@@ -29,7 +29,6 @@
 		D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD116766FA600CE32DE /* NSString+HTML.m */; };
 		D2D60BDD16766FA600CE32DE /* GTMNSString+HTML.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */; };
 		D2D60BDE16766FA600CE32DE /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */; };
-		D2D60BE11676706A00CE32DE /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BE01676706A00CE32DE /* cTiVo.icns */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,7 +61,6 @@
 		D2D60BD116766FA600CE32DE /* NSString+HTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+HTML.m"; sourceTree = "<group>"; };
 		D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = "GTMNSString+HTML.h"; sourceTree = "<group>"; };
 		D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GTMNSString+HTML.m"; sourceTree = "<group>"; };
-		D2D60BE01676706A00CE32DE /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = cTiVo.icns; path = ../../../Desktop/cTiVo.icns; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,7 +114,6 @@
 		D2D60BA716766EFD00CE32DE /* cTiVo */ = {
 			isa = PBXGroup;
 			children = (
-				D2D60BE01676706A00CE32DE /* cTiVo.icns */,
 				D2D60BDF16766FB100CE32DE /* Utilities */,
 				D2D60BCB16766FA600CE32DE /* MTConstants.h */,
 				D2D60BC916766FA600CE32DE /* MTNetworkTivos.m */,
@@ -229,7 +226,6 @@
 				D2D60BC616766F3200CE32DE /* HandBrakeCLI in Resources */,
 				D2D60BC716766F3200CE32DE /* mencoder in Resources */,
 				D2D60BC816766F3200CE32DE /* tivodecode in Resources */,
-				D2D60BE11676706A00CE32DE /* cTiVo.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -344,6 +340,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -356,6 +353,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -380,6 +378,7 @@
 				D2D60BBD16766EFD00CE32DE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
