@@ -1,0 +1,17 @@
+//
+//  MTDownloadList.h
+//  myTivo
+//
+//  Created by Scott Buchanan on 12/8/12.
+//  Copyright (c) 2012 Scott Buchanan. All rights reserved.
+//
+
+#import <Cocoa/Cocoa.h>
+#import "MTNetworkTivos.h"
+
+@interface MTDownloadList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>
+
+@property (nonatomic, retain) NSMutableArray *downloadQueue;
+@property (nonatomic, assign) MTNetworkTivos *myTivos;
+
+@end

@@ -1,0 +1,387 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA116766EFD00CE32DE /* Cocoa.framework */; };
+		D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
+		D2D60BAE16766EFD00CE32DE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BAD16766EFD00CE32DE /* main.m */; };
+		D2D60BB216766EFD00CE32DE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BB016766EFD00CE32DE /* Credits.rtf */; };
+		D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */; };
+		D2D60BB816766EFD00CE32DE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BB616766EFD00CE32DE /* MainMenu.xib */; };
+		D2D60BC416766F3200CE32DE /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BBF16766F3200CE32DE /* cTiVo.icns */; };
+		D2D60BC516766F3200CE32DE /* formats.plist in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC016766F3200CE32DE /* formats.plist */; };
+		D2D60BC616766F3200CE32DE /* HandBrakeCLI in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC116766F3200CE32DE /* HandBrakeCLI */; };
+		D2D60BC716766F3200CE32DE /* mencoder in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC216766F3200CE32DE /* mencoder */; };
+		D2D60BC816766F3200CE32DE /* tivodecode in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC316766F3200CE32DE /* tivodecode */; };
+		D2D60BD416766FA600CE32DE /* MTNetworkTivos.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BC916766FA600CE32DE /* MTNetworkTivos.m */; };
+		D2D60BD516766FA600CE32DE /* MTNetworkTivos.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCA16766FA600CE32DE /* MTNetworkTivos.h */; };
+		D2D60BD616766FA600CE32DE /* MTConstants.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCB16766FA600CE32DE /* MTConstants.h */; };
+		D2D60BD716766FA600CE32DE /* MTDownloadList.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCC16766FA600CE32DE /* MTDownloadList.m */; };
+		D2D60BD816766FA600CE32DE /* MTDownloadList.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCD16766FA600CE32DE /* MTDownloadList.h */; };
+		D2D60BD916766FA600CE32DE /* MTProgramList.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCE16766FA600CE32DE /* MTProgramList.m */; };
+		D2D60BDA16766FA600CE32DE /* MTProgramList.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCF16766FA600CE32DE /* MTProgramList.h */; };
+		D2D60BDB16766FA600CE32DE /* NSString+HTML.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD016766FA600CE32DE /* NSString+HTML.h */; };
+		D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD116766FA600CE32DE /* NSString+HTML.m */; };
+		D2D60BDD16766FA600CE32DE /* GTMNSString+HTML.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */; };
+		D2D60BDE16766FA600CE32DE /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */; };
+		D2D60BE11676706A00CE32DE /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BE01676706A00CE32DE /* cTiVo.icns */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		D2D60B9D16766EFD00CE32DE /* cTiVo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTiVo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2D60BA116766EFD00CE32DE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		D2D60BA416766EFD00CE32DE /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		D2D60BA516766EFD00CE32DE /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		D2D60BA616766EFD00CE32DE /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		D2D60BA916766EFD00CE32DE /* cTiVo-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "cTiVo-Info.plist"; sourceTree = "<group>"; };
+		D2D60BAB16766EFD00CE32DE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D2D60BAD16766EFD00CE32DE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		D2D60BAF16766EFD00CE32DE /* cTiVo-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "cTiVo-Prefix.pch"; sourceTree = "<group>"; };
+		D2D60BB116766EFD00CE32DE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.objj.h; path = MTAppDelegate.h; sourceTree = "<group>"; };
+		D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTAppDelegate.m; sourceTree = "<group>"; };
+		D2D60BB716766EFD00CE32DE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		D2D60BBF16766F3200CE32DE /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cTiVo.icns; sourceTree = "<group>"; };
+		D2D60BC016766F3200CE32DE /* formats.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = formats.plist; sourceTree = "<group>"; };
+		D2D60BC116766F3200CE32DE /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
+		D2D60BC216766F3200CE32DE /* mencoder */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = mencoder; sourceTree = "<group>"; };
+		D2D60BC316766F3200CE32DE /* tivodecode */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = tivodecode; sourceTree = "<group>"; };
+		D2D60BC916766FA600CE32DE /* MTNetworkTivos.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTNetworkTivos.m; sourceTree = "<group>"; };
+		D2D60BCA16766FA600CE32DE /* MTNetworkTivos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTNetworkTivos.h; sourceTree = "<group>"; };
+		D2D60BCB16766FA600CE32DE /* MTConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTConstants.h; sourceTree = "<group>"; };
+		D2D60BCC16766FA600CE32DE /* MTDownloadList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadList.m; sourceTree = "<group>"; };
+		D2D60BCD16766FA600CE32DE /* MTDownloadList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTDownloadList.h; sourceTree = "<group>"; };
+		D2D60BCE16766FA600CE32DE /* MTProgramList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgramList.m; sourceTree = "<group>"; };
+		D2D60BCF16766FA600CE32DE /* MTProgramList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTProgramList.h; sourceTree = "<group>"; };
+		D2D60BD016766FA600CE32DE /* NSString+HTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = "NSString+HTML.h"; sourceTree = "<group>"; };
+		D2D60BD116766FA600CE32DE /* NSString+HTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+HTML.m"; sourceTree = "<group>"; };
+		D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = "GTMNSString+HTML.h"; sourceTree = "<group>"; };
+		D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GTMNSString+HTML.m"; sourceTree = "<group>"; };
+		D2D60BE01676706A00CE32DE /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = cTiVo.icns; path = ../../../Desktop/cTiVo.icns; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D2D60B9A16766EFD00CE32DE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D2D60B9216766EFD00CE32DE = {
+			isa = PBXGroup;
+			children = (
+				D2D60BA716766EFD00CE32DE /* cTiVo */,
+				D2D60BA016766EFD00CE32DE /* Frameworks */,
+				D2D60B9E16766EFD00CE32DE /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D2D60B9E16766EFD00CE32DE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2D60B9D16766EFD00CE32DE /* cTiVo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D2D60BA016766EFD00CE32DE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D2D60BA116766EFD00CE32DE /* Cocoa.framework */,
+				D2D60BA316766EFD00CE32DE /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D2D60BA316766EFD00CE32DE /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D2D60BA416766EFD00CE32DE /* AppKit.framework */,
+				D2D60BA516766EFD00CE32DE /* CoreData.framework */,
+				D2D60BA616766EFD00CE32DE /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		D2D60BA716766EFD00CE32DE /* cTiVo */ = {
+			isa = PBXGroup;
+			children = (
+				D2D60BE01676706A00CE32DE /* cTiVo.icns */,
+				D2D60BDF16766FB100CE32DE /* Utilities */,
+				D2D60BCB16766FA600CE32DE /* MTConstants.h */,
+				D2D60BC916766FA600CE32DE /* MTNetworkTivos.m */,
+				D2D60BCA16766FA600CE32DE /* MTNetworkTivos.h */,
+				D2D60BCC16766FA600CE32DE /* MTDownloadList.m */,
+				D2D60BCD16766FA600CE32DE /* MTDownloadList.h */,
+				D2D60BCE16766FA600CE32DE /* MTProgramList.m */,
+				D2D60BCF16766FA600CE32DE /* MTProgramList.h */,
+				D2D60BBE16766F1100CE32DE /* Resources */,
+				D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */,
+				D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */,
+				D2D60BB616766EFD00CE32DE /* MainMenu.xib */,
+				D2D60BA816766EFD00CE32DE /* Supporting Files */,
+			);
+			path = cTiVo;
+			sourceTree = "<group>";
+		};
+		D2D60BA816766EFD00CE32DE /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				D2D60BA916766EFD00CE32DE /* cTiVo-Info.plist */,
+				D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */,
+				D2D60BAD16766EFD00CE32DE /* main.m */,
+				D2D60BAF16766EFD00CE32DE /* cTiVo-Prefix.pch */,
+				D2D60BB016766EFD00CE32DE /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		D2D60BBE16766F1100CE32DE /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D2D60BBF16766F3200CE32DE /* cTiVo.icns */,
+				D2D60BC016766F3200CE32DE /* formats.plist */,
+				D2D60BC116766F3200CE32DE /* HandBrakeCLI */,
+				D2D60BC216766F3200CE32DE /* mencoder */,
+				D2D60BC316766F3200CE32DE /* tivodecode */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		D2D60BDF16766FB100CE32DE /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				D2D60BD016766FA600CE32DE /* NSString+HTML.h */,
+				D2D60BD116766FA600CE32DE /* NSString+HTML.m */,
+				D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */,
+				D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */,
+			);
+			name = Utilities;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D2D60B9C16766EFD00CE32DE /* cTiVo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
+			buildPhases = (
+				D2D60B9916766EFD00CE32DE /* Sources */,
+				D2D60B9A16766EFD00CE32DE /* Frameworks */,
+				D2D60B9B16766EFD00CE32DE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = cTiVo;
+			productName = cTiVo;
+			productReference = D2D60B9D16766EFD00CE32DE /* cTiVo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D2D60B9416766EFD00CE32DE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = MT;
+				LastUpgradeCheck = 0450;
+				ORGANIZATIONNAME = "Scott Buchanan";
+			};
+			buildConfigurationList = D2D60B9716766EFD00CE32DE /* Build configuration list for PBXProject "cTiVo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = D2D60B9216766EFD00CE32DE;
+			productRefGroup = D2D60B9E16766EFD00CE32DE /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D2D60B9C16766EFD00CE32DE /* cTiVo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D2D60B9B16766EFD00CE32DE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */,
+				D2D60BB216766EFD00CE32DE /* Credits.rtf in Resources */,
+				D2D60BB816766EFD00CE32DE /* MainMenu.xib in Resources */,
+				D2D60BC416766F3200CE32DE /* cTiVo.icns in Resources */,
+				D2D60BC516766F3200CE32DE /* formats.plist in Resources */,
+				D2D60BC616766F3200CE32DE /* HandBrakeCLI in Resources */,
+				D2D60BC716766F3200CE32DE /* mencoder in Resources */,
+				D2D60BC816766F3200CE32DE /* tivodecode in Resources */,
+				D2D60BE11676706A00CE32DE /* cTiVo.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2D60B9916766EFD00CE32DE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
+				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
+				D2D60BD416766FA600CE32DE /* MTNetworkTivos.m in Sources */,
+				D2D60BD516766FA600CE32DE /* MTNetworkTivos.h in Sources */,
+				D2D60BD616766FA600CE32DE /* MTConstants.h in Sources */,
+				D2D60BD716766FA600CE32DE /* MTDownloadList.m in Sources */,
+				D2D60BD816766FA600CE32DE /* MTDownloadList.h in Sources */,
+				D2D60BD916766FA600CE32DE /* MTProgramList.m in Sources */,
+				D2D60BDA16766FA600CE32DE /* MTProgramList.h in Sources */,
+				D2D60BDB16766FA600CE32DE /* NSString+HTML.h in Sources */,
+				D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */,
+				D2D60BDD16766FA600CE32DE /* GTMNSString+HTML.h in Sources */,
+				D2D60BDE16766FA600CE32DE /* GTMNSString+HTML.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D2D60BAB16766EFD00CE32DE /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		D2D60BB016766EFD00CE32DE /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D2D60BB116766EFD00CE32DE /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		D2D60BB616766EFD00CE32DE /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D2D60BB716766EFD00CE32DE /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		D2D60BB916766EFD00CE32DE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		D2D60BBA16766EFD00CE32DE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		D2D60BBC16766EFD00CE32DE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
+				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		D2D60BBD16766EFD00CE32DE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
+				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D2D60B9716766EFD00CE32DE /* Build configuration list for PBXProject "cTiVo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D2D60BB916766EFD00CE32DE /* Debug */,
+				D2D60BBA16766EFD00CE32DE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D2D60BBC16766EFD00CE32DE /* Debug */,
+				D2D60BBD16766EFD00CE32DE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D2D60B9416766EFD00CE32DE /* Project object */;
+}

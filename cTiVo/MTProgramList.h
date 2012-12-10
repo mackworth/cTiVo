@@ -1,0 +1,17 @@
+//
+//  MTProgramList.h
+//  myTivo
+//
+//  Created by Scott Buchanan on 12/7/12.
+//  Copyright (c) 2012 Scott Buchanan. All rights reserved.
+//
+
+#import <Cocoa/Cocoa.h>
+#import "MTNetworkTivos.h"
+
+@interface MTProgramList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>
+
+@property (nonatomic, retain) NSArray *recordings;
+@property (nonatomic, assign) MTNetworkTivos *myTivos;
+
+@end
