@@ -13,7 +13,6 @@
 #define kMTNotificationEncodeDidFinish @"MTNotificationEncodeDidFinish"
 #define testMAK @"0636497662"
 
-
 //USER DEFAULTS
 
 #define kMTMediaKeys @"MediaKeys"
