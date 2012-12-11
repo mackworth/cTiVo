@@ -34,15 +34,16 @@
 
 -(void)tableViewSelectionDidChange:(NSNotification *)notification
 {
-    NSTableView *viewChanged = (NSTableView *)notification.object;
-    for (int i = 0; i <  _myTivos.recordings.count; i++) {
-        NSTextField *thisRow = [viewChanged viewAtColumn:0 row:i makeIfNecessary:NO];
-        if ([viewChanged isRowSelected:i]) {
-            thisRow.backgroundColor = [NSColor colorWithCalibratedRed:.4 green:.4 blue:1 alpha:.5];
-        } else {
-            thisRow.backgroundColor = [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0];
-        }
-    }
+	return;
+//    NSTableView *viewChanged = (NSTableView *)notification.object;
+//    for (int i = 0; i <  _myTivos.recordings.count; i++) {
+//        NSTextField *thisRow = [viewChanged viewAtColumn:0 row:i makeIfNecessary:NO];
+//        if ([viewChanged isRowSelected:i]) {
+//            thisRow.backgroundColor = [NSColor colorWithCalibratedRed:.4 green:.4 blue:1 alpha:.5];
+//        } else {
+//            thisRow.backgroundColor = [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0];
+//        }
+//    }
     
 }
 
@@ -58,7 +59,7 @@
 {
     NSString *s = [[_myTivos.recordings objectAtIndex:row] objectForKey:@"Title"];
     // get an existing cell with the MyView identifier if it exists
-    NSTextField *result = [tableView makeViewWithIdentifier:@"MyView" owner:self];
+    NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
     
     // There is no existing cell to reuse so we will create a new one
     if (result == nil) {
@@ -66,19 +67,19 @@
         // create the new NSTextField with a frame of the {0,0} with the width of the table
         // note that the height of the frame is not really relevant, the row-height will modify the height
         // the new text field is then returned as an autoreleased object
-        result = [[[NSTextField alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)] autorelease];
-        result.font = [NSFont userFontOfSize:14];
-        result.editable = NO;
+        result = [[[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)] autorelease];
+        result.textField.font = [NSFont userFontOfSize:14];
+        result.textField.editable = NO;
         
         // the identifier of the NSTextField instance is set to MyView. This
         // allows it to be re-used
-        result.identifier = @"MyView";
+        result.identifier = tableColumn.identifier;
     }
     
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
-    result.stringValue = s ;
+    result.textField.stringValue = s ;
     
     // return the result.
     return result;
