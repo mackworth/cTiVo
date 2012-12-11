@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */; };
 		D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA116766EFD00CE32DE /* Cocoa.framework */; };
 		D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
 		D2D60BAE16766EFD00CE32DE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BAD16766EFD00CE32DE /* main.m */; };
@@ -32,6 +33,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadListCellView.h; sourceTree = "<group>"; };
+		D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadListCellView.m; sourceTree = "<group>"; };
 		D2D60B9D16766EFD00CE32DE /* cTiVo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTiVo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2D60BA116766EFD00CE32DE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		D2D60BA416766EFD00CE32DE /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -120,6 +123,8 @@
 				D2D60BC916766FA600CE32DE /* MTNetworkTivos.m */,
 				D2D60BCD16766FA600CE32DE /* MTDownloadList.h */,
 				D2D60BCC16766FA600CE32DE /* MTDownloadList.m */,
+				D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */,
+				D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */,
 				D2D60BCF16766FA600CE32DE /* MTProgramList.h */,
 				D2D60BCE16766FA600CE32DE /* MTProgramList.m */,
 				D2D60BBE16766F1100CE32DE /* Resources */,
@@ -266,6 +271,7 @@
 				D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */,
 				D2D60BDD16766FA600CE32DE /* GTMNSString+HTML.h in Sources */,
 				D2D60BDE16766FA600CE32DE /* GTMNSString+HTML.m in Sources */,
+				D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

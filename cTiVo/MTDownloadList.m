@@ -55,6 +55,25 @@
     return _myTivos.downloadQueue.count;
 }
 
+-(id)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
+{
+    id result;
+    if([identifier compare: @"Program"] == NSOrderedSame) {
+        NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
+        MTDownloadListCellView *thisCell = [[[MTDownloadListCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)] autorelease];
+        //        result.textField.font = [NSFont userFontOfSize:14];
+        thisCell.textField.editable = NO;
+        
+        // the identifier of the NSTextField instance is set to MyView. This
+        // allows it to be re-used
+        thisCell.identifier = identifier;
+        result = (id)thisCell;
+    } else {
+        result =[super makeViewWithIdentifier:identifier owner:owner];       
+    }
+    return result;
+}
+
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     NSDictionary *rowData = [_myTivos.downloadQueue objectAtIndex:row];
@@ -62,7 +81,7 @@
 	
     // get an existing cell with the MyView identifier if it exists
 	
-    NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
+    MTDownloadListCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
     
     // There is no existing cell to reuse so we will create a new one
     if (result == nil) {
@@ -70,13 +89,13 @@
         // create the new NSTextField with a frame of the {0,0} with the width of the table
         // note that the height of the frame is not really relevant, the row-height will modify the height
         // the new text field is then returned as an autoreleased object
-        result = [[[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableColumn.width, 20)] autorelease];
+        result = [[[MTDownloadListCellView alloc] initWithFrame:CGRectMake(0, 0, tableColumn.width, 20)] autorelease];
 //        result.textField.font = [NSFont userFontOfSize:14];
         result.textField.editable = NO;
         
         // the identifier of the NSTextField instance is set to MyView. This
         // allows it to be re-used
-        result.identifier = @"MyView";
+        result.identifier = tableColumn.identifier;
     }
     
     // result is now guaranteed to be valid, either as a re-used cell

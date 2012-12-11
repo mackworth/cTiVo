@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MTNetworkTivos.h"
+#import "MTDownloadListCellView.h"
 
 @interface MTDownloadList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>
 
