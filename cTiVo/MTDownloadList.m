@@ -15,7 +15,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
     self.dataSource = self;
     self.delegate    = self;
-    self.rowHeight = 24;
+//    self.rowHeight = 24;
     self.allowsMultipleSelection = YES;
 }
 
@@ -71,7 +71,7 @@
         // note that the height of the frame is not really relevant, the row-height will modify the height
         // the new text field is then returned as an autoreleased object
         result = [[[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableColumn.width, 20)] autorelease];
-        result.textField.font = [NSFont userFontOfSize:14];
+//        result.textField.font = [NSFont userFontOfSize:14];
         result.textField.editable = NO;
         
         // the identifier of the NSTextField instance is set to MyView. This
