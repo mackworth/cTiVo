@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
 		D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */; };
 		D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA116766EFD00CE32DE /* Cocoa.framework */; };
 		D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
@@ -20,19 +21,15 @@
 		D2D60BC716766F3200CE32DE /* mencoder in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC216766F3200CE32DE /* mencoder */; };
 		D2D60BC816766F3200CE32DE /* tivodecode in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC316766F3200CE32DE /* tivodecode */; };
 		D2D60BD416766FA600CE32DE /* MTNetworkTivos.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BC916766FA600CE32DE /* MTNetworkTivos.m */; };
-		D2D60BD516766FA600CE32DE /* MTNetworkTivos.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCA16766FA600CE32DE /* MTNetworkTivos.h */; };
-		D2D60BD616766FA600CE32DE /* MTConstants.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCB16766FA600CE32DE /* MTConstants.h */; };
 		D2D60BD716766FA600CE32DE /* MTDownloadList.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCC16766FA600CE32DE /* MTDownloadList.m */; };
-		D2D60BD816766FA600CE32DE /* MTDownloadList.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCD16766FA600CE32DE /* MTDownloadList.h */; };
 		D2D60BD916766FA600CE32DE /* MTProgramList.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCE16766FA600CE32DE /* MTProgramList.m */; };
-		D2D60BDA16766FA600CE32DE /* MTProgramList.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCF16766FA600CE32DE /* MTProgramList.h */; };
-		D2D60BDB16766FA600CE32DE /* NSString+HTML.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD016766FA600CE32DE /* NSString+HTML.h */; };
 		D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD116766FA600CE32DE /* NSString+HTML.m */; };
-		D2D60BDD16766FA600CE32DE /* GTMNSString+HTML.h in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */; };
 		D2D60BDE16766FA600CE32DE /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressindicator.h; sourceTree = "<group>"; };
+		D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressindicator.m; sourceTree = "<group>"; };
 		D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadListCellView.h; sourceTree = "<group>"; };
 		D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadListCellView.m; sourceTree = "<group>"; };
 		D2D60B9D16766EFD00CE32DE /* cTiVo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTiVo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -125,6 +122,8 @@
 				D2D60BCC16766FA600CE32DE /* MTDownloadList.m */,
 				D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */,
 				D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */,
+				D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */,
+				D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */,
 				D2D60BCF16766FA600CE32DE /* MTProgramList.h */,
 				D2D60BCE16766FA600CE32DE /* MTProgramList.m */,
 				D2D60BBE16766F1100CE32DE /* Resources */,
@@ -261,17 +260,12 @@
 				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
 				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
 				D2D60BD416766FA600CE32DE /* MTNetworkTivos.m in Sources */,
-				D2D60BD516766FA600CE32DE /* MTNetworkTivos.h in Sources */,
-				D2D60BD616766FA600CE32DE /* MTConstants.h in Sources */,
 				D2D60BD716766FA600CE32DE /* MTDownloadList.m in Sources */,
-				D2D60BD816766FA600CE32DE /* MTDownloadList.h in Sources */,
 				D2D60BD916766FA600CE32DE /* MTProgramList.m in Sources */,
-				D2D60BDA16766FA600CE32DE /* MTProgramList.h in Sources */,
-				D2D60BDB16766FA600CE32DE /* NSString+HTML.h in Sources */,
 				D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */,
-				D2D60BDD16766FA600CE32DE /* GTMNSString+HTML.h in Sources */,
 				D2D60BDE16766FA600CE32DE /* GTMNSString+HTML.m in Sources */,
 				D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */,
+				D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

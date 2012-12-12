@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "NSString+HTML.h"
+#import "MTDownloadListCellView.h"
 
 
 @interface MTNetworkTivos : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
@@ -15,28 +16,28 @@
     NSNetService *tivoService ;
     NSNetServiceBrowser *tivoBrowser;
     NSMutableData *listingData;
-	IBOutlet NSProgressIndicator *downloadingProgress, *decryptingProgress, *encodingProgress;
 	IBOutlet NSPopUpButton *tivoList, *formatList;
-	IBOutlet NSTextField *downloadingLabel, *decryptingLabel, *encodingLabel, *mediaKeyLabel, *loadingProgramListLabel, *downloadDirectory;
+	IBOutlet NSTextField  *mediaKeyLabel, *loadingProgramListLabel, *downloadDirectory;
 	IBOutlet NSProgressIndicator *loadingProgramListIndicator;
 	IBOutlet NSTableView *programListTable, *downloadQueueTable;
-	IBOutlet NSButton *cancelDownloadingButton, *cancelDecryptingButton, *cancelEncodingButton;
 	NSURLConnection *programListURLConnection, *downloadURLConnection;
 	NSTask *decryptingTask, *encodingTask;
 	NSArray *encodingFormats;
 	NSMutableDictionary *mediaKeys;
-	NSDictionary *programDownloading, *programDecrypting, *programEncoding;
+	NSMutableDictionary *programDownloading, *programDecrypting, *programEncoding;
 	NSFileHandle *downloadFile, *stdOutFileHandle;
 	double dataDownloaded, referenceFileSize;
 	NSNetService *tivoConnectingTo;
 	NSOpenPanel *myOpenPanel;
     double percentComplete;
+    MTDownloadListCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
 }
 
-@property (nonatomic, readonly) NSMutableArray *tivoNames, *recordings, *downloadQueue, *decryptQueue, *encodeQueue;
+@property (nonatomic, readonly) NSMutableArray *tivoNames, *recordings, *downloadQueue;
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic) BOOL videoListNeedsFilling;
 
 -(void)fetchVideoListFromHost;
+-(void)manageDownloads;
 
 @end

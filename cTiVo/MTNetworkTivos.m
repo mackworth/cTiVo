@@ -42,8 +42,6 @@
 	[loadingProgramListIndicator stopAnimation:nil];
 	loadingProgramListLabel.stringValue = @"";
 	_downloadQueue = [[NSMutableArray alloc] init];
-	_decryptQueue = [[NSMutableArray alloc] init];
-	_encodeQueue = [[NSMutableArray alloc] init];
 	programEncoding = nil;
 	programDecrypting = nil;
 	programDownloading = nil;
@@ -54,12 +52,12 @@
 	encodingTask = nil;
 	stdOutFileHandle = nil;
 	tivoConnectingTo = nil;
+    decryptTableCell = nil;
+    downloadTableCell = nil;
+    encodeTableCell = nil;
 	
-	[cancelDecryptingButton setHidden:YES];
-	[cancelDownloadingButton setHidden:YES];
-	[cancelEncodingButton setHidden:YES];
 
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
+//	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDecrypts) name:kMTNotificationDownloadDidFinish object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageEncodes) name:kMTNotificationDecryptDidFinish object:nil];
 }
@@ -77,6 +75,24 @@
 			}
 		}
 	}
+}
+
+-(void)setProgressIndicatorForProgram:(NSMutableDictionary *)program withValue:(double)value
+{
+	MTDownloadListCellView *thisCellView = [downloadQueueTable viewAtColumn:0 row:[_downloadQueue indexOfObject:program] makeIfNecessary:NO];
+	thisCellView.progressIndicator.doubleValue = value;
+    [program setObject:[NSNumber numberWithDouble:value] forKey:kMTDownloadPercent];
+	[thisCellView setNeedsDisplay:YES];
+    
+}
+
+-(void)setProgressStatus:(NSMutableDictionary *)program withValue:(NSString *)status
+{
+    [program setObject:status forKey:kMTDownloadStatus];
+	MTDownloadListCellView *thisCellView = [downloadQueueTable viewAtColumn:0 row:[_downloadQueue indexOfObject:program] makeIfNecessary:NO];
+    thisCellView.progressIndicator.rightText.stringValue = status;
+	[thisCellView setNeedsDisplay:YES];
+    
 }
 
 #pragma mark - UI Actions
@@ -119,7 +135,17 @@
 	NSMutableArray *itemsToRemove = [NSMutableArray array];
     for (int i = 0; i <  _downloadQueue.count; i++) {
         if ([downloadQueueTable isRowSelected:i]) {
-			[itemsToRemove addObject:[_downloadQueue objectAtIndex:i]];
+            NSMutableDictionary *programToRemove = [_downloadQueue objectAtIndex:i];
+			[itemsToRemove addObject:programToRemove];
+            if ([[programToRemove objectForKey:kMTStatus] intValue] == kMTStatusDownloading) {
+                [self cancelDownload:nil];
+            }
+            if ([[programToRemove objectForKey:kMTStatus] intValue] == kMTStatusDecrypting) {
+                [self cancelDecrypt:nil];
+            }
+            if ([[programToRemove objectForKey:kMTStatus] intValue] == kMTStatusEncoding) {
+                [self cancelEncode:nil];
+            }
         }
     }
 	for (id i in itemsToRemove) {
@@ -140,14 +166,12 @@
 		[downloadURLConnection cancel];
 		[downloadURLConnection release];
 		downloadURLConnection = nil;
-		downloadingLabel.stringValue = @"Downloading";
-		downloadingProgress.doubleValue = 0;
+//		downloadingLabel.stringValue = @"Downloading";
+//		downloadingProgress.doubleValue = 0;
 		[downloadFile closeFile];
 		[downloadFile release];
 		downloadFile = nil;
-		[programDownloading release];
 		programDownloading = nil;
-		[cancelDownloadingButton setHidden:YES];
 		[self performSelector:@selector(manageDownloads) withObject:nil afterDelay:3.0];
 	}
 }
@@ -175,11 +199,10 @@
 		[decryptingTask terminate];
 		[decryptingTask release];
 		decryptingTask = nil;
-		decryptingProgress.doubleValue = 0.0;
-		decryptingLabel.stringValue = @"Decrypting";
-		[programDecrypting release];
+        [self setProgressIndicatorForProgram:programDecrypting withValue:0.0];
+//		decryptingProgress.doubleValue = 0.0;
+//		decryptingLabel.stringValue = @"Decrypting";
 		programDecrypting = nil;
-		[cancelDecryptingButton setHidden:YES];
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(trackDecrypts) object:nil];
 		[self manageDecrypts];
 	}
@@ -195,11 +218,10 @@
 		[encodingTask terminate];
 		[encodingTask release];
 		encodingTask = nil;
-		encodingProgress.doubleValue = 0.0;
-		encodingLabel.stringValue = @"Encoding";
-		[programEncoding release];
+//		encodingProgress.doubleValue = 0.0;
+        [self setProgressIndicatorForProgram:programEncoding withValue:0.0];
+//		encodingLabel.stringValue = @"Encoding";
 		programEncoding = nil;
-		[cancelEncodingButton setHidden:YES];
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(trackEncodes) object:nil];
 		[self manageEncodes];
 	}
@@ -230,6 +252,11 @@
 		NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:program];
 		[tmpDict setObject:selectedFormat forKey:kMTSelectedFormat];
 		[tmpDict setObject:selectedTivo forKey:kMTSelectedTivo];
+        [tmpDict setObject:@"" forKey:kMTDownloadStatus	];
+        [tmpDict setObject:[NSNumber numberWithInt:kMTStatusNew] forKey:kMTStatus];
+		[tmpDict setObject:[NSNumber numberWithBool:NO] forKey:kMTIsDownloaded];
+		[tmpDict setObject:[NSNumber numberWithBool:NO] forKey:kMTIsDecrypted];
+		[tmpDict setObject:[NSNumber numberWithBool:NO] forKey:kMTIsEncoded];
 		[_downloadQueue addObject:tmpDict];
 	}
 }
@@ -242,7 +269,22 @@
 	if (programDownloading || downloadURLConnection || _downloadQueue.count == 0) {
 		return;
 	}
-	programDownloading = [[_downloadQueue objectAtIndex:0] retain];
+    //Find if any left in the queue need downloading
+    for (int i = 0; i < _downloadQueue.count; i++) {
+        if ([[(NSMutableDictionary *)[_downloadQueue objectAtIndex:i] objectForKey:kMTStatus] intValue] == kMTStatusNew) {
+            programDownloading = [_downloadQueue objectAtIndex:i];
+//            downloadTableCell = [downloadQueueTable viewAtColumn:0 row:i makeIfNecessary:NO];
+//			[programDownloading setObject:@"Downloading" forKey:kMTDownloadStatus];
+            [self setProgressStatus:programDownloading withValue:@"Downloading"];
+            [programDownloading setObject:[NSNumber numberWithInt:kMTStatusDownloading] forKey:kMTStatus];
+//			[programDownloading setObject:[NSNumber numberWithBool:YES] forKey:kMTIsDownloading];
+            break;
+        }
+    }
+    if (!programDownloading) {
+        return;
+    }
+//	programDownloading = [[_downloadQueue objectAtIndex:0] retain];
 	NSString *sizeString = [programDownloading objectForKey:@"Size"];
 	double size = [[sizeString substringToIndex:sizeString.length-3] doubleValue];
 	NSString *modifier = [sizeString substringFromIndex:sizeString.length-2];
@@ -251,7 +293,6 @@
 	} else {
 		size *= 1000 * 1000 * 1000;
 	}
-//	NSLog(@"Downloading %@ of size %lf",[programDownloading objectForKey:@"Title"],size);
 	NSURLRequest *thisRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[programDownloading objectForKey:@"URL"]]];
 	downloadURLConnection = [[NSURLConnection connectionWithRequest:thisRequest delegate:self] retain];
 	NSString *downloadFilePath = [NSString stringWithFormat:@"%@%@.tivo",[[NSUserDefaults standardUserDefaults] objectForKey:kMTDownloadDirectory] ,[programDownloading objectForKey:@"Title"]];
@@ -259,24 +300,30 @@
 	[fm createFileAtPath:downloadFilePath contents:[NSData data] attributes:nil];
 	downloadFile = [[NSFileHandle fileHandleForWritingAtPath:downloadFilePath] retain];
 	[downloadURLConnection start];
-	[_downloadQueue removeObjectAtIndex:0];
 	dataDownloaded = 0.0;
-	[downloadingProgress setMinValue:0];
-	[downloadingProgress setMaxValue:1.0];
 	referenceFileSize = size;
-	downloadingProgress.doubleValue = 0.0;
-	[cancelDownloadingButton setHidden:NO];
-	downloadingLabel.stringValue = [NSString stringWithFormat:@"Downloading %@",[programDownloading objectForKey:@"Title"]];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+//	NSLog(@"Downloading %@ of size %lf",[programDownloading objectForKey:@"Title"],referenceFileSize);
 	//Note track downloads is done by the NSURLConnection delegate
 }
 
 -(void)manageDecrypts
 {
-	if (programDecrypting || _decryptQueue.count == 0) {
+	if (programDecrypting) {
 		return;
 	}
-	programDecrypting = [[_decryptQueue objectAtIndex:0] retain];
+    for (int i = 0; i < _downloadQueue.count; i++) {
+        if ([[[_downloadQueue objectAtIndex:i] objectForKey:kMTStatus] intValue] == kMTStatusDownloaded) {
+            programDecrypting = [_downloadQueue objectAtIndex:i];
+            [self setProgressStatus:programDecrypting withValue:@"Decrypting"];
+			[programDecrypting setObject:[NSNumber numberWithBool:YES] forKey:kMTIsDecrypting];
+            [programDecrypting setObject:[NSNumber numberWithInt:kMTStatusDecrypting] forKey:kMTStatus];
+			[downloadQueueTable reloadData];
+           break;
+        }
+    }
+    if (!programDecrypting) {
+        return;
+    }
 	NSString *stdOutFile = [NSString stringWithFormat:@"/tmp/decoding%@.txt",[programDecrypting objectForKey:@"Title"]];
 	[[NSFileManager defaultManager] createFileAtPath:stdOutFile contents:[NSData data] attributes:nil];
 	stdOutFileHandle = [NSFileHandle fileHandleForWritingAtPath:stdOutFile];
@@ -287,7 +334,6 @@
 	[decryptingTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
 	[decryptingTask setStandardOutput:stdOutFileHandle];
 	[decryptingTask setStandardError:stdOutFileHandle];
-	[_decryptQueue removeObjectAtIndex:0];
 	//Find the source file size
 	NSString *sourceFilePath = [NSString stringWithFormat:@"%@/%@.tivo",[[NSUserDefaults standardUserDefaults] objectForKey:kMTDownloadDirectory],[programDecrypting objectForKey:@"Title"]];
 	NSFileHandle *sourceFileHandle = [NSFileHandle fileHandleForReadingAtPath:sourceFilePath];
@@ -304,12 +350,8 @@
 						  [NSString stringWithFormat:@"%@%@.tivo",[[NSUserDefaults standardUserDefaults] objectForKey:kMTDownloadDirectory],[programDecrypting objectForKey:@"Title"]],
 						  nil];
 	[decryptingTask setArguments:arguments];
-	decryptingLabel.stringValue = [NSString stringWithFormat:@"Decrypting %@",[programDecrypting objectForKey:@"Title"]];
-	decryptingProgress.doubleValue = 0;
-	[decryptingProgress setMinValue:0];
-	[decryptingProgress setMaxValue:1.0];
+	[self setProgressIndicatorForProgram:programDecrypting withValue:0.0];
 	[decryptingTask launch];
-	[cancelDecryptingButton setHidden:NO];
 	[self performSelector:@selector(trackDecrypts) withObject:nil afterDelay:0.3];
 	
 }
@@ -317,20 +359,18 @@
 -(void)trackDecrypts
 {
 	if (![decryptingTask isRunning]) {
-//		if (programDecrypting) {
-			decryptingProgress.doubleValue = 1.0;
-			[_encodeQueue addObject:programDecrypting];
-			decryptingLabel.stringValue = [NSString stringWithFormat:@"Decrypted %@",[programDecrypting objectForKey:@"Title"]];
-			NSString *sourceFilePath = [NSString stringWithFormat:@"%@/%@.tivo",[[NSUserDefaults standardUserDefaults] objectForKey:kMTDownloadDirectory],[programDecrypting objectForKey:@"Title"]];
-			NSError *thisError = nil;
-			[[NSFileManager defaultManager] removeItemAtPath:sourceFilePath error:&thisError];
+		[self setProgressIndicatorForProgram:programDecrypting withValue:1.0];
+        [self setProgressStatus:programDecrypting withValue:@"Decrypted"];
+        [programDecrypting setObject:[NSNumber numberWithInt:kMTStatusDecrypted] forKey:kMTStatus];
+		[programDecrypting setObject:[NSNumber numberWithBool:YES] forKey:kMTIsDecrypted];
+		[downloadQueueTable reloadData];
+		NSString *sourceFilePath = [NSString stringWithFormat:@"%@/%@.tivo",[[NSUserDefaults standardUserDefaults] objectForKey:kMTDownloadDirectory],[programDecrypting objectForKey:@"Title"]];
+		NSError *thisError = nil;
+		[[NSFileManager defaultManager] removeItemAtPath:sourceFilePath error:&thisError];
 
-			[programDecrypting release];
-			programDecrypting = nil;
-			[cancelDecryptingButton setHidden:YES];
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
-			[self manageDecrypts];
-//		}
+		programDecrypting = nil;
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
+		[self manageDecrypts];
 		return;
 	}
 	NSString *readFile = [NSString stringWithFormat:@"/tmp/decoding%@.txt",[programDecrypting objectForKey:@"Title"]];
@@ -344,7 +384,7 @@
 		data = [lines objectAtIndex:lines.count-2];
 		lines = [data componentsSeparatedByString:@":"];
 		double position = [[lines objectAtIndex:0] doubleValue];
-		decryptingProgress.doubleValue = position/referenceFileSize;
+		[self setProgressIndicatorForProgram:programDecrypting withValue:position/referenceFileSize];
 
 	}
 	[self performSelector:@selector(trackDecrypts) withObject:nil afterDelay:0.3];
@@ -354,11 +394,22 @@
 
 -(void)manageEncodes
 {
-	if (programEncoding || _encodeQueue.count == 0) {
+	if (programEncoding) {
 		return;
 	}
-	programEncoding = [[_encodeQueue objectAtIndex:0] retain];
-	[_encodeQueue removeObjectAtIndex:0];
+    for (int i = 0; i < _downloadQueue.count; i++) {
+        if ([[[_downloadQueue objectAtIndex:i] objectForKey:kMTStatus] intValue] == kMTStatusDecrypted) {
+            programEncoding = [_downloadQueue objectAtIndex:i];
+            [self setProgressStatus:programEncoding withValue:@"Encoding"];
+            [programEncoding setObject:[NSNumber numberWithInt:kMTStatusEncoding] forKey:kMTStatus];
+			[programEncoding setObject:[NSNumber numberWithBool:YES] forKey:kMTIsEncoding];
+			[downloadQueueTable reloadData];
+            break;
+        }
+    }
+    if (!programEncoding) {
+        return;
+    }
 	NSString *stdOutFile = [NSString stringWithFormat:@"/tmp/encoding%@.txt",[programEncoding objectForKey:@"Title"]];
 	[[NSFileManager defaultManager] createFileAtPath:stdOutFile contents:[NSData data] attributes:nil];
 	stdOutFileHandle = [NSFileHandle fileHandleForWritingAtPath:stdOutFile];
@@ -394,13 +445,9 @@
 	[encodingTask setArguments:arguments];
 	[encodingTask setStandardOutput:stdOutFileHandle];
 	[encodingTask setStandardError:[NSFileHandle fileHandleForWritingAtPath:@"/dev/null"]];
-	encodingLabel.stringValue = [NSString stringWithFormat:@"Encoding %@",[programEncoding objectForKey:@"Title"]];
-	encodingProgress.doubleValue = 0;
+	[self setProgressIndicatorForProgram:programEncoding withValue:0.0];
 	percentComplete = 0;
-	[encodingProgress setMinValue:0];
-	[encodingProgress setMaxValue:1.0];
 	[encodingTask launch];
-	[cancelEncodingButton setHidden:NO];
 	[self performSelector:@selector(trackEncodes) withObject:nil afterDelay:0.5];
 	
 }
@@ -408,18 +455,15 @@
 -(void)trackEncodes
 {
 	if (![encodingTask isRunning]) {
-//		if (programEncoding) {
-			encodingProgress.doubleValue = 1.0;
-			encodingLabel.stringValue = [NSString stringWithFormat:@"Encoded %@",[programEncoding objectForKey:@"Title"]];
-			NSString *sourceFilePath = [NSString stringWithFormat:@"%@/%@.tivo.mpg",[[NSUserDefaults standardUserDefaults] objectForKey:kMTDownloadDirectory],[programEncoding objectForKey:@"Title"]];
-			[[NSFileManager defaultManager] removeItemAtPath:sourceFilePath error:nil];
+        [self setProgressIndicatorForProgram:programEncoding withValue:1.0];
+        NSString *sourceFilePath = [NSString stringWithFormat:@"%@/%@.tivo.mpg",[[NSUserDefaults standardUserDefaults] objectForKey:kMTDownloadDirectory],[programEncoding objectForKey:@"Title"]];
+        [[NSFileManager defaultManager] removeItemAtPath:sourceFilePath error:nil];
+        [self setProgressStatus:programEncoding withValue:@"Complete"];
+        [programEncoding setObject:[NSNumber numberWithBool:YES] forKey:kMTIsEncoded];
 
-			[programEncoding release];
-			programEncoding = nil;
-			[cancelEncodingButton setHidden:YES];
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
-			[self manageEncodes];
-//		}
+        programEncoding = nil;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
+        [self manageEncodes];
 		return;
 	}
 	NSDictionary *selectedFormat = [programEncoding objectForKey:kMTSelectedFormat];
@@ -446,7 +490,7 @@
 				percentComplete = [[data substringWithRange:valueRange] doubleValue]/105.0;
 			}
 		}
-		encodingProgress.doubleValue = percentComplete;
+        [self setProgressIndicatorForProgram:programEncoding withValue:percentComplete];
 		
 	}
 	[self performSelector:@selector(trackEncodes) withObject:nil afterDelay:0.5];
@@ -461,8 +505,6 @@
 		[_recordings release];
 	}
 	[_downloadQueue release];
-	[_decryptQueue release];
-	[_encodeQueue release];
 	[encodingFormats release];
 	[tivoBrowser release];
 	[_tivoNames release];
@@ -655,11 +697,15 @@
 {
 	if (connection == programListURLConnection) {
 		[listingData appendData:data];
+//        NSLog(@"Current listing data = %@",[[[NSString alloc] initWithData:listingData encoding:NSUTF8StringEncoding] autorelease]);
 	}
 	if (connection == downloadURLConnection) {
 		[downloadFile writeData:data];
+//        NSLog(@"Data Downloaded = %lf",dataDownloaded);
 		dataDownloaded += data.length;
-		downloadingProgress.doubleValue = dataDownloaded/referenceFileSize;
+		[self setProgressIndicatorForProgram:programDownloading withValue:dataDownloaded/referenceFileSize];
+		[programDownloading setObject:[NSNumber numberWithBool:YES] forKey:kMTIsDownloading];
+	
 	}
 }
 
@@ -688,20 +734,22 @@
 		[programListURLConnection release];
 		programListURLConnection = nil;
 		tivoConnectingTo = nil;
+        NSLog(@"Finished program list URL");
 	}
 	if (connection == downloadURLConnection) {
 		[downloadFile closeFile];
 		[downloadFile release];
+        downloadFile = nil;
 		[downloadURLConnection release];
 		downloadURLConnection = nil;
-		[_decryptQueue addObject:programDownloading];
-		downloadingLabel.stringValue = [NSString stringWithFormat:@"Downloaded %@",[programDownloading objectForKey:@"Title"]];
-
-		[programDownloading release];
+//		downloadingLabel.stringValue = [NSString stringWithFormat:@"Downloaded %@",[programDownloading objectForKey:@"Title"]];
+//		[programDownloading setObject:[NSNumber numberWithBool:YES] forKey:kMTIsDownloaded];
+//        [programDownloading setObject:@"Downloaded" forKey:kMTDownloadStatus];
+        [self setProgressStatus:programDownloading withValue:@"Downloaded"];
+        [programDownloading setObject:[NSNumber numberWithInt:kMTStatusDownloaded] forKey:kMTStatus];
+		[self setProgressIndicatorForProgram:programDownloading withValue:1.0];
 		programDownloading = nil;
-		downloadingProgress.doubleValue = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadDidFinish object:nil];
-		[cancelDownloadingButton setHidden:YES];
 		[self performSelector:@selector(manageDownloads) withObject:nil afterDelay:3.0];  // See if there are any more downloads to perform but wait some time for the tivo to recover and fully close the previous download
 	}
 }

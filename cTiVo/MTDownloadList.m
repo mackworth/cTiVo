@@ -12,16 +12,17 @@
 
 -(void)awakeFromNib
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTable) name:kMTNotificationDownloadQueueUpdated object:nil];
     self.dataSource = self;
     self.delegate    = self;
 //    self.rowHeight = 24;
     self.allowsMultipleSelection = YES;
 }
 
--(void)reloadData
+-(void)updateTable
 {
     [super reloadData];
+    [_myTivos manageDownloads];
 }
 
 -(void)dealloc
@@ -106,12 +107,16 @@
 	NSString *content = @"";
 	if ([dataKey compare:@"Title"] == NSOrderedSame) {
 		content = columnItem;
+		result.progressIndicator.rightText.stringValue = [rowData objectForKey:kMTDownloadStatus];
+        result.progressIndicator.leftText.stringValue = content ;
+        result.progressIndicator.doubleValue = [[rowData objectForKey:kMTDownloadPercent] doubleValue];
 	} else if ([dataKey compare:kMTSelectedTivo] == NSOrderedSame) {
 		content	= [columnItem name];
+        result.textField.stringValue = content ;
 	} else {
 		content	= [columnItem objectForKey:@"name"];
+        result.textField.stringValue = content ;
 	}
-    result.textField.stringValue = content ;
     
     // return the result.
     return result;
