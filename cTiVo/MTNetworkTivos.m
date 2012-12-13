@@ -79,8 +79,14 @@
 
 -(void)setProgressIndicatorForProgram:(NSMutableDictionary *)program withValue:(double)value
 {
-	MTDownloadListCellView *thisCellView = [downloadQueueTable viewAtColumn:0 row:[_downloadQueue indexOfObject:program] makeIfNecessary:NO];
-	thisCellView.progressIndicator.doubleValue = value;
+	long numRows = [downloadQueueTable numberOfRows];
+	MTDownloadListCellView *thisCellView = nil;
+	if ([_downloadQueue indexOfObject:program] < numRows) {
+		thisCellView = [downloadQueueTable viewAtColumn:0 row:[_downloadQueue indexOfObject:program] makeIfNecessary:NO];
+	}
+	if (thisCellView) {
+		thisCellView.progressIndicator.doubleValue = value;
+	}
     [program setObject:[NSNumber numberWithDouble:value] forKey:kMTDownloadPercent];
     
 }
@@ -88,9 +94,15 @@
 -(void)setProgressStatus:(NSMutableDictionary *)program withValue:(NSString *)status
 {
     [program setObject:status forKey:kMTDownloadStatus];
-	MTDownloadListCellView *thisCellView = [downloadQueueTable viewAtColumn:0 row:[_downloadQueue indexOfObject:program] makeIfNecessary:NO];
-    thisCellView.progressIndicator.rightText.stringValue = status;
-	[thisCellView setNeedsDisplay:YES];
+	long numRows = [downloadQueueTable numberOfRows];
+	MTDownloadListCellView *thisCellView = nil;
+	if ([_downloadQueue indexOfObject:program] < numRows) {
+		thisCellView = [downloadQueueTable viewAtColumn:0 row:[_downloadQueue indexOfObject:program] makeIfNecessary:NO];
+	}
+	if (thisCellView) {
+		thisCellView.progressIndicator.rightText.stringValue = status;
+		[thisCellView setNeedsDisplay:YES];
+	}
     
 }
 
