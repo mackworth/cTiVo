@@ -82,7 +82,6 @@
 	MTDownloadListCellView *thisCellView = [downloadQueueTable viewAtColumn:0 row:[_downloadQueue indexOfObject:program] makeIfNecessary:NO];
 	thisCellView.progressIndicator.doubleValue = value;
     [program setObject:[NSNumber numberWithDouble:value] forKey:kMTDownloadPercent];
-	[thisCellView setNeedsDisplay:YES];
     
 }
 

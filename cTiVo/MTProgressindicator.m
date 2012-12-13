@@ -44,6 +44,12 @@
     [thisPath fill];
 }
 
+-(void)setDoubleValue:(double)doubleValue
+{
+	_doubleValue = doubleValue;
+	[self setNeedsDisplay:YES];
+}
+
 -(void)dealloc
 {
     [_barColor release];
