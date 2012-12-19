@@ -12,6 +12,6 @@
 @interface MTDownloadListCellView : NSTableCellView
 
 @property (nonatomic, readonly) IBOutlet MTProgressindicator *progressIndicator;
-@property (nonatomic, readonly) IBOutlet NSTextField *downloadStage;
+@property (unsafe_unretained, nonatomic, readonly) IBOutlet NSTextField *downloadStage;
 
 @end

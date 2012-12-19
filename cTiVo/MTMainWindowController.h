@@ -23,10 +23,10 @@
 	
 }
 
-@property (nonatomic, assign) MTNetworkTivos *myTiVos;
-@property (nonatomic, assign) NSMutableDictionary *mediaKeys;
-@property (nonatomic, assign) NSNetService *selectedTiVo;
-@property (nonatomic, assign) NSMutableArray *tiVoList, *formatList;
-@property (nonatomic, assign) NSDictionary *selectedFormat;
+@property (nonatomic, unsafe_unretained) MTNetworkTivos *myTiVos;
+@property (nonatomic, unsafe_unretained) NSMutableDictionary *mediaKeys;
+@property (nonatomic, unsafe_unretained) NSNetService *selectedTiVo;
+@property (nonatomic, unsafe_unretained) NSMutableArray *tiVoList, *formatList;
+@property (nonatomic, unsafe_unretained) NSDictionary *selectedFormat;
 
 @end

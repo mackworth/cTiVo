@@ -31,13 +31,10 @@
 {
     NSURLRequest *thisRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:_urlString ]];
     activeURLConnection = [NSURLConnection connectionWithRequest:thisRequest delegate:self];
-	if (targetFilePath) {
-		[targetFilePath release];
-	}
-    targetFilePath = [[NSString stringWithFormat:@"%@%@.tivo",_downloadDirectory ,_title] retain];
+    targetFilePath = [NSString stringWithFormat:@"%@%@.tivo",_downloadDirectory ,_title];
     NSFileManager *fm = [NSFileManager defaultManager];
     [fm createFileAtPath:targetFilePath contents:[NSData data] attributes:nil];
-    activeFile = [[NSFileHandle fileHandleForWritingAtPath:targetFilePath] retain];
+    activeFile = [NSFileHandle fileHandleForWritingAtPath:targetFilePath];
     [activeURLConnection start];
     dataDownloaded = 0.0;
     _downloadStatus = kMTStatusDownloading;
@@ -46,16 +43,7 @@
 
 -(void)decrypt
 {
-    if (activeTask) {
-        [activeTask release];
-    }
-	if (targetFilePath) {
-		[targetFilePath release];
-	}
-	if (sourceFilePath) {
-		[sourceFilePath release];
-	}
-	targetFilePath = [[NSString stringWithFormat:@"/tmp/decoding%@.txt",_title] retain];
+	targetFilePath = [NSString stringWithFormat:@"/tmp/decoding%@.txt",_title];
 	[[NSFileManager defaultManager] createFileAtPath:targetFilePath contents:[NSData data] attributes:nil];
 	activeFile = [NSFileHandle fileHandleForWritingAtPath:targetFilePath];
 	activeTask = [[NSTask alloc] init];
@@ -63,7 +51,7 @@
 	[activeTask setStandardOutput:activeFile];
 	[activeTask setStandardError:activeFile];
 	//Find the source file size
-	sourceFilePath = [[NSString stringWithFormat:@"%@/%@.tivo",_downloadDirectory,_title] retain];
+	sourceFilePath = [NSString stringWithFormat:@"%@/%@.tivo",_downloadDirectory,_title];
 	NSFileHandle *sourceFileHandle = [NSFileHandle fileHandleForReadingAtPath:sourceFilePath];
 	_fileSize = (double)[sourceFileHandle seekToEndOfFile];
 	
@@ -93,11 +81,8 @@
         _downloadStatus = kMTStatusDecrypted;
 		NSError *thisError = nil;
 		[[NSFileManager defaultManager] removeItemAtPath:sourceFilePath error:&thisError];
-		[sourceFilePath release];
 		sourceFilePath = nil;
-		[targetFilePath release];
 		targetFilePath = nil;
- 		[activeTask release];
 		activeTask = nil;
        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
 		return;
@@ -108,7 +93,7 @@
 	if (fileSize > 100) {
 		[readFileHandle seekToFileOffset:(fileSize-100)];
 		NSData *tailOfFile = [readFileHandle readDataOfLength:100];
-		NSString *data = [[[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding] autorelease];
+		NSString *data = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
 		NSArray *lines = [data componentsSeparatedByString:@"\n"];
 		data = [lines objectAtIndex:lines.count-2];
 		lines = [data componentsSeparatedByString:@":"];
@@ -126,17 +111,8 @@
 
 -(void)encode
 {
-	if (activeTask) {
-		[activeTask release];
-	}
-	if (targetFilePath) {
-		[targetFilePath release];
-	}
-	if (sourceFilePath) {
-		[sourceFilePath release];
-	}
-	targetFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",_title] retain];
-	sourceFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.mpg",_downloadDirectory,_title] retain];
+	targetFilePath = [NSString stringWithFormat:@"/tmp/encoding%@.txt",_title];
+	sourceFilePath = [NSString stringWithFormat:@"%@/%@.tivo.mpg",_downloadDirectory,_title];
 	[[NSFileManager defaultManager] createFileAtPath:targetFilePath contents:[NSData data] attributes:nil];
 	activeFile = [NSFileHandle fileHandleForWritingAtPath:targetFilePath];
 	activeTask = [[NSTask alloc] init];
@@ -182,11 +158,8 @@
 	if (![activeTask isRunning]) {
         _processProgress = 1.0;
         [[NSFileManager defaultManager] removeItemAtPath:sourceFilePath error:nil];
-		[sourceFilePath release];
 		sourceFilePath = nil;
-		[targetFilePath release];
 		targetFilePath = nil;
-		[activeTask release];
 		activeTask = nil;
         _showStatus = @"Complete";
         _downloadStatus = kMTStatusDone;
@@ -200,7 +173,7 @@
 	if (fileSize > 100) {
 		[readFileHandle seekToFileOffset:(fileSize-100)];
 		NSData *tailOfFile = [readFileHandle readDataOfLength:100];
-		NSString *data = [[[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding] autorelease];
+		NSString *data = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
 		if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"mencoder"] == NSOrderedSame) {
 			NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"\\((.*?)\\%\\)" options:NSRegularExpressionCaseInsensitive error:nil];
 			NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
@@ -284,7 +257,6 @@
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
     [activeFile closeFile];
-    [activeFile release];
     _downloadStatus = kMTStatusDownloaded  ;
 	activeURLConnection = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadDidFinish object:nil];
@@ -292,25 +264,6 @@
 
 #pragma mark - Memory Management
 
--(void)dealloc
-{
-    self.urlString = nil;
-    self.downloadDirectory = nil;
-    self.mediaKey = nil;
-    self.title = nil;
-    self.description = nil;
-    self.showStatus = nil;
-    self.URL = nil;
-    self.encodeFormat = nil;
-    self.tiVo = nil;
-	if (targetFilePath) {
-		[targetFilePath release];
-	}
-	if (sourceFilePath) {
-		[sourceFilePath release];
-	}
-	[super dealloc];
-}
 
 
 @end

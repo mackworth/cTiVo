@@ -34,7 +34,7 @@
 	_tiVoList = [[NSMutableArray alloc] init];
 	NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
 	NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
-	_formatList = [[NSMutableArray arrayWithArray:[formats objectForKey:@"formats"] ] retain];
+	_formatList = [NSMutableArray arrayWithArray:[formats objectForKey:@"formats"] ];
     
     //Make sure there's a selected format, espeically on first launch
     _selectedFormat = nil;
@@ -88,8 +88,7 @@
     if (selectedFormat == _selectedFormat) {
         return;
     }
-    [_selectedFormat release];
-    _selectedFormat = [selectedFormat retain];
+    _selectedFormat = selectedFormat;
     [[NSUserDefaults standardUserDefaults] setObject:[_selectedFormat objectForKey:@"name"] forKey:kMTSelectedFormat];
 }
 
@@ -161,15 +160,7 @@
 
 -(void)dealloc
 {
-    [_tiVoShows release];
-	[_downloadQueue release];
-	[_formatList release];
-	[tivoBrowser release];
-    [_tiVoList release];
-	[_tivoServices release];
-    [listingData release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
 }
 
 -(void)fetchVideoListFromHost
@@ -179,7 +170,6 @@
 	}
 	if (programListURLConnection) {
 		[programListURLConnection cancel];
-		[programListURLConnection release];
 		programListURLConnection = nil;
 	}
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:nil];
@@ -197,7 +187,7 @@
     NSString *tivoURLString = [[NSString stringWithFormat:@"https://tivo:%@@%@/nowplaying/index.html?Recurse=Yes",mediaKeyString,host] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
     NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
-    programListURLConnection = [[NSURLConnection connectionWithRequest:tivoURLRequest delegate:self] retain];
+    programListURLConnection = [NSURLConnection connectionWithRequest:tivoURLRequest delegate:self];
     [listingData setData:[NSData data]];
     [self setProgramLoadingString:@"Loading Programs"];
     [programListURLConnection start];
@@ -207,7 +197,7 @@
 -(void)parseListingData
 {
     [_tiVoShows removeAllObjects];
-	NSString *listingDataString = [[[NSString alloc] initWithData:listingData encoding:NSUTF8StringEncoding] autorelease];
+	NSString *listingDataString = [[NSString alloc] initWithData:listingData encoding:NSUTF8StringEncoding];
 	NSRegularExpression *tableRx = [NSRegularExpression regularExpressionWithPattern:@"<table[^>]*>(.*?)</table>" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *rowRx = [NSRegularExpression regularExpressionWithPattern:@"<tr[^>]*>(.*?)</tr>" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *cellRx = [NSRegularExpression regularExpressionWithPattern:@"<td[^>]*>(.*?)(</td>|<td)" options:NSRegularExpressionCaseInsensitive error:nil];
@@ -286,7 +276,7 @@
 			
 		}
 		if (downloadURL.length) {
-            MTTiVoShow *thisShow = [[[MTTiVoShow alloc] init] autorelease];
+            MTTiVoShow *thisShow = [[MTTiVoShow alloc] init];
             thisShow.title = title;
             thisShow.description = description;
             thisShow.urlString = downloadURL;
@@ -359,7 +349,6 @@
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
     [self parseListingData];
-    [programListURLConnection release];
     programListURLConnection = nil;
     tivoConnectingTo = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:nil];

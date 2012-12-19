@@ -13,6 +13,6 @@
 
 @interface MTDownloadList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>
 
-@property (nonatomic, assign) NSMutableArray *downloadQueue;
+@property (nonatomic, unsafe_unretained) NSMutableArray *downloadQueue;
 
 @end

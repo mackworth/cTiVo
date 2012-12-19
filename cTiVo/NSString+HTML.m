@@ -37,7 +37,6 @@
 - (NSString *)stringByConvertingHTMLToPlainText {
 	
 	// Pool
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	// Character sets
 	NSCharacterSet *stopCharacters = [NSCharacterSet characterSetWithCharactersInString:[NSString stringWithFormat:@"< \t\n\r%C%C%C%C", 0x0085, 0x000C, 0x2028, 0x2029]];
@@ -115,17 +114,14 @@
 	} while (![scanner isAtEnd]);
 	
 	// Cleanup
-	[scanner release];
 	
 	// Decode HTML entities and return
-	NSString *retString = [[result stringByDecodingHTMLEntities] retain];
-	[result release];
+	NSString *retString = [result stringByDecodingHTMLEntities];
 	
 	// Drain
-	[pool drain];
 	
 	// Return
-	return [retString autorelease];
+	return retString;
 	
 }
 
@@ -148,7 +144,6 @@
 - (NSString *)stringWithNewLinesAsBRs {
 	
 	// Pool
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	// Strange New lines:
 	//	Next Line, U+0085
@@ -192,22 +187,18 @@
 	} while (![scanner isAtEnd]);
 	
 	// Cleanup & return
-	[scanner release];
-	NSString *retString = [[NSString stringWithString:result] retain];
-	[result release];
+	NSString *retString = [NSString stringWithString:result];
 	
 	// Drain
-	[pool drain];
 	
 	// Return
-	return [retString autorelease];
+	return retString;
 	
 }
 
 - (NSString *)stringByRemovingNewLinesAndWhitespace {
 	
 	// Pool
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	// Strange New lines:
 	//	Next Line, U+0085
@@ -239,35 +230,29 @@
 	}
 	
 	// Cleanup
-	[scanner release];
 	
 	// Return
-	NSString *retString = [[NSString stringWithString:result] retain];
-	[result release];
+	NSString *retString = [NSString stringWithString:result];
 	
 	// Drain
-	[pool drain];
 	
 	// Return
-	return [retString autorelease];
+	return retString;
 	
 }
 
 - (NSString *)stringByLinkifyingURLs {
     if (!NSClassFromString(@"NSRegularExpression")) return self;
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSString *pattern = @"(?<!=\")\\b((http|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%%&amp;:/~\\+#]*[\\w\\-\\@?^=%%&amp;/~\\+#])?)";
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:nil];
-    NSString *modifiedString = [[regex stringByReplacingMatchesInString:self options:0 range:NSMakeRange(0, [self length])
-                                                           withTemplate:@"<a href=\"$1\" class=\"linkified\">$1</a>"] retain];
-    [pool drain];
-    return [modifiedString autorelease];
+    NSString *modifiedString = [regex stringByReplacingMatchesInString:self options:0 range:NSMakeRange(0, [self length])
+                                                           withTemplate:@"<a href=\"$1\" class=\"linkified\">$1</a>"];
+    return modifiedString;
 }
 
 - (NSString *)stringByStrippingTags {
 	
 	// Pool
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	// Find first & and short-cut if we can
 	NSUInteger ampIndex = [self rangeOfString:@"<" options:NSLiteralSearch].location;
@@ -291,7 +276,6 @@
 		if (tag) {
 			NSString *t = [[NSString alloc] initWithFormat:@"%@>", tag];
 			[tags addObject:t];
-			[t release];
 		}
 		
 	} while (![scanner isAtEnd]);
@@ -325,17 +309,14 @@
 	}
 	
 	// Remove multi-spaces and line breaks
-	finalString = [[result stringByRemovingNewLinesAndWhitespace] retain];
+	finalString = [result stringByRemovingNewLinesAndWhitespace];
 	
 	// Cleanup
-	[result release];
-	[tags release];
 	
 	// Drain
-	[pool drain];
 	
 	// Return
-    return [finalString autorelease];
+    return finalString;
 	
 }
 

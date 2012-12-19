@@ -11,6 +11,6 @@
 
 @interface MTProgramList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>
 
-@property (nonatomic, assign) NSMutableArray *tiVoShows;
+@property (nonatomic, unsafe_unretained) NSMutableArray *tiVoShows;
 
 @end

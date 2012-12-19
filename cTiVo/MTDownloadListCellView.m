@@ -47,10 +47,5 @@
     // Drawing code here.
 }
 
--(void)dealloc
-{
-    [_downloadStage release];
-    [super dealloc];
-}
 
 @end
