@@ -10,6 +10,7 @@
 #import "MTNetworkTivos.h"
 #import "MTProgramList.h"
 #import "MTDownloadList.h"
+#import "MTMainWindowController.h"
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate> {
 //	IBOutlet NSPopUpButton *tivoList;
@@ -17,7 +18,8 @@
 	IBOutlet MTDownloadList *downloadList;
 //	IBOutlet NSProgressIndicator *downloadingProgress, *decryptingProgress, *encodingProgress;
 //	IBOutlet NSTextField *downloadingLabel, *decriptingLabel, *encodingLabel;
-	IBOutlet MTNetworkTivos *myTivos;
+	IBOutlet MTNetworkTivos *myTiVos;
+	 MTMainWindowController *mainWindowController;
 }
 
 @property (assign) IBOutlet NSWindow *window;
@@ -25,7 +27,5 @@
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
-
-- (IBAction)saveAction:(id)sender;
 
 @end

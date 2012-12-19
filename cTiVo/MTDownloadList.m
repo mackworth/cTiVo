@@ -13,6 +13,7 @@
 -(void)awakeFromNib
 {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTable) name:kMTNotificationDownloadQueueUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
     self.dataSource = self;
     self.delegate    = self;
 //    self.rowHeight = 24;
@@ -22,7 +23,22 @@
 -(void)updateTable
 {
     [super reloadData];
-    [_myTivos manageDownloads];
+    //Check download Status
+    
+    
+}
+
+-(void)updateProgress
+{
+	for (int i=0; i< _downloadQueue.count; i++) {
+		MTDownloadListCellView *thisCell = [self viewAtColumn:0 row:i makeIfNecessary:NO];
+		if (thisCell) {
+			MTTiVoShow *thisShow = [_downloadQueue objectAtIndex:i];
+			thisCell.progressIndicator.doubleValue = thisShow.processProgress;
+			thisCell.progressIndicator.rightText.stringValue = thisShow.showStatus;
+			[thisCell setNeedsDisplay:YES];
+		}
+	}
 }
 
 -(void)dealloc
@@ -53,7 +69,7 @@
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-    return _myTivos.downloadQueue.count;
+    return _downloadQueue.count;
 }
 
 -(id)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
@@ -77,8 +93,8 @@
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    NSDictionary *rowData = [_myTivos.downloadQueue objectAtIndex:row];
-	NSDictionary *idMapping = [NSDictionary dictionaryWithObjectsAndKeys:@"Title",@"Program",kMTSelectedTivo,@"TiVo",kMTSelectedFormat,@"Format", nil];
+    MTTiVoShow *rowData = [_downloadQueue objectAtIndex:row];
+//	NSDictionary *idMapping = [NSDictionary dictionaryWithObjectsAndKeys:@"Title",@"Program",kMTSelectedTiVo,@"TiVo",kMTSelectedFormat,@"Format", nil];
 	
     // get an existing cell with the MyView identifier if it exists
 	
@@ -102,20 +118,19 @@
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
-	NSString *dataKey = [idMapping objectForKey:tableColumn.identifier];
-	id columnItem = [rowData objectForKey:dataKey];
-	NSString *content = @"";
-	if ([dataKey compare:@"Title"] == NSOrderedSame) {
-		content = columnItem;
-		result.progressIndicator.rightText.stringValue = [rowData objectForKey:kMTDownloadStatus];
-        result.progressIndicator.leftText.stringValue = content ;
-        result.progressIndicator.doubleValue = [[rowData objectForKey:kMTDownloadPercent] doubleValue];
-	} else if ([dataKey compare:kMTSelectedTivo] == NSOrderedSame) {
-		content	= [columnItem name];
-        result.textField.stringValue = content ;
-	} else {
-		content	= [columnItem objectForKey:@"name"];
-        result.textField.stringValue = content ;
+//	NSString *dataKey = [idMapping objectForKey:tableColumn.identifier];
+//	id columnItem = [rowData objectForKey:dataKey];
+//	NSString *content = @"";
+	if ([tableColumn.identifier compare:@"Program"] == NSOrderedSame) {
+		result.progressIndicator.rightText.stringValue = rowData.showStatus;
+        result.progressIndicator.leftText.stringValue = rowData.title ;
+        result.progressIndicator.doubleValue = rowData.processProgress;
+	} else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
+//		content	= [columnItem name];
+        result.textField.stringValue = rowData.tiVo.name ;
+	} else { //This is the format column
+//		content	= [columnItem objectForKey:@"name"];
+        result.textField.stringValue = [rowData.encodeFormat objectForKey:@"name"] ;
 	}
     
     // return the result.

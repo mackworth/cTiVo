@@ -12,7 +12,7 @@
 
 -(void)awakeFromNib
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationRecordingsUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated object:nil];
     self.dataSource = self;
     self.delegate    = self;
 //    self.rowHeight = 24;
@@ -52,12 +52,12 @@
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-    return _myTivos.recordings.count;
+    return _tiVoShows.count;
 }
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    NSString *s = [[_myTivos.recordings objectAtIndex:row] objectForKey:@"Title"];
+    NSString *s = [[_tiVoShows objectAtIndex:row] title];
     // get an existing cell with the MyView identifier if it exists
     NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
     

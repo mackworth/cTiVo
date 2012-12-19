@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "NSString+HTML.h"
 #import "MTDownloadListCellView.h"
+#import "MTTiVoShow.h"
 
 
 @interface MTNetworkTivos : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
@@ -16,28 +17,35 @@
     NSNetService *tivoService ;
     NSNetServiceBrowser *tivoBrowser;
     NSMutableData *listingData;
-	IBOutlet NSPopUpButton *tivoList, *formatList;
-	IBOutlet NSTextField  *mediaKeyLabel, *loadingProgramListLabel, *downloadDirectory;
-	IBOutlet NSProgressIndicator *loadingProgramListIndicator;
-	IBOutlet NSTableView *programListTable, *downloadQueueTable;
+	
 	NSURLConnection *programListURLConnection, *downloadURLConnection;
 	NSTask *decryptingTask, *encodingTask;
-	NSArray *encodingFormats;
-	NSMutableDictionary *mediaKeys;
-	NSMutableDictionary *programDownloading, *programDecrypting, *programEncoding;
+    NSMutableDictionary *programDownloading, *programDecrypting, *programEncoding;
 	NSFileHandle *downloadFile, *stdOutFileHandle;
 	double dataDownloaded, referenceFileSize;
 	NSNetService *tivoConnectingTo;
 	NSOpenPanel *myOpenPanel;
     double percentComplete;
     MTDownloadListCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
+
 }
 
-@property (nonatomic, readonly) NSMutableArray *tivoNames, *recordings, *downloadQueue;
+//Shared Data
+
+@property (nonatomic, readonly) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
+@property (nonatomic, retain) NSString *downloadDirectory, *programLoadingString;
+
+//Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic) BOOL videoListNeedsFilling;
+@property (nonatomic, retain) NSDictionary *selectedFormat;
+@property (nonatomic, retain) NSNetService *selectedTiVo;
+@property (nonatomic, readonly) NSMutableArray *tiVoNames;
+
+
 
 -(void)fetchVideoListFromHost;
--(void)manageDownloads;
+-(void)addProgramToDownloadQueue:(MTTiVoShow *)program;
+
 
 @end

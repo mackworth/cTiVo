@@ -11,7 +11,6 @@
 
 @interface MTProgramList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>
 
-@property (nonatomic, retain) NSArray *recordings;
-@property (nonatomic, assign) MTNetworkTivos *myTivos;
+@property (nonatomic, assign) NSMutableArray *tiVoShows;
 
 @end

@@ -13,7 +13,6 @@
 
 @interface MTDownloadList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>
 
-@property (nonatomic, retain) NSMutableArray *downloadQueue;
-@property (nonatomic, assign) MTNetworkTivos *myTivos;
+@property (nonatomic, assign) NSMutableArray *downloadQueue;
 
 @end
