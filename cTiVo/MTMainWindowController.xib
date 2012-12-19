@@ -76,7 +76,7 @@
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<bool key="NSEnabled">YES</bool>
 									<object class="NSButtonCell" key="NSCell" id="244550631">
-										<int key="NSCellFlags">-2080374784</int>
+										<int key="NSCellFlags">-1543503872</int>
 										<int key="NSCellFlags2">134217728</int>
 										<string key="NSContents">Remove From Queue</string>
 										<object class="NSFont" key="NSSupport" id="84772249">
@@ -110,7 +110,7 @@
 													<string key="NSFrameSize">{670, 152}</string>
 													<reference key="NSSuperview" ref="1053596382"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="334740629"/>
+													<reference key="NSNextKeyView" ref="794705384"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -308,7 +308,6 @@
 											<string key="NSFrame">{{1, 158}, {725, 16}}</string>
 											<reference key="NSSuperview" ref="193322370"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView"/>
 											<string key="NSReuseIdentifierKey">_NS:60</string>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 											<int key="NSsFlags">1</int>
@@ -335,7 +334,7 @@
 									<string key="NSFrameSize">{672, 170}</string>
 									<reference key="NSSuperview" ref="366407957"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="794705384"/>
+									<reference key="NSNextKeyView" ref="1053596382"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133682</int>
 									<reference key="NSVScroller" ref="863871934"/>
@@ -362,7 +361,7 @@
 													<string key="NSFrameSize">{670, 197}</string>
 													<reference key="NSSuperview" ref="556230325"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="5386701"/>
+													<reference key="NSNextKeyView" ref="39833346"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -487,7 +486,7 @@
 									<string key="NSFrame">{{0, 208}, {672, 215}}</string>
 									<reference key="NSSuperview" ref="366407957"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="39833346"/>
+									<reference key="NSNextKeyView" ref="556230325"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133682</int>
 									<reference key="NSVScroller" ref="785357226"/>
@@ -780,13 +779,13 @@
 								<string key="NSCellIdentifier">_NS:9</string>
 								<reference key="NSControlView" ref="1024277849"/>
 								<bool key="NSDrawsBackground">YES</bool>
-								<object class="NSColor" key="NSBackgroundColor" id="1012821933">
+								<object class="NSColor" key="NSBackgroundColor">
 									<int key="NSColorSpace">6</int>
 									<string key="NSCatalogName">System</string>
 									<string key="NSColorName">textBackgroundColor</string>
 									<reference key="NSColor" ref="1013893883"/>
 								</object>
-								<object class="NSColor" key="NSTextColor" id="109208711">
+								<object class="NSColor" key="NSTextColor">
 									<int key="NSColorSpace">6</int>
 									<string key="NSCatalogName">System</string>
 									<string key="NSColorName">textColor</string>
@@ -816,15 +815,15 @@
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSTextFieldCell" key="NSCell" id="468387810">
-								<int key="NSCellFlags">-1804599231</int>
+								<int key="NSCellFlags">-2079326144</int>
 								<int key="NSCellFlags2">272630784</int>
 								<string key="NSContents"/>
 								<reference key="NSSupport" ref="26"/>
 								<string key="NSCellIdentifier">_NS:9</string>
 								<reference key="NSControlView" ref="37222579"/>
 								<bool key="NSDrawsBackground">YES</bool>
-								<reference key="NSBackgroundColor" ref="1012821933"/>
-								<reference key="NSTextColor" ref="109208711"/>
+								<reference key="NSBackgroundColor" ref="162790425"/>
+								<reference key="NSTextColor" ref="686684468"/>
 							</object>
 							<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 						</object>
@@ -863,7 +862,7 @@
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="732553831">
-								<int key="NSCellFlags">-2080374784</int>
+								<int key="NSCellFlags">-1543503872</int>
 								<int key="NSCellFlags2">134217728</int>
 								<string key="NSContents">Add To Queue</string>
 								<reference key="NSSupport" ref="84772249"/>
@@ -1003,6 +1002,22 @@
 						<reference key="destination" ref="969919815"/>
 					</object>
 					<int key="connectionID">151</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">addToQueueButton</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="862415292"/>
+					</object>
+					<int key="connectionID">154</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">removeFromQueueButton</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="465007069"/>
+					</object>
+					<int key="connectionID">155</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -1755,7 +1770,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">153</int>
+			<int key="maxID">155</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1771,16 +1786,22 @@
 					<string key="className">MTMainWindowController</string>
 					<string key="superclassName">NSWindowController</string>
 					<dictionary class="NSMutableDictionary" key="outlets">
+						<string key="addToQueueButton">NSButton</string>
 						<string key="downloadDirectory">NSTextField</string>
 						<string key="downloadQueueTable">MTDownloadList</string>
 						<string key="formatListPopUp">NSPopUpButton</string>
 						<string key="loadingProgramListIndicator">NSProgressIndicator</string>
 						<string key="loadingProgramListLabel">NSTextField</string>
 						<string key="mediaKeyLabel">NSTextField</string>
+						<string key="removeFromQueueButton">NSButton</string>
 						<string key="tiVoListPopUp">NSPopUpButton</string>
 						<string key="tiVoShowTable">MTProgramList</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
+						<object class="IBToOneOutletInfo" key="addToQueueButton">
+							<string key="name">addToQueueButton</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
 						<object class="IBToOneOutletInfo" key="downloadDirectory">
 							<string key="name">downloadDirectory</string>
 							<string key="candidateClassName">NSTextField</string>
@@ -1804,6 +1825,10 @@
 						<object class="IBToOneOutletInfo" key="mediaKeyLabel">
 							<string key="name">mediaKeyLabel</string>
 							<string key="candidateClassName">NSTextField</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="removeFromQueueButton">
+							<string key="name">removeFromQueueButton</string>
+							<string key="candidateClassName">NSButton</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="tiVoListPopUp">
 							<string key="name">tiVoListPopUp</string>

@@ -43,6 +43,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:downloadQueueTable selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(startAnimation:) name:kMTNotificationShowListUpdating object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(stopAnimation:) name:kMTNotificationShowListUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
     [_myTiVos addObserver:self forKeyPath:@"programLoadingString" options:0 context:nil];
     
 }
@@ -180,6 +181,21 @@
 	}
 }
 
+#pragma mark - Table View Notification Handling
+
+-(void)tableSelectionChanged:(NSNotification *)notification
+{
+    [addToQueueButton setEnabled:NO];
+    [removeFromQueueButton setEnabled:NO];
+    if ([downloadQueueTable numberOfSelectedRows]) {
+        [removeFromQueueButton setEnabled:YES];
+    }
+    if ([tiVoShowTable numberOfSelectedRows]) {
+        [addToQueueButton setEnabled:YES];
+    }
+}
+
+#pragma mark - Memory Management
 
 -(void)dealloc
 {

@@ -49,21 +49,6 @@
 
 #pragma mark - Table Delegate Protocol
 
--(void)tableViewSelectionDidChange:(NSNotification *)notification
-{
-	return;
-//    NSTableView *viewChanged = (NSTableView *)notification.object;
-//    for (int i = 0; i <  _myTivos.downloadQueue.count; i++) {
-//        NSTextField *thisRow = [viewChanged viewAtColumn:0 row:i makeIfNecessary:NO];
-//        if ([viewChanged isRowSelected:i]) {
-//            thisRow.backgroundColor = [NSColor colorWithCalibratedRed:.4 green:.4 blue:1 alpha:.5];
-//        } else {
-//            thisRow.backgroundColor = [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0];
-//        }
-//    }
-    
-}
-
 
 #pragma mark - Table Data Source Protocol
 
