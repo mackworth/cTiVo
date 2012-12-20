@@ -16,7 +16,7 @@
 	NSString *sourceFilePath, *targetFilePath;
 }
 
-@property (nonatomic, strong) NSString *urlString, *downloadDirectory, *mediaKey, *title, *description, *showStatus;
+@property (nonatomic, strong) NSString *urlString, *downloadDirectory, *mediaKey, *title, *description, *showStatus, *showDate;
 @property (nonatomic, strong) NSURL *URL;
 @property int downloadStatus, showID;
 @property double processProgress; //Should be between 0 and 1

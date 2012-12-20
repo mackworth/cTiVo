@@ -56,7 +56,8 @@
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    NSString *s = [[_tiVoShows objectAtIndex:row] title];
+    NSString *show = [[_tiVoShows objectAtIndex:row] title];
+	NSString *date = [[_tiVoShows objectAtIndex:row] showDate];
     // get an existing cell with the MyView identifier if it exists
     NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
     
@@ -78,7 +79,11 @@
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
-    result.textField.stringValue = s ;
+	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
+		result.textField.stringValue = show ;
+	} else {
+		result.textField.stringValue = date;
+	}
     
     // return the result.
     return result;

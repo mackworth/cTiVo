@@ -203,6 +203,7 @@
 	NSRegularExpression *cellRx = [NSRegularExpression regularExpressionWithPattern:@"<td[^>]*>(.*?)(</td>|<td)" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *titleRx = [NSRegularExpression regularExpressionWithPattern:@"<b[^>]*>(.*?)</b>" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *descriptionRx = [NSRegularExpression regularExpressionWithPattern:@"<br>(.*)" options:NSRegularExpressionCaseInsensitive error:nil];
+	NSRegularExpression *dateRx = [NSRegularExpression regularExpressionWithPattern:@"(.*)<br>(.*)" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *urlRx = [NSRegularExpression regularExpressionWithPattern:@"<a href=\"([^\"]*)\">Download MPEG-PS" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *idRx = [NSRegularExpression regularExpressionWithPattern:@"id=(\\d+)" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSArray *tables = [tableRx matchesInString:listingDataString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, listingDataString.length)];
@@ -218,7 +219,7 @@
 	NSTextCheckingResult *cell;
 	NSRange cellRange;
 	int cellIndex = 0;
-	NSString *title = @"", *description = @"", *downloadURL = @"", *idString = @"", *size = @"";
+	NSString *title = @"", *description = @"", *downloadURL = @"", *idString = @"", *size = @"", *showDate = @"";
 	NSRange rangeToCheck;
 	for (NSTextCheckingResult *row in rows) {
 		title = @"";
@@ -226,6 +227,7 @@
 		downloadURL = @"";
 		idString = @"";
 		size = @"";
+		showDate = @"";
 		cellIndex = 0;
 		rangeToCheck = [row rangeAtIndex:1];
 		cell = [cellRx firstMatchInString:listingDataString options:NSMatchingWithoutAnchoringBounds range:rangeToCheck];
@@ -244,7 +246,18 @@
 				title = [[fullTitle substringWithRange:[titleResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
 				NSTextCheckingResult *descriptionResult = [descriptionRx firstMatchInString:fullTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullTitle.length)];
 				description = [[fullTitle substringWithRange:[descriptionResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
-			} 
+			}
+			if (cellIndex == 3) {
+				//We've got the date
+				NSString *fullString = [listingDataString substringWithRange:[cell rangeAtIndex:1]];
+				NSTextCheckingResult *dateResult = [dateRx firstMatchInString:fullString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullString.length)];
+				if (dateResult.range.location != NSNotFound) {
+					NSString *day = [[fullString substringWithRange:[dateResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
+					NSString *date = [[fullString substringWithRange:[dateResult rangeAtIndex:2]] stringByDecodingHTMLEntities];
+					showDate = [NSString stringWithFormat:@"%@ %@",day, date];
+				}
+
+			}
 			if (cellIndex == 4) {
 				//We've got the size 
 				NSString *fullString = [listingDataString substringWithRange:[cell rangeAtIndex:1]];
@@ -281,6 +294,7 @@
             thisShow.description = description;
             thisShow.urlString = downloadURL;
             thisShow.showID = [idString intValue];
+			thisShow.showDate = showDate;
             double sizeValue = [[size substringToIndex:size.length-3] doubleValue];
             NSString *modifier = [size substringFromIndex:size.length-2];
             if ([modifier caseInsensitiveCompare:@"MB"] == NSOrderedSame) {

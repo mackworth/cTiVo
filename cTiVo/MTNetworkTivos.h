@@ -40,8 +40,6 @@
 @property (nonatomic) BOOL videoListNeedsFilling;
 @property (nonatomic, strong) NSDictionary *selectedFormat;
 @property (nonatomic, strong) NSNetService *selectedTiVo;
-@property (unsafe_unretained, nonatomic, readonly) NSMutableArray *tiVoNames;
-
 
 
 -(void)fetchVideoListFromHost;
