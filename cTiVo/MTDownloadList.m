@@ -70,8 +70,12 @@
         // allows it to be re-used
         thisCell.identifier = identifier;
         result = (id)thisCell;
-    } else {
-        result =[super makeViewWithIdentifier:identifier owner:owner];       
+    } else if([identifier compare: @"iTunes"] == NSOrderedSame) {
+        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(0, 0, 20, 20)] autorelease];
+        thisCell.identifier = identifier;
+        result = (id)thisCell;
+   } else {
+        result =[super makeViewWithIdentifier:identifier owner:owner];
     }
     return result;
 }
@@ -103,19 +107,22 @@
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
-//	NSString *dataKey = [idMapping objectForKey:tableColumn.identifier];
-//	id columnItem = [rowData objectForKey:dataKey];
-//	NSString *content = @"";
 	if ([tableColumn.identifier compare:@"Program"] == NSOrderedSame) {
 		result.progressIndicator.rightText.stringValue = rowData.showStatus;
         result.progressIndicator.leftText.stringValue = rowData.title ;
         result.progressIndicator.doubleValue = rowData.processProgress;
 	} else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
-//		content	= [columnItem name];
         result.textField.stringValue = rowData.tiVo.name ;
-	} else { //This is the format column
-//		content	= [columnItem objectForKey:@"name"];
+	} else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
         result.textField.stringValue = [rowData.encodeFormat objectForKey:@"name"] ;
+	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
+        NSInteger c = NSOffState;
+        if (rowData.addToiTunesWhenEncoded) {
+            c = NSOnState;
+        }
+        [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
+	} else { //This is the iTunes column
+        
 	}
     
     // return the result.

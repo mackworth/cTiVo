@@ -37,6 +37,7 @@
     _selectedTiVo = _myTiVos.selectedTiVo;
     self.formatList = _myTiVos.formatList;
     self.tiVoList = _myTiVos.tiVoList;
+    [addToiTunesButton setState:NSOffState];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshTiVoListPopup) name:kMTNotificationTiVoListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:tiVoShowTable selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated object:nil];
@@ -45,6 +46,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(stopAnimation:) name:kMTNotificationShowListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
     [_myTiVos addObserver:self forKeyPath:@"programLoadingString" options:0 context:nil];
+    [_myTiVos addObserver:self forKeyPath:@"selectedFormat" options:0 context:nil];
     
 }
 
@@ -52,6 +54,15 @@
 {
     if ([keyPath compare:@"programLoadingString"] == NSOrderedSame) {
         loadingProgramListLabel.stringValue = _myTiVos.programLoadingString;
+    }
+    if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
+        _selectedFormat = _myTiVos.selectedFormat;
+        BOOL caniTune = [[_selectedFormat objectForKey:@"iTunes"] boolValue];
+        [addToiTunesButton setEnabled:YES];
+        if (!caniTune) {
+            [addToiTunesButton setState:NSOffState];
+            [addToiTunesButton setEnabled:NO];
+        }
     }
 }
 
@@ -131,7 +142,7 @@
 {
     NSPopUpButton *thisButton = (NSPopUpButton *)sender;
     _myTiVos.selectedFormat = [[thisButton selectedItem] representedObject];
-    _selectedFormat = _myTiVos.selectedFormat;
+//    _selectedFormat = _myTiVos.selectedFormat;
 	[[NSUserDefaults standardUserDefaults] setObject:[_selectedFormat objectForKey:@"name"] forKey:kMTSelectedFormat];
 	
 }
@@ -139,6 +150,11 @@
 {
     for (int i = 0; i < _myTiVos.tiVoShows.count; i++) {
         if([tiVoShowTable isRowSelected:i]) {
+            MTTiVoShow *thisShow = [_myTiVos.tiVoShows objectAtIndex:i];
+            thisShow.addToiTunesWhenEncoded = NO;
+            if (addToiTunesButton.state == NSOnState && [[_selectedFormat objectForKey:@"iTunes"] boolValue]) {
+                thisShow.addToiTunesWhenEncoded  = YES;
+            }
             [_myTiVos addProgramToDownloadQueue:[_myTiVos.tiVoShows objectAtIndex:i]];
         }
     }

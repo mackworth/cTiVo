@@ -28,6 +28,8 @@
 		D2D60BD916766FA600CE32DE /* MTProgramList.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCE16766FA600CE32DE /* MTProgramList.m */; };
 		D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD116766FA600CE32DE /* NSString+HTML.m */; };
 		D2D60BDE16766FA600CE32DE /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */; };
+		D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */; };
+		D2DFA68F1683C27600CD6CE0 /* MTDownloadListCheckCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -69,6 +71,10 @@
 		D2D60BD116766FA600CE32DE /* NSString+HTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+HTML.m"; sourceTree = "<group>"; };
 		D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = "GTMNSString+HTML.h"; sourceTree = "<group>"; };
 		D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GTMNSString+HTML.m"; sourceTree = "<group>"; };
+		D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = System/Library/Frameworks/ScriptingBridge.framework; sourceTree = SDKROOT; };
+		D2DFA68C1683BA0300CD6CE0 /* iTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
+		D2DFA68D1683C27600CD6CE0 /* MTDownloadListCheckCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadListCheckCell.h; sourceTree = "<group>"; };
+		D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadListCheckCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */,
 				D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -103,6 +110,7 @@
 		D2D60BA016766EFD00CE32DE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */,
 				D2D60BA116766EFD00CE32DE /* Cocoa.framework */,
 				D2D60BA316766EFD00CE32DE /* Other Frameworks */,
 			);
@@ -122,6 +130,7 @@
 		D2D60BA716766EFD00CE32DE /* cTiVo */ = {
 			isa = PBXGroup;
 			children = (
+				D2DFA68B1683B9EC00CD6CE0 /* iTunesInterface */,
 				D2D60BDF16766FB100CE32DE /* Utilities */,
 				D2D60BCB16766FA600CE32DE /* MTConstants.h */,
 				D2D60BCA16766FA600CE32DE /* MTNetworkTivos.h */,
@@ -132,6 +141,8 @@
 				D2D60BCC16766FA600CE32DE /* MTDownloadList.m */,
 				D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */,
 				D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */,
+				D2DFA68D1683C27600CD6CE0 /* MTDownloadListCheckCell.h */,
+				D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */,
 				D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */,
 				D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */,
 				D2D60BCF16766FA600CE32DE /* MTProgramList.h */,
@@ -181,6 +192,14 @@
 				D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */,
 			);
 			name = Utilities;
+			sourceTree = "<group>";
+		};
+		D2DFA68B1683B9EC00CD6CE0 /* iTunesInterface */ = {
+			isa = PBXGroup;
+			children = (
+				D2DFA68C1683BA0300CD6CE0 /* iTunes.h */,
+			);
+			name = iTunesInterface;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -282,6 +301,7 @@
 				D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */,
 				D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */,
 				D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */,
+				D2DFA68F1683C27600CD6CE0 /* MTDownloadListCheckCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

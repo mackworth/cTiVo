@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "iTunes.h"
 
 @interface MTTiVoShow : NSObject {
     NSFileHandle *activeFile;
@@ -23,6 +24,7 @@
 @property double fileSize;  //Size on TiVo;
 @property (nonatomic, retain) NSDictionary *encodeFormat;
 @property (nonatomic, retain) NSNetService *tiVo;
+@property BOOL addToiTunesWhenEncoded;
 
 
 -(BOOL)cancel;

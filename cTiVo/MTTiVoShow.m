@@ -20,6 +20,7 @@
         _showStatus = @"";
 		targetFilePath = nil;
 		sourceFilePath = nil;
+        _addToiTunesWhenEncoded = NO;
     }
     return self;
 }
@@ -55,9 +56,10 @@
 	if (sourceFilePath) {
 		[sourceFilePath release];
 	}
-	targetFilePath = [[NSString stringWithFormat:@"/tmp/decoding%@.txt",_title] retain];
-	[[NSFileManager defaultManager] createFileAtPath:targetFilePath contents:[NSData data] attributes:nil];
-	activeFile = [NSFileHandle fileHandleForWritingAtPath:targetFilePath];
+	targetFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",_downloadDirectory,_title] retain];
+	NSString *logFile = [NSString stringWithFormat:@"/tmp/decoding%@.txt",_title];
+	[[NSFileManager defaultManager] createFileAtPath:logFile contents:[NSData data] attributes:nil];
+	activeFile = [NSFileHandle fileHandleForWritingAtPath:logFile];
 	activeTask = [[NSTask alloc] init];
 	[activeTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
 	[activeTask setStandardOutput:activeFile];
@@ -71,7 +73,7 @@
     
 	NSArray *arguments = [NSArray arrayWithObjects:
 						  [NSString stringWithFormat:@"-m%@",_mediaKey],
-						  [NSString stringWithFormat:@"-o%@%@.tivo.mpg",_downloadDirectory,_title],
+						  [NSString stringWithFormat:@"-o%@",targetFilePath],
 						  @"-v",
 						  [NSString stringWithFormat:@"%@%@.tivo",_downloadDirectory,_title],
 						  nil];
@@ -135,10 +137,11 @@
 	if (sourceFilePath) {
 		[sourceFilePath release];
 	}
-	targetFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",_title] retain];
+	targetFilePath = [[NSString stringWithFormat:@"%@/%@%@",_downloadDirectory,_title,[_encodeFormat objectForKey:@"filenameExtension"]] retain];
+	NSString *logFile = [NSString stringWithFormat:@"/tmp/encoding%@.txt",_title];
 	sourceFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.mpg",_downloadDirectory,_title] retain];
-	[[NSFileManager defaultManager] createFileAtPath:targetFilePath contents:[NSData data] attributes:nil];
-	activeFile = [NSFileHandle fileHandleForWritingAtPath:targetFilePath];
+	[[NSFileManager defaultManager] createFileAtPath:logFile contents:[NSData data] attributes:nil];
+	activeFile = [NSFileHandle fileHandleForWritingAtPath:logFile];
 	activeTask = [[NSTask alloc] init];
 //	NSDictionary *selectedFormat = [programEncoding objectForKey:kMTSelectedFormat];
 	NSMutableArray *arguments = [NSMutableArray array];
@@ -150,7 +153,7 @@
 		[arguments addObjectsFromArray:[[_encodeFormat objectForKey:@"encoderAudioOptions"] componentsSeparatedByString:@" "]];
 		[arguments addObjectsFromArray:[[_encodeFormat objectForKey:@"encoderOtherOptions"] componentsSeparatedByString:@" "]];
 		[arguments addObject:@"-o"];
-		[arguments addObject:[NSString stringWithFormat:@"%@/%@%@",_downloadDirectory,_title,[_encodeFormat objectForKey:@"filenameExtension"]]];
+		[arguments addObject:targetFilePath];
 		
 	}
 	if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"HandBrake"] == NSOrderedSame ) {
@@ -184,14 +187,20 @@
         [[NSFileManager defaultManager] removeItemAtPath:sourceFilePath error:nil];
 		[sourceFilePath release];
 		sourceFilePath = nil;
-		[targetFilePath release];
-		targetFilePath = nil;
 		[activeTask release];
 		activeTask = nil;
         _showStatus = @"Complete";
         _downloadStatus = kMTStatusDone;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
+        if (_addToiTunesWhenEncoded) {
+            iTunesApplication *iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
+            if (iTunes) {
+                [iTunes add:[NSArray arrayWithObject:[NSURL fileURLWithPath:targetFilePath]] to:nil];
+            }
+        }
+		[targetFilePath release];
+		targetFilePath = nil;
 		return;
 	}
 	NSString *readFile = [NSString stringWithFormat:@"/tmp/encoding%@.txt",_title];
