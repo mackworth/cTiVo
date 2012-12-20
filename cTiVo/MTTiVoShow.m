@@ -217,6 +217,9 @@
 				[fm removeItemAtPath:sourceFilePath error:nil];
 				[fm removeItemAtPath:targetFilePath error:nil];
 			}
+			_downloadStatus = kMTStatusNew;
+			_processProgress = 0.0;
+			_showStatus = @"";
 		} else {
 			ret = NO;
 		}
