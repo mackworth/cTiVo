@@ -44,6 +44,7 @@
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [super dealloc];
 }
 
 #pragma mark - Table Delegate Protocol
@@ -61,7 +62,7 @@
     id result;
     if([identifier compare: @"Program"] == NSOrderedSame) {
         NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
-        MTDownloadListCellView *thisCell = [[MTDownloadListCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)];
+        MTDownloadListCellView *thisCell = [[[MTDownloadListCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)] autorelease];
         //        result.textField.font = [NSFont userFontOfSize:14];
         thisCell.textField.editable = NO;
         
@@ -90,7 +91,7 @@
         // create the new NSTextField with a frame of the {0,0} with the width of the table
         // note that the height of the frame is not really relevant, the row-height will modify the height
         // the new text field is then returned as an autoreleased object
-        result = [[MTDownloadListCellView alloc] initWithFrame:CGRectMake(0, 0, tableColumn.width, 20)];
+        result = [[[MTDownloadListCellView alloc] initWithFrame:CGRectMake(0, 0, tableColumn.width, 20)] autorelease];
 //        result.textField.font = [NSFont userFontOfSize:14];
         result.textField.editable = NO;
         

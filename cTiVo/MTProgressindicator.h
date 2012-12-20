@@ -13,6 +13,6 @@
 @property (nonatomic, readonly) NSTextField *leftText, *rightText;
 @property (nonatomic) float leftRightRatio;
 @property (nonatomic) double doubleValue;  // % length of colored section
-@property (nonatomic, strong) NSColor *barColor;
+@property (nonatomic, retain) NSColor *barColor;
 
 @end

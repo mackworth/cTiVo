@@ -27,6 +27,7 @@
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [super dealloc];
 }
 
 #pragma mark - Table Delegate Protocol
@@ -68,7 +69,7 @@
         // note that the height of the frame is not really relevant, the row-height will modify the height
         // the new text field is then returned as an autoreleased object
         result = [[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)];
-//        result.textField.font = [NSFont userFontOfSize:14];
+        //        result.textField.font = [NSFont userFontOfSize:14];
         result.textField.editable = NO;
         
         // the identifier of the NSTextField instance is set to MyView. This

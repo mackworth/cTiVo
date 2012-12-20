@@ -28,8 +28,10 @@
         [_rightText setBezeled:NO];
         [self addSubview:_leftText];
         [self addSubview:_rightText];
+        [_leftText release];
+        [_rightText release];
         _doubleValue = 0.0;
-        _barColor = [NSColor colorWithCalibratedRed:.7 green:.7 blue:1.0 alpha:1.0];
+        _barColor = [[NSColor colorWithCalibratedRed:.7 green:.7 blue:1.0 alpha:1.0] retain];
     }
     
     return self;
@@ -48,5 +50,10 @@
 	[self setNeedsDisplay:YES];
 }
 
+-(void)dealloc
+{
+    [_barColor release];
+    [super dealloc];
+}
 
 @end
