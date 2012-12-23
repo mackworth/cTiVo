@@ -30,6 +30,8 @@
     [super windowDidLoad];
     
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
+	[tiVoListPopUp removeAllItems];
+	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
     tiVoShowTable.tiVoShows = _myTiVos.tiVoShows;  //Connect display to data source
     downloadQueueTable.downloadQueue = _myTiVos.downloadQueue;  //Connect display to data source
     downloadDirectory.stringValue = _myTiVos.downloadDirectory;
@@ -38,6 +40,7 @@
     self.formatList = _myTiVos.formatList;
     self.tiVoList = _myTiVos.tiVoList;
     [addToiTunesButton setState:NSOffState];
+    [simultaneousEncodeButton setState:NSOnState];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshTiVoListPopup) name:kMTNotificationTiVoListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:tiVoShowTable selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated object:nil];
@@ -58,10 +61,16 @@
     if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
         _selectedFormat = _myTiVos.selectedFormat;
         BOOL caniTune = [[_selectedFormat objectForKey:@"iTunes"] boolValue];
+        BOOL canSimulEncode = ![[_selectedFormat objectForKey:@"mustDownloadFirst"] boolValue];
         [addToiTunesButton setEnabled:YES];
         if (!caniTune) {
             [addToiTunesButton setState:NSOffState];
             [addToiTunesButton setEnabled:NO];
+        }
+        [simultaneousEncodeButton setEnabled:YES];
+        if (!canSimulEncode) {
+            [simultaneousEncodeButton setState:NSOffState];
+            [simultaneousEncodeButton setEnabled:NO];
         }
     }
 }
@@ -118,6 +127,7 @@
 		
 	}
     if (_selectedTiVo) {
+		[mediaKeyLabel setEnabled:YES];
         mediaKeyLabel.stringValue = [[[NSUserDefaults standardUserDefaults]  objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name];
         [_myTiVos fetchVideoListFromHost];
     }
@@ -154,6 +164,10 @@
             thisShow.addToiTunesWhenEncoded = NO;
             if (addToiTunesButton.state == NSOnState && [[_selectedFormat objectForKey:@"iTunes"] boolValue]) {
                 thisShow.addToiTunesWhenEncoded  = YES;
+            }
+            thisShow.simultaneousEncode = YES;
+            if (simultaneousEncodeButton.state == NSOffState) {
+                thisShow.simultaneousEncode = NO;
             }
             [_myTiVos addProgramToDownloadQueue:[_myTiVos.tiVoShows objectAtIndex:i]];
         }

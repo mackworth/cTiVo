@@ -11,15 +11,6 @@
 
 @implementation MTNetworkTivos
 
--(id)init
-{
-	self = [super init];
-	if (self) {
-		[self awakeFromNib];
-	}
-	return self;
-}
-
 -(void)awakeFromNib
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -74,11 +65,13 @@
     decryptTableCell = nil;
     downloadTableCell = nil;
     encodeTableCell = nil;
-    
+	numDecoders = 0;
+	   
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fetchVideoListFromHost) name:kMTNotificationTiVoChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDecryptDidFinish object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
 	
 
 }
@@ -92,8 +85,6 @@
     _selectedFormat = [selectedFormat retain];
     [[NSUserDefaults standardUserDefaults] setObject:[_selectedFormat objectForKey:@"name"] forKey:kMTSelectedFormat];
 }
-
-
 
 
 #pragma mark - Support methods
@@ -137,24 +128,37 @@
     }
     if (!isDownloading) {
         for (MTTiVoShow *s in _downloadQueue) {
-            if (s.downloadStatus == kMTStatusNew) {
-                [s download];
+            if (s.downloadStatus == kMTStatusNew && (numDecoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
+				if (s.simultaneousEncode) {
+					numDecoders++;
+				}
+				[s download];
                 break;
             }
         }
+    }
+    if (!isDecrypting) {
         for (MTTiVoShow *s in _downloadQueue) {
-            if (s.downloadStatus == kMTStatusDownloaded) {
+            if (s.downloadStatus == kMTStatusDownloaded && !s.simultaneousEncode) {
                 [s decrypt];
                 break;
             }
         }
+    }
+    if (!isEncoding) {
         for (MTTiVoShow *s in _downloadQueue) {
-            if (s.downloadStatus == kMTStatusDecrypted) {
+            if (s.downloadStatus == kMTStatusDecrypted && numDecoders < kMTMaxNumDownloaders) {
+				numDecoders++;
                 [s encode];
                 break;
             }
         }
     }
+}
+
+-(void)encodeFinished
+{
+	numDecoders--;
 }
 
 #pragma mark - Memory Management
@@ -199,7 +203,7 @@
     NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
     programListURLConnection = [[NSURLConnection connectionWithRequest:tivoURLRequest delegate:self] retain];
     [listingData setData:[NSData data]];
-    [self setProgramLoadingString:@"Loading Programs"];
+    [self setProgramLoadingString:[NSString stringWithFormat:@"Loading Programs - %@",_selectedTiVo.name]];
     [programListURLConnection start];
                       
 }
@@ -344,6 +348,7 @@
 {
     NSLog(@"Service %@ failed to resolve",sender.name);
 }
+
 
 #pragma mark - NSURL Delegate Methods
 

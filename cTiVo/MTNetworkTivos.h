@@ -10,6 +10,7 @@
 #import "NSString+HTML.h"
 #import "MTDownloadListCellView.h"
 #import "MTTiVoShow.h"
+#import "MTTiVoShowOperation.h"
 
 
 @interface MTNetworkTivos : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
@@ -27,6 +28,7 @@
 	NSOpenPanel *myOpenPanel;
     double percentComplete;
     MTDownloadListCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
+	int numDecoders;//Want to limit launches to two decoders.
 
 }
 

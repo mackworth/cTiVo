@@ -44,6 +44,8 @@
 #define kMTStatusEncoding 5
 #define kMTStatusDone 6
 
+#define kMTMaxNumDownloaders 2
+
 
 //USER DEFAULTS
 

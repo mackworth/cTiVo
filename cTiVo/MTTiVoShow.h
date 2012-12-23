@@ -10,11 +10,17 @@
 #import "iTunes.h"
 
 @interface MTTiVoShow : NSObject {
-    NSFileHandle *activeFile;
+    NSFileHandle *activeFile, *encodeFile;
+	NSString *activeFilePath, *encodeFilePath;
     double dataDownloaded;
-    NSTask *activeTask;
+    NSTask *activeTask, *tivodecoderTask;
 	NSURLConnection *activeURLConnection;
-	NSString *sourceFilePath, *targetFilePath;
+	NSString *sourceFilePath, *targetFilePath, *fileBufferPath;
+	NSPipe *pipe1, *pipe2;
+	NSMutableArray *dataToWrite;
+	BOOL volatile writingData, downloadingURL, pipingData;
+	off_t readPointer, writePointer;
+	NSFileHandle *fileBufferRead, *fileBufferWrite;
 }
 
 @property (nonatomic, retain) NSString *urlString, *downloadDirectory, *mediaKey, *title, *description, *showStatus, *showDate;
@@ -24,7 +30,8 @@
 @property double fileSize;  //Size on TiVo;
 @property (nonatomic, retain) NSDictionary *encodeFormat;
 @property (nonatomic, retain) NSNetService *tiVo;
-@property BOOL addToiTunesWhenEncoded;
+@property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding;
+@property BOOL volatile isCanceled;
 
 
 -(BOOL)cancel;

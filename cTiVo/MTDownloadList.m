@@ -74,7 +74,11 @@
         MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(0, 0, 20, 20)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
-   } else {
+    } else if([identifier compare: @"Simu"] == NSOrderedSame) {
+        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(0, 0, 20, 20)] autorelease];
+        thisCell.identifier = identifier;
+        result = (id)thisCell;
+	} else {
         result =[super makeViewWithIdentifier:identifier owner:owner];
     }
     return result;
@@ -121,7 +125,12 @@
             c = NSOnState;
         }
         [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
-	} else { //This is the iTunes column
+	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
+        NSInteger c = NSOffState;
+        if (rowData.simultaneousEncode) {
+            c = NSOnState;
+        }
+        [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
         
 	}
     
