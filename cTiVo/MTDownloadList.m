@@ -60,8 +60,8 @@
 -(id)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
 {
     id result;
+	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
     if([identifier compare: @"Program"] == NSOrderedSame) {
-        NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
         MTDownloadListCellView *thisCell = [[[MTDownloadListCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)] autorelease];
         //        result.textField.font = [NSFont userFontOfSize:14];
         thisCell.textField.editable = NO;
@@ -71,11 +71,11 @@
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"iTunes"] == NSOrderedSame) {
-        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(0, 0, 20, 20)] autorelease];
+        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"Simu"] == NSOrderedSame) {
-        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(0, 0, 20, 20)] autorelease];
+        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
 	} else {
@@ -113,7 +113,7 @@
     // nameArray value at row
 	if ([tableColumn.identifier compare:@"Program"] == NSOrderedSame) {
 		result.progressIndicator.rightText.stringValue = rowData.showStatus;
-        result.progressIndicator.leftText.stringValue = rowData.title ;
+        result.progressIndicator.leftText.stringValue = rowData.showTitle ;
         result.progressIndicator.doubleValue = rowData.processProgress;
 	} else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
         result.textField.stringValue = rowData.tiVo.name ;

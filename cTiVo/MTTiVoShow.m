@@ -8,8 +8,12 @@
 // Class for handling individual TiVo Shows
 
 #import "MTTiVoShow.h"
+#import "MTProgramList.h"
+#import "MTiTunes.h"
 
 @implementation MTTiVoShow
+
+@synthesize targetFilePath;
 
 -(id)init
 {
@@ -28,10 +32,86 @@
 		writingData = NO;
 		downloadingURL = NO;
 		pipingData = NO;
+		gotDetails = NO;
 		fileBufferRead = fileBufferWrite = nil;
 		fileBufferPath = nil;
+		element = nil;
+		_season = 0;
+		_episode = 0;
+		_episodeNumber = @"";
+		_episodeGenre = @"";
+//		_originalAirDate = @"";
+		_episodeYear = 0;
     }
     return self;
+}
+
+-(void)getShowDetailWithNotification
+{
+	if (gotDetails) {
+		return;
+	}
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]	;
+	[self getShowDetail];
+	if (gotDetails) {
+//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+		[_myTableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
+	} else {
+		NSLog(@"Got Details Failed for %@",_showTitle);
+	}
+	[pool drain];
+}
+
+-(void)getShowDetail
+{
+	if (gotDetails) {
+		return;
+	}
+	gotDetails = YES;
+	NSString *detailURLString = [NSString stringWithFormat:@"https://%@/TiVoVideoDetails?id=%d",_tiVo.hostName,_showID];
+//	NSLog(@"Show Detail URL %@",detailURLString);
+	NSURLResponse *detailResponse = nil;
+	NSURLRequest *detailRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:detailURLString]];;
+	NSData *xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
+//	NSLog(@"Returned XML is %@",[[[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	] autorelease]	);
+	parser = [[[NSXMLParser alloc] initWithData:xml] autorelease];
+	parser.delegate = self;
+	[parser parse];
+	if (!gotDetails) {
+		NSLog(@"Got Details Failed for %@",_showTitle);
+	}
+}
+
+#pragma  mark - parser methods
+
+-(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
+{
+	if (element) {
+		[element release];
+	}
+	element = [[NSMutableString alloc] init];
+}
+
+-(void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
+{
+	[element appendString:string];
+}
+
+-(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
+{
+	@try {
+		[self setValue:element forKeyPath:elementName];
+	}
+	@catch (NSException *exception) {
+	}
+	@finally {
+	}
+}
+
+-(void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError
+{
+	gotDetails = NO;
+	NSLog(@"Parser Error %@",parseError);
 }
 
 
@@ -40,6 +120,10 @@
 -(void)download
 {
 	self.isCanceled = NO;
+	if (!gotDetails) {
+		[self getShowDetail];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+	}
     NSURLRequest *thisRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:_urlString ]];
 //    activeURLConnection = [NSURLConnection connectionWithRequest:thisRequest delegate:self];
     activeURLConnection = [[[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] autorelease];
@@ -50,7 +134,7 @@
     if (fileBufferPath) {
         [fileBufferPath release];
     }
-	fileBufferPath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",_title] retain];
+	fileBufferPath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",_showTitle] retain];
 	NSFileManager *fm = [NSFileManager defaultManager];
 	[fm createFileAtPath:fileBufferPath contents:[NSData data] attributes:nil];
 	if (fileBufferWrite) {
@@ -62,7 +146,7 @@
 	fileBufferRead = [[NSFileHandle fileHandleForReadingAtPath:fileBufferPath] retain];
 	fileBufferWrite = [[NSFileHandle fileHandleForWritingAtPath:fileBufferPath] retain];
     if (!_simultaneousEncode || [[_encodeFormat objectForKey:@"mustDownloadFirst"] boolValue]) {
-        targetFilePath = [[NSString stringWithFormat:@"%@%@.tivo",_downloadDirectory ,_title] retain];
+        targetFilePath = [[NSString stringWithFormat:@"%@%@.tivo",_downloadDirectory ,_showTitle] retain];
         NSFileManager *fm = [NSFileManager defaultManager];
         [fm createFileAtPath:targetFilePath contents:[NSData data] attributes:nil];
         activeFile = [[NSFileHandle fileHandleForWritingAtPath:targetFilePath] retain];
@@ -72,7 +156,7 @@
         pipe2 = [[NSPipe pipe] retain];
 		activeFile = [pipe1 fileHandleForWriting];
        //Decrypting section of full pipeline
-        encodeFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",_title] retain];
+        encodeFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",_showTitle] retain];
         [[NSFileManager defaultManager] createFileAtPath:encodeFilePath contents:[NSData data] attributes:nil];
         encodeFile  = [[NSFileHandle fileHandleForWritingAtPath:encodeFilePath] retain];
 		if (tivodecoderTask) {
@@ -94,7 +178,7 @@
         [tivodecoderTask setStandardOutput:pipe2];
         NSString *mencoderLaunchPath;
 		if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"mencoder"] == NSOrderedSame ) {
-			targetFilePath = [[NSString stringWithFormat:@"%@/%@%@",_downloadDirectory,_title,[_encodeFormat objectForKey:@"filenameExtension"]] retain];
+			targetFilePath = [[NSString stringWithFormat:@"%@/%@%@",_downloadDirectory,_showTitle,[_encodeFormat objectForKey:@"filenameExtension"]] retain];
 			activeTask = [[NSTask alloc] init];
             mencoderLaunchPath = [[[NSBundle mainBundle] pathForResource:@"mencoder" ofType:@""] retain];
 			[activeTask setLaunchPath:mencoderLaunchPath];
@@ -131,6 +215,14 @@
         [tivodecoderTask release];
         tivodecoderTask = nil;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        if (_addToiTunesWhenEncoded) {
+			MTiTunes *iTunes = [[[MTiTunes alloc] init] autorelease];
+			[iTunes importIntoiTunes:self];
+			//            iTunesApplication *iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
+			//            if (iTunes) {
+			//                [iTunes add:[NSArray arrayWithObject:[NSURL fileURLWithPath:targetFilePath]] to:nil];
+			//            }
+        }
     }
 }
 
@@ -148,8 +240,8 @@
 	if (sourceFilePath) {
 		[sourceFilePath release];
 	}
-	targetFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",_downloadDirectory,_title] retain];
-	activeFilePath = [[NSString stringWithFormat:@"/tmp/decoding%@.txt",_title] retain];
+	targetFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",_downloadDirectory,_showTitle] retain];
+	activeFilePath = [[NSString stringWithFormat:@"/tmp/decoding%@.txt",_showTitle] retain];
 	[[NSFileManager defaultManager] createFileAtPath:activeFilePath contents:[NSData data] attributes:nil];
 	activeFile = [NSFileHandle fileHandleForWritingAtPath:activeFilePath];
 	activeTask = [[NSTask alloc] init];
@@ -157,7 +249,7 @@
 	[activeTask setStandardOutput:activeFile];
 	[activeTask setStandardError:activeFile];
 	//Find the source file size
-	sourceFilePath = [[NSString stringWithFormat:@"%@/%@.tivo",_downloadDirectory,_title] retain];
+	sourceFilePath = [[NSString stringWithFormat:@"%@/%@.tivo",_downloadDirectory,_showTitle] retain];
 	NSFileHandle *sourceFileHandle = [NSFileHandle fileHandleForReadingAtPath:sourceFilePath];
 	_fileSize = (double)[sourceFileHandle seekToEndOfFile];
 	
@@ -167,7 +259,7 @@
 						  [NSString stringWithFormat:@"-m%@",_mediaKey],
 						  [NSString stringWithFormat:@"-o%@",targetFilePath],
 						  @"-v",
-						  [NSString stringWithFormat:@"%@%@.tivo",_downloadDirectory,_title],
+						  [NSString stringWithFormat:@"%@%@.tivo",_downloadDirectory,_showTitle],
 						  nil];
     _processProgress = 0.0;
  	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
@@ -196,7 +288,7 @@
        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
 		return;
 	}
-	NSString *readFile = [NSString stringWithFormat:@"/tmp/decoding%@.txt",_title];
+	NSString *readFile = [NSString stringWithFormat:@"/tmp/decoding%@.txt",_showTitle];
 	NSFileHandle *readFileHandle = [NSFileHandle fileHandleForReadingAtPath:readFile];
 	unsigned long long fileSize = [readFileHandle seekToEndOfFile];
 	if (fileSize > 100) {
@@ -229,12 +321,12 @@
 	if (sourceFilePath) {
 		[sourceFilePath release];
 	}
-	targetFilePath = [[NSString stringWithFormat:@"%@/%@%@",_downloadDirectory,_title,[_encodeFormat objectForKey:@"filenameExtension"]] retain];
+	targetFilePath = [[NSString stringWithFormat:@"%@/%@%@",_downloadDirectory,_showTitle,[_encodeFormat objectForKey:@"filenameExtension"]] retain];
 	if (activeFilePath) {
 		[activeFilePath release];
 	}
-	activeFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",_title] retain];
-	sourceFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.mpg",_downloadDirectory,_title] retain];
+	activeFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",_showTitle] retain];
+	sourceFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.mpg",_downloadDirectory,_showTitle] retain];
 	[[NSFileManager defaultManager] createFileAtPath:activeFilePath contents:[NSData data] attributes:nil];
 	activeFile = [NSFileHandle fileHandleForWritingAtPath:activeFilePath];
 	activeTask = [[NSTask alloc] init];
@@ -250,7 +342,7 @@
 		arguments = [NSMutableArray array];
 		[activeTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"HandBrakeCLI" ofType:@""]];
 		[arguments addObject:sourceFilePath];  //start with the input file
-		[arguments addObject:[NSString stringWithFormat:@"-o%@/%@%@",_downloadDirectory,_title,[_encodeFormat objectForKey:@"filenameExtension"]]];  //add the output file
+		[arguments addObject:[NSString stringWithFormat:@"-o%@/%@%@",_downloadDirectory,_showTitle,[_encodeFormat objectForKey:@"filenameExtension"]]];  //add the output file
 		[arguments addObject:[_encodeFormat objectForKey:@"encoderVideoOptions"]];
 		if ([_encodeFormat objectForKey:@"encoderAudioOptions"] && ((NSString *)[_encodeFormat objectForKey:@"encoderAudioOptions"]).length) {
 			[arguments addObject:[_encodeFormat objectForKey:@"encoderAudioOptions"]];
@@ -285,17 +377,17 @@
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
         if (_addToiTunesWhenEncoded) {
-            iTunesApplication *iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
-            if (iTunes) {
-                [iTunes add:[NSArray arrayWithObject:[NSURL fileURLWithPath:targetFilePath]] to:nil];
-            }
+			MTiTunes *iTunes = [[[MTiTunes alloc] init] autorelease];
+			[iTunes importIntoiTunes:self];
+//            iTunesApplication *iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
+//            if (iTunes) {
+//                [iTunes add:[NSArray arrayWithObject:[NSURL fileURLWithPath:targetFilePath]] to:nil];
+//            }
         }
-		[targetFilePath release];
-		targetFilePath = nil;
 		return;
 	}
 	double newProgressValue = 0;
-	NSString *readFile = [NSString stringWithFormat:@"/tmp/encoding%@.txt",_title];
+	NSString *readFile = [NSString stringWithFormat:@"/tmp/encoding%@.txt",_showTitle];
 	NSFileHandle *readFileHandle = [NSFileHandle fileHandleForReadingAtPath:readFile];
 	unsigned long long fileSize = [readFileHandle seekToEndOfFile];
 	if (fileSize > 100) {
@@ -345,7 +437,7 @@
     BOOL ret = YES;
     if (_downloadStatus != kMTStatusNew && _downloadStatus != kMTStatusDone) {
 		//Put alert here
-		NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel Download of %@",_title] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@""];
+		NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel Download of %@",_showTitle] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@""];
 		myAlert.alertStyle = NSCriticalAlertStyle;
 		NSInteger result = [myAlert runModal];
 		if (result != NSAlertAlternateReturn) {
@@ -498,6 +590,35 @@
     
 }
 
+-(void)setOriginalAirDate:(NSString *)originalAirDate
+{
+	if (originalAirDate != _originalAirDate) {
+		[_originalAirDate release];
+		_originalAirDate = [originalAirDate retain];
+		if (originalAirDate.length > 4) {
+			_episodeYear = [[originalAirDate substringToIndex:4] intValue];
+		}
+	}
+}
+
+-(void)setEpisodeNumber:(NSString *)episodeNumber
+{
+	if (episodeNumber != _episodeNumber) {  // this check is mandatory
+        [_episodeNumber release];
+        _episodeNumber = [episodeNumber retain];
+		if (episodeNumber.length) {
+			long l = episodeNumber.length;
+			if (l > 2) {
+				_episode = [[episodeNumber substringFromIndex:l-2] intValue];
+				_season = [[episodeNumber substringToIndex:l-2] intValue];
+			} else {
+				_episode = [episodeNumber intValue];
+			}
+		}
+	}
+
+}
+
 #pragma mark - Memory Management
 
 -(void)dealloc
@@ -505,8 +626,8 @@
     self.urlString = nil;
     self.downloadDirectory = nil;
     self.mediaKey = nil;
-    self.title = nil;
-    self.description = nil;
+    self.showTitle = nil;
+    self.showDescription = nil;
     self.showStatus = nil;
     self.URL = nil;
     self.encodeFormat = nil;
@@ -538,6 +659,9 @@
 	[fileBufferPath release];
 	[fileBufferRead release];
 	[fileBufferWrite release];
+	if (targetFilePath) {
+		[targetFilePath release];
+	}
 //    [dataBuffer release];
 	[super dealloc];
 }

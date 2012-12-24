@@ -14,6 +14,8 @@
 
 @implementation MTMainWindowController
 
+@synthesize tiVoShowTable;
+
 - (id)initWithWindow:(NSWindow *)window
 {
     self = [super initWithWindow:window];
@@ -41,7 +43,8 @@
     self.tiVoList = _myTiVos.tiVoList;
     [addToiTunesButton setState:NSOffState];
     [simultaneousEncodeButton setState:NSOnState];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshTiVoListPopup) name:kMTNotificationTiVoListUpdated object:nil];
+ 	_myTiVos.tiVoShowTableView = tiVoShowTable;
+   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshTiVoListPopup) name:kMTNotificationTiVoListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:tiVoShowTable selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:downloadQueueTable selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];

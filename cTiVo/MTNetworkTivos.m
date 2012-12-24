@@ -66,6 +66,8 @@
     downloadTableCell = nil;
     encodeTableCell = nil;
 	numDecoders = 0;
+	queue = [[NSOperationQueue alloc] init];
+	queue.maxConcurrentOperationCount = 1;
 	   
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fetchVideoListFromHost) name:kMTNotificationTiVoChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
@@ -172,6 +174,7 @@
     [_tiVoList release];
 	[_tivoServices release];
     [listingData release];
+	[queue release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[super dealloc];
 }
@@ -195,8 +198,6 @@
 	if ([[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name]) {
 		mediaKeyString = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name];
 	}
-	 
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 
     NSString *tivoURLString = [[NSString stringWithFormat:@"https://tivo:%@@%@/nowplaying/index.html?Recurse=Yes",mediaKeyString,host] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
@@ -206,6 +207,19 @@
     [self setProgramLoadingString:[NSString stringWithFormat:@"Loading Programs - %@",_selectedTiVo.name]];
     [programListURLConnection start];
                       
+}
+
+-(long) parseTime: (NSString *) timeString {
+	NSRegularExpression *timeRx = [NSRegularExpression regularExpressionWithPattern:@"([0-9]{1,3}):([0-9]{1,2}):([0-9]{1,2})" options:NSRegularExpressionCaseInsensitive error:nil];
+	NSTextCheckingResult *timeResult = [timeRx firstMatchInString:timeString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, timeString.length)];
+	if (timeResult) {
+		NSInteger hr = [timeString substringWithRange:[timeResult rangeAtIndex:1]].integerValue ;
+		NSInteger min = [timeString substringWithRange:[timeResult rangeAtIndex:2]].integerValue ;
+		NSInteger sec = [timeString substringWithRange:[timeResult rangeAtIndex:3]].integerValue ;
+		return hr*3600+min*60+sec;
+	} else {
+		return 0;
+	}
 }
 
 -(void)parseListingData
@@ -218,6 +232,7 @@
 	NSRegularExpression *titleRx = [NSRegularExpression regularExpressionWithPattern:@"<b[^>]*>(.*?)</b>" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *descriptionRx = [NSRegularExpression regularExpressionWithPattern:@"<br>(.*)" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *dateRx = [NSRegularExpression regularExpressionWithPattern:@"(.*)<br>(.*)" options:NSRegularExpressionCaseInsensitive error:nil];
+	NSRegularExpression *twoFieldRx = [NSRegularExpression regularExpressionWithPattern:@"(.*)<br>(.*)" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *urlRx = [NSRegularExpression regularExpressionWithPattern:@"<a href=\"([^\"]*)\">Download MPEG-PS" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *idRx = [NSRegularExpression regularExpressionWithPattern:@"id=(\\d+)" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSArray *tables = [tableRx matchesInString:listingDataString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, listingDataString.length)];
@@ -233,7 +248,13 @@
 	NSTextCheckingResult *cell;
 	NSRange cellRange;
 	int cellIndex = 0;
-	NSString *title = @"", *description = @"", *downloadURL = @"", *idString = @"", *size = @"", *showDate = @"";
+	NSString	*title = @"",
+				*description = @"",
+				*downloadURL = @"",
+				*idString = @"",
+				*showLength = @"",
+				*size = @"",
+				*showDate = @"";
 	NSRange rangeToCheck;
 	for (NSTextCheckingResult *row in rows) {
 		title = @"";
@@ -241,11 +262,12 @@
 		downloadURL = @"";
 		idString = @"";
 		size = @"";
+		showLength = @"";
         showDate = @"";
 		cellIndex = 0;
 		rangeToCheck = [row rangeAtIndex:1];
 		cell = [cellRx firstMatchInString:listingDataString options:NSMatchingWithoutAnchoringBounds range:rangeToCheck];
-		while (cell && cell.range.location != NSNotFound) {
+		while (cell && cell.range.location != NSNotFound && cellIndex < 6) {
 			NSString *cellString = [listingDataString substringWithRange:cell.range];
 			NSString *cellStringEnd = [cellString substringFromIndex:(cellString.length - 3)];
 			if ([cellStringEnd caseInsensitiveCompare:@"<td"] == NSOrderedSame) {
@@ -273,12 +295,14 @@
                 
 			}
 			if (cellIndex == 4) {
-				//We've got the size 
+				//We've got the length and size
 				NSString *fullString = [listingDataString substringWithRange:[cell rangeAtIndex:1]];
-				NSTextCheckingResult *sizeResult = [descriptionRx firstMatchInString:fullString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullString.length)];
+				NSTextCheckingResult *sizeResult = [twoFieldRx firstMatchInString:fullString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullString.length)];
 				if (sizeResult.range.location != NSNotFound) {
-					size = [[fullString substringWithRange:[sizeResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
+					showLength = [[fullString substringWithRange:[sizeResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
+					size = [[fullString substringWithRange:[sizeResult rangeAtIndex:2]] stringByDecodingHTMLEntities];
 				}
+				
 			}
 			if (cellIndex == 5) {
 				//We've got the download Reference
@@ -304,19 +328,30 @@
 		}
 		if (downloadURL.length) {
             MTTiVoShow *thisShow = [[[MTTiVoShow alloc] init] autorelease];
-            thisShow.title = title;
-            thisShow.description = description;
+            thisShow.showTitle = title;
+            thisShow.showDescription = description;
             thisShow.urlString = downloadURL;
             thisShow.showID = [idString intValue];
             thisShow.showDate = showDate;
-            double sizeValue = [[size substringToIndex:size.length-3] doubleValue];
-            NSString *modifier = [size substringFromIndex:size.length-2];
-            if ([modifier caseInsensitiveCompare:@"MB"] == NSOrderedSame) {
-                sizeValue *= 1000 * 1000;
-            } else {
-                sizeValue *= 1000 * 1000 * 1000;
+			thisShow.showLength= ([self parseTime: showLength]+30)/60; //round up to nearest minute
+            double sizeValue;
+			if (size.length <= 3) {
+				sizeValue = 0;
+			} else {
+				sizeValue = [[size substringToIndex:size.length-3] doubleValue];
+				NSString *modifier = [size substringFromIndex:size.length-2];
+				if ([modifier caseInsensitiveCompare:@"MB"] == NSOrderedSame) {
+					sizeValue *= 1000 * 1000;
+				} else {
+					sizeValue *= 1000 * 1000 * 1000;
+				}
             }
             thisShow.fileSize = sizeValue;
+			thisShow.tiVo = _selectedTiVo;
+			thisShow.myTableView = _tiVoShowTableView;
+			NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetailWithNotification) object:nil] autorelease];
+			[queue addOperation:nextDetail];
+//			[thisShow getShowDetail];
 			[_tiVoShows addObject:thisShow];
 		}
 	}

@@ -19,8 +19,7 @@
 	IBOutlet NSProgressIndicator *loadingProgramListIndicator;
 	IBOutlet MTDownloadList *downloadQueueTable;
 	IBOutlet MTProgramList  *tiVoShowTable;
-    
-	
+
 }
 
 @property (nonatomic, assign) MTNetworkTivos *myTiVos;
@@ -28,5 +27,6 @@
 @property (nonatomic, assign) NSNetService *selectedTiVo;
 @property (nonatomic, assign) NSMutableArray *tiVoList, *formatList;
 @property (nonatomic, assign) NSDictionary *selectedFormat;
+@property (nonatomic, readonly) IBOutlet MTProgramList  *tiVoShowTable;
 
 @end

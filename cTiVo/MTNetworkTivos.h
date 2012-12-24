@@ -11,6 +11,8 @@
 #import "MTDownloadListCellView.h"
 #import "MTTiVoShow.h"
 #import "MTTiVoShowOperation.h"
+#import "MTProgramList.h"
+
 
 
 @interface MTNetworkTivos : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
@@ -29,6 +31,8 @@
     double percentComplete;
     MTDownloadListCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
 	int numDecoders;//Want to limit launches to two decoders.
+	
+	NSOperationQueue *queue;
 
 }
 
@@ -43,6 +47,7 @@
 @property (nonatomic, retain) NSDictionary *selectedFormat;
 @property (nonatomic, retain) NSNetService *selectedTiVo;
 @property (nonatomic, readonly) NSMutableArray *tiVoNames;
+@property (nonatomic,assign) MTProgramList *tiVoShowTableView;
 
 
 

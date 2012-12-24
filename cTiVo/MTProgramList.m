@@ -57,8 +57,6 @@
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    NSString *show = [[_tiVoShows objectAtIndex:row] title];
-	NSString *date = [[_tiVoShows objectAtIndex:row] showDate];
     // get an existing cell with the MyView identifier if it exists
     NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
     
@@ -81,11 +79,29 @@
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
 	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
-		result.textField.stringValue = show ;
-	} else {
-		result.textField.stringValue = date;
+		result.textField.stringValue = [[_tiVoShows objectAtIndex:row] showTitle] ;
+	} else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
+		result.textField.stringValue = [[_tiVoShows objectAtIndex:row] showDate];
+		[result.textField setAlignment:NSCenterTextAlignment];
+	} else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
+		result.textField.stringValue = [NSString stringWithFormat:@"%ld",[[_tiVoShows objectAtIndex:row] showLength]];
+		[result.textField setAlignment:NSCenterTextAlignment];
+	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
+		int e = [[_tiVoShows objectAtIndex:row] episode];
+		int s = [[_tiVoShows objectAtIndex:row] season];
+		NSString *episode = @"";
+		if (e > 0) {
+			if (s > 0) {
+				episode = [NSString stringWithFormat:@"S%d E%d",s,e ];
+			} else {
+				episode	 = [NSString stringWithFormat:@"E%d",e];
+			}
+		}
+		result.textField.stringValue = [(MTTiVoShow *)[_tiVoShows objectAtIndex:row] episodeNumber];
+		result.textField.stringValue = episode;
+		[result.textField setAlignment:NSCenterTextAlignment];
 	}
-    
+
     // return the result.
     return result;
     
