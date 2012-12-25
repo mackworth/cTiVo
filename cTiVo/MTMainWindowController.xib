@@ -2350,7 +2350,6 @@
 				<boolean value="YES" key="38.ibExternalAutomaticallyCalculatesRowSizeFromViewHeight"/>
 				<string key="39.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="40.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="40.userInterfaceItemIdentifier">Length</string>
 				<string key="41.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="42.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="YES" key="42.isInViewBasedMode"/>

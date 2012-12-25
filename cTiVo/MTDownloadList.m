@@ -18,6 +18,9 @@
     self.delegate    = self;
 //    self.rowHeight = 24;
     self.allowsMultipleSelection = YES;
+	NSTableColumn *simuColumn = [self tableColumnWithIdentifier:@"Simu"];
+	NSTableHeaderCell *simuHeader = [simuColumn headerCell];
+	[simuHeader setAlignment:NSCenterTextAlignment];
 }
 
 -(void)updateTable

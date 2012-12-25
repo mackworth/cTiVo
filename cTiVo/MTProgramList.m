@@ -59,14 +59,14 @@
 {
     // get an existing cell with the MyView identifier if it exists
     NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
-    
+    MTTiVoShow *thisShow = [_tiVoShows objectAtIndex:row];
     // There is no existing cell to reuse so we will create a new one
     if (result == nil) {
         
         // create the new NSTextField with a frame of the {0,0} with the width of the table
         // note that the height of the frame is not really relevant, the row-height will modify the height
         // the new text field is then returned as an autoreleased object
-        result = [[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)];
+        result = [[[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)] autorelease];
         //        result.textField.font = [NSFont userFontOfSize:14];
         result.textField.editable = NO;
         
@@ -79,16 +79,16 @@
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
 	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
-		result.textField.stringValue = [[_tiVoShows objectAtIndex:row] showTitle] ;
+		result.textField.stringValue = thisShow.showTitle ;
 	} else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
-		result.textField.stringValue = [[_tiVoShows objectAtIndex:row] showDate];
+		result.textField.stringValue = thisShow.showDate;
 		[result.textField setAlignment:NSCenterTextAlignment];
 	} else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
-		result.textField.stringValue = [NSString stringWithFormat:@"%ld",[[_tiVoShows objectAtIndex:row] showLength]];
+		result.textField.stringValue = [NSString stringWithFormat:@"%ld",thisShow.showLength];
 		[result.textField setAlignment:NSCenterTextAlignment];
 	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
-		int e = [[_tiVoShows objectAtIndex:row] episode];
-		int s = [[_tiVoShows objectAtIndex:row] season];
+		int e = thisShow.episode;
+		int s = thisShow.season;
 		NSString *episode = @"";
 		if (e > 0) {
 			if (s > 0) {
@@ -97,7 +97,7 @@
 				episode	 = [NSString stringWithFormat:@"E%d",e];
 			}
 		}
-		result.textField.stringValue = [(MTTiVoShow *)[_tiVoShows objectAtIndex:row] episodeNumber];
+		result.textField.stringValue = thisShow.episodeNumber;
 		result.textField.stringValue = episode;
 		[result.textField setAlignment:NSCenterTextAlignment];
 	}

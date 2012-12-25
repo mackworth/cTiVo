@@ -25,7 +25,7 @@
 	NSFileHandle *fileBufferRead, *fileBufferWrite;
 	NSXMLParser *parser;
 	NSMutableString *element;
-	BOOL gotDetails;
+	BOOL    gotDetails;
 }
 
 @property (nonatomic, retain) NSString *urlString,
@@ -50,7 +50,9 @@
 @property double fileSize;  //Size on TiVo;
 @property (nonatomic, retain) NSDictionary *encodeFormat;
 @property (nonatomic, retain) NSNetService *tiVo;
-@property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding;
+@property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding,
+                isSelected;//Used for refresh of table
+
 @property BOOL volatile isCanceled;
 @property (nonatomic, assign) MTProgramList *myTableView;
 

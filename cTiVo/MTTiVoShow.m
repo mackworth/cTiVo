@@ -33,9 +33,12 @@
 		downloadingURL = NO;
 		pipingData = NO;
 		gotDetails = NO;
+        _isSelected = NO;
 		fileBufferRead = fileBufferWrite = nil;
 		fileBufferPath = nil;
 		element = nil;
+        pipe1 = nil;
+        pipe2 = nil;
 		_season = 0;
 		_episode = 0;
 		_episodeNumber = @"";
@@ -55,11 +58,25 @@
 	[self getShowDetail];
 	if (gotDetails) {
 //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-		[_myTableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
+//		[_myTableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
+		[self performSelectorOnMainThread:@selector(reloadEpisode) withObject:nil waitUntilDone:YES];
+//        [_myTableView updateEpisodeForShow:self];
 	} else {
 		NSLog(@"Got Details Failed for %@",_showTitle);
 	}
 	[pool drain];
+}
+
+-(void)reloadEpisode
+{
+	NSInteger row = 0;
+	for (row=0; row < _myTableView.tiVoShows.count; row++) {
+		if ([_myTableView.tiVoShows objectAtIndex:row] == self) {
+			break;
+		}
+	}
+	NSInteger column = [_myTableView columnWithIdentifier:@"Episode"];
+	[_myTableView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:column]];
 }
 
 -(void)getShowDetail
@@ -152,6 +169,12 @@
         activeFile = [[NSFileHandle fileHandleForWritingAtPath:targetFilePath] retain];
         _isSimultaneousEncoding = NO;
     } else { //We'll build the full piped download chain here
+        if (pipe1) {
+            [pipe1 release];
+        }
+        if (pipe2) {
+            [pipe2 release];
+        }
         pipe1 = [[NSPipe pipe] retain];
         pipe2 = [[NSPipe pipe] retain];
 		activeFile = [pipe1 fileHandleForWriting];
@@ -166,7 +189,7 @@
 			[tivodecoderTask release];
 		}
         tivodecoderTask  = [[NSTask alloc] init];
-        NSString *tivodecoderLaunchPath = [[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""] retain];
+        NSString *tivodecoderLaunchPath = [[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""];
 		[tivodecoderTask setLaunchPath:tivodecoderLaunchPath];
 		NSMutableArray *arguments = [NSMutableArray arrayWithObjects:
                         [NSString stringWithFormat:@"-m%@",_mediaKey],
@@ -180,7 +203,7 @@
 		if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"mencoder"] == NSOrderedSame ) {
 			targetFilePath = [[NSString stringWithFormat:@"%@/%@%@",_downloadDirectory,_showTitle,[_encodeFormat objectForKey:@"filenameExtension"]] retain];
 			activeTask = [[NSTask alloc] init];
-            mencoderLaunchPath = [[[NSBundle mainBundle] pathForResource:@"mencoder" ofType:@""] retain];
+            mencoderLaunchPath = [[NSBundle mainBundle] pathForResource:@"mencoder" ofType:@""];
 			[activeTask setLaunchPath:mencoderLaunchPath];
         
 			arguments = [self mencoderArgumentsWithOutputFile:targetFilePath];
@@ -233,6 +256,7 @@
     }
 	if (targetFilePath) {
 		[targetFilePath release];
+		targetFilePath = nil;
 	}
 	if (activeFilePath) {
 		[activeFilePath release];
@@ -317,6 +341,7 @@
 	}
 	if (targetFilePath) {
 		[targetFilePath release];
+		targetFilePath = nil;
 	}
 	if (sourceFilePath) {
 		[sourceFilePath release];
@@ -331,7 +356,7 @@
 	activeFile = [NSFileHandle fileHandleForWritingAtPath:activeFilePath];
 	activeTask = [[NSTask alloc] init];
 //	NSDictionary *selectedFormat = [programEncoding objectForKey:kMTSelectedFormat];
-	NSMutableArray *arguments;
+	NSMutableArray *arguments = nil;
 	if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"mencoder"] == NSOrderedSame ) {
 		[activeTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"mencoder" ofType:@""]];
 		arguments = [self mencoderArgumentsWithOutputFile:targetFilePath];        
@@ -454,7 +479,9 @@
             activeURLConnection = nil;
             [fm removeItemAtPath:targetFilePath error:nil];
         }
-		while (pipingData); //Wait for pipe out to complete
+		while (pipingData){
+			//Block until latest pipe write is complete
+		} //Wait for pipe out to complete
         if(activeTask && [activeTask isRunning]) {
             [activeTask terminate];
             [fm removeItemAtPath:sourceFilePath error:nil];
@@ -514,7 +541,7 @@
 		if (_isCanceled) break;
 		dataRead = data.length;
 		dataDownloaded += data.length;
-		_processProgress = dataDownloaded/_fileSize;
+		_processProgress = (double)[fileBufferRead offsetInFile]/_fileSize;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 		nchunks++;
 		if (nchunks == chunkReleaseMemory) {
@@ -526,12 +553,15 @@
 	[pool drain];
 	if (!downloadingURL || _isCanceled) {
 		[activeFile closeFile];
-		[activeFile release];
+		if (activeFile != [pipe1 fileHandleForWriting]) {
+			[activeFile release];
+		}
 		activeFile = nil;
 		[fileBufferRead closeFile];
 		[fileBufferRead release];
 		fileBufferRead = nil;
 		[[NSFileManager defaultManager] removeItemAtPath:fileBufferPath error:nil];
+		[[NSFileManager defaultManager] removeItemAtPath:encodeFilePath error:nil];
 		[fileBufferPath release];
 		fileBufferPath = nil;
 	}
@@ -569,7 +599,9 @@
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
     if (!_isSimultaneousEncoding) {
-		while (pipingData);
+		while (pipingData){
+			//Block until the latest pipe data output is complete
+		}
         _downloadStatus = kMTStatusDownloaded;
     } else {
         _downloadStatus = kMTStatusEncoding;
@@ -653,15 +685,18 @@
 		}
 		[tivodecoderTask release];
 	}
-    [pipe1 release];
-    [pipe2 release];
+    if (pipe1) {
+        [pipe1 release];
+		pipe1 = nil;
+    }
+    if (pipe2) {
+        [pipe2 release];
+		pipe2 = nil;
+    }
 	[dataToWrite release];
 	[fileBufferPath release];
 	[fileBufferRead release];
 	[fileBufferWrite release];
-	if (targetFilePath) {
-		[targetFilePath release];
-	}
 //    [dataBuffer release];
 	[super dealloc];
 }
