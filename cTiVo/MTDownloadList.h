@@ -12,7 +12,9 @@
 #import "MTDownloadListCheckCell.h"
 #import "MTProgressindicator.h"
 
-@interface MTDownloadList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>
+@interface MTDownloadList : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
+    IBOutlet NSWindowController *myController;
+}
 
 @property (nonatomic, assign) NSMutableArray *downloadQueue;
 

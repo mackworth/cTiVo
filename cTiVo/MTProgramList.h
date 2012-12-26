@@ -9,7 +9,9 @@
 #import <Cocoa/Cocoa.h>
 #import "MTNetworkTivos.h"
 
-@interface MTProgramList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>
+@interface MTProgramList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>{
+    IBOutlet NSWindowController *myController;
+}
 
 @property (nonatomic, assign) NSMutableArray *tiVoShows;
 

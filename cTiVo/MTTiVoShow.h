@@ -50,7 +50,7 @@
 @property double fileSize;  //Size on TiVo;
 @property (nonatomic, retain) NSDictionary *encodeFormat;
 @property (nonatomic, retain) NSNetService *tiVo;
-@property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding,
+@property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding, isQueued,
                 isSelected;//Used for refresh of table
 
 @property BOOL volatile isCanceled;

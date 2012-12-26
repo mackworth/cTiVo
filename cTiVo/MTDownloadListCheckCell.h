@@ -7,9 +7,13 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MTCheckBox.h"
 
 @interface MTDownloadListCheckCell : NSTableCellView
 
-@property (nonatomic, readonly) NSButton *checkBox;
+@property (nonatomic, readonly) MTCheckBox *checkBox;
+
+- (id)initWithFrame:(NSRect)frame withTarget:(id)target withAction:(SEL)selector;
+
 
 @end

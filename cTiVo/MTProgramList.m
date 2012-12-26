@@ -7,6 +7,7 @@
 //
 
 #import "MTProgramList.h"
+#import "MTDownloadListCheckCell.h"
 
 @implementation MTProgramList
 
@@ -55,6 +56,21 @@
     return _tiVoShows.count;
 }
 
+//-(id)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
+//{
+//    id result;
+//	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
+//    if([identifier compare: @"Queued"] == NSOrderedSame) {
+//        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20)] autorelease];
+//        thisCell.identifier = identifier;
+//        result = (id)thisCell;
+//	} else {
+//        result =[super makeViewWithIdentifier:identifier owner:owner];
+//    }
+//    return result;
+//}
+//
+
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     // get an existing cell with the MyView identifier if it exists
@@ -100,6 +116,15 @@
 		result.textField.stringValue = thisShow.episodeNumber;
 		result.textField.stringValue = episode;
 		[result.textField setAlignment:NSCenterTextAlignment];
+	} else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
+//        NSInteger c = NSOffState;
+        if (thisShow.isQueued) {
+            result.textField.stringValue = @"✔";
+        } else {
+            result.textField.stringValue = @"";
+        }
+//        [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
+//        ((MTDownloadListCheckCell *)result).checkBox.owner = thisShow;
 	}
 
     // return the result.

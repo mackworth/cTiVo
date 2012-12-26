@@ -34,6 +34,7 @@
 		pipingData = NO;
 		gotDetails = NO;
         _isSelected = NO;
+        _isQueued = NO;
 		fileBufferRead = fileBufferWrite = nil;
 		fileBufferPath = nil;
 		element = nil;
@@ -45,6 +46,7 @@
 		_episodeGenre = @"";
 //		_originalAirDate = @"";
 		_episodeYear = 0;
+        
     }
     return self;
 }

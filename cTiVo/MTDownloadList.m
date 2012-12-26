@@ -74,11 +74,11 @@
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"iTunes"] == NSOrderedSame) {
-        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20)] autorelease];
+        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"Simu"] == NSOrderedSame) {
-        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20)] autorelease];
+        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeDownload:)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
 	} else {
@@ -128,12 +128,18 @@
             c = NSOnState;
         }
         [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
+        [((MTDownloadListCheckCell *)result).checkBox setEnabled:YES] ;
+        ((MTDownloadListCheckCell *)result).checkBox.owner = rowData;
 	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
         NSInteger c = NSOffState;
         if (rowData.simultaneousEncode) {
             c = NSOnState;
         }
         [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
+        ((MTDownloadListCheckCell *)result).checkBox.owner = rowData;
+        if (rowData.downloadStatus == kMTStatusNew) {
+            [((MTDownloadListCheckCell *)result).checkBox setEnabled:YES] ;
+        }
         
 	}
     

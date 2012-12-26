@@ -7,6 +7,7 @@
 //
 
 #import "MTMainWindowController.h"
+#import "MTCheckBox.h"
 
 @interface MTMainWindowController ()
 
@@ -172,11 +173,13 @@
             if (simultaneousEncodeButton.state == NSOffState) {
                 thisShow.simultaneousEncode = NO;
             }
+            ((MTTiVoShow *)[_myTiVos.tiVoShows objectAtIndex:i]).isQueued = YES;
             [_myTiVos addProgramToDownloadQueue:[_myTiVos.tiVoShows objectAtIndex:i]];
         }
     }
 	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
+    [tiVoShowTable reloadData];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
 }
 
@@ -192,8 +195,10 @@
        }
     }
 	for (id i in itemsToRemove) {
+        ((MTTiVoShow *)i).isQueued = NO;
 		[_myTiVos.downloadQueue removeObject:i];
 	}
+    [tiVoShowTable reloadData];
 	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
@@ -212,6 +217,26 @@
         _myTiVos.downloadDirectory = dir;
 		[[NSUserDefaults standardUserDefaults] setValue:dir forKey:kMTDownloadDirectory];
 	}
+}
+
+-(IBAction)changeDownload:(id)sender
+{
+    MTCheckBox *checkbox = sender;
+    if (checkbox.owner.simultaneousEncode) {
+        checkbox.owner.simultaneousEncode = NO;
+    } else {
+        checkbox.owner.simultaneousEncode = YES;
+    }
+}
+
+-(IBAction)changeiTunes:(id)sender
+{     
+    MTCheckBox *checkbox = sender;
+    if (checkbox.owner.addToiTunesWhenEncoded) {
+        checkbox.owner.addToiTunesWhenEncoded = NO;
+    } else {
+        checkbox.owner.addToiTunesWhenEncoded = YES;
+    }
 }
 
 #pragma mark - Table View Notification Handling

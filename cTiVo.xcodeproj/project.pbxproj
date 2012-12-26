@@ -12,6 +12,7 @@
 		D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D279D3E9167A32FA007F0677 /* MTMainWindowController.m */; };
 		D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */; };
 		D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */; };
+		D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = D2995CA5168B8BB200B960B9 /* MTCheckBox.m */; };
 		D2C390761687FFA600D2062E /* MTiTunes.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C390741687FFA600D2062E /* MTiTunes.m */; };
 		D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA116766EFD00CE32DE /* Cocoa.framework */; };
 		D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
@@ -43,6 +44,8 @@
 		D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowController.xib; sourceTree = "<group>"; };
 		D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadListCellView.h; sourceTree = "<group>"; };
 		D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadListCellView.m; sourceTree = "<group>"; };
+		D2995CA4168B8BB200B960B9 /* MTCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTCheckBox.h; sourceTree = "<group>"; };
+		D2995CA5168B8BB200B960B9 /* MTCheckBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTCheckBox.m; sourceTree = "<group>"; };
 		D2C390741687FFA600D2062E /* MTiTunes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTunes.m; sourceTree = "<group>"; };
 		D2C390751687FFA600D2062E /* MTiTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTunes.h; sourceTree = "<group>"; };
 		D2D60B9D16766EFD00CE32DE /* cTiVo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTiVo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -144,6 +147,8 @@
 				D2D60BCC16766FA600CE32DE /* MTDownloadList.m */,
 				D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */,
 				D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */,
+				D2995CA4168B8BB200B960B9 /* MTCheckBox.h */,
+				D2995CA5168B8BB200B960B9 /* MTCheckBox.m */,
 				D2DFA68D1683C27600CD6CE0 /* MTDownloadListCheckCell.h */,
 				D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */,
 				D279D3E8167A32FA007F0677 /* MTMainWindowController.h */,
@@ -308,6 +313,7 @@
 				D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */,
 				D2DFA68F1683C27600CD6CE0 /* MTDownloadListCheckCell.m in Sources */,
 				D2C390761687FFA600D2062E /* MTiTunes.m in Sources */,
+				D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -10,14 +10,22 @@
 
 @implementation MTDownloadListCheckCell
 
-- (id)initWithFrame:(NSRect)frame
+-(id)initWithFrame:(NSRect)frameRect
+{
+    return [self initWithFrame:frameRect withTarget:nil withAction:nil];
+}
+
+- (id)initWithFrame:(NSRect)frame withTarget:(id)target withAction:(SEL)selector
 {
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code here.
-        _checkBox = [[[NSButton alloc] initWithFrame:frame] autorelease];
+        _checkBox = [[[MTCheckBox alloc] initWithFrame:frame] autorelease];
         [_checkBox setButtonType:NSSwitchButton];
         [self addSubview:_checkBox];
+        [_checkBox setTarget:target];
+        [_checkBox setAction:selector];
+        [_checkBox setEnabled:NO];
     }
     
     return self;
