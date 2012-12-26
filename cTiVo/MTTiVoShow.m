@@ -151,24 +151,25 @@
     if (fileBufferPath) {
         [fileBufferPath release];
     }
-	fileBufferPath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",_showTitle] retain];
-	NSFileManager *fm = [NSFileManager defaultManager];
-	[fm createFileAtPath:fileBufferPath contents:[NSData data] attributes:nil];
 	if (fileBufferWrite) {
 		[fileBufferWrite release];
 	}
 	if (fileBufferRead) {
 		[fileBufferRead release];
 	}
-	fileBufferRead = [[NSFileHandle fileHandleForReadingAtPath:fileBufferPath] retain];
-	fileBufferWrite = [[NSFileHandle fileHandleForWritingAtPath:fileBufferPath] retain];
     if (!_simultaneousEncode || [[_encodeFormat objectForKey:@"mustDownloadFirst"] boolValue]) {
         targetFilePath = [[NSString stringWithFormat:@"%@%@.tivo",_downloadDirectory ,_showTitle] retain];
         NSFileManager *fm = [NSFileManager defaultManager];
         [fm createFileAtPath:targetFilePath contents:[NSData data] attributes:nil];
         activeFile = [[NSFileHandle fileHandleForWritingAtPath:targetFilePath] retain];
+        fileBufferWrite = [activeFile retain];
         _isSimultaneousEncoding = NO;
     } else { //We'll build the full piped download chain here
+        fileBufferPath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",_showTitle] retain];
+        NSFileManager *fm = [NSFileManager defaultManager];
+        [fm createFileAtPath:fileBufferPath contents:[NSData data] attributes:nil];
+        fileBufferRead = [[NSFileHandle fileHandleForReadingAtPath:fileBufferPath] retain];
+        fileBufferWrite = [[NSFileHandle fileHandleForWritingAtPath:fileBufferPath] retain];
         if (pipe1) {
             [pipe1 release];
         }
@@ -540,7 +541,7 @@
 		pipingData = NO;
 		if (_isCanceled) break;
 		dataRead = data.length;
-		dataDownloaded += data.length;
+//		dataDownloaded += data.length;
 		_processProgress = (double)[fileBufferRead offsetInFile]/_fileSize;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 		nchunks++;
@@ -573,7 +574,13 @@
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
 	[fileBufferWrite writeData:data];
-	if (!writingData) {
+    if (!_isSimultaneousEncoding) {
+        dataDownloaded += data.length;
+        _processProgress = dataDownloaded/_fileSize;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+
+    }
+	if (!writingData && _isSimultaneousEncoding) {
 		[self performSelectorInBackground:@selector(writeData) withObject:nil];
 	}
 }
@@ -599,22 +606,27 @@
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
     if (!_isSimultaneousEncoding) {
-		while (pipingData){
-			//Block until the latest pipe data output is complete
-		}
+//		while (pipingData){
+//			//Block until the latest pipe data output is complete
+//		}
+        [activeFile release];
+        activeFile = nil;
         _downloadStatus = kMTStatusDownloaded;
     } else {
         _downloadStatus = kMTStatusEncoding;
         _showStatus = @"Encoding";
  		downloadingURL = NO;
-		[fileBufferWrite closeFile];
-		[fileBufferWrite release];
-		fileBufferWrite = nil;
        [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
     }
+    _fileSize = (double)[fileBufferWrite offsetInFile];
+    [fileBufferWrite closeFile];
+    [fileBufferWrite release];
+    fileBufferWrite = nil;
 	activeURLConnection = nil;
     [self performSelector:@selector(sendNotification:) withObject:kMTNotificationDownloadDidFinish afterDelay:4.0];
 }
+
+#pragma mark - Misc Support Functions
 
 -(void)sendNotification:(NSString *)notification
 {
