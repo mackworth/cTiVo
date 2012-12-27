@@ -102,7 +102,7 @@
 -(BOOL) importIntoiTunes: (MTTiVoShow * ) show {
 	//Caller responsible for informing user of progress
 	// There can be a long delay as iTunes starts up
-	NSURL * showFileURL = [NSURL fileURLWithPath:show.targetFilePath];
+	NSURL * showFileURL = [NSURL fileURLWithPath:show.encodeFilePath];
 	NSLog(@"%@",showFileURL);
 	
 	

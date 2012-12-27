@@ -29,7 +29,7 @@
 	NSOpenPanel *myOpenPanel;
     double percentComplete;
     MTDownloadListCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
-	int numDecoders;//Want to limit launches to two decoders.
+	int numEncoders;//Want to limit launches to two encoders.
 	
 	NSOperationQueue *queue;
 

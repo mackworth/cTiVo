@@ -65,7 +65,7 @@
     decryptTableCell = nil;
     downloadTableCell = nil;
     encodeTableCell = nil;
-	numDecoders = 0;
+	numEncoders = 0;
 	queue = [[NSOperationQueue alloc] init];
 	queue.maxConcurrentOperationCount = 1;
 	   
@@ -116,7 +116,7 @@
 -(void)manageDownloads
 {
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
-    BOOL isDownloading = NO, isDecrypting = NO, isEncoding = NO;
+    BOOL isDownloading = NO, isDecrypting = NO;
     for (MTTiVoShow *s in _downloadQueue) {
         if (s.downloadStatus == kMTStatusDownloading) {
             isDownloading = YES;
@@ -124,15 +124,12 @@
         if (s.downloadStatus == kMTStatusDecrypting) {
             isDecrypting = YES;
         }
-        if (s.downloadStatus == kMTStatusEncoding) {
-            isEncoding = YES;
-        }
     }
     if (!isDownloading) {
         for (MTTiVoShow *s in _downloadQueue) {
-            if (s.downloadStatus == kMTStatusNew && (numDecoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
+            if (s.downloadStatus == kMTStatusNew && (numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
 				if (s.simultaneousEncode) {
-					numDecoders++;
+					numEncoders++;
 				}
 				[s download];
                 break;
@@ -147,12 +144,11 @@
             }
         }
     }
-    if (!isEncoding) {
+    if (numEncoders < kMTMaxNumDownloaders) {
         for (MTTiVoShow *s in _downloadQueue) {
-            if (s.downloadStatus == kMTStatusDecrypted && numDecoders < kMTMaxNumDownloaders) {
-				numDecoders++;
+            if (s.downloadStatus == kMTStatusDecrypted && numEncoders < kMTMaxNumDownloaders) {
+				numEncoders++;
                 [s encode];
-                break;
             }
         }
     }
@@ -160,7 +156,9 @@
 
 -(void)encodeFinished
 {
-	numDecoders--;
+	numEncoders--;
+    [self manageDownloads];
+    NSLog(@"num decoders after decrement is %d",numEncoders);
 }
 
 #pragma mark - Memory Management

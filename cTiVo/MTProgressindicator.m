@@ -20,7 +20,7 @@
         [_leftText setBackgroundColor:[NSColor clearColor]];
         [_leftText setEditable:NO];
         [_leftText setBezeled:NO];
-        _rightText = [[NSTextField alloc] initWithFrame:CGRectMake(frame.size.width * 0.8, -4, frame.size.width * 0.2, frame.size.height)];
+        _rightText = [[NSTextField alloc] initWithFrame:CGRectMake(frame.size.width * 0.7, -4, frame.size.width * 0.3, frame.size.height)];
         [_rightText setFont:[NSFont userFontOfSize:10]];
         [_rightText setAlignment:NSRightTextAlignment];
         [_rightText setBackgroundColor:[NSColor clearColor]];

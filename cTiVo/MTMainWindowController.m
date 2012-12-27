@@ -54,6 +54,12 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
     [_myTiVos addObserver:self forKeyPath:@"programLoadingString" options:0 context:nil];
     [_myTiVos addObserver:self forKeyPath:@"selectedFormat" options:0 context:nil];
+	BOOL canSimulEncode = ![[_myTiVos.selectedFormat objectForKey:@"mustDownloadFirst"] boolValue];
+	simultaneousEncodeButton.state = NSOffState;
+	if (canSimulEncode) {
+		simultaneousEncodeButton.state = NSOnState;
+	}
+
     
 }
 
@@ -72,6 +78,7 @@
             [addToiTunesButton setEnabled:NO];
         }
         [simultaneousEncodeButton setEnabled:YES];
+        [simultaneousEncodeButton setState:NSOnState];
         if (!canSimulEncode) {
             [simultaneousEncodeButton setState:NSOffState];
             [simultaneousEncodeButton setEnabled:NO];

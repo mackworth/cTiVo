@@ -12,17 +12,23 @@
 @class MTProgramList;
 
 @interface MTTiVoShow : NSObject <NSXMLParserDelegate> {
-    NSFileHandle *activeFile, *encodeFile;
-	NSString *activeFilePath, *targetFilePath, *encodeFilePath;
+    NSFileHandle    *downloadFileHandle,
+                    *decryptFileHandle,
+                    *decryptLogFileHandle,
+                    *decryptLogFileReadHandle,
+                    *encodeFileHandle,
+                    *encodeLogFileHandle,
+                    *encodeLogFileReadHandle,
+                    *bufferFileReadHandle,
+                    *bufferFileWriteHandle,
+                    *devNullFileHandle;
+	NSString *downloadFilePath, *decryptFilePath, *decryptLogFilePath, *encodeFilePath, *encodeLogFilePath, *bufferFilePath;
     double dataDownloaded;
-    NSTask *activeTask, *tivodecoderTask;
+    NSTask *encoderTask, *decrypterTask;
 	NSURLConnection *activeURLConnection, *detailURLConnection;
-	NSString *sourceFilePath, *fileBufferPath;
 	NSPipe *pipe1, *pipe2;
-	NSMutableArray *dataToWrite;
 	BOOL volatile writingData, downloadingURL, pipingData;
 	off_t readPointer, writePointer;
-	NSFileHandle *fileBufferRead, *fileBufferWrite;
 	NSXMLParser *parser;
 	NSMutableString *element;
 	BOOL    gotDetails;
@@ -42,7 +48,7 @@
 									*episodeGenre,
 									*showDate;
 
-@property (nonatomic, readonly) NSString *targetFilePath;
+@property (nonatomic, readonly) NSString *encodeFilePath;
 @property time_t showLength;  //length of show in seconds
 @property (nonatomic, retain) NSURL *URL;
 @property int downloadStatus, showID, season, episode, episodeYear;
