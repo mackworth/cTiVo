@@ -23,7 +23,6 @@
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"
 #define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
 #define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated"
-#define testMAK @"0636497662"
 
 #define kMTIsDownloading @"MTIsDownloading"
 #define kMTIsDecrypting @"MTIsDecrypting"
