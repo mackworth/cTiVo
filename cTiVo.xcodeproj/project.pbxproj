@@ -13,6 +13,9 @@
 		D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */; };
 		D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */; };
 		D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = D2995CA5168B8BB200B960B9 /* MTCheckBox.m */; };
+		D2995CAB168D08B300B960B9 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = D2995CAA168D08B300B960B9 /* dsa_pub.pem */; };
+		D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
+		D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		D2C390761687FFA600D2062E /* MTiTunes.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C390741687FFA600D2062E /* MTiTunes.m */; };
 		D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA116766EFD00CE32DE /* Cocoa.framework */; };
 		D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
@@ -34,6 +37,19 @@
 		D2DFA68F1683C27600CD6CE0 /* MTDownloadListCheckCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		D2995CAE168D0F7D00B960B9 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressindicator.h; sourceTree = "<group>"; };
 		D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressindicator.m; sourceTree = "<group>"; };
@@ -46,6 +62,8 @@
 		D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadListCellView.m; sourceTree = "<group>"; };
 		D2995CA4168B8BB200B960B9 /* MTCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTCheckBox.h; sourceTree = "<group>"; };
 		D2995CA5168B8BB200B960B9 /* MTCheckBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTCheckBox.m; sourceTree = "<group>"; };
+		D2995CAA168D08B300B960B9 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
+		D2995CAC168D0EE700B960B9 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = cTiVo/Sparkle.framework; sourceTree = "<group>"; };
 		D2C390741687FFA600D2062E /* MTiTunes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTunes.m; sourceTree = "<group>"; };
 		D2C390751687FFA600D2062E /* MTiTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTunes.h; sourceTree = "<group>"; };
 		D2D60B9D16766EFD00CE32DE /* cTiVo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTiVo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -88,6 +106,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */,
 				D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */,
 				D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */,
 			);
@@ -116,6 +135,7 @@
 		D2D60BA016766EFD00CE32DE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D2995CAC168D0EE700B960B9 /* Sparkle.framework */,
 				D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */,
 				D2D60BA116766EFD00CE32DE /* Cocoa.framework */,
 				D2D60BA316766EFD00CE32DE /* Other Frameworks */,
@@ -184,6 +204,7 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				D2995CAA168D08B300B960B9 /* dsa_pub.pem */,
 				D2D60BBF16766F3200CE32DE /* cTiVo.icns */,
 				D2D60BC016766F3200CE32DE /* formats.plist */,
 				D2D60BC116766F3200CE32DE /* HandBrakeCLI */,
@@ -223,6 +244,7 @@
 				D2901ADC1677AF3C001E559C /* ShellScript */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
+				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -274,6 +296,7 @@
 				D2D60BC716766F3200CE32DE /* mencoder in Resources */,
 				D2D60BC816766F3200CE32DE /* tivodecode in Resources */,
 				D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */,
+				D2995CAB168D08B300B960B9 /* dsa_pub.pem in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -402,6 +425,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/cTiVo\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
@@ -415,6 +443,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/cTiVo\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
