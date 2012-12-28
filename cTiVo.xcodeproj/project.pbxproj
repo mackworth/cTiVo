@@ -13,7 +13,7 @@
 		D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */; };
 		D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */; };
 		D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = D2995CA5168B8BB200B960B9 /* MTCheckBox.m */; };
-		D2995CAB168D08B300B960B9 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = D2995CAA168D08B300B960B9 /* dsa_pub.pem */; };
+		D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */; };
 		D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		D2C390761687FFA600D2062E /* MTiTunes.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C390741687FFA600D2062E /* MTiTunes.m */; };
@@ -62,7 +62,7 @@
 		D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadListCellView.m; sourceTree = "<group>"; };
 		D2995CA4168B8BB200B960B9 /* MTCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTCheckBox.h; sourceTree = "<group>"; };
 		D2995CA5168B8BB200B960B9 /* MTCheckBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTCheckBox.m; sourceTree = "<group>"; };
-		D2995CAA168D08B300B960B9 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
+		D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cTiVo_sparkle_pub.pem; sourceTree = "<group>"; };
 		D2995CAC168D0EE700B960B9 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = cTiVo/Sparkle.framework; sourceTree = "<group>"; };
 		D2C390741687FFA600D2062E /* MTiTunes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTunes.m; sourceTree = "<group>"; };
 		D2C390751687FFA600D2062E /* MTiTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTunes.h; sourceTree = "<group>"; };
@@ -204,7 +204,7 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				D2995CAA168D08B300B960B9 /* dsa_pub.pem */,
+				D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */,
 				D2D60BBF16766F3200CE32DE /* cTiVo.icns */,
 				D2D60BC016766F3200CE32DE /* formats.plist */,
 				D2D60BC116766F3200CE32DE /* HandBrakeCLI */,
@@ -296,7 +296,7 @@
 				D2D60BC716766F3200CE32DE /* mencoder in Resources */,
 				D2D60BC816766F3200CE32DE /* tivodecode in Resources */,
 				D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */,
-				D2995CAB168D08B300B960B9 /* dsa_pub.pem in Resources */,
+				D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
