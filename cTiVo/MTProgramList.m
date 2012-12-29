@@ -18,6 +18,14 @@
     self.delegate    = self;
 //    self.rowHeight = 24;
     self.allowsMultipleSelection = YES;
+	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
+	NSArray *tmp = @[@"Queued",@"Episode",@"Date",@"Length"];
+	for (NSString *ident in tmp) {
+		NSTableColumn *column = [self tableColumnWithIdentifier:ident];
+		NSTableHeaderCell *header = [column headerCell];
+		[header setAlignment:NSCenterTextAlignment];
+
+	}
 }
 
 -(void)reloadData
@@ -96,26 +104,30 @@
     // nameArray value at row
 	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.showTitle ;
-	} else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.showDate;
+        result.toolTip = result.textField.stringValue;
+    } else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.showDateString;
 		[result.textField setAlignment:NSCenterTextAlignment];
+        result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
-		result.textField.stringValue = [NSString stringWithFormat:@"%ld",thisShow.showLength];
+		result.textField.stringValue = [NSString stringWithFormat:@"%ld:%0.2ld",thisShow.showLength/60,thisShow.showLength % 60];
 		[result.textField setAlignment:NSCenterTextAlignment];
+        result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
 		int e = thisShow.episode;
 		int s = thisShow.season;
 		NSString *episode = @"";
 		if (e > 0) {
-			if (s > 0) {
-				episode = [NSString stringWithFormat:@"S%d E%d",s,e ];
+			if (s > 0 && s < 100 && e < 100) {
+				episode = [NSString stringWithFormat:@"S%0.2d E%0.2d",s,e ];
 			} else {
-				episode	 = [NSString stringWithFormat:@"E%d",e];
-			}
+				episode	 = [NSString stringWithFormat:@"%d",e];
+            }
 		}
 		result.textField.stringValue = thisShow.episodeNumber;
 		result.textField.stringValue = episode;
 		[result.textField setAlignment:NSCenterTextAlignment];
+        result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
 //        NSInteger c = NSOffState;
         if (thisShow.isQueued) {

@@ -11,11 +11,13 @@
 #import "MTProgramList.h"
 #import "MTDownloadList.h"
 #import "MTMainWindowController.h"
+#import "MTSubscriptionList.h"
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate> {
 //	IBOutlet NSPopUpButton *tivoList;
     IBOutlet MTProgramList *programList;
 	IBOutlet MTDownloadList *downloadList;
+	IBOutlet MTSubscriptionList *subscriptionList;
 //	IBOutlet NSProgressIndicator *downloadingProgress, *decryptingProgress, *encodingProgress;
 //	IBOutlet NSTextField *downloadingLabel, *decriptingLabel, *encodingLabel;
 	IBOutlet MTNetworkTivos *myTiVos;

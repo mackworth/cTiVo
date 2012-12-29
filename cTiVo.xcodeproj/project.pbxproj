@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
 		D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
+		D235BF01168F52DE00320FA5 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = D235BF00168F52DE00320FA5 /* MTSubscriptionList.m */; };
 		D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D279D3E9167A32FA007F0677 /* MTMainWindowController.m */; };
 		D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */; };
 		D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */; };
@@ -55,6 +56,8 @@
 		D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressindicator.m; sourceTree = "<group>"; };
 		D22BC41D1680DB5E007D699C /* MTTiVoShow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoShow.h; sourceTree = "<group>"; };
 		D22BC41E1680DB5E007D699C /* MTTiVoShow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoShow.m; sourceTree = "<group>"; };
+		D235BEFF168F52DE00320FA5 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
+		D235BF00168F52DE00320FA5 /* MTSubscriptionList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionList.m; sourceTree = "<group>"; };
 		D279D3E8167A32FA007F0677 /* MTMainWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTMainWindowController.h; sourceTree = "<group>"; };
 		D279D3E9167A32FA007F0677 /* MTMainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTMainWindowController.m; sourceTree = "<group>"; };
 		D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowController.xib; sourceTree = "<group>"; };
@@ -156,21 +159,21 @@
 		D2D60BA716766EFD00CE32DE /* cTiVo */ = {
 			isa = PBXGroup;
 			children = (
-				D2C390741687FFA600D2062E /* MTiTunes.m */,
-				D2C390751687FFA600D2062E /* MTiTunes.h */,
 				D2DFA68B1683B9EC00CD6CE0 /* iTunesInterface */,
 				D2D60BB616766EFD00CE32DE /* MainMenu.xib */,
 				D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */,
 				D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */,
+				D2995CA4168B8BB200B960B9 /* MTCheckBox.h */,
+				D2995CA5168B8BB200B960B9 /* MTCheckBox.m */,
 				D2D60BCB16766FA600CE32DE /* MTConstants.h */,
 				D2D60BCD16766FA600CE32DE /* MTDownloadList.h */,
 				D2D60BCC16766FA600CE32DE /* MTDownloadList.m */,
 				D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */,
 				D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */,
-				D2995CA4168B8BB200B960B9 /* MTCheckBox.h */,
-				D2995CA5168B8BB200B960B9 /* MTCheckBox.m */,
 				D2DFA68D1683C27600CD6CE0 /* MTDownloadListCheckCell.h */,
 				D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */,
+				D2C390751687FFA600D2062E /* MTiTunes.h */,
+				D2C390741687FFA600D2062E /* MTiTunes.m */,
 				D279D3E8167A32FA007F0677 /* MTMainWindowController.h */,
 				D279D3E9167A32FA007F0677 /* MTMainWindowController.m */,
 				D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */,
@@ -180,6 +183,8 @@
 				D2D60BCE16766FA600CE32DE /* MTProgramList.m */,
 				D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */,
 				D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */,
+				D235BEFF168F52DE00320FA5 /* MTSubscriptionList.h */,
+				D235BF00168F52DE00320FA5 /* MTSubscriptionList.m */,
 				D22BC41D1680DB5E007D699C /* MTTiVoShow.h */,
 				D22BC41E1680DB5E007D699C /* MTTiVoShow.m */,
 				D2D60BBE16766F1100CE32DE /* Resources */,
@@ -337,6 +342,7 @@
 				D2DFA68F1683C27600CD6CE0 /* MTDownloadListCheckCell.m in Sources */,
 				D2C390761687FFA600D2062E /* MTiTunes.m in Sources */,
 				D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */,
+				D235BF01168F52DE00320FA5 /* MTSubscriptionList.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

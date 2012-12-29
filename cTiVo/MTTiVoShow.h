@@ -46,7 +46,10 @@
 									*isEpisode,
 									*originalAirDate,
 									*episodeGenre,
-									*showDate;
+                                    *seriesTitle,
+                                    *time,
+                                    *showDateString;
+@property (nonatomic, retain) NSDate *showDate;
 
 @property (nonatomic, readonly) NSString *encodeFilePath;
 @property time_t showLength;  //length of show in seconds

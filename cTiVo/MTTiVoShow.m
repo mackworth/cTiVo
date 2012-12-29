@@ -96,6 +96,7 @@
 	if (!gotDetails) {
 		NSLog(@"Got Details Failed for %@",_showTitle);
 	}
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
 }
 
 #pragma  mark - parser methods
@@ -325,7 +326,7 @@
         _showStatus = @"Complete";
         _processProgress = 1.0;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
         if (_addToiTunesWhenEncoded) {
 			MTiTunes *iTunes = [[[MTiTunes alloc] init] autorelease];
 			[iTunes importIntoiTunes:self];
@@ -441,7 +442,7 @@
         _downloadStatus = kMTStatusDone;
         [self cleanupFiles];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
         if (_addToiTunesWhenEncoded) {
 			MTiTunes *iTunes = [[[MTiTunes alloc] init] autorelease];
 			[iTunes importIntoiTunes:self];
@@ -527,7 +528,7 @@
     BOOL ret = YES;
     if (_downloadStatus != kMTStatusNew && _downloadStatus != kMTStatusDone) {
 		//Put alert here
-		NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel Download of %@",_showTitle] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@""];
+		NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",_showTitle] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@""];
 		myAlert.alertStyle = NSCriticalAlertStyle;
 		NSInteger result = [myAlert runModal];
 		if (result != NSAlertAlternateReturn) {
@@ -558,8 +559,8 @@
             [encodeFileHandle closeFile];
             [fm removeItemAtPath:encodeFilePath error:nil];
         }
-        if (_downloadStatus == kMTStatusEncoding || _simultaneousEncode) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
+        if (_downloadStatus == kMTStatusEncoding || (_simultaneousEncode && _downloadStatus == kMTStatusDownloading)) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
         }
         _downloadStatus = kMTStatusNew;
         _processProgress = 0.0;
@@ -583,13 +584,13 @@
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSData *data = [bufferFileReadHandle readDataOfLength:chunkSize];
 	pipingData = YES;
-	[downloadFileHandle writeData:data];
+	if (!_isCanceled) [downloadFileHandle writeData:data];
 	pipingData = NO;
 	dataRead = data.length;
 	while (dataRead == chunkSize && !_isCanceled) {
 		data = [bufferFileReadHandle readDataOfLength:chunkSize];
 		pipingData = YES;
-		[downloadFileHandle writeData:data];
+		if (!_isCanceled) [downloadFileHandle writeData:data];
 		pipingData = NO;
 		if (_isCanceled) break;
 		dataRead = data.length;
@@ -676,10 +677,51 @@
 
 #pragma mark - Misc Support Functions
 
+- (NSDate *)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString
+// Returns a  date  that corresponds to the
+// specified RFC 3339 date time string. Note that this does not handle
+// all possible RFC 3339 date time strings, just one of the most common
+// styles.
+{
+    static NSDateFormatter *    sRFC3339DateFormatter;
+    NSDate *                    date;
+	
+    // If the date formatters aren't already set up, do that now and cache them
+    // for subsequence reuse.
+	
+    if (sRFC3339DateFormatter == nil) {
+        NSLocale *                  enUSPOSIXLocale;
+		
+        sRFC3339DateFormatter = [[NSDateFormatter alloc] init];
+		
+        enUSPOSIXLocale = [[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease];
+		
+        [sRFC3339DateFormatter setLocale:enUSPOSIXLocale];
+        [sRFC3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"];
+        [sRFC3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    }
+	
+    // Convert the RFC 3339 date time string to an NSDate.
+    // Then convert the NSDate to a user-visible date string.
+	
+ 	
+    date = [sRFC3339DateFormatter dateFromString:rfc3339DateTimeString];
+	return date;
+}
+
 -(void)sendNotification:(NSString *)notification
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:notification object:nil];
     
+}
+#pragma mark Setters (most to complete parsing)
+
+-(void) setTime: (NSString *) newTime {
+	if (newTime != _time) {
+        [_time release];
+        _time = [newTime retain];
+        self.showDate = [self dateForRFC3339DateTimeString:_time];
+    }
 }
 
 -(void)setOriginalAirDate:(NSString *)originalAirDate

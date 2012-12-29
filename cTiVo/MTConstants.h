@@ -23,17 +23,9 @@
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"
 #define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
 #define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated"
+#define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"
 
-#define kMTIsDownloading @"MTIsDownloading"
-#define kMTIsDecrypting @"MTIsDecrypting"
-#define kMTIsEncoding @"MTIsEncoding"
-#define kMTIsDownloaded @"MTIsDownloaded"
-#define kMTIsDecrypted @"MTIsDecrypted"
-#define kMTIsEncoded @"MTIsEncoded"
-#define kMTDownloadStatus @"MTDownloadStatus"
-#define kMTStatus @"MTStatus"
-#define kMTDownloadPercent @"MTDownloadPercent"
-
+//Download Status
 #define kMTStatusNew 0
 #define kMTStatusDownloading 1
 #define kMTStatusDownloaded 2
@@ -44,6 +36,14 @@
 
 #define kMTMaxNumDownloaders 2
 
+//Subscribed Show
+#define kMTSubscribedSeries @"MTSubscribedSeries"
+#define kMTSubscribedSeriesDate	@"MTSubscribedSeriesDate"
+
+//Misc
+
+#define kMTUpdateIntervalMinutes 30 //Update interval for re-checking current TiVo
+
 
 //USER DEFAULTS
 
@@ -51,4 +51,5 @@
 #define kMTSelectedTiVo @"SelectedTiVo"
 #define kMTSelectedFormat @"SelectedFormat"
 #define kMTDownloadDirectory  @"DownloadDirectory"
+#define kMTSubscriptionList @"SubscriptionList"
 

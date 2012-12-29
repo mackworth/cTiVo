@@ -16,11 +16,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
     self.dataSource = self;
     self.delegate    = self;
-//    self.rowHeight = 24;
     self.allowsMultipleSelection = YES;
-	NSTableColumn *simuColumn = [self tableColumnWithIdentifier:@"Simu"];
-	NSTableHeaderCell *simuHeader = [simuColumn headerCell];
-	[simuHeader setAlignment:NSCenterTextAlignment];
+	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
 }
 
 -(void)updateTable
@@ -118,10 +115,13 @@
 		result.progressIndicator.rightText.stringValue = rowData.showStatus;
         result.progressIndicator.leftText.stringValue = rowData.showTitle ;
         result.progressIndicator.doubleValue = rowData.processProgress;
+        result.toolTip = rowData.showTitle;
 	} else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
         result.textField.stringValue = rowData.tiVo.name ;
+        result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
         result.textField.stringValue = [rowData.encodeFormat objectForKey:@"name"] ;
+        result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         NSInteger c = NSOffState;
         if (rowData.addToiTunesWhenEncoded) {
@@ -130,7 +130,7 @@
         [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
         [((MTDownloadListCheckCell *)result).checkBox setEnabled:YES] ;
         ((MTDownloadListCheckCell *)result).checkBox.owner = rowData;
-	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
+ 	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
         NSInteger c = NSOffState;
         if (rowData.simultaneousEncode) {
             c = NSOnState;

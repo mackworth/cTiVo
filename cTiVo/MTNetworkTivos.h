@@ -37,7 +37,7 @@
 
 //Shared Data
 
-@property (nonatomic, readonly) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
+@property (nonatomic, retain) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList, *subscribedShows;
 @property (nonatomic, retain) NSString *downloadDirectory, *programLoadingString;
 
 //Other Properties
@@ -50,7 +50,7 @@
 
 
 
--(void)fetchVideoListFromHost;
+-(void)fetchVideoListFromHost:(NSNetService *)newTivo;
 -(void)addProgramToDownloadQueue:(MTTiVoShow *)program;
 
 

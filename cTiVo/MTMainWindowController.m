@@ -15,7 +15,6 @@
 
 @implementation MTMainWindowController
 
-@synthesize tiVoShowTable;
 
 - (id)initWithWindow:(NSWindow *)window
 {
@@ -37,6 +36,7 @@
 	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
     tiVoShowTable.tiVoShows = _myTiVos.tiVoShows;  //Connect display to data source
     downloadQueueTable.downloadQueue = _myTiVos.downloadQueue;  //Connect display to data source
+    subscriptionTable.subscribedShows = _myTiVos.subscribedShows;  //Connect display to data source
     downloadDirectory.stringValue = _myTiVos.downloadDirectory;
     _selectedFormat = _myTiVos.selectedFormat;
     _selectedTiVo = _myTiVos.selectedTiVo;
@@ -49,6 +49,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:tiVoShowTable selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:downloadQueueTable selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(startAnimation:) name:kMTNotificationShowListUpdating object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(stopAnimation:) name:kMTNotificationShowListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
@@ -104,7 +105,6 @@
 -(void)refreshFormatListPopup
 {
 	[formatListPopUp removeAllItems];
-    mediaKeyLabel.stringValue = @"";
 //    if (_selectedFormat) {
 //        mediaKeyLabel.stringValue = [[NSUserDefaults standardUserDefaults] stringForKey:[_selectedFormat objectForKey:@"name"]];
 //    }
@@ -132,7 +132,7 @@
         [[tiVoListPopUp lastItem] setRepresentedObject:ts];
 		if ([ts.name compare:selectedTiVoName] == NSOrderedSame) {
 			[tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
-            _myTiVos.selectedTiVo = ts;
+//            _myTiVos.selectedTiVo = ts;
             _selectedTiVo = ts;
 		}
 		
@@ -140,7 +140,7 @@
     if (_selectedTiVo) {
 		[mediaKeyLabel setEnabled:YES];
         mediaKeyLabel.stringValue = [[[NSUserDefaults standardUserDefaults]  objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name];
-        [_myTiVos fetchVideoListFromHost];
+        [_myTiVos fetchVideoListFromHost:_selectedTiVo];
     }
 }
 
@@ -149,14 +149,16 @@
 -(IBAction)selectTivo:(id)sender
 {
     NSPopUpButton *thisButton = (NSPopUpButton *)sender;
-    _myTiVos.selectedTiVo = [[thisButton selectedItem] representedObject];
-    _selectedTiVo = _myTiVos.selectedTiVo;
-    mediaKeyLabel.stringValue = @"";
-	if ([[[NSUserDefaults standardUserDefaults]  objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name]) {
-		mediaKeyLabel.stringValue = [[[NSUserDefaults standardUserDefaults]  objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name];
+    _selectedTiVo = [[thisButton selectedItem] representedObject];
+//    _myTiVos.selectedTiVo = _selectedTiVo;
+    mediaKeyLabel.enabled =  (_selectedTiVo != nil);
+    //mediaKeyLabel.stringValue = @"";
+    NSString * possibleKey =[[[NSUserDefaults standardUserDefaults]  objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name];
+	if (possibleKey) {
+		mediaKeyLabel.stringValue = possibleKey;
 	}
 	[[NSUserDefaults standardUserDefaults] setObject:_selectedTiVo.name forKey:kMTSelectedTiVo];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoChanged object:nil];
+	[_myTiVos fetchVideoListFromHost:_selectedTiVo];
 }
 
 -(IBAction)selectFormat:(id)sender
@@ -167,21 +169,59 @@
 	[[NSUserDefaults standardUserDefaults] setObject:[_selectedFormat objectForKey:@"name"] forKey:kMTSelectedFormat];
 	
 }
--(IBAction)updateDownloadQueue:(id)sender
+
+#pragma mark - Subscription Management
+-(void) checkSubscriptionShow:(MTTiVoShow *) show {
+	if([subscriptionTable isSubscribed:show] && (show.downloadStatus == kMTStatusNew)) {
+		[self downloadthisShow:show];
+		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
+	}
+}
+
+-(void) checkSubscription: (NSNotification *) notification {
+	[self checkSubscriptionShow: (MTTiVoShow *) notification.object];
+}
+
+-(void) checkSubscriptionsAll {
+	for (MTTiVoShow * show in _myTiVos.tiVoShows) {
+		[self checkSubscriptionShow:show];
+	}
+}
+
+-(IBAction)subscribe:(id) sender {
+	BOOL anySubscribed = NO;
+    for (int i = 0; i < _myTiVos.tiVoShows.count; i++) {
+        if ([tiVoShowTable isRowSelected:i]) {
+			anySubscribed = YES;
+			MTTiVoShow *thisShow = [_myTiVos.tiVoShows objectAtIndex:i];
+			[subscriptionTable addSubscription:thisShow];
+		}
+	}
+	if (anySubscribed) {
+		[self checkSubscriptionsAll];
+		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
+		[subscriptionTable reloadData];
+	}
+}
+
+-(void) downloadthisShow:(MTTiVoShow*) thisShow {
+	thisShow.addToiTunesWhenEncoded = NO;
+	if (addToiTunesButton.state == NSOnState && [[_selectedFormat objectForKey:@"iTunes"] boolValue]) {
+		thisShow.addToiTunesWhenEncoded  = YES;
+	}
+	thisShow.simultaneousEncode = YES;
+	if (simultaneousEncodeButton.state == NSOffState) {
+		thisShow.simultaneousEncode = NO;
+	}
+	thisShow.isQueued = YES;
+     [_myTiVos addProgramToDownloadQueue:thisShow];
+}
+
+-(IBAction)downloadSelectedShows:(id)sender
 {
     for (int i = 0; i < _myTiVos.tiVoShows.count; i++) {
         if([tiVoShowTable isRowSelected:i]) {
-            MTTiVoShow *thisShow = [_myTiVos.tiVoShows objectAtIndex:i];
-            thisShow.addToiTunesWhenEncoded = NO;
-            if (addToiTunesButton.state == NSOnState && [[_selectedFormat objectForKey:@"iTunes"] boolValue]) {
-                thisShow.addToiTunesWhenEncoded  = YES;
-            }
-            thisShow.simultaneousEncode = YES;
-            if (simultaneousEncodeButton.state == NSOffState) {
-                thisShow.simultaneousEncode = NO;
-            }
-            ((MTTiVoShow *)[_myTiVos.tiVoShows objectAtIndex:i]).isQueued = YES;
-            [_myTiVos addProgramToDownloadQueue:[_myTiVos.tiVoShows objectAtIndex:i]];
+            [self downloadthisShow:[_myTiVos.tiVoShows objectAtIndex:i]];
         }
     }
 	[tiVoShowTable deselectAll:nil];
@@ -223,10 +263,11 @@
 		downloadDirectory.stringValue = dir;
         _myTiVos.downloadDirectory = dir;
 		[[NSUserDefaults standardUserDefaults] setValue:dir forKey:kMTDownloadDirectory];
+        downloadDirectory.toolTip = dir;
 	}
 }
 
--(IBAction)changeDownload:(id)sender
+-(IBAction)changeSimultaneous:(id)sender
 {
     MTCheckBox *checkbox = sender;
     if (checkbox.owner.simultaneousEncode) {
@@ -252,11 +293,13 @@
 {
     [addToQueueButton setEnabled:NO];
     [removeFromQueueButton setEnabled:NO];
+	[subscribeButton setEnabled:NO];
     if ([downloadQueueTable numberOfSelectedRows]) {
         [removeFromQueueButton setEnabled:YES];
     }
     if ([tiVoShowTable numberOfSelectedRows]) {
         [addToQueueButton setEnabled:YES];
+        [subscribeButton setEnabled:YES];
     }
 }
 
@@ -279,7 +322,7 @@
         NSMutableDictionary *mediaKeys = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys]];
         [mediaKeys setObject:newMAK forKey:_selectedTiVo.name];
         [[NSUserDefaults standardUserDefaults] setObject:mediaKeys forKey:kMTMediaKeys];
-        [_myTiVos fetchVideoListFromHost];
+        [_myTiVos fetchVideoListFromHost:_selectedTiVo];
     }
     if (control == downloadDirectory) {
         _myTiVos.downloadDirectory = control.stringValue;
