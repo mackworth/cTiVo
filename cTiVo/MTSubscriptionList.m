@@ -14,10 +14,6 @@
 
 -(void)awakeFromNib
 {
-	//note that awakeFromNib may be called multiple times
-    NSLog(@"awakefromNib");
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
-    
 	self.dataSource  = self;
     self.delegate    = self;
 //    self.rowHeight = 24;
@@ -49,10 +45,7 @@
 	NSUInteger index = [self findShow:tivoShow];
 	if (index == NSNotFound) return NO;
 	NSDate * prevRecording = (NSDate *)[[self.subscribedShows objectAtIndex:index] objectForKey:kMTSubscribedSeriesDate];
-	//NSLog(@"prevRecord: %@; thisShow: %@",prevRecording, tivoShow.showDate);
 	BOOL before = [prevRecording compare: tivoShow.showDate] == NSOrderedAscending;
-	if (before)
-		NSLog(@"foundit");
 	return before;
 } 
 
@@ -90,7 +83,6 @@
 	//set the "lastrecording" time for one second before this show, to include this show.
 	if ([self findShow:tivoShow] == NSNotFound) {
         NSDate * earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
-        NSLog(@"times: %@ vs %@",tivoShow.showDate, earlierTime);
         [self.subscribedShows addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:
 					tivoShow.seriesTitle,kMTSubscribedSeries,
 					earlierTime, kMTSubscribedSeriesDate,

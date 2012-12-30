@@ -145,7 +145,7 @@
         [downloadFilePath release];
         downloadFilePath = nil;
     }
-    if (downloadFileHandle) {
+    if (downloadFileHandle && downloadFileHandle != [pipe1 fileHandleForWriting]) {
         [downloadFileHandle release];
         downloadFileHandle = nil;
     }
@@ -585,7 +585,10 @@
 	int chunkReleaseMemory = 10;
 	unsigned long dataRead;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSData *data = [bufferFileReadHandle readDataOfLength:chunkSize];
+	NSData *data = nil;
+	if (!_isCanceled) {
+		data = [bufferFileReadHandle readDataOfLength:chunkSize];
+	}
 	pipingData = YES;
 	if (!_isCanceled) [downloadFileHandle writeData:data];
 	pipingData = NO;
@@ -639,11 +642,6 @@
 	if (!writingData && _isSimultaneousEncoding) {
 		[self performSelectorInBackground:@selector(writeData) withObject:nil];
 	}
-}
-
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
-{
-	NSLog(@"Response from URL was %@",response);
 }
 
 - (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {

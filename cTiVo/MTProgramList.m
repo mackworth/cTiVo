@@ -13,7 +13,6 @@
 
 -(void)awakeFromNib
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated object:nil];
     self.dataSource = self;
     self.delegate    = self;
 //    self.rowHeight = 24;

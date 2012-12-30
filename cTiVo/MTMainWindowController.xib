@@ -3,12 +3,12 @@
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
 		<string key="IBDocument.SystemVersion">12C60</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2840</string>
+		<string key="IBDocument.InterfaceBuilderVersion">2844</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">2840</string>
+			<string key="NS.object.0">2844</string>
 		</object>
 		<array key="IBDocument.IntegratedClassDependencies">
 			<string>NSButton</string>
@@ -136,7 +136,7 @@
 													<string key="NSFrameSize">{249, 133}</string>
 													<reference key="NSSuperview" ref="56095981"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="83364493"/>
+													<reference key="NSNextKeyView" ref="228630423"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -309,7 +309,6 @@
 											<string key="NSFrame">{{1, 134}, {248, 16}}</string>
 											<reference key="NSSuperview" ref="719796418"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView"/>
 											<string key="NSReuseIdentifierKey">_NS:60</string>
 											<bool key="NSEnabled">YES</bool>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -337,7 +336,7 @@
 									<string key="NSFrame">{{422, 0}, {250, 151}}</string>
 									<reference key="NSSuperview" ref="366407957"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="228630423"/>
+									<reference key="NSNextKeyView" ref="56095981"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133810</int>
 									<reference key="NSVScroller" ref="663152309"/>
@@ -364,7 +363,7 @@
 													<string key="NSFrameSize">{412, 133}</string>
 													<reference key="NSSuperview" ref="1053596382"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="334740629"/>
+													<reference key="NSNextKeyView" ref="794705384"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -600,7 +599,7 @@
 									<string key="NSFrameSize">{414, 151}</string>
 									<reference key="NSSuperview" ref="366407957"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="794705384"/>
+									<reference key="NSNextKeyView" ref="1053596382"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133682</int>
 									<reference key="NSVScroller" ref="863871934"/>
@@ -627,7 +626,7 @@
 													<string key="NSFrameSize">{671, 197}</string>
 													<reference key="NSSuperview" ref="556230325"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="5386701"/>
+													<reference key="NSNextKeyView" ref="39833346"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -867,7 +866,7 @@
 									<string key="NSFrame">{{0, 185}, {672, 215}}</string>
 									<reference key="NSSuperview" ref="366407957"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="39833346"/>
+									<reference key="NSNextKeyView" ref="556230325"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133810</int>
 									<reference key="NSVScroller" ref="785357226"/>
@@ -2941,6 +2940,7 @@
 				</object>
 				<string key="16.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="160.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="162.CustomClassName">MTCheckBox</string>
 				<object class="NSMutableDictionary" key="162.IBAttributePlaceholdersKey">
 					<string key="NS.key.0">ToolTip</string>
 					<object class="IBToolTipAttribute" key="NS.object.0">
@@ -2977,6 +2977,7 @@
 					</object>
 				</object>
 				<string key="17.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="173.CustomClassName">MTCheckBox</string>
 				<object class="NSMutableDictionary" key="173.IBAttributePlaceholdersKey">
 					<string key="NS.key.0">ToolTip</string>
 					<object class="IBToolTipAttribute" key="NS.object.0">
@@ -3233,6 +3234,14 @@
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
+				<object class="IBPartialClassDescription">
+					<string key="className">MTCheckBox</string>
+					<string key="superclassName">NSButton</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">./Classes/MTCheckBox.h</string>
+					</object>
+				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">MTDownloadList</string>
 					<string key="superclassName">NSTableView</string>

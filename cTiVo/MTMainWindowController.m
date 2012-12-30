@@ -54,8 +54,10 @@
    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshTiVoListPopup) name:kMTNotificationTiVoListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:tiVoShowTable selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:downloadQueueTable selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:downloadQueueTable selector:@selector(updateTable) name:kMTNotificationDownloadQueueUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:downloadQueueTable selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:subscriptionTable selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(startAnimation:) name:kMTNotificationShowListUpdating object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(stopAnimation:) name:kMTNotificationShowListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];

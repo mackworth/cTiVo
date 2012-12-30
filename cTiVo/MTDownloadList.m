@@ -12,8 +12,6 @@
 
 -(void)awakeFromNib
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTable) name:kMTNotificationDownloadQueueUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
     self.dataSource = self;
     self.delegate    = self;
     self.allowsMultipleSelection = YES;
