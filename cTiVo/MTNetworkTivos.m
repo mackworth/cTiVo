@@ -13,69 +13,72 @@
 
 @synthesize subscribedShows = _subscribedShows;
 
--(void)awakeFromNib
+-(id)init
 {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	tivoBrowser = [[NSNetServiceBrowser alloc] init];
-	tivoBrowser.delegate = self;
-	[tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-	[tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
-	_tivoServices = [[NSMutableArray alloc] init];
-	_videoListNeedsFilling = YES;
-	listingData = [[NSMutableData alloc] init];
-	_tiVoShows = [[NSMutableArray alloc] init];
-	_tiVoList = [[NSMutableArray alloc] init];
-	NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
-	NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
-	_formatList = [[NSMutableArray arrayWithArray:[formats objectForKey:@"formats"] ] retain];
-    
-    //Make sure there's a selected format, espeically on first launch
-    _selectedFormat = nil;
-    if ([defaults objectForKey:kMTSelectedFormat]) {
-        NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
-        for (NSDictionary *fl in _formatList) {
-            if ([formatName compare:[fl objectForKey:@"name"]] == NSOrderedSame) {
-                self.selectedFormat = fl;
-            }
-        }
-    }
-    //If no selected format make it the first.
-    if (!_selectedFormat) {
-        self.selectedFormat = [_formatList objectAtIndex:0];
-        
-    }
-	if (![defaults objectForKey:kMTMediaKeys]) {
-		[defaults setObject:[NSDictionary dictionary] forKey:kMTMediaKeys];
+	self = [super init];
+	if (self) {
+		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+		tivoBrowser = [[NSNetServiceBrowser alloc] init];
+		tivoBrowser.delegate = self;
+		[tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+		[tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
+		_tivoServices = [[NSMutableArray alloc] init];
+		_videoListNeedsFilling = YES;
+		listingData = [[NSMutableData alloc] init];
+		_tiVoShows = [[NSMutableArray alloc] init];
+		_tiVoList = [[NSMutableArray alloc] init];
+		NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
+		NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
+		_formatList = [[NSMutableArray arrayWithArray:[formats objectForKey:@"formats"] ] retain];
+		
+		//Make sure there's a selected format, espeically on first launch
+		_selectedFormat = nil;
+		if ([defaults objectForKey:kMTSelectedFormat]) {
+			NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
+			for (NSDictionary *fl in _formatList) {
+				if ([formatName compare:[fl objectForKey:@"name"]] == NSOrderedSame) {
+					self.selectedFormat = fl;
+				}
+			}
+		}
+		//If no selected format make it the first.
+		if (!_selectedFormat) {
+			self.selectedFormat = [_formatList objectAtIndex:0];
+			
+		}
+		if (![defaults objectForKey:kMTMediaKeys]) {
+			[defaults setObject:[NSDictionary dictionary] forKey:kMTMediaKeys];
+		}
+		if (![defaults objectForKey:kMTDownloadDirectory]) {
+			NSString *ddir = [NSString stringWithFormat:@"%@/Downloads/",NSHomeDirectory()];
+			[defaults setValue:ddir forKey:kMTDownloadDirectory];
+		}
+		_downloadDirectory = [defaults objectForKey:kMTDownloadDirectory];
+		[self setProgramLoadingString:@""];
+		_downloadQueue = [NSMutableArray new];
+		programEncoding = nil;
+		programDecrypting = nil;
+		programDownloading = nil;
+		downloadURLConnection = nil;
+		programListURLConnection = nil;
+		downloadFile = nil;
+		decryptingTask = nil;
+		encodingTask = nil;
+		stdOutFileHandle = nil;
+		tivoConnectingTo = nil;
+		decryptTableCell = nil;
+		downloadTableCell = nil;
+		encodeTableCell = nil;
+		numEncoders = 0;
+		queue = [[NSOperationQueue alloc] init];
+		queue.maxConcurrentOperationCount = 1;
+		   
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDecryptDidFinish object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
 	}
-	if (![defaults objectForKey:kMTDownloadDirectory]) {
-		NSString *ddir = [NSString stringWithFormat:@"%@/Downloads/",NSHomeDirectory()];
-		[defaults setValue:ddir forKey:kMTDownloadDirectory];
-	}
-	_downloadDirectory = [defaults objectForKey:kMTDownloadDirectory];
-    [self setProgramLoadingString:@""];
-	_downloadQueue = [NSMutableArray new];
-	programEncoding = nil;
-	programDecrypting = nil;
-	programDownloading = nil;
-	downloadURLConnection = nil;
-	programListURLConnection = nil;
-	downloadFile = nil;
-	decryptingTask = nil;
-	encodingTask = nil;
-	stdOutFileHandle = nil;
-	tivoConnectingTo = nil;
-    decryptTableCell = nil;
-    downloadTableCell = nil;
-    encodeTableCell = nil;
-	numEncoders = 0;
-	queue = [[NSOperationQueue alloc] init];
-	queue.maxConcurrentOperationCount = 1;
-	   
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDecryptDidFinish object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
-	
+	return self;
 
 }
 

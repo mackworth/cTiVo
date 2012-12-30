@@ -14,20 +14,10 @@
 #import "MTSubscriptionList.h"
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate> {
-//	IBOutlet NSPopUpButton *tivoList;
-    IBOutlet MTProgramList *programList;
-	IBOutlet MTDownloadList *downloadList;
-	IBOutlet MTSubscriptionList *subscriptionList;
-//	IBOutlet NSProgressIndicator *downloadingProgress, *decryptingProgress, *encodingProgress;
-//	IBOutlet NSTextField *downloadingLabel, *decriptingLabel, *encodingLabel;
-	IBOutlet MTNetworkTivos *myTiVos;
-	 MTMainWindowController *mainWindowController;
+	MTNetworkTivos *myTiVos;
+	MTMainWindowController *mainWindowController;
 }
 
 @property (assign) IBOutlet NSWindow *window;
-
-@property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
-@property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
-@property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
 @end

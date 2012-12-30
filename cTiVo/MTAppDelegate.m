@@ -12,22 +12,14 @@
 
 - (void)dealloc
 {
-    [_persistentStoreCoordinator release];
-    [_managedObjectModel release];
-    [_managedObjectContext release];
+	[myTiVos release];
     [super dealloc];
 }
-
-@synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
-@synthesize managedObjectModel = _managedObjectModel;
-@synthesize managedObjectContext = _managedObjectContext;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     // Insert code here to initialize your application
-//	myTivos = [[MTNetworkTivos alloc] init];
-//    programList.myTivos = myTiVos;
-//	downloadList.myTivos  = myTiVos;
+	myTiVos = [[MTNetworkTivos alloc] init];
 	mainWindowController = nil;
 	[self showMainWindow:nil];
 }
@@ -48,17 +40,7 @@
 -(IBAction)showMainWindow:(id)sender
 {
 	if (!mainWindowController) {
-		mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
-		mainWindowController.myTiVos = myTiVos;
-		//    mainWindowController.mediaKeys = myTiVos.mediaKeys;
-		mainWindowController.tiVoList = myTiVos.tiVoList;
-		mainWindowController.tiVoShowTable.tiVoShows = myTiVos.tiVoShows;  //Connect display to data source
-		mainWindowController.downloadQueueTable.downloadQueue = myTiVos.downloadQueue;  //Connect display to data source
-		mainWindowController.subscriptionTable.subscribedShows = myTiVos.subscribedShows;  //Connect display to data source
-		mainWindowController.selectedFormat = myTiVos.selectedFormat;
-		mainWindowController.selectedTiVo = myTiVos.selectedTiVo;
-		mainWindowController.formatList = myTiVos.formatList;
-		mainWindowController.tiVoList = myTiVos.tiVoList;
+		mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController" withNetworkTivos:myTiVos];
 	}
 	[mainWindowController showWindow:nil];
 	
@@ -67,45 +49,6 @@
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
     // Save changes in the application's managed object context before the application terminates.
-    
-    if (!_managedObjectContext) {
-        return NSTerminateNow;
-    }
-    
-    if (![[self managedObjectContext] commitEditing]) {
-        NSLog(@"%@:%@ unable to commit editing to terminate", [self class], NSStringFromSelector(_cmd));
-        return NSTerminateCancel;
-    }
-    
-    if (![[self managedObjectContext] hasChanges]) {
-        return NSTerminateNow;
-    }
-    
-    NSError *error = nil;
-    if (![[self managedObjectContext] save:&error]) {
-
-        // Customize this code block to include application-specific recovery steps.              
-        BOOL result = [sender presentError:error];
-        if (result) {
-            return NSTerminateCancel;
-        }
-
-        NSString *question = NSLocalizedString(@"Could not save changes while quitting. Quit anyway?", @"Quit without saves error question message");
-        NSString *info = NSLocalizedString(@"Quitting now will lose any changes you have made since the last successful save", @"Quit without saves error question info");
-        NSString *quitButton = NSLocalizedString(@"Quit anyway", @"Quit anyway button title");
-        NSString *cancelButton = NSLocalizedString(@"Cancel", @"Cancel button title");
-        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
-        [alert setMessageText:question];
-        [alert setInformativeText:info];
-        [alert addButtonWithTitle:quitButton];
-        [alert addButtonWithTitle:cancelButton];
-
-        NSInteger answer = [alert runModal];
-        
-        if (answer == NSAlertAlternateReturn) {
-            return NSTerminateCancel;
-        }
-    }
 
     return NSTerminateNow;
 }

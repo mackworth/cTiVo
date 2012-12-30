@@ -17,27 +17,25 @@
 
 @synthesize tiVoShowTable,subscriptionTable, downloadQueueTable;
 
-
-- (id)initWithWindow:(NSWindow *)window
+-(id)initWithWindowNibName:(NSString *)windowNibName withNetworkTivos:(MTNetworkTivos *)myTiVos
 {
-    self = [super initWithWindow:window];
-    if (self) {
-        // Initialization code here.
-        _selectedFormat = nil;
-    }
-    
-    return self;
+	self = [super initWithWindowNibName:windowNibName];
+	if (self) {
+		self.myTiVos = myTiVos;
+		_selectedFormat = _myTiVos.selectedFormat;
+		_selectedTiVo = _myTiVos.selectedTiVo;
+		_formatList = _myTiVos.formatList;
+		_tiVoList = _myTiVos.tiVoList;
+	}
+	return self;
 }
 
 -(void)awakeFromNib
 {
-    tiVoShowTable.tiVoShows = _myTiVos.tiVoShows;  //Connect display to data source
-    downloadQueueTable.downloadQueue = _myTiVos.downloadQueue;  //Connect display to data source
-    subscriptionTable.subscribedShows = _myTiVos.subscribedShows;  //Connect display to data source
-    _selectedFormat = _myTiVos.selectedFormat;
-    _selectedTiVo = _myTiVos.selectedTiVo;
-    self.formatList = _myTiVos.formatList;
-    self.tiVoList = _myTiVos.tiVoList;
+//Connect displays to data sources
+    tiVoShowTable.tiVoShows = _myTiVos.tiVoShows; 
+    downloadQueueTable.downloadQueue = _myTiVos.downloadQueue; 
+    subscriptionTable.subscribedShows = _myTiVos.subscribedShows; 
 	
 }
 

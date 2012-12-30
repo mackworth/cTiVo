@@ -32,6 +32,7 @@
 @property (nonatomic, assign) MTProgramList *tiVoShowTable;
 @property (nonatomic, assign) MTSubscriptionList *subscriptionTable;
 
+-(id)initWithWindowNibName:(NSString *)windowNibName withNetworkTivos:(MTNetworkTivos *)myTiVos;
 -(IBAction)selectTivo:(id)sender;
 -(IBAction)selectFormat:(id)sender;
 -(IBAction)subscribe:(id) sender;
