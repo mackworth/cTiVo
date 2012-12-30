@@ -35,7 +35,8 @@
 //Connect displays to data sources
     tiVoShowTable.tiVoShows = _myTiVos.tiVoShows; 
     downloadQueueTable.downloadQueue = _myTiVos.downloadQueue; 
-    subscriptionTable.subscribedShows = _myTiVos.subscribedShows; 
+    subscriptionTable.subscribedShows = _myTiVos.subscribedShows;
+	[self refreshFormatListPopup];
 	
 }
 
