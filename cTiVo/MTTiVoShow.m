@@ -96,8 +96,11 @@
 	if (!gotDetails) {
 		NSLog(@"Got Details Failed for %@",_showTitle);
 	}
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
+	NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDetailsLoaded object:self];
+    [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 }
+
+
 
 #pragma  mark - parser methods
 
