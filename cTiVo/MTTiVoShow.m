@@ -33,9 +33,11 @@
 		gotDetails = NO;
         _isSelected = NO;
         _isQueued = NO;
-		element = nil;
+		elementString = nil;
         pipe1 = nil;
         pipe2 = nil;
+		_vActor = nil;
+		_vExecProducer = nil;
         devNullFileHandle = [[NSFileHandle fileHandleForWritingAtPath:@"/dev/null"] retain];
 		_season = 0;
 		_episode = 0;
@@ -43,6 +45,7 @@
 		_episodeGenre = @"";
 //		_originalAirDate = @"";
 		_episodeYear = 0;
+		parseTermMapping = [@{@"description" : @"showDescription", @"time": @"showTime"} retain];
         
     }
     return self;
@@ -78,6 +81,22 @@
 	[_myTableView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:column]];
 }
 
+-(NSArray *)parseNames:(NSArray *)nameSet
+{
+	if (!nameSet || nameSet.count == 0) {
+		return nameSet;
+	}
+	NSRegularExpression *nameParse = [NSRegularExpression regularExpressionWithPattern:@"([^|]*)\\|([^|]*)" options:NSRegularExpressionCaseInsensitive error:nil];
+	NSMutableArray *newNames = [NSMutableArray array];
+	for (NSString *name in nameSet) {
+		NSTextCheckingResult *match = [nameParse firstMatchInString:name options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, name.length)];
+		NSString *lastName = [name substringWithRange:[match rangeAtIndex:1]];
+		NSString *firstName = [name substringWithRange:[match rangeAtIndex:2]];
+		[newNames addObject:@{kMTLastName : lastName, kMTFirstName : firstName}];
+	}
+	return [NSArray arrayWithArray:newNames];
+}
+
 -(void)getShowDetail
 {
 	if (gotDetails) {
@@ -93,6 +112,8 @@
 	parser = [[[NSXMLParser alloc] initWithData:xml] autorelease];
 	parser.delegate = self;
 	[parser parse];
+	self.vActor = [self parseNames:_vActor];
+	self.vExecProducer = [self parseNames:_vExecProducer];
 	if (!gotDetails) {
 		NSLog(@"Got Details Failed for %@",_showTitle);
 	}
@@ -106,25 +127,44 @@
 
 -(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
-	if (element) {
-		[element release];
+	if (elementString) {
+		[elementString release];
 	}
-	element = [[NSMutableString alloc] init];
+	elementString = [NSMutableString new];
+	if ([elementName compare:@"element"] != NSOrderedSame) {
+		if (elementArray) {
+			[elementArray release];
+		}
+		elementArray = [NSMutableArray new];
+	}
 }
 
 -(void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
 {
-	[element appendString:string];
+	[elementString appendString:string];
 }
 
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
-	@try {
-		[self setValue:element forKeyPath:elementName];
+	if (parseTermMapping[elementName]) {
+		elementName = parseTermMapping[elementName];
 	}
-	@catch (NSException *exception) {
-	}
-	@finally {
+	if ([elementName compare:@"element"] == NSOrderedSame) {
+		[elementArray addObject:elementString];
+	} else {
+		id item;
+		if (elementArray.count) {
+			item = [NSArray arrayWithArray:elementArray];
+		} else {
+			item = elementString;
+		}
+		@try {
+			[self setValue:item forKeyPath:elementName];
+		}
+		@catch (NSException *exception) {
+		}
+		@finally {
+		}
 	}
 }
 
@@ -759,6 +799,26 @@
 
 }
 
+#pragma mark - Custom Setters
+
+-(void)setVActor:(NSArray *)vActor
+{
+	if (_vActor == vActor || ![vActor isKindOfClass:[NSArray class]]) {
+		return;
+	}
+	[_vActor release];
+	_vActor = [vActor retain];
+}
+
+-(void)setVExecProducer:(NSArray *)vExecProducer
+{
+	if (_vExecProducer == vExecProducer || ![vExecProducer isKindOfClass:[NSArray class]]) {
+		return;
+	}
+	[_vExecProducer release];
+	_vExecProducer = [vExecProducer retain];
+}
+
 #pragma mark - Memory Management
 
 -(void)dealloc
@@ -772,8 +832,15 @@
     self.URL = nil;
     self.encodeFormat = nil;
     self.tiVo = nil;
+	if (elementString) {
+		[elementString release];
+	}
+	if (elementArray) {
+		[elementArray release];
+	}
     [self deallocDownloadHandling];
     [devNullFileHandle release];
+	[parseTermMapping release];
 	[super dealloc];
 }
 

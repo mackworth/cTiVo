@@ -30,8 +30,11 @@
 	BOOL volatile writingData, downloadingURL, pipingData;
 	off_t readPointer, writePointer;
 	NSXMLParser *parser;
-	NSMutableString *element;
+	NSMutableString *elementString;
+	NSMutableArray *elementArray;
+	NSArray *arrayHolder;
 	BOOL    gotDetails;
+	NSDictionary *parseTermMapping;
 }
 
 @property (nonatomic, retain) NSString *urlString,
@@ -39,6 +42,7 @@
 									*mediaKey,
 									*showTitle,
 									*showDescription,
+									*showTime,
 									*showStatus,
 									*episodeTitle,
 									*showGenre,
@@ -49,6 +53,13 @@
                                     *seriesTitle,
                                     *time,
                                     *showDateString;
+
+@property (nonatomic, retain) NSArray *vActor,
+										*vExecProducer,
+										*vProgramGenre,
+										*vSeriesGenre,
+										*vGuestStar,
+										*vDirector;
 @property (nonatomic, retain) NSDate *showDate;
 
 @property (nonatomic, readonly) NSString *encodeFilePath;

@@ -43,6 +43,8 @@
 //Misc
 
 #define kMTUpdateIntervalMinutes 30 //Update interval for re-checking current TiVo
+#define kMTFirstName @"MTFirstName"
+#define kMTLastName @"MTLastName"
 
 
 //USER DEFAULTS
@@ -52,4 +54,6 @@
 #define kMTSelectedFormat @"SelectedFormat"
 #define kMTDownloadDirectory  @"DownloadDirectory"
 #define kMTSubscriptionList @"SubscriptionList"
+#define kMTiTunesEncode @"iTunesEncode"
+#define kMTSimultaneousEncode @"SimultaneousEncode"
 

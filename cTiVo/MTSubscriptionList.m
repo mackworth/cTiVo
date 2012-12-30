@@ -45,7 +45,7 @@
 	NSUInteger index = [self findShow:tivoShow];
 	if (index == NSNotFound) return NO;
 	NSDate * prevRecording = (NSDate *)[[self.subscribedShows objectAtIndex:index] objectForKey:kMTSubscribedSeriesDate];
-	BOOL before = [prevRecording compare: tivoShow.showDate] == NSOrderedAscending;
+    BOOL before = [prevRecording compare: tivoShow.showDate] == NSOrderedAscending;
 	return before;
 } 
 
@@ -92,14 +92,6 @@
 	}
 }
 
-//-(void) removeSubscription:(NSString *) seriesName {
-//	NSUInteger index = [self findShow:seriesName];
-//	if (index != NSNotFound) {
-//		[self.subscribedShows removeObjectAtIndex:index];
-//	}
-//}
-
-#
 
 -(void)dealloc
 {
@@ -112,15 +104,6 @@
 -(void)tableViewSelectionDidChange:(NSNotification *)notification
 {
     [_unsubscribeButton setEnabled:([self numberOfSelectedRows] !=0)];
-//    NSTableView *viewChanged = (NSTableView *)notification.object;
-//    for (int i = 0; i <  _myTivos.recordings.count; i++) {
-//        NSTextField *thisRow = [viewChanged viewAtColumn:0 row:i makeIfNecessary:NO];
-//        if ([viewChanged isRowSelected:i]) {
-//            thisRow.backgroundColor = [NSColor colorWithCalibratedRed:.4 green:.4 blue:1 alpha:.5];
-//        } else {
-//            thisRow.backgroundColor = [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0];
-//        }
-//    }
     
 }
 

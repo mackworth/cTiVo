@@ -18,13 +18,6 @@
 //    self.rowHeight = 24;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-	NSArray *tmp = @[@"Queued",@"Episode",@"Date",@"Length"];
-	for (NSString *ident in tmp) {
-		NSTableColumn *column = [self tableColumnWithIdentifier:ident];
-		NSTableHeaderCell *header = [column headerCell];
-		[header setAlignment:NSCenterTextAlignment];
-
-	}
 }
 
 -(void)reloadData
