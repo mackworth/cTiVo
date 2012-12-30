@@ -11,6 +11,8 @@
 
 @implementation MTNetworkTivos
 
+@synthesize subscribedShows = _subscribedShows;
+
 -(void)awakeFromNib
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -52,7 +54,6 @@
 	_downloadDirectory = [defaults objectForKey:kMTDownloadDirectory];
     [self setProgramLoadingString:@""];
 	_downloadQueue = [NSMutableArray new];
-	_subscribedShows = [NSMutableArray new];
 	programEncoding = nil;
 	programDecrypting = nil;
 	programDownloading = nil;
@@ -80,7 +81,11 @@
 
 -(NSMutableArray *) subscribedShows {
 	if (_subscribedShows ==  nil) {
-		_subscribedShows = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] valueForKey:kMTSubscriptionList]];
+		if ([[NSUserDefaults standardUserDefaults] arrayForKey:kMTSubscriptionList]) {
+			_subscribedShows = [[NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTSubscriptionList]] retain];
+		} else {
+			_subscribedShows = [NSMutableArray new];
+		}
 	}
 	return _subscribedShows;
 }
@@ -175,6 +180,7 @@
 {
     [_tiVoShows release];
 	[_downloadQueue release];
+	[_subscribedShows release];
 	[_formatList release];
 	[tivoBrowser release];
     [_tiVoList release];

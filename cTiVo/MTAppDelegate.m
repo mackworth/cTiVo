@@ -47,14 +47,19 @@
 
 -(IBAction)showMainWindow:(id)sender
 {
-	if (mainWindowController) {
-        [mainWindowController showWindow:nil];
-		return;
+	if (!mainWindowController) {
+		mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
+		mainWindowController.myTiVos = myTiVos;
+		//    mainWindowController.mediaKeys = myTiVos.mediaKeys;
+		mainWindowController.tiVoList = myTiVos.tiVoList;
+		mainWindowController.tiVoShowTable.tiVoShows = myTiVos.tiVoShows;  //Connect display to data source
+		mainWindowController.downloadQueueTable.downloadQueue = myTiVos.downloadQueue;  //Connect display to data source
+		mainWindowController.subscriptionTable.subscribedShows = myTiVos.subscribedShows;  //Connect display to data source
+		mainWindowController.selectedFormat = myTiVos.selectedFormat;
+		mainWindowController.selectedTiVo = myTiVos.selectedTiVo;
+		mainWindowController.formatList = myTiVos.formatList;
+		mainWindowController.tiVoList = myTiVos.tiVoList;
 	}
-	mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
-	mainWindowController.myTiVos = myTiVos;
-//    mainWindowController.mediaKeys = myTiVos.mediaKeys;
-    mainWindowController.tiVoList = myTiVos.tiVoList;
 	[mainWindowController showWindow:nil];
 	
 }

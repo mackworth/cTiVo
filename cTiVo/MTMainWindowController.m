@@ -15,6 +15,8 @@
 
 @implementation MTMainWindowController
 
+@synthesize tiVoShowTable,subscriptionTable, downloadQueueTable;
+
 
 - (id)initWithWindow:(NSWindow *)window
 {
@@ -27,6 +29,18 @@
     return self;
 }
 
+-(void)awakeFromNib
+{
+    tiVoShowTable.tiVoShows = _myTiVos.tiVoShows;  //Connect display to data source
+    downloadQueueTable.downloadQueue = _myTiVos.downloadQueue;  //Connect display to data source
+    subscriptionTable.subscribedShows = _myTiVos.subscribedShows;  //Connect display to data source
+    _selectedFormat = _myTiVos.selectedFormat;
+    _selectedTiVo = _myTiVos.selectedTiVo;
+    self.formatList = _myTiVos.formatList;
+    self.tiVoList = _myTiVos.tiVoList;
+	
+}
+
 - (void)windowDidLoad
 {
     [super windowDidLoad];
@@ -34,14 +48,7 @@
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 	[tiVoListPopUp removeAllItems];
 	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
-    tiVoShowTable.tiVoShows = _myTiVos.tiVoShows;  //Connect display to data source
-    downloadQueueTable.downloadQueue = _myTiVos.downloadQueue;  //Connect display to data source
-    subscriptionTable.subscribedShows = _myTiVos.subscribedShows;  //Connect display to data source
     downloadDirectory.stringValue = _myTiVos.downloadDirectory;
-    _selectedFormat = _myTiVos.selectedFormat;
-    _selectedTiVo = _myTiVos.selectedTiVo;
-    self.formatList = _myTiVos.formatList;
-    self.tiVoList = _myTiVos.tiVoList;
     [addToiTunesButton setState:NSOffState];
     [simultaneousEncodeButton setState:NSOnState];
  	_myTiVos.tiVoShowTableView = tiVoShowTable;

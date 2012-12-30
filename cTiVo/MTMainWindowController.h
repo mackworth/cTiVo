@@ -23,6 +23,15 @@
 	IBOutlet MTSubscriptionList  *subscriptionTable;
 }
 
+@property (nonatomic, assign) MTNetworkTivos *myTiVos;
+@property (nonatomic, assign) NSMutableDictionary *mediaKeys;
+@property (nonatomic, assign) NSNetService *selectedTiVo;
+@property (nonatomic, assign) NSMutableArray *tiVoList, *formatList;
+@property (nonatomic, assign) NSDictionary *selectedFormat;
+@property (nonatomic, assign) MTDownloadList *downloadQueueTable;
+@property (nonatomic, assign) MTProgramList *tiVoShowTable;
+@property (nonatomic, assign) MTSubscriptionList *subscriptionTable;
+
 -(IBAction)selectTivo:(id)sender;
 -(IBAction)selectFormat:(id)sender;
 -(IBAction)subscribe:(id) sender;
@@ -31,11 +40,5 @@
 -(IBAction)getDownloadDirectory:(id)sender;
 -(IBAction)changeSimultaneous:(id)sender;
 -(IBAction)changeiTunes:(id)sender;
-
-@property (nonatomic, assign) MTNetworkTivos *myTiVos;
-@property (nonatomic, assign) NSMutableDictionary *mediaKeys;
-@property (nonatomic, assign) NSNetService *selectedTiVo;
-@property (nonatomic, assign) NSMutableArray *tiVoList, *formatList;
-@property (nonatomic, assign) NSDictionary *selectedFormat;
 
 @end
