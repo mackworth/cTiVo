@@ -51,7 +51,6 @@
 									*originalAirDate,
 									*episodeGenre,
                                     *seriesTitle,
-                                    *time,
                                     *showDateString;
 
 @property (nonatomic, retain) NSArray *vActor,

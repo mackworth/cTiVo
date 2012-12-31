@@ -45,20 +45,22 @@
 	NSUInteger index = [self findShow:tivoShow];
 	if (index == NSNotFound) return NO;
 	NSDate * prevRecording = (NSDate *)[[self.subscribedShows objectAtIndex:index] objectForKey:kMTSubscribedSeriesDate];
-    BOOL before = [prevRecording compare: tivoShow.showDate] == NSOrderedAscending;
+    BOOL before = (tivoShow.showDate != nil) && [prevRecording compare: tivoShow.showDate] == NSOrderedAscending;
+	//   NSLog(@"%@ for %@, date:%@ prev:%@", before ? @"YES": @"NO",tivoShow.showTitle, tivoShow.showDate, prevRecording);
 	return before;
-} 
+}
 
 -(void)updateSubscriptionWithDate: (NSNotification *) notification
 {
 	MTTiVoShow * tivoShow = (MTTiVoShow *)notification.object;
 	NSUInteger index = [self findShow:tivoShow];
-	if (index != NSNotFound) {
+	if (index != NSNotFound && tivoShow.showDate) {
 		[[self.subscribedShows objectAtIndex:index] setObject:tivoShow.showDate forKey:kMTSubscribedSeriesDate];
 		[[NSUserDefaults standardUserDefaults] setValue:self.subscribedShows forKey:kMTSubscriptionList];
-
+		
 	}
 }
+
 -(IBAction) unsubscribeSelectedItems:(id) sender {
 	
 	NSMutableSet *itemsToRemove = [NSMutableSet setWithCapacity: subscribedShows.count];

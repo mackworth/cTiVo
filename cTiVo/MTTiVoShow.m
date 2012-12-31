@@ -762,11 +762,15 @@
 }
 #pragma mark Setters (most to complete parsing)
 
--(void) setTime: (NSString *) newTime {
-	if (newTime != _time) {
-        [_time release];
-        _time = [newTime retain];
-        self.showDate = [self dateForRFC3339DateTimeString:_time];
+-(void) setShowTime: (NSString *) newTime {
+	if (newTime != _showTime) {
+        [_showTime release];
+        _showTime = [newTime retain];
+        NSDate *newDate =[self dateForRFC3339DateTimeString:_showTime];
+        if (newDate) {
+            self.showDate = newDate;
+        }
+		//        NSLog(@"converting %@ from: %@ to %@ ", self.showTitle, newTime, self.showDate);
     }
 }
 
