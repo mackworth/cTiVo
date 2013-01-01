@@ -42,7 +42,7 @@
 
 //Misc
 
-#define kMTUpdateIntervalMinutes 30 //Update interval for re-checking current TiVo
+#define kMTUpdateIntervalMinutes 15 //Update interval for re-checking current TiVo
 #define kMTFirstName @"MTFirstName"
 #define kMTLastName @"MTLastName"
 

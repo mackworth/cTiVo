@@ -19,6 +19,8 @@
     NSNetService *tivoService ;
     NSNetServiceBrowser *tivoBrowser;
     NSMutableData *listingData;
+	NSMutableDictionary *tiVoShowsDictionary;
+	NSMutableArray *updatingTiVoShows;
 	
 	NSURLConnection *programListURLConnection, *downloadURLConnection;
 	NSTask *decryptingTask, *encodingTask;

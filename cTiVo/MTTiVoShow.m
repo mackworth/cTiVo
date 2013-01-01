@@ -51,24 +51,6 @@
     return self;
 }
 
--(void)getShowDetailWithNotification
-{
-	if (gotDetails) {
-		return;
-	}
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]	;
-	[self getShowDetail];
-	if (gotDetails) {
-//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-//		[_myTableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
-		[self performSelectorOnMainThread:@selector(reloadEpisode) withObject:nil waitUntilDone:YES];
-//        [_myTableView updateEpisodeForShow:self];
-	} else {
-		NSLog(@"Got Details Failed for %@",_showTitle);
-	}
-	[pool drain];
-}
-
 -(void)reloadEpisode
 {
 	NSInteger row = 0;
@@ -95,6 +77,24 @@
 		[newNames addObject:@{kMTLastName : lastName, kMTFirstName : firstName}];
 	}
 	return [NSArray arrayWithArray:newNames];
+}
+
+-(void)getShowDetailWithNotification
+{
+	if (gotDetails) {
+		return;
+	}
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]	;
+	[self getShowDetail];
+	if (gotDetails) {
+		//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+		//		[_myTableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
+		[self performSelectorOnMainThread:@selector(reloadEpisode) withObject:nil waitUntilDone:YES];
+		//        [_myTableView updateEpisodeForShow:self];
+	} else {
+		NSLog(@"Got Details Failed for %@",_showTitle);
+	}
+	[pool drain];
 }
 
 -(void)getShowDetail
@@ -736,7 +736,7 @@
     // for subsequence reuse.
 	
     if (sRFC3339DateFormatter == nil) {
-        NSLocale *                  enUSPOSIXLocale;
+        NSLocale *enUSPOSIXLocale;
 		
         sRFC3339DateFormatter = [[NSDateFormatter alloc] init];
 		

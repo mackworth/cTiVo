@@ -8,6 +8,12 @@
 
 #import "MTNetworkTivos.h"
 
+@interface MTNetworkTivos ()
+
+@property (retain) NSNetService *updatingTiVo;
+
+@end
+
 
 @implementation MTNetworkTivos
 
@@ -18,20 +24,25 @@
 	self = [super init];
 	if (self) {
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-		tivoBrowser = [[NSNetServiceBrowser alloc] init];
+		
+		tivoBrowser = [NSNetServiceBrowser new];
 		tivoBrowser.delegate = self;
 		[tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 		[tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
-		_tivoServices = [[NSMutableArray alloc] init];
-		_videoListNeedsFilling = YES;
-		listingData = [[NSMutableData alloc] init];
-		_tiVoShows = [[NSMutableArray alloc] init];
-		_tiVoList = [[NSMutableArray alloc] init];
+		tiVoShowsDictionary = [NSMutableDictionary new];
+		_tivoServices = [NSMutableArray new];
+		listingData = [NSMutableData new];
+		_tiVoShows = [NSMutableArray new];
+		_tiVoList = [NSMutableArray new];
+		queue = [NSOperationQueue new];
+		_downloadQueue = [NSMutableArray new];
+
 		NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
 		NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
 		_formatList = [[NSMutableArray arrayWithArray:[formats objectForKey:@"formats"] ] retain];
 		
 		//Make sure there's a selected format, espeically on first launch
+		
 		_selectedFormat = nil;
 		if ([defaults objectForKey:kMTSelectedFormat]) {
 			NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
@@ -46,6 +57,7 @@
 			self.selectedFormat = [_formatList objectAtIndex:0];
 			
 		}
+		
 		if (![defaults objectForKey:kMTMediaKeys]) {
 			[defaults setObject:[NSDictionary dictionary] forKey:kMTMediaKeys];
 		}
@@ -55,7 +67,6 @@
 		}
 		_downloadDirectory = [defaults objectForKey:kMTDownloadDirectory];
 		[self setProgramLoadingString:@""];
-		_downloadQueue = [NSMutableArray new];
 		programEncoding = nil;
 		programDecrypting = nil;
 		programDownloading = nil;
@@ -69,9 +80,11 @@
 		decryptTableCell = nil;
 		downloadTableCell = nil;
 		encodeTableCell = nil;
+		
 		numEncoders = 0;
-		queue = [[NSOperationQueue alloc] init];
 		queue.maxConcurrentOperationCount = 1;
+		
+		_videoListNeedsFilling = YES;
 		   
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
@@ -190,35 +203,70 @@
 	[_tivoServices release];
     [listingData release];
 	[queue release];
+	[tiVoShowsDictionary release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	self.updatingTiVo = nil;
 	[super dealloc];
 }
 
--(void)fetchVideoListFromHost:(NSNetService *)newTivo;
+-(void)updateVideoList
 {
-	if (tivoConnectingTo && tivoConnectingTo == _selectedTiVo) {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateVideoList) object:nil];
+	BOOL startedFetch = NO;
+	for (NSString *d in tiVoShowsDictionary) {
+		NSDate *dateUpdated = tiVoShowsDictionary[d][@"DateUpdated"];
+		if ([[NSDate date] compare:[dateUpdated dateByAddingTimeInterval:(kMTUpdateIntervalMinutes * 60.0)]] == NSOrderedDescending) {
+			NSLog(@"Fetch Tivo %@",d);
+			[self fetchVideoListFromHost:tiVoShowsDictionary[d][@"TiVo"] display:NO];
+			startedFetch = YES;
+			break;
+		}
+	}
+	if (!startedFetch) {
+		[self performSelector:@selector(updateVideoList) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0)];
+	}
+}
+
+-(void)fetchVideoListFromHost:(NSNetService *)newTivo
+{
+	[self fetchVideoListFromHost:newTivo display:YES];
+}
+-(void)fetchVideoListFromHost:(NSNetService *)newTivo display:(BOOL)display
+{
+if (tivoConnectingTo && tivoConnectingTo == newTivo) {
 		return;
 	}
 	if (newTivo == nil) {
 		newTivo = _selectedTiVo;
 	}
-	if (newTivo != _selectedTiVo ) {
-		[_tiVoShows removeAllObjects];
+	self.updatingTiVo = newTivo;
+	updatingTiVoShows = [tiVoShowsDictionary objectForKey:_updatingTiVo.name][@"Shows"];
+	if (!updatingTiVoShows) {
+		updatingTiVoShows = [NSMutableArray array];
+		[tiVoShowsDictionary setObject:@{@"Shows" : updatingTiVoShows, @"DateUpdated" : [NSDate dateWithTimeIntervalSinceReferenceDate:0], @"TiVo" : _updatingTiVo} forKey:_updatingTiVo.name];
+;
+	}
+	if (display) {
+		self.selectedTiVo = _updatingTiVo;
+		_tiVoShows = updatingTiVoShows;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	}
-	self.selectedTiVo = newTivo;
+//	if (newTivo != _selectedTiVo ) {
+//		[_tiVoShows removeAllObjects];
+//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+//	}
 	if (programListURLConnection) {
 		[programListURLConnection cancel];
 		[programListURLConnection release];
 		programListURLConnection = nil;
 	}
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:nil];
-	tivoConnectingTo = _selectedTiVo;
+	tivoConnectingTo = _updatingTiVo;
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-	NSString *host = _selectedTiVo.hostName;
+	NSString *host = _updatingTiVo.hostName;
 	NSString *mediaKeyString = @"";
-	if ([[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name]) {
-		mediaKeyString = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name];
+	if ([[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_updatingTiVo.name]) {
+		mediaKeyString = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_updatingTiVo.name];
 	}
 
     NSString *tivoURLString = [[NSString stringWithFormat:@"https://tivo:%@@%@/nowplaying/index.html?Recurse=Yes",mediaKeyString,host] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -226,12 +274,20 @@
     NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
     programListURLConnection = [[NSURLConnection connectionWithRequest:tivoURLRequest delegate:self] retain];
     [listingData setData:[NSData data]];
-    if (_selectedTiVo.name) [self setProgramLoadingString:[NSString stringWithFormat:@"Loading Programs - %@",_selectedTiVo.name]];
+    if (_updatingTiVo.name  && display) { 
+		if (updatingTiVoShows.count == 0) {
+			[self setProgramLoadingString:[NSString stringWithFormat:@"Loading Programs - %@",_updatingTiVo.name]];
+		} else {
+			[self setProgramLoadingString:[NSString stringWithFormat:@"Updating Programs - %@",_updatingTiVo.name]];
+		}
+	}
     [programListURLConnection start];
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(fetchVideoListFromHost:) object:nil];  //Do this to make sure we're not left with any from previous TiVo's
-	[self performSelector:@selector(fetchVideoListFromHost:) withObject:nil afterDelay:kMTUpdateIntervalMinutes * 60];
-                      
+//	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(fetchVideoListFromHost:) object:nil];  //Do this to make sure we're not left with any from previous TiVo's
+//	[self performSelector:@selector(fetchVideoListFromHost:) withObject:nil afterDelay:kMTUpdateIntervalMinutes * 60];
+    
 }
+
+
 
 
 
@@ -251,12 +307,12 @@
 -(void)parseListingData
 {
     NSMutableDictionary * previousShowList = [[[NSMutableDictionary alloc] initWithCapacity:_tiVoShows.count] autorelease];
-	for (MTTiVoShow * show in _tiVoShows) {
+	for (MTTiVoShow * show in updatingTiVoShows) {
 		NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
         //		NSLog(@"prevID: %@ %@",idString,show.showTitle);
 		[previousShowList setValue:show forKey:idString];
 	}
-    [_tiVoShows removeAllObjects];
+    [updatingTiVoShows removeAllObjects];
 	NSString *listingDataString = [[[NSString alloc] initWithData:listingData encoding:NSUTF8StringEncoding] autorelease];
 	NSRegularExpression *tableRx = [NSRegularExpression regularExpressionWithPattern:@"<table[^>]*>(.*?)</table>" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *rowRx = [NSRegularExpression regularExpressionWithPattern:@"<tr[^>]*>(.*?)</tr>" options:NSRegularExpressionCaseInsensitive error:nil];
@@ -344,7 +400,7 @@
 					downloadURL = [[fullString substringWithRange:[urlResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
 					//Add login information
 					if (downloadURL.length > 10) {
-						downloadURL = [NSString stringWithFormat:@"%@tivo:%@@%@",[downloadURL substringToIndex:7],[[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name ],[downloadURL substringFromIndex:7]];
+						downloadURL = [NSString stringWithFormat:@"%@tivo:%@@%@",[downloadURL substringToIndex:7],[[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_updatingTiVo.name ],[downloadURL substringFromIndex:7]];
 					}
 					NSTextCheckingResult *idResult = [idRx firstMatchInString:downloadURL options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, downloadURL.length)];
 					if(idResult.range.location != NSNotFound){
@@ -381,7 +437,7 @@
                     }
                 }
                 thisShow.fileSize = sizeValue;
-                thisShow.tiVo = _selectedTiVo;
+                thisShow.tiVo = _updatingTiVo;
                 thisShow.myTableView = _tiVoShowTableView;
                 NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetailWithNotification) object:nil] autorelease];
                 [queue addOperation:nextDetail];
@@ -389,10 +445,11 @@
 			} else {
 				//NSLog(@"cache hit: %@ thisShow: %@", idString, thisShow.showTitle);
 			}
-			[_tiVoShows addObject:thisShow];
+			[updatingTiVoShows addObject:thisShow];
 		}
 	}
 //	NSLog(@"Avialable Recordings are %@",_recordings);
+	[tiVoShowsDictionary setObject:@{@"Shows" : updatingTiVoShows, @"DateUpdated" : [NSDate date], @"TiVo" : _updatingTiVo} forKey:_updatingTiVo.name];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
     [self setProgramLoadingString:@""];
 }
@@ -412,6 +469,9 @@
 - (void)netServiceDidResolveAddress:(NSNetService *)sender
 {
     [_tiVoList addObject:sender];
+	if (![tiVoShowsDictionary objectForKey:sender.name]) {
+		[tiVoShowsDictionary setObject:@{@"Shows" : [NSMutableArray array], @"DateUpdated" : [NSDate dateWithTimeIntervalSinceReferenceDate:0], @"TiVo" : sender} forKey:sender.name];
+	}
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
     
 }
@@ -435,7 +495,7 @@
 
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 //    [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-    [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:[[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo.name] persistence:NSURLCredentialPersistencePermanent] forAuthenticationChallenge:challenge];
+    [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:[[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_updatingTiVo.name] persistence:NSURLCredentialPersistencePermanent] forAuthenticationChallenge:challenge];
     [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
 }
 
@@ -443,10 +503,10 @@
 {
     NSLog(@"URL Connection Failed with error %@",error);
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:nil];
-    if (!_selectedTiVo.name) {
+    if (!_updatingTiVo.name) {
 		[self setProgramLoadingString:@"Tivo not found"];
 	} else {
-		[self setProgramLoadingString:[NSString stringWithFormat:@"Connection to %@ TiVo Failed",_selectedTiVo.name]];
+		[self setProgramLoadingString:[NSString stringWithFormat:@"Connection to %@ TiVo Failed",_updatingTiVo.name]];
     }
     tivoConnectingTo = nil;
 
@@ -459,6 +519,7 @@
     [programListURLConnection release];
     programListURLConnection = nil;
     tivoConnectingTo = nil;
+	[self updateVideoList];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:nil];
 }
 
