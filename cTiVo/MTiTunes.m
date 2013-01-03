@@ -14,7 +14,6 @@
 
 -(SBApplication *) iTunes {
 	if (!_iTunes || ![_iTunes isRunning]){
-		NSLog(@"new iTunes");
 		_iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
 	}
 	return _iTunes;
@@ -118,23 +117,24 @@
 			newTrack.name = show.episodeTitle;
 		} else {
 			newTrack.videoKind = iTunesEVdKTVShow;
-			newTrack.album = show.episodeTitle;
-			newTrack.albumArtist = show.episodeTitle;
+			newTrack.album = show.seriesTitle;
+			newTrack.albumArtist = show.seriesTitle;
 			if (show.episodeTitle.length ==0) {
-				newTrack.name = [NSString stringWithFormat:@"%@ - %d",show.episodeTitle, show.showID];
-				newTrack.episodeID = [NSString stringWithFormat:@"%d", show.showID];
+                NSDateFormatter *dateFormat = [[[NSDateFormatter alloc] init] autorelease];
+                [dateFormat setDateStyle:NSDateFormatterShortStyle];
+                [dateFormat setTimeStyle:NSDateFormatterNoStyle];
+				newTrack.name = [NSString stringWithFormat:@"%@ - %@",show.showTitle, [dateFormat stringFromDate: show.showDate ]];
 			} else {
 				newTrack.name = show.episodeTitle;
-				newTrack.episodeID = show.episodeTitle;
 			}
-			if ([show.episodeNumber intValue] > 0) {
-				newTrack.episodeNumber = [show.episodeNumber intValue];
-			}
-			
+			newTrack.episodeID = [NSString stringWithFormat:@"%d", show.showID];
+            newTrack.episodeNumber = show.episode;
+            newTrack.seasonNumber = show.season;
 		}
-		newTrack.comment = show.description;
-		newTrack.longDescription = show.description;
-		newTrack.show = show.episodeTitle;
+		newTrack.comment = show.showDescription;
+		newTrack.longDescription = show.showDescription;
+		newTrack.objectDescription = show.showDescription;
+		newTrack.show = show.seriesTitle;
 		newTrack.year = show.episodeYear;
 		newTrack.genre = show.episodeGenre;
 	/* haven't bothered with:

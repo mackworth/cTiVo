@@ -106,18 +106,7 @@
 		[result.textField setAlignment:NSCenterTextAlignment];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
-		int e = thisShow.episode;
-		int s = thisShow.season;
-		NSString *episode = @"";
-		if (e > 0) {
-			if (s > 0 && s < 100 && e < 100) {
-				episode = [NSString stringWithFormat:@"S%0.2d E%0.2d",s,e ];
-			} else {
-				episode	 = [NSString stringWithFormat:@"%d",e];
-            }
-		}
-		result.textField.stringValue = thisShow.episodeNumber;
-		result.textField.stringValue = episode;
+		result.textField.stringValue = thisShow.seasonEpisode;
 		[result.textField setAlignment:NSCenterTextAlignment];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {

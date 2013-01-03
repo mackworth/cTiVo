@@ -723,7 +723,7 @@
 
 #pragma mark - Misc Support Functions
 
-- (NSDate *)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString
++ (NSDate *)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString
 // Returns a  date  that corresponds to the
 // specified RFC 3339 date time string. Note that this does not handle
 // all possible RFC 3339 date time strings, just one of the most common
@@ -766,7 +766,7 @@
 	if (newTime != _showTime) {
         [_showTime release];
         _showTime = [newTime retain];
-        NSDate *newDate =[self dateForRFC3339DateTimeString:_showTime];
+        NSDate *newDate =[MTTiVoShow dateForRFC3339DateTimeString:_showTime];
         if (newDate) {
             self.showDate = newDate;
         }
@@ -802,8 +802,41 @@
 	}
 
 }
+#pragma mark - Custom Getters
+
+-(NSString *) seasonEpisode {
+    
+    int e = _episode;
+    int s = _season;
+    NSString *episode = @"";
+    if (e > 0) {
+        if (s > 0 && s < 100 && e < 100) {
+            episode = [NSString stringWithFormat:@"S%0.2d E%0.2d",s,e ];
+        } else {
+            episode	 = [NSString stringWithFormat:@"%d",e];
+        }
+    } else {
+        episode = _episodeNumber;
+    }
+    return episode;
+}
 
 #pragma mark - Custom Setters
+
+-(void)setShowDescription:(NSString *)showDescription
+{
+    NSString * tribuneCopyright = @" Copyright Tribune Media Services, Inc.";
+	if (_showDescription == showDescription) {
+		return;
+	}
+	[_showDescription release];
+    if ([showDescription hasSuffix: tribuneCopyright]){
+        _showDescription = [[showDescription substringToIndex:showDescription.length -tribuneCopyright.length]  retain ];
+    } else {
+        _showDescription = [showDescription retain];
+
+    }
+}
 
 -(void)setVActor:(NSArray *)vActor
 {
@@ -823,6 +856,35 @@
 	_vExecProducer = [vExecProducer retain];
 }
 
+
+-(NSString *) combineGenres {
+    //iTunes says "there can only be one", so pick the first we see.
+    NSCharacterSet * quotes = [NSCharacterSet characterSetWithCharactersInString:@"\""];
+    NSString * firstGenre = nil;
+    if (_vSeriesGenre.count > 0) firstGenre = [_vSeriesGenre objectAtIndex:0];
+        else if (_vProgramGenre.count > 0) firstGenre = [_vProgramGenre objectAtIndex:0];
+    return [firstGenre stringByTrimmingCharactersInSet:quotes];
+}
+
+-(void)setVProgramGenre:(NSArray *)vProgramGenre
+{
+	if (_vProgramGenre == vProgramGenre || ![vProgramGenre isKindOfClass:[NSArray class]]) {
+		return;
+	}
+	[_vProgramGenre release];
+	_vProgramGenre = [vProgramGenre retain];
+    self.episodeGenre = [self combineGenres];
+}
+
+-(void)setVSeriesGenre:(NSArray *)vSeriesGenre{
+	if (_vSeriesGenre == vSeriesGenre || ![vSeriesGenre isKindOfClass:[NSArray class]]) {
+		return;
+	}
+	[_vSeriesGenre release];
+	_vSeriesGenre = [vSeriesGenre retain];
+    self.episodeGenre = [self combineGenres];
+}
+
 #pragma mark - Memory Management
 
 -(void)dealloc
@@ -838,9 +900,11 @@
     self.tiVo = nil;
 	if (elementString) {
 		[elementString release];
+        elementString = nil;
 	}
 	if (elementArray) {
 		[elementArray release];
+        elementArray = nil;
 	}
     [self deallocDownloadHandling];
     [devNullFileHandle release];

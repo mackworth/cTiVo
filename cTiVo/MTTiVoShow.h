@@ -62,6 +62,7 @@
 @property (nonatomic, retain) NSDate *showDate;
 
 @property (nonatomic, readonly) NSString *encodeFilePath;
+@property (nonatomic, readonly) NSString *seasonEpisode; //attempts to build S02 E04 version
 @property time_t showLength;  //length of show in seconds
 @property (nonatomic, retain) NSURL *URL;
 @property int downloadStatus, showID, season, episode, episodeYear;
@@ -82,6 +83,8 @@
 -(void)encode;
 -(void)getShowDetail;
 -(void)getShowDetailWithNotification;
+
++(NSDate *)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString;
 
 
 
