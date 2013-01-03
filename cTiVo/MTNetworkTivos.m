@@ -85,11 +85,13 @@
 		queue.maxConcurrentOperationCount = 1;
 		
 		_videoListNeedsFilling = YES;
+        
+        NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
 		   
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDecryptDidFinish object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
+		[defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
+		[defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
+		[defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDecryptDidFinish object:nil];
+		[defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
 	}
 	return self;
 
@@ -136,7 +138,8 @@
             program.mediaKey = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:program.tiVo.name];
             program.downloadDirectory = _downloadDirectory;
             [_downloadQueue addObject:program];
-        }
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+       }
 	}
 }
 
@@ -147,16 +150,16 @@
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
     BOOL isDownloading = NO, isDecrypting = NO;
     for (MTTiVoShow *s in _downloadQueue) {
-        if (s.downloadStatus == kMTStatusDownloading) {
+        if ([s.downloadStatus intValue] == kMTStatusDownloading) {
             isDownloading = YES;
         }
-        if (s.downloadStatus == kMTStatusDecrypting) {
+        if ([s.downloadStatus intValue] == kMTStatusDecrypting) {
             isDecrypting = YES;
         }
     }
     if (!isDownloading) {
         for (MTTiVoShow *s in _downloadQueue) {
-            if (s.downloadStatus == kMTStatusNew && (numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
+            if ([s.downloadStatus intValue] == kMTStatusNew && (numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
 				if (s.simultaneousEncode) {
 					numEncoders++;
 				}
@@ -167,7 +170,7 @@
     }
     if (!isDecrypting) {
         for (MTTiVoShow *s in _downloadQueue) {
-            if (s.downloadStatus == kMTStatusDownloaded && !s.simultaneousEncode) {
+            if ([s.downloadStatus intValue] == kMTStatusDownloaded && !s.simultaneousEncode) {
                 [s decrypt];
                 break;
             }
@@ -175,7 +178,7 @@
     }
     if (numEncoders < kMTMaxNumDownloaders) {
         for (MTTiVoShow *s in _downloadQueue) {
-            if (s.downloadStatus == kMTStatusDecrypted && numEncoders < kMTMaxNumDownloaders) {
+            if ([s.downloadStatus intValue] == kMTStatusDecrypted && numEncoders < kMTMaxNumDownloaders) {
 				numEncoders++;
                 [s encode];
             }
@@ -233,7 +236,7 @@
 }
 -(void)fetchVideoListFromHost:(NSNetService *)newTivo display:(BOOL)display
 {
-if (tivoConnectingTo && tivoConnectingTo == newTivo) {
+    if (tivoConnectingTo && tivoConnectingTo == newTivo) {
 		return;
 	}
 	if (newTivo == nil) {
@@ -248,7 +251,10 @@ if (tivoConnectingTo && tivoConnectingTo == newTivo) {
 	}
 	if (display) {
 		self.selectedTiVo = _updatingTiVo;
-		_tiVoShows = updatingTiVoShows;
+        if (_tiVoShows) {
+            [_tiVoShows release];
+        }
+		_tiVoShows = [updatingTiVoShows retain];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	}
 //	if (newTivo != _selectedTiVo ) {
@@ -262,7 +268,7 @@ if (tivoConnectingTo && tivoConnectingTo == newTivo) {
 	}
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:nil];
 	tivoConnectingTo = _updatingTiVo;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	NSString *host = _updatingTiVo.hostName;
 	NSString *mediaKeyString = @"";
 	if ([[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_updatingTiVo.name]) {
@@ -306,7 +312,7 @@ if (tivoConnectingTo && tivoConnectingTo == newTivo) {
 
 -(void)parseListingData
 {
-    NSMutableDictionary * previousShowList = [[[NSMutableDictionary alloc] initWithCapacity:_tiVoShows.count] autorelease];
+    NSMutableDictionary * previousShowList = [NSMutableDictionary dictionary];
 	for (MTTiVoShow * show in updatingTiVoShows) {
 		NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
         //		NSLog(@"prevID: %@ %@",idString,show.showTitle);
@@ -450,7 +456,9 @@ if (tivoConnectingTo && tivoConnectingTo == newTivo) {
 	}
 //	NSLog(@"Avialable Recordings are %@",_recordings);
 	[tiVoShowsDictionary setObject:@{@"Shows" : updatingTiVoShows, @"DateUpdated" : [NSDate date], @"TiVo" : _updatingTiVo} forKey:_updatingTiVo.name];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+    if (updatingTiVoShows == _tiVoShows) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+    }
     [self setProgramLoadingString:@""];
 }
 

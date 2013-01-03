@@ -191,7 +191,7 @@
 
 #pragma mark - Subscription Management
 -(void) checkSubscriptionShow:(MTTiVoShow *) show {
-	if([subscriptionTable isSubscribed:show] && (show.downloadStatus == kMTStatusNew)) {
+	if([subscriptionTable isSubscribed:show] && ([show.downloadStatus intValue] == kMTStatusNew)) {
 		[self downloadthisShow:show];
 		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
 	}
@@ -238,22 +238,24 @@
 
 -(IBAction)downloadSelectedShows:(id)sender
 {
+	NSIndexSet *selectedRows = [tiVoShowTable selectedRowIndexes];
     for (int i = 0; i < _myTiVos.tiVoShows.count; i++) {
-        if([tiVoShowTable isRowSelected:i]) {
+        if([selectedRows containsIndex:i]) {
             [self downloadthisShow:[_myTiVos.tiVoShows objectAtIndex:i]];
         }
     }
 	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
-    [tiVoShowTable reloadData];
+//    [tiVoShowTable reloadData];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
 }
 
 -(IBAction)removeFromDownloadQueue:(id)sender
 {
+	NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
 	NSMutableArray *itemsToRemove = [NSMutableArray array];
     for (int i = 0; i <  _myTiVos.downloadQueue.count; i++) {
-        if ([downloadQueueTable isRowSelected:i]) {
+        if ([selectedRows containsIndex:i]) {
             MTTiVoShow *programToRemove = [_myTiVos.downloadQueue objectAtIndex:i];
             if ([programToRemove cancel]) {
                 [itemsToRemove addObject:programToRemove];
@@ -263,8 +265,9 @@
 	for (id i in itemsToRemove) {
         ((MTTiVoShow *)i).isQueued = NO;
 		[_myTiVos.downloadQueue removeObject:i];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	}
-    [tiVoShowTable reloadData];
+//    [tiVoShowTable reloadData];
 	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];

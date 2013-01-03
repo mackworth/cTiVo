@@ -46,10 +46,20 @@
 //		_originalAirDate = @"";
 		_episodeYear = 0;
 		parseTermMapping = [@{@"description" : @"showDescription", @"time": @"showTime"} retain];
+        [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
         
     }
     return self;
 }
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadStatusChanged object:nil];
+    }
+}
+
+
 
 -(void)reloadEpisode
 {
@@ -357,7 +367,8 @@
 	downloadingURL = YES;
     dataDownloaded = 0.0;
     _processProgress = 0.0;
-    _downloadStatus = kMTStatusDownloading;
+    [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
+//    _downloadStatus = [NSNumber numberWithInt:kMTStatusDownloading];
     _showStatus = @"Downloading";
 }
 -(void)trackDownloadEncode
@@ -365,7 +376,8 @@
     if([encoderTask isRunning]) {
         [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
     } else {
-        _downloadStatus = kMTStatusDone;
+        [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
+//        _downloadStatus = [NSNumber numberWithInt:kMTStatusDone];
         _showStatus = @"Complete";
         _processProgress = 1.0;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
@@ -397,7 +409,8 @@
 						  nil];
     _processProgress = 0.0;
  	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-    _downloadStatus = kMTStatusDecrypting;
+    [self setValue:[NSNumber numberWithInt:kMTStatusDecrypting] forKeyPath:@"downloadStatus"];
+//    _downloadStatus = [NSNumber numberWithInt:kMTStatusDecrypting];
 	_showStatus = @"Decrypting";
 	[decrypterTask setArguments:arguments];
 	[decrypterTask launch];
@@ -410,7 +423,8 @@
 	if (![decrypterTask isRunning]) {
 		_processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        _downloadStatus = kMTStatusDecrypted;
+        [self setValue:[NSNumber numberWithInt:kMTStatusDecrypted] forKeyPath:@"downloadStatus"];
+//        _downloadStatus = [NSNumber numberWithInt:kMTStatusDecrypted];
         _showStatus = @"Wait for encoder";
 		NSError *thisError = nil;
 		[[NSFileManager defaultManager] removeItemAtPath:downloadFilePath error:&thisError];
@@ -468,7 +482,8 @@
     _processProgress = 0.0;
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 	[encoderTask launch];
-    _downloadStatus = kMTStatusEncoding;
+    [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+//    _downloadStatus = [NSNumber numberWithInt:kMTStatusEncoding];
 	_showStatus = @"Encoding";
 	[self performSelector:@selector(trackEncodes) withObject:nil afterDelay:0.5];
 	
@@ -482,7 +497,8 @@
 		[encoderTask release];
 		encoderTask = nil;
         _showStatus = @"Complete";
-        _downloadStatus = kMTStatusDone;
+        [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
+//        _downloadStatus = [NSNumber numberWithInt:kMTStatusDone];
         [self cleanupFiles];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
@@ -569,7 +585,7 @@
 -(BOOL)cancel
 {
     BOOL ret = YES;
-    if (_downloadStatus != kMTStatusNew && _downloadStatus != kMTStatusDone) {
+    if ([_downloadStatus intValue] != kMTStatusNew && [_downloadStatus intValue] != kMTStatusDone) {
 		//Put alert here
 		NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",_showTitle] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@""];
 		myAlert.alertStyle = NSCriticalAlertStyle;
@@ -583,7 +599,7 @@
         NSFileManager *fm = [NSFileManager defaultManager];
 		self.isCanceled = YES;
 		[NSObject cancelPreviousPerformRequestsWithTarget:self];
-        if (_downloadStatus == kMTStatusDownloading && activeURLConnection) {
+        if ([_downloadStatus intValue] == kMTStatusDownloading && activeURLConnection) {
             [activeURLConnection cancel];
             activeURLConnection = nil;
             [fm removeItemAtPath:decryptFilePath error:nil];
@@ -602,10 +618,11 @@
             [encodeFileHandle closeFile];
             [fm removeItemAtPath:encodeFilePath error:nil];
         }
-        if (_downloadStatus == kMTStatusEncoding || (_simultaneousEncode && _downloadStatus == kMTStatusDownloading)) {
+        if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && [_downloadStatus intValue] == kMTStatusDownloading)) {
             [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
         }
-        _downloadStatus = kMTStatusNew;
+        [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+//        _downloadStatus = [NSNumber numberWithInt:kMTStatusNew];
         _processProgress = 0.0;
         _showStatus = @"";
     }
@@ -697,7 +714,8 @@
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     NSLog(@"URL Connection Failed with error %@",error);
-	_downloadStatus = kMTStatusNew;
+    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+//	_downloadStatus = [NSNumber numberWithInt:kMTStatusNew];
 	activeURLConnection = nil;
 }
 
@@ -708,9 +726,11 @@
         _fileSize = (double)[downloadFileHandle offsetInFile];
        [downloadFileHandle release];
         downloadFileHandle = nil;
-        _downloadStatus = kMTStatusDownloaded;
+        [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
+//        _downloadStatus = [NSNumber numberWithInt:kMTStatusDownloaded];
     } else {
-        _downloadStatus = kMTStatusEncoding;
+        [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+//        _downloadStatus = [NSNumber numberWithInt:kMTStatusEncoding];
         _showStatus = @"Encoding";
  		downloadingURL = NO;
        [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];

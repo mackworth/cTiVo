@@ -14,6 +14,7 @@
 #define kMTNotificationDownloadDidFinish @"MTNotificationDownloadDidFinish"
 #define kMTNotificationDecryptDidFinish @"MTNotificationDecryptDidFinish"
 #define kMTNotificationEncodeDidFinish @"MTNotificationEncodeDidFinish"
+#define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"
 
 //UI Change Notifications
 #define kMTNotificationTiVoChanged @"MTNotificationTiVoChanged"

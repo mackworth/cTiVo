@@ -16,6 +16,7 @@
     self.delegate    = self;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadStatusChanged object:nil];
 }
 
 -(void)updateTable
@@ -73,7 +74,7 @@
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"Simu"] == NSOrderedSame) {
-        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeDownload:)] autorelease];
+        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
 	} else {
@@ -126,7 +127,11 @@
             c = NSOnState;
         }
         [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
-        [((MTDownloadListCheckCell *)result).checkBox setEnabled:YES] ;
+        if ([rowData.downloadStatus intValue] != kMTStatusDone) {
+            [((MTDownloadListCheckCell *)result).checkBox setEnabled:YES] ;
+        } else {
+            [((MTDownloadListCheckCell *)result).checkBox setEnabled:NO] ;
+        }
         ((MTDownloadListCheckCell *)result).checkBox.owner = rowData;
  	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
         NSInteger c = NSOffState;
@@ -135,8 +140,10 @@
         }
         [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
         ((MTDownloadListCheckCell *)result).checkBox.owner = rowData;
-        if (rowData.downloadStatus == kMTStatusNew) {
+        if ([rowData.downloadStatus intValue] == kMTStatusNew) {
             [((MTDownloadListCheckCell *)result).checkBox setEnabled:YES] ;
+        } else {
+            [((MTDownloadListCheckCell *)result).checkBox setEnabled:NO] ;
         }
         
 	}

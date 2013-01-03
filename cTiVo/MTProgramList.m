@@ -27,6 +27,7 @@
 
 -(void)dealloc
 {
+    self.tiVoShows = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
@@ -97,6 +98,9 @@
 	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.showTitle ;
         result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
+        result.textField.stringValue = thisShow.tiVo.name;
+        result.toolTip = thisShow.tiVo.name;
     } else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.showDateString;
 		[result.textField setAlignment:NSCenterTextAlignment];
