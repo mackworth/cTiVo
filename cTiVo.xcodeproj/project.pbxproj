@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E189AE01695E4B500359D73 /* MTiTivoImport.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E189ADF1695E4B500359D73 /* MTiTivoImport.m */; };
 		D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
 		D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
 		D235BF01168F52DE00320FA5 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = D235BF00168F52DE00320FA5 /* MTSubscriptionList.m */; };
@@ -52,6 +53,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1E189ADB1695E31A00359D73 /* MTiTivoImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTiTivoImport.h; sourceTree = "<group>"; };
+		1E189ADF1695E4B500359D73 /* MTiTivoImport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTivoImport.m; sourceTree = "<group>"; };
 		D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressindicator.h; sourceTree = "<group>"; };
 		D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressindicator.m; sourceTree = "<group>"; };
 		D22BC41D1680DB5E007D699C /* MTTiVoShow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoShow.h; sourceTree = "<group>"; };
@@ -179,6 +182,8 @@
 				D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */,
 				D2D60BCA16766FA600CE32DE /* MTNetworkTivos.h */,
 				D2D60BC916766FA600CE32DE /* MTNetworkTivos.m */,
+				1E189ADB1695E31A00359D73 /* MTiTivoImport.h */,
+				1E189ADF1695E4B500359D73 /* MTiTivoImport.m */,
 				D2D60BCF16766FA600CE32DE /* MTProgramList.h */,
 				D2D60BCE16766FA600CE32DE /* MTProgramList.m */,
 				D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */,
@@ -343,6 +348,7 @@
 				D2C390761687FFA600D2062E /* MTiTunes.m in Sources */,
 				D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */,
 				D235BF01168F52DE00320FA5 /* MTSubscriptionList.m in Sources */,
+				1E189AE01695E4B500359D73 /* MTiTivoImport.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

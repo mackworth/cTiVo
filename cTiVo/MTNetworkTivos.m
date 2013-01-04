@@ -7,6 +7,7 @@
 //
 
 #import "MTNetworkTivos.h"
+#import "MTiTiVoImport.h"
 
 @interface MTNetworkTivos ()
 
@@ -44,11 +45,17 @@
 		//Make sure there's a selected format, espeically on first launch
 		
 		_selectedFormat = nil;
+		if (![defaults objectForKey:kMTSelectedFormat]) {
+            //What? No previous format,must be our first run. Let's see if there's any iTivo prefs.
+            [MTiTiVoImport checkForiTiVoPrefs];
+        }
+        
 		if ([defaults objectForKey:kMTSelectedFormat]) {
 			NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
 			for (NSDictionary *fl in _formatList) {
 				if ([formatName compare:[fl objectForKey:@"name"]] == NSOrderedSame) {
 					self.selectedFormat = fl;
+                    break;
 				}
 			}
 		}
