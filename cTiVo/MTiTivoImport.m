@@ -165,15 +165,23 @@
             [sUD setBool:   [sUD boolForKey:kITuseTime]             forKey:kMTScheduledOperations ];
             
             // When to start queue   Example: "2009-02-10T06:00:00Z";
-            [sUD setValue:   [MTTiVoShow dateForRFC3339DateTimeString:
-                                            [sUD objectForKey:kITuseTimeStartTime]]
-                  forKey:kMTScheduledStartTime ];
-            
+            id startDate = [sUD objectForKey:kITuseTimeStartTime];
+            if ([startDate isKindOfClass:[NSDate class]]) {
+                [sUD setValue:  startDate forKey:kMTScheduledStartTime ];
+            } else if ([startDate isKindOfClass:[NSString class]]) {
+                 [sUD setValue:  [MTTiVoShow dateForRFC3339DateTimeString:startDate ]
+                                                  forKey:kMTScheduledStartTime ];
+            }
+                        
             // When to end queue  Example: "2009-02-10T11:00:00Z";
-            [sUD setValue:   [MTTiVoShow dateForRFC3339DateTimeString:
-                                            [sUD objectForKey:kITuseTimeEndTime]]
-                  forKey:kMTScheduledEndTime ];
-            
+            id endDate = [sUD objectForKey:kITuseTimeEndTime];
+            if ([endDate isKindOfClass:[NSDate class]]) {
+                [sUD setValue:  endDate forKey:kMTScheduledEndTime ];
+            } else if ([endDate isKindOfClass:[NSString class]]) {
+                [sUD setValue:  [MTTiVoShow dateForRFC3339DateTimeString:endDate ]
+                       forKey:kMTScheduledEndTime ];
+            }
+
             // Whether to start queue to sleep after scheduled downloads
             [sUD setBool:   [sUD boolForKey:kITSchedulingSleep]     forKey:kMTScheduledSleep ];
             
