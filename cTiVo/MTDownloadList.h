@@ -7,15 +7,16 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "MTNetworkTivos.h"
+#import "MTTiVoManager.h"
 #import "MTDownloadListCellView.h"
 #import "MTDownloadListCheckCell.h"
 #import "MTProgressindicator.h"
 
 @interface MTDownloadList : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
     IBOutlet NSWindowController *myController;
+	MTTiVoManager *tiVoManager;
 }
 
-@property (nonatomic, assign) NSMutableArray *downloadQueue;
+@property (nonatomic, assign) NSArray *sortedShows;
 
 @end

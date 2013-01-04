@@ -7,14 +7,14 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "MTNetworkTivos.h"
+#import "MTTiVoManager.h"
 #import "MTProgramList.h"
 #import "MTDownloadList.h"
 #import "MTMainWindowController.h"
 #import "MTSubscriptionList.h"
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate> {
-	MTNetworkTivos *myTiVos;
+	MTTiVoManager *tiVoManager;
 	MTMainWindowController *mainWindowController;
 }
 

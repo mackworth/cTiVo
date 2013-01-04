@@ -11,6 +11,6 @@
 
 @interface MTCheckBox : NSButton
 
-@property (nonatomic, assign) MTTiVoShow *owner;
+@property (nonatomic, assign) id owner;
 
 @end

@@ -17,22 +17,29 @@
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadStatusChanged object:nil];
+	tiVoManager = [MTTiVoManager sharedTiVoManager];
 }
 
 -(void)updateTable
 {
-    [super reloadData];
+    [self reloadData];
     //Check download Status
-    
-    
 }
+
+-(NSArray *)sortedShows
+{
+	return [tiVoManager.downloadQueue sortedArrayUsingDescriptors:self.sortDescriptors];
+}
+
+
 
 -(void)updateProgress
 {
-	for (int i=0; i< _downloadQueue.count; i++) {
+	NSArray *displayedShows = self.sortedShows;
+	for (int i=0; i< displayedShows.count; i++) {
 		MTDownloadListCellView *thisCell = [self viewAtColumn:0 row:i makeIfNecessary:NO];
 		if (thisCell) {
-			MTTiVoShow *thisShow = [_downloadQueue objectAtIndex:i];
+			MTTiVoShow *thisShow = [displayedShows objectAtIndex:i];
 			thisCell.progressIndicator.doubleValue = thisShow.processProgress;
 			thisCell.progressIndicator.rightText.stringValue = thisShow.showStatus;
 			[thisCell setNeedsDisplay:YES];
@@ -53,7 +60,7 @@
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-    return _downloadQueue.count;
+    return self.sortedShows.count;
 }
 
 -(id)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
@@ -85,7 +92,7 @@
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    MTTiVoShow *rowData = [_downloadQueue objectAtIndex:row];
+    MTTiVoShow *rowData = [self.sortedShows objectAtIndex:row];
 //	NSDictionary *idMapping = [NSDictionary dictionaryWithObjectsAndKeys:@"Title",@"Program",kMTSelectedTiVo,@"TiVo",kMTSelectedFormat,@"Format", nil];
 	
     // get an existing cell with the MyView identifier if it exists

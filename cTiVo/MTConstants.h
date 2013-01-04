@@ -25,6 +25,8 @@
 #define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
 #define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated"
 #define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"
+#define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
+#define kMTNotificationSubscriptionsUpdated @"MTNotificationSubscriptionsUpdated"
 
 //Download Status
 #define kMTStatusNew 0
@@ -40,12 +42,14 @@
 //Subscribed Show
 #define kMTSubscribedSeries @"MTSubscribedSeries"
 #define kMTSubscribedSeriesDate	@"MTSubscribedSeriesDate"
+#define kMTSubscribedSeriesFormat @"MTSubscribedSeriesFormat"
 
 //Misc
 
 #define kMTUpdateIntervalMinutes 15 //Update interval for re-checking current TiVo
 #define kMTFirstName @"MTFirstName"
 #define kMTLastName @"MTLastName"
+#define kMTAllTiVos @"All TiVos"
 
 
 //USER DEFAULTS

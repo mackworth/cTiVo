@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1E189AE01695E4B500359D73 /* MTiTivoImport.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E189ADF1695E4B500359D73 /* MTiTivoImport.m */; };
+		D202E0A2169778DA00514213 /* MTiTivoImport.m in Sources */ = {isa = PBXBuildFile; fileRef = D202E0A0169778DA00514213 /* MTiTivoImport.m */; };
 		D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
 		D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
 		D235BF01168F52DE00320FA5 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = D235BF00168F52DE00320FA5 /* MTSubscriptionList.m */; };
+		D257C6E41697400700EBE30B /* MTPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTPopUpButton.m */; };
+		D257C6E9169740A000EBE30B /* MTPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */; };
 		D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D279D3E9167A32FA007F0677 /* MTMainWindowController.m */; };
 		D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */; };
 		D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */; };
@@ -30,7 +32,7 @@
 		D2D60BC616766F3200CE32DE /* HandBrakeCLI in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC116766F3200CE32DE /* HandBrakeCLI */; };
 		D2D60BC716766F3200CE32DE /* mencoder in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC216766F3200CE32DE /* mencoder */; };
 		D2D60BC816766F3200CE32DE /* tivodecode in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC316766F3200CE32DE /* tivodecode */; };
-		D2D60BD416766FA600CE32DE /* MTNetworkTivos.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BC916766FA600CE32DE /* MTNetworkTivos.m */; };
+		D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BC916766FA600CE32DE /* MTTiVoManager.m */; };
 		D2D60BD716766FA600CE32DE /* MTDownloadList.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCC16766FA600CE32DE /* MTDownloadList.m */; };
 		D2D60BD916766FA600CE32DE /* MTProgramList.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCE16766FA600CE32DE /* MTProgramList.m */; };
 		D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD116766FA600CE32DE /* NSString+HTML.m */; };
@@ -53,14 +55,18 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1E189ADB1695E31A00359D73 /* MTiTivoImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTiTivoImport.h; sourceTree = "<group>"; };
-		1E189ADF1695E4B500359D73 /* MTiTivoImport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTivoImport.m; sourceTree = "<group>"; };
+		D202E09F169778DA00514213 /* MTiTivoImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTivoImport.h; sourceTree = "<group>"; };
+		D202E0A0169778DA00514213 /* MTiTivoImport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTivoImport.m; sourceTree = "<group>"; };
 		D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressindicator.h; sourceTree = "<group>"; };
 		D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressindicator.m; sourceTree = "<group>"; };
 		D22BC41D1680DB5E007D699C /* MTTiVoShow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoShow.h; sourceTree = "<group>"; };
 		D22BC41E1680DB5E007D699C /* MTTiVoShow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoShow.m; sourceTree = "<group>"; };
 		D235BEFF168F52DE00320FA5 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
 		D235BF00168F52DE00320FA5 /* MTSubscriptionList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionList.m; sourceTree = "<group>"; };
+		D257C6E11697400600EBE30B /* MTPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTPopUpButton.h; sourceTree = "<group>"; };
+		D257C6E21697400600EBE30B /* MTPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPopUpButton.m; sourceTree = "<group>"; };
+		D257C6E61697409F00EBE30B /* MTPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTPopUpTableCellView.h; sourceTree = "<group>"; };
+		D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPopUpTableCellView.m; sourceTree = "<group>"; };
 		D279D3E8167A32FA007F0677 /* MTMainWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTMainWindowController.h; sourceTree = "<group>"; };
 		D279D3E9167A32FA007F0677 /* MTMainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTMainWindowController.m; sourceTree = "<group>"; };
 		D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowController.xib; sourceTree = "<group>"; };
@@ -90,8 +96,8 @@
 		D2D60BC116766F3200CE32DE /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
 		D2D60BC216766F3200CE32DE /* mencoder */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = mencoder; sourceTree = "<group>"; };
 		D2D60BC316766F3200CE32DE /* tivodecode */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = tivodecode; sourceTree = "<group>"; };
-		D2D60BC916766FA600CE32DE /* MTNetworkTivos.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTNetworkTivos.m; sourceTree = "<group>"; };
-		D2D60BCA16766FA600CE32DE /* MTNetworkTivos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTNetworkTivos.h; sourceTree = "<group>"; };
+		D2D60BC916766FA600CE32DE /* MTTiVoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoManager.m; sourceTree = "<group>"; };
+		D2D60BCA16766FA600CE32DE /* MTTiVoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTTiVoManager.h; sourceTree = "<group>"; };
 		D2D60BCB16766FA600CE32DE /* MTConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTConstants.h; sourceTree = "<group>"; };
 		D2D60BCC16766FA600CE32DE /* MTDownloadList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadList.m; sourceTree = "<group>"; };
 		D2D60BCD16766FA600CE32DE /* MTDownloadList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTDownloadList.h; sourceTree = "<group>"; };
@@ -162,6 +168,8 @@
 		D2D60BA716766EFD00CE32DE /* cTiVo */ = {
 			isa = PBXGroup;
 			children = (
+				D202E09F169778DA00514213 /* MTiTivoImport.h */,
+				D202E0A0169778DA00514213 /* MTiTivoImport.m */,
 				D2DFA68B1683B9EC00CD6CE0 /* iTunesInterface */,
 				D2D60BB616766EFD00CE32DE /* MainMenu.xib */,
 				D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */,
@@ -180,16 +188,18 @@
 				D279D3E8167A32FA007F0677 /* MTMainWindowController.h */,
 				D279D3E9167A32FA007F0677 /* MTMainWindowController.m */,
 				D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */,
-				D2D60BCA16766FA600CE32DE /* MTNetworkTivos.h */,
-				D2D60BC916766FA600CE32DE /* MTNetworkTivos.m */,
-				1E189ADB1695E31A00359D73 /* MTiTivoImport.h */,
-				1E189ADF1695E4B500359D73 /* MTiTivoImport.m */,
+				D257C6E11697400600EBE30B /* MTPopUpButton.h */,
+				D257C6E21697400600EBE30B /* MTPopUpButton.m */,
+				D257C6E61697409F00EBE30B /* MTPopUpTableCellView.h */,
+				D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */,
 				D2D60BCF16766FA600CE32DE /* MTProgramList.h */,
 				D2D60BCE16766FA600CE32DE /* MTProgramList.m */,
 				D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */,
 				D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */,
 				D235BEFF168F52DE00320FA5 /* MTSubscriptionList.h */,
 				D235BF00168F52DE00320FA5 /* MTSubscriptionList.m */,
+				D2D60BCA16766FA600CE32DE /* MTTiVoManager.h */,
+				D2D60BC916766FA600CE32DE /* MTTiVoManager.m */,
 				D22BC41D1680DB5E007D699C /* MTTiVoShow.h */,
 				D22BC41E1680DB5E007D699C /* MTTiVoShow.m */,
 				D2D60BBE16766F1100CE32DE /* Resources */,
@@ -335,7 +345,7 @@
 			files = (
 				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
 				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
-				D2D60BD416766FA600CE32DE /* MTNetworkTivos.m in Sources */,
+				D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */,
 				D2D60BD716766FA600CE32DE /* MTDownloadList.m in Sources */,
 				D2D60BD916766FA600CE32DE /* MTProgramList.m in Sources */,
 				D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */,
@@ -348,7 +358,9 @@
 				D2C390761687FFA600D2062E /* MTiTunes.m in Sources */,
 				D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */,
 				D235BF01168F52DE00320FA5 /* MTSubscriptionList.m in Sources */,
-				1E189AE01695E4B500359D73 /* MTiTivoImport.m in Sources */,
+				D257C6E41697400700EBE30B /* MTPopUpButton.m in Sources */,
+				D257C6E9169740A000EBE30B /* MTPopUpTableCellView.m in Sources */,
+				D202E0A2169778DA00514213 /* MTiTivoImport.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

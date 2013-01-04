@@ -7,12 +7,18 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "MTNetworkTivos.h"
+
+@class MTTiVoManager;
 
 @interface MTProgramList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>{
     IBOutlet NSWindowController *myController;
+	MTTiVoManager *tiVoManager;
 }
 
-@property (nonatomic, assign) NSMutableArray *tiVoShows;
+@property (nonatomic, assign) NSArray *sortedShows;
+@property (nonatomic, retain) NSString *selectedTiVo;
+
+-(NSArray *)sortedShows;
+-(IBAction)selectTivo:(id)sender;
 
 @end

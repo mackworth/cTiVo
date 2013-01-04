@@ -7,21 +7,25 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "MTNetworkTivos.h"
+#import "MTTiVoManager.h"
+#import "MTDownloadListCheckCell.h"
+#import "MTPopUpTableCellView.h"
 
 @interface MTSubscriptionList : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
     IBOutlet NSWindowController *myController;
+	MTTiVoManager *tiVoManager;
 }
 
 
--(BOOL) isSubscribed:(MTTiVoShow *) tivoShow;
 
--(void) addSubscription:(MTTiVoShow *) tivoShow;
+//-(BOOL) isSubscribed:(MTTiVoShow *) tivoShow;
+//
+//-(void) addSubscription:(MTTiVoShow *) tivoShow;
 //-(void) removeSubscription:(NSString *) seriesName;
 
 -(IBAction) unsubscribeSelectedItems:(id) sender;
 
-@property (nonatomic, assign) NSMutableArray *subscribedShows;
 @property (assign) IBOutlet NSButton *unsubscribeButton;
+@property (nonatomic, assign) NSArray *sortedShows;
 
 @end

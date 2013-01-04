@@ -12,19 +12,18 @@
 
 - (void)dealloc
 {
-	[myTiVos release];
+	[tiVoManager release];
     [super dealloc];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     // Insert code here to initialize your application
-	myTiVos = [[MTNetworkTivos alloc] init];
+	tiVoManager = [MTTiVoManager sharedTiVoManager];
 	mainWindowController = nil;
 	[self showMainWindow:nil];
 }
 
-// Returns the directory the application uses to store the Core Data store file. This code uses a directory named "com.fawkesconsulting.-.myTivo" in the user's Application Support directory.
 - (NSURL *)applicationFilesDirectory
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -40,7 +39,7 @@
 -(IBAction)showMainWindow:(id)sender
 {
 	if (!mainWindowController) {
-		mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController" withNetworkTivos:myTiVos];
+		mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
 	}
 	[mainWindowController showWindow:nil];
 	
@@ -48,7 +47,8 @@
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
-    // Save changes in the application's managed object context before the application terminates.
+    // Save changes in the application's user defaults before the application terminates.
+    [[NSUserDefaults standardUserDefaults] synchronize];
 
     return NSTerminateNow;
 }

@@ -14,7 +14,7 @@
 
 
 
-@interface MTNetworkTivos : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
+@interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
     
     NSNetService *tivoService ;
     NSNetServiceBrowser *tivoBrowser;
@@ -32,6 +32,8 @@
     double percentComplete;
     MTDownloadListCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
 	int numEncoders;//Want to limit launches to two encoders.
+    
+    BOOL volatile updatingVideoList;
 	
 	NSOperationQueue *queue;
 
@@ -44,16 +46,17 @@
 
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
-@property (nonatomic) BOOL videoListNeedsFilling;
+@property (nonatomic) BOOL videoListNeedsFilling, addToItunes, simultaneousEncode;
 @property (nonatomic, retain) NSDictionary *selectedFormat;
-@property (nonatomic, retain) NSNetService *selectedTiVo;
+//@property (nonatomic, retain) NSNetService *selectedTiVo;
 @property (nonatomic, readonly) NSMutableArray *tiVoNames;
 @property (nonatomic,assign) MTProgramList *tiVoShowTableView;
 
++ (MTTiVoManager *)sharedTiVoManager;
 
 
 -(void)fetchVideoListFromHost:(NSNetService *)newTivo;
 -(void)addProgramToDownloadQueue:(MTTiVoShow *)program;
-
-
+-(void) addSubscription:(MTTiVoShow *) tivoShow;
+-(void) checkSubscriptionsAll;
 @end

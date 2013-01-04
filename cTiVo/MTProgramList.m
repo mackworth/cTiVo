@@ -8,6 +8,8 @@
 
 #import "MTProgramList.h"
 #import "MTDownloadListCheckCell.h"
+#import "MTTiVoManager.h"
+
 
 @implementation MTProgramList
 
@@ -15,9 +17,13 @@
 {
     self.dataSource = self;
     self.delegate    = self;
-//    self.rowHeight = 24;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
+	tiVoManager = [MTTiVoManager sharedTiVoManager];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationReloadEpisode object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationShowListUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
+    self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
 }
 
 -(void)reloadData
@@ -25,9 +31,24 @@
     [super reloadData];
 }
 
+-(void)reloadEpisode:(NSNotification *)notification
+{
+	MTTiVoShow *thisShow = notification.object;
+	NSInteger row = 0;
+	NSArray *displayedShows = self.sortedShows;
+	for (row=0; row < displayedShows.count; row++) {
+		if ([displayedShows objectAtIndex:row] == thisShow) {
+			break;
+		}
+	}
+	NSInteger column = [self columnWithIdentifier:@"Episode"];
+	[self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:column]];
+}
+
+
 -(void)dealloc
 {
-    self.tiVoShows = nil;
+    self.selectedTiVo = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
@@ -49,12 +70,40 @@
     
 }
 
+-(IBAction)selectTivo:(id)sender
+{
+    if (tiVoManager.tiVoList.count > 1) { //Nothing to change otherwise
+        self.selectedTiVo = [(NSPopUpButton *)sender selectedItem].title;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:nil];
+        [[NSUserDefaults standardUserDefaults] setObject:self.selectedTiVo forKey:kMTSelectedTiVo];
+    }
+    
+}
+
+-(NSArray *)sortedShows
+{
+    NSMutableArray *arrayToSort = [NSMutableArray arrayWithArray:tiVoManager.tiVoShows];
+    NSPredicate *tiVoPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+        return YES;
+    }];;
+    if (self.selectedTiVo && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
+        tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.name == %@",self.selectedTiVo];
+    }
+    [arrayToSort filterUsingPredicate:tiVoPredicate];
+	return [arrayToSort  sortedArrayUsingDescriptors:self.sortDescriptors];
+}
+
 
 #pragma mark - Table Data Source Protocol
 
+-(void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors	
+{
+	[self reloadData];
+}
+
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-    return _tiVoShows.count;
+    return self.sortedShows.count;
 }
 
 //-(id)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
@@ -76,7 +125,7 @@
 {
     // get an existing cell with the MyView identifier if it exists
     NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
-    MTTiVoShow *thisShow = [_tiVoShows objectAtIndex:row];
+    MTTiVoShow *thisShow = [[self sortedShows] objectAtIndex:row];
     // There is no existing cell to reuse so we will create a new one
     if (result == nil) {
         

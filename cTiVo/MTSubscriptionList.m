@@ -10,90 +10,44 @@
 
 @implementation MTSubscriptionList
 
-@synthesize subscribedShows;
 
 -(void)awakeFromNib
 {
 	self.dataSource  = self;
     self.delegate    = self;
-//    self.rowHeight = 24;
+//    self.rowHeight = 20;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
+	tiVoManager = [MTTiVoManager sharedTiVoManager];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationSubscriptionsUpdated object:nil];
 }
 
-
--(NSString *) seriesFromProgram:(NSString *) name {
-	NSArray * nameParts = [name componentsSeparatedByString: @":"];
-	if (nameParts.count == 0) return name;
-	return [nameParts objectAtIndex:0];
-}
-
-- (NSUInteger) findShow: (MTTiVoShow *) show {
-	if (!show.seriesTitle) {
-		show.seriesTitle = [self seriesFromProgram:show.showTitle];
-	}
-	NSString * seriesSearchString = show.seriesTitle;
-	if (!seriesSearchString) return NSNotFound;
-	return [self.subscribedShows indexOfObjectPassingTest:
-		^BOOL(NSDictionary *showItem, NSUInteger index, BOOL *stop) {
-			NSString * possMatch =	(NSString *)[showItem objectForKey:kMTSubscribedSeries];
-			return [possMatch localizedCaseInsensitiveCompare:seriesSearchString] == NSOrderedSame;
-	}];
-}
-
--(BOOL) isSubscribed:(MTTiVoShow *) tivoShow {
-	NSUInteger index = [self findShow:tivoShow];
-	if (index == NSNotFound) return NO;
-	NSDate * prevRecording = (NSDate *)[[self.subscribedShows objectAtIndex:index] objectForKey:kMTSubscribedSeriesDate];
-    BOOL before = (tivoShow.showDate != nil) && [prevRecording compare: tivoShow.showDate] == NSOrderedAscending;
-	//   NSLog(@"%@ for %@, date:%@ prev:%@", before ? @"YES": @"NO",tivoShow.showTitle, tivoShow.showDate, prevRecording);
-	return before;
-}
-
--(void)updateSubscriptionWithDate: (NSNotification *) notification
+-(NSArray *)sortedShows
 {
-	MTTiVoShow * tivoShow = (MTTiVoShow *)notification.object;
-	NSUInteger index = [self findShow:tivoShow];
-	if (index != NSNotFound && tivoShow.showDate) {
-		[[self.subscribedShows objectAtIndex:index] setObject:tivoShow.showDate forKey:kMTSubscribedSeriesDate];
-		[[NSUserDefaults standardUserDefaults] setValue:self.subscribedShows forKey:kMTSubscriptionList];
-		
-	}
+	return [tiVoManager.subscribedShows sortedArrayUsingDescriptors:self.sortDescriptors];
 }
+
+
 
 -(IBAction) unsubscribeSelectedItems:(id) sender {
 	
-	NSMutableSet *itemsToRemove = [NSMutableSet setWithCapacity: subscribedShows.count];
+	NSMutableSet *itemsToRemove = [NSMutableSet setWithCapacity: self.sortedShows.count];
 	for (NSUInteger i = 0; i <  self.numberOfRows; i++) {
 		if ([self isRowSelected:i]) {
-			MTTiVoShow *programToRemove = [subscribedShows objectAtIndex:i];
+			MTTiVoShow *programToRemove = [self.sortedShows objectAtIndex:i];
 			[itemsToRemove addObject:programToRemove];
 		}
 	}
 	for (NSDictionary * subscription in itemsToRemove) {
-		[subscribedShows removeObject:subscription];
+		[tiVoManager.subscribedShows removeObject:subscription];
 	}
 	
-	[[NSUserDefaults standardUserDefaults] setValue:self.subscribedShows forKey:kMTSubscriptionList];
+	[[NSUserDefaults standardUserDefaults] setObject:tiVoManager.subscribedShows	forKey:kMTSubscriptionList];
 	[self deselectAll:nil];
 	[self reloadData];
 	//No need to notify...
 	//[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionListUpdated object:nil];
 }
-
--(void) addSubscription:(MTTiVoShow *) tivoShow {
-	//set the "lastrecording" time for one second before this show, to include this show.
-	if ([self findShow:tivoShow] == NSNotFound) {
-        NSDate * earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
-        [self.subscribedShows addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:
-					tivoShow.seriesTitle,kMTSubscribedSeries,
-					earlierTime, kMTSubscribedSeriesDate,
-											nil]];
-		[[NSUserDefaults standardUserDefaults] setValue:self.subscribedShows forKey:kMTSubscriptionList];
-		[self reloadData];
-	}
-}
-
 
 -(void)dealloc
 {
@@ -109,21 +63,62 @@
     
 }
 
+-(CGFloat)tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row
+{
+    return 24.0;
+}
+
 
 #pragma mark - Table Data Source Protocol
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-	return self.subscribedShows.count;
+	return self.sortedShows.count;
 }
 
 static NSDateFormatter *dateFormatter;
+
+-(id)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
+{
+    id result;
+	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
+    if([identifier compare: @"iTunes"] == NSOrderedSame) {
+        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)] autorelease];
+        thisCell.identifier = identifier;
+        result = (id)thisCell;
+    } else if([identifier compare: @"Simu"] == NSOrderedSame) {
+        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
+        thisCell.identifier = identifier;
+        result = (id)thisCell;
+    } else if([identifier compare: @"FormatPopUp"] == NSOrderedSame) {
+		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
+		thisCell.identifier = identifier;
+        NSArray *formatList = [MTTiVoManager sharedTiVoManager].formatList;
+        [thisCell.popUpButton removeAllItems];
+        //    if (_selectedFormat) {
+        //        mediaKeyLabel.stringValue = [[NSUserDefaults standardUserDefaults] stringForKey:[_selectedFormat objectForKey:@"name"]];
+        //    }
+        for (NSDictionary *fl in formatList) {
+            [thisCell.popUpButton addItemWithTitle:[fl objectForKey:@"name"]];
+            [[thisCell.popUpButton lastItem] setRepresentedObject:fl];
+            //            if (_selectedFormat && [[fl objectForKey:@"name"] compare:[_selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
+            //                [self selectItem:[self lastItem]];
+            //            }
+            //            
+        }
+		result = (id)thisCell;
+	} else {
+        result =[super makeViewWithIdentifier:identifier owner:owner];
+    }
+    return result;
+}
+
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     // get an existing cell with the MyView identifier if it exists
 	NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
-	NSDictionary *thisSubscription = [self.subscribedShows objectAtIndex:row];
+	NSDictionary *thisSubscription = [self.sortedShows objectAtIndex:row];
     // There is no existing cell to reuse so we will create a new one
 	if (result == nil) {
         
@@ -158,7 +153,38 @@ static NSDateFormatter *dateFormatter;
 		result.textField.stringValue = [dateFormatter stringFromDate: lastDate ];
 		[result.textField setAlignment:NSRightTextAlignment];
         result.toolTip = result.textField.stringValue;
-	}
+	} else if ([tableColumn.identifier compare:@"FormatPopUp"] == NSOrderedSame) {
+//		result.textField.stringValue = [thisSubscription objectForKey:kMTSubscribedSeriesFormat] ;
+//        result.toolTip = result.textField.stringValue;
+		((MTPopUpTableCellView *)result).popUpButton.owner = thisSubscription;
+        [((MTPopUpTableCellView *)result).popUpButton selectItemWithTitle:thisSubscription[kMTSubscribedSeriesFormat]];
+		
+	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
+        NSInteger c = NSOffState;
+        if ([[thisSubscription objectForKey:kMTiTunesEncode] boolValue]) {
+            c = NSOnState;
+        }
+        [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
+        [((MTDownloadListCheckCell *)result).checkBox setEnabled:YES] ;
+		((MTDownloadListCheckCell *)result).checkBox.owner = thisSubscription;
+ 	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
+        NSInteger c = NSOffState;
+        if ([[thisSubscription objectForKey:kMTSimultaneousEncode] boolValue]) {
+            c = NSOnState;
+        }
+        [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
+        [((MTDownloadListCheckCell *)result).checkBox setEnabled:YES] ;
+		((MTDownloadListCheckCell *)result).checkBox.owner = thisSubscription;
+        //Make sure that this format can simu  encode
+        for (NSDictionary *fd in tiVoManager.formatList) {
+            if ([(NSString *)(thisSubscription[kMTSubscribedSeriesFormat]) compare:fd[@"name"]] == NSOrderedSame) {
+                BOOL canSimu = ![fd[@"mustDownloadFirst"] boolValue];
+                if (!canSimu) {
+                    [((MTDownloadListCheckCell *)result).checkBox setEnabled:NO];
+                }
+            }
+        }
+    }
 	
     // return the result.
     return result;

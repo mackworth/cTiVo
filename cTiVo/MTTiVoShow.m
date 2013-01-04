@@ -61,17 +61,17 @@
 
 
 
--(void)reloadEpisode
-{
-	NSInteger row = 0;
-	for (row=0; row < _myTableView.tiVoShows.count; row++) {
-		if ([_myTableView.tiVoShows objectAtIndex:row] == self) {
-			break;
-		}
-	}
-	NSInteger column = [_myTableView columnWithIdentifier:@"Episode"];
-	[_myTableView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:column]];
-}
+//-(void)reloadEpisode
+//{
+//	NSInteger row = 0;
+//	for (row=0; row < _myTableView.tiVoShows.count; row++) {
+//		if ([_myTableView.tiVoShows objectAtIndex:row] == self) {
+//			break;
+//		}
+//	}
+//	NSInteger column = [_myTableView columnWithIdentifier:@"Episode"];
+//	[_myTableView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:column]];
+//}
 
 -(NSArray *)parseNames:(NSArray *)nameSet
 {
@@ -99,7 +99,9 @@
 	if (gotDetails) {
 		//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 		//		[_myTableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
-		[self performSelectorOnMainThread:@selector(reloadEpisode) withObject:nil waitUntilDone:YES];
+		NSNotification *n = [NSNotification notificationWithName:kMTNotificationReloadEpisode object:self];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:n  waitUntilDone:NO];
+//		[self performSelectorOnMainThread:@selector(reloadEpisode) withObject:nil waitUntilDone:YES];
 		//        [_myTableView updateEpisodeForShow:self];
 	} else {
 		NSLog(@"Got Details Failed for %@",_showTitle);
