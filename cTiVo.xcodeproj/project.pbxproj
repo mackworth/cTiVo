@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1E791BD41697C59400E47E84 /* MTSubscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E791BD31697C59300E47E84 /* MTSubscription.m */; };
 		D202E0A2169778DA00514213 /* MTiTivoImport.m in Sources */ = {isa = PBXBuildFile; fileRef = D202E0A0169778DA00514213 /* MTiTivoImport.m */; };
 		D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
 		D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
@@ -21,6 +20,8 @@
 		D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */; };
 		D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
+		D2A648F216991CD300C7DA01 /* MTTiVo.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A648F116991CD300C7DA01 /* MTTiVo.m */; };
+		D2A648FB16994D2A00C7DA01 /* MTSubscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E791BD31697C59300E47E84 /* MTSubscription.m */; };
 		D2C390761687FFA600D2062E /* MTiTunes.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C390741687FFA600D2062E /* MTiTunes.m */; };
 		D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA116766EFD00CE32DE /* Cocoa.framework */; };
 		D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
@@ -79,6 +80,8 @@
 		D2995CA5168B8BB200B960B9 /* MTCheckBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTCheckBox.m; sourceTree = "<group>"; };
 		D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cTiVo_sparkle_pub.pem; sourceTree = "<group>"; };
 		D2995CAC168D0EE700B960B9 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = cTiVo/Sparkle.framework; sourceTree = "<group>"; };
+		D2A648F016991CD300C7DA01 /* MTTiVo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVo.h; sourceTree = "<group>"; };
+		D2A648F116991CD300C7DA01 /* MTTiVo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVo.m; sourceTree = "<group>"; };
 		D2C390741687FFA600D2062E /* MTiTunes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTunes.m; sourceTree = "<group>"; };
 		D2C390751687FFA600D2062E /* MTiTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTunes.h; sourceTree = "<group>"; };
 		D2D60B9D16766EFD00CE32DE /* cTiVo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTiVo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -198,6 +201,12 @@
 				D2D60BCB16766FA600CE32DE /* MTConstants.h */,
 				D2D60BCD16766FA600CE32DE /* MTDownloadList.h */,
 				D2D60BCC16766FA600CE32DE /* MTDownloadList.m */,
+				D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */,
+				D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */,
+				D2DFA68D1683C27600CD6CE0 /* MTDownloadListCheckCell.h */,
+				D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */,
+				D202E09F169778DA00514213 /* MTiTivoImport.h */,
+				D202E0A0169778DA00514213 /* MTiTivoImport.m */,
 				D2C390751687FFA600D2062E /* MTiTunes.h */,
 				D2C390741687FFA600D2062E /* MTiTunes.m */,
 				D202E09F169778DA00514213 /* MTiTivoImport.h */,
@@ -218,6 +227,8 @@
 				D2D60BBE16766F1100CE32DE /* Resources */,
 				D2D60BA816766EFD00CE32DE /* Supporting Files */,
 				D2D60BDF16766FB100CE32DE /* Utilities */,
+				D2A648F016991CD300C7DA01 /* MTTiVo.h */,
+				D2A648F116991CD300C7DA01 /* MTTiVo.m */,
 			);
 			path = cTiVo;
 			sourceTree = "<group>";
@@ -374,7 +385,8 @@
 				D257C6E41697400700EBE30B /* MTPopUpButton.m in Sources */,
 				D257C6E9169740A000EBE30B /* MTPopUpTableCellView.m in Sources */,
 				D202E0A2169778DA00514213 /* MTiTivoImport.m in Sources */,
-				1E791BD41697C59400E47E84 /* MTSubscription.m in Sources */,
+				D2A648F216991CD300C7DA01 /* MTTiVo.m in Sources */,
+				D2A648FB16994D2A00C7DA01 /* MTSubscription.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

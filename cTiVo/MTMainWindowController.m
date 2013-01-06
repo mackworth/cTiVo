@@ -149,10 +149,10 @@
         }
     }
 	[tiVoListPopUp removeAllItems];
-	for (NSNetService *ts in tiVoManager.tiVoList) {
-		[tiVoListPopUp addItemWithTitle:ts.name];
+	for (MTTiVo *ts in tiVoManager.tiVoList) {
+		[tiVoListPopUp addItemWithTitle:ts.tiVo.name];
         [[tiVoListPopUp lastItem] setRepresentedObject:ts];
-		if ([ts.name compare:_selectedTiVo] == NSOrderedSame) {
+		if ([ts.tiVo.name compare:_selectedTiVo] == NSOrderedSame) {
 			[tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
 //            _myTiVos.selectedTiVo = ts;
 //            _selectedTiVo = ts;
@@ -201,10 +201,10 @@
 
 -(IBAction)subscribe:(id) sender {
 	BOOL anySubscribed = NO;
-    for (int i = 0; i < tiVoManager.tiVoShows.count; i++) {
+    for (int i = 0; i < tiVoShowTable.sortedShows.count; i++) {
         if ([tiVoShowTable isRowSelected:i]) {
 			anySubscribed = YES;
-			MTTiVoShow *thisShow = [tiVoManager.tiVoShows objectAtIndex:i];
+			MTTiVoShow *thisShow = [tiVoShowTable.sortedShows objectAtIndex:i];
 			[tiVoManager.subscribedShows addSubscription:thisShow];
 		}
 	}

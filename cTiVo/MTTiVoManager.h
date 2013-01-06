@@ -11,6 +11,7 @@
 #import "MTDownloadListCellView.h"
 #import "MTTiVoShow.h"
 #import "MTProgramList.h"
+#import "MTTiVo.h"
 #import "MTSubscription.h"
 
 
@@ -19,7 +20,7 @@
     NSNetService *tivoService ;
     NSNetServiceBrowser *tivoBrowser;
     NSMutableData *listingData;
-	NSMutableDictionary *tiVoShowsDictionary;
+//	NSMutableDictionary *tiVoShowsDictionary;
 	NSMutableArray *updatingTiVoShows;
 	
 	NSURLConnection *programListURLConnection, *downloadURLConnection;
@@ -57,7 +58,6 @@
 
 #define tiVoManager [MTTiVoManager sharedTiVoManager]
 
--(void)fetchVideoListFromHost:(NSNetService *)newTivo;
 -(void)addProgramToDownloadQueue:(MTTiVoShow *)program;
 -(void) downloadthisShowWithCurrentOptions:(MTTiVoShow*) thisShow;  
 

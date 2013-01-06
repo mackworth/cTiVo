@@ -75,7 +75,7 @@
                 isSelected;//Used for refresh of table
 
 @property BOOL volatile isCanceled;
-@property (nonatomic, assign) MTProgramList *myTableView;
+//@property (nonatomic, assign) MTProgramList *myTableView;
 
 
 -(BOOL)cancel;
