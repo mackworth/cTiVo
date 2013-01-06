@@ -12,14 +12,14 @@
 
 - (void)dealloc
 {
-	[tiVoManager release];
+	[tiVoGlobalManager release];
     [super dealloc];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     // Insert code here to initialize your application
-	tiVoManager = [MTTiVoManager sharedTiVoManager];
+	tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
 	mainWindowController = nil;
 	[self showMainWindow:nil];
 }

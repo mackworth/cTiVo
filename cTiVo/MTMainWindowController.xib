@@ -3,12 +3,12 @@
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
 		<string key="IBDocument.SystemVersion">12C60</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2840</string>
+		<string key="IBDocument.InterfaceBuilderVersion">2844</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">2840</string>
+			<string key="NS.object.0">2844</string>
 		</object>
 		<array key="IBDocument.IntegratedClassDependencies">
 			<string>NSButton</string>
@@ -111,7 +111,7 @@
 													<string key="NSFrameSize">{670, 100}</string>
 													<reference key="NSSuperview" ref="56095981"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="228630423"/>
+													<reference key="NSNextKeyView" ref="83364493"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -192,6 +192,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="841493015"/>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">seriesTitle</string>
+																<bool key="NSAscending">YES</bool>
+																<string key="NSSelector">compare:</string>
+															</object>
 															<string key="NSHeaderToolTip">Future shows to automatically download</string>
 														</object>
 														<object class="NSTableColumn" id="1014946391">
@@ -228,6 +233,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="841493015"/>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">lastRecordedTime</string>
+																<bool key="NSAscending">YES</bool>
+																<string key="NSSelector">compare:</string>
+															</object>
 															<string key="NSHeaderToolTip">Last date this program was recorded</string>
 														</object>
 														<object class="NSTableColumn" id="473608070">
@@ -256,6 +266,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="841493015"/>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">encodeFormat.name</string>
+																<bool key="NSAscending">YES</bool>
+																<string key="NSSelector">compare:</string>
+															</object>
 														</object>
 														<object class="NSTableColumn" id="857745020">
 															<string key="NSIdentifier">iTunes</string>
@@ -283,6 +298,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="841493015"/>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">addToiTunes</string>
+																<bool key="NSAscending">YES</bool>
+																<string key="NSSelector">compare:</string>
+															</object>
 														</object>
 														<object class="NSTableColumn" id="1042292621">
 															<string key="NSIdentifier">Simu</string>
@@ -310,6 +330,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="841493015"/>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">shouldAddToiTunes</string>
+																<bool key="NSAscending">YES</bool>
+																<string key="NSSelector">compare:</string>
+															</object>
 														</object>
 													</array>
 													<double key="NSIntercellSpacingWidth">3</double>
@@ -391,7 +416,7 @@
 									<string key="NSFrameSize">{672, 118}</string>
 									<reference key="NSSuperview" ref="882086054"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="56095981"/>
+									<reference key="NSNextKeyView" ref="228630423"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133682</int>
 									<reference key="NSVScroller" ref="663152309"/>
@@ -527,7 +552,7 @@
 													<string key="NSFrameSize">{670, 193}</string>
 													<reference key="NSSuperview" ref="556230325"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="39833346"/>
+													<reference key="NSNextKeyView" ref="5386701"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -582,7 +607,7 @@
 															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
 																<string key="NSKey">showTitle</string>
 																<bool key="NSAscending">YES</bool>
-																<string key="NSSelector">compare:</string>
+																<string key="NSSelector">localizedCaseInsensitiveCompare:</string>
 															</object>
 															<string key="NSHeaderToolTip">Name of program</string>
 														</object>
@@ -615,7 +640,7 @@
 															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
 																<string key="NSKey">tiVo.name</string>
 																<bool key="NSAscending">YES</bool>
-																<string key="NSSelector">compare:</string>
+																<string key="NSSelector">localizedCaseInsensitiveCompare:</string>
 															</object>
 															<string key="NSHeaderToolTip">Scheduled to be downloaded?</string>
 														</object>
@@ -823,7 +848,7 @@
 									<string key="NSFrame">{{0, 353}, {672, 211}}</string>
 									<reference key="NSSuperview" ref="882086054"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="556230325"/>
+									<reference key="NSNextKeyView" ref="39833346"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133682</int>
 									<reference key="NSVScroller" ref="785357226"/>
@@ -875,7 +900,7 @@
 													<string key="NSFrameSize">{670, 131}</string>
 													<reference key="NSSuperview" ref="1053596382"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="794705384"/>
+													<reference key="NSNextKeyView" ref="334740629"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -927,6 +952,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="629789127"/>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">showTitle</string>
+																<bool key="NSAscending">YES</bool>
+																<string key="NSSelector">localizedCaseInsensitiveCompare:</string>
+															</object>
 															<string key="NSHeaderToolTip">Program to download</string>
 														</object>
 														<object class="NSTableColumn" id="869600631">
@@ -955,6 +985,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="629789127"/>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">tiVo.name</string>
+																<bool key="NSAscending">YES</bool>
+																<string key="NSSelector">localizedCaseInsensitiveCompare:</string>
+															</object>
 														</object>
 														<object class="NSTableColumn" id="701843703">
 															<string key="NSIdentifier">Format</string>
@@ -982,6 +1017,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="629789127"/>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">encodeFormat.name</string>
+																<bool key="NSAscending">YES</bool>
+																<string key="NSSelector">localizedCaseInsensitiveCompare:</string>
+															</object>
 														</object>
 														<object class="NSTableColumn" id="178137037">
 															<string key="NSIdentifier">iTunes</string>
@@ -1009,6 +1049,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="629789127"/>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">addToiTunesWhenEncoded</string>
+																<bool key="NSAscending">YES</bool>
+																<string key="NSSelector">compare:</string>
+															</object>
 														</object>
 														<object class="NSTableColumn" id="1016407587">
 															<string key="NSIdentifier">Simu</string>
@@ -1036,6 +1081,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="629789127"/>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">simultaneousEncode</string>
+																<bool key="NSAscending">YES</bool>
+																<string key="NSSelector">compare:</string>
+															</object>
 															<string key="NSHeaderToolTip">Simultaneous downloading and encoding</string>
 														</object>
 													</array>
@@ -1111,7 +1161,7 @@
 									<string key="NSFrame">{{0, 164}, {672, 149}}</string>
 									<reference key="NSSuperview" ref="882086054"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="1053596382"/>
+									<reference key="NSNextKeyView" ref="794705384"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133682</int>
 									<reference key="NSVScroller" ref="863871934"/>
@@ -1385,7 +1435,7 @@
 							<string key="NSFrame">{{746, 651}, {216, 22}}</string>
 							<reference key="NSSuperview" ref="994730169"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
+							<reference key="NSNextKeyView" ref="602285747"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSTextFieldCell" key="NSCell" id="468387810">
@@ -1432,7 +1482,7 @@
 					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="755028800"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1920, 1058}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{700, 552}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
@@ -1780,7 +1830,11 @@
 										<int key="NSCellFlags">67108928</int>
 										<int key="NSCellFlags2">272631808</int>
 										<string key="NSContents">Table View Cell</string>
-										<reference key="NSSupport" ref="1042930898"/>
+										<object class="NSFont" key="NSSupport">
+											<string key="NSName">LucidaGrande</string>
+											<double key="NSSize">13</double>
+											<int key="NSfFlags">16</int>
+										</object>
 										<reference key="NSControlView" ref="678223270"/>
 										<reference key="NSBackgroundColor" ref="162790425"/>
 										<reference key="NSTextColor" ref="686684468"/>
@@ -2005,14 +2059,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">myController</string>
-						<reference key="source" ref="841493015"/>
-						<reference key="destination" ref="1001"/>
-					</object>
-					<int key="connectionID">298</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
 						<string key="label">unsubscribeButton</string>
 						<reference key="source" ref="841493015"/>
 						<reference key="destination" ref="324106926"/>
@@ -2020,12 +2066,20 @@
 					<int key="connectionID">296</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">myController</string>
+						<reference key="source" ref="841493015"/>
+						<reference key="destination" ref="1001"/>
+					</object>
+					<int key="connectionID">340</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
 						<string key="label">unsubscribeSelectedItems:</string>
 						<reference key="source" ref="841493015"/>
 						<reference key="destination" ref="324106926"/>
 					</object>
-					<int key="connectionID">297</int>
+					<int key="connectionID">341</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -3360,7 +3414,7 @@
 				<string key="23.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="24.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="248.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="249.CustomClassName">MTSubscriptionList</string>
+				<string key="249.CustomClassName">MTSubscriptionTableView</string>
 				<string key="249.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="YES" key="249.ibExternalAutomaticallyCalculatesRowSizeFromViewHeight"/>
 				<string key="25.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3574,7 +3628,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">339</int>
+			<int key="maxID">341</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -3615,7 +3669,6 @@
 						<string key="getDownloadDirectory:">id</string>
 						<string key="removeFromDownloadQueue:">id</string>
 						<string key="selectFormat:">id</string>
-						<string key="selectTivo:">id</string>
 						<string key="subscribe:">id</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
@@ -3643,10 +3696,6 @@
 							<string key="name">selectFormat:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="selectTivo:">
-							<string key="name">selectTivo:</string>
-							<string key="candidateClassName">id</string>
-						</object>
 						<object class="IBActionInfo" key="subscribe:">
 							<string key="name">subscribe:</string>
 							<string key="candidateClassName">id</string>
@@ -3660,11 +3709,10 @@
 						<string key="formatListPopUp">NSPopUpButton</string>
 						<string key="loadingProgramListIndicator">NSProgressIndicator</string>
 						<string key="loadingProgramListLabel">NSTextField</string>
-						<string key="mediaKeyLabel">NSTextField</string>
 						<string key="removeFromQueueButton">NSButton</string>
 						<string key="simultaneousEncodeButton">NSButton</string>
 						<string key="subscribeButton">NSButton</string>
-						<string key="subscriptionTable">MTSubscriptionList</string>
+						<string key="subscriptionTable">MTSubscriptionTableView</string>
 						<string key="tiVoListPopUp">NSPopUpButton</string>
 						<string key="tiVoShowTable">MTProgramList</string>
 						<string key="view">NSView</string>
@@ -3698,10 +3746,6 @@
 							<string key="name">loadingProgramListLabel</string>
 							<string key="candidateClassName">NSTextField</string>
 						</object>
-						<object class="IBToOneOutletInfo" key="mediaKeyLabel">
-							<string key="name">mediaKeyLabel</string>
-							<string key="candidateClassName">NSTextField</string>
-						</object>
 						<object class="IBToOneOutletInfo" key="removeFromQueueButton">
 							<string key="name">removeFromQueueButton</string>
 							<string key="candidateClassName">NSButton</string>
@@ -3716,7 +3760,7 @@
 						</object>
 						<object class="IBToOneOutletInfo" key="subscriptionTable">
 							<string key="name">subscriptionTable</string>
-							<string key="candidateClassName">MTSubscriptionList</string>
+							<string key="candidateClassName">MTSubscriptionTableView</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="tiVoListPopUp">
 							<string key="name">tiVoListPopUp</string>
@@ -3767,7 +3811,7 @@
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
-					<string key="className">MTSubscriptionList</string>
+					<string key="className">MTSubscriptionTableView</string>
 					<string key="superclassName">NSTableView</string>
 					<object class="NSMutableDictionary" key="actions">
 						<string key="NS.key.0">unsubscribeSelectedItems:</string>
@@ -3796,7 +3840,7 @@
 					</dictionary>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/MTSubscriptionList.h</string>
+						<string key="minorKey">./Classes/MTSubscriptionTableView.h</string>
 					</object>
 				</object>
 			</array>

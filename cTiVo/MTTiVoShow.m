@@ -156,6 +156,11 @@
 	[elementString appendString:string];
 }
 
+- (void)setValue:(id)value forUndefinedKey:(NSString *)key{
+    //nothing to see here; just move along
+}
+
+
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
 	if (parseTermMapping[elementName]) {
@@ -841,6 +846,19 @@
         episode = _episodeNumber;
     }
     return episode;
+}
+
+-(NSString *) seriesFromProgram:(NSString *) name {
+    NSArray * nameParts = [name componentsSeparatedByString: @":"];
+    if (nameParts.count == 0) return name;
+    return [nameParts objectAtIndex:0];
+}
+
+-(NSString * ) seriesTitle {
+    if (!_seriesTitle) {
+        self.seriesTitle = [self seriesFromProgram:_showTitle];
+    }
+    return _seriesTitle;
 }
 
 #pragma mark - Custom Setters

@@ -8,6 +8,7 @@
 
 #import "MTTiVoManager.h"
 #import "MTiTivoImport.h"
+#import "MTSubscription.h"
 
 @interface MTTiVoManager ()
 
@@ -27,6 +28,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 + (MTTiVoManager *)sharedTiVoManager {
     if (sharedTiVoManager == nil) {
         sharedTiVoManager = [[super allocWithZone:NULL] init];
+        [sharedTiVoManager setupNotifications];
     }
     
     return sharedTiVoManager;
@@ -95,17 +97,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 		if ([defaults objectForKey:kMTSelectedFormat]) {
 			NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
-			for (NSDictionary *fl in _formatList) {
-				if ([formatName compare:[fl objectForKey:@"name"]] == NSOrderedSame) {
-					self.selectedFormat = fl;
-                    break;
-				}
-			}
+			self.selectedFormat = [self findFormat:formatName];
 		}
+        
 		//If no selected format make it the first.
 		if (!_selectedFormat) {
 			self.selectedFormat = [_formatList objectAtIndex:0];
-			
 		}
 		
 		if (![defaults objectForKey:kMTMediaKeys]) {
@@ -138,29 +135,32 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		_simultaneousEncode = YES;
 		_videoListNeedsFilling = YES;
         updatingVideoList = NO;
-        
-        NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-		   
-		[defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
-		[defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
-		[defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDecryptDidFinish object:nil];
-		[defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
-		[defaultCenter addObserver:self selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
-		[defaultCenter addObserver:self selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
-        [defaultCenter addObserver:self selector:@selector(updateVideoList) name:kMTNotificationTiVoListUpdated object:nil];
-	}
-	return self;
-
+    }
+    return self;
 }
 
+-(void) setupNotifications {
+    //have to wait until tivomanager is setup before calling subsidiary data models
+    NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
+    
+    [defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
+    [defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
+    [defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDecryptDidFinish object:nil];
+    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
+    [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
+    [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
+    [defaultCenter addObserver:self selector:@selector(updateVideoList) name:kMTNotificationTiVoListUpdated object:nil];
+}
+
+
 -(NSMutableArray *) subscribedShows {
+    
 	if (_subscribedShows ==  nil) {
-		if ([[NSUserDefaults standardUserDefaults] arrayForKey:kMTSubscriptionList]) {
-			_subscribedShows = [[NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTSubscriptionList]] retain];
-		} else {
-			_subscribedShows = [NSMutableArray new];
-		}
+
+            _subscribedShows = [NSMutableArray new];
+        [_subscribedShows loadSubscriptions];
 	}
+ 
 	return _subscribedShows;
 }
 
@@ -175,8 +175,24 @@ static MTTiVoManager *sharedTiVoManager = nil;
     [[NSUserDefaults standardUserDefaults] setObject:[_selectedFormat objectForKey:@"name"] forKey:kMTSelectedFormat];
 }
 
+-(NSDictionary *) findFormat:(NSString *) formatName {
+    for (NSDictionary *fd in _formatList) {
+        if ([formatName compare:fd[@"name"]] == NSOrderedSame) {
+            return fd;
+        }
+    }
+    return nil;
+}
 
-#pragma mark - Support methods
+-(BOOL) canAddToiTunes:(NSDictionary *) format {
+    return [format[@"iTunes"] boolValue];
+}
+
+-(BOOL) canSimulEncode:(NSDictionary *) format {
+    return [format[@"iTunes"] boolValue];
+}
+
+#pragma mark - Download Management
 
 -(void)addProgramToDownloadQueue:(MTTiVoShow *)program
 {
@@ -188,108 +204,23 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	
 	if (!programFound) {
-        if (_selectedFormat) {
-            program.encodeFormat = _selectedFormat;
+        program.isQueued = YES;
 //            program.tiVo = _selectedTiVo;
 //            program.mediaKey = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:program.tiVo.name];
             program.downloadDirectory = _downloadDirectory;
             [_downloadQueue addObject:program];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-       }
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+        [[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
 	}
 }
 
-#pragma mark - Subscription Management
-
--(void) checkSubscriptionShow:(MTTiVoShow *) show {
-	if([self isSubscribed:show] && ([show.downloadStatus intValue] == kMTStatusNew)) {
-		[self downloadthisShow:show];
-		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
-	}
-}
-
--(void) checkSubscription: (NSNotification *) notification {
-	[self checkSubscriptionShow: (MTTiVoShow *) notification.object];
-}
-
--(void) checkSubscriptionsAll {
-	for (MTTiVoShow * show in self.tiVoShows.reverseObjectEnumerator) {
-		[self checkSubscriptionShow:show];
-	}
-}
-
-
--(NSString *) seriesFromProgram:(NSString *) name {
-	NSArray * nameParts = [name componentsSeparatedByString: @":"];
-	if (nameParts.count == 0) return name;
-	return [nameParts objectAtIndex:0];
-}
-
-- (NSUInteger) findShow: (MTTiVoShow *) show {
-	if (!show.seriesTitle) {
-		show.seriesTitle = [self seriesFromProgram:show.showTitle];
-	}
-	NSString * seriesSearchString = show.seriesTitle;
-	if (!seriesSearchString) return NSNotFound;
-	return [self.subscribedShows indexOfObjectPassingTest:
-			^BOOL(NSDictionary *showItem, NSUInteger index, BOOL *stop) {
-				NSString * possMatch =	(NSString *)[showItem objectForKey:kMTSubscribedSeries];
-				return [possMatch localizedCaseInsensitiveCompare:seriesSearchString] == NSOrderedSame;
-			}];
-}
-
--(BOOL) isSubscribed:(MTTiVoShow *) tivoShow {
-	NSUInteger index = [self findShow:tivoShow];
-	if (index == NSNotFound) return NO;
-	NSDate * prevRecording = (NSDate *)[[_subscribedShows objectAtIndex:index] objectForKey:kMTSubscribedSeriesDate];
-    BOOL before = (tivoShow.showDate != nil) && [prevRecording compare: tivoShow.showDate] == NSOrderedAscending;
-	//   NSLog(@"%@ for %@, date:%@ prev:%@", before ? @"YES": @"NO",tivoShow.showTitle, tivoShow.showDate, prevRecording);
-	return before;
-}
-
-
--(void) addSubscription:(MTTiVoShow *) tivoShow {
-	//set the "lastrecording" time for one second before this show, to include this show.
-	if ([self findShow:tivoShow] == NSNotFound) {
-        NSDate * earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
-        [self.subscribedShows addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:
-												tivoShow.seriesTitle,kMTSubscribedSeries,
-												earlierTime, kMTSubscribedSeriesDate,
-												[NSNumber numberWithBool:_addToItunes], kMTiTunesEncode,
-												[NSNumber numberWithBool:_simultaneousEncode], kMTSimultaneousEncode,
-												_selectedFormat[@"name"], kMTSubscribedSeriesFormat,
-												nil]];
-		[[NSUserDefaults standardUserDefaults] setObject:self.subscribedShows forKey:kMTSubscriptionList];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
-	}
-}
-
--(void)updateSubscriptionWithDate: (NSNotification *) notification
-{
-	MTTiVoShow * tivoShow = (MTTiVoShow *)notification.object;
-	NSUInteger index = [self findShow:tivoShow];
-	if (index != NSNotFound && tivoShow.showDate) {
-		[[_subscribedShows objectAtIndex:index] setObject:tivoShow.showDate forKey:kMTSubscribedSeriesDate];
-		[[NSUserDefaults standardUserDefaults] setObject:_subscribedShows forKey:kMTSubscriptionList];
-		
-	}
-}
-
-
-
-#pragma mark - Download Management
-
--(void) downloadthisShow:(MTTiVoShow*) thisShow {
-	thisShow.addToiTunesWhenEncoded = NO;
-	if (_addToItunes && [[_selectedFormat objectForKey:@"iTunes"] boolValue]) {
-		thisShow.addToiTunesWhenEncoded  = YES;
-	}
-	thisShow.simultaneousEncode = YES;
-	if (!_simultaneousEncode) {
-		thisShow.simultaneousEncode = NO;
-	}
-	thisShow.isQueued = YES;
-	[self addProgramToDownloadQueue:thisShow];
+-(void) downloadthisShowWithCurrentOptions:(MTTiVoShow*) thisShow {
+	thisShow.encodeFormat = [self selectedFormat];
+	thisShow.addToiTunesWhenEncoded = [self canAddToiTunes:thisShow.encodeFormat] &&
+                                        self.addToItunes;
+	thisShow.simultaneousEncode = [self canSimulEncode:thisShow.encodeFormat] &&
+                                        self.simultaneousEncode;
+    [self addProgramToDownloadQueue:thisShow];
 }
 
 

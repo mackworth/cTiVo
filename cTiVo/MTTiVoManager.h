@@ -11,7 +11,7 @@
 #import "MTDownloadListCellView.h"
 #import "MTTiVoShow.h"
 #import "MTProgramList.h"
-
+#import "MTSubscription.h"
 
 
 @interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
@@ -41,7 +41,8 @@
 
 //Shared Data
 
-@property (nonatomic, readonly) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList, *subscribedShows;
+@property (nonatomic, readonly) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
+@property (nonatomic, readonly) NSMutableArray *subscribedShows;
 @property (nonatomic, retain) NSString *downloadDirectory, *programLoadingString;
 
 //Other Properties
@@ -54,9 +55,14 @@
 
 + (MTTiVoManager *)sharedTiVoManager;
 
+#define tiVoManager [MTTiVoManager sharedTiVoManager]
 
 -(void)fetchVideoListFromHost:(NSNetService *)newTivo;
 -(void)addProgramToDownloadQueue:(MTTiVoShow *)program;
--(void) addSubscription:(MTTiVoShow *) tivoShow;
--(void) checkSubscriptionsAll;
+-(void) downloadthisShowWithCurrentOptions:(MTTiVoShow*) thisShow;  
+
+-(BOOL) canAddToiTunes:(NSDictionary *) format;
+-(BOOL) canSimulEncode:(NSDictionary *) format;
+-(NSDictionary *) findFormat:(NSString *) formatName;
+
 @end

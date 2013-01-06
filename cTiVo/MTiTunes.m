@@ -150,4 +150,12 @@
 	}
 }
 
+- (void) updateAllIDevices {
+    SBElementArray * sources = [[self iTunes] sources];
+    for (iTunesSource * iPod in sources) {
+        [iPod update];
+    }
+
+}
+
 @end

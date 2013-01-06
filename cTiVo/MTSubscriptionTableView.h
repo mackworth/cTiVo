@@ -1,5 +1,5 @@
 //
-//  MTSubscriptionList.h
+//  MTSubscriptionTableView.h
 //  myTivo
 //
 //  Created by Scott Buchanan on 12/7/12.
@@ -11,9 +11,9 @@
 #import "MTDownloadListCheckCell.h"
 #import "MTPopUpTableCellView.h"
 
-@interface MTSubscriptionList : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
+@interface MTSubscriptionTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
     IBOutlet NSWindowController *myController;
-	MTTiVoManager *tiVoManager;
+
 }
 
 
@@ -26,6 +26,6 @@
 -(IBAction) unsubscribeSelectedItems:(id) sender;
 
 @property (assign) IBOutlet NSButton *unsubscribeButton;
-@property (nonatomic, assign) NSArray *sortedShows;
+@property (nonatomic, retain) NSArray *sortedSubscriptions;
 
 @end

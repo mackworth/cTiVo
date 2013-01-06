@@ -21,7 +21,6 @@
 {
 	self = [super initWithWindowNibName:windowNibName];
 	if (self) {
-		tiVoManager = [MTTiVoManager sharedTiVoManager];
 		_selectedFormat = tiVoManager.selectedFormat;
 //		_selectedTiVo = tiVoManager.selectedTiVo;
 		_formatList = tiVoManager.formatList;
@@ -54,7 +53,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadProgramData) name:kMTNotificationTiVoShowsUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:downloadQueueTable selector:@selector(updateTable) name:kMTNotificationDownloadQueueUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:downloadQueueTable selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:subscriptionList selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(startAnimation:) name:kMTNotificationShowListUpdating object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(stopAnimation:) name:kMTNotificationShowListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
@@ -189,38 +188,16 @@
         [[NSUserDefaults standardUserDefaults] setObject:[_selectedFormat objectForKey:@"name"] forKey:kMTSelectedFormat];
     } else {
         MTPopUpButton *thisButton = (MTPopUpButton *)sender;
-        NSMutableDictionary *owner = (NSMutableDictionary *)(thisButton.owner);
-        NSDictionary *format = [[thisButton selectedItem] representedObject];
-       [owner setObject:[thisButton selectedItem].title forKey:kMTSubscribedSeriesFormat];
-        [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.subscribedShows forKey:kMTSubscriptionList];
-        //Check to make sure simultaneou is OK with new selection
-        if([owner[kMTSimultaneousEncode] boolValue]) {
-            if ([format[@"mustDownloadFirst"] boolValue]) { //We can't have a simulateous encode with this format
-                [owner setObject:[NSNumber numberWithBool:NO] forKey:kMTSimultaneousEncode];
-            }
+        if ([thisButton.owner class] == [MTSubscription class]) {
+            MTSubscription * subscription = (MTSubscription *) thisButton.owner;
+            
+            subscription.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
+               [tiVoManager.subscribedShows saveSubscriptions];
         }
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
     }
-	
 }
 
 #pragma mark - Subscription Management
-//-(void) checkSubscriptionShow:(MTTiVoShow *) show {
-//	if([subscriptionTable isSubscribed:show] && ([show.downloadStatus intValue] == kMTStatusNew)) {
-//		[self downloadthisShow:show];
-//		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
-//	}
-//}
-//
-//-(void) checkSubscription: (NSNotification *) notification {
-//	[self checkSubscriptionShow: (MTTiVoShow *) notification.object];
-//}
-//
-//-(void) checkSubscriptionsAll {
-//	for (MTTiVoShow * show in tiVoManager.tiVoShows.reverseObjectEnumerator) {
-//		[self checkSubscriptionShow:show];
-//	}
-//}
 
 -(IBAction)subscribe:(id) sender {
 	BOOL anySubscribed = NO;
@@ -228,28 +205,16 @@
         if ([tiVoShowTable isRowSelected:i]) {
 			anySubscribed = YES;
 			MTTiVoShow *thisShow = [tiVoManager.tiVoShows objectAtIndex:i];
-			[tiVoManager addSubscription:thisShow];
+			[tiVoManager.subscribedShows addSubscription:thisShow];
 		}
 	}
 	if (anySubscribed) {
-		[tiVoManager checkSubscriptionsAll];
+		[tiVoManager.subscribedShows checkSubscriptionsAll];
 		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
 		[subscriptionTable reloadData];
 	}
 }
 
--(void) downloadthisShow:(MTTiVoShow*) thisShow {
-	thisShow.addToiTunesWhenEncoded = NO;
-	if (addToiTunesButton.state == NSOnState && [[_selectedFormat objectForKey:@"iTunes"] boolValue]) {
-		thisShow.addToiTunesWhenEncoded  = YES;
-	}
-	thisShow.simultaneousEncode = YES;
-	if (simultaneousEncodeButton.state == NSOffState) {
-		thisShow.simultaneousEncode = NO;
-	}
-	thisShow.isQueued = YES;
-     [tiVoManager addProgramToDownloadQueue:thisShow];
-}
 
 -(IBAction)downloadSelectedShows:(id)sender
 {
@@ -257,7 +222,7 @@
 	NSArray *displayedShows = tiVoShowTable.sortedShows;
     for (int i = 0; i < tiVoManager.tiVoShows.count; i++) {
         if([selectedRows containsIndex:i]) {
-            [self downloadthisShow:[displayedShows objectAtIndex:i]];
+            [tiVoManager downloadthisShowWithCurrentOptions:[displayedShows objectAtIndex:i]];
         }
     }
 	[tiVoShowTable deselectAll:nil];
@@ -310,20 +275,16 @@
     MTCheckBox *checkbox = sender;
     if (sender == simultaneousEncodeButton) {
         [[NSUserDefaults standardUserDefaults] setBool:checkbox.state forKey:kMTSimultaneousEncode];
+    
     } else if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
-        if (((MTTiVoShow *)checkbox.owner).simultaneousEncode) {
-            ((MTTiVoShow *)checkbox.owner).simultaneousEncode = NO;
-        } else {
-            ((MTTiVoShow *)checkbox.owner).simultaneousEncode = YES;
-        }
-    } else if ([checkbox.owner isKindOfClass:[NSMutableDictionary class]]){
-		NSMutableDictionary *d = (NSMutableDictionary *)(checkbox.owner);
-		if ([d[kMTSimultaneousEncode] boolValue]) {
-			d[kMTSimultaneousEncode] = [NSNumber numberWithBool:NO];
-		} else {
-			d[kMTSimultaneousEncode] = [NSNumber numberWithBool:YES];
-		}
-        [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.subscribedShows forKey:kMTSubscriptionList];
+        ((MTTiVoShow *)checkbox.owner).simultaneousEncode = ! ((MTTiVoShow *)checkbox.owner).simultaneousEncode;
+
+    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
+		
+        MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		sub.simultaneousEncode = [NSNumber numberWithBool: ! [sub.simultaneousEncode boolValue]];
+        [tiVoManager.subscribedShows saveSubscriptions];
+        
    }
 }
 
@@ -332,21 +293,16 @@
     MTCheckBox *checkbox = sender;
     if (sender == addToiTunesButton) {
         [[NSUserDefaults standardUserDefaults] setBool:checkbox.state forKey:kMTiTunesEncode];
+
     } else if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
         //updating an individual show in download queue
-        if (((MTTiVoShow *)checkbox.owner).addToiTunesWhenEncoded) {
-            ((MTTiVoShow *)checkbox.owner).addToiTunesWhenEncoded = NO;
-        } else {
-            ((MTTiVoShow *)checkbox.owner).addToiTunesWhenEncoded = YES;
-        }
-    } else if ([checkbox.owner isKindOfClass:[NSMutableDictionary class]]){
-		NSMutableDictionary *d = (NSMutableDictionary *)(checkbox.owner);
-		if ([d[kMTiTunesEncode] boolValue]) {
-			d[kMTiTunesEncode] = [NSNumber numberWithBool:NO];
-		} else {
-			d[kMTiTunesEncode] = [NSNumber numberWithBool:YES];
-		}
-        [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.subscribedShows forKey:kMTSubscriptionList];
+            ((MTTiVoShow *)checkbox.owner).addToiTunesWhenEncoded = !((MTTiVoShow *)checkbox.owner).addToiTunesWhenEncoded;
+
+    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
+		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		sub.addToiTunes = [NSNumber numberWithBool:!sub.shouldAddToiTunes];
+        [tiVoManager.subscribedShows saveSubscriptions];
+        
     }
 }
 

@@ -11,10 +11,10 @@
 #import "MTProgramList.h"
 #import "MTDownloadList.h"
 #import "MTMainWindowController.h"
-#import "MTSubscriptionList.h"
+#import "MTSubscriptionTableView.h"
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate> {
-	MTTiVoManager *tiVoManager;
+	MTTiVoManager *tiVoGlobalManager;
 	MTMainWindowController *mainWindowController;
 }
 

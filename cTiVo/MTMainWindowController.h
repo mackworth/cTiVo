@@ -10,7 +10,7 @@
 #import "MTTiVoManager.h"
 #import "MTDownloadList.h"
 #import "MTProgramList.h"
-#import "MTSubscriptionList.h"
+#import "MTSubscriptionTableView.h"
 #import "MTPopUpButton.h"
 
 
@@ -21,9 +21,8 @@
 	IBOutlet NSProgressIndicator *loadingProgramListIndicator;
 	IBOutlet MTDownloadList *downloadQueueTable;
 	IBOutlet MTProgramList  *tiVoShowTable;
-	IBOutlet MTSubscriptionList  *subscriptionTable;
+	IBOutlet MTSubscriptionTableView  *subscriptionTable;
     IBOutlet NSView *view;
-	MTTiVoManager *tiVoManager;
 }
 
 @property (nonatomic, assign) NSMutableDictionary *mediaKeys;
@@ -31,7 +30,7 @@
 @property (nonatomic, assign) NSDictionary *selectedFormat;
 @property (nonatomic, assign) MTDownloadList *downloadQueueTable;
 @property (nonatomic, assign) MTProgramList *tiVoShowTable;
-@property (nonatomic, assign) MTSubscriptionList *subscriptionTable;
+@property (nonatomic, assign) MTSubscriptionTableView *subscriptionTable;
 @property (nonatomic, retain) NSString *selectedTiVo;
 
 -(IBAction)selectFormat:(id)sender;

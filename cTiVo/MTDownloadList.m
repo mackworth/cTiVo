@@ -17,7 +17,6 @@
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadStatusChanged object:nil];
-	tiVoManager = [MTTiVoManager sharedTiVoManager];
 }
 
 -(void)updateTable
@@ -31,6 +30,10 @@
 	return [tiVoManager.downloadQueue sortedArrayUsingDescriptors:self.sortDescriptors];
 }
 
+-(void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors
+{
+	[self reloadData];
+}
 
 
 -(void)updateProgress
@@ -122,37 +125,29 @@
         result.progressIndicator.leftText.stringValue = rowData.showTitle ;
         result.progressIndicator.doubleValue = rowData.processProgress;
         result.toolTip = rowData.showTitle;
-	} else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
+	
+    } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
         result.textField.stringValue = rowData.tiVo.name ;
         result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
+	
+    } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
         result.textField.stringValue = [rowData.encodeFormat objectForKey:@"name"] ;
         result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
-        NSInteger c = NSOffState;
-        if (rowData.addToiTunesWhenEncoded) {
-            c = NSOnState;
-        }
-        [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
-        if ([rowData.downloadStatus intValue] != kMTStatusDone) {
-            [((MTDownloadListCheckCell *)result).checkBox setEnabled:YES] ;
-        } else {
-            [((MTDownloadListCheckCell *)result).checkBox setEnabled:NO] ;
-        }
-        ((MTDownloadListCheckCell *)result).checkBox.owner = rowData;
+	
+    } else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
+        MTCheckBox * checkBox = ((MTDownloadListCheckCell *)result).checkBox;
+        [checkBox setOn: rowData.addToiTunesWhenEncoded];
+        [checkBox setEnabled: [rowData.downloadStatus intValue] != kMTStatusDone &&
+                              [tiVoManager canAddToiTunes:rowData.encodeFormat] ];
+         checkBox.owner = rowData;
+
  	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
-        NSInteger c = NSOffState;
-        if (rowData.simultaneousEncode) {
-            c = NSOnState;
-        }
-        [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
-        ((MTDownloadListCheckCell *)result).checkBox.owner = rowData;
-        if ([rowData.downloadStatus intValue] == kMTStatusNew) {
-            [((MTDownloadListCheckCell *)result).checkBox setEnabled:YES] ;
-        } else {
-            [((MTDownloadListCheckCell *)result).checkBox setEnabled:NO] ;
-        }
-        
+        MTCheckBox * checkBox = ((MTDownloadListCheckCell *)result).checkBox;
+        [checkBox setOn: rowData.simultaneousEncode];
+         checkBox.owner = rowData;
+        [checkBox setEnabled: [rowData.downloadStatus intValue] == kMTStatusNew &&
+                              [tiVoManager canSimulEncode:rowData.encodeFormat ]];
+
 	}
     
     // return the result.

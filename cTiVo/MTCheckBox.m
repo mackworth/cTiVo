@@ -10,4 +10,12 @@
 
 @implementation MTCheckBox
 
+-(void)setOn: (BOOL) shouldTurnOn {
+    if (shouldTurnOn) {
+        self.state = NSOnState;
+    } else {
+        self.state = NSOffState;
+    }
+}
+
 @end

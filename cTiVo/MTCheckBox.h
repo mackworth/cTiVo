@@ -13,4 +13,5 @@
 
 @property (nonatomic, assign) id owner;
 
+-(void)setOn: (BOOL) shouldTurnOn;
 @end

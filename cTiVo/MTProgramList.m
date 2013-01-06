@@ -19,7 +19,7 @@
     self.delegate    = self;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-	tiVoManager = [MTTiVoManager sharedTiVoManager];
+
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationReloadEpisode object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationShowListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
@@ -169,8 +169,6 @@
         } else {
             result.textField.stringValue = @"";
         }
-//        [((MTDownloadListCheckCell *)result).checkBox setState:c] ;
-//        ((MTDownloadListCheckCell *)result).checkBox.owner = thisShow;
 	}
 
     // return the result.

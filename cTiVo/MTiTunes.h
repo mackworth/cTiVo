@@ -20,7 +20,7 @@
 @property (nonatomic, strong) iTunesPlaylist *tivoPlayList;
 
 -(BOOL) importIntoiTunes: (MTTiVoShow * ) show;
-
+-(void) updateAllIDevices;
 //-(void) testModule;
 
 @end

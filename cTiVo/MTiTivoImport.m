@@ -81,6 +81,16 @@
  
 */
 
++(NSDate *) testDate: (id) inDate {
+
+    if ([inDate isKindOfClass:[NSDate class]]) {
+        return inDate;
+    } else if ([inDate isKindOfClass:[NSString class]]) {
+        return [MTTiVoShow dateForRFC3339DateTimeString:inDate ];
+    } else {
+        return [NSDate date];
+    }
+}
 
 +(void) checkForiTiVoPrefs {
     NSUserDefaults * sUD = [NSUserDefaults standardUserDefaults];
@@ -88,41 +98,32 @@
         [sUD addSuiteNamed:@"com.iTivo.iTivo"];
         if ([sUD objectForKey:kITTiVo]) {
            
-            //Subscriptions
-            NSArray * iTivoSubscriptions = [sUD objectForKey:@"targetDataSList"];
-            NSMutableArray * cTivoSubs = [[[NSMutableArray alloc] initWithCapacity:iTivoSubscriptions.count] autorelease];
-            for (NSDictionary * sub in iTivoSubscriptions) {
-                NSDate * date= [MTTiVoShow dateForRFC3339DateTimeString:[sub objectForKey:@"LastDLVal"]];
-                NSString * seriesName = [sub objectForKey:@"ShowVal"];
-                [cTivoSubs addObject:[NSDictionary  dictionaryWithObjectsAndKeys:
-                                      seriesName,kMTSubscribedSeries,
-                                      date, kMTSubscribedSeriesDate,
-                                      nil]
-                 ];
-            }
-            [sUD setValue:cTivoSubs forKey:kMTSubscriptionList];
-            
+           
             //Current TiVo
             NSString * currentTivo = [sUD objectForKey:kITTiVo];
-           [sUD setValue: currentTivo        forKey:kMTSelectedTiVo];
-
-            //Current MAK
-            NSString * MAK = [sUD objectForKey:kITMAK];
-            if (MAK.length > 0 && currentTivo.length > 0 && [currentTivo compare:@"My Tivos"] != NSOrderedSame) {
-                NSMutableDictionary * MAKs = [sUD objectForKey:kMTMediaKeys];
-                if (MAKs) {
-                    [MAKs setValue:MAK forKey:currentTivo];
-                } else {
-                    MAKs = [NSDictionary dictionaryWithObject:MAK  forKey:currentTivo];
+            if (currentTivo.length> 0) {
+                [sUD setValue: currentTivo forKey:kMTSelectedTiVo];
+                
+                //Current MAK  (No place to put MAK if no Tivo
+                NSString * MAK = [sUD objectForKey:kITMAK];
+                if (MAK.length > 0 && [currentTivo compare:@"My Tivos"] != NSOrderedSame) {
+                    NSMutableDictionary * MAKs = [sUD objectForKey:kMTMediaKeys];
+                    if (MAKs) {
+                        [MAKs setValue:MAK forKey:currentTivo];
+                    } else {
+                        MAKs = [NSDictionary dictionaryWithObject:MAK  forKey:currentTivo];
+                    }
+                    [sUD setValue:MAKs forKey:kMTMediaKeys];
                 }
-                [sUD setValue:MAKs forKey:kMTMediaKeys];
             }
             //iTunes preference
-            [sUD setBool:   [sUD boolForKey:kITiTunes]              forKey:kMTiTunesEncode ];
+            BOOL iTunes = [sUD boolForKey:kITiTunes];
+            [sUD setBool:   iTunes forKey:kMTiTunesEncode ];
             
             //Simultaneous encode
-            [sUD setBool:   ![sUD boolForKey:kITDownloadFirst]      forKey:kMTSimultaneousEncode ];
-
+            BOOL simulEncode = ![sUD boolForKey:kITDownloadFirst];
+            [sUD setBool: simulEncode forKey:kMTSimultaneousEncode ];
+            
             //download directory
             NSString * downloadDir = [sUD objectForKey:kITDL];
             BOOL isDirectory = NO;
@@ -134,8 +135,32 @@
 
             //preferred format
             NSString * format = [sUD objectForKey:kITiTivoFormat];
-            [sUD setValue:format       forKey:kMTSelectedFormat];
+            if (format.length > 0) {
+                [sUD setValue:format       forKey:kMTSelectedFormat];
+            } else{
+                format =@"iPhone";  //just for the heck of it
+            }
              
+            //Subscriptions
+            NSArray * iTivoSubscriptions = [sUD objectForKey:@"targetDataSList"];
+            NSMutableArray * cTivoSubs = [[[NSMutableArray alloc] initWithCapacity:iTivoSubscriptions.count] autorelease];
+            for (NSDictionary * sub in iTivoSubscriptions) {
+                NSDate * date= [self testDate:[sub objectForKey:@"LastDLVal"]];
+                NSString * seriesName = [sub objectForKey:@"ShowVal"];
+                
+                if (seriesName && date) {
+                    [cTivoSubs addObject:[NSDictionary  dictionaryWithObjectsAndKeys:
+                                          seriesName,kMTSubscribedSeries,
+                                          date, kMTSubscribedDate,
+                                          format, kMTSubscribedFormat,
+                                          [NSNumber numberWithBool: iTunes ],kMTSubscribediTunes,
+                                           [NSNumber numberWithBool: simulEncode ],kMTSimultaneousEncode,
+                                          nil]
+                     ];
+                }
+            }
+            if (cTivoSubs.count > 0)[sUD setValue:cTivoSubs forKey:kMTSubscriptionList];
+ 
             // whether to make subdirectories for each series
             [sUD setBool:   [sUD boolForKey:kITMakeSubdirs]         forKey:kMTMakeSubDirs ];
 
@@ -165,22 +190,14 @@
             [sUD setBool:   [sUD boolForKey:kITuseTime]             forKey:kMTScheduledOperations ];
             
             // When to start queue   Example: "2009-02-10T06:00:00Z";
-            id startDate = [sUD objectForKey:kITuseTimeStartTime];
-            if ([startDate isKindOfClass:[NSDate class]]) {
-                [sUD setValue:  startDate forKey:kMTScheduledStartTime ];
-            } else if ([startDate isKindOfClass:[NSString class]]) {
-                 [sUD setValue:  [MTTiVoShow dateForRFC3339DateTimeString:startDate ]
-                                                  forKey:kMTScheduledStartTime ];
-            }
+            
+            NSDate * startDate = [self testDate:[sUD objectForKey:kITuseTimeStartTime]];
+            if (startDate)[sUD setValue:  startDate forKey:kMTScheduledStartTime ];
                         
             // When to end queue  Example: "2009-02-10T11:00:00Z";
-            id endDate = [sUD objectForKey:kITuseTimeEndTime];
-            if ([endDate isKindOfClass:[NSDate class]]) {
-                [sUD setValue:  endDate forKey:kMTScheduledEndTime ];
-            } else if ([endDate isKindOfClass:[NSString class]]) {
-                [sUD setValue:  [MTTiVoShow dateForRFC3339DateTimeString:endDate ]
-                       forKey:kMTScheduledEndTime ];
-            }
+            NSDate * endDate = [self testDate:[sUD objectForKey:kITuseTimeEndTime]];
+            if (endDate)[sUD setValue:  endDate forKey:kMTScheduledEndTime ];
+        
 
             // Whether to start queue to sleep after scheduled downloads
             [sUD setBool:   [sUD boolForKey:kITSchedulingSleep]     forKey:kMTScheduledSleep ];
@@ -195,7 +212,8 @@
             
             
             // Example: "# mv \"$file\" ~/.Trash ;;used for Tivo only";
-            [sUD setValue:   [sUD objectForKey:kITPostDownloadCmd]         forKey:kMTPostDownloadCommand ];
+            NSString * postDownload =[sUD objectForKey:kITPostDownloadCmd];
+            if (postDownload.length > 0)[sUD setValue: [sUD objectForKey:kITPostDownloadCmd]   forKey:kMTPostDownloadCommand ];
 
         }
         //And we're done...

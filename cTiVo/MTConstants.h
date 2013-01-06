@@ -41,8 +41,10 @@
 
 //Subscribed Show
 #define kMTSubscribedSeries @"MTSubscribedSeries"
-#define kMTSubscribedSeriesDate	@"MTSubscribedSeriesDate"
-#define kMTSubscribedSeriesFormat @"MTSubscribedSeriesFormat"
+#define kMTSubscribedDate	@"MTSubscribedSeriesDate"
+#define kMTSubscribedFormat @"MTSubscribedSeriesFormat"
+#define kMTSubscribediTunes @"addToiTunes"
+#define kMTSubscribedSimulEncode @"simultaneousEncode"
 
 //Misc
 

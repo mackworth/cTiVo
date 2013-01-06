@@ -14,7 +14,6 @@
 
 @interface MTDownloadList : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
     IBOutlet NSWindowController *myController;
-	MTTiVoManager *tiVoManager;
 }
 
 @property (nonatomic, assign) NSArray *sortedShows;
