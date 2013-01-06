@@ -13,16 +13,48 @@
 
 @implementation MTProgramList
 
+//
+//-(id)init
+//{
+//	self = [super init];
+//	if (self) {
+//		[self setNotifications];
+//	}
+//	return self;
+//}
+
+-(id) initWithCoder:(NSCoder *)aDecoder
+{
+	self = [super initWithCoder:aDecoder];
+	if (self) {
+		[self setNotifications];
+	}
+	return self;
+}
+
+//-(id)initWithFrame:(NSRect)frameRect
+//{
+//	self = [super initWithFrame:frameRect];
+//	if (self) {
+//		[self setNotifications];
+//	}
+//	return self;
+//}
+//
+-(void)setNotifications
+{
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationReloadEpisode object:nil];
+//	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationShowListUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
+	
+}
+
 -(void)awakeFromNib
 {
     self.dataSource = self;
     self.delegate    = self;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationReloadEpisode object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationShowListUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
     self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
 }
 
@@ -74,7 +106,7 @@
 {
     if (tiVoManager.tiVoList.count > 1) { //Nothing to change otherwise
         self.selectedTiVo = [(NSPopUpButton *)sender selectedItem].title;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
         [[NSUserDefaults standardUserDefaults] setObject:self.selectedTiVo forKey:kMTSelectedTiVo];
     }
     
@@ -125,7 +157,7 @@
 {
     // get an existing cell with the MyView identifier if it exists
     NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
-    MTTiVoShow *thisShow = [[self sortedShows] objectAtIndex:row];
+    MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
     // There is no existing cell to reuse so we will create a new one
     if (result == nil) {
         

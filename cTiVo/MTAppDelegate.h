@@ -16,6 +16,9 @@
 @interface MTAppDelegate : NSObject <NSApplicationDelegate> {
 	MTTiVoManager *tiVoGlobalManager;
 	MTMainWindowController *mainWindowController;
+	IBOutlet NSMenuItem *refreshTiVoMenuItem;
+	NSMutableArray *mediaKeyQueue;
+	BOOL gettingMediaKey;
 }
 
 @property (assign) IBOutlet NSWindow *window;

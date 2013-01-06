@@ -28,7 +28,7 @@
 #define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
 #define kMTNotificationSubscriptionsUpdated @"MTNotificationSubscriptionsUpdated"
 #define kMTNotificationTiVoNowPlayingDownloaded @"MTNotificationTiVoNowPlayingDownloaded"
-#define kMTNotificationMediaKeyUpdated @"MTNotificationMediaKeyUpdated"
+#define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"
 
 //Download Status
 #define kMTStatusNew 0

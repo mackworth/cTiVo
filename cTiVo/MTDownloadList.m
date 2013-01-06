@@ -10,13 +10,45 @@
 
 @implementation MTDownloadList
 
+//-(id)init
+//{
+//	self = [super init];
+//	if (self) {
+//		[self setNotifications];
+//	}
+//	return self;
+//}
+//
+-(id) initWithCoder:(NSCoder *)aDecoder
+{
+	self = [super initWithCoder:aDecoder];
+	if (self) {
+		[self setNotifications];
+	}
+	return self;
+}
+
+//-(id)initWithFrame:(NSRect)frameRect
+//{
+//	self = [super initWithFrame:frameRect];
+//	if (self) {
+//		[self setNotifications];
+//	}
+//	return self;
+//}
+//
+-(void)setNotifications
+{
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadStatusChanged object:nil];
+
+}
+
 -(void)awakeFromNib
 {
     self.dataSource = self;
     self.delegate    = self;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadStatusChanged object:nil];
 }
 
 -(void)updateTable

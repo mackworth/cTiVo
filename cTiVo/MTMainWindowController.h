@@ -23,6 +23,7 @@
 	IBOutlet MTProgramList  *tiVoShowTable;
 	IBOutlet MTSubscriptionTableView  *subscriptionTable;
     IBOutlet NSView *view;
+	NSMutableArray *loadingTiVos;
 }
 
 @property (nonatomic, assign) NSMutableDictionary *mediaKeys;

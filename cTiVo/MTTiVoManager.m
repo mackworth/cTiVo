@@ -10,6 +10,8 @@
 #import "MTiTivoImport.h"
 #import "MTSubscription.h"
 
+#include <arpa/inet.h>
+
 @interface MTTiVoManager ()
 
 @property (retain) NSNetService *updatingTiVo;
@@ -135,17 +137,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		_simultaneousEncode = YES;
 		_videoListNeedsFilling = YES;
         updatingVideoList = NO;
+		
+		hostAddresses = [[[NSHost currentHost] addresses] retain];
         
-//        NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-		   
-//		[defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
-//		[defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
-//		[defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDecryptDidFinish object:nil];
-//		[defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
-//		[defaultCenter addObserver:self selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
-//		[defaultCenter addObserver:self selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
-//		[defaultCenter addObserver:self selector:@selector(updateMediaKeysDefaults) name:kMTNotificationMediaKeyUpdated object:nil];
-////        [defaultCenter addObserver:self selector:@selector(updateVideoList) name:kMTNotificationTiVoListUpdated object:nil];
 	}
 	return self;
 }
@@ -161,7 +155,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
 //    [defaultCenter addObserver:self selector:@selector(updateVideoList) name:kMTNotificationTiVoListUpdated object:nil];
-	[defaultCenter addObserver:self selector:@selector(updateMediaKeysDefaults) name:kMTNotificationMediaKeyUpdated object:nil];
+//	[defaultCenter addObserver:self selector:@selector(updateMediaKeysDefaults) name:kMTNotificationMediaKeyUpdated object:nil];
 }
 
 
@@ -194,6 +188,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
         }
     }
     return nil;
+}
+
+-(NSDictionary *)currentMediaKeys
+{
+	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
+	for (MTTiVo *thisTiVo in _tiVoList) {
+		[tmpDict setObject:thisTiVo.mediaKey forKey:thisTiVo.tiVo.name];
+	}
+	return [NSDictionary dictionaryWithDictionary:tmpDict];
 }
 
 -(BOOL) canAddToiTunes:(NSDictionary *) format {
@@ -317,7 +320,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
 {
-//	NSLog(@"Found Service %@",netService);
+	NSLog(@"Found Service %@",netService);
     [_tivoServices addObject:netService];
     netService.delegate = self;
     [netService resolveWithTimeout:2.0];
@@ -327,9 +330,20 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 - (void)netServiceDidResolveAddress:(NSNetService *)sender
 {
-	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender];
-	newTiVo.queue = queue;
-	[newTiVo updateShows];
+	NSString *ipAddress = @"";
+	if ([sender addresses] && [sender addresses].count) {
+		ipAddress = [self getStringFromAddressData:[sender addresses][0]];
+		
+	}
+
+	for (NSString *hostAddress in hostAddresses) {
+		if ([hostAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
+			return;  // This filters out PyTivo instances on the current host
+		}
+	}
+
+	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
+//	[newTiVo updateShows:nil];
     [_tiVoList addObject:newTiVo];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
     
@@ -339,5 +353,16 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
     NSLog(@"Service %@ failed to resolve",sender.name);
 }
+
+- (NSString *)getStringFromAddressData:(NSData *)dataIn {
+    struct sockaddr_in  *socketAddress = nil;
+    NSString            *ipString = nil;
+	
+    socketAddress = (struct sockaddr_in *)[dataIn bytes];
+    ipString = [NSString stringWithFormat: @"%s",
+                inet_ntoa(socketAddress->sin_addr)];  ///problem here
+    return ipString;
+}
+
 
 @end

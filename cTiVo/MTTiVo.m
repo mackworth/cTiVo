@@ -13,9 +13,9 @@
 
 @implementation MTTiVo
 
-+(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo
++(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue
 {
-	return [[[MTTiVo alloc] initWithTivo:tiVo] autorelease];
+	return [[[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue] autorelease];
 }
 	
 -(id)init
@@ -28,17 +28,24 @@
 		self.lastUpdated = [NSDate dateWithTimeIntervalSinceReferenceDate:0];
 		_mediaKey = @"";
 		isConnecting = NO;
+		_mediaKeyIsGood = NO;
 	}
 	return self;
 	
 }
 
--(id) initWithTivo:(NSNetService *)tiVo
+-(id) initWithTivo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue
 {
 	self = [self init];
 	if (self) {
 		self.tiVo = tiVo;
+		self.queue = queue;
 		[self getMediaKey];
+		if (_mediaKey.length == 0) {
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
+		} else {
+			[self updateShows:nil];
+		}
 	}
 	return self;
 }
@@ -63,31 +70,31 @@
     self.mediaKey = mediaKeyString;
 }
 
--(void)getMediaKeyFromUser:(NSString *)message
-{
-	NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-	NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
-	
-	[input setStringValue:_mediaKey];
-	[input autorelease];
-	[keyAlert setAccessoryView:input];
-	NSInteger button = [keyAlert runModal];
-	if (button == NSAlertDefaultReturn) {
-		[input validateEditing];
-		NSLog(@"Got Media Key %@",input.stringValue);
-		self.mediaKey = input.stringValue;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyUpdated object:nil];
-	}
+//-(void)getMediaKeyFromUser:(NSString *)message
+//{
+//	NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
+//	NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
+//	
+//	[input setStringValue:_mediaKey];
+//	[input autorelease];
+//	[keyAlert setAccessoryView:input];
+//	NSInteger button = [keyAlert runModal];
+//	if (button == NSAlertDefaultReturn) {
+//		[input validateEditing];
+//		NSLog(@"Got Media Key %@",input.stringValue);
+//		self.mediaKey = input.stringValue;
+////		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyUpdated object:nil];
+//	}
+//
+//}
+//
 
-}
-
-
--(void)updateShows
+-(void)updateShows:(id)sender
 {
 	if (isConnecting) {
 		return;
 	}
-	if ([[NSDate date] compare:[_lastUpdated dateByAddingTimeInterval:kMTUpdateIntervalMinutes * 60]] == NSOrderedAscending) {
+	if (!sender && [[NSDate date] compare:[_lastUpdated dateByAddingTimeInterval:kMTUpdateIntervalMinutes * 60]] == NSOrderedAscending) {
 		return;
 	}
 	isConnecting = YES;
@@ -96,12 +103,12 @@
 		[showURLConnection release];
 		showURLConnection = nil;
 	}
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateShows) object:nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:nil];
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateShows:) object:nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
 	//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-	if (_mediaKey.length == 0) {
-		[self getMediaKeyFromUser:[NSString stringWithFormat:@"Need Media Key for %@",_tiVo.name]];
-	}
+//	if (_mediaKey.length == 0) {
+//		[self getMediaKeyFromUser:[NSString stringWithFormat:@"Need Media Key for %@",_tiVo.name]];
+//	}
 	NSString *tivoURLString = [[NSString stringWithFormat:@"https://tivo:%@@%@/nowplaying/index.html?Recurse=Yes",_mediaKey,_tiVo.hostName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 //	NSLog(@"Tivo URL String %@",tivoURLString);
 	NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
@@ -114,7 +121,6 @@
 		[_tiVoManager setProgramLoadingString:[NSString stringWithFormat:@"Updating Programs - %@",_tiVo.name]];
 	}
 	[showURLConnection start];
-	[self performSelector:@selector(updateShows) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0)];
 		
 }
 
@@ -140,11 +146,14 @@
 	NSArray *tables = [tableRx matchesInString:urlDataString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, urlDataString.length)];
 	if (tables.count == 0) {
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:self];
-		[self getMediaKeyFromUser:[NSString stringWithFormat:@"Incorrect Media Key for %@",_tiVo.name]];
+		_mediaKeyIsGood = NO;
+//		[self getMediaKeyFromUser:[NSString stringWithFormat:@"Incorrect Media Key for %@",_tiVo.name]];
 		//		loadingProgramListLabel.stringValue = @"Incorrect Media Key";
 //        [self setProgramLoadingString:@"Incorrect Media Key"];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
 		return;
 	}
+	_mediaKeyIsGood = YES;
 	NSTextCheckingResult *table = [tables objectAtIndex:0];
 	urlDataString = [urlDataString substringWithRange:[table rangeAtIndex:1]];
 	NSArray *rows = [rowRx matchesInString:urlDataString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, urlDataString.length)];
@@ -264,6 +273,7 @@
 		}
 	}
 	self.lastUpdated = [NSDate date];  // Record when we updated
+	[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
 	//	NSLog(@"Avialable Recordings are %@",_recordings);
 	//    if (updatingTiVoShows == _tiVoShows) {
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
@@ -307,7 +317,7 @@
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     NSLog(@"URL Connection Failed with error %@",error);
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
     if (!_tiVo.name) {
 		[_tiVoManager setProgramLoadingString:@"Tivo not found"];
 	} else {
@@ -320,11 +330,12 @@
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
+    isConnecting = NO;
     [self parseListingData];
     [showURLConnection release];
     showURLConnection = nil;
-    isConnecting = NO;
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoNowPlayingDownloaded object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 }
 
 #pragma mark - Memory Management

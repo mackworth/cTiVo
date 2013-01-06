@@ -15,7 +15,7 @@
 #import "MTSubscription.h"
 
 
-@interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
+@interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate>  {
     
     NSNetService *tivoService ;
     NSNetServiceBrowser *tivoBrowser;
@@ -37,6 +37,8 @@
     BOOL volatile updatingVideoList;
 	
 	NSOperationQueue *queue;
+	
+	NSArray *hostAddresses;
 
 }
 
@@ -64,5 +66,6 @@
 -(BOOL) canAddToiTunes:(NSDictionary *) format;
 -(BOOL) canSimulEncode:(NSDictionary *) format;
 -(NSDictionary *) findFormat:(NSString *) formatName;
+-(NSDictionary *)currentMediaKeys;
 
 @end

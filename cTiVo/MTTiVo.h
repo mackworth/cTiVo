@@ -22,11 +22,12 @@
 @property (nonatomic, retain) NSString *mediaKey;
 @property (nonatomic, assign) NSOperationQueue *queue;
 @property (nonatomic, retain) MTTiVoManager *tiVoManager;
+@property BOOL mediaKeyIsGood;
 
-+(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo;
++(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
 
--(id) initWithTivo:(NSNetService *)tiVo;
--(void)updateShows;
+-(id) initWithTivo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
+-(void)updateShows:(id)sender;
 
 
 @end

@@ -25,6 +25,7 @@
 //		_selectedTiVo = tiVoManager.selectedTiVo;
 		_formatList = tiVoManager.formatList;
 		_tiVoList = tiVoManager.tiVoList;
+		loadingTiVos = [NSMutableArray new];
 	}
 	return self;
 }
@@ -48,16 +49,18 @@
 	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
     downloadDirectory.stringValue = tiVoManager.downloadDirectory;
  	tiVoManager.tiVoShowTableView = tiVoShowTable;
-   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshTiVoListPopup) name:kMTNotificationTiVoListUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadProgramData) name:kMTNotificationTiVoShowsUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:downloadQueueTable selector:@selector(updateTable) name:kMTNotificationDownloadQueueUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:downloadQueueTable selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:subscriptionList selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(startAnimation:) name:kMTNotificationShowListUpdating object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:loadingProgramListIndicator selector:@selector(stopAnimation:) name:kMTNotificationShowListUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
-    [tiVoManager addObserver:self forKeyPath:@"programLoadingString" options:0 context:nil];
+	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
+	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup) name:kMTNotificationTiVoListUpdated object:nil];
+    [defaultCenter addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
+    [defaultCenter addObserver:self selector:@selector(reloadProgramData) name:kMTNotificationTiVoShowsUpdated object:nil];
+    [defaultCenter addObserver:downloadQueueTable selector:@selector(updateTable) name:kMTNotificationDownloadQueueUpdated object:nil];
+    [defaultCenter addObserver:downloadQueueTable selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
+	
+	//Spinner Progress Handling 
+    [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdating object:nil];
+    [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdated object:nil];
+	
+    [defaultCenter addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
     [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
     
 
@@ -65,9 +68,6 @@
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if ([keyPath compare:@"programLoadingString"] == NSOrderedSame) {
-        loadingProgramListLabel.stringValue = tiVoManager.programLoadingString;
-    }
     if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
         _selectedFormat = tiVoManager.selectedFormat;
         BOOL caniTune = [[_selectedFormat objectForKey:@"iTunes"] boolValue];
@@ -102,6 +102,31 @@
 			tiVoManager.simultaneousEncode = NO;
         }
     }
+}
+
+-(void)manageLoadingIndicator:(NSNotification *)notification
+{
+	if (!notification) { //Don't accept nil notifications
+		return;  
+	}
+	if ([notification.name  compare:kMTNotificationShowListUpdating] == NSOrderedSame) {
+		[loadingTiVos addObject:notification.object];
+	} else if ([notification.name compare:kMTNotificationShowListUpdated] == NSOrderedSame) {
+		[loadingTiVos removeObject:notification.object];
+	}
+if (loadingTiVos.count) {
+	[loadingProgramListIndicator startAnimation:nil];
+	NSMutableString *message = [NSMutableString stringWithString:@"Updating "];
+	for (MTTiVo *tiVo in loadingTiVos) {
+		[message appendString:[NSString stringWithFormat:@" %@,",tiVo.tiVo.name]];
+	}
+	
+	loadingProgramListLabel.stringValue = [message substringToIndex:message.length-1];
+
+} else {
+	[loadingProgramListIndicator stopAnimation:nil];
+	loadingProgramListLabel.stringValue = @"";
+}
 }
 
 -(void)reloadProgramData
@@ -326,6 +351,7 @@
 
 -(void)dealloc
 {
+	[loadingTiVos release];
     self.selectedTiVo = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[super dealloc];
