@@ -229,10 +229,16 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	
 	if (!programFound) {
         program.isQueued = YES;
-//            program.tiVo = _selectedTiVo;
-//            program.mediaKey = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:program.tiVo.name];
-            program.downloadDirectory = _downloadDirectory;
-            [_downloadQueue addObject:program];
+		NSString *tryDirectory = _downloadDirectory;
+		//Check that download directory exists.  If create it.  If unsuccessful use default ~/Movies
+		if (![[NSFileManager defaultManager] fileExistsAtPath:tryDirectory]) { // try to create it
+			if (![[NSFileManager defaultManager] createDirectoryAtPath:tryDirectory withIntermediateDirectories:YES attributes:nil error:nil]) { //Go to default if not successful
+				tryDirectory = [NSString stringWithFormat:@"%@/Movies",NSHomeDirectory()];
+			}
+		}
+		program.downloadDirectory = tryDirectory;
+		program.numRetriesRemaining = kMTMaxDownloadRetries;
+		[_downloadQueue addObject:program];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
         [[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
 	}

@@ -53,6 +53,8 @@
 #define kMTFirstName @"MTFirstName"
 #define kMTLastName @"MTLastName"
 #define kMTAllTiVos @"All TiVos"
+#define kMTMaxDownloadRetries 3	  // Only allow 3 retries to download a show
+#define kMTProgressCheckDelay 60  //Check progress every 60 seconds to make sure its not stalled
 
 
 //USER DEFAULTS

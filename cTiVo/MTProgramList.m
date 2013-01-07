@@ -106,7 +106,8 @@
 {
     if (tiVoManager.tiVoList.count > 1) { //Nothing to change otherwise
         self.selectedTiVo = [(NSPopUpButton *)sender selectedItem].title;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:_selectedTiVo];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
         [[NSUserDefaults standardUserDefaults] setObject:self.selectedTiVo forKey:kMTSelectedTiVo];
     }
     

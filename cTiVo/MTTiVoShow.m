@@ -10,6 +10,8 @@
 #import "MTTiVoShow.h"
 #import "MTProgramList.h"
 #import "MTiTunes.h"
+#import "MTTiVoManager.h"
+
 
 @implementation MTTiVoShow
 
@@ -45,6 +47,7 @@
 		_episodeGenre = @"";
 //		_originalAirDate = @"";
 		_episodeYear = 0;
+		_numRetriesRemaining = kMTMaxDownloadRetries;
 		parseTermMapping = [@{@"description" : @"showDescription", @"time": @"showTime"} retain];
         [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
         
@@ -59,19 +62,6 @@
     }
 }
 
-
-
-//-(void)reloadEpisode
-//{
-//	NSInteger row = 0;
-//	for (row=0; row < _myTableView.tiVoShows.count; row++) {
-//		if ([_myTableView.tiVoShows objectAtIndex:row] == self) {
-//			break;
-//		}
-//	}
-//	NSInteger column = [_myTableView columnWithIdentifier:@"Episode"];
-//	[_myTableView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:column]];
-//}
 
 -(NSArray *)parseNames:(NSArray *)nameSet
 {
@@ -133,7 +123,24 @@
     [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 }
 
-
+-(void)checkStillActive
+{
+	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
+		//Cancel and restart or delete depending on number of time we've been through this
+		[self cancel];
+		if (_numRetriesRemaining <= 0) {
+			[[MTTiVoManager sharedTiVoManager] deleteProgramFromDownloadQueue:self];
+		} else {
+			_numRetriesRemaining--;
+			[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+		}
+		
+	} else {
+		previousProcessProgress = _processProgress;
+		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
+	}
+}
 
 #pragma  mark - parser methods
 
@@ -374,6 +381,8 @@
 	downloadingURL = YES;
     dataDownloaded = 0.0;
     _processProgress = 0.0;
+	previousProcessProgress = 0.0;
+	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
     [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
 //    _downloadStatus = [NSNumber numberWithInt:kMTStatusDownloading];
     _showStatus = @"Downloading";
@@ -415,6 +424,8 @@
 						  downloadFilePath,
 						  nil];
     _processProgress = 0.0;
+	previousProcessProgress = 0.0;
+	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
  	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
     [self setValue:[NSNumber numberWithInt:kMTStatusDecrypting] forKeyPath:@"downloadStatus"];
 //    _downloadStatus = [NSNumber numberWithInt:kMTStatusDecrypting];
@@ -428,6 +439,7 @@
 -(void)trackDecrypts
 {
 	if (![decrypterTask isRunning]) {
+		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 		_processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [self setValue:[NSNumber numberWithInt:kMTStatusDecrypted] forKeyPath:@"downloadStatus"];
@@ -487,6 +499,8 @@
 	[encoderTask setStandardOutput:encodeLogFileHandle];
 	[encoderTask setStandardError:devNullFileHandle];
     _processProgress = 0.0;
+	previousProcessProgress = 0.0;
+	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 	[encoderTask launch];
     [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
@@ -499,6 +513,7 @@
 -(void)trackEncodes
 {
 	if (![encoderTask isRunning]) {
+		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         _processProgress = 1.0;
         [[NSFileManager defaultManager] removeItemAtPath:decryptFilePath error:nil];
 		[encoderTask release];
@@ -667,6 +682,7 @@
 	}
 	[pool drain];
 	if (!downloadingURL || _isCanceled) {
+		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 		[downloadFileHandle closeFile];
 		if (downloadFileHandle != [pipe1 fileHandleForWriting]) {
 			[downloadFileHandle release];
@@ -725,6 +741,7 @@
        [downloadFileHandle release];
         downloadFileHandle = nil;
         [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
+		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 //        _downloadStatus = [NSNumber numberWithInt:kMTStatusDownloaded];
     } else {
         [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];

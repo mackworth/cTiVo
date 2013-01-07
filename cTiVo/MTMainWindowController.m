@@ -50,7 +50,7 @@
     downloadDirectory.stringValue = tiVoManager.downloadDirectory;
  	tiVoManager.tiVoShowTableView = tiVoShowTable;
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup) name:kMTNotificationTiVoListUpdated object:nil];
+	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoListUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(reloadProgramData) name:kMTNotificationTiVoShowsUpdated object:nil];
     [defaultCenter addObserver:downloadQueueTable selector:@selector(updateTable) name:kMTNotificationDownloadQueueUpdated object:nil];
@@ -165,8 +165,9 @@ if (loadingTiVos.count) {
 	}
 }
 
--(void)refreshTiVoListPopup
+-(void)refreshTiVoListPopup:(NSNotification *)notification
 {
+	self.selectedTiVo = notification.object;
     if (!_selectedTiVo) {
         self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
         if (!_selectedTiVo) {
