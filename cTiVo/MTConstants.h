@@ -19,7 +19,6 @@
 //UI Change Notifications
 #define kMTNotificationTiVoChanged @"MTNotificationTiVoChanged"
 #define kMTNotificationTiVoListUpdated @"MTNotificationTiVoListUpdated"
-#define kMTNotificationDownloadListUpdated @"MTNotificationDownloadListUpdated"
 #define kMTNotificationFormatListUpdated @"MTNotificationFormatListUpdated"
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"
 #define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
