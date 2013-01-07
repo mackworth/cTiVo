@@ -74,11 +74,12 @@
 @property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding, isQueued,
                 isSelected;//Used for refresh of table
 
+@property (readonly) BOOL isInProgress;
 @property BOOL volatile isCanceled;
 //@property (nonatomic, assign) MTProgramList *myTableView;
 
 
--(BOOL)cancel;
+-(void)cancel;
 -(void)download;
 -(void)decrypt;
 -(void)encode;

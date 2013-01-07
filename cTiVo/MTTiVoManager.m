@@ -252,10 +252,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	for (MTTiVoShow *p in _downloadQueue) {
 		if (p.showID == program.showID	) {
 			programFound = YES;
+            break;
 		}
 	}
 	
 	if (programFound) {
+        [program cancel];
         program.isQueued = NO;
         [_downloadQueue removeObject:program];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];

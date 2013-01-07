@@ -589,51 +589,42 @@
     }
 }
 
--(BOOL)cancel
-{
-    BOOL ret = YES;
-    if ([_downloadStatus intValue] != kMTStatusNew && [_downloadStatus intValue] != kMTStatusDone) {
-		//Put alert here
-		NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",_showTitle] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@""];
-		myAlert.alertStyle = NSCriticalAlertStyle;
-		NSInteger result = [myAlert runModal];
-		if (result != NSAlertAlternateReturn) {
-			ret = NO;
-		}
+-(BOOL) isInProgress {
+    return ([_downloadStatus intValue] != kMTStatusNew && [_downloadStatus intValue] != kMTStatusDone);
+}
 
+-(void)cancel
+{
+    NSFileManager *fm = [NSFileManager defaultManager];
+    self.isCanceled = YES;
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+    if ([_downloadStatus intValue] == kMTStatusDownloading && activeURLConnection) {
+        [activeURLConnection cancel];
+        activeURLConnection = nil;
+        [fm removeItemAtPath:decryptFilePath error:nil];
     }
-    if (ret) {
-        NSFileManager *fm = [NSFileManager defaultManager];
-		self.isCanceled = YES;
-		[NSObject cancelPreviousPerformRequestsWithTarget:self];
-        if ([_downloadStatus intValue] == kMTStatusDownloading && activeURLConnection) {
-            [activeURLConnection cancel];
-            activeURLConnection = nil;
-            [fm removeItemAtPath:decryptFilePath error:nil];
-        }
-		while (pipingData){
-			//Block until latest pipe write is complete
-		} //Wait for pipe out to complete
-        [self cleanupFiles]; //Everything but the final file
-        if(decrypterTask && [decrypterTask isRunning]) {
-            [decrypterTask terminate];
-        }
-        if(encoderTask && [encoderTask isRunning]) {
-            [encoderTask terminate];
-        }
-        if (encodeFileHandle) {
-            [encodeFileHandle closeFile];
-            [fm removeItemAtPath:encodeFilePath error:nil];
-        }
-        if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && [_downloadStatus intValue] == kMTStatusDownloading)) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
-        }
-        [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+    while (pipingData){
+        //Block until latest pipe write is complete
+    } //Wait for pipe out to complete
+    [self cleanupFiles]; //Everything but the final file
+    if(decrypterTask && [decrypterTask isRunning]) {
+        [decrypterTask terminate];
+    }
+    if(encoderTask && [encoderTask isRunning]) {
+        [encoderTask terminate];
+    }
+    if (encodeFileHandle) {
+        [encodeFileHandle closeFile];
+        [fm removeItemAtPath:encodeFilePath error:nil];
+    }
+    if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && [_downloadStatus intValue] == kMTStatusDownloading)) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
+    }
+    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
 //        _downloadStatus = [NSNumber numberWithInt:kMTStatusNew];
-        _processProgress = 0.0;
-        _showStatus = @"";
-    }
-    return ret;
+    _processProgress = 0.0;
+    _showStatus = @"";
+    
 }
 
 -(void)updateProgress
