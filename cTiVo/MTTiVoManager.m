@@ -218,6 +218,25 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 #pragma mark - Download Management
 
+-(void)checkShowTitleUniqueness:(MTTiVoShow *)program
+{
+    //Make sure the title isn't the same and if it is add a -1 modifier
+    for (MTTiVoShow *p in _downloadQueue) {
+        if ([p.showTitle compare:program.showTitle] == NSOrderedSame) {
+            NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
+            NSTextCheckingResult *result = [ending firstMatchInString:program.showTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, program.showTitle.length)];
+            if (result) {
+                int n = [[program.showTitle substringWithRange:[result rangeAtIndex:2]] intValue];
+                program.showTitle = [[program.showTitle substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
+            } else {
+                program.showTitle = [program.showTitle stringByAppendingString:@"-1"];
+            }
+            [self checkShowTitleUniqueness:program];
+        }
+    }
+
+}
+
 -(void)addProgramToDownloadQueue:(MTTiVoShow *)program
 {
 	BOOL programFound = NO;
@@ -228,6 +247,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	
 	if (!programFound) {
+        //Make sure the title isn't the same and if it is add a -1 modifier
+        [self checkShowTitleUniqueness:program];
         program.isQueued = YES;
 		NSString *tryDirectory = _downloadDirectory;
 		//Check that download directory exists.  If create it.  If unsuccessful use default ~/Movies
