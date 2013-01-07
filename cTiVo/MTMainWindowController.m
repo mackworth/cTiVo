@@ -235,7 +235,6 @@ if (loadingTiVos.count) {
 	}
 	if (anySubscribed) {
 		[tiVoManager.subscribedShows checkSubscriptionsAll];
-		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
 		[subscriptionTable reloadData];
 	}
 }
@@ -244,39 +243,23 @@ if (loadingTiVos.count) {
 -(IBAction)downloadSelectedShows:(id)sender
 {
 	NSIndexSet *selectedRows = [tiVoShowTable selectedRowIndexes];
-	NSArray *displayedShows = tiVoShowTable.sortedShows;
-    for (int i = 0; i < tiVoManager.tiVoShows.count; i++) {
-        if([selectedRows containsIndex:i]) {
-            [tiVoManager downloadthisShowWithCurrentOptions:[displayedShows objectAtIndex:i]];
-        }
+	NSArray *selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:selectedRows];
+    for (MTTiVoShow * show in selectedShows) {
+        [tiVoManager downloadthisShowWithCurrentOptions:show];
     }
 	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
 //    [tiVoShowTable reloadData];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
 }
 
 -(IBAction)removeFromDownloadQueue:(id)sender
 {
 	NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
-	NSMutableArray *itemsToRemove = [NSMutableArray array];
-    for (int i = 0; i <  tiVoManager.downloadQueue.count; i++) {
-        if ([selectedRows containsIndex:i]) {
-            MTTiVoShow *programToRemove = [tiVoManager.downloadQueue objectAtIndex:i];
-            if ([programToRemove cancel]) {
-                [itemsToRemove addObject:programToRemove];
-            }
-       }
-    }
-	for (id i in itemsToRemove) {
-        ((MTTiVoShow *)i).isQueued = NO;
-		[tiVoManager.downloadQueue removeObject:i];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+	NSArray *itemsToRemove = [downloadQueueTable.sortedShows objectsAtIndexes:selectedRows];
+ 	for (MTTiVoShow * show in itemsToRemove) {
+		[tiVoManager deleteProgramFromDownloadQueue:show];
 	}
-//    [tiVoShowTable reloadData];
-	[tiVoShowTable deselectAll:nil];
-	[downloadQueueTable deselectAll:nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+ 	[downloadQueueTable deselectAll:nil];
 }
 
 -(IBAction)getDownloadDirectory:(id)sender

@@ -138,7 +138,7 @@
     [self removeAllObjects];
     
     for (NSDictionary * sub in tempArray) {
-        MTSubscription * tempSub = [[MTSubscription alloc] init];
+        MTSubscription * tempSub = [[[MTSubscription alloc] init] autorelease];
         tempSub.seriesTitle = sub[kMTSubscribedSeries];
         tempSub.lastRecordedTime = sub[kMTSubscribedDate];
         

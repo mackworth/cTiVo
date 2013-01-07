@@ -62,6 +62,7 @@
 
 -(void)addProgramToDownloadQueue:(MTTiVoShow *)program;
 -(void) downloadthisShowWithCurrentOptions:(MTTiVoShow*) thisShow;  
+-(void) deleteProgramFromDownloadQueue:(MTTiVoShow *) program;
 
 -(BOOL) canAddToiTunes:(NSDictionary *) format;
 -(BOOL) canSimulEncode:(NSDictionary *) format;

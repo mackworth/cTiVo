@@ -247,6 +247,21 @@ static MTTiVoManager *sharedTiVoManager = nil;
     [self addProgramToDownloadQueue:thisShow];
 }
 
+-(void) deleteProgramFromDownloadQueue:(MTTiVoShow *) program {
+    BOOL programFound = NO;
+	for (MTTiVoShow *p in _downloadQueue) {
+		if (p.showID == program.showID	) {
+			programFound = YES;
+		}
+	}
+	
+	if (programFound) {
+        program.isQueued = NO;
+        [_downloadQueue removeObject:program];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+        [[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
+	}
+}
 
 
 -(void)manageDownloads

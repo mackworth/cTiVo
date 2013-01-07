@@ -16,6 +16,6 @@
     IBOutlet NSWindowController *myController;
 }
 
-@property (nonatomic, assign) NSArray *sortedShows;
+@property (nonatomic, retain) NSArray *sortedShows;
 
 @end

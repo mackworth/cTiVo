@@ -9,7 +9,7 @@
 #import "MTDownloadList.h"
 
 @implementation MTDownloadList
-
+@synthesize  sortedShows= _sortedShows;
 //-(id)init
 //{
 //	self = [super init];
@@ -26,6 +26,10 @@
 		[self setNotifications];
 	}
 	return self;
+}
+
+-(IBAction) delete:(id)sender {
+   //Need to tell Controller to delete.
 }
 
 //-(id)initWithFrame:(NSRect)frameRect
@@ -51,6 +55,11 @@
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
 }
 
+-(void) reloadData {
+    self.sortedShows =nil;
+    [super reloadData];
+}
+
 -(void)updateTable
 {
     [self reloadData];
@@ -59,7 +68,10 @@
 
 -(NSArray *)sortedShows
 {
-	return [tiVoManager.downloadQueue sortedArrayUsingDescriptors:self.sortDescriptors];
+	if (!_sortedShows) {
+        self.sortedShows = [tiVoManager.downloadQueue sortedArrayUsingDescriptors:self.sortDescriptors];
+    }
+    return _sortedShows;
 }
 
 -(void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors
@@ -84,6 +96,7 @@
 
 -(void)dealloc
 {
+    self.sortedShows= nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }

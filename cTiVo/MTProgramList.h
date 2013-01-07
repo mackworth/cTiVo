@@ -15,7 +15,7 @@
 	MTTiVoManager *tiVoManager;
 }
 
-@property (nonatomic, assign) NSArray *sortedShows;
+@property (nonatomic, retain) NSArray *sortedShows;
 @property (nonatomic, retain) NSString *selectedTiVo;
 
 -(NSArray *)sortedShows;

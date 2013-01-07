@@ -12,7 +12,7 @@
 
 
 @implementation MTProgramList
-
+@synthesize  sortedShows= _sortedShows;
 //
 //-(id)init
 //{
@@ -60,7 +60,21 @@
 
 -(void)reloadData
 {
+    NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
+    
+    NSArray * selectedItems = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+    self.sortedShows = nil;
     [super reloadData];
+    
+    NSMutableIndexSet * newSelectionIndexes = [[[NSMutableIndexSet alloc] init] autorelease] ;
+    for (MTTiVoShow * show in selectedItems) {
+        NSUInteger index = [self.sortedShows indexOfObject:show];
+        if (index != NSNotFound) {
+            [newSelectionIndexes addIndex:index];
+        }
+    }
+    [self selectRowIndexes:newSelectionIndexes byExtendingSelection:NO];
+    
 }
 
 -(void)reloadEpisode:(NSNotification *)notification
@@ -81,26 +95,12 @@
 -(void)dealloc
 {
     self.selectedTiVo = nil;
+    self.sortedShows = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
 
 #pragma mark - Table Delegate Protocol
-
--(void)tableViewSelectionDidChange:(NSNotification *)notification
-{
-	return;
-//    NSTableView *viewChanged = (NSTableView *)notification.object;
-//    for (int i = 0; i <  _myTivos.recordings.count; i++) {
-//        NSTextField *thisRow = [viewChanged viewAtColumn:0 row:i makeIfNecessary:NO];
-//        if ([viewChanged isRowSelected:i]) {
-//            thisRow.backgroundColor = [NSColor colorWithCalibratedRed:.4 green:.4 blue:1 alpha:.5];
-//        } else {
-//            thisRow.backgroundColor = [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0];
-//        }
-//    }
-    
-}
 
 -(IBAction)selectTivo:(id)sender
 {
@@ -114,23 +114,26 @@
 
 -(NSArray *)sortedShows
 {
-    NSMutableArray *arrayToSort = [NSMutableArray arrayWithArray:tiVoManager.tiVoShows];
-    NSPredicate *tiVoPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
-        return YES;
-    }];;
-    if (self.selectedTiVo && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
-        tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.name == %@",self.selectedTiVo];
+    if (!_sortedShows ) {
+        NSMutableArray *arrayToSort = [NSMutableArray arrayWithArray:tiVoManager.tiVoShows];
+        NSPredicate *tiVoPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+            return YES;
+        }];;
+        if (self.selectedTiVo && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
+            tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.name == %@",self.selectedTiVo];
+        }
+        [arrayToSort filterUsingPredicate:tiVoPredicate];
+        self.sortedShows = [arrayToSort  sortedArrayUsingDescriptors:self.sortDescriptors];
     }
-    [arrayToSort filterUsingPredicate:tiVoPredicate];
-	return [arrayToSort  sortedArrayUsingDescriptors:self.sortDescriptors];
+    return _sortedShows;
 }
 
 
 #pragma mark - Table Data Source Protocol
 
--(void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors	
+-(void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors
 {
-	[self reloadData];
+    [self reloadData];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
