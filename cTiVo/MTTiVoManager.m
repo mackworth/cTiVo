@@ -77,10 +77,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		tivoBrowser.delegate = self;
 		[tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 		[tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
-//		tiVoShowsDictionary = [NSMutableDictionary new];
 		_tivoServices = [NSMutableArray new];
 		listingData = [NSMutableData new];
-//		_tiVoShows = [NSMutableArray new];
 		_tiVoList = [NSMutableArray new];
 		queue = [NSOperationQueue new];
 		_downloadQueue = [NSMutableArray new];
@@ -152,10 +150,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
     [defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
     [defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDecryptDidFinish object:nil];
     [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
+    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
-//    [defaultCenter addObserver:self selector:@selector(updateVideoList) name:kMTNotificationTiVoListUpdated object:nil];
-//	[defaultCenter addObserver:self selector:@selector(updateMediaKeysDefaults) name:kMTNotificationMediaKeyUpdated object:nil];
 }
 
 
@@ -387,7 +384,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 
 	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
-//	[newTiVo updateShows:nil];
     [_tiVoList addObject:newTiVo];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
     

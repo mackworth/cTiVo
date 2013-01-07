@@ -26,9 +26,6 @@
 	NSMutableArray *loadingTiVos;
 }
 
-@property (nonatomic, assign) NSMutableDictionary *mediaKeys;
-@property (nonatomic, assign) NSMutableArray *tiVoList, *formatList;
-@property (nonatomic, assign) NSDictionary *selectedFormat;
 @property (nonatomic, assign) MTDownloadList *downloadQueueTable;
 @property (nonatomic, assign) MTProgramList *tiVoShowTable;
 @property (nonatomic, assign) MTSubscriptionTableView *subscriptionTable;

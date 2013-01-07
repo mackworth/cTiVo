@@ -9,15 +9,16 @@
 //Queue change notifications
 #define kMTNotificationTiVoShowsUpdated @"MTNotificationTiVoShowsUpdated"
 #define kMTNotificationDownloadQueueUpdated @"MTNotificationDownloadQueueUpdated"
+#define kMTNotificationSubscriptionsUpdated @"MTNotificationSubscriptionsUpdated"
 
 //Download Progress Notifications
 #define kMTNotificationDownloadDidFinish @"MTNotificationDownloadDidFinish"
 #define kMTNotificationDecryptDidFinish @"MTNotificationDecryptDidFinish"
 #define kMTNotificationEncodeDidFinish @"MTNotificationEncodeDidFinish"
+#define kMTNotificationEncodeWasCanceled @"MTNotificationEncodeWasCanceled"
 #define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"
 
 //UI Change Notifications
-#define kMTNotificationTiVoChanged @"MTNotificationTiVoChanged"
 #define kMTNotificationTiVoListUpdated @"MTNotificationTiVoListUpdated"
 #define kMTNotificationFormatListUpdated @"MTNotificationFormatListUpdated"
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"
@@ -25,8 +26,6 @@
 #define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated"
 #define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"
 #define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
-#define kMTNotificationSubscriptionsUpdated @"MTNotificationSubscriptionsUpdated"
-#define kMTNotificationTiVoNowPlayingDownloaded @"MTNotificationTiVoNowPlayingDownloaded"
 #define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"
 
 //Download Status
@@ -38,7 +37,12 @@
 #define kMTStatusEncoding 5
 #define kMTStatusDone 6
 
-#define kMTMaxNumDownloaders 2
+//Contants
+
+#define kMTMaxNumDownloaders 2      //Limit number of encoders to limit cpu usage
+#define kMTUpdateIntervalMinutes 15 //Update interval for re-checking current TiVo
+#define kMTMaxDownloadRetries 3	  // Only allow 3 retries to download a show
+#define kMTProgressCheckDelay 60  //Check progress every 60 seconds to make sure its not stalled
 
 //Subscribed Show
 #define kMTSubscribedSeries @"MTSubscribedSeries"
@@ -49,12 +53,9 @@
 
 //Misc
 
-#define kMTUpdateIntervalMinutes 15 //Update interval for re-checking current TiVo
 #define kMTFirstName @"MTFirstName"
 #define kMTLastName @"MTLastName"
 #define kMTAllTiVos @"All TiVos"
-#define kMTMaxDownloadRetries 3	  // Only allow 3 retries to download a show
-#define kMTProgressCheckDelay 60  //Check progress every 60 seconds to make sure its not stalled
 
 
 //USER DEFAULTS

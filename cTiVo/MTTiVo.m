@@ -70,25 +70,6 @@
     self.mediaKey = mediaKeyString;
 }
 
-//-(void)getMediaKeyFromUser:(NSString *)message
-//{
-//	NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-//	NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
-//	
-//	[input setStringValue:_mediaKey];
-//	[input autorelease];
-//	[keyAlert setAccessoryView:input];
-//	NSInteger button = [keyAlert runModal];
-//	if (button == NSAlertDefaultReturn) {
-//		[input validateEditing];
-//		NSLog(@"Got Media Key %@",input.stringValue);
-//		self.mediaKey = input.stringValue;
-////		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyUpdated object:nil];
-//	}
-//
-//}
-//
-
 -(void)updateShows:(id)sender
 {
 	if (isConnecting) {
@@ -105,10 +86,6 @@
 	}
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateShows:) object:nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
-	//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-//	if (_mediaKey.length == 0) {
-//		[self getMediaKeyFromUser:[NSString stringWithFormat:@"Need Media Key for %@",_tiVo.name]];
-//	}
 	NSString *tivoURLString = [[NSString stringWithFormat:@"https://tivo:%@@%@/nowplaying/index.html?Recurse=Yes",_mediaKey,_tiVo.hostName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 //	NSLog(@"Tivo URL String %@",tivoURLString);
 	NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
@@ -129,7 +106,7 @@
     NSMutableDictionary * previousShowList = [NSMutableDictionary dictionary];
 	for (MTTiVoShow * show in _shows) {
 		NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
-        //		NSLog(@"prevID: %@ %@",idString,show.showTitle);
+//		NSLog(@"prevID: %@ %@",idString,show.showTitle);
 		[previousShowList setValue:show forKey:idString];
 	}
     [_shows removeAllObjects];
@@ -147,9 +124,6 @@
 	if (tables.count == 0) {
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:self];
 		_mediaKeyIsGood = NO;
-//		[self getMediaKeyFromUser:[NSString stringWithFormat:@"Incorrect Media Key for %@",_tiVo.name]];
-		//		loadingProgramListLabel.stringValue = @"Incorrect Media Key";
-//        [self setProgramLoadingString:@"Incorrect Media Key"];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
 		return;
 	}
@@ -267,17 +241,15 @@
                 [_queue addOperation:nextDetail];
 				//			[thisShow getShowDetail];
 			} else {
-				//NSLog(@"cache hit: %@ thisShow: %@", idString, thisShow.showTitle);
+//              NSLog(@"cache hit: %@ thisShow: %@", idString, thisShow.showTitle);
 			}
 			[_shows addObject:thisShow];
 		}
 	}
 	self.lastUpdated = [NSDate date];  // Record when we updated
 	[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
-	//	NSLog(@"Avialable Recordings are %@",_recordings);
-	//    if (updatingTiVoShows == _tiVoShows) {
+//	NSLog(@"Avialable Recordings are %@",_recordings);
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-	//    }
     [_tiVoManager setProgramLoadingString:@""];
 }
 
@@ -309,7 +281,7 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-	//    [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
+//    [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
     [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:[[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_tiVo.name] persistence:NSURLCredentialPersistencePermanent] forAuthenticationChallenge:challenge];
     [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
 }
@@ -334,7 +306,6 @@
     [self parseListingData];
     [showURLConnection release];
     showURLConnection = nil;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoNowPlayingDownloaded object:self];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 }
 

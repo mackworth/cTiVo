@@ -13,15 +13,6 @@
 
 @implementation MTProgramList
 @synthesize  sortedShows= _sortedShows;
-//
-//-(id)init
-//{
-//	self = [super init];
-//	if (self) {
-//		[self setNotifications];
-//	}
-//	return self;
-//}
 
 -(id) initWithCoder:(NSCoder *)aDecoder
 {
@@ -32,19 +23,9 @@
 	return self;
 }
 
-//-(id)initWithFrame:(NSRect)frameRect
-//{
-//	self = [super initWithFrame:frameRect];
-//	if (self) {
-//		[self setNotifications];
-//	}
-//	return self;
-//}
-//
 -(void)setNotifications
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationReloadEpisode object:nil];
-//	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationShowListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
 	
 }
@@ -142,21 +123,6 @@
     return self.sortedShows.count;
 }
 
-//-(id)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
-//{
-//    id result;
-//	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
-//    if([identifier compare: @"Queued"] == NSOrderedSame) {
-//        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20)] autorelease];
-//        thisCell.identifier = identifier;
-//        result = (id)thisCell;
-//	} else {
-//        result =[super makeViewWithIdentifier:identifier owner:owner];
-//    }
-//    return result;
-//}
-//
-
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     // get an existing cell with the MyView identifier if it exists
@@ -199,7 +165,6 @@
 		[result.textField setAlignment:NSCenterTextAlignment];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
-//        NSInteger c = NSOffState;
         if (thisShow.isQueued) {
             result.textField.stringValue = @"✔";
         } else {

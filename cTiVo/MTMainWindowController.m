@@ -21,22 +21,14 @@
 {
 	self = [super initWithWindowNibName:windowNibName];
 	if (self) {
-		_selectedFormat = tiVoManager.selectedFormat;
-//		_selectedTiVo = tiVoManager.selectedTiVo;
-		_formatList = tiVoManager.formatList;
-		_tiVoList = tiVoManager.tiVoList;
 		loadingTiVos = [NSMutableArray new];
+        self.selectedTiVo = nil;
 	}
 	return self;
 }
 
 -(void)awakeFromNib
 {
-//Connect displays to data sources
-//    tiVoShowTable.tiVoShows = tiVoManager.tiVoShows; 
-//    downloadQueueTable.downloadQueue = tiVoManager.downloadQueue; 
-//    subscriptionTable.subscribedShows = tiVoManager.subscribedShows;
-    self.selectedTiVo = nil;
 	[self refreshFormatListPopup];
 }
 
@@ -48,12 +40,11 @@
 	[tiVoListPopUp removeAllItems];
 	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
     downloadDirectory.stringValue = tiVoManager.downloadDirectory;
- 	tiVoManager.tiVoShowTableView = tiVoShowTable;
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoListUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(reloadProgramData) name:kMTNotificationTiVoShowsUpdated object:nil];
-    [defaultCenter addObserver:downloadQueueTable selector:@selector(updateTable) name:kMTNotificationDownloadQueueUpdated object:nil];
+    [defaultCenter addObserver:downloadQueueTable selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
     [defaultCenter addObserver:downloadQueueTable selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
 	
 	//Spinner Progress Handling 
@@ -69,8 +60,7 @@
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
-        _selectedFormat = tiVoManager.selectedFormat;
-        BOOL caniTune = [[_selectedFormat objectForKey:@"iTunes"] boolValue];
+        BOOL caniTune = [[tiVoManager.selectedFormat objectForKey:@"iTunes"] boolValue];
         [addToiTunesButton setEnabled:caniTune];
         if (caniTune) {
             BOOL wantsiTunes = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesEncode];
@@ -86,7 +76,7 @@
 		   tiVoManager.addToItunes = YES;
         }
 
-        BOOL canSimulEncode = ![[_selectedFormat objectForKey:@"mustDownloadFirst"] boolValue];
+        BOOL canSimulEncode = ![[tiVoManager.selectedFormat objectForKey:@"mustDownloadFirst"] boolValue];
         [simultaneousEncodeButton setEnabled:canSimulEncode];
         if (canSimulEncode) {
             BOOL wantsSimul = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
@@ -134,31 +124,15 @@ if (loadingTiVos.count) {
 	[tiVoShowTable reloadData];
 }
 
--(void)setFormatList:(NSMutableArray *)formatList
-{
-	_formatList = formatList;
-    [self refreshFormatListPopup];
-}
-
-
--(void)setTiVoList:(NSMutableArray *)tiVoList
-{
-	_tiVoList = tiVoList;
-}
-
-
 #pragma mark - Notification Responsders
 
 -(void)refreshFormatListPopup
 {
 	[formatListPopUp removeAllItems];
-//    if (_selectedFormat) {
-//        mediaKeyLabel.stringValue = [[NSUserDefaults standardUserDefaults] stringForKey:[_selectedFormat objectForKey:@"name"]];
-//    }
-	for (NSDictionary *fl in _formatList) {
+	for (NSDictionary *fl in tiVoManager.formatList) {
 		[formatListPopUp addItemWithTitle:[fl objectForKey:@"name"]];
         [[formatListPopUp lastItem] setRepresentedObject:fl];
-		if (_selectedFormat && [[fl objectForKey:@"name"] compare:[_selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
+		if (tiVoManager.selectedFormat && [[fl objectForKey:@"name"] compare:[tiVoManager.selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
 			[formatListPopUp selectItem:[formatListPopUp lastItem]];
 		}
 		
@@ -180,8 +154,6 @@ if (loadingTiVos.count) {
         [[tiVoListPopUp lastItem] setRepresentedObject:ts];
 		if ([ts.tiVo.name compare:_selectedTiVo] == NSOrderedSame) {
 			[tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
-//            _myTiVos.selectedTiVo = ts;
-//            _selectedTiVo = ts;
 		}
 		
 	}
@@ -197,21 +169,12 @@ if (loadingTiVos.count) {
 
 #pragma mark - UI Actions
 
-//-(IBAction)selectTivo:(id)sender
-//{
-//    NSPopUpButton *thisButton = (NSPopUpButton *)sender;
-//    _selectedTiVo = [[thisButton selectedItem] title];
-//    NSString * possibleKey =[[[NSUserDefaults standardUserDefaults]  objectForKey:kMTMediaKeys] objectForKey:_selectedTiVo];
-//	[[NSUserDefaults standardUserDefaults] setObject:_selectedTiVo forKey:kMTSelectedTiVo];
-//}
-//
 -(IBAction)selectFormat:(id)sender
 {
     if (sender == formatListPopUp) {
         NSPopUpButton *thisButton = (NSPopUpButton *)sender;
         tiVoManager.selectedFormat = [[thisButton selectedItem] representedObject];
-    //    _selectedFormat = _myTiVos.selectedFormat;
-        [[NSUserDefaults standardUserDefaults] setObject:[_selectedFormat objectForKey:@"name"] forKey:kMTSelectedFormat];
+        [[NSUserDefaults standardUserDefaults] setObject:[tiVoManager.selectedFormat objectForKey:@"name"] forKey:kMTSelectedFormat];
     } else {
         MTPopUpButton *thisButton = (MTPopUpButton *)sender;
         if ([thisButton.owner class] == [MTSubscription class]) {
@@ -250,7 +213,6 @@ if (loadingTiVos.count) {
     }
 	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
-//    [tiVoShowTable reloadData];
 }
 
 -(BOOL) confirmCancel:(NSString *) title {

@@ -10,15 +10,7 @@
 
 @implementation MTDownloadList
 @synthesize  sortedShows= _sortedShows;
-//-(id)init
-//{
-//	self = [super init];
-//	if (self) {
-//		[self setNotifications];
-//	}
-//	return self;
-//}
-//
+
 -(id) initWithCoder:(NSCoder *)aDecoder
 {
 	self = [super initWithCoder:aDecoder];
@@ -32,15 +24,7 @@
    //Need to tell Controller to delete.
 }
 
-//-(id)initWithFrame:(NSRect)frameRect
-//{
-//	self = [super initWithFrame:frameRect];
-//	if (self) {
-//		[self setNotifications];
-//	}
-//	return self;
-//}
-//
+
 -(void)setNotifications
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadStatusChanged object:nil];
@@ -60,12 +44,6 @@
     [super reloadData];
 }
 
--(void)updateTable
-{
-    [self reloadData];
-    //Check download Status
-}
-
 -(NSArray *)sortedShows
 {
 	if (!_sortedShows) {
@@ -78,7 +56,6 @@
 {
 	[self reloadData];
 }
-
 
 -(void)updateProgress
 {

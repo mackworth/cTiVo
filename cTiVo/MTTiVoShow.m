@@ -87,12 +87,8 @@
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]	;
 	[self getShowDetail];
 	if (gotDetails) {
-		//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-		//		[_myTableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
 		NSNotification *n = [NSNotification notificationWithName:kMTNotificationReloadEpisode object:self];
 		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:n  waitUntilDone:NO];
-//		[self performSelectorOnMainThread:@selector(reloadEpisode) withObject:nil waitUntilDone:YES];
-		//        [_myTableView updateEpisodeForShow:self];
 	} else {
 		NSLog(@"Got Details Failed for %@",_showTitle);
 	}
@@ -384,7 +380,6 @@
 	previousProcessProgress = 0.0;
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
     [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
-//    _downloadStatus = [NSNumber numberWithInt:kMTStatusDownloading];
     _showStatus = @"Downloading";
 }
 -(void)trackDownloadEncode
@@ -393,7 +388,6 @@
         [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
     } else {
         [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
-//        _downloadStatus = [NSNumber numberWithInt:kMTStatusDone];
         _showStatus = @"Complete";
         _processProgress = 1.0;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
@@ -401,10 +395,6 @@
         if (_addToiTunesWhenEncoded) {
 			MTiTunes *iTunes = [[[MTiTunes alloc] init] autorelease];
 			[iTunes importIntoiTunes:self];
-			//            iTunesApplication *iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
-			//            if (iTunes) {
-			//                [iTunes add:[NSArray arrayWithObject:[NSURL fileURLWithPath:targetFilePath]] to:nil];
-			//            }
         }
     }
 }
@@ -428,7 +418,6 @@
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
  	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
     [self setValue:[NSNumber numberWithInt:kMTStatusDecrypting] forKeyPath:@"downloadStatus"];
-//    _downloadStatus = [NSNumber numberWithInt:kMTStatusDecrypting];
 	_showStatus = @"Decrypting";
 	[decrypterTask setArguments:arguments];
 	[decrypterTask launch];
@@ -443,7 +432,6 @@
 		_processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [self setValue:[NSNumber numberWithInt:kMTStatusDecrypted] forKeyPath:@"downloadStatus"];
-//        _downloadStatus = [NSNumber numberWithInt:kMTStatusDecrypted];
         _showStatus = @"Wait for encoder";
 		NSError *thisError = nil;
 		[[NSFileManager defaultManager] removeItemAtPath:downloadFilePath error:&thisError];
@@ -504,7 +492,6 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 	[encoderTask launch];
     [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-//    _downloadStatus = [NSNumber numberWithInt:kMTStatusEncoding];
 	_showStatus = @"Encoding";
 	[self performSelector:@selector(trackEncodes) withObject:nil afterDelay:0.5];
 	
@@ -520,17 +507,12 @@
 		encoderTask = nil;
         _showStatus = @"Complete";
         [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
-//        _downloadStatus = [NSNumber numberWithInt:kMTStatusDone];
         [self cleanupFiles];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
         if (_addToiTunesWhenEncoded) {
 			MTiTunes *iTunes = [[[MTiTunes alloc] init] autorelease];
 			[iTunes importIntoiTunes:self];
-//            iTunesApplication *iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
-//            if (iTunes) {
-//                [iTunes add:[NSArray arrayWithObject:[NSURL fileURLWithPath:targetFilePath]] to:nil];
-//            }
         }
 		return;
 	}
@@ -633,10 +615,9 @@
         [fm removeItemAtPath:encodeFilePath error:nil];
     }
     if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && [_downloadStatus intValue] == kMTStatusDownloading)) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
     }
     [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
-//        _downloadStatus = [NSNumber numberWithInt:kMTStatusNew];
     _processProgress = 0.0;
     _showStatus = @"";
     
@@ -729,7 +710,6 @@
 {
     NSLog(@"URL Connection Failed with error %@",error);
     [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
-//	_downloadStatus = [NSNumber numberWithInt:kMTStatusNew];
 	activeURLConnection = nil;
 }
 
@@ -742,10 +722,8 @@
         downloadFileHandle = nil;
         [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-//        _downloadStatus = [NSNumber numberWithInt:kMTStatusDownloaded];
     } else {
         [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-//        _downloadStatus = [NSNumber numberWithInt:kMTStatusEncoding];
         _showStatus = @"Encoding";
  		downloadingURL = NO;
        [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];

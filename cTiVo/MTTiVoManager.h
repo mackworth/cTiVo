@@ -44,17 +44,14 @@
 
 //Shared Data
 
-@property (nonatomic, readonly) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
-@property (nonatomic, readonly) NSMutableArray *subscribedShows;
+@property (nonatomic, retain) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
+@property (nonatomic, retain) NSMutableArray *subscribedShows;
 @property (nonatomic, retain) NSString *downloadDirectory, *programLoadingString;
 
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic) BOOL videoListNeedsFilling, addToItunes, simultaneousEncode;
 @property (nonatomic, retain) NSDictionary *selectedFormat;
-//@property (nonatomic, retain) NSNetService *selectedTiVo;
-@property (nonatomic, readonly) NSMutableArray *tiVoNames;
-@property (nonatomic,assign) MTProgramList *tiVoShowTableView;
 
 + (MTTiVoManager *)sharedTiVoManager;
 
