@@ -15,7 +15,11 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code here.
-		_popUpButton = [[[MTPopUpButton alloc] initWithFrame:NSMakeRect(4, 4, frame.size.width-8, 20) pullsDown:NO] autorelease];
+		_popUpButton = [[[MTPopUpButton alloc] initWithFrame:NSMakeRect(4, 2, frame.size.width-8, frame.size.height-4) pullsDown:NO] autorelease];
+        [_popUpButton setFont:[NSFont systemFontOfSize:12]];
+        [_popUpButton.cell setControlSize:NSMiniControlSize];
+        [_popUpButton setAutoresizesSubviews:YES];
+        [_popUpButton setAutoresizingMask:NSViewWidthSizable];
         [_popUpButton setTarget:target];
         [_popUpButton setAction:selector];
 		[self addSubview:_popUpButton];

@@ -101,7 +101,7 @@
 
 -(CGFloat)tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row
 {
-    return 24.0;
+    return 18.0;
 }
 
 

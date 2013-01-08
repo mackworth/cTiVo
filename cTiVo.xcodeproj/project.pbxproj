@@ -133,7 +133,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1E791BD01697ACAA00E47E84 /* UIViews */ = {
+		1E791BD01697ACAA00E47E84 /* NSViews */ = {
 			isa = PBXGroup;
 			children = (
 				D2995CA4168B8BB200B960B9 /* MTCheckBox.h */,
@@ -149,7 +149,7 @@
 				D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */,
 				D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */,
 			);
-			name = UIViews;
+			name = NSViews;
 			sourceTree = "<group>";
 		};
 		D2D60B9216766EFD00CE32DE = {
@@ -226,7 +226,7 @@
 				D22BC41E1680DB5E007D699C /* MTTiVoShow.m */,
 				D2D60BBE16766F1100CE32DE /* Resources */,
 				D2D60BA816766EFD00CE32DE /* Supporting Files */,
-				1E791BD01697ACAA00E47E84 /* UIViews */,
+				1E791BD01697ACAA00E47E84 /* NSViews */,
 				D2D60BDF16766FB100CE32DE /* Utilities */,
 			);
 			path = cTiVo;
