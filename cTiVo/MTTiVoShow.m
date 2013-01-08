@@ -101,7 +101,7 @@
 	}
 	gotDetails = YES;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]	;
-	NSString *detailURLString = [NSString stringWithFormat:@"https://%@/TiVoVideoDetails?id=%d",_tiVo.hostName,_showID];
+	NSString *detailURLString = [NSString stringWithFormat:@"https://%@/TiVoVideoDetails?id=%d",_tiVo.tiVo.hostName,_showID];
 //	NSLog(@"Show Detail URL %@",detailURLString);
 	NSURLResponse *detailResponse = nil;
 	NSURLRequest *detailRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:detailURLString]];;

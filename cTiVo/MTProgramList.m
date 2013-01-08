@@ -102,7 +102,7 @@
             return YES;
         }];;
         if (self.selectedTiVo && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
-            tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.name == %@",self.selectedTiVo];
+            tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",self.selectedTiVo];
         }
         [arrayToSort filterUsingPredicate:tiVoPredicate];
         self.sortedShows = [arrayToSort  sortedArrayUsingDescriptors:self.sortDescriptors];
@@ -150,8 +150,8 @@
 		result.textField.stringValue = thisShow.showTitle ;
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
-        result.textField.stringValue = thisShow.tiVo.name;
-        result.toolTip = thisShow.tiVo.name;
+        result.textField.stringValue = thisShow.tiVo.tiVo.name;
+        result.toolTip = thisShow.tiVo.tiVo.name;
     } else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.showDateString;
 		[result.textField setAlignment:NSCenterTextAlignment];

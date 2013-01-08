@@ -295,6 +295,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)manageDownloads
 {
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
     BOOL isDownloading = NO, isDecrypting = NO;
     for (MTTiVoShow *s in _downloadQueue) {
         if ([s.downloadStatus intValue] == kMTStatusDownloading) {
@@ -307,10 +308,16 @@ static MTTiVoManager *sharedTiVoManager = nil;
     if (!isDownloading) {
         for (MTTiVoShow *s in _downloadQueue) {
             if ([s.downloadStatus intValue] == kMTStatusNew && (numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
-				if (s.simultaneousEncode) {
-					numEncoders++;
-				}
-				[s download];
+                SCNetworkReachabilityGetFlags(s.tiVo.reachability , &networkReachabilityFlags);
+                if (networkReachabilityFlags & 0x20000) {  //if the 17th bit is set we are reachable.
+                    if (s.simultaneousEncode) {
+                        numEncoders++;
+                    }
+                    [s download];
+                } else {    //We'll try again in kMTRetryNetworkInterval seconds at a minimum;
+                    NSLog(@"Could not reach %@ tivo will try later",s.tiVo.tiVo.name);
+                    [self performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTRetryNetworkInterval];
+                }
                 break;
             }
         }

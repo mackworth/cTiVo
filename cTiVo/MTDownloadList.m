@@ -149,7 +149,7 @@
         result.toolTip = rowData.showTitle;
 	
     } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
-        result.textField.stringValue = rowData.tiVo.name ;
+        result.textField.stringValue = rowData.tiVo.tiVo.name ;
         result.toolTip = result.textField.stringValue;
 	
     } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {

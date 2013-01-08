@@ -46,6 +46,7 @@
 		} else {
 			[self updateShows:nil];
 		}
+        _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [tiVo.addresses[0] bytes]);
 	}
 	return self;
 }
@@ -235,7 +236,7 @@
                     }
                 }
                 thisShow.fileSize = sizeValue;
-                thisShow.tiVo = _tiVo;
+                thisShow.tiVo = self;
 				thisShow.mediaKey = _mediaKey;
                 NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil] autorelease];
                 [_queue addOperation:nextDetail];

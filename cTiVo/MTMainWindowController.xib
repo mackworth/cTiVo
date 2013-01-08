@@ -3,12 +3,12 @@
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
 		<string key="IBDocument.SystemVersion">12C60</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2844</string>
+		<string key="IBDocument.InterfaceBuilderVersion">2840</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">2844</string>
+			<string key="NS.object.0">2840</string>
 		</object>
 		<array key="IBDocument.IntegratedClassDependencies">
 			<string>NSButton</string>
@@ -651,8 +651,8 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="969919815"/>
-															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype" id="270808298">
-																<string key="NSKey">tiVo.name</string>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">tiVo.tiVo.name</string>
 																<bool key="NSAscending">YES</bool>
 																<string key="NSSelector">localizedCaseInsensitiveCompare:</string>
 															</object>
@@ -808,7 +808,6 @@
 														<reference ref="207287558"/>
 														<reference ref="138257121"/>
 														<reference ref="395305364"/>
-														<reference ref="270808298"/>
 													</array>
 													<int key="NSColumnAutoresizingStyle">4</int>
 													<int key="NSDraggingSourceMaskForLocal">15</int>
@@ -1003,8 +1002,8 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<bool key="NSIsEditable">YES</bool>
 															<reference key="NSTableView" ref="629789127"/>
-															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype" id="950190610">
-																<string key="NSKey">tiVo.name</string>
+															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
+																<string key="NSKey">tiVo.tiVo.name</string>
 																<bool key="NSAscending">YES</bool>
 																<string key="NSSelector">localizedCaseInsensitiveCompare:</string>
 															</object>
@@ -1119,7 +1118,6 @@
 													<reference key="NSDelegate"/>
 													<reference key="NSDataSource"/>
 													<array key="NSSortDescriptors">
-														<reference ref="950190610"/>
 														<reference ref="121197169"/>
 														<reference ref="310169153"/>
 													</array>
@@ -1466,7 +1464,7 @@
 					<reference key="NSSuperview"/>
 					<reference key="NSNextKeyView" ref="755028800"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1920, 1058}}</string>
 				<string key="NSMinSize">{700, 552}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <SystemConfiguration/SystemConfiguration.h>
 
 @class MTTiVoManager;
 
@@ -23,6 +24,7 @@
 @property (nonatomic, assign) NSOperationQueue *queue;
 @property (nonatomic, retain) MTTiVoManager *tiVoManager;
 @property BOOL mediaKeyIsGood;
+@property SCNetworkReachabilityRef reachability;
 
 +(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
 

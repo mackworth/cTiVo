@@ -13,6 +13,7 @@
 #import "MTProgramList.h"
 #import "MTTiVo.h"
 #import "MTSubscription.h"
+#import <SystemConfiguration/SystemConfiguration.h>
 
 
 @interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate>  {
@@ -39,7 +40,7 @@
 	NSOperationQueue *queue;
 	
 	NSArray *hostAddresses;
-
+    uint32_t    networkReachabilityFlags;
 }
 
 //Shared Data
