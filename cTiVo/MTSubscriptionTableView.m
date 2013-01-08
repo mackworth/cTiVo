@@ -84,6 +84,10 @@
     [self deselectAll:nil];
 }
 
+-(IBAction)delete:(id)sender{
+    [self unsubscribeSelectedItems:sender];
+}
+
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];

@@ -122,7 +122,8 @@
 {
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
 		//Cancel and restart or delete depending on number of time we've been through this
-		[self cancel];
+		NSLog(@"Stalled, %@ download of %@ ",(_numRetriesRemaining > 0) ? @"restarting":@"cancelling",  _showTitle);
+        [self cancel];
 		if (_numRetriesRemaining <= 0) {
 			[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
 			_showStatus = @"Failed";
@@ -344,7 +345,7 @@
     activeURLConnection = [[[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] autorelease];
 
 //Now set up for either simul or sequential download
-
+    NSLog(@"Starting download %@",_showTitle);
     if (!_simultaneousEncode || [[_encodeFormat objectForKey:@"mustDownloadFirst"] boolValue]) {
         _isSimultaneousEncoding = NO;
     } else { //We'll build the full piped download chain here
@@ -391,6 +392,7 @@
     if([encoderTask isRunning]) {
         [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
     } else {
+        NSLog(@"Finished simul donload/encode %@", _showTitle);
         [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
         _showStatus = @"Complete";
         _processProgress = 1.0;
@@ -466,6 +468,7 @@
 {
 	encoderTask = [[NSTask alloc] init];
 //	NSDictionary *selectedFormat = [programEncoding objectForKey:kMTSelectedFormat];
+	NSLog(@"starting encode of %@", _showTitle);
 	NSMutableArray *arguments = nil;
 	if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"mencoder"] == NSOrderedSame ) {
 		[encoderTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"mencoder" ofType:@""]];
@@ -504,6 +507,7 @@
 -(void)trackEncodes
 {
 	if (![encoderTask isRunning]) {
+        NSLog(@"Finished Encoding %@",_showTitle);
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         _processProgress = 1.0;
         [[NSFileManager defaultManager] removeItemAtPath:decryptFilePath error:nil];
@@ -596,6 +600,7 @@
 
 -(void)cancel
 {
+    NSLog(@"Cancelling %@", _showTitle);
     NSFileManager *fm = [NSFileManager defaultManager];
     self.isCanceled = YES;
     [NSObject cancelPreviousPerformRequestsWithTarget:self];

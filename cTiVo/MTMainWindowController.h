@@ -8,11 +8,11 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
-#import "MTDownloadList.h"
-#import "MTProgramList.h"
-#import "MTSubscriptionTableView.h"
-#import "MTPopUpButton.h"
 
+@class MTDownloadList;
+@class MTProgramList;
+@class MTSubscriptionTableView;
+@class MTPopUpButton;
 
 @interface MTMainWindowController : NSWindowController {
 	IBOutlet NSPopUpButton *tiVoListPopUp, *formatListPopUp;

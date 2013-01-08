@@ -21,7 +21,7 @@
 }
 
 -(IBAction) delete:(id)sender {
-   //Need to tell Controller to delete.
+    [myController removeFromDownloadQueue:sender];
 }
 
 

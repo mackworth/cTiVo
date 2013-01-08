@@ -8,12 +8,13 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
+#import "MTMainWindowController.h"
 #import "MTDownloadListCellView.h"
 #import "MTDownloadListCheckCell.h"
 #import "MTProgressindicator.h"
 
 @interface MTDownloadList : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
-    IBOutlet NSWindowController *myController;
+    IBOutlet MTMainWindowController *myController;
 }
 
 @property (nonatomic, retain) NSArray *sortedShows;

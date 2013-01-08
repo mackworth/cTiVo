@@ -7,6 +7,10 @@
 //
 
 #import "MTMainWindowController.h"
+#import "MTDownloadList.h"
+#import "MTProgramList.h"
+#import "MTSubscriptionTableView.h"
+#import "MTPopUpButton.h"
 #import "MTCheckBox.h"
 
 @interface MTMainWindowController ()

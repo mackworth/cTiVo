@@ -77,38 +77,16 @@
 }
 
 
-//-(void) testModule {
-//	NSLog(@"Current song is %@", [[self.iTunes currentTrack] name]);
-//	
-//	NSLog(@"Library playlist contains %ld", self.libraryPlayList.tracks.count);
-//	NSLog(@"Tivo Shows playlist contains %ld", self.tivoPlayList.tracks.count);
-//	MTTiVoShow * show = [[MTTiVoShow alloc] init];
-//	show.title = @"Aistream";
-//	if (![self importIntoiTunes:@{@"fileName":@"/Users/hughmackworth/Movies/TiVoShows/mitologia.mp4",
-//	 @"Title": @"Aistream",
-//	 @"ID": @(23432),
-//	 @"Size": @(234333343),
-//	
-//	@"episodeNum": @(23),
-//	@"episodeYear":@(2012),
-//	@"episodeLength": @(70),
-//	 @"episodeGenre": @"Comedy",
-//		 }]) NSLog(@"Ooops");
-//	NSLog(@"Tivo Shows playlist contains %ld", self.tivoPlayList.tracks.count);
-//
-//}
-
 -(BOOL) importIntoiTunes: (MTTiVoShow * ) show {
 	//Caller responsible for informing user of progress
 	// There can be a long delay as iTunes starts up
 	NSURL * showFileURL = [NSURL fileURLWithPath:show.encodeFilePath];
-	NSLog(@"%@",showFileURL);
 	
 	
-	//NSLog(@"adding %@",trackName);
+	
 	iTunesTrack * newTrack = [self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
 	if ([newTrack exists]) {
-		NSLog(@"Added track: %@", newTrack);
+		NSLog(@"Added track to iTunes: %@", newTrack);
 
 		if ((show.episodeTitle.length ==0) &&
 			([show.episodeNumber intValue] == 0) &&
@@ -145,7 +123,7 @@
 	 */
 		return YES;
 	} else {
-		NSLog(@"Couldn't add track: %@ from %@", show.showTitle, showFileURL);
+		NSLog(@"Couldn't add track to itunes: %@ from %@", show.showTitle, showFileURL);
 		return NO;
 	}
 }

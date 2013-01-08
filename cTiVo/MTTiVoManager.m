@@ -364,6 +364,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
 - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
 {
 	NSLog(@"Found Service %@",netService);
+    for (NSNetService * prevService in _tivoServices) {
+        if ([prevService.name compare:netService.name] == NSOrderedSame) {
+            return; //already got this one
+        }
+    }
     [_tivoServices addObject:netService];
     netService.delegate = self;
     [netService resolveWithTimeout:2.0];
