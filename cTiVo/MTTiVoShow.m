@@ -47,7 +47,6 @@
 		_episodeGenre = @"";
 //		_originalAirDate = @"";
 		_episodeYear = 0;
-		_numRetriesRemaining = kMTMaxDownloadRetries;
 		parseTermMapping = [@{@"description" : @"showDescription", @"time": @"showTime"} retain];
         [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
         
@@ -125,7 +124,12 @@
 		//Cancel and restart or delete depending on number of time we've been through this
 		[self cancel];
 		if (_numRetriesRemaining <= 0) {
-			[[MTTiVoManager sharedTiVoManager] deleteProgramFromDownloadQueue:self];
+			[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+			_showStatus = @"Failed";
+			_processProgress = 1.0;
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+
+//			[[MTTiVoManager sharedTiVoManager] deleteProgramFromDownloadQueue:self];
 		} else {
 			_numRetriesRemaining--;
 			[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];

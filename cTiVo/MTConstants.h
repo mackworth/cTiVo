@@ -36,6 +36,7 @@
 #define kMTStatusDecrypted 4
 #define kMTStatusEncoding 5
 #define kMTStatusDone 6
+#define kMTStatusFailed 7
 
 //Contants
 
