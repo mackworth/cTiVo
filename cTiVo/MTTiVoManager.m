@@ -337,7 +337,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
 	numEncoders--;
     [self manageDownloads];
-    NSLog(@"num decoders after decrement is %d",numEncoders);
+    //NSLog(@"num decoders after decrement is %d",numEncoders);
 }
 
 #pragma mark - Memory Management

@@ -122,8 +122,8 @@
 {
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
 		//Cancel and restart or delete depending on number of time we've been through this
-		NSLog(@"Stalled, %@ download of %@ ",(_numRetriesRemaining > 0) ? @"restarting":@"cancelling",  _showTitle);
         [self cancel];
+		NSLog(@"Stalled, %@ download of %@ ",(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _showTitle);
 		if (_numRetriesRemaining <= 0) {
 			[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
 			_showStatus = @"Failed";
@@ -345,7 +345,7 @@
     activeURLConnection = [[[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] autorelease];
 
 //Now set up for either simul or sequential download
-    NSLog(@"Starting download %@",_showTitle);
+    NSLog(@"Starting %@download of %@", (_simultaneousEncode ? @"simultaneous " : @""), _showTitle);
     if (!_simultaneousEncode || [[_encodeFormat objectForKey:@"mustDownloadFirst"] boolValue]) {
         _isSimultaneousEncoding = NO;
     } else { //We'll build the full piped download chain here
@@ -601,7 +601,7 @@
 
 -(void)cancel
 {
-    NSLog(@"Cancelling %@", _showTitle);
+    NSLog(@"Canceling %@", _showTitle);
     NSFileManager *fm = [NSFileManager defaultManager];
     self.isCanceled = YES;
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
