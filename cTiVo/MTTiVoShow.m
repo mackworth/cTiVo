@@ -596,7 +596,7 @@
 }
 
 -(BOOL) isInProgress {
-    return ([_downloadStatus intValue] != kMTStatusNew && [_downloadStatus intValue] != kMTStatusDone);
+    return ([_downloadStatus intValue] != kMTStatusNew && [_downloadStatus intValue] != kMTStatusDone &&  [_downloadStatus intValue] != kMTStatusFailed);
 }
 
 -(void)cancel
