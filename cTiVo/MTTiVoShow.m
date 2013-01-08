@@ -49,7 +49,7 @@
 		_episodeYear = 0;
 		parseTermMapping = [@{@"description" : @"showDescription", @"time": @"showTime"} retain];
         [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
-        
+        previousCheck = [[NSDate date] retain];
     }
     return self;
 }
@@ -78,21 +78,21 @@
 	return [NSArray arrayWithArray:newNames];
 }
 
--(void)getShowDetailWithNotification
-{
-	if (gotDetails) {
-		return;
-	}
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]	;
-	[self getShowDetail];
-	if (gotDetails) {
-		NSNotification *n = [NSNotification notificationWithName:kMTNotificationReloadEpisode object:self];
-		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:n  waitUntilDone:NO];
-	} else {
-		NSLog(@"Got Details Failed for %@",_showTitle);
-	}
-	[pool drain];
-}
+//-(void)getShowDetailWithNotification
+//{
+//	if (gotDetails) {
+//		return;
+//	}
+//	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]	;
+//	[self getShowDetail];
+//	if (gotDetails) {
+//		NSNotification *n = [NSNotification notificationWithName:kMTNotificationReloadEpisode object:self];
+//		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:n  waitUntilDone:NO];
+//	} else {
+//		NSLog(@"Got Details Failed for %@",_showTitle);
+//	}
+//	[pool drain];
+//}
 
 -(void)getShowDetail
 {
@@ -100,6 +100,7 @@
 		return;
 	}
 	gotDetails = YES;
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]	;
 	NSString *detailURLString = [NSString stringWithFormat:@"https://%@/TiVoVideoDetails?id=%d",_tiVo.hostName,_showID];
 //	NSLog(@"Show Detail URL %@",detailURLString);
 	NSURLResponse *detailResponse = nil;
@@ -116,6 +117,7 @@
 	}
 	NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDetailsLoaded object:self];
     [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
+	[pool drain];
 }
 
 -(void)checkStillActive
@@ -123,12 +125,13 @@
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
 		//Cancel and restart or delete depending on number of time we've been through this
         [self cancel];
-		NSLog(@"Stalled, %@ download of %@ ",(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _showTitle);
+		NSLog(@"Stalled, %@ download of %@ with progress at %lf with previous check at %@",(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _showTitle, _processProgress, previousCheck );
 		if (_numRetriesRemaining <= 0) {
 			[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
 			_showStatus = @"Failed";
 			_processProgress = 1.0;
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
 
 //			[[MTTiVoManager sharedTiVoManager] deleteProgramFromDownloadQueue:self];
 		} else {
@@ -141,6 +144,8 @@
 		previousProcessProgress = _processProgress;
 		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
 	}
+    [previousCheck release];
+    previousCheck = [[NSDate date] retain];
 }
 
 #pragma  mark - parser methods
@@ -673,6 +678,7 @@
 	}
 	[pool drain];
 	if (!downloadingURL || _isCanceled) {
+        NSLog(@"Closing downloadFileHandle which %@ from pipe1 for show %@", (downloadFileHandle != [pipe1 fileHandleForWriting]) ? @"is not" : @"is", _showTitle);
 		[downloadFileHandle closeFile];
 		if (downloadFileHandle != [pipe1 fileHandleForWriting]) {
 			[downloadFileHandle release];
@@ -734,12 +740,17 @@
     } else {
         [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
         _showStatus = @"Encoding";
- 		downloadingURL = NO;
        [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
         _fileSize = (double)[bufferFileWriteHandle offsetInFile];
         [bufferFileWriteHandle closeFile];
     }
+    downloadingURL = NO;
 	activeURLConnection = nil;
+    
+    //Make sure to flush the last of the buffer file into the pipe and close it.
+	if (!writingData && _isSimultaneousEncoding) {
+		[self performSelectorInBackground:@selector(writeData) withObject:nil];
+	}
     [self performSelector:@selector(sendNotification:) withObject:kMTNotificationDownloadDidFinish afterDelay:4.0];
 }
 
@@ -941,6 +952,7 @@
 		[elementArray release];
         elementArray = nil;
 	}
+    [previousCheck release];
     [self deallocDownloadHandling];
     [devNullFileHandle release];
 	[parseTermMapping release];

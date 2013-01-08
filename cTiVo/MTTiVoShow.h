@@ -36,6 +36,7 @@
 	BOOL    gotDetails;
 	NSDictionary *parseTermMapping;
 	double previousProcessProgress;
+    NSDate *previousCheck;
 }
 
 @property (nonatomic, retain) NSString *urlString,
@@ -85,7 +86,7 @@
 -(void)decrypt;
 -(void)encode;
 -(void)getShowDetail;
--(void)getShowDetailWithNotification;
+//-(void)getShowDetailWithNotification;
 
 +(NSDate *)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString;
 

@@ -237,7 +237,7 @@
                 thisShow.fileSize = sizeValue;
                 thisShow.tiVo = _tiVo;
 				thisShow.mediaKey = _mediaKey;
-                NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetailWithNotification) object:nil] autorelease];
+                NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil] autorelease];
                 [_queue addOperation:nextDetail];
 				//			[thisShow getShowDetail];
 			} else {
