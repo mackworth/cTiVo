@@ -15,6 +15,7 @@
 @interface MTTiVoManager ()
 
 @property (retain) NSNetService *updatingTiVo;
+@property (nonatomic, retain) NSArray *hostAddresses;
 
 @end
 
@@ -119,6 +120,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		programDownloading = nil;
 		downloadURLConnection = nil;
 		programListURLConnection = nil;
+        _hostAddresses = nil;
 		downloadFile = nil;
 		decryptingTask = nil;
 		encodingTask = nil;
@@ -135,11 +137,24 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		_simultaneousEncode = YES;
 		_videoListNeedsFilling = YES;
         updatingVideoList = NO;
-		
-		hostAddresses = [[[NSHost currentHost] addresses] retain];
+//		NSLog(@"Getting Host Addresses");
+//		hostAddresses = [[[NSHost currentHost] addresses] retain];
+//        NSLog(@"Host Addresses = %@",self.hostAddresses);
+//        NSLog(@"Host Names = %@",[[NSHost currentHost] names]);
+//        NSLog(@"Host addresses for first name %@",[[NSHost hostWithName:[[NSHost currentHost] names][0]] addresses]);
         
 	}
 	return self;
+}
+
+-(NSArray *)hostAddresses
+{
+    NSArray *ret = _hostAddresses;
+    if (!_hostAddresses) {
+        self.hostAddresses = [[NSHost currentHost] addresses];
+        ret = _hostAddresses;
+    }
+    return ret;
 }
 
 -(void) setupNotifications {
@@ -391,7 +406,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		
 	}
 
-	for (NSString *hostAddress in hostAddresses) {
+	for (NSString *hostAddress in self.hostAddresses) {
 		if ([hostAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
 			return;  // This filters out PyTivo instances on the current host
 		}

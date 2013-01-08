@@ -314,6 +314,7 @@
 
 -(void)dealloc
 {
+    CFRelease(_reachability);
 	self.mediaKey = nil;
 	[urlData release];
 	self.shows = nil;

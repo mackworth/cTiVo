@@ -38,8 +38,7 @@
     BOOL volatile updatingVideoList;
 	
 	NSOperationQueue *queue;
-	
-	NSArray *hostAddresses;
+    
     uint32_t    networkReachabilityFlags;
 }
 
