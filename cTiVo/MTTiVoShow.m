@@ -137,7 +137,7 @@
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
 		}
 		
-	} else {
+	} else if ([self isInProgress]){
 		previousProcessProgress = _processProgress;
 		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
 	}
@@ -337,7 +337,7 @@
 	self.isCanceled = NO;
 	if (!gotDetails) {
 		[self getShowDetail];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	}
     [self configureFiles];
     NSURLRequest *thisRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:_urlString ]];
@@ -393,7 +393,8 @@
         [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
     } else {
         NSLog(@"Finished simul donload/encode %@", _showTitle);
-        [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
+ 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
+       [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
         _showStatus = @"Complete";
         _processProgress = 1.0;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
@@ -507,8 +508,8 @@
 -(void)trackEncodes
 {
 	if (![encoderTask isRunning]) {
-        NSLog(@"Finished Encoding %@",_showTitle);
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
+        NSLog(@"Finished Encoding %@",_showTitle);
         _processProgress = 1.0;
         [[NSFileManager defaultManager] removeItemAtPath:decryptFilePath error:nil];
 		[encoderTask release];
@@ -672,7 +673,6 @@
 	}
 	[pool drain];
 	if (!downloadingURL || _isCanceled) {
-		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 		[downloadFileHandle closeFile];
 		if (downloadFileHandle != [pipe1 fileHandleForWriting]) {
 			[downloadFileHandle release];
