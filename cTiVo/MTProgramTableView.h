@@ -10,7 +10,7 @@
 
 @class MTTiVoManager;
 
-@interface MTProgramList : NSTableView <NSTableViewDataSource, NSTableViewDelegate>{
+@interface MTProgramTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate>{
     IBOutlet NSWindowController *myController;
 	MTTiVoManager *tiVoManager;
 }

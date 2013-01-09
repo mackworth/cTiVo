@@ -14,7 +14,7 @@
 		D257C6E9169740A000EBE30B /* MTPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */; };
 		D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D279D3E9167A32FA007F0677 /* MTMainWindowController.m */; };
 		D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */; };
-		D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */; };
+		D2901AE91677BB0E001E559C /* MTDownloadTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */; };
 		D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = D2995CA5168B8BB200B960B9 /* MTCheckBox.m */; };
 		D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */; };
 		D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
@@ -36,12 +36,12 @@
 		D2D60BC716766F3200CE32DE /* mencoder in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC216766F3200CE32DE /* mencoder */; };
 		D2D60BC816766F3200CE32DE /* tivodecode in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC316766F3200CE32DE /* tivodecode */; };
 		D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BC916766FA600CE32DE /* MTTiVoManager.m */; };
-		D2D60BD716766FA600CE32DE /* MTDownloadList.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCC16766FA600CE32DE /* MTDownloadList.m */; };
-		D2D60BD916766FA600CE32DE /* MTProgramList.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCE16766FA600CE32DE /* MTProgramList.m */; };
+		D2D60BD716766FA600CE32DE /* MTDownloadTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */; };
+		D2D60BD916766FA600CE32DE /* MTProgramTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */; };
 		D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD116766FA600CE32DE /* NSString+HTML.m */; };
 		D2D60BDE16766FA600CE32DE /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */; };
 		D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */; };
-		D2DFA68F1683C27600CD6CE0 /* MTDownloadListCheckCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */; };
+		D2DFA68F1683C27600CD6CE0 /* MTDownloadCheckTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -74,8 +74,8 @@
 		D279D3E8167A32FA007F0677 /* MTMainWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTMainWindowController.h; sourceTree = "<group>"; };
 		D279D3E9167A32FA007F0677 /* MTMainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTMainWindowController.m; sourceTree = "<group>"; };
 		D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowController.xib; sourceTree = "<group>"; };
-		D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadListCellView.h; sourceTree = "<group>"; };
-		D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadListCellView.m; sourceTree = "<group>"; };
+		D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadTableCellView.h; sourceTree = "<group>"; };
+		D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadTableCellView.m; sourceTree = "<group>"; };
 		D2995CA4168B8BB200B960B9 /* MTCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTCheckBox.h; sourceTree = "<group>"; };
 		D2995CA5168B8BB200B960B9 /* MTCheckBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTCheckBox.m; sourceTree = "<group>"; };
 		D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cTiVo_sparkle_pub.pem; sourceTree = "<group>"; };
@@ -107,18 +107,18 @@
 		D2D60BC916766FA600CE32DE /* MTTiVoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoManager.m; sourceTree = "<group>"; };
 		D2D60BCA16766FA600CE32DE /* MTTiVoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTTiVoManager.h; sourceTree = "<group>"; };
 		D2D60BCB16766FA600CE32DE /* MTConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTConstants.h; sourceTree = "<group>"; };
-		D2D60BCC16766FA600CE32DE /* MTDownloadList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadList.m; sourceTree = "<group>"; };
-		D2D60BCD16766FA600CE32DE /* MTDownloadList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTDownloadList.h; sourceTree = "<group>"; };
-		D2D60BCE16766FA600CE32DE /* MTProgramList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgramList.m; sourceTree = "<group>"; };
-		D2D60BCF16766FA600CE32DE /* MTProgramList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTProgramList.h; sourceTree = "<group>"; };
+		D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadTableView.m; sourceTree = "<group>"; };
+		D2D60BCD16766FA600CE32DE /* MTDownloadTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadTableView.h; sourceTree = "<group>"; };
+		D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgramTableView.m; sourceTree = "<group>"; };
+		D2D60BCF16766FA600CE32DE /* MTProgramTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgramTableView.h; sourceTree = "<group>"; };
 		D2D60BD016766FA600CE32DE /* NSString+HTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = "NSString+HTML.h"; sourceTree = "<group>"; };
 		D2D60BD116766FA600CE32DE /* NSString+HTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+HTML.m"; sourceTree = "<group>"; };
 		D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = "GTMNSString+HTML.h"; sourceTree = "<group>"; };
 		D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GTMNSString+HTML.m"; sourceTree = "<group>"; };
 		D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = System/Library/Frameworks/ScriptingBridge.framework; sourceTree = SDKROOT; };
 		D2DFA68C1683BA0300CD6CE0 /* iTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
-		D2DFA68D1683C27600CD6CE0 /* MTDownloadListCheckCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadListCheckCell.h; sourceTree = "<group>"; };
-		D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadListCheckCell.m; sourceTree = "<group>"; };
+		D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadCheckTableCell.h; sourceTree = "<group>"; };
+		D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadCheckTableCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,10 +141,10 @@
 			children = (
 				D2995CA4168B8BB200B960B9 /* MTCheckBox.h */,
 				D2995CA5168B8BB200B960B9 /* MTCheckBox.m */,
-				D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */,
-				D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */,
-				D2DFA68D1683C27600CD6CE0 /* MTDownloadListCheckCell.h */,
-				D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */,
+				D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */,
+				D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */,
+				D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */,
+				D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */,
 				D257C6E11697400600EBE30B /* MTPopUpButton.h */,
 				D257C6E21697400600EBE30B /* MTPopUpButton.m */,
 				D257C6E61697409F00EBE30B /* MTPopUpTableCellView.h */,
@@ -266,17 +266,17 @@
 		D2DA8FBB169CDACC0053B7CB /* UI Classes */ = {
 			isa = PBXGroup;
 			children = (
-				D2D60BCD16766FA600CE32DE /* MTDownloadList.h */,
-				D2D60BCC16766FA600CE32DE /* MTDownloadList.m */,
-				D2901AE71677BB0E001E559C /* MTDownloadListCellView.h */,
-				D2901AE81677BB0E001E559C /* MTDownloadListCellView.m */,
-				D2DFA68D1683C27600CD6CE0 /* MTDownloadListCheckCell.h */,
-				D2DFA68E1683C27600CD6CE0 /* MTDownloadListCheckCell.m */,
+				D2D60BCD16766FA600CE32DE /* MTDownloadTableView.h */,
+				D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */,
+				D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */,
+				D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */,
+				D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */,
+				D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */,
 				D279D3E8167A32FA007F0677 /* MTMainWindowController.h */,
 				D279D3E9167A32FA007F0677 /* MTMainWindowController.m */,
 				D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */,
-				D2D60BCF16766FA600CE32DE /* MTProgramList.h */,
-				D2D60BCE16766FA600CE32DE /* MTProgramList.m */,
+				D2D60BCF16766FA600CE32DE /* MTProgramTableView.h */,
+				D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */,
 				1E791BD21697C59300E47E84 /* MTSubscription.h */,
 				1E791BD31697C59300E47E84 /* MTSubscription.m */,
 				D235BEFF168F52DE00320FA5 /* MTSubscriptionTableView.h */,
@@ -388,15 +388,15 @@
 				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
 				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
 				D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */,
-				D2D60BD716766FA600CE32DE /* MTDownloadList.m in Sources */,
-				D2D60BD916766FA600CE32DE /* MTProgramList.m in Sources */,
+				D2D60BD716766FA600CE32DE /* MTDownloadTableView.m in Sources */,
+				D2D60BD916766FA600CE32DE /* MTProgramTableView.m in Sources */,
 				D2D60BDC16766FA600CE32DE /* NSString+HTML.m in Sources */,
 				D2D60BDE16766FA600CE32DE /* GTMNSString+HTML.m in Sources */,
-				D2901AE91677BB0E001E559C /* MTDownloadListCellView.m in Sources */,
+				D2901AE91677BB0E001E559C /* MTDownloadTableCellView.m in Sources */,
 				D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */,
 				D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */,
 				D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */,
-				D2DFA68F1683C27600CD6CE0 /* MTDownloadListCheckCell.m in Sources */,
+				D2DFA68F1683C27600CD6CE0 /* MTDownloadCheckTableCell.m in Sources */,
 				D2C390761687FFA600D2062E /* MTiTunes.m in Sources */,
 				D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */,
 				D235BF01168F52DE00320FA5 /* MTSubscriptionTableView.m in Sources */,

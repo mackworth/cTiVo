@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Scott Buchanan. All rights reserved.
 //
 
-#import "MTDownloadListCellView.h"
+#import "MTDownloadTableCellView.h"
 
-@implementation MTDownloadListCellView
+@implementation MTDownloadTableCellView
 
 - (id)initWithFrame:(NSRect)frame
 {

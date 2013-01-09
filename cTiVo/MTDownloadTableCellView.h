@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "MTProgressindicator.h"
 
-@interface MTDownloadListCellView : NSTableCellView
+@interface MTDownloadTableCellView : NSTableCellView
 
 @property (nonatomic, readonly) IBOutlet MTProgressindicator *progressIndicator;
 @property (nonatomic, readonly) IBOutlet NSTextField *downloadStage;

@@ -121,11 +121,11 @@
     id result;
 	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
     if([identifier compare: @"iTunes"] == NSOrderedSame) {
-        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"Simu"] == NSOrderedSame) {
-        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"FormatPopUp"] == NSOrderedSame) {
@@ -201,12 +201,12 @@ static NSDateFormatter *dateFormatter;
         [((MTPopUpTableCellView *)result).popUpButton selectItemWithTitle:thisSubscription.encodeFormat[@"name"]];
 		
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
-        MTCheckBox * checkBox = ((MTDownloadListCheckCell *)result).checkBox;
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setEnabled: [thisSubscription canAddToiTunes]];
         [checkBox setOn:[thisSubscription shouldAddToiTunes] && [thisSubscription canAddToiTunes]];
         checkBox.owner = thisSubscription;
  	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
-        MTCheckBox * checkBox = ((MTDownloadListCheckCell *)result).checkBox;
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setEnabled: [thisSubscription canSimulEncode]] ;
         [checkBox setOn:[ thisSubscription shouldSimulEncode]];
         checkBox.owner = thisSubscription;

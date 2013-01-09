@@ -9,8 +9,8 @@
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
 
-@class MTDownloadList;
-@class MTProgramList;
+@class MTDownloadTableView;
+@class MTProgramTableView;
 @class MTSubscriptionTableView;
 @class MTPopUpButton;
 
@@ -19,15 +19,15 @@
     IBOutlet NSButton *addToQueueButton, *removeFromQueueButton, *addToiTunesButton, *simultaneousEncodeButton, *subscribeButton;
 	IBOutlet NSTextField *loadingProgramListLabel, *downloadDirectory;
 	IBOutlet NSProgressIndicator *loadingProgramListIndicator;
-	IBOutlet MTDownloadList *downloadQueueTable;
-	IBOutlet MTProgramList  *tiVoShowTable;
+	IBOutlet MTDownloadTableView *downloadQueueTable;
+	IBOutlet MTProgramTableView  *tiVoShowTable;
 	IBOutlet MTSubscriptionTableView  *subscriptionTable;
     IBOutlet NSView *view;
 	NSMutableArray *loadingTiVos;
 }
 
-@property (nonatomic, assign) MTDownloadList *downloadQueueTable;
-@property (nonatomic, assign) MTProgramList *tiVoShowTable;
+@property (nonatomic, assign) MTDownloadTableView *downloadQueueTable;
+@property (nonatomic, assign) MTProgramTableView *tiVoShowTable;
 @property (nonatomic, assign) MTSubscriptionTableView *subscriptionTable;
 @property (nonatomic, retain) NSString *selectedTiVo;
 

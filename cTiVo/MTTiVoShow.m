@@ -8,7 +8,7 @@
 // Class for handling individual TiVo Shows
 
 #import "MTTiVoShow.h"
-#import "MTProgramList.h"
+#import "MTProgramTableView.h"
 #import "MTiTunes.h"
 #import "MTTiVoManager.h"
 

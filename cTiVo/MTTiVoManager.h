@@ -8,9 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import "NSString+HTML.h"
-#import "MTDownloadListCellView.h"
+#import "MTDownloadTableCellView.h"
 #import "MTTiVoShow.h"
-#import "MTProgramList.h"
+#import "MTProgramTableView.h"
 #import "MTTiVo.h"
 #import "MTSubscription.h"
 #import <SystemConfiguration/SystemConfiguration.h>
@@ -32,7 +32,7 @@
 	NSNetService *tivoConnectingTo;
 	NSOpenPanel *myOpenPanel;
     double percentComplete;
-    MTDownloadListCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
+    MTDownloadTableCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
 	int numEncoders;//Want to limit launches to two encoders.
     
     BOOL volatile updatingVideoList;

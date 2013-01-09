@@ -9,11 +9,11 @@
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
 #import "MTMainWindowController.h"
-#import "MTDownloadListCellView.h"
-#import "MTDownloadListCheckCell.h"
+#import "MTDownloadTableCellView.h"
+#import "MTDownloadCheckTableCell.h"
 #import "MTProgressindicator.h"
 
-@interface MTDownloadList : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
+@interface MTDownloadTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
     IBOutlet MTMainWindowController *myController;
 }
 

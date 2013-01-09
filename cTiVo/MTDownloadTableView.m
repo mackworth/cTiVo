@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Scott Buchanan. All rights reserved.
 //
 
-#import "MTDownloadList.h"
+#import "MTDownloadTableView.h"
 
-@implementation MTDownloadList
+@implementation MTDownloadTableView
 @synthesize  sortedShows= _sortedShows;
 
 -(id) initWithCoder:(NSCoder *)aDecoder
@@ -61,7 +61,7 @@
 {
 	NSArray *displayedShows = self.sortedShows;
 	for (int i=0; i< displayedShows.count; i++) {
-		MTDownloadListCellView *thisCell = [self viewAtColumn:0 row:i makeIfNecessary:NO];
+		MTDownloadTableCellView *thisCell = [self viewAtColumn:0 row:i makeIfNecessary:NO];
 		if (thisCell) {
 			MTTiVoShow *thisShow = [displayedShows objectAtIndex:i];
 			thisCell.progressIndicator.doubleValue = thisShow.processProgress;
@@ -93,7 +93,7 @@
     id result;
 	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
     if([identifier compare: @"Program"] == NSOrderedSame) {
-        MTDownloadListCellView *thisCell = [[[MTDownloadListCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)] autorelease];
+        MTDownloadTableCellView *thisCell = [[[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)] autorelease];
         //        result.textField.font = [NSFont userFontOfSize:14];
         thisCell.textField.editable = NO;
         
@@ -102,11 +102,11 @@
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"iTunes"] == NSOrderedSame) {
-        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"Simu"] == NSOrderedSame) {
-        MTDownloadListCheckCell *thisCell = [[[MTDownloadListCheckCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
 	} else {
@@ -122,7 +122,7 @@
 	
     // get an existing cell with the MyView identifier if it exists
 	
-    MTDownloadListCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
+    MTDownloadTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
     
     // There is no existing cell to reuse so we will create a new one
     if (result == nil) {
@@ -130,7 +130,7 @@
         // create the new NSTextField with a frame of the {0,0} with the width of the table
         // note that the height of the frame is not really relevant, the row-height will modify the height
         // the new text field is then returned as an autoreleased object
-        result = [[[MTDownloadListCellView alloc] initWithFrame:CGRectMake(0, 0, tableColumn.width, 20)] autorelease];
+        result = [[[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableColumn.width, 20)] autorelease];
 //        result.textField.font = [NSFont userFontOfSize:14];
         result.textField.editable = NO;
         
@@ -157,14 +157,14 @@
         result.toolTip = result.textField.stringValue;
 	
     } else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
-        MTCheckBox * checkBox = ((MTDownloadListCheckCell *)result).checkBox;
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: rowData.addToiTunesWhenEncoded];
         [checkBox setEnabled: [rowData.downloadStatus intValue] != kMTStatusDone &&
                               [tiVoManager canAddToiTunes:rowData.encodeFormat] ];
          checkBox.owner = rowData;
 
  	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
-        MTCheckBox * checkBox = ((MTDownloadListCheckCell *)result).checkBox;
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: rowData.simultaneousEncode];
          checkBox.owner = rowData;
         [checkBox setEnabled: [rowData.downloadStatus intValue] == kMTStatusNew &&

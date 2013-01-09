@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "MTCheckBox.h"
 
-@interface MTDownloadListCheckCell : NSTableCellView
+@interface MTDownloadCheckTableCell : NSTableCellView
 
 @property (nonatomic, readonly) MTCheckBox *checkBox;
 

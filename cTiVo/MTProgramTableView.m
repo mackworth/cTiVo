@@ -6,12 +6,12 @@
 //  Copyright (c) 2012 Scott Buchanan. All rights reserved.
 //
 
-#import "MTProgramList.h"
-#import "MTDownloadListCheckCell.h"
+#import "MTProgramTableView.h"
+#import "MTDownloadCheckTableCell.h"
 #import "MTTiVoManager.h"
 
 
-@implementation MTProgramList
+@implementation MTProgramTableView
 @synthesize  sortedShows= _sortedShows;
 
 -(id) initWithCoder:(NSCoder *)aDecoder

@@ -10,7 +10,7 @@
 #import "iTunes.h"
 #import "MTTiVo.h"
 
-@class MTProgramList;
+@class MTProgramTableView;
 
 @interface MTTiVoShow : NSObject <NSXMLParserDelegate> {
     NSFileHandle    *downloadFileHandle,

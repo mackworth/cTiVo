@@ -8,8 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
-#import "MTProgramList.h"
-#import "MTDownloadList.h"
+#import "MTProgramTableView.h"
+#import "MTDownloadTableView.h"
 #import "MTMainWindowController.h"
 #import "MTSubscriptionTableView.h"
 

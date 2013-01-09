@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Scott Buchanan. All rights reserved.
 //
 
-#import "MTDownloadListCheckCell.h"
+#import "MTDownloadCheckTableCell.h"
 
-@implementation MTDownloadListCheckCell
+@implementation MTDownloadCheckTableCell
 
 -(id)initWithFrame:(NSRect)frameRect
 {
