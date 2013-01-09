@@ -120,26 +120,31 @@
 	[pool drain];
 }
 
+-(void)rescheduleShow
+{
+	[self cancel];
+	NSLog(@"Stalled, %@ download of %@ with progress at %lf with previous check at %@",(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _showTitle, _processProgress, previousCheck );
+	if (_numRetriesRemaining <= 0) {
+		[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+		_showStatus = @"Failed";
+		_processProgress = 1.0;
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+		
+		//			[[MTTiVoManager sharedTiVoManager] deleteProgramFromDownloadQueue:self];
+	} else {
+		_numRetriesRemaining--;
+		[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+	}
+	
+}
+
 -(void)checkStillActive
 {
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
 		//Cancel and restart or delete depending on number of time we've been through this
-        [self cancel];
-		NSLog(@"Stalled, %@ download of %@ with progress at %lf with previous check at %@",(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _showTitle, _processProgress, previousCheck );
-		if (_numRetriesRemaining <= 0) {
-			[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
-			_showStatus = @"Failed";
-			_processProgress = 1.0;
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-
-//			[[MTTiVoManager sharedTiVoManager] deleteProgramFromDownloadQueue:self];
-		} else {
-			_numRetriesRemaining--;
-			[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-		}
-		
+        [self rescheduleShow];
 	} else if ([self isInProgress]){
 		previousProcessProgress = _processProgress;
 		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
@@ -724,8 +729,7 @@
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     NSLog(@"URL Connection Failed with error %@",error);
-    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
-	activeURLConnection = nil;
+	[self rescheduleShow];
 }
 
 
