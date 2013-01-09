@@ -11,6 +11,10 @@
 #import "NSString+HTML.h"
 #import "MTTiVoManager.h"
 
+@interface MTTiVo ()
+@property SCNetworkReachabilityRef reachability;
+@end
+
 @implementation MTTiVo
 
 +(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue
@@ -40,15 +44,27 @@
 	if (self) {
 		self.tiVo = tiVo;
 		self.queue = queue;
+        _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [tiVo.addresses[0] bytes]);
+
 		[self getMediaKey];
 		if (_mediaKey.length == 0) {
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
 		} else {
 			[self updateShows:nil];
 		}
-        _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [tiVo.addresses[0] bytes]);
 	}
 	return self;
+}
+
+-(NSString * ) description {
+    return self.tiVo.name;
+}
+
+-(BOOL) isReachable {
+    uint32_t    networkReachabilityFlags;
+    SCNetworkReachabilityGetFlags(self.reachability , &networkReachabilityFlags);
+    BOOL result = (networkReachabilityFlags >>17) && 1 ;  //if the 17th bit is set we are reachable.
+    return result;
 }
 
 -(void)getMediaKey
@@ -76,15 +92,21 @@
 	if (isConnecting) {
 		return;
 	}
-	if (!sender && [[NSDate date] compare:[_lastUpdated dateByAddingTimeInterval:kMTUpdateIntervalMinutes * 60]] == NSOrderedAscending) {
-		return;
-	}
-	isConnecting = YES;
+//	if (!sender && [[NSDate date] compare:[_lastUpdated dateByAddingTimeInterval:kMTUpdateIntervalMinutes * 60]] == NSOrderedAscending) {
+//		return;
+//	}
 	if (showURLConnection) {
 		[showURLConnection cancel];
 		[showURLConnection release];
 		showURLConnection = nil;
 	}
+	if (![self isReachable]){
+        [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkNotAvailable object:self];
+        [self performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTRetryNetworkInterval];
+        return;
+    }
+    isConnecting = YES;
+
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateShows:) object:nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
 	NSString *tivoURLString = [[NSString stringWithFormat:@"https://tivo:%@@%@/nowplaying/index.html?Recurse=Yes",_mediaKey,_tiVo.hostName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -93,11 +115,6 @@
 	NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
 	showURLConnection = [[NSURLConnection connectionWithRequest:tivoURLRequest delegate:self] retain];
 	[urlData setData:[NSData data]];
-	if (_shows.count == 0) {
-		[_tiVoManager setProgramLoadingString:[NSString stringWithFormat:@"Loading Programs - %@",_tiVo.name]];
-	} else {
-		[_tiVoManager setProgramLoadingString:[NSString stringWithFormat:@"Updating Programs - %@",_tiVo.name]];
-	}
 	[showURLConnection start];
 		
 }
@@ -251,7 +268,6 @@
 	[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
 //	NSLog(@"Avialable Recordings are %@",_recordings);
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-    [_tiVoManager setProgramLoadingString:@""];
 }
 
 #pragma mark - Helper Methods
@@ -291,11 +307,9 @@
 {
     NSLog(@"URL Connection Failed with error %@",error);
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
-    if (!_tiVo.name) {
-		[_tiVoManager setProgramLoadingString:@"Tivo not found"];
-	} else {
-		[_tiVoManager setProgramLoadingString:[NSString stringWithFormat:@"Connection to %@ TiVo Failed",_tiVo.name]];
-    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationNetworkNotAvailable object:self];
+    [self performSelector:@selector(updateShows:) withObject:   nil afterDelay:kMTRetryNetworkInterval];
+    
     isConnecting = NO;
 	
 }
@@ -315,6 +329,7 @@
 -(void)dealloc
 {
     CFRelease(_reachability);
+    _reachability = nil;
 	self.mediaKey = nil;
 	[urlData release];
 	self.shows = nil;

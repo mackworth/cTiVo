@@ -355,7 +355,7 @@
     activeURLConnection = [[[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] autorelease];
 
 //Now set up for either simul or sequential download
-    NSLog(@"Starting %@download of %@", (_simultaneousEncode ? @"simultaneous " : @""), _showTitle);
+    NSLog(@"Starting %@download of %@ AT %@ INTO %@", (_simultaneousEncode ? @"simultaneous " : @""), _showTitle, _urlString, encodeFilePath);
     if (!_simultaneousEncode || [[_encodeFormat objectForKey:@"mustDownloadFirst"] boolValue]) {
         _isSimultaneousEncoding = NO;
     } else { //We'll build the full piped download chain here
@@ -402,7 +402,7 @@
     if([encoderTask isRunning]) {
         [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
     } else {
-        NSLog(@"Finished simul donload/encode %@", _showTitle);
+        NSLog(@"Finished simul download/encode %@", _showTitle);
  		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
        [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
         _showStatus = @"Complete";
@@ -418,6 +418,7 @@
 
 -(void)decrypt
 {
+	NSLog(@"starting decrypt of %@", _showTitle);
 	decrypterTask = [[NSTask alloc] init];
 	[decrypterTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
 	[decrypterTask setStandardOutput:decryptLogFileHandle];
@@ -446,6 +447,7 @@
 {
 	if (![decrypterTask isRunning]) {
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
+        NSLog(@"finished decrypt of %@", _showTitle);
 		_processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [self setValue:[NSNumber numberWithInt:kMTStatusDecrypted] forKeyPath:@"downloadStatus"];

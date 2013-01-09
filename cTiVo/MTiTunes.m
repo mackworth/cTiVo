@@ -86,7 +86,7 @@
 	
 	iTunesTrack * newTrack = [self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
 	if ([newTrack exists]) {
-		NSLog(@"Added track to iTunes: %@", newTrack);
+		NSLog(@"Added track to iTunes: %@", show.showTitle);
 
 		if ((show.episodeTitle.length ==0) &&
 			([show.episodeNumber intValue] == 0) &&

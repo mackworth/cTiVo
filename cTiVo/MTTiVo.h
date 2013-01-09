@@ -24,7 +24,7 @@
 @property (nonatomic, assign) NSOperationQueue *queue;
 @property (nonatomic, retain) MTTiVoManager *tiVoManager;
 @property BOOL mediaKeyIsGood;
-@property SCNetworkReachabilityRef reachability;
+@property (readonly) BOOL isReachable;
 
 +(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
 

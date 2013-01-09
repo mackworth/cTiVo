@@ -54,6 +54,7 @@
 	//Spinner Progress Handling 
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdating object:nil];
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdated object:nil];
+    [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationNetworkNotAvailable object:nil];
 	
     [defaultCenter addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
     [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
@@ -103,24 +104,26 @@
 	if (!notification) { //Don't accept nil notifications
 		return;  
 	}
-	if ([notification.name  compare:kMTNotificationShowListUpdating] == NSOrderedSame) {
-		[loadingTiVos addObject:notification.object];
+    MTTiVo * tivo = (MTTiVo *) notification.object;
+    if ([notification.name  compare:kMTNotificationShowListUpdating] == NSOrderedSame) {
+		[loadingTiVos addObject:tivo];
 	} else if ([notification.name compare:kMTNotificationShowListUpdated] == NSOrderedSame) {
-		[loadingTiVos removeObject:notification.object];
+		[loadingTiVos removeObject:tivo];
 	}
-if (loadingTiVos.count) {
-	[loadingProgramListIndicator startAnimation:nil];
-	NSMutableString *message = [NSMutableString stringWithString:@"Updating "];
-	for (MTTiVo *tiVo in loadingTiVos) {
-		[message appendString:[NSString stringWithFormat:@" %@,",tiVo.tiVo.name]];
-	}
-	
-	loadingProgramListLabel.stringValue = [message substringToIndex:message.length-1];
+    
+    if ([notification.name compare:kMTNotificationNetworkNotAvailable] == NSOrderedSame){            [loadingProgramListIndicator startAnimation:nil];
+        loadingProgramListLabel.stringValue = [NSString stringWithFormat:@"Network problem for %@; retrying...",[tivo description]];
+        //and assumes that a Tivo will start loading when network comes up, erasing this message.
+    } else if (loadingTiVos.count) {
+        [loadingProgramListIndicator startAnimation:nil];
+        //note: this relies on [MTTivo description]
+        NSString *message =[NSString stringWithFormat: @"Updating %@",[loadingTiVos componentsJoinedByString:@", "]];
 
-} else {
-	[loadingProgramListIndicator stopAnimation:nil];
-	loadingProgramListLabel.stringValue = @"";
-}
+        loadingProgramListLabel.stringValue = message;
+    } else {
+        [loadingProgramListIndicator stopAnimation:nil];
+        loadingProgramListLabel.stringValue = @"";
+    }
 }
 
 -(void)reloadProgramData

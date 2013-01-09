@@ -39,14 +39,13 @@
 	
 	NSOperationQueue *queue;
     
-    uint32_t    networkReachabilityFlags;
 }
 
 //Shared Data
 
 @property (nonatomic, retain) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
 @property (nonatomic, retain) NSMutableArray *subscribedShows;
-@property (nonatomic, retain) NSString *downloadDirectory, *programLoadingString;
+@property (nonatomic, retain) NSString *downloadDirectory;
 
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;

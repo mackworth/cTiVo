@@ -114,7 +114,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			[defaults setValue:ddir forKey:kMTDownloadDirectory];
 		}
 		_downloadDirectory = [defaults objectForKey:kMTDownloadDirectory];
-		[self setProgramLoadingString:@""];
 		programEncoding = nil;
 		programDecrypting = nil;
 		programDownloading = nil;
@@ -323,8 +322,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     if (!isDownloading) {
         for (MTTiVoShow *s in _downloadQueue) {
             if ([s.downloadStatus intValue] == kMTStatusNew && (numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
-                SCNetworkReachabilityGetFlags(s.tiVo.reachability , &networkReachabilityFlags);
-                if (networkReachabilityFlags & 0x20000) {  //if the 17th bit is set we are reachable.
+                if(s.tiVo.isReachable) {
                     if (s.simultaneousEncode) {
                         numEncoders++;
                     }
@@ -393,7 +391,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     }
     [_tivoServices addObject:netService];
     netService.delegate = self;
-    [netService resolveWithTimeout:2.0];
+    [netService resolveWithTimeout:4.0];
 }
 
 #pragma mark - NetService delegate methods
