@@ -328,6 +328,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
                     }
                     [s download];
                 } else {    //We'll try again in kMTRetryNetworkInterval seconds at a minimum;
+                    [s.tiVo reportNetworkFailure];
                     NSLog(@"Could not reach %@ tivo will try later",s.tiVo.tiVo.name);
                     [self performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTRetryNetworkInterval];
                 }

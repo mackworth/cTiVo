@@ -60,6 +60,11 @@
     return self.tiVo.name;
 }
 
+-(void) reportNetworkFailure {
+    [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkNotAvailable object:self];
+    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTRetryNetworkInterval];
+}
+
 -(BOOL) isReachable {
     uint32_t    networkReachabilityFlags;
     SCNetworkReachabilityGetFlags(self.reachability , &networkReachabilityFlags);
@@ -100,14 +105,13 @@
 		[showURLConnection release];
 		showURLConnection = nil;
 	}
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateShows:) object:nil];
 	if (![self isReachable]){
-        [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkNotAvailable object:self];
-        [self performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTRetryNetworkInterval];
+        [self reportNetworkFailure];
         return;
     }
     isConnecting = YES;
 
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateShows:) object:nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
 	NSString *tivoURLString = [[NSString stringWithFormat:@"https://tivo:%@@%@/nowplaying/index.html?Recurse=Yes",_mediaKey,_tiVo.hostName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 //	NSLog(@"Tivo URL String %@",tivoURLString);
@@ -307,8 +311,7 @@
 {
     NSLog(@"URL Connection Failed with error %@",error);
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationNetworkNotAvailable object:self];
-    [self performSelector:@selector(updateShows:) withObject:   nil afterDelay:kMTRetryNetworkInterval];
+    [self reportNetworkFailure];
     
     isConnecting = NO;
 	
