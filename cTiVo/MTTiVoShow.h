@@ -28,7 +28,7 @@
     NSTask *encoderTask, *decrypterTask;
 	NSURLConnection *activeURLConnection, *detailURLConnection;
 	NSPipe *pipe1, *pipe2;
-	BOOL volatile writingData, downloadingURL, pipingData;
+	BOOL volatile writingData, downloadingURL, pipingData, isCanceled;
 	off_t readPointer, writePointer;
 	NSXMLParser *parser;
 	NSMutableString *elementString;
@@ -78,7 +78,6 @@
                 isSelected;//Used for refresh of table
 
 @property (readonly) BOOL isInProgress;
-@property BOOL volatile isCanceled;
 //@property (nonatomic, assign) MTProgramList *myTableView;
 
 

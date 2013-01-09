@@ -122,21 +122,21 @@
 
 -(void)rescheduleShow
 {
-	[self cancel];
 	NSLog(@"Stalled, %@ download of %@ with progress at %lf with previous check at %@",(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _showTitle, _processProgress, previousCheck );
+	[self cancel];
 	if (_numRetriesRemaining <= 0) {
 		[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
 		_showStatus = @"Failed";
 		_processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
 		
 		//			[[MTTiVoManager sharedTiVoManager] deleteProgramFromDownloadQueue:self];
 	} else {
 		_numRetriesRemaining--;
 		[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
 	}
+	NSNotification *downloadNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:downloadNotification afterDelay:4.0];
 	
 }
 
@@ -344,7 +344,7 @@
 
 -(void)download
 {
-	self.isCanceled = NO;
+	isCanceled = NO;
 	if (!gotDetails) {
 		[self getShowDetail];
 //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
@@ -388,11 +388,11 @@
         [encoderTask launch];
         _isSimultaneousEncoding = YES;
     }
-	[activeURLConnection start];
 	downloadingURL = YES;
     dataDownloaded = 0.0;
     _processProgress = 0.0;
 	previousProcessProgress = 0.0;
+	[activeURLConnection start];
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
     [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
     _showStatus = @"Downloading";
@@ -613,7 +613,7 @@
 {
     NSLog(@"Canceling %@", _showTitle);
     NSFileManager *fm = [NSFileManager defaultManager];
-    self.isCanceled = YES;
+    isCanceled = YES;
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if ([_downloadStatus intValue] == kMTStatusDownloading && activeURLConnection) {
         [activeURLConnection cancel];
@@ -657,19 +657,19 @@
 	unsigned long dataRead;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSData *data = nil;
-	if (!_isCanceled) {
+	if (!isCanceled) {
 		data = [bufferFileReadHandle readDataOfLength:chunkSize];
 	}
 	pipingData = YES;
-	if (!_isCanceled) [downloadFileHandle writeData:data];
+	if (!isCanceled) [downloadFileHandle writeData:data];
 	pipingData = NO;
 	dataRead = data.length;
-	while (dataRead == chunkSize && !_isCanceled) {
+	while (dataRead == chunkSize && !isCanceled) {
 		data = [bufferFileReadHandle readDataOfLength:chunkSize];
 		pipingData = YES;
-		if (!_isCanceled) [downloadFileHandle writeData:data];
+		if (!isCanceled) [downloadFileHandle writeData:data];
 		pipingData = NO;
-		if (_isCanceled) break;
+		if (isCanceled) break;
 		dataRead = data.length;
 //		dataDownloaded += data.length;
 		_processProgress = (double)[bufferFileReadHandle offsetInFile]/_fileSize;
@@ -682,7 +682,7 @@
 		}
 	}
 	[pool drain];
-	if (!downloadingURL || _isCanceled) {
+	if (!activeURLConnection || isCanceled) {
         NSLog(@"Closing downloadFileHandle which %@ from pipe1 for show %@", (downloadFileHandle != [pipe1 fileHandleForWriting]) ? @"is not" : @"is", _showTitle);
 		[downloadFileHandle closeFile];
 		if (downloadFileHandle != [pipe1 fileHandleForWriting]) {
@@ -735,25 +735,39 @@
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
+	double downloadedFileSize = 0;
     if (!_isSimultaneousEncoding) {
-        _fileSize = (double)[downloadFileHandle offsetInFile];
+        downloadedFileSize = (double)[downloadFileHandle offsetInFile];
        [downloadFileHandle release];
         downloadFileHandle = nil;
-        [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
-		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
+		//Check to make sure a reasonable file size in case there was a problem.
+		if (downloadedFileSize > 100000) {
+			[self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
+			[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
+		}
     } else {
-        [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-        _showStatus = @"Encoding";
-       [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
-        _fileSize = (double)[bufferFileWriteHandle offsetInFile];
+        downloadedFileSize = (double)[bufferFileWriteHandle offsetInFile];
         [bufferFileWriteHandle closeFile];
+		//Check to make sure a reasonable file size in case there was a problem.
+		if (downloadedFileSize > 100000) {
+			[self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+			_showStatus = @"Encoding";
+		   [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
+		}
     }
-    downloadingURL = NO;
+	downloadingURL = NO;
 	activeURLConnection = nil;
-    
+	
     //Make sure to flush the last of the buffer file into the pipe and close it.
 	if (!writingData && _isSimultaneousEncoding) {
-		[self performSelectorInBackground:@selector(writeData) withObject:nil];
+//		[self performSelectorInBackground:@selector(writeData) withObject:nil];
+		[self writeData];
+	}
+	if (downloadedFileSize < 100000) { //Not a good download - reschedule
+		NSLog(@"Downloaded file was too small - rescheduling");
+		[self rescheduleShow];
+	} else {
+		_fileSize = downloadedFileSize;  //More accurate file size
 	}
     [self performSelector:@selector(sendNotification:) withObject:kMTNotificationDownloadDidFinish afterDelay:4.0];
 }
@@ -960,6 +974,7 @@
     [self deallocDownloadHandling];
     [devNullFileHandle release];
 	[parseTermMapping release];
+	[self removeObserver:self forKeyPath:@"downloadStatus"];
 	[super dealloc];
 }
 
