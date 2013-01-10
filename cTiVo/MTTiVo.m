@@ -340,6 +340,7 @@
 
 -(void)dealloc
 {
+	SCNetworkReachabilityUnscheduleFromRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
 	self.networkAvailability = nil;
     CFRelease(_reachability);
     _reachability = nil;
