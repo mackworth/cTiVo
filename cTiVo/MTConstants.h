@@ -24,7 +24,7 @@
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"
 #define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
 #define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated"
-#define kMTNotificationNetworkNotAvailable @"MTNotificationNetworkNotAvailable"
+#define kMTNotificationNetworkChanged @"MTNotificationNetworkChanged"
 #define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"
 #define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
 #define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"
@@ -37,7 +37,7 @@
 #define kMTStatusDecrypted 4
 #define kMTStatusEncoding 5
 #define kMTStatusDone 6
-#define kMTStatusFailed 7
+#define kMTStatusFailed 15
 
 //Contants
 

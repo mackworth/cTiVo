@@ -55,7 +55,7 @@
 	//Spinner Progress Handling 
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdating object:nil];
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdated object:nil];
-    [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationNetworkNotAvailable object:nil];
+    [defaultCenter addObserver:self selector:@selector(networkChanged:) name:kMTNotificationNetworkChanged object:nil];
 	
     [defaultCenter addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
     [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
@@ -100,6 +100,13 @@
     }
 }
 
+-(void)networkChanged:(NSNotification *)notification
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:_selectedTiVo];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+	
+}
+
 -(void)manageLoadingIndicator:(NSNotification *)notification
 {
 	if (!notification) { //Don't accept nil notifications
@@ -112,11 +119,7 @@
 		[loadingTiVos removeObject:tivo];
 	}
     
-    if ([notification.name compare:kMTNotificationNetworkNotAvailable] == NSOrderedSame){
-		[loadingProgramListIndicator stopAnimation:nil];
-        loadingProgramListLabel.stringValue = [NSString stringWithFormat:@"Network problem for %@",[tivo description]];
-        //and assumes that a Tivo will start loading when network comes up, erasing this message.
-    } else if (loadingTiVos.count) {
+	if (loadingTiVos.count) {
         [loadingProgramListIndicator startAnimation:nil];
         //note: this relies on [MTTivo description]
         NSString *message =[NSString stringWithFormat: @"Updating %@",[loadingTiVos componentsJoinedByString:@", "]];
@@ -140,9 +143,10 @@
 	[formatListPopUp removeAllItems];
 	for (NSDictionary *fl in tiVoManager.formatList) {
 		[formatListPopUp addItemWithTitle:[fl objectForKey:@"name"]];
-        [[formatListPopUp lastItem] setRepresentedObject:fl];
+        NSMenuItem *thisItem = [formatListPopUp lastItem];
+        [thisItem setRepresentedObject:fl];
 		if (tiVoManager.selectedFormat && [[fl objectForKey:@"name"] compare:[tiVoManager.selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
-			[formatListPopUp selectItem:[formatListPopUp lastItem]];
+			[formatListPopUp selectItem:thisItem];
 		}
 		
 	}
@@ -150,26 +154,44 @@
 
 -(void)refreshTiVoListPopup:(NSNotification *)notification
 {
-	self.selectedTiVo = notification.object;
-    if (!_selectedTiVo) {
-        self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
-        if (!_selectedTiVo) {
-            self.selectedTiVo = kMTAllTiVos;
-        }
-    }
+	if (notification) {
+		self.selectedTiVo = notification.object;
+		if (!_selectedTiVo) {
+			self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
+			if (!_selectedTiVo) {
+				self.selectedTiVo = kMTAllTiVos;
+			}
+		}
+	}
 	[tiVoListPopUp removeAllItems];
 	for (MTTiVo *ts in tiVoManager.tiVoList) {
 		[tiVoListPopUp addItemWithTitle:ts.tiVo.name];
         [[tiVoListPopUp lastItem] setRepresentedObject:ts];
+        NSMenuItem *thisItem = [tiVoListPopUp lastItem];
+        if (!ts.isReachable) {
+            NSFont *thisFont = [NSFont systemFontOfSize:13];
+            NSString *thisTitle = [NSString stringWithFormat:@"%@ offline",ts.tiVo.name];
+            NSAttributedString *aTitle = [[[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]] autorelease];
+            [thisItem setAttributedTitle:aTitle];
+
+        }
 		if ([ts.tiVo.name compare:_selectedTiVo] == NSOrderedSame) {
-			[tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
+			[tiVoListPopUp selectItem:thisItem];
 		}
 		
 	}
     if (tiVoManager.tiVoList.count == 1) {
+		MTTiVo *ts = tiVoManager.tiVoList[0];
         [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
         [tiVoListPopUp setHidden:YES];
-        tiVoListPopUpLabel.stringValue = [NSString stringWithFormat:@"TiVo: %@",((MTTiVo *)[tiVoManager.tiVoList objectAtIndex:0]).tiVo.name];
+        tiVoListPopUpLabel.stringValue = [NSString stringWithFormat:@"TiVo: %@",ts.tiVo.name];
+        if (!ts.isReachable) {
+            NSFont *thisFont = [NSFont systemFontOfSize:13];
+            NSString *thisTitle = [NSString stringWithFormat:@"TiVo: %@ offline",ts.tiVo.name];
+            NSAttributedString *aTitle = [[[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]] autorelease];
+            [tiVoListPopUpLabel setAttributedStringValue:aTitle];
+			
+        }
     } else {
         [tiVoListPopUp addItemWithTitle:kMTAllTiVos];
         if ([kMTAllTiVos compare:_selectedTiVo] == NSOrderedSame) {

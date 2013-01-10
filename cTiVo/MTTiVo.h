@@ -31,6 +31,6 @@
 
 -(id) initWithTivo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
 -(void)updateShows:(id)sender;
--(void) reportNetworkFailure;
+//-(void) reportNetworkFailure;
 
 @end

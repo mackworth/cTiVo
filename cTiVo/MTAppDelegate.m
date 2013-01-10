@@ -38,18 +38,31 @@
 	if (tiVoGlobalManager.tiVoList.count == 0) {
 		[refreshTiVoMenuItem setEnabled:NO];
 	} else if (tiVoGlobalManager.tiVoList.count ==1) {
-		[refreshTiVoMenuItem setTarget:tiVoGlobalManager.tiVoList[0]];
-		[refreshTiVoMenuItem setAction:@selector(updateShows:)];
-		[refreshTiVoMenuItem setEnabled:YES];
+		[refreshTiVoMenuItem setTarget:nil];
+		[refreshTiVoMenuItem setAction:NULL];
+		if (((MTTiVo *)tiVoGlobalManager.tiVoList[0]).isReachable) {
+			[refreshTiVoMenuItem setTarget:tiVoGlobalManager.tiVoList[0]];
+			[refreshTiVoMenuItem setAction:@selector(updateShows:)];
+			[refreshTiVoMenuItem setEnabled:YES];
+		} else  {
+			[refreshTiVoMenuItem setEnabled:NO];
+		}
 	} else {
 		NSSortDescriptor *sd = [NSSortDescriptor sortDescriptorWithKey:@"tiVo.name" ascending:YES];
 		NSArray *sortedTiVos = [[NSArray arrayWithArray:tiVoGlobalManager.tiVoList] sortedArrayUsingDescriptors:[NSArray arrayWithObject:sd]];
 		NSMenu *thisMenu = [[[NSMenu alloc] initWithTitle:@"Refresh Tivo"] autorelease];
 		for (MTTiVo *tiVo in sortedTiVos) {
 			NSMenuItem *thisMenuItem = [[[NSMenuItem alloc] initWithTitle:tiVo.tiVo.name action:NULL keyEquivalent:@""] autorelease];
-			[thisMenuItem setTarget:tiVo];
-			[thisMenuItem setAction:@selector(updateShows:)];
-			[thisMenuItem setEnabled:YES];
+			if (!tiVo.isReachable) {
+				NSFont *thisFont = [NSFont systemFontOfSize:13];
+				NSString *thisTitle = [NSString stringWithFormat:@"%@ offline",tiVo.tiVo.name];
+				NSAttributedString *aTitle = [[[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]] autorelease];
+				[thisMenuItem setAttributedTitle:aTitle];
+			} else {
+				[thisMenuItem setTarget:tiVo];
+				[thisMenuItem setAction:@selector(updateShows:)];
+				[thisMenuItem setEnabled:YES];
+			}
 			[thisMenu addItem:thisMenuItem];
 		}
 		NSMenuItem *thisMenuItem = [[[NSMenuItem alloc] initWithTitle:@"All TiVos" action:NULL keyEquivalent:@""] autorelease];

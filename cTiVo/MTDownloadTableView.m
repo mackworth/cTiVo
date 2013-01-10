@@ -169,6 +169,10 @@
     } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
         result.textField.stringValue = rowData.tiVo.tiVo.name ;
         result.toolTip = result.textField.stringValue;
+        result.textField.textColor = [NSColor blackColor];
+        if (!rowData.tiVo.isReachable && [rowData.downloadStatus intValue] == kMTStatusDownloading) {
+            result.textField.textColor = [NSColor redColor];
+        }
 	
     } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
         result.textField.stringValue = [rowData.encodeFormat objectForKey:@"name"] ;

@@ -69,10 +69,10 @@
     return self.tiVo.name;
 }
 
--(void) reportNetworkFailure {
-    [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkNotAvailable object:self];
-//    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTRetryNetworkInterval];
-}
+//-(void) reportNetworkFailure {
+//    [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkNotAvailable object:self];
+////    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTRetryNetworkInterval];
+//}
 
 //-(BOOL) isReachable {
 //    uint32_t    networkReachabilityFlags;
@@ -115,10 +115,10 @@
 		showURLConnection = nil;
 	}
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateShows:) object:nil];
-	if (![self isReachable]){
-        [self reportNetworkFailure];
-        return;
-    }
+//	if (![self isReachable]){
+//        [self reportNetworkFailure];
+//        return;
+//    }
     isConnecting = YES;
 
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
@@ -320,7 +320,7 @@
 {
     NSLog(@"URL Connection Failed with error %@",error);
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
-    [self reportNetworkFailure];
+//    [self reportNetworkFailure];
     
     isConnecting = NO;
 	

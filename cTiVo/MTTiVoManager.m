@@ -23,9 +23,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[NSObject cancelPreviousPerformRequestsWithTarget:[MTTiVoManager sharedTiVoManager] selector:@selector(manageDownloads) object:nil];
 		[[MTTiVoManager sharedTiVoManager] performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTTiVoAccessDelay+2];
 		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
-	} else {
-		[thisTivo reportNetworkFailure];
-	}
+	} 
+    [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkChanged object:nil];
 	NSLog(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
 }
 
@@ -422,9 +421,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		ipAddress = [self getStringFromAddressData:[sender addresses][0]];
 		
 	}
-//    if (_tiVoList.count == 1) {  //Test code for single tivo testing
-//        return;
-//    }
+    if (_tiVoList.count == 1) {  //Test code for single tivo testing
+        return;
+    }
 
 	for (NSString *hostAddress in self.hostAddresses) {
 		if ([hostAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {

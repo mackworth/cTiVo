@@ -175,6 +175,10 @@
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
         result.textField.stringValue = thisShow.tiVo.tiVo.name;
+        result.textField.textColor = [NSColor blackColor];
+        if (!thisShow.tiVo.isReachable) {
+            result.textField.textColor = [NSColor redColor];
+        }
         result.toolTip = thisShow.tiVo.tiVo.name;
     } else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.showDateString;
