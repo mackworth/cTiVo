@@ -13,6 +13,7 @@
 @interface MTProgramTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate>{
     IBOutlet NSWindowController *myController;
 	MTTiVoManager *tiVoManager;
+    NSTableColumn *tiVoColumnHolder;
 }
 
 @property (nonatomic, retain) NSArray *sortedShows;

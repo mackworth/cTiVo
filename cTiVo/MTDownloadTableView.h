@@ -15,6 +15,7 @@
 
 @interface MTDownloadTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
     IBOutlet MTMainWindowController *myController;
+    NSTableColumn *tiVoColumnHolder;
 }
 
 @property (nonatomic, retain) NSArray *sortedShows;

@@ -12,6 +12,7 @@
 #import "MTSubscriptionTableView.h"
 #import "MTPopUpButton.h"
 #import "MTCheckBox.h"
+#import "MTTiVo.h"
 
 @interface MTMainWindowController ()
 
@@ -167,11 +168,16 @@
 	}
     if (tiVoManager.tiVoList.count == 1) {
         [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
+        [tiVoListPopUp setHidden:YES];
+        tiVoListPopUpLabel.stringValue = [NSString stringWithFormat:@"TiVo: %@",((MTTiVo *)[tiVoManager.tiVoList objectAtIndex:0]).tiVo.name];
     } else {
         [tiVoListPopUp addItemWithTitle:kMTAllTiVos];
         if ([kMTAllTiVos compare:_selectedTiVo] == NSOrderedSame) {
             [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
         }
+        [tiVoListPopUp setHidden:NO];
+        [tiVoListPopUpLabel setHidden:NO];
+        tiVoListPopUpLabel.stringValue = @"Filter TiVo:";
     }
 }
 
@@ -255,6 +261,9 @@
 	[myOpenPanel setCanChooseDirectories:YES];
 	[myOpenPanel setCanChooseFiles:NO];
 	[myOpenPanel setAllowsMultipleSelection:NO];
+    [myOpenPanel setCanCreateDirectories:YES];
+    [myOpenPanel setTitle:@"Choose Directory for Download of Videos"];
+    [myOpenPanel setPrompt:@"Choose"];
 	NSInteger ret = [myOpenPanel runModal];
 	if (ret == NSFileHandlingPanelOKButton) {
 		NSString *dir = [myOpenPanel.URL.absoluteString substringFromIndex:16];

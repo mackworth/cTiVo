@@ -17,7 +17,7 @@
 @interface MTMainWindowController : NSWindowController {
 	IBOutlet NSPopUpButton *tiVoListPopUp, *formatListPopUp;
     IBOutlet NSButton *addToQueueButton, *removeFromQueueButton, *addToiTunesButton, *simultaneousEncodeButton, *subscribeButton;
-	IBOutlet NSTextField *loadingProgramListLabel, *downloadDirectory;
+	IBOutlet NSTextField *loadingProgramListLabel, *downloadDirectory, *tiVoListPopUpLabel;
 	IBOutlet NSProgressIndicator *loadingProgramListIndicator;
 	IBOutlet MTDownloadTableView *downloadQueueTable;
 	IBOutlet MTProgramTableView  *tiVoShowTable;

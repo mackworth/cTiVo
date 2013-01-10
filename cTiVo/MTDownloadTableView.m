@@ -37,9 +37,26 @@
     self.delegate    = self;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
+    tiVoColumnHolder = [[self tableColumnWithIdentifier:@"TiVo"] retain];
 }
 
 -(void) reloadData {
+    //Configure Table Columns depending on how many TiVos
+    NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
+    NSTableColumn *programColumn = [self tableColumnWithIdentifier:@"Programs"];
+    if (tiVoManager.tiVoList.count == 1) {
+        if (tiVoColumn) {
+            [self removeTableColumn:tiVoColumn];
+            programColumn.width += tiVoColumn.width + 3;
+        }
+    } else {
+        if (!tiVoColumn) {
+            [self addTableColumn:tiVoColumnHolder];
+            NSInteger colPos = [self columnWithIdentifier:@"TiVo"];
+            [self moveColumn:colPos toColumn:1];
+            programColumn.width -= tiVoColumn.width + 3;
+        }
+    }
     self.sortedShows =nil;
     [super reloadData];
 }
@@ -73,6 +90,7 @@
 
 -(void)dealloc
 {
+    [tiVoColumnHolder release];
     self.sortedShows= nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
@@ -92,7 +110,7 @@
 {
     id result;
 	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
-    if([identifier compare: @"Program"] == NSOrderedSame) {
+    if([identifier compare: @"Programs"] == NSOrderedSame) {
         MTDownloadTableCellView *thisCell = [[[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)] autorelease];
         //        result.textField.font = [NSFont userFontOfSize:14];
         thisCell.textField.editable = NO;
@@ -118,7 +136,7 @@
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     MTTiVoShow *rowData = [self.sortedShows objectAtIndex:row];
-//	NSDictionary *idMapping = [NSDictionary dictionaryWithObjectsAndKeys:@"Title",@"Program",kMTSelectedTiVo,@"TiVo",kMTSelectedFormat,@"Format", nil];
+//	NSDictionary *idMapping = [NSDictionary dictionaryWithObjectsAndKeys:@"Title",@"Programs",kMTSelectedTiVo,@"TiVo",kMTSelectedFormat,@"Format", nil];
 	
     // get an existing cell with the MyView identifier if it exists
 	
@@ -142,7 +160,7 @@
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
-	if ([tableColumn.identifier compare:@"Program"] == NSOrderedSame) {
+	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
 		result.progressIndicator.rightText.stringValue = rowData.showStatus;
         result.progressIndicator.leftText.stringValue = rowData.showTitle ;
         result.progressIndicator.doubleValue = rowData.processProgress;

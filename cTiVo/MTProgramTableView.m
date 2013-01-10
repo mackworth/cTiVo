@@ -37,10 +37,33 @@
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
     self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
+    tiVoColumnHolder = [[self tableColumnWithIdentifier:@"TiVo"] retain];
 }
 
 -(void)reloadData
 {
+    //Configure Table Columns depending on how many TiVos
+    NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
+    NSTableColumn *programColumn = [self tableColumnWithIdentifier:@"Programs"];
+    BOOL changedColumns = NO;
+    if (tiVoManager.tiVoList.count == 1) {
+        if (tiVoColumn) {
+            [self removeTableColumn:tiVoColumn];
+            programColumn.width += tiVoColumn.width + 3;
+            changedColumns = YES;
+        }
+    } else {
+        if (!tiVoColumn) {
+            [self addTableColumn:tiVoColumnHolder];
+            NSInteger colPos = [self columnWithIdentifier:@"TiVo"];
+            [self moveColumn:colPos toColumn:1];
+            programColumn.width -= tiVoColumn.width + 3;
+            changedColumns = YES;
+        }
+    }
+    if (changedColumns) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+    }
     NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
     
     NSArray * selectedItems = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
@@ -75,6 +98,7 @@
 
 -(void)dealloc
 {
+    [tiVoColumnHolder release];
     self.selectedTiVo = nil;
     self.sortedShows = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
