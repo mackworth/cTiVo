@@ -12,6 +12,24 @@
 
 #include <arpa/inet.h>
 
+void tivoNetworkCallback    (SCNetworkReachabilityRef target,
+							 SCNetworkReachabilityFlags flags,
+							 void *info)
+{
+    MTTiVo *thisTivo = (MTTiVo *)info;
+	thisTivo.isReachable = (flags >>17) && 1 ;
+	if (thisTivo.isReachable) {
+		thisTivo.networkAvailability = [NSDate date];
+		[NSObject cancelPreviousPerformRequestsWithTarget:[MTTiVoManager sharedTiVoManager] selector:@selector(manageDownloads) object:nil];
+		[[MTTiVoManager sharedTiVoManager] performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTTiVoAccessDelay+2];
+		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
+	} else {
+		[thisTivo reportNetworkFailure];
+	}
+	NSLog(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
+}
+
+
 @interface MTTiVoManager ()
 
 @property (retain) NSNetService *updatingTiVo;
@@ -326,11 +344,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
                     if (s.simultaneousEncode) {
                         numEncoders++;
                     }
-                    [s download];
-                } else {    //We'll try again in kMTRetryNetworkInterval seconds at a minimum;
-                    [s.tiVo reportNetworkFailure];
-                    NSLog(@"Could not reach %@ tivo will try later",s.tiVo.tiVo.name);
-                    [self performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTRetryNetworkInterval];
+					[s download];
+//                } else {    //We'll try again in kMTRetryNetworkInterval seconds at a minimum;
+//                    [s.tiVo reportNetworkFailure];
+//                    NSLog(@"Could not reach %@ tivo will try later",s.tiVo.tiVo.name);
+//                    [self performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTRetryNetworkInterval];
                 }
                 break;
             }
@@ -392,7 +410,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     }
     [_tivoServices addObject:netService];
     netService.delegate = self;
-    [netService resolveWithTimeout:4.0];
+    [netService resolveWithTimeout:6.0];
 }
 
 #pragma mark - NetService delegate methods

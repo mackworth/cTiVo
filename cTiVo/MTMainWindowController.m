@@ -111,8 +111,9 @@
 		[loadingTiVos removeObject:tivo];
 	}
     
-    if ([notification.name compare:kMTNotificationNetworkNotAvailable] == NSOrderedSame){            [loadingProgramListIndicator startAnimation:nil];
-        loadingProgramListLabel.stringValue = [NSString stringWithFormat:@"Network problem for %@; retrying...",[tivo description]];
+    if ([notification.name compare:kMTNotificationNetworkNotAvailable] == NSOrderedSame){
+		[loadingProgramListIndicator stopAnimation:nil];
+        loadingProgramListLabel.stringValue = [NSString stringWithFormat:@"Network problem for %@",[tivo description]];
         //and assumes that a Tivo will start loading when network comes up, erasing this message.
     } else if (loadingTiVos.count) {
         [loadingProgramListIndicator startAnimation:nil];

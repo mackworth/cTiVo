@@ -41,11 +41,12 @@
 
 //Contants
 
-#define kMTMaxNumDownloaders 2      //Limit number of encoders to limit cpu usage
+#define kMTMaxNumDownloaders 2		//Limit number of encoders to limit cpu usage
 #define kMTUpdateIntervalMinutes 15 //Update interval for re-checking current TiVo
-#define kMTMaxDownloadRetries 3	  // Only allow 3 retries to download a show
-#define kMTProgressCheckDelay 60  //Check progress every 60 seconds to make sure its not stalled
-#define kMTRetryNetworkInterval 15 //Re-Check for network connectivity every X seconds
+#define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show
+#define kMTProgressCheckDelay 60	//Check progress every 60 seconds to make sure its not stalled
+//#define kMTRetryNetworkInterval 15	//Re-Check for network connectivity every X seconds
+#define kMTTiVoAccessDelay 7		//Seconds to wait after TiVo is found on network
 
 //Subscribed Show
 #define kMTSubscribedSeries @"MTSubscribedSeries"

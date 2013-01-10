@@ -33,6 +33,11 @@
 		_mediaKey = @"";
 		isConnecting = NO;
 		_mediaKeyIsGood = NO;
+        reachabilityContext.version = 0;
+        reachabilityContext.info = self;
+        reachabilityContext.retain = NULL;
+        reachabilityContext.release = NULL;
+        reachabilityContext.copyDescription = NULL;
 	}
 	return self;
 	
@@ -45,7 +50,11 @@
 		self.tiVo = tiVo;
 		self.queue = queue;
         _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [tiVo.addresses[0] bytes]);
-
+		self.networkAvailability = [NSDate date];
+        SCNetworkReachabilitySetCallback(_reachability, tivoNetworkCallback, &reachabilityContext);
+		BOOL didSchedule = SCNetworkReachabilityScheduleWithRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+		_isReachable = YES;
+		NSLog(@"%@ reachability for tivo %@",didSchedule ? @"Scheduled" : @"Failed to schedule", _tiVo.name);
 		[self getMediaKey];
 		if (_mediaKey.length == 0) {
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
@@ -62,16 +71,16 @@
 
 -(void) reportNetworkFailure {
     [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkNotAvailable object:self];
-    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTRetryNetworkInterval];
+//    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTRetryNetworkInterval];
 }
 
--(BOOL) isReachable {
-    uint32_t    networkReachabilityFlags;
-    SCNetworkReachabilityGetFlags(self.reachability , &networkReachabilityFlags);
-    BOOL result = (networkReachabilityFlags >>17) && 1 ;  //if the 17th bit is set we are reachable.
-    return result;
-}
-
+//-(BOOL) isReachable {
+//    uint32_t    networkReachabilityFlags;
+//    SCNetworkReachabilityGetFlags(self.reachability , &networkReachabilityFlags);
+//    BOOL result = (networkReachabilityFlags >>17) && 1 ;  //if the 17th bit is set we are reachable.
+//    return result;
+//}
+//
 -(void)getMediaKey
 {
 	NSString *mediaKeyString = @"";
@@ -331,6 +340,7 @@
 
 -(void)dealloc
 {
+	self.networkAvailability = nil;
     CFRelease(_reachability);
     _reachability = nil;
 	self.mediaKey = nil;

@@ -16,6 +16,11 @@
 #import <SystemConfiguration/SystemConfiguration.h>
 
 
+
+void tivoNetworkCallback    (SCNetworkReachabilityRef target,
+							 SCNetworkReachabilityFlags flags,
+							 void *info);
+
 @interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate>  {
     
     NSNetService *tivoService ;
@@ -64,5 +69,6 @@
 -(BOOL) canSimulEncode:(NSDictionary *) format;
 -(NSDictionary *) findFormat:(NSString *) formatName;
 -(NSDictionary *)currentMediaKeys;
+-(void)manageDownloads;
 
 @end

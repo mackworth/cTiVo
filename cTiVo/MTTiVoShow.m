@@ -135,8 +135,9 @@
 		_numRetriesRemaining--;
 		[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
 	}
-	NSNotification *downloadNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:downloadNotification afterDelay:4.0];
+	[tiVoManager performSelector:@selector(manageDownloads) withObject:nil afterDelay:4.0];
+//	NSNotification *downloadNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
+//	[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:downloadNotification afterDelay:4.0];
 	
 }
 
@@ -345,6 +346,8 @@
 -(void)download
 {
 	isCanceled = NO;
+    [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
+    _showStatus = @"Downloading";
 	if (!gotDetails) {
 		[self getShowDetail];
 //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
@@ -394,8 +397,6 @@
 	previousProcessProgress = 0.0;
 	[activeURLConnection start];
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
-    [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
-    _showStatus = @"Downloading";
 }
 -(void)trackDownloadEncode
 {
@@ -622,8 +623,8 @@
         activeURLConnection = nil;
         [fm removeItemAtPath:decryptFilePath error:nil];
     }
-    while (pipingData){
-        //Block until latest pipe write is complete
+    while (writingData){
+        //Block until latest write data is complete - should stop quickly because isCanceled is set
     } //Wait for pipe out to complete
     [self cleanupFiles]; //Everything but the final file
     if(decrypterTask && [decrypterTask isRunning]) {
@@ -766,12 +767,14 @@
 		[self writeData];
 	}
 	if (downloadedFileSize < 100000) { //Not a good download - reschedule
+		NSString *dataReceived = [NSString stringWithContentsOfFile:bufferFilePath encoding:NSUTF8StringEncoding error:nil];
 		NSLog(@"Downloaded file was too small - rescheduling");
+		NSLog(@"File sent was %@",dataReceived);
 		[self rescheduleShow];
 	} else {
 		_fileSize = downloadedFileSize;  //More accurate file size
+		[self performSelector:@selector(sendNotification:) withObject:kMTNotificationDownloadDidFinish afterDelay:4.0];
 	}
-    [self performSelector:@selector(sendNotification:) withObject:kMTNotificationDownloadDidFinish afterDelay:4.0];
 }
 
 #pragma mark - Misc Support Functions

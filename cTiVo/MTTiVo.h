@@ -15,16 +15,17 @@
 	BOOL volatile isConnecting;
 	NSURLConnection *showURLConnection;
 	NSMutableData *urlData;
+    SCNetworkReachabilityContext reachabilityContext;
 }
 
 @property (nonatomic, retain) NSNetService *tiVo;
 @property (nonatomic, retain) NSMutableArray *shows;
-@property (nonatomic, retain) NSDate *lastUpdated;
+@property (nonatomic, retain) NSDate *lastUpdated, *networkAvailability;
 @property (nonatomic, retain) NSString *mediaKey;
 @property (nonatomic, assign) NSOperationQueue *queue;
 @property (nonatomic, retain) MTTiVoManager *tiVoManager;
 @property BOOL mediaKeyIsGood;
-@property (readonly) BOOL isReachable;
+@property BOOL isReachable;
 
 +(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
 
