@@ -197,7 +197,7 @@
         popUpButton.owner = rowData;
         [popUpButton selectItemWithTitle:rowData.encodeFormat[@"name"]];
         popUpButton.enabled = ([rowData.downloadStatus intValue] == kMTStatusNew);
-        result.toolTip = result.textField.stringValue;
+        result.toolTip = [NSString stringWithFormat:@"%@: %@", rowData.encodeFormat[@"name"], rowData.encodeFormat[@"formatDescription"]];
     } else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: rowData.addToiTunesWhenEncoded];

@@ -361,7 +361,7 @@
     activeURLConnection = [[[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] autorelease];
 
 //Now set up for either simul or sequential download
-    NSLog(@"Starting %@download of %@ AT %@ INTO %@", (_simultaneousEncode ? @"simultaneous " : @""), _showTitle, _urlString, encodeFilePath);
+    NSLog(@"Starting %@download of %@", (_simultaneousEncode ? @"simultaneous " : @""), _showTitle);
     if (!_simultaneousEncode ) {
         _isSimultaneousEncoding = NO;
     } else { //We'll build the full piped download chain here
@@ -422,7 +422,7 @@
 
 -(void)decrypt
 {
-	NSLog(@"starting decrypt of %@", _showTitle);
+	NSLog(@"Starting Decrypt of %@", _showTitle);
 	decrypterTask = [[NSTask alloc] init];
 	[decrypterTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
 	[decrypterTask setStandardOutput:decryptLogFileHandle];
@@ -451,7 +451,7 @@
 {
 	if (![decrypterTask isRunning]) {
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-        NSLog(@"finished decrypt of %@", _showTitle);
+        NSLog(@"Finished Decrypt of %@", _showTitle);
 		_processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [self setValue:[NSNumber numberWithInt:kMTStatusDecrypted] forKeyPath:@"downloadStatus"];
@@ -485,7 +485,7 @@
 {
 	encoderTask = [[NSTask alloc] init];
 //	NSDictionary *selectedFormat = [programEncoding objectForKey:kMTSelectedFormat];
-	NSLog(@"starting encode of %@", _showTitle);
+	NSLog(@"Starting Encode of %@", _showTitle);
 	NSMutableArray *arguments = nil;
 	if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"mencoder"] == NSOrderedSame ) {
 		[encoderTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"mencoder" ofType:@""]];
@@ -525,7 +525,7 @@
 {
 	if (![encoderTask isRunning]) {
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-        NSLog(@"Finished Encoding %@",_showTitle);
+        NSLog(@"Finished Encode of   %@",_showTitle);
         _processProgress = 1.0;
         [[NSFileManager defaultManager] removeItemAtPath:decryptFilePath error:nil];
 		[encoderTask release];

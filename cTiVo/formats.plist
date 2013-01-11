@@ -246,7 +246,7 @@
 			<key>iTunes</key>
 			<true/>
 			<key>mustDownloadFirst</key>
-			<true/>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>

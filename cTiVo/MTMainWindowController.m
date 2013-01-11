@@ -145,11 +145,13 @@
 		[formatListPopUp addItemWithTitle:[fl objectForKey:@"name"]];
         NSMenuItem *thisItem = [formatListPopUp lastItem];
         [thisItem setRepresentedObject:fl];
+        thisItem.toolTip = [NSString stringWithFormat:@"%@: %@", fl[@"name"], fl[@"formatDescription"]];
 		if (tiVoManager.selectedFormat && [[fl objectForKey:@"name"] compare:[tiVoManager.selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
 			[formatListPopUp selectItem:thisItem];
 		}
 		
 	}
+    
 }
 
 -(void)refreshTiVoListPopup:(NSNotification *)notification

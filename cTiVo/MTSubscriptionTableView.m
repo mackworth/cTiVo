@@ -199,7 +199,8 @@ static NSDateFormatter *dateFormatter;
 //        result.toolTip = result.textField.stringValue;
 		((MTPopUpTableCellView *)result).popUpButton.owner = thisSubscription;
         [((MTPopUpTableCellView *)result).popUpButton selectItemWithTitle:thisSubscription.encodeFormat[@"name"]];
-		
+        result.toolTip = [NSString stringWithFormat:@"%@: %@", thisSubscription.encodeFormat[@"name"], thisSubscription.encodeFormat[@"formatDescription"]];
+ 
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setEnabled: [thisSubscription canAddToiTunes]];

@@ -12,21 +12,6 @@
 
 #include <arpa/inet.h>
 
-void tivoNetworkCallback    (SCNetworkReachabilityRef target,
-							 SCNetworkReachabilityFlags flags,
-							 void *info)
-{
-    MTTiVo *thisTivo = (MTTiVo *)info;
-	thisTivo.isReachable = (flags >>17) && 1 ;
-	if (thisTivo.isReachable) {
-		thisTivo.networkAvailability = [NSDate date];
-		[NSObject cancelPreviousPerformRequestsWithTarget:[MTTiVoManager sharedTiVoManager] selector:@selector(manageDownloads) object:nil];
-		[[MTTiVoManager sharedTiVoManager] performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTTiVoAccessDelay+2];
-		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
-	} 
-    [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkChanged object:nil];
-	NSLog(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
-}
 
 
 @interface MTTiVoManager ()
