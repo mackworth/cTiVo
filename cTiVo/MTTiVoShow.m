@@ -654,6 +654,12 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 }
 
+-(void)sendNotification
+{
+	NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:4.0];
+}
+
 -(void)writeData
 {
 	writingData = YES;
@@ -664,16 +670,60 @@
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSData *data = nil;
 	if (!isCanceled) {
-		data = [bufferFileReadHandle readDataOfLength:chunkSize];
+		@try {
+			data = [bufferFileReadHandle readDataOfLength:chunkSize];
+		}
+		@catch (NSException *exception) {
+			writingData = NO;
+			[self rescheduleShow];
+			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
+			return;
+		}
+		@finally {
+		}
 	}
 	pipingData = YES;
-	if (!isCanceled) [downloadFileHandle writeData:data];
+	if (!isCanceled){
+		@try {
+			[downloadFileHandle writeData:data];
+		}
+		@catch (NSException *exception) {
+			writingData = NO;
+			[self rescheduleShow];
+			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
+			return;
+		}
+		@finally {
+		}
+	}
 	pipingData = NO;
 	dataRead = data.length;
 	while (dataRead == chunkSize && !isCanceled) {
-		data = [bufferFileReadHandle readDataOfLength:chunkSize];
+		@try {
+			data = [bufferFileReadHandle readDataOfLength:chunkSize];
+		}
+		@catch (NSException *exception) {
+			writingData = NO;
+			[self rescheduleShow];
+			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
+			return;
+		}
+		@finally {
+		}
 		pipingData = YES;
-		if (!isCanceled) [downloadFileHandle writeData:data];
+		if (!isCanceled) {
+			@try {
+				[downloadFileHandle writeData:data];
+			}
+			@catch (NSException *exception) {
+				writingData = NO;
+				[self rescheduleShow];
+				[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
+				return;
+			}
+			@finally {
+			}
+		}
 		pipingData = NO;
 		if (isCanceled) break;
 		dataRead = data.length;

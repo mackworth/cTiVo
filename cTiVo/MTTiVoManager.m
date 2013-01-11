@@ -406,9 +406,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		ipAddress = [self getStringFromAddressData:[sender addresses][0]];
 		
 	}
-    if (_tiVoList.count == 1) {  //Test code for single tivo testing
-        return;
-    }
+//    if (_tiVoList.count == 1) {  //Test code for single tivo testing
+//        return;
+//    }
 
 	for (NSString *hostAddress in self.hostAddresses) {
 		if ([hostAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {

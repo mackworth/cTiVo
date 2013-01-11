@@ -9,6 +9,12 @@
 #import "MTAppDelegate.h"
 #import "MTTiVo.h"
 
+void signalHandler(int signal)
+{
+	//Do nothing only use to intercept SIGPIPE.  Ignoring this should be fine as the the retry system should catch the failure and cancel and restart
+	NSLog(@"Got signal %d",signal);
+}
+
 @implementation MTAppDelegate
 
 - (void)dealloc
@@ -29,6 +35,8 @@
 	[self updateTivoRefreshMenu];
 	mediaKeyQueue = [NSMutableArray new];
 	gettingMediaKey = NO;
+	signal(SIGPIPE, &signalHandler);
+	signal(SIGABRT, &signalHandler );
 }
 
 #pragma mark - UI support
