@@ -35,13 +35,23 @@
 
 -(void) setEncodeFormat:(NSDictionary *) encodeFormat {
     if (_encodeFormat != encodeFormat ) {
+        BOOL simulWasDisabled = ![self canSimulEncode];
+        BOOL iTunesWasDisabled = ![self canAddToiTunes];
         [_encodeFormat release];
         _encodeFormat = [encodeFormat retain];
         if (!self.canSimulEncode && self.shouldSimulEncode) {
+            //no longer possible
             self.simultaneousEncode = [NSNumber numberWithBool:NO];
+        } else if (simulWasDisabled && [self canSimulEncode]) {
+            //newly possible, so take user default
+            self.simultaneousEncode = [NSNumber numberWithBool:[tiVoManager simultaneousEncode]];
         }
         if (!self.canAddToiTunes && self.shouldAddToiTunes) {
+            //no longer possible
             self.addToiTunes = [NSNumber numberWithBool:NO];
+        } else if (iTunesWasDisabled && [self canAddToiTunes]) {
+            //newly possible, so take user default
+            self.simultaneousEncode = [NSNumber numberWithBool:[tiVoManager addToItunes]];
         }
     }
 }

@@ -232,7 +232,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 -(BOOL) canSimulEncode:(NSDictionary *) format {
-	return [format[@"iTunes"] boolValue];
+	return ![format[@"mustDownloadFirst"] boolValue];
 }
 
 -(void)updateMediaKeysDefaults
@@ -431,10 +431,14 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 	}
 
-	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
-    [_tiVoList addObject:newTiVo];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
-    
+    if ([sender.name rangeOfString:@"Py"].location == NSNotFound) {
+        MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
+      
+        [_tiVoList addObject:newTiVo];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+    } else {
+        NSLog(@"PyAddress: %@ not in hostAddresses = %@", ipAddress, self.hostAddresses);
+    }
 }
 
 -(void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict

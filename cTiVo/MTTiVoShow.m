@@ -352,6 +352,9 @@
 		[self getShowDetail];
 //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	}
+    if (_simultaneousEncode && ![tiVoManager canSimulEncode:_encodeFormat]) {  //last chance check
+        _simultaneousEncode = NO;
+    }
     [self configureFiles];
     NSURLRequest *thisRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:_urlString ]];
 //    activeURLConnection = [NSURLConnection connectionWithRequest:thisRequest delegate:self];
@@ -359,7 +362,7 @@
 
 //Now set up for either simul or sequential download
     NSLog(@"Starting %@download of %@ AT %@ INTO %@", (_simultaneousEncode ? @"simultaneous " : @""), _showTitle, _urlString, encodeFilePath);
-    if (!_simultaneousEncode || [[_encodeFormat objectForKey:@"mustDownloadFirst"] boolValue]) {
+    if (!_simultaneousEncode ) {
         _isSimultaneousEncoding = NO;
     } else { //We'll build the full piped download chain here
        //Decrypting section of full pipeline
@@ -770,7 +773,7 @@
 		NSString *dataReceived = [NSString stringWithContentsOfFile:bufferFilePath encoding:NSUTF8StringEncoding error:nil];
 		NSLog(@"Downloaded file was too small - rescheduling");
 		NSLog(@"File sent was %@",dataReceived);
-		[self rescheduleShow];
+		[self performSelector:@selector( rescheduleShow) withObject:nil afterDelay:kMTTiVoAccessDelay];
 	} else {
 		_fileSize = downloadedFileSize;  //More accurate file size
 		[self performSelector:@selector(sendNotification:) withObject:kMTNotificationDownloadDidFinish afterDelay:4.0];
