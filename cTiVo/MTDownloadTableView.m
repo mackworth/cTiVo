@@ -7,6 +7,7 @@
 //
 
 #import "MTDownloadTableView.h"
+#import "MTPopUpTableCellView.h"
 
 @implementation MTDownloadTableView
 @synthesize  sortedShows= _sortedShows;
@@ -127,7 +128,24 @@
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
-	} else {
+   } else if([identifier compare: @"Format"] == NSOrderedSame) {
+		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
+		thisCell.identifier = identifier;
+        NSArray *formatList = [MTTiVoManager sharedTiVoManager].formatList;
+        [thisCell.popUpButton removeAllItems];
+        //    if (_selectedFormat) {
+        //        mediaKeyLabel.stringValue = [[NSUserDefaults standardUserDefaults] stringForKey:[_selectedFormat objectForKey:@"name"]];
+        //    }
+        for (NSDictionary *fl in formatList) {
+            [thisCell.popUpButton addItemWithTitle:[fl objectForKey:@"name"]];
+            [[thisCell.popUpButton lastItem] setRepresentedObject:fl];
+            //            if (_selectedFormat && [[fl objectForKey:@"name"] compare:[_selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
+            //                [self selectItem:[self lastItem]];
+            //            }
+            //
+        }
+       result = thisCell;
+    } else {
         result =[super makeViewWithIdentifier:identifier owner:owner];
     }
     return result;
@@ -175,9 +193,11 @@
         }
 	
     } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
-        result.textField.stringValue = [rowData.encodeFormat objectForKey:@"name"] ;
+		MTPopUpButton *popUpButton = ((MTPopUpTableCellView *)result).popUpButton;
+        popUpButton.owner = rowData;
+        [popUpButton selectItemWithTitle:rowData.encodeFormat[@"name"]];
+        popUpButton.enabled = ([rowData.downloadStatus intValue] == kMTStatusNew);
         result.toolTip = result.textField.stringValue;
-	
     } else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: rowData.addToiTunesWhenEncoded];

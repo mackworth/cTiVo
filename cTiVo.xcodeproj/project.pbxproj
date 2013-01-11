@@ -259,6 +259,8 @@
 				D2D60BC916766FA600CE32DE /* MTTiVoManager.m */,
 				D22BC41D1680DB5E007D699C /* MTTiVoShow.h */,
 				D22BC41E1680DB5E007D699C /* MTTiVoShow.m */,
+				1E791BD21697C59300E47E84 /* MTSubscription.h */,
+				1E791BD31697C59300E47E84 /* MTSubscription.m */,
 			);
 			name = "Data Model";
 			sourceTree = "<group>";
@@ -277,8 +279,6 @@
 				D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */,
 				D2D60BCF16766FA600CE32DE /* MTProgramTableView.h */,
 				D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */,
-				1E791BD21697C59300E47E84 /* MTSubscription.h */,
-				1E791BD31697C59300E47E84 /* MTSubscription.m */,
 				D235BEFF168F52DE00320FA5 /* MTSubscriptionTableView.h */,
 				D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */,
 			);

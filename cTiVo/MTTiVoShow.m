@@ -861,7 +861,47 @@
 	}
 
 }
+
+-(BOOL) canSimulEncode {
+    return [tiVoManager canSimulEncode:self.encodeFormat];
+}
+
+-(BOOL) shouldSimulEncode {
+    return _simultaneousEncode;
+}
+
+-(BOOL) canAddToiTunes {
+    return [tiVoManager canAddToiTunes:self.encodeFormat];
+ }
+
+-(BOOL) shouldAddToiTunes {
+    return _addToiTunesWhenEncoded;
+}
+
 #pragma mark - Custom Getters
+
+-(void) setEncodeFormat:(NSDictionary *) encodeFormat {
+    if (_encodeFormat != encodeFormat ) {
+        BOOL simulWasDisabled = ![self canSimulEncode];
+        BOOL iTunesWasDisabled = ![self canAddToiTunes];
+        [_encodeFormat release];
+        _encodeFormat = [encodeFormat retain];
+        if (!self.canSimulEncode && self.shouldSimulEncode) {
+            //no longer possible
+            self.simultaneousEncode = NO;
+        } else if (simulWasDisabled && [self canSimulEncode]) {
+            //newly possible, so take user default
+            self.simultaneousEncode = [tiVoManager simultaneousEncode];
+        }
+        if (!self.canAddToiTunes && self.shouldAddToiTunes) {
+            //no longer possible
+            self.addToiTunesWhenEncoded = NO;
+        } else if (iTunesWasDisabled && [self canAddToiTunes]) {
+            //newly possible, so take user default
+            self.addToiTunesWhenEncoded = [tiVoManager addToItunes];
+        }
+    }
+}
 
 -(NSString *) seasonEpisode {
     

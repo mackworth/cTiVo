@@ -217,9 +217,15 @@
             MTSubscription * subscription = (MTSubscription *) thisButton.owner;
             
             subscription.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
-               [tiVoManager.subscribedShows saveSubscriptions];
-        }
-    }
+            [tiVoManager.subscribedShows saveSubscriptions];
+       } else if ([thisButton.owner class] == [MTTiVoShow class]) {
+            MTTiVoShow * show = (MTTiVoShow *) thisButton.owner;
+           if([show.downloadStatus intValue] == kMTStatusNew) {
+                show.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
+            }
+          [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationDownloadStatusChanged object:nil];
+       }
+     }
 }
 
 #pragma mark - Subscription Management

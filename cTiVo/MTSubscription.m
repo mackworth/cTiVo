@@ -51,7 +51,7 @@
             self.addToiTunes = [NSNumber numberWithBool:NO];
         } else if (iTunesWasDisabled && [self canAddToiTunes]) {
             //newly possible, so take user default
-            self.simultaneousEncode = [NSNumber numberWithBool:[tiVoManager addToItunes]];
+            self.addToiTunes = [NSNumber numberWithBool:[tiVoManager addToItunes]];
         }
     }
 }
