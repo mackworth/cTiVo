@@ -86,13 +86,13 @@
 	
 	iTunesTrack * newTrack = [self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
 	if ([newTrack exists]) {
-		NSLog(@"Added track to iTunes: %@", show.showTitle);
+		NSLog(@"Added iTunes track:  %@", show.showTitle);
 
 		if ((show.episodeTitle.length ==0) &&
 			([show.episodeNumber intValue] == 0) &&
 			(show.showLength > 70) ) {
 			newTrack.videoKind = iTunesEVdKMovie;
-			newTrack.name = show.episodeTitle;
+			newTrack.name = show.showTitle;
 		} else {
 			newTrack.videoKind = iTunesEVdKTVShow;
 			newTrack.album = show.seriesTitle;
@@ -123,9 +123,10 @@
 	 */
 		return YES;
 	} else {
-		NSLog(@"Couldn't add track to itunes: %@ from %@", show.showTitle, showFileURL);
+		NSLog(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, show.encodeFormat[@"name"], showFileURL );
 		return NO;
 	}
+    [self updateAllIDevices];
 }
 
 - (void) updateAllIDevices {

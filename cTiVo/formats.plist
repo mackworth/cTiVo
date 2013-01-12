@@ -8,7 +8,9 @@
 	<array>
 		<dict>
 			<key>formatDescription</key>
-			<string>for viewing on iPhone video: 480x320 h.264 at 384kbps audio: aac at 128kbs</string>
+			<string>for viewing on iPhone
+video: 480x320 h.264 at 384kbps
+audio: aac at 128kbs</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -30,7 +32,9 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for viewing on video iPod video: 320x240 h.264 at 256kbps audio: aac at 128kbs</string>
+			<string>for viewing on video iPod
+video: 320x240 h.264 at 256kbps
+audio: aac at 128kbs</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -52,7 +56,9 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for viewing on TV hooked up to iPod/iPhone video: 640x480 h.264 at 1500kbps audio: aac at 128kbs</string>
+			<string>for viewing on TV hooked up to iPod/iPhone
+video: 640x480 h.264 at 1500kbps
+audio: aac at 128kbs</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>comSkip</key>
@@ -74,7 +80,9 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for archival at super quality video: original resolution h.264 at 10Mbps audio: aac at 256kbps</string>
+			<string>for archival at super quality
+video: original resolution h.264 at 10Mbps
+audio: aac at 256kbps</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -96,7 +104,9 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for archival at high quality video: original resolution h.264 at 5Mbps audio: aac at 192kbs</string>
+			<string>for archival at high quality
+video: original resolution h.264 at 5Mbps
+audio: aac at 192kbs</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -118,7 +128,9 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for archival at medium quality video: original h.264 at 3Mbps audio: aac at 192kbs</string>
+			<string>for archival at medium quality
+video: original h.264 at 3Mbps
+audio: aac at 192kbs</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -140,7 +152,9 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for archival at low quality video: original h.264 at 1Mbps audio: aac at 128kbs</string>
+			<string>for archival at low quality
+video: original h.264 at 1Mbps
+audio: aac at 128kbs</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -162,7 +176,9 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for compressing to very small size video: original h.264 at 128kbps audio: aac at 128kbs</string>
+			<string>for compressing to very small size
+video: original h.264 at 128kbps
+audio: aac at 128kbs</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -184,7 +200,11 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for fast encode (lower quality) video: original size DivX (mpeg4) at 1500kbps audio: mp3 at 128kbs  NOTE: *MUST* install a codec (http://perian.org/)</string>
+			<string>for fast encode (lower quality)
+video: original size DivX (mpeg4) at 1500kbps
+audio: mp3 at 128kbs
+
+NOTE: *MUST* install a codec (http://perian.org/)</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -200,13 +220,17 @@
 			<key>encoderOtherOptions</key>
 			<string>-of lavf -lavfopts format=mov -hr-edl-seek</string>
 			<key>iTunes</key>
-			<true/>
+			<false/>
 			<key>mustDownloadFirst</key>
 			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for faster encode (worse quality) video: 640x480 DivX 3 at 3000mbps audio: mp3 at 128kbs  NOTE: *MUST* install a codec (http://perian.org/)</string>
+			<string>for faster encode (worse quality)
+video: 640x480 DivX 3 at 3000mbps
+audio: mp3 at 128kbs
+
+NOTE: *MUST* install a codec (http://perian.org/)</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -228,7 +252,9 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for fastest encode (worst quality) video: 640x480 mpeg-1 at 3000mbps audio: mp2 at 128kbs</string>
+			<string>for fastest encode (worst quality)
+video: 640x480 mpeg-1 at 3000mbps
+audio: mp2 at 128kbs</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -250,7 +276,9 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for Microsoft Zune (untested) video: 320x240 h.264 at 384kbps audio: mp3 at 192kbs</string>
+			<string>for Microsoft Zune (untested)
+video: 320x240 h.264 at 384kbps
+audio: mp3 at 192kbs</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -272,7 +300,9 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for playback on AppleTV video: 960x540 h.264 at 2Mbps audio: 2-channel aac at 128kbs</string>
+			<string>for playback on AppleTV
+video: 960x540 h.264 at 2Mbps
+audio: 2-channel aac at 128kbs</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -294,7 +324,10 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for Sony PSP video: 480x272 h.264 at 256kbps audio: aac at 128kbs (put in a folder named VIDEO on your PSP memory stick)</string>
+			<string>for Sony PSP
+video: 480x272 h.264 at 256kbps
+audio: aac at 128kbs
+(put in a folder named VIDEO on your PSP memory stick)</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -316,7 +349,10 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for Sony PS3 video: 1920x1080 h.264 at 1.5Mbps audio: aac at 128kbs *UNTESTED*</string>
+			<string>for Sony PS3
+video: 1920x1080 h.264 at 1.5Mbps
+audio: aac at 128kbs
+*UNTESTED*</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -338,7 +374,10 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for Microsoft XBOX 360 video: original h.264 at 2Mbps audio: aac at 128kbs *UNTESTED*</string>
+			<string>for Microsoft XBOX 360
+video: original h.264 at 2Mbps
+audio: aac at 128kbs
+*UNTESTED*</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -360,7 +399,11 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>YouTube High-Def video: 1280x720 h.264 at 1.5Mbps audio: aac at 192kbs  Note:  only YouTube Partners can upload this</string>
+			<string>YouTube High-Def
+video: 1280x720 h.264 at 1.5Mbps
+audio: aac at 192kbs
+
+Note:  only YouTube Partners can upload this</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>comSkip</key>
@@ -382,7 +425,11 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for uploading to YouTube video: 640x360 h.264 at 512kbps audio: aac at 128kbs  *MAKE SURE* your video is under 10 minutes</string>
+			<string>for uploading to YouTube
+video: 640x360 h.264 at 512kbps
+audio: aac at 128kbs
+
+*MAKE SURE* your video is under 10 minutes</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>comSkip</key>
@@ -404,11 +451,14 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>MPEG-2 Program Stream intended for HD sources video: original resolution mpeg-2 at 5Mbps audio: mp2 at 128kbs  May not work in quicktime</string>
+			<string>MPEG-2 Program Stream
+intended for HD sources
+video: original resolution mpeg-2 at 5Mbps
+audio: mp2 at 128kbs
+
+May not work in quicktime</string>
 			<key>comSkip</key>
 			<true/>
-			<key>New item</key>
-			<string></string>
 			<key>filenameExtension</key>
 			<string>.mpg</string>
 			<key>encoderUsed</key>
@@ -428,7 +478,11 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>MPEG-2 Program Stream video: original resolution, mpeg-2 at 1Mbps audio: mp2 at 128kbs  May not work in Quicktime</string>
+			<string>MPEG-2 Program Stream
+video: original resolution, mpeg-2 at 1Mbps
+audio: mp2 at 128kbs
+
+May not work in Quicktime</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -450,7 +504,10 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for burning to DVD widescreen NTSC video: 720x480, mpeg2 at 5Mbps (variable &lt;9.8) audio: mp2 at 192kbs</string>
+			<string>for burning to DVD
+widescreen NTSC
+video: 720x480, mpeg2 at 5Mbps (variable &lt;9.8)
+audio: mp2 at 192kbs</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -472,7 +529,7 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>HandBrake using the built-in iPhone preset TESTING: may not work  10.5 (Leopard) ONLY!!</string>
+			<string>HandBrake using the built-in iPhone preset</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -494,7 +551,7 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>HandBrake using the built-in AppleTV preset TESTING: may not work  10.5 (Leopard) only!!!</string>
+			<string>HandBrake using the built-in AppleTV preset</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>
@@ -516,7 +573,7 @@
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>HandBrake using the built-in Television preset TESTING: may not work  10.5 (Leopard) ONLY!!</string>
+			<string>HandBrake using the built-in Television preset</string>
 			<key>comSkip</key>
 			<true/>
 			<key>filenameExtension</key>

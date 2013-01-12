@@ -113,7 +113,7 @@
 	self.vActor = [self parseNames:_vActor];
 	self.vExecProducer = [self parseNames:_vExecProducer];
 	if (!gotDetails) {
-		NSLog(@"Got Details Failed for %@",_showTitle);
+		NSLog(@"GetDetails Fail for %@",_showTitle);
 	}
 	NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDetailsLoaded object:self];
     [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
@@ -361,7 +361,7 @@
     activeURLConnection = [[[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] autorelease];
 
 //Now set up for either simul or sequential download
-    NSLog(@"Starting %@download of %@", (_simultaneousEncode ? @"simultaneous " : @""), _showTitle);
+    NSLog(@"Starting %@ of %@", (_simultaneousEncode ? @"simul DL " : @"download"), _showTitle);
     if (!_simultaneousEncode ) {
         _isSimultaneousEncoding = NO;
     } else { //We'll build the full piped download chain here
@@ -406,7 +406,7 @@
     if([encoderTask isRunning]) {
         [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
     } else {
-        NSLog(@"Finished simul download/encode %@", _showTitle);
+        NSLog(@"Finished simul DL of %@", _showTitle);
  		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
        [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
         _showStatus = @"Complete";
@@ -422,7 +422,7 @@
 
 -(void)decrypt
 {
-	NSLog(@"Starting Decrypt of %@", _showTitle);
+	NSLog(@"Starting Decrypt of  %@", _showTitle);
 	decrypterTask = [[NSTask alloc] init];
 	[decrypterTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
 	[decrypterTask setStandardOutput:decryptLogFileHandle];
@@ -451,7 +451,7 @@
 {
 	if (![decrypterTask isRunning]) {
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-        NSLog(@"Finished Decrypt of %@", _showTitle);
+        NSLog(@"Finished Decrypt of  %@", _showTitle);
 		_processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [self setValue:[NSNumber numberWithInt:kMTStatusDecrypted] forKeyPath:@"downloadStatus"];
@@ -485,7 +485,7 @@
 {
 	encoderTask = [[NSTask alloc] init];
 //	NSDictionary *selectedFormat = [programEncoding objectForKey:kMTSelectedFormat];
-	NSLog(@"Starting Encode of %@", _showTitle);
+	NSLog(@"Starting Encode of   %@", _showTitle);
 	NSMutableArray *arguments = nil;
 	if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"mencoder"] == NSOrderedSame ) {
 		[encoderTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"mencoder" ofType:@""]];
@@ -617,7 +617,7 @@
 
 -(void)cancel
 {
-    NSLog(@"Canceling %@", _showTitle);
+    NSLog(@"Canceling of         %@", _showTitle);
     NSFileManager *fm = [NSFileManager defaultManager];
     isCanceled = YES;
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
@@ -821,8 +821,7 @@
 	}
 	if (downloadedFileSize < 100000) { //Not a good download - reschedule
 		NSString *dataReceived = [NSString stringWithContentsOfFile:bufferFilePath encoding:NSUTF8StringEncoding error:nil];
-		NSLog(@"Downloaded file was too small - rescheduling");
-		NSLog(@"File sent was %@",dataReceived);
+		NSLog(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
 		[self performSelector:@selector( rescheduleShow) withObject:nil afterDelay:kMTTiVoAccessDelay];
 	} else {
 		_fileSize = downloadedFileSize;  //More accurate file size
