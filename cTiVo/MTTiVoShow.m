@@ -662,7 +662,7 @@
 
 -(void)writeData
 {
-	writingData = YES;
+//	writingData = YES;
 	int chunkSize = 10000;
 	int nchunks = 0;
 	int chunkReleaseMemory = 10;
@@ -768,6 +768,7 @@
         [bufferFileWriteHandle writeData:data];
     }
 	if (!writingData && _isSimultaneousEncoding) {
+		writingData = YES;
 		[self performSelectorInBackground:@selector(writeData) withObject:nil];
 	}
 }
@@ -817,6 +818,7 @@
     //Make sure to flush the last of the buffer file into the pipe and close it.
 	if (!writingData && _isSimultaneousEncoding) {
 //		[self performSelectorInBackground:@selector(writeData) withObject:nil];
+		writingData = YES;
 		[self writeData];
 	}
 	if (downloadedFileSize < 100000) { //Not a good download - reschedule
