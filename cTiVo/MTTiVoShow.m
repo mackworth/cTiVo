@@ -120,7 +120,7 @@
 	[pool drain];
 }
 
--(void)rescheduleShow
+-(void)rescheduleShow:(NSNumber *)decrementRetries
 {
 	NSLog(@"Stalled, %@ download of %@ with progress at %lf with previous check at %@",(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _showTitle, _processProgress, previousCheck );
 	[self cancel];
@@ -132,7 +132,10 @@
 		
 		//			[[MTTiVoManager sharedTiVoManager] deleteProgramFromDownloadQueue:self];
 	} else {
-		_numRetriesRemaining--;
+		if ([decrementRetries boolValue]) {
+			_numRetriesRemaining--;
+
+		}
 		[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
 	}
 	[tiVoManager performSelector:@selector(manageDownloads) withObject:nil afterDelay:4.0];
@@ -145,7 +148,7 @@
 {
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
 		//Cancel and restart or delete depending on number of time we've been through this
-        [self rescheduleShow];
+        [self rescheduleShow:[NSNumber numberWithBool:YES]];
 	} else if ([self isInProgress]){
 		previousProcessProgress = _processProgress;
 		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
@@ -675,7 +678,7 @@
 		}
 		@catch (NSException *exception) {
 			writingData = NO;
-			[self rescheduleShow];
+			[self rescheduleShow:[NSNumber numberWithBool:YES]];
 			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
 			return;
 		}
@@ -689,7 +692,7 @@
 		}
 		@catch (NSException *exception) {
 			writingData = NO;
-			[self rescheduleShow];
+			[self rescheduleShow:[NSNumber numberWithBool:YES]];
 			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
 			return;
 		}
@@ -704,7 +707,7 @@
 		}
 		@catch (NSException *exception) {
 			writingData = NO;
-			[self rescheduleShow];
+			[self rescheduleShow:[NSNumber numberWithBool:YES]];
 			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
 			return;
 		}
@@ -717,7 +720,7 @@
 			}
 			@catch (NSException *exception) {
 				writingData = NO;
-				[self rescheduleShow];
+				[self rescheduleShow:[NSNumber numberWithBool:YES]];
 				[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
 				return;
 			}
@@ -786,7 +789,7 @@
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     NSLog(@"URL Connection Failed with error %@",error);
-	[self rescheduleShow];
+	[self rescheduleShow:[NSNumber numberWithBool:YES]];
 }
 
 
@@ -824,7 +827,7 @@
 	if (downloadedFileSize < 100000) { //Not a good download - reschedule
 		NSString *dataReceived = [NSString stringWithContentsOfFile:bufferFilePath encoding:NSUTF8StringEncoding error:nil];
 		NSLog(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
-		[self performSelector:@selector( rescheduleShow) withObject:nil afterDelay:kMTTiVoAccessDelay];
+		[self performSelector:@selector(rescheduleShow) withObject:[NSNumber numberWithBool:NO] afterDelay:kMTTiVoAccessDelay];
 	} else {
 		_fileSize = downloadedFileSize;  //More accurate file size
 		[self performSelector:@selector(sendNotification:) withObject:kMTNotificationDownloadDidFinish afterDelay:4.0];
