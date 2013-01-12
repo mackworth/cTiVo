@@ -1,0 +1,46 @@
+*cTiVo* is a Mac application to download shows from your TiVo Series 2, Series 3, TiVoHD, and Premiere device. Simple to set up and use, it will download shows to your mac, and convert them to many popular formats / devices. It is inspired by the great work done on iTivo, but written in Cocoa/Objective C for better performance / compatability.
+
+*cTivo* is under rapid development. We're currently at an alpha release; give it a try and tell us what you think.
+----
+==Features similar to iTivo include:==
+  * Formats include h.264, mpeg-2, mpeg-1, avi.
+  * Target devices include iPhone, iPod, AppleTV, Xbox 360, PlayStation 3, PSP, youtube.
+  * 'Subscriptions' to your regular shows: downloading them whenever new episodes are available.
+  * Support for different encoders, including HandBrake, mencoder.
+  * Download queue for batch processing.
+  * Automatic discovery of Tivos using Bonjour.
+  * Automatic updates of the software.
+  * Automatically perform an 'iTunes sync' to your device when the download is completed.
+  * With appropriate configuration, in the morning, you will find all your favorite shows from your TiVo loaded onto your i Phone or iPad.
+  * Imports iTivo preferences, including subscriptions and Media Access Key.
+----
+==Features in addition to iTivo include:==
+  * Support for multiple TiVos (with same or different Media Access Keys), all displayed/active simultaneously.
+  * Change conversion formats for each download or subscription.
+  * Turn on/off iTunes /simultaneous download encoding for each download or subscription.
+  * More parallel processing, including downloading next show while encoding current one
+  * Sorting download and subscription queues.
+  * Fully compatible with OS X Mountain Lion (10.8) through Leopard (10.5).
+----
+==iTivo features not implemented, at least yet:==
+  * Decrypt-only downloads.
+  * Preferences screen.
+  * Automatically remove commercials from downloaded shows.
+  * Download queue restored when restarting app.
+  * Generate metadata appropriate for use by tools such as pyTivoX.
+  * Optionally show non-downloadable copy-protected shows.
+  * Create subtitle files (.srt) from the closed caption info.
+  * Scheduling of when the queue will be processed.
+  * Support for FFmpeg, ElGato Turbo encoders.
+  * Manual connect by IP address.
+  * Display filter in program list.
+  * Detailed info on each show.
+  * Full control over encoder options.
+  * Reporting on tivo's Hard Drive usage.
+  * Growl notifications.
+----
+==To install:==
+
+Download the *cTiVo* application, and drag it to your Applications Folder
+
+*cTiVo* is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions (other than above not-implemented yet)  at https://code.google.com/p/ctivo/issues/list.

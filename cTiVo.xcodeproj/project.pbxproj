@@ -82,6 +82,7 @@
 		D2995CAC168D0EE700B960B9 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = cTiVo/Sparkle.framework; sourceTree = "<group>"; };
 		D2A648F016991CD300C7DA01 /* MTTiVo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVo.h; sourceTree = "<group>"; };
 		D2A648F116991CD300C7DA01 /* MTTiVo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVo.m; sourceTree = "<group>"; };
+		D2A7269416A2005400C58C5F /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTivoImport.m; sourceTree = "<group>"; };
 		D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		D2C390741687FFA600D2062E /* MTiTunes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTunes.m; sourceTree = "<group>"; };
@@ -208,6 +209,7 @@
 				D2D60BBE16766F1100CE32DE /* Resources */,
 				D2D60BA816766EFD00CE32DE /* Supporting Files */,
 				D2D60BDF16766FB100CE32DE /* Utilities */,
+				D2A7269416A2005400C58C5F /* README */,
 			);
 			path = cTiVo;
 			sourceTree = "<group>";
