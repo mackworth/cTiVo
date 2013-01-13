@@ -308,7 +308,8 @@
 {
     MTCheckBox *checkbox = sender;
     if (sender == simultaneousEncodeButton) {
-        [[NSUserDefaults standardUserDefaults] setBool:checkbox.state forKey:kMTSimultaneousEncode];
+        [[NSUserDefaults standardUserDefaults] setBool:(checkbox.state == NSOnState) forKey:kMTSimultaneousEncode];
+		tiVoManager.simultaneousEncode = checkbox.state == NSOnState;
     
     } else if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
         ((MTTiVoShow *)checkbox.owner).simultaneousEncode = ! ((MTTiVoShow *)checkbox.owner).simultaneousEncode;
@@ -326,7 +327,8 @@
 {     
     MTCheckBox *checkbox = sender;
     if (sender == addToiTunesButton) {
-        [[NSUserDefaults standardUserDefaults] setBool:checkbox.state forKey:kMTiTunesEncode];
+        [[NSUserDefaults standardUserDefaults] setBool:(checkbox.state == NSOnState) forKey:kMTiTunesEncode];
+		tiVoManager.addToItunes = checkbox.state == NSOnState;
 
     } else if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
         //updating an individual show in download queue
