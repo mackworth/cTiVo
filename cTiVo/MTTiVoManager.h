@@ -63,8 +63,6 @@
 -(void) downloadthisShowWithCurrentOptions:(MTTiVoShow*) thisShow;  
 -(void) deleteProgramFromDownloadQueue:(MTTiVoShow *) program;
 
--(BOOL) canAddToiTunes:(MTFormat *) format;
--(BOOL) canSimulEncode:(MTFormat *) format;
 -(MTFormat *) findFormat:(NSString *) formatName;
 -(NSDictionary *)currentMediaKeys;
 -(void)manageDownloads;

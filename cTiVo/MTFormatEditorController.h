@@ -13,6 +13,7 @@
 @interface MTFormatEditorController : NSWindowController <NSWindowDelegate> {
 	IBOutlet NSPopUpButton *formatPopUpButton;
 	NSAlert *deleteAlert, *saveOrCancelAlert, *cancelAlert;
+    IBOutlet NSButton *cancelButton, *saveButton;
 }
 
 @property (nonatomic, retain) MTFormat *currentFormat;

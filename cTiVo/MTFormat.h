@@ -26,9 +26,12 @@
 @property (nonatomic, retain) NSNumber	*comSkip,
 										*iTunes,
 										*mustDownloadFirst,
+                                        *isHidden,
 										*isFactoryFormat;
 
 @property (nonatomic, retain) NSAttributedString *attributedFormatDescription;
+
+@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode;
 
 
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format;

@@ -225,14 +225,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	return [NSDictionary dictionaryWithDictionary:tmpDict];
 }
 
--(BOOL) canAddToiTunes:(MTFormat *) format {
-    return [format.iTunes boolValue];
-}
-
--(BOOL) canSimulEncode:(MTFormat *) format {
-	return ![format.mustDownloadFirst boolValue];
-}
-
 -(void)updateMediaKeysDefaults
 {
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
@@ -299,9 +291,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void) downloadthisShowWithCurrentOptions:(MTTiVoShow*) thisShow {
 	thisShow.encodeFormat = [self selectedFormat];
-	thisShow.addToiTunesWhenEncoded = [self canAddToiTunes:thisShow.encodeFormat] &&
+	thisShow.addToiTunesWhenEncoded = thisShow.encodeFormat.canAddToiTunes &&
                                         self.addToItunes;
-	thisShow.simultaneousEncode = [self canSimulEncode:thisShow.encodeFormat] &&
+	thisShow.simultaneousEncode = thisShow.encodeFormat.canSimulEncode &&
                                         self.simultaneousEncode;
     [self addProgramToDownloadQueue:thisShow];
 }

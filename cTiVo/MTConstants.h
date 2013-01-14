@@ -28,6 +28,7 @@
 #define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"
 //#define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
 #define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"
+#define kMTNotificationFormatChanged @"MTNotificationFormatChanged"
 
 //Download Status
 #define kMTStatusNew 0

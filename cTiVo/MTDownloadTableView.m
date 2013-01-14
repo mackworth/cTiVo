@@ -202,7 +202,7 @@
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: rowData.addToiTunesWhenEncoded];
         [checkBox setEnabled: [rowData.downloadStatus intValue] != kMTStatusDone &&
-                              [tiVoManager canAddToiTunes:rowData.encodeFormat] ];
+                              rowData.encodeFormat.canAddToiTunes ];
          checkBox.owner = rowData;
 
  	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
@@ -210,7 +210,7 @@
         [checkBox setOn: rowData.simultaneousEncode];
          checkBox.owner = rowData;
         [checkBox setEnabled: [rowData.downloadStatus intValue] == kMTStatusNew &&
-                              [tiVoManager canSimulEncode:rowData.encodeFormat ]];
+                              rowData.encodeFormat.canSimulEncode];
 
 	}
     

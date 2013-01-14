@@ -38,6 +38,7 @@
 		self.iTunes = [NSNumber numberWithBool:NO];
 		self.mustDownloadFirst = [NSNumber numberWithBool:YES];
 		self.isFactoryFormat = [NSNumber numberWithBool:NO];
+        self.isHidden = [NSNumber numberWithBool:NO];
 		
 		keys = [[NSArray arrayWithObjects:
 						 @"formatDescription",
@@ -53,15 +54,23 @@
 						 @"comSkip",
 						 @"iTunes",
 						 @"mustDownloadFirst",
+                         @"isHidden",
 						 @"isFactoryFormat",
 						 nil] retain];
 	}
 	return self;
 }
 
+-(void)setValue:(id)value forKey:(NSString *)key
+{
+    [super setValue:value forKey:key];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatChanged object:self];
+}
+
 -(NSAttributedString *)attributedFormatDescription
 {
-	return [[NSAttributedString alloc] initWithString:_formatDescription];
+	return [_isFactoryFormat boolValue] ? [[NSAttributedString alloc] initWithString:_formatDescription attributes:@{NSForegroundColorAttributeName : [NSColor grayColor]}] :
+                                [[NSAttributedString alloc] initWithString:_formatDescription];
 }
 
 -(void)setAttributedFormatDescription:(NSAttributedString *)attributedFormatDescription
@@ -99,6 +108,7 @@
 	new.comSkip = [_comSkip copyWithZone:zone];
 	new.iTunes = [_iTunes copyWithZone:zone];
 	new.mustDownloadFirst = [_mustDownloadFirst copyWithZone:zone];
+	new.isHidden = [_isHidden copyWithZone:zone];
 	new.isFactoryFormat = [_isFactoryFormat copyWithZone:zone];
 	return new;
 }
@@ -113,6 +123,18 @@
 		}
 	}
 	return ret;
+}
+
+#pragma mark - Convenience Methods
+
+-(BOOL)canAddToiTunes
+{
+    return [_iTunes boolValue];
+}
+
+-(BOOL)canSimulEncode
+{
+    return ![_mustDownloadFirst boolValue];
 }
 
 -(void)dealloc
@@ -131,6 +153,7 @@
 	self.comSkip = nil;
 	self.iTunes = nil;
 	self.mustDownloadFirst = nil;
+    self.isHidden = nil;
 	self.isFactoryFormat = nil;
 	[super dealloc];
 }

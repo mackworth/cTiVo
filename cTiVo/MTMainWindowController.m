@@ -154,11 +154,33 @@
 -(void)refreshFormatListPopup:(NSPopUpButton *)popUp selected:(NSString *)selectedName
 {
 	[popUp removeAllItems];
-	for (MTFormat *fl in tiVoManager.formatList) {
+    NSPredicate *hiddenPredicate = [NSPredicate predicateWithFormat:@"isHidden == %@",[NSNumber numberWithBool:NO]];
+    NSSortDescriptor *user = [NSSortDescriptor sortDescriptorWithKey:@"isFactoryFormat" ascending:YES];
+    NSSortDescriptor *title = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)];
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:user,title, nil];
+    
+    NSArray *sortedFormatList = [[tiVoManager.formatList filteredArrayUsingPredicate:hiddenPredicate] sortedArrayUsingDescriptors:sortDescriptors];
+//    NSArray *sortedFormatList = [tiVoManager.formatList sortedArrayUsingDescriptors:sortDescriptors];
+    BOOL isFactory = YES;
+	for (MTFormat *fl in sortedFormatList) {
+        if ([popUp numberOfItems] == 0 && ![fl.isFactoryFormat boolValue]) {
+            [popUp addItemWithTitle:@"    User Formats"];
+            [[popUp lastItem] setEnabled:NO];
+            [[popUp lastItem] setTarget:nil];
+
+        }
+        if ([fl.isFactoryFormat boolValue] && isFactory) { //This is a changeover from user input to factory input (if any
+            NSMenuItem *separator = [NSMenuItem separatorItem];
+            [[popUp menu] addItem:separator];
+            [popUp addItemWithTitle:@"    Built In Formats"];
+            [[popUp lastItem] setEnabled:NO];
+            [[popUp lastItem] setTarget:nil];
+            isFactory = NO;
+        }
 		[popUp addItemWithTitle:fl.name];
 		if (![fl.isFactoryFormat boolValue]) { //Change the color for user formats
 			NSFont *thisFont = popUp.font;
-			NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString:fl.name attributes:@{NSFontAttributeName : thisFont, NSForegroundColorAttributeName : [NSColor blueColor]}];
+			NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString:fl.name attributes:@{NSFontAttributeName : thisFont, NSForegroundColorAttributeName : [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.7 alpha:1.0]}];
 			[popUp lastItem].attributedTitle = attTitle;
 		}
         NSMenuItem *thisItem = [popUp lastItem];

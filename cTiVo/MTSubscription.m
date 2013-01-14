@@ -18,7 +18,7 @@
 
 
 -(BOOL) canSimulEncode {
-    return [tiVoManager canSimulEncode:self.encodeFormat];
+    return self.encodeFormat.canSimulEncode;
 }
 
 -(BOOL) shouldSimulEncode {
@@ -26,7 +26,7 @@
 }
 
 -(BOOL) canAddToiTunes {
-    return [tiVoManager canAddToiTunes:self.encodeFormat];
+    return self.encodeFormat.canAddToiTunes;
  }
 
 -(BOOL) shouldAddToiTunes {

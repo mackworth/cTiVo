@@ -32,6 +32,7 @@
     [super windowDidLoad];
 	//Deepcopy array so we have new object
 	self.formatList = [NSMutableArray array];
+
 	for (MTFormat *f in tiVoManager.formatList) {
 		MTFormat *newFormat = [[f copy] autorelease];
 		[_formatList addObject:newFormat];
@@ -43,6 +44,8 @@
 //	self.currentFormat = [tiVoManager.selectedFormat copy];
  	[self refreshFormatPopUp:nil];
 	self.shouldSave = [NSNumber numberWithBool:NO];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(checkShouldSave) name:kMTNotificationFormatChanged object:nil];
    
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
@@ -62,21 +65,21 @@
 	}
 }
 
+
 -(void)showWindow:(id)sender
 {
 	//Deepcopy array so we have new object
-	self.formatList = [NSMutableArray array];
-	for (MTFormat *f in tiVoManager.formatList) {
-		MTFormat *newFormat = [[f copy] autorelease];
-		[_formatList addObject:newFormat];
-		if ([tiVoManager.selectedFormat.name compare:newFormat.name] == NSOrderedSame) {
-			self.currentFormat = newFormat;
-		}
-	}
-	//	self.formatList = [NSMutableArray arrayWithArray:tiVoManager.formatList];
-	//	self.currentFormat = [tiVoManager.selectedFormat copy];
- 	[self refreshFormatPopUp:nil];
-	self.shouldSave = [NSNumber numberWithBool:NO];
+    if (formatPopUpButton) {  //Clumsy way of refreshing popup selection after dismissal and re-show of window.  Need better connection
+        for (MTFormat *f in _formatList) {
+            if ([tiVoManager.selectedFormat.name compare:f.name] == NSOrderedSame) {
+                self.currentFormat = f;
+            }
+        }
+        //	self.formatList = [NSMutableArray arrayWithArray:tiVoManager.formatList];
+        //	self.currentFormat = [tiVoManager.selectedFormat copy];
+        [self refreshFormatPopUp:nil];
+        self.shouldSave = [NSNumber numberWithBool:NO];
+    }
 	[super showWindow:sender];
 }
 
@@ -186,10 +189,14 @@
 	BOOL result = NO;
 	for (MTFormat *f in _formatList) {
 		MTFormat *foundFormat = [tiVoManager findFormat:f.name];
-		if (!(foundFormat && [f isSame:foundFormat])) {
+		if (!foundFormat) { //We have a new format so we should be able to save/cancel
 			result = YES;
 			break;
 		}
+        if (![foundFormat isSame:f]) { //We found a format that exisit but is different.
+            result = YES;
+			break;
+        }
 	}
 	self.shouldSave = [NSNumber numberWithBool:result];
 }
@@ -208,9 +215,36 @@
 
 -(void)refreshFormatPopUp:(NSNotification *)notification
 {
+    //Created Sorted List
+    NSSortDescriptor *user = [NSSortDescriptor sortDescriptorWithKey:@"isFactoryFormat" ascending:YES];
+    NSSortDescriptor *title = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)];
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:user,title, nil];
+    NSMutableArray *tmpArray = [NSMutableArray arrayWithArray:_formatList];
+    [tmpArray  sortUsingDescriptors:sortDescriptors];
+    
 	[formatPopUpButton removeAllItems];
-	for (MTFormat *f in self.formatList) {
+    BOOL isFactory = YES;
+	for (MTFormat *f in tmpArray) {
+        if ([formatPopUpButton numberOfItems] == 0 && ![f.isFactoryFormat boolValue]) {
+            [formatPopUpButton addItemWithTitle:@"    User Formats"];
+            [[formatPopUpButton lastItem] setEnabled:NO];
+            [[formatPopUpButton lastItem] setTarget:nil];
+            
+        }
+        if ([f.isFactoryFormat boolValue] && isFactory) { //This is a changeover from user input to factory input (if any
+            NSMenuItem *separator = [NSMenuItem separatorItem];
+            [[formatPopUpButton menu] addItem:separator];
+            [formatPopUpButton addItemWithTitle:@"    Built In Formats"];
+            [[formatPopUpButton lastItem] setEnabled:NO];
+            [[formatPopUpButton lastItem] setTarget:nil];
+            isFactory = NO;
+        }
 		[formatPopUpButton addItemWithTitle:f.name];
+		if (![f.isFactoryFormat boolValue]) { //Change the color for user formats
+			NSFont *thisFont = formatPopUpButton.font;
+			NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString:f.name attributes:@{NSFontAttributeName : thisFont, NSForegroundColorAttributeName : [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.7 alpha:1.0]}];
+			[formatPopUpButton lastItem].attributedTitle = attTitle;
+		}
 		[[formatPopUpButton lastItem] setRepresentedObject:f];
 	}
 	[formatPopUpButton selectItemWithTitle:_currentFormat.name];

@@ -380,7 +380,7 @@
 		[self getShowDetail];
 //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	}
-    if (_simultaneousEncode && ![tiVoManager canSimulEncode:_encodeFormat]) {  //last chance check
+    if (_simultaneousEncode && !_encodeFormat.canSimulEncode) {  //last chance check
         _simultaneousEncode = NO;
     }
     [self configureFiles];
@@ -940,7 +940,7 @@
 }
 
 -(BOOL) canSimulEncode {
-    return [tiVoManager canSimulEncode:self.encodeFormat];
+    return self.encodeFormat.canSimulEncode;
 }
 
 -(BOOL) shouldSimulEncode {
@@ -948,7 +948,7 @@
 }
 
 -(BOOL) canAddToiTunes {
-    return [tiVoManager canAddToiTunes:self.encodeFormat];
+    return self.encodeFormat.canAddToiTunes;
  }
 
 -(BOOL) shouldAddToiTunes {
