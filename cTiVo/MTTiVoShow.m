@@ -313,7 +313,6 @@
 
 -(NSString *) directoryForShowInDirectory:(NSString*) tryDirectory  {
 	//Check that download directory (including show directory) exists.  If create it.  If unsuccessful return nil
-	NSLog(@"Default: %d;  isMovie: %d", [[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs], [self isMovie]);
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs] && ![self isMovie]){
 		tryDirectory = [tryDirectory stringByAppendingPathComponent:self.seriesTitle];
 	}
@@ -330,9 +329,14 @@
 {
     //Release all previous attached pointers
     [self deallocDownloadHandling];
-	NSString *downloadDir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
-	
-	//go to default if not successful
+	NSString *downloadDir = [self directoryForShowInDirectory:[self downloadDirectory]];
+
+	//go to current directory if one at show scheduling time failed
+	if (!downloadDir) {
+		downloadDir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
+	}
+    
+	//finally, go to default if not successful
 	if (!downloadDir) {
 		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
 	}
@@ -1090,6 +1094,7 @@
     self.URL = nil;
     self.encodeFormat = nil;
     self.tiVo = nil;
+	self.downloadDirectory = nil;
 	if (elementString) {
 		[elementString release];
         elementString = nil;

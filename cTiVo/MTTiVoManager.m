@@ -261,6 +261,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
         [self checkShowTitleUniqueness:program];
         program.isQueued = YES;
 		program.numRetriesRemaining = kMTMaxDownloadRetries;
+		program.downloadDirectory = tiVoManager.downloadDirectory;
 		[_downloadQueue addObject:program];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
         [[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
