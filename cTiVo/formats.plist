@@ -8,7 +8,7 @@
 	<array>
 		<dict>
 			<key>formatDescription</key>
-			<string>for viewing on iPhone
+			<string>for viewing on iPhone 
 video: 480x320 h.264 at 384kbps
 audio: aac at 128kbs</string>
 			<key>comSkip</key>
@@ -535,11 +535,11 @@ audio: mp2 at 192kbs</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>encoderUsed</key>
-			<string>HandBrake</string>
+			<string>HandBrakeCLI</string>
 			<key>name</key>
 			<string>HandBrake iPhone</string>
 			<key>encoderVideoOptions</key>
-			<string>-ZiPhone &amp; iPod Touch</string>
+			<string>-Z&quot;iPhone &amp; iPod Touch&quot;</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
@@ -557,11 +557,11 @@ audio: mp2 at 192kbs</string>
 			<key>filenameExtension</key>
 			<string>.m4v</string>
 			<key>encoderUsed</key>
-			<string>HandBrake</string>
+			<string>HandBrakeCLI</string>
 			<key>name</key>
 			<string>HandBrake AppleTV</string>
 			<key>encoderVideoOptions</key>
-			<string>-ZAppleTV 2</string>
+			<string>-Z&quot;AppleTV 2&quot;</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
@@ -579,7 +579,7 @@ audio: mp2 at 192kbs</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>encoderUsed</key>
-			<string>HandBrake</string>
+			<string>HandBrakeCLI</string>
 			<key>name</key>
 			<string>HandBrake TV</string>
 			<key>encoderVideoOptions</key>

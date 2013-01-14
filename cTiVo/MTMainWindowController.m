@@ -68,7 +68,7 @@
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
-        BOOL caniTune = [[tiVoManager.selectedFormat objectForKey:@"iTunes"] boolValue];
+        BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
         [addToiTunesButton setEnabled:caniTune];
         if (caniTune) {
             BOOL wantsiTunes = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesEncode];
@@ -84,7 +84,7 @@
 		   tiVoManager.addToItunes = YES;
         }
 
-        BOOL canSimulEncode = ![[tiVoManager.selectedFormat objectForKey:@"mustDownloadFirst"] boolValue];
+        BOOL canSimulEncode = ![tiVoManager.selectedFormat.mustDownloadFirst boolValue];
         [simultaneousEncodeButton setEnabled:canSimulEncode];
         if (canSimulEncode) {
             BOOL wantsSimul = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
@@ -148,13 +148,23 @@
 
 -(void)refreshFormatListPopup
 {
-	[formatListPopUp removeAllItems];
-	for (NSDictionary *fl in tiVoManager.formatList) {
-		[formatListPopUp addItemWithTitle:[fl objectForKey:@"name"]];
-        NSMenuItem *thisItem = [formatListPopUp lastItem];
+	[self refreshFormatListPopup:formatListPopUp selected:tiVoManager.selectedFormat.name];
+}
+
+-(void)refreshFormatListPopup:(NSPopUpButton *)popUp selected:(NSString *)selectedName
+{
+	[popUp removeAllItems];
+	for (MTFormat *fl in tiVoManager.formatList) {
+		[popUp addItemWithTitle:fl.name];
+		if (![fl.isFactoryFormat boolValue]) { //Change the color for user formats
+			NSFont *thisFont = popUp.font;
+			NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString:fl.name attributes:@{NSFontAttributeName : thisFont, NSForegroundColorAttributeName : [NSColor blueColor]}];
+			[popUp lastItem].attributedTitle = attTitle;
+		}
+        NSMenuItem *thisItem = [popUp lastItem];
         [thisItem setRepresentedObject:fl];
-        thisItem.toolTip = [NSString stringWithFormat:@"%@: %@", fl[@"name"], fl[@"formatDescription"]];
-		if (tiVoManager.selectedFormat && [[fl objectForKey:@"name"] compare:[tiVoManager.selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
+        thisItem.toolTip = [NSString stringWithFormat:@"%@: %@", fl.name, fl.formatDescription];
+		if (selectedName && [fl.name compare:selectedName] == NSOrderedSame) {
 			[formatListPopUp selectItem:thisItem];
 		}
 		
@@ -222,12 +232,19 @@ if ([tiVoManager.downloadQueue count] > 0) {
 
 #pragma mark - UI Actions
 
+-(IBAction)editFormats:(id)sender
+{
+	MTFormatEditorController *myFormatEditor = [[MTFormatEditorController alloc] initWithWindowNibName:@"MTFormatEditorController"];
+	[myFormatEditor showWindow:nil];
+//	[myFormatEditor release];
+}
+
 -(IBAction)selectFormat:(id)sender
 {
     if (sender == formatListPopUp) {
         NSPopUpButton *thisButton = (NSPopUpButton *)sender;
         tiVoManager.selectedFormat = [[thisButton selectedItem] representedObject];
-        [[NSUserDefaults standardUserDefaults] setObject:[tiVoManager.selectedFormat objectForKey:@"name"] forKey:kMTSelectedFormat];
+        [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.selectedFormat.name forKey:kMTSelectedFormat];
     } else {
         MTPopUpButton *thisButton = (MTPopUpButton *)sender;
         if ([thisButton.owner class] == [MTSubscription class]) {

@@ -33,7 +33,7 @@
     return [self.addToiTunes boolValue];
 }
 
--(void) setEncodeFormat:(NSDictionary *) encodeFormat {
+-(void) setEncodeFormat:(MTFormat *) encodeFormat {
     if (_encodeFormat != encodeFormat ) {
         BOOL simulWasDisabled = ![self canSimulEncode];
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
@@ -170,7 +170,7 @@
     for (MTSubscription * sub in self) {
         NSDictionary * tempSub = [NSDictionary dictionaryWithObjectsAndKeys:
                                   sub.seriesTitle, kMTSubscribedSeries,
-                                  sub.encodeFormat[@"name"], kMTSubscribedFormat,
+                                  sub.encodeFormat.name, kMTSubscribedFormat,
                                   sub.lastRecordedTime, kMTSubscribedDate,
                                   sub.addToiTunes, kMTSubscribediTunes,
                                   sub.simultaneousEncode, kMTSubscribedSimulEncode,

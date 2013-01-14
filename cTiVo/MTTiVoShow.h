@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "iTunes.h"
 #import "MTTiVo.h"
+#import "MTFormat.h"
 
 @class MTProgramTableView;
 
@@ -72,7 +73,7 @@
 @property (retain) NSNumber *downloadStatus;
 @property double processProgress; //Should be between 0 and 1
 @property double fileSize;  //Size on TiVo;
-@property (nonatomic, retain) NSDictionary *encodeFormat;
+@property (nonatomic, retain) MTFormat *encodeFormat;
 @property (nonatomic, retain) MTTiVo *tiVo;
 @property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding, isQueued,
                 isSelected;//Used for refresh of table

@@ -12,6 +12,7 @@
 #import "MTDownloadTableView.h"
 #import "MTMainWindowController.h"
 #import "MTSubscriptionTableView.h"
+#import "MTFormatEditorController.h"
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate> {
 	MTTiVoManager *tiVoGlobalManager;
@@ -22,5 +23,9 @@
 }
 
 @property (assign) IBOutlet NSWindow *window;
+@property (nonatomic, retain) 	MTFormatEditorController *formatEditorController;
+
+
+-(IBAction)editFormats:(id)sender;
 
 @end

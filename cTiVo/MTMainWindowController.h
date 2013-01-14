@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
+#import "MTFormatEditorController.h"
 
 @class MTDownloadTableView;
 @class MTProgramTableView;
@@ -38,5 +39,7 @@
 -(IBAction)getDownloadDirectory:(id)sender;
 -(IBAction)changeSimultaneous:(id)sender;
 -(IBAction)changeiTunes:(id)sender;
+
+-(void)refreshFormatListPopup:(NSPopUpButton *)popUp selected:(NSString *)selectedName;
 
 @end

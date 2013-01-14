@@ -121,7 +121,7 @@
 	 */
 		return YES;
 	} else {
-		NSLog(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, show.encodeFormat[@"name"], showFileURL );
+		NSLog(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, show.encodeFormat.name, showFileURL );
 		return NO;
 	}
     [self updateAllIDevices];

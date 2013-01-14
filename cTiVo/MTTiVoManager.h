@@ -14,6 +14,7 @@
 #import "MTTiVo.h"
 #import "MTSubscription.h"
 #import <SystemConfiguration/SystemConfiguration.h>
+#import "MTFormat.h"
 
 
 @interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate>  {
@@ -34,6 +35,7 @@
     double percentComplete;
     MTDownloadTableCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
 	int numEncoders;//Want to limit launches to two encoders.
+	NSArray *factoryFormatList;
     
     BOOL volatile updatingVideoList;
 	
@@ -51,7 +53,7 @@
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic) BOOL videoListNeedsFilling, addToItunes, simultaneousEncode;
-@property (nonatomic, retain) NSDictionary *selectedFormat;
+@property (nonatomic, retain) MTFormat *selectedFormat;
 
 + (MTTiVoManager *)sharedTiVoManager;
 
@@ -61,10 +63,11 @@
 -(void) downloadthisShowWithCurrentOptions:(MTTiVoShow*) thisShow;  
 -(void) deleteProgramFromDownloadQueue:(MTTiVoShow *) program;
 
--(BOOL) canAddToiTunes:(NSDictionary *) format;
--(BOOL) canSimulEncode:(NSDictionary *) format;
--(NSDictionary *) findFormat:(NSString *) formatName;
+-(BOOL) canAddToiTunes:(MTFormat *) format;
+-(BOOL) canSimulEncode:(MTFormat *) format;
+-(MTFormat *) findFormat:(NSString *) formatName;
 -(NSDictionary *)currentMediaKeys;
 -(void)manageDownloads;
+-(void)addFormatsToList:(NSArray *)formats;
 
 @end

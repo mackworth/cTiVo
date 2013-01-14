@@ -136,8 +136,8 @@
         //    if (_selectedFormat) {
         //        mediaKeyLabel.stringValue = [[NSUserDefaults standardUserDefaults] stringForKey:[_selectedFormat objectForKey:@"name"]];
         //    }
-        for (NSDictionary *fl in formatList) {
-            [thisCell.popUpButton addItemWithTitle:[fl objectForKey:@"name"]];
+        for (MTFormat *fl in formatList) {
+            [thisCell.popUpButton addItemWithTitle:fl.name];
             [[thisCell.popUpButton lastItem] setRepresentedObject:fl];
             //            if (_selectedFormat && [[fl objectForKey:@"name"] compare:[_selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
             //                [self selectItem:[self lastItem]];
@@ -198,8 +198,8 @@ static NSDateFormatter *dateFormatter;
 //		result.textField.stringValue = [thisSubscription objectForKey:kMTSubscribedSeriesFormat] ;
 //        result.toolTip = result.textField.stringValue;
 		((MTPopUpTableCellView *)result).popUpButton.owner = thisSubscription;
-        [((MTPopUpTableCellView *)result).popUpButton selectItemWithTitle:thisSubscription.encodeFormat[@"name"]];
-        result.toolTip = [NSString stringWithFormat:@"%@: %@", thisSubscription.encodeFormat[@"name"], thisSubscription.encodeFormat[@"formatDescription"]];
+        [((MTPopUpTableCellView *)result).popUpButton selectItemWithTitle:thisSubscription.encodeFormat.name];
+        result.toolTip = [NSString stringWithFormat:@"%@: %@", thisSubscription.encodeFormat.name, thisSubscription.encodeFormat.formatDescription];
  
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;

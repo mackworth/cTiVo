@@ -31,6 +31,7 @@ void signalHandler(int signal)
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
 	tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
 	mainWindowController = nil;
+	_formatEditorController = nil;
 	[self showMainWindow:nil];
 	[self updateTivoRefreshMenu];
 	mediaKeyQueue = [NSMutableArray new];
@@ -83,6 +84,49 @@ void signalHandler(int signal)
 	}
 	return;
 	
+}
+
+-(IBAction)editFormats:(id)sender
+{
+	[self.formatEditorController showWindow:nil];
+}
+
+-(IBAction)exportFormats:(id)sender
+{
+	NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:@"formats"];
+	NSSavePanel *mySavePanel = [[[NSSavePanel alloc] init] autorelease];
+	[mySavePanel setTitle:@"Save User Formats"];
+	[mySavePanel setAllowedFileTypes:[NSArray arrayWithObject:@"plist"]];
+	
+	NSInteger ret = [mySavePanel runModal];
+	if (ret == NSFileHandlingPanelOKButton) {
+		NSString *filenmae = mySavePanel.URL.path;
+		[userFormats writeToFile:filenmae atomically:YES];
+	}
+}
+
+-(IBAction)importFormats:(id)sender
+{
+	
+	NSArray *newFormats = nil;
+	NSOpenPanel *myOpenPanel = [[[NSOpenPanel alloc] init] autorelease];
+	[myOpenPanel setTitle:@"Import User Formats"];
+	[myOpenPanel setAllowedFileTypes:[NSArray arrayWithObject:@"plist"]];
+	NSInteger ret = [myOpenPanel runModal];
+	if (ret == NSFileHandlingPanelOKButton) {
+		NSString *filename = myOpenPanel.URL.path;
+		newFormats = [NSArray arrayWithContentsOfFile:filename];
+		[tiVoGlobalManager addFormatsToList:newFormats];	
+	}
+	
+}
+
+-(MTFormatEditorController *)formatEditorController
+{
+	if (!_formatEditorController) {
+		_formatEditorController = [[MTFormatEditorController alloc] initWithWindowNibName:@"MTFormatEditorController"];
+	}
+	return _formatEditorController;
 }
 
 -(void)updateAllTiVos:(id)sender

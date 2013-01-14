@@ -88,7 +88,31 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 		NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
 		NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
-		_formatList = [[NSMutableArray arrayWithArray:[formats objectForKey:@"formats"] ] retain];
+		_formatList = [NSMutableArray arrayWithArray:[formats objectForKey:@"formats"]];
+		NSMutableArray *tmpArray = [NSMutableArray array];
+		for (NSDictionary *fl in _formatList) {
+			MTFormat *thisFormat = [MTFormat formatWithDictionary:fl];
+			thisFormat.isFactoryFormat = [NSNumber numberWithBool:YES];
+			if ([thisFormat.encoderUsed compare:@"mencoder"] == NSOrderedSame) {
+				thisFormat.outputFileFlag = @"-o";
+				thisFormat.regExProgress = @"\\((.*?)\\%\\)";
+			} else { //Its a HandBrake encoder
+				thisFormat.outputFileFlag = @"-o";
+				thisFormat.inputFileFlag = @"-i";
+				thisFormat.regExProgress = @" ([\\d.]*?) \\% ";
+			}
+			[tmpArray addObject:thisFormat];
+		}
+		factoryFormatList = [tmpArray copy];
+		_formatList = [tmpArray retain];
+		
+		//Load user formats from preferences if any
+		NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:@"formats"];
+		if (userFormats) {
+			for (NSDictionary *fl in userFormats) {
+				[_formatList addObject:[MTFormat formatWithDictionary:fl]];
+			}
+		}
 		
 		//Make sure there's a selected format, espeically on first launch
 		
@@ -181,19 +205,19 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 
--(void)setSelectedFormat:(NSDictionary *)selectedFormat
+-(void)setSelectedFormat:(MTFormat *)selectedFormat
 {
     if (selectedFormat == _selectedFormat) {
         return;
     }
     [_selectedFormat release];
     _selectedFormat = [selectedFormat retain];
-    [[NSUserDefaults standardUserDefaults] setObject:[_selectedFormat objectForKey:@"name"] forKey:kMTSelectedFormat];
+    [[NSUserDefaults standardUserDefaults] setObject:_selectedFormat.name forKey:kMTSelectedFormat];
 }
 
--(NSDictionary *) findFormat:(NSString *) formatName {
-    for (NSDictionary *fd in _formatList) {
-        if ([formatName compare:fd[@"name"]] == NSOrderedSame) {
+-(MTFormat *) findFormat:(NSString *) formatName {
+    for (MTFormat *fd in _formatList) {
+        if ([formatName compare:fd.name] == NSOrderedSame) {
             return fd;
         }
     }
@@ -209,12 +233,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	return [NSDictionary dictionaryWithDictionary:tmpDict];
 }
 
--(BOOL) canAddToiTunes:(NSDictionary *) format {
-    return [format[@"iTunes"] boolValue];
+-(BOOL) canAddToiTunes:(MTFormat *) format {
+    return [format.iTunes boolValue];
 }
 
--(BOOL) canSimulEncode:(NSDictionary *) format {
-	return ![format[@"mustDownloadFirst"] boolValue];
+-(BOOL) canSimulEncode:(MTFormat *) format {
+	return ![format.mustDownloadFirst boolValue];
 }
 
 -(void)updateMediaKeysDefaults
@@ -224,6 +248,19 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[tmpDict setValue:tiVo.mediaKey forKey:tiVo.tiVo.name];
 	}
 	[[NSUserDefaults standardUserDefaults] setValue:tmpDict forKey:kMTMediaKeys];
+}
+
+#pragma mark - Format Handling Routines
+
+
+-(void)addFormatsToList:(NSArray *)formats
+{
+	for (NSDictionary *f in formats) {
+		MTFormat *newFormat = [MTFormat formatWithDictionary:f];
+		//Lots of error checking here
+		[_formatList addObject:newFormat];
+	}
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
 }
 
 #pragma mark - Download Management

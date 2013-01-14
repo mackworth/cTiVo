@@ -136,8 +136,8 @@
         //    if (_selectedFormat) {
         //        mediaKeyLabel.stringValue = [[NSUserDefaults standardUserDefaults] stringForKey:[_selectedFormat objectForKey:@"name"]];
         //    }
-        for (NSDictionary *fl in formatList) {
-            [thisCell.popUpButton addItemWithTitle:[fl objectForKey:@"name"]];
+        for (MTFormat *fl in formatList) {
+            [thisCell.popUpButton addItemWithTitle:fl.name];
             [[thisCell.popUpButton lastItem] setRepresentedObject:fl];
             //            if (_selectedFormat && [[fl objectForKey:@"name"] compare:[_selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
             //                [self selectItem:[self lastItem]];
@@ -195,9 +195,9 @@
     } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
 		MTPopUpButton *popUpButton = ((MTPopUpTableCellView *)result).popUpButton;
         popUpButton.owner = rowData;
-        [popUpButton selectItemWithTitle:rowData.encodeFormat[@"name"]];
+        [popUpButton selectItemWithTitle:rowData.encodeFormat.name];
         popUpButton.enabled = ([rowData.downloadStatus intValue] == kMTStatusNew);
-        result.toolTip = [NSString stringWithFormat:@"%@: %@", rowData.encodeFormat[@"name"], rowData.encodeFormat[@"formatDescription"]];
+        result.toolTip = [NSString stringWithFormat:@"%@: %@", rowData.encodeFormat.name, rowData.encodeFormat.formatDescription];
     } else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: rowData.addToiTunesWhenEncoded];

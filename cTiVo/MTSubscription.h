@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MTTiVoShow.h"
+#import "MTFormat.h"
 
 @interface MTSubscription : NSObject {
     
@@ -19,7 +20,7 @@
 
 @property (nonatomic, retain) NSNumber *addToiTunes;
 @property (nonatomic, retain) NSNumber *simultaneousEncode;
-@property (nonatomic, retain) NSDictionary *encodeFormat;
+@property (nonatomic, retain) MTFormat *encodeFormat;
 
 @property (readonly) BOOL canSimulEncode;
 @property (readonly) BOOL shouldSimulEncode;

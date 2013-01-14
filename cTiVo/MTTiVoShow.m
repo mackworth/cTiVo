@@ -340,7 +340,7 @@
 	if (!downloadDir) {
 		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
 	}
-    encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,_showTitle,[_encodeFormat objectForKey:@"filenameExtension"]] retain];
+    encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,_showTitle,_encodeFormat.filenameExtension] retain];
     if (_simultaneousEncode) {
         //Things require uniquely for simultaneous download
         pipe1 = [[NSPipe pipe] retain];
@@ -406,18 +406,13 @@
         [decrypterTask setStandardInput:pipe1];
         [decrypterTask setStandardOutput:pipe2];
         NSString *encoderLaunchPath;
-		if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"mencoder"] == NSOrderedSame ) {
-			encoderTask = [[NSTask alloc] init];
-            encoderLaunchPath = [[NSBundle mainBundle] pathForResource:@"mencoder" ofType:@""];
-			[encoderTask setLaunchPath:encoderLaunchPath];
-        
-			arguments = [self mencoderArgumentsWithOutputFile:encodeFilePath];
-			[arguments addObject:@"-"];  //Take input from standard Input
-			[encoderTask setArguments:arguments];
-			[encoderTask setStandardInput:pipe2];
-			[encoderTask setStandardOutput:devNullFileHandle];
-			[encoderTask setStandardError:devNullFileHandle];
-		}
+		encoderTask = [[NSTask alloc] init];
+		encoderLaunchPath = [[NSBundle mainBundle] pathForResource:_encodeFormat.encoderUsed ofType:@""];
+		[encoderTask setLaunchPath:encoderLaunchPath];
+		[encoderTask setArguments:[self encodingArgumentsWithInputFile:@"-" outputFile:encodeFilePath]];
+		[encoderTask setStandardInput:pipe2];
+		[encoderTask setStandardOutput:devNullFileHandle];
+		[encoderTask setStandardError:devNullFileHandle];
         [decrypterTask launch];
         [encoderTask launch];
         _isSimultaneousEncoding = YES;
@@ -512,29 +507,10 @@
 -(void)encode
 {
 	encoderTask = [[NSTask alloc] init];
-//	NSDictionary *selectedFormat = [programEncoding objectForKey:kMTSelectedFormat];
 	NSLog(@"Starting Encode of   %@", _showTitle);
-	NSMutableArray *arguments = nil;
-	if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"mencoder"] == NSOrderedSame ) {
-		[encoderTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"mencoder" ofType:@""]];
-		arguments = [self mencoderArgumentsWithOutputFile:encodeFilePath];
-		[arguments addObject:decryptFilePath];  //start with the input file
-		
-	}
-	if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"HandBrake"] == NSOrderedSame ) {
-		arguments = [NSMutableArray array];
-		NSString *thisLaunchPath = [[NSBundle mainBundle] pathForResource:@"HandBrakeCLI" ofType:@""];
-		[encoderTask setLaunchPath:thisLaunchPath];
-		[arguments addObject:[NSString stringWithFormat:@"-i%@",decryptFilePath]];  //start with the input file
-		[arguments addObject:[NSString stringWithFormat:@"-o%@",encodeFilePath]];  //add the output file
-		[arguments addObject:[_encodeFormat objectForKey:@"encoderVideoOptions"]];
-		if ([_encodeFormat objectForKey:@"encoderAudioOptions"] && ((NSString *)[_encodeFormat objectForKey:@"encoderAudioOptions"]).length) {
-			[arguments addObject:[_encodeFormat objectForKey:@"encoderAudioOptions"]];
-		}
-		if ([_encodeFormat objectForKey:@"encoderOtherOptions"] && ((NSString *)[_encodeFormat objectForKey:@"encoderOtherOptions"]).length) {
-			[arguments addObject:[_encodeFormat objectForKey:@"encoderOtherOptions"]];
-		}
-	}
+	NSMutableArray *arguments = [self encodingArgumentsWithInputFile:decryptFilePath outputFile:encodeFilePath];
+	NSString *thisLaunchPath = [[NSBundle mainBundle] pathForResource:_encodeFormat.encoderUsed ofType:@""];
+	[encoderTask setLaunchPath:thisLaunchPath];
 	[encoderTask setArguments:arguments];
 	[encoderTask setStandardOutput:encodeLogFileHandle];
 	[encoderTask setStandardError:devNullFileHandle];
@@ -575,24 +551,25 @@
 		[encodeLogFileReadHandle seekToFileOffset:(logFileSize-100)];
 		NSData *tailOfFile = [encodeLogFileReadHandle readDataOfLength:100];
 		NSString *data = [[[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding] autorelease];
-		if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"mencoder"] == NSOrderedSame) {
-			NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"\\((.*?)\\%\\)" options:NSRegularExpressionCaseInsensitive error:nil];
+		NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:_encodeFormat.regExProgress options:NSRegularExpressionCaseInsensitive error:nil];
+//		if ([_encodeFormat.encoderUsed caseInsensitiveCompare:@"mencoder"] == NSOrderedSame) {
+//			NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"\\((.*?)\\%\\)" options:NSRegularExpressionCaseInsensitive error:nil];
 			NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
 			NSTextCheckingResult *lastItem = [values lastObject];
 			NSRange valueRange = [lastItem rangeAtIndex:1];
 			newProgressValue = [[data substringWithRange:valueRange] doubleValue]/100.0;
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		}
-		if ([(NSString *)[_encodeFormat objectForKey:@"encoderUsed"] caseInsensitiveCompare:@"HandBrake"] == NSOrderedSame) {
-			NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@" ([\\d.]*?) \\% " options:NSRegularExpressionCaseInsensitive error:nil];
-			NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
-			if (values.count) {
-				NSTextCheckingResult *lastItem = [values lastObject];
-				NSRange valueRange = [lastItem rangeAtIndex:1];
-				newProgressValue = [[data substringWithRange:valueRange] doubleValue]/102.0;
-				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-			}
-		}
+//		}
+//		if ([_encodeFormat.encoderUsed caseInsensitiveCompare:@"HandBrakeCLI"] == NSOrderedSame) {
+//			NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@" ([\\d.]*?) \\% " options:NSRegularExpressionCaseInsensitive error:nil];
+//			NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
+//			if (values.count) {
+//				NSTextCheckingResult *lastItem = [values lastObject];
+//				NSRange valueRange = [lastItem rangeAtIndex:1];
+//				newProgressValue = [[data substringWithRange:valueRange] doubleValue]/102.0;
+//				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+//			}
+//		}
 		if (newProgressValue > _processProgress) {
 			_processProgress = newProgressValue;
 		}
@@ -601,16 +578,37 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];	
 }
 
--(NSMutableArray *)mencoderArgumentsWithOutputFile:(NSString *)outputFile
+-(NSMutableArray *)getArguments:(NSString *)argString
+{
+	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"([^\\s\"\']+)|\"(.*?)\"|'(.*?)'" options:NSRegularExpressionCaseInsensitive error:nil];
+	NSArray *matches = [regex matchesInString:argString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, argString.length)];
+	NSMutableArray *arguments = [NSMutableArray array];
+	for (NSTextCheckingResult *tr in matches) {
+		int j;
+		for (j=1; j<tr.numberOfRanges; j++) {
+			if ([tr rangeAtIndex:j].location != NSNotFound) {
+				break;
+			}
+		}
+		[arguments addObject:[argString substringWithRange:[tr rangeAtIndex:j]]];
+	}
+	return arguments;
+
+}
+
+-(NSMutableArray *)encodingArgumentsWithInputFile:(NSString *)inputFilePath outputFile:(NSString *)outputFilePath
 {
 	NSMutableArray *arguments = [NSMutableArray array];
-	[arguments addObjectsFromArray:[[_encodeFormat objectForKey:@"encoderVideoOptions"] componentsSeparatedByString:@" "]];
-	[arguments addObjectsFromArray:[[_encodeFormat objectForKey:@"encoderAudioOptions"] componentsSeparatedByString:@" "]];
-	[arguments addObjectsFromArray:[[_encodeFormat objectForKey:@"encoderOtherOptions"] componentsSeparatedByString:@" "]];
-	[arguments addObject:@"-o"];
-	[arguments addObject:outputFile];
+	[arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderVideoOptions]];
+	[arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderAudioOptions]];
+	[arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderOtherOptions]];
+	[arguments addObject:_encodeFormat.outputFileFlag];
+	[arguments addObject:outputFilePath];
+	if (_encodeFormat.inputFileFlag.length) {
+		[arguments addObject:_encodeFormat.inputFileFlag];
+	}
+	[arguments addObject:inputFilePath];
 	return arguments;
-	
 }
 
 -(void)cleanupFiles
@@ -959,7 +957,7 @@
 
 #pragma mark - Custom Getters
 
--(void) setEncodeFormat:(NSDictionary *) encodeFormat {
+-(void) setEncodeFormat:(MTFormat *) encodeFormat {
     if (_encodeFormat != encodeFormat ) {
         BOOL simulWasDisabled = ![self canSimulEncode];
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
