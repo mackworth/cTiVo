@@ -93,14 +93,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		for (NSDictionary *fl in _formatList) {
 			MTFormat *thisFormat = [MTFormat formatWithDictionary:fl];
 			thisFormat.isFactoryFormat = [NSNumber numberWithBool:YES];
-			if ([thisFormat.encoderUsed compare:@"mencoder"] == NSOrderedSame) {
-				thisFormat.outputFileFlag = @"-o";
-				thisFormat.regExProgress = @"\\((.*?)\\%\\)";
-			} else { //Its a HandBrake encoder
-				thisFormat.outputFileFlag = @"-o";
-				thisFormat.inputFileFlag = @"-i";
-				thisFormat.regExProgress = @" ([\\d.]*?) \\% ";
-			}
 			[tmpArray addObject:thisFormat];
 		}
 		factoryFormatList = [tmpArray copy];

@@ -29,6 +29,14 @@ audio: aac at 128kbs</string>
 			<true/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -53,6 +61,14 @@ audio: aac at 128kbs</string>
 			<true/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -76,6 +92,14 @@ audio: aac at 128kbs</string>
 			<key>iTunes</key>
 			<true/>
 			<key>mustDownloadFirst</key>
+			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
 			<false/>
 		</dict>
 		<dict>
@@ -101,6 +125,14 @@ audio: aac at 256kbps</string>
 			<true/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -124,6 +156,14 @@ audio: aac at 192kbs</string>
 			<key>iTunes</key>
 			<true/>
 			<key>mustDownloadFirst</key>
+			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
 			<false/>
 		</dict>
 		<dict>
@@ -149,6 +189,14 @@ audio: aac at 192kbs</string>
 			<true/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -173,6 +221,14 @@ audio: aac at 128kbs</string>
 			<true/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -196,6 +252,14 @@ audio: aac at 128kbs</string>
 			<key>iTunes</key>
 			<true/>
 			<key>mustDownloadFirst</key>
+			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
 			<false/>
 		</dict>
 		<dict>
@@ -223,6 +287,14 @@ NOTE: *MUST* install a codec (http://perian.org/)</string>
 			<false/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -249,6 +321,14 @@ NOTE: *MUST* install a codec (http://perian.org/)</string>
 			<true/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -272,6 +352,14 @@ audio: mp2 at 128kbs</string>
 			<key>iTunes</key>
 			<true/>
 			<key>mustDownloadFirst</key>
+			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
 			<false/>
 		</dict>
 		<dict>
@@ -297,6 +385,14 @@ audio: mp3 at 192kbs</string>
 			<false/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -320,6 +416,14 @@ audio: 2-channel aac at 128kbs</string>
 			<key>iTunes</key>
 			<true/>
 			<key>mustDownloadFirst</key>
+			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
 			<false/>
 		</dict>
 		<dict>
@@ -346,6 +450,14 @@ audio: aac at 128kbs
 			<false/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -371,6 +483,14 @@ audio: aac at 128kbs
 			<false/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -396,6 +516,14 @@ audio: aac at 128kbs
 			<false/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -422,6 +550,14 @@ Note:  only YouTube Partners can upload this</string>
 			<true/>
 			<key>mustDownloadFirst</key>
 			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -447,6 +583,14 @@ audio: aac at 128kbs
 			<key>iTunes</key>
 			<true/>
 			<key>mustDownloadFirst</key>
+			<false/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
 			<false/>
 		</dict>
 		<dict>
@@ -475,6 +619,14 @@ May not work in quicktime</string>
 			<false/>
 			<key>mustDownloadFirst</key>
 			<true/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -501,6 +653,12 @@ May not work in Quicktime</string>
 			<false/>
 			<key>mustDownloadFirst</key>
 			<true/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -526,6 +684,14 @@ audio: mp2 at 192kbs</string>
 			<false/>
 			<key>mustDownloadFirst</key>
 			<true/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>\((.*?)\%\)</string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -548,6 +714,14 @@ audio: mp2 at 192kbs</string>
 			<true/>
 			<key>mustDownloadFirst</key>
 			<true/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>regExProgress</key>
+			<string> ([\d.]*?) \% </string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -570,6 +744,14 @@ audio: mp2 at 192kbs</string>
 			<true/>
 			<key>mustDownloadFirst</key>
 			<true/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>regExProgress</key>
+			<string> ([\d.]*?) \% </string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -592,6 +774,14 @@ audio: mp2 at 192kbs</string>
 			<true/>
 			<key>mustDownloadFirst</key>
 			<true/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>regExProgress</key>
+			<string> ([\d.]*?) \% </string>
+			<key>isHidden</key>
+			<false/>
 		</dict>
 	</array>
 </dict>
