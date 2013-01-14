@@ -311,11 +311,32 @@
     }
 }
 
+-(NSString *) directoryForShowInDirectory:(NSString*) tryDirectory  {
+	//Check that download directory (including show directory) exists.  If create it.  If unsuccessful return nil
+	NSLog(@"Default: %d;  isMovie: %d", [[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs], [self isMovie]);
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs] && ![self isMovie]){
+		tryDirectory = [tryDirectory stringByAppendingPathComponent:self.seriesTitle];
+	}
+	if (![[NSFileManager defaultManager] fileExistsAtPath: tryDirectory]) { // try to create it
+		if (![[NSFileManager defaultManager] createDirectoryAtPath:tryDirectory withIntermediateDirectories:YES attributes:nil error:nil]) {
+			return nil;
+		}
+	}
+	return tryDirectory;
+}
+
+
 -(void)configureFiles
 {
     //Release all previous attached pointers
     [self deallocDownloadHandling];
-    encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",_downloadDirectory,_showTitle,[_encodeFormat objectForKey:@"filenameExtension"]] retain];
+	NSString *downloadDir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
+	
+	//go to default if not successful
+	if (!downloadDir) {
+		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
+	}
+    encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,_showTitle,[_encodeFormat objectForKey:@"filenameExtension"]] retain];
     if (_simultaneousEncode) {
         //Things require uniquely for simultaneous download
         pipe1 = [[NSPipe pipe] retain];
@@ -327,12 +348,12 @@
         bufferFileWriteHandle = [[NSFileHandle fileHandleForWritingAtPath:bufferFilePath] retain];
     } else {
         //Things require uniquely for sequential download
-        downloadFilePath = [[NSString stringWithFormat:@"%@%@.tivo",_downloadDirectory ,_showTitle] retain];
+        downloadFilePath = [[NSString stringWithFormat:@"%@%@.tivo",downloadDir ,_showTitle] retain];
         NSFileManager *fm = [NSFileManager defaultManager];
         [fm createFileAtPath:downloadFilePath contents:[NSData data] attributes:nil];
         downloadFileHandle = [[NSFileHandle fileHandleForWritingAtPath:downloadFilePath] retain];
         
-        decryptFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",_downloadDirectory ,_showTitle] retain];
+        decryptFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",downloadDir ,_showTitle] retain];
         
         decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",_showTitle] retain];
         [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
@@ -364,7 +385,7 @@
     activeURLConnection = [[[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] autorelease];
 
 //Now set up for either simul or sequential download
-    NSLog(@"Starting %@ of %@", (_simultaneousEncode ? @"simul DL " : @"download"), _showTitle);
+    NSLog(@"Starting %@ of %@", (_simultaneousEncode ? @"simul DL" : @"download"), _showTitle);
     if (!_simultaneousEncode ) {
         _isSimultaneousEncoding = NO;
     } else { //We'll build the full piped download chain here
@@ -987,6 +1008,12 @@
     return _seriesTitle;
 }
 
+-(BOOL) isMovie {
+	return (self.episodeTitle.length == 0) &&
+	([self.episodeNumber intValue] == 0) &&
+			 (self.showLength > 70) ;
+}
+
 #pragma mark - Custom Setters
 
 -(void)setShowDescription:(NSString *)showDescription
@@ -1056,7 +1083,6 @@
 -(void)dealloc
 {
     self.urlString = nil;
-    self.downloadDirectory = nil;
     self.mediaKey = nil;
     self.showTitle = nil;
     self.showDescription = nil;

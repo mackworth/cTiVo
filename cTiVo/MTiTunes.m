@@ -88,9 +88,7 @@
 	if ([newTrack exists]) {
 		NSLog(@"Added iTunes track:  %@", show.showTitle);
 
-		if ((show.episodeTitle.length ==0) &&
-			([show.episodeNumber intValue] == 0) &&
-			(show.showLength > 70) ) {
+		if (show.isMovie) {
 			newTrack.videoKind = iTunesEVdKMovie;
 			newTrack.name = show.showTitle;
 		} else {

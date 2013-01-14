@@ -44,12 +44,13 @@
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 	[tiVoListPopUp removeAllItems];
 	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
-    downloadDirectory.stringValue = tiVoManager.downloadDirectory;
+	subDirectoriesButton.state = [[NSUserDefaults standardUserDefaults ] boolForKey:kMTMakeSubDirs] ? NSOnState : NSOffState;
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoListUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(reloadProgramData) name:kMTNotificationTiVoShowsUpdated object:nil];
     [defaultCenter addObserver:downloadQueueTable selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
+	[defaultCenter addObserver:self selector:@selector(refreshAddToQueueButton:) name:kMTNotificationDownloadQueueUpdated object:nil];
     [defaultCenter addObserver:downloadQueueTable selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
 	
 	//Spinner Progress Handling 
@@ -59,7 +60,8 @@
 	
     [defaultCenter addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
     [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
-    
+	[tiVoManager addObserver:self forKeyPath:@"downloadDirectory" options:NSKeyValueObservingOptionInitial context:nil];
+
 
 }
 
@@ -97,7 +99,13 @@
             [simultaneousEncodeButton setState:NSOffState];
 			tiVoManager.simultaneousEncode = NO;
         }
-    }
+    } else if ([keyPath compare:@"downloadDirectory"] == NSOrderedSame) {
+		downloadDirectory.stringValue = tiVoManager.downloadDirectory;
+		NSString *dir = tiVoManager.downloadDirectory;
+		if (!dir) dir = @"Directory not available!";
+		downloadDirectory.stringValue = dir;
+		downloadDirectory.toolTip = dir;
+	}
 }
 
 -(void)networkChanged:(NSNotification *)notification
@@ -152,6 +160,13 @@
 		
 	}
     
+}
+- (void) refreshAddToQueueButton: (NSNotification *) notification {
+if ([tiVoManager.downloadQueue count] > 0) {
+    addToQueueButton.title =@"Add to Queue";
+    } else {
+     addToQueueButton.title =@"Download";
+   }
 }
 
 -(void)refreshTiVoListPopup:(NSNotification *)notification
@@ -230,6 +245,15 @@
      }
 }
 
+-(IBAction)changeSubDirectories:(id)sender
+{
+    MTCheckBox *checkbox = sender;
+    if (sender == subDirectoriesButton) {
+        [[NSUserDefaults standardUserDefaults] setBool:(checkbox.state == NSOnState) forKey:kMTMakeSubDirs];
+	}
+}
+
+
 #pragma mark - Subscription Management
 
 -(IBAction)subscribe:(id) sender {
@@ -296,11 +320,7 @@
     [myOpenPanel setPrompt:@"Choose"];
 	NSInteger ret = [myOpenPanel runModal];
 	if (ret == NSFileHandlingPanelOKButton) {
-		NSString *dir = [myOpenPanel.URL.absoluteString substringFromIndex:16];
-		downloadDirectory.stringValue = dir;
-        tiVoManager.downloadDirectory = dir;
-		[[NSUserDefaults standardUserDefaults] setObject:dir forKey:kMTDownloadDirectory];
-        downloadDirectory.toolTip = dir;
+		tiVoManager.downloadDirectory = myOpenPanel.URL.path;
 	}
 }
 
@@ -375,7 +395,6 @@
 {
     if (control == downloadDirectory) {
         tiVoManager.downloadDirectory = control.stringValue;
-		[[NSUserDefaults standardUserDefaults] setObject:control.stringValue forKey:kMTDownloadDirectory];
     }
 	return YES;
 }

@@ -111,11 +111,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		if (![defaults objectForKey:kMTMediaKeys]) {
 			[defaults setObject:[NSDictionary dictionary] forKey:kMTMediaKeys];
 		}
-		if (![defaults objectForKey:kMTDownloadDirectory]) {
-			NSString *ddir = [NSString stringWithFormat:@"%@/Downloads/",NSHomeDirectory()];
-			[defaults setValue:ddir forKey:kMTDownloadDirectory];
-		}
-		_downloadDirectory = [defaults objectForKey:kMTDownloadDirectory];
+		
+		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
 		programEncoding = nil;
 		programDecrypting = nil;
 		programDownloading = nil;
@@ -263,14 +260,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
         //Make sure the title isn't the same and if it is add a -1 modifier
         [self checkShowTitleUniqueness:program];
         program.isQueued = YES;
-		NSString *tryDirectory = _downloadDirectory;
-		//Check that download directory exists.  If create it.  If unsuccessful use default ~/Movies
-		if (![[NSFileManager defaultManager] fileExistsAtPath:tryDirectory]) { // try to create it
-			if (![[NSFileManager defaultManager] createDirectoryAtPath:tryDirectory withIntermediateDirectories:YES attributes:nil error:nil]) { //Go to default if not successful
-				tryDirectory = [NSString stringWithFormat:@"%@/Movies",NSHomeDirectory()];
-			}
-		}
-		program.downloadDirectory = tryDirectory;
 		program.numRetriesRemaining = kMTMaxDownloadRetries;
 		[_downloadQueue addObject:program];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
@@ -361,6 +350,58 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	numEncoders--;
     [self manageDownloads];
     //NSLog(@"num decoders after decrement is %d",numEncoders);
+}
+
+#pragma mark - Handle directory
+
+-(BOOL) checkDirectory: (NSString *) directory {
+	return ([[NSFileManager defaultManager]	createDirectoryAtPath:[directory stringByExpandingTildeInPath]
+										  withIntermediateDirectories:YES
+														   attributes:nil
+																error:nil]);
+}
+
+-(void) setDownloadDirectory: (NSString *) newDir {
+	if (newDir != _downloadDirectory) {
+		[_downloadDirectory release];
+		
+		if (newDir.length > 0) {
+			if (![self checkDirectory:newDir]) {
+				newDir = nil;	
+			}
+		}
+		if (!newDir) {
+			// nil, or it was bad
+			newDir = [self defaultDownloadDirectory];
+			
+			if (![self checkDirectory:newDir]) {
+				//whoa. very bad things in user directory land
+				newDir = nil;
+			}
+		}
+		if (newDir) {
+			[[NSUserDefaults standardUserDefaults] setValue:newDir forKey:kMTDownloadDirectory];
+			_downloadDirectory = [newDir retain];
+		}
+	}
+}
+
+-(NSString *) defaultDownloadDirectory {
+	return [NSString stringWithFormat:@"%@/%@/",NSHomeDirectory(),kMTDefaultDownloadDir];
+//note this will fail in sandboxing. Need something like...
+
+//	if ([[NSFileManager defaultManager] respondsToSelector:@selector(URLsForDirectory:inDomains:)]) {
+//		//requires 10.6
+//		NSArray * movieDirs = [[NSFileManager defaultManager] URLsForDirectory:NSMoviesDirectory inDomains:NSUserDomainMask];
+//		if (movieDirs.count >0) {
+//			NSURL *movieURL = (NSURL *) movieDirs[0];
+//			[movieURL URLByAppendingPathComponent:kMTDefaultDownloadDir].path;
+//		}
+//	} else { //10.5
+//	return [NSString stringWithFormat:@"%@/@",NSHomeDirectory(),kMTDefaultDownloadDir]
+//
+//	}
+
 }
 
 #pragma mark - Memory Management

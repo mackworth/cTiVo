@@ -60,6 +60,7 @@
 #define kMTFirstName @"MTFirstName"
 #define kMTLastName @"MTLastName"
 #define kMTAllTiVos @"All TiVos"
+#define kMTDefaultDownloadDir  @"Movies/TiVoShows/"
 
 
 //USER DEFAULTS

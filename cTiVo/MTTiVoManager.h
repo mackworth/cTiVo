@@ -46,6 +46,7 @@
 @property (nonatomic, retain) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
 @property (nonatomic, retain) NSMutableArray *subscribedShows;
 @property (nonatomic, retain) NSString *downloadDirectory;
+@property (readonly) NSString *defaultDownloadDirectory;
 
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;

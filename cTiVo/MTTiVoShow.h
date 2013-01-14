@@ -41,7 +41,6 @@
 }
 
 @property (nonatomic, retain) NSString *urlString,
-									*downloadDirectory,
 									*mediaKey,
 									*showTitle,
 									*showDescription,
@@ -78,6 +77,7 @@
                 isSelected;//Used for refresh of table
 
 @property (readonly) BOOL isInProgress;
+@property (readonly) BOOL isMovie;
 //@property (nonatomic, assign) MTProgramList *myTableView;
 
 

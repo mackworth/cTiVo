@@ -126,13 +126,8 @@
             
             //download directory
             NSString * downloadDir = [sUD objectForKey:kITDL];
-            BOOL isDirectory = NO;
-            if ([[NSFileManager defaultManager] fileExistsAtPath:downloadDir isDirectory:&isDirectory]) {
-                if (isDirectory) {
-                    [sUD setValue: downloadDir  forKey:kMTDownloadDirectory];
-                }
-            }
-
+			[sUD setValue: downloadDir  forKey:kMTDownloadDirectory];  //will validate when loaded again
+ 
             //preferred format
             NSString * format = [sUD objectForKey:kITiTivoFormat];
             if (format.length > 0) {
