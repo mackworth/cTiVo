@@ -97,6 +97,21 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 		factoryFormatList = [tmpArray copy];
 		_formatList = [tmpArray retain];
+        
+        //Set user desired hiding of the user pref, if any
+        
+        NSArray *hiddenFormatNames = [defaults objectForKey:@"hiddenFormats"];
+        if (hiddenFormatNames) {
+            //Un hide all 
+            for (MTFormat *f in _formatList) {
+                f.isHidden = [NSNumber numberWithBool:NO];
+            }
+            //Hide what the user wants
+            for (NSString *name in hiddenFormatNames) {
+                MTFormat *f = [self findFormat:name];
+                f.isHidden = [NSNumber numberWithBool:YES];
+            }
+        }
 		
 		//Load user formats from preferences if any
 		NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:@"formats"];

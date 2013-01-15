@@ -180,6 +180,7 @@
 
 -(IBAction)saveFormats:(id)sender
 {
+    NSMutableArray *hiddenBuiltInFormats = [NSMutableArray array];
 	NSMutableArray *userFormats = [NSMutableArray array];
 	[tiVoManager.formatList removeAllObjects];
 	for (MTFormat *f in _formatList) {
@@ -187,11 +188,14 @@
 		[tiVoManager.formatList addObject:newFormat];
 		if (![newFormat.isFactoryFormat boolValue]) {
 			[userFormats addObject:[newFormat toDictionary]];
-		}
+		} else if ([newFormat.isHidden boolValue]){
+            [hiddenBuiltInFormats addObject:newFormat.name];
+        }
 	}
     //Now update the tiVoManger selectedFormat object
     tiVoManager.selectedFormat = [tiVoManager findFormat:tiVoManager.selectedFormat.name];
 	[[NSUserDefaults standardUserDefaults] setObject:userFormats forKey:@"formats"];
+    [[NSUserDefaults standardUserDefaults] setObject:hiddenBuiltInFormats forKey:@"hiddenFormats"];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
 	[self updateForFormatChange];
 }
