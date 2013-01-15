@@ -46,6 +46,7 @@
 	self.shouldSave = [NSNumber numberWithBool:NO];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(checkShouldSave) name:kMTNotificationFormatChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshFormatPopUp:) name:kMTNotificationFormatChanged object:nil];
    
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
