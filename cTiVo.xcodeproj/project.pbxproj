@@ -13,6 +13,7 @@
 		D219D5F416A503C100C79962 /* EncoderHelpText.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D219D5F316A503C100C79962 /* EncoderHelpText.rtf */; };
 		D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
 		D235BF01168F52DE00320FA5 /* MTSubscriptionTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */; };
+		D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */ = {isa = PBXBuildFile; fileRef = D24A8D0D16A5F3DC00DFF890 /* catToFile */; };
 		D257C6E41697400700EBE30B /* MTFormatPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */; };
 		D257C6E9169740A000EBE30B /* MTPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */; };
 		D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D279D3E9167A32FA007F0677 /* MTMainWindowController.m */; };
@@ -77,6 +78,7 @@
 		D22BC41E1680DB5E007D699C /* MTTiVoShow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoShow.m; sourceTree = "<group>"; };
 		D235BEFF168F52DE00320FA5 /* MTSubscriptionTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionTableView.h; sourceTree = "<group>"; };
 		D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionTableView.m; sourceTree = "<group>"; };
+		D24A8D0D16A5F3DC00DFF890 /* catToFile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = catToFile; sourceTree = "<group>"; };
 		D257C6E11697400600EBE30B /* MTFormatPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTFormatPopUpButton.h; sourceTree = "<group>"; };
 		D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTFormatPopUpButton.m; sourceTree = "<group>"; };
 		D257C6E61697409F00EBE30B /* MTPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTPopUpTableCellView.h; sourceTree = "<group>"; };
@@ -258,6 +260,7 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				D24A8D0D16A5F3DC00DFF890 /* catToFile */,
 				D219D5F316A503C100C79962 /* EncoderHelpText.rtf */,
 				D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */,
 				D2D60BBF16766F3200CE32DE /* cTiVo.icns */,
@@ -396,6 +399,7 @@
 				D2A7269D16A25DEB00C58C5F /* MTFormatEditorController.xib in Resources */,
 				D219D5E916A4F88D00C79962 /* MTHelpViewController.xib in Resources */,
 				D219D5F416A503C100C79962 /* EncoderHelpText.rtf in Resources */,
+				D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

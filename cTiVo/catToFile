@@ -1,0 +1,11 @@
+#!/bin/sh
+if [ '$1' == "-" ]
+then
+eval "cat - > '$2'"
+elif [ '$2' == "-" ]
+then
+eval "cat - > '$1'"
+else
+eval "cat '$1' > '$2'"
+echo "cat '$1' > '$2'"
+fi

@@ -90,6 +90,7 @@
          self.shouldSave = [NSNumber numberWithBool:NO];
     }
 	[super showWindow:sender];
+    [self updateForFormatChange];
 }
 
 #pragma mark - Utility Methods
@@ -188,9 +189,11 @@
 			[userFormats addObject:[newFormat toDictionary]];
 		}
 	}
+    //Now update the tiVoManger selectedFormat object
+    tiVoManager.selectedFormat = [tiVoManager findFormat:tiVoManager.selectedFormat.name];
 	[[NSUserDefaults standardUserDefaults] setObject:userFormats forKey:@"formats"];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
-	[self checkShouldSave];
+	[self updateForFormatChange];
 }
 
 - (void) alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
@@ -200,7 +203,7 @@
 			[self.formatList removeObject:_currentFormat];
 			self.currentFormat = _formatList[0];
 			[self refreshFormatPopUp:nil];
-			[self checkShouldSave];
+			[self updateForFormatChange];
 		}
 	}
 	if (alert == saveOrCancelAlert) {

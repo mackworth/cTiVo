@@ -27,6 +27,7 @@
 		self.filenameExtension = @"";
 		self.encoderUsed = @"";
 		self.name = @"";
+		self.regExProgress = @"";
 		self.encoderVideoOptions = @"";
 		self.encoderAudioOptions = @"";
 		self.encoderOtherOptions = @"";
@@ -84,9 +85,14 @@
 
 -(NSDictionary *)toDictionary
 {
+    NSLog(@"Creating dictionary for %@",_name);
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
 	for (NSString *key in keys) {
-		[tmpDict setObject:[self valueForKey:key] forKey:key];
+        id val = [self valueForKey:key];
+        if (!val) {
+            val = @"";
+        }
+		[tmpDict setObject:val forKey:key];
 	}
 	return tmpDict;
 }

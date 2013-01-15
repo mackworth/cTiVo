@@ -361,39 +361,49 @@
 		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
 	}
     encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,_showTitle,_encodeFormat.filenameExtension] retain];
+    NSFileManager *fm = [NSFileManager defaultManager];
     if (_simultaneousEncode) {
         //Things require uniquely for simultaneous download
         pipe1 = [[NSPipe pipe] retain];
         pipe2 = [[NSPipe pipe] retain];
 		downloadFileHandle = [pipe1 fileHandleForWriting];
         bufferFilePath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",_showTitle] retain];
-        [[NSFileManager defaultManager] createFileAtPath:bufferFilePath contents:[NSData data] attributes:nil];
+        [fm createFileAtPath:bufferFilePath contents:[NSData data] attributes:nil];
         bufferFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:bufferFilePath] retain];
         bufferFileWriteHandle = [[NSFileHandle fileHandleForWritingAtPath:bufferFilePath] retain];
     } else {
         //Things require uniquely for sequential download
         downloadFilePath = [[NSString stringWithFormat:@"%@%@.tivo",downloadDir ,_showTitle] retain];
-        NSFileManager *fm = [NSFileManager defaultManager];
         [fm createFileAtPath:downloadFilePath contents:[NSData data] attributes:nil];
         downloadFileHandle = [[NSFileHandle fileHandleForWritingAtPath:downloadFilePath] retain];
         
-        decryptFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",downloadDir ,_showTitle] retain];
-        
-        decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",_showTitle] retain];
-        [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
-        decryptLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath] retain];
-        decryptLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath] retain];
-        
-        encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",_showTitle] retain];
-        [fm createFileAtPath:encodeLogFilePath contents:[NSData data] attributes:nil];
-        encodeLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:encodeLogFilePath] retain];
-        encodeLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath] retain];
     }
+    decryptFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",downloadDir ,_showTitle] retain];
+    
+    decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",_showTitle] retain];
+    [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
+    decryptLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath] retain];
+    decryptLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath] retain];
+    
+    encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",_showTitle] retain];
+    [fm createFileAtPath:encodeLogFilePath contents:[NSData data] attributes:nil];
+    encodeLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:encodeLogFilePath] retain];
+    encodeLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath] retain];
 }
 
 -(void)download
 {
 	isCanceled = NO;
+    //Before starting make sure the encoder is OK.
+    NSString *encoderLaunchPath = [MTTiVoShow pathForExecutable:_encodeFormat.encoderUsed];
+    if (!encoderLaunchPath) {
+        NSLog(@"Encoding of %@ failed for %@ format, encoder %@ not found",_showTitle,_encodeFormat.name,_encodeFormat.encoderUsed);
+        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+        _showStatus = @"Failed";
+        _processProgress = 1.0;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        
+    }
     [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
     _showStatus = @"Downloading";
 	if (!gotDetails) {
@@ -425,14 +435,13 @@
         [decrypterTask setArguments:arguments];
         [decrypterTask setStandardInput:pipe1];
         [decrypterTask setStandardOutput:pipe2];
-        NSString *encoderLaunchPath;
 		encoderTask = [[NSTask alloc] init];
-		encoderLaunchPath = [[NSBundle mainBundle] pathForResource:_encodeFormat.encoderUsed ofType:@""];
 		[encoderTask setLaunchPath:encoderLaunchPath];
+        arguments = [self encodingArgumentsWithInputFile:@"-" outputFile:encodeFilePath];
 		[encoderTask setArguments:[self encodingArgumentsWithInputFile:@"-" outputFile:encodeFilePath]];
 		[encoderTask setStandardInput:pipe2];
-		[encoderTask setStandardOutput:devNullFileHandle];
-		[encoderTask setStandardError:devNullFileHandle];
+		[encoderTask setStandardOutput:encodeLogFileHandle];
+		[encoderTask setStandardError:encodeLogFileHandle];
         [decrypterTask launch];
         [encoderTask launch];
         _isSimultaneousEncoding = YES;
@@ -526,11 +535,19 @@
 
 -(void)encode
 {
+    NSString *encoderLaunchPath = [MTTiVoShow pathForExecutable:_encodeFormat.encoderUsed];
+    if (!encoderLaunchPath) {
+        NSLog(@"Encoding of %@ failed for %@ format, encoder %@ not found",_showTitle,_encodeFormat.name,_encodeFormat.encoderUsed);
+        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+        _showStatus = @"Failed";
+        _processProgress = 1.0;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        
+    }
 	encoderTask = [[NSTask alloc] init];
 	NSLog(@"Starting Encode of   %@", _showTitle);
 	NSMutableArray *arguments = [self encodingArgumentsWithInputFile:decryptFilePath outputFile:encodeFilePath];
-	NSString *thisLaunchPath = [[NSBundle mainBundle] pathForResource:_encodeFormat.encoderUsed ofType:@""];
-	[encoderTask setLaunchPath:thisLaunchPath];
+	[encoderTask setLaunchPath:encoderLaunchPath];
 	[encoderTask setArguments:arguments];
 	[encoderTask setStandardOutput:encodeLogFileHandle];
 	[encoderTask setStandardError:devNullFileHandle];
@@ -619,15 +636,23 @@
 -(NSMutableArray *)encodingArgumentsWithInputFile:(NSString *)inputFilePath outputFile:(NSString *)outputFilePath
 {
 	NSMutableArray *arguments = [NSMutableArray array];
-	[arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderVideoOptions]];
-	[arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderAudioOptions]];
-	[arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderOtherOptions]];
-	[arguments addObject:_encodeFormat.outputFileFlag];
-	[arguments addObject:outputFilePath];
-	if (_encodeFormat.inputFileFlag.length) {
-		[arguments addObject:_encodeFormat.inputFileFlag];
-	}
-	[arguments addObject:inputFilePath];
+    if (_encodeFormat.encoderVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderVideoOptions]];
+	if (_encodeFormat.encoderAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderAudioOptions]];
+	if (_encodeFormat.encoderOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderOtherOptions]];
+    if (_encodeFormat.outputFileFlag.length) {
+        [arguments addObject:_encodeFormat.outputFileFlag];
+        [arguments addObject:outputFilePath];
+        if (_encodeFormat.inputFileFlag.length) {
+            [arguments addObject:_encodeFormat.inputFileFlag];
+        }
+        [arguments addObject:inputFilePath];
+    } else {
+        if (_encodeFormat.inputFileFlag.length) {
+            [arguments addObject:_encodeFormat.inputFileFlag];
+        }
+        [arguments addObject:inputFilePath];
+        [arguments addObject:outputFilePath];
+    }
 	return arguments;
 }
 

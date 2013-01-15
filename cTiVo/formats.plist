@@ -783,6 +783,66 @@ audio: mp2 at 192kbs</string>
 			<key>isHidden</key>
 			<false/>
 		</dict>
+		<dict>
+			<key>formatDescription</key>
+			<string>Test Format for ffmpeg (assumes ffmpeg is on users system)</string>
+			<key>comSkip</key>
+			<true/>
+			<key>filenameExtension</key>
+			<string>.avi</string>
+			<key>encoderUsed</key>
+			<string>ffmpeg</string>
+			<key>name</key>
+			<string>ffmpeg -&gt; avi</string>
+			<key>encoderVideoOptions</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string>-y</string>
+			<key>iTunes</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<false/>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>regExProgress</key>
+			<string></string>
+			<key>isHidden</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>formatDescription</key>
+			<string>Save the decrypted TiVo file</string>
+			<key>comSkip</key>
+			<true/>
+			<key>filenameExtension</key>
+			<string>.mpg</string>
+			<key>encoderUsed</key>
+			<string>catToFile</string>
+			<key>name</key>
+			<string>Decrypted TiVo Show</string>
+			<key>encoderVideoOptions</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>iTunes</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<false/>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string></string>
+			<key>isHidden</key>
+			<false/>
+		</dict>
 	</array>
 </dict>
 </plist>
