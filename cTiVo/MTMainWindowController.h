@@ -13,10 +13,11 @@
 @class MTDownloadTableView;
 @class MTProgramTableView;
 @class MTSubscriptionTableView;
-@class MTPopUpButton;
+@class MTFormatPopUpButton;
 
 @interface MTMainWindowController : NSWindowController {
-	IBOutlet NSPopUpButton *tiVoListPopUp, *formatListPopUp;
+	IBOutlet NSPopUpButton *tiVoListPopUp;
+	IBOutlet MTFormatPopUpButton *formatListPopUp;
     IBOutlet NSButton *addToQueueButton, *removeFromQueueButton, *addToiTunesButton, *simultaneousEncodeButton, *subscribeButton, *subDirectoriesButton;
 	IBOutlet NSTextField *loadingProgramListLabel, *downloadDirectory, *tiVoListPopUpLabel;
 	IBOutlet NSProgressIndicator *loadingProgramListIndicator;

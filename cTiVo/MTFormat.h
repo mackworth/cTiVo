@@ -39,4 +39,6 @@
 -(NSDictionary *)toDictionary;
 -(BOOL)isSame:(MTFormat *)testFormat;
 
+-(NSAttributedString *) attributedFormatStringForFont:(NSFont *) font;
+
 @end

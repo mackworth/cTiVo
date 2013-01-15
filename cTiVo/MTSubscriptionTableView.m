@@ -130,20 +130,8 @@
         result = (id)thisCell;
     } else if([identifier compare: @"FormatPopUp"] == NSOrderedSame) {
 		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
+	    thisCell.popUpButton.showHidden = NO;
 		thisCell.identifier = identifier;
-        NSArray *formatList = [MTTiVoManager sharedTiVoManager].formatList;
-        [thisCell.popUpButton removeAllItems];
-        //    if (_selectedFormat) {
-        //        mediaKeyLabel.stringValue = [[NSUserDefaults standardUserDefaults] stringForKey:[_selectedFormat objectForKey:@"name"]];
-        //    }
-        for (MTFormat *fl in formatList) {
-            [thisCell.popUpButton addItemWithTitle:fl.name];
-            [[thisCell.popUpButton lastItem] setRepresentedObject:fl];
-            //            if (_selectedFormat && [[fl objectForKey:@"name"] compare:[_selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
-            //                [self selectItem:[self lastItem]];
-            //            }
-            //            
-        }
 		result = (id)thisCell;
 	} else {
         result =[super makeViewWithIdentifier:identifier owner:owner];
@@ -197,9 +185,10 @@ static NSDateFormatter *dateFormatter;
 	} else if ([tableColumn.identifier compare:@"FormatPopUp"] == NSOrderedSame) {
 //		result.textField.stringValue = [thisSubscription objectForKey:kMTSubscribedSeriesFormat] ;
 //        result.toolTip = result.textField.stringValue;
-		((MTPopUpTableCellView *)result).popUpButton.owner = thisSubscription;
-        [((MTPopUpTableCellView *)result).popUpButton selectItemWithTitle:thisSubscription.encodeFormat.name];
-        result.toolTip = [NSString stringWithFormat:@"%@: %@", thisSubscription.encodeFormat.name, thisSubscription.encodeFormat.formatDescription];
+		MTFormatPopUpButton * popUp = ((MTPopUpTableCellView *)result).popUpButton;
+		popUp.owner = thisSubscription;
+		popUp.formatList = tiVoManager.formatList;
+		thisSubscription.encodeFormat = [popUp selectFormatNamed:thisSubscription.encodeFormat.name];
  
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;

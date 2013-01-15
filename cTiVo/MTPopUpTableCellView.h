@@ -7,11 +7,11 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "MTPopUpButton.h"
+#import "MTFormatPopUpButton.h"
 
 @interface MTPopUpTableCellView : NSTableCellView
 
-@property (nonatomic, readonly) MTPopUpButton *popUpButton;
+@property (nonatomic, readonly) MTFormatPopUpButton *popUpButton;
 
 - (id)initWithFrame:(NSRect)frame withTarget:(id)target withAction:(SEL)selector;
 

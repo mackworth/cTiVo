@@ -130,20 +130,8 @@
         result = (id)thisCell;
    } else if([identifier compare: @"Format"] == NSOrderedSame) {
 		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
+	    thisCell.popUpButton.showHidden = NO;
 		thisCell.identifier = identifier;
-        NSArray *formatList = [MTTiVoManager sharedTiVoManager].formatList;
-        [thisCell.popUpButton removeAllItems];
-        //    if (_selectedFormat) {
-        //        mediaKeyLabel.stringValue = [[NSUserDefaults standardUserDefaults] stringForKey:[_selectedFormat objectForKey:@"name"]];
-        //    }
-        for (MTFormat *fl in formatList) {
-            [thisCell.popUpButton addItemWithTitle:fl.name];
-            [[thisCell.popUpButton lastItem] setRepresentedObject:fl];
-            //            if (_selectedFormat && [[fl objectForKey:@"name"] compare:[_selectedFormat objectForKey:@"name"]] == NSOrderedSame) {
-            //                [self selectItem:[self lastItem]];
-            //            }
-            //
-        }
        result = thisCell;
     } else {
         result =[super makeViewWithIdentifier:identifier owner:owner];
@@ -193,11 +181,12 @@
         }
 	
     } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
-		MTPopUpButton *popUpButton = ((MTPopUpTableCellView *)result).popUpButton;
+		MTFormatPopUpButton *popUpButton = ((MTPopUpTableCellView *)result).popUpButton;
         popUpButton.owner = rowData;
-        [popUpButton selectItemWithTitle:rowData.encodeFormat.name];
+		popUpButton.formatList = tiVoManager.formatList;
+        rowData.encodeFormat = [popUpButton selectFormatNamed:rowData.encodeFormat.name];
         popUpButton.enabled = ([rowData.downloadStatus intValue] == kMTStatusNew);
-        result.toolTip = [NSString stringWithFormat:@"%@: %@", rowData.encodeFormat.name, rowData.encodeFormat.formatDescription];
+		
     } else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: rowData.addToiTunesWhenEncoded];

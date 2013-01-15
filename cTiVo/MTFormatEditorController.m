@@ -8,6 +8,7 @@
 
 #import "MTFormatEditorController.h"
 #import "MTTiVoManager.h"
+#import "MTFormatPopUpButton.h"
 
 #define tiVoManager [MTTiVoManager sharedTiVoManager]
 
@@ -52,6 +53,8 @@
 	}
 //	self.formatList = [NSMutableArray arrayWithArray:tiVoManager.formatList];
 //	self.currentFormat = [tiVoManager.selectedFormat copy];
+	formatPopUpButton.showHidden = YES;
+	formatPopUpButton.formatList =  self.formatList;
  	[self refreshFormatPopUp:nil];
 	self.shouldSave = [NSNumber numberWithBool:NO];
     
@@ -80,15 +83,11 @@
 {
 	//Deepcopy array so we have new object
     if (formatPopUpButton) {  //Clumsy way of refreshing popup selection after dismissal and re-show of window.  Need better connection
-        for (MTFormat *f in _formatList) {
-            if ([tiVoManager.selectedFormat.name compare:f.name] == NSOrderedSame) {
-                self.currentFormat = f;
-            }
-        }
-        //	self.formatList = [NSMutableArray arrayWithArray:tiVoManager.formatList];
-        //	self.currentFormat = [tiVoManager.selectedFormat copy];
-        [self refreshFormatPopUp:nil];
-        self.shouldSave = [NSNumber numberWithBool:NO];
+		[self refreshFormatPopUp:nil];
+				self.currentFormat= [formatPopUpButton selectFormatNamed:tiVoManager.selectedFormat.name];
+		self.currentFormat = formatPopUpButton.selectedItem.representedObject;
+  
+         self.shouldSave = [NSNumber numberWithBool:NO];
     }
 	[super showWindow:sender];
 }
@@ -120,16 +119,20 @@
 -(void)checkShouldSave
 {
 	BOOL result = NO;
-	for (MTFormat *f in _formatList) {
-		MTFormat *foundFormat = [tiVoManager findFormat:f.name];
-		if (!foundFormat) { //We have a new format so we should be able to save/cancel
-			result = YES;
-			break;
+	if (_formatList.count != tiVoManager.formatList.count) {
+		result =  YES;
+	} else {
+		for (MTFormat *f in _formatList) {
+			MTFormat *foundFormat = [tiVoManager findFormat:f.name];
+			if (!foundFormat) { //We have a new format so we should be able to save/cancel
+				result = YES;
+				break;
+			}
+			if (![foundFormat isSame:f]) { //We found a format that exisit but is different.
+				result = YES;
+				break;
+			}
 		}
-        if (![foundFormat isSame:f]) { //We found a format that exisit but is different.
-            result = YES;
-			break;
-        }
 	}
 	self.shouldSave = [NSNumber numberWithBool:result];
 }
@@ -162,14 +165,14 @@
 
 -(IBAction)selectFormat:(id)sender
 {
-        NSPopUpButton *thisButton = (NSPopUpButton *)sender;
+        MTFormatPopUpButton *thisButton = (MTFormatPopUpButton *)sender;
         self.currentFormat = [[thisButton selectedItem] representedObject];
 	
 }
 
 -(IBAction)deleteFormat:(id)sender
 {
-	deleteAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to delete the format %@",_currentFormat.name] defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@"This cannot be undone"];
+	deleteAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to delete the format %@?",_currentFormat.name] defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@"This cannot be undone!"];
 	[deleteAlert beginSheetModalForWindow:self.window modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:nil];
 	
 }
@@ -226,6 +229,7 @@
 	MTFormat *newFormat = [[MTFormat new] autorelease];
 	newFormat.name = [self checkFormatName:@"New Format"];
 	[self.formatList addObject:newFormat];
+	self.currentFormat = newFormat;
 	[self refreshFormatPopUp:nil];
 	[formatPopUpButton selectItemWithTitle:newFormat.name];
 	self.currentFormat = [[formatPopUpButton selectedItem] representedObject];
@@ -239,6 +243,7 @@
 	newFormat.name = [self checkFormatName:newFormat.name];
 	newFormat.isFactoryFormat = [NSNumber numberWithBool:NO];
 	[self.formatList addObject:newFormat];
+	self.currentFormat = newFormat;
 	[self refreshFormatPopUp:nil];
 	[formatPopUpButton selectItemWithTitle:newFormat.name];
 	self.currentFormat = [[formatPopUpButton selectedItem] representedObject];
@@ -247,45 +252,8 @@
 
 -(void)refreshFormatPopUp:(NSNotification *)notification
 {
-    //Created Sorted List
-    NSSortDescriptor *user = [NSSortDescriptor sortDescriptorWithKey:@"isFactoryFormat" ascending:YES];
-    NSSortDescriptor *title = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)];
-    NSArray *sortDescriptors = [NSArray arrayWithObjects:user,title, nil];
-    NSMutableArray *tmpArray = [NSMutableArray arrayWithArray:_formatList];
-    [tmpArray  sortUsingDescriptors:sortDescriptors];
-    
-	[formatPopUpButton removeAllItems];
-    BOOL isFactory = YES;
-	for (MTFormat *f in tmpArray) {
-        if ([formatPopUpButton numberOfItems] == 0 && ![f.isFactoryFormat boolValue]) {
-            [formatPopUpButton addItemWithTitle:@"    User Formats"];
-            [[formatPopUpButton lastItem] setEnabled:NO];
-            [[formatPopUpButton lastItem] setTarget:nil];
-            
-        }
-        if ([f.isFactoryFormat boolValue] && isFactory) { //This is a changeover from user input to factory input (if any
-            NSMenuItem *separator = [NSMenuItem separatorItem];
-            [[formatPopUpButton menu] addItem:separator];
-            [formatPopUpButton addItemWithTitle:@"    Built In Formats"];
-            [[formatPopUpButton lastItem] setEnabled:NO];
-            [[formatPopUpButton lastItem] setTarget:nil];
-            isFactory = NO;
-        }
-		[formatPopUpButton addItemWithTitle:f.name];
-		NSColor * formatColor = [NSColor colorWithDeviceRed:0.0
-													  green:0.0
-													   blue:([f.isFactoryFormat boolValue] ? 0.0: 0.6)
-													  alpha:[f.isHidden boolValue] ? 0.5: 1.0];
-		NSAttributedString *attTitle = [[[NSAttributedString alloc] initWithString: f.name
-																	   attributes: @{NSFontAttributeName : formatPopUpButton.font,
-																		   NSForegroundColorAttributeName: formatColor}] autorelease];
-		[formatPopUpButton lastItem].attributedTitle = attTitle;
-		
-		[formatPopUpButton lastItem].toolTip = f.description;
-		[[formatPopUpButton lastItem] setRepresentedObject:f];
-	}
-	[formatPopUpButton selectItemWithTitle:_currentFormat.name];
-	self.currentFormat = [[formatPopUpButton selectedItem] representedObject];
+	[formatPopUpButton refreshMenu];
+	self.currentFormat = [formatPopUpButton selectFormatNamed:_currentFormat.name];
 }
 
 -(IBAction)help:(id)sender

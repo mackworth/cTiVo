@@ -10,8 +10,6 @@
 
 @implementation MTFormat
 
-@synthesize attributedFormatDescription = _attributedFormatDescription;
-
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format
 {
 	MTFormat *newFormat = [[[MTFormat alloc] init] autorelease];
@@ -67,20 +65,21 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatChanged object:self];
 }
 
+
+-(NSAttributedString *) attributedFormatStringForFont:(NSFont *) font {
+	NSColor * formatColor = [NSColor colorWithDeviceRed:0.0
+												  green:0.0
+												   blue:([_isFactoryFormat boolValue] ? 0.0: 0.6)
+												  alpha:[_isHidden boolValue] ? 0.5: 1.0];
+	NSAttributedString *attTitle = [[[NSAttributedString alloc] initWithString: _name
+																	attributes: @{NSFontAttributeName : font,
+												NSForegroundColorAttributeName: formatColor}] autorelease];
+	return attTitle;
+}
 -(NSAttributedString *)attributedFormatDescription
 {
 	return [_isFactoryFormat boolValue] ? [[[NSAttributedString alloc] initWithString:_formatDescription attributes:@{NSForegroundColorAttributeName : [NSColor grayColor]}] autorelease] :
-                                [[[NSAttributedString alloc] initWithString:_formatDescription] autorelease];
-}
-
--(void)setAttributedFormatDescription:(NSAttributedString *)attributedFormatDescription
-{
-	if (attributedFormatDescription == _attributedFormatDescription) {
-		return;
-	}
-	[_attributedFormatDescription release];
-	_attributedFormatDescription = [attributedFormatDescription retain];
-	self.formatDescription = [_attributedFormatDescription string];
+	[[[NSAttributedString alloc] initWithString:_formatDescription] autorelease];
 }
 
 -(NSDictionary *)toDictionary
