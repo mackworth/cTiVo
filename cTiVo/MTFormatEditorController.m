@@ -24,6 +24,9 @@
     if (self) {
         // Initialization code here.
 		myPopover = nil;
+		self.validExecutableColor = [NSColor blackColor];
+		self.validExecutable = [NSNumber numberWithBool:YES];
+		self.validExecutableString = @"No valid executable found.";
     }
     
     return self;
@@ -52,8 +55,7 @@
  	[self refreshFormatPopUp:nil];
 	self.shouldSave = [NSNumber numberWithBool:NO];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(checkShouldSave) name:kMTNotificationFormatChanged object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshFormatPopUp:) name:kMTNotificationFormatChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateForFormatChange) name:kMTNotificationFormatChanged object:nil];
    
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
@@ -93,7 +95,27 @@
 
 #pragma mark - Utility Methods
 
+-(void)updateForFormatChange
+{
+	[self checkShouldSave];
+	[self checkValidExecutable];
+	[self refreshFormatPopUp:nil];
+}
 
+-(void)checkValidExecutable
+{
+	NSString *validPath = [MTTiVoShow pathForExecutable:_currentFormat.encoderUsed];
+	BOOL isValid = NO;
+	self.validExecutableString = @"No valid executable found.";
+	NSColor *isValidColor = [NSColor redColor];
+	if (validPath) {
+		isValidColor = [NSColor blackColor];
+		isValid = YES;
+		self.validExecutableString = [NSString stringWithFormat:@"Found at %@",validPath];
+	}
+	self.validExecutableColor = isValidColor;
+	self.validExecutable = [NSNumber numberWithBool:isValid];
+}
 
 -(void)checkShouldSave
 {
@@ -207,7 +229,7 @@
 	[self refreshFormatPopUp:nil];
 	[formatPopUpButton selectItemWithTitle:newFormat.name];
 	self.currentFormat = [[formatPopUpButton selectedItem] representedObject];
-	[self checkShouldSave];
+	[self updateForFormatChange];
 	
 }
 
@@ -220,7 +242,7 @@
 	[self refreshFormatPopUp:nil];
 	[formatPopUpButton selectItemWithTitle:newFormat.name];
 	self.currentFormat = [[formatPopUpButton selectedItem] representedObject];
-	[self checkShouldSave];
+	[self updateForFormatChange];
 }
 
 -(void)refreshFormatPopUp:(NSNotification *)notification
