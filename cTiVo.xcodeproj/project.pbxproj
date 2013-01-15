@@ -164,6 +164,16 @@
 			name = "Custom NSViews";
 			sourceTree = "<group>";
 		};
+		1EE4418016A4E64800796897 /* UI Classes- Format Edit */ = {
+			isa = PBXGroup;
+			children = (
+				D2A7269916A25DEB00C58C5F /* MTFormatEditorController.h */,
+				D2A7269A16A25DEB00C58C5F /* MTFormatEditorController.m */,
+				D2A7269B16A25DEB00C58C5F /* MTFormatEditorController.xib */,
+			);
+			name = "UI Classes- Format Edit";
+			sourceTree = "<group>";
+		};
 		D2D60B9216766EFD00CE32DE = {
 			isa = PBXGroup;
 			children = (
@@ -212,7 +222,8 @@
 				D2D60BCB16766FA600CE32DE /* MTConstants.h */,
 				D2A7269416A2005400C58C5F /* README */,
 				D2DA8FBA169CDAAD0053B7CB /* Data Model */,
-				D2DA8FBB169CDACC0053B7CB /* UI Classes */,
+				D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */,
+				1EE4418016A4E64800796897 /* UI Classes- Format Edit */,
 				1E791BD01697ACAA00E47E84 /* Custom NSViews */,
 				D2D60BBE16766F1100CE32DE /* Resources */,
 				D2D60BA816766EFD00CE32DE /* Supporting Files */,
@@ -277,27 +288,24 @@
 			name = "Data Model";
 			sourceTree = "<group>";
 		};
-		D2DA8FBB169CDACC0053B7CB /* UI Classes */ = {
+		D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */ = {
 			isa = PBXGroup;
 			children = (
+				D279D3E8167A32FA007F0677 /* MTMainWindowController.h */,
+				D279D3E9167A32FA007F0677 /* MTMainWindowController.m */,
+				D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */,
+				D2D60BCF16766FA600CE32DE /* MTProgramTableView.h */,
+				D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */,
 				D2D60BCD16766FA600CE32DE /* MTDownloadTableView.h */,
 				D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */,
 				D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */,
 				D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */,
 				D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */,
 				D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */,
-				D279D3E8167A32FA007F0677 /* MTMainWindowController.h */,
-				D279D3E9167A32FA007F0677 /* MTMainWindowController.m */,
-				D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */,
-				D2D60BCF16766FA600CE32DE /* MTProgramTableView.h */,
-				D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */,
 				D235BEFF168F52DE00320FA5 /* MTSubscriptionTableView.h */,
 				D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */,
-				D2A7269916A25DEB00C58C5F /* MTFormatEditorController.h */,
-				D2A7269A16A25DEB00C58C5F /* MTFormatEditorController.m */,
-				D2A7269B16A25DEB00C58C5F /* MTFormatEditorController.xib */,
 			);
-			name = "UI Classes";
+			name = "UI Classes- Main Window";
 			sourceTree = "<group>";
 		};
 		D2DFA68B1683B9EC00CD6CE0 /* iTunesInterface */ = {

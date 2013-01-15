@@ -240,11 +240,16 @@
             isFactory = NO;
         }
 		[formatPopUpButton addItemWithTitle:f.name];
-		if (![f.isFactoryFormat boolValue]) { //Change the color for user formats
-			NSFont *thisFont = formatPopUpButton.font;
-			NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString:f.name attributes:@{NSFontAttributeName : thisFont, NSForegroundColorAttributeName : [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.7 alpha:1.0]}];
-			[formatPopUpButton lastItem].attributedTitle = attTitle;
-		}
+		NSColor * formatColor = [NSColor colorWithDeviceRed:0.0
+													  green:0.0
+													   blue:([f.isFactoryFormat boolValue] ? 0.7: 0.0)
+													  alpha:[f.isHidden boolValue] ? 0.5: 1.0];
+		NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString: f.name
+																	   attributes: @{NSFontAttributeName : formatPopUpButton.font,
+																		   NSForegroundColorAttributeName: formatColor}];
+		[formatPopUpButton lastItem].attributedTitle = attTitle;
+		
+		[formatPopUpButton lastItem].toolTip = f.description;
 		[[formatPopUpButton lastItem] setRepresentedObject:f];
 	}
 	[formatPopUpButton selectItemWithTitle:_currentFormat.name];

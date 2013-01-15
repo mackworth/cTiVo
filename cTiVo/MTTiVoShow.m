@@ -106,7 +106,6 @@
 	NSURLResponse *detailResponse = nil;
 	NSURLRequest *detailRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:detailURLString]];;
 	NSData *xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
-//	NSLog(@"Returned XML is %@",[[[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	] autorelease]	);
 	parser = [[[NSXMLParser alloc] initWithData:xml] autorelease];
 	parser.delegate = self;
 	[parser parse];
@@ -114,6 +113,7 @@
 	self.vExecProducer = [self parseNames:_vExecProducer];
 	if (!gotDetails) {
 		NSLog(@"GetDetails Fail for %@",_showTitle);
+		NSLog(@"Returned XML is %@",[[[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	] autorelease]	);
 	}
 	NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDetailsLoaded object:self];
     [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
