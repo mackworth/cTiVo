@@ -8,12 +8,16 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MTFormat.h"
+#import "MTHelpViewController.h"
 
 
-@interface MTFormatEditorController : NSWindowController <NSWindowDelegate> {
+@interface MTFormatEditorController : NSWindowController <NSWindowDelegate, NSPopoverDelegate> {
 	IBOutlet NSPopUpButton *formatPopUpButton;
 	NSAlert *deleteAlert, *saveOrCancelAlert, *cancelAlert;
     IBOutlet NSButton *cancelButton, *saveButton;
+	NSPopover *myPopover;
+	IBOutlet NSWindow *popoverDetachWindow;
+	IBOutlet MTHelpViewController *popoverDetachController, *helpContoller;
 }
 
 @property (nonatomic, retain) MTFormat *currentFormat;

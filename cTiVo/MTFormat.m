@@ -69,8 +69,8 @@
 
 -(NSAttributedString *)attributedFormatDescription
 {
-	return [_isFactoryFormat boolValue] ? [[NSAttributedString alloc] initWithString:_formatDescription attributes:@{NSForegroundColorAttributeName : [NSColor grayColor]}] :
-                                [[NSAttributedString alloc] initWithString:_formatDescription];
+	return [_isFactoryFormat boolValue] ? [[[NSAttributedString alloc] initWithString:_formatDescription attributes:@{NSForegroundColorAttributeName : [NSColor grayColor]}] autorelease] :
+                                [[[NSAttributedString alloc] initWithString:_formatDescription] autorelease];
 }
 
 -(void)setAttributedFormatDescription:(NSAttributedString *)attributedFormatDescription
@@ -95,21 +95,21 @@
 -(id)copyWithZone:(NSZone *)zone
 {
 	MTFormat *new = [MTFormat new];
-	new.formatDescription = [_formatDescription copyWithZone:zone];
-	new.filenameExtension = [_filenameExtension copyWithZone:zone];
-	new.encoderUsed = [_encoderUsed copyWithZone:zone];
-	new.name = [_name copyWithZone:zone];
-	new.encoderVideoOptions = [_encoderVideoOptions copyWithZone:zone];
-	new.encoderAudioOptions = [_encoderAudioOptions copyWithZone:zone];
-	new.encoderOtherOptions = [_encoderOtherOptions copyWithZone:zone];
-	new.inputFileFlag = [_inputFileFlag copyWithZone:zone];
-	new.outputFileFlag = [_outputFileFlag copyWithZone:zone];
-	new.regExProgress = [_regExProgress copyWithZone:zone];
-	new.comSkip = [_comSkip copyWithZone:zone];
-	new.iTunes = [_iTunes copyWithZone:zone];
-	new.mustDownloadFirst = [_mustDownloadFirst copyWithZone:zone];
-	new.isHidden = [_isHidden copyWithZone:zone];
-	new.isFactoryFormat = [_isFactoryFormat copyWithZone:zone];
+	new.formatDescription = [[_formatDescription copyWithZone:zone] autorelease];
+	new.filenameExtension = [[_filenameExtension copyWithZone:zone] autorelease];
+	new.encoderUsed = [[_encoderUsed copyWithZone:zone] autorelease];
+	new.name = [[_name copyWithZone:zone] autorelease];
+	new.encoderVideoOptions = [[_encoderVideoOptions copyWithZone:zone] autorelease];
+	new.encoderAudioOptions = [[_encoderAudioOptions copyWithZone:zone] autorelease];
+	new.encoderOtherOptions = [[_encoderOtherOptions copyWithZone:zone] autorelease];
+	new.inputFileFlag = [[_inputFileFlag copyWithZone:zone] autorelease];
+	new.outputFileFlag = [[_outputFileFlag copyWithZone:zone] autorelease];
+	new.regExProgress = [[_regExProgress copyWithZone:zone] autorelease];
+	new.comSkip = [[_comSkip copyWithZone:zone] autorelease];
+	new.iTunes = [[_iTunes copyWithZone:zone] autorelease];
+	new.mustDownloadFirst = [[_mustDownloadFirst copyWithZone:zone] autorelease];
+	new.isHidden = [[_isHidden copyWithZone:zone] autorelease];
+	new.isFactoryFormat = [[_isFactoryFormat copyWithZone:zone] autorelease];
 	return new;
 }
 

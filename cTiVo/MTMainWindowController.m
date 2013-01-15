@@ -180,7 +180,7 @@
 		[popUp addItemWithTitle:fl.name];
 		if (![fl.isFactoryFormat boolValue]) { //Change the color for user formats
 			NSFont *thisFont = popUp.font;
-			NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString:fl.name attributes:@{NSFontAttributeName : thisFont, NSForegroundColorAttributeName : [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.7 alpha:1.0]}];
+			NSAttributedString *attTitle = [[[NSAttributedString alloc] initWithString:fl.name attributes:@{NSFontAttributeName : thisFont, NSForegroundColorAttributeName : [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.7 alpha:1.0]}] autorelease];
 			[popUp lastItem].attributedTitle = attTitle;
 		}
         NSMenuItem *thisItem = [popUp lastItem];
@@ -253,13 +253,6 @@ if ([tiVoManager.downloadQueue count] > 0) {
 }
 
 #pragma mark - UI Actions
-
--(IBAction)editFormats:(id)sender
-{
-	MTFormatEditorController *myFormatEditor = [[MTFormatEditorController alloc] initWithWindowNibName:@"MTFormatEditorController"];
-	[myFormatEditor showWindow:nil];
-//	[myFormatEditor release];
-}
 
 -(IBAction)selectFormat:(id)sender
 {

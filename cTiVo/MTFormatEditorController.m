@@ -17,14 +17,21 @@
 
 @implementation MTFormatEditorController
 
+
 - (id)initWithWindow:(NSWindow *)window
 {
     self = [super initWithWindow:window];
     if (self) {
         // Initialization code here.
+		myPopover = nil;
     }
     
     return self;
+}
+
+-(void)awakeFromNib
+{
+	popoverDetachWindow.contentView = popoverDetachController.view;
 }
 
 - (void)windowDidLoad
@@ -85,6 +92,25 @@
 }
 
 #pragma mark - Utility Methods
+
+
+
+-(void)checkShouldSave
+{
+	BOOL result = NO;
+	for (MTFormat *f in _formatList) {
+		MTFormat *foundFormat = [tiVoManager findFormat:f.name];
+		if (!foundFormat) { //We have a new format so we should be able to save/cancel
+			result = YES;
+			break;
+		}
+        if (![foundFormat isSame:f]) { //We found a format that exisit but is different.
+            result = YES;
+			break;
+        }
+	}
+	self.shouldSave = [NSNumber numberWithBool:result];
+}
 
 -(NSString *)checkFormatName:(NSString *)name
 {
@@ -185,23 +211,6 @@
 	
 }
 
--(void)checkShouldSave
-{
-	BOOL result = NO;
-	for (MTFormat *f in _formatList) {
-		MTFormat *foundFormat = [tiVoManager findFormat:f.name];
-		if (!foundFormat) { //We have a new format so we should be able to save/cancel
-			result = YES;
-			break;
-		}
-        if (![foundFormat isSame:f]) { //We found a format that exisit but is different.
-            result = YES;
-			break;
-        }
-	}
-	self.shouldSave = [NSNumber numberWithBool:result];
-}
-
 -(IBAction)duplicateFormat:(id)sender
 {
 	MTFormat *newFormat = [[_currentFormat copy] autorelease];
@@ -245,9 +254,9 @@
 													  green:0.0
 													   blue:([f.isFactoryFormat boolValue] ? 0.0: 0.6)
 													  alpha:[f.isHidden boolValue] ? 0.5: 1.0];
-		NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString: f.name
+		NSAttributedString *attTitle = [[[NSAttributedString alloc] initWithString: f.name
 																	   attributes: @{NSFontAttributeName : formatPopUpButton.font,
-																		   NSForegroundColorAttributeName: formatColor}];
+																		   NSForegroundColorAttributeName: formatColor}] autorelease];
 		[formatPopUpButton lastItem].attributedTitle = attTitle;
 		
 		[formatPopUpButton lastItem].toolTip = f.description;
@@ -257,8 +266,48 @@
 	self.currentFormat = [[formatPopUpButton selectedItem] representedObject];
 }
 
+-(IBAction)help:(id)sender
+{
+	//Get help text for encoder
+	NSString *helpFilePath = [[NSBundle mainBundle] pathForResource:@"EncoderHelpText" ofType:@"rtf"];
+	NSAttributedString *attrHelpText = [[[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL] autorelease];
+	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
+	NSButton *thisButton = (NSButton *)sender;
+	if (!myPopover) {
+		myPopover = [[NSPopover alloc] init];
+		myPopover.delegate = self;
+		myPopover.behavior = NSPopoverBehaviorTransient;
+		myPopover.contentViewController = helpContoller;
+		[helpContoller loadView];
+		helpContoller.displayMessage.attributedStringValue = attrHelpText;
+	}
+	//	[self.helpController.displayMessage insertText:helpText];
+	popoverDetachController.displayMessage.attributedStringValue = attrHelpText;
+	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+}
+
+
+#pragma mark - Popover Delegate Methods
+
+-(NSWindow *)detachableWindowForPopover:(NSPopover *)popover
+{
+	return popoverDetachWindow;
+}
+
+-(void)popoverDidClose:(NSNotification *)notification
+{
+	[myPopover release];
+	myPopover = nil;
+}
+
+
+#pragma mark - Memory Management
+
 -(void)dealloc
 {
+	if (myPopover) {
+		[myPopover release];
+	}
 	self.currentFormat = nil;
 	[super dealloc];
 }

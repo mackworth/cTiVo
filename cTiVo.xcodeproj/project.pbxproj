@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
+		D219D5E916A4F88D00C79962 /* MTHelpViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */; };
+		D219D5EA16A4F88D00C79962 /* MTHelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D219D5E816A4F88D00C79962 /* MTHelpViewController.m */; };
+		D219D5F416A503C100C79962 /* EncoderHelpText.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D219D5F316A503C100C79962 /* EncoderHelpText.rtf */; };
 		D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
 		D235BF01168F52DE00320FA5 /* MTSubscriptionTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */; };
 		D257C6E41697400700EBE30B /* MTPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTPopUpButton.m */; };
@@ -66,6 +69,10 @@
 		D202E09F169778DA00514213 /* MTiTivoImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTivoImport.h; sourceTree = "<group>"; };
 		D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressindicator.h; sourceTree = "<group>"; };
 		D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressindicator.m; sourceTree = "<group>"; };
+		D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTHelpViewController.xib; sourceTree = "<group>"; };
+		D219D5E716A4F88C00C79962 /* MTHelpViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTHelpViewController.h; sourceTree = "<group>"; };
+		D219D5E816A4F88D00C79962 /* MTHelpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTHelpViewController.m; sourceTree = "<group>"; };
+		D219D5F316A503C100C79962 /* EncoderHelpText.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = EncoderHelpText.rtf; sourceTree = "<group>"; };
 		D22BC41D1680DB5E007D699C /* MTTiVoShow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoShow.h; sourceTree = "<group>"; };
 		D22BC41E1680DB5E007D699C /* MTTiVoShow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoShow.m; sourceTree = "<group>"; };
 		D235BEFF168F52DE00320FA5 /* MTSubscriptionTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionTableView.h; sourceTree = "<group>"; };
@@ -167,6 +174,9 @@
 		1EE4418016A4E64800796897 /* UI Classes- Format Edit */ = {
 			isa = PBXGroup;
 			children = (
+				D219D5E716A4F88C00C79962 /* MTHelpViewController.h */,
+				D219D5E816A4F88D00C79962 /* MTHelpViewController.m */,
+				D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */,
 				D2A7269916A25DEB00C58C5F /* MTFormatEditorController.h */,
 				D2A7269A16A25DEB00C58C5F /* MTFormatEditorController.m */,
 				D2A7269B16A25DEB00C58C5F /* MTFormatEditorController.xib */,
@@ -248,6 +258,7 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				D219D5F316A503C100C79962 /* EncoderHelpText.rtf */,
 				D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */,
 				D2D60BBF16766F3200CE32DE /* cTiVo.icns */,
 				D2D60BC016766F3200CE32DE /* formats.plist */,
@@ -383,6 +394,8 @@
 				D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */,
 				D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */,
 				D2A7269D16A25DEB00C58C5F /* MTFormatEditorController.xib in Resources */,
+				D219D5E916A4F88D00C79962 /* MTHelpViewController.xib in Resources */,
+				D219D5F416A503C100C79962 /* EncoderHelpText.rtf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,6 +444,7 @@
 				D2AFDBE8169B2D3A00D7DA3B /* MTiTivoImport.m in Sources */,
 				D2A7269816A23E3D00C58C5F /* MTFormat.m in Sources */,
 				D2A7269C16A25DEB00C58C5F /* MTFormatEditorController.m in Sources */,
+				D219D5EA16A4F88D00C79962 /* MTHelpViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
