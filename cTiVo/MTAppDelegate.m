@@ -93,17 +93,71 @@ void signalHandler(int signal)
 
 -(IBAction)exportFormats:(id)sender
 {
-	NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:@"formats"];
 	NSSavePanel *mySavePanel = [[[NSSavePanel alloc] init] autorelease];
-	[mySavePanel setTitle:@"Save User Formats"];
+	[mySavePanel setTitle:@"Export User Formats"];
 	[mySavePanel setAllowedFileTypes:[NSArray arrayWithObject:@"plist"]];
+    [mySavePanel setAccessoryView:formatSelectionTable];
 	
 	NSInteger ret = [mySavePanel runModal];
 	if (ret == NSFileHandlingPanelOKButton) {
-		NSString *filenmae = mySavePanel.URL.path;
-		[userFormats writeToFile:filenmae atomically:YES];
+        NSMutableArray *formatsToWrite = [NSMutableArray array];
+        for (int i = 0; i < tiVoGlobalManager.userFormats.count; i++) {
+            //Get selected formats
+            NSButton *checkbox = [exportTableView viewAtColumn:0 row:i makeIfNecessary:NO];
+            if (checkbox.state) {
+                [formatsToWrite addObject:[tiVoGlobalManager.userFormats[i] toDictionary]];
+            }
+        }
+		NSString *filename = mySavePanel.URL.path;
+		[formatsToWrite writeToFile:filename atomically:YES];
 	}
 }
+
+#pragma mark - Table Support Methods
+
+-(NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
+{
+    return tiVoGlobalManager.userFormats.count;
+}
+
+-(CGFloat)tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row
+{
+    return 17;
+}
+
+- (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+{
+    // get an existing cell with the MyView identifier if it exists
+    NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
+    MTFormat *thisFomat = [tiVoGlobalManager.userFormats objectAtIndex:row];
+    // There is no existing cell to reuse so we will create a new one
+    if (result == nil) {
+        
+        // create the new NSTextField with a frame of the {0,0} with the width of the table
+        // note that the height of the frame is not really relevant, the row-height will modify the height
+        // the new text field is then returned as an autoreleased object
+        result = [[[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)] autorelease];
+        //        result.textField.font = [NSFont userFontOfSize:14];
+        result.textField.editable = NO;
+        
+        // the identifier of the NSTextField instance is set to MyView. This
+        // allows it to be re-used
+        result.identifier = tableColumn.identifier;
+    }
+    
+    // result is now guaranteed to be valid, either as a re-used cell
+    // or as a new cell, so set the stringValue of the cell to the
+    // nameArray value at row
+	if ([tableColumn.identifier compare:@"checkBox"] == NSOrderedSame) {
+	} else if ([tableColumn.identifier compare:@"name"] == NSOrderedSame) {
+        result.textField.stringValue = thisFomat.name;
+        result.textField.textColor = [NSColor blackColor];
+    }     // return the result.
+    return result;
+    
+}
+
+
 
 -(IBAction)importFormats:(id)sender
 {

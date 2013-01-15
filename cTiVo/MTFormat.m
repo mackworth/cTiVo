@@ -85,7 +85,6 @@
 
 -(NSDictionary *)toDictionary
 {
-    NSLog(@"Creating dictionary for %@",_name);
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
 	for (NSString *key in keys) {
         id val = [self valueForKey:key];

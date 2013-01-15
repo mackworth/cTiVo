@@ -14,10 +14,12 @@
 #import "MTSubscriptionTableView.h"
 #import "MTFormatEditorController.h"
 
-@interface MTAppDelegate : NSObject <NSApplicationDelegate> {
+@interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate> {
 	MTTiVoManager *tiVoGlobalManager;
 	MTMainWindowController *mainWindowController;
 	IBOutlet NSMenuItem *refreshTiVoMenuItem;
+    IBOutlet NSView *formatSelectionTable;
+    IBOutlet NSTableView *exportTableView;
 	NSMutableArray *mediaKeyQueue;
 	BOOL gettingMediaKey;
 }

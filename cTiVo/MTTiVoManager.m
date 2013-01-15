@@ -211,6 +211,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	return _subscribedShows;
 }
 
+#pragma mark - Format Handling
+
+
+-(NSArray *)userFormats
+{
+    NSMutableArray *tmpFormats = [NSMutableArray arrayWithArray:_formatList];
+    [tmpFormats filterUsingPredicate:[NSPredicate predicateWithFormat:@"isFactoryFormat == %@",[NSNumber numberWithBool:NO]]];
+    return [NSArray arrayWithArray:tmpFormats];
+}
 
 -(void)setSelectedFormat:(MTFormat *)selectedFormat
 {
