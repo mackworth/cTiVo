@@ -243,7 +243,7 @@
 		[formatPopUpButton addItemWithTitle:f.name];
 		NSColor * formatColor = [NSColor colorWithDeviceRed:0.0
 													  green:0.0
-													   blue:([f.isFactoryFormat boolValue] ? 0.7: 0.0)
+													   blue:([f.isFactoryFormat boolValue] ? 0.0: 0.6)
 													  alpha:[f.isHidden boolValue] ? 0.5: 1.0];
 		NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString: f.name
 																	   attributes: @{NSFontAttributeName : formatPopUpButton.font,
