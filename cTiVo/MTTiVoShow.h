@@ -65,11 +65,13 @@
 										*vDirector;
 @property (nonatomic, retain) NSDate *showDate;
 
+@property (nonatomic, retain) NSNumber *downloadIndex;
+
 @property (nonatomic, readonly) NSString *encodeFilePath;
 @property (nonatomic, readonly) NSString *seasonEpisode; //attempts to build S02 E04 version
 @property time_t showLength;  //length of show in seconds
 @property (nonatomic, retain) NSURL *URL;
-@property int  showID, season, episode, episodeYear, numRetriesRemaining;
+@property int  showID, season, episode, episodeYear, numRetriesRemaining, numStartupRetriesRemaining;
 @property (retain) NSNumber *downloadStatus;
 @property double processProgress; //Should be between 0 and 1
 @property double fileSize;  //Size on TiVo;

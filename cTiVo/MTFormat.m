@@ -19,6 +19,25 @@
 	return newFormat;
 }
 
+-(void)checkAndUpdateFormatName:(NSArray *)formatList
+{
+	//Make sure the title isn't the same and if it is add a -1 modifier
+    for (MTFormat *f in formatList) {
+		if ([_name caseInsensitiveCompare:f.name] == NSOrderedSame) {
+            NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
+            NSTextCheckingResult *result = [ending firstMatchInString:_name options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, _name.length)];
+            if (result) {
+                int n = [[f.name substringWithRange:[result rangeAtIndex:2]] intValue];
+                self.name = [[_name substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
+            } else {
+                self.name = [_name stringByAppendingString:@"-1"];
+            }
+            [self checkAndUpdateFormatName:formatList];
+        }
+    }
+}
+
+
 -(id)init
 {
 	self = [super init];

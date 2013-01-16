@@ -34,9 +34,9 @@
 	NSOpenPanel *myOpenPanel;
     double percentComplete;
     MTDownloadTableCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
-	int numEncoders;//Want to limit launches to two encoders.
 	NSArray *factoryFormatList;
-    
+    int numEncoders;//Want to limit launches to two encoders.
+
     BOOL volatile updatingVideoList;
 	
 	NSOperationQueue *queue;
@@ -55,6 +55,8 @@
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic) BOOL videoListNeedsFilling, addToItunes, simultaneousEncode;
 @property (nonatomic, retain) MTFormat *selectedFormat;
+@property int numEncoders;//Want to limit launches to two encoders.
+
 
 + (MTTiVoManager *)sharedTiVoManager;
 
@@ -68,9 +70,10 @@
 -(NSArray *)userFormats;
 -(MTFormat *) findFormat:(NSString *) formatName;
 -(NSDictionary *)currentMediaKeys;
--(void)manageDownloads;
+//-(void)manageDownloads;
 -(void)addFormatsToList:(NSArray *)formats;
 
 -(void)writeDownloadQueueToUserDefaults;
+-(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo;
 
 @end

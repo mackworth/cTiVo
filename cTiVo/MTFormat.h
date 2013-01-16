@@ -40,5 +40,6 @@
 -(BOOL)isSame:(MTFormat *)testFormat;
 
 -(NSAttributedString *) attributedFormatStringForFont:(NSFont *) font;
+-(void)checkAndUpdateFormatName:(NSArray *)formatList;
 
 @end

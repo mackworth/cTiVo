@@ -118,8 +118,10 @@
 -(void) addSubscription:(MTTiVoShow *) tivoShow {
 	//set the "lastrecording" time for one second before this show, to include this show.
 	if ([self findShow:tivoShow] == nil) {
-        NSDate * earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
-        
+        NSDate *earlierTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
+        if (tivoShow.showDate) {
+            earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
+        }
         MTSubscription *newSub = [[MTSubscription new] autorelease];
         newSub.seriesTitle = tivoShow.seriesTitle;
         newSub.lastRecordedTime = earlierTime;

@@ -12,7 +12,7 @@
 @class MTTiVoManager;
 
 @interface MTTiVo : NSObject {
-	BOOL volatile isConnecting;
+	BOOL volatile isConnecting, managingDownloads;
 	NSURLConnection *showURLConnection;
 	NSMutableData *urlData;
     SCNetworkReachabilityContext reachabilityContext;

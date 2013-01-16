@@ -24,7 +24,7 @@
 
 @implementation MTTiVoManager
 
-@synthesize subscribedShows = _subscribedShows;
+@synthesize subscribedShows = _subscribedShows, numEncoders;
 
 #pragma mark - Singleton Support Routines
 
@@ -100,7 +100,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
         
         //Set user desired hiding of the user pref, if any
         
-        NSArray *hiddenFormatNames = [defaults objectForKey:@"hiddenFormats"];
+        NSArray *hiddenFormatNames = [defaults objectForKey:kMTHiddenFormats];
         if (hiddenFormatNames) {
             //Un hide all 
             for (MTFormat *f in _formatList) {
@@ -114,7 +114,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
         }
 		
 		//Load user formats from preferences if any
-		NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:@"formats"];
+		NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTFormats];
 		if (userFormats) {
 			for (NSDictionary *fl in userFormats) {
 				[_formatList addObject:[MTFormat formatWithDictionary:fl]];
@@ -193,9 +193,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
     //have to wait until tivomanager is setup before calling subsidiary data models
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
     
-    [defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadQueueUpdated object:nil];
-    [defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDownloadDidFinish object:nil];
-    [defaultCenter addObserver:self selector:@selector(manageDownloads) name:kMTNotificationDecryptDidFinish object:nil];
     [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
     [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
@@ -269,6 +266,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	for (NSDictionary *f in formats) {
 		MTFormat *newFormat = [MTFormat formatWithDictionary:f];
 		//Lots of error checking here
+        //Check that name is unique
+        [newFormat checkAndUpdateFormatName:tiVoManager.formatList];
 		[_formatList addObject:newFormat];
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
@@ -315,6 +314,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			[self checkShowTitleUniqueness:program];
 			program.isQueued = YES;
 			program.numRetriesRemaining = kMTMaxDownloadRetries;
+            program.numStartupRetriesRemaining = kMTMaxDownloadStartupRetries;
 			program.downloadDirectory = tiVoManager.downloadDirectory;
 			if (nextShow) {
 				NSUInteger index = [_downloadQueue indexOfObject:nextShow];
@@ -367,59 +367,18 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 }
 
+#pragma mark - Download Support for Tivos and Shows
 
--(void)manageDownloads
+-(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo
 {
-    //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
-    BOOL isDownloading = NO, isDecrypting = NO;
-    for (MTTiVoShow *s in _downloadQueue) {
-        if ([s.downloadStatus intValue] == kMTStatusDownloading) {
-            isDownloading = YES;
-        }
-        if ([s.downloadStatus intValue] == kMTStatusDecrypting) {
-            isDecrypting = YES;
-        }
-    }
-    if (!isDownloading) {
-        for (MTTiVoShow *s in _downloadQueue) {
-            if ([s.downloadStatus intValue] == kMTStatusNew && (numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
-                if(s.tiVo.isReachable) {
-                    if (s.simultaneousEncode) {
-                        numEncoders++;
-                    }
-					[s download];
-//                } else {    //We'll try again in kMTRetryNetworkInterval seconds at a minimum;
-//                    [s.tiVo reportNetworkFailure];
-//                    NSLog(@"Could not reach %@ tivo will try later",s.tiVo.tiVo.name);
-//                    [self performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTRetryNetworkInterval];
-                }
-                break;
-            }
-        }
-    }
-    if (!isDecrypting) {
-        for (MTTiVoShow *s in _downloadQueue) {
-            if ([s.downloadStatus intValue] == kMTStatusDownloaded && !s.simultaneousEncode) {
-                [s decrypt];
-                break;
-            }
-        }
-    }
-    if (numEncoders < kMTMaxNumDownloaders) {
-        for (MTTiVoShow *s in _downloadQueue) {
-            if ([s.downloadStatus intValue] == kMTStatusDecrypted && numEncoders < kMTMaxNumDownloaders) {
-				numEncoders++;
-                [s encode];
-            }
-        }
-    }
+    return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",tiVo.tiVo.name]];
 }
+
 
 -(void)encodeFinished
 {
 	numEncoders--;
-    [self manageDownloads];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
     //NSLog(@"num decoders after decrement is %d",numEncoders);
 }
 

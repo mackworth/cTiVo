@@ -194,8 +194,8 @@
 	}
     //Now update the tiVoManger selectedFormat object
     tiVoManager.selectedFormat = [tiVoManager findFormat:tiVoManager.selectedFormat.name];
-	[[NSUserDefaults standardUserDefaults] setObject:userFormats forKey:@"formats"];
-    [[NSUserDefaults standardUserDefaults] setObject:hiddenBuiltInFormats forKey:@"hiddenFormats"];
+	[[NSUserDefaults standardUserDefaults] setObject:userFormats forKey:kMTFormats];
+    [[NSUserDefaults standardUserDefaults] setObject:hiddenBuiltInFormats forKey:kMTHiddenFormats];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
 	[self updateForFormatChange];
 }
@@ -234,7 +234,8 @@
 {
 	
 	MTFormat *newFormat = [[MTFormat new] autorelease];
-	newFormat.name = [self checkFormatName:@"New Format"];
+    newFormat.name = @"New Format";
+    [newFormat checkAndUpdateFormatName:_formatList];
 	[self.formatList addObject:newFormat];
 	self.currentFormat = newFormat;
 	[self refreshFormatPopUp:nil];
@@ -247,7 +248,7 @@
 -(IBAction)duplicateFormat:(id)sender
 {
 	MTFormat *newFormat = [[_currentFormat copy] autorelease];
-	newFormat.name = [self checkFormatName:newFormat.name];
+    [newFormat checkAndUpdateFormatName:_formatList];
 	newFormat.isFactoryFormat = [NSNumber numberWithBool:NO];
 	[self.formatList addObject:newFormat];
 	self.currentFormat = newFormat;

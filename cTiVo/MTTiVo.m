@@ -13,6 +13,7 @@
 
 @interface MTTiVo ()
 @property SCNetworkReachabilityRef reachability;
+@property (nonatomic, assign) NSArray *downloadQueue;
 @end
 
 @implementation MTTiVo
@@ -33,6 +34,7 @@
 		_mediaKey = @"";
 		isConnecting = NO;
 		_mediaKeyIsGood = NO;
+        managingDownloads = NO;
         reachabilityContext.version = 0;
         reachabilityContext.info = self;
         reachabilityContext.retain = NULL;
@@ -61,6 +63,10 @@
 		} else {
 			[self updateShows:nil];
 		}
+        NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
+        [defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadQueueUpdated object:nil];
+        [defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadDidFinish object:nil];
+        [defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDecryptDidFinish object:nil];
 	}
 	return self;
 }
@@ -74,6 +80,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	if (thisTivo.isReachable) {
 		thisTivo.networkAvailability = [NSDate date];
 		[NSObject cancelPreviousPerformRequestsWithTarget:[MTTiVoManager sharedTiVoManager] selector:@selector(manageDownloads) object:nil];
+        NSLog(@"calling managedownloads from MTTiVo:tivoNetworkCallback with delay+2");
 		[[MTTiVoManager sharedTiVoManager] performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTTiVoAccessDelay+2];
 		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
 	} 
@@ -302,6 +309,74 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 }
 
+#pragma mark - Download Management
+
+-(NSArray *)downloadQueue
+{
+    return [tiVoManager downloadQueueForTiVo:self];
+}
+
+-(void)manageDownloads:(NSNotification *)notification
+{
+    NSLog(@"calling managedownloads from notification %@",notification.name);
+    [self manageDownloads];
+    
+}
+
+-(void)manageDownloads
+{
+    if (managingDownloads) {
+        return;
+    }
+    managingDownloads = YES;
+    //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
+    BOOL isDownloading = NO, isDecrypting = NO;
+    for (MTTiVoShow *s in self.downloadQueue) {
+        if ([s.downloadStatus intValue] == kMTStatusDownloading) {
+            isDownloading = YES;
+        }
+        if ([s.downloadStatus intValue] == kMTStatusDecrypting) {
+            isDecrypting = YES;
+        }
+    }
+    if (!isDownloading) {
+        for (MTTiVoShow *s in self.downloadQueue) {
+            if ([s.downloadStatus intValue] == kMTStatusNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
+                if(s.tiVo.isReachable) {
+                    if (s.simultaneousEncode) {
+                        tiVoManager.numEncoders++;
+                    }
+					[s download];
+                    //                } else {    //We'll try again in kMTRetryNetworkInterval seconds at a minimum;
+                    //                    [s.tiVo reportNetworkFailure];
+                    //                    NSLog(@"Could not reach %@ tivo will try later",s.tiVo.tiVo.name);
+                    //                    [self performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTRetryNetworkInterval];
+                }
+                break;
+            }
+        }
+    }
+    if (!isDecrypting) {
+        for (MTTiVoShow *s in self.downloadQueue) {
+            if ([s.downloadStatus intValue] == kMTStatusDownloaded && !s.simultaneousEncode) {
+                [s decrypt];
+                break;
+            }
+        }
+    }
+    if (tiVoManager.numEncoders < kMTMaxNumDownloaders) {
+        for (MTTiVoShow *s in self.downloadQueue) {
+            if ([s.downloadStatus intValue] == kMTStatusDecrypted && tiVoManager.numEncoders < kMTMaxNumDownloaders) {
+				tiVoManager.numEncoders++;
+                [s encode];
+            }
+        }
+    }
+    managingDownloads = NO;
+}
+
+
 #define kMTQueueShow @"MTQueueShow"
 //only used in next two methods, marks shows that have already been requeued
 -(MTTiVoShow *) findNextShow:(NSInteger) index {
@@ -395,6 +470,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 	SCNetworkReachabilityUnscheduleFromRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
 	self.networkAvailability = nil;
     CFRelease(_reachability);

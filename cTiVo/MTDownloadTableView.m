@@ -78,9 +78,10 @@
 
 -(void)updateProgress
 {
+    NSInteger programColumnIndex = [self columnWithIdentifier:@"Programs"];
 	NSArray *displayedShows = self.sortedShows;
 	for (int i=0; i< displayedShows.count; i++) {
-		MTDownloadTableCellView *thisCell = [self viewAtColumn:0 row:i makeIfNecessary:NO];
+		MTDownloadTableCellView *thisCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
 		if (thisCell) {
 			MTTiVoShow *thisShow = [displayedShows objectAtIndex:i];
 			thisCell.progressIndicator.doubleValue = thisShow.processProgress;
@@ -180,7 +181,11 @@
         if (!rowData.tiVo.isReachable && [rowData.downloadStatus intValue] == kMTStatusDownloading) {
             result.textField.textColor = [NSColor redColor];
         }
-	
+        
+    } else if ([tableColumn.identifier compare:@"Order"] == NSOrderedSame) {
+        result.textField.stringValue = [NSString stringWithFormat:@"%@",rowData.downloadIndex] ;
+        result.toolTip = result.textField.stringValue;
+        
     } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
 		MTFormatPopUpButton *popUpButton = ((MTPopUpTableCellView *)result).popUpButton;
         popUpButton.owner = rowData;

@@ -81,6 +81,12 @@
     }
 }
 
+-(NSNumber *)downloadIndex
+{
+    NSInteger index = [tiVoManager.downloadQueue indexOfObject:self];
+    return [NSNumber numberWithInteger:index+1];
+}
+
 
 -(NSArray *)parseNames:(NSArray *)nameSet
 {
@@ -144,7 +150,7 @@
 {
 	NSLog(@"Stalled, %@ download of %@ with progress at %lf with previous check at %@",(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _showTitle, _processProgress, previousCheck );
 	[self cancel];
-	if (_numRetriesRemaining <= 0) {
+	if (_numRetriesRemaining <= 0 || _numStartupRetriesRemaining <=0) {
 		[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
 		_showStatus = @"Failed";
 		_processProgress = 1.0;
@@ -154,17 +160,18 @@
 	} else {
 		if ([decrementRetries boolValue]) {
 			_numRetriesRemaining--;
-
-		}
+		} else {
+            _numStartupRetriesRemaining--;
+        }
 		[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
 	}
-	[tiVoManager performSelector:@selector(manageDownloads) withObject:nil afterDelay:4.0];
-//	NSNotification *downloadNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
-//	[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:downloadNotification afterDelay:4.0];
+    NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
 	
 }
 
-#pragma mark Queue methods
+#pragma mark - Queue methods
+
 - (NSDictionary *) queueRecord {
 	return [NSDictionary dictionaryWithObjectsAndKeys:
 			[NSNumber numberWithInteger: _showID], kMTQueueID,
@@ -470,7 +477,6 @@
         [decrypterTask setStandardOutput:pipe2];
 		encoderTask = [[NSTask alloc] init];
 		[encoderTask setLaunchPath:encoderLaunchPath];
-        arguments = [self encodingArgumentsWithInputFile:@"-" outputFile:encodeFilePath];
 		[encoderTask setArguments:[self encodingArgumentsWithInputFile:@"-" outputFile:encodeFilePath]];
 		[encoderTask setStandardInput:pipe2];
 		[encoderTask setStandardOutput:encodeLogFileHandle];

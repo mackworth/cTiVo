@@ -45,6 +45,7 @@
 #define kMTMaxNumDownloaders 2		//Limit number of encoders to limit cpu usage
 #define kMTUpdateIntervalMinutes 15 //Update interval for re-checking current TiVo
 #define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show
+#define kMTMaxDownloadStartupRetries 20		// Only allow 20 retries due to a download startup failuer
 #define kMTProgressCheckDelay 60	//Check progress every 60 seconds to make sure its not stalled
 //#define kMTRetryNetworkInterval 15	//Re-Check for network connectivity every X seconds
 #define kMTTiVoAccessDelay 7		//Seconds to wait after TiVo is found on network
@@ -75,6 +76,8 @@
 
 //USER DEFAULTS
 
+#define kMTFormats @"Formats"                        //User defined Formats
+#define kMTHiddenFormats @"HiddenFormats"        //User defined list of built-in formats to be hidden in the UI
 #define kMTMediaKeys @"MediaKeys"                   //MAK dictionary, indexed by TiVo Name
 #define kMTSelectedTiVo @"SelectedTiVo"             //Name of currently selected TiVo
 #define kMTSelectedFormat @"SelectedFormat"         //Name of currently selected format for conversion
