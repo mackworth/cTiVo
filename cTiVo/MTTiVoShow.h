@@ -82,6 +82,10 @@
 @property (readonly) BOOL isMovie;
 //@property (nonatomic, assign) MTProgramList *myTableView;
 
+@property (readonly) NSDictionary * queueRecord;
+
+-(BOOL) isSameAs:(NSDictionary *) queueEntry;
+-(void) restoreDownloadData:(NSDictionary *) queueEntry;
 
 -(void)cancel;
 -(void)download;

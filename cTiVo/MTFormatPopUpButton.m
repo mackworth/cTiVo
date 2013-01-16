@@ -23,7 +23,6 @@
 		NSSortDescriptor *title = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)];
 		_sortDescriptors = [[NSArray arrayWithObjects:user,title, nil] retain];
 		
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshMenu) name:kMTNotificationFormatListUpdated object:nil];
 
 		
 	}
@@ -85,7 +84,7 @@
 			thisItem.toolTip = [NSString stringWithFormat:@"%@: %@", f.name, f.formatDescription];
 			thisItem.RepresentedObject = f;
 			
-			if ([f.name compare: currSelection] == NSOrderedSame) {
+			if ( [currSelection compare: f.name] == NSOrderedSame) {
 				[self selectItem:thisItem];
 				currSelection = nil;
 			}

@@ -274,9 +274,8 @@ if ([tiVoManager.downloadQueue count] > 0) {
 {
 	NSIndexSet *selectedRows = [tiVoShowTable selectedRowIndexes];
 	NSArray *selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:selectedRows];
-    for (MTTiVoShow * show in selectedShows) {
-        [tiVoManager downloadthisShowWithCurrentOptions:show];
-    }
+	[tiVoManager downloadShowsWithCurrentOptions:selectedShows];
+    
 	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
 }

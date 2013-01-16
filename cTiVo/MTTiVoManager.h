@@ -47,6 +47,7 @@
 
 @property (nonatomic, retain) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
 @property (nonatomic, retain) NSMutableArray *subscribedShows;
+@property (nonatomic, retain) NSMutableArray *oldQueue; //queue from last run of program
 @property (nonatomic, retain) NSString *downloadDirectory;
 @property (readonly) NSString *defaultDownloadDirectory;
 
@@ -59,8 +60,9 @@
 
 #define tiVoManager [MTTiVoManager sharedTiVoManager]
 
--(void)addProgramToDownloadQueue:(MTTiVoShow *)program;
--(void) downloadthisShowWithCurrentOptions:(MTTiVoShow*) thisShow;  
+-(void) addProgramToDownloadQueue:(MTTiVoShow *)program;
+-(void) addProgramsToDownloadQueue:(NSArray *)programs beforeShow:(MTTiVoShow *) nextShow;
+-(void) downloadShowsWithCurrentOptions:(NSArray *) shows;
 -(void) deleteProgramFromDownloadQueue:(MTTiVoShow *) program;
 
 -(NSArray *)userFormats;
@@ -68,5 +70,7 @@
 -(NSDictionary *)currentMediaKeys;
 -(void)manageDownloads;
 -(void)addFormatsToList:(NSArray *)formats;
+
+-(void)writeDownloadQueueToUserDefaults;
 
 @end

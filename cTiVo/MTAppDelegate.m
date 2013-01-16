@@ -257,6 +257,7 @@ void signalHandler(int signal)
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
     // Save changes in the application's user defaults before the application terminates.
+	[tiVoManager writeDownloadQueueToUserDefaults];
     [[NSUserDefaults standardUserDefaults] synchronize];
 	[mediaKeyQueue release];
     return NSTerminateNow;

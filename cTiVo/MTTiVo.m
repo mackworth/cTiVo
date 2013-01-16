@@ -293,10 +293,49 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			[_shows addObject:thisShow];
 		}
 	}
-	self.lastUpdated = [NSDate date];  // Record when we updated
+	if ([self.lastUpdated compare:[NSDate dateWithTimeIntervalSinceReferenceDate:0]] == NSOrderedSame) {
+		[self performSelector:@selector(findShowsToDownload) withObject:nil afterDelay:10];
+
+	}	self.lastUpdated = [NSDate date];  // Record when we updated
 	[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
 //	NSLog(@"Avialable Recordings are %@",_recordings);
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+}
+
+#define kMTQueueShow @"MTQueueShow"
+//only used in next two methods, marks shows that have already been requeued
+-(MTTiVoShow *) findNextShow:(NSInteger) index {
+	for (NSInteger nextIndex = index+1; nextIndex  < tiVoManager.oldQueue.count; nextIndex++) {
+		MTTiVoShow * nextShow = tiVoManager.oldQueue[nextIndex][kMTQueueShow];
+		if (nextShow != nil) {
+			return nextShow;
+		}
+	}
+	return nil;
+}
+
+-(void) findShowsToDownload {
+	for (NSInteger index = 0; index < tiVoManager.oldQueue.count; index++) {
+		NSDictionary * queueEntry = tiVoManager.oldQueue[index];
+		//So For each queueEntry, if we haven't found it before, and it's this TiVo
+		if (queueEntry[kMTQueueShow] == nil && [self.tiVo.name compare: queueEntry [KMTQueueTivo]] == NSOrderedSame) {
+			for (MTTiVoShow * show in self.shows) {
+				//see if it's available in shows
+				if ([show isSameAs: queueEntry]) {
+					[show restoreDownloadData:queueEntry];
+					MTTiVoShow * nextShow = [self findNextShow:index];
+					[tiVoManager addProgramsToDownloadQueue: [NSArray arrayWithObject: show] beforeShow:nextShow];
+					[queueEntry setValue: show forKey:kMTQueueShow];
+				}
+			}
+		}
+	}
+	for (NSDictionary * queueEntry in tiVoManager.oldQueue) {
+		if (queueEntry[kMTQueueShow]== nil) {
+			NSLog(@"TiVo no longer has show: %@", queueEntry[kMTQueueTitle]);
+		}
+	}
+
 }
 
 #pragma mark - Helper Methods

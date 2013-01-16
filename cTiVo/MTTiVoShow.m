@@ -164,6 +164,39 @@
 	
 }
 
+#pragma mark Queue methods
+- (NSDictionary *) queueRecord {
+	return [NSDictionary dictionaryWithObjectsAndKeys:
+			[NSNumber numberWithInteger: _showID], kMTQueueID,
+			_showTitle, kMTQueueTitle,
+			_tiVo.tiVo.name, KMTQueueTivo,
+			[NSNumber numberWithBool:_addToiTunesWhenEncoded], kMTSubscribediTunes,
+			[NSNumber numberWithBool:_simultaneousEncode], kMTSubscribedSimulEncode,
+			_encodeFormat.name,KMTQueueFormat,
+			_downloadStatus, kMTQueueStatus,
+			_showStatus, kMTQueueStatus,
+			nil];
+}
+
+-(BOOL) isSameAs:(NSDictionary *) queueEntry {
+	NSInteger queueID = [queueEntry[kMTQueueID] integerValue];
+	BOOL result = (queueID == _showID) && ([self.tiVo.tiVo.name compare:queueEntry[KMTQueueTivo]] == NSOrderedSame);
+	if (result && [self.showTitle compare:queueEntry[kMTQueueTitle]] != NSOrderedSame) {
+		NSLog(@"Very odd, but reloading anyways: same ID: %ld same TiVo:%@ but different titles: <<%@>> vs <<%@>>",queueID, queueEntry[KMTQueueTivo], self.showTitle, queueEntry[kMTQueueTitle] );
+	}
+	return result;
+	
+}
+
+-(void) restoreDownloadData:queueEntry {
+	self.addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
+	self.simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
+	self.encodeFormat = [tiVoManager findFormat: queueEntry[KMTQueueFormat]];
+	self.downloadStatus = queueEntry[kMTQueueStatus];
+	if (queueEntry[kMTQueueShowStatus]) self.showStatus = queueEntry[kMTQueueShowStatus];
+}
+
+
 -(void)checkStillActive
 {
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart

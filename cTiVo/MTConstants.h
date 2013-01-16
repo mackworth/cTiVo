@@ -49,12 +49,21 @@
 //#define kMTRetryNetworkInterval 15	//Re-Check for network connectivity every X seconds
 #define kMTTiVoAccessDelay 7		//Seconds to wait after TiVo is found on network
 
-//Subscribed Show
+//Subscribed Show userDefaults
 #define kMTSubscribedSeries @"MTSubscribedSeries"
 #define kMTSubscribedDate	@"MTSubscribedSeriesDate"
 #define kMTSubscribedFormat @"MTSubscribedSeriesFormat"
 #define kMTSubscribediTunes @"addToiTunes"
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
+
+//Download queue userDefaults
+#define KMTQueue      @"Queue"
+#define kMTQueueID    @"QueueID"
+#define kMTQueueTitle @"QueueTitle"
+#define KMTQueueTivo  @"QueueTivo"
+#define KMTQueueFormat  @"QueueFormat"
+#define kMTQueueStatus  @"QueueStatus"
+#define kMTQueueShowStatus @"QueueShowStatus"
 
 //Misc
 

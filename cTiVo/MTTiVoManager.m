@@ -144,6 +144,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 		
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
+		
+		self.oldQueue = [[NSUserDefaults standardUserDefaults] objectForKey:KMTQueue];
+		
 		programEncoding = nil;
 		programDecrypting = nil;
 		programDownloading = nil;
@@ -291,35 +294,57 @@ static MTTiVoManager *sharedTiVoManager = nil;
     }
 
 }
+-(void)addProgramToDownloadQueue:(MTTiVoShow *) program {
+	[self addProgramsToDownloadQueue:[NSArray arrayWithObject:program] beforeShow:nil];
+}
 
--(void)addProgramToDownloadQueue:(MTTiVoShow *)program
-{
-	BOOL programFound = NO;
-	for (MTTiVoShow *p in _downloadQueue) {
-		if (p.showID == program.showID	) {
-			programFound = YES;
+-(void)addProgramsToDownloadQueue:(NSArray *)programs beforeShow:(MTTiVoShow *) nextShow {
+	BOOL submittedAny = NO;
+	for (MTTiVoShow *program in programs){
+		
+		BOOL programFound = NO;
+		for (MTTiVoShow *p in _downloadQueue) {
+			if (p.showID == program.showID	) {
+				programFound = YES;
+			}
+		}
+		
+		if (!programFound) {
+			//Make sure the title isn't the same and if it is add a -1 modifier
+			submittedAny = YES;
+			[self checkShowTitleUniqueness:program];
+			program.isQueued = YES;
+			program.numRetriesRemaining = kMTMaxDownloadRetries;
+			program.downloadDirectory = tiVoManager.downloadDirectory;
+			if (nextShow) {
+				NSUInteger index = [_downloadQueue indexOfObject:nextShow];
+				if (index == NSNotFound) {
+					[_downloadQueue addObject:program];
+					
+				} else {
+					[_downloadQueue insertObject:program atIndex:index];
+				}
+			} else {
+				[_downloadQueue addObject:program];
+			}
 		}
 	}
-	
-	if (!programFound) {
-        //Make sure the title isn't the same and if it is add a -1 modifier
-        [self checkShowTitleUniqueness:program];
-        program.isQueued = YES;
-		program.numRetriesRemaining = kMTMaxDownloadRetries;
-		program.downloadDirectory = tiVoManager.downloadDirectory;
-		[_downloadQueue addObject:program];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+	if (submittedAny){
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
         [[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
 	}
 }
 
--(void) downloadthisShowWithCurrentOptions:(MTTiVoShow*) thisShow {
-	thisShow.encodeFormat = [self selectedFormat];
-	thisShow.addToiTunesWhenEncoded = thisShow.encodeFormat.canAddToiTunes &&
-                                        self.addToItunes;
-	thisShow.simultaneousEncode = thisShow.encodeFormat.canSimulEncode &&
-                                        self.simultaneousEncode;
-    [self addProgramToDownloadQueue:thisShow];
+
+-(void) downloadShowsWithCurrentOptions:(NSArray *) shows {
+	for (MTTiVoShow * thisShow in shows) {
+		thisShow.encodeFormat = [self selectedFormat];
+		thisShow.addToiTunesWhenEncoded = thisShow.encodeFormat.canAddToiTunes &&
+											self.addToItunes;
+		thisShow.simultaneousEncode = thisShow.encodeFormat.canSimulEncode &&
+											self.simultaneousEncode;
+    }
+	[self addProgramsToDownloadQueue:shows beforeShow:nil ];
 }
 
 -(void) deleteProgramFromDownloadQueue:(MTTiVoShow *) program {
@@ -396,6 +421,18 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	numEncoders--;
     [self manageDownloads];
     //NSLog(@"num decoders after decrement is %d",numEncoders);
+}
+
+-(void)writeDownloadQueueToUserDefaults {
+	NSMutableArray * downloadArray = [NSMutableArray arrayWithCapacity:_downloadQueue.count];
+	for (MTTiVoShow * show in _downloadQueue) {
+		if (show.isInProgress){
+			[show cancel];	
+		}
+		[downloadArray addObject:[show queueRecord]];
+								
+	}
+	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:KMTQueue];
 }
 
 #pragma mark - Handle directory

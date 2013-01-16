@@ -42,6 +42,8 @@
 -(void)setNotifications
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationSubscriptionsUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatChanged object:nil];
+	
 }
 
 -(void)awakeFromNib

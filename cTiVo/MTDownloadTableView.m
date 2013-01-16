@@ -29,6 +29,7 @@
 -(void)setNotifications
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadStatusChanged object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatChanged object:nil];
 
 }
 
@@ -141,7 +142,7 @@
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    MTTiVoShow *rowData = [self.sortedShows objectAtIndex:row];
+	MTTiVoShow *rowData = [self.sortedShows objectAtIndex:row];
 //	NSDictionary *idMapping = [NSDictionary dictionaryWithObjectsAndKeys:@"Title",@"Programs",kMTSelectedTiVo,@"TiVo",kMTSelectedFormat,@"Format", nil];
 	
     // get an existing cell with the MyView identifier if it exists
@@ -168,7 +169,7 @@
     // nameArray value at row
 	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
 		result.progressIndicator.rightText.stringValue = rowData.showStatus;
-        result.progressIndicator.leftText.stringValue = rowData.showTitle ;
+ 		result.progressIndicator.leftText.stringValue = rowData.showTitle ;
         result.progressIndicator.doubleValue = rowData.processProgress;
         result.toolTip = rowData.showTitle;
 	
