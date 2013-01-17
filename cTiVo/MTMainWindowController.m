@@ -34,8 +34,6 @@
 
 -(void)awakeFromNib
 {
-	formatListPopUp.showHidden = NO;
-	formatListPopUp.formatList =  tiVoManager.formatList;
 	[self refreshFormatListPopup];
 }
 
@@ -148,15 +146,12 @@
 
 #pragma mark - Notification Responsders
 
--(void)refreshFormatListPopup
-{
-	[self refreshFormatListPopup:formatListPopUp selected:tiVoManager.selectedFormat.name];
-}
+-(void)refreshFormatListPopup {
+	formatListPopUp.showHidden = NO;
+	formatListPopUp.formatList =  tiVoManager.formatList;
+	[formatListPopUp refreshMenu];
+	tiVoManager.selectedFormat = [formatListPopUp selectFormatNamed:tiVoManager.selectedFormat.name];
 
--(void)refreshFormatListPopup:(MTFormatPopUpButton *)popUp selected:(NSString *)selectedName {
-	[popUp refreshMenu];
-	[popUp selectFormatNamed:selectedName];
-    
 }
 
 - (void) refreshAddToQueueButton: (NSNotification *) notification {

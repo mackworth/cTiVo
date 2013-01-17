@@ -50,7 +50,6 @@
 	NSString * foundName = [(MTFormat *) self.selectedItem.representedObject name];
 	if ([newName compare:foundName ] != NSOrderedSame) {
 		//hmm, must have deleted this one during editing.
-		NSLog(@"EDITED: %@, %@, %@", newName, oldName, foundName);
 		[self selectItemWithTitle: oldName];
 	}
 	return self.selectedItem.representedObject;
@@ -70,8 +69,10 @@
 				[[self lastItem] setTarget:nil];
 			}
 			if ([f.isFactoryFormat boolValue] && isFactory) { //This is a changeover from user input to factory input (if any
-				NSMenuItem *separator = [NSMenuItem separatorItem];
-				[[self menu] addItem:separator];
+				if ( self.numberOfItems > 0) {
+					NSMenuItem *separator = [NSMenuItem separatorItem];
+					[[self menu] addItem:separator];
+				}
 				[self addItemWithTitle:@"    Built In Formats"];
 				[[self lastItem] setEnabled:NO];
 				[[self lastItem] setTarget:nil];

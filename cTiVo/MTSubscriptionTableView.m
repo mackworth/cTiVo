@@ -42,7 +42,7 @@
 -(void)setNotifications
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationSubscriptionsUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatChanged object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatListUpdated object:nil];
 	
 }
 
@@ -190,8 +190,11 @@ static NSDateFormatter *dateFormatter;
 		MTFormatPopUpButton * popUp = ((MTPopUpTableCellView *)result).popUpButton;
 		popUp.owner = thisSubscription;
 		popUp.formatList = tiVoManager.formatList;
+		NSString * tempQQQQ = thisSubscription.encodeFormat.name;
 		thisSubscription.encodeFormat = [popUp selectFormatNamed:thisSubscription.encodeFormat.name];
- 
+ 		if([tempQQQQ compare: thisSubscription.encodeFormat.name] != NSOrderedSame)
+			NSLog(@"SB popup at %@ changed from %@ to %@", thisSubscription.seriesTitle, tempQQQQ, thisSubscription.encodeFormat.name);
+
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setEnabled: [thisSubscription canAddToiTunes]];

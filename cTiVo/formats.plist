@@ -350,7 +350,7 @@ audio: mp2 at 128kbs</string>
 			<key>encoderOtherOptions</key>
 			<string>-of lavf -lavfopts format=mpeg -hr-edl-seek</string>
 			<key>iTunes</key>
-			<true/>
+			<false/>
 			<key>mustDownloadFirst</key>
 			<false/>
 			<key>outputFileFlag</key>
@@ -793,7 +793,7 @@ audio: mp2 at 192kbs</string>
 			<key>encoderUsed</key>
 			<string>ffmpeg</string>
 			<key>name</key>
-			<string>ffmpeg -&gt; avi</string>
+			<string>ffmpeg AVI</string>
 			<key>encoderVideoOptions</key>
 			<string></string>
 			<key>encoderAudioOptions</key>
@@ -811,7 +811,7 @@ audio: mp2 at 192kbs</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>

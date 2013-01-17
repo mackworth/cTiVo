@@ -28,11 +28,22 @@
 
 -(void)setNotifications
 {
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadStatusChanged object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatChanged object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataDownload) name:kMTNotificationDownloadStatusChanged object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
 
 }
 
+-(void) reloadDataDownload {
+	//QQQ debugging msgs to be removed
+	NSLog(@"QQQReloading from Download status changed");
+	[self reloadData];
+	
+}
+-(void) reloadDataFormat{
+	NSLog(@"QQQReloading from Format status changed");
+	[self reloadData];
+	
+}
 -(void)awakeFromNib
 {
     self.dataSource = self;
@@ -187,12 +198,22 @@
         result.toolTip = result.textField.stringValue;
         
     } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
-		MTFormatPopUpButton *popUpButton = ((MTPopUpTableCellView *)result).popUpButton;
-        popUpButton.owner = rowData;
-		popUpButton.formatList = tiVoManager.formatList;
-        rowData.encodeFormat = [popUpButton selectFormatNamed:rowData.encodeFormat.name];
-        popUpButton.enabled = ([rowData.downloadStatus intValue] == kMTStatusNew);
-		
+		MTPopUpTableCellView * cell = (MTPopUpTableCellView *)result;
+		MTFormatPopUpButton *popUpButton = cell.popUpButton;
+		popUpButton.owner = rowData;
+       if (([rowData.downloadStatus intValue] == kMTStatusNew)) {
+		    popUpButton.owner = rowData;
+			popUpButton.formatList = tiVoManager.formatList;
+			//ensure this format is still "available"
+			rowData.encodeFormat = [popUpButton selectFormatNamed:rowData.encodeFormat.name];
+			popUpButton.hidden = NO;
+			cell.textField.hidden= YES;
+	   } else {
+			//can't change now; just let them know what it is/was
+		   cell.textField.stringValue = rowData.encodeFormat.name;
+		   popUpButton.hidden = YES;
+		   cell.textField.hidden= NO;
+		}
     } else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: rowData.addToiTunesWhenEncoded];

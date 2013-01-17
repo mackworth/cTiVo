@@ -66,7 +66,7 @@
 - (BOOL)windowShouldClose:(id)sender
 {
 	if ([self.shouldSave boolValue]) {
-		saveOrCancelAlert = [NSAlert alertWithMessageText:@"You have edited the formats.  Closed the window will discard your changes.  Do you want to save your changes?" defaultButton:@"Save" alternateButton:@"Close Window" otherButton:@"Don't Close Window" informativeTextWithFormat:@""];
+		saveOrCancelAlert = [NSAlert alertWithMessageText:@"You have edited the formats.  Closing the window will discard your changes.  Do you want to save your changes?" defaultButton:@"Save" alternateButton:@"Close Window" otherButton:@"Continue Editing" informativeTextWithFormat:@""];
 		[saveOrCancelAlert beginSheetModalForWindow:self.window modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:nil];
 		return NO;
 	} else {
@@ -84,7 +84,7 @@
 	//Deepcopy array so we have new object
     if (formatPopUpButton) {  //Clumsy way of refreshing popup selection after dismissal and re-show of window.  Need better connection
 		[self refreshFormatPopUp:nil];
-				self.currentFormat= [formatPopUpButton selectFormatNamed:tiVoManager.selectedFormat.name];
+		self.currentFormat= [formatPopUpButton selectFormatNamed:tiVoManager.selectedFormat.name];
 		self.currentFormat = formatPopUpButton.selectedItem.representedObject;
   
          self.shouldSave = [NSNumber numberWithBool:NO];

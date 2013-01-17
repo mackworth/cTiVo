@@ -77,6 +77,7 @@
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
+		NSLog(@"QQQChanging DL status of %@ to %@", [(MTTiVoShow *)object showTitle], [(MTTiVoShow *)object downloadStatus]);
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadStatusChanged object:nil];
     }
 }
@@ -181,7 +182,7 @@
 			[NSNumber numberWithBool:_simultaneousEncode], kMTSubscribedSimulEncode,
 			_encodeFormat.name,KMTQueueFormat,
 			_downloadStatus, kMTQueueStatus,
-			_showStatus, kMTQueueStatus,
+			_showStatus, kMTQueueShowStatus,
 			nil];
 }
 
@@ -196,11 +197,20 @@
 }
 
 -(void) restoreDownloadData:queueEntry {
-	self.addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
-	self.simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
-	self.encodeFormat = [tiVoManager findFormat: queueEntry[KMTQueueFormat]];
-	self.downloadStatus = queueEntry[kMTQueueStatus];
-	if (queueEntry[kMTQueueShowStatus]) self.showStatus = queueEntry[kMTQueueShowStatus];
+	_addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
+	if (queueEntry[kMTQueueStatus] != kMTStatusNew){
+		//previously failed or completed
+		_downloadStatus = queueEntry[kMTQueueStatus];
+	}
+	if (!self.isInProgress) {
+		_simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
+		self.encodeFormat = [tiVoManager findFormat: queueEntry[KMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
+		if (queueEntry[kMTQueueShowStatus]) {
+			self.showStatus = queueEntry[kMTQueueShowStatus];
+		} else {
+			self.showStatus = @"";
+		}
+	}
 }
 
 
@@ -442,7 +452,7 @@
         _showStatus = @"Failed";
         _processProgress = 1.0;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        
+        return;
     }
     [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
     _showStatus = @"Downloading";

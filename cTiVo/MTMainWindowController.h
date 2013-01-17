@@ -41,6 +41,5 @@
 -(IBAction)changeSimultaneous:(id)sender;
 -(IBAction)changeiTunes:(id)sender;
 
--(void)refreshFormatListPopup:(NSPopUpButton *)popUp selected:(NSString *)selectedName;
 
 @end

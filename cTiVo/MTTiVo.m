@@ -80,7 +80,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	if (thisTivo.isReachable) {
 		thisTivo.networkAvailability = [NSDate date];
 		[NSObject cancelPreviousPerformRequestsWithTarget:[MTTiVoManager sharedTiVoManager] selector:@selector(manageDownloads) object:nil];
-        NSLog(@"calling managedownloads from MTTiVo:tivoNetworkCallback with delay+2");
+        NSLog(@"QQQcalling managedownloads from MTTiVo:tivoNetworkCallback with delay+2");
 		[[MTTiVoManager sharedTiVoManager] performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTTiVoAccessDelay+2];
 		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
 	} 
@@ -301,7 +301,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		}
 	}
 	if ([self.lastUpdated compare:[NSDate dateWithTimeIntervalSinceReferenceDate:0]] == NSOrderedSame) {
-		[self performSelector:@selector(findShowsToDownload) withObject:nil afterDelay:10];
+		[self restoreQueue]; //performSelector:@selector(restoreQueue) withObject:nil afterDelay:10]; //should this post the TiVoShowsUpdated?
 
 	}	self.lastUpdated = [NSDate date];  // Record when we updated
 	[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
@@ -318,7 +318,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)manageDownloads:(NSNotification *)notification
 {
-    NSLog(@"calling managedownloads from notification %@",notification.name);
+    NSLog(@"QQQcalling managedownloads from notification %@",notification.name);
     [self manageDownloads];
     
 }
@@ -389,7 +389,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	return nil;
 }
 
--(void) findShowsToDownload {
+-(void) restoreQueue {
+	//find any shows in oldQueue from this TiVo to reload
+	NSDate * startTime  = [NSDate date];
+	NSMutableArray * showsToSubmit = nil;  //signal for not optimize
+	if ([tiVoManager downloadQueue].count == 0) {
+		//no previous shows to sort against, so we'll optimize first pass through
+		showsToSubmit= [NSMutableArray arrayWithCapacity:tiVoManager.oldQueue.count];
+	}
 	for (NSInteger index = 0; index < tiVoManager.oldQueue.count; index++) {
 		NSDictionary * queueEntry = tiVoManager.oldQueue[index];
 		//So For each queueEntry, if we haven't found it before, and it's this TiVo
@@ -397,20 +404,34 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			for (MTTiVoShow * show in self.shows) {
 				//see if it's available in shows
 				if ([show isSameAs: queueEntry]) {
-					[show restoreDownloadData:queueEntry];
-					MTTiVoShow * nextShow = [self findNextShow:index];
-					[tiVoManager addProgramsToDownloadQueue: [NSArray arrayWithObject: show] beforeShow:nextShow];
+					NSLog(@"Restoring show %@",queueEntry[kMTQueueTitle]);
 					[queueEntry setValue: show forKey:kMTQueueShow];
+					if ([[tiVoManager downloadQueue] indexOfObject:show] == NSNotFound ){
+						[show restoreDownloadData:queueEntry];
+						if (showsToSubmit) {
+							[showsToSubmit addObject:show];
+						} else {
+							MTTiVoShow * nextShow = [self findNextShow:index];
+							[tiVoManager addProgramsToDownloadQueue: [NSArray arrayWithObject: show] beforeShow:nextShow];
+						}
+					} else {
+						//otherwise already scheduled. probably Subscription.
+						NSLog(@"Already restored: %@",show.showTitle );
+					}
+					break; //found it so move on
 				}
 			}
 		}
 	}
+	if (showsToSubmit) {
+		[tiVoManager addProgramsToDownloadQueue: showsToSubmit beforeShow:nil];
+	}
 	for (NSDictionary * queueEntry in tiVoManager.oldQueue) {
-		if (queueEntry[kMTQueueShow]== nil) {
+		if (queueEntry[kMTQueueShow]== nil && [self.tiVo.name compare: queueEntry [KMTQueueTivo]] == NSOrderedSame) {
 			NSLog(@"TiVo no longer has show: %@", queueEntry[kMTQueueTitle]);
 		}
 	}
-
+	NSLog(@"time to reload: %f", [startTime timeIntervalSinceNow]);
 }
 
 #pragma mark - Helper Methods

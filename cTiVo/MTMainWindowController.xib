@@ -3,12 +3,12 @@
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
 		<string key="IBDocument.SystemVersion">12C60</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2840</string>
+		<string key="IBDocument.InterfaceBuilderVersion">2844</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">2840</string>
+			<string key="NS.object.0">2844</string>
 		</object>
 		<array key="IBDocument.IntegratedClassDependencies">
 			<string>NSButton</string>
@@ -1531,8 +1531,8 @@
 						</object>
 						<object class="NSButton" id="563771226">
 							<reference key="NSNextResponder" ref="994730169"/>
-							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{486, 626}, {208, 18}}</string>
+							<int key="NSvFlags">265</int>
+							<string key="NSFrame">{{486, 625}, {208, 18}}</string>
 							<reference key="NSSuperview" ref="994730169"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="882086054"/>
@@ -3907,6 +3907,7 @@
 					<string key="superclassName">NSWindowController</string>
 					<dictionary class="NSMutableDictionary" key="actions">
 						<string key="changeSimultaneous:">id</string>
+						<string key="changeSubDirectories:">id</string>
 						<string key="changeiTunes:">id</string>
 						<string key="downloadSelectedShows:">id</string>
 						<string key="getDownloadDirectory:">id</string>
@@ -3917,6 +3918,10 @@
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
 						<object class="IBActionInfo" key="changeSimultaneous:">
 							<string key="name">changeSimultaneous:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="changeSubDirectories:">
+							<string key="name">changeSubDirectories:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 						<object class="IBActionInfo" key="changeiTunes:">
