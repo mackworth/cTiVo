@@ -31,7 +31,7 @@
 
 @property (nonatomic, retain) NSAttributedString *attributedFormatDescription;
 
-@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode;
+@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable;
 
 
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format;
@@ -41,5 +41,6 @@
 
 -(NSAttributedString *) attributedFormatStringForFont:(NSFont *) font;
 -(void)checkAndUpdateFormatName:(NSArray *)formatList;
+-(NSString *)pathForExecutable;
 
 @end

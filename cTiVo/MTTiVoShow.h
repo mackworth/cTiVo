@@ -97,7 +97,6 @@
 //-(void)getShowDetailWithNotification;
 
 +(NSDate *)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString;
-+(NSString *)pathForExecutable:(NSString *)executable;
 
 
 

@@ -152,7 +152,11 @@
     for (NSDictionary * sub in tempArray) {
         MTSubscription * tempSub = [[[MTSubscription alloc] init] autorelease];
         tempSub.seriesTitle = sub[kMTSubscribedSeries];
-        tempSub.lastRecordedTime = sub[kMTSubscribedDate];
+		NSDate *earlierTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
+        if (sub[kMTSubscribedDate]) {
+            earlierTime = sub[kMTSubscribedDate];
+        }
+       tempSub.lastRecordedTime = earlierTime;
         
         tempSub.encodeFormat= [tiVoManager findFormat:sub[kMTSubscribedFormat] ];
         if (tempSub.encodeFormat ==nil) tempSub.encodeFormat = [tiVoManager selectedFormat];

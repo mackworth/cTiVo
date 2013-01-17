@@ -318,9 +318,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)manageDownloads:(NSNotification *)notification
 {
-    NSLog(@"QQQcalling managedownloads from notification %@",notification.name);
-    [self manageDownloads];
-    
+    if (!notification.object || notification.object == self) {
+        NSLog(@"QQQCalled managedownloads on TiVo %@ from notification %@",_tiVo.name,notification.name);
+        [self manageDownloads];
+    }
+
 }
 
 -(void)manageDownloads

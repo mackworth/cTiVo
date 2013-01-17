@@ -213,12 +213,32 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 #pragma mark - Format Handling
 
+-(NSArray *)userFormatDictionaries
+{
+	NSMutableArray *tmpArray = [NSMutableArray array];
+	for (MTFormat *f in self.userFormats) {
+		[tmpArray addObject:[f toDictionary]];
+	}
+	return [NSArray arrayWithArray:tmpArray];
+}
 
 -(NSArray *)userFormats
 {
     NSMutableArray *tmpFormats = [NSMutableArray arrayWithArray:_formatList];
     [tmpFormats filterUsingPredicate:[NSPredicate predicateWithFormat:@"isFactoryFormat == %@",[NSNumber numberWithBool:NO]]];
     return [NSArray arrayWithArray:tmpFormats];
+}
+
+-(NSArray *)hiddenBuiltinFormatNames
+{
+    NSMutableArray *tmpFormats = [NSMutableArray arrayWithArray:_formatList];
+    [tmpFormats filterUsingPredicate:[NSPredicate predicateWithFormat:@"isFactoryFormat == %@ && isHidden == %@",[NSNumber numberWithBool:YES],[NSNumber numberWithBool:YES]]];
+	NSMutableArray *tmpFormatNames = [NSMutableArray array];
+	for (MTFormat *f in tmpFormats) {
+		[tmpFormatNames addObject:f.name];
+	}
+    return [NSArray arrayWithArray:tmpFormatNames];
+	
 }
 
 -(void)setSelectedFormat:(MTFormat *)selectedFormat
@@ -331,7 +351,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	if (submittedAny){
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-        [[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:self];
+        [[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:nil];
 	}
 }
 

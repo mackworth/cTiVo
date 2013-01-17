@@ -68,6 +68,8 @@
 -(void) deleteProgramFromDownloadQueue:(MTTiVoShow *) program;
 
 -(NSArray *)userFormats;
+-(NSArray *)userFormatDictionaries;
+-(NSArray *)hiddenBuiltinFormatNames;
 -(MTFormat *) findFormat:(NSString *) formatName;
 -(NSDictionary *)currentMediaKeys;
 //-(void)manageDownloads;

@@ -37,6 +37,27 @@
     }
 }
 
+-(NSString *)pathForExecutable
+{
+	NSArray *searchPaths = [NSArray arrayWithObjects:@"/usr/local/bin/%1$@",@"/opt/local/bin/%1$@",@"/usr/local/%1$@/bin/%1$@",@"/opt/local/%1$@/bin/%1$@",@"/usr/bin/%1$@",@"%1$@", nil];
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *validPath = [[NSBundle mainBundle] pathForResource:self.encoderUsed ofType:@""];
+	if (validPath) {
+		return validPath;
+	}
+	for (NSString *searchPath in searchPaths) {
+		if ([fm fileExistsAtPath:[NSString stringWithFormat:searchPath,self.encoderUsed]]){ //Its there now check that its executable
+			int permissions = [[fm attributesOfItemAtPath:[NSString stringWithFormat:searchPath,self.encoderUsed] error:nil][NSFilePosixPermissions] shortValue];
+			if (permissions && 01) { //We have an executable file
+				validPath = [NSString stringWithFormat:searchPath,self.encoderUsed];
+				break;
+			}
+		}
+	}
+	return validPath;
+}
+
+
 
 -(id)init
 {

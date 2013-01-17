@@ -61,6 +61,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateForFormatChange) name:kMTNotificationFormatChanged object:nil];
    
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
+	[self updateForFormatChange];
 }
 
 - (BOOL)windowShouldClose:(id)sender
@@ -104,7 +105,7 @@
 
 -(void)checkValidExecutable
 {
-	NSString *validPath = [MTTiVoShow pathForExecutable:_currentFormat.encoderUsed];
+	NSString *validPath = [_currentFormat pathForExecutable];
 	BOOL isValid = NO;
 	self.validExecutableString = @"No valid executable found.";
 	NSColor *isValidColor = [NSColor redColor];
@@ -166,8 +167,9 @@
 
 -(IBAction)selectFormat:(id)sender
 {
-        MTFormatPopUpButton *thisButton = (MTFormatPopUpButton *)sender;
-        self.currentFormat = [[thisButton selectedItem] representedObject];
+	MTFormatPopUpButton *thisButton = (MTFormatPopUpButton *)sender;
+	self.currentFormat = [[thisButton selectedItem] representedObject];
+	[self updateForFormatChange];
 	
 }
 
@@ -180,22 +182,15 @@
 
 -(IBAction)saveFormats:(id)sender
 {
-    NSMutableArray *hiddenBuiltInFormats = [NSMutableArray array];
-	NSMutableArray *userFormats = [NSMutableArray array];
 	[tiVoManager.formatList removeAllObjects];
 	for (MTFormat *f in _formatList) {
 		MTFormat *newFormat = [[f copy] autorelease];
 		[tiVoManager.formatList addObject:newFormat];
-		if (![newFormat.isFactoryFormat boolValue]) {
-			[userFormats addObject:[newFormat toDictionary]];
-		} else if ([newFormat.isHidden boolValue]){
-            [hiddenBuiltInFormats addObject:newFormat.name];
-        }
 	}
-    //Now update the tiVoManger selectedFormat object
+    //Now update the tiVoManger selectedFormat object and user preference
     tiVoManager.selectedFormat = [tiVoManager findFormat:tiVoManager.selectedFormat.name];
-	[[NSUserDefaults standardUserDefaults] setObject:userFormats forKey:kMTFormats];
-    [[NSUserDefaults standardUserDefaults] setObject:hiddenBuiltInFormats forKey:kMTHiddenFormats];
+	[[NSUserDefaults standardUserDefaults] setObject:tiVoManager.userFormatDictionaries forKey:kMTFormats];
+    [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.hiddenBuiltinFormatNames forKey:kMTHiddenFormats];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
 	[self updateForFormatChange];
 }

@@ -17,25 +17,6 @@
 
 @synthesize encodeFilePath;
 
-+(NSString *)pathForExecutable:(NSString *)executable
-{
-	NSArray *searchPaths = [NSArray arrayWithObjects:@"/usr/local/bin/%1$@",@"/opt/local/bin/%1$@",@"/usr/local/%1$@/bin/%1$@",@"/opt/local/%1$@/bin/%1$@",@"/usr/bin/%1$@",@"%1$@", nil];
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *validPath = [[NSBundle mainBundle] pathForResource:executable ofType:@""];
-	if (validPath) {
-		return validPath;
-	}
-	for (NSString *searchPath in searchPaths) {
-		if ([fm fileExistsAtPath:[NSString stringWithFormat:searchPath,executable]]){ //Its there now check that its executable
-			int permissions = [[fm attributesOfItemAtPath:[NSString stringWithFormat:searchPath,executable] error:nil][NSFilePosixPermissions] shortValue];
-			if (permissions && 01) { //We have an executable file
-				validPath = [NSString stringWithFormat:searchPath,executable];
-				break;
-			}
-		}
-	}
-	return validPath;
-}
 
 -(id)init
 {
@@ -166,7 +147,7 @@
         }
 		[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
 	}
-    NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
+    NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:self.tiVo];
     [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
 	
 }
@@ -445,7 +426,7 @@
 {
 	isCanceled = NO;
     //Before starting make sure the encoder is OK.
-    NSString *encoderLaunchPath = [MTTiVoShow pathForExecutable:_encodeFormat.encoderUsed];
+    NSString *encoderLaunchPath = [_encodeFormat pathForExecutable];
     if (!encoderLaunchPath) {
         NSLog(@"Encoding of %@ failed for %@ format, encoder %@ not found",_showTitle,_encodeFormat.name,_encodeFormat.encoderUsed);
         [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
@@ -559,7 +540,7 @@
         _showStatus = @"Wait for encoder";
 		NSError *thisError = nil;
 		[[NSFileManager defaultManager] removeItemAtPath:downloadFilePath error:&thisError];
-       [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
+       [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:self.tiVo];
 		return;
 	}
 	unsigned long long logFileSize = [decryptLogFileReadHandle seekToEndOfFile];
@@ -584,7 +565,7 @@
 
 -(void)encode
 {
-    NSString *encoderLaunchPath = [MTTiVoShow pathForExecutable:_encodeFormat.encoderUsed];
+    NSString *encoderLaunchPath = [_encodeFormat pathForExecutable];
     if (!encoderLaunchPath) {
         NSLog(@"Encoding of %@ failed for %@ format, encoder %@ not found",_showTitle,_encodeFormat.name,_encodeFormat.encoderUsed);
         [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
@@ -593,22 +574,46 @@
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         
     }
-	encoderTask = [[NSTask alloc] init];
-	NSLog(@"Starting Encode of   %@", _showTitle);
-	NSMutableArray *arguments = [self encodingArgumentsWithInputFile:decryptFilePath outputFile:encodeFilePath];
-	[encoderTask setLaunchPath:encoderLaunchPath];
-	[encoderTask setArguments:arguments];
-	[encoderTask setStandardOutput:encodeLogFileHandle];
-	[encoderTask setStandardError:devNullFileHandle];
-    _processProgress = 0.0;
-	previousProcessProgress = 0.0;
-	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-	[encoderTask launch];
-    [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-	_showStatus = @"Encoding";
-	[self performSelector:@selector(trackEncodes) withObject:nil afterDelay:0.5];
-	
+    encoderTask = [[NSTask alloc] init];
+    NSLog(@"Starting Encode of   %@", _showTitle);
+    [encoderTask setLaunchPath:encoderLaunchPath];
+    if (!_encodeFormat.canSimulEncode) {  //If can't simul encode have to depend on log file for tracking
+        NSMutableArray *arguments = [self encodingArgumentsWithInputFile:decryptFilePath outputFile:encodeFilePath];
+        [encoderTask setArguments:arguments];
+        [encoderTask setStandardOutput:encodeLogFileHandle];
+        [encoderTask setStandardError:devNullFileHandle];
+        _processProgress = 0.0;
+        previousProcessProgress = 0.0;
+        [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        [encoderTask launch];
+        [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+        _showStatus = @"Encoding";
+        [self performSelector:@selector(trackEncodes) withObject:nil afterDelay:0.5];
+    } else { //if can simul encode we can ignore the log file and just track an input pipe - more accurate and more general
+        if(pipe1){
+            [pipe1 release];
+        }
+        pipe1 = [[NSPipe pipe] retain];
+        bufferFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptFilePath] retain];
+        NSMutableArray *arguments = [self encodingArgumentsWithInputFile:@"-" outputFile:encodeFilePath];
+        [encoderTask setArguments:arguments];
+        [encoderTask setStandardInput:pipe1];
+        [encoderTask setStandardOutput:encodeLogFileHandle];
+        [encoderTask setStandardError:devNullFileHandle];
+        if (downloadFileHandle) {
+            [downloadFileHandle release];
+        }
+        downloadFileHandle = [pipe1 fileHandleForWriting];
+        _processProgress = 0.0;
+        previousProcessProgress = 0.0;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        [encoderTask launch];
+        [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+        _showStatus = @"Encoding";
+        [self performSelectorInBackground:@selector(writeData) withObject:nil];
+        [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:3.0];
+    }
 }
 
 -(void)trackEncodes
@@ -776,7 +781,7 @@
 
 -(void)sendNotification
 {
-	NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
+	NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:self.tiVo];
 	[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:4.0];
 }
 
@@ -987,7 +992,7 @@
 
 -(void)sendNotification:(NSString *)notification
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:notification object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:notification object:self.tiVo];
     
 }
 #pragma mark Setters (most to complete parsing)

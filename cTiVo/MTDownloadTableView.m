@@ -196,6 +196,7 @@
     } else if ([tableColumn.identifier compare:@"Order"] == NSOrderedSame) {
         result.textField.stringValue = [NSString stringWithFormat:@"%@",rowData.downloadIndex] ;
         result.toolTip = result.textField.stringValue;
+        result.textField.alignment = NSRightTextAlignment;
         
     } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
 		MTPopUpTableCellView * cell = (MTPopUpTableCellView *)result;

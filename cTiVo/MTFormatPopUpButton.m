@@ -62,7 +62,7 @@
 	[self removeAllItems];
 	BOOL isFactory = YES;
 	for (MTFormat *f in tmpArray) {
-		if(self.showHidden || ![f.isHidden boolValue]) {
+		if(self.showHidden || !([f.isHidden boolValue] || ![f pathForExecutable])) {
 			if ( self.numberOfItems == 0 && ![f.isFactoryFormat boolValue]) {
 				[self addItemWithTitle:@"    User Formats"];
 				[[self lastItem] setEnabled:NO];
