@@ -26,6 +26,7 @@
 
 @property (assign) IBOutlet NSWindow *window;
 @property (nonatomic, retain) 	MTFormatEditorController *formatEditorController;
+@property (nonatomic, readonly) NSNumber *numberOfUserFormats;
 
 
 -(IBAction)editFormats:(id)sender;

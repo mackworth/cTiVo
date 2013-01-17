@@ -12,7 +12,7 @@
 @class MTTiVoManager;
 
 @interface MTTiVo : NSObject {
-	BOOL volatile isConnecting, managingDownloads;
+	BOOL volatile isConnecting, managingDownloads, firstUpdate;
 	NSURLConnection *showURLConnection;
 	NSMutableData *urlData;
     SCNetworkReachabilityContext reachabilityContext;
@@ -20,7 +20,7 @@
 
 @property (nonatomic, retain) NSNetService *tiVo;
 @property (nonatomic, retain) NSMutableArray *shows;
-@property (nonatomic, retain) NSDate *lastUpdated, *networkAvailability;
+@property (nonatomic, retain) NSDate *networkAvailability;
 @property (nonatomic, retain) NSString *mediaKey;
 @property (nonatomic, assign) NSOperationQueue *queue;
 @property (nonatomic, retain) MTTiVoManager *tiVoManager;

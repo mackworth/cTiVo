@@ -30,11 +30,11 @@
 		self.shows = [NSMutableArray array];
 		urlData = [NSMutableData new];
 		_tiVo = nil;
-		self.lastUpdated = [NSDate dateWithTimeIntervalSinceReferenceDate:0];
 		_mediaKey = @"";
 		isConnecting = NO;
 		_mediaKeyIsGood = NO;
         managingDownloads = NO;
+		firstUpdate = YES;
         reachabilityContext.version = 0;
         reachabilityContext.info = self;
         reachabilityContext.retain = NULL;
@@ -300,10 +300,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			[_shows addObject:thisShow];
 		}
 	}
-	if ([self.lastUpdated compare:[NSDate dateWithTimeIntervalSinceReferenceDate:0]] == NSOrderedSame) {
+	if (firstUpdate) {
 		[self restoreQueue]; //performSelector:@selector(restoreQueue) withObject:nil afterDelay:10]; //should this post the TiVoShowsUpdated?
 
-	}	self.lastUpdated = [NSDate date];  // Record when we updated
+	}
+	firstUpdate = NO;
 	[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
 //	NSLog(@"Avialable Recordings are %@",_recordings);
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
@@ -501,7 +502,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	self.mediaKey = nil;
 	[urlData release];
 	self.shows = nil;
-	self.lastUpdated = nil;
 	self.tiVo = nil;
 	[super dealloc];
 }

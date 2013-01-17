@@ -86,6 +86,11 @@ void signalHandler(int signal)
 	
 }
 
+-(NSNumber *)numberOfUserFormats
+{
+	return [NSNumber numberWithInteger:tiVoGlobalManager.userFormats.count];
+}
+
 -(IBAction)editFormats:(id)sender
 {
 	[self.formatEditorController showWindow:nil];
