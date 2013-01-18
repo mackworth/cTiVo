@@ -17,7 +17,7 @@
 #import "MTFormat.h"
 
 
-@interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate>  {
+@interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
     
     NSNetService *tivoService ;
     NSNetServiceBrowser *tivoBrowser;
@@ -56,6 +56,7 @@
 @property (nonatomic) BOOL videoListNeedsFilling, addToItunes, simultaneousEncode;
 @property (nonatomic, retain) MTFormat *selectedFormat;
 @property int numEncoders;//Want to limit launches to two encoders.
+@property (nonatomic, assign) NSWindow *mainWindow;
 
 
 + (MTTiVoManager *)sharedTiVoManager;
@@ -77,5 +78,6 @@
 
 -(void)writeDownloadQueueToUserDefaults;
 -(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo;
+- (void) noRecordingAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
 @end

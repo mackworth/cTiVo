@@ -254,6 +254,7 @@ void signalHandler(int signal)
 {
 	if (!mainWindowController) {
 		mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
+        tiVoGlobalManager.mainWindow = mainWindowController.window;
 	}
 	[mainWindowController showWindow:nil];
 	

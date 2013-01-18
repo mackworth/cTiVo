@@ -367,6 +367,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[self addProgramsToDownloadQueue:shows beforeShow:nil ];
 }
 
+- (void) noRecordingAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    [self deleteProgramFromDownloadQueue:contextInfo];
+    
+}
+
 -(void) deleteProgramFromDownloadQueue:(MTTiVoShow *) program {
     BOOL programFound = NO;
 	for (MTTiVoShow *p in _downloadQueue) {
