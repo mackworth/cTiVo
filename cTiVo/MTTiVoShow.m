@@ -957,15 +957,16 @@
 	}
 	if (downloadedFileSize < 100000) { //Not a good download - reschedule
 		NSString *dataReceived = [NSString stringWithContentsOfFile:bufferFilePath encoding:NSUTF8StringEncoding error:nil];
-        NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
-        if (noRecording.location != NSNotFound) { //This is a missing recording
-            NSAlert *notFoundAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"%@ not found.  Deleting from download queue",_showTitle] defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-            [notFoundAlert beginSheetModalForWindow:tiVoManager.mainWindow modalDelegate:tiVoManager didEndSelector:@selector(noRecordingAlertDidEnd:returnCode:contextInfo:) contextInfo:self];
-            [self performSelector:@selector(dismissAlertSheet) withObject:nil afterDelay:3.0];
-            [self.tiVo updateShows:nil];
-//            [tiVoManager deleteProgramFromDownloadQueue:self];
-            return;
-        }
+		if (dataReceived) {
+			NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
+			if (noRecording.location != NSNotFound) { //This is a missing recording
+				NSAlert *notFoundAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"%@ not found.  Deleting from download queue",_showTitle] defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
+				[notFoundAlert beginSheetModalForWindow:tiVoManager.mainWindow modalDelegate:tiVoManager didEndSelector:@selector(noRecordingAlertDidEnd:returnCode:contextInfo:) contextInfo:self];
+				[self performSelector:@selector(dismissAlertSheet) withObject:nil afterDelay:3.0];
+				[self.tiVo updateShows:nil];
+				return;
+			}
+		}
 		NSLog(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
 		[self performSelector:@selector(rescheduleShow:) withObject:[NSNumber numberWithBool:NO] afterDelay:kMTTiVoAccessDelay];
 	} else {
