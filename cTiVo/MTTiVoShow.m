@@ -1227,5 +1227,10 @@
 	[super dealloc];
 }
 
+-(NSString *)description
+{
+    return [NSString stringWithFormat:@"Title: %@\nTiVo: %@\nProtected %@",_showTitle,_tiVo.tiVo.name,_protectedShow];
+}
+
 
 @end

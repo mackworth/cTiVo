@@ -320,34 +320,35 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)addProgramsToDownloadQueue:(NSArray *)programs beforeShow:(MTTiVoShow *) nextShow {
 	BOOL submittedAny = NO;
 	for (MTTiVoShow *program in programs){
-		
-		BOOL programFound = NO;
-		for (MTTiVoShow *p in _downloadQueue) {
-			if (p.showID == program.showID	) {
-				programFound = YES;
-			}
-		}
-		
-		if (!programFound) {
-			//Make sure the title isn't the same and if it is add a -1 modifier
-			submittedAny = YES;
-			[self checkShowTitleUniqueness:program];
-			program.isQueued = YES;
-			program.numRetriesRemaining = kMTMaxDownloadRetries;
-            program.numStartupRetriesRemaining = kMTMaxDownloadStartupRetries;
-			program.downloadDirectory = tiVoManager.downloadDirectory;
-			if (nextShow) {
-				NSUInteger index = [_downloadQueue indexOfObject:nextShow];
-				if (index == NSNotFound) {
-					[_downloadQueue addObject:program];
-					
-				} else {
-					[_downloadQueue insertObject:program atIndex:index];
-				}
-			} else {
-				[_downloadQueue addObject:program];
-			}
-		}
+		if (![program.protectedShow boolValue]) {
+            BOOL programFound = NO;
+            for (MTTiVoShow *p in _downloadQueue) {
+                if (p.showID == program.showID	) {
+                    programFound = YES;
+                }
+            }
+            
+            if (!programFound) {
+                //Make sure the title isn't the same and if it is add a -1 modifier
+                submittedAny = YES;
+                [self checkShowTitleUniqueness:program];
+                program.isQueued = YES;
+                program.numRetriesRemaining = kMTMaxDownloadRetries;
+                program.numStartupRetriesRemaining = kMTMaxDownloadStartupRetries;
+                program.downloadDirectory = tiVoManager.downloadDirectory;
+                if (nextShow) {
+                    NSUInteger index = [_downloadQueue indexOfObject:nextShow];
+                    if (index == NSNotFound) {
+                        [_downloadQueue addObject:program];
+                        
+                    } else {
+                        [_downloadQueue insertObject:program atIndex:index];
+                    }
+                } else {
+                    [_downloadQueue addObject:program];
+                }
+            }
+        }
 	}
 	if (submittedAny){
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];

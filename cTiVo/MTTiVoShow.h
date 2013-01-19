@@ -63,9 +63,10 @@
 										*vSeriesGenre,
 										*vGuestStar,
 										*vDirector;
+
 @property (nonatomic, retain) NSDate *showDate;
 
-@property (nonatomic, retain) NSNumber *downloadIndex;
+@property (nonatomic, retain) NSNumber *downloadIndex, *protectedShow;
 
 @property (nonatomic, readonly) NSString *encodeFilePath;
 @property (nonatomic, readonly) NSString *seasonEpisode; //attempts to build S02 E04 version

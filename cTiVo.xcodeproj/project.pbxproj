@@ -159,10 +159,6 @@
 			children = (
 				D2995CA4168B8BB200B960B9 /* MTCheckBox.h */,
 				D2995CA5168B8BB200B960B9 /* MTCheckBox.m */,
-				D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */,
-				D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */,
-				D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */,
-				D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */,
 				D257C6E11697400600EBE30B /* MTFormatPopUpButton.h */,
 				D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */,
 				D257C6E61697409F00EBE30B /* MTPopUpTableCellView.h */,
@@ -305,19 +301,23 @@
 		D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */ = {
 			isa = PBXGroup;
 			children = (
+				D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */,
+				D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */,
+				D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */,
+				D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */,
+				D2D60BCD16766FA600CE32DE /* MTDownloadTableView.h */,
+				D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */,
 				D279D3E8167A32FA007F0677 /* MTMainWindowController.h */,
 				D279D3E9167A32FA007F0677 /* MTMainWindowController.m */,
 				D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */,
 				D2D60BCF16766FA600CE32DE /* MTProgramTableView.h */,
 				D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */,
-				D2D60BCD16766FA600CE32DE /* MTDownloadTableView.h */,
-				D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */,
+				D235BEFF168F52DE00320FA5 /* MTSubscriptionTableView.h */,
+				D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */,
 				D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */,
 				D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */,
 				D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */,
 				D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */,
-				D235BEFF168F52DE00320FA5 /* MTSubscriptionTableView.h */,
-				D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */,
 			);
 			name = "UI Classes- Main Window";
 			sourceTree = "<group>";

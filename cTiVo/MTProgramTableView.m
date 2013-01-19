@@ -9,6 +9,7 @@
 #import "MTProgramTableView.h"
 #import "MTDownloadCheckTableCell.h"
 #import "MTTiVoManager.h"
+#import "MTMainWindowController.h"
 
 
 @implementation MTProgramTableView
@@ -34,6 +35,13 @@
 {
     self.dataSource = self;
     self.delegate    = self;
+    self.showProtected = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowCopyProtected];
+    if (!_showProtected) {
+        self.showProtected = [NSNumber numberWithBool:NO];
+        [[NSUserDefaults standardUserDefaults] setObject:_showProtected forKey:kMTShowCopyProtected];
+    }
+    myController.showProtectedShows.state = [_showProtected integerValue];
+    
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
     self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
@@ -118,20 +126,44 @@
     
 }
 
+-(IBAction)selectProtectedShows:(id)sender
+{
+    NSButton *thisButton = (NSButton *)sender;
+    self.showProtected = [NSNumber numberWithInteger:thisButton.state];
+    [[NSUserDefaults standardUserDefaults] setObject:_showProtected forKey:kMTShowCopyProtected];
+    [self reloadData];
+}
+
+-(NSInteger)numberOfSelectedRows
+{
+    NSIndexSet *currentSelectedRows = [self selectedRowIndexes];
+    __block NSInteger numSelected = 0;
+    NSArray *showsToCheck = self.sortedShows;
+    [currentSelectedRows enumerateIndexesUsingBlock:^(NSUInteger row, BOOL *stop){
+        MTTiVoShow *thisShow = [showsToCheck objectAtIndex:row];
+       if (![thisShow.protectedShow boolValue]) {
+            numSelected++;
+        }
+
+    }];
+    return numSelected;
+}
+
 -(NSArray *)sortedShows
 {
-    if (!_sortedShows ) {
-        NSMutableArray *arrayToSort = [NSMutableArray arrayWithArray:tiVoManager.tiVoShows];
-        NSPredicate *tiVoPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+    NSPredicate *protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
+    if ([_showProtected boolValue]) {
+        protectedPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
             return YES;
-        }];;
-        if (self.selectedTiVo && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
-            tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",self.selectedTiVo];
-        }
-        [arrayToSort filterUsingPredicate:tiVoPredicate];
-        self.sortedShows = [arrayToSort  sortedArrayUsingDescriptors:self.sortDescriptors];
+        }];
     }
-    return _sortedShows;
+    NSPredicate *tiVoPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+        return YES;
+    }];
+    if (self.selectedTiVo && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
+        tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",self.selectedTiVo];
+    }
+    return [[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate] filteredArrayUsingPredicate:protectedPredicate] sortedArrayUsingDescriptors:self.sortDescriptors];
 }
 
 
@@ -145,6 +177,16 @@
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
     return self.sortedShows.count;
+}
+
+- (void)tableView:(NSTableView *)tableView didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row
+{
+    MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
+    if ([thisShow.protectedShow boolValue]) {
+        rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleNone;
+    } else {
+        rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleRegular;
+    }
 }
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
@@ -199,6 +241,11 @@
             result.textField.stringValue = @"";
         }
 	}
+    if ([thisShow.protectedShow boolValue]) {
+        result.textField.textColor = [NSColor grayColor];
+    } else {
+        result.textField.textColor = [NSColor blackColor];
+    }
 
     // return the result.
     return result;

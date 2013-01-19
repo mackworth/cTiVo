@@ -8,18 +8,21 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class MTTiVoManager;
+@class MTTiVoManager, MTMainWindowController;
+
 
 @interface MTProgramTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate>{
-    IBOutlet NSWindowController *myController;
+    IBOutlet MTMainWindowController *myController;
 	MTTiVoManager *tiVoManager;
     NSTableColumn *tiVoColumnHolder;
 }
 
 @property (nonatomic, retain) NSArray *sortedShows;
 @property (nonatomic, retain) NSString *selectedTiVo;
+@property (nonatomic, retain) NSNumber *showProtected;
 
 -(NSArray *)sortedShows;
 -(IBAction)selectTivo:(id)sender;
+-(IBAction)selectProtectedShows:(id)sender;
 
 @end

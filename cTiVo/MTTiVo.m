@@ -175,6 +175,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	NSRegularExpression *urlRx = [NSRegularExpression regularExpressionWithPattern:@"<a href=\"([^\"]*)\">Download MPEG-PS" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *idRx = [NSRegularExpression regularExpressionWithPattern:@"id=(\\d+)" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSArray *tables = [tableRx matchesInString:urlDataString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, urlDataString.length)];
+    NSDateFormatter *showDateFormatter = [[[NSDateFormatter alloc] init] autorelease];
+    [showDateFormatter setDateFormat:@"M/d/y"];
+    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit fromDate:[NSDate date]];
+    NSInteger thisYear = [components year];
+    NSInteger thisMonth = [components month];
 	if (tables.count == 0) {
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:self];
 		_mediaKeyIsGood = NO;
@@ -195,6 +200,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	*showLength = @"",
 	*size = @"",
 	*showDateString = @"";
+    BOOL protected = NO;
 	NSRange rangeToCheck;
 	for (NSTextCheckingResult *row in rows) {
 		title = @"";
@@ -205,6 +211,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		showLength = @"";
         showDateString = @"";
 		cellIndex = 0;
+        protected = NO;
 		rangeToCheck = [row rangeAtIndex:1];
 		cell = [cellRx firstMatchInString:urlDataString options:NSMatchingWithoutAnchoringBounds range:rangeToCheck];
 		while (cell && cell.range.location != NSNotFound && cellIndex < 6) {
@@ -247,18 +254,23 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			if (cellIndex == 5) {
 				//We've got the download Reference
 				NSString *fullString = [urlDataString substringWithRange:[cell rangeAtIndex:1]];
-				NSTextCheckingResult *urlResult = [urlRx firstMatchInString:fullString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullString.length)];
-				if (urlResult.range.location != NSNotFound) {
-					downloadURL = [[fullString substringWithRange:[urlResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
-					//Add login information
-					if (downloadURL.length > 10) {
-						downloadURL = [NSString stringWithFormat:@"%@tivo:%@@%@",[downloadURL substringToIndex:7],[[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_tiVo.name ],[downloadURL substringFromIndex:7]];
-					}
-					NSTextCheckingResult *idResult = [idRx firstMatchInString:downloadURL options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, downloadURL.length)];
-					if(idResult.range.location != NSNotFound){
-						idString = [downloadURL substringWithRange:[idResult rangeAtIndex:1]];
-					}
-				}
+                NSRange protectedRange = [fullString rangeOfString:@"Protected" options:NSCaseInsensitiveSearch];
+                if (protectedRange.location != NSNotFound) {
+                    protected = YES;
+                } else {
+                    NSTextCheckingResult *urlResult = [urlRx firstMatchInString:fullString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullString.length)];
+                    if (urlResult.range.location != NSNotFound) {
+                        downloadURL = [[fullString substringWithRange:[urlResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
+                        //Add login information
+                        if (downloadURL.length > 10) {
+                            downloadURL = [NSString stringWithFormat:@"%@tivo:%@@%@",[downloadURL substringToIndex:7],[[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_tiVo.name ],[downloadURL substringFromIndex:7]];
+                        }
+                        NSTextCheckingResult *idResult = [idRx firstMatchInString:downloadURL options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, downloadURL.length)];
+                        if(idResult.range.location != NSNotFound){
+                            idString = [downloadURL substringWithRange:[idResult rangeAtIndex:1]];
+                        }
+                    }
+                }
 			}
 			//find the next cell
 			rangeToCheck = NSMakeRange(cellRange.location + cellRange.length, urlDataString.length - (cellRange.location + cellRange.length));
@@ -266,7 +278,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			cellIndex++;
 			
 		}
-		if (downloadURL.length) {
+		if (downloadURL.length || protected) {
             MTTiVoShow *thisShow = [previousShowList valueForKey:idString];
 			if (!thisShow) {
 				thisShow = [[[MTTiVoShow alloc] init] autorelease];
@@ -275,7 +287,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                 thisShow.urlString = downloadURL;
                 thisShow.showID = [idString intValue];
                 thisShow.showDateString = showDateString;
+                NSArray *showDateComponents = [showDateString componentsSeparatedByString:@" "];
+                thisShow.showDate = [showDateFormatter dateFromString:[NSString stringWithFormat:@"%@/%ld",showDateComponents[1],thisYear]];
+                if ([[NSDate date] compare:[thisShow.showDate dateByAddingTimeInterval:-180*24*60*60]] == NSOrderedAscending) {
+                    thisShow.showDate = [showDateFormatter dateFromString:[NSString stringWithFormat:@"%@/%ld",showDateComponents[1],thisYear-1]];
+
+                }
+//                NSLog(@"Got show date and showdate string %@ and %@ and day = %@",thisShow.showDate,showDateString, [NSString stringWithFormat:@"%@/%ld",showDateComponents[1],thisYear]);
                 thisShow.showLength= ([self parseTime: showLength]+30)/60; //round up to nearest minute
+                thisShow.protectedShow = [NSNumber numberWithBool:protected];
                 double sizeValue;
                 if (size.length <= 3) {
                     sizeValue = 0;
@@ -291,8 +311,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                 thisShow.fileSize = sizeValue;
                 thisShow.tiVo = self;
 				thisShow.mediaKey = _mediaKey;
-                NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil] autorelease];
-                [_queue addOperation:nextDetail];
+                if (!protected) {
+                    NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil] autorelease];
+                    [_queue addOperation:nextDetail];
+                }
 				//			[thisShow getShowDetail];
 			} else {
 //              NSLog(@"cache hit: %@ thisShow: %@", idString, thisShow.showTitle);
