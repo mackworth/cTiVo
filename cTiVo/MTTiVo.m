@@ -79,9 +79,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	thisTivo.isReachable = (flags >>17) && 1 ;
 	if (thisTivo.isReachable) {
 		thisTivo.networkAvailability = [NSDate date];
-		[NSObject cancelPreviousPerformRequestsWithTarget:[MTTiVoManager sharedTiVoManager] selector:@selector(manageDownloads) object:nil];
+		[NSObject cancelPreviousPerformRequestsWithTarget:thisTivo selector:@selector(manageDownloads:) object:thisTivo];
         NSLog(@"QQQcalling managedownloads from MTTiVo:tivoNetworkCallback with delay+2");
-		[[MTTiVoManager sharedTiVoManager] performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTTiVoAccessDelay+2];
+		[thisTivo performSelector:@selector(manageDownloads) withObject:thisTivo afterDelay:kMTTiVoAccessDelay+2];
 		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
 	} 
     [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkChanged object:nil];
