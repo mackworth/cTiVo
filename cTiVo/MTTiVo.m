@@ -179,7 +179,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     [showDateFormatter setDateFormat:@"M/d/y"];
     NSDateComponents *components = [[NSCalendar currentCalendar] components:NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit fromDate:[NSDate date]];
     NSInteger thisYear = [components year];
-    NSInteger thisMonth = [components month];
+//    NSInteger thisMonth = [components month];
 	if (tables.count == 0) {
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:self];
 		_mediaKeyIsGood = NO;

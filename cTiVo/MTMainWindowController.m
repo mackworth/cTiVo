@@ -238,15 +238,6 @@ if ([tiVoManager.downloadQueue count] > 0) {
      }
 }
 
--(IBAction)changeSubDirectories:(id)sender
-{
-    MTCheckBox *checkbox = sender;
-    if (sender == subDirectoriesButton) {
-        [[NSUserDefaults standardUserDefaults] setBool:(checkbox.state == NSOnState) forKey:kMTMakeSubDirs];
-	}
-}
-
-
 #pragma mark - Subscription Management
 
 -(IBAction)subscribe:(id) sender {

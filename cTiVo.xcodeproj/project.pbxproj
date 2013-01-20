@@ -31,6 +31,8 @@
 		D2AFDBE8169B2D3A00D7DA3B /* MTiTivoImport.m in Sources */ = {isa = PBXBuildFile; fileRef = D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */; };
 		D2B6706D169CA91F009CB164 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */; };
 		D2C390761687FFA600D2062E /* MTiTunes.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C390741687FFA600D2062E /* MTiTunes.m */; };
+		D2CAF34016AB43AE004E4CFA /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2CAF33F16AB43AE004E4CFA /* IOKit.framework */; };
+		D2CAF34316AB6FDE004E4CFA /* checkImage.png in Resources */ = {isa = PBXBuildFile; fileRef = D2CAF34216AB6FDE004E4CFA /* checkImage.png */; };
 		D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA116766EFD00CE32DE /* Cocoa.framework */; };
 		D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
 		D2D60BAE16766EFD00CE32DE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BAD16766EFD00CE32DE /* main.m */; };
@@ -104,6 +106,8 @@
 		D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		D2C390741687FFA600D2062E /* MTiTunes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTunes.m; sourceTree = "<group>"; };
 		D2C390751687FFA600D2062E /* MTiTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTunes.h; sourceTree = "<group>"; };
+		D2CAF33F16AB43AE004E4CFA /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		D2CAF34216AB6FDE004E4CFA /* checkImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkImage.png; sourceTree = "<group>"; };
 		D2D60B9D16766EFD00CE32DE /* cTiVo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTiVo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2D60BA116766EFD00CE32DE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		D2D60BA416766EFD00CE32DE /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -144,6 +148,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D2CAF34016AB43AE004E4CFA /* IOKit.framework in Frameworks */,
 				D2B6706D169CA91F009CB164 /* SystemConfiguration.framework in Frameworks */,
 				D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */,
 				D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */,
@@ -202,6 +207,7 @@
 		D2D60BA016766EFD00CE32DE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D2CAF33F16AB43AE004E4CFA /* IOKit.framework */,
 				D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */,
 				D2995CAC168D0EE700B960B9 /* Sparkle.framework */,
 				D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */,
@@ -233,9 +239,9 @@
 				D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */,
 				1EE4418016A4E64800796897 /* UI Classes- Format Edit */,
 				1E791BD01697ACAA00E47E84 /* Custom NSViews */,
+				D2DFA68B1683B9EC00CD6CE0 /* iTunesInterface */,
 				D2D60BBE16766F1100CE32DE /* Resources */,
 				D2D60BA816766EFD00CE32DE /* Supporting Files */,
-				D2DFA68B1683B9EC00CD6CE0 /* iTunesInterface */,
 				D2D60BDF16766FB100CE32DE /* Utilities */,
 			);
 			path = cTiVo;
@@ -256,6 +262,7 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				D2CAF34216AB6FDE004E4CFA /* checkImage.png */,
 				D24A8D0D16A5F3DC00DFF890 /* catToFile */,
 				D219D5F316A503C100C79962 /* EncoderHelpText.rtf */,
 				D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */,
@@ -301,12 +308,12 @@
 		D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */ = {
 			isa = PBXGroup;
 			children = (
-				D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */,
-				D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */,
-				D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */,
-				D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */,
 				D2D60BCD16766FA600CE32DE /* MTDownloadTableView.h */,
 				D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */,
+				D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */,
+				D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */,
+				D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */,
+				D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */,
 				D279D3E8167A32FA007F0677 /* MTMainWindowController.h */,
 				D279D3E9167A32FA007F0677 /* MTMainWindowController.m */,
 				D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */,
@@ -400,6 +407,7 @@
 				D219D5E916A4F88D00C79962 /* MTHelpViewController.xib in Resources */,
 				D219D5F416A503C100C79962 /* EncoderHelpText.rtf in Resources */,
 				D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */,
+				D2CAF34316AB6FDE004E4CFA /* checkImage.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

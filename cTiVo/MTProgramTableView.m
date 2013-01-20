@@ -28,6 +28,7 @@
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDetailsLoaded object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowCopyProtected options:NSKeyValueChangeSetting context:nil];
 	
 }
 
@@ -35,13 +36,6 @@
 {
     self.dataSource = self;
     self.delegate    = self;
-    self.showProtected = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowCopyProtected];
-    if (!_showProtected) {
-        self.showProtected = [NSNumber numberWithBool:NO];
-        [[NSUserDefaults standardUserDefaults] setObject:_showProtected forKey:kMTShowCopyProtected];
-    }
-    myController.showProtectedShows.state = [_showProtected integerValue];
-    
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
     self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
@@ -89,6 +83,13 @@
     
 }
 
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+	if ([keyPath compare:kMTShowCopyProtected] == NSOrderedSame) {
+		[self reloadData];
+	}
+}
+
 -(void)reloadEpisode:(NSNotification *)notification
 {
 	MTTiVoShow *thisShow = notification.object;
@@ -126,14 +127,6 @@
     
 }
 
--(IBAction)selectProtectedShows:(id)sender
-{
-    NSButton *thisButton = (NSButton *)sender;
-    self.showProtected = [NSNumber numberWithInteger:thisButton.state];
-    [[NSUserDefaults standardUserDefaults] setObject:_showProtected forKey:kMTShowCopyProtected];
-    [self reloadData];
-}
-
 -(NSInteger)numberOfSelectedRows
 {
     NSIndexSet *currentSelectedRows = [self selectedRowIndexes];
@@ -151,19 +144,22 @@
 
 -(NSArray *)sortedShows
 {
-    NSPredicate *protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
-    if ([_showProtected boolValue]) {
-        protectedPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
-            return YES;
-        }];
-    }
-    NSPredicate *tiVoPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
-        return YES;
-    }];
-    if (self.selectedTiVo && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
-        tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",self.selectedTiVo];
-    }
-    return [[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate] filteredArrayUsingPredicate:protectedPredicate] sortedArrayUsingDescriptors:self.sortDescriptors];
+	if (!_sortedShows) {
+		NSPredicate *protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
+		if ([[[NSUserDefaults standardUserDefaults] objectForKey:kMTShowCopyProtected] boolValue]) {
+			protectedPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+				return YES;
+			}];
+		}
+		NSPredicate *tiVoPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+			return YES;
+		}];
+		if (self.selectedTiVo && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
+			tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",self.selectedTiVo];
+		}
+		self.sortedShows = [[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate] filteredArrayUsingPredicate:protectedPredicate] sortedArrayUsingDescriptors:self.sortDescriptors];
+	}
+	return _sortedShows;
 }
 
 

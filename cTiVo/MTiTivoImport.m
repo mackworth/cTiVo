@@ -160,7 +160,7 @@
             [sUD setBool:   [sUD boolForKey:kITMakeSubdirs]         forKey:kMTMakeSubDirs ];
 
             // whether to display uncopyable shows
-            [sUD setBool:   [sUD boolForKey:kITShowCopyProtected]   forKey:kMTShowCopyProtected ];
+            [sUD setObject: [NSNumber numberWithBool:[sUD boolForKey:kITShowCopyProtected]]   forKey:kMTShowCopyProtected ];
             
             // How many retries during download failures
             [sUD setInteger: [sUD integerForKey:kITdownloadRetries]  forKey:kMTNumDownloadRetries ];

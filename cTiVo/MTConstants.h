@@ -76,6 +76,7 @@
 
 //USER DEFAULTS
 
+#define kMTPreventSleep @"PreventSleep"			//If true this will prevent sleep when possible
 #define kMTFormats @"Formats"                        //User defined Formats
 #define kMTHiddenFormats @"HiddenFormats"        //User defined list of built-in formats to be hidden in the UI
 #define kMTMediaKeys @"MediaKeys"                   //MAK dictionary, indexed by TiVo Name

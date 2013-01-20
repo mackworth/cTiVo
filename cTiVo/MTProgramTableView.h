@@ -19,10 +19,8 @@
 
 @property (nonatomic, retain) NSArray *sortedShows;
 @property (nonatomic, retain) NSString *selectedTiVo;
-@property (nonatomic, retain) NSNumber *showProtected;
 
 -(NSArray *)sortedShows;
 -(IBAction)selectTivo:(id)sender;
--(IBAction)selectProtectedShows:(id)sender;
 
 @end

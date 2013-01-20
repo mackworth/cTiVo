@@ -8,6 +8,90 @@
 
 #import "MTAppDelegate.h"
 #import "MTTiVo.h"
+#import <IOKit/pwr_mgt/IOPMLib.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <mach/mach_port.h>
+#include <mach/mach_interface.h>
+#include <mach/mach_init.h>
+
+#include <IOKit/pwr_mgt/IOPMLib.h>
+#include <IOKit/IOMessage.h>
+
+io_connect_t  root_port; // a reference to the Root Power Domain IOService
+
+void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType, void * messageArgument )
+{
+    printf( "messageType %08lx, arg %08lx\n",
+		   (long unsigned int)messageType,
+		   (long unsigned int)messageArgument );
+	
+    switch ( messageType )
+    {
+			
+        case kIOMessageCanSystemSleep:
+            /* Idle sleep is about to kick in. This message will not be sent for forced sleep.
+			 Applications have a chance to prevent sleep by calling IOCancelPowerChange.
+			 Most applications should not prevent idle sleep.
+			 
+			 Power Management waits up to 30 seconds for you to either allow or deny idle
+			 sleep. If you don't acknowledge this power change by calling either
+			 IOAllowPowerChange or IOCancelPowerChange, the system will wait 30
+			 seconds then go to sleep.
+			 */
+			
+            //Uncomment to cancel idle sleep
+            //IOCancelPowerChange( root_port, (long)messageArgument );
+            // we will allow idle sleep
+			NSLog(@"ZZZReceived Soft Sleep Notice");
+		
+			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTPreventSleep]) { //We want to prevent sleep if still downloading
+				if ([tiVoManager numberOfShowsToDownload]) {
+					NSLog(@"ZZZReceived Soft Sleep Notice and cancelling");
+					IOCancelPowerChange(root_port, (long)messageArgument);
+				} else { //THere are no shows pending so sleeep
+					NSLog(@"ZZZReceived Soft Sleep Notice but no shows downloading so allowing");
+					IOAllowPowerChange( root_port, (long)messageArgument );
+				}
+			} else { //Cancel things and get on with it.
+				NSLog(@"ZZZReceived Soft Sleep Notice and allowing");
+				IOAllowPowerChange( root_port, (long)messageArgument );
+			}
+            break;
+			
+        case kIOMessageSystemWillSleep:
+            /* The system WILL go to sleep. If you do not call IOAllowPowerChange or
+			 IOCancelPowerChange to acknowledge this message, sleep will be
+			 delayed by 30 seconds.
+			 
+			 NOTE: If you call IOCancelPowerChange to deny sleep it returns
+			 kIOReturnSuccess, however the system WILL still go to sleep.
+			 */
+			
+			NSLog(@"ZZZReceived Forced Sleep Notice and shutting down downloads");
+			for (MTTiVoShow *s in tiVoManager.downloadQueue) {
+				[s cancel];
+			}
+            IOAllowPowerChange( root_port, (long)messageArgument );
+            break;
+			
+        case kIOMessageSystemWillPowerOn:
+            //System has started the wake up process...
+			NSLog(@"ZZZReceived Wake Notice");
+            break;
+			
+        case kIOMessageSystemHasPoweredOn:
+            //System has finished waking up...
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+			break;
+			
+        default:
+            break;
+			
+    }
+}
 
 void signalHandler(int signal)
 {
@@ -29,6 +113,12 @@ void signalHandler(int signal)
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
+	if (![[[NSUserDefaults standardUserDefaults] objectForKey:kMTPreventSleep] boolValue]) {
+		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:NO] forKey:kMTPreventSleep];
+	}
+	if (![[[NSUserDefaults standardUserDefaults] objectForKey:kMTShowCopyProtected] boolValue]) {
+		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:NO] forKey:kMTShowCopyProtected];
+	}
 	tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
 	mainWindowController = nil;
 	_formatEditorController = nil;
@@ -38,6 +128,28 @@ void signalHandler(int signal)
 	gettingMediaKey = NO;
 	signal(SIGPIPE, &signalHandler);
 	signal(SIGABRT, &signalHandler );
+    
+	//Set up callback for sleep notification (this is 10.5 method and is still valid.  There is newer UI in 10.6 on.
+	
+	// notification port allocated by IORegisterForSystemPower
+    IONotificationPortRef  notifyPortRef;
+	
+    // notifier object, used to deregister later
+    io_object_t            notifierObject;
+	// this parameter is passed to the callback
+    void*                  refCon  = NULL;
+	
+    // register to receive system sleep notifications
+	
+    root_port = IORegisterForSystemPower( refCon, &notifyPortRef, MySleepCallBack, &notifierObject );
+    if ( root_port == 0 )
+    {
+        printf("IORegisterForSystemPower failed\n");
+    }
+	
+    // add the notification port to the application runloop
+    CFRunLoopAddSource( CFRunLoopGetCurrent(),
+					   IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes );
 }
 
 #pragma mark - UI support

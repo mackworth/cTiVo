@@ -260,6 +260,21 @@ static MTTiVoManager *sharedTiVoManager = nil;
     return nil;
 }
 
+-(void)addFormatsToList:(NSArray *)formats
+{
+	for (NSDictionary *f in formats) {
+		MTFormat *newFormat = [MTFormat formatWithDictionary:f];
+		//Lots of error checking here
+        //Check that name is unique
+        [newFormat checkAndUpdateFormatName:tiVoManager.formatList];
+		[_formatList addObject:newFormat];
+	}
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
+}
+
+
+#pragma mark - Media Key Support
+
 -(NSDictionary *)currentMediaKeys
 {
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
@@ -276,21 +291,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[tmpDict setValue:tiVo.mediaKey forKey:tiVo.tiVo.name];
 	}
 	[[NSUserDefaults standardUserDefaults] setValue:tmpDict forKey:kMTMediaKeys];
-}
-
-#pragma mark - Format Handling Routines
-
-
--(void)addFormatsToList:(NSArray *)formats
-{
-	for (NSDictionary *f in formats) {
-		MTFormat *newFormat = [MTFormat formatWithDictionary:f];
-		//Lots of error checking here
-        //Check that name is unique
-        [newFormat checkAndUpdateFormatName:tiVoManager.formatList];
-		[_formatList addObject:newFormat];
-	}
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
 }
 
 #pragma mark - Download Management
@@ -313,6 +313,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     }
 
 }
+
 -(void)addProgramToDownloadQueue:(MTTiVoShow *) program {
 	[self addProgramsToDownloadQueue:[NSArray arrayWithObject:program] beforeShow:nil];
 }
@@ -392,6 +393,17 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		NSNotification *downloadQueueNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:self];
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:downloadQueueNotification afterDelay:4.0];
 	}
+}
+
+-(NSInteger)numberOfShowsToDownload
+{
+	NSInteger n= 0;
+	for (MTTiVoShow *s in _downloadQueue) {
+		if (!([s.downloadStatus intValue] == kMTStatusDone || [s.downloadStatus intValue] == kMTStatusFailed)) {
+			n++;
+		}
+	}
+	return n;
 }
 
 #pragma mark - Download Support for Tivos and Shows
