@@ -58,13 +58,17 @@
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
 
 //Download queue userDefaults
-#define KMTQueue      @"Queue"
+#define kMTQueue      @"Queue"
 #define kMTQueueID    @"QueueID"
 #define kMTQueueTitle @"QueueTitle"
-#define KMTQueueTivo  @"QueueTivo"
-#define KMTQueueFormat  @"QueueFormat"
+#define kMTQueueTivo  @"QueueTivo"
+#define kMTQueueFormat  @"QueueFormat"
 #define kMTQueueStatus  @"QueueStatus"
 #define kMTQueueShowStatus @"QueueShowStatus"
+#define kMTQueueDirectory @"QueueDirectory"
+#define kMTQueueDownloadFile @"QueueDownloadFile"
+#define kMTQueueBufferFile @"QueueBufferFile"
+#define kMTQueueFinalFile @"QueueFileName"
 
 //Misc
 
@@ -72,6 +76,8 @@
 #define kMTLastName @"MTLastName"
 #define kMTAllTiVos @"All TiVos"
 #define kMTDefaultDownloadDir  @"Movies/TiVoShows/"
+
+#define kMTTivoShowPasteBoardType @"com.cTiVo.TivoShow"
 
 
 //USER DEFAULTS

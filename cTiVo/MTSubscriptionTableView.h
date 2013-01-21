@@ -10,18 +10,12 @@
 #import "MTTiVoManager.h"
 #import "MTDownloadCheckTableCell.h"
 #import "MTPopUpTableCellView.h"
+@class MTMainWindowController;
 
-@interface MTSubscriptionTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
-    IBOutlet NSWindowController *myController;
+@interface MTSubscriptionTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource> {
+    IBOutlet MTMainWindowController *myController;
 
 }
-
-
-
-//-(BOOL) isSubscribed:(MTTiVoShow *) tivoShow;
-//
-//-(void) addSubscription:(MTTiVoShow *) tivoShow;
-//-(void) removeSubscription:(NSString *) seriesName;
 
 -(IBAction) unsubscribeSelectedItems:(id) sender;
 

@@ -30,6 +30,10 @@
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataDownload) name:kMTNotificationDownloadStatusChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
+	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, nil]];
+	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
+	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
+
 
 }
 
@@ -104,7 +108,8 @@
 
 -(void)dealloc
 {
-    [tiVoColumnHolder release];
+	[self  unregisterDraggedTypes];
+	[tiVoColumnHolder release];
     self.sortedShows= nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
@@ -234,5 +239,111 @@
     return result;
     
 }
+  
+#pragma mark Drag N Drop support
+
+//Drag&Drop Source:
+
+- (NSDragOperation)draggingSession:(NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context {
+	
+    switch(context) {
+        case NSDraggingContextOutsideApplication:
+            return NSDragOperationCopy | NSDragOperationDelete;
+            break;
+			
+        case NSDraggingContextWithinApplication:
+        default:
+            return NSDragOperationGeneric | NSDragOperationCopy  | NSDragOperationMove ;
+            break;
+	}
+}
+
+
+
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
+    // Drag and drop support
+ 	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
+	[pboard writeObjects:selectedObjects];
+	//NSLog (@"QQQproperty list: (Files:) %@ (shows): %@", [pboard propertyListForType:(NSString *)kUTTypeFileURL],[pboard propertyListForType:kMTTivoShowPasteBoardType]);
+	return YES;
+}
+
+-(void) draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation {
+	//pre 10.7
+	if (operation == NSDragOperationDelete) {
+		[myController removeFromDownloadQueue:nil];
+	}
+
+}
+/* post 10.7,but redundant with above
+- (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
+	//post 10.7
+	if (operation == NSDragOperationDelete) {
+		[myController removeFromDownloadQueue:nil];
+	}
+}
+*/
+
+//Drag and drop Receiver
+- (NSDragOperation)tableView:(NSTableView *)aTableView validateDrop:(id < NSDraggingInfo >)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)operation {
+	if ([info draggingSource] == aTableView) {
+		return NSDragOperationMove;
+	} else if ([info draggingSource] == myController.tiVoShowTable) {
+		return NSDragOperationCopy;
+	} else {
+		return NSDragOperationNone;
+	}
+}
+
+
+- (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation
+{
+	if (row < 0) row = 0;
+	//although displayed in sorted order, need to work in actual download order
+	NSUInteger insertRow;
+	if (row < _sortedShows.count) {
+		insertRow = [tiVoManager.downloadQueue indexOfObject: _sortedShows[row]];
+	} else {
+		insertRow = tiVoManager.downloadQueue.count; //just beyond end of
+	}
+	//move to after the completed/inprogress ones
+	while (insertRow < [tiVoManager downloadQueue].count && [((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).downloadStatus intValue] != kMTStatusNew) {
+		insertRow ++;
+	}
+	
+	NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
+	NSDictionary *options = [NSDictionary dictionary];
+	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
+	//NSLog(@"calling readObjects%@",pasteboard);
+	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
+	NSLog(@"dragging: %@", draggedShows);
+	
+	//dragged shows are copies, so we need to find the real show objects
+	NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
+	for (MTTiVoShow * show in draggedShows) {
+		MTTiVoShow * realShow= [tiVoManager findRealShow:show];
+		if (realShow) [realShows addObject:realShow];
+	}
+	
+	if( [info draggingSource] == aTableView ) {
+		//reordering self (download table)
+		NSIndexSet * destinationIndexes = [tiVoManager moveShowsInDownloadQueue:realShows toIndex:insertRow];
+		[self selectRowIndexes:destinationIndexes byExtendingSelection:NO];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+		return  YES;
+
+    } else if ([info draggingSource] == myController.tiVoShowTable) {
+		MTTiVoShow * insertShow = nil;
+		if (insertRow < [tiVoManager downloadQueue].count) {
+			insertShow = [tiVoManager.downloadQueue objectAtIndex:insertRow];
+			NSLog(@"QQQ inserting before %@",insertShow.showTitle);
+		}
+		[tiVoManager downloadShowsWithCurrentOptions:realShows beforeShow:insertShow];
+		return YES;
+	} else {
+		return NO;
+	}
+}
+
 
 @end

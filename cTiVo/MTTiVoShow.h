@@ -13,7 +13,7 @@
 
 @class MTProgramTableView;
 
-@interface MTTiVoShow : NSObject <NSXMLParserDelegate> {
+@interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding> {
     NSFileHandle    *downloadFileHandle,
                     *decryptFileHandle,
                     *decryptLogFileHandle,
@@ -24,7 +24,7 @@
                     *bufferFileReadHandle,
                     *bufferFileWriteHandle,
                     *devNullFileHandle;
-	NSString *downloadFilePath, *decryptFilePath, *decryptLogFilePath, *encodeFilePath, *encodeLogFilePath, *bufferFilePath;
+	NSString *decryptFilePath, *decryptLogFilePath, *encodeLogFilePath;
     double dataDownloaded;
     NSTask *encoderTask, *decrypterTask;
 	NSURLConnection *activeURLConnection, *detailURLConnection;
@@ -68,7 +68,9 @@
 
 @property (nonatomic, retain) NSNumber *downloadIndex, *protectedShow;
 
-@property (nonatomic, readonly) NSString *encodeFilePath;
+@property (nonatomic, readonly) NSString *encodeFilePath,
+										 *bufferFilePath,
+										 *downloadFilePath;
 @property (nonatomic, readonly) NSString *seasonEpisode; //attempts to build S02 E04 version
 @property time_t showLength;  //length of show in seconds
 @property (nonatomic, retain) NSURL *URL;
@@ -78,6 +80,7 @@
 @property double fileSize;  //Size on TiVo;
 @property (nonatomic, retain) MTFormat *encodeFormat;
 @property (nonatomic, retain) MTTiVo *tiVo;
+@property (nonatomic, retain) NSString *tempTiVoName;
 @property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding, isQueued,
                 isSelected;//Used for refresh of table
 

@@ -7,6 +7,7 @@
 //
 
 #import "MTSubscriptionTableView.h"
+#import "MTMainWindowController.h"
 
 @implementation MTSubscriptionTableView
 
@@ -43,7 +44,9 @@
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatListUpdated object:nil];
-	
+	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, nil]];
+	[self  setDraggingSourceOperationMask:NSDragOperationDelete forLocal:NO];
+
 }
 
 -(void)awakeFromNib
@@ -76,13 +79,11 @@
 }
 
 -(IBAction) unsubscribeSelectedItems:(id) sender {
-	
+	NSLog(@"unsubscring");
     NSArray * itemsToRemove = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
 
-	[tiVoManager.subscribedShows  removeObjectsInArray:itemsToRemove];
+	[tiVoManager.subscribedShows  deleteSubscriptions:itemsToRemove];
     
-	[tiVoManager.subscribedShows saveSubscriptions];
-     
     [self deselectAll:nil];
 }
 
@@ -92,6 +93,7 @@
 
 -(void)dealloc
 {
+	[self unregisterDraggedTypes];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     self.sortedSubscriptions = nil;
     [super dealloc];
@@ -211,6 +213,85 @@ static NSDateFormatter *dateFormatter;
     // return the result.
     return result;
     
+}
+
+#pragma mark drag and drop routines
+
+//Drag&drop source (for now,just for delete)
+-(void) draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation {
+	//pre 10.7
+	if (operation == NSDragOperationDelete) {
+		[self unsubscribeSelectedItems:nil];
+	}
+}
+/* //should use this for 10.7 and after, but redundant with above
+- (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
+	
+	if (operation == NSDragOperationDelete) {
+		[self unsubscribeSelectedItems:nil];
+	}
+}
+*/
+
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
+    // Drag and drop support:  nothing to do here, as we're only a "source" to drag to trash
+	// 	NSArray	*selectedObjects = [self.sortedSubscriptions objectsAtIndexes:rowIndexes ];
+	//	[pboard declareTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType,nil] owner:self];
+	//[pboard writeObjects:selectedObjects];
+	//	NSLog (@"QQQQproperty list: %@",[pboard propertyListForType:kMTTivoShowPasteBoardType]);
+	return YES;
+}
+
+- (NSDragOperation)draggingSession:(NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context {
+	
+    switch(context) {
+        case NSDraggingContextOutsideApplication:
+            return NSDragOperationDelete;
+            break;
+			
+        case NSDraggingContextWithinApplication:
+        default:
+            return NO ;
+            break;
+	}
+}
+
+//Drag and drop receiver methods
+
+- (NSDragOperation)tableView:(NSTableView *)aTableView validateDrop:(id < NSDraggingInfo >)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)operation {
+	if ([info draggingSource] == aTableView) {
+		return NSDragOperationMove;
+	} else if ([info draggingSource] == myController.tiVoShowTable ||
+			   [info draggingSource] == myController.downloadQueueTable) {
+		return NSDragOperationCopy;
+	} else {
+		return NSDragOperationNone;
+	}
+}
+
+
+- (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation {
+	NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
+	NSDictionary *options = [NSDictionary dictionary];
+	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
+	//NSLog(@"calling readObjects%@",pasteboard);
+	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
+	NSLog(@"dragging: %@", draggedShows);
+	
+	//dragged shows are copies, so we need to find the real show objects
+	NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
+	for (MTTiVoShow * show in draggedShows) {
+		MTTiVoShow * realShow= [tiVoManager findRealShow:show];
+		if (realShow) [realShows addObject:realShow];
+	}
+	
+	if( [info draggingSource] == myController.tiVoShowTable  ||
+	    [info draggingSource] == myController.downloadQueueTable) {
+		[tiVoManager.subscribedShows addSubscriptions: realShows];
+		return YES;
+	} else {
+		return NO;
+	}
 }
 
 

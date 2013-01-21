@@ -30,6 +30,9 @@
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowCopyProtected options:NSKeyValueChangeSetting context:nil];
 	
+	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
+	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
+
 }
 
 -(void)awakeFromNib
@@ -247,5 +250,31 @@
     return result;
     
 }
+
+#pragma mark Drag N Drop support
+
+
+- (NSDragOperation)draggingSession:(NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context {
+	
+    switch(context) {
+        case NSDraggingContextOutsideApplication:
+            return NO;  //could theoretically allow, as completed shows are also here.
+            break;
+			
+        case NSDraggingContextWithinApplication:
+        default:
+            return NSDragOperationGeneric | NSDragOperationCopy |NSDragOperationLink;
+            break;
+	}
+}
+
+
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
+    // Drag and drop support
+ 	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
+	[pboard writeObjects:selectedObjects];
+   return YES;
+}
+
 
 @end

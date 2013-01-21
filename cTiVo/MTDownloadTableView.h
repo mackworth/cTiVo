@@ -13,7 +13,7 @@
 #import "MTDownloadCheckTableCell.h"
 #import "MTProgressindicator.h"
 
-@interface MTDownloadTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate> {
+@interface MTDownloadTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource> {
     IBOutlet MTMainWindowController *myController;
     NSTableColumn *tiVoColumnHolder;
 }

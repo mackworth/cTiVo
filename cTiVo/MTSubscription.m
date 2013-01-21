@@ -80,7 +80,8 @@
        thisShow.encodeFormat = subscription.encodeFormat;
        thisShow.addToiTunesWhenEncoded = ([subscription canAddToiTunes] && [subscription shouldAddToiTunes]);
        thisShow.simultaneousEncode = ([subscription canSimulEncode] && [subscription shouldSimulEncode]);
-        [tiVoManager addProgramToDownloadQueue:thisShow];
+	   thisShow.downloadDirectory = [tiVoManager downloadDirectory];  //should we have one per subscription? UI?
+	   [tiVoManager addProgramToDownloadQueue:thisShow];
 	}
 }
 
@@ -114,8 +115,22 @@
 	return before;
 }
 
+-(void) addSubscriptions: (NSArray *) shows {
+	
+	BOOL anySubscribed = NO;
+    for (MTTiVoShow * thisShow in shows) {
+		if ([self addSubscription:thisShow]) {
+			anySubscribed = YES;
+		}
+	}
+	if (anySubscribed) {
+		[self saveSubscriptions];
+		[self checkSubscriptionsAll];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
+	}
+}
 
--(void) addSubscription:(MTTiVoShow *) tivoShow {
+-(BOOL) addSubscription:(MTTiVoShow *) tivoShow {
 	//set the "lastrecording" time for one second before this show, to include this show.
 	if ([self findShow:tivoShow] == nil) {
         NSDate *earlierTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
@@ -131,8 +146,17 @@
         newSub.simultaneousEncode = [NSNumber numberWithBool:
                                      tiVoManager.simultaneousEncode];
         [self addObject:newSub];
-        [self saveSubscriptions];
- 	}
+		return YES;
+ 	} else {
+		return NO;
+	}
+}
+
+-(void) deleteSubscriptions:(NSArray *) subscriptions {
+	[self  removeObjectsInArray:subscriptions];
+	[self saveSubscriptions];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
+
 }
 
 -(void)updateSubscriptionWithDate: (NSNotification *) notification

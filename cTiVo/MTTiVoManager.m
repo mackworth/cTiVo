@@ -145,7 +145,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
 		
-		self.oldQueue = [[NSUserDefaults standardUserDefaults] objectForKey:KMTQueue];
+		self.oldQueue = [[NSUserDefaults standardUserDefaults] objectForKey:kMTQueue];
 		
 		programEncoding = nil;
 		programDecrypting = nil;
@@ -313,6 +313,33 @@ static MTTiVoManager *sharedTiVoManager = nil;
     }
 
 }
+-(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) shows
+								 toIndex:(NSUInteger)insertIndex
+{
+	NSMutableIndexSet *fromIndexSet = [NSMutableIndexSet indexSet  ];
+	for (MTTiVoShow * show in shows) {
+		NSUInteger index = [[tiVoManager downloadQueue] indexOfObject :show];
+		//can't move an inprogress/canceled/failed one.
+		if (index != NSNotFound && ((MTTiVoShow *) tiVoManager.downloadQueue[index]).downloadStatus == kMTStatusNew) {
+			[fromIndexSet addIndex:index];
+		}
+	}
+	if (fromIndexSet.count ==0) return nil;
+	
+	// If any of the removed objects come before the insertion index,
+	// we need to decrement the index appropriately
+	NSMutableArray * dlQueue = [self downloadQueue];
+	NSUInteger adjustedInsertIndex = insertIndex -
+	[fromIndexSet countOfIndexesInRange:(NSRange){0, insertIndex}];
+	NSRange destinationRange = NSMakeRange(adjustedInsertIndex, [fromIndexSet count]);
+	NSIndexSet *destinationIndexes = [NSIndexSet indexSetWithIndexesInRange:destinationRange];
+	
+	NSArray *objectsToMove = [dlQueue objectsAtIndexes:fromIndexSet];
+	[dlQueue removeObjectsAtIndexes: fromIndexSet];
+	[dlQueue insertObjects:objectsToMove atIndexes:destinationIndexes];
+	
+	return destinationIndexes;
+}
 
 -(void)addProgramToDownloadQueue:(MTTiVoShow *) program {
 	[self addProgramsToDownloadQueue:[NSArray arrayWithObject:program] beforeShow:nil];
@@ -336,8 +363,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
                 program.isQueued = YES;
                 program.numRetriesRemaining = kMTMaxDownloadRetries;
                 program.numStartupRetriesRemaining = kMTMaxDownloadStartupRetries;
-                program.downloadDirectory = tiVoManager.downloadDirectory;
-                if (nextShow) {
+				if (!program.downloadDirectory) {
+					program.downloadDirectory = tiVoManager.downloadDirectory;
+				}
+				if (nextShow) {
                     NSUInteger index = [_downloadQueue indexOfObject:nextShow];
                     if (index == NSNotFound) {
                         [_downloadQueue addObject:program];
@@ -358,39 +387,52 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 
--(void) downloadShowsWithCurrentOptions:(NSArray *) shows {
+-(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeShow:(MTTiVoShow *) nextShow {
 	for (MTTiVoShow * thisShow in shows) {
 		thisShow.encodeFormat = [self selectedFormat];
 		thisShow.addToiTunesWhenEncoded = thisShow.encodeFormat.canAddToiTunes &&
 											self.addToItunes;
 		thisShow.simultaneousEncode = thisShow.encodeFormat.canSimulEncode &&
 											self.simultaneousEncode;
-    }
-	[self addProgramsToDownloadQueue:shows beforeShow:nil ];
+		thisShow.downloadDirectory = tiVoManager.downloadDirectory;
+	}
+	[self addProgramsToDownloadQueue:shows beforeShow:nextShow ];
 }
 
 - (void) noRecordingAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
-    [self deleteProgramFromDownloadQueue:contextInfo];
+    MTTiVoShow * show = (MTTiVoShow *) contextInfo;
+	[self deleteProgramsFromDownloadQueue: @[show] ];
     
 }
 
--(void) deleteProgramFromDownloadQueue:(MTTiVoShow *) program {
-    BOOL programFound = NO;
-	for (MTTiVoShow *p in _downloadQueue) {
-		if (p.showID == program.showID	) {
-			programFound = YES;
-            break;
+-(void) deleteProgramsFromDownloadQueue:(NSArray *) programs {
+    NSMutableIndexSet * itemsToRemove= [NSMutableIndexSet indexSet];
+	for (MTTiVoShow * program in programs) {
+
+		NSUInteger index = [_downloadQueue indexOfObject:program];
+		if (index == NSNotFound) {
+			for (MTTiVoShow *p in _downloadQueue) {  //this is probably unncessary
+				if (p.showID == program.showID	) {
+					index = [_downloadQueue indexOfObject:p];
+					break;
+				}
+			}
+		}
+		if (index != NSNotFound) {
+			MTTiVoShow *p = _downloadQueue[index];
+			[p cancel];
+			p.isQueued = NO;
+			[itemsToRemove addIndex:index];
 		}
 	}
 	
-	if (programFound) {
-        [program cancel];
-        program.isQueued = NO;
-        [_downloadQueue removeObject:program];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-        [[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadStatusChanged object:nil];
-		NSNotification *downloadQueueNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:self];
+	if (itemsToRemove.count > 0) {
+		[_downloadQueue removeObjectsAtIndexes:itemsToRemove];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadStatusChanged object:nil];
+			NSLog(@"QQQ setting DLQueueUpdated post");
+		NSNotification *downloadQueueNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:downloadQueueNotification afterDelay:4.0];
 	}
 }
@@ -405,6 +447,18 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	return n;
 }
+
+-(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget {
+	if (showTarget.tiVo) {
+		for (MTTiVoShow * show in showTarget.tiVo.shows)  {
+			if (show.showID == showTarget.showID) {
+				return show;
+			}
+		}
+	}
+	return nil;
+}
+
 
 #pragma mark - Download Support for Tivos and Shows
 
@@ -430,7 +484,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[downloadArray addObject:[show queueRecord]];
 								
 	}
-	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:KMTQueue];
+	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];
 }
 
 #pragma mark - Handle directory

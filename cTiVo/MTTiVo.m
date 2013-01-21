@@ -341,8 +341,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)manageDownloads:(NSNotification *)notification
 {
-    if (!notification.object || notification.object == self) {
-        NSLog(@"QQQCalled managedownloads on TiVo %@ from notification %@",_tiVo.name,notification.name);
+	NSLog(@"QQQCalled managedownloads on TiVo %@ from notification %@",_tiVo.name,notification.name);
+   if (!notification.object || notification.object == self) {
         [self manageDownloads];
     }
 
@@ -350,7 +350,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)manageDownloads
 {
-    if (managingDownloads) {
+	NSLog(@"QQQ-manageDownloads");
+	if (managingDownloads) {
         return;
     }
     managingDownloads = YES;
@@ -416,7 +417,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void) restoreQueue {
 	//find any shows in oldQueue from this TiVo to reload
-	NSDate * startTime  = [NSDate date];
 	NSMutableArray * showsToSubmit = nil;  //signal for not optimize
 	if ([tiVoManager downloadQueue].count == 0) {
 		//no previous shows to sort against, so we'll optimize first pass through
@@ -425,7 +425,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	for (NSInteger index = 0; index < tiVoManager.oldQueue.count; index++) {
 		NSDictionary * queueEntry = tiVoManager.oldQueue[index];
 		//So For each queueEntry, if we haven't found it before, and it's this TiVo
-		if (queueEntry[kMTQueueShow] == nil && [self.tiVo.name compare: queueEntry [KMTQueueTivo]] == NSOrderedSame) {
+		if (queueEntry[kMTQueueShow] == nil && [self.tiVo.name compare: queueEntry [kMTQueueTivo]] == NSOrderedSame) {
 			for (MTTiVoShow * show in self.shows) {
 				//see if it's available in shows
 				if ([show isSameAs: queueEntry]) {
@@ -452,11 +452,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[tiVoManager addProgramsToDownloadQueue: showsToSubmit beforeShow:nil];
 	}
 	for (NSDictionary * queueEntry in tiVoManager.oldQueue) {
-		if (queueEntry[kMTQueueShow]== nil && [self.tiVo.name compare: queueEntry [KMTQueueTivo]] == NSOrderedSame) {
+		if (queueEntry[kMTQueueShow]== nil && [self.tiVo.name compare: queueEntry [kMTQueueTivo]] == NSOrderedSame) {
 			NSLog(@"TiVo no longer has show: %@", queueEntry[kMTQueueTitle]);
 		}
 	}
-	NSLog(@"time to reload: %f", [startTime timeIntervalSinceNow]);
 }
 
 #pragma mark - Helper Methods

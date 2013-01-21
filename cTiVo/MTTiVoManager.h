@@ -65,8 +65,12 @@
 
 -(void) addProgramToDownloadQueue:(MTTiVoShow *)program;
 -(void) addProgramsToDownloadQueue:(NSArray *)programs beforeShow:(MTTiVoShow *) nextShow;
--(void) downloadShowsWithCurrentOptions:(NSArray *) shows;
--(void) deleteProgramFromDownloadQueue:(MTTiVoShow *) program;
+-(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeShow:(MTTiVoShow *) nextShow;
+-(void) deleteProgramsFromDownloadQueue:(NSArray *)programs;
+-(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) shows
+								 toIndex:(NSUInteger)insertIndex;
+
+-(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget;
 
 -(NSArray *)userFormats;
 -(NSArray *)userFormatDictionaries;

@@ -15,7 +15,10 @@
 
 @implementation MTTiVoShow
 
-@synthesize encodeFilePath;
+@synthesize encodeFilePath   = _encodeFilePath,
+			downloadFilePath = _downloadFilePath,
+			bufferFilePath   = _bufferFilePath,
+			tempTiVoName     = _tempTiVoName;
 
 
 -(id)init
@@ -153,25 +156,150 @@
 }
 
 #pragma mark - Queue methods
+#pragma mark - NSCoding
+
+- (void) encodeWithCoder:(NSCoder *)encoder {
+	//necessary for cut/paste drag/drop. Not used for persistent queue, as we like having english readable pref lists
+	//keep parallel with queueRecord
+
+	[encoder encodeObject:[NSNumber numberWithInteger: _showID] forKey: kMTQueueID];
+	[encoder encodeObject:_showTitle forKey: kMTQueueTitle];
+	[encoder encodeObject:_tiVo.tiVo.name forKey: kMTQueueTivo];
+	[encoder encodeObject:[NSNumber numberWithBool:_addToiTunesWhenEncoded] forKey: kMTSubscribediTunes];
+	[encoder encodeObject:[NSNumber numberWithBool:_simultaneousEncode] forKey: kMTSubscribedSimulEncode];
+	[encoder encodeObject:_encodeFormat.name forKey:kMTQueueFormat];
+	[encoder encodeObject:_downloadStatus forKey: kMTQueueStatus];
+	[encoder encodeObject:_showStatus forKey: kMTQueueShowStatus];
+	[encoder encodeObject: _downloadDirectory forKey: kMTQueueDirectory];
+	[encoder encodeObject: _downloadFilePath forKey: kMTQueueDownloadFile] ;
+	[encoder encodeObject: _bufferFilePath forKey: kMTQueueBufferFile] ;
+	[encoder encodeObject: _encodeFilePath forKey: kMTQueueFinalFile] ;
+
+}
 
 - (NSDictionary *) queueRecord {
+	//used for persistent queue, as we like having english readable pref lists
+	//keep parallel with encodeWithCoder
+
 	return [NSDictionary dictionaryWithObjectsAndKeys:
 			[NSNumber numberWithInteger: _showID], kMTQueueID,
 			_showTitle, kMTQueueTitle,
-			_tiVo.tiVo.name, KMTQueueTivo,
+			_tiVo.tiVo.name, kMTQueueTivo,
 			[NSNumber numberWithBool:_addToiTunesWhenEncoded], kMTSubscribediTunes,
 			[NSNumber numberWithBool:_simultaneousEncode], kMTSubscribedSimulEncode,
-			_encodeFormat.name,KMTQueueFormat,
+			_encodeFormat.name,kMTQueueFormat,
 			_downloadStatus, kMTQueueStatus,
 			_showStatus, kMTQueueShowStatus,
+			 _downloadDirectory, kMTQueueDirectory,
+			_downloadFilePath, kMTQueueDownloadFile,
+			_bufferFilePath, kMTQueueBufferFile,
+			_encodeFilePath, kMTQueueFinalFile,
 			nil];
+}
+
+
+
+- (id)initWithCoder:(NSCoder *)decoder {
+	//keep parallel with updateFromDecodedShow
+	if ((self = [self init])) {
+		//NSString *title = [decoder decodeObjectForKey:kTitleKey];
+		//float rating = [decoder decodeFloatForKey:kRatingKey];
+		_showID   = [[decoder decodeObjectForKey: kMTQueueID] intValue];
+		_showTitle= [[decoder decodeObjectForKey: kMTQueueTitle] retain];
+		NSString * tivoName = [decoder decodeObjectForKey: kMTQueueTivo] ;
+		for (MTTiVo * tiVo in [tiVoManager tiVoList]) {
+			if ([tiVo.tiVo.name compare: tivoName] == NSOrderedSame) {
+				_tiVo = [tiVo retain];
+				break;
+			}
+		}
+		if (!_tiVo) {
+			self.tempTiVoName = tivoName;
+		}
+		_addToiTunesWhenEncoded= [[decoder decodeObjectForKey: kMTSubscribediTunes] boolValue];
+		_simultaneousEncode	 =   [[decoder decodeObjectForKey: kMTSubscribedSimulEncode] boolValue];
+		NSString * encodeName	 = [decoder decodeObjectForKey:kMTQueueFormat];
+		_encodeFormat =	[[tiVoManager findFormat: encodeName] retain]; //minor bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is then wrong for completed/failed entries
+		_downloadStatus		 = [[decoder decodeObjectForKey: kMTQueueStatus] retain];
+		_showStatus			 = [[decoder decodeObjectForKey: kMTQueueShowStatus] retain];
+		_bufferFilePath = [[decoder decodeObjectForKey:kMTQueueBufferFile] retain];
+		_downloadFilePath = [[decoder decodeObjectForKey:kMTQueueDownloadFile] retain];
+		_encodeFilePath = [[decoder decodeObjectForKey:kMTQueueFinalFile] retain];
+	}
+	return self;
+}
+
+-(void) updateFromDecodedShow:(MTTiVoShow *) newShow {
+	//copies details that were encoded into current show
+	//Keep parallel with InitWithDecoder
+	//Assumed that showID and showTItle are already matched
+	_addToiTunesWhenEncoded = newShow.addToiTunesWhenEncoded;
+	if ([newShow.downloadStatus intValue] != kMTStatusNew){
+		//previously failed or completed, but don't stomp on inprogress
+		_downloadStatus = newShow.downloadStatus;
+	}
+	if (!self.isInProgress) {
+		_simultaneousEncode = newShow.simultaneousEncode;
+		if (newShow.showStatus) {
+			self.showStatus = newShow.showStatus;
+		} else {
+			self.showStatus = @"";
+		}
+		self.downloadDirectory = newShow.downloadDirectory;
+		_encodeFilePath = [newShow.encodeFilePath retain];
+		_downloadFilePath = [newShow.downloadFilePath retain];
+		_bufferFilePath = [newShow.bufferFilePath retain];
+		
+	}
+}
+
+
+- (id)pasteboardPropertyListForType:(NSString *)type {
+	if ([type compare:kMTTivoShowPasteBoardType] ==NSOrderedSame) {
+		return  [NSKeyedArchiver archivedDataWithRootObject:self];
+/* NOT working yet
+ } else if ([type compare:(NSString *)kUTTypeFileURL] ==NSOrderedSame) {
+		if (self.downloadStatus.integerValue ==kMTStatusDone) {
+			if (self.encodeFilePath) {
+				NSArray * urls = @[[NSURL fileURLWithPath:self.encodeFilePath isDirectory:NO]];
+				//id data = [urls pasteboardPropertyListForType:(NSString *)kUTTypeFileURL];
+				NSLog(@"Returning %@", urls);
+				return urls;
+			} else {
+				return nil;
+			}
+		} else {
+			return nil;
+		}
+ */
+	} else {
+		return nil;
+	}
+}
+
+-(NSArray *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
+	return @[kMTTivoShowPasteBoardType];// ,(NSString *)kUTTypeFileURL];  //NOT working yet
+}
+
+- (NSPasteboardWritingOptions)writingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard {
+	return 0;
+}
+
++ (NSArray *)readableTypesForPasteboard:(NSPasteboard *)pasteboard {
+	return @[kMTTivoShowPasteBoardType];
+
+}
++ (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard {
+	if ([type compare:kMTTivoShowPasteBoardType] ==NSOrderedSame)
+		return NSPasteboardReadingAsKeyedArchive;
+	return 0;
 }
 
 -(BOOL) isSameAs:(NSDictionary *) queueEntry {
 	NSInteger queueID = [queueEntry[kMTQueueID] integerValue];
-	BOOL result = (queueID == _showID) && ([self.tiVo.tiVo.name compare:queueEntry[KMTQueueTivo]] == NSOrderedSame);
+	BOOL result = (queueID == _showID) && ([self.tiVo.tiVo.name compare:queueEntry[kMTQueueTivo]] == NSOrderedSame);
 	if (result && [self.showTitle compare:queueEntry[kMTQueueTitle]] != NSOrderedSame) {
-		NSLog(@"Very odd, but reloading anyways: same ID: %ld same TiVo:%@ but different titles: <<%@>> vs <<%@>>",queueID, queueEntry[KMTQueueTivo], self.showTitle, queueEntry[kMTQueueTitle] );
+		NSLog(@"Very odd, but reloading anyways: same ID: %ld same TiVo:%@ but different titles: <<%@>> vs <<%@>>",queueID, queueEntry[kMTQueueTivo], self.showTitle, queueEntry[kMTQueueTitle] );
 	}
 	return result;
 	
@@ -185,7 +313,7 @@
 	}
 	if (!self.isInProgress) {
 		_simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
-		self.encodeFormat = [tiVoManager findFormat: queueEntry[KMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
+		self.encodeFormat = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
 		if (queueEntry[kMTQueueShowStatus]) {
 			self.showStatus = queueEntry[kMTQueueShowStatus];
 		} else {
@@ -271,9 +399,9 @@
 
 -(void)deallocDownloadHandling
 {
-    if (downloadFilePath) {
-        [downloadFilePath release];
-        downloadFilePath = nil;
+    if (_downloadFilePath) {
+        [_downloadFilePath release];
+        _downloadFilePath = nil;
     }
     if (downloadFileHandle && downloadFileHandle != [pipe1 fileHandleForWriting]) {
         [downloadFileHandle release];
@@ -315,9 +443,9 @@
         [encoderTask release];
         encoderTask = nil;
     }
-    if (encodeFilePath) {
-        [encodeFilePath release];
-        encodeFilePath = nil;
+    if (_encodeFilePath) {
+        [_encodeFilePath release];
+        _encodeFilePath = nil;
     }
     if (encodeFileHandle) {
         [encodeFileHandle closeFile];
@@ -338,9 +466,9 @@
         [encodeLogFileReadHandle release];
         encodeLogFileReadHandle = nil;
     }
-    if (bufferFilePath) {
-        [bufferFilePath release];
-        bufferFilePath = nil;
+    if (_bufferFilePath) {
+        [_bufferFilePath release];
+        _bufferFilePath = nil;
     }
     if (bufferFileReadHandle) {
         [bufferFileReadHandle closeFile];
@@ -391,22 +519,22 @@
 	if (!downloadDir) {
 		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
 	}
-    encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,_showTitle,_encodeFormat.filenameExtension] retain];
+    _encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,_showTitle,_encodeFormat.filenameExtension] retain];
     NSFileManager *fm = [NSFileManager defaultManager];
     if (_simultaneousEncode) {
         //Things require uniquely for simultaneous download
         pipe1 = [[NSPipe pipe] retain];
         pipe2 = [[NSPipe pipe] retain];
 		downloadFileHandle = [pipe1 fileHandleForWriting];
-        bufferFilePath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",_showTitle] retain];
-        [fm createFileAtPath:bufferFilePath contents:[NSData data] attributes:nil];
-        bufferFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:bufferFilePath] retain];
-        bufferFileWriteHandle = [[NSFileHandle fileHandleForWritingAtPath:bufferFilePath] retain];
+        _bufferFilePath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",_showTitle] retain];
+        [fm createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
+        bufferFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:_bufferFilePath] retain];
+        bufferFileWriteHandle = [[NSFileHandle fileHandleForWritingAtPath:_bufferFilePath] retain];
     } else {
         //Things require uniquely for sequential download
-        downloadFilePath = [[NSString stringWithFormat:@"%@%@.tivo",downloadDir ,_showTitle] retain];
-        [fm createFileAtPath:downloadFilePath contents:[NSData data] attributes:nil];
-        downloadFileHandle = [[NSFileHandle fileHandleForWritingAtPath:downloadFilePath] retain];
+        _downloadFilePath = [[NSString stringWithFormat:@"%@%@.tivo",downloadDir ,_showTitle] retain];
+        [fm createFileAtPath:_downloadFilePath contents:[NSData data] attributes:nil];
+        downloadFileHandle = [[NSFileHandle fileHandleForWritingAtPath:_downloadFilePath] retain];
         
     }
     decryptFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",downloadDir ,_showTitle] retain];
@@ -422,19 +550,30 @@
     encodeLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath] retain];
 }
 
--(void)download
-{
-	isCanceled = NO;
-    //Before starting make sure the encoder is OK.
-    NSString *encoderLaunchPath = [_encodeFormat pathForExecutable];
+-(NSString *) encoderPath {
+	NSString *encoderLaunchPath = [_encodeFormat pathForExecutable];
     if (!encoderLaunchPath) {
         NSLog(@"Encoding of %@ failed for %@ format, encoder %@ not found",_showTitle,_encodeFormat.name,_encodeFormat.encoderUsed);
         [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
         _showStatus = @"Failed";
         _processProgress = 1.0;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        return;
-    }
+        return nil;
+    } else {
+		return encoderLaunchPath;
+	}
+}
+
+
+-(void)download
+{
+	isCanceled = NO;
+    //Before starting make sure the encoder is OK.
+	NSString *encoderLaunchPath = [self encoderPath];
+	if (!encoderLaunchPath) {
+		return;
+	}
+
     [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
     _showStatus = @"Downloading";
 	if (!gotDetails) {
@@ -468,7 +607,7 @@
         [decrypterTask setStandardOutput:pipe2];
 		encoderTask = [[NSTask alloc] init];
 		[encoderTask setLaunchPath:encoderLaunchPath];
-		[encoderTask setArguments:[self encodingArgumentsWithInputFile:@"-" outputFile:encodeFilePath]];
+		[encoderTask setArguments:[self encodingArgumentsWithInputFile:@"-" outputFile:_encodeFilePath]];
 		[encoderTask setStandardInput:pipe2];
 		[encoderTask setStandardOutput:encodeLogFileHandle];
 		[encoderTask setStandardError:encodeLogFileHandle];
@@ -483,6 +622,7 @@
 	[activeURLConnection start];
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
 }
+
 -(void)trackDownloadEncode
 {
     if([encoderTask isRunning]) {
@@ -515,7 +655,7 @@
 						  [NSString stringWithFormat:@"-m%@",_mediaKey],
 						  [NSString stringWithFormat:@"-o%@",decryptFilePath],
 						  @"-v",
-						  downloadFilePath,
+						  _downloadFilePath,
 						  nil];
     _processProgress = 0.0;
 	previousProcessProgress = 0.0;
@@ -539,7 +679,7 @@
         [self setValue:[NSNumber numberWithInt:kMTStatusDecrypted] forKeyPath:@"downloadStatus"];
         _showStatus = @"Wait for encoder";
 		NSError *thisError = nil;
-		[[NSFileManager defaultManager] removeItemAtPath:downloadFilePath error:&thisError];
+		[[NSFileManager defaultManager] removeItemAtPath:_downloadFilePath error:&thisError];
        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:self.tiVo];
 		return;
 	}
@@ -565,20 +705,16 @@
 
 -(void)encode
 {
-    NSString *encoderLaunchPath = [_encodeFormat pathForExecutable];
-    if (!encoderLaunchPath) {
-        NSLog(@"Encoding of %@ failed for %@ format, encoder %@ not found",_showTitle,_encodeFormat.name,_encodeFormat.encoderUsed);
-        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
-        _showStatus = @"Failed";
-        _processProgress = 1.0;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        
-    }
+	NSString *encoderLaunchPath = [self encoderPath];
+	if (!encoderLaunchPath) {
+		return;
+	}
+
     encoderTask = [[NSTask alloc] init];
     NSLog(@"Starting Encode of   %@", _showTitle);
     [encoderTask setLaunchPath:encoderLaunchPath];
     if (!_encodeFormat.canSimulEncode) {  //If can't simul encode have to depend on log file for tracking
-        NSMutableArray *arguments = [self encodingArgumentsWithInputFile:decryptFilePath outputFile:encodeFilePath];
+        NSMutableArray *arguments = [self encodingArgumentsWithInputFile:decryptFilePath outputFile:_encodeFilePath];
         [encoderTask setArguments:arguments];
         [encoderTask setStandardOutput:encodeLogFileHandle];
         [encoderTask setStandardError:devNullFileHandle];
@@ -596,7 +732,7 @@
         }
         pipe1 = [[NSPipe pipe] retain];
         bufferFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptFilePath] retain];
-        NSMutableArray *arguments = [self encodingArgumentsWithInputFile:@"-" outputFile:encodeFilePath];
+        NSMutableArray *arguments = [self encodingArgumentsWithInputFile:@"-" outputFile:_encodeFilePath];
         [encoderTask setArguments:arguments];
         [encoderTask setStandardInput:pipe1];
         [encoderTask setStandardOutput:encodeLogFileHandle];
@@ -713,14 +849,14 @@
 -(void)cleanupFiles
 {
     NSFileManager *fm = [NSFileManager defaultManager];
-    if (downloadFilePath) {
+    if (_downloadFilePath) {
         [downloadFileHandle closeFile];
-        [fm removeItemAtPath:downloadFilePath error:nil];
+        [fm removeItemAtPath:_downloadFilePath error:nil];
     }
-    if (bufferFilePath) {
+    if (_bufferFilePath) {
         [bufferFileReadHandle closeFile];
         [bufferFileWriteHandle closeFile];
-        [fm removeItemAtPath:bufferFilePath error:nil];
+        [fm removeItemAtPath:_bufferFilePath error:nil];
     }
     if (encodeLogFileHandle) {
         [encodeLogFileHandle closeFile];
@@ -763,7 +899,7 @@
     }
     if (encodeFileHandle) {
         [encodeFileHandle closeFile];
-        [fm removeItemAtPath:encodeFilePath error:nil];
+        [fm removeItemAtPath:_encodeFilePath error:nil];
     }
     if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && [_downloadStatus intValue] == kMTStatusDownloading)) {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
@@ -873,7 +1009,7 @@
 		[bufferFileReadHandle closeFile];
 		[bufferFileReadHandle release];
 		bufferFileReadHandle = nil;
-		[[NSFileManager defaultManager] removeItemAtPath:bufferFilePath error:nil];
+		[[NSFileManager defaultManager] removeItemAtPath:_bufferFilePath error:nil];
 
 	}
 	writingData = NO;
@@ -956,7 +1092,7 @@
 		[self writeData];
 	}
 	if (downloadedFileSize < 100000) { //Not a good download - reschedule
-		NSString *dataReceived = [NSString stringWithContentsOfFile:bufferFilePath encoding:NSUTF8StringEncoding error:nil];
+		NSString *dataReceived = [NSString stringWithContentsOfFile:_bufferFilePath encoding:NSUTF8StringEncoding error:nil];
 		if (dataReceived) {
 			NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
 			if (noRecording.location != NSNotFound) { //This is a missing recording
@@ -1134,6 +1270,18 @@
 			 (self.showLength > 70) ;
 }
 
+-(MTTiVo *) tiVo {
+	if (!_tiVo) {
+		for (MTTiVo * possibleTiVo in tiVoManager.tiVoList) {
+			if ([possibleTiVo.tiVo.name compare:self.tempTiVoName]) {
+				self.tiVo = possibleTiVo;
+				break;
+			}
+		}
+	}
+	return _tiVo;
+}
+
 #pragma mark - Custom Setters
 
 -(void)setShowDescription:(NSString *)showDescription
@@ -1211,6 +1359,18 @@
     self.encodeFormat = nil;
     self.tiVo = nil;
 	self.downloadDirectory = nil;
+	if (_encodeFilePath) {
+		[_encodeFilePath release];
+        _encodeFilePath = nil;
+	}
+	if (_bufferFilePath) {
+		[_bufferFilePath release];
+        _bufferFilePath = nil;
+	}
+	if (_downloadFilePath) {
+		[_downloadFilePath release];
+        _downloadFilePath = nil;
+	}
 	if (elementString) {
 		[elementString release];
         elementString = nil;

@@ -155,11 +155,19 @@
 }
 
 - (void) refreshAddToQueueButton: (NSNotification *) notification {
-if ([tiVoManager.downloadQueue count] > 0) {
-    addToQueueButton.title =@"Add to Queue";
+	BOOL foundAny = NO;
+	for (MTTiVoShow * show in tiVoManager.downloadQueue) {
+		NSInteger status = [show.downloadStatus intValue];
+		if (status != kMTStatusDone && status != kMTStatusFailed) {
+			foundAny = YES;
+			break; //no real need to count them all
+		}
+	}
+	if (foundAny ) {
+		addToQueueButton.title =@"Add to Queue";
     } else {
-     addToQueueButton.title =@"Download";
-   }
+		addToQueueButton.title =@"Download";
+	}
 }
 
 -(void)refreshTiVoListPopup:(NSNotification *)notification
@@ -240,19 +248,10 @@ if ([tiVoManager.downloadQueue count] > 0) {
 
 #pragma mark - Subscription Management
 
+
 -(IBAction)subscribe:(id) sender {
-	BOOL anySubscribed = NO;
-    for (int i = 0; i < tiVoShowTable.sortedShows.count; i++) {
-        if ([tiVoShowTable isRowSelected:i]) {
-			anySubscribed = YES;
-			MTTiVoShow *thisShow = [tiVoShowTable.sortedShows objectAtIndex:i];
-			[tiVoManager.subscribedShows addSubscription:thisShow];
-		}
-	}
-	if (anySubscribed) {
-		[tiVoManager.subscribedShows checkSubscriptionsAll];
-		[subscriptionTable reloadData];
-	}
+	NSArray * selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:tiVoShowTable.selectedRowIndexes];
+	[tiVoManager.subscribedShows addSubscriptions:selectedShows];
 }
 
 
@@ -260,7 +259,7 @@ if ([tiVoManager.downloadQueue count] > 0) {
 {
 	NSIndexSet *selectedRows = [tiVoShowTable selectedRowIndexes];
 	NSArray *selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:selectedRows];
-	[tiVoManager downloadShowsWithCurrentOptions:selectedShows];
+	[tiVoManager downloadShowsWithCurrentOptions:selectedShows beforeShow:nil];
     
 	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
@@ -286,9 +285,8 @@ if ([tiVoManager.downloadQueue count] > 0) {
             }
         }
     }
-    for (MTTiVoShow * show in itemsToRemove) {
-        [tiVoManager deleteProgramFromDownloadQueue:show];
-	}
+	[tiVoManager deleteProgramsFromDownloadQueue:itemsToRemove];
+
  	[downloadQueueTable deselectAll:nil];
 }
 
