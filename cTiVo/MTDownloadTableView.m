@@ -200,9 +200,6 @@
  		result.progressIndicator.leftText.stringValue = rowData.showTitle ;
         result.progressIndicator.doubleValue = rowData.processProgress;
         result.toolTip = rowData.showTitle;
-		if ([self.selectedRowIndexes containsIndex:row]) {
-			result.progressIndicator.rightText.
-		}
 			
     } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
         result.textField.stringValue = rowData.tiVo.tiVo.name ;
