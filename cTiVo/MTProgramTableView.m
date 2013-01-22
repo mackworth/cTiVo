@@ -69,20 +69,22 @@
     if (changedColumns) {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
     }
-    NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
     
-    NSArray * selectedItems = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-    self.sortedShows = nil;
+	//save selection to preserve after reloadData
+	NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
+    NSArray * selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+    
+	self.sortedShows = nil;
     [super reloadData];
     
-    NSMutableIndexSet * newSelectionIndexes = [[[NSMutableIndexSet alloc] init] autorelease] ;
-    for (MTTiVoShow * show in selectedItems) {
-        NSUInteger index = [self.sortedShows indexOfObject:show];
-        if (index != NSNotFound) {
-            [newSelectionIndexes addIndex:index];
-        }
-    }
-    [self selectRowIndexes:newSelectionIndexes byExtendingSelection:NO];
+
+	//now restore selection
+	NSIndexSet * showIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+		return [selectedShows indexOfObject:obj] !=NSNotFound;
+	}];
+	
+
+    [self selectRowIndexes:showIndexes byExtendingSelection:NO];
     
 }
 

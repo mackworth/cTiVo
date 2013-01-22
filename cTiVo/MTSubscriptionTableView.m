@@ -68,8 +68,20 @@
 }
 
 -(void) reloadData {
-    self.sortedSubscriptions = nil;
+	//save selection to preserve after reloadData
+	NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
+    NSArray * selectedSubs = [self.sortedSubscriptions objectsAtIndexes:selectedRowIndexes];
+    
+	self.sortedSubscriptions = nil;
     [super reloadData];
+    
+	
+	//now restore selection
+	NSIndexSet * subIndexes = [self.sortedSubscriptions indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+		return [selectedSubs indexOfObject:obj] !=NSNotFound;
+	}];
+    [self selectRowIndexes:subIndexes byExtendingSelection:NO];
+	
 }
 
 -(void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors

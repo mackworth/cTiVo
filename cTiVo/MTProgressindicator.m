@@ -17,16 +17,16 @@
     if (self) {
         // Initialization code here.
         const int widthStatusField = 70;
-        _leftText = [[NSTextField alloc] initWithFrame:CGRectMake(0, -3, frame.size.width -widthStatusField, frame.size.height)];
+        _leftText = [[NSTextField alloc] initWithFrame:CGRectMake(0, -2, frame.size.width -widthStatusField, frame.size.height)];
         [_leftText setBackgroundColor:[NSColor clearColor]];
         [_leftText setEditable:NO];
         [_leftText setBezeled:NO];
         [_leftText setAutoresizingMask:NSViewWidthSizable ];
         [_leftText setFont: [NSFont systemFontOfSize:13.0f]];
         [_leftText.cell setWraps:NO];
-        [[_leftText cell] setLineBreakMode:NSLineBreakByTruncatingTail];
+        [[_leftText cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
         
-        _rightText = [[NSTextField alloc] initWithFrame:CGRectMake(frame.size.width -widthStatusField, 0, widthStatusField, frame.size.height-7)];
+        _rightText = [[NSTextField alloc] initWithFrame:CGRectMake(frame.size.width -widthStatusField, 1, widthStatusField, frame.size.height-6)];
         [_rightText setFont:[NSFont userFontOfSize:10]];
         [_rightText setAlignment:NSRightTextAlignment];
         [_rightText setBackgroundColor:[NSColor clearColor]];
@@ -39,7 +39,7 @@
         [_leftText release];
         [_rightText release];
         _doubleValue = 0.0;
-        _barColor = [[NSColor colorWithCalibratedRed:.7 green:.7 blue:1.0 alpha:1.0] retain];
+        _barColor = [[NSColor colorWithCalibratedRed:1.0 green:.61 blue:.45 alpha:0.25] retain];
         [self setAutoresizingMask:NSViewWidthSizable ];
 
     }

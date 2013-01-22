@@ -59,7 +59,11 @@
 
 -(void) reloadData {
     //Configure Table Columns depending on how many TiVos
-    NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
+    
+	//save selection to restore after reload
+	NSArray * selectedShows = [self.sortedShows objectsAtIndexes: self.selectedRowIndexes];
+	
+	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
     NSTableColumn *programColumn = [self tableColumnWithIdentifier:@"Programs"];
     if (tiVoManager.tiVoList.count == 1) {
         if (tiVoColumn) {
@@ -76,6 +80,13 @@
     }
     self.sortedShows =nil;
     [super reloadData];
+	
+	//now restore selection
+	NSIndexSet * showIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+		return [selectedShows indexOfObject:obj] !=NSNotFound;
+	}];
+	
+	[self selectRowIndexes:showIndexes byExtendingSelection:NO];
 }
 
 -(NSArray *)sortedShows
@@ -189,7 +200,10 @@
  		result.progressIndicator.leftText.stringValue = rowData.showTitle ;
         result.progressIndicator.doubleValue = rowData.processProgress;
         result.toolTip = rowData.showTitle;
-	
+		if ([self.selectedRowIndexes containsIndex:row]) {
+			result.progressIndicator.rightText.
+		}
+			
     } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
         result.textField.stringValue = rowData.tiVo.tiVo.name ;
         result.toolTip = result.textField.stringValue;

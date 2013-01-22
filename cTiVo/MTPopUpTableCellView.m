@@ -15,7 +15,7 @@
     self = [super initWithFrame:frame];
     if (self) {
 		NSInteger textIndent = 9;
-		CGRect subFramePopUp = NSMakeRect(4, 2, frame.size.width-8, frame.size.height-4);
+		CGRect subFramePopUp = NSMakeRect(4, 0, frame.size.width-8, frame.size.height-4);
 		CGRect subFrameText = NSMakeRect(4+textIndent, -6, frame.size.width-8-textIndent, frame.size.height);
 		NSFont * cellFont = [NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSMiniControlSize]];
 		
