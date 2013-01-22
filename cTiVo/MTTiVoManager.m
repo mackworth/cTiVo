@@ -463,6 +463,18 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 #pragma mark - Download Support for Tivos and Shows
 
+-(BOOL)foundTiVoNamed:(NSString *)tiVoName
+{
+	BOOL ret = NO;
+	for (MTTiVo *tiVo in self.tiVoList) {
+		if ([tiVo.tiVo.name compare:tiVoName] == NSOrderedSame) {
+			ret = YES;
+			break;
+		}
+	}
+	return ret;
+}
+
 -(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo
 {
     return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",tiVo.tiVo.name]];

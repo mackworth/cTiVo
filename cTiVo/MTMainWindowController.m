@@ -246,6 +246,102 @@
      }
 }
 
+#pragma mark - Menu Delegate
+
+-(void)menuWillOpen:(NSMenu *)menu
+{
+	menuCursorPosition = [self.window mouseLocationOutsideOfEventStream];
+	NSTableView *workingTable = nil;
+	NSString *selector = nil;
+	if ([menu.title compare:@"ProgramTableMenu"] == NSOrderedSame) {
+		workingTable = tiVoShowTable;
+		selector = @"programMenuHandler:";
+		//Update titles as appropriate
+		for (NSMenuItem *mi in [menu itemArray]) {
+			if ([mi.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+				if (tiVoManager.tiVoList.count > 1) {
+					mi.title = @"Refresh this TiVo";
+				} else {
+					mi.title = @"Refresh TiVo";
+				}
+			}
+		}
+	}
+	if ([menu.title compare:@"DownloadTableMenu"] == NSOrderedSame) {
+		workingTable = downloadQueueTable;
+		selector = @"downloadMenuHandler:";
+	}
+	if ([menu.title compare:@"SubscriptionTableMenu"] == NSOrderedSame) {
+		workingTable = subscriptionTable;
+		selector = @"subscriptionMenuHandler:";
+	}
+	if (workingTable) {
+		NSPoint p = [workingTable convertPoint:menuCursorPosition fromView:nil];
+		menuTableRow = [workingTable rowAtPoint:p];
+		for (NSMenuItem *mi in [menu itemArray]) {
+			[mi setAction:NSSelectorFromString(selector)];
+		}
+		if (menuTableRow < 0) { //disable row functions  Row based functions have tag=1;
+			for (NSMenuItem *mi in [menu itemArray]) {
+				if (mi.tag == 1) {
+					[mi setAction:NULL];
+				}
+			}
+		}
+		if ([workingTable selectedRowIndexes].count == 0) { //No selection so disable group fuctions
+			for (NSMenuItem *mi in [menu itemArray]) {
+				if (mi.tag == 0) {
+					[mi setAction:NULL];
+				}
+			}
+
+		}
+
+	}
+}
+
+-(IBAction)programMenuHandler:(NSMenuItem *)menu
+{
+	if ([menu.title caseInsensitiveCompare:@"Download selected shows"] == NSOrderedSame) {
+		[self downloadSelectedShows:menu];
+	}
+	if ([menu.title caseInsensitiveCompare:@"Download this show"] == NSOrderedSame) {
+		[tiVoManager downloadShowsWithCurrentOptions:[NSArray arrayWithObject:tiVoShowTable.sortedShows[menuTableRow]] beforeShow:nil];
+	}
+	if ([menu.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
+		[thisShow.tiVo updateShows:nil];
+	}
+	if ([menu.title caseInsensitiveCompare:@"Subscribe to selected shows"] == NSOrderedSame) {
+		[self subscribe:menu];
+	}
+	if ([menu.title caseInsensitiveCompare:@"Subscribe to this show"] == NSOrderedSame) {
+		[tiVoManager.subscribedShows addSubscriptions:[NSArray arrayWithObject:tiVoShowTable.sortedShows[menuTableRow]]];
+	}
+}
+
+-(IBAction)downloadMenuHandler:(NSMenuItem *)menu
+{
+	if ([menu.title caseInsensitiveCompare:@"Remove selected shows"] == NSOrderedSame) {
+		[self removeFromDownloadQueue:menu];
+	}
+	if ([menu.title caseInsensitiveCompare:@"Remove this show"] == NSOrderedSame) {
+		[self removeFromDownloadQueue:[NSArray arrayWithObject:downloadQueueTable.sortedShows[menuTableRow]]];
+	}
+	
+}
+
+-(IBAction)subscriptionMenuHandler:(NSMenuItem *)menu
+{
+	if ([menu.title caseInsensitiveCompare:@"Unsubscribe selected shows"] == NSOrderedSame) {
+		[subscriptionTable unsubscribeSelectedItems:menu];
+	}
+	if ([menu.title caseInsensitiveCompare:@"Unsubscribe this show"] == NSOrderedSame) {
+		[tiVoManager.subscribedShows  deleteSubscriptions:[NSArray arrayWithObject:subscriptionTable.sortedSubscriptions[menuTableRow]]];
+	}
+	
+}
+
 #pragma mark - Subscription Management
 
 
@@ -253,7 +349,6 @@
 	NSArray * selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:tiVoShowTable.selectedRowIndexes];
 	[tiVoManager.subscribedShows addSubscriptions:selectedShows];
 }
-
 
 -(IBAction)downloadSelectedShows:(id)sender
 {
@@ -275,8 +370,13 @@
 
 -(IBAction)removeFromDownloadQueue:(id)sender
 {
-	NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
-	NSArray *itemsToRemove = [downloadQueueTable.sortedShows objectsAtIndexes:selectedRows];
+	NSArray *itemsToRemove;
+	if ([sender isKindOfClass:[NSArray class]]) {
+		itemsToRemove = sender;
+	}else {
+		NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
+		itemsToRemove = [downloadQueueTable.sortedShows objectsAtIndexes:selectedRows];
+	}
  	for (MTTiVoShow * show in itemsToRemove) {
         if (show.isInProgress) {
             if( ![self confirmCancel:show.showTitle]) {

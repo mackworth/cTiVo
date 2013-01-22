@@ -15,7 +15,7 @@
 @class MTSubscriptionTableView;
 @class MTFormatPopUpButton;
 
-@interface MTMainWindowController : NSWindowController {
+@interface MTMainWindowController : NSWindowController <NSMenuDelegate> {
 	IBOutlet NSPopUpButton *tiVoListPopUp;
 	IBOutlet MTFormatPopUpButton *formatListPopUp;
     IBOutlet NSButton *addToQueueButton, *removeFromQueueButton, *addToiTunesButton, *simultaneousEncodeButton, *subscribeButton, *subDirectoriesButton;
@@ -25,6 +25,9 @@
 	IBOutlet MTProgramTableView  *tiVoShowTable;
 	IBOutlet MTSubscriptionTableView  *subscriptionTable;
     IBOutlet NSView *view;
+	IBOutlet NSMenu *programContextualMenu, *downloadContextualMenu, *subscriptionContextualMenu;
+	NSPoint menuCursorPosition;
+	NSInteger menuTableRow;
 	NSMutableArray *loadingTiVos;
 }
 

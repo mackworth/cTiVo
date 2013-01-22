@@ -83,6 +83,7 @@
 -(void)writeDownloadQueueToUserDefaults;
 -(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo;
 - (void) noRecordingAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+-(BOOL)foundTiVoNamed:(NSString *)tiVoName;
 -(NSInteger)numberOfShowsToDownload;
 
 @end
