@@ -262,6 +262,7 @@
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
     // Drag and drop support
+	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
  	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
 	[pboard writeObjects:selectedObjects];
 	//NSLog (@"QQQproperty list: (Files:) %@ (shows): %@", [pboard propertyListForType:(NSString *)kUTTypeFileURL],[pboard propertyListForType:kMTTivoShowPasteBoardType]);
@@ -339,6 +340,13 @@
 			NSLog(@"QQQ inserting before %@",insertShow.showTitle);
 		}
 		[tiVoManager downloadShowsWithCurrentOptions:realShows beforeShow:insertShow];
+		
+		//now leave new shows selected
+		NSIndexSet * showIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+			return [realShows indexOfObject:obj] !=NSNotFound;
+		}];
+		if (showIndexes.count > 0)[self selectRowIndexes:showIndexes byExtendingSelection:NO];
+									
 		return YES;
 	} else {
 		return NO;

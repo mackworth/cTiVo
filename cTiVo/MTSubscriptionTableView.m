@@ -195,7 +195,7 @@ static NSDateFormatter *dateFormatter;
 		NSString * tempQQQQ = thisSubscription.encodeFormat.name;
 		thisSubscription.encodeFormat = [popUp selectFormatNamed:thisSubscription.encodeFormat.name];
  		if([tempQQQQ compare: thisSubscription.encodeFormat.name] != NSOrderedSame)
-			NSLog(@"SB popup at %@ changed from %@ to %@", thisSubscription.seriesTitle, tempQQQQ, thisSubscription.encodeFormat.name);
+			NSLog(@"QQQSB popup at %@ changed from %@ to %@", thisSubscription.seriesTitle, tempQQQQ, thisSubscription.encodeFormat.name);
 
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
@@ -239,6 +239,7 @@ static NSDateFormatter *dateFormatter;
 	//	[pboard declareTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType,nil] owner:self];
 	//[pboard writeObjects:selectedObjects];
 	//	NSLog (@"QQQQproperty list: %@",[pboard propertyListForType:kMTTivoShowPasteBoardType]);
+	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
 	return YES;
 }
 
@@ -276,7 +277,7 @@ static NSDateFormatter *dateFormatter;
 	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
 	//NSLog(@"calling readObjects%@",pasteboard);
 	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
-	NSLog(@"dragging: %@", draggedShows);
+	NSLog(@"QQQdragging: %@", draggedShows);
 	
 	//dragged shows are copies, so we need to find the real show objects
 	NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
@@ -287,7 +288,14 @@ static NSDateFormatter *dateFormatter;
 	
 	if( [info draggingSource] == myController.tiVoShowTable  ||
 	    [info draggingSource] == myController.downloadQueueTable) {
-		[tiVoManager.subscribedShows addSubscriptions: realShows];
+		NSArray * newSubs = [tiVoManager.subscribedShows addSubscriptions: realShows];
+		
+		//now leave new subscriptions selected
+		self.sortedSubscriptions  = nil;  //reset sort with new subs
+		NSIndexSet * subIndexes = [self.sortedSubscriptions indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+			return [newSubs indexOfObject:obj] !=NSNotFound;
+		}];
+		if (subIndexes.count > 0) [self selectRowIndexes:subIndexes byExtendingSelection:NO];
 		return YES;
 	} else {
 		return NO;

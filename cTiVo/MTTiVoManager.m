@@ -320,7 +320,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	for (MTTiVoShow * show in shows) {
 		NSUInteger index = [[tiVoManager downloadQueue] indexOfObject :show];
 		//can't move an inprogress/canceled/failed one.
-		if (index != NSNotFound && ((MTTiVoShow *) tiVoManager.downloadQueue[index]).downloadStatus == kMTStatusNew) {
+		if (index != NSNotFound && (show.downloadStatus.intValue == kMTStatusNew)) {
 			[fromIndexSet addIndex:index];
 		}
 	}
@@ -353,6 +353,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
             for (MTTiVoShow *p in _downloadQueue) {
                 if (p.showID == program.showID	) {
                     programFound = YES;
+					break;
                 }
             }
             

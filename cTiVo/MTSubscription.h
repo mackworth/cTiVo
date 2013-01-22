@@ -32,7 +32,7 @@
 @interface NSMutableArray (MTSubscriptionList)
 
 -(void) checkSubscriptionsAll;
--(void) addSubscriptions:(NSArray *) shows;
+-(NSArray *) addSubscriptions:(NSArray *) shows; //returns new subs
 -(void) deleteSubscriptions:(NSArray *) subscriptions;
 -(void) updateSubscriptionWithDate: (NSNotification *) notification;
 -(BOOL) isSubscribed:(MTTiVoShow *) tivoShow;

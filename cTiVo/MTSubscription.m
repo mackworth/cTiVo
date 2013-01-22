@@ -115,22 +115,26 @@
 	return before;
 }
 
--(void) addSubscriptions: (NSArray *) shows {
+-(NSArray *) addSubscriptions: (NSArray *) shows {
 	
-	BOOL anySubscribed = NO;
+	NSMutableArray * newSubs = [NSMutableArray arrayWithCapacity:shows.count];
     for (MTTiVoShow * thisShow in shows) {
-		if ([self addSubscription:thisShow]) {
-			anySubscribed = YES;
+		MTSubscription * newSub = [self addSubscription:thisShow];
+		if (newSub) {
+			[newSubs addObject:newSub];
 		}
 	}
-	if (anySubscribed) {
+	if (newSubs.count > 0) {
 		[self saveSubscriptions];
 		[self checkSubscriptionsAll];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
+		return newSubs;
+	} else {
+		return nil;
 	}
 }
 
--(BOOL) addSubscription:(MTTiVoShow *) tivoShow {
+-(MTSubscription *) addSubscription:(MTTiVoShow *) tivoShow {
 	//set the "lastrecording" time for one second before this show, to include this show.
 	if ([self findShow:tivoShow] == nil) {
         NSDate *earlierTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
@@ -146,9 +150,9 @@
         newSub.simultaneousEncode = [NSNumber numberWithBool:
                                      tiVoManager.simultaneousEncode];
         [self addObject:newSub];
-		return YES;
+		return newSub;
  	} else {
-		return NO;
+		return nil;
 	}
 }
 

@@ -236,7 +236,7 @@
 	_addToiTunesWhenEncoded = newShow.addToiTunesWhenEncoded;
 	if ([newShow.downloadStatus intValue] != kMTStatusNew){
 		//previously failed or completed, but don't stomp on inprogress
-		_downloadStatus = newShow.downloadStatus;
+		_downloadStatus = [newShow.downloadStatus retain];
 	}
 	if (!self.isInProgress) {
 		_simultaneousEncode = newShow.simultaneousEncode;

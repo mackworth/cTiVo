@@ -271,7 +271,8 @@
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
     // Drag and drop support
- 	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
+	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
+	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
 	[pboard writeObjects:selectedObjects];
    return YES;
 }
