@@ -88,6 +88,7 @@
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
+	[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 	if ([keyPath compare:kMTShowCopyProtected] == NSOrderedSame) {
 		[self reloadData];
 	}
@@ -270,7 +271,26 @@
 
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
-    // Drag and drop support
+	NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
+	NSPoint p = [tv convertPoint:windowPoint fromView:nil];
+	NSInteger r = [tv rowAtPoint:p];
+	NSInteger c = [tv columnAtPoint:p];
+	NSTableColumn *selectedColumn = tv.tableColumns[c];
+	BOOL isSelectedRow = [tv isRowSelected:r];
+	BOOL isOverText = NO;
+	if ([selectedColumn.identifier caseInsensitiveCompare:@"Programs"] == NSOrderedSame) { //Check if over text
+		NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+		NSTextField *showField = showCellView.textField;
+		NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+		NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
+		if (clickInText.x < stringSize.width) {
+			isOverText = YES;
+		}
+	}
+	if (!isSelectedRow && !isOverText) {
+		return NO;
+	}
+	// Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
 	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
 	[pboard writeObjects:selectedObjects];

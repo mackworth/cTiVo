@@ -261,6 +261,25 @@
 
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
+	NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
+	NSPoint p = [tv convertPoint:windowPoint fromView:nil];
+	NSInteger r = [tv rowAtPoint:p];
+	NSInteger c = [tv columnAtPoint:p];
+	NSTableColumn *selectedColumn = tv.tableColumns[c];
+	BOOL isSelectedRow = [tv isRowSelected:r];
+	BOOL isOverText = NO;
+	if ([selectedColumn.identifier caseInsensitiveCompare:@"Programs"] == NSOrderedSame) { //Check if over text
+		MTDownloadTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+		NSTextField *showField = showCellView.progressIndicator.leftText;
+		NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+		NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
+		if (clickInText.x < stringSize.width && clickInText.x < showField.bounds.size.width) {
+			isOverText = YES;
+		}
+	}
+	if (!isSelectedRow && !isOverText) {
+		return NO;
+	}
     // Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
  	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
