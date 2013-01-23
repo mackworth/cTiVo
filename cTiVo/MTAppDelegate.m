@@ -158,22 +158,28 @@ void signalHandler(int signal)
 	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
 		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
         BOOL canSimulEncode = ![tiVoManager.selectedFormat.mustDownloadFirst boolValue];
+		NSArray *menuItems = [optionsMenu itemArray];
+		for (NSMenuItem *mi in menuItems) {
+			if ([mi isSeparatorItem]) {
+				break;
+			}
+			[optionsMenu removeItem:mi];
+		}
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-		if (canSimulEncode) {
-			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:@"SimultaneousEncode" options:nil];
-//			[simulEncodeItem setEnabled:YES];
-		} else {
-			[simulEncodeItem unbind:@"value"];
-//			[simulEncodeItem setEnabled:NO];
-		}
 		if (caniTune) {
+			iTunesMenuItem = [[NSMenuItem alloc] init];
+			iTunesMenuItem.title = @"Add to iTunes when complete";
 			[iTunesMenuItem bind:@"value" toObject:defaults withKeyPath:@"iTunesSubmit" options:nil];
-//			[iTunesMenuItem setEnabled:YES];
-		} else {
-			[iTunesMenuItem unbind:@"value"];
-//			[iTunesMenuItem setEnabled:NO];
+			[optionsMenu insertItem:iTunesMenuItem atIndex:0];
+			//			[simulEncodeItem setEnabled:YES];
 		}
-
+		if (canSimulEncode) {
+			simulEncodeItem = [[NSMenuItem alloc] init];
+			simulEncodeItem.title = @"Simultaneous Encoding";
+			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:@"SimultaneousEncode" options:nil];
+			[optionsMenu insertItem:simulEncodeItem atIndex:0];
+			//			[simulEncodeItem setEnabled:YES];
+		}
 	}
 }
 

@@ -416,6 +416,9 @@
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="35465992"/>
 									<reference key="NSMixedImage" ref="502551668"/>
+									<object class="NSAttributedString" key="NSAttributedTitle">
+										<string key="NSString"/>
+									</object>
 								</object>
 								<object class="NSMenuItem" id="877201681">
 									<reference key="NSMenu" ref="135398297"/>
@@ -1019,6 +1022,14 @@
 						<reference key="destination" ref="351954164"/>
 					</object>
 					<int key="connectionID">1020</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">optionsMenu</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="135398297"/>
+					</object>
+					<int key="connectionID">1021</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -1928,7 +1939,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">1020</int>
+			<int key="maxID">1021</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1950,6 +1961,7 @@
 						<string key="exportTableView">NSTableView</string>
 						<string key="formatSelectionTable">NSView</string>
 						<string key="iTunesMenuItem">NSMenuItem</string>
+						<string key="optionsMenu">NSMenu</string>
 						<string key="refreshTiVoMenuItem">NSMenuItem</string>
 						<string key="simulEncodeItem">NSMenuItem</string>
 						<string key="window">NSWindow</string>
@@ -1966,6 +1978,10 @@
 						<object class="IBToOneOutletInfo" key="iTunesMenuItem">
 							<string key="name">iTunesMenuItem</string>
 							<string key="candidateClassName">NSMenuItem</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="optionsMenu">
+							<string key="name">optionsMenu</string>
+							<string key="candidateClassName">NSMenu</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="refreshTiVoMenuItem">
 							<string key="name">refreshTiVoMenuItem</string>

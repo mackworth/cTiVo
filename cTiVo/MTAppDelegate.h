@@ -18,6 +18,7 @@
 	MTTiVoManager *tiVoGlobalManager;
 	MTMainWindowController *mainWindowController;
 	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *simulEncodeItem;
+	IBOutlet NSMenu *optionsMenu;
     IBOutlet NSView *formatSelectionTable;
     IBOutlet NSTableView *exportTableView;
 	NSMutableArray *mediaKeyQueue;
