@@ -1222,14 +1222,14 @@
             self.simultaneousEncode = NO;
         } else if (simulWasDisabled && [self canSimulEncode]) {
             //newly possible, so take user default
-            self.simultaneousEncode = [tiVoManager simultaneousEncode];
+            self.simultaneousEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
         }
         if (!self.canAddToiTunes && self.shouldAddToiTunes) {
             //no longer possible
             self.addToiTunesWhenEncoded = NO;
         } else if (iTunesWasDisabled && [self canAddToiTunes]) {
             //newly possible, so take user default
-            self.addToiTunesWhenEncoded = [tiVoManager addToItunes];
+            self.addToiTunesWhenEncoded = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
         }
     }
 }

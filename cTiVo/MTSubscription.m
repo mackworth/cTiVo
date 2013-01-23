@@ -44,14 +44,14 @@
             self.simultaneousEncode = [NSNumber numberWithBool:NO];
         } else if (simulWasDisabled && [self canSimulEncode]) {
             //newly possible, so take user default
-            self.simultaneousEncode = [NSNumber numberWithBool:[tiVoManager simultaneousEncode]];
+            self.simultaneousEncode = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode] && self.encodeFormat.canSimulEncode)];
         }
         if (!self.canAddToiTunes && self.shouldAddToiTunes) {
             //no longer possible
             self.addToiTunes = [NSNumber numberWithBool:NO];
         } else if (iTunesWasDisabled && [self canAddToiTunes]) {
             //newly possible, so take user default
-            self.addToiTunes = [NSNumber numberWithBool:[tiVoManager addToItunes]];
+            self.addToiTunes = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit] && self.encodeFormat.canAddToiTunes)];
         }
     }
 }
@@ -141,14 +141,13 @@
         if (tivoShow.showDate) {
             earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
         }
+		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         MTSubscription *newSub = [[MTSubscription new] autorelease];
         newSub.seriesTitle = tivoShow.seriesTitle;
         newSub.lastRecordedTime = earlierTime;
         newSub.encodeFormat = tiVoManager.selectedFormat;
-        newSub.addToiTunes = [NSNumber numberWithBool:
-                                    tiVoManager.addToItunes];
-        newSub.simultaneousEncode = [NSNumber numberWithBool:
-                                     tiVoManager.simultaneousEncode];
+        newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
+        newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
         [self addObject:newSub];
 		return newSub;
  	} else {
@@ -190,10 +189,10 @@
         if (tempSub.encodeFormat ==nil) tempSub.encodeFormat = [tiVoManager selectedFormat];
         
         tempSub.addToiTunes = sub[kMTSubscribediTunes];
-        if (tempSub.addToiTunes ==nil) tempSub.addToiTunes = [NSNumber numberWithBool: [tiVoManager addToItunes]];
+        if (tempSub.addToiTunes ==nil) tempSub.addToiTunes = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit] && tempSub.encodeFormat.canAddToiTunes)];
                                                     
         tempSub.simultaneousEncode = sub[kMTSubscribedSimulEncode];
-        if (tempSub.simultaneousEncode ==nil) tempSub.simultaneousEncode = [NSNumber numberWithBool: [tiVoManager simultaneousEncode]];
+        if (tempSub.simultaneousEncode ==nil) tempSub.simultaneousEncode = [NSNumber numberWithBool: ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode] && tempSub.encodeFormat.canSimulEncode)];
         
         [self addObject:tempSub];
     }

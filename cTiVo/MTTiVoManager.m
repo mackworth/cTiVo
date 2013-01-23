@@ -165,8 +165,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		numEncoders = 0;
 		queue.maxConcurrentOperationCount = 1;
 		
-		_addToItunes = NO;
-		_simultaneousEncode = YES;
 		_videoListNeedsFilling = YES;
         updatingVideoList = NO;
 //		NSLog(@"Getting Host Addresses");

@@ -67,39 +67,7 @@
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
-        BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
-        [addToiTunesButton setEnabled:caniTune];
-        if (caniTune) {
-            BOOL wantsiTunes = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
-            if (wantsiTunes) {
-                [addToiTunesButton setState:NSOnState];
-				tiVoManager.addToItunes = YES;
-            } else {
-                [addToiTunesButton setState:NSOffState];
-				tiVoManager.addToItunes = NO;
-            }
-       } else {
-           [addToiTunesButton setState:NSOffState];
-		   tiVoManager.addToItunes = YES;
-        }
-
-        BOOL canSimulEncode = ![tiVoManager.selectedFormat.mustDownloadFirst boolValue];
-        [simultaneousEncodeButton setEnabled:canSimulEncode];
-        if (canSimulEncode) {
-            BOOL wantsSimul = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
-            if (wantsSimul) {
-                [simultaneousEncodeButton setState:NSOnState];
-				tiVoManager.simultaneousEncode = YES;
-            } else {
-                [simultaneousEncodeButton setState:NSOffState];
-				tiVoManager.simultaneousEncode = NO;
-            }
-        } else {
-            [simultaneousEncodeButton setState:NSOffState];
-			tiVoManager.simultaneousEncode = NO;
-        }
-    } else if ([keyPath compare:@"downloadDirectory"] == NSOrderedSame) {
+	if ([keyPath compare:@"downloadDirectory"] == NSOrderedSame) {
 		downloadDirectory.stringValue = tiVoManager.downloadDirectory;
 		NSString *dir = tiVoManager.downloadDirectory;
 		if (!dir) dir = @"Directory not available!";
@@ -404,11 +372,7 @@
 -(IBAction)changeSimultaneous:(id)sender
 {
     MTCheckBox *checkbox = sender;
-    if (sender == simultaneousEncodeButton) {
-        [[NSUserDefaults standardUserDefaults] setBool:(checkbox.state == NSOnState) forKey:kMTSimultaneousEncode];
-		tiVoManager.simultaneousEncode = checkbox.state == NSOnState;
-    
-    } else if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
         ((MTTiVoShow *)checkbox.owner).simultaneousEncode = ! ((MTTiVoShow *)checkbox.owner).simultaneousEncode;
 
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
@@ -423,11 +387,7 @@
 -(IBAction)changeiTunes:(id)sender
 {     
     MTCheckBox *checkbox = sender;
-    if (sender == addToiTunesButton) {
-        [[NSUserDefaults standardUserDefaults] setBool:(checkbox.state == NSOnState) forKey:kMTiTunesSubmit];
-		tiVoManager.addToItunes = checkbox.state == NSOnState;
-
-    } else if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
         //updating an individual show in download queue
             ((MTTiVoShow *)checkbox.owner).addToiTunesWhenEncoded = !((MTTiVoShow *)checkbox.owner).addToiTunesWhenEncoded;
 
@@ -438,6 +398,7 @@
         
     }
 }
+
 
 #pragma mark - Table View Notification Handling
 

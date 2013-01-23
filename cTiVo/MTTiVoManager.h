@@ -53,7 +53,7 @@
 
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
-@property (nonatomic) BOOL videoListNeedsFilling, addToItunes, simultaneousEncode;
+@property (nonatomic) BOOL videoListNeedsFilling;
 @property (nonatomic, retain) MTFormat *selectedFormat;
 @property int numEncoders;//Want to limit launches to two encoders.
 @property (nonatomic, assign) NSWindow *mainWindow;
