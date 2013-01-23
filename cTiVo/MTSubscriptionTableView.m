@@ -91,7 +91,7 @@
 }
 
 -(IBAction) unsubscribeSelectedItems:(id) sender {
-	NSLog(@"unsubscring");
+	NSLog(@"unsubscribing");
     NSArray * itemsToRemove = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
 
 	[tiVoManager.subscribedShows  deleteSubscriptions:itemsToRemove];

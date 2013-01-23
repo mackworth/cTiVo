@@ -425,7 +425,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#svn update\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion `svn info | grep Revision | awk '{print $2}'`\" ${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\n";
+			shellScript = "svn update\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion `svn info | grep Revision | awk '{print $2}'`\" ${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

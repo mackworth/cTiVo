@@ -287,6 +287,8 @@
 					[mi setAction:NULL];
 				}
 			}
+		} else {
+			[workingTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
 		}
 		if ([workingTable selectedRowIndexes].count == 0) { //No selection so disable group fuctions
 			for (NSMenuItem *mi in [menu itemArray]) {
@@ -302,42 +304,36 @@
 
 -(IBAction)programMenuHandler:(NSMenuItem *)menu
 {
-	if ([menu.title caseInsensitiveCompare:@"Download selected shows"] == NSOrderedSame) {
+	if ([menu.title caseInsensitiveCompare:@"Download"] == NSOrderedSame) {
+		[tiVoShowTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
 		[self downloadSelectedShows:menu];
-	}
-	if ([menu.title caseInsensitiveCompare:@"Download this show"] == NSOrderedSame) {
-		[tiVoManager downloadShowsWithCurrentOptions:[NSArray arrayWithObject:tiVoShowTable.sortedShows[menuTableRow]] beforeShow:nil];
 	}
 	if ([menu.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
 		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
 		[thisShow.tiVo updateShows:nil];
 	}
-	if ([menu.title caseInsensitiveCompare:@"Subscribe to selected shows"] == NSOrderedSame) {
+	if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
+		[tiVoShowTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
 		[self subscribe:menu];
-	}
-	if ([menu.title caseInsensitiveCompare:@"Subscribe to this show"] == NSOrderedSame) {
-		[tiVoManager.subscribedShows addSubscriptions:[NSArray arrayWithObject:tiVoShowTable.sortedShows[menuTableRow]]];
 	}
 }
 
 -(IBAction)downloadMenuHandler:(NSMenuItem *)menu
 {
-	if ([menu.title caseInsensitiveCompare:@"Remove selected shows"] == NSOrderedSame) {
+	if ([menu.title caseInsensitiveCompare:@"Delete"] == NSOrderedSame) {
 		[self removeFromDownloadQueue:menu];
 	}
-	if ([menu.title caseInsensitiveCompare:@"Remove this show"] == NSOrderedSame) {
-		[self removeFromDownloadQueue:[NSArray arrayWithObject:downloadQueueTable.sortedShows[menuTableRow]]];
+	if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
+		NSArray * selectedShows = [downloadQueueTable.sortedShows objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
+		[tiVoManager.subscribedShows addSubscriptions:selectedShows];
 	}
 	
 }
 
 -(IBAction)subscriptionMenuHandler:(NSMenuItem *)menu
 {
-	if ([menu.title caseInsensitiveCompare:@"Unsubscribe selected shows"] == NSOrderedSame) {
+	if ([menu.title caseInsensitiveCompare:@"Unsubscribe"] == NSOrderedSame) {
 		[subscriptionTable unsubscribeSelectedItems:menu];
-	}
-	if ([menu.title caseInsensitiveCompare:@"Unsubscribe this show"] == NSOrderedSame) {
-		[tiVoManager.subscribedShows  deleteSubscriptions:[NSArray arrayWithObject:subscriptionTable.sortedSubscriptions[menuTableRow]]];
 	}
 	
 }

@@ -39,7 +39,7 @@
         [_leftText release];
         [_rightText release];
         _doubleValue = 0.0;
-        _barColor = [[NSColor colorWithCalibratedRed:1.0 green:.61 blue:.45 alpha:0.25] retain];
+        _barColor = [[NSColor colorWithCalibratedRed:1.0 green:.61 blue:.45 alpha:0.75] retain];
         [self setAutoresizingMask:NSViewWidthSizable ];
 
     }
