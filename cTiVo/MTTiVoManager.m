@@ -430,7 +430,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[_downloadQueue removeObjectsAtIndexes:itemsToRemove];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadStatusChanged object:nil];
-			NSLog(@"QQQ setting DLQueueUpdated post");
+//			NSLog(@"QQQ setting DLQueueUpdated post");
 		NSNotification *downloadQueueNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:downloadQueueNotification afterDelay:4.0];
 	}

@@ -61,7 +61,7 @@
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
-		NSLog(@"QQQChanging DL status of %@ to %@", [(MTTiVoShow *)object showTitle], [(MTTiVoShow *)object downloadStatus]);
+//		NSLog(@"QQQChanging DL status of %@ to %@", [(MTTiVoShow *)object showTitle], [(MTTiVoShow *)object downloadStatus]);
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadStatusChanged object:nil];
     }
 }

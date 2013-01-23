@@ -80,7 +80,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	if (thisTivo.isReachable) {
 		thisTivo.networkAvailability = [NSDate date];
 		[NSObject cancelPreviousPerformRequestsWithTarget:thisTivo selector:@selector(manageDownloads:) object:thisTivo];
-        NSLog(@"QQQcalling managedownloads from MTTiVo:tivoNetworkCallback with delay+2");
+//        NSLog(@"QQQcalling managedownloads from MTTiVo:tivoNetworkCallback with delay+2");
 		[thisTivo performSelector:@selector(manageDownloads) withObject:thisTivo afterDelay:kMTTiVoAccessDelay+2];
 		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
 	} 
@@ -341,7 +341,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)manageDownloads:(NSNotification *)notification
 {
-	NSLog(@"QQQCalled managedownloads on TiVo %@ from notification %@",_tiVo.name,notification.name);
+//	NSLog(@"QQQCalled managedownloads on TiVo %@ from notification %@",_tiVo.name,notification.name);
    if (!notification.object || notification.object == self) {
         [self manageDownloads];
     }
@@ -350,7 +350,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)manageDownloads
 {
-	NSLog(@"QQQ-manageDownloads");
+//	NSLog(@"QQQ-manageDownloads");
 	if (managingDownloads) {
         return;
     }

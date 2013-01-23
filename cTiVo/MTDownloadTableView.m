@@ -39,12 +39,12 @@
 
 -(void) reloadDataDownload {
 	//QQQ debugging msgs to be removed
-	NSLog(@"QQQReloading from Download status changed");
+//	NSLog(@"QQQReloading from Download status changed");
 	[self reloadData];
 	
 }
 -(void) reloadDataFormat{
-	NSLog(@"QQQReloading from Format status changed");
+//	NSLog(@"QQQReloading from Format status changed");
 	[self reloadData];
 	
 }
@@ -367,7 +367,7 @@
 		MTTiVoShow * insertShow = nil;
 		if (insertRow < [tiVoManager downloadQueue].count) {
 			insertShow = [tiVoManager.downloadQueue objectAtIndex:insertRow];
-			NSLog(@"QQQ inserting before %@",insertShow.showTitle);
+//			NSLog(@"QQQ inserting before %@",insertShow.showTitle);
 		}
 		[tiVoManager downloadShowsWithCurrentOptions:realShows beforeShow:insertShow];
 		

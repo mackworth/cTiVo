@@ -204,10 +204,10 @@ static NSDateFormatter *dateFormatter;
 		MTFormatPopUpButton * popUp = ((MTPopUpTableCellView *)result).popUpButton;
 		popUp.owner = thisSubscription;
 		popUp.formatList = tiVoManager.formatList;
-		NSString * tempQQQQ = thisSubscription.encodeFormat.name;
+//		NSString * tempQQQQ = thisSubscription.encodeFormat.name;
 		thisSubscription.encodeFormat = [popUp selectFormatNamed:thisSubscription.encodeFormat.name];
- 		if([tempQQQQ compare: thisSubscription.encodeFormat.name] != NSOrderedSame)
-			NSLog(@"QQQSB popup at %@ changed from %@ to %@", thisSubscription.seriesTitle, tempQQQQ, thisSubscription.encodeFormat.name);
+// 		if([tempQQQQ compare: thisSubscription.encodeFormat.name] != NSOrderedSame)
+//			NSLog(@"QQQSB popup at %@ changed from %@ to %@", thisSubscription.seriesTitle, tempQQQQ, thisSubscription.encodeFormat.name);
 
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
@@ -308,7 +308,7 @@ static NSDateFormatter *dateFormatter;
 	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
 	//NSLog(@"calling readObjects%@",pasteboard);
 	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
-	NSLog(@"QQQdragging: %@", draggedShows);
+//	NSLog(@"QQQdragging: %@", draggedShows);
 	
 	//dragged shows are copies, so we need to find the real show objects
 	NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
