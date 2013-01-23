@@ -150,7 +150,7 @@
 	formatListPopUp.showHidden = NO;
 	formatListPopUp.formatList =  tiVoManager.formatList;
 	[formatListPopUp refreshMenu];
-	tiVoManager.selectedFormat = [formatListPopUp selectFormatNamed:tiVoManager.selectedFormat.name];
+	[tiVoManager setValue:[formatListPopUp selectFormatNamed:tiVoManager.selectedFormat.name] forKey:@"selectedFormat"];
 
 }
 
@@ -227,7 +227,7 @@
 {
     if (sender == formatListPopUp) {
         MTFormatPopUpButton *thisButton = (MTFormatPopUpButton *)sender;
-        tiVoManager.selectedFormat = [[thisButton selectedItem] representedObject];
+        [tiVoManager setValue:[[thisButton selectedItem] representedObject] forKey:@"selectedFormat"];
         [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.selectedFormat.name forKey:kMTSelectedFormat];
     } else {
         MTFormatPopUpButton *thisButton = (MTFormatPopUpButton *)sender;

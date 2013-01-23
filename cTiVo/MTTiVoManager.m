@@ -392,9 +392,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	for (MTTiVoShow * thisShow in shows) {
 		thisShow.encodeFormat = [self selectedFormat];
 		thisShow.addToiTunesWhenEncoded = thisShow.encodeFormat.canAddToiTunes &&
-											self.addToItunes;
+											[[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
 		thisShow.simultaneousEncode = thisShow.encodeFormat.canSimulEncode &&
-											self.simultaneousEncode;
+											[[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
 		thisShow.downloadDirectory = tiVoManager.downloadDirectory;
 	}
 	[self addProgramsToDownloadQueue:shows beforeShow:nextShow ];

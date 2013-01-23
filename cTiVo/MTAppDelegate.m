@@ -120,6 +120,7 @@ void signalHandler(int signal)
 		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:NO] forKey:kMTShowCopyProtected];
 	}
 	tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
+    [tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
 	mainWindowController = nil;
 	_formatEditorController = nil;
 	[self showMainWindow:nil];
@@ -150,6 +151,30 @@ void signalHandler(int signal)
     // add the notification port to the application runloop
     CFRunLoopAddSource( CFRunLoopGetCurrent(),
 					   IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes );
+}
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
+		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
+        BOOL canSimulEncode = ![tiVoManager.selectedFormat.mustDownloadFirst boolValue];
+		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+		if (canSimulEncode) {
+			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:@"SimultaneousEncode" options:nil];
+//			[simulEncodeItem setEnabled:YES];
+		} else {
+			[simulEncodeItem unbind:@"value"];
+//			[simulEncodeItem setEnabled:NO];
+		}
+		if (caniTune) {
+			[iTunesMenuItem bind:@"value" toObject:defaults withKeyPath:@"iTunesSubmit" options:nil];
+//			[iTunesMenuItem setEnabled:YES];
+		} else {
+			[iTunesMenuItem unbind:@"value"];
+//			[iTunesMenuItem setEnabled:NO];
+		}
+
+	}
 }
 
 #pragma mark - UI support

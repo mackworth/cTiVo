@@ -3,12 +3,12 @@
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
 		<string key="IBDocument.SystemVersion">12C60</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2844</string>
+		<string key="IBDocument.InterfaceBuilderVersion">2840</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">2844</string>
+			<string key="NS.object.0">2840</string>
 		</object>
 		<array key="IBDocument.IntegratedClassDependencies">
 			<string>NSButton</string>
@@ -505,65 +505,6 @@
 										<string key="NSKeyEquivalent"/>
 										<int key="NSPeriodicDelay">400</int>
 										<int key="NSPeriodicInterval">75</int>
-									</object>
-									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
-								</object>
-								<object class="NSButton" id="838053559">
-									<reference key="NSNextResponder" ref="882086054"/>
-									<int key="NSvFlags">268</int>
-									<string key="NSFrame">{{193, 572}, {207, 18}}</string>
-									<reference key="NSSuperview" ref="882086054"/>
-									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="882920055"/>
-									<string key="NSReuseIdentifierKey">_NS:9</string>
-									<bool key="NSEnabled">YES</bool>
-									<object class="NSButtonCell" key="NSCell" id="779962319">
-										<int key="NSCellFlags">-2080374784</int>
-										<int key="NSCellFlags2">268435456</int>
-										<string key="NSContents">Add to iTunes When Encoded</string>
-										<reference key="NSSupport" ref="1042930898"/>
-										<string key="NSCellIdentifier">_NS:9</string>
-										<reference key="NSControlView" ref="838053559"/>
-										<int key="NSButtonFlags">1211912448</int>
-										<int key="NSButtonFlags2">2</int>
-										<object class="NSCustomResource" key="NSNormalImage" id="1005133185">
-											<string key="NSClassName">NSImage</string>
-											<string key="NSResourceName">NSSwitch</string>
-										</object>
-										<object class="NSButtonImageSource" key="NSAlternateImage" id="981430337">
-											<string key="NSImageName">NSSwitch</string>
-										</object>
-										<string key="NSAlternateContents"/>
-										<string key="NSKeyEquivalent"/>
-										<int key="NSPeriodicDelay">200</int>
-										<int key="NSPeriodicInterval">25</int>
-									</object>
-									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
-								</object>
-								<object class="NSButton" id="1978532">
-									<reference key="NSNextResponder" ref="882086054"/>
-									<int key="NSvFlags">268</int>
-									<string key="NSFrame">{{0, 572}, {157, 18}}</string>
-									<reference key="NSSuperview" ref="882086054"/>
-									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="838053559"/>
-									<string key="NSReuseIdentifierKey">_NS:9</string>
-									<bool key="NSEnabled">YES</bool>
-									<object class="NSButtonCell" key="NSCell" id="879724836">
-										<int key="NSCellFlags">-2080374784</int>
-										<int key="NSCellFlags2">268435456</int>
-										<string key="NSContents">Simultaneous encode</string>
-										<reference key="NSSupport" ref="1042930898"/>
-										<string key="NSCellIdentifier">_NS:9</string>
-										<reference key="NSControlView" ref="1978532"/>
-										<int key="NSButtonFlags">1211912448</int>
-										<int key="NSButtonFlags2">2</int>
-										<reference key="NSNormalImage" ref="1005133185"/>
-										<reference key="NSAlternateImage" ref="981430337"/>
-										<string key="NSAlternateContents"/>
-										<string key="NSKeyEquivalent"/>
-										<int key="NSPeriodicDelay">200</int>
-										<int key="NSPeriodicInterval">25</int>
 									</object>
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
@@ -1257,7 +1198,7 @@
 							<string key="NSFrame">{{20, 20}, {672, 599}}</string>
 							<reference key="NSSuperview" ref="994730169"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView" ref="1978532"/>
+							<reference key="NSNextKeyView" ref="882920055"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<string key="NSClassName">NSView</string>
 						</object>
@@ -1706,38 +1647,6 @@
 						<reference key="destination" ref="969919815"/>
 					</object>
 					<int key="connectionID">194</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">simultaneousEncodeButton</string>
-						<reference key="source" ref="1001"/>
-						<reference key="destination" ref="1978532"/>
-					</object>
-					<int key="connectionID">175</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">changeSimultaneous:</string>
-						<reference key="source" ref="1001"/>
-						<reference key="destination" ref="1978532"/>
-					</object>
-					<int key="connectionID">294</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">changeiTunes:</string>
-						<reference key="source" ref="1001"/>
-						<reference key="destination" ref="838053559"/>
-					</object>
-					<int key="connectionID">293</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">addToiTunesButton</string>
-						<reference key="source" ref="1001"/>
-						<reference key="destination" ref="838053559"/>
-					</object>
-					<int key="connectionID">164</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -2775,13 +2684,11 @@
 						<int key="objectID">311</int>
 						<reference key="object" ref="882086054"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="838053559"/>
 							<reference ref="882920055"/>
 							<reference ref="779895097"/>
 							<reference ref="465007069"/>
 							<reference ref="719796418"/>
 							<reference ref="324106926"/>
-							<reference ref="1978532"/>
 							<reference ref="862415292"/>
 							<reference ref="193322370"/>
 						</array>
@@ -3264,32 +3171,6 @@
 						<reference key="parent" ref="15422368"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">173</int>
-						<reference key="object" ref="1978532"/>
-						<array class="NSMutableArray" key="children">
-							<reference ref="879724836"/>
-						</array>
-						<reference key="parent" ref="882086054"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">174</int>
-						<reference key="object" ref="879724836"/>
-						<reference key="parent" ref="1978532"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">162</int>
-						<reference key="object" ref="838053559"/>
-						<array class="NSMutableArray" key="children">
-							<reference ref="779962319"/>
-						</array>
-						<reference key="parent" ref="882086054"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">163</int>
-						<reference key="object" ref="779962319"/>
-						<reference key="parent" ref="838053559"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">284</int>
 						<reference key="object" ref="882920055"/>
 						<array class="NSMutableArray" key="children">
@@ -3679,17 +3560,6 @@
 				<string key="158.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="159.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="160.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="162.CustomClassName">MTCheckBox</string>
-				<object class="NSMutableDictionary" key="162.IBAttributePlaceholdersKey">
-					<string key="NS.key.0">ToolTip</string>
-					<object class="IBToolTipAttribute" key="NS.object.0">
-						<string key="name">ToolTip</string>
-						<reference key="object" ref="838053559"/>
-						<string key="toolTip">Add program to iTunes videos when complete</string>
-					</object>
-				</object>
-				<string key="162.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="163.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="165.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="YES" key="165.isInViewBasedMode"/>
 				<array key="165.prototypeCellViews">
@@ -3707,17 +3577,6 @@
 				<string key="167.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="168.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="169.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="173.CustomClassName">MTCheckBox</string>
-				<object class="NSMutableDictionary" key="173.IBAttributePlaceholdersKey">
-					<string key="NS.key.0">ToolTip</string>
-					<object class="IBToolTipAttribute" key="NS.object.0">
-						<string key="name">ToolTip</string>
-						<reference key="object" ref="1978532"/>
-						<string key="toolTip">Allow encoding while downloading?</string>
-					</object>
-				</object>
-				<string key="173.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="174.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="176.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="YES" key="176.isInViewBasedMode"/>
 				<array key="176.prototypeCellViews">
@@ -4038,14 +3897,6 @@
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<object class="IBPartialClassDescription">
-					<string key="className">MTCheckBox</string>
-					<string key="superclassName">NSButton</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/MTCheckBox.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
 					<string key="className">MTDownloadTableView</string>
 					<string key="superclassName">NSTableView</string>
 					<object class="NSMutableDictionary" key="outlets">
@@ -4295,7 +4146,6 @@
 		<dictionary class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
 			<string key="NSMenuCheckmark">{11, 11}</string>
 			<string key="NSMenuMixedState">{10, 3}</string>
-			<string key="NSSwitch">{15, 15}</string>
 		</dictionary>
 	</data>
 </archive>

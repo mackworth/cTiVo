@@ -17,7 +17,7 @@
 @interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate> {
 	MTTiVoManager *tiVoGlobalManager;
 	MTMainWindowController *mainWindowController;
-	IBOutlet NSMenuItem *refreshTiVoMenuItem;
+	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *simulEncodeItem;
     IBOutlet NSView *formatSelectionTable;
     IBOutlet NSTableView *exportTableView;
 	NSMutableArray *mediaKeyQueue;
