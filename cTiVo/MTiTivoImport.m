@@ -118,7 +118,7 @@
             }
             //iTunes preference
             BOOL iTunes = [sUD boolForKey:kITiTunes];
-            [sUD setBool:   iTunes forKey:kMTiTunesEncode ];
+            [sUD setBool:   iTunes forKey:kMTiTunesSubmit ];
             
             //Simultaneous encode
             BOOL simulEncode = ![sUD boolForKey:kITDownloadFirst];

@@ -90,14 +90,15 @@
 #define kMTSelectedFormat @"SelectedFormat"         //Name of currently selected format for conversion
 #define kMTDownloadDirectory  @"DownloadDirectory"  //Pathname for directory for dowloaded files
 #define kMTSubscriptionList @"SubscriptionList"     //Array of subscription dictionaries
-#define kMTiTunesEncode @"iTunesEncode"             //Whether to submit to iTunes after encoding
+#define kMTiTunesSubmit @"iTunesSubmit"             //Whether to submit to iTunes after encoding
+#define kMTiTunesSync @"iTunesSync"                 // Whether to sync iDevices after iTunes submital
 #define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
 
-//NOT IMPLEMENTED YET, but preferences imported from iTivo
 #define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
-#define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
 
+//NOT IMPLEMENTED YET, but preferences imported from iTivo
+#define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
 #define kMTRunComSkip @"RunComSkip"                 // Whether to run comSkip program after conversion
 #define kMTExportTivoMetaData @"ExportTivoMetaData" // Whether to export XML metadata
 #define kMTExportSubtitles @"ExportSubtitles"       // Whether to export subtitles with ts2ami
@@ -110,6 +111,5 @@
 #define kMTScheduledSleep      @"ScheduledSleep"     // Whether to start queue to sleep after scheduled downloads
 
 #define kMTiTunesIcon @"iTunesIcon"                 // Whether to use video frame (versus cTivo logo) for iTUnes icon
-#define kMTiTunesSync @"iTunesSync"                 // Whether to sync iDevices after iTunes submital
 #define kMTPostDownloadCommand @"PostDownloadCommand" // Example: "# mv \"$file\" ~/.Trash ;";
 

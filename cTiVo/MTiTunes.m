@@ -124,7 +124,9 @@
 		NSLog(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, show.encodeFormat.name, showFileURL );
 		return NO;
 	}
-    [self updateAllIDevices];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSync]) {
+		[self updateAllIDevices];
+	}
 }
 
 - (void) updateAllIDevices {

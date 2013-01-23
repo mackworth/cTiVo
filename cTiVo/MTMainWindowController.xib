@@ -3,12 +3,12 @@
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
 		<string key="IBDocument.SystemVersion">12C60</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2840</string>
+		<string key="IBDocument.InterfaceBuilderVersion">2844</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">2840</string>
+			<string key="NS.object.0">2844</string>
 		</object>
 		<array key="IBDocument.IntegratedClassDependencies">
 			<string>NSButton</string>
@@ -405,6 +405,7 @@
 											<string key="NSFrame">{{224, 17}, {15, 102}}</string>
 											<reference key="NSSuperview" ref="719796418"/>
 											<reference key="NSWindow"/>
+											<reference key="NSNextKeyView"/>
 											<string key="NSReuseIdentifierKey">_NS:58</string>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 											<reference key="NSTarget" ref="719796418"/>
@@ -965,9 +966,9 @@
 													<array class="NSMutableArray" key="NSTableColumns">
 														<object class="NSTableColumn" id="332580739">
 															<string key="NSIdentifier">Order</string>
-															<double key="NSWidth">30</double>
-															<double key="NSMinWidth">30</double>
-															<double key="NSMaxWidth">2000</double>
+															<double key="NSWidth">28</double>
+															<double key="NSMinWidth">22</double>
+															<double key="NSMaxWidth">40</double>
 															<object class="NSTableHeaderCell" key="NSHeaderCell">
 																<int key="NSCellFlags">75497536</int>
 																<int key="NSCellFlags2">134219776</int>
@@ -1950,7 +1951,7 @@
 								<object class="NSTextField" id="800776596">
 									<reference key="NSNextResponder" ref="334740629"/>
 									<int key="NSvFlags">266</int>
-									<string key="NSFrame">{{0, 1}, {28, 17}}</string>
+									<string key="NSFrame">{{7, 1}, {19, 17}}</string>
 									<reference key="NSSuperview" ref="334740629"/>
 									<reference key="NSNextKeyView" ref="64645210"/>
 									<string key="NSAntiCompressionPriority">{250, 750}</string>
@@ -1967,7 +1968,7 @@
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{1, 1}, {30, 17}}</string>
+							<string key="NSFrame">{{1, 1}, {28, 17}}</string>
 							<reference key="NSNextKeyView" ref="800776596"/>
 						</object>
 						<reference key="destination" ref="800776596"/>
@@ -2001,7 +2002,7 @@
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{329, 1}, {120, 17}}</string>
+							<string key="NSFrame">{{327, 1}, {120, 17}}</string>
 							<reference key="NSNextKeyView" ref="966352320"/>
 						</object>
 						<reference key="destination" ref="966352320"/>
@@ -2039,7 +2040,7 @@
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{452, 1}, {140, 17}}</string>
+							<string key="NSFrame">{{450, 1}, {140, 17}}</string>
 							<reference key="NSNextKeyView" ref="678223270"/>
 						</object>
 						<reference key="destination" ref="678223270"/>
@@ -2107,7 +2108,7 @@
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{595, 1}, {40, 17}}</string>
+							<string key="NSFrame">{{593, 1}, {40, 17}}</string>
 							<reference key="NSNextKeyView" ref="490571548"/>
 						</object>
 						<reference key="destination" ref="490571548"/>
@@ -2141,7 +2142,7 @@
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{638, 1}, {30, 17}}</string>
+							<string key="NSFrame">{{636, 1}, {30, 17}}</string>
 							<reference key="NSNextKeyView" ref="900077842"/>
 						</object>
 						<reference key="destination" ref="900077842"/>
@@ -2517,7 +2518,7 @@
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{34, 1}, {292, 17}}</string>
+							<string key="NSFrame">{{32, 1}, {292, 17}}</string>
 							<reference key="NSNextKeyView" ref="904342467"/>
 						</object>
 						<reference key="destination" ref="904342467"/>
@@ -2781,8 +2782,8 @@
 							<reference ref="719796418"/>
 							<reference ref="324106926"/>
 							<reference ref="1978532"/>
-							<reference ref="193322370"/>
 							<reference ref="862415292"/>
+							<reference ref="193322370"/>
 						</array>
 						<reference key="parent" ref="994730169"/>
 					</object>

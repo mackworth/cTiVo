@@ -71,7 +71,7 @@
         BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
         [addToiTunesButton setEnabled:caniTune];
         if (caniTune) {
-            BOOL wantsiTunes = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesEncode];
+            BOOL wantsiTunes = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
             if (wantsiTunes) {
                 [addToiTunesButton setState:NSOnState];
 				tiVoManager.addToItunes = YES;
@@ -424,7 +424,7 @@
 {     
     MTCheckBox *checkbox = sender;
     if (sender == addToiTunesButton) {
-        [[NSUserDefaults standardUserDefaults] setBool:(checkbox.state == NSOnState) forKey:kMTiTunesEncode];
+        [[NSUserDefaults standardUserDefaults] setBool:(checkbox.state == NSOnState) forKey:kMTiTunesSubmit];
 		tiVoManager.addToItunes = checkbox.state == NSOnState;
 
     } else if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){

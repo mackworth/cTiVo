@@ -3,40 +3,43 @@
 *cTivo* is under rapid development. We're currently at an alpha release; give it a try and tell us what you think.
 ----
 ==Features similar to iTivo include:==
-  * Formats include h.264, mpeg-2, mpeg-1, avi.
+  * Formats include h.264, mpeg-2, mpeg-1, avi, decrypt-only.
   * Target devices include iPhone, iPod, AppleTV, Xbox 360, PlayStation 3, PSP, youtube.
   * 'Subscriptions' to your regular shows: downloading them whenever new episodes are available.
   * Support for different encoders, including HandBrake, mencoder.
   * Download queue for batch processing.
+  * Optionally show non-downloadable copy-protected shows.
+  * Support for FFmpeg, ElGato Turbo encoders.
+  * Download queue restored when restarting app.
   * Automatic discovery of Tivos using Bonjour.
+  * Folders optionally created for each Series
   * Automatic updates of the software.
   * Automatically perform an 'iTunes sync' to your device when the download is completed.
-  * With appropriate configuration, in the morning, you will find all your favorite shows from your TiVo loaded onto your i Phone or iPad.
+  * With appropriate configuration, in the morning, you will find all your favorite shows from your TiVo loaded onto your iPhone or iPad.
   * Imports iTivo preferences, including subscriptions and Media Access Key.
 ----
 ==Features in addition to iTivo include:==
   * Support for multiple TiVos (with same or different Media Access Keys), all displayed/active simultaneously.
   * Change conversion formats for each download or subscription.
+  * Change download directories
   * Turn on/off iTunes /simultaneous download encoding for each download or subscription.
+  * Simultaneous downloading from multiple TiVos
+  * Option to prevent sleep until processing complete
   * More parallel processing, including downloading next show while encoding current one
   * Sorting download and subscription queues.
+  * Completely customizable encoder options; 
+  * Drag/drop and contextual menus for ease of use
   * Fully compatible with OS X Mountain Lion (10.8) through Leopard (10.5).
 ----
-==iTivo features not implemented, at least yet:==
-  * Decrypt-only downloads.
-  * Preferences screen.
+==iTivo features not implemented, at least not yet:==
   * Automatically remove commercials from downloaded shows.
-  * Download queue restored when restarting app.
   * Generate metadata appropriate for use by tools such as pyTivoX.
-  * Optionally show non-downloadable copy-protected shows.
   * Create subtitle files (.srt) from the closed caption info.
   * Scheduling of when the queue will be processed.
-  * Support for FFmpeg, ElGato Turbo encoders.
   * Manual connect by IP address.
   * Display filter in program list.
   * Detailed info on each show.
-  * Full control over encoder options.
-  * Reporting on tivo's Hard Drive usage.
+  * Reporting on TiVo's disk usage.
   * Growl notifications.
 ----
 ==To install:==
