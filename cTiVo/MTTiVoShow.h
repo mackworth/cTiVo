@@ -75,7 +75,8 @@
 
 //Properties for display in detail
 
-@property (nonatomic, readonly) NSString *actors;
+@property (nonatomic, readonly) NSAttributedString *actors, *guestStars, *directors, *producers;
+@property (nonatomic, readonly) NSString *yearString;
 
 @property (nonatomic, readonly) NSString *seasonEpisode; //attempts to build S02 E04 version
 @property time_t showLength;  //length of show in seconds

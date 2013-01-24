@@ -44,6 +44,8 @@
         pipe2 = nil;
 		_vActor = nil;
 		_vExecProducer = nil;
+        _vDirector = nil;
+        _vGuestStar = nil;
         devNullFileHandle = [[NSFileHandle fileHandleForWritingAtPath:@"/dev/null"] retain];
 		_season = 0;
 		_episode = 0;
@@ -75,7 +77,7 @@
 
 -(NSArray *)parseNames:(NSArray *)nameSet
 {
-	if (!nameSet || nameSet.count == 0) {
+	if (!nameSet || ![nameSet respondsToSelector:@selector(count)] || nameSet.count == 0) {
 		return nameSet;
 	}
 	NSRegularExpression *nameParse = [NSRegularExpression regularExpressionWithPattern:@"([^|]*)\\|([^|]*)" options:NSRegularExpressionCaseInsensitive error:nil];
@@ -127,6 +129,8 @@
 	[parser parse];
 	self.vActor = [self parseNames:_vActor];
 	self.vExecProducer = [self parseNames:_vExecProducer];
+	self.vGuestStar = [self parseNames:_vGuestStar];
+	self.vDirector = [self parseNames:_vDirector];
 	if (!gotDetails) {
 		NSLog(@"GetDetails Fail for %@",_showTitle);
 		NSLog(@"Returned XML is %@",[[[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	] autorelease]	);
@@ -1064,13 +1068,42 @@
 
 }
 
--(NSString *)actors
+-(NSAttributedString *)attrStringFromDictionary:(id)nameList
 {
     NSMutableString *returnString = [NSMutableString string];
-    for (NSDictionary *actor in _vActor) {
-        [returnString appendFormat:@"%@\n",[self nameString:actor]];
+    if ([nameList isKindOfClass:[NSArray class]]) {
+        for (NSDictionary *name in nameList) {
+            [returnString appendFormat:@"%@\n",[self nameString:name]];
+        }
+        
     }
-    return [NSString stringWithString:returnString];
+    return [[[NSAttributedString alloc] initWithString:returnString attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:11]}] autorelease];
+    
+}
+
+-(NSAttributedString *)actors
+{
+    return [self attrStringFromDictionary:_vActor];
+}
+
+-(NSAttributedString *)guestStars
+{
+    return [self attrStringFromDictionary:_vGuestStar];
+}
+
+-(NSAttributedString *)directors
+{
+    return [self attrStringFromDictionary:_vDirector];
+}
+
+-(NSAttributedString *)producers
+{
+    return [self attrStringFromDictionary:_vExecProducer];
+}
+
+-(NSString *)yearString
+{
+    return [NSString stringWithFormat:@"%d",_episodeYear];
 }
 
 
