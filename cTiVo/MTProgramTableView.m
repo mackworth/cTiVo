@@ -77,7 +77,9 @@
 	self.sortedShows = nil;
     [super reloadData];
     
-
+    if (self.sortedShows.count) {
+        myController.showForDetail = self.sortedShows[0];
+    }
 	//now restore selection
 	NSIndexSet * showIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
 		return [selectedShows indexOfObject:obj] !=NSNotFound;
@@ -166,6 +168,15 @@
 		self.sortedShows = [[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate] filteredArrayUsingPredicate:protectedPredicate] sortedArrayUsingDescriptors:self.sortDescriptors];
 	}
 	return _sortedShows;
+}
+
+-(void)tableViewSelectionDidChange:(NSNotification *)notification
+{
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+    if (selectedRowIndexes.count == 1) {
+        NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+        myController.showForDetail = selectedRows[0];
+    }
 }
 
 

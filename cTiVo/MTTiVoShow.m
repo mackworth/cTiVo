@@ -89,6 +89,11 @@
 	return [NSArray arrayWithArray:newNames];
 }
 
+-(NSString *)nameString:(NSDictionary *)nameDictionary
+{
+    return [NSString stringWithFormat:@"%@ %@",nameDictionary[kMTFirstName] ? nameDictionary[kMTFirstName] : @"" ,nameDictionary[kMTLastName] ? nameDictionary[kMTLastName] : @"" ];
+}
+
 //-(void)getShowDetailWithNotification
 //{
 //	if (gotDetails) {
@@ -1057,6 +1062,15 @@
     [alertWindow orderOut:self];
     [tiVoManager noRecordingAlertDidEnd:nil returnCode:0 contextInfo:self];
 
+}
+
+-(NSString *)actors
+{
+    NSMutableString *returnString = [NSMutableString string];
+    for (NSDictionary *actor in _vActor) {
+        [returnString appendFormat:@"%@\n",[self nameString:actor]];
+    }
+    return [NSString stringWithString:returnString];
 }
 
 

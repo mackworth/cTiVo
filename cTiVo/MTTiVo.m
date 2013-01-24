@@ -174,6 +174,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	NSRegularExpression *twoFieldRx = [NSRegularExpression regularExpressionWithPattern:@"(.*)<br>(.*)" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *urlRx = [NSRegularExpression regularExpressionWithPattern:@"<a href=\"([^\"]*)\">Download MPEG-PS" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSRegularExpression *idRx = [NSRegularExpression regularExpressionWithPattern:@"id=(\\d+)" options:NSRegularExpressionCaseInsensitive error:nil];
+	NSRegularExpression *stationCallSignRx = [NSRegularExpression regularExpressionWithPattern:@"alt=\"(.+)\"" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSArray *tables = [tableRx matchesInString:urlDataString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, urlDataString.length)];
     NSDateFormatter *showDateFormatter = [[[NSDateFormatter alloc] init] autorelease];
     [showDateFormatter setDateFormat:@"M/d/y"];
@@ -199,7 +200,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	*idString = @"",
 	*showLength = @"",
 	*size = @"",
-	*showDateString = @"";
+	*showDateString = @"",
+    *stationCallSign = @"";
     BOOL protected = NO;
 	NSRange rangeToCheck;
 	for (NSTextCheckingResult *row in rows) {
@@ -210,6 +212,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		size = @"";
 		showLength = @"";
         showDateString = @"";
+        stationCallSign = @"";
 		cellIndex = 0;
         protected = NO;
 		rangeToCheck = [row rangeAtIndex:1];
@@ -222,6 +225,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			} else {
 				cellRange = cell.range;
 			}
+            if (cellIndex == 1) {
+                //Get the station call sign
+ 				NSString *fullTitle = [urlDataString substringWithRange:[cell rangeAtIndex:1]];
+				NSTextCheckingResult *callSignResult = [stationCallSignRx firstMatchInString:fullTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullTitle.length)];
+				stationCallSign = [[fullTitle substringWithRange:[callSignResult rangeAtIndex:1]] stringByDecodingHTMLEntities];             
+            }
 			if (cellIndex == 2) {
 				//We've got the title
 				NSString *fullTitle = [urlDataString substringWithRange:[cell rangeAtIndex:1]];
@@ -287,6 +296,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                 thisShow.urlString = downloadURL;
                 thisShow.showID = [idString intValue];
                 thisShow.showDateString = showDateString;
+                thisShow.stationCallsign = stationCallSign;
                 NSArray *showDateComponents = [showDateString componentsSeparatedByString:@" "];
                 thisShow.showDate = [showDateFormatter dateFromString:[NSString stringWithFormat:@"%@/%ld",showDateComponents[1],thisYear]];
                 if ([[NSDate date] compare:[thisShow.showDate dateByAddingTimeInterval:-180*24*60*60]] == NSOrderedAscending) {

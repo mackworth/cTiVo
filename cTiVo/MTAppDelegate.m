@@ -167,14 +167,14 @@ void signalHandler(int signal)
 		}
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		if (caniTune) {
-			iTunesMenuItem = [[NSMenuItem alloc] init];
+			iTunesMenuItem = [[[NSMenuItem alloc] init] autorelease];
 			iTunesMenuItem.title = @"Add to iTunes when complete";
 			[iTunesMenuItem bind:@"value" toObject:defaults withKeyPath:@"iTunesSubmit" options:nil];
 			[optionsMenu insertItem:iTunesMenuItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
 		}
 		if (canSimulEncode) {
-			simulEncodeItem = [[NSMenuItem alloc] init];
+			simulEncodeItem = [[[NSMenuItem alloc] init] autorelease];
 			simulEncodeItem.title = @"Simultaneous Encoding";
 			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:@"SimultaneousEncode" options:nil];
 			[optionsMenu insertItem:simulEncodeItem atIndex:0];

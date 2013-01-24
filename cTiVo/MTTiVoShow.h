@@ -55,7 +55,8 @@
 									*originalAirDate,
 									*episodeGenre,
                                     *seriesTitle,
-                                    *showDateString;
+                                    *showDateString,
+                                    *stationCallsign;
 
 @property (nonatomic, retain) NSArray *vActor,
 										*vExecProducer,
@@ -71,6 +72,11 @@
 @property (nonatomic, readonly) NSString *encodeFilePath,
 										 *bufferFilePath,
 										 *downloadFilePath;
+
+//Properties for display in detail
+
+@property (nonatomic, readonly) NSString *actors;
+
 @property (nonatomic, readonly) NSString *seasonEpisode; //attempts to build S02 E04 version
 @property time_t showLength;  //length of show in seconds
 @property (nonatomic, retain) NSURL *URL;
