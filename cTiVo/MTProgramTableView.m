@@ -175,7 +175,7 @@
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
     if (selectedRowIndexes.count == 1) {
         NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-        myController.showForDetail = selectedRows[0];
+        [myController setValue:selectedRows[0] forKey:@"showForDetail"];
     }
 }
 

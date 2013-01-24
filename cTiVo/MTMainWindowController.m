@@ -284,7 +284,19 @@
 		[tiVoShowTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
 		[self subscribe:menu];
 	}
+	if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
+		self.showForDetail = tiVoShowTable.sortedShows[menuTableRow];
+		[tiVoShowTable deselectAll:nil];
+		[tiVoShowTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:NO];
+		[showDetailDrawer open];
+	}
 }
+
+-(void)doubleClickForDetails:(id)input
+{
+	[showDetailDrawer open];
+}
+
 
 -(IBAction)downloadMenuHandler:(NSMenuItem *)menu
 {
@@ -294,6 +306,12 @@
 	if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		NSArray * selectedShows = [downloadQueueTable.sortedShows objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
 		[tiVoManager.subscribedShows addSubscriptions:selectedShows];
+	}
+	if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
+		self.showForDetail = downloadQueueTable.sortedShows[menuTableRow];
+		[downloadQueueTable deselectAll:nil];
+		[downloadQueueTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:NO];
+		[showDetailDrawer open];
 	}
 	
 }

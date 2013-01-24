@@ -47,6 +47,30 @@
     return self;
 }
 
+- (void)setBackgroundStyle:(NSBackgroundStyle)style
+{
+    [super setBackgroundStyle:style];
+	
+    // If the cell's text color is black, this sets it to white
+	//    [((NSCell *)self.progressIndicator.leftText.cell) setBackgroundStyle:style];
+	
+    // Otherwise you need to change the color manually
+	NSColor *fontColor;
+    switch (style) {
+        case NSBackgroundStyleLight:
+			fontColor = [NSColor colorWithCalibratedWhite:0.0 alpha:1.0];
+            break;
+			
+        case NSBackgroundStyleDark:
+        default:
+			fontColor = [NSColor colorWithCalibratedWhite:1.0 alpha:1.0];
+            break;
+    }
+	self.textField.textColor = fontColor;
+}
+
+
+
 - (void)drawRect:(NSRect)dirtyRect
 {
     // Drawing code here.

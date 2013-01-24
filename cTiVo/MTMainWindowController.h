@@ -25,6 +25,7 @@
 	IBOutlet MTProgramTableView  *tiVoShowTable;
 	IBOutlet MTSubscriptionTableView  *subscriptionTable;
     IBOutlet NSView *view;
+	IBOutlet NSDrawer *showDetailDrawer;
 	IBOutlet NSMenu *programContextualMenu, *downloadContextualMenu, *subscriptionContextualMenu;
 	NSPoint menuCursorPosition;
 	NSInteger menuTableRow;

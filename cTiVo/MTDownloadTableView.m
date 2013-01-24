@@ -128,6 +128,14 @@
 
 #pragma mark - Table Delegate Protocol
 
+-(void)tableViewSelectionDidChange:(NSNotification *)notification
+{
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+    if (selectedRowIndexes.count == 1) {
+        NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+        [myController setValue:selectedRows[0] forKey:@"showForDetail"];
+    }
+}
 
 #pragma mark - Table Data Source Protocol
 
