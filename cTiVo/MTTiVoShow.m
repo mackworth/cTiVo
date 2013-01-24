@@ -1125,6 +1125,15 @@
     return [NSString stringWithFormat:@"%d",_episodeYear];
 }
 
+-(NSString *)seasonString
+{
+	NSString *returnString = @"";
+	if (_season > 0) {
+		returnString = [NSString stringWithFormat:@"%d",_season];
+	}
+    return returnString;
+}
+
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
@@ -1237,6 +1246,9 @@
 		_originalAirDate = [originalAirDate retain];
 		if (originalAirDate.length > 4) {
 			_episodeYear = [[originalAirDate substringToIndex:4] intValue];
+		}
+		if (originalAirDate.length >= 10) {
+			self.originalAirDateNoTime = [originalAirDate substringToIndex:10];
 		}
 	}
 }
