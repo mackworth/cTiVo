@@ -150,10 +150,14 @@
 		_processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 		
+		[tiVoManager  notifyWithTitle: @"TiVo show failed; cancelled."
+					  subTitle:self.showTitle forNotification:kMTGrowlEndDownload];
+		
 		//			[[MTTiVoManager sharedTiVoManager] deleteProgramFromDownloadQueue:self];
 	} else {
 		if ([decrementRetries boolValue]) {
 			_numRetriesRemaining--;
+			[tiVoManager  notifyWithTitle:@"TiVo show failed; retrying..." subTitle:self.showTitle forNotification:kMTGrowlEndDownload];
 		} else {
             _numStartupRetriesRemaining--;
         }
@@ -528,32 +532,35 @@
 	if (!downloadDir) {
 		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
 	}
-    _encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,_showTitle,_encodeFormat.filenameExtension] retain];
+	NSString * safeTitle = [_showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+	safeTitle = [safeTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+	
+    _encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,safeTitle,_encodeFormat.filenameExtension] retain];
     NSFileManager *fm = [NSFileManager defaultManager];
     if (_simultaneousEncode) {
         //Things require uniquely for simultaneous download
         pipe1 = [[NSPipe pipe] retain];
         pipe2 = [[NSPipe pipe] retain];
 		downloadFileHandle = [pipe1 fileHandleForWriting];
-        _bufferFilePath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",_showTitle] retain];
+        _bufferFilePath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",safeTitle] retain];
         [fm createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
         bufferFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:_bufferFilePath] retain];
         bufferFileWriteHandle = [[NSFileHandle fileHandleForWritingAtPath:_bufferFilePath] retain];
     } else {
         //Things require uniquely for sequential download
-        _downloadFilePath = [[NSString stringWithFormat:@"%@%@.tivo",downloadDir ,_showTitle] retain];
+        _downloadFilePath = [[NSString stringWithFormat:@"%@%@.tivo",downloadDir ,safeTitle] retain];
         [fm createFileAtPath:_downloadFilePath contents:[NSData data] attributes:nil];
         downloadFileHandle = [[NSFileHandle fileHandleForWritingAtPath:_downloadFilePath] retain];
         
     }
-    decryptFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",downloadDir ,_showTitle] retain];
+    decryptFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",downloadDir ,safeTitle] retain];
     
-    decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",_showTitle] retain];
+    decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",safeTitle] retain];
     [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
     decryptLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath] retain];
     decryptLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath] retain];
     
-    encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",_showTitle] retain];
+    encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",safeTitle] retain];
     [fm createFileAtPath:encodeLogFilePath contents:[NSData data] attributes:nil];
     encodeLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:encodeLogFilePath] retain];
     encodeLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath] retain];
@@ -599,7 +606,9 @@
 
 //Now set up for either simul or sequential download
     NSLog(@"Starting %@ of %@", (_simultaneousEncode ? @"simul DL" : @"download"), _showTitle);
-    if (!_simultaneousEncode ) {
+	[tiVoManager  notifyWithTitle: [NSString stringWithFormat: @"TiVo %@ starting download...",self.tiVo.tiVo.name]
+													 subTitle:self.showTitle forNotification:kMTGrowlBeginDownload];
+	 if (!_simultaneousEncode ) {
         _isSimultaneousEncoding = NO;
     } else { //We'll build the full piped download chain here
        //Decrypting section of full pipeline
@@ -644,6 +653,9 @@
         _processProgress = 1.0;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
+
+		[tiVoManager  notifyWithTitle:@"TiVo show transferred." subTitle:self.showTitle forNotification:kMTGrowlEndDownload];
+        
         if (_addToiTunesWhenEncoded) {
 			MTiTunes *iTunes = [[[MTiTunes alloc] init] autorelease];
 			[iTunes importIntoiTunes:self];
@@ -775,6 +787,9 @@
         [self cleanupFiles];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
+		
+		[tiVoManager  notifyWithTitle:@"TiVo show transferred." subTitle:self.showTitle forNotification:kMTGrowlEndDownload];
+		
         if (_addToiTunesWhenEncoded) {
 			MTiTunes *iTunes = [[[MTiTunes alloc] init] autorelease];
 			[iTunes importIntoiTunes:self];

@@ -86,4 +86,6 @@
 -(BOOL)foundTiVoNamed:(NSString *)tiVoName;
 -(NSInteger)numberOfShowsToDownload;
 
+- (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification;
+
 @end

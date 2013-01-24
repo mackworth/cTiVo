@@ -9,6 +9,7 @@
 #import "MTTiVoManager.h"
 #import "MTiTivoImport.h"
 #import "MTSubscription.h"
+#import <Growl/Growl.h>
 
 #include <arpa/inet.h>
 
@@ -167,6 +168,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		
 		_videoListNeedsFilling = YES;
         updatingVideoList = NO;
+		
+		[self loadGrowl];
 //		NSLog(@"Getting Host Addresses");
 //		hostAddresses = [[[NSHost currentHost] addresses] retain];
 //        NSLog(@"Host Addresses = %@",self.hostAddresses);
@@ -445,6 +448,45 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 	}
 	return n;
+}
+
+#pragma mark Growl/Apple Notifications
+
+-(void) loadGrowl {
+	
+	if(NSAppKitVersionNumber >= NSAppKitVersionNumber10_6) {
+		NSBundle *myBundle = [NSBundle mainBundle];
+		NSString *growlPath = [[myBundle privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
+		NSBundle *growlFramework = [NSBundle bundleWithPath:growlPath];
+		
+		if (growlFramework && [growlFramework load]) {
+			// Register ourselves as a Growl delegate
+			
+			NSDictionary *infoDictionary = [growlFramework infoDictionary];
+			NSLog(@"Using Growl.framework %@ (%@)",
+				  [infoDictionary objectForKey:@"CFBundleShortVersionString"],
+				  [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey]);
+			
+			Class GAB = NSClassFromString(@"GrowlApplicationBridge");
+			if([GAB respondsToSelector:@selector(setGrowlDelegate:)]) {
+				[GAB performSelector:@selector(setGrowlDelegate:) withObject:self];
+			}
+		}
+	}
+}
+//Note that any new notification types need to be added to constants.h, but especially Growl Registration Ticket.growRegDict
+- (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification {
+	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
+	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
+		[GAB notifyWithTitle: title
+				 description: subTitle
+			notificationName: notification
+					iconData: nil  //use our app logo
+					priority: 0
+					isSticky: NO
+				clickContext: nil
+		 ];
+	
 }
 
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget {
