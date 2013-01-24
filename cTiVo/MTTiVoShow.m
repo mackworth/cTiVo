@@ -405,6 +405,13 @@
 	NSLog(@"Parser Error %@",parseError);
 }
 
+-(NSString *)showTitleForFiles
+{
+	NSString * safeTitle = [_showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+	safeTitle = [safeTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+	return safeTitle;
+}
+
 
 #pragma mark - Download decrypt and encode Methods
 
@@ -532,35 +539,32 @@
 	if (!downloadDir) {
 		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
 	}
-	NSString * safeTitle = [_showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-	safeTitle = [safeTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
-	
-    _encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,safeTitle,_encodeFormat.filenameExtension] retain];
+    _encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,self.showTitleForFiles,_encodeFormat.filenameExtension] retain];
     NSFileManager *fm = [NSFileManager defaultManager];
     if (_simultaneousEncode) {
         //Things require uniquely for simultaneous download
         pipe1 = [[NSPipe pipe] retain];
         pipe2 = [[NSPipe pipe] retain];
 		downloadFileHandle = [pipe1 fileHandleForWriting];
-        _bufferFilePath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",safeTitle] retain];
+        _bufferFilePath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",self.showTitleForFiles] retain];
         [fm createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
         bufferFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:_bufferFilePath] retain];
         bufferFileWriteHandle = [[NSFileHandle fileHandleForWritingAtPath:_bufferFilePath] retain];
     } else {
         //Things require uniquely for sequential download
-        _downloadFilePath = [[NSString stringWithFormat:@"%@%@.tivo",downloadDir ,safeTitle] retain];
+        _downloadFilePath = [[NSString stringWithFormat:@"%@%@.tivo",downloadDir ,self.showTitleForFiles] retain];
         [fm createFileAtPath:_downloadFilePath contents:[NSData data] attributes:nil];
         downloadFileHandle = [[NSFileHandle fileHandleForWritingAtPath:_downloadFilePath] retain];
         
     }
-    decryptFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",downloadDir ,safeTitle] retain];
+    decryptFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",downloadDir ,self.showTitleForFiles] retain];
     
-    decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",safeTitle] retain];
+    decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",self.showTitleForFiles] retain];
     [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
     decryptLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath] retain];
     decryptLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath] retain];
     
-    encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",safeTitle] retain];
+    encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",self.showTitleForFiles] retain];
     [fm createFileAtPath:encodeLogFilePath contents:[NSData data] attributes:nil];
     encodeLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:encodeLogFilePath] retain];
     encodeLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath] retain];

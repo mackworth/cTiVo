@@ -255,6 +255,9 @@ static NSDateFormatter *dateFormatter;
 	NSPoint p = [tv convertPoint:windowPoint fromView:nil];
 	NSInteger r = [tv rowAtPoint:p];
 	NSInteger c = [tv columnAtPoint:p];
+	if (c < 0) {
+		c = 0;
+	}
 	NSTableColumn *selectedColumn = tv.tableColumns[c];
 	BOOL isSelectedRow = [tv isRowSelected:r];
 	BOOL isOverText = NO;

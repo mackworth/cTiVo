@@ -41,6 +41,9 @@
     NSDate *previousCheck;
 }
 
+@property (nonatomic, readonly) NSString *showTitleForFiles;
+
+
 @property (nonatomic, retain) NSString *urlString,
 									*downloadDirectory,
 									*mediaKey,
