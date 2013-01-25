@@ -44,8 +44,7 @@
 @property (nonatomic, readonly) NSString *showTitleForFiles;
 
 
-@property (nonatomic, retain) NSString *urlString,
-									*downloadDirectory,
+@property (nonatomic, retain) NSString *downloadDirectory,
 									*mediaKey,
 									*showTitle,
 									*showDescription,
@@ -60,6 +59,13 @@
 									*episodeGenre,
                                     *seriesTitle,
                                     *showDateString,
+									*showLengthString,
+                                    *channelString,
+                                    *programId,
+                                    *seriesId,
+                                    *tvRating,
+                                    *sourceType,
+                                    *idGuidSource,
                                     *stationCallsign;
 
 @property (nonatomic, retain) NSArray *vActor,
@@ -71,10 +77,11 @@
 
 @property (nonatomic, retain) NSDate *showDate;
 
-@property (nonatomic, retain) NSNumber *downloadIndex, *protectedShow;
+@property (nonatomic, retain) NSNumber *downloadIndex, *protectedShow, *isHD;
 
 @property (nonatomic, readonly) NSString *encodeFilePath,
 										 *bufferFilePath,
+										 *hDString,
 										 *downloadFilePath;
 
 //Properties for display in detail
@@ -84,7 +91,7 @@
 
 @property (nonatomic, readonly) NSString *seasonEpisode; //attempts to build S02 E04 version
 @property time_t showLength;  //length of show in seconds
-@property (nonatomic, retain) NSURL *URL;
+@property (nonatomic, retain) NSURL *downloadURL, *detailURL;
 @property int  showID, season, episode, episodeYear, numRetriesRemaining, numStartupRetriesRemaining;
 @property (retain) NSNumber *downloadStatus;
 @property double processProgress; //Should be between 0 and 1

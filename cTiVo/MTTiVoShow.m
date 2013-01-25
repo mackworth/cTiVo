@@ -18,6 +18,8 @@
 @synthesize encodeFilePath   = _encodeFilePath,
 			downloadFilePath = _downloadFilePath,
 			bufferFilePath   = _bufferFilePath,
+			seriesTitle = _seriesTitle,
+			episodeTitle = _episodeTitle,
 			tempTiVoName     = _tempTiVoName;
 
 
@@ -51,8 +53,11 @@
 		_episode = 0;
 		_episodeNumber = @"";
 		_episodeGenre = @"";
+		_episodeTitle = @"";
+		_seriesTitle = @"";
 //		_originalAirDate = @"";
 		_episodeYear = 0;
+		self.protectedShow = [NSNumber numberWithBool:NO]; //This is the default
 		parseTermMapping = [@{@"description" : @"showDescription", @"time": @"showTime"} retain];
         [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
         previousCheck = [[NSDate date] retain];
@@ -96,6 +101,15 @@
     return [NSString stringWithFormat:@"%@ %@",nameDictionary[kMTFirstName] ? nameDictionary[kMTFirstName] : @"" ,nameDictionary[kMTLastName] ? nameDictionary[kMTLastName] : @"" ];
 }
 
+-(void)setShowLengthString:(NSString *)showLengthString
+{
+	if (showLengthString != _showLengthString) {
+		[_showLengthString release];
+		_showLengthString = [showLengthString retain];
+		_showLength = [_showLengthString longLongValue]/1000;
+	}
+}
+
 //-(void)getShowDetailWithNotification
 //{
 //	if (gotDetails) {
@@ -119,10 +133,10 @@
 	}
 	gotDetails = YES;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]	;
-	NSString *detailURLString = [NSString stringWithFormat:@"https://%@/TiVoVideoDetails?id=%d",_tiVo.tiVo.hostName,_showID];
+//	NSString *detailURLString = [NSString stringWithFormat:@"https://%@/TiVoVideoDetails?id=%d",_tiVo.tiVo.hostName,_showID];
 //	NSLog(@"Show Detail URL %@",detailURLString);
 	NSURLResponse *detailResponse = nil;
-	NSURLRequest *detailRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:detailURLString]];;
+	NSURLRequest *detailRequest = [NSURLRequest requestWithURL:_detailURL];;
 	NSData *xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
 	parser = [[[NSXMLParser alloc] initWithData:xml] autorelease];
 	parser.delegate = self;
@@ -604,7 +618,7 @@
         _simultaneousEncode = NO;
     }
     [self configureFiles];
-    NSURLRequest *thisRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:_urlString ]];
+    NSURLRequest *thisRequest = [NSURLRequest requestWithURL:_downloadURL];
 //    activeURLConnection = [NSURLConnection connectionWithRequest:thisRequest delegate:self];
     activeURLConnection = [[[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] autorelease];
 
@@ -1063,12 +1077,12 @@
 }
 
 - (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
-    return [protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust];
+    return YES;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
     //    [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-    [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:_mediaKey persistence:NSURLCredentialPersistencePermanent] forAuthenticationChallenge:challenge];
+    [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:_mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
     [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
 }
 
@@ -1289,27 +1303,13 @@
 
 #pragma mark - Custom Getters
 
--(void) setEncodeFormat:(MTFormat *) encodeFormat {
-    if (_encodeFormat != encodeFormat ) {
-        BOOL simulWasDisabled = ![self canSimulEncode];
-        BOOL iTunesWasDisabled = ![self canAddToiTunes];
-        [_encodeFormat release];
-        _encodeFormat = [encodeFormat retain];
-        if (!self.canSimulEncode && self.shouldSimulEncode) {
-            //no longer possible
-            self.simultaneousEncode = NO;
-        } else if (simulWasDisabled && [self canSimulEncode]) {
-            //newly possible, so take user default
-            self.simultaneousEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
-        }
-        if (!self.canAddToiTunes && self.shouldAddToiTunes) {
-            //no longer possible
-            self.addToiTunesWhenEncoded = NO;
-        } else if (iTunesWasDisabled && [self canAddToiTunes]) {
-            //newly possible, so take user default
-            self.addToiTunesWhenEncoded = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
-        }
-    }
+-(NSString *)hDString
+{
+	NSString *returnString = @"No";
+	if ([_isHD boolValue ]) {
+		returnString = @"Yes";
+	}
+	return returnString;
 }
 
 -(NSString *) seasonEpisode {
@@ -1323,7 +1323,7 @@
         } else {
             episode	 = [NSString stringWithFormat:@"%d",e];
         }
-    } else {
+    } else if ([_episodeNumber compare:@"0"] != NSOrderedSame){
         episode = _episodeNumber;
     }
     return episode;
@@ -1360,7 +1360,56 @@
 	return _tiVo;
 }
 
+-(NSString *)showDateString
+{
+	NSDateFormatter *dateFormat = [[[NSDateFormatter alloc] init] autorelease];
+	[dateFormat setDateFormat:@"EE M/d"];
+//	[dateFormat setTimeStyle:NSDateFormatterNoStyle];
+	return [dateFormat stringFromDate:_showDate];
+}
+
 #pragma mark - Custom Setters
+
+-(void) setEncodeFormat:(MTFormat *) encodeFormat {
+    if (_encodeFormat != encodeFormat ) {
+        BOOL simulWasDisabled = ![self canSimulEncode];
+        BOOL iTunesWasDisabled = ![self canAddToiTunes];
+        [_encodeFormat release];
+        _encodeFormat = [encodeFormat retain];
+        if (!self.canSimulEncode && self.shouldSimulEncode) {
+            //no longer possible
+            self.simultaneousEncode = NO;
+        } else if (simulWasDisabled && [self canSimulEncode]) {
+            //newly possible, so take user default
+            self.simultaneousEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
+        }
+        if (!self.canAddToiTunes && self.shouldAddToiTunes) {
+            //no longer possible
+            self.addToiTunesWhenEncoded = NO;
+        } else if (iTunesWasDisabled && [self canAddToiTunes]) {
+            //newly possible, so take user default
+            self.addToiTunesWhenEncoded = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
+        }
+    }
+}
+
+-(void)setSeriesTitle:(NSString *)seriesTitle
+{
+	if (_seriesTitle != seriesTitle) {
+		[_seriesTitle release];
+		_seriesTitle = [seriesTitle retain];
+		self.showTitle = [NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
+	}
+}
+
+-(void)setEpisodeTitle:(NSString *)episodeTitle
+{
+	if (_episodeTitle != episodeTitle) {
+		[_episodeTitle release];
+		_episodeTitle = [episodeTitle retain];
+		self.showTitle = [NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
+	}
+}
 
 -(void)setShowDescription:(NSString *)showDescription
 {
@@ -1428,12 +1477,12 @@
 
 -(void)dealloc
 {
-    self.urlString = nil;
     self.mediaKey = nil;
     self.showTitle = nil;
     self.showDescription = nil;
     self.showStatus = nil;
-    self.URL = nil;
+    self.detailURL = nil;
+	self.downloadURL = nil;
     self.encodeFormat = nil;
     self.tiVo = nil;
 	self.downloadDirectory = nil;

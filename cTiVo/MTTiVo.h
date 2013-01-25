@@ -9,13 +9,23 @@
 #import <Foundation/Foundation.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 
-@class MTTiVoManager;
+@class MTTiVoManager, MTTiVoShow;
 
-@interface MTTiVo : NSObject {
-	BOOL volatile isConnecting, managingDownloads, firstUpdate;
+@interface MTTiVo : NSObject <NSXMLParserDelegate> {
+	BOOL volatile isConnecting, managingDownloads, firstUpdate, canPing;
 	NSURLConnection *showURLConnection;
 	NSMutableData *urlData;
     SCNetworkReachabilityContext reachabilityContext;
+    int totalItemsOnTivo;
+    int lastChangeDate;
+    int itemStart;
+    int itemCount;
+    BOOL parsingShow, gettingContent, gettingDetails;
+    NSMutableString *element;
+    MTTiVoShow *currentShow;
+    NSDictionary *elementToPropertyMap;
+	NSMutableDictionary *previousShowList;
+    
 }
 
 @property (nonatomic, retain) NSNetService *tiVo;
@@ -25,7 +35,7 @@
 @property (nonatomic, assign) NSOperationQueue *queue;
 @property (nonatomic, retain) MTTiVoManager *tiVoManager;
 @property BOOL mediaKeyIsGood;
-@property BOOL isReachable;
+@property BOOL isReachable, isResponding;
 
 +(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
 
