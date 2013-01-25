@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <SystemConfiguration/SystemConfiguration.h>
+#import "MTNetService.h"
 
 @class MTTiVoManager, MTTiVoShow;
 
@@ -28,18 +29,18 @@
     
 }
 
-@property (nonatomic, retain) NSNetService *tiVo;
+@property (nonatomic, retain) MTNetService *tiVo;
 @property (nonatomic, retain) NSMutableArray *shows;
 @property (nonatomic, retain) NSDate *networkAvailability;
 @property (nonatomic, retain) NSString *mediaKey;
 @property (nonatomic, assign) NSOperationQueue *queue;
 @property (nonatomic, retain) MTTiVoManager *tiVoManager;
 @property BOOL mediaKeyIsGood;
-@property BOOL isReachable, isResponding;
+@property BOOL isReachable, isResponding, manualTiVo;
 
-+(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
++(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
 
--(id) initWithTivo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
+-(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
 -(void)updateShows:(id)sender;
 //-(void) reportNetworkFailure;
 

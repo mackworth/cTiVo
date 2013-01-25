@@ -19,7 +19,7 @@
 
 @interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
     
-    NSNetService *tivoService ;
+    MTNetService *tivoService ;
     NSNetServiceBrowser *tivoBrowser;
     NSMutableData *listingData;
 //	NSMutableDictionary *tiVoShowsDictionary;
@@ -30,7 +30,7 @@
     NSMutableDictionary *programDownloading, *programDecrypting, *programEncoding;
 	NSFileHandle *downloadFile, *stdOutFileHandle;
 	double dataDownloaded, referenceFileSize;
-	NSNetService *tivoConnectingTo;
+	MTNetService *tivoConnectingTo;
 	NSOpenPanel *myOpenPanel;
     double percentComplete;
     MTDownloadTableCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
@@ -45,7 +45,7 @@
 
 //Shared Data
 
-@property (nonatomic, retain) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
+@property (nonatomic, retain) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList, *manualTiVoList;
 @property (nonatomic, retain) NSMutableArray *subscribedShows;
 @property (nonatomic, retain) NSMutableArray *oldQueue; //queue from last run of program
 @property (nonatomic, retain) NSString *downloadDirectory;
@@ -55,7 +55,7 @@
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic) BOOL videoListNeedsFilling;
 @property (nonatomic, retain) MTFormat *selectedFormat;
-@property int numEncoders;//Want to limit launches to two encoders.
+@property (nonatomic) int numEncoders, totalShows;//Want to limit launches to two encoders.
 @property (nonatomic, assign) NSWindow *mainWindow;
 
 

@@ -31,7 +31,7 @@
 
 @implementation MTTiVo
 
-+(MTTiVo *)tiVoWithTiVo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue
++(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue
 {
 	return [[[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue] autorelease];
 }
@@ -48,6 +48,7 @@
 		isConnecting = NO;
 		_mediaKeyIsGood = NO;
         managingDownloads = NO;
+        _manualTiVo = NO;
 		firstUpdate = YES;
         itemStart = 0;
         itemCount = 50;
@@ -78,13 +79,13 @@
 	
 }
 
--(id) initWithTivo:(NSNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue
+-(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue
 {
 	self = [self init];
 	if (self) {
 		self.tiVo = tiVo;
 		self.queue = queue;
-        _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [tiVo.addresses[0] bytes]);
+        _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [self.tiVo.addresses[0] bytes]);
 		self.networkAvailability = [NSDate date];
         SCNetworkReachabilitySetCallback(_reachability, tivoNetworkCallback, &reachabilityContext);
 		BOOL didSchedule = SCNetworkReachabilityScheduleWithRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
@@ -303,8 +304,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			}
 			[currentShow release];
 			currentShow = nil;
-			NSLog(@"There are now %ld shows in TiVo %@",_shows.count,_tiVo.name);
-				parsingShow = NO;
+            parsingShow = NO;
         }
     } else {
         if ([elementName compare:@"TotalItems"] == NSOrderedSame) {

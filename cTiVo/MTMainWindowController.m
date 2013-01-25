@@ -47,6 +47,7 @@
 	subDirectoriesButton.state = [[NSUserDefaults standardUserDefaults ] boolForKey:kMTMakeSubDirs] ? NSOnState : NSOffState;
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoListUpdated object:nil];
+	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoShowsUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(reloadProgramData) name:kMTNotificationTiVoShowsUpdated object:nil];
     [defaultCenter addObserver:downloadQueueTable selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
@@ -151,7 +152,7 @@
 	}
 	[tiVoListPopUp removeAllItems];
 	for (MTTiVo *ts in tiVoManager.tiVoList) {
-		[tiVoListPopUp addItemWithTitle:ts.tiVo.name];
+		[tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%ld)",ts.tiVo.name,ts.shows.count]];
         [[tiVoListPopUp lastItem] setRepresentedObject:ts];
         NSMenuItem *thisItem = [tiVoListPopUp lastItem];
         if (!ts.isReachable) {
@@ -170,7 +171,7 @@
 		MTTiVo *ts = tiVoManager.tiVoList[0];
         [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
         [tiVoListPopUp setHidden:YES];
-        tiVoListPopUpLabel.stringValue = [NSString stringWithFormat:@"TiVo: %@",ts.tiVo.name];
+        tiVoListPopUpLabel.stringValue = [NSString stringWithFormat:@"TiVo: %@ (%ld)",ts.tiVo.name,ts.shows.count];
         if (!ts.isReachable) {
             NSFont *thisFont = [NSFont systemFontOfSize:13];
             NSString *thisTitle = [NSString stringWithFormat:@"TiVo: %@ offline",ts.tiVo.name];
@@ -179,7 +180,7 @@
 			
         }
     } else {
-        [tiVoListPopUp addItemWithTitle:kMTAllTiVos];
+        [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d)",kMTAllTiVos,tiVoManager.totalShows]];
         if ([kMTAllTiVos compare:_selectedTiVo] == NSOrderedSame) {
             [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
         }

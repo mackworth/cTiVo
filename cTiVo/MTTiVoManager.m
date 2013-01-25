@@ -17,7 +17,7 @@
 
 @interface MTTiVoManager ()
 
-@property (retain) NSNetService *updatingTiVo;
+@property (retain) MTNetService *updatingTiVo;
 @property (nonatomic, retain) NSArray *hostAddresses;
 
 @end
@@ -76,16 +76,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	self = [super init];
 	if (self) {
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-		
-		tivoBrowser = [NSNetServiceBrowser new];
-		tivoBrowser.delegate = self;
-		[tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-		[tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
 		_tivoServices = [NSMutableArray new];
 		listingData = [NSMutableData new];
 		_tiVoList = [NSMutableArray new];
+        _manualTiVoList = [NSMutableArray new];
 		queue = [NSOperationQueue new];
 		_downloadQueue = [NSMutableArray new];
+        
+        [self loadManualTiVos];
+        [self searchForBonjourTiVos];
 
 		NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
 		NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
@@ -180,6 +179,38 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	return self;
 }
 
+#pragma mark - TiVo Search Methods
+
+-(void)loadManualTiVos
+{
+    BOOL didFindTiVo = NO;
+    NSArray *manualTiVoDescriptions = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos];
+    for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
+        MTNetService *newTiVoService = [[[MTNetService alloc] init] autorelease];
+        newTiVoService.userName = manualTiVoDescription[@"userName"];
+        newTiVoService.iPAddress = manualTiVoDescription[@"iPAddress"];
+        newTiVoService.userPort = [manualTiVoDescription[@"userPort"] integerValue];
+        MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:newTiVoService withOperationQueue:queue];
+        newTiVo.manualTiVo = YES;
+        [_manualTiVoList addObject:newTiVo];
+        [_tiVoList addObject:newTiVo];
+        didFindTiVo = YES;
+    }
+    if (didFindTiVo) {
+        NSNotification *notification = [NSNotification notificationWithName:kMTNotificationTiVoListUpdated object:nil];
+        [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
+    }
+}
+
+
+-(void)searchForBonjourTiVos
+{
+    tivoBrowser = [NSNetServiceBrowser new];
+    tivoBrowser.delegate = self;
+    [tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    [tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
+}
+
 -(NSArray *)hostAddresses
 {
     NSArray *ret = _hostAddresses;
@@ -188,6 +219,18 @@ static MTTiVoManager *sharedTiVoManager = nil;
         ret = _hostAddresses;
     }
     return ret;
+}
+
+-(NSArray *)tiVoAddresses
+{
+    NSMutableArray *addresses = [NSMutableArray array];
+    for (MTTiVo *tiVo in _tiVoList) {
+        if ([tiVo.tiVo addresses] && [tiVo.tiVo addresses].count) {
+            NSString *ipAddress = [self getStringFromAddressData:[tiVo.tiVo addresses][0]];
+            [addresses addObject:ipAddress];
+        }
+    }
+    return addresses;
 }
 
 -(void) setupNotifications {
@@ -503,6 +546,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 #pragma mark - Download Support for Tivos and Shows
 
+-(int)totalShows
+{
+    int total = 0;
+    for (MTTiVo *tiVo in _tiVoList) {
+        total += tiVo.shows.count;
+    }
+    return total;
+}
+
 -(BOOL)foundTiVoNamed:(NSString *)tiVoName
 {
 	BOOL ret = NO;
@@ -645,6 +697,13 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 	}
 
+	for (NSString *tiVoAddress in [self tiVoAddresses]) {
+//        NSLog(@"Comparing tiVo %@ address %@ to ipaddress %@",sender.name,tiVoAddress,ipAddress);
+		if ([tiVoAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
+			return;  // This filters out tivos that have already been found from a manual entry
+		}
+	}
+    
     if ([sender.name rangeOfString:@"Py"].location == NSNotFound) {
         MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
       

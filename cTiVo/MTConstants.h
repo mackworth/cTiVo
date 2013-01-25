@@ -82,6 +82,7 @@
 
 //USER DEFAULTS
 
+#define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address.  
 #define kMTPreventSleep @"PreventSleep"			//If true this will prevent sleep when possible
 #define kMTFormats @"Formats"                        //User defined Formats
 #define kMTHiddenFormats @"HiddenFormats"        //User defined list of built-in formats to be hidden in the UI
