@@ -206,7 +206,7 @@
 {
     // get an existing cell with the MyView identifier if it exists
     NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
-    NSLog(@"%@ ==> %@",tableColumn.identifier, result.textField);
+//    NSLog(@"%@ ==> %@",tableColumn.identifier, result.textField);
 	MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
     // There is no existing cell to reuse so we will create a new one
  	if (result == nil) {
@@ -257,7 +257,7 @@
 	} else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.isQueued ? @"✔" : @"";
 	} else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.isHD ? @"✔" : @"";
+		result.textField.stringValue = [thisShow.isHD boolValue] ? @"✔" : @"";
 		result.textField.alignment = NSCenterTextAlignment;
 	} else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.channelString;

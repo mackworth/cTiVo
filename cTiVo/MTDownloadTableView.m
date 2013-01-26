@@ -361,7 +361,7 @@
 	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
 	//NSLog(@"calling readObjects%@",pasteboard);
 	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
-	NSLog(@"dragging: %@", draggedShows);
+//	NSLog(@"dragging: %@", draggedShows);
 	
 	//dragged shows are copies, so we need to find the real show objects
 	NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];

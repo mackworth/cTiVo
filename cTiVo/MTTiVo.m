@@ -278,6 +278,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                 case kMTBoolType:
                     //Process String Type here
 					[currentShow setValue:[NSNumber numberWithBool:[element boolValue]] forKey:elementToPropertyMap[elementName][kMTValue]];
+//					NSLog(@"set %@ property to %@ for %@ element",elementToPropertyMap[elementName][kMTValue],[NSNumber numberWithBool:[element boolValue]], element);
                     break;
                                         
                 case kMTNumberType:
@@ -338,7 +339,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	if (itemStart+itemCount < totalItemsOnTivo) {
 		[self updateShowsStartingAt:itemStart + itemCount withCount:kMTNumberShowToGet];
 	} else {
-		NSLog(@"sss All done");
+//		NSLog(@"sss All done");
 		if (firstUpdate) {
 			[self restoreQueue]; //performSelector:@selector(restoreQueue) withObject:nil afterDelay:10]; //should this post the TiVoShowsUpdated?
 			firstUpdate = NO;

@@ -1041,7 +1041,7 @@
 	}
 	[pool drain];
 	if (!activeURLConnection || isCanceled) {
-        NSLog(@"Closing downloadFileHandle which %@ from pipe1 for show %@", (downloadFileHandle != [pipe1 fileHandleForWriting]) ? @"is not" : @"is", _showTitle);
+//        NSLog(@"Closing downloadFileHandle which %@ from pipe1 for show %@", (downloadFileHandle != [pipe1 fileHandleForWriting]) ? @"is not" : @"is", _showTitle);
 		[downloadFileHandle closeFile];
 		if (downloadFileHandle != [pipe1 fileHandleForWriting]) {
 			[downloadFileHandle release];
