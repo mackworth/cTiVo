@@ -79,7 +79,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		_tivoServices = [NSMutableArray new];
 		listingData = [NSMutableData new];
 		_tiVoList = [NSMutableArray new];
-        _manualTiVoList = [NSMutableArray new];
 		queue = [NSOperationQueue new];
 		_downloadQueue = [NSMutableArray new];
         
@@ -184,6 +183,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)loadManualTiVos
 {
     BOOL didFindTiVo = NO;
+	NSMutableArray *manualTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
+	[_tiVoList removeObjectsInArray:manualTiVoList];
     NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
 	//Validate array
 	NSMutableArray *itemsToRemove = [NSMutableArray array];
@@ -201,21 +202,50 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	
     for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
-        MTNetService *newTiVoService = [[[MTNetService alloc] init] autorelease];
-        newTiVoService.userName = manualTiVoDescription[@"userName"];
-        newTiVoService.iPAddress = manualTiVoDescription[@"iPAddress"];
-        newTiVoService.userPort = [manualTiVoDescription[@"userPort"] integerValue];
-        MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:newTiVoService withOperationQueue:queue];
-        newTiVo.manualTiVo = YES;
-		newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
-        [_manualTiVoList addObject:newTiVo];
-        [_tiVoList addObject:newTiVo];
-        didFindTiVo = YES;
+		//Check for exisitng
+		MTNetService *newTiVoService = nil;
+		MTTiVo *newTiVo = nil;
+		for (MTTiVo *tivo in manualTiVoList) {
+			if ([tivo.tiVo.iPAddress compare:manualTiVoDescription[@"iPAddress"]] == NSOrderedSame) {
+				newTiVo = tivo;
+				newTiVo.tiVo.userName = manualTiVoDescription[@"userName"];
+				newTiVo.tiVo.userPort = [manualTiVoDescription[@"userPort"] integerValue];
+				newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
+				break;
+			}
+		}
+		if (!newTiVo) {
+			newTiVoService = [[[MTNetService alloc] init] autorelease];
+			newTiVoService.userName = manualTiVoDescription[@"userName"];
+			newTiVoService.iPAddress = manualTiVoDescription[@"iPAddress"];
+			newTiVoService.userPort = [manualTiVoDescription[@"userPort"] integerValue];
+			newTiVo = [MTTiVo tiVoWithTiVo:newTiVoService withOperationQueue:queue];
+			newTiVo.manualTiVo = YES;
+			newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
+		}
+		if (newTiVo.enabled) {
+			//Remove any matching ip address already in _tiVoList
+			NSMutableArray *itemsToRemove = [NSMutableArray array];
+			for (MTTiVo *tiVo in _tiVoList) {
+				NSString *ipaddr = [self getStringFromAddressData:[tiVo.tiVo addresses][0]];
+				if ([ipaddr compare:newTiVo.tiVo.iPAddress] == NSOrderedSame) {
+					[itemsToRemove addObject:tiVo];
+				}
+			}
+			[_tiVoList removeObjectsInArray:itemsToRemove];
+			[_tiVoList addObject:newTiVo];
+			didFindTiVo = YES;
+		}
     }
-    if (didFindTiVo) {
+//    if (didFindTiVo) {
         NSNotification *notification = [NSNotification notificationWithName:kMTNotificationTiVoListUpdated object:nil];
         [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
-    }
+//    }
+	if (tivoBrowser) {
+		[tivoBrowser stop];
+		[_tivoServices removeAllObjects];
+		[tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
+	}
 }
 
 

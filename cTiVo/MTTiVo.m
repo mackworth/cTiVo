@@ -739,7 +739,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	SCNetworkReachabilityUnscheduleFromRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
 	self.networkAvailability = nil;
-    CFRelease(_reachability);
+	if (_reachability) {
+		CFRelease(_reachability);
+	}
     _reachability = nil;
 	self.mediaKey = nil;
 	[urlData release];
