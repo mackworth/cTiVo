@@ -151,8 +151,15 @@
 		}
 	}
 	[tiVoListPopUp removeAllItems];
+	BOOL lastTivoWasManual = NO;
 	for (MTTiVo *ts in tiVoManager.tiVoList) {
-		[tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%ld)",ts.tiVo.name,ts.shows.count]];
+		NSString *tsTitle = [NSString stringWithFormat:@"%@ (%ld)",ts.tiVo.name,ts.shows.count];
+		if (!ts.manualTiVo && lastTivoWasManual) { //Insert a separator
+			NSMenuItem *menuItem = [NSMenuItem separatorItem];
+			[tiVoListPopUp.menu addItem:menuItem];
+		}
+		lastTivoWasManual = ts.manualTiVo;
+		[tiVoListPopUp addItemWithTitle:tsTitle];
         [[tiVoListPopUp lastItem] setRepresentedObject:ts];
         NSMenuItem *thisItem = [tiVoListPopUp lastItem];
         if (!ts.isReachable) {
@@ -162,7 +169,7 @@
             [thisItem setAttributedTitle:aTitle];
 
         }
-		if ([ts.tiVo.name compare:_selectedTiVo] == NSOrderedSame) {
+		if ([ts.tiVo.name compare:self.selectedTiVo] == NSOrderedSame) {
 			[tiVoListPopUp selectItem:thisItem];
 		}
 		

@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MTTiVo.h"
 
 @class MTTiVoManager, MTMainWindowController;
 

@@ -200,10 +200,14 @@ void signalHandler(int signal)
 			[refreshTiVoMenuItem setEnabled:NO];
 		}
 	} else {
-		NSSortDescriptor *sd = [NSSortDescriptor sortDescriptorWithKey:@"tiVo.name" ascending:YES];
-		NSArray *sortedTiVos = [[NSArray arrayWithArray:tiVoGlobalManager.tiVoList] sortedArrayUsingDescriptors:[NSArray arrayWithObject:sd]];
 		NSMenu *thisMenu = [[[NSMenu alloc] initWithTitle:@"Refresh Tivo"] autorelease];
-		for (MTTiVo *tiVo in sortedTiVos) {
+		BOOL lastTivoWasManual = NO;
+		for (MTTiVo *tiVo in tiVoGlobalManager.tiVoList) {
+			if (!tiVo.manualTiVo && lastTivoWasManual) { //Insert a separator
+				NSMenuItem *menuItem = [NSMenuItem separatorItem];
+				[thisMenu addItem:menuItem];
+			}
+			lastTivoWasManual = tiVo.manualTiVo;
 			NSMenuItem *thisMenuItem = [[[NSMenuItem alloc] initWithTitle:tiVo.tiVo.name action:NULL keyEquivalent:@""] autorelease];
 			if (!tiVo.isReachable) {
 				NSFont *thisFont = [NSFont systemFontOfSize:13];
@@ -237,6 +241,13 @@ void signalHandler(int signal)
 -(IBAction)editFormats:(id)sender
 {
 	[self.formatEditorController showWindow:nil];
+//	[self.window addChildWindow:self.formatEditorController.window  ordered:NSWindowAbove];
+}
+
+-(IBAction)editManualTiVos:(id)sender
+{
+//	[self.window addChildWindow:self.manualTiVoEditorController.window  ordered:NSWindowAbove];
+	[self.manualTiVoEditorController showWindow:nil];
 }
 
 -(IBAction)exportFormats:(id)sender
@@ -331,6 +342,14 @@ void signalHandler(int signal)
 	return _formatEditorController;
 }
 
+-(MTManualTiVoEditorController *)manualTiVoEditorController
+{
+	if (!_manualTiVoEditorController) {
+		_manualTiVoEditorController = [[MTManualTiVoEditorController alloc] initWithWindowNibName:@"MTManualTiVoEditorController"];
+	}
+	return _manualTiVoEditorController;
+}
+
 -(void)updateAllTiVos:(id)sender
 {
 	for (MTTiVo *tiVo in tiVoGlobalManager.tiVoList) {
@@ -386,11 +405,6 @@ void signalHandler(int signal)
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSURL *appSupportURL = [[fileManager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject];
     return [appSupportURL URLByAppendingPathComponent:@"com.cTiVo.cTivo"];
-}
-
--(IBAction)closeMainWindow:(id)sender
-{
-    [mainWindowController close];
 }
 
 -(IBAction)showMainWindow:(id)sender

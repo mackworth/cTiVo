@@ -36,7 +36,7 @@
 @property (nonatomic, assign) NSOperationQueue *queue;
 @property (nonatomic, retain) MTTiVoManager *tiVoManager;
 @property BOOL mediaKeyIsGood;
-@property BOOL isReachable, isResponding, manualTiVo;
+@property BOOL isReachable, isResponding, manualTiVo, enabled;
 
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
 

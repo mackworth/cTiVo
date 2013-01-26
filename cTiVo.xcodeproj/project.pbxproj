@@ -37,6 +37,8 @@
 		D2C390761687FFA600D2062E /* MTiTunes.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C390741687FFA600D2062E /* MTiTunes.m */; };
 		D2CAF34016AB43AE004E4CFA /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2CAF33F16AB43AE004E4CFA /* IOKit.framework */; };
 		D2CAF34316AB6FDE004E4CFA /* checkImage.png in Resources */ = {isa = PBXBuildFile; fileRef = D2CAF34216AB6FDE004E4CFA /* checkImage.png */; };
+		D2D2C6F016B3816B001AFE75 /* MTManualTiVoEditorController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2D2C6ED16B3816B001AFE75 /* MTManualTiVoEditorController.xib */; };
+		D2D2C6F116B3816B001AFE75 /* MTManualTiVoEditorController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D2C6EE16B3816B001AFE75 /* MTManualTiVoEditorController.m */; };
 		D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA116766EFD00CE32DE /* Cocoa.framework */; };
 		D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
 		D2D60BAE16766EFD00CE32DE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BAD16766EFD00CE32DE /* main.m */; };
@@ -117,6 +119,9 @@
 		D2C390751687FFA600D2062E /* MTiTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTunes.h; sourceTree = "<group>"; };
 		D2CAF33F16AB43AE004E4CFA /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		D2CAF34216AB6FDE004E4CFA /* checkImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkImage.png; sourceTree = "<group>"; };
+		D2D2C6ED16B3816B001AFE75 /* MTManualTiVoEditorController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTManualTiVoEditorController.xib; sourceTree = "<group>"; };
+		D2D2C6EE16B3816B001AFE75 /* MTManualTiVoEditorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTManualTiVoEditorController.m; sourceTree = "<group>"; };
+		D2D2C6EF16B3816B001AFE75 /* MTManualTiVoEditorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTManualTiVoEditorController.h; sourceTree = "<group>"; };
 		D2D60B9D16766EFD00CE32DE /* cTiVo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTiVo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2D60BA116766EFD00CE32DE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		D2D60BA416766EFD00CE32DE /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -197,6 +202,16 @@
 			name = "UI Classes- Format Edit";
 			sourceTree = "<group>";
 		};
+		D272E49116B33D1600392165 /* UI Classes - Manual TiVo Editor */ = {
+			isa = PBXGroup;
+			children = (
+				D2D2C6ED16B3816B001AFE75 /* MTManualTiVoEditorController.xib */,
+				D2D2C6EE16B3816B001AFE75 /* MTManualTiVoEditorController.m */,
+				D2D2C6EF16B3816B001AFE75 /* MTManualTiVoEditorController.h */,
+			);
+			name = "UI Classes - Manual TiVo Editor";
+			sourceTree = "<group>";
+		};
 		D2D60B9216766EFD00CE32DE = {
 			isa = PBXGroup;
 			children = (
@@ -249,6 +264,7 @@
 				D2DA8FBA169CDAAD0053B7CB /* Data Model */,
 				D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */,
 				1EE4418016A4E64800796897 /* UI Classes- Format Edit */,
+				D272E49116B33D1600392165 /* UI Classes - Manual TiVo Editor */,
 				1E791BD01697ACAA00E47E84 /* Custom NSViews */,
 				D2DFA68B1683B9EC00CD6CE0 /* iTunesInterface */,
 				D2D60BBE16766F1100CE32DE /* Resources */,
@@ -423,6 +439,7 @@
 				D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */,
 				D2CAF34316AB6FDE004E4CFA /* checkImage.png in Resources */,
 				1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */,
+				D2D2C6F016B3816B001AFE75 /* MTManualTiVoEditorController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,6 +490,7 @@
 				D2A7269C16A25DEB00C58C5F /* MTFormatEditorController.m in Sources */,
 				D219D5EA16A4F88D00C79962 /* MTHelpViewController.m in Sources */,
 				D28EB0FB16B3182100AA0330 /* MTNetService.m in Sources */,
+				D2D2C6F116B3816B001AFE75 /* MTManualTiVoEditorController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

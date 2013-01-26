@@ -184,7 +184,22 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)loadManualTiVos
 {
     BOOL didFindTiVo = NO;
-    NSArray *manualTiVoDescriptions = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos];
+    NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
+	//Validate array
+	NSMutableArray *itemsToRemove = [NSMutableArray array];
+    for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
+		if (manualTiVoDescription.count != 4 ||
+			((NSString *)manualTiVoDescription[@"userName"]).length == 0 ||
+			((NSString *)manualTiVoDescription[@"iPAddress"]).length == 0) {
+			[itemsToRemove addObject:manualTiVoDescription];
+			continue;
+		}
+	}
+	if (itemsToRemove.count) {
+		[manualTiVoDescriptions removeObjectsInArray:itemsToRemove];
+		[[NSUserDefaults standardUserDefaults] setObject:manualTiVoDescriptions forKey:kMTManualTiVos];
+	}
+	
     for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
         MTNetService *newTiVoService = [[[MTNetService alloc] init] autorelease];
         newTiVoService.userName = manualTiVoDescription[@"userName"];
@@ -192,6 +207,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
         newTiVoService.userPort = [manualTiVoDescription[@"userPort"] integerValue];
         MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:newTiVoService withOperationQueue:queue];
         newTiVo.manualTiVo = YES;
+		newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
         [_manualTiVoList addObject:newTiVo];
         [_tiVoList addObject:newTiVo];
         didFindTiVo = YES;
@@ -231,6 +247,13 @@ static MTTiVoManager *sharedTiVoManager = nil;
         }
     }
     return addresses;
+}
+
+-(NSArray *)tiVoList
+{
+	NSSortDescriptor *manualSort = [NSSortDescriptor sortDescriptorWithKey:@"manualTiVo" ascending:NO];
+	NSSortDescriptor *nameSort = [NSSortDescriptor sortDescriptorWithKey:@"tiVo.name" ascending:YES];
+	return [_tiVoList sortedArrayUsingDescriptors:[NSArray arrayWithObjects:manualSort,nameSort, nil]];
 }
 
 -(void) setupNotifications {

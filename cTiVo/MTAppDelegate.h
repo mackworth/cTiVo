@@ -13,6 +13,7 @@
 #import "MTMainWindowController.h"
 #import "MTSubscriptionTableView.h"
 #import "MTFormatEditorController.h"
+#import "MTManualTiVoEditorController.h"
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate> {
 	MTTiVoManager *tiVoGlobalManager;
@@ -27,6 +28,7 @@
 
 @property (assign) IBOutlet NSWindow *window;
 @property (nonatomic, retain) 	MTFormatEditorController *formatEditorController;
+@property (nonatomic, retain) 	MTManualTiVoEditorController *manualTiVoEditorController;
 @property (nonatomic, readonly) NSNumber *numberOfUserFormats;
 
 

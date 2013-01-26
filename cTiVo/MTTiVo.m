@@ -50,6 +50,7 @@
         managingDownloads = NO;
         _manualTiVo = NO;
 		firstUpdate = YES;
+		_enabled = YES;
         itemStart = 0;
         itemCount = 50;
         reachabilityContext.version = 0;
@@ -87,8 +88,11 @@
 		self.queue = queue;
         _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [self.tiVo.addresses[0] bytes]);
 		self.networkAvailability = [NSDate date];
-        SCNetworkReachabilitySetCallback(_reachability, tivoNetworkCallback, &reachabilityContext);
-		BOOL didSchedule = SCNetworkReachabilityScheduleWithRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+		BOOL didSchedule = NO;
+		if (_reachability) {
+			SCNetworkReachabilitySetCallback(_reachability, tivoNetworkCallback, &reachabilityContext);
+			didSchedule = SCNetworkReachabilityScheduleWithRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+		}
 		_isReachable = YES;
 		NSLog(@"%@ reachability for tivo %@",didSchedule ? @"Scheduled" : @"Failed to schedule", _tiVo.name);
 		[self getMediaKey];
