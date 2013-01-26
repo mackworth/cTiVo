@@ -221,11 +221,16 @@
         // allows it to be re-used
         result.identifier = tableColumn.identifier;
         if (!result.textField) NSLog (@"created but no textField");
-    } else {
-		if (!result.textField) NSLog (@"made but no textField");
-
 	}
-    
+	if (!result.textField) {
+		NSLog (@"made but no textField!");
+		result.textField = [[NSTextField alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)];
+		[result.textField  setBordered: NO];
+        result.textField.editable = NO;
+		[result addSubview:result.textField];
+		
+	}
+
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
@@ -253,13 +258,14 @@
 		result.textField.stringValue = thisShow.isQueued ? @"✔" : @"";
 	} else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.isHD ? @"✔" : @"";
+		result.textField.alignment = NSCenterTextAlignment;
 	} else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.channelString;
 	} else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
-		if (thisShow.fileSize > 1024*1024*1024) {
-			result.textField.stringValue = [NSString stringWithFormat:@"%0.2fGB",thisShow.fileSize/1024.0/1024.0 ];
+		if (thisShow.fileSize >= 1024*1024*1024) {
+			result.textField.stringValue = [NSString stringWithFormat:@"%0.1fGB",thisShow.fileSize/1073741824 ];
 		} else {
-			result.textField.stringValue = [NSString stringWithFormat:@"%ldMB",((NSInteger)thisShow.fileSize)/1024 ];
+			result.textField.stringValue = [NSString stringWithFormat:@"%ldMB",((NSInteger)thisShow.fileSize)/1048576 ];
 		};
 	}
     if ([thisShow.protectedShow boolValue]) {
