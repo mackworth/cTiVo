@@ -52,7 +52,6 @@
 		_season = 0;
 		_episode = 0;
 		_episodeNumber = @"";
-		_episodeGenre = @"";
 		_episodeTitle = @"";
 		_seriesTitle = @"";
 //		_originalAirDate = @"";
@@ -1362,8 +1361,12 @@
 
 -(NSString *)showDateString
 {
-	NSDateFormatter *dateFormat = [[[NSDateFormatter alloc] init] autorelease];
-	[dateFormat setDateFormat:@"EE M/d"];
+	static NSDateFormatter *dateFormat;
+	if(!dateFormat) {
+		dateFormat = [[NSDateFormatter alloc] init] ;
+		[dateFormat setDateStyle:NSDateFormatterShortStyle];
+		[dateFormat setTimeStyle:NSDateFormatterShortStyle] ;
+	}
 //	[dateFormat setTimeStyle:NSDateFormatterNoStyle];
 	return [dateFormat stringFromDate:_showDate];
 }
@@ -1461,7 +1464,6 @@
 	}
 	[_vProgramGenre release];
 	_vProgramGenre = [vProgramGenre retain];
-    self.episodeGenre = [self combineGenres];
 }
 
 -(void)setVSeriesGenre:(NSArray *)vSeriesGenre{
@@ -1470,7 +1472,6 @@
 	}
 	[_vSeriesGenre release];
 	_vSeriesGenre = [vSeriesGenre retain];
-    self.episodeGenre = [self combineGenres];
 }
 
 #pragma mark - Memory Management

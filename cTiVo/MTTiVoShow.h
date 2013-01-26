@@ -41,7 +41,8 @@
     NSDate *previousCheck;
 }
 
-@property (nonatomic, readonly) NSString *showTitleForFiles;
+@property (nonatomic, readonly) NSString *showTitleForFiles,
+									*episodeGenre;
 
 
 @property (nonatomic, retain) NSString *downloadDirectory,
@@ -56,7 +57,6 @@
 									*isEpisode,
 									*originalAirDate,
 									*originalAirDateNoTime,
-									*episodeGenre,
                                     *seriesTitle,
                                     *showDateString,
 									*showLengthString,
@@ -93,6 +93,8 @@
 @property time_t showLength;  //length of show in seconds
 @property (nonatomic, retain) NSURL *downloadURL, *detailURL;
 @property int  showID, season, episode, episodeYear, numRetriesRemaining, numStartupRetriesRemaining;
+
+
 @property (retain) NSNumber *downloadStatus;
 @property double processProgress; //Should be between 0 and 1
 @property double fileSize;  //Size on TiVo;
@@ -103,7 +105,7 @@
                 isSelected;//Used for refresh of table
 
 @property (readonly) BOOL isInProgress;
-@property (readonly) BOOL isMovie;
+@property (nonatomic, readonly) BOOL isMovie;
 //@property (nonatomic, assign) MTProgramList *myTableView;
 
 @property (readonly) NSDictionary * queueRecord;

@@ -187,7 +187,7 @@
 			
         }
     } else {
-        [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d)",kMTAllTiVos,tiVoManager.totalShows]];
+        [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d shows)",kMTAllTiVos,tiVoManager.totalShows]];
         if ([kMTAllTiVos compare:_selectedTiVo] == NSOrderedSame) {
             [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
         }

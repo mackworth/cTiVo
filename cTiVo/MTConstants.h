@@ -22,13 +22,15 @@
 #define kMTNotificationTiVoListUpdated @"MTNotificationTiVoListUpdated"
 #define kMTNotificationFormatListUpdated @"MTNotificationFormatListUpdated"
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"
-#define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
-#define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated"
 #define kMTNotificationNetworkChanged @"MTNotificationNetworkChanged"
 #define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"
 //#define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
 #define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"
 #define kMTNotificationFormatChanged @"MTNotificationFormatChanged"
+
+//Tivo busy indicator
+#define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
+#define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated"
 
 //Download Status
 #define kMTStatusNew 0
@@ -94,7 +96,7 @@
 #define kMTiTunesSubmit @"iTunesSubmit"             //Whether to submit to iTunes after encoding
 #define kMTiTunesSync @"iTunesSync"                 // Whether to sync iDevices after iTunes submital
 #define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
-
+#define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
 #define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
 

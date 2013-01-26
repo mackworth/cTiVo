@@ -251,27 +251,29 @@ static NSDateFormatter *dateFormatter;
 	//	[pboard declareTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType,nil] owner:self];
 	//[pboard writeObjects:selectedObjects];
 	//	NSLog (@"QQQQproperty list: %@",[pboard propertyListForType:kMTTivoShowPasteBoardType]);
-	NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
-	NSPoint p = [tv convertPoint:windowPoint fromView:nil];
-	NSInteger r = [tv rowAtPoint:p];
-	NSInteger c = [tv columnAtPoint:p];
-	if (c < 0) {
-		c = 0;
-	}
-	NSTableColumn *selectedColumn = tv.tableColumns[c];
-	BOOL isSelectedRow = [tv isRowSelected:r];
-	BOOL isOverText = NO;
-	if ([selectedColumn.identifier caseInsensitiveCompare:@"series"] == NSOrderedSame) { //Check if over text
-		NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
-		NSTextField *showField = showCellView.textField;
-		NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
-		NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
-		if (clickInText.x < stringSize.width) {
-			isOverText = YES;
+	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
+		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
+		NSPoint p = [tv convertPoint:windowPoint fromView:nil];
+		NSInteger r = [tv rowAtPoint:p];
+		NSInteger c = [tv columnAtPoint:p];
+		if (c < 0) {
+			c = 0;
 		}
-	}
-	if (!isSelectedRow && !isOverText) {
-		return NO;
+		NSTableColumn *selectedColumn = tv.tableColumns[c];
+		BOOL isSelectedRow = [tv isRowSelected:r];
+		BOOL isOverText = NO;
+		if ([selectedColumn.identifier caseInsensitiveCompare:@"series"] == NSOrderedSame) { //Check if over text
+			NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+			NSTextField *showField = showCellView.textField;
+			NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+			NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
+			if (clickInText.x < stringSize.width) {
+				isOverText = YES;
+			}
+		}
+		if (!isSelectedRow && !isOverText) {
+			return NO;
+		}
 	}
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
 	return YES;

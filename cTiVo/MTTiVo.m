@@ -21,7 +21,7 @@
 
 
 #define kMTNumberShowToGet 50
-
+#define kMTNumberShowToGetFirst 15
 
 
 @interface MTTiVo ()
@@ -190,7 +190,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //		NSLog(@"prevID: %@ %@",idString,show.showTitle);
 		[previousShowList setValue:show forKey:idString];
 	}
-    [_shows removeAllObjects];    [self updateShowsStartingAt:0 withCount:kMTNumberShowToGet];
+    [_shows removeAllObjects];
+	[self updateShowsStartingAt:0 withCount:kMTNumberShowToGetFirst];
 }
 
 -(void)updateShowsStartingAt:(int)anchor withCount:(int)count
@@ -333,18 +334,19 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)parserDidEndDocument:(NSXMLParser *)parser
 {
 	//Check if we're done yet
-	if (itemCount == kMTNumberShowToGet) {
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+	if (itemStart+itemCount < totalItemsOnTivo) {
 		[self updateShowsStartingAt:itemStart + itemCount withCount:kMTNumberShowToGet];
 	} else {
+		NSLog(@"sss All done");
 		if (firstUpdate) {
 			[self restoreQueue]; //performSelector:@selector(restoreQueue) withObject:nil afterDelay:10]; //should this post the TiVoShowsUpdated?
-			
+			firstUpdate = NO;
 		}
-		firstUpdate = NO;
 		isConnecting = NO;
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 		[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
 		//	NSLog(@"Avialable Recordings are %@",_recordings);
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	}
     [parser release];
 }
@@ -727,7 +729,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[parser parse];
     [showURLConnection release];
     showURLConnection = nil;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 }
 
 #pragma mark - Memory Management

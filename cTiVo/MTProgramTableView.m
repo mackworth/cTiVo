@@ -61,7 +61,7 @@
         if (!tiVoColumn) {
             [self addTableColumn:tiVoColumnHolder];
             NSInteger colPos = [self columnWithIdentifier:@"TiVo"];
-            [self moveColumn:colPos toColumn:1];
+            [self moveColumn:colPos toColumn:2];
             programColumn.width -= tiVoColumn.width + 3;
             changedColumns = YES;
         }
@@ -206,9 +206,10 @@
 {
     // get an existing cell with the MyView identifier if it exists
     NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
-    MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
+    NSLog(@"%@ ==> %@",tableColumn.identifier, result.textField);
+	MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
     // There is no existing cell to reuse so we will create a new one
-    if (result == nil) {
+ 	if (result == nil) {
         
         // create the new NSTextField with a frame of the {0,0} with the width of the table
         // note that the height of the frame is not really relevant, the row-height will modify the height
@@ -216,11 +217,14 @@
         result = [[[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)] autorelease];
         //        result.textField.font = [NSFont userFontOfSize:14];
         result.textField.editable = NO;
-        
         // the identifier of the NSTextField instance is set to MyView. This
         // allows it to be re-used
         result.identifier = tableColumn.identifier;
-    }
+        if (!result.textField) NSLog (@"created but no textField");
+    } else {
+		if (!result.textField) NSLog (@"made but no textField");
+
+	}
     
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
@@ -237,22 +241,26 @@
         result.toolTip = thisShow.tiVo.tiVo.name;
     } else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.showDateString;
-		[result.textField setAlignment:NSCenterTextAlignment];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
-		result.textField.stringValue = [NSString stringWithFormat:@"%ld:%0.2ld",thisShow.showLength/60,thisShow.showLength % 60];
-		[result.textField setAlignment:NSCenterTextAlignment];
+		NSInteger length = (thisShow.showLength+30)/60; //round up to nearest minute;
+		result.textField.stringValue = [NSString stringWithFormat:@"%ld:%0.2ld",length/60,length % 60];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.seasonEpisode;
-		[result.textField setAlignment:NSCenterTextAlignment];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
-        if (thisShow.isQueued) {
-            result.textField.stringValue = @"✔";
-        } else {
-            result.textField.stringValue = @"";
-        }
+		result.textField.stringValue = thisShow.isQueued ? @"✔" : @"";
+	} else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.isHD ? @"✔" : @"";
+	} else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.channelString;
+	} else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
+		if (thisShow.fileSize > 1024*1024*1024) {
+			result.textField.stringValue = [NSString stringWithFormat:@"%0.2fGB",thisShow.fileSize/1024.0/1024.0 ];
+		} else {
+			result.textField.stringValue = [NSString stringWithFormat:@"%ldMB",((NSInteger)thisShow.fileSize)/1024 ];
+		};
 	}
     if ([thisShow.protectedShow boolValue]) {
         result.textField.textColor = [NSColor grayColor];
@@ -284,27 +292,29 @@
 
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
-	NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
-	NSPoint p = [tv convertPoint:windowPoint fromView:nil];
-	NSInteger r = [tv rowAtPoint:p];
-	NSInteger c = [tv columnAtPoint:p];
-	if (c < 0) {
-		c = 0;
-	}
-	NSTableColumn *selectedColumn = tv.tableColumns[c];
-	BOOL isSelectedRow = [tv isRowSelected:r];
-	BOOL isOverText = NO;
-	if ([selectedColumn.identifier caseInsensitiveCompare:@"Programs"] == NSOrderedSame) { //Check if over text
-		NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
-		NSTextField *showField = showCellView.textField;
-		NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
-		NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
-		if (clickInText.x < stringSize.width) {
-			isOverText = YES;
+	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
+		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
+		NSPoint p = [tv convertPoint:windowPoint fromView:nil];
+		NSInteger r = [tv rowAtPoint:p];
+		NSInteger c = [tv columnAtPoint:p];
+		if (c < 0) {
+			c = 0;
 		}
+		NSTableColumn *selectedColumn = tv.tableColumns[c];
+		BOOL isSelectedRow = [tv isRowSelected:r];
+		BOOL isOverText = NO;
+		if ([selectedColumn.identifier caseInsensitiveCompare:@"Programs"] == NSOrderedSame) { //Check if over text
+			NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+			NSTextField *showField = showCellView.textField;
+			NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+			NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
+			if (clickInText.x < stringSize.width) {
+				isOverText = YES;
+			}
+		}
+		if (!isSelectedRow && !isOverText) {
+			return NO;
 	}
-	if (!isSelectedRow && !isOverText) {
-		return NO;
 	}
 	// Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
