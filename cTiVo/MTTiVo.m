@@ -197,7 +197,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)updateShowsStartingAt:(int)anchor withCount:(int)count
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
-	NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,anchor,count] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	NSString *portString = @"";
+	if ([_tiVo isKindOfClass:[MTNetService class]]) {
+		portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];
+	}
+	
+	NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,anchor,count] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 //	NSLog(@"Tivo URL String %@",tivoURLString);
 	NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
 	NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
@@ -252,17 +257,24 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		} else if (gettingDetails) {
             //Get URL for details here
 			if ([elementName caseInsensitiveCompare:@"Url"] == NSOrderedSame) {
+				//If a manual tivo put in port information
+				if (self.manualTiVo) {
+					[self updatePortsInURLString:element];
+				}
 				[currentShow setValue:[NSURL URLWithString:element] forKey:@"detailURL"];
 			}
         } else if (gettingContent) {
             //Get URL for Content here
 			if ([elementName caseInsensitiveCompare:@"Url"] == NSOrderedSame) {
-				[currentShow setValue:[NSURL URLWithString:element] forKey:@"downloadURL"];
 				NSRegularExpression *idRx = [NSRegularExpression regularExpressionWithPattern:@"id=(\\d+)" options:NSRegularExpressionCaseInsensitive error:nil];
 				NSTextCheckingResult *idResult = [idRx firstMatchInString:element options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, element.length)];
 				if(idResult.range.location != NSNotFound){
 					currentShow.showID = [[element substringWithRange:[idResult rangeAtIndex:1]] intValue];
 				}
+				if (self.manualTiVo) {
+					[self updatePortsInURLString:element];
+				}
+				[currentShow setValue:[NSURL URLWithString:element] forKey:@"downloadURL"];
 			}
         } else if ([elementToPropertyMap objectForKey:elementName]){
 //        [currentShow setValue:element forKey:elementToPropertyMap[elementName]];
@@ -332,6 +344,23 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
+-(void)updatePortsInURLString:(NSMutableString *)elementToUpdate
+{
+	NSRegularExpression *portRx = [NSRegularExpression regularExpressionWithPattern:@"\\:(\\d+)\\/" options:NSRegularExpressionCaseInsensitive error:nil];
+	NSTextCheckingResult *portMatch = [portRx firstMatchInString:elementToUpdate options:0 range:NSMakeRange(0, elementToUpdate.length)];
+	if (portMatch.numberOfRanges == 2) {
+		NSString *portString = [elementToUpdate substringWithRange:[portMatch rangeAtIndex:1]];
+		NSString *portReplaceString = portString;
+		if ([portString compare:@"443"] == NSOrderedSame) {
+			portReplaceString = [NSString stringWithFormat:@"%d",self.tiVo.userPortSSL];
+		}
+		if ([portString compare:@"80"] == NSOrderedSame) {
+			portReplaceString = [NSString stringWithFormat:@"%d",self.tiVo.userPort];
+		}
+		[elementToUpdate replaceOccurrencesOfString:portString withString:portReplaceString options:0 range:NSMakeRange(0, elementToUpdate.length)];
+	}
+}
+
 -(void)parserDidEndDocument:(NSXMLParser *)parser
 {
 	//Check if we're done yet
@@ -352,194 +381,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     [parser release];
 }
 
-
-
-//-(void)parseListingData
-//{
-//    NSMutableDictionary * previousShowList = [NSMutableDictionary dictionary];
-//	for (MTTiVoShow * show in _shows) {
-//		NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
-////		NSLog(@"prevID: %@ %@",idString,show.showTitle);
-//		[previousShowList setValue:show forKey:idString];
-//	}
-//    [_shows removeAllObjects];
-//	NSString *urlDataString = [[[NSString alloc] initWithData:urlData encoding:NSUTF8StringEncoding] autorelease];
-//	NSRegularExpression *tableRx = [NSRegularExpression regularExpressionWithPattern:@"<table[^>]*>(.*?)</table>" options:NSRegularExpressionCaseInsensitive error:nil];
-//	NSRegularExpression *rowRx = [NSRegularExpression regularExpressionWithPattern:@"<tr[^>]*>(.*?)</tr>" options:NSRegularExpressionCaseInsensitive error:nil];
-//	NSRegularExpression *cellRx = [NSRegularExpression regularExpressionWithPattern:@"<td[^>]*>(.*?)(</td>|<td)" options:NSRegularExpressionCaseInsensitive error:nil];
-//	NSRegularExpression *titleRx = [NSRegularExpression regularExpressionWithPattern:@"<b[^>]*>(.*?)</b>" options:NSRegularExpressionCaseInsensitive error:nil];
-//	NSRegularExpression *descriptionRx = [NSRegularExpression regularExpressionWithPattern:@"<br>(.*)" options:NSRegularExpressionCaseInsensitive error:nil];
-//	NSRegularExpression *dateRx = [NSRegularExpression regularExpressionWithPattern:@"(.*)<br>(.*)" options:NSRegularExpressionCaseInsensitive error:nil];
-//	NSRegularExpression *twoFieldRx = [NSRegularExpression regularExpressionWithPattern:@"(.*)<br>(.*)" options:NSRegularExpressionCaseInsensitive error:nil];
-//	NSRegularExpression *urlRx = [NSRegularExpression regularExpressionWithPattern:@"<a href=\"([^\"]*)\">Download MPEG-PS" options:NSRegularExpressionCaseInsensitive error:nil];
-//	NSRegularExpression *idRx = [NSRegularExpression regularExpressionWithPattern:@"id=(\\d+)" options:NSRegularExpressionCaseInsensitive error:nil];
-//	NSRegularExpression *stationCallSignRx = [NSRegularExpression regularExpressionWithPattern:@"alt=\"(.+)\"" options:NSRegularExpressionCaseInsensitive error:nil];
-//	NSArray *tables = [tableRx matchesInString:urlDataString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, urlDataString.length)];
-//    NSDateFormatter *showDateFormatter = [[[NSDateFormatter alloc] init] autorelease];
-//    [showDateFormatter setDateFormat:@"M/d/y"];
-//    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit fromDate:[NSDate date]];
-//    NSInteger thisYear = [components year];
-////    NSInteger thisMonth = [components month];
-//	if (tables.count == 0) {
-//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:self];
-//		_mediaKeyIsGood = NO;
-//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
-//		return;
-//	}
-//	_mediaKeyIsGood = YES;
-//	NSTextCheckingResult *table = [tables objectAtIndex:0];
-//	urlDataString = [urlDataString substringWithRange:[table rangeAtIndex:1]];
-//	NSArray *rows = [rowRx matchesInString:urlDataString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, urlDataString.length)];
-//	NSTextCheckingResult *cell;
-//	NSRange cellRange;
-//	int cellIndex = 0;
-//	NSString	*title = @"",
-//	*description = @"",
-//	*downloadURL = @"",
-//	*idString = @"",
-//	*showLength = @"",
-//	*size = @"",
-//	*showDateString = @"",
-//    *stationCallSign = @"";
-//    BOOL protected = NO;
-//	NSRange rangeToCheck;
-//	for (NSTextCheckingResult *row in rows) {
-//		title = @"";
-//		description = @"";
-//		downloadURL = @"";
-//		idString = @"";
-//		size = @"";
-//		showLength = @"";
-//        showDateString = @"";
-//        stationCallSign = @"";
-//		cellIndex = 0;
-//        protected = NO;
-//		rangeToCheck = [row rangeAtIndex:1];
-//		cell = [cellRx firstMatchInString:urlDataString options:NSMatchingWithoutAnchoringBounds range:rangeToCheck];
-//		while (cell && cell.range.location != NSNotFound && cellIndex < 6) {
-//			NSString *cellString = [urlDataString substringWithRange:cell.range];
-//			NSString *cellStringEnd = [cellString substringFromIndex:(cellString.length - 3)];
-//			if ([cellStringEnd caseInsensitiveCompare:@"<td"] == NSOrderedSame) {
-//				cellRange = NSMakeRange(cell.range.location , cell.range.length - 3);
-//			} else {
-//				cellRange = cell.range;
-//			}
-//            if (cellIndex == 1) {
-//                //Get the station call sign
-// 				NSString *fullTitle = [urlDataString substringWithRange:[cell rangeAtIndex:1]];
-//				NSTextCheckingResult *callSignResult = [stationCallSignRx firstMatchInString:fullTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullTitle.length)];
-//				stationCallSign = [[fullTitle substringWithRange:[callSignResult rangeAtIndex:1]] stringByDecodingHTMLEntities];             
-//            }
-//			if (cellIndex == 2) {
-//				//We've got the title
-//				NSString *fullTitle = [urlDataString substringWithRange:[cell rangeAtIndex:1]];
-//				NSTextCheckingResult *titleResult = [titleRx firstMatchInString:fullTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullTitle.length)];
-//				title = [[fullTitle substringWithRange:[titleResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
-//				NSTextCheckingResult *descriptionResult = [descriptionRx firstMatchInString:fullTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullTitle.length)];
-//				description = [[fullTitle substringWithRange:[descriptionResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
-//			}
-//			if (cellIndex == 3) {
-//				//We've got the date
-//				NSString *fullString = [urlDataString substringWithRange:[cell rangeAtIndex:1]];
-//				NSTextCheckingResult *dateResult = [dateRx firstMatchInString:fullString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullString.length)];
-//				if (dateResult.range.location != NSNotFound) {
-//					NSString *day = [[fullString substringWithRange:[dateResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
-//					NSString *date = [[fullString substringWithRange:[dateResult rangeAtIndex:2]] stringByDecodingHTMLEntities];
-//					showDateString = [NSString stringWithFormat:@"%@ %@",day, date];
-//				}
-//                
-//			}
-//			if (cellIndex == 4) {
-//				//We've got the length and size
-//				NSString *fullString = [urlDataString substringWithRange:[cell rangeAtIndex:1]];
-//				NSTextCheckingResult *sizeResult = [twoFieldRx firstMatchInString:fullString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullString.length)];
-//				if (sizeResult.range.location != NSNotFound) {
-//					showLength = [[fullString substringWithRange:[sizeResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
-//					size = [[fullString substringWithRange:[sizeResult rangeAtIndex:2]] stringByDecodingHTMLEntities];
-//				}
-//				
-//			}
-//			if (cellIndex == 5) {
-//				//We've got the download Reference
-//				NSString *fullString = [urlDataString substringWithRange:[cell rangeAtIndex:1]];
-//                NSRange protectedRange = [fullString rangeOfString:@"Protected" options:NSCaseInsensitiveSearch];
-//                if (protectedRange.location != NSNotFound) {
-//                    protected = YES;
-//                } else {
-//                    NSTextCheckingResult *urlResult = [urlRx firstMatchInString:fullString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, fullString.length)];
-//                    if (urlResult.range.location != NSNotFound) {
-//                        downloadURL = [[fullString substringWithRange:[urlResult rangeAtIndex:1]] stringByDecodingHTMLEntities];
-//                        //Add login information
-//                        if (downloadURL.length > 10) {
-//                            downloadURL = [NSString stringWithFormat:@"%@tivo:%@@%@",[downloadURL substringToIndex:7],[[[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys] objectForKey:_tiVo.name ],[downloadURL substringFromIndex:7]];
-//                        }
-//                        NSTextCheckingResult *idResult = [idRx firstMatchInString:downloadURL options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, downloadURL.length)];
-//                        if(idResult.range.location != NSNotFound){
-//                            idString = [downloadURL substringWithRange:[idResult rangeAtIndex:1]];
-//                        }
-//                    }
-//                }
-//			}
-//			//find the next cell
-//			rangeToCheck = NSMakeRange(cellRange.location + cellRange.length, urlDataString.length - (cellRange.location + cellRange.length));
-//			cell = [cellRx firstMatchInString:urlDataString options:NSMatchingWithoutAnchoringBounds range:rangeToCheck];
-//			cellIndex++;
-//			
-//		}
-//		if (downloadURL.length || protected) {
-//            MTTiVoShow *thisShow = [previousShowList valueForKey:idString];
-//			if (!thisShow) {
-//				thisShow = [[[MTTiVoShow alloc] init] autorelease];
-//                thisShow.showTitle = title;
-//                thisShow.showDescription = description;
-////                thisShow.urlString = downloadURL;
-//                thisShow.showID = [idString intValue];
-//                thisShow.showDateString = showDateString;
-//                thisShow.stationCallsign = stationCallSign;
-//                NSArray *showDateComponents = [showDateString componentsSeparatedByString:@" "];
-//                thisShow.showDate = [showDateFormatter dateFromString:[NSString stringWithFormat:@"%@/%ld",showDateComponents[1],thisYear]];
-//                if ([[NSDate date] compare:[thisShow.showDate dateByAddingTimeInterval:-180*24*60*60]] == NSOrderedAscending) {
-//                    thisShow.showDate = [showDateFormatter dateFromString:[NSString stringWithFormat:@"%@/%ld",showDateComponents[1],thisYear-1]];
-//
-//                }
-////                NSLog(@"Got show date and showdate string %@ and %@ and day = %@",thisShow.showDate,showDateString, [NSString stringWithFormat:@"%@/%ld",showDateComponents[1],thisYear]);
-//                thisShow.showLength= ([self parseTime: showLength]+30)/60; //round up to nearest minute
-//                thisShow.protectedShow = [NSNumber numberWithBool:protected];
-//                double sizeValue;
-//                if (size.length <= 3) {
-//                    sizeValue = 0;
-//                } else {
-//                    sizeValue = [[size substringToIndex:size.length-3] doubleValue];
-//                    NSString *modifier = [size substringFromIndex:size.length-2];
-//                    if ([modifier caseInsensitiveCompare:@"MB"] == NSOrderedSame) {
-//                        sizeValue *= 1000 * 1000;
-//                    } else {
-//                        sizeValue *= 1000 * 1000 * 1000;
-//                    }
-//                }
-//                thisShow.fileSize = sizeValue;
-//                thisShow.tiVo = self;
-//				thisShow.mediaKey = _mediaKey;
-////                if (!protected) {
-//                    NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil] autorelease];
-//                    [_queue addOperation:nextDetail];
-////                }
-//				//			[thisShow getShowDetail];
-//			} else {
-////              NSLog(@"cache hit: %@ thisShow: %@", idString, thisShow.showTitle);
-//			}
-//			[_shows addObject:thisShow];
-//		}
-//	}
-//	if (firstUpdate) {
-//		[self restoreQueue]; //performSelector:@selector(restoreQueue) withObject:nil afterDelay:10]; //should this post the TiVoShowsUpdated?
-//
-//	}
-//	firstUpdate = NO;
-//	[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
-////	NSLog(@"Avialable Recordings are %@",_recordings);
-//	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-//}
 
 #pragma mark - Download Management
 

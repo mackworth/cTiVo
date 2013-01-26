@@ -14,7 +14,8 @@
 -(id)init{
     self = [super init];
     if (self) {
-        self.userPort = 0;
+        self.userPort = 80;
+		self.userPortSSL = 443;
         self.userName = nil;
         self.iPAddress = nil;
     }

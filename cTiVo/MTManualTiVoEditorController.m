@@ -28,14 +28,14 @@
 - (void)windowDidLoad
 {
     [super windowDidLoad];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:@"ManualTiVos" options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTManualTiVos options:NSKeyValueObservingOptionNew context:nil];
     
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-	if ([keyPath compare:@"ManualTiVos"] == NSOrderedSame) {
+	if ([keyPath compare:kMTManualTiVos] == NSOrderedSame) {
 		[tiVoManager loadManualTiVos];
 	}
 }
@@ -43,7 +43,7 @@
 -(IBAction)add:(id)sender
 {
 	if (((NSArray *)arrayController.content).count == 0) { //No template to check
-		[[NSUserDefaults standardUserDefaults] setObject:@[@{@"enabled" : [NSNumber numberWithBool:YES], @"userName" : @"TiVo Name", @"iPAddress" : @"0.0.0.0", @"userPort" : @"0"}] forKey:kMTManualTiVos];
+		[[NSUserDefaults standardUserDefaults] setObject:@[@{@"enabled" : [NSNumber numberWithBool:NO], @"userName" : @"TiVo Name", @"iPAddress" : @"0.0.0.0", @"userPort" : @"80", @"userPortSSL" : @"443"}] forKey:kMTManualTiVos];
 	} else {
 		[arrayController add:sender];
 	}
@@ -51,7 +51,7 @@
 
 -(void)dealloc
 {
-	[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:@"ManualTiVos"];
+	[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:kMTManualTiVos];
 	[super dealloc];
 }
 

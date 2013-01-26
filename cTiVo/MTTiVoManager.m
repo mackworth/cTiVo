@@ -189,7 +189,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	//Validate array
 	NSMutableArray *itemsToRemove = [NSMutableArray array];
     for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
-		if (manualTiVoDescription.count != 4 ||
+		if (manualTiVoDescription.count != 5 ||
 			((NSString *)manualTiVoDescription[@"userName"]).length == 0 ||
 			((NSString *)manualTiVoDescription[@"iPAddress"]).length == 0) {
 			[itemsToRemove addObject:manualTiVoDescription];
@@ -210,6 +210,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 				newTiVo = tivo;
 				newTiVo.tiVo.userName = manualTiVoDescription[@"userName"];
 				newTiVo.tiVo.userPort = [manualTiVoDescription[@"userPort"] integerValue];
+				newTiVo.tiVo.userPortSSL = [manualTiVoDescription[@"userPortSSL"] integerValue];
 				newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
 				break;
 			}
@@ -219,6 +220,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			newTiVoService.userName = manualTiVoDescription[@"userName"];
 			newTiVoService.iPAddress = manualTiVoDescription[@"iPAddress"];
 			newTiVoService.userPort = [manualTiVoDescription[@"userPort"] integerValue];
+			newTiVoService.userPortSSL = [manualTiVoDescription[@"userPortSSL"] integerValue];
 			newTiVo = [MTTiVo tiVoWithTiVo:newTiVoService withOperationQueue:queue];
 			newTiVo.manualTiVo = YES;
 			newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];

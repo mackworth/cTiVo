@@ -12,6 +12,6 @@
 
 @property (nonatomic, retain) NSString *userName, *iPAddress;
 
-@property (nonatomic) short userPort;
+@property (nonatomic) short userPort, userPortSSL;
 
 @end
