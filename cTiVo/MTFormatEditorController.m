@@ -14,14 +14,17 @@
 
 @interface MTFormatEditorController ()
 
+@property (nonatomic, retain) NSDictionary *alertResponseInfo;
+
 @end
 
 @implementation MTFormatEditorController
 
 
-- (id)initWithWindow:(NSWindow *)window
+//- (id)initWithWindow:(NSWindow *)window
+-(id)initWithCoder:(NSCoder *)aDecoder
 {
-    self = [super initWithWindow:window];
+    self = [super initWithCoder:aDecoder];
     if (self) {
         // Initialization code here.
 		myPopover = nil;
@@ -36,11 +39,6 @@
 -(void)awakeFromNib
 {
 	popoverDetachWindow.contentView = popoverDetachController.view;
-}
-
-- (void)windowDidLoad
-{
-    [super windowDidLoad];
 	[self refreshFormatList];
 //	self.formatList = [NSMutableArray arrayWithArray:tiVoManager.formatList];
 //	self.currentFormat = [tiVoManager.selectedFormat copy];
@@ -59,6 +57,7 @@
 {
 	//Deepcopy array so we have new object
 	self.formatList = [NSMutableArray array];
+	formatPopUpButton.formatList = self.formatList;
 	
 	for (MTFormat *f in tiVoManager.formatList) {
 		MTFormat *newFormat = [[f copy] autorelease];
@@ -73,43 +72,86 @@
 - (BOOL)windowShouldClose:(id)sender
 {
 	if ([self.shouldSave boolValue]) {
-		saveOrCancelAlert = [NSAlert alertWithMessageText:@"You have edited the formats.  Closing the window will discard your changes.  Do you want to save your changes?" defaultButton:@"Save" alternateButton:@"Close Window" otherButton:@"Continue Editing" informativeTextWithFormat:@""];
-		[saveOrCancelAlert beginSheetModalForWindow:self.window modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+		saveOrCancelAlert = [NSAlert alertWithMessageText:@"You have edited the formats.  Leaving the window will discard your changes.  Do you want to save your changes?" defaultButton:@"Save" alternateButton:@"Leave Window" otherButton:@"Continue Editing" informativeTextWithFormat:@""];
+		[saveOrCancelAlert beginSheetModalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+		self.alertResponseInfo = (NSDictionary *)sender;
 		return NO;
 	} else {
-		if (!sender) {
-			[self close];
-//			[self.window close];
-		}
+		[self close];
 		return YES;
 
 	}
 }
 
+- (void) alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+{
+	if (alert == deleteAlert) {
+		if (returnCode == 1) {
+			[self.formatList removeObject:_currentFormat];
+			self.currentFormat = _formatList[0];
+			[self refreshFormatPopUp:nil];
+			[self updateForFormatChange];
+		}
+	}
+	if (alert == saveOrCancelAlert) {
+		switch (returnCode) {
+			case 1:
+				//Save changes here
+				[self saveFormats:nil];
+				//				[self.window close];
+				[self close];
+				[self alertResponse:_alertResponseInfo];
+				break;
+			case 0:
+				//Cancel Changes here and dismiss
+				//				[self.window close];
+				[self close];
+				[self alertResponse:_alertResponseInfo];
+				break;
+			case -1:
+				//Don't Close the window
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+-(void)alertResponse:(NSDictionary *)info
+{
+	id target = (id)info[@"Target"];
+	SEL selector = NSSelectorFromString(info[@"Selector"]);
+	id argument = (id)info[@"Argument"];
+	[target performSelector:selector withObject:argument];
+}
+
+
+
 -(void)close
 {
-	[NSApp endSheet:self.window];
-	[self.window orderOut:nil];
+//	[NSApp endSheet:self.window];
+//	[self.window orderOut:nil];
 	[self refreshFormatList];
  	[self refreshFormatPopUp:nil];
+	[self updateForFormatChange];
 
 }
 
 
--(void)showWindow:(id)sender
-{
-	//Deepcopy array so we have new object
-    if (formatPopUpButton) {  //Clumsy way of refreshing popup selection after dismissal and re-show of window.  Need better connection
-		[self refreshFormatPopUp:nil];
-		self.currentFormat= [formatPopUpButton selectFormatNamed:tiVoManager.selectedFormat.name];
-		self.currentFormat = formatPopUpButton.selectedItem.representedObject;
-  
-         self.shouldSave = [NSNumber numberWithBool:NO];
-    }
-	[super showWindow:sender];
-    [self updateForFormatChange];
-}
-
+//-(void)showWindow:(id)sender
+//{
+//	//Deepcopy array so we have new object
+//    if (formatPopUpButton) {  //Clumsy way of refreshing popup selection after dismissal and re-show of window.  Need better connection
+//		[self refreshFormatPopUp:nil];
+//		self.currentFormat= [formatPopUpButton selectFormatNamed:tiVoManager.selectedFormat.name];
+//		self.currentFormat = formatPopUpButton.selectedItem.representedObject;
+//  
+//         self.shouldSave = [NSNumber numberWithBool:NO];
+//    }
+//	[super showWindow:sender];
+//    [self updateForFormatChange];
+//}
+//
 #pragma mark - Utility Methods
 
 -(void)updateForFormatChange
@@ -193,7 +235,7 @@
 -(IBAction)deleteFormat:(id)sender
 {
 	deleteAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to delete the format %@?",_currentFormat.name] defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@"This cannot be undone!"];
-	[deleteAlert beginSheetModalForWindow:self.window modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+	[deleteAlert beginSheetModalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:nil];
 	
 }
 
@@ -210,38 +252,6 @@
     [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.hiddenBuiltinFormatNames forKey:kMTHiddenFormats];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
 	[self updateForFormatChange];
-}
-
-- (void) alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-{
-	if (alert == deleteAlert) {
-		if (returnCode == 1) {
-			[self.formatList removeObject:_currentFormat];
-			self.currentFormat = _formatList[0];
-			[self refreshFormatPopUp:nil];
-			[self updateForFormatChange];
-		}
-	}
-	if (alert == saveOrCancelAlert) {
-		switch (returnCode) {
-			case 1:
-				//Save changes here
-				[self saveFormats:nil];
-//				[self.window close];
-				[self close];
-				break;
-			case 0:
-				//Cancel Changes here and dismiss
-//				[self.window close];
-				[self close];
-				break;
-			case -1:
-				//Don't Close the window
-				break;
-			default:
-				break;
-		}
-	}
 }
 
 -(IBAction)newFormat:(id)sender
@@ -321,6 +331,7 @@
 		[myPopover release];
 	}
 	self.currentFormat = nil;
+	self.alertResponseInfo = nil;
 	[super dealloc];
 }
 

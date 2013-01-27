@@ -10,10 +10,11 @@
 #import "MTFormat.h"
 #import "MTHelpViewController.h"
 #import "MTTiVoShow.h"
+#import "MTTabViewItem.h"
 
 @class MTFormatPopUpButton;
 
-@interface MTFormatEditorController : NSWindowController <NSWindowDelegate, NSPopoverDelegate> {
+@interface MTFormatEditorController : NSViewController <NSPopoverDelegate, MTTabViewItemControllerDelegate> {
 	IBOutlet MTFormatPopUpButton *formatPopUpButton;
 	NSAlert *deleteAlert, *saveOrCancelAlert, *cancelAlert;
     IBOutlet NSButton *cancelButton, *saveButton;

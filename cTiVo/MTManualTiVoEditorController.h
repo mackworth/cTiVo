@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface MTManualTiVoEditorController : NSWindowController {
+@interface MTManualTiVoEditorController : NSViewController {
 	IBOutlet NSArrayController *arrayController;
 }
 

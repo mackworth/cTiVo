@@ -7,8 +7,9 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MTTabViewItem.h"
 
-@interface MTHelpViewController : NSViewController 
+@interface MTHelpViewController : NSViewController <MTTabViewItemControllerDelegate>
 
 @property (nonatomic, retain) IBOutlet NSTextField *displayMessage;
 

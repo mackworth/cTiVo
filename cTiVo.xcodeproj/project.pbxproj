@@ -19,6 +19,9 @@
 		D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */ = {isa = PBXBuildFile; fileRef = D24A8D0D16A5F3DC00DFF890 /* catToFile */; };
 		D257C6E41697400700EBE30B /* MTFormatPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */; };
 		D257C6E9169740A000EBE30B /* MTPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */; };
+		D27579BD16B4DC2B0090D137 /* MTPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D27579BB16B4DC2B0090D137 /* MTPreferencesWindowController.m */; };
+		D27579BE16B4DC2B0090D137 /* MTPreferencesWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D27579BC16B4DC2B0090D137 /* MTPreferencesWindowController.xib */; };
+		D27579C216B575A30090D137 /* MTTabViewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D27579C116B575A20090D137 /* MTTabViewItem.m */; };
 		D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D279D3E9167A32FA007F0677 /* MTMainWindowController.m */; };
 		D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */; };
 		D28EB0FB16B3182100AA0330 /* MTNetService.m in Sources */ = {isa = PBXBuildFile; fileRef = D28EB0F916B3182100AA0330 /* MTNetService.m */; };
@@ -94,6 +97,11 @@
 		D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTFormatPopUpButton.m; sourceTree = "<group>"; };
 		D257C6E61697409F00EBE30B /* MTPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTPopUpTableCellView.h; sourceTree = "<group>"; };
 		D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPopUpTableCellView.m; sourceTree = "<group>"; };
+		D27579BA16B4DC2B0090D137 /* MTPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTPreferencesWindowController.h; sourceTree = "<group>"; };
+		D27579BB16B4DC2B0090D137 /* MTPreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPreferencesWindowController.m; sourceTree = "<group>"; };
+		D27579BC16B4DC2B0090D137 /* MTPreferencesWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTPreferencesWindowController.xib; sourceTree = "<group>"; };
+		D27579C016B575A20090D137 /* MTTabViewItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTabViewItem.h; sourceTree = "<group>"; };
+		D27579C116B575A20090D137 /* MTTabViewItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTabViewItem.m; sourceTree = "<group>"; };
 		D279D3E8167A32FA007F0677 /* MTMainWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTMainWindowController.h; sourceTree = "<group>"; };
 		D279D3E9167A32FA007F0677 /* MTMainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTMainWindowController.m; sourceTree = "<group>"; };
 		D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowController.xib; sourceTree = "<group>"; };
@@ -215,6 +223,11 @@
 		D278CCDA16B49A8500711FFD /* UI Classes - Tab  */ = {
 			isa = PBXGroup;
 			children = (
+				D27579BA16B4DC2B0090D137 /* MTPreferencesWindowController.h */,
+				D27579BB16B4DC2B0090D137 /* MTPreferencesWindowController.m */,
+				D27579BC16B4DC2B0090D137 /* MTPreferencesWindowController.xib */,
+				D27579C016B575A20090D137 /* MTTabViewItem.h */,
+				D27579C116B575A20090D137 /* MTTabViewItem.m */,
 			);
 			name = "UI Classes - Tab ";
 			sourceTree = "<group>";
@@ -448,6 +461,7 @@
 				D2CAF34316AB6FDE004E4CFA /* checkImage.png in Resources */,
 				1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */,
 				D2D2C6F016B3816B001AFE75 /* MTManualTiVoEditorController.xib in Resources */,
+				D27579BE16B4DC2B0090D137 /* MTPreferencesWindowController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -499,6 +513,8 @@
 				D219D5EA16A4F88D00C79962 /* MTHelpViewController.m in Sources */,
 				D28EB0FB16B3182100AA0330 /* MTNetService.m in Sources */,
 				D2D2C6F116B3816B001AFE75 /* MTManualTiVoEditorController.m in Sources */,
+				D27579BD16B4DC2B0090D137 /* MTPreferencesWindowController.m in Sources */,
+				D27579C216B575A30090D137 /* MTTabViewItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -123,7 +123,7 @@ void signalHandler(int signal)
 	tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
     [tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
 	mainWindowController = nil;
-	_formatEditorController = nil;
+//	_formatEditorController = nil;
 	[self showMainWindow:nil];
 	[self updateTivoRefreshMenu];
 	mediaKeyQueue = [NSMutableArray new];
@@ -242,13 +242,16 @@ void signalHandler(int signal)
 -(IBAction)editFormats:(id)sender
 {
 //	[self.formatEditorController showWindow:nil];
-	[NSApp beginSheet:self.formatEditorController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+	self.preferencesController.startingTabIdentifier = @"Formats";
+	[NSApp beginSheet:self.preferencesController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 }
 
 -(IBAction)editManualTiVos:(id)sender
 {
 //	[self.manualTiVoEditorController showWindow:nil];
-	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+//	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+	self.preferencesController.startingTabIdentifier = @"TiVos";
+	[NSApp beginSheet:self.preferencesController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 }
 
 -(IBAction)exportFormats:(id)sender
@@ -335,21 +338,29 @@ void signalHandler(int signal)
 	
 }
 
--(MTFormatEditorController *)formatEditorController
+-(MTPreferencesWindowController *)preferencesController;
 {
-	if (!_formatEditorController) {
-		_formatEditorController = [[MTFormatEditorController alloc] initWithWindowNibName:@"MTFormatEditorController"];
+	if (!_preferencesController) {
+		_preferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
 	}
-	return _formatEditorController;
+	return _preferencesController;
 }
 
--(MTManualTiVoEditorController *)manualTiVoEditorController
-{
-	if (!_manualTiVoEditorController) {
-		_manualTiVoEditorController = [[MTManualTiVoEditorController alloc] initWithWindowNibName:@"MTManualTiVoEditorController"];
-	}
-	return _manualTiVoEditorController;
-}
+//-(MTFormatEditorController *)formatEditorController
+//{
+//	if (!_formatEditorController) {
+//		_formatEditorController = [[MTFormatEditorController alloc] initWithWindowNibName:@"MTFormatEditorController"];
+//	}
+//	return _formatEditorController;
+//}
+//
+//-(MTManualTiVoEditorController *)manualTiVoEditorController
+//{
+//	if (!_manualTiVoEditorController) {
+//		_manualTiVoEditorController = [[MTManualTiVoEditorController alloc] initWithWindowNibName:@"MTManualTiVoEditorController"];
+//	}
+//	return _manualTiVoEditorController;
+//}
 
 -(void)updateAllTiVos:(id)sender
 {
