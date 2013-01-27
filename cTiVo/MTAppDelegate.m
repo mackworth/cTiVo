@@ -243,7 +243,7 @@ void signalHandler(int signal)
 {
 //	[self.formatEditorController showWindow:nil];
 	self.preferencesController.startingTabIdentifier = @"Formats";
-	[NSApp beginSheet:self.preferencesController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+	[self showPreferences:nil];
 }
 
 -(IBAction)editManualTiVos:(id)sender
@@ -251,7 +251,13 @@ void signalHandler(int signal)
 //	[self.manualTiVoEditorController showWindow:nil];
 //	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 	self.preferencesController.startingTabIdentifier = @"TiVos";
+	[self showPreferences:nil];
+}
+
+-(IBAction)showPreferences:(id)sender
+{
 	[NSApp beginSheet:self.preferencesController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+
 }
 
 -(IBAction)exportFormats:(id)sender
