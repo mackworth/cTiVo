@@ -241,14 +241,14 @@ void signalHandler(int signal)
 
 -(IBAction)editFormats:(id)sender
 {
-	[self.formatEditorController showWindow:nil];
-//	[self.window addChildWindow:self.formatEditorController.window  ordered:NSWindowAbove];
+//	[self.formatEditorController showWindow:nil];
+	[NSApp beginSheet:self.formatEditorController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 }
 
 -(IBAction)editManualTiVos:(id)sender
 {
-//	[self.window addChildWindow:self.manualTiVoEditorController.window  ordered:NSWindowAbove];
-	[self.manualTiVoEditorController showWindow:nil];
+//	[self.manualTiVoEditorController showWindow:nil];
+	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 }
 
 -(IBAction)exportFormats:(id)sender

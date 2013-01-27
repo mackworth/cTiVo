@@ -212,6 +212,13 @@
 			name = "UI Classes - Manual TiVo Editor";
 			sourceTree = "<group>";
 		};
+		D278CCDA16B49A8500711FFD /* UI Classes - Tab  */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "UI Classes - Tab ";
+			sourceTree = "<group>";
+		};
 		D2D60B9216766EFD00CE32DE = {
 			isa = PBXGroup;
 			children = (
@@ -263,6 +270,7 @@
 				D2A7269416A2005400C58C5F /* README */,
 				D2DA8FBA169CDAAD0053B7CB /* Data Model */,
 				D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */,
+				D278CCDA16B49A8500711FFD /* UI Classes - Tab  */,
 				1EE4418016A4E64800796897 /* UI Classes- Format Edit */,
 				D272E49116B33D1600392165 /* UI Classes - Manual TiVo Editor */,
 				1E791BD01697ACAA00E47E84 /* Custom NSViews */,

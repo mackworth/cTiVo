@@ -41,16 +41,7 @@
 - (void)windowDidLoad
 {
     [super windowDidLoad];
-	//Deepcopy array so we have new object
-	self.formatList = [NSMutableArray array];
-
-	for (MTFormat *f in tiVoManager.formatList) {
-		MTFormat *newFormat = [[f copy] autorelease];
-		[_formatList addObject:newFormat];
-		if ([tiVoManager.selectedFormat.name compare:newFormat.name] == NSOrderedSame) {
-			self.currentFormat = newFormat;
-		}
-	}
+	[self refreshFormatList];
 //	self.formatList = [NSMutableArray arrayWithArray:tiVoManager.formatList];
 //	self.currentFormat = [tiVoManager.selectedFormat copy];
 	formatPopUpButton.showHidden = YES;
@@ -64,6 +55,21 @@
 	[self updateForFormatChange];
 }
 
+-(void)refreshFormatList
+{
+	//Deepcopy array so we have new object
+	self.formatList = [NSMutableArray array];
+	
+	for (MTFormat *f in tiVoManager.formatList) {
+		MTFormat *newFormat = [[f copy] autorelease];
+		[_formatList addObject:newFormat];
+		if ([tiVoManager.selectedFormat.name compare:newFormat.name] == NSOrderedSame) {
+			self.currentFormat = newFormat;
+		}
+	}
+
+}
+
 - (BOOL)windowShouldClose:(id)sender
 {
 	if ([self.shouldSave boolValue]) {
@@ -72,11 +78,21 @@
 		return NO;
 	} else {
 		if (!sender) {
-			[self.window close];
+			[self close];
+//			[self.window close];
 		}
 		return YES;
 
 	}
+}
+
+-(void)close
+{
+	[NSApp endSheet:self.window];
+	[self.window orderOut:nil];
+	[self refreshFormatList];
+ 	[self refreshFormatPopUp:nil];
+
 }
 
 
@@ -173,6 +189,7 @@
 	
 }
 
+
 -(IBAction)deleteFormat:(id)sender
 {
 	deleteAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to delete the format %@?",_currentFormat.name] defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@"This cannot be undone!"];
@@ -210,11 +227,13 @@
 			case 1:
 				//Save changes here
 				[self saveFormats:nil];
-				[self.window close];
+//				[self.window close];
+				[self close];
 				break;
 			case 0:
 				//Cancel Changes here and dismiss
-				[self.window close];
+//				[self.window close];
+				[self close];
 				break;
 			case -1:
 				//Don't Close the window

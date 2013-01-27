@@ -40,6 +40,12 @@
 	}
 }
 
+-(IBAction)endSheet:(id)sender
+{
+	[NSApp endSheet:self.window];
+	[self.window orderOut:nil];
+}
+
 -(IBAction)add:(id)sender
 {
 	if (((NSArray *)arrayController.content).count == 0) { //No template to check
