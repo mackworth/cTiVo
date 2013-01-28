@@ -91,7 +91,7 @@
 									<reference key="NSOnImage" ref="35465992"/>
 									<reference key="NSMixedImage" ref="502551668"/>
 								</object>
-								<object class="NSMenuItem" id="978601833">
+								<object class="NSMenuItem" id="888887201">
 									<reference key="NSMenu" ref="110575045"/>
 									<string key="NSTitle">Preferences</string>
 									<string key="NSKeyEquiv">,</string>
@@ -779,7 +779,6 @@
 								<string key="NSFrame">{{1, 210}, {232, 16}}</string>
 								<reference key="NSSuperview" ref="190679637"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:60</string>
 								<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								<int key="NSsFlags">1</int>
@@ -1060,7 +1059,7 @@
 					<object class="IBActionConnection" key="connection">
 						<string key="label">showPreferences:</string>
 						<reference key="source" ref="976324537"/>
-						<reference key="destination" ref="978601833"/>
+						<reference key="destination" ref="888887201"/>
 					</object>
 					<int key="connectionID">1066</int>
 				</object>
@@ -1343,7 +1342,7 @@
 							<reference ref="1046388886"/>
 							<reference ref="1056857174"/>
 							<reference ref="342932134"/>
-							<reference ref="978601833"/>
+							<reference ref="888887201"/>
 						</array>
 						<reference key="parent" ref="694149608"/>
 					</object>
@@ -1804,7 +1803,7 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">1064</int>
-						<reference key="object" ref="978601833"/>
+						<reference key="object" ref="888887201"/>
 						<reference key="parent" ref="110575045"/>
 					</object>
 				</array>
@@ -1946,7 +1945,7 @@
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="877201681"/>
-						<string key="toolTip">Disables sleep until queue processing is complete</string>
+						<string key="toolTip">Disables sleep while queue is processing</string>
 					</object>
 				</object>
 				<string key="934.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>

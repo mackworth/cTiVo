@@ -12,8 +12,5 @@
 	IBOutlet NSArrayController *arrayController;
 }
 
-@property (nonatomic, retain) NSMutableArray *manualTiVoList;
-
--(IBAction)logArray:(id)sender;
 
 @end

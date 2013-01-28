@@ -10,6 +10,8 @@
 		1EABE6F416B0A254004DDB61 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
+		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
+		D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */; };
 		D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
 		D219D5E916A4F88D00C79962 /* MTHelpViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */; };
 		D219D5EA16A4F88D00C79962 /* MTHelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D219D5E816A4F88D00C79962 /* MTHelpViewController.m */; };
@@ -82,6 +84,9 @@
 		1EABE6F316B0A254004DDB61 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = cTiVo/Growl.framework; sourceTree = "<group>"; };
 		1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Growl Registration Ticket.growlRegDict"; sourceTree = "<group>"; };
 		D202E09F169778DA00514213 /* MTiTivoImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTivoImport.h; sourceTree = "<group>"; };
+		D208560416B61B9B002F5F8C /* MTPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTPreferencesViewController.h; sourceTree = "<group>"; };
+		D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPreferencesViewController.m; sourceTree = "<group>"; };
+		D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTPreferencesViewController.xib; sourceTree = "<group>"; };
 		D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressindicator.h; sourceTree = "<group>"; };
 		D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressindicator.m; sourceTree = "<group>"; };
 		D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTHelpViewController.xib; sourceTree = "<group>"; };
@@ -220,7 +225,7 @@
 			name = "UI Classes - Manual TiVo Editor";
 			sourceTree = "<group>";
 		};
-		D278CCDA16B49A8500711FFD /* UI Classes - Tab  */ = {
+		D278CCDA16B49A8500711FFD /* UI Classes - Preferences  */ = {
 			isa = PBXGroup;
 			children = (
 				D27579BA16B4DC2B0090D137 /* MTPreferencesWindowController.h */,
@@ -228,8 +233,11 @@
 				D27579BC16B4DC2B0090D137 /* MTPreferencesWindowController.xib */,
 				D27579C016B575A20090D137 /* MTTabViewItem.h */,
 				D27579C116B575A20090D137 /* MTTabViewItem.m */,
+				D208560416B61B9B002F5F8C /* MTPreferencesViewController.h */,
+				D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */,
+				D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */,
 			);
-			name = "UI Classes - Tab ";
+			name = "UI Classes - Preferences ";
 			sourceTree = "<group>";
 		};
 		D2D60B9216766EFD00CE32DE = {
@@ -283,7 +291,7 @@
 				D2A7269416A2005400C58C5F /* README */,
 				D2DA8FBA169CDAAD0053B7CB /* Data Model */,
 				D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */,
-				D278CCDA16B49A8500711FFD /* UI Classes - Tab  */,
+				D278CCDA16B49A8500711FFD /* UI Classes - Preferences  */,
 				1EE4418016A4E64800796897 /* UI Classes- Format Edit */,
 				D272E49116B33D1600392165 /* UI Classes - Manual TiVo Editor */,
 				1E791BD01697ACAA00E47E84 /* Custom NSViews */,
@@ -462,6 +470,7 @@
 				1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */,
 				D2D2C6F016B3816B001AFE75 /* MTManualTiVoEditorController.xib in Resources */,
 				D27579BE16B4DC2B0090D137 /* MTPreferencesWindowController.xib in Resources */,
+				D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -515,6 +524,7 @@
 				D2D2C6F116B3816B001AFE75 /* MTManualTiVoEditorController.m in Sources */,
 				D27579BD16B4DC2B0090D137 /* MTPreferencesWindowController.m in Sources */,
 				D27579C216B575A30090D137 /* MTTabViewItem.m in Sources */,
+				D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

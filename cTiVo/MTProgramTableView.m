@@ -320,7 +320,7 @@
 		}
 		if (!isSelectedRow && !isOverText) {
 			return NO;
-	}
+		}
 	}
 	// Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];

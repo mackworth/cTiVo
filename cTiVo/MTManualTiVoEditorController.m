@@ -54,9 +54,4 @@
 	[super dealloc];
 }
 
--(IBAction)logArray:(id)sender
-{
-	NSLog(@"array contains %@",arrayController.arrangedObjects);
-}
-
 @end
