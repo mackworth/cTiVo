@@ -21,8 +21,6 @@
     self = [super initWithWindow:window];
     if (self) {
         // Initialization code here.
-		FormatsSize = NSMakeSize(600, 750);
-		TiVosSize = NSMakeSize(520, 350);
 		_startingTabIdentifier = @"";
     }
     
@@ -32,8 +30,8 @@
 - (void)windowDidLoad
 {
     [super windowDidLoad];
-	ignoreTabItemSelection = YES;
-	NSArray *tabViewItems = [myTabView tabViewItems];
+	_ignoreTabItemSelection = YES;
+	NSArray *tabViewItems = [_myTabView tabViewItems];
 	for (MTTabViewItem *tabViewItem in tabViewItems) {
 		NSViewController *thisController = (NSViewController *)tabViewItem.windowController;
 		NSRect tabViewFrame = ((NSView *)tabViewItem.view).frame;
@@ -56,15 +54,15 @@
 //	[tabViewItem.view addSubview:formatEditorController.view];
 	
 	if (_startingTabIdentifier && _startingTabIdentifier.length) {
-		NSTabViewItem *itemToSelect = [myTabView tabViewItemAtIndex:[myTabView indexOfTabViewItemWithIdentifier:_startingTabIdentifier]];
+		NSTabViewItem *itemToSelect = [_myTabView tabViewItemAtIndex:[_myTabView indexOfTabViewItemWithIdentifier:_startingTabIdentifier]];
 		if (itemToSelect) {
-			[myTabView selectTabViewItem:itemToSelect];
+			[_myTabView selectTabViewItem:itemToSelect];
 		}
 	}
 
-	MTTabViewItem *tabViewItem = (MTTabViewItem *)[myTabView selectedTabViewItem];
+	MTTabViewItem *tabViewItem = (MTTabViewItem *)[_myTabView selectedTabViewItem];
 	[self.window setFrame:[self getNewWindowRect:tabViewItem] display:NO];
-	ignoreTabItemSelection = NO;
+	_ignoreTabItemSelection = NO;
 }
 
 -(void)setStartingTabIdentifier:(NSString *)startingTabIdentifier
@@ -73,9 +71,9 @@
 		[_startingTabIdentifier release];
 		_startingTabIdentifier = [startingTabIdentifier retain];
 		if (_startingTabIdentifier && _startingTabIdentifier.length) {
-			NSTabViewItem *itemToSelect = [myTabView tabViewItemAtIndex:[myTabView indexOfTabViewItemWithIdentifier:_startingTabIdentifier]];
+			NSTabViewItem *itemToSelect = [_myTabView tabViewItemAtIndex:[_myTabView indexOfTabViewItemWithIdentifier:_startingTabIdentifier]];
 			if (itemToSelect) {
-				[myTabView selectTabViewItem:itemToSelect];
+				[_myTabView selectTabViewItem:itemToSelect];
 			}
 		}
 	}
@@ -87,7 +85,7 @@
 
 -(IBAction)shouldCloseSheet:(id)sender
 {
-	MTTabViewItem *selectedItem = (MTTabViewItem *)[myTabView selectedTabViewItem];
+	MTTabViewItem *selectedItem = (MTTabViewItem *)[_myTabView selectedTabViewItem];
 	BOOL shouldClose = YES;
 	if ([selectedItem.windowController respondsToSelector:@selector(windowShouldClose:)]) {
 		shouldClose = [selectedItem.windowController windowShouldClose:@{@"Target" : self , @"Argument" : @"", @"Selector" : @"closeSheet:"}];
@@ -108,13 +106,8 @@
 
 -(NSRect)getNewWindowRect:(MTTabViewItem *)tabViewItem
 {
-	NSSize newSize = NSMakeSize([tabViewItem.windowWidth floatValue], [tabViewItem.windowHeight floatValue]);
-//	if ([(NSString *)(tabViewItem.identifier) compare:@"Formats"] == NSOrderedSame) {
-//		newSize = FormatsSize;
-//	}
-//	if ([(NSString *)(tabViewItem.identifier) compare:@"TiVos"] == NSOrderedSame) {
-//		newSize = TiVosSize;
-//	}
+	NSSize viewSize = ((NSViewController *)tabViewItem.windowController).view.frame.size;
+	NSSize newSize = NSMakeSize(viewSize.width+40, viewSize.height + 100);
 	NSRect frame = self.window.frame;
 	float newXOrigin = frame.origin.x + (frame.size.width - newSize.width)/2.0;
 	float newYOrigin = frame.origin.y + frame.size.height - newSize.height;
@@ -135,7 +128,7 @@
 
 -(void)tabView:(NSTabView *)tabView willSelectTabViewItem:(NSTabViewItem *)tabViewItem
 {
-	if (!ignoreTabItemSelection) {
+	if (!_ignoreTabItemSelection) {
 		[[self.window animator] setFrame:[self getNewWindowRect:(MTTabViewItem *)tabViewItem] display:NO];
 	}
 }

@@ -14,13 +14,13 @@
 
 
 @interface MTPreferencesWindowController : NSWindowController <NSTabViewDelegate> {
-	IBOutlet NSTabView *myTabView;
 	IBOutlet MTManualTiVoEditorController *manualTiVoEditorController;
 	IBOutlet MTFormatEditorController *formatEditorController;
-	NSSize TiVosSize, FormatsSize;
-	BOOL ignoreTabItemSelection;
 }
 
 @property (nonatomic, retain) NSString *startingTabIdentifier;
+@property (nonatomic, retain) IBOutlet NSTabView *myTabView;
+@property BOOL ignoreTabItemSelection;
+
 
 @end

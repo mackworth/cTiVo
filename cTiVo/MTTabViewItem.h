@@ -19,8 +19,6 @@
 
 @interface MTTabViewItem : NSTabViewItem
 
-@property (nonatomic, assign) IBOutlet id<MTTabViewItemControllerDelegate> windowController;
-@property (nonatomic, retain) NSString *controllerClassName;
-@property (nonatomic, retain) NSNumber *windowWidth, *windowHeight ;
+@property (nonatomic, retain) IBOutlet id<MTTabViewItemControllerDelegate> windowController;
 
 @end

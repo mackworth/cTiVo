@@ -10,15 +10,10 @@
 
 @implementation MTTabViewItem
 
--(id)initWithCoder:(NSCoder *)aDecoder
+
+-(void)dealloc
 {
-	self = [super initWithCoder:aDecoder];
-	if (self) {
-		self.windowWidth = [NSNumber numberWithFloat:500];
-		self.windowHeight = [NSNumber numberWithFloat:500];
-	}
-	return self;
+	self.windowController = nil;
+	[super dealloc];
 }
-
-
 @end

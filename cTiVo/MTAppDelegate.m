@@ -260,6 +260,11 @@ void signalHandler(int signal)
 
 }
 
+-(IBAction)showAdvPreferences:(id)sender
+{
+	[NSApp beginSheet:self.advPreferencesController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+}
+
 -(IBAction)exportFormats:(id)sender
 {
 	NSSavePanel *mySavePanel = [[[NSSavePanel alloc] init] autorelease];
@@ -352,21 +357,27 @@ void signalHandler(int signal)
 	return _preferencesController;
 }
 
-//-(MTFormatEditorController *)formatEditorController
-//{
-//	if (!_formatEditorController) {
-//		_formatEditorController = [[MTFormatEditorController alloc] initWithWindowNibName:@"MTFormatEditorController"];
-//	}
-//	return _formatEditorController;
-//}
-//
-//-(MTManualTiVoEditorController *)manualTiVoEditorController
-//{
-//	if (!_manualTiVoEditorController) {
-//		_manualTiVoEditorController = [[MTManualTiVoEditorController alloc] initWithWindowNibName:@"MTManualTiVoEditorController"];
-//	}
-//	return _manualTiVoEditorController;
-//}
+-(MTPreferencesWindowController *)advPreferencesController;
+{
+	if (!_advPreferencesController) {
+		_advPreferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
+		[_advPreferencesController window];
+		MTTabViewItem *advTabViewItem = [[MTTabViewItem alloc] initWithIdentifier:@"AdvSettinge"];
+		advTabViewItem.label = @"Advanced Settings";
+		NSViewController *thisController = [[[NSViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil] autorelease];
+		advTabViewItem.windowController = (id)thisController;
+		[_advPreferencesController.myTabView insertTabViewItem:advTabViewItem atIndex:0];
+		NSRect tabViewFrame = ((NSView *)advTabViewItem.view).frame;
+		NSRect editorViewFrame = thisController.view.frame;
+		[thisController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
+		[advTabViewItem.view addSubview:thisController.view];
+		_advPreferencesController.ignoreTabItemSelection = YES;
+		[_advPreferencesController.myTabView selectTabViewItem:advTabViewItem];
+		_advPreferencesController.ignoreTabItemSelection = NO;;
+ }
+	return _advPreferencesController;
+}
+
 
 -(void)updateAllTiVos:(id)sender
 {

@@ -28,6 +28,7 @@
 
 @property (assign) IBOutlet NSWindow *window;
 @property (nonatomic, retain) MTPreferencesWindowController *preferencesController;
+@property (nonatomic, retain) MTPreferencesWindowController *advPreferencesController;
 @property (nonatomic, readonly) NSNumber *numberOfUserFormats;
 
 

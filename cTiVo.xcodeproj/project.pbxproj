@@ -17,6 +17,7 @@
 		D219D5EA16A4F88D00C79962 /* MTHelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D219D5E816A4F88D00C79962 /* MTHelpViewController.m */; };
 		D219D5F416A503C100C79962 /* EncoderHelpText.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D219D5F316A503C100C79962 /* EncoderHelpText.rtf */; };
 		D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
+		D22E4B1916B76DCD00619A6E /* MTAdvPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D22E4B1716B76DCD00619A6E /* MTAdvPreferencesViewController.xib */; };
 		D235BF01168F52DE00320FA5 /* MTSubscriptionTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */; };
 		D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */ = {isa = PBXBuildFile; fileRef = D24A8D0D16A5F3DC00DFF890 /* catToFile */; };
 		D257C6E41697400700EBE30B /* MTFormatPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */; };
@@ -95,6 +96,7 @@
 		D219D5F316A503C100C79962 /* EncoderHelpText.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = EncoderHelpText.rtf; sourceTree = "<group>"; };
 		D22BC41D1680DB5E007D699C /* MTTiVoShow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoShow.h; sourceTree = "<group>"; };
 		D22BC41E1680DB5E007D699C /* MTTiVoShow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoShow.m; sourceTree = "<group>"; };
+		D22E4B1716B76DCD00619A6E /* MTAdvPreferencesViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTAdvPreferencesViewController.xib; sourceTree = "<group>"; };
 		D235BEFF168F52DE00320FA5 /* MTSubscriptionTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionTableView.h; sourceTree = "<group>"; };
 		D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionTableView.m; sourceTree = "<group>"; };
 		D24A8D0D16A5F3DC00DFF890 /* catToFile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = catToFile; sourceTree = "<group>"; };
@@ -236,6 +238,7 @@
 				D208560416B61B9B002F5F8C /* MTPreferencesViewController.h */,
 				D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */,
 				D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */,
+				D22E4B1716B76DCD00619A6E /* MTAdvPreferencesViewController.xib */,
 			);
 			name = "UI Classes - Preferences ";
 			sourceTree = "<group>";
@@ -471,6 +474,7 @@
 				D2D2C6F016B3816B001AFE75 /* MTManualTiVoEditorController.xib in Resources */,
 				D27579BE16B4DC2B0090D137 /* MTPreferencesWindowController.xib in Resources */,
 				D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */,
+				D22E4B1916B76DCD00619A6E /* MTAdvPreferencesViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
