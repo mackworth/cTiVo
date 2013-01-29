@@ -89,5 +89,6 @@
 -(NSInteger)numberOfShowsToDownload;
 -(void)loadManualTiVos;
 - (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification;
+-(void)refreshAllTiVos;
 
 @end

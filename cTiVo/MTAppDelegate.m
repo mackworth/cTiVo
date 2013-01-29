@@ -201,6 +201,9 @@ void signalHandler(int signal)
 			[refreshTiVoMenuItem setEnabled:NO];
 		}
 	} else {
+		[refreshTiVoMenuItem setTarget:tiVoGlobalManager];
+		[refreshTiVoMenuItem setAction:@selector(refreshAllTiVos)];
+		[refreshTiVoMenuItem setEnabled:YES];
 		NSMenu *thisMenu = [[[NSMenu alloc] initWithTitle:@"Refresh Tivo"] autorelease];
 		BOOL lastTivoWasManual = NO;
 		for (MTTiVo *tiVo in tiVoGlobalManager.tiVoList) {

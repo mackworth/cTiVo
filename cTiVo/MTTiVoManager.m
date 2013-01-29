@@ -348,6 +348,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
     }
 }
 
+-(void)refreshAllTiVos
+{
+	for (MTTiVo *tiVo in _tiVoList) {
+		if (tiVo.isReachable) {
+			[tiVo updateShows:nil];
+		}
+	}
+}
+
 
 -(NSMutableArray *) subscribedShows {
     
