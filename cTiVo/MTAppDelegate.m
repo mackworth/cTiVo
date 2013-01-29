@@ -101,17 +101,23 @@ void signalHandler(int signal)
 
 @implementation MTAppDelegate
 
+__DDLOGHERE__
+
 - (void)dealloc
 {
+	DDLogDetail(@"deallocing AppDelegate");
 	[tiVoGlobalManager release];
     [super dealloc];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
+	[[NSUserDefaults standardUserDefaults]  registerDefaults:@{kMTDebugLevel: @1}];
 
-	// Insert code here to initialize your application
+	[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
 	
+	// Insert code here to initialize your application
+	DDLogDetail(@"Starting Program");
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
 	if (![[[NSUserDefaults standardUserDefaults] objectForKey:kMTPreventSleep] boolValue]) {
@@ -157,6 +163,7 @@ void signalHandler(int signal)
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
 	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
+		DDLogDetail(@"Selecting Format");
 		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
         BOOL canSimulEncode = ![tiVoManager.selectedFormat.mustDownloadFirst boolValue];
 		NSArray *menuItems = [optionsMenu itemArray];
@@ -188,6 +195,8 @@ void signalHandler(int signal)
 
 -(void)updateTivoRefreshMenu
 {
+	DDLogDetail(@"Rebuilding TivoRefresh Menu");
+	DDLogVerbose(@"Tivos: %@",tiVoGlobalManager.tiVoList);
 	if (tiVoGlobalManager.tiVoList.count == 0) {
 		[refreshTiVoMenuItem setEnabled:NO];
 	} else if (tiVoGlobalManager.tiVoList.count ==1) {
@@ -285,6 +294,7 @@ void signalHandler(int signal)
                 [formatsToWrite addObject:[tiVoGlobalManager.userFormats[i] toDictionary]];
             }
         }
+		DDLogVerbose(@"formats: %@",formatsToWrite);
 		NSString *filename = mySavePanel.URL.path;
 		[formatsToWrite writeToFile:filename atomically:YES];
 	}
@@ -363,9 +373,9 @@ void signalHandler(int signal)
 -(MTPreferencesWindowController *)advPreferencesController;
 {
 	if (!_advPreferencesController) {
-		_advPreferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
+		_advPreferencesController = [[[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"] autorelease];
 		[_advPreferencesController window];
-		MTTabViewItem *advTabViewItem = [[MTTabViewItem alloc] initWithIdentifier:@"AdvSettinge"];
+		MTTabViewItem *advTabViewItem = [[[MTTabViewItem alloc] initWithIdentifier:@"AdvSettinge"] autorelease];
 		advTabViewItem.label = @"Advanced Settings";
 		NSViewController *thisController = [[[NSViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil] autorelease];
 		advTabViewItem.windowController = (id)thisController;
@@ -399,10 +409,11 @@ void signalHandler(int signal)
 	}
 	MTTiVo *tiVo = [mediaKeyQueue objectAtIndex:0]; //Pop off the first in the queue
 	gettingMediaKey = YES;
+	DDLogDetail(@"Getting MAK for %@",tiVo);
 	if ( tiVo.mediaKey.length == 0 && tiVoGlobalManager.tiVoList.count && tiVo != (MTTiVo *)[tiVoGlobalManager.tiVoList objectAtIndex:0]) {
 		tiVo.mediaKey = ((MTTiVo *)[tiVoGlobalManager.tiVoList objectAtIndex:0]).mediaKey;
 		[mediaKeyQueue removeObject:tiVo];
-		NSLog(@"set key for tivo %@ to %@",tiVo.tiVo.name,tiVo.mediaKey);
+		DDLogDetail(@"Trying key for tivo %@ to %@",tiVo.tiVo.name,tiVo.mediaKey);
 		[tiVo updateShows:nil];
 	}  else {
 		NSString *message = [NSString stringWithFormat:@"Need Media Key for %@",tiVo.tiVo.name];
@@ -436,6 +447,7 @@ void signalHandler(int signal)
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSURL *appSupportURL = [[fileManager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject];
+	DDLogVerbose(@"App Support Dir: %@",appSupportURL);
     return [appSupportURL URLByAppendingPathComponent:@"com.cTiVo.cTivo"];
 }
 
@@ -452,6 +464,7 @@ void signalHandler(int signal)
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
     // Save changes in the application's user defaults before the application terminates.
+	DDLogDetail(@"exiting");
 	[tiVoManager writeDownloadQueueToUserDefaults];
     [[NSUserDefaults standardUserDefaults] synchronize];
 	[mediaKeyQueue release];

@@ -14,5 +14,8 @@
 
 @implementation MTPreferencesViewController
 
+-(IBAction)setDebugLevel:(id)sender {
+	[DDLog setAllClassesLogLevelFromUserDefaults: kMTDebugLevel];
+}
 
 @end

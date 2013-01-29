@@ -31,6 +31,8 @@
 
 @implementation MTTiVo
 
+__DDLOGHERE__
+
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue
 {
 	return [[[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue] autorelease];
@@ -85,6 +87,7 @@
 {
 	self = [self init];
 	if (self) {
+		DDLogDetail(@"Creating TiVo %@",tiVo);
 		self.tiVo = tiVo;
 		self.queue = queue;
         _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [self.tiVo.addresses[0] bytes]);
@@ -95,9 +98,10 @@
 			didSchedule = SCNetworkReachabilityScheduleWithRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
 		}
 		_isReachable = YES;
-		NSLog(@"%@ reachability for tivo %@",didSchedule ? @"Scheduled" : @"Failed to schedule", _tiVo.name);
+		DDLogMajor(@"%@ reachability for tivo %@",didSchedule ? @"Scheduled" : @"Failed to schedule", _tiVo.name);
 		[self getMediaKey];
 		if (_mediaKey.length == 0) {
+			DDLogDetail(@"Failed to get MAK for %@",tiVo);
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
 		} else {
 			[self updateShows:nil];
@@ -124,7 +128,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
 	} 
     [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkChanged object:nil];
-	NSLog(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
+	DDLogCReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
 }
 
 -(NSString * ) description {
@@ -145,17 +149,21 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //
 -(void)getMediaKey
 {
+	DDLogDetail(@"Getting media key for %@", self);
 	NSString *mediaKeyString = @"";
     NSMutableDictionary *mediaKeys = [NSMutableDictionary dictionary];
     if ([[NSUserDefaults standardUserDefaults] dictionaryForKey:kMTMediaKeys]) {
-        mediaKeys = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:kMTMediaKeys]];
+        DDLogVerbose(@"Got all media keys %@", self);
+		mediaKeys = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] dictionaryForKey:kMTMediaKeys]];
     }
     if ([mediaKeys objectForKey:_tiVo.name]) {
         mediaKeyString = [mediaKeys objectForKey:_tiVo.name];
+		DDLogVerbose(@"Found media key for %@", self);
     }else {
         NSArray *keys = [mediaKeys allKeys];
         if (keys.count) {
-            mediaKeyString = [mediaKeys objectForKey:[keys objectAtIndex:0]];
+			DDLogVerbose(@"Defaulting to first key for %@", self);
+			mediaKeyString = [mediaKeys objectForKey:[keys objectAtIndex:0]];
             [mediaKeys setObject:mediaKeyString forKey:_tiVo.name];
             [[NSUserDefaults standardUserDefaults] setObject:mediaKeys  forKey:kMTMediaKeys];
         }
@@ -165,6 +173,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)updateShows:(id)sender
 {
+	DDLogMajor(@"Updating Tivo %@", self);
 	if (isConnecting) {
 		return;
 	}
@@ -191,7 +200,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //		NSLog(@"prevID: %@ %@",idString,show.showTitle);
 		[previousShowList setValue:show forKey:idString];
 	}
-    [_shows removeAllObjects];
+    DDLogVerbose(@"Previous shows were: %@:",previousShowList);
+	[_shows removeAllObjects];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
 	[self updateShowsStartingAt:0 withCount:kMTNumberShowToGetFirst];
 }
@@ -219,13 +229,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)updateShowsStartingAt:(int)anchor withCount:(int)count
 {
+	DDLogDetail(@"Updating %@ from %d to %d",self, anchor, anchor+count);
 	NSString *portString = @"";
 	if ([_tiVo isKindOfClass:[MTNetService class]]) {
+		DDLogDetail(@"On TiVo %@ port %d",self, _tiVo.userPortSSL);
 		portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];
 	}
 	
 	NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,anchor,count] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-//	NSLog(@"Tivo URL String %@",tivoURLString);
+	DDLogDetail(@"Tivo %@ URL String %@",self, tivoURLString);
 	NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
 	NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
 	showURLConnection = [[NSURLConnection connectionWithRequest:tivoURLRequest delegate:self] retain];
@@ -245,7 +257,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
-    element = [NSMutableString string];
+    DDLogVerbose(@"Tivo %@ Start: %@",self, elementName);
+	element = [NSMutableString string];
     if ([elementName compare:@"Item"] == NSOrderedSame) {
         parsingShow = YES;
         currentShow = [[MTTiVoShow alloc] init];
@@ -268,7 +281,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
-//	NSLog(@"ZZZEnding element parse for tivo %@ and element %@ with value %@",_tiVo.name,elementName,element);
+	DDLogDetail(@"Tivo %@:  %@ --> %@",_tiVo.name,elementName,element);
     if (parsingShow) {
         //extract show parameters here
 //        [currentShow setValue:element forKey:elementToPropertyMap[elementName]];
@@ -284,6 +297,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 					[self updatePortsInURLString:element];
 				}
 				[currentShow setValue:[NSURL URLWithString:element] forKey:@"detailURL"];
+				DDLogVerbose(@"Detail URL is %@",[NSURL URLWithString:element]);
 			}
         } else if (gettingContent) {
             //Get URL for Content here
@@ -297,49 +311,54 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 					[self updatePortsInURLString:element];
 				}
 				[currentShow setValue:[NSURL URLWithString:element] forKey:@"downloadURL"];
+				DDLogVerbose(@"Content URL is %@",[NSURL URLWithString:element]);
 			}
         } else if ([elementToPropertyMap objectForKey:elementName]){
 //        [currentShow setValue:element forKey:elementToPropertyMap[elementName]];
-            int type = [elementToPropertyMap[elementName][kMTType] intValue];
-			double timestamp = 0;
-			NSDate *thisDate = nil;
-            switch (type) {
+			int type = [elementToPropertyMap[elementName][kMTType] intValue];
+			id valueToSet = nil;
+			NSString * keyToSet = elementToPropertyMap[elementName][kMTValue];
+			switch (type) {
                 case kMTStringType:
                     //Process String Type here
-					[currentShow setValue:element forKey:elementToPropertyMap[elementName][kMTValue]];
-                    break;
+					valueToSet = element;
+					break;
                     
                 case kMTBoolType:
-                    //Process String Type here
-					[currentShow setValue:[NSNumber numberWithBool:[element boolValue]] forKey:elementToPropertyMap[elementName][kMTValue]];
-//					NSLog(@"set %@ property to %@ for %@ element",elementToPropertyMap[elementName][kMTValue],[NSNumber numberWithBool:[element boolValue]], element);
+                    //Process Boolean Type here
+					valueToSet = [NSNumber numberWithBool:[element boolValue]];
                     break;
                                         
                 case kMTNumberType:
-                    //Process String Type here
- 					[currentShow setValue:[NSNumber numberWithDouble:[element doubleValue]] forKey:elementToPropertyMap[elementName][kMTValue]];
+                    //Process Number Type here
+ 					valueToSet = [NSNumber numberWithDouble:[element doubleValue]];
                    break;
                     
-                case kMTDateType:
+			   case kMTDateType: {
                     //Process date type which are hex timestamps
+				   double timestamp = 0;
 					[[NSScanner scannerWithString:element] scanHexDouble:&timestamp];
 //					timestamp = [element doubleValue];
-					thisDate = [NSDate dateWithTimeIntervalSince1970:timestamp];
- 					[currentShow setValue:thisDate forKey:elementToPropertyMap[elementName][kMTValue]];
+					valueToSet = [NSDate dateWithTimeIntervalSince1970:timestamp];
                    break;
-                    
+			   }
                 default:
                     break;
             }
+			if (valueToSet) [currentShow setValue:valueToSet forKey:keyToSet];
+			DDLogVerbose(@"set %@ property(%d type) to %@ for %@ element",keyToSet, type, valueToSet, element);
+
         } else if ([elementName compare:@"Item"] == NSOrderedSame) {
             MTTiVoShow *thisShow = [previousShowList valueForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
 			if (!thisShow) {
 				currentShow.tiVo = self;
 				currentShow.mediaKey = [[NSUserDefaults standardUserDefaults] dictionaryForKey:kMTMediaKeys][self.tiVo.name];
+				DDLogDetail(@"Added new show %@",currentShow.showTitle);
 				[_shows addObject:currentShow];
 				NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil] autorelease];
 				[_queue addOperation:nextDetail];
 			} else {
+				DDLogDetail(@"Updated show %@", currentShow.showTitle);
 				[_shows addObject:thisShow];
 			}
 			[currentShow release];
@@ -349,20 +368,24 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     } else {
         if ([elementName compare:@"TotalItems"] == NSOrderedSame) {
             totalItemsOnTivo = [element intValue];
-        }
-        if ([elementName compare:@"ItemStart"] == NSOrderedSame) {
+			DDLogVerbose(@"TotalItems: %d",totalItemsOnTivo);
+        } else if ([elementName compare:@"ItemStart"] == NSOrderedSame) {
             itemStart = [element intValue];
-        }
-        if ([elementName compare:@"ItemCount"] == NSOrderedSame) {
+			DDLogVerbose(@"ItemStart: %d",itemStart);
+        } else if ([elementName compare:@"ItemCount"] == NSOrderedSame) {
             itemCount = [element intValue];
-        }
-        if ([elementName compare:@"LastChangeDate"] == NSOrderedSame) {
+			DDLogVerbose(@"ItemCount: %d",itemCount);
+        } else if ([elementName compare:@"LastChangeDate"] == NSOrderedSame) {
             int newLastChangeDate = [element intValue];
             if (newLastChangeDate != lastChangeDate) {
+				DDLogVerbose(@"Oops. Date changed under us: was: %d now: %d",lastChangeDate, newLastChangeDate);
                 //Implement start over here
             }
             lastChangeDate = newLastChangeDate;
-        }
+        } else {
+			DDLogVerbose(@"Unrecognized element: %@-->%@",elementName,element);
+			
+		}
     }
 }
 
@@ -379,6 +402,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		if ([portString compare:@"80"] == NSOrderedSame) {
 			portReplaceString = [NSString stringWithFormat:@"%d",self.tiVo.userPort];
 		}
+		DDLogVerbose(@"Replacing port %@ with %@",portString,portReplaceString);
 		[elementToUpdate replaceOccurrencesOfString:portString withString:portReplaceString options:0 range:NSMakeRange(0, elementToUpdate.length)];
 	}
 }
@@ -388,9 +412,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	//Check if we're done yet
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	if (itemStart+itemCount < totalItemsOnTivo) {
+		DDLogDetail(@"TiVo %@ finished batch", self);
 		[self updateShowsStartingAt:itemStart + itemCount withCount:kMTNumberShowToGet];
 	} else {
-//		NSLog(@"sss All done");
+		DDLogMajor(@"TiVo %@ completed parsing", self);
 		if (firstUpdate) {
 			[self restoreQueue]; //performSelector:@selector(restoreQueue) withObject:nil afterDelay:10]; //should this post the TiVoShowsUpdated?
 			firstUpdate = NO;
@@ -413,29 +438,29 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)manageDownloads:(id)info
 {
-//	NSLog(@"QQQCalled managedownloads on TiVo %@ from notification %@",_tiVo.name,notification.name);
     if ([tiVoManager.hasScheduledQueueStart boolValue]  && [tiVoManager.queueStartTime compare:[NSDate date]] == NSOrderedDescending) { //Don't start unless we're after the scheduled time if we're supposed to be scheduled.
-        return;
+        DDLogMajor(@"%@ Delaying download until %@",self,tiVoManager.queueStartTime);
+		return;
     }
-    if (info) {
-        if ([info isKindOfClass:[NSNotification class]]) {
-            NSNotification *notification = (NSNotification *)info;
-            if (!notification.object || notification.object == self) {
-                [self manageDownloads];
-            }
-        }
-        if ([info isKindOfClass:[self class]]) {
-            if (info == self ) {
-                [self manageDownloads];
-            }
-        }
-    }
+	if ([info isKindOfClass:[NSNotification class]]) {
+		NSNotification *notification = (NSNotification *)info;
+		if (!notification.object || notification.object == self) {
+			DDLogDetail(@"%@ got manageDownload notification %@",self, notification.name);
+			[self manageDownloads];
+		} else {
+			DDLogDetail(@"%@ ignoring notification %@ for %@",notification.name, self,notification.object);
+		}
+	} else if ([info isKindOfClass:[self class]] && info == self ) {
+			[self manageDownloads];
+	} else {
+		DDLogMajor(@"Unrecognized info to launch manageDownloads %@",info);
+	}
 
 }
 
 -(void)manageDownloads
 {
-//	NSLog(@"QQQ-manageDownloads");
+	DDLogMajor(@"Checking %@ queue", self);
 	if (managingDownloads) {
         return;
     }
@@ -452,7 +477,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         }
     }
     if (!isDownloading) {
-        for (MTTiVoShow *s in self.downloadQueue) {
+		DDLogDetail(@"%@ Checking for new download", self);
+		for (MTTiVoShow *s in self.downloadQueue) {
             if ([s.downloadStatus intValue] == kMTStatusNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
                 if(s.tiVo.isReachable) {
                     if (s.simultaneousEncode) {
@@ -469,6 +495,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         }
     }
     if (!isDecrypting) {
+		DDLogDetail(@"%@ Checking for new decrypt", self);
         for (MTTiVoShow *s in self.downloadQueue) {
             if ([s.downloadStatus intValue] == kMTStatusDownloaded && !s.simultaneousEncode) {
                 [s decrypt];
@@ -477,6 +504,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         }
     }
     if (tiVoManager.numEncoders < kMTMaxNumDownloaders) {
+		DDLogDetail(@"%@ Checking for new encode", self);
         for (MTTiVoShow *s in self.downloadQueue) {
             if ([s.downloadStatus intValue] == kMTStatusDecrypted && tiVoManager.numEncoders < kMTMaxNumDownloaders) {
 				tiVoManager.numEncoders++;
@@ -502,6 +530,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void) restoreQueue {
 	//find any shows in oldQueue from this TiVo to reload
+	DDLogMajor(@"Restoring Queue for %@",self);
 	NSMutableArray * showsToSubmit = nil;  //signal for not optimize
 	if ([tiVoManager downloadQueue].count == 0) {
 		//no previous shows to sort against, so we'll optimize first pass through
@@ -511,12 +540,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		NSDictionary * queueEntry = tiVoManager.oldQueue[index];
 		//So For each queueEntry, if we haven't found it before, and it's this TiVo
 		if (queueEntry[kMTQueueShow] == nil && [self.tiVo.name compare: queueEntry [kMTQueueTivo]] == NSOrderedSame) {
+			DDLogVerbose(@"Looking for %@(%@)",queueEntry[kMTQueueTitle], queueEntry[kMTQueueID]);
 			for (MTTiVoShow * show in self.shows) {
 				//see if it's available in shows
+				DDLogVerbose(@"Checking %@ (%d)",show.showTitle, show.showID);
 				if ([show isSameAs: queueEntry]) {
-					NSLog(@"Restoring show %@",queueEntry[kMTQueueTitle]);
 					[queueEntry setValue: show forKey:kMTQueueShow];
 					if ([[tiVoManager downloadQueue] indexOfObject:show] == NSNotFound ){
+						DDLogDetail(@"Restoring show %@",queueEntry[kMTQueueTitle]);
 						[show restoreDownloadData:queueEntry];
 						if (showsToSubmit) {
 							[showsToSubmit addObject:show];
@@ -526,7 +557,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 						}
 					} else {
 						//otherwise already scheduled. probably Subscription.
-						NSLog(@"Already restored: %@",show.showTitle );
+						DDLogDetail(@"Already restored: %@",show.showTitle );
 					}
 					break; //found it so move on
 				}
@@ -534,11 +565,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		}
 	}
 	if (showsToSubmit) {
+		DDLogVerbose(@"Restoring shows %@",showsToSubmit);
 		[tiVoManager addProgramsToDownloadQueue: showsToSubmit beforeShow:nil];
 	}
-	for (NSDictionary * queueEntry in tiVoManager.oldQueue) {
-		if (queueEntry[kMTQueueShow]== nil && [self.tiVo.name compare: queueEntry [kMTQueueTivo]] == NSOrderedSame) {
-			NSLog(@"TiVo no longer has show: %@", queueEntry[kMTQueueTitle]);
+	if (LOG_DETAIL) {
+		for (NSDictionary * queueEntry in tiVoManager.oldQueue) {
+			if (queueEntry[kMTQueueShow]== nil && [self.tiVo.name compare: queueEntry [kMTQueueTivo]] == NSOrderedSame) {
+				DDLogDetail(@"TiVo no longer has show: %@", queueEntry[kMTQueueTitle]);
+			}
 		}
 	}
 }
@@ -563,6 +597,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
+	DDLogVerbose(@"TiVo %@ sent data",self);
 	[urlData appendData:data];
 }
 
@@ -588,7 +623,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    NSLog(@"URL Connection Failed with error %@",error);
+    DDLogReport(@"URL Connection Failed with error %@",error);
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 //    [self reportNetworkFailure];
     
@@ -599,8 +634,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-//	NSLog(@"Data received is %@",[[[NSString alloc] initWithData:urlData encoding:NSUTF8StringEncoding] autorelease]);
-//    [self parseListingData];
+	DDLogMajor(@"%@ URL Connection completed ",self);
+    DDLogVerbose(@"Data received is %@",[[[NSString alloc] initWithData:urlData encoding:NSUTF8StringEncoding] autorelease]);
+
     NSXMLParser *parser = [[NSXMLParser alloc] initWithData:urlData];
 	parser.delegate = self;
 	[parser parse];
@@ -612,7 +648,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    DDLogDetail(@"Deallocing TiVo %@",self);
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	SCNetworkReachabilityUnscheduleFromRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
 	self.networkAvailability = nil;
 	if (_reachability) {

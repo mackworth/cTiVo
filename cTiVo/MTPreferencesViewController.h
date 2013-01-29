@@ -11,4 +11,6 @@
 
 @interface MTPreferencesViewController : NSViewController<MTTabViewItemControllerDelegate>
 
+-(IBAction)setDebugLevel:(id)sender;
+
 @end

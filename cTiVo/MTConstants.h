@@ -72,6 +72,11 @@
 #define kMTQueueBufferFile @"QueueBufferFile"
 #define kMTQueueFinalFile @"QueueFileName"
 
+//Column editing userDefaults
+#define kMTProgramTableColumns @"ProgramTableColumns"
+#define kMTDownloadTableColumns @"DownloadTableColumns"
+#define kMTSubscriptionTableColumns @"kMTSubscriptionTableColumns"
+
 //Misc
 
 #define kMTFirstName @"MTFirstName"
@@ -116,7 +121,9 @@
 #define kMTiTunesIcon @"iTunesIcon"                 // Whether to use video frame (versus cTivo logo) for iTUnes icon
 #define kMTPostDownloadCommand @"PostDownloadCommand" // Example: "# mv \"$file\" ~/.Trash ;";
 
+#define kMTDebugLevel @"DebugLevel"
 
+//Growl notification constants (see growlRegDict file)
 #define kMTGrowlBeginDownload @"Begin Download"
 #define kMTGrowlEndDownload   @"End Download"
 #define kMTGrowlCantDownload  @"Can't Download"
