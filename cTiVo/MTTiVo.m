@@ -120,7 +120,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		thisTivo.networkAvailability = [NSDate date];
 		[NSObject cancelPreviousPerformRequestsWithTarget:thisTivo selector:@selector(manageDownloads:) object:thisTivo];
 //        NSLog(@"QQQcalling managedownloads from MTTiVo:tivoNetworkCallback with delay+2");
-		[thisTivo performSelector:@selector(manageDownloads) withObject:thisTivo afterDelay:kMTTiVoAccessDelay+2];
+		[thisTivo performSelector:@selector(manageDownloads:) withObject:thisTivo afterDelay:kMTTiVoAccessDelay+2];
 		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
 	} 
     [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkChanged object:nil];
@@ -192,12 +192,33 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[previousShowList setValue:show forKey:idString];
 	}
     [_shows removeAllObjects];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
 	[self updateShowsStartingAt:0 withCount:kMTNumberShowToGetFirst];
+}
+
+-(NSInteger)numberOfShowsInProcess
+{
+    NSInteger n = 0;
+    for (MTTiVoShow *show in _shows) {
+        if (show.isInProgress) {
+            n++;
+        }
+    }
+    return n;
+}
+
+-(void)rescheduleAllShows
+{
+    for (MTTiVoShow *show in _shows) {
+        if (show.isInProgress) {
+            [show rescheduleShow:@NO];
+        }
+    }
+    
 }
 
 -(void)updateShowsStartingAt:(int)anchor withCount:(int)count
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
 	NSString *portString = @"";
 	if ([_tiVo isKindOfClass:[MTNetService class]]) {
 		portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];
@@ -390,11 +411,24 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     return [tiVoManager downloadQueueForTiVo:self];
 }
 
--(void)manageDownloads:(NSNotification *)notification
+-(void)manageDownloads:(id)info
 {
 //	NSLog(@"QQQCalled managedownloads on TiVo %@ from notification %@",_tiVo.name,notification.name);
-   if (!notification.object || notification.object == self) {
-        [self manageDownloads];
+    if ([tiVoManager.hasScheduledQueueStart boolValue]  && [tiVoManager.queueStartTime compare:[NSDate date]] == NSOrderedDescending) { //Don't start unless we're after the scheduled time if we're supposed to be scheduled.
+        return;
+    }
+    if (info) {
+        if ([info isKindOfClass:[NSNotification class]]) {
+            NSNotification *notification = (NSNotification *)info;
+            if (!notification.object || notification.object == self) {
+                [self manageDownloads];
+            }
+        }
+        if ([info isKindOfClass:[self class]]) {
+            if (info == self ) {
+                [self manageDownloads];
+            }
+        }
     }
 
 }
@@ -407,7 +441,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
     managingDownloads = YES;
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
+//	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
     BOOL isDownloading = NO, isDecrypting = NO;
     for (MTTiVoShow *s in self.downloadQueue) {
         if ([s.downloadStatus intValue] == kMTStatusDownloading) {

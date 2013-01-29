@@ -42,6 +42,9 @@
 
 -(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
 -(void)updateShows:(id)sender;
+-(void)manageDownloads:(id)info;
 //-(void) reportNetworkFailure;
+-(NSInteger)numberOfShowsInProcess;
+-(void)rescheduleAllShows;
 
 @end

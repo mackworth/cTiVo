@@ -110,8 +110,10 @@
 
 @property (readonly) NSDictionary * queueRecord;
 
+
 -(BOOL) isSameAs:(NSDictionary *) queueEntry;
 -(void) restoreDownloadData:(NSDictionary *) queueEntry;
+-(void)rescheduleShow:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
 
 -(void)cancel;
 -(void)download;

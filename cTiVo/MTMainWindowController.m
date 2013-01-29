@@ -28,6 +28,7 @@
 	if (self) {
 		loadingTiVos = [NSMutableArray new];
         self.selectedTiVo = nil;
+        _myTiVoManager = tiVoManager;
 	}
 	return self;
 }

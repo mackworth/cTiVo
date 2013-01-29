@@ -36,8 +36,9 @@
 @property (nonatomic, assign) MTProgramTableView *tiVoShowTable;
 @property (nonatomic, assign) MTSubscriptionTableView *subscriptionTable;
 @property (nonatomic, retain) NSString *selectedTiVo;
-@property (nonatomic, readonly) IBOutlet NSButton *showProtectedShows;
+@property (nonatomic, assign, readwrite) IBOutlet NSButton *showProtectedShows;
 @property (nonatomic, retain) MTTiVoShow *showForDetail;
+@property (nonatomic, readonly) MTTiVoManager *myTiVoManager;
 
 -(IBAction)selectFormat:(id)sender;
 -(IBAction)subscribe:(id) sender;
