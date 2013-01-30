@@ -81,8 +81,11 @@
 {
 	MTTiVoShow *thisShow = notification.object;
 	NSInteger row = [self.sortedShows indexOfObject:thisShow];
-	NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
-	[self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
+    if (row != NSNotFound) {
+        NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
+        [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
+
+    }
 }
 
 
