@@ -42,33 +42,12 @@
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
     self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
-    tiVoColumnHolder = [[self tableColumnWithIdentifier:@"TiVo"] retain];
 }
 
 -(void)reloadData
 {
     //Configure Table Columns depending on how many TiVos
-    NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
-    NSTableColumn *programColumn = [self tableColumnWithIdentifier:@"Programs"];
-    BOOL changedColumns = NO;
-    if (tiVoManager.tiVoList.count == 1) {
-        if (tiVoColumn) {
-            [self removeTableColumn:tiVoColumn];
-            programColumn.width += tiVoColumn.width + 3;
-            changedColumns = YES;
-        }
-    } else {
-        if (!tiVoColumn) {
-            [self addTableColumn:tiVoColumnHolder];
-            NSInteger colPos = [self columnWithIdentifier:@"TiVo"];
-            [self moveColumn:colPos toColumn:2];
-            programColumn.width -= tiVoColumn.width + 3;
-            changedColumns = YES;
-        }
-    }
-    if (changedColumns) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-    }
+    //[tiVoColumnHolder setHidden:tiVoManager.tiVoList.count == 1]; //now let user decide
     
 	//save selection to preserve after reloadData
 	NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
@@ -101,15 +80,9 @@
 -(void)reloadEpisode:(NSNotification *)notification
 {
 	MTTiVoShow *thisShow = notification.object;
-	NSInteger row = 0;
-	NSArray *displayedShows = self.sortedShows;
-	for (row=0; row < displayedShows.count; row++) {
-		if ([displayedShows objectAtIndex:row] == thisShow) {
-			break;
-		}
-	}
-	NSInteger column = [self columnWithIdentifier:@"Episode"];
-	[self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:column]];
+	NSInteger row = [self.sortedShows indexOfObject:thisShow];
+	NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
+	[self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
 }
 
 
@@ -179,6 +152,16 @@
     }
 }
 
+-(void) tableViewColumnDidResize:(NSNotification *) notification {
+
+	NSTableColumn * column = notification.userInfo[@"NSTableColumn"];
+	if ([column.identifier compare:@"Date" ] ==NSOrderedSame) {
+		NSInteger columnNum = [self columnWithIdentifier:@"Date"];
+		[self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.sortedShows.count)]
+							 columnIndexes:[NSIndexSet indexSetWithIndex:columnNum]];
+	}
+
+}
 
 #pragma mark - Table Data Source Protocol
 
@@ -220,15 +203,6 @@
         // the identifier of the NSTextField instance is set to MyView. This
         // allows it to be re-used
         result.identifier = tableColumn.identifier;
-        if (!result.textField) NSLog (@"created but no textField");
-	}
-	if (!result.textField) {
-		NSLog (@"made but no textField!");
-		result.textField = [[NSTextField alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)];
-		[result.textField  setBordered: NO];
-        result.textField.editable = NO;
-		[result addSubview:result.textField];
-		
 	}
 
     // result is now guaranteed to be valid, either as a re-used cell
@@ -245,8 +219,12 @@
         }
         result.toolTip = thisShow.tiVo.tiVo.name;
     } else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.showDateString;
-        result.toolTip = result.textField.stringValue;
+		if ([tableColumn width] > 135) {
+			result.textField.stringValue = thisShow.showMediumDateString;
+		} else {
+			result.textField.stringValue = thisShow.showDateString;
+		}
+			result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
 		NSInteger length = (thisShow.showLength+30)/60; //round up to nearest minute;
 		result.textField.stringValue = [NSString stringWithFormat:@"%ld:%0.2ld",length/60,length % 60];
@@ -262,11 +240,25 @@
 	} else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.channelString;
 	} else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
-		if (thisShow.fileSize >= 1024*1024*1024) {
-			result.textField.stringValue = [NSString stringWithFormat:@"%0.1fGB",thisShow.fileSize/1073741824 ];
+		if (thisShow.fileSize >= 1000000000) {
+			result.textField.stringValue = [NSString stringWithFormat:@"%0.1fGB",thisShow.fileSize/1000000000.0];
 		} else {
-			result.textField.stringValue = [NSString stringWithFormat:@"%ldMB",((NSInteger)thisShow.fileSize)/1048576 ];
+			result.textField.stringValue = [NSString stringWithFormat:@"%ldMB",((NSInteger)thisShow.fileSize)/1000000 ];
 		};
+	} else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
+		result.textField.stringValue = [NSString stringWithFormat:@"%d", thisShow.showID ];
+	} else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.seriesTitle;
+		result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.episodeTitle;
+		result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Station"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.stationCallsign;
+	} else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
+		NSLog(@"airdate: %@",thisShow.originalAirDateNoTime);
+		result.textField.stringValue = thisShow.originalAirDateNoTime ? thisShow.originalAirDateNoTime : @"";
+	
 	}
     if ([thisShow.protectedShow boolValue]) {
         result.textField.textColor = [NSColor grayColor];

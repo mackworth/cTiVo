@@ -184,7 +184,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void)loadManualTiVos
 {
-    BOOL didFindTiVo = NO;
+//    BOOL didFindTiVo = NO;
 	NSMutableArray *manualTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
 	[_tiVoList removeObjectsInArray:manualTiVoList];
     NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
@@ -238,7 +238,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			}
 			[_tiVoList removeObjectsInArray:itemsToRemove];
 			[_tiVoList addObject:newTiVo];
-			didFindTiVo = YES;
+//			didFindTiVo = YES;
 		}
     }
 //    if (didFindTiVo) {
@@ -315,7 +315,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
                 numberOfShowsProcessing += [tiVo numberOfShowsInProcess];
             }
             if (numberOfShowsProcessing) {
-                NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process and you are setting a scheduled time to start.  Show the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton:@"Complete stage of current shows" otherButton:nil informativeTextWithFormat:@""];
+                NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton:@"Complete stage of current shows" otherButton:nil informativeTextWithFormat:@""];
                 NSInteger returnValue = [scheduleAlert runModal];
                 NSLog(@"Got returnValue %ld from cancel alert",returnValue);
                 if (returnValue == 1) {

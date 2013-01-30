@@ -1371,6 +1371,18 @@
 	return [dateFormat stringFromDate:_showDate];
 }
 
+-(NSString *)showMediumDateString
+{
+	static NSDateFormatter *dateFormat;
+	if(!dateFormat) {
+		dateFormat = [[NSDateFormatter alloc] init] ;
+		[dateFormat setDateStyle:NSDateFormatterMediumStyle];
+		[dateFormat setTimeStyle:NSDateFormatterShortStyle] ;
+	}
+	//	[dateFormat setTimeStyle:NSDateFormatterNoStyle];
+	return [dateFormat stringFromDate:_showDate];
+}
+
 #pragma mark - Custom Setters
 
 -(void) setEncodeFormat:(MTFormat *) encodeFormat {

@@ -178,7 +178,7 @@
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-	MTTiVoShow *rowData = [self.sortedShows objectAtIndex:row];
+	MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
 //	NSDictionary *idMapping = [NSDictionary dictionaryWithObjectsAndKeys:@"Title",@"Programs",kMTSelectedTiVo,@"TiVo",kMTSelectedFormat,@"Format", nil];
 	
     // get an existing cell with the MyView identifier if it exists
@@ -204,54 +204,94 @@
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
 	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
-		result.progressIndicator.rightText.stringValue = rowData.showStatus;
- 		result.progressIndicator.leftText.stringValue = rowData.showTitle ;
-        result.progressIndicator.doubleValue = rowData.processProgress;
-        result.toolTip = rowData.showTitle;
+		result.progressIndicator.rightText.stringValue = thisShow.showStatus;
+ 		result.progressIndicator.leftText.stringValue = thisShow.showTitle ;
+        result.progressIndicator.doubleValue = thisShow.processProgress;
+        result.toolTip = thisShow.showTitle;
 			
     } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
-        result.textField.stringValue = rowData.tiVo.tiVo.name ;
+        result.textField.stringValue = thisShow.tiVo.tiVo.name ;
         result.toolTip = result.textField.stringValue;
         result.textField.textColor = [NSColor blackColor];
-        if (!rowData.tiVo.isReachable && [rowData.downloadStatus intValue] == kMTStatusDownloading) {
+        if (!thisShow.tiVo.isReachable && [thisShow.downloadStatus intValue] == kMTStatusDownloading) {
             result.textField.textColor = [NSColor redColor];
         }
         
     } else if ([tableColumn.identifier compare:@"Order"] == NSOrderedSame) {
-        result.textField.stringValue = [NSString stringWithFormat:@"%@",rowData.downloadIndex] ;
+        result.textField.stringValue = [NSString stringWithFormat:@"%@",thisShow.downloadIndex] ;
         result.toolTip = result.textField.stringValue;
         
     } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
 		MTPopUpTableCellView * cell = (MTPopUpTableCellView *)result;
 		MTFormatPopUpButton *popUpButton = cell.popUpButton;
-		popUpButton.owner = rowData;
-       if (([rowData.downloadStatus intValue] == kMTStatusNew)) {
-		    popUpButton.owner = rowData;
+		popUpButton.owner = thisShow;
+       if (([thisShow.downloadStatus intValue] == kMTStatusNew)) {
+		    popUpButton.owner = thisShow;
 			popUpButton.formatList = tiVoManager.formatList;
 			//ensure this format is still "available"
-			rowData.encodeFormat = [popUpButton selectFormatNamed:rowData.encodeFormat.name];
+			thisShow.encodeFormat = [popUpButton selectFormatNamed:thisShow.encodeFormat.name];
 			popUpButton.hidden = NO;
 			cell.textField.hidden= YES;
 	   } else {
 			//can't change now; just let them know what it is/was
-		   cell.textField.stringValue = rowData.encodeFormat.name;
+		   cell.textField.stringValue = thisShow.encodeFormat.name;
 		   popUpButton.hidden = YES;
 		   cell.textField.hidden= NO;
 		}
     } else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: rowData.addToiTunesWhenEncoded];
-        [checkBox setEnabled: [rowData.downloadStatus intValue] != kMTStatusDone &&
-                              rowData.encodeFormat.canAddToiTunes ];
-         checkBox.owner = rowData;
+        [checkBox setOn: thisShow.addToiTunesWhenEncoded];
+        [checkBox setEnabled: [thisShow.downloadStatus intValue] != kMTStatusDone &&
+                              thisShow.encodeFormat.canAddToiTunes ];
+         checkBox.owner = thisShow;
 
  	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: rowData.simultaneousEncode];
-         checkBox.owner = rowData;
-        [checkBox setEnabled: [rowData.downloadStatus intValue] == kMTStatusNew &&
-                              rowData.encodeFormat.canSimulEncode];
+        [checkBox setOn: thisShow.simultaneousEncode];
+         checkBox.owner = thisShow;
+        [checkBox setEnabled: [thisShow.downloadStatus intValue] == kMTStatusNew &&
+                              thisShow.encodeFormat.canSimulEncode];
 
+	} else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
+		if ([tableColumn width] > 135) {
+			result.textField.stringValue = thisShow.showMediumDateString;
+		} else {
+			result.textField.stringValue = thisShow.showDateString;
+		}
+		result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
+		NSInteger length = (thisShow.showLength+30)/60; //round up to nearest minute;
+		result.textField.stringValue = [NSString stringWithFormat:@"%ld:%0.2ld",length/60,length % 60];
+        result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.seasonEpisode;
+        result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.isQueued ? @"✔" : @"";
+	} else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
+		result.textField.stringValue = [thisShow.isHD boolValue] ? @"✔" : @"";
+		result.textField.alignment = NSCenterTextAlignment;
+	} else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.channelString;
+	} else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
+		if (thisShow.fileSize >= 1000000000) {
+			result.textField.stringValue = [NSString stringWithFormat:@"%0.1fGB",thisShow.fileSize/1000000000.0];
+		} else {
+			result.textField.stringValue = [NSString stringWithFormat:@"%ldMB",((NSInteger)thisShow.fileSize)/1000000 ];
+		};
+	} else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
+		result.textField.stringValue = [NSString stringWithFormat:@"%d", thisShow.showID ];
+	} else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.seriesTitle;
+		result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.episodeTitle;
+		result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Station"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.stationCallsign;
+	} else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
+		NSLog(@"airdate: %@",thisShow.originalAirDateNoTime);
+		result.textField.stringValue = thisShow.originalAirDateNoTime ? thisShow.originalAirDateNoTime : @"";
 	}
     
     // return the result.

@@ -58,7 +58,6 @@
 									*originalAirDate,
 									*originalAirDateNoTime,
                                     *seriesTitle,
-                                    *showDateString,
 									*showLengthString,
                                     *channelString,
                                     *programId,
@@ -81,6 +80,8 @@
 
 @property (nonatomic, readonly) NSString *encodeFilePath,
 										 *bufferFilePath,
+										 *showDateString,
+										 *showMediumDateString,
 										 *hDString,
 										 *downloadFilePath;
 

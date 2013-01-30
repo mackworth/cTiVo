@@ -20,10 +20,13 @@
 
 @implementation MTMainWindowController
 
+__DDLOGHERE__
+
 @synthesize tiVoShowTable,subscriptionTable, downloadQueueTable;
 
 -(id)initWithWindowNibName:(NSString *)windowNibName
 {
+	DDLogDetail(@"creating Main Window");
 	self = [super initWithWindowNibName:windowNibName];
 	if (self) {
 		loadingTiVos = [NSMutableArray new];
@@ -35,6 +38,7 @@
 
 -(void)awakeFromNib
 {
+	DDLogDetail(@"MainWindow awakeFromNib");
 	[self refreshFormatListPopup];
 }
 
@@ -42,6 +46,7 @@
 {
     [super windowDidLoad];
     
+	DDLogDetail(@"MainWindow windowDidLoad");
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 	[tiVoListPopUp removeAllItems];
 	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
@@ -61,15 +66,18 @@
     [defaultCenter addObserver:self selector:@selector(networkChanged:) name:kMTNotificationNetworkChanged object:nil];
 	
     [defaultCenter addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
+    [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidMoveNotification object:nil];
     [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
 	[tiVoManager addObserver:self forKeyPath:@"downloadDirectory" options:NSKeyValueObservingOptionInitial context:nil];
 
+	[self buildColumnMenuForTables ];
 
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
 	if ([keyPath compare:@"downloadDirectory"] == NSOrderedSame) {
+		DDLogDetail(@"changing downloadDirectory");
 		downloadDirectory.stringValue = tiVoManager.downloadDirectory;
 		NSString *dir = tiVoManager.downloadDirectory;
 		if (!dir) dir = @"Directory not available!";
@@ -80,6 +88,7 @@
 
 -(void)networkChanged:(NSNotification *)notification
 {
+	DDLogMajor(@"MainWindow network Changed");
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:_selectedTiVo];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	
@@ -91,8 +100,11 @@
 		return;  
 	}
     MTTiVo * tivo = (MTTiVo *) notification.object;
+	DDLogDetail(@"LoadingIndicator: %@ for %@",notification.name, tivo);
     if ([notification.name  compare:kMTNotificationShowListUpdating] == NSOrderedSame) {
-		[loadingTiVos addObject:tivo];
+		if ([loadingTiVos indexOfObject:tivo] == NSNotFound) {
+			[loadingTiVos addObject:tivo];
+		}
 	} else if ([notification.name compare:kMTNotificationShowListUpdated] == NSOrderedSame) {
 		[loadingTiVos removeObject:tivo];
 	}
@@ -325,6 +337,8 @@
 	
 }
 
+#pragma mark - Subscription Buttons
+
 -(IBAction)subscriptionMenuHandler:(NSMenuItem *)menu
 {
 	if ([menu.title caseInsensitiveCompare:@"Unsubscribe"] == NSOrderedSame) {
@@ -333,13 +347,12 @@
 	
 }
 
-#pragma mark - Subscription Management
-
-
 -(IBAction)subscribe:(id) sender {
 	NSArray * selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:tiVoShowTable.selectedRowIndexes];
 	[tiVoManager.subscribedShows addSubscriptions:selectedShows];
 }
+
+#pragma mark - Download Buttons
 
 -(IBAction)downloadSelectedShows:(id)sender
 {
@@ -396,6 +409,7 @@
 	}
 }
 
+#pragma mark - Download Options
 -(IBAction)changeSimultaneous:(id)sender
 {
     MTCheckBox *checkbox = sender;
@@ -426,6 +440,43 @@
     }
 }
 
+#pragma mark - Customize Columns
+
+-(void) buildColumnMenuForTables{
+	[self buildColumnMenuForTable: downloadQueueTable];
+	[self buildColumnMenuForTable: tiVoShowTable];
+	[self buildColumnMenuForTable: subscriptionTable ];
+}
+
+-(void) columnOrderChanged: (NSNotification *) notification {
+	NSTableView * tableView = (NSTableView  *)notification.object;
+	[self buildColumnMenuForTable:tableView];
+}
+
+-(void) buildColumnMenuForTable:(NSTableView *) table {
+	NSMenu *tableHeaderContextMenu = [[[NSMenu alloc] initWithTitle:@""] autorelease];
+	[[table headerView] setMenu:tableHeaderContextMenu];
+	
+	for (NSTableColumn *column in [table tableColumns]) {
+		NSString *title = [[column headerCell] title];
+		NSMenuItem *item = [tableHeaderContextMenu addItemWithTitle:title action:@selector(contextMenuSelected:) keyEquivalent:@""];
+		[item setTarget:self];
+		[item setRepresentedObject:column];
+		[item setState:column.isHidden?NSOffState: NSOnState];
+	}
+}
+
+
+- (void)contextMenuSelected:(id)sender {
+	BOOL wasOn = ([sender state] == NSOnState);
+	NSTableColumn *column = [sender representedObject];
+	[column setHidden:wasOn];
+	if(wasOn) {
+		[sender setState: NSOffState ];
+	} else {
+		[sender setState: NSOnState];
+	}
+}
 
 #pragma mark - Table View Notification Handling
 
