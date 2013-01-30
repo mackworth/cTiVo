@@ -30,6 +30,7 @@
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataDownload) name:kMTNotificationDownloadStatusChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataTiVos) name:kMTNotificationTiVoListUpdated object:nil];
 	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
@@ -37,9 +38,13 @@
 
 }
 
+-(void) reloadDataTiVos {
+	//NSLog(@"QQQReloading from Tivos changed");
+	[self reloadData];
+	
+}
 -(void) reloadDataDownload {
-	//QQQ debugging msgs to be removed
-//	NSLog(@"QQQReloading from Download status changed");
+	//	NSLog(@"QQQReloading from Download status changed");
 	[self reloadData];
 	
 }
@@ -49,12 +54,12 @@
 	
 }
 -(void)awakeFromNib
-{
+{  //remember: called multiple times for each new cell loaded
     self.dataSource = self;
     self.delegate    = self;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-    tiVoColumnHolder = [[self tableColumnWithIdentifier:@"TiVo"] retain];
+    if (!tiVoColumnHolder) tiVoColumnHolder = [[self tableColumnWithIdentifier:@"TiVo"] retain];
 }
 
 -(void) reloadData {
@@ -64,20 +69,20 @@
 	NSArray * selectedShows = [self.sortedShows objectsAtIndexes: self.selectedRowIndexes];
 	
 	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
-    NSTableColumn *programColumn = [self tableColumnWithIdentifier:@"Programs"];
     if (tiVoManager.tiVoList.count == 1) {
         if (tiVoColumn) {
-            [self removeTableColumn:tiVoColumn];
-            programColumn.width += tiVoColumn.width + 3;
+			[self removeTableColumn:tiVoColumn];
+            [self tableColumnWithIdentifier:@"Programs"].width += tiVoColumn.width + 3;
         }
     } else {
-        if (!tiVoColumn) {
-            [self addTableColumn:tiVoColumnHolder];
+        if (!tiVoColumn && tiVoColumnHolder) {
+            [self addTableColumn: tiVoColumnHolder];
             NSInteger colPos = [self columnWithIdentifier:@"TiVo"];
             [self moveColumn:colPos toColumn:1];
-            programColumn.width -= tiVoColumn.width + 3;
+            [self tableColumnWithIdentifier:@"Programs"].width -= tiVoColumn.width + 3;
         }
     }
+	[self sizeToFit];
     self.sortedShows =nil;
     [super reloadData];
 	
@@ -120,7 +125,7 @@
 -(void)dealloc
 {
 	[self  unregisterDraggedTypes];
-	[tiVoColumnHolder release];
+	[tiVoColumnHolder release]; tiVoColumnHolder=nil;
     self.sortedShows= nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];

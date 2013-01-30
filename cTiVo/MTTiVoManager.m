@@ -27,6 +27,8 @@
 
 @synthesize subscribedShows = _subscribedShows, numEncoders;
 
+__DDLOGHERE__
+
 #pragma mark - Singleton Support Routines
 
 static MTTiVoManager *sharedTiVoManager = nil;
@@ -75,6 +77,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
 	self = [super init];
 	if (self) {
+		DDLogDetail(@"setting up TivoManager");
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		_tivoServices = [NSMutableArray new];
 		listingData = [NSMutableData new];
@@ -96,13 +99,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 		factoryFormatList = [tmpArray copy];
 		_formatList = [tmpArray retain];
-        
+        DDLogVerbose(@"factory Formats: %@", factoryFormatList);
+		
         //Set user desired hiding of the user pref, if any
         
         NSArray *hiddenFormatNames = [defaults objectForKey:kMTHiddenFormats];
         if (hiddenFormatNames) {
             //Un hide all 
-            for (MTFormat *f in _formatList) {
+            DDLogVerbose(@"Hiding formats: %@", hiddenFormatNames);
+			for (MTFormat *f in _formatList) {
                 f.isHidden = [NSNumber numberWithBool:NO];
             }
             //Hide what the user wants
@@ -115,6 +120,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		//Load user formats from preferences if any
 		NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTFormats];
 		if (userFormats) {
+			DDLogVerbose(@"User formats: %@", userFormats);
 			for (NSDictionary *fl in userFormats) {
 				[_formatList addObject:[MTFormat formatWithDictionary:fl]];
 			}
@@ -131,6 +137,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		if ([defaults objectForKey:kMTSelectedFormat]) {
 			NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
 			self.selectedFormat = [self findFormat:formatName];
+			DDLogVerbose(@"defaultFormat %@", formatName);
 		}
         
 		//If no selected format make it the first.
@@ -143,6 +150,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 		
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
+		DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
 		
 		self.oldQueue = [[NSUserDefaults standardUserDefaults] objectForKey:kMTQueue];
 		
@@ -185,6 +193,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)loadManualTiVos
 {
 //    BOOL didFindTiVo = NO;
+	DDLogDetail(@"LoadingTivos");
 	NSMutableArray *manualTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
 	[_tiVoList removeObjectsInArray:manualTiVoList];
     NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
@@ -199,6 +208,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 	}
 	if (itemsToRemove.count) {
+		DDLogMajor(@"Removing manual Tivos %@", itemsToRemove);
 		[manualTiVoDescriptions removeObjectsInArray:itemsToRemove];
 		[[NSUserDefaults standardUserDefaults] setObject:manualTiVoDescriptions forKey:kMTManualTiVos];
 	}
@@ -209,12 +219,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		MTTiVo *newTiVo = nil;
 		for (MTTiVo *tivo in manualTiVoList) {
 			if ([tivo.tiVo.iPAddress compare:manualTiVoDescription[@"iPAddress"]] == NSOrderedSame) {
+				DDLogDetail(@"Adding manual TiVo %@", tivo);
 				newTiVo = tivo;
 				newTiVo.tiVo.userName = manualTiVoDescription[@"userName"];
 				newTiVo.tiVo.userPort = [manualTiVoDescription[@"userPort"] integerValue];
 				newTiVo.tiVo.userPortSSL = [manualTiVoDescription[@"userPortSSL"] integerValue];
 				newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
 				break;
+			} else {
+				DDLogDetail(@"Already have manual TiVo %@", newTiVo);
 			}
 		}
 		if (!newTiVo) {
@@ -234,6 +247,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 				NSString *ipaddr = [self getStringFromAddressData:[tiVo.tiVo addresses][0]];
 				if ([ipaddr compare:newTiVo.tiVo.iPAddress] == NSOrderedSame) {
 					[itemsToRemove addObject:tiVo];
+					DDLogDetail(@"Already had %@ at %@", tiVo, ipaddr);
 				}
 			}
 			[_tiVoList removeObjectsInArray:itemsToRemove];
@@ -246,6 +260,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
         [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 //    }
 	if (tivoBrowser) {
+		DDLogDetail(@"stopping tivo browser: %@", tivoBrowser);
 		[tivoBrowser stop];
 		[_tivoServices removeAllObjects];
 		[tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
@@ -255,6 +270,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void)searchForBonjourTiVos
 {
+	DDLogDetail(@"searching for Bonjour");
     tivoBrowser = [NSNetServiceBrowser new];
     tivoBrowser.delegate = self;
     [tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
@@ -266,6 +282,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     NSArray *ret = _hostAddresses;
     if (!_hostAddresses) {
         self.hostAddresses = [[NSHost currentHost] addresses];
+		DDLogDetail(@"Host Addresses:  %@",self.hostAddresses);
         ret = _hostAddresses;
     }
     return ret;
@@ -280,6 +297,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
             [addresses addObject:ipAddress];
         }
     }
+	DDLogVerbose(@"Tivo Addresses:  %@",addresses);
     return addresses;
 }
 
@@ -287,11 +305,13 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
 	NSSortDescriptor *manualSort = [NSSortDescriptor sortDescriptorWithKey:@"manualTiVo" ascending:NO];
 	NSSortDescriptor *nameSort = [NSSortDescriptor sortDescriptorWithKey:@"tiVo.name" ascending:YES];
+	DDLogVerbose(@"resorting TiVoList %@", _tiVoList);
 	return [_tiVoList sortedArrayUsingDescriptors:[NSArray arrayWithObjects:manualSort,nameSort, nil]];
 }
 
 -(void) setupNotifications {
     //have to wait until tivomanager is setup before calling subsidiary data models
+	DDLogVerbose(@"setting tivoManager notifications");
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
     
     [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
@@ -307,7 +327,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
     if ([keyPath compare:@"hasScheduledQueueStart"] == NSOrderedSame || [keyPath compare:@"queueStartTime"] == NSOrderedSame) {
 		[_queueStartTime release];
+		DDLogVerbose(@"setting QueueStart");
 		_queueStartTime = [[NSDate dateWithTimeIntervalSinceReferenceDate:floor([_queueStartTime timeIntervalSinceReferenceDate] / 60.0) * 60.0] retain];
+		DDLogVerbose(@"setting QueueStart: %@",_queueStartTime);
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(startAllTiVoQueues) object:nil];
         if ([_hasScheduledQueueStart boolValue]) {
             NSInteger numberOfShowsProcessing = 0;
@@ -315,9 +337,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
                 numberOfShowsProcessing += [tiVo numberOfShowsInProcess];
             }
             if (numberOfShowsProcessing) {
-                NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton:@"Complete stage of current shows" otherButton:nil informativeTextWithFormat:@""];
+                NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton:@"Complete stage of current shows" otherButton:nil informativeTextWithFormat:@""];
                 NSInteger returnValue = [scheduleAlert runModal];
-                NSLog(@"Got returnValue %ld from cancel alert",returnValue);
+                DDLogDetail(@"User said %ld to cancel alert",returnValue);
                 if (returnValue == 1) {
                     //We're rescheduling shows
                     for (MTTiVo *tiVo in _tiVoList) {
@@ -327,11 +349,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
             }
 			NSTimeInterval time = floor([_queueStartTime timeIntervalSinceReferenceDate] / 60.0) * 60.0;
 			NSDate *realStartDate = [NSDate dateWithTimeIntervalSinceReferenceDate:time];
-			NSLog(@"Stored Date %@ vs calc date %@",_queueStartTime,realStartDate);
+			DDLogVerbose(@"Stored Date %@ vs calc date %@",_queueStartTime,realStartDate);
 
             double delay = [realStartDate timeIntervalSinceNow];
             if (delay > 0) {
-                NSLog(@"ZZZsetting download start for %f seconds from now at %@, should be %@",delay,[NSDate dateWithTimeIntervalSinceNow:delay], realStartDate);
+                DDLogVerbose(@"Setting download start for %f seconds from now at %@, should be %@",delay,[NSDate dateWithTimeIntervalSinceNow:delay], realStartDate);
                 [self performSelector:@selector(startAllTiVoQueues) withObject:nil afterDelay:delay+1];
             }
         } else {
@@ -343,13 +365,14 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)startAllTiVoQueues
 {
     for (MTTiVo *tiVo in _tiVoList) {
-        NSLog(@"ZZZStarting download after delay on tiVo %@",tiVo.tiVo.name);
+        DDLogDetail(@"Starting download on tiVo %@",tiVo.tiVo.name);
         [tiVo manageDownloads:tiVo];
     }
 }
 
 -(void)refreshAllTiVos
 {
+	DDLogMajor(@"Refreshing all Tivos");
 	for (MTTiVo *tiVo in _tiVoList) {
 		if (tiVo.isReachable) {
 			[tiVo updateShows:nil];
@@ -364,6 +387,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
             _subscribedShows = [NSMutableArray new];
         [_subscribedShows loadSubscriptions];
+		DDLogVerbose(@"Loaded subscriptions: %@", _subscribedShows);
 	}
  
 	return _subscribedShows;
@@ -458,13 +482,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
     //Make sure the title isn't the same and if it is add a -1 modifier
     for (MTTiVoShow *p in _downloadQueue) {
         if ([p.showTitle compare:program.showTitle] == NSOrderedSame) {
-            NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
+			NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
             NSTextCheckingResult *result = [ending firstMatchInString:program.showTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, program.showTitle.length)];
             if (result) {
                 int n = [[program.showTitle substringWithRange:[result rangeAtIndex:2]] intValue];
-                program.showTitle = [[program.showTitle substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
-            } else {
+				DDLogVerbose(@"found show title %@, incrementing version number %d", program.showTitle, n);
+				program.showTitle = [[program.showTitle substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
+           } else {
                 program.showTitle = [program.showTitle stringByAppendingString:@"-1"];
+			   DDLogDetail(@"found show title %@, adding version number", program.showTitle);
             }
             [self checkShowTitleUniqueness:program];
         }
@@ -474,6 +500,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) shows
 								 toIndex:(NSUInteger)insertIndex
 {
+	DDLogDetail(@"moving shows %@ to %ld", shows,insertIndex);
 	NSMutableIndexSet *fromIndexSet = [NSMutableIndexSet indexSet  ];
 	for (MTTiVoShow * show in shows) {
 		NSUInteger index = [[tiVoManager downloadQueue] indexOfObject :show];
@@ -493,6 +520,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	NSIndexSet *destinationIndexes = [NSIndexSet indexSetWithIndexesInRange:destinationRange];
 	
 	NSArray *objectsToMove = [dlQueue objectsAtIndexes:fromIndexSet];
+	DDLogVerbose(@"moving shows %@ from %@ to %@", objectsToMove,fromIndexSet, destinationIndexes);
 	[dlQueue removeObjectsAtIndexes: fromIndexSet];
 	[dlQueue insertObjects:objectsToMove atIndexes:destinationIndexes];
 	
@@ -510,6 +538,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
             BOOL programFound = NO;
             for (MTTiVoShow *p in _downloadQueue) {
                 if (p.showID == program.showID	) {
+					DDLogDetail(@"program %@ already in queue as %@",p, program);
                     programFound = YES;
 					break;
                 }
@@ -528,18 +557,22 @@ static MTTiVoManager *sharedTiVoManager = nil;
 				if (nextShow) {
                     NSUInteger index = [_downloadQueue indexOfObject:nextShow];
                     if (index == NSNotFound) {
-                        [_downloadQueue addObject:program];
+						DDLogDetail(@"Prev show not found, adding %@ at end",nextShow);
+						[_downloadQueue addObject:program];
                         
                     } else {
+						DDLogVerbose(@"inserting before %@ at %ld",nextShow, index);
                         [_downloadQueue insertObject:program atIndex:index];
                     }
                 } else {
-                    [_downloadQueue addObject:program];
+					DDLogVerbose(@"adding %@ at end",nextShow);
+                   [_downloadQueue addObject:program];
                 }
             }
         }
 	}
 	if (submittedAny){
+		DDLogDetail(@"Posting showsUpdated notifications");
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
         [[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:nil];
 	}
@@ -548,6 +581,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeShow:(MTTiVoShow *) nextShow {
 	for (MTTiVoShow * thisShow in shows) {
+		DDLogDetail(@"Adding show: %@", thisShow);
 		thisShow.encodeFormat = [self selectedFormat];
 		thisShow.addToiTunesWhenEncoded = thisShow.encodeFormat.canAddToiTunes &&
 											[[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
@@ -561,18 +595,21 @@ static MTTiVoManager *sharedTiVoManager = nil;
 - (void) noRecordingAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     MTTiVoShow * show = (MTTiVoShow *) contextInfo;
+	DDLogDetail(@"User confirmed: delete show: %@", show);
 	[self deleteProgramsFromDownloadQueue: @[show] ];
     
 }
 
 -(void) deleteProgramsFromDownloadQueue:(NSArray *) programs {
     NSMutableIndexSet * itemsToRemove= [NSMutableIndexSet indexSet];
+	DDLogDetail(@"Delete shows: %@", programs);
 	for (MTTiVoShow * program in programs) {
 
 		NSUInteger index = [_downloadQueue indexOfObject:program];
 		if (index == NSNotFound) {
 			for (MTTiVoShow *p in _downloadQueue) {  //this is probably unncessary
 				if (p.showID == program.showID	) {
+					DDLogMajor(@"Odd: two shows with same ID: %@ in queue v %@", program, p);
 					index = [_downloadQueue indexOfObject:p];
 					break;
 				}
@@ -587,12 +624,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	
 	if (itemsToRemove.count > 0) {
+		DDLogVerbose(@"Deleted shows: %@", itemsToRemove);
 		[_downloadQueue removeObjectsAtIndexes:itemsToRemove];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadStatusChanged object:nil];
-//			NSLog(@"QQQ setting DLQueueUpdated post");
 		NSNotification *downloadQueueNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:downloadQueueNotification afterDelay:4.0];
+	} else {
+		DDLogDetail(@"No shows to delete?");
+
 	}
 }
 
@@ -620,7 +660,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			// Register ourselves as a Growl delegate
 			
 			NSDictionary *infoDictionary = [growlFramework infoDictionary];
-			NSLog(@"Using Growl.framework %@ (%@)",
+			DDLogMajor(@"Using Growl.framework %@ (%@)",
 				  [infoDictionary objectForKey:@"CFBundleShortVersionString"],
 				  [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey]);
 			
@@ -633,6 +673,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 //Note that any new notification types need to be added to constants.h, but especially Growl Registration Ticket.growRegDict
 - (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification {
+	DDLogMajor(@"Growl: %@/%@: %@", title, subTitle, notification);
 	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
 	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
 		[GAB notifyWithTitle: title
@@ -691,7 +732,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
 	numEncoders--;
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-    //NSLog(@"num decoders after decrement is %d",numEncoders);
+    DDLogMajor(@"num decoders after decrement is %d",numEncoders);
 }
 
 -(void)writeDownloadQueueToUserDefaults {
@@ -703,6 +744,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[downloadArray addObject:[show queueRecord]];
 								
 	}
+    DDLogVerbose(@"writing DL queue: %@", downloadArray);
 	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];
 }
 
@@ -721,7 +763,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		
 		if (newDir.length > 0) {
 			if (![self checkDirectory:newDir]) {
-				newDir = nil;	
+				DDLogReport(@"Can't open user's download directory %@; trying default", newDir);
+				newDir = nil;
 			}
 		}
 		if (!newDir) {
@@ -729,7 +772,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			newDir = [self defaultDownloadDirectory];
 			
 			if (![self checkDirectory:newDir]) {
-				//whoa. very bad things in user directory land
+				DDLogReport(@"Can't open default download directory:  %@ ", newDir); //whoa. very bad things in user directory land
 				newDir = nil;
 			}
 		}
@@ -770,6 +813,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(NSMutableArray *)tiVoShows
 {
 	NSMutableArray *totalShows = [NSMutableArray array];
+	DDLogVerbose(@"reloading shows");
 	for (MTTiVo *tv in _tiVoList) {
 		[totalShows addObjectsFromArray:tv.shows];
 	}
@@ -781,9 +825,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
 {
-	NSLog(@"Found Service %@",netService);
+	DDLogMajor(@"Found Service %@",netService);
     for (NSNetService * prevService in _tivoServices) {
         if ([prevService.name compare:netService.name] == NSOrderedSame) {
+			DDLogDetail(@"Already had %@",netService);
             return; //already got this one
         }
     }
@@ -804,6 +849,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 //    if (_tiVoList.count == 1) {  //Test code for single tivo testing
 //        return;
 //    }
+	DDLogDetail(@"Checking hostAddresses for %@",ipAddress);
 
 	for (NSString *hostAddress in self.hostAddresses) {
 		if ([hostAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
@@ -812,7 +858,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 
 	for (NSString *tiVoAddress in [self tiVoAddresses]) {
-//        NSLog(@"Comparing tiVo %@ address %@ to ipaddress %@",sender.name,tiVoAddress,ipAddress);
+		DDLogVerbose(@"Comparing tiVo %@ address %@ to ipaddress %@",sender.name,tiVoAddress,ipAddress);
 		if ([tiVoAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
 			return;  // This filters out tivos that have already been found from a manual entry
 		}
@@ -822,15 +868,16 @@ static MTTiVoManager *sharedTiVoManager = nil;
         MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
       
         [_tiVoList addObject:newTiVo];
+		DDLogMajor(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
     } else {
-        NSLog(@"PyAddress: %@ not in hostAddresses = %@", ipAddress, self.hostAddresses);
+		DDLogMajor(@"PyAddress: %@ not in hostAddresses = %@", ipAddress, self.hostAddresses);
     }
 }
 
 -(void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict
 {
-    NSLog(@"Service %@ failed to resolve",sender.name);
+    DDLogReport(@"Service %@ failed to resolve",sender.name);
 }
 
 - (NSString *)getStringFromAddressData:(NSData *)dataIn {
@@ -840,6 +887,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     socketAddress = (struct sockaddr_in *)[dataIn bytes];
     ipString = [NSString stringWithFormat: @"%s",
                 inet_ntoa(socketAddress->sin_addr)];  ///problem here
+	DDLogVerbose(@"Translated %d to %@", socketAddress->sin_addr.s_addr, ipString);
     return ipString;
 }
 

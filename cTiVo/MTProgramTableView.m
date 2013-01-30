@@ -28,6 +28,7 @@
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDetailsLoaded object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowCopyProtected options:NSKeyValueChangeSetting context:nil];
 	
 	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
@@ -42,13 +43,26 @@
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
     self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
+    if (!tiVoColumnHolder) tiVoColumnHolder = [[self tableColumnWithIdentifier:@"TiVo"] retain];
 }
 
--(void)reloadData
-{
+-(void) reloadData {
     //Configure Table Columns depending on how many TiVos
-    //[tiVoColumnHolder setHidden:tiVoManager.tiVoList.count == 1]; //now let user decide
-    
+    	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
+    if (tiVoManager.tiVoList.count == 1) {
+        if (tiVoColumn) {
+			[self removeTableColumn:tiVoColumn];
+            [self tableColumnWithIdentifier:@"Programs"].width += tiVoColumn.width + 3;
+        }
+    } else {
+        if (!tiVoColumn && tiVoColumnHolder) {
+            [self addTableColumn: tiVoColumnHolder];
+            NSInteger colPos = [self columnWithIdentifier:@"TiVo"];
+            [self moveColumn:colPos toColumn:1];
+            [self tableColumnWithIdentifier:@"Programs"].width -= tiVoColumn.width + 3;
+        }
+    }
+
 	//save selection to preserve after reloadData
 	NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
     NSArray * selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
@@ -91,7 +105,7 @@
 
 -(void)dealloc
 {
-    [tiVoColumnHolder release];
+    [tiVoColumnHolder release];tiVoColumnHolder = nil;
     self.selectedTiVo = nil;
     self.sortedShows = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
