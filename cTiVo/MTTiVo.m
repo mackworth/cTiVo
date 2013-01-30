@@ -19,7 +19,7 @@
 #define kMTValue @"KeyValue"
 #define kMTType @"KeyType"
 
-
+//no more than 128 at a time
 #define kMTNumberShowToGet 50
 #define kMTNumberShowToGetFirst 15
 
@@ -380,6 +380,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             if (newLastChangeDate != lastChangeDate) {
 				DDLogVerbose(@"Oops. Date changed under us: was: %d now: %d",lastChangeDate, newLastChangeDate);
                 //Implement start over here
+				//except that a show in progress updates this value
             }
             lastChangeDate = newLastChangeDate;
         } else {
