@@ -68,8 +68,7 @@ __DDLOGHERE__
 	
     [defaultCenter addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
     [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidMoveNotification object:nil];
-    [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidResizeNotification object:nil];
-    [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
+     [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
 	[tiVoManager addObserver:self forKeyPath:@"downloadDirectory" options:NSKeyValueObservingOptionInitial context:nil];
 
 	[self buildColumnMenuForTables ];
@@ -451,8 +450,7 @@ __DDLOGHERE__
 }
 
 -(void) columnOrderChanged: (NSNotification *) notification {
-	NSTableView * tableView = (NSTableView  *)notification.object;
-	[self buildColumnMenuForTable:tableView];
+	[self buildColumnMenuForTables];
 }
 
 -(void) buildColumnMenuForTable:(NSTableView *) table {

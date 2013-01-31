@@ -50,13 +50,13 @@
 }
 
 -(void)awakeFromNib
-{
+{//remember this can be called multiple times
 	self.dataSource  = self;
     self.delegate    = self;
 //    self.rowHeight = 20;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-    _sortedSubscriptions = nil;
+    self.sortedSubscriptions = nil;
 }
 
 -(NSArray *)sortedSubscriptions

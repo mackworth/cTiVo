@@ -257,7 +257,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	DDLogDetail(@"Tivo %@ URL String %@",self, tivoURLString);
 	NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
 	NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
-	self.showURLConnection = [[NSURLConnection connectionWithRequest:tivoURLRequest delegate:self] retain];
+	self.showURLConnection = [NSURLConnection connectionWithRequest:tivoURLRequest delegate:self];
 	[urlData setData:[NSData data]];
 	[showURLConnection start];
 		
@@ -447,6 +447,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
 		//	NSLog(@"Avialable Recordings are %@",_recordings);
 	}
+	[previousShowList release]; previousShowList = nil;
     [parser release];
 }
 
@@ -631,9 +632,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 	NSString *password = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys][_tiVo.name];
 	if (challenge.previousFailureCount == 0) {
+		DDLogDetail(@"%@ password ask",self);
 		NSURLCredential *myCredential = [NSURLCredential credentialWithUser:@"tivo" password:password persistence:NSURLCredentialPersistenceForSession];
 		[challenge.sender useCredential:myCredential forAuthenticationChallenge:challenge];
 	} else {
+		DDLogDetail(@"%@ challenge failed",self);
 		[challenge.sender cancelAuthenticationChallenge:challenge];
 		[showURLConnection cancel];
 		self.showURLConnection = nil;

@@ -15,7 +15,7 @@
                 addToiTunes = _addToiTunes,
                 simultaneousEncode = _simultaneousEncode,
                 encodeFormat = _encodeFormat;
-
+__DDLOGHERE__
 
 -(BOOL) canSimulEncode {
     return self.encodeFormat.canSimulEncode;
@@ -56,6 +56,10 @@
     }
 }
 
+-(NSString *) description {
+	return [NSString stringWithFormat:@"Subscription:%@ lastAt:%@ format:%@", self.seriesTitle, self.lastRecordedTime, self.encodeFormat];
+}
+
 
 - (void)dealloc
 {
@@ -75,7 +79,9 @@
 #pragma mark - Subscription Management
 
 -(void) checkSubscriptionShow:(MTTiVoShow *) thisShow {
-   if ([self isSubscribed:thisShow] && ([thisShow.downloadStatus intValue] == kMTStatusNew)) {
+	DDLogVerbose(@"checking Subscription for %@", thisShow);
+	if ([self isSubscribed:thisShow] && ([thisShow.downloadStatus intValue] == kMTStatusNew)) {
+		DDLogDetail(@"Subscribed; adding %@", thisShow);
        MTSubscription * subscription = [self findShow:thisShow];
        thisShow.encodeFormat = subscription.encodeFormat;
        thisShow.addToiTunesWhenEncoded = ([subscription canAddToiTunes] && [subscription shouldAddToiTunes]);
@@ -90,6 +96,7 @@
 }
 
 -(void) checkSubscriptionsAll {
+	DDLogVerbose(@"checking Subscriptions");
 	for (MTTiVoShow * show in tiVoManager.tiVoShows.reverseObjectEnumerator) {
 		[self checkSubscriptionShow:show];
 	}
@@ -100,6 +107,7 @@
 	if (!seriesSearchString) return nil;
     for (MTSubscription * possMatch in self) {
         if ([possMatch.seriesTitle localizedCaseInsensitiveCompare:seriesSearchString] == NSOrderedSame) {
+			DDLogVerbose(@"found show %@ in subscription %@", show, possMatch);
             return possMatch;
         }
     }
@@ -111,14 +119,15 @@
 	if (seriesMatch == nil) return NO;
     BOOL before = (tivoShow.showDate != nil) &&
                  [seriesMatch.lastRecordedTime compare: tivoShow.showDate] == NSOrderedAscending;
-	//   NSLog(@"%@ for %@, date:%@ prev:%@", before ? @"YES": @"NO",tivoShow.showTitle, tivoShow.showDate, prevRecording);
+	DDLogVerbose(@"%@ for %@, date:%@ prev:%@", before ? @"YES": @"NO",tivoShow.showTitle, tivoShow.showDate, seriesMatch.lastRecordedTime);
 	return before;
 }
 
 -(NSArray *) addSubscriptions: (NSArray *) shows {
 	
 	NSMutableArray * newSubs = [NSMutableArray arrayWithCapacity:shows.count];
-    for (MTTiVoShow * thisShow in shows) {
+    DDLogDetail(@"Subscribing to %@", shows);
+	for (MTTiVoShow * thisShow in shows) {
 		MTSubscription * newSub = [self addSubscription:thisShow];
 		if (newSub) {
 			[newSubs addObject:newSub];
@@ -148,7 +157,9 @@
         newSub.encodeFormat = tiVoManager.selectedFormat;
         newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
         newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
-        [self addObject:newSub];
+		DDLogVerbose(@"Subscribing %@ as: %@ ", tivoShow, newSub);
+		
+		[self addObject:newSub];
 		return newSub;
  	} else {
 		return nil;
@@ -156,6 +167,7 @@
 }
 
 -(void) deleteSubscriptions:(NSArray *) subscriptions {
+	DDLogDetail(@"Removing Subscriptions: %@", subscriptions);
 	[self  removeObjectsInArray:subscriptions];
 	[self saveSubscriptions];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
@@ -166,6 +178,7 @@
 {
 	MTTiVoShow * tivoShow = (MTTiVoShow *)notification.object;
 	MTSubscription * seriesMatch = [self findShow:tivoShow];
+	DDLogDetail(@"UPdating time on Subscriptions: %@ to %@", seriesMatch, tivoShow.showDate);
 	if (seriesMatch && tivoShow.showDate) {
 		seriesMatch.lastRecordedTime = tivoShow.showDate;
 		[self saveSubscriptions];
@@ -176,6 +189,7 @@
     NSArray * tempArray = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSubscriptionList];
     [self removeAllObjects];
     
+	DDLogDetail(@"Loading subscriptions");
     for (NSDictionary * sub in tempArray) {
         MTSubscription * tempSub = [[[MTSubscription alloc] init] autorelease];
         tempSub.seriesTitle = sub[kMTSubscribedSeries];
@@ -193,7 +207,7 @@
                                                     
         tempSub.simultaneousEncode = sub[kMTSubscribedSimulEncode];
         if (tempSub.simultaneousEncode ==nil) tempSub.simultaneousEncode = [NSNumber numberWithBool: ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode] && tempSub.encodeFormat.canSimulEncode)];
-        
+        DDLogVerbose(@"Loaded Sub: %@ from %@",tempSub, sub);
         [self addObject:tempSub];
     }
 }
@@ -208,7 +222,8 @@
                                   sub.addToiTunes, kMTSubscribediTunes,
                                   sub.simultaneousEncode, kMTSubscribedSimulEncode,
                                   nil];
-        [tempArray addObject:tempSub];
+		DDLogVerbose(@"Saving Sub: %@ ",tempSub);
+		[tempArray addObject:tempSub];
     }
     [[NSUserDefaults standardUserDefaults] setObject:tempArray forKey:kMTSubscriptionList];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];

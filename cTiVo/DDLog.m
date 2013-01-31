@@ -267,9 +267,9 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 	
 	if (copy)
 	{
-		return [[NSString alloc] initWithBytes:subStr
+		return [[[NSString alloc] initWithBytes:subStr
 		                                length:subLen
-		                              encoding:NSUTF8StringEncoding];
+		                              encoding:NSUTF8StringEncoding] autorelease];
 	}
 	else
 	{
@@ -277,10 +277,10 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 		// Specifically, we don't need to waste time copying the string.
 		// We can just tell NSString to point to a range within the string literal.
 		
-		return [[NSString alloc] initWithBytesNoCopy:subStr
+		return [[[NSString alloc] initWithBytesNoCopy:subStr
 		                                      length:subLen
 		                                    encoding:NSUTF8StringEncoding
-		                                freeWhenDone:NO];
+		                                freeWhenDone:NO] autorelease];
 	}
 }
 

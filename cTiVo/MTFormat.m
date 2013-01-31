@@ -10,12 +10,15 @@
 
 @implementation MTFormat
 
+__DDLOGHERE__
+
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format
 {
 	MTFormat *newFormat = [[[MTFormat alloc] init] autorelease];
 	for(NSString *key in format) {
 		[newFormat setValue:[format objectForKey:key] forKey:key];
 	}
+	DDLogVerbose(@"New format %@ from %@", newFormat, format);
 	return newFormat;
 }
 
@@ -179,6 +182,10 @@
 -(BOOL)canSimulEncode
 {
     return ![_mustDownloadFirst boolValue];
+}
+
+-(NSString *) description {
+	return [NSString stringWithFormat:@" %@(%@) Encoder: %@ =>%@",self.name,self.formatDescription,self.encoderUsed, self.filenameExtension ];
 }
 
 -(void)dealloc

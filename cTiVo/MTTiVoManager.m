@@ -571,7 +571,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 				if (nextShow) {
                     NSUInteger index = [_downloadQueue indexOfObject:nextShow];
                     if (index == NSNotFound) {
-						DDLogDetail(@"Prev show not found, adding %@ at end",nextShow);
+						DDLogDetail(@"Prev show not found, adding %@ at end",program);
 						[_downloadQueue addObject:program];
                         
                     } else {
@@ -579,7 +579,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
                         [_downloadQueue insertObject:program atIndex:index];
                     }
                 } else {
-					DDLogVerbose(@"adding %@ at end",nextShow);
+					DDLogVerbose(@"adding %@ at end",program);
                    [_downloadQueue addObject:program];
                 }
             }
@@ -727,7 +727,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(BOOL)foundTiVoNamed:(NSString *)tiVoName
 {
 	BOOL ret = NO;
-	for (MTTiVo *tiVo in self.tiVoList) {
+	for (MTTiVo *tiVo in _tiVoList) {
 		if ([tiVo.tiVo.name compare:tiVoName] == NSOrderedSame) {
 			ret = YES;
 			break;
