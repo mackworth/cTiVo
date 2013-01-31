@@ -70,14 +70,11 @@
 	
 	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
     if (tiVoManager.tiVoList.count == 1) {
-        if (tiVoColumn) {
-			[self removeTableColumn:tiVoColumn];
-        }
+        [tiVoColumn setHidden:YES];
     } else {
-        if (!tiVoColumn && tiVoColumnHolder) {
-            [self addTableColumn: tiVoColumnHolder];
-            NSInteger colPos = [self columnWithIdentifier:@"TiVo"];
-            [self moveColumn:colPos toColumn:1];
+        [tiVoColumn setHidden:NO];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTHideTiVoColumnDownloads]) {
+            [tiVoColumn setHidden:YES];
         }
     }
 	[self sizeToFit];

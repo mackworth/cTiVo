@@ -20,7 +20,7 @@
 	IBOutlet MTFormatPopUpButton *formatListPopUp;
     IBOutlet NSButton *addToQueueButton, *removeFromQueueButton, *subscribeButton, *subDirectoriesButton;
 	IBOutlet NSTextField *loadingProgramListLabel, *downloadDirectory, *tiVoListPopUpLabel;
-	IBOutlet NSProgressIndicator *loadingProgramListIndicator;
+	IBOutlet NSProgressIndicator *loadingProgramListIndicator, *searchingTiVosIndicator;
 	IBOutlet MTDownloadTableView *downloadQueueTable;
 	IBOutlet MTProgramTableView  *tiVoShowTable;
 	IBOutlet MTSubscriptionTableView  *subscriptionTable;

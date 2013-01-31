@@ -76,6 +76,8 @@
 #define kMTProgramTableColumns @"ProgramTableColumns"
 #define kMTDownloadTableColumns @"DownloadTableColumns"
 #define kMTSubscriptionTableColumns @"kMTSubscriptionTableColumns"
+#define kMTHideTiVoColumnPrograms @"HideTiVoColumnPrograms"
+#define kMTHideTiVoColumnDownloads @"HideTiVoColumnDownloads"
 
 //Misc
 

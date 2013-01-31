@@ -50,7 +50,9 @@
 	if (((NSArray *)arrayController.content).count == 0) { //No template to check
 		[[NSUserDefaults standardUserDefaults] setObject:@[@{@"enabled" : [NSNumber numberWithBool:NO], @"userName" : @"TiVo Name", @"iPAddress" : @"0.0.0.0", @"userPort" : @"80", @"userPortSSL" : @"443"}] forKey:kMTManualTiVos];
 	} else {
-		[arrayController add:sender];
+        NSMutableArray *manualTiVos = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:kMTManualTiVos]];
+        [manualTiVos addObject:@{@"enabled" : [NSNumber numberWithBool:NO], @"userName" : @"TiVo Name", @"iPAddress" : @"0.0.0.0", @"userPort" : @"80", @"userPortSSL" : @"443"}];
+		[[NSUserDefaults standardUserDefaults] setObject:manualTiVos forKey:kMTManualTiVos];
 	}
 }
 

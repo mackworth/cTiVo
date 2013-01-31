@@ -52,7 +52,9 @@ __DDLOGHERE__
 	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
 	subDirectoriesButton.state = [[NSUserDefaults standardUserDefaults ] boolForKey:kMTMakeSubDirs] ? NSOnState : NSOffState;
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
+    [searchingTiVosIndicator startAnimation:nil];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoListUpdated object:nil];
+	[defaultCenter addObserver:self selector:@selector(buildColumnMenuForTables) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoShowsUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(reloadProgramData) name:kMTNotificationTiVoShowsUpdated object:nil];
@@ -189,6 +191,7 @@ __DDLOGHERE__
 		
 	}
     if (tiVoManager.tiVoList.count == 1) {
+        [searchingTiVosIndicator stopAnimation:nil];
 		MTTiVo *ts = tiVoManager.tiVoList[0];
         [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
         [tiVoListPopUp setHidden:YES];
@@ -200,8 +203,9 @@ __DDLOGHERE__
             [tiVoListPopUpLabel setAttributedStringValue:aTitle];
 			
         }
-    } else {
-        [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d shows)",kMTAllTiVos,tiVoManager.totalShows]];
+    } else if (tiVoManager.tiVoList.count > 1){
+        [searchingTiVosIndicator stopAnimation:nil];
+       [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d shows)",kMTAllTiVos,tiVoManager.totalShows]];
         if ([kMTAllTiVos compare:_selectedTiVo] == NSOrderedSame) {
             [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
         }
@@ -458,19 +462,33 @@ __DDLOGHERE__
 	[[table headerView] setMenu:tableHeaderContextMenu];
 	
 	for (NSTableColumn *column in [table tableColumns]) {
-		NSString *title = [[column headerCell] title];
-		NSMenuItem *item = [tableHeaderContextMenu addItemWithTitle:title action:@selector(contextMenuSelected:) keyEquivalent:@""];
-		[item setTarget:self];
-		[item setRepresentedObject:column];
-		[item setState:column.isHidden?NSOffState: NSOnState];
+        if ([column.identifier compare:@"TiVo"] != NSOrderedSame || tiVoManager.tiVoList.count > 1) {
+            NSString *title = [[column headerCell] title];
+            NSMenuItem *item = [tableHeaderContextMenu addItemWithTitle:title action:@selector(contextMenuSelected:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setRepresentedObject:@{@"Column" : column, @"Table" : table}];
+            [item setState:column.isHidden?NSOffState: NSOnState];
+        }
 	}
 }
 
 
 - (void)contextMenuSelected:(id)sender {
+    NSTableColumn *column = [sender representedObject][@"Column"];
+    NSTableView *table = [sender representedObject][@"Table"];
+    NSString *key = nil;
+    if (table == tiVoShowTable) {
+        key = kMTHideTiVoColumnPrograms;
+    }
+    if (table == downloadQueueTable) {
+        key = kMTHideTiVoColumnDownloads;
+    }
+    NSString *columnIdentifier = column.identifier;
 	BOOL wasOn = ([sender state] == NSOnState);
-	NSTableColumn *column = [sender representedObject];
 	[column setHidden:wasOn];
+    if ([columnIdentifier compare:@"TiVo"] == NSOrderedSame && key) {
+        [[NSUserDefaults standardUserDefaults] setBool:wasOn forKey:key];
+    }
 	if(wasOn) {
 		[sender setState: NSOffState ];
 	} else {
