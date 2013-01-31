@@ -35,6 +35,7 @@
 @property (nonatomic, retain) NSString *mediaKey;
 @property (nonatomic, assign) NSOperationQueue *queue;
 @property (nonatomic, retain) MTTiVoManager *tiVoManager;
+@property (nonatomic, retain) NSURLConnection *showURLConnection;
 @property BOOL mediaKeyIsGood;
 @property BOOL isReachable, isResponding, manualTiVo, enabled;
 
@@ -46,5 +47,6 @@
 //-(void) reportNetworkFailure;
 -(NSInteger)numberOfShowsInProcess;
 -(void)rescheduleAllShows;
+-(void)setupNotifications;
 
 @end

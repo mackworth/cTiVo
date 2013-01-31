@@ -214,33 +214,35 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	
     for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
-		//Check for exisitng
-		MTNetService *newTiVoService = nil;
-		MTTiVo *newTiVo = nil;
-		for (MTTiVo *tivo in manualTiVoList) {
-			if ([tivo.tiVo.iPAddress compare:manualTiVoDescription[@"iPAddress"]] == NSOrderedSame) {
-				DDLogDetail(@"Adding manual TiVo %@", tivo);
-				newTiVo = tivo;
-				newTiVo.tiVo.userName = manualTiVoDescription[@"userName"];
-				newTiVo.tiVo.userPort = [manualTiVoDescription[@"userPort"] integerValue];
-				newTiVo.tiVo.userPortSSL = [manualTiVoDescription[@"userPortSSL"] integerValue];
-				newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
-				break;
-			} else {
-				DDLogDetail(@"Already have manual TiVo %@", newTiVo);
+		if ([manualTiVoDescription[@"enabled"] boolValue]) {
+			//Check for exisitng
+			MTNetService *newTiVoService = nil;
+			MTTiVo *newTiVo = nil;
+			for (MTTiVo *tivo in manualTiVoList) {
+				if ([tivo.tiVo.iPAddress compare:manualTiVoDescription[@"iPAddress"]] == NSOrderedSame) {
+					DDLogDetail(@"Already have manual TiVo %@ - Updating values", tivo);
+					newTiVo = tivo;
+					newTiVo.tiVo.userName = manualTiVoDescription[@"userName"];
+					newTiVo.tiVo.userPort = [manualTiVoDescription[@"userPort"] integerValue];
+					newTiVo.tiVo.userPortSSL = [manualTiVoDescription[@"userPortSSL"] integerValue];
+					newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
+					break;
+				}
 			}
-		}
-		if (!newTiVo) {
-			newTiVoService = [[[MTNetService alloc] init] autorelease];
-			newTiVoService.userName = manualTiVoDescription[@"userName"];
-			newTiVoService.iPAddress = manualTiVoDescription[@"iPAddress"];
-			newTiVoService.userPort = [manualTiVoDescription[@"userPort"] integerValue];
-			newTiVoService.userPortSSL = [manualTiVoDescription[@"userPortSSL"] integerValue];
-			newTiVo = [MTTiVo tiVoWithTiVo:newTiVoService withOperationQueue:queue];
-			newTiVo.manualTiVo = YES;
-			newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
-		}
-		if (newTiVo.enabled) {
+			if (newTiVo) {
+				[manualTiVoList removeObject:newTiVo];
+			}
+			if (!newTiVo) {
+				newTiVoService = [[[MTNetService alloc] init] autorelease];
+				newTiVoService.userName = manualTiVoDescription[@"userName"];
+				newTiVoService.iPAddress = manualTiVoDescription[@"iPAddress"];
+				newTiVoService.userPort = [manualTiVoDescription[@"userPort"] integerValue];
+				newTiVoService.userPortSSL = [manualTiVoDescription[@"userPortSSL"] integerValue];
+				newTiVo = [MTTiVo tiVoWithTiVo:newTiVoService withOperationQueue:queue];
+				newTiVo.manualTiVo = YES;
+				newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
+				DDLogDetail(@"Adding new manual TiVo %@",newTiVo);
+			}
 			//Remove any matching ip address already in _tiVoList
 			NSMutableArray *itemsToRemove = [NSMutableArray array];
 			for (MTTiVo *tiVo in _tiVoList) {
@@ -252,15 +254,25 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			}
 			[_tiVoList removeObjectsInArray:itemsToRemove];
 			[_tiVoList addObject:newTiVo];
+			for (MTTiVo *tiVo in itemsToRemove) {
+				NSLog(@"Inactivating from items to remove %@",tiVo.tiVo.name);
+				NSLog(@"Retain count %ld for %@",[tiVo retainCount], tiVo.tiVo.name);
+				[[NSNotificationCenter defaultCenter] removeObserver:tiVo];
+			}
 //			didFindTiVo = YES;
 		}
     }
+	for (MTTiVo *tiVo in manualTiVoList) {
+		NSLog(@"Inactivating from manual tivo list %@",tiVo.tiVo.name);
+		NSLog(@"Retain count %ld for %@",[tiVo retainCount], tiVo.tiVo.name);
+		[[NSNotificationCenter defaultCenter] removeObserver:tiVo];
+	}
 //    if (didFindTiVo) {
         NSNotification *notification = [NSNotification notificationWithName:kMTNotificationTiVoListUpdated object:nil];
         [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 //    }
 	if (tivoBrowser) {
-		DDLogDetail(@"stopping tivo browser: %@", tivoBrowser);
+		DDLogDetail(@"Reloading bonjour tivos with tivoBrowser %@", tivoBrowser);
 		[tivoBrowser stop];
 		[_tivoServices removeAllObjects];
 		[tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];

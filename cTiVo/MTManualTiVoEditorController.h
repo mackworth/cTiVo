@@ -7,8 +7,9 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MTTabViewItem.h"
 
-@interface MTManualTiVoEditorController : NSViewController {
+@interface MTManualTiVoEditorController : NSViewController <MTTabViewItemControllerDelegate> {
 	IBOutlet NSArrayController *arrayController;
 }
 

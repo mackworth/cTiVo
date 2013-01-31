@@ -25,6 +25,12 @@
     return self;
 }
 
+-(BOOL)windowShouldClose:(id)sender
+{
+	[self.view.window makeFirstResponder:self.view]; //This closes out handing editing.
+	return YES;
+}
+
 - (void)awakeFromNib	
 {
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTManualTiVos options:NSKeyValueObservingOptionNew context:nil];

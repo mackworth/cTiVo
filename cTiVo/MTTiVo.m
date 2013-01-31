@@ -29,7 +29,11 @@
 @property (nonatomic, assign) NSArray *downloadQueue;
 @end
 
+static int numberOfInstances = 0;
+
 @implementation MTTiVo
+
+@synthesize showURLConnection;
 
 __DDLOGHERE__
 
@@ -46,6 +50,7 @@ __DDLOGHERE__
 		urlData = [NSMutableData new];
 		_tiVo = nil;
 		previousShowList = nil;
+		showURLConnection = nil;
 		_mediaKey = @"";
 		isConnecting = NO;
 		_mediaKeyIsGood = NO;
@@ -78,6 +83,7 @@ __DDLOGHERE__
             @"SourceType" : @{kMTValue : @"sourceType", kMTType : [NSNumber numberWithInt:kMTStringType]},
             @"IdGuideSource" : @{kMTValue : @"idGuidSource", kMTType : [NSNumber numberWithInt:kMTStringType]}};
 		elementToPropertyMap = [[NSDictionary alloc] initWithDictionary:elementToPropertyMap];
+		numberOfInstances++;
 	}
 	return self;
 	
@@ -100,17 +106,15 @@ __DDLOGHERE__
 		_isReachable = YES;
 		DDLogMajor(@"%@ reachability for tivo %@",didSchedule ? @"Scheduled" : @"Failed to schedule", _tiVo.name);
 		[self getMediaKey];
-		if (_mediaKey.length == 0) {
-			DDLogDetail(@"Failed to get MAK for %@",tiVo);
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
-		} else {
-			[self updateShows:nil];
-		}
-        NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-        [defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadQueueUpdated object:nil];
-        [defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadDidFinish object:nil];
-        [defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDecryptDidFinish object:nil];
+//		if (_mediaKey.length == 0) {
+//			DDLogDetail(@"Failed to get MAK for %@",tiVo);
+//			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
+//		} else {
+		[self updateShows:nil];
+//		}
+		[self setupNotifications];
 	}
+	NSLog(@"There are now %d instances of MTTiVo this is %@",numberOfInstances,self.tiVo.name);
 	return self;
 }
 
@@ -129,6 +133,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	} 
     [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkChanged object:nil];
 	DDLogCReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
+}
+
+-(void)setupNotifications
+{
+	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
+	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadQueueUpdated object:nil];
+	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadDidFinish object:nil];
+	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDecryptDidFinish object:nil];
+	
 }
 
 -(NSString * ) description {
@@ -173,6 +186,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)updateShows:(id)sender
 {
+	if (_mediaKey.length == 0) {
+		DDLogDetail(@"Failed to get MAK for %@",self);
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
+		return;
+	}
 	DDLogMajor(@"Updating Tivo %@", self);
 	if (isConnecting) {
 		return;
@@ -182,8 +200,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //	}
 	if (showURLConnection) {
 		[showURLConnection cancel];
-		[showURLConnection release];
-		showURLConnection = nil;
+		self.showURLConnection = nil;
 	}
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateShows:) object:nil];
 //	if (![self isReachable]){
@@ -240,7 +257,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	DDLogDetail(@"Tivo %@ URL String %@",self, tivoURLString);
 	NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
 	NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
-	showURLConnection = [[NSURLConnection connectionWithRequest:tivoURLRequest delegate:self] retain];
+	self.showURLConnection = [[NSURLConnection connectionWithRequest:tivoURLRequest delegate:self] retain];
 	[urlData setData:[NSData data]];
 	[showURLConnection start];
 		
@@ -619,8 +636,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	} else {
 		[challenge.sender cancelAuthenticationChallenge:challenge];
 		[showURLConnection cancel];
-		[showURLConnection release];
-		showURLConnection = nil;
+		self.showURLConnection = nil;
 		isConnecting = NO;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
 	}
@@ -631,6 +647,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     DDLogReport(@"URL Connection Failed with error %@",error);
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 //    [self reportNetworkFailure];
+    self.showURLConnection = nil;
     
     isConnecting = NO;
 	
@@ -645,8 +662,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     NSXMLParser *parser = [[NSXMLParser alloc] initWithData:urlData];
 	parser.delegate = self;
 	[parser parse];
-    [showURLConnection release];
-    showURLConnection = nil;
+    self.showURLConnection = nil;
 }
 
 #pragma mark - Memory Management
@@ -666,6 +682,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	self.shows = nil;
 	self.tiVo = nil;
 	[elementToPropertyMap release];
+	numberOfInstances--;
 	[super dealloc];
 }
 

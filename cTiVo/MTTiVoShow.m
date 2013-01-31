@@ -235,7 +235,7 @@
 		NSString * tivoName = [decoder decodeObjectForKey: kMTQueueTivo] ;
 		for (MTTiVo * tiVo in [tiVoManager tiVoList]) {
 			if ([tiVo.tiVo.name compare: tivoName] == NSOrderedSame) {
-				_tiVo = [tiVo retain];
+				_tiVo = tiVo;
 				break;
 			}
 		}
