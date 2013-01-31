@@ -255,17 +255,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			[_tiVoList removeObjectsInArray:itemsToRemove];
 			[_tiVoList addObject:newTiVo];
 			for (MTTiVo *tiVo in itemsToRemove) {
-				NSLog(@"Inactivating from items to remove %@",tiVo.tiVo.name);
-				NSLog(@"Retain count %ld for %@",[tiVo retainCount], tiVo.tiVo.name);
 				[[NSNotificationCenter defaultCenter] removeObserver:tiVo];
+				[NSObject cancelPreviousPerformRequestsWithTarget:tiVo];
 			}
 //			didFindTiVo = YES;
 		}
     }
 	for (MTTiVo *tiVo in manualTiVoList) {
-		NSLog(@"Inactivating from manual tivo list %@",tiVo.tiVo.name);
-		NSLog(@"Retain count %ld for %@",[tiVo retainCount], tiVo.tiVo.name);
 		[[NSNotificationCenter defaultCenter] removeObserver:tiVo];
+		[NSObject cancelPreviousPerformRequestsWithTarget:tiVo];
 	}
 //    if (didFindTiVo) {
         NSNotification *notification = [NSNotification notificationWithName:kMTNotificationTiVoListUpdated object:nil];
