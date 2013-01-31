@@ -52,14 +52,12 @@
     if (tiVoManager.tiVoList.count == 1) {
         if (tiVoColumn) {
 			[self removeTableColumn:tiVoColumn];
-            [self tableColumnWithIdentifier:@"Programs"].width += tiVoColumn.width + 3;
-        }
+       }
     } else {
         if (!tiVoColumn && tiVoColumnHolder) {
             [self addTableColumn: tiVoColumnHolder];
             NSInteger colPos = [self columnWithIdentifier:@"TiVo"];
             [self moveColumn:colPos toColumn:1];
-            [self tableColumnWithIdentifier:@"Programs"].width -= tiVoColumn.width + 3;
         }
     }
 
@@ -270,6 +268,9 @@
 	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.episodeTitle;
 		result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Genre"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.episodeGenre;
+        result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Station"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.stationCallsign;
 	} else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {

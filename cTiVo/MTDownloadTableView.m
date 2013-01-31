@@ -72,14 +72,12 @@
     if (tiVoManager.tiVoList.count == 1) {
         if (tiVoColumn) {
 			[self removeTableColumn:tiVoColumn];
-            [self tableColumnWithIdentifier:@"Programs"].width += tiVoColumn.width + 3;
         }
     } else {
         if (!tiVoColumn && tiVoColumnHolder) {
             [self addTableColumn: tiVoColumnHolder];
             NSInteger colPos = [self columnWithIdentifier:@"TiVo"];
             [self moveColumn:colPos toColumn:1];
-            [self tableColumnWithIdentifier:@"Programs"].width -= tiVoColumn.width + 3;
         }
     }
 	[self sizeToFit];
@@ -268,6 +266,9 @@
 		NSInteger length = (thisShow.showLength+30)/60; //round up to nearest minute;
 		result.textField.stringValue = [NSString stringWithFormat:@"%ld:%0.2ld",length/60,length % 60];
         result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.seriesTitle;
+		result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.seasonEpisode;
         result.toolTip = result.textField.stringValue;
@@ -286,14 +287,14 @@
 		};
 	} else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
 		result.textField.stringValue = [NSString stringWithFormat:@"%d", thisShow.showID ];
-	} else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.seriesTitle;
-		result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.episodeTitle;
 		result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Station"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.stationCallsign;
+	} else if ([tableColumn.identifier compare:@"Genre"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.episodeGenre;
+        result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
 		NSLog(@"airdate: %@",thisShow.originalAirDateNoTime);
 		result.textField.stringValue = thisShow.originalAirDateNoTime ? thisShow.originalAirDateNoTime : @"";

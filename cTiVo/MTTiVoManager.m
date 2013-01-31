@@ -538,8 +538,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
             BOOL programFound = NO;
             for (MTTiVoShow *p in _downloadQueue) {
                 if (p.showID == program.showID	) {
-					DDLogDetail(@"program %@ already in queue as %@",p, program);
-                    programFound = YES;
+					if (p==program) {
+						DDLogDetail(@" %@ already in queue",p);
+					} else {
+						DDLogReport(@"program %@ already in queue as %@ with same ID %@!",p, program, p.programId);
+					}
+					programFound = YES;
 					break;
                 }
             }

@@ -229,10 +229,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)updateShowsStartingAt:(int)anchor withCount:(int)count
 {
-	DDLogDetail(@"Updating %@ from %d to %d",self, anchor, anchor+count);
+	DDLogDetail(@"Getting %@ shows from %d to %d",self, anchor, anchor+count);
 	NSString *portString = @"";
 	if ([_tiVo isKindOfClass:[MTNetService class]]) {
-		DDLogDetail(@"On TiVo %@ port %d",self, _tiVo.userPortSSL);
+		DDLogDetail(@"On TiVo %@; port %d",self, _tiVo.userPortSSL);
 		portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];
 	}
 	
@@ -278,10 +278,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     [element appendString:string];
 }
 
+-(void)parserElement:(NSString*) elementName {
+	//jsut gives a shorter method name for DDLog
+	DDLogDetail(@"Tivo %@:  %@ --> %@",_tiVo.name,elementName,element);
+}
 
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
-	DDLogDetail(@"Tivo %@:  %@ --> %@",_tiVo.name,elementName,element);
+	[self parserElement: elementName];
     if (parsingShow) {
         //extract show parameters here
 //        [currentShow setValue:element forKey:elementToPropertyMap[elementName]];
@@ -346,7 +350,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                     break;
             }
 			if (valueToSet) [currentShow setValue:valueToSet forKey:keyToSet];
-			DDLogVerbose(@"set %@ property(%d type) to %@ for %@ element",keyToSet, type, valueToSet, element);
+			DDLogVerbose(@"set %@ property(%d type) to %@ for %@ element",keyToSet, type, valueToSet, elementName);
 
         } else if ([elementName compare:@"Item"] == NSOrderedSame) {
             MTTiVoShow *thisShow = [previousShowList valueForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];

@@ -9,26 +9,31 @@
   * Support for different encoders, including HandBrake, mencoder.
   * Download queue for batch processing.
   * Optionally show non-downloadable copy-protected shows.
-  * Support for FFmpeg, ElGato Turbo encoders.
+  * Support for FFmpeg, ElGato Turbo (untested) encoders.
   * Download queue restored when restarting app.
   * Automatic discovery of Tivos using Bonjour.
   * Folders optionally created for each Series
   * Automatic updates of the software.
   * Automatically perform an 'iTunes sync' to your device when the download is completed.
   * With appropriate configuration, in the morning, you will find all your favorite shows from your TiVo loaded onto your iPhone or iPad.
+  * Manual connect by IP address.
+  * Detailed info on each show.
+  * Growl or Apple notifications.
   * Imports iTivo preferences, including subscriptions and Media Access Key.
 ----
 ==Features in addition to iTivo include:==
   * Support for multiple TiVos (with same or different Media Access Keys), all displayed/active simultaneously.
   * Change conversion formats for each download or subscription.
-  * Change download directories
+  * Change download directories.
   * Turn on/off iTunes /simultaneous download encoding for each download or subscription.
-  * Simultaneous downloading from multiple TiVos
-  * Option to prevent sleep until processing complete
-  * More parallel processing, including downloading next show while encoding current one
+  * Simultaneous downloading from multiple TiVos.
+  * Option to prevent sleep until processing complete.
+  * More parallel processing, including downloading next show while encoding current one.
   * Sorting download and subscription queues.
-  * Completely customizable encoder options; 
-  * Drag/drop and contextual menus for ease of use
+  * Completely customizable encoder options.
+  * Drag/drop and contextual menus for ease of use.
+  * Customizable columns; show exactly what you want to see.
+  * User-definable ports for TiVos; allows advanced users to access TiVo shows remotely (requires network reconfiguration).
   * Fully compatible with OS X Mountain Lion (10.8) through Leopard (10.5).
 ----
 ==iTivo features not implemented, at least not yet:==
@@ -36,11 +41,8 @@
   * Generate metadata appropriate for use by tools such as pyTivoX.
   * Create subtitle files (.srt) from the closed caption info.
   * Scheduling of when the queue will be processed.
-  * Manual connect by IP address.
   * Display filter in program list.
-  * Detailed info on each show.
   * Reporting on TiVo's disk usage.
-  * Growl notifications.
 ----
 ==To install:==
 

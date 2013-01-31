@@ -62,5 +62,8 @@
     return returnArray;
 }
 
+-(NSString*) description {
+	return [NSString stringWithFormat:@"%@, host:%@:%ld/%d",self.name,self.hostName,self.port, self.userPortSSL ];
+}
 
 @end

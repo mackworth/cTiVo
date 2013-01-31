@@ -1460,12 +1460,13 @@
 }
 
 
--(NSString *) combineGenres {
+-(NSString *) episodeGenre {
     //iTunes says "there can only be one", so pick the first we see.
     NSCharacterSet * quotes = [NSCharacterSet characterSetWithCharactersInString:@"\""];
     NSString * firstGenre = nil;
     if (_vSeriesGenre.count > 0) firstGenre = [_vSeriesGenre objectAtIndex:0];
         else if (_vProgramGenre.count > 0) firstGenre = [_vProgramGenre objectAtIndex:0];
+			else firstGenre = @"";
     return [firstGenre stringByTrimmingCharactersInSet:quotes];
 }
 
@@ -1529,7 +1530,7 @@
 
 -(NSString *)description
 {
-    return [NSString stringWithFormat:@"Title: %@\nTiVo: %@\nProtected %@",_showTitle,_tiVo.tiVo.name,_protectedShow];
+    return [NSString stringWithFormat:@"%@ (%@)%@",_showTitle,_tiVo.tiVo.name,[_protectedShow boolValue]?@"-Protected":@""];
 }
 
 
