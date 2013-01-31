@@ -194,25 +194,14 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
 //    BOOL didFindTiVo = NO;
 	DDLogDetail(@"LoadingTivos");
+	NSMutableArray *bonjourTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == NO"]]];
 	NSMutableArray *manualTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
-	[_tiVoList removeObjectsInArray:manualTiVoList];
-    NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
-	//Validate array
-	NSMutableArray *itemsToRemove = [NSMutableArray array];
-    for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
-		if (manualTiVoDescription.count != 5 ||
-			((NSString *)manualTiVoDescription[@"userName"]).length == 0 ||
-			((NSString *)manualTiVoDescription[@"iPAddress"]).length == 0) {
-			[itemsToRemove addObject:manualTiVoDescription];
-			continue;
-		}
-	}
-	if (itemsToRemove.count) {
-		DDLogMajor(@"Removing manual Tivos %@", itemsToRemove);
-		[manualTiVoDescriptions removeObjectsInArray:itemsToRemove];
-		[[NSUserDefaults standardUserDefaults] setObject:manualTiVoDescriptions forKey:kMTManualTiVos];
-	}
+//	[_tiVoList removeObjectsInArray:manualTiVoList];
 	
+	NSArray *manualTiVoDescriptions = [self getManualTiVoDescriptions];
+	
+	//Update rebuild manualTiVoList reusing what can be reused.
+	NSMutableArray *newManualTiVoList = [NSMutableArray array];
     for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
 		if ([manualTiVoDescription[@"enabled"] boolValue]) {
 			//Check for exisitng
@@ -229,9 +218,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 					break;
 				}
 			}
-			if (newTiVo) {
-				[manualTiVoList removeObject:newTiVo];
-			}
 			if (!newTiVo) {
 				newTiVoService = [[[MTNetService alloc] init] autorelease];
 				newTiVoService.userName = manualTiVoDescription[@"userName"];
@@ -243,38 +229,70 @@ static MTTiVoManager *sharedTiVoManager = nil;
 				newTiVo.enabled = [manualTiVoDescription[@"enabled"] boolValue];
 				DDLogDetail(@"Adding new manual TiVo %@",newTiVo);
 			}
-			//Remove any matching ip address already in _tiVoList
+			//Remove any matching ip address already in bonjour list
 			NSMutableArray *itemsToRemove = [NSMutableArray array];
-			for (MTTiVo *tiVo in _tiVoList) {
+			for (MTTiVo *tiVo in bonjourTiVoList) {
 				NSString *ipaddr = [self getStringFromAddressData:[tiVo.tiVo addresses][0]];
 				if ([ipaddr compare:newTiVo.tiVo.iPAddress] == NSOrderedSame) {
 					[itemsToRemove addObject:tiVo];
 					DDLogDetail(@"Already had %@ at %@", tiVo, ipaddr);
 				}
 			}
-			[_tiVoList removeObjectsInArray:itemsToRemove];
-			[_tiVoList addObject:newTiVo];
-			for (MTTiVo *tiVo in itemsToRemove) {
+			[bonjourTiVoList removeObjectsInArray:itemsToRemove];
+			for (MTTiVo *tiVo in itemsToRemove) { //Deactive those we are removing
 				[[NSNotificationCenter defaultCenter] removeObserver:tiVo];
 				[NSObject cancelPreviousPerformRequestsWithTarget:tiVo];
 			}
+			[newManualTiVoList addObject:newTiVo];
+//			if (itemsToRemove.count) {
+//				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+//			}
+//			for (MTTiVo *tiVo in itemsToRemove) {
+//				[[NSNotificationCenter defaultCenter] removeObserver:tiVo];
+//				[NSObject cancelPreviousPerformRequestsWithTarget:tiVo];
+//			}
 //			didFindTiVo = YES;
 		}
     }
-	for (MTTiVo *tiVo in manualTiVoList) {
-		[[NSNotificationCenter defaultCenter] removeObserver:tiVo];
-		[NSObject cancelPreviousPerformRequestsWithTarget:tiVo];
+	for (MTTiVo *tiVo in manualTiVoList) { //Deactivate those that are NOT in the newManualTiVoList
+		if ([newManualTiVoList indexOfObject:tiVo] == NSNotFound) {
+			[[NSNotificationCenter defaultCenter] removeObserver:tiVo];
+			[NSObject cancelPreviousPerformRequestsWithTarget:tiVo];
+		}
 	}
-//    if (didFindTiVo) {
-        NSNotification *notification = [NSNotification notificationWithName:kMTNotificationTiVoListUpdated object:nil];
-        [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
-//    }
+	//Re build _tivoList
+	[bonjourTiVoList addObjectsFromArray:newManualTiVoList];
+	self.tiVoList = bonjourTiVoList;
+	NSNotification *notification = [NSNotification notificationWithName:kMTNotificationTiVoListUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	if (tivoBrowser) {
 		DDLogDetail(@"Reloading bonjour tivos with tivoBrowser %@", tivoBrowser);
 		[tivoBrowser stop];
 		[_tivoServices removeAllObjects];
 		[tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
 	}
+}
+
+
+//Found issues with corrupt, or manually edited entries in the manual array so use this to remove them
+-(NSArray *)getManualTiVoDescriptions
+{
+	NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
+	NSMutableArray *itemsToRemove = [NSMutableArray array];
+    for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
+		if (manualTiVoDescription.count != 5 ||
+			((NSString *)manualTiVoDescription[@"userName"]).length == 0 ||
+			((NSString *)manualTiVoDescription[@"iPAddress"]).length == 0) {
+			[itemsToRemove addObject:manualTiVoDescription];
+			continue;
+		}
+	}
+	if (itemsToRemove.count) {
+		DDLogMajor(@"Removing manual Tivos %@", itemsToRemove);
+		[manualTiVoDescriptions removeObjectsInArray:itemsToRemove];
+		[[NSUserDefaults standardUserDefaults] setObject:manualTiVoDescriptions forKey:kMTManualTiVos];
+	}
+	return [NSArray arrayWithArray:manualTiVoDescriptions];
 }
 
 

@@ -29,8 +29,6 @@
 @property (nonatomic, assign) NSArray *downloadQueue;
 @end
 
-static int numberOfInstances = 0;
-
 @implementation MTTiVo
 
 @synthesize showURLConnection;
@@ -83,7 +81,6 @@ __DDLOGHERE__
             @"SourceType" : @{kMTValue : @"sourceType", kMTType : [NSNumber numberWithInt:kMTStringType]},
             @"IdGuideSource" : @{kMTValue : @"idGuidSource", kMTType : [NSNumber numberWithInt:kMTStringType]}};
 		elementToPropertyMap = [[NSDictionary alloc] initWithDictionary:elementToPropertyMap];
-		numberOfInstances++;
 	}
 	return self;
 	
@@ -114,7 +111,6 @@ __DDLOGHERE__
 //		}
 		[self setupNotifications];
 	}
-	NSLog(@"There are now %d instances of MTTiVo this is %@",numberOfInstances,self.tiVo.name);
 	return self;
 }
 
@@ -685,7 +681,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	self.shows = nil;
 	self.tiVo = nil;
 	[elementToPropertyMap release];
-	numberOfInstances--;
 	[super dealloc];
 }
 

@@ -117,6 +117,9 @@ __DDLOGHERE__
 	[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
 	
 	// Insert code here to initialize your application
+	
+	[[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTMediaKeys];
+	
 	DDLogDetail(@"Starting Program");
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
