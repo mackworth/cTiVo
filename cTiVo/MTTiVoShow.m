@@ -1107,9 +1107,10 @@
         for (NSDictionary *name in nameList) {
             [returnString appendFormat:@"%@\n",[self nameString:name]];
         }
-        
+       	if (returnString.length > 0)[returnString deleteCharactersInRange:NSMakeRange(returnString.length-1, 1)];
+		
     }
-    return [[[NSAttributedString alloc] initWithString:returnString attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:11]}] autorelease];
+   return [[[NSAttributedString alloc] initWithString:returnString attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:11]}] autorelease];
     
 }
 

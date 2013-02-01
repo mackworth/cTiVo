@@ -112,9 +112,20 @@ __DDLOGHERE__
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	[[NSUserDefaults standardUserDefaults]  registerDefaults:@{kMTDebugLevel: @1}];
+	CGEventRef event = CGEventCreate(NULL);
+    CGEventFlags modifiers = CGEventGetFlags(event);
+    CFRelease(event);
+	
+    CGEventFlags flags = (kCGEventFlagMaskAlternate | kCGEventFlagMaskControl);
+    if ((modifiers & flags) == flags) {
+		[[NSUserDefaults standardUserDefaults] setObject:@15 forKey:kMTDebugLevel];
+		[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
+	} else {
+		[[NSUserDefaults standardUserDefaults]  registerDefaults:@{kMTDebugLevel: @1}];
+		[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
 
-	[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
+	}
+
 	
 	// Insert code here to initialize your application
 	

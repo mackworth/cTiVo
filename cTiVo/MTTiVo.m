@@ -211,7 +211,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	for (MTTiVoShow * show in _shows) {
 		NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
 //		NSLog(@"prevID: %@ %@",idString,show.showTitle);
-		[previousShowList setValue:show forKey:idString];
+		if(!show.protectedShow.boolValue){
+			[previousShowList setValue:show forKey:idString];
+		}
 	}
     DDLogVerbose(@"Previous shows were: %@:",previousShowList);
 	[_shows removeAllObjects];
