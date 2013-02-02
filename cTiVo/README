@@ -20,6 +20,7 @@
   * Detailed info on each show.
   * Growl or Apple notifications.
   * Imports iTivo preferences, including subscriptions and Media Access Key.
+  * Scheduling of when the queue will be processed.
 ----
 ==Features in addition to iTivo include:==
   * Support for multiple TiVos (with same or different Media Access Keys), all displayed/active simultaneously.
@@ -40,7 +41,6 @@
   * Automatically remove commercials from downloaded shows.
   * Generate metadata appropriate for use by tools such as pyTivoX.
   * Create subtitle files (.srt) from the closed caption info.
-  * Scheduling of when the queue will be processed.
   * Display filter in program list.
   * Reporting on TiVo's disk usage.
 ----
