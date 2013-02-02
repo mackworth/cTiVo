@@ -565,12 +565,12 @@
         bufferFileWriteHandle = [[NSFileHandle fileHandleForWritingAtPath:_bufferFilePath] retain];
     } else {
         //Things require uniquely for sequential download
-        _downloadFilePath = [[NSString stringWithFormat:@"%@%@.tivo",downloadDir ,self.showTitleForFiles] retain];
+        _downloadFilePath = [[NSString stringWithFormat:@"%@/%@.tivo",downloadDir ,self.showTitleForFiles] retain];
         [fm createFileAtPath:_downloadFilePath contents:[NSData data] attributes:nil];
         downloadFileHandle = [[NSFileHandle fileHandleForWritingAtPath:_downloadFilePath] retain];
         
     }
-    decryptFilePath = [[NSString stringWithFormat:@"%@%@.tivo.mpg",downloadDir ,self.showTitleForFiles] retain];
+    decryptFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.mpg",downloadDir ,self.showTitleForFiles] retain];
     
     decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",self.showTitleForFiles] retain];
     [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
