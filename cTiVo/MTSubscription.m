@@ -21,8 +21,16 @@ __DDLOGHERE__
     return self.encodeFormat.canSimulEncode;
 }
 
+-(BOOL) canSkipCommercials {
+    return self.encodeFormat.comSkip;
+}
+
 -(BOOL) shouldSimulEncode {
     return [_simultaneousEncode boolValue];
+}
+
+-(BOOL) shouldSkipCommercials {
+    return [_skipCommercials boolValue];
 }
 
 -(BOOL) canAddToiTunes {
@@ -37,6 +45,7 @@ __DDLOGHERE__
     if (_encodeFormat != encodeFormat ) {
         BOOL simulWasDisabled = ![self canSimulEncode];
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
+        BOOL skipWasDisabled = ![self canSkipCommercials];
         [_encodeFormat release];
         _encodeFormat = [encodeFormat retain];
         if (!self.canSimulEncode && self.shouldSimulEncode) {
@@ -52,6 +61,13 @@ __DDLOGHERE__
         } else if (iTunesWasDisabled && [self canAddToiTunes]) {
             //newly possible, so take user default
             self.addToiTunes = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit] && self.encodeFormat.canAddToiTunes)];
+        }
+        if (!self.canSkipCommercials && self.shouldSkipCommercials) {
+            //no longer possible
+            self.skipCommercials = [NSNumber numberWithBool:NO];
+        } else if (skipWasDisabled && [self canSkipCommercials]) {
+            //newly possible, so take user default
+            self.skipCommercials = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"] && self.encodeFormat.comSkip)];
         }
     }
 }
@@ -157,6 +173,7 @@ __DDLOGHERE__
         newSub.encodeFormat = tiVoManager.selectedFormat;
         newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
         newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
+        newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip)];
 		DDLogVerbose(@"Subscribing %@ as: %@ ", tivoShow, newSub);
 		
 		[self addObject:newSub];

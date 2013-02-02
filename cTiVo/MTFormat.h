@@ -21,6 +21,8 @@
 										*encoderOtherOptions,
 										*inputFileFlag,
 										*outputFileFlag,
+										*edlFlag,
+										*comSkipOptions,
 										*regExProgress;
 
 @property (nonatomic, retain) NSNumber	*comSkip,
@@ -31,7 +33,7 @@
 
 @property (nonatomic, retain) NSAttributedString *attributedFormatDescription;
 
-@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable;
+@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip;
 
 
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format;

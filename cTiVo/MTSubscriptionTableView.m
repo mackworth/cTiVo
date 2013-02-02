@@ -144,6 +144,10 @@
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
+    } else if([identifier compare: @"Skip"] == NSOrderedSame) {
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)] autorelease];
+        thisCell.identifier = identifier;
+        result = (id)thisCell;
     } else if([identifier compare: @"FormatPopUp"] == NSOrderedSame) {
 		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
 	    thisCell.popUpButton.showHidden = NO;
@@ -218,6 +222,11 @@ static NSDateFormatter *dateFormatter;
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setEnabled: [thisSubscription canSimulEncode]] ;
         [checkBox setOn:[ thisSubscription shouldSimulEncode]];
+        checkBox.owner = thisSubscription;
+ 	} else if ([tableColumn.identifier compare:@"Skip"] == NSOrderedSame) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setEnabled: [thisSubscription canSkipCommercials]] ;
+        [checkBox setOn:[ thisSubscription skipCommercials]];
         checkBox.owner = thisSubscription;
         
     }

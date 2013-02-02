@@ -494,13 +494,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     managingDownloads = YES;
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
 //	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
-    BOOL isDownloading = NO, isDecrypting = NO;
+    BOOL isDownloading = NO, isDecrypting = NO, isCommercialing = NO;
     for (MTTiVoShow *s in self.downloadQueue) {
         if ([s.downloadStatus intValue] == kMTStatusDownloading) {
             isDownloading = YES;
         }
         if ([s.downloadStatus intValue] == kMTStatusDecrypting) {
             isDecrypting = YES;
+        }
+        if ([s.downloadStatus intValue] == kMTStatusCommercialing) {
+            isCommercialing = YES;
         }
     }
     if (!isDownloading) {
@@ -530,10 +533,24 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             }
         }
     }
+    if (!isCommercialing) {
+		DDLogDetail(@"%@ Checking for new commercial detection", self);
+        for (MTTiVoShow *s in self.downloadQueue) {
+            if ([s.downloadStatus intValue] == kMTStatusDecrypted && s.skipCommercials
+						&&
+				tiVoManager.numCommercials < kMTMaxNumDownloaders) {
+                [s commercial];
+				tiVoManager.numCommercials++;
+                break;
+            }
+        }
+    }
     if (tiVoManager.numEncoders < kMTMaxNumDownloaders) {
 		DDLogDetail(@"%@ Checking for new encode", self);
         for (MTTiVoShow *s in self.downloadQueue) {
-            if ([s.downloadStatus intValue] == kMTStatusDecrypted && tiVoManager.numEncoders < kMTMaxNumDownloaders) {
+            if ((([s.downloadStatus intValue] == kMTStatusDecrypted && !s.skipCommercials) || [s.downloadStatus intValue] == kMTStatusCommercialed)
+							&&
+				tiVoManager.numEncoders < kMTMaxNumDownloaders) {
 				tiVoManager.numEncoders++;
                 [s encode];
             }

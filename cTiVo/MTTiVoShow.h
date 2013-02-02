@@ -15,18 +15,20 @@
 
 @interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding> {
     NSFileHandle    *downloadFileHandle,
-                    *decryptFileHandle,
                     *decryptLogFileHandle,
                     *decryptLogFileReadHandle,
+                    *commercialFileHandle,
+                    *commercialLogFileHandle,
+                    *commercialLogFileReadHandle,
                     *encodeFileHandle,
                     *encodeLogFileHandle,
                     *encodeLogFileReadHandle,
                     *bufferFileReadHandle,
                     *bufferFileWriteHandle,
                     *devNullFileHandle;
-	NSString *decryptFilePath, *decryptLogFilePath, *encodeLogFilePath;
+	NSString *decryptFilePath, *decryptLogFilePath, *encodeLogFilePath, *commercialFilePath, *commercialLogFilePath;
     double dataDownloaded;
-    NSTask *encoderTask, *decrypterTask;
+    NSTask *encoderTask, *decrypterTask, *commercialTask;
 	NSURLConnection *activeURLConnection, *detailURLConnection;
 	NSPipe *pipe1, *pipe2;
 	BOOL volatile writingData, downloadingURL, pipingData, isCanceled;
@@ -102,7 +104,7 @@
 @property (nonatomic, retain) MTFormat *encodeFormat;
 @property (nonatomic, assign) MTTiVo *tiVo;
 @property (nonatomic, retain) NSString *tempTiVoName;
-@property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding, isQueued,
+@property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding, isQueued, skipCommercials,
                 isSelected;//Used for refresh of table
 
 @property (readonly) BOOL isInProgress;
@@ -119,6 +121,7 @@
 -(void)cancel;
 -(void)download;
 -(void)decrypt;
+-(void)commercial;
 -(void)encode;
 -(void)getShowDetail;
 //-(void)getShowDetailWithNotification;

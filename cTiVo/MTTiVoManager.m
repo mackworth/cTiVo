@@ -25,7 +25,7 @@
 
 @implementation MTTiVoManager
 
-@synthesize subscribedShows = _subscribedShows, numEncoders;
+@synthesize subscribedShows = _subscribedShows, numEncoders, numCommercials;
 
 __DDLOGHERE__
 
@@ -171,6 +171,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
         _queueStartTime = [[NSDate date] retain];
 		
 		numEncoders = 0;
+		numCommercials = 0;
 		queue.maxConcurrentOperationCount = 1;
 		
 		_videoListNeedsFilling = YES;
@@ -344,6 +345,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
     
     [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
     [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
+    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
+    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
     
@@ -619,6 +622,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 											[[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
 		thisShow.simultaneousEncode = thisShow.encodeFormat.canSimulEncode &&
 											[[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
+		thisShow.skipCommercials = thisShow.encodeFormat.comSkip &&
+											[[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
 		thisShow.downloadDirectory = tiVoManager.downloadDirectory;
 	}
 	[self addProgramsToDownloadQueue:shows beforeShow:nextShow ];
@@ -763,6 +768,13 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)encodeFinished
 {
 	numEncoders--;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+    DDLogMajor(@"num decoders after decrement is %d",numEncoders);
+}
+
+-(void)commercialFinished
+{
+	numCommercials--;
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
     DDLogMajor(@"num decoders after decrement is %d",numEncoders);
 }

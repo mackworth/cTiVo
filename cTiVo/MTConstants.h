@@ -16,6 +16,8 @@
 #define kMTNotificationDecryptDidFinish @"MTNotificationDecryptDidFinish"
 #define kMTNotificationEncodeDidFinish @"MTNotificationEncodeDidFinish"
 #define kMTNotificationEncodeWasCanceled @"MTNotificationEncodeWasCanceled"
+#define kMTNotificationCommercialDidFinish @"MTNotificationEncodeDidFinish"
+#define kMTNotificationCommercialWasCanceled @"MTNotificationEncodeWasCanceled"
 #define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"
 
 //UI Change Notifications
@@ -38,8 +40,10 @@
 #define kMTStatusDownloaded 2
 #define kMTStatusDecrypting 3
 #define kMTStatusDecrypted 4
-#define kMTStatusEncoding 5
-#define kMTStatusDone 6
+#define kMTStatusCommercialing 5
+#define kMTStatusCommercialed 6
+#define kMTStatusEncoding 7
+#define kMTStatusDone 8
 #define kMTStatusFailed 15
 
 //Contants

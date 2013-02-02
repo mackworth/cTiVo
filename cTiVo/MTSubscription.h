@@ -19,13 +19,15 @@
 @property (nonatomic, retain) NSDate *lastRecordedTime;
 
 @property (nonatomic, retain) NSNumber *addToiTunes;
-@property (nonatomic, retain) NSNumber *simultaneousEncode;
+@property (nonatomic, retain) NSNumber *simultaneousEncode, *skipCommercials;
 @property (nonatomic, retain) MTFormat *encodeFormat;
 
 @property (readonly) BOOL canSimulEncode;
 @property (readonly) BOOL shouldSimulEncode;
 @property (readonly) BOOL canAddToiTunes;
 @property (readonly) BOOL shouldAddToiTunes;
+@property (readonly) BOOL canSkipCommercials;
+@property (readonly) BOOL shouldSkipCommercials;
 
 @end
 

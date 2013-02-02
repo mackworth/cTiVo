@@ -31,6 +31,7 @@
         _showID = 0;
         _showStatus = @"";
 		decryptFilePath = nil;
+        commercialFilePath = nil;
         _addToiTunesWhenEncoded = NO;
         _simultaneousEncode = YES;
 		encoderTask = nil;
@@ -463,10 +464,6 @@
         [decryptFilePath release];
         decryptFilePath = nil;
     }
-    if (decryptFileHandle) {
-        [decryptFileHandle release];
-        decryptFileHandle = nil;
-    }
     if (decryptLogFilePath) {
         [decryptLogFilePath release];
         decryptLogFilePath = nil;
@@ -480,6 +477,28 @@
         [decryptLogFileReadHandle closeFile];
         [decryptLogFileReadHandle release];
         decryptLogFileReadHandle = nil;
+    }
+    if (commercialFilePath) {
+        [commercialFilePath release];
+        commercialFilePath = nil;
+    }
+    if (commercialFileHandle) {
+        [commercialFileHandle release];
+        commercialFileHandle = nil;
+    }
+    if (commercialLogFilePath) {
+        [commercialLogFilePath release];
+        commercialLogFilePath = nil;
+    }
+    if (commercialLogFileHandle) {
+        [commercialLogFileHandle closeFile];
+        [commercialLogFileHandle release];
+        commercialLogFileHandle = nil;
+    }
+    if (commercialLogFileReadHandle) {
+        [commercialLogFileReadHandle closeFile];
+        [commercialLogFileReadHandle release];
+        commercialLogFileReadHandle = nil;
     }
     if (encoderTask) {
 		if ([encoderTask isRunning]) {
@@ -580,14 +599,17 @@
         _downloadFilePath = [[NSString stringWithFormat:@"%@/%@.tivo",downloadDir ,self.showTitleForFiles] retain];
         [fm createFileAtPath:_downloadFilePath contents:[NSData data] attributes:nil];
         downloadFileHandle = [[NSFileHandle fileHandleForWritingAtPath:_downloadFilePath] retain];
+		decryptFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.mpg",downloadDir ,self.showTitleForFiles] retain];
+        decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",self.showTitleForFiles] retain];
+        [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
+        decryptLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath] retain];
+        decryptLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath] retain];
+        commercialLogFilePath = [[NSString stringWithFormat:@"/tmp/commercial%@.txt",self.showTitleForFiles] retain];
+        [fm createFileAtPath:commercialLogFilePath contents:[NSData data] attributes:nil];
+        commercialLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:commercialLogFilePath] retain];
+        commercialLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:commercialLogFilePath] retain];
         
     }
-    decryptFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.mpg",downloadDir ,self.showTitleForFiles] retain];
-    
-    decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",self.showTitleForFiles] retain];
-    [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
-    decryptLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath] retain];
-    decryptLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath] retain];
     
     encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",self.showTitleForFiles] retain];
     [fm createFileAtPath:encodeLogFilePath contents:[NSData data] attributes:nil];
@@ -689,6 +711,7 @@
 			MTiTunes *iTunes = [[[MTiTunes alloc] init] autorelease];
 			[iTunes importIntoiTunes:self];
         }
+		[self cleanupFiles];
     }
 }
 
@@ -753,6 +776,62 @@
 	
 }
 
+-(void)commercial
+{
+	NSLog(@"Starting Decrypt of  %@", _showTitle);
+	commercialTask = [[NSTask alloc] init];
+	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]];
+	[commercialTask setStandardOutput:commercialLogFileHandle];
+	[commercialTask setStandardError:commercialLogFileHandle];
+	NSMutableArray *arguments = [NSMutableArray array];
+    if (_encodeFormat.comSkipOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.comSkipOptions]];
+    [arguments addObject:@"--output=/tmp/"];
+	[arguments addObject:decryptFilePath];
+    [commercialTask setArguments:arguments];
+    _processProgress = 0.0;
+	previousProcessProgress = 0.0;
+	[commercialTask launch];
+	[self setValue:[NSNumber numberWithInt:kMTStatusCommercialing] forKeyPath:@"downloadStatus"];
+	_showStatus = @"Detecting Commercials";
+	[self performSelector:@selector(trackCommercial) withObject:nil afterDelay:3.0];
+}
+
+-(void)trackCommercial
+{
+	if (![commercialTask isRunning]) {
+		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
+        NSLog(@"Finished detecting commercials in %@",_showTitle);
+        _processProgress = 1.0;
+		[commercialTask release];
+		commercialTask = nil;
+        _showStatus = @"Commercials Detected";
+        [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialDidFinish object:self];
+		return;
+	}
+	double newProgressValue = 0;
+	unsigned long long logFileSize = [commercialLogFileReadHandle seekToEndOfFile];
+	if (logFileSize > 100) {
+		[commercialLogFileReadHandle seekToFileOffset:(logFileSize-100)];
+		NSData *tailOfFile = [commercialLogFileReadHandle readDataOfLength:100];
+		NSString *data = [[[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding] autorelease];
+		
+		NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)\\%" options:NSRegularExpressionCaseInsensitive error:nil];
+		NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
+		NSTextCheckingResult *lastItem = [values lastObject];
+		NSRange valueRange = [lastItem rangeAtIndex:1];
+		newProgressValue = [[data substringWithRange:valueRange] doubleValue]/100.0;
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+		if (newProgressValue > _processProgress) {
+			_processProgress = newProgressValue;
+		}
+	}
+	[self performSelector:@selector(trackCommercial) withObject:nil afterDelay:0.5];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+	
+}
+
 -(void)encode
 {
 	NSString *encoderLaunchPath = [self encoderPath];
@@ -808,7 +887,6 @@
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         NSLog(@"Finished Encode of   %@",_showTitle);
         _processProgress = 1.0;
-        [[NSFileManager defaultManager] removeItemAtPath:decryptFilePath error:nil];
 		[encoderTask release];
 		encoderTask = nil;
         _showStatus = @"Complete";
@@ -823,6 +901,7 @@
 			MTiTunes *iTunes = [[[MTiTunes alloc] init] autorelease];
 			[iTunes importIntoiTunes:self];
         }
+		[self cleanupFiles];
 		return;
 	}
 	double newProgressValue = 0;
@@ -882,6 +961,10 @@
     if (_encodeFormat.encoderVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderVideoOptions]];
 	if (_encodeFormat.encoderAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderAudioOptions]];
 	if (_encodeFormat.encoderOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderOtherOptions]];
+	if ([_encodeFormat.comSkip boolValue] && _skipCommercials) {
+		[arguments addObject:@"-edl"];
+		[arguments addObject:[NSString stringWithFormat:@"/tmp/%@.tivo.edl",self.showTitleForFiles]];
+	}
     if (_encodeFormat.outputFileFlag.length) {
         [arguments addObject:_encodeFormat.outputFileFlag];
         [arguments addObject:outputFilePath];
@@ -905,24 +988,46 @@
     if (_downloadFilePath) {
         [downloadFileHandle closeFile];
         [fm removeItemAtPath:_downloadFilePath error:nil];
+		[downloadFileHandle release]; downloadFileHandle = nil;
+		[_downloadFilePath release]; _downloadFilePath = nil;
     }
     if (_bufferFilePath) {
         [bufferFileReadHandle closeFile];
         [bufferFileWriteHandle closeFile];
         [fm removeItemAtPath:_bufferFilePath error:nil];
+		[bufferFileReadHandle release]; bufferFileReadHandle = nil;
+		[bufferFileWriteHandle release]; bufferFileWriteHandle = nil;
+		[_bufferFilePath release]; _bufferFilePath = nil;
+    }
+    if (commercialLogFileHandle) {
+        [commercialLogFileHandle closeFile];
+        [fm removeItemAtPath:commercialLogFilePath error:nil];
+		[commercialLogFileHandle release]; commercialLogFileHandle = nil;
+		[commercialLogFilePath release]; commercialLogFilePath = nil;
     }
     if (encodeLogFileHandle) {
         [encodeLogFileHandle closeFile];
         [fm removeItemAtPath:encodeLogFilePath error:nil];
-    }
-    if (decryptFileHandle) {
-        [decryptFileHandle closeFile];
-        [fm removeItemAtPath:decryptFilePath error:nil];
+		[encodeLogFileHandle release]; encodeLogFileHandle = nil;
+		[encodeLogFilePath release]; encodeLogFilePath = nil;
     }
     if (decryptLogFileHandle) {
         [decryptLogFileHandle closeFile];
         [fm removeItemAtPath:decryptLogFilePath error:nil];
+		[decryptLogFileHandle release]; decryptLogFileHandle = nil;
+		[decryptLogFilePath release]; decryptLogFilePath = nil;
     }
+    if (decryptFilePath) {
+        [fm removeItemAtPath:decryptFilePath error:nil];
+		[decryptFilePath release]; decryptFilePath = nil;
+    }
+	//Clean up files in /tmp
+	NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:@"/tmp/" error:nil];
+	[fm changeCurrentDirectoryPath:@"/tmp"];
+	for(NSString *file in tmpFiles){
+		NSRange tmpRange = [file rangeOfString:[self showTitleForFiles]];
+		if(tmpRange.location != NSNotFound) [fm removeItemAtPath:file error:nil];
+	}
 }
 
 -(BOOL) isInProgress {
@@ -950,12 +1055,18 @@
     if(encoderTask && [encoderTask isRunning]) {
         [encoderTask terminate];
     }
+    if(commercialTask && [commercialTask isRunning]) {
+        [commercialTask terminate];
+    }
     if (encodeFileHandle) {
         [encodeFileHandle closeFile];
         [fm removeItemAtPath:_encodeFilePath error:nil];
     }
     if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && [_downloadStatus intValue] == kMTStatusDownloading)) {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
+    }
+    if ([_downloadStatus intValue] == kMTStatusCommercialing) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
     }
     [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
     _processProgress = 0.0;
@@ -1305,6 +1416,14 @@
     return _simultaneousEncode;
 }
 
+-(BOOL) canSkipCommercials {
+    return self.encodeFormat.comSkip;
+}
+
+-(BOOL) shouldSkipCommercials {
+    return _skipCommercials;
+}
+
 -(BOOL) canAddToiTunes {
     return self.encodeFormat.canAddToiTunes;
  }
@@ -1402,6 +1521,7 @@
     if (_encodeFormat != encodeFormat ) {
         BOOL simulWasDisabled = ![self canSimulEncode];
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
+        BOOL skipWasDisabled = ![self canSkipCommercials];
         [_encodeFormat release];
         _encodeFormat = [encodeFormat retain];
         if (!self.canSimulEncode && self.shouldSimulEncode) {
@@ -1417,6 +1537,13 @@
         } else if (iTunesWasDisabled && [self canAddToiTunes]) {
             //newly possible, so take user default
             self.addToiTunesWhenEncoded = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
+        }
+        if (!self.canSkipCommercials && self.shouldSkipCommercials) {
+            //no longer possible
+            self.skipCommercials = NO;
+        } else if (skipWasDisabled && [self canSkipCommercials]) {
+            //newly possible, so take user default
+            self.skipCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
         }
     }
 }

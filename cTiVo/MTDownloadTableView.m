@@ -165,6 +165,10 @@
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
         thisCell.identifier = identifier;
         result = (id)thisCell;
+    } else if([identifier compare: @"Skip"] == NSOrderedSame) {
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)] autorelease];
+        thisCell.identifier = identifier;
+        result = (id)thisCell;
    } else if([identifier compare: @"Format"] == NSOrderedSame) {
 		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
 	    thisCell.popUpButton.showHidden = NO;
@@ -248,10 +252,17 @@
  	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisShow.simultaneousEncode];
-         checkBox.owner = thisShow;
+        checkBox.owner = thisShow;
         [checkBox setEnabled: [thisShow.downloadStatus intValue] == kMTStatusNew &&
-                              thisShow.encodeFormat.canSimulEncode];
-
+         thisShow.encodeFormat.canSimulEncode];
+        
+ 	} else if ([tableColumn.identifier compare:@"Skip"] == NSOrderedSame) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setOn: thisShow.skipCommercials];
+        checkBox.owner = thisShow;
+        [checkBox setEnabled: [thisShow.downloadStatus intValue] == kMTStatusNew &&
+         thisShow.encodeFormat.canSkip];
+        
 	} else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
 		if ([tableColumn width] > 135) {
 			result.textField.stringValue = thisShow.showMediumDateString;

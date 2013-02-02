@@ -74,6 +74,7 @@ __DDLOGHERE__
 		self.encoderVideoOptions = @"";
 		self.encoderAudioOptions = @"";
 		self.encoderOtherOptions = @"";
+		self.comSkipOptions = @"";
 		self.inputFileFlag = @"";
 		self.outputFileFlag = @"";
 		self.comSkip = [NSNumber numberWithBool:NO];
@@ -92,6 +93,8 @@ __DDLOGHERE__
 						 @"encoderOtherOptions",
 						 @"inputFileFlag",
 						 @"outputFileFlag",
+						 @"edlFlag",
+						 @"comSkipOptions",
 						 @"regExProgress",
 						 @"comSkip",
 						 @"iTunes",
@@ -151,6 +154,8 @@ __DDLOGHERE__
 	new.encoderOtherOptions = [[_encoderOtherOptions copyWithZone:zone] autorelease];
 	new.inputFileFlag = [[_inputFileFlag copyWithZone:zone] autorelease];
 	new.outputFileFlag = [[_outputFileFlag copyWithZone:zone] autorelease];
+	new.edlFlag = [[_edlFlag copyWithZone:zone] autorelease];
+	new.comSkipOptions = [[_comSkipOptions copyWithZone:zone] autorelease];
 	new.regExProgress = [[_regExProgress copyWithZone:zone] autorelease];
 	new.comSkip = [[_comSkip copyWithZone:zone] autorelease];
 	new.iTunes = [[_iTunes copyWithZone:zone] autorelease];
@@ -184,6 +189,11 @@ __DDLOGHERE__
     return ![_mustDownloadFirst boolValue];
 }
 
+-(BOOL)canSkip
+{
+    return [_comSkip boolValue];
+}
+
 -(NSString *) description {
 	return [NSString stringWithFormat:@" %@(%@) Encoder: %@ =>%@",self.name,self.formatDescription,self.encoderUsed, self.filenameExtension ];
 }
@@ -198,8 +208,10 @@ __DDLOGHERE__
 	self.encoderVideoOptions = nil;
 	self.encoderAudioOptions = nil;
 	self.encoderOtherOptions = nil;
+	self.comSkipOptions = nil;
 	self.inputFileFlag = nil;
 	self.outputFileFlag = nil;
+	self.edlFlag = nil;
 	self.regExProgress = nil;
 	self.comSkip = nil;
 	self.iTunes = nil;

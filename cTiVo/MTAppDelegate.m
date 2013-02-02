@@ -142,6 +142,8 @@ __DDLOGHERE__
 	}
 	tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
     [tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:@"RunComSkip" options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:@"SimultaneousEncode" options:NSKeyValueObservingOptionNew context:nil];
 	mainWindowController = nil;
 //	_formatEditorController = nil;
 	[self showMainWindow:nil];
@@ -180,6 +182,7 @@ __DDLOGHERE__
 		DDLogDetail(@"Selecting Format");
 		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
         BOOL canSimulEncode = ![tiVoManager.selectedFormat.mustDownloadFirst boolValue];
+        BOOL canSkip = [tiVoManager.selectedFormat.comSkip boolValue];
 		NSArray *menuItems = [optionsMenu itemArray];
 		for (NSMenuItem *mi in menuItems) {
 			if ([mi isSeparatorItem]) {
@@ -201,6 +204,25 @@ __DDLOGHERE__
 			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:@"SimultaneousEncode" options:nil];
 			[optionsMenu insertItem:simulEncodeItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
+		}
+		if (canSkip) {
+			skipCommercialsItem = [[[NSMenuItem alloc] init] autorelease];
+			skipCommercialsItem.title = @"Skip Commercials";
+			[skipCommercialsItem bind:@"value" toObject:defaults withKeyPath:@"RunComSkip" options:nil];
+			[optionsMenu insertItem:skipCommercialsItem atIndex:0];
+			//			[simulEncodeItem setEnabled:YES];
+		}
+	} else if ([keyPath compare:@"SimultaneousEncode"] == NSOrderedSame) {
+		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:@"SimultaneousEncode"];
+		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
+		if (simulEncode && runComSkip) {
+			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"RunComSkip"];
+		}
+	} else if ([keyPath compare:@"RunComSkip"] == NSOrderedSame) {
+		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:@"SimultaneousEncode"];
+		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
+		if (simulEncode && runComSkip) {
+			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"SimultaneousEncode"];
 		}
 	}
 }

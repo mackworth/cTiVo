@@ -415,19 +415,48 @@ __DDLOGHERE__
 }
 
 #pragma mark - Download Options
+-(IBAction)changeSkip:(id)sender
+{
+    MTCheckBox *checkbox = sender;
+	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+		MTTiVoShow *show = (MTTiVoShow *)(checkbox.owner);
+        show.skipCommercials = ! show.skipCommercials;
+		if (show.skipCommercials) {  //Need to make sure that simul encode is not checked
+				show.simultaneousEncode = NO;
+		}
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
+    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
+		
+        MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		sub.skipCommercials = [NSNumber numberWithBool: ! [sub.skipCommercials boolValue]];
+		if ([sub.skipCommercials boolValue]) { //Need to make sure simultaneous encode is off
+			sub.simultaneousEncode = @(NO);
+		}
+        [tiVoManager.subscribedShows saveSubscriptions];
+        
+    }
+}
+
 -(IBAction)changeSimultaneous:(id)sender
 {
     MTCheckBox *checkbox = sender;
 	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
-        ((MTTiVoShow *)checkbox.owner).simultaneousEncode = ! ((MTTiVoShow *)checkbox.owner).simultaneousEncode;
-
+		MTTiVoShow *show = (MTTiVoShow *)(checkbox.owner);
+        show.simultaneousEncode = ! show.simultaneousEncode;
+		if (show.simultaneousEncode) {  //Need to make sure that simul encode is not checked
+				show.skipCommercials = NO;
+		}
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
 		
         MTSubscription *sub = (MTSubscription *)(checkbox.owner);
 		sub.simultaneousEncode = [NSNumber numberWithBool: ! [sub.simultaneousEncode boolValue]];
+		if ([sub.simultaneousEncode boolValue]) { //Need to make sure simultaneous encode is off
+			sub.skipCommercials = @(NO);
+		}
         [tiVoManager.subscribedShows saveSubscriptions];
         
-   }
+    }
 }
 
 -(IBAction)changeiTunes:(id)sender
