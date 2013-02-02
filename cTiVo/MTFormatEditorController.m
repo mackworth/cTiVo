@@ -301,10 +301,10 @@
 		myPopover.behavior = NSPopoverBehaviorTransient;
 		myPopover.contentViewController = helpContoller;
 		[helpContoller loadView];
-		helpContoller.displayMessage.attributedStringValue = attrHelpText;
+		[helpContoller.displayMessage.textStorage setAttributedString:attrHelpText];
 	}
 	//	[self.helpController.displayMessage insertText:helpText];
-	popoverDetachController.displayMessage.attributedStringValue = attrHelpText;
+	[popoverDetachController.displayMessage.textStorage setAttributedString:attrHelpText];
 	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
 }
 

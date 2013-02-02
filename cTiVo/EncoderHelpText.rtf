@@ -2,9 +2,10 @@
 {\fonttbl\f0\fnil\fcharset0 LucidaGrande;}
 {\colortbl;\red255\green255\blue255;}
 \margl1440\margr1440\vieww10800\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\deftab720
+\pard\pardeftab720
 
-\f0\fs22 \cf0 Enter either the name or the full path to the encoder to be user. The path searched for the encoder with be, in order\
+\f0\fs22 \cf0 Enter either the name or the full path to the encoder to be used. The paths searched for the encoder are (in order)\
 \
 	<Main Bundle>\
 	/usr/local/bin\
@@ -12,16 +13,40 @@
 	/usr/local/<encoder name>/bin\
 	/opt/local/<encoder name>/bin\
 	/usr/bin\
+	<Full path>\
 \
-If the encoder accept - for standard input you should check 'Can run download and encode at the same time' to allow simultaneous encoding.\
+If the encoder accepts - (dash) for standard input, you should check 'Can run download and encode at the same time' to allow simultaneous encoding. The encoder must be marked as executable.\
 \
+\pard\pardeftab720
 
-\b mencoder
+\b \cf0 mencoder
 \b0  & 
 \b HandBrakeCLI
 \b0  are included in the cTiVo bundle.\
 \
-The encoder should provide in its standard output an record of percent complete as a number from 0-100.  You will need to provide a regex expression for extracting this number from the last few lines of the standard output.  This will only be used when doing sequential downloading, decrypting and encoding.  When doing simultaneous encoding the data flow through the pipes is used to measure progress.
-\fs20 \
+If the encoder cannot support simultaneous encoding (e.g. HandBrakeCLI), the encoder should provide in its standard output the percentage complete as a number from 0-100.\'a0 You will need to provide a regex expression for extracting this number from the last few lines of the standard output.\'a0 This will only be used when doing sequential downloading, decrypting and encoding.\'a0 When doing simultaneous encoding, the data flow through the pipes is used to measure progress.\
+\pard\pardeftab720
+
+\fs20 \cf0 \
+The arguments passed from the options are:\
+	<Video options>\
+	<Audio options>\
+	<Other options>\
+	<EDL Switch>		//These two only if running comSkip to skip commercials.\
+	<.edl FileName>\
+	<outputFileFlag>\
+	<<outputFileName>>\
+	<inputFileFlag>\
+	<<inputFileName>>\
+OR, if no outputFileFlag:\
+	<Video options>\
+	<Audio options>\
+	<Other options>\
+	<EDL Switch>		//These two only if running comSkip to skip commercials.\
+	<.edl FileName>\
+	<inputFileFlag>\
+	<<inputFileName>>\
+	<<outputFileName>>\
 \
+Your encoder can be a script file (with standard first line of #! to specify script type, such as #!/usr/bin/osascript for Applescript), provided it accepts the above arguments and is marked as executable.\'a0\
 }

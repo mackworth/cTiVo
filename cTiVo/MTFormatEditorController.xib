@@ -597,7 +597,6 @@
 						<string key="NSFrame">{{418, 19}, {102, 19}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="151665682">
@@ -846,7 +845,7 @@
 										<string key="NSFrameSize">{411, 55}</string>
 										<reference key="NSSuperview" ref="451388003"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="925642279"/>
+										<reference key="NSNextKeyView" ref="842044650"/>
 										<string key="NSReuseIdentifierKey">_NS:13</string>
 										<object class="NSTextContainer" key="NSTextContainer" id="954985744">
 											<object class="NSLayoutManager" key="NSLayoutManager">
@@ -1100,7 +1099,7 @@ wGw</bytes>
 						<string key="NSFrame">{{107, 423}, {413, 57}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="842044650"/>
+						<reference key="NSNextKeyView" ref="451388003"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<int key="NSsFlags">133138</int>
 						<reference key="NSVScroller" ref="925642279"/>
@@ -1191,7 +1190,7 @@ wGw</bytes>
 						<object class="NSTextFieldCell" key="NSCell" id="595469665">
 							<int key="NSCellFlags">68157504</int>
 							<int key="NSCellFlags2">4195328</int>
-							<string key="NSContents">Comskip Options:</string>
+							<string key="NSContents">ComSkip Options:</string>
 							<reference key="NSSupport" ref="180612610"/>
 							<string key="NSCellIdentifier">_NS:1535</string>
 							<reference key="NSControlView" ref="296149271"/>
@@ -1374,7 +1373,6 @@ wGw</bytes>
 					<string key="NSFrameSize">{480, 380}</string>
 					<reference key="NSSuperview"/>
 					<reference key="NSWindow"/>
-					<reference key="NSNextKeyView"/>
 					<string key="NSReuseIdentifierKey">_NS:20</string>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
@@ -3605,13 +3603,13 @@ wGw</bytes>
 					<string key="superclassName">NSViewController</string>
 					<object class="NSMutableDictionary" key="outlets">
 						<string key="NS.key.0">displayMessage</string>
-						<string key="NS.object.0">NSTextField</string>
+						<string key="NS.object.0">NSTextView</string>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
 						<string key="NS.key.0">displayMessage</string>
 						<object class="IBToOneOutletInfo" key="NS.object.0">
 							<string key="name">displayMessage</string>
-							<string key="candidateClassName">NSTextField</string>
+							<string key="candidateClassName">NSTextView</string>
 						</object>
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
