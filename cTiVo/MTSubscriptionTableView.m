@@ -226,7 +226,7 @@ static NSDateFormatter *dateFormatter;
  	} else if ([tableColumn.identifier compare:@"Skip"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setEnabled: [thisSubscription canSkipCommercials]] ;
-        [checkBox setOn:[ thisSubscription skipCommercials]];
+        [checkBox setOn:[ thisSubscription canSkipCommercials]];
         checkBox.owner = thisSubscription;
         
     }

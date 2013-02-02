@@ -49,10 +49,11 @@ __DDLOGHERE__
 		return validPath;
 	}
 	for (NSString *searchPath in searchPaths) {
-		if ([fm fileExistsAtPath:[NSString stringWithFormat:searchPath,self.encoderUsed]]){ //Its there now check that its executable
-			int permissions = [[fm attributesOfItemAtPath:[NSString stringWithFormat:searchPath,self.encoderUsed] error:nil][NSFilePosixPermissions] shortValue];
+		NSString * filePath = [[NSString stringWithFormat:searchPath,self.encoderUsed] stringByResolvingSymlinksInPath];
+		if ([fm fileExistsAtPath:filePath]){ //Its there now check that its executable
+			int permissions = [[fm attributesOfItemAtPath:filePath error:nil][NSFilePosixPermissions] shortValue];
 			if (permissions && 01) { //We have an executable file
-				validPath = [NSString stringWithFormat:searchPath,self.encoderUsed];
+				validPath = filePath;
 				break;
 			}
 		}

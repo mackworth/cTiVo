@@ -22,7 +22,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) canSkipCommercials {
-    return self.encodeFormat.comSkip;
+    return self.encodeFormat.comSkip.boolValue;
 }
 
 -(BOOL) shouldSimulEncode {

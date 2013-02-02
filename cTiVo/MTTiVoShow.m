@@ -1417,7 +1417,7 @@
 }
 
 -(BOOL) canSkipCommercials {
-    return self.encodeFormat.comSkip;
+    return self.encodeFormat.comSkip.boolValue;
 }
 
 -(BOOL) shouldSkipCommercials {
@@ -1553,7 +1553,11 @@
 	if (_seriesTitle != seriesTitle) {
 		[_seriesTitle release];
 		_seriesTitle = [seriesTitle retain];
-		self.showTitle = [NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
+		if (_episodeTitle.length > 0 ) {
+			self.showTitle = [NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
+		} else {
+			self.showTitle = _seriesTitle;
+		}
 	}
 }
 
@@ -1562,7 +1566,11 @@
 	if (_episodeTitle != episodeTitle) {
 		[_episodeTitle release];
 		_episodeTitle = [episodeTitle retain];
-		self.showTitle = [NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
+		if (_episodeTitle.length > 0 ) {
+			self.showTitle = [NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
+		} else {
+			self.showTitle = _seriesTitle;
+		}
 	}
 }
 

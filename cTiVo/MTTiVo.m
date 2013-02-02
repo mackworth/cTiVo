@@ -440,12 +440,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[self updateShowsStartingAt:itemStart + itemCount withCount:kMTNumberShowToGet];
 	} else {
 		DDLogMajor(@"TiVo %@ completed parsing", self);
+		isConnecting = NO;
+		self.shows = [NSMutableArray arrayWithArray:newShows];
 		if (firstUpdate) {
 			[self restoreQueue]; //performSelector:@selector(restoreQueue) withObject:nil afterDelay:10]; //should this post the TiVoShowsUpdated?
 			firstUpdate = NO;
 		}
-		isConnecting = NO;
-		self.shows = [NSMutableArray arrayWithArray:newShows];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 		[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
