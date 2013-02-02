@@ -364,7 +364,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
             for (MTTiVo *tiVo in _tiVoList) {
                 numberOfShowsProcessing += [tiVo numberOfShowsInProcess];
             }
-            if (numberOfShowsProcessing) {
+            if (numberOfShowsProcessing && [keyPath compare:@"hasScheduledQueueStart"] == NSOrderedSame) {
                 NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton:@"Complete stage of current shows" otherButton:nil informativeTextWithFormat:@""];
                 NSInteger returnValue = [scheduleAlert runModal];
                 DDLogDetail(@"User said %ld to cancel alert",returnValue);
