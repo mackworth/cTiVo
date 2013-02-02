@@ -76,7 +76,7 @@
 
 @property (nonatomic, retain) NSDate *showDate;
 
-@property (nonatomic, retain) NSNumber *downloadIndex, *protectedShow, *isHD;
+@property (nonatomic, retain) NSNumber *downloadIndex, *protectedShow, *isHD, *inProgress;
 
 @property (nonatomic, readonly) NSString *encodeFilePath,
 										 *bufferFilePath,

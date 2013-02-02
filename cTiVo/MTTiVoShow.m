@@ -56,7 +56,8 @@
 		_seriesTitle = @"";
 //		_originalAirDate = @"";
 		_episodeYear = 0;
-		self.protectedShow = [NSNumber numberWithBool:NO]; //This is the default
+		self.protectedShow = @(NO); //This is the default
+		self.inProgress = @(NO); //This is the default
 		parseTermMapping = [@{@"description" : @"showDescription", @"time": @"showTime"} retain];
         [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
         previousCheck = [[NSDate date] retain];
@@ -76,6 +77,17 @@
 {
     NSInteger index = [tiVoManager.downloadQueue indexOfObject:self];
     return [NSNumber numberWithInteger:index+1];
+}
+
+-(void)setInProgress:(NSNumber *)inProgress
+{
+	if (_inProgress != inProgress) {
+		[_inProgress release];
+		_inProgress = [inProgress retain];
+		if ([_inProgress boolValue]) {
+			self.protectedShow = @(YES);
+		}
+	}
 }
 
 

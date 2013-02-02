@@ -46,6 +46,7 @@ __DDLOGHERE__
 	if (self) {
 		self.shows = [NSMutableArray array];
 		urlData = [NSMutableData new];
+		newShows = [NSMutableArray new];
 		_tiVo = nil;
 		previousShowList = nil;
 		showURLConnection = nil;
@@ -67,7 +68,7 @@ __DDLOGHERE__
             @"Title" : @{kMTValue : @"seriesTitle", kMTType : [NSNumber numberWithInt:kMTStringType]},
             @"EpisodeTitle" : @{kMTValue : @"episodeTitle", kMTType : [NSNumber numberWithInt:kMTStringType]},
             @"CopyProtected" : @{kMTValue : @"protectedShow", kMTType : [NSNumber numberWithInt:kMTBoolType]},
-            @"InProgress" : @{kMTValue : @"protectedShow", kMTType : [NSNumber numberWithInt:kMTBoolType]},
+            @"InProgress" : @{kMTValue : @"inProgress", kMTType : [NSNumber numberWithInt:kMTBoolType]},
             @"SourceSize" : @{kMTValue : @"fileSize", kMTType : [NSNumber numberWithInt:kMTNumberType]},
             @"Duration" : @{kMTValue : @"showLengthString", kMTType : [NSNumber numberWithInt:kMTStringType]},
             @"CaptureDate" : @{kMTValue : @"showDate", kMTType : [NSNumber numberWithInt:kMTDateType]},
@@ -211,12 +212,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	for (MTTiVoShow * show in _shows) {
 		NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
 //		NSLog(@"prevID: %@ %@",idString,show.showTitle);
-		if(!show.protectedShow.boolValue){
+		if(!show.inProgress.boolValue){
 			[previousShowList setValue:show forKey:idString];
 		}
 	}
     DDLogVerbose(@"Previous shows were: %@:",previousShowList);
-	[_shows removeAllObjects];
+	[newShows removeAllObjects];
+//	[_shows removeAllObjects];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
 	[self updateShowsStartingAt:0 withCount:kMTNumberShowToGetFirst];
 }
@@ -373,12 +375,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				currentShow.tiVo = self;
 				currentShow.mediaKey = [[NSUserDefaults standardUserDefaults] dictionaryForKey:kMTMediaKeys][self.tiVo.name];
 				DDLogDetail(@"Added new show %@",currentShow.showTitle);
-				[_shows addObject:currentShow];
+				[newShows addObject:currentShow];
 				NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil] autorelease];
 				[_queue addOperation:nextDetail];
 			} else {
 				DDLogDetail(@"Updated show %@", currentShow.showTitle);
-				[_shows addObject:thisShow];
+				[newShows addObject:thisShow];
 			}
 			[currentShow release];
 			currentShow = nil;
@@ -430,9 +432,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)parserDidEndDocument:(NSXMLParser *)parser
 {
 	//Check if we're done yet
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	if (itemStart+itemCount < totalItemsOnTivo) {
 		DDLogDetail(@"TiVo %@ finished batch", self);
+		if (newShows.count > _shows.count) {
+			self.shows = [NSMutableArray arrayWithArray:newShows];
+		}
 		[self updateShowsStartingAt:itemStart + itemCount withCount:kMTNumberShowToGet];
 	} else {
 		DDLogMajor(@"TiVo %@ completed parsing", self);
@@ -441,11 +445,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			firstUpdate = NO;
 		}
 		isConnecting = NO;
+		self.shows = [NSMutableArray arrayWithArray:newShows];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 		[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
 		//	NSLog(@"Avialable Recordings are %@",_recordings);
+		[previousShowList release]; previousShowList = nil;
 	}
-	[previousShowList release]; previousShowList = nil;
     [parser release];
 }
 
@@ -682,6 +688,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[urlData release];
 	self.shows = nil;
 	self.tiVo = nil;
+	[newShows release];
 	[elementToPropertyMap release];
 	[super dealloc];
 }

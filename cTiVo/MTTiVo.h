@@ -16,6 +16,7 @@
 	BOOL volatile isConnecting, managingDownloads, firstUpdate, canPing;
 	NSURLConnection *showURLConnection;
 	NSMutableData *urlData;
+	NSMutableArray *newShows;
     SCNetworkReachabilityContext reachabilityContext;
     int totalItemsOnTivo;
     int lastChangeDate;
