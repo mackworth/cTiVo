@@ -62,6 +62,7 @@
 #define kMTSubscribedFormat @"MTSubscribedSeriesFormat"
 #define kMTSubscribediTunes @"addToiTunes"
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
+#define kMTSubscribedSkipCommercials @"skipCommercials"
 
 //Download queue userDefaults
 #define kMTQueue      @"Queue"

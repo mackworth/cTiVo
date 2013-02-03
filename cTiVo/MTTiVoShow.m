@@ -206,6 +206,7 @@
 	[encoder encodeObject:_tiVo.tiVo.name forKey: kMTQueueTivo];
 	[encoder encodeObject:[NSNumber numberWithBool:_addToiTunesWhenEncoded] forKey: kMTSubscribediTunes];
 	[encoder encodeObject:[NSNumber numberWithBool:_simultaneousEncode] forKey: kMTSubscribedSimulEncode];
+	[encoder encodeObject:[NSNumber numberWithBool:_skipCommercials] forKey: kMTSubscribedSkipCommercials];
 	[encoder encodeObject:_encodeFormat.name forKey:kMTQueueFormat];
 	[encoder encodeObject:_downloadStatus forKey: kMTQueueStatus];
 	[encoder encodeObject:_showStatus forKey: kMTQueueShowStatus];
@@ -226,6 +227,7 @@
 			_tiVo.tiVo.name, kMTQueueTivo,
 			[NSNumber numberWithBool:_addToiTunesWhenEncoded], kMTSubscribediTunes,
 			[NSNumber numberWithBool:_simultaneousEncode], kMTSubscribedSimulEncode,
+			[NSNumber numberWithBool:_skipCommercials], kMTSubscribedSkipCommercials,
 			_encodeFormat.name,kMTQueueFormat,
 			_downloadStatus, kMTQueueStatus,
 			_showStatus, kMTQueueShowStatus,
@@ -257,6 +259,7 @@
 		}
 		_addToiTunesWhenEncoded= [[decoder decodeObjectForKey: kMTSubscribediTunes] boolValue];
 		_simultaneousEncode	 =   [[decoder decodeObjectForKey: kMTSubscribedSimulEncode] boolValue];
+		_skipCommercials   =     [[decoder decodeObjectForKey: kMTSubscribedSkipCommercials] boolValue];
 		NSString * encodeName	 = [decoder decodeObjectForKey:kMTQueueFormat];
 		_encodeFormat =	[[tiVoManager findFormat: encodeName] retain]; //minor bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is then wrong for completed/failed entries
 		_downloadStatus		 = [[decoder decodeObjectForKey: kMTQueueStatus] retain];
@@ -271,7 +274,7 @@
 -(void) updateFromDecodedShow:(MTTiVoShow *) newShow {
 	//copies details that were encoded into current show
 	//Keep parallel with InitWithDecoder
-	//Assumed that showID and showTItle are already matched
+	//Assumed that showID and showTItle and TiVO are already matched
 	_addToiTunesWhenEncoded = newShow.addToiTunesWhenEncoded;
 	if ([newShow.downloadStatus intValue] != kMTStatusNew){
 		//previously failed or completed, but don't stomp on inprogress
@@ -279,6 +282,8 @@
 	}
 	if (!self.isInProgress) {
 		_simultaneousEncode = newShow.simultaneousEncode;
+		_addToiTunesWhenEncoded = newShow.addToiTunesWhenEncoded;
+		_skipCommercials = newShow.skipCommercials;
 		if (newShow.showStatus) {
 			self.showStatus = newShow.showStatus;
 		} else {
@@ -346,6 +351,7 @@
 
 -(void) restoreDownloadData:queueEntry {
 	_addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
+	_skipCommercials = [queueEntry[kMTSubscribedSkipCommercials ]  boolValue];
 	if (queueEntry[kMTQueueStatus] != kMTStatusNew){
 		//previously failed or completed
 		_downloadStatus = queueEntry[kMTQueueStatus];
@@ -667,7 +673,7 @@
         NSString *tivodecoderLaunchPath = [[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""];
 		[decrypterTask setLaunchPath:tivodecoderLaunchPath];
 		NSMutableArray *arguments = [NSMutableArray arrayWithObjects:
-                        [NSString stringWithFormat:@"-m%@",_mediaKey],
+                        [NSString stringWithFormat:@"-m%@",_tiVo.mediaKey],
                         @"--",
                         @"-",
                         nil];
@@ -725,7 +731,7 @@
     // tivodecode -m0636497662 -o Two\ and\ a\ Half\ Men.mpg -v Two\ and\ a\ Half\ Men.TiVo
     
 	NSArray *arguments = [NSArray arrayWithObjects:
-						  [NSString stringWithFormat:@"-m%@",_mediaKey],
+						  [NSString stringWithFormat:@"-m%@",_tiVo.mediaKey],
 						  [NSString stringWithFormat:@"-o%@",decryptFilePath],
 						  @"-v",
 						  _downloadFilePath,
@@ -778,7 +784,7 @@
 
 -(void)commercial
 {
-	NSLog(@"Starting Decrypt of  %@", _showTitle);
+	NSLog(@"Starting comskip of  %@", _showTitle);
 	commercialTask = [[NSTask alloc] init];
 	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]];
 	[commercialTask setStandardOutput:commercialLogFileHandle];
@@ -1204,7 +1210,7 @@
 
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
     //    [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-    [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:_mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
+    [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:_tiVo.mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
     [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
 }
 
@@ -1639,7 +1645,6 @@
 
 -(void)dealloc
 {
-    self.mediaKey = nil;
     self.showTitle = nil;
     self.showDescription = nil;
     self.showStatus = nil;

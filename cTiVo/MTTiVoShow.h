@@ -48,7 +48,7 @@
 
 
 @property (nonatomic, retain) NSString *downloadDirectory,
-									*mediaKey,
+
 									*showTitle,
 									*showDescription,
 									*showTime,

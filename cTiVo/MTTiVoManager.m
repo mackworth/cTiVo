@@ -882,7 +882,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
 	numCommercials--;
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-    DDLogMajor(@"num decoders after decrement is %d",numEncoders);
+    DDLogMajor(@"num commercials after decrement is %d",numCommercials);
 }
 
 -(void)writeDownloadQueueToUserDefaults {

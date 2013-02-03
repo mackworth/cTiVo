@@ -195,8 +195,8 @@ __DDLOGHERE__
 {
 	MTTiVoShow * tivoShow = (MTTiVoShow *)notification.object;
 	MTSubscription * seriesMatch = [self findShow:tivoShow];
-	DDLogDetail(@"UPdating time on Subscriptions: %@ to %@", seriesMatch, tivoShow.showDate);
 	if (seriesMatch && tivoShow.showDate) {
+		DDLogDetail(@"UPdating time on Subscriptions: %@ to %@", seriesMatch, tivoShow.showDate);
 		seriesMatch.lastRecordedTime = tivoShow.showDate;
 		[self saveSubscriptions];
 		
