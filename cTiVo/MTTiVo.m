@@ -373,7 +373,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             MTTiVoShow *thisShow = [previousShowList valueForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
 			if (!thisShow) {
 				currentShow.tiVo = self;
-				currentShow.mediaKey = [[NSUserDefaults standardUserDefaults] dictionaryForKey:kMTMediaKeys][self.tiVo.name];
 				DDLogDetail(@"Added new show %@",currentShow.showTitle);
 				[newShows addObject:currentShow];
 				NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil] autorelease];
