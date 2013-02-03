@@ -394,9 +394,26 @@
 	}
 }
 
+-(BOOL)shows:(NSArray *)shows contain:(MTTiVo *)tiVo
+{
+	BOOL returnValue = NO;
+	for (MTTiVoShow * show in shows) {
+		if (show.tiVo  == tiVo) {
+			returnValue = YES;
+		}
+	}
+	return returnValue;
+}
+
 
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation
 {
+	NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
+	NSDictionary *options = [NSDictionary dictionary];
+	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
+	//NSLog(@"calling readObjects%@",pasteboard);
+	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
+
 	if (row < 0) row = 0;
 	//although displayed in sorted order, need to work in actual download order
 	NSUInteger insertRow;
@@ -408,7 +425,9 @@
 	//move to after the completed/inprogress ones
 	//Check to see if user want to reschdule current download
 	BOOL didReschedule = NO;
-	if (insertRow < [tiVoManager downloadQueue].count && [((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).downloadStatus intValue] == kMTStatusDownloading) {
+	if (insertRow < [tiVoManager downloadQueue].count
+			&& [((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).downloadStatus intValue] == kMTStatusDownloading
+			&& [self shows:draggedShows contain:((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).tiVo]) {
 		NSString *message = [NSString stringWithFormat:@"Do you want to reschedule %@",((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).showTitle];
 		NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
 		NSInteger returnValue = [insertDownloadAlert runModal];
@@ -423,11 +442,6 @@
 		}
 	}
 
-	NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
-	NSDictionary *options = [NSDictionary dictionary];
-	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
-	//NSLog(@"calling readObjects%@",pasteboard);
-	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
 //	NSLog(@"dragging: %@", draggedShows);
 	
 	//dragged shows are copies, so we need to find the real show objects
