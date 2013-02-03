@@ -360,12 +360,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)determineCurrentProcessingState
 {
 	int secondsInADay = 3600 * 24;
-	double currentSeconds = (int)[[NSDate date] timeIntervalSinceReferenceDate] % secondsInADay;
+	double currentSeconds = (int)[[NSDate date] timeIntervalSince1970] % secondsInADay;
 
 	NSDate *startTime = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
-	double startTimeSeconds = (int)[startTime timeIntervalSinceReferenceDate] % secondsInADay;
+	double startTimeSeconds = (int)[startTime timeIntervalSince1970] % secondsInADay;
 	NSDate *endTime = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
-	double endTimeSeconds = (int)[endTime timeIntervalSinceReferenceDate] % secondsInADay;
+	double endTimeSeconds = (int)[endTime timeIntervalSince1970] % secondsInADay;
 	if (endTimeSeconds < startTimeSeconds) {
 		endTimeSeconds += (double)secondsInADay;
 	}
@@ -419,12 +419,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(unPauseQueue) object:nil];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]) return;
 	int secondsInADay = 3600 * 24;
-	double currentSeconds = (int)[[NSDate date] timeIntervalSinceReferenceDate] % secondsInADay;
-	double secondsAtStartOfDay = [[NSDate date] timeIntervalSinceReferenceDate] - currentSeconds;
+	double currentSeconds = (int)[[NSDate date] timeIntervalSince1970] % secondsInADay;
+	double secondsAtStartOfDay = [[NSDate date] timeIntervalSince1970] - currentSeconds;
 	NSDate *startTime = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
-	double seconds = (int)[startTime timeIntervalSinceReferenceDate] % secondsInADay;
+	double seconds = (int)[startTime timeIntervalSince1970] % secondsInADay;
 	if (seconds < currentSeconds) seconds += (double) secondsInADay;
-	double targetSeconds = secondsAtStartOfDay + seconds - [[NSDate date] timeIntervalSinceReferenceDate];
+	double targetSeconds = secondsAtStartOfDay + seconds - [[NSDate date] timeIntervalSince1970];
 	[self performSelector:@selector(unPauseQueue) withObject:nil afterDelay:targetSeconds];
 }
 
@@ -433,12 +433,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(pauseQueue:) object:@(NO)];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]) return;
 	int secondsInADay = 3600 * 24;
-	double currentSeconds = (int)[[NSDate date] timeIntervalSinceReferenceDate] % secondsInADay;
-	double secondsAtStartOfDay = [[NSDate date] timeIntervalSinceReferenceDate] - currentSeconds;
+	double currentSeconds = (int)[[NSDate date] timeIntervalSince1970] % secondsInADay;
+	double secondsAtStartOfDay = [[NSDate date] timeIntervalSince1970] - currentSeconds;
 	NSDate *endTime = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
-	double seconds = (int)[endTime timeIntervalSinceReferenceDate] % secondsInADay;
+	double seconds = (int)[endTime timeIntervalSince1970] % secondsInADay;
 	if (seconds < currentSeconds) seconds += (double) secondsInADay;
-	double targetSeconds = secondsAtStartOfDay + seconds - [[NSDate date] timeIntervalSinceReferenceDate];
+	double targetSeconds = secondsAtStartOfDay + seconds - [[NSDate date] timeIntervalSince1970];
 	[self performSelector:@selector(pauseQueue:) withObject:@(NO) afterDelay:targetSeconds];
 }
 
@@ -454,41 +454,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-//    if ([keyPath compare:@"hasScheduledQueueStart"] == NSOrderedSame || [keyPath compare:@"queueStartTime"] == NSOrderedSame) {
-//		[_queueStartTime release];
-//		DDLogVerbose(@"setting QueueStart");
-//		_queueStartTime = [[NSDate dateWithTimeIntervalSinceReferenceDate:floor([_queueStartTime timeIntervalSinceReferenceDate] / 60.0) * 60.0] retain];
-//		DDLogVerbose(@"setting QueueStart: %@",_queueStartTime);
-//        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(startAllTiVoQueues) object:nil];
-//        if ([_hasScheduledQueueStart boolValue]) {
-//            NSInteger numberOfShowsProcessing = 0;
-//            for (MTTiVo *tiVo in _tiVoList) {
-//                numberOfShowsProcessing += [tiVo numberOfShowsInProcess];
-//            }
-//            if (numberOfShowsProcessing && [keyPath compare:@"hasScheduledQueueStart"] == NSOrderedSame) {
-//                NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton:@"Complete stage of current shows" otherButton:nil informativeTextWithFormat:@""];
-//                NSInteger returnValue = [scheduleAlert runModal];
-//                DDLogDetail(@"User said %ld to cancel alert",returnValue);
-//                if (returnValue == 1) {
-//                    //We're rescheduling shows
-//                    for (MTTiVo *tiVo in _tiVoList) {
-//                        [tiVo rescheduleAllShows];
-//                    }
-//                }
-//            }
-//			NSTimeInterval time = floor([_queueStartTime timeIntervalSinceReferenceDate] / 60.0) * 60.0;
-//			NSDate *realStartDate = [NSDate dateWithTimeIntervalSinceReferenceDate:time];
-//			DDLogVerbose(@"Stored Date %@ vs calc date %@",_queueStartTime,realStartDate);
-//
-//            double delay = [realStartDate timeIntervalSinceNow];
-//            if (delay > 0) {
-//                DDLogVerbose(@"Setting download start for %f seconds from now at %@, should be %@",delay,[NSDate dateWithTimeIntervalSinceNow:delay], realStartDate);
-//                [self performSelector:@selector(startAllTiVoQueues) withObject:nil afterDelay:delay+1];
-//            }
-//        } else {
-//            [self startAllTiVoQueues];
-//        }
-//    }
 	if ([keyPath compare:kMTQueuePaused] == NSOrderedSame) {
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTQueuePaused]) {
 			[self pauseQueue:@(YES)];

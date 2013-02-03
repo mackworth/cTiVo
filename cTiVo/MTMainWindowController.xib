@@ -186,7 +186,7 @@
 													<string key="NSFrameSize">{870, 100}</string>
 													<reference key="NSSuperview" ref="56095981"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="83364493"/>
+													<reference key="NSNextKeyView" ref="228630423"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -514,7 +514,7 @@
 									<string key="NSFrameSize">{871, 118}</string>
 									<reference key="NSSuperview" ref="882086054"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="228630423"/>
+									<reference key="NSNextKeyView" ref="56095981"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133810</int>
 									<reference key="NSVScroller" ref="663152309"/>
@@ -541,7 +541,7 @@
 													<string key="NSFrameSize">{869, 228}</string>
 													<reference key="NSSuperview" ref="556230325"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="543308253"/>
+													<reference key="NSNextKeyView" ref="39833346"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -1130,7 +1130,7 @@
 									<string key="NSFrame">{{0, 328}, {871, 246}}</string>
 									<reference key="NSSuperview" ref="882086054"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="39833346"/>
+									<reference key="NSNextKeyView" ref="556230325"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133682</int>
 									<reference key="NSVScroller" ref="785357226"/>
@@ -1182,7 +1182,7 @@
 													<string key="NSFrameSize">{870, 114}</string>
 													<reference key="NSSuperview" ref="1053596382"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="334740629"/>
+													<reference key="NSNextKeyView" ref="794705384"/>
 													<string key="NSReuseIdentifierKey">_NS:13</string>
 													<bool key="NSEnabled">YES</bool>
 													<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -1831,7 +1831,7 @@
 											<string key="NSReuseIdentifierKey">_NS:11</string>
 											<reference key="NSDocView" ref="629789127"/>
 											<reference key="NSBGColor" ref="549620270"/>
-											<int key="NScvFlags">4</int>
+											<int key="NScvFlags">6</int>
 										</object>
 										<object class="NSScroller" id="863871934">
 											<reference key="NSNextResponder" ref="193322370"/>
@@ -1881,7 +1881,7 @@
 									<string key="NSFrame">{{0, 156}, {871, 132}}</string>
 									<reference key="NSSuperview" ref="882086054"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="794705384"/>
+									<reference key="NSNextKeyView" ref="1053596382"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<int key="NSsFlags">133810</int>
 									<reference key="NSVScroller" ref="863871934"/>
@@ -2412,7 +2412,7 @@
 										<string key="NSFrameSize">{158, 29}</string>
 										<reference key="NSSuperview" ref="981177366"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="771020743"/>
+										<reference key="NSNextKeyView" ref="156813550"/>
 										<string key="NSReuseIdentifierKey">_NS:13</string>
 										<object class="NSTextContainer" key="NSTextContainer" id="1019701962">
 											<object class="NSLayoutManager" key="NSLayoutManager">
@@ -2663,7 +2663,7 @@ wGw</bytes>
 						<string key="NSFrame">{{120, 19}, {160, 31}}</string>
 						<reference key="NSSuperview" ref="511115729"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="156813550"/>
+						<reference key="NSNextKeyView" ref="981177366"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<int key="NSsFlags">133138</int>
 						<reference key="NSVScroller" ref="771020743"/>
@@ -2708,7 +2708,7 @@ wGw</bytes>
 										<string key="NSFrameSize">{158, 21}</string>
 										<reference key="NSSuperview" ref="408011241"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="718504923"/>
+										<reference key="NSNextKeyView" ref="334153467"/>
 										<string key="NSReuseIdentifierKey">_NS:13</string>
 										<object class="NSTextContainer" key="NSTextContainer" id="458010454">
 											<object class="NSLayoutManager" key="NSLayoutManager">
@@ -2944,7 +2944,7 @@ wGw</bytes>
 						<string key="NSFrame">{{120, 75}, {160, 23}}</string>
 						<reference key="NSSuperview" ref="511115729"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="334153467"/>
+						<reference key="NSNextKeyView" ref="408011241"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<int key="NSsFlags">133138</int>
 						<reference key="NSVScroller" ref="718504923"/>
@@ -2989,7 +2989,7 @@ wGw</bytes>
 										<string key="NSFrameSize">{158, 43}</string>
 										<reference key="NSSuperview" ref="769040193"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="409778718"/>
+										<reference key="NSNextKeyView" ref="997876089"/>
 										<string key="NSReuseIdentifierKey">_NS:13</string>
 										<object class="NSTextContainer" key="NSTextContainer" id="815722173">
 											<object class="NSLayoutManager" key="NSLayoutManager">
@@ -3225,7 +3225,7 @@ wGw</bytes>
 						<string key="NSFrame">{{120, 113}, {160, 45}}</string>
 						<reference key="NSSuperview" ref="511115729"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="997876089"/>
+						<reference key="NSNextKeyView" ref="769040193"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<int key="NSsFlags">133138</int>
 						<reference key="NSVScroller" ref="409778718"/>
@@ -3249,7 +3249,7 @@ wGw</bytes>
 										<string key="NSFrameSize">{158, 67}</string>
 										<reference key="NSSuperview" ref="859935886"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="136568095"/>
+										<reference key="NSNextKeyView" ref="630069239"/>
 										<string key="NSReuseIdentifierKey">_NS:13</string>
 										<object class="NSTextContainer" key="NSTextContainer" id="639982500">
 											<object class="NSLayoutManager" key="NSLayoutManager">
@@ -3485,7 +3485,7 @@ wGw</bytes>
 						<string key="NSFrame">{{120, 231}, {160, 69}}</string>
 						<reference key="NSSuperview" ref="511115729"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="630069239"/>
+						<reference key="NSNextKeyView" ref="859935886"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<int key="NSsFlags">133138</int>
 						<reference key="NSVScroller" ref="136568095"/>
@@ -3530,7 +3530,7 @@ wGw</bytes>
 										<string key="NSFrameSize">{158, 49}</string>
 										<reference key="NSSuperview" ref="249559841"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="294226443"/>
+										<reference key="NSNextKeyView" ref="251214704"/>
 										<string key="NSReuseIdentifierKey">_NS:13</string>
 										<object class="NSTextContainer" key="NSTextContainer" id="529008354">
 											<object class="NSLayoutManager" key="NSLayoutManager">
@@ -3766,7 +3766,7 @@ wGw</bytes>
 						<string key="NSFrame">{{120, 172}, {160, 51}}</string>
 						<reference key="NSSuperview" ref="511115729"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="251214704"/>
+						<reference key="NSNextKeyView" ref="249559841"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<int key="NSsFlags">133138</int>
 						<reference key="NSVScroller" ref="294226443"/>
@@ -8877,6 +8877,11 @@ wGw</bytes>
 						<reference key="parent" ref="535069220"/>
 					</object>
 					<object class="IBObjectRecord">
+						<int key="objectID">882</int>
+						<reference key="object" ref="137800532"/>
+						<reference key="parent" ref="347184331"/>
+					</object>
+					<object class="IBObjectRecord">
 						<int key="objectID">874</int>
 						<reference key="object" ref="330637767"/>
 						<array class="NSMutableArray" key="children">
@@ -8888,11 +8893,6 @@ wGw</bytes>
 						<int key="objectID">875</int>
 						<reference key="object" ref="336841253"/>
 						<reference key="parent" ref="330637767"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">882</int>
-						<reference key="object" ref="137800532"/>
-						<reference key="parent" ref="347184331"/>
 					</object>
 				</array>
 			</object>
@@ -9606,33 +9606,21 @@ wGw</bytes>
 					<string key="superclassName">NSWindowController</string>
 					<dictionary class="NSMutableDictionary" key="actions">
 						<string key="changeSimultaneous:">id</string>
-						<string key="changeSkip:">id</string>
 						<string key="changeiTunes:">id</string>
-						<string key="downloadMenuHandler:">NSMenuItem</string>
 						<string key="downloadSelectedShows:">id</string>
 						<string key="getDownloadDirectory:">id</string>
-						<string key="programMenuHandler:">NSMenuItem</string>
 						<string key="removeFromDownloadQueue:">id</string>
 						<string key="selectFormat:">id</string>
 						<string key="subscribe:">id</string>
-						<string key="subscriptionMenuHandler:">NSMenuItem</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
 						<object class="IBActionInfo" key="changeSimultaneous:">
 							<string key="name">changeSimultaneous:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="changeSkip:">
-							<string key="name">changeSkip:</string>
-							<string key="candidateClassName">id</string>
-						</object>
 						<object class="IBActionInfo" key="changeiTunes:">
 							<string key="name">changeiTunes:</string>
 							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="downloadMenuHandler:">
-							<string key="name">downloadMenuHandler:</string>
-							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBActionInfo" key="downloadSelectedShows:">
 							<string key="name">downloadSelectedShows:</string>
@@ -9641,10 +9629,6 @@ wGw</bytes>
 						<object class="IBActionInfo" key="getDownloadDirectory:">
 							<string key="name">getDownloadDirectory:</string>
 							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="programMenuHandler:">
-							<string key="name">programMenuHandler:</string>
-							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBActionInfo" key="removeFromDownloadQueue:">
 							<string key="name">removeFromDownloadQueue:</string>
@@ -9657,10 +9641,6 @@ wGw</bytes>
 						<object class="IBActionInfo" key="subscribe:">
 							<string key="name">subscribe:</string>
 							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="subscriptionMenuHandler:">
-							<string key="name">subscriptionMenuHandler:</string>
-							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
@@ -9785,17 +9765,20 @@ wGw</bytes>
 				<object class="IBPartialClassDescription">
 					<string key="className">MTSubscriptionTableView</string>
 					<string key="superclassName">NSTableView</string>
-					<object class="NSMutableDictionary" key="actions">
-						<string key="NS.key.0">unsubscribeSelectedItems:</string>
-						<string key="NS.object.0">id</string>
-					</object>
-					<object class="NSMutableDictionary" key="actionInfosByName">
-						<string key="NS.key.0">unsubscribeSelectedItems:</string>
-						<object class="IBActionInfo" key="NS.object.0">
+					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="delete:">id</string>
+						<string key="unsubscribeSelectedItems:">id</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="delete:">
+							<string key="name">delete:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="unsubscribeSelectedItems:">
 							<string key="name">unsubscribeSelectedItems:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-					</object>
+					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="myController">MTMainWindowController</string>
 						<string key="unsubscribeButton">NSButton</string>

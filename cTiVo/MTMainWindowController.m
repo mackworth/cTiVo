@@ -334,8 +334,13 @@ __DDLOGHERE__
 	if ([menu.title caseInsensitiveCompare:@"Reschedule"] == NSOrderedSame) {
 		NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
 		NSArray *itemsToRemove = [downloadQueueTable.sortedShows objectsAtIndexes:selectedRows];
-		for (MTTiVoShow *show in itemsToRemove) {
-			[show rescheduleShow:@(NO)];
+		if ([tiVoManager.processingPaused boolValue]) {
+			for (MTTiVoShow *show in itemsToRemove) {
+					[show rescheduleShow:@(NO)];
+			}
+		} else {
+			[tiVoManager deleteProgramsFromDownloadQueue:itemsToRemove];
+			[tiVoManager addProgramsToDownloadQueue:itemsToRemove beforeShow:nil];
 		}
 	}
 	if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
