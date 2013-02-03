@@ -111,7 +111,7 @@
 							<reference key="NSNextResponder" ref="994730169"/>
 							<int key="NSvFlags">274</int>
 							<array class="NSMutableArray" key="NSSubviews">
-								<object class="NSTextField" id="868390927">
+								<object class="NSTextField" id="915058714">
 									<reference key="NSNextResponder" ref="882086054"/>
 									<int key="NSvFlags">301</int>
 									<string key="NSFrame">{{294, 169}, {282, 87}}</string>
@@ -120,7 +120,7 @@
 									<reference key="NSNextKeyView" ref="324106926"/>
 									<string key="NSReuseIdentifierKey">_NS:1535</string>
 									<bool key="NSEnabled">YES</bool>
-									<object class="NSTextFieldCell" key="NSCell" id="298555132">
+									<object class="NSTextFieldCell" key="NSCell" id="271922519">
 										<int key="NSCellFlags">605028416</int>
 										<int key="NSCellFlags2">171967488</int>
 										<string key="NSContents">Paused</string>
@@ -130,7 +130,7 @@
 											<int key="NSfFlags">16</int>
 										</object>
 										<string key="NSCellIdentifier">_NS:1535</string>
-										<reference key="NSControlView" ref="868390927"/>
+										<reference key="NSControlView" ref="915058714"/>
 										<object class="NSColor" key="NSBackgroundColor">
 											<int key="NSColorSpace">1</int>
 											<bytes key="NSRGB">MCAxIDEgMAA</bytes>
@@ -473,7 +473,6 @@
 											<string key="NSFrame">{{224, 17}, {15, 102}}</string>
 											<reference key="NSSuperview" ref="719796418"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView"/>
 											<string key="NSReuseIdentifierKey">_NS:58</string>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 											<reference key="NSTarget" ref="719796418"/>
@@ -1840,7 +1839,7 @@
 											<string key="NSFrame">{{224, 17}, {15, 102}}</string>
 											<reference key="NSSuperview" ref="193322370"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView" ref="868390927"/>
+											<reference key="NSNextKeyView" ref="915058714"/>
 											<string key="NSReuseIdentifierKey">_NS:58</string>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 											<reference key="NSTarget" ref="193322370"/>
@@ -2630,7 +2629,6 @@ wGw</bytes>
 								<string key="NSFrame">{{143, 1}, {16, 29}}</string>
 								<reference key="NSSuperview" ref="594437509"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:83</string>
 								<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								<reference key="NSTarget" ref="594437509"/>
@@ -4580,6 +4578,14 @@ wGw</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
+						<string key="label">pausedLabel</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="915058714"/>
+					</object>
+					<int key="connectionID">881</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="1052654280"/>
 						<reference key="destination" ref="1001"/>
@@ -6405,10 +6411,10 @@ wGw</bytes>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">hidden: myTiVoManager.processingPaused</string>
-						<reference key="source" ref="868390927"/>
+						<reference key="source" ref="915058714"/>
 						<reference key="destination" ref="1001"/>
 						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="868390927"/>
+							<reference key="NSSource" ref="915058714"/>
 							<reference key="NSDestination" ref="1001"/>
 							<string key="NSLabel">hidden: myTiVoManager.processingPaused</string>
 							<string key="NSBinding">hidden</string>
@@ -6656,7 +6662,7 @@ wGw</bytes>
 							<reference ref="779895097"/>
 							<reference ref="719796418"/>
 							<reference ref="193322370"/>
-							<reference ref="868390927"/>
+							<reference ref="915058714"/>
 						</array>
 						<reference key="parent" ref="994730169"/>
 					</object>
@@ -8855,16 +8861,16 @@ wGw</bytes>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">874</int>
-						<reference key="object" ref="868390927"/>
+						<reference key="object" ref="915058714"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="298555132"/>
+							<reference ref="271922519"/>
 						</array>
 						<reference key="parent" ref="882086054"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">875</int>
-						<reference key="object" ref="298555132"/>
-						<reference key="parent" ref="868390927"/>
+						<reference key="object" ref="271922519"/>
+						<reference key="parent" ref="915058714"/>
 					</object>
 				</array>
 			</object>
@@ -9541,7 +9547,7 @@ wGw</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">880</int>
+			<int key="maxID">881</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -9577,21 +9583,33 @@ wGw</bytes>
 					<string key="superclassName">NSWindowController</string>
 					<dictionary class="NSMutableDictionary" key="actions">
 						<string key="changeSimultaneous:">id</string>
+						<string key="changeSkip:">id</string>
 						<string key="changeiTunes:">id</string>
+						<string key="downloadMenuHandler:">NSMenuItem</string>
 						<string key="downloadSelectedShows:">id</string>
 						<string key="getDownloadDirectory:">id</string>
+						<string key="programMenuHandler:">NSMenuItem</string>
 						<string key="removeFromDownloadQueue:">id</string>
 						<string key="selectFormat:">id</string>
 						<string key="subscribe:">id</string>
+						<string key="subscriptionMenuHandler:">NSMenuItem</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
 						<object class="IBActionInfo" key="changeSimultaneous:">
 							<string key="name">changeSimultaneous:</string>
 							<string key="candidateClassName">id</string>
 						</object>
+						<object class="IBActionInfo" key="changeSkip:">
+							<string key="name">changeSkip:</string>
+							<string key="candidateClassName">id</string>
+						</object>
 						<object class="IBActionInfo" key="changeiTunes:">
 							<string key="name">changeiTunes:</string>
 							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="downloadMenuHandler:">
+							<string key="name">downloadMenuHandler:</string>
+							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBActionInfo" key="downloadSelectedShows:">
 							<string key="name">downloadSelectedShows:</string>
@@ -9600,6 +9618,10 @@ wGw</bytes>
 						<object class="IBActionInfo" key="getDownloadDirectory:">
 							<string key="name">getDownloadDirectory:</string>
 							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="programMenuHandler:">
+							<string key="name">programMenuHandler:</string>
+							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBActionInfo" key="removeFromDownloadQueue:">
 							<string key="name">removeFromDownloadQueue:</string>
@@ -9613,6 +9635,10 @@ wGw</bytes>
 							<string key="name">subscribe:</string>
 							<string key="candidateClassName">id</string>
 						</object>
+						<object class="IBActionInfo" key="subscriptionMenuHandler:">
+							<string key="name">subscriptionMenuHandler:</string>
+							<string key="candidateClassName">NSMenuItem</string>
+						</object>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="addToQueueButton">NSButton</string>
@@ -9622,6 +9648,7 @@ wGw</bytes>
 						<string key="formatListPopUp">MTFormatPopUpButton</string>
 						<string key="loadingProgramListIndicator">NSProgressIndicator</string>
 						<string key="loadingProgramListLabel">NSTextField</string>
+						<string key="pausedLabel">NSTextField</string>
 						<string key="programContextualMenu">NSMenu</string>
 						<string key="removeFromQueueButton">NSButton</string>
 						<string key="searchingTiVosIndicator">NSProgressIndicator</string>
@@ -9663,6 +9690,10 @@ wGw</bytes>
 						</object>
 						<object class="IBToOneOutletInfo" key="loadingProgramListLabel">
 							<string key="name">loadingProgramListLabel</string>
+							<string key="candidateClassName">NSTextField</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="pausedLabel">
+							<string key="name">pausedLabel</string>
 							<string key="candidateClassName">NSTextField</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="programContextualMenu">
@@ -9756,20 +9787,17 @@ wGw</bytes>
 				<object class="IBPartialClassDescription">
 					<string key="className">MTSubscriptionTableView</string>
 					<string key="superclassName">NSTableView</string>
-					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="delete:">id</string>
-						<string key="unsubscribeSelectedItems:">id</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="delete:">
-							<string key="name">delete:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="unsubscribeSelectedItems:">
+					<object class="NSMutableDictionary" key="actions">
+						<string key="NS.key.0">unsubscribeSelectedItems:</string>
+						<string key="NS.object.0">id</string>
+					</object>
+					<object class="NSMutableDictionary" key="actionInfosByName">
+						<string key="NS.key.0">unsubscribeSelectedItems:</string>
+						<object class="IBActionInfo" key="NS.object.0">
 							<string key="name">unsubscribeSelectedItems:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-					</dictionary>
+					</object>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="myController">MTMainWindowController</string>
 						<string key="unsubscribeButton">NSButton</string>

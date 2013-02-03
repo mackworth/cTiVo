@@ -50,7 +50,6 @@ __DDLOGHERE__
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 	[tiVoListPopUp removeAllItems];
 	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
-	subDirectoriesButton.state = [[NSUserDefaults standardUserDefaults ] boolForKey:kMTMakeSubDirs] ? NSOnState : NSOffState;
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
     [searchingTiVosIndicator startAnimation:nil];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoListUpdated object:nil];
@@ -76,6 +75,7 @@ __DDLOGHERE__
 	[tiVoManager determineCurrentProcessingState];
 
 	[self buildColumnMenuForTables ];
+	[pausedLabel setNextResponder:downloadQueueTable];  //Pass through mouse events to the downloadQueueTable.
 
 }
 

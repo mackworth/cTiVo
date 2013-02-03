@@ -18,15 +18,14 @@
 @interface MTMainWindowController : NSWindowController <NSMenuDelegate> {
 	IBOutlet NSPopUpButton *tiVoListPopUp;
 	IBOutlet MTFormatPopUpButton *formatListPopUp;
-    IBOutlet NSButton *addToQueueButton, *removeFromQueueButton, *subscribeButton, *subDirectoriesButton;
-	IBOutlet NSTextField *loadingProgramListLabel, *downloadDirectory, *tiVoListPopUpLabel;
+    IBOutlet NSButton *addToQueueButton, *removeFromQueueButton, *subscribeButton;
+	IBOutlet NSTextField *loadingProgramListLabel, *downloadDirectory, *tiVoListPopUpLabel, *pausedLabel;
 	IBOutlet NSProgressIndicator *loadingProgramListIndicator, *searchingTiVosIndicator;
 	IBOutlet MTDownloadTableView *downloadQueueTable;
 	IBOutlet MTProgramTableView  *tiVoShowTable;
 	IBOutlet MTSubscriptionTableView  *subscriptionTable;
     IBOutlet NSView *view;
 	IBOutlet NSDrawer *showDetailDrawer;
-	IBOutlet NSMenu *programContextualMenu, *downloadContextualMenu, *subscriptionContextualMenu;
 	NSPoint menuCursorPosition;
 	NSInteger menuTableRow;
 	NSMutableArray *loadingTiVos;
@@ -36,7 +35,6 @@
 @property (nonatomic, assign) MTProgramTableView *tiVoShowTable;
 @property (nonatomic, assign) MTSubscriptionTableView *subscriptionTable;
 @property (nonatomic, retain) NSString *selectedTiVo;
-@property (nonatomic, assign, readwrite) IBOutlet NSButton *showProtectedShows;
 @property (nonatomic, retain) MTTiVoShow *showForDetail;
 @property (nonatomic, readonly) MTTiVoManager *myTiVoManager;
 
