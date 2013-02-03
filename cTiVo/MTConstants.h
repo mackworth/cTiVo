@@ -95,6 +95,7 @@
 
 //USER DEFAULTS
 
+#define	kMTQueuePaused @"QueuePaused"			//State of pause for the download queue
 #define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address.  
 #define kMTPreventSleep @"PreventSleep"			//If true this will prevent sleep when possible
 #define kMTFormats @"Formats"                        //User defined Formats

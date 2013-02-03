@@ -101,12 +101,13 @@ void signalHandler(int signal)
 
 @implementation MTAppDelegate
 
+
 __DDLOGHERE__
 
 - (void)dealloc
 {
 	DDLogDetail(@"deallocing AppDelegate");
-	[tiVoGlobalManager release];
+	self.tiVoGlobalManager = nil;
     [super dealloc];
 }
 
@@ -140,8 +141,9 @@ __DDLOGHERE__
 	if (![[[NSUserDefaults standardUserDefaults] objectForKey:kMTShowCopyProtected] boolValue]) {
 		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:NO] forKey:kMTShowCopyProtected];
 	}
-	tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
-    [tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
+	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
+    [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
+    [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueChangeSetting context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:@"RunComSkip" options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:@"SimultaneousEncode" options:NSKeyValueObservingOptionNew context:nil];
 	mainWindowController = nil;
@@ -152,6 +154,10 @@ __DDLOGHERE__
 	gettingMediaKey = NO;
 	signal(SIGPIPE, &signalHandler);
 	signal(SIGABRT, &signalHandler );
+	
+	//Turn off check mark on Pause/Resume queue menu item
+	[pauseMenuItem setOnStateImage:nil];
+	[self.tiVoGlobalManager determineCurrentProcessingState];
     
 	//Set up callback for sleep notification (this is 10.5 method and is still valid.  There is newer UI in 10.6 on.
 	
@@ -224,6 +230,8 @@ __DDLOGHERE__
 		if (simulEncode && runComSkip) {
 			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"SimultaneousEncode"];
 		}
+	} else if ([keyPath compare:@"processingPaused"] == NSOrderedSame) {
+		pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";
 	}
 }
 
@@ -232,26 +240,26 @@ __DDLOGHERE__
 -(void)updateTivoRefreshMenu
 {
 	DDLogDetail(@"Rebuilding TivoRefresh Menu");
-	DDLogVerbose(@"Tivos: %@",tiVoGlobalManager.tiVoList);
-	if (tiVoGlobalManager.tiVoList.count == 0) {
+	DDLogVerbose(@"Tivos: %@",_tiVoGlobalManager.tiVoList);
+	if (_tiVoGlobalManager.tiVoList.count == 0) {
 		[refreshTiVoMenuItem setEnabled:NO];
-	} else if (tiVoGlobalManager.tiVoList.count ==1) {
+	} else if (_tiVoGlobalManager.tiVoList.count ==1) {
 		[refreshTiVoMenuItem setTarget:nil];
 		[refreshTiVoMenuItem setAction:NULL];
-		if (((MTTiVo *)tiVoGlobalManager.tiVoList[0]).isReachable) {
-			[refreshTiVoMenuItem setTarget:tiVoGlobalManager.tiVoList[0]];
+		if (((MTTiVo *)_tiVoGlobalManager.tiVoList[0]).isReachable) {
+			[refreshTiVoMenuItem setTarget:_tiVoGlobalManager.tiVoList[0]];
 			[refreshTiVoMenuItem setAction:@selector(updateShows:)];
 			[refreshTiVoMenuItem setEnabled:YES];
 		} else  {
 			[refreshTiVoMenuItem setEnabled:NO];
 		}
 	} else {
-		[refreshTiVoMenuItem setTarget:tiVoGlobalManager];
+		[refreshTiVoMenuItem setTarget:_tiVoGlobalManager];
 		[refreshTiVoMenuItem setAction:@selector(refreshAllTiVos)];
 		[refreshTiVoMenuItem setEnabled:YES];
 		NSMenu *thisMenu = [[[NSMenu alloc] initWithTitle:@"Refresh Tivo"] autorelease];
 		BOOL lastTivoWasManual = NO;
-		for (MTTiVo *tiVo in tiVoGlobalManager.tiVoList) {
+		for (MTTiVo *tiVo in _tiVoGlobalManager.tiVoList) {
 			if (!tiVo.manualTiVo && lastTivoWasManual) { //Insert a separator
 				NSMenuItem *menuItem = [NSMenuItem separatorItem];
 				[thisMenu addItem:menuItem];
@@ -284,7 +292,7 @@ __DDLOGHERE__
 
 -(NSNumber *)numberOfUserFormats
 {
-	return [NSNumber numberWithInteger:tiVoGlobalManager.userFormats.count];
+	return [NSNumber numberWithInteger:_tiVoGlobalManager.userFormats.count];
 }
 
 -(IBAction)editFormats:(id)sender
@@ -323,11 +331,11 @@ __DDLOGHERE__
 	NSInteger ret = [mySavePanel runModal];
 	if (ret == NSFileHandlingPanelOKButton) {
         NSMutableArray *formatsToWrite = [NSMutableArray array];
-        for (int i = 0; i < tiVoGlobalManager.userFormats.count; i++) {
+        for (int i = 0; i < _tiVoGlobalManager.userFormats.count; i++) {
             //Get selected formats
             NSButton *checkbox = [exportTableView viewAtColumn:0 row:i makeIfNecessary:NO];
             if (checkbox.state) {
-                [formatsToWrite addObject:[tiVoGlobalManager.userFormats[i] toDictionary]];
+                [formatsToWrite addObject:[_tiVoGlobalManager.userFormats[i] toDictionary]];
             }
         }
 		DDLogVerbose(@"formats: %@",formatsToWrite);
@@ -336,11 +344,23 @@ __DDLOGHERE__
 	}
 }
 
+-(IBAction)togglePause:(id)sender
+{
+	self.tiVoGlobalManager.processingPaused = [self.tiVoGlobalManager.processingPaused boolValue] ? @(NO) : @(YES);
+//	pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";
+	if ([self.tiVoGlobalManager.processingPaused boolValue]) {
+		[self.tiVoGlobalManager pauseQueue:@(YES)];
+	} else {
+		[self.tiVoGlobalManager unPauseQueue];
+	}
+	
+}
+
 #pragma mark - Table Support Methods
 
 -(NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
 {
-    return tiVoGlobalManager.userFormats.count;
+    return _tiVoGlobalManager.userFormats.count;
 }
 
 -(CGFloat)tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row
@@ -352,7 +372,7 @@ __DDLOGHERE__
 {
     // get an existing cell with the MyView identifier if it exists
     NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
-    MTFormat *thisFomat = [tiVoGlobalManager.userFormats objectAtIndex:row];
+    MTFormat *thisFomat = [_tiVoGlobalManager.userFormats objectAtIndex:row];
     // There is no existing cell to reuse so we will create a new one
     if (result == nil) {
         
@@ -393,7 +413,7 @@ __DDLOGHERE__
 	if (ret == NSFileHandlingPanelOKButton) {
 		NSString *filename = myOpenPanel.URL.path;
 		newFormats = [NSArray arrayWithContentsOfFile:filename];
-		[tiVoGlobalManager addFormatsToList:newFormats];	
+		[_tiVoGlobalManager addFormatsToList:newFormats];	
 	}
 	
 }
@@ -430,7 +450,7 @@ __DDLOGHERE__
 
 -(void)updateAllTiVos:(id)sender
 {
-	for (MTTiVo *tiVo in tiVoGlobalManager.tiVoList) {
+	for (MTTiVo *tiVo in _tiVoGlobalManager.tiVoList) {
 		[tiVo updateShows:sender];
 	}
 }
@@ -446,8 +466,8 @@ __DDLOGHERE__
 	MTTiVo *tiVo = [mediaKeyQueue objectAtIndex:0]; //Pop off the first in the queue
 	gettingMediaKey = YES;
 	DDLogDetail(@"Getting MAK for %@",tiVo);
-	if ( tiVo.mediaKey.length == 0 && tiVoGlobalManager.tiVoList.count && tiVo != (MTTiVo *)[tiVoGlobalManager.tiVoList objectAtIndex:0]) {
-		tiVo.mediaKey = ((MTTiVo *)[tiVoGlobalManager.tiVoList objectAtIndex:0]).mediaKey;
+	if ( tiVo.mediaKey.length == 0 && _tiVoGlobalManager.tiVoList.count && tiVo != (MTTiVo *)[_tiVoGlobalManager.tiVoList objectAtIndex:0]) {
+		tiVo.mediaKey = ((MTTiVo *)[_tiVoGlobalManager.tiVoList objectAtIndex:0]).mediaKey;
 		[mediaKeyQueue removeObject:tiVo];
 		DDLogDetail(@"Trying key for tivo %@ to %@",tiVo.tiVo.name,tiVo.mediaKey);
 		[tiVo updateShows:nil];
@@ -472,7 +492,7 @@ __DDLOGHERE__
 		}
 	}
 	gettingMediaKey = NO;
-	[[NSUserDefaults standardUserDefaults] setObject:[tiVoGlobalManager currentMediaKeys] forKey:kMTMediaKeys];
+	[[NSUserDefaults standardUserDefaults] setObject:[_tiVoGlobalManager currentMediaKeys] forKey:kMTMediaKeys];
 	[self getMediaKeyFromUser:nil];//Process rest of queue
 }
 
@@ -491,7 +511,7 @@ __DDLOGHERE__
 {
 	if (!mainWindowController) {
 		mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
-        tiVoGlobalManager.mainWindow = mainWindowController.window;
+        _tiVoGlobalManager.mainWindow = mainWindowController.window;
 	}
 	[mainWindowController showWindow:nil];
 	

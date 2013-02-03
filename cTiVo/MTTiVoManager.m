@@ -168,7 +168,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		decryptTableCell = nil;
 		downloadTableCell = nil;
 		encodeTableCell = nil;
-        _queueStartTime = [[NSDate date] retain];
 		
 		numEncoders = 0;
 		numCommercials = 0;
@@ -176,7 +175,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		
 		_videoListNeedsFilling = YES;
         updatingVideoList = NO;
-        _hasScheduledQueueStart = @NO;
+		_processingPaused = @(NO);
 		
 		[self loadGrowl];
 //		NSLog(@"Getting Host Addresses");
@@ -350,47 +349,97 @@ static MTTiVoManager *sharedTiVoManager = nil;
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
     
-    [self addObserver:self forKeyPath:@"hasScheduledQueueStart" options:NSKeyValueObservingOptionNew context:nil];
-    [self addObserver:self forKeyPath:@"queueStartTime" options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTQueuePaused options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
 }
 
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-    if ([keyPath compare:@"hasScheduledQueueStart"] == NSOrderedSame || [keyPath compare:@"queueStartTime"] == NSOrderedSame) {
-		[_queueStartTime release];
-		DDLogVerbose(@"setting QueueStart");
-		_queueStartTime = [[NSDate dateWithTimeIntervalSinceReferenceDate:floor([_queueStartTime timeIntervalSinceReferenceDate] / 60.0) * 60.0] retain];
-		DDLogVerbose(@"setting QueueStart: %@",_queueStartTime);
-        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(startAllTiVoQueues) object:nil];
-        if ([_hasScheduledQueueStart boolValue]) {
-            NSInteger numberOfShowsProcessing = 0;
-            for (MTTiVo *tiVo in _tiVoList) {
-                numberOfShowsProcessing += [tiVo numberOfShowsInProcess];
-            }
-            if (numberOfShowsProcessing && [keyPath compare:@"hasScheduledQueueStart"] == NSOrderedSame) {
-                NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton:@"Complete stage of current shows" otherButton:nil informativeTextWithFormat:@""];
-                NSInteger returnValue = [scheduleAlert runModal];
-                DDLogDetail(@"User said %ld to cancel alert",returnValue);
-                if (returnValue == 1) {
-                    //We're rescheduling shows
-                    for (MTTiVo *tiVo in _tiVoList) {
-                        [tiVo rescheduleAllShows];
-                    }
-                }
-            }
-			NSTimeInterval time = floor([_queueStartTime timeIntervalSinceReferenceDate] / 60.0) * 60.0;
-			NSDate *realStartDate = [NSDate dateWithTimeIntervalSinceReferenceDate:time];
-			DDLogVerbose(@"Stored Date %@ vs calc date %@",_queueStartTime,realStartDate);
+#pragma mark - Scheduling routine
 
-            double delay = [realStartDate timeIntervalSinceNow];
-            if (delay > 0) {
-                DDLogVerbose(@"Setting download start for %f seconds from now at %@, should be %@",delay,[NSDate dateWithTimeIntervalSinceNow:delay], realStartDate);
-                [self performSelector:@selector(startAllTiVoQueues) withObject:nil afterDelay:delay+1];
-            }
-        } else {
-            [self startAllTiVoQueues];
-        }
-    }
+-(void)determineCurrentProcessingState
+{
+	int secondsInADay = 3600 * 24;
+	double currentSeconds = (int)[[NSDate date] timeIntervalSinceReferenceDate] % secondsInADay;
+
+	NSDate *startTime = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
+	double startTimeSeconds = (int)[startTime timeIntervalSinceReferenceDate] % secondsInADay;
+	NSDate *endTime = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
+	double endTimeSeconds = (int)[endTime timeIntervalSinceReferenceDate] % secondsInADay;
+	if (endTimeSeconds < startTimeSeconds) {
+		endTimeSeconds += (double)secondsInADay;
+	}
+	BOOL schedulingActive = [[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations];
+	if ((startTimeSeconds > currentSeconds || currentSeconds > endTimeSeconds) && schedulingActive) { //We're NOT active
+		[self setValue:@(YES) forKey:@"processingPaused"];
+	} else {
+		[self setValue:@(NO) forKey:@"processingPaused"];
+	}
+	
+}
+
+-(void)pauseQueue:(NSNumber *)askUser
+{
+	self.processingPaused = @(YES);
+//	return;
+	NSInteger numberOfShowsProcessing = 0;
+	for (MTTiVo *tiVo in _tiVoList) {
+		numberOfShowsProcessing += [tiVo numberOfShowsInProcess];
+	}
+	if (numberOfShowsProcessing && [askUser boolValue]) {
+		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton:@"Complete stage of current shows" otherButton:nil informativeTextWithFormat:@""];
+		NSInteger returnValue = [scheduleAlert runModal];
+		DDLogDetail(@"User said %ld to cancel alert",returnValue);
+		if (returnValue == 1) {
+			//We're rescheduling shows
+			for (MTTiVo *tiVo in _tiVoList) {
+				[tiVo rescheduleAllShows];
+			}
+		}
+	}
+	[self configureSchedule];
+}
+
+-(void)unPauseQueue
+{
+	self.processingPaused = @(NO);
+//	return;
+	[self startAllTiVoQueues];
+	[self configureSchedule];
+}
+
+-(void)configureSchedule
+{
+	[self setQueueStartTime];
+	[self setQueueEndTime];
+}
+
+-(void)setQueueStartTime
+{
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(unPauseQueue) object:nil];
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]) return;
+	int secondsInADay = 3600 * 24;
+	double currentSeconds = (int)[[NSDate date] timeIntervalSinceReferenceDate] % secondsInADay;
+	double secondsAtStartOfDay = [[NSDate date] timeIntervalSinceReferenceDate] - currentSeconds;
+	NSDate *startTime = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
+	double seconds = (int)[startTime timeIntervalSinceReferenceDate] % secondsInADay;
+	if (seconds < currentSeconds) seconds += (double) secondsInADay;
+	double targetSeconds = secondsAtStartOfDay + seconds - [[NSDate date] timeIntervalSinceReferenceDate];
+	[self performSelector:@selector(unPauseQueue) withObject:nil afterDelay:targetSeconds];
+}
+
+-(void)setQueueEndTime
+{
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(pauseQueue:) object:@(NO)];
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]) return;
+	int secondsInADay = 3600 * 24;
+	double currentSeconds = (int)[[NSDate date] timeIntervalSinceReferenceDate] % secondsInADay;
+	double secondsAtStartOfDay = [[NSDate date] timeIntervalSinceReferenceDate] - currentSeconds;
+	NSDate *endTime = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
+	double seconds = (int)[endTime timeIntervalSinceReferenceDate] % secondsInADay;
+	if (seconds < currentSeconds) seconds += (double) secondsInADay;
+	double targetSeconds = secondsAtStartOfDay + seconds - [[NSDate date] timeIntervalSinceReferenceDate];
+	[self performSelector:@selector(pauseQueue:) withObject:@(NO) afterDelay:targetSeconds];
 }
 
 -(void)startAllTiVoQueues
@@ -399,6 +448,63 @@ static MTTiVoManager *sharedTiVoManager = nil;
         DDLogDetail(@"Starting download on tiVo %@",tiVo.tiVo.name);
         [tiVo manageDownloads:tiVo];
     }
+}
+
+#pragma mark - Key Value Observing
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+//    if ([keyPath compare:@"hasScheduledQueueStart"] == NSOrderedSame || [keyPath compare:@"queueStartTime"] == NSOrderedSame) {
+//		[_queueStartTime release];
+//		DDLogVerbose(@"setting QueueStart");
+//		_queueStartTime = [[NSDate dateWithTimeIntervalSinceReferenceDate:floor([_queueStartTime timeIntervalSinceReferenceDate] / 60.0) * 60.0] retain];
+//		DDLogVerbose(@"setting QueueStart: %@",_queueStartTime);
+//        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(startAllTiVoQueues) object:nil];
+//        if ([_hasScheduledQueueStart boolValue]) {
+//            NSInteger numberOfShowsProcessing = 0;
+//            for (MTTiVo *tiVo in _tiVoList) {
+//                numberOfShowsProcessing += [tiVo numberOfShowsInProcess];
+//            }
+//            if (numberOfShowsProcessing && [keyPath compare:@"hasScheduledQueueStart"] == NSOrderedSame) {
+//                NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton:@"Complete stage of current shows" otherButton:nil informativeTextWithFormat:@""];
+//                NSInteger returnValue = [scheduleAlert runModal];
+//                DDLogDetail(@"User said %ld to cancel alert",returnValue);
+//                if (returnValue == 1) {
+//                    //We're rescheduling shows
+//                    for (MTTiVo *tiVo in _tiVoList) {
+//                        [tiVo rescheduleAllShows];
+//                    }
+//                }
+//            }
+//			NSTimeInterval time = floor([_queueStartTime timeIntervalSinceReferenceDate] / 60.0) * 60.0;
+//			NSDate *realStartDate = [NSDate dateWithTimeIntervalSinceReferenceDate:time];
+//			DDLogVerbose(@"Stored Date %@ vs calc date %@",_queueStartTime,realStartDate);
+//
+//            double delay = [realStartDate timeIntervalSinceNow];
+//            if (delay > 0) {
+//                DDLogVerbose(@"Setting download start for %f seconds from now at %@, should be %@",delay,[NSDate dateWithTimeIntervalSinceNow:delay], realStartDate);
+//                [self performSelector:@selector(startAllTiVoQueues) withObject:nil afterDelay:delay+1];
+//            }
+//        } else {
+//            [self startAllTiVoQueues];
+//        }
+//    }
+	if ([keyPath compare:kMTQueuePaused] == NSOrderedSame) {
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTQueuePaused]) {
+			[self pauseQueue:@(YES)];
+		} else {
+			[self unPauseQueue];
+		}
+	}
+	if ([keyPath compare:kMTScheduledOperations] == NSOrderedSame) {
+		[self configureSchedule];
+	}
+	if ([keyPath compare:kMTScheduledEndTime] == NSOrderedSame) {
+		[self configureSchedule];
+	}
+	if ([keyPath compare:kMTScheduledStartTime] == NSOrderedSame) {
+		[self configureSchedule];
+	}
 }
 
 -(void)refreshAllTiVos

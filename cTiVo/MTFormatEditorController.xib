@@ -170,7 +170,7 @@
 					<object class="NSButton" id="1051039738">
 						<reference key="NSNextResponder" ref="331029513"/>
 						<int key="NSvFlags">268</int>
-						<string key="NSFrame">{{18, 18}, {307, 18}}</string>
+						<string key="NSFrame">{{18, 18}, {163, 18}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="1025469082"/>
@@ -179,7 +179,7 @@
 						<object class="NSButtonCell" key="NSCell" id="806695203">
 							<int key="NSCellFlags">-2080374784</int>
 							<int key="NSCellFlags2">268435456</int>
-							<string key="NSContents">Can Skip Commercials (not yet implemented)</string>
+							<string key="NSContents">Can Skip Commercials</string>
 							<reference key="NSSupport" ref="180612610"/>
 							<string key="NSCellIdentifier">_NS:9</string>
 							<reference key="NSControlView" ref="1051039738"/>
@@ -597,6 +597,7 @@
 						<string key="NSFrame">{{418, 19}, {102, 19}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="151665682">
@@ -845,7 +846,7 @@
 										<string key="NSFrameSize">{411, 55}</string>
 										<reference key="NSSuperview" ref="451388003"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="842044650"/>
+										<reference key="NSNextKeyView" ref="925642279"/>
 										<string key="NSReuseIdentifierKey">_NS:13</string>
 										<object class="NSTextContainer" key="NSTextContainer" id="954985744">
 											<object class="NSLayoutManager" key="NSLayoutManager">
@@ -1099,7 +1100,7 @@ wGw</bytes>
 						<string key="NSFrame">{{107, 423}, {413, 57}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="451388003"/>
+						<reference key="NSNextKeyView" ref="842044650"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<int key="NSsFlags">133138</int>
 						<reference key="NSVScroller" ref="925642279"/>
@@ -1373,6 +1374,7 @@ wGw</bytes>
 					<string key="NSFrameSize">{480, 380}</string>
 					<reference key="NSSuperview"/>
 					<reference key="NSWindow"/>
+					<reference key="NSNextKeyView"/>
 					<string key="NSReuseIdentifierKey">_NS:20</string>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
@@ -3503,7 +3505,7 @@ wGw</bytes>
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="73076074"/>
-						<string key="toolTip">Encoder command-line switch to specify output filename. Example:  -o</string>
+						<string key="toolTip">Encoder command-line switch to specify edl list file: e.g.  -edl</string>
 					</object>
 				</object>
 				<string key="2678.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>

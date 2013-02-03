@@ -465,10 +465,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)manageDownloads:(id)info
 {
-    if ([tiVoManager.hasScheduledQueueStart boolValue]  && [tiVoManager.queueStartTime compare:[NSDate date]] == NSOrderedDescending) { //Don't start unless we're after the scheduled time if we're supposed to be scheduled.
-        DDLogMajor(@"%@ Delaying download until %@",self,tiVoManager.queueStartTime);
+//    if ([tiVoManager.hasScheduledQueueStart boolValue]  && [tiVoManager.queueStartTime compare:[NSDate date]] == NSOrderedDescending) { //Don't start unless we're after the scheduled time if we're supposed to be scheduled.
+//        DDLogMajor(@"%@ Delaying download until %@",self,tiVoManager.queueStartTime);
+//		return;
+//    }
+	if ([tiVoManager.processingPaused boolValue]) {
 		return;
-    }
+	}
 	if ([info isKindOfClass:[NSNotification class]]) {
 		NSNotification *notification = (NSNotification *)info;
 		if (!notification.object || notification.object == self) {

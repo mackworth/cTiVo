@@ -72,6 +72,8 @@ __DDLOGHERE__
     [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidMoveNotification object:nil];
      [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
 	[tiVoManager addObserver:self forKeyPath:@"downloadDirectory" options:NSKeyValueObservingOptionInitial context:nil];
+	
+	[tiVoManager determineCurrentProcessingState];
 
 	[self buildColumnMenuForTables ];
 

@@ -15,9 +15,8 @@
 #import "MTPreferencesWindowController.h"
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate> {
-	MTTiVoManager *tiVoGlobalManager;
 	MTMainWindowController *mainWindowController;
-	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *simulEncodeItem, *skipCommercialsItem;
+	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *simulEncodeItem, *skipCommercialsItem, *pauseMenuItem;
 	IBOutlet NSMenu *optionsMenu;
     IBOutlet NSView *formatSelectionTable;
     IBOutlet NSTableView *exportTableView;
@@ -30,8 +29,10 @@
 @property (nonatomic, retain) MTPreferencesWindowController *preferencesController;
 @property (nonatomic, retain) MTPreferencesWindowController *advPreferencesController;
 @property (nonatomic, readonly) NSNumber *numberOfUserFormats;
+@property (nonatomic, retain) MTTiVoManager *tiVoGlobalManager;
 
 
+-(IBAction)togglePause:(id)sender;
 -(IBAction)editFormats:(id)sender;
 
 @end

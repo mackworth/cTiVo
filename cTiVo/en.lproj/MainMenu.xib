@@ -229,6 +229,15 @@
 									<reference key="NSOnImage" ref="35465992"/>
 									<reference key="NSMixedImage" ref="502551668"/>
 								</object>
+								<object class="NSMenuItem" id="684169279">
+									<reference key="NSMenu" ref="720053764"/>
+									<string key="NSTitle">Pause Queue</string>
+									<string key="NSKeyEquiv">u</string>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="35465992"/>
+									<reference key="NSMixedImage" ref="502551668"/>
+								</object>
 								<object class="NSMenuItem" id="72110368">
 									<reference key="NSMenu" ref="720053764"/>
 									<string key="NSTitle">Refresh TiVo</string>
@@ -797,6 +806,7 @@
 								<string key="NSFrame">{{1, 210}, {232, 16}}</string>
 								<reference key="NSSuperview" ref="190679637"/>
 								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:60</string>
 								<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								<int key="NSsFlags">1</int>
@@ -1106,6 +1116,22 @@
 					<int key="connectionID">1077</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">pauseMenuItem</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="684169279"/>
+					</object>
+					<int key="connectionID">1090</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">togglePause:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="684169279"/>
+					</object>
+					<int key="connectionID">1091</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
 						<string key="label">checkForUpdates:</string>
 						<reference key="source" ref="56197990"/>
@@ -1372,6 +1398,7 @@
 							<reference ref="254048281"/>
 							<reference ref="56498923"/>
 							<reference ref="997268993"/>
+							<reference ref="684169279"/>
 						</array>
 						<reference key="parent" ref="379814623"/>
 					</object>
@@ -1881,6 +1908,11 @@
 						<reference key="object" ref="796623023"/>
 						<reference key="parent" ref="135398297"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1078</int>
+						<reference key="object" ref="684169279"/>
+						<reference key="parent" ref="720053764"/>
+					</object>
 				</array>
 			</object>
 			<dictionary class="NSMutableDictionary" key="flattenedProperties">
@@ -1917,6 +1949,15 @@
 					</object>
 				</object>
 				<string key="1073.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<object class="NSMutableDictionary" key="1078.IBAttributePlaceholdersKey">
+					<string key="NS.key.0">ToolTip</string>
+					<object class="IBToolTipAttribute" key="NS.object.0">
+						<string key="name">ToolTip</string>
+						<reference key="object" ref="684169279"/>
+						<string key="toolTip">Reload Now Playing from TiVo</string>
+					</object>
+				</object>
+				<string key="1078.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="129.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="130.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="131.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2079,29 +2120,33 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">1077</int>
+			<int key="maxID">1096</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<object class="IBPartialClassDescription">
 					<string key="className">MTAppDelegate</string>
 					<string key="superclassName">NSObject</string>
-					<object class="NSMutableDictionary" key="actions">
-						<string key="NS.key.0">editFormats:</string>
-						<string key="NS.object.0">id</string>
-					</object>
-					<object class="NSMutableDictionary" key="actionInfosByName">
-						<string key="NS.key.0">editFormats:</string>
-						<object class="IBActionInfo" key="NS.object.0">
+					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="editFormats:">id</string>
+						<string key="togglePause:">id</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="editFormats:">
 							<string key="name">editFormats:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-					</object>
+						<object class="IBActionInfo" key="togglePause:">
+							<string key="name">togglePause:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="exportTableView">NSTableView</string>
 						<string key="formatSelectionTable">NSView</string>
 						<string key="iTunesMenuItem">NSMenuItem</string>
 						<string key="optionsMenu">NSMenu</string>
+						<string key="pauseMenuItem">NSMenuItem</string>
 						<string key="refreshTiVoMenuItem">NSMenuItem</string>
 						<string key="simulEncodeItem">NSMenuItem</string>
 						<string key="skipCommercialsItem">NSMenuItem</string>
@@ -2123,6 +2168,10 @@
 						<object class="IBToOneOutletInfo" key="optionsMenu">
 							<string key="name">optionsMenu</string>
 							<string key="candidateClassName">NSMenu</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="pauseMenuItem">
+							<string key="name">pauseMenuItem</string>
+							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="refreshTiVoMenuItem">
 							<string key="name">refreshTiVoMenuItem</string>
