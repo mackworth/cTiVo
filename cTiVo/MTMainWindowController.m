@@ -331,6 +331,13 @@ __DDLOGHERE__
 	if ([menu.title caseInsensitiveCompare:@"Delete"] == NSOrderedSame) {
 		[self removeFromDownloadQueue:menu];
 	}
+	if ([menu.title caseInsensitiveCompare:@"Reschedule"] == NSOrderedSame) {
+		NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
+		NSArray *itemsToRemove = [downloadQueueTable.sortedShows objectsAtIndexes:selectedRows];
+		for (MTTiVoShow *show in itemsToRemove) {
+			[show rescheduleShow:@(NO)];
+		}
+	}
 	if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		NSArray * selectedShows = [downloadQueueTable.sortedShows objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
 		[tiVoManager.subscribedShows addSubscriptions:selectedShows];

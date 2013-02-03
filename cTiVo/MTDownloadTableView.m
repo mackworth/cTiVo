@@ -406,10 +406,23 @@
 		insertRow = tiVoManager.downloadQueue.count; //just beyond end of
 	}
 	//move to after the completed/inprogress ones
-	while (insertRow < [tiVoManager downloadQueue].count && [((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).downloadStatus intValue] != kMTStatusNew) {
-		insertRow ++;
+	//Check to see if user want to reschdule current download
+	BOOL didReschedule = NO;
+	if (insertRow < [tiVoManager downloadQueue].count && [((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).downloadStatus intValue] == kMTStatusDownloading) {
+		NSString *message = [NSString stringWithFormat:@"Do you want to reschedule %@",((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).showTitle];
+		NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
+		NSInteger returnValue = [insertDownloadAlert runModal];
+		if (returnValue == 1) {
+			[((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]) rescheduleShow:@(NO)];
+			didReschedule = YES;
+		}
 	}
-	
+	if (!didReschedule) {
+		while (insertRow < [tiVoManager downloadQueue].count && [((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).downloadStatus intValue] != kMTStatusNew) {
+			insertRow ++;
+		}
+	}
+
 	NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
 	NSDictionary *options = [NSDictionary dictionary];
 	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
