@@ -14,118 +14,125 @@
 @class MTProgramTableView;
 
 @interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding> {
-    NSFileHandle    *downloadFileHandle,
-                    *decryptLogFileHandle,
-                    *decryptLogFileReadHandle,
-                    *commercialFileHandle,
-                    *commercialLogFileHandle,
-                    *commercialLogFileReadHandle,
-                    *encodeFileHandle,
-                    *encodeLogFileHandle,
-                    *encodeLogFileReadHandle,
-                    *bufferFileReadHandle,
-                    *bufferFileWriteHandle,
-                    *devNullFileHandle;
-	NSString *decryptFilePath, *decryptLogFilePath, *encodeLogFilePath, *commercialFilePath, *commercialLogFilePath;
-    double dataDownloaded;
-    NSTask *encoderTask, *decrypterTask, *commercialTask;
-	NSURLConnection *activeURLConnection, *detailURLConnection;
-	NSPipe *pipe1, *pipe2;
-	BOOL volatile writingData, downloadingURL, pipingData, isCanceled;
-	off_t readPointer, writePointer;
-	NSXMLParser *parser;
-	NSMutableString *elementString;
-	NSMutableArray *elementArray;
-	NSArray *arrayHolder;
-	BOOL    gotDetails;
-	NSDictionary *parseTermMapping;
-	double previousProcessProgress;
-    NSDate *previousCheck;
-}
-
-@property (nonatomic, readonly) NSString *showTitleForFiles,
-									*episodeGenre;
+ }
 
 
-@property (nonatomic, retain) NSString *downloadDirectory,
+#pragma mark - Which TiVo did we come from
+@property (nonatomic, assign) MTTiVo *tiVo;
+@property (nonatomic, retain) NSString *tempTiVoName;  //used before we find TiVo
 
-									*showTitle,
+//--------------------------------------------------------------
+#pragma mark - Properties loaded in from TiVo's XML
+@property (nonatomic, retain) NSString 
+									*seriesTitle,
+									*episodeTitle,
 									*showDescription,
 									*showTime,
-									*showStatus,
-									*episodeTitle,
-									*showGenre,
 									*episodeNumber,
-									*isEpisode,
 									*originalAirDate,
-									*originalAirDateNoTime,
-                                    *seriesTitle,
 									*showLengthString,
                                     *channelString,
-                                    *programId,
+                                    *stationCallsign,
+									*programId,
                                     *seriesId,
                                     *tvRating,
                                     *sourceType,
-                                    *idGuidSource,
-                                    *stationCallsign;
+                                    *idGuidSource;
 
-@property (nonatomic, retain) NSArray *vActor,
-										*vExecProducer,
-										*vProgramGenre,
-										*vSeriesGenre,
-										*vGuestStar,
-										*vDirector;
+@property (nonatomic, retain) NSNumber  *protectedShow,  //really BOOLs
+										*inProgress,
+										*isHD;
+@property					  double fileSize;  //Size on TiVo;
+
+@property (nonatomic, retain) NSURL *downloadURL,
+									*detailURL;
 
 @property (nonatomic, retain) NSDate *showDate;
+@property					  int    showID;
 
-@property (nonatomic, retain) NSNumber *downloadIndex, *protectedShow, *isHD, *inProgress;
+@property					  time_t showLength;  //length of show in seconds
 
-@property (nonatomic, readonly) NSString *encodeFilePath,
-										 *bufferFilePath,
+
+
+#pragma mark - Properties loaded in from Details Page
+@property int episodeYear;
+
+
+//--------------------------------------------------------------
+#pragma mark - Calculated properties for display 
+@property (nonatomic, retain)	NSString *showTitle;  //calculated from series: episode
+@property (nonatomic, readonly) NSString *yearString,
+										*originalAirDateNoTime,
 										 *showDateString,
-										 *showMediumDateString,
-										 *hDString,
-										 *downloadFilePath;
+										 *showMediumDateString;
+@property						int	season, episode; //calculated from EpisodeNumber
+@property (nonatomic, readonly) NSString *seasonString;
+@property (nonatomic, readonly) NSString *seasonEpisode; // S02 E04 version
 
-//Properties for display in detail
+@property (nonatomic, readonly)	NSString *episodeGenre;
 
-@property (nonatomic, readonly) NSAttributedString *actors, *guestStars, *directors, *producers;
-@property (nonatomic, readonly) NSString *yearString, *seasonString;
+@property (nonatomic, readonly) BOOL    isMovie;
+@property (nonatomic, readonly) NSString *IDString,
+										*lengthString,
+										*isQueuedString,
+										*isHDString,
+										*sizeString;
+@property (nonatomic, readonly) NSAttributedString *actors,
+													*guestStars,
+													*directors,
+													*producers;
 
-@property (nonatomic, readonly) NSString *seasonEpisode; //attempts to build S02 E04 version
-@property time_t showLength;  //length of show in seconds
-@property (nonatomic, retain) NSURL *downloadURL, *detailURL;
-@property int  showID, season, episode, episodeYear, numRetriesRemaining, numStartupRetriesRemaining;
 
-
-@property (retain) NSNumber *downloadStatus;
-@property double processProgress; //Should be between 0 and 1
-@property double fileSize;  //Size on TiVo;
-@property (nonatomic, retain) MTFormat *encodeFormat;
-@property (nonatomic, assign) MTTiVo *tiVo;
-@property (nonatomic, retain) NSString *tempTiVoName;
-@property BOOL addToiTunesWhenEncoded, simultaneousEncode, isSimultaneousEncoding, isQueued, skipCommercials,
-                isSelected;//Used for refresh of table
-
-@property (readonly) BOOL isInProgress;
-@property (nonatomic, readonly) BOOL isMovie;
-//@property (nonatomic, assign) MTProgramList *myTableView;
-
-@property (readonly) NSDictionary * queueRecord;
-
+//--------------------------------------------------------------
+#pragma mark - Properties/Methods for persistent queue
+@property (readonly) NSDictionary * queueRecord;  //used to write
 
 -(BOOL) isSameAs:(NSDictionary *) queueEntry;
 -(void) restoreDownloadData:(NSDictionary *) queueEntry;
--(void)rescheduleShow:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
 
+
+
+#pragma mark - Properties for download/conversion work
+@property (nonatomic, retain) NSNumber *downloadIndex;
+
+@property (nonatomic, retain) NSString *downloadDirectory;
+@property (nonatomic, retain) MTFormat *encodeFormat;
+@property BOOL  addToiTunesWhenEncoded,
+				simultaneousEncode,
+				skipCommercials;
+				
+@property int  	numRetriesRemaining,
+				numStartupRetriesRemaining;
+
+@property (nonatomic, readonly) NSString *encodeFilePath,
+										 *bufferFilePath,   //
+										 *downloadFilePath;
+
+
+
+//--------------------------------------------------------------
+#pragma mark - Properties for download/conversion progress
+@property (retain) NSNumber *downloadStatus;
+@property (nonatomic, readonly)	NSString *showStatus;
+
+@property double processProgress; //Should be between 0 and 1
+
+@property BOOL isSimultaneousEncoding,
+				isQueued,
+                isSelected;//Used for refresh of table
+@property (readonly) BOOL isNew, isDownloading, isInProgress, isDone;
+
+
+#pragma mark - Methods for download/conversion work
+-(void)rescheduleShow:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
 -(void)cancel;
 -(void)download;
 -(void)decrypt;
 -(void)commercial;
 -(void)encode;
 -(void)getShowDetail;
-//-(void)getShowDetailWithNotification;
 
+//Move to category on NSString
 +(NSDate *)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString;
 
 

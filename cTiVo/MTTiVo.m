@@ -318,7 +318,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 					[self updatePortsInURLString:element];
 				}
 				[currentShow setValue:[NSURL URLWithString:element] forKey:@"detailURL"];
-				DDLogVerbose(@"Detail URL is %@",[NSURL URLWithString:element]);
+				DDLogVerbose(@"Detail URL is %@",currentShow.detailURL);
 			}
         } else if (gettingContent) {
             //Get URL for Content here
@@ -332,7 +332,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 					[self updatePortsInURLString:element];
 				}
 				[currentShow setValue:[NSURL URLWithString:element] forKey:@"downloadURL"];
-				DDLogVerbose(@"Content URL is %@",[NSURL URLWithString:element]);
+				DDLogVerbose(@"Content URL is %@",currentShow.downloadURL);
 			}
         } else if ([elementToPropertyMap objectForKey:elementName]){
 //        [currentShow setValue:element forKey:elementToPropertyMap[elementName]];
@@ -511,7 +511,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     if (!isDownloading) {
 		DDLogDetail(@"%@ Checking for new download", self);
 		for (MTTiVoShow *s in self.downloadQueue) {
-            if ([s.downloadStatus intValue] == kMTStatusNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
+            if (s.isNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
                 if(s.tiVo.isReachable) {
                     if (s.simultaneousEncode) {
                         tiVoManager.numEncoders++;

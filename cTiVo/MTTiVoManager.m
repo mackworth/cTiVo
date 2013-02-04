@@ -53,25 +53,25 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 // Once again - do nothing, as we don't have a retain counter for this object.
-- (id)retain {
-    return self;
-}
+//- (id)retain {
+//    return self;
+//}
 
-// Replace the retain counter so we can never release this object.
-- (NSUInteger)retainCount {
-    return NSUIntegerMax;
-}
-
-// This function is empty, as we don't want to let the user release this object.
-- (oneway void)release {
-    
-}
-
-//Do nothing, other than return the shared instance - as this is expected from autorelease.
-- (id)autorelease {
-    return self;
-}
-
+//// Replace the retain counter so we can never release this object.
+//- (NSUInteger)retainCount {
+//    return NSUIntegerMax;
+//}
+//
+//// This function is empty, as we don't want to let the user release this object.
+//- (oneway void)release {
+//    
+//}
+//
+////Do nothing, other than return the shared instance - as this is expected from autorelease.
+//- (id)autorelease {
+//    return self;
+//}
+//
 
 -(id)init
 {
@@ -414,17 +414,25 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[self setQueueEndTime];
 }
 
+-(double) secondsUntilNextTimeOfDay:(NSDate *) date {
+	//find the next timeOfDay that the timeOfDay represented by date will occur (could be a category on NSDate)
+	const int secondsInADay = 3600 * 24;
+	double now = [[NSDate date] timeIntervalSince1970];
+	double currentSecondsOfToday = (int)now % secondsInADay;
+	double secondsAtStartOfDay = now - currentSecondsOfToday;
+	double startTimeOfDayinSeconds = (int)[date timeIntervalSince1970] % secondsInADay;
+	//now advance it to a time after now
+	while (startTimeOfDayinSeconds < currentSecondsOfToday) startTimeOfDayinSeconds += (double) secondsInADay;
+	return secondsAtStartOfDay + startTimeOfDayinSeconds - now;
+}
+
 -(void)setQueueStartTime
 {
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(unPauseQueue) object:nil];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]) return;
-	int secondsInADay = 3600 * 24;
-	double currentSeconds = (int)[[NSDate date] timeIntervalSince1970] % secondsInADay;
-	double secondsAtStartOfDay = [[NSDate date] timeIntervalSince1970] - currentSeconds;
-	NSDate *startTime = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
-	double seconds = (int)[startTime timeIntervalSince1970] % secondsInADay;
-	if (seconds < currentSeconds) seconds += (double) secondsInADay;
-	double targetSeconds = secondsAtStartOfDay + seconds - [[NSDate date] timeIntervalSince1970];
+	NSDate* startDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
+	double targetSeconds = [self secondsUntilNextTimeOfDay:startDate];
+	DDLogDetail(@"Will start queue in %f seconds, due to beginDate of %@",targetSeconds, startDate);
 	[self performSelector:@selector(unPauseQueue) withObject:nil afterDelay:targetSeconds];
 }
 
@@ -432,13 +440,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(pauseQueue:) object:@(NO)];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]) return;
-	int secondsInADay = 3600 * 24;
-	double currentSeconds = (int)[[NSDate date] timeIntervalSince1970] % secondsInADay;
-	double secondsAtStartOfDay = [[NSDate date] timeIntervalSince1970] - currentSeconds;
-	NSDate *endTime = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
-	double seconds = (int)[endTime timeIntervalSince1970] % secondsInADay;
-	if (seconds < currentSeconds) seconds += (double) secondsInADay;
-	double targetSeconds = secondsAtStartOfDay + seconds - [[NSDate date] timeIntervalSince1970];
+	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
+	double targetSeconds = [self secondsUntilNextTimeOfDay:endDate];
+	DDLogDetail(@"Will pause queue in %f seconds, due to endDate of %@",targetSeconds, endDate);
 	[self performSelector:@selector(pauseQueue:) withObject:@(NO) afterDelay:targetSeconds];
 }
 
@@ -607,7 +611,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	for (MTTiVoShow * show in shows) {
 		NSUInteger index = [[tiVoManager downloadQueue] indexOfObject :show];
 		//can't move an inprogress/canceled/failed one.
-		if (index != NSNotFound && (show.downloadStatus.intValue == kMTStatusNew)) {
+		if (index != NSNotFound && (show.isNew)) {
 			[fromIndexSet addIndex:index];
 		}
 	}
@@ -643,7 +647,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 					if (p==program) {
 						DDLogDetail(@" %@ already in queue",p);
 					} else {
-						DDLogReport(@"program %@ already in queue as %@ with same ID %@!",p, program, p.programId);
+						DDLogReport(@"program %@ already in queue as %@ with same ID %d!",p, program, p.showID);
 					}
 					programFound = YES;
 					break;
@@ -747,8 +751,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(NSInteger)numberOfShowsToDownload
 {
 	NSInteger n= 0;
-	for (MTTiVoShow *s in _downloadQueue) {
-		if (!([s.downloadStatus intValue] == kMTStatusDone || [s.downloadStatus intValue] == kMTStatusFailed)) {
+	for (MTTiVoShow *show in _downloadQueue) {
+		if (!show.isDone) {
 			n++;
 		}
 	}

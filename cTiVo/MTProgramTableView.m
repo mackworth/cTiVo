@@ -238,38 +238,33 @@
 		}
 			result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
-		NSInteger length = (thisShow.showLength+30)/60; //round up to nearest minute;
-		result.textField.stringValue = [NSString stringWithFormat:@"%ld:%0.2ld",length/60,length % 60];
-        result.toolTip = result.textField.stringValue;
+		result.textField.stringValue = thisShow.lengthString;
+		result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.seriesTitle;
+		result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.seasonEpisode;
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.isQueued ? @"✔" : @"";
+		result.textField.stringValue = thisShow.isQueuedString;
 	} else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
-		result.textField.stringValue = [thisShow.isHD boolValue] ? @"✔" : @"";
+		result.textField.stringValue = thisShow.isHDString;
 		result.textField.alignment = NSCenterTextAlignment;
 	} else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.channelString;
 	} else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
-		if (thisShow.fileSize >= 1000000000) {
-			result.textField.stringValue = [NSString stringWithFormat:@"%0.1fGB",thisShow.fileSize/1000000000.0];
-		} else {
-			result.textField.stringValue = [NSString stringWithFormat:@"%ldMB",((NSInteger)thisShow.fileSize)/1000000 ];
-		};
+		result.textField.stringValue = thisShow.sizeString;
 	} else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
-		result.textField.stringValue = [NSString stringWithFormat:@"%d", thisShow.showID ];
-	} else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.seriesTitle;
-		result.toolTip = result.textField.stringValue;
+		result.textField.stringValue = thisShow.IDString;
 	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.episodeTitle;
 		result.toolTip = result.textField.stringValue;
+	} else if ([tableColumn.identifier compare:@"Station"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.stationCallsign;
 	} else if ([tableColumn.identifier compare:@"Genre"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.episodeGenre;
         result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Station"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.stationCallsign;
 	} else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
 		NSLog(@"airdate: %@",thisShow.originalAirDateNoTime);
 		result.textField.stringValue = thisShow.originalAirDateNoTime ? thisShow.originalAirDateNoTime : @"";

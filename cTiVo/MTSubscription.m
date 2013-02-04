@@ -96,7 +96,7 @@ __DDLOGHERE__
 
 -(void) checkSubscriptionShow:(MTTiVoShow *) thisShow {
 	DDLogVerbose(@"checking Subscription for %@", thisShow);
-	if ([self isSubscribed:thisShow] && ([thisShow.downloadStatus intValue] == kMTStatusNew)) {
+	if ([self isSubscribed:thisShow] && (thisShow.isNew)) {
 		DDLogDetail(@"Subscribed; adding %@", thisShow);
        MTSubscription * subscription = [self findShow:thisShow];
        thisShow.encodeFormat = subscription.encodeFormat;

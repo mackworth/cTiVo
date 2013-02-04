@@ -142,18 +142,16 @@ __DDLOGHERE__
 }
 
 - (void) refreshAddToQueueButton: (NSNotification *) notification {
-	BOOL foundAny = NO;
-	for (MTTiVoShow * show in tiVoManager.downloadQueue) {
-		NSInteger status = [show.downloadStatus intValue];
-		if (status != kMTStatusDone && status != kMTStatusFailed) {
-			foundAny = YES;
-			break; //no real need to count them all
-		}
-	}
-	if (foundAny ) {
+	addToQueueButton.title = @"Download";
+	if (tiVoManager.processingPaused) {
 		addToQueueButton.title =@"Add to Queue";
-    } else {
-		addToQueueButton.title =@"Download";
+	} else {
+		for (MTTiVoShow * show in tiVoManager.downloadQueue) {
+			if (!show.isDone) {
+				addToQueueButton.title =@"Add to Queue";
+				break; //no real need to count them all
+			}
+		}
 	}
 }
 
@@ -234,7 +232,7 @@ __DDLOGHERE__
             [tiVoManager.subscribedShows saveSubscriptions];
        } else if ([thisButton.owner class] == [MTTiVoShow class]) {
             MTTiVoShow * show = (MTTiVoShow *) thisButton.owner;
-           if([show.downloadStatus intValue] == kMTStatusNew) {
+           if(show.isNew) {
                 show.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
             }
           [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationDownloadStatusChanged object:nil];
@@ -320,9 +318,22 @@ __DDLOGHERE__
 	}
 }
 
--(void)doubleClickForDetails:(id)input
-{
+-(void)doubleClickForDetails:(id)input {
+	NSLog(@"DoubleClick input %@",input);
 	[showDetailDrawer open];
+	if (input == tiVoShowTable || input==downloadQueueTable) {
+		NSInteger rowNumber = [input clickedRow];
+		NSLog(@"clickedRow %ld",rowNumber);
+		if (rowNumber != -1) {
+			MTTiVoShow * show = [[input sortedShows] objectAtIndex:rowNumber];
+			if (show.isDone ) {
+				NSString * showPath = show.encodeFilePath;
+				NSLog(@"launching file %@ ", showPath);
+				[[NSWorkspace sharedWorkspace] openFile:showPath];  //don't really care if it worked or not.
+				[[NSWorkspace sharedWorkspace] openFile:showPath withApplication:@"Finder"];
+			}
+		}
+	}
 }
 
 
