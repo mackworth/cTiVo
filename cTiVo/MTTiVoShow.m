@@ -743,28 +743,32 @@ __DDLOGHERE__
 -(NSMutableArray *)encodingArgumentsWithInputFile:(NSString *)inputFilePath outputFile:(NSString *)outputFilePath
 {
 	NSMutableArray *arguments = [NSMutableArray array];
-    if (_encodeFormat.encoderVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderVideoOptions]];
-	if (_encodeFormat.encoderAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderAudioOptions]];
-	if (_encodeFormat.encoderOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderOtherOptions]];
-	if ([_encodeFormat.comSkip boolValue] && _skipCommercials) {
-		[arguments addObject:@"-edl"];
-		[arguments addObject:[NSString stringWithFormat:@"/tmp/%@.tivo.edl",self.showTitleForFiles]];
-	}
-    if (_encodeFormat.outputFileFlag.length) {
-        [arguments addObject:_encodeFormat.outputFileFlag];
-        [arguments addObject:outputFilePath];
-        if (_encodeFormat.inputFileFlag.length) {
-            [arguments addObject:_encodeFormat.inputFileFlag];
-        }
-        [arguments addObject:inputFilePath];
-    } else {
-        if (_encodeFormat.inputFileFlag.length) {
-            [arguments addObject:_encodeFormat.inputFileFlag];
-        }
-        [arguments addObject:inputFilePath];
-        [arguments addObject:outputFilePath];
-    }
-	DDLogVerbose(@"encoding arguments: %@", arguments);
+    if ([_encodeFormat.encoderVideoOptions compare: @"VLC"] == NSOrderedSame) {
+		[arguments addObject:@"-"];
+	} else {
+		
+		if (_encodeFormat.encoderVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderVideoOptions]];
+		if (_encodeFormat.encoderAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderAudioOptions]];
+		if (_encodeFormat.encoderOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderOtherOptions]];
+		if ([_encodeFormat.comSkip boolValue] && _skipCommercials) {
+			[arguments addObject:@"-edl"];
+			[arguments addObject:[NSString stringWithFormat:@"/tmp/%@.tivo.edl",self.showTitleForFiles]];
+		}
+		if (_encodeFormat.outputFileFlag.length) {
+			[arguments addObject:_encodeFormat.outputFileFlag];
+			[arguments addObject:outputFilePath];
+			if (_encodeFormat.inputFileFlag.length) {
+				[arguments addObject:_encodeFormat.inputFileFlag];
+			}
+			[arguments addObject:inputFilePath];
+		} else {
+			if (_encodeFormat.inputFileFlag.length) {
+				[arguments addObject:_encodeFormat.inputFileFlag];
+			}
+			[arguments addObject:inputFilePath];
+			[arguments addObject:outputFilePath];
+		}
+	}DDLogVerbose(@"encoding arguments: %@", arguments);
 	return arguments;
 }
 
