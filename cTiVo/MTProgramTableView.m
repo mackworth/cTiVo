@@ -256,7 +256,7 @@
 	} else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.sizeString;
 	} else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.IDString;
+		result.textField.stringValue = thisShow.idString;
 	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.episodeTitle;
 		result.toolTip = result.textField.stringValue;

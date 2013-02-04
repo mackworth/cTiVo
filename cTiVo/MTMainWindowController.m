@@ -76,6 +76,12 @@ __DDLOGHERE__
 
 	[self buildColumnMenuForTables ];
 	[pausedLabel setNextResponder:downloadQueueTable];  //Pass through mouse events to the downloadQueueTable.
+	
+	[tiVoShowTable setTarget: self];
+	[tiVoShowTable setDoubleAction:@selector(doubleClickForDetails:)];
+	
+	[downloadQueueTable setTarget: self];
+	[downloadQueueTable setDoubleAction:@selector(doubleClickForDetails:)];
 
 }
 
@@ -298,27 +304,30 @@ __DDLOGHERE__
 
 -(IBAction)programMenuHandler:(NSMenuItem *)menu
 {
+	MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
 	if ([menu.title caseInsensitiveCompare:@"Download"] == NSOrderedSame) {
 		[tiVoShowTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
 		[self downloadSelectedShows:menu];
-	}
-	if ([menu.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
-		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
+	} else if ([menu.title rangeOfString:@"Refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
 		[thisShow.tiVo updateShows:nil];
-	}
-	if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
+	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		[tiVoShowTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
 		[self subscribe:menu];
-	}
-	if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
-		self.showForDetail = tiVoShowTable.sortedShows[menuTableRow];
+	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
+		self.showForDetail = thisShow;
 		[tiVoShowTable deselectAll:nil];
 		[tiVoShowTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:NO];
 		[showDetailDrawer open];
+	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
+		[thisShow playVideo];
+	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
+		[thisShow revealInFinder];
+		
 	}
 }
 
--(void)doubleClickForDetails:(id)input {
+
+-(IBAction)doubleClickForDetails:(id)input {
 	NSLog(@"DoubleClick input %@",input);
 	[showDetailDrawer open];
 	if (input == tiVoShowTable || input==downloadQueueTable) {
@@ -326,12 +335,8 @@ __DDLOGHERE__
 		NSLog(@"clickedRow %ld",rowNumber);
 		if (rowNumber != -1) {
 			MTTiVoShow * show = [[input sortedShows] objectAtIndex:rowNumber];
-			if (show.isDone ) {
-				NSString * showPath = show.encodeFilePath;
-				NSLog(@"launching file %@ ", showPath);
-				[[NSWorkspace sharedWorkspace] openFile:showPath];  //don't really care if it worked or not.
-				[[NSWorkspace sharedWorkspace] openFile:showPath withApplication:@"Finder"];
-			}
+			[show revealInFinder];
+			[show playVideo];
 		}
 	}
 }
@@ -341,8 +346,7 @@ __DDLOGHERE__
 {
 	if ([menu.title caseInsensitiveCompare:@"Delete"] == NSOrderedSame) {
 		[self removeFromDownloadQueue:menu];
-	}
-	if ([menu.title caseInsensitiveCompare:@"Reschedule"] == NSOrderedSame) {
+	} else if ([menu.title caseInsensitiveCompare:@"Reschedule"] == NSOrderedSame) {
 		NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
 		NSArray *itemsToRemove = [downloadQueueTable.sortedShows objectsAtIndexes:selectedRows];
 		if ([tiVoManager.processingPaused boolValue]) {
@@ -353,16 +357,19 @@ __DDLOGHERE__
 			[tiVoManager deleteProgramsFromDownloadQueue:itemsToRemove];
 			[tiVoManager addProgramsToDownloadQueue:itemsToRemove beforeShow:nil];
 		}
-	}
-	if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
+	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		NSArray * selectedShows = [downloadQueueTable.sortedShows objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
 		[tiVoManager.subscribedShows addSubscriptions:selectedShows];
-	}
-	if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
+	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
 		self.showForDetail = downloadQueueTable.sortedShows[menuTableRow];
 		[downloadQueueTable deselectAll:nil];
 		[downloadQueueTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:NO];
 		[showDetailDrawer open];
+	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
+		[downloadQueueTable.sortedShows[menuTableRow] playVideo];
+	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
+		[downloadQueueTable.sortedShows[menuTableRow] revealInFinder];
+		
 	}
 	
 }

@@ -72,7 +72,7 @@
 @property (nonatomic, readonly)	NSString *episodeGenre;
 
 @property (nonatomic, readonly) BOOL    isMovie;
-@property (nonatomic, readonly) NSString *IDString,
+@property (nonatomic, readonly) NSString *idString,
 										*lengthString,
 										*isQueuedString,
 										*isHDString,
@@ -131,6 +131,10 @@
 -(void)commercial;
 -(void)encode;
 -(void)getShowDetail;
+
+#pragma mark - Methods for manipulating video
+-(void) playVideo;
+-(void) revealInFinder;
 
 //Move to category on NSString
 +(NSDate *)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString;

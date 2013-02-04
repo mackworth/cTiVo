@@ -272,9 +272,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     gettingDetails = NO;
 }
 
+-(void) startElement:(NSString *) elementName {
+	//just gives a shorter method name for DDLog
+	 DDLogVerbose(@"%@ Start: %@",self, elementName);
+}
+
 -(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
-    DDLogVerbose(@"Tivo %@ Start: %@",self, elementName);
+    if (LOG_VERBOSE) [self startElement:elementName];
 	element = [NSMutableString string];
     if ([elementName compare:@"Item"] == NSOrderedSame) {
         parsingShow = YES;
@@ -296,12 +301,18 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void)parserElement:(NSString*) elementName {
-	//jsut gives a shorter method name for DDLog
-	DDLogDetail(@"Tivo %@:  %@ --> %@",_tiVo.name,elementName,element);
+	//just gives a shorter method name for DDLog
+	DDLogDetail(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
 }
 
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
+	[self endElement:elementName];
+}
+
+-(void) endElement:(NSString *) elementName {
+	//just gives a shorter method name for DDLog
+
 	[self parserElement: elementName];
     if (parsingShow) {
         //extract show parameters here
@@ -367,7 +378,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                     break;
             }
 			if (valueToSet) [currentShow setValue:valueToSet forKey:keyToSet];
-			DDLogVerbose(@"set %@ property(%d type) to %@ for %@ element",keyToSet, type, valueToSet, elementName);
+			DDLogVerbose(@"set %@ (type %d) to %@ for %@",keyToSet, type, valueToSet, elementName);
 
         } else if ([elementName compare:@"Item"] == NSOrderedSame) {
             MTTiVoShow *thisShow = [previousShowList valueForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
@@ -541,9 +552,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             if ([s.downloadStatus intValue] == kMTStatusDecrypted && s.skipCommercials
 						&&
 				tiVoManager.numCommercials < kMTMaxNumDownloaders) {
-                [s commercial];
+				DDLogDetail(@"Launching commercial detection %@", s);
 				tiVoManager.numCommercials++;
-                break;
+				[s commercial];
+               break;
             }
         }
     }

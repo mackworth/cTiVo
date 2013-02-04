@@ -144,9 +144,9 @@
     return self.sortedShows.count;
 }
 
--(id)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
+-(NSTableCellView *)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
 {
-    id result;
+    NSTableCellView * result;
 	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
     if([identifier compare: @"Programs"] == NSOrderedSame) {
         MTDownloadTableCellView *thisCell = [[[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)] autorelease];
@@ -156,26 +156,26 @@
         // the identifier of the NSTextField instance is set to MyView. This
         // allows it to be re-used
         thisCell.identifier = identifier;
-        result = (id)thisCell;
+        result = thisCell;
     } else if([identifier compare: @"iTunes"] == NSOrderedSame) {
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)] autorelease];
         thisCell.identifier = identifier;
-        result = (id)thisCell;
+        result = thisCell;
     } else if([identifier compare: @"Simu"] == NSOrderedSame) {
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
         thisCell.identifier = identifier;
-        result = (id)thisCell;
+        result = thisCell;
     } else if([identifier compare: @"Skip"] == NSOrderedSame) {
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)] autorelease];
         thisCell.identifier = identifier;
-        result = (id)thisCell;
+        result = thisCell;
    } else if([identifier compare: @"Format"] == NSOrderedSame) {
 		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
 	    thisCell.popUpButton.showHidden = NO;
 		thisCell.identifier = identifier;
        result = thisCell;
     } else {
-        result =[super makeViewWithIdentifier:identifier owner:owner];
+        result = (NSTableCellView*)[super makeViewWithIdentifier:identifier owner:owner];
     }
     return result;
 }
@@ -187,31 +187,33 @@
 	
     // get an existing cell with the MyView identifier if it exists
 	
-    MTDownloadTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
+    NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
     
     // There is no existing cell to reuse so we will create a new one
-    if (result == nil) {
-        
-        // create the new NSTextField with a frame of the {0,0} with the width of the table
-        // note that the height of the frame is not really relevant, the row-height will modify the height
-        // the new text field is then returned as an autoreleased object
-        result = [[[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableColumn.width, 20)] autorelease];
-//        result.textField.font = [NSFont userFontOfSize:14];
-        result.textField.editable = NO;
-        
-        // the identifier of the NSTextField instance is set to MyView. This
-        // allows it to be re-used
-        result.identifier = tableColumn.identifier;
-    }
+//    if (result == nil) {
+//	This isn't getting called in 10.8, and as it always returns a MTDownload, that's a problem in anyone where it is called.
+//
+//        // create the new NSTextField with a frame of the {0,0} with the width of the table
+//        // note that the height of the frame is not really relevant, the row-height will modify the height
+//        // the new text field is then returned as an autoreleased object
+//        result = [[[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableColumn.width, 20)] autorelease];
+////        result.textField.font = [NSFont userFontOfSize:14];
+//        result.editable = NO;
+//        
+//        // the identifier of the NSTextField instance is set to MyView. This
+//        // allows it to be re-used
+//        result.identifier = tableColumn.identifier;
+//    }
     
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
 	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
-		result.progressIndicator.rightText.stringValue = thisShow.showStatus;
- 		result.progressIndicator.leftText.stringValue = thisShow.showTitle ;
-        result.progressIndicator.doubleValue = thisShow.processProgress;
-        result.toolTip = thisShow.showTitle;
+		MTDownloadTableCellView *	programCell = (MTDownloadTableCellView *) result;
+		programCell.progressIndicator.rightText.stringValue = thisShow.showStatus;
+ 		programCell.progressIndicator.leftText.stringValue = thisShow.showTitle ;
+        programCell.progressIndicator.doubleValue = thisShow.processProgress;
+        programCell.toolTip = thisShow.showTitle;
 			
     } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
         result.textField.stringValue = thisShow.tiVo.tiVo.name ;
@@ -287,7 +289,7 @@
 	} else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.sizeString;
 	} else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.IDString;
+		result.textField.stringValue = thisShow.idString;
 	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.episodeTitle;
 		result.toolTip = result.textField.stringValue;
@@ -299,6 +301,8 @@
 	} else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
 		NSLog(@"airdate: %@",thisShow.originalAirDateNoTime);
 		result.textField.stringValue = thisShow.originalAirDateNoTime ? thisShow.originalAirDateNoTime : @"";
+	} else {
+		NSLog(@"Unknown Column: %@ ",tableColumn.identifier);
 	}
     
     // return the result.
@@ -421,7 +425,7 @@
 	if (insertRow < [tiVoManager downloadQueue].count
 			&& ((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).isDownloading
 			&& [self shows:draggedShows contain:((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).tiVo]) {
-		NSString *message = [NSString stringWithFormat:@"Do you want to reschedule %@",((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).showTitle];
+		NSString *message = [NSString stringWithFormat:@"Do you want to reschedule %@?",((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).showTitle];
 		NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
 		NSInteger returnValue = [insertDownloadAlert runModal];
 		if (returnValue == 1) {
@@ -430,7 +434,7 @@
 		}
 	}
 	if (!didReschedule) {
-		while (insertRow < [tiVoManager downloadQueue].count && ((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).isNew) {
+		while (insertRow < [tiVoManager downloadQueue].count && !((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).isNew) {
 			insertRow ++;
 		}
 	}
@@ -464,7 +468,7 @@
 			return [realShows indexOfObject:obj] !=NSNotFound;
 		}];
 		if (showIndexes.count > 0)[self selectRowIndexes:showIndexes byExtendingSelection:NO];
-									
+		//note that dragged copies will now be dealloc'ed 								
 		return YES;
 	} else {
 		return NO;
