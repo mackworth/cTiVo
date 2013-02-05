@@ -27,7 +27,8 @@ __DDLOGHERE__
 	//Make sure the title isn't the same and if it is add a -1 modifier
     for (MTFormat *f in formatList) {
 		if ([_name caseInsensitiveCompare:f.name] == NSOrderedSame) {
-            NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
+			DDLogVerbose(@"Format  %@ same name as existing %@", self, f);
+			NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
             NSTextCheckingResult *result = [ending firstMatchInString:_name options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, _name.length)];
             if (result) {
                 int n = [[f.name substringWithRange:[result rangeAtIndex:2]] intValue];
@@ -53,11 +54,13 @@ __DDLOGHERE__
 		if ([fm fileExistsAtPath:filePath]){ //Its there now check that its executable
 			int permissions = [[fm attributesOfItemAtPath:filePath error:nil][NSFilePosixPermissions] shortValue];
 			if (permissions && 01) { //We have an executable file
+				DDLogVerbose(@"Found %@ in %@ (format %@)", self.encoderUsed, searchPath, self);
 				validPath = filePath;
 				break;
 			}
 		}
 	}
+	if (!validPath) DDLogMajor(@"For format %@, couldn't find %@ in %@ ", self, self.encoderUsed, searchPaths);
 	return validPath;
 }
 
@@ -140,6 +143,7 @@ __DDLOGHERE__
         }
 		[tmpDict setObject:val forKey:key];
 	}
+	DDLogVerbose(@"Format %@ as dict: %@", _name, tmpDict);
 	return tmpDict;
 }
 

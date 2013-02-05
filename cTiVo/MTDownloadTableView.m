@@ -12,6 +12,8 @@
 @implementation MTDownloadTableView
 @synthesize  sortedShows= _sortedShows;
 
+__DDLOGHERE__
+
 -(id) initWithCoder:(NSCoder *)aDecoder
 {
 	self = [super initWithCoder:aDecoder];
@@ -22,12 +24,14 @@
 }
 
 -(IBAction) delete:(id)sender {
-    [myController removeFromDownloadQueue:sender];
+	DDLogDetail(@"user request to delete shows");
+	[myController removeFromDownloadQueue:sender];
 }
 
 
 -(void)setNotifications
 {
+	DDLogDetail(@"Setting up notifications");
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataDownload) name:kMTNotificationDownloadStatusChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataTiVos) name:kMTNotificationTiVoListUpdated object:nil];
@@ -39,23 +43,24 @@
 }
 
 -(void) reloadDataTiVos {
-	//NSLog(@"QQQReloading from Tivos changed");
+	DDLogDetail(@"Reloading DL table from TivoListUpdated");
 	[self reloadData];
 	
 }
 -(void) reloadDataDownload {
-	//	NSLog(@"QQQReloading from Download status changed");
+	DDLogDetail(@"Reloading DL table from DownloadStatusChanged");
 	[self reloadData];
 	
 }
 -(void) reloadDataFormat{
-//	NSLog(@"QQQReloading from Format status changed");
+	DDLogDetail(@"Reloading DL table from FormatStatusChanged");
 	[self reloadData];
 	
 }
 -(void)awakeFromNib
 {  //remember: called multiple times for each new cell loaded
-    self.dataSource = self;
+ 	DDLogDetail(@"DL Table awakeFromNib");
+   self.dataSource = self;
     self.delegate    = self;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
@@ -66,6 +71,7 @@
     //Configure Table Columns depending on how many TiVos
     
 	//save selection to restore after reload
+	DDLogVerbose(@"Reloading DL table");
 	NSArray * selectedShows = [self.sortedShows objectsAtIndexes: self.selectedRowIndexes];
 	
 	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
@@ -99,22 +105,29 @@
 
 -(void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors
 {
+	DDLogDetail(@"Reloading DL table from SortingChanged");
 	[self reloadData];
 }
 
+-(void) updateProgressInCell:(MTDownloadTableCellView *) cell forShow:(MTTiVoShow *) show {
+	cell.progressIndicator.doubleValue = show.processProgress;
+	cell.progressIndicator.rightText.stringValue = show.showStatus;
+	[cell setNeedsDisplay:YES];
+
+}
 -(void)updateProgress
 {
     NSInteger programColumnIndex = [self columnWithIdentifier:@"Programs"];
+    NSInteger seriesColumnIndex = [self columnWithIdentifier:@"Series"];
 	NSArray *displayedShows = self.sortedShows;
 	for (int i=0; i< displayedShows.count; i++) {
-		MTDownloadTableCellView *thisCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
-		if (thisCell) {
-			MTTiVoShow *thisShow = [displayedShows objectAtIndex:i];
-			thisCell.progressIndicator.doubleValue = thisShow.processProgress;
-			thisCell.progressIndicator.rightText.stringValue = thisShow.showStatus;
-			[thisCell setNeedsDisplay:YES];
-		}
+		MTTiVoShow *thisShow = [displayedShows objectAtIndex:i];
+		MTDownloadTableCellView *programCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
+		[self updateProgressInCell: programCell forShow: thisShow];
+		MTDownloadTableCellView *seriesCell = [self viewAtColumn:seriesColumnIndex row:i makeIfNecessary:NO];
+		[self updateProgressInCell: seriesCell forShow: thisShow];
 	}
+		
 }
 
 -(void)dealloc
@@ -148,7 +161,8 @@
 {
     NSTableCellView * result;
 	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
-    if([identifier compare: @"Programs"] == NSOrderedSame) {
+    if([identifier compare: @"Programs"] == NSOrderedSame ||
+	   [identifier compare: @"Series" ] == NSOrderedSame) {
         MTDownloadTableCellView *thisCell = [[[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)] autorelease];
         //        result.textField.font = [NSFont userFontOfSize:14];
         thisCell.textField.editable = NO;
@@ -210,11 +224,15 @@
     // nameArray value at row
 	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
 		MTDownloadTableCellView *	programCell = (MTDownloadTableCellView *) result;
-		programCell.progressIndicator.rightText.stringValue = thisShow.showStatus;
- 		programCell.progressIndicator.leftText.stringValue = thisShow.showTitle ;
-        programCell.progressIndicator.doubleValue = thisShow.processProgress;
+		programCell.progressIndicator.leftText.stringValue = thisShow.showTitle ;
         programCell.toolTip = thisShow.showTitle;
+		[self updateProgressInCell:programCell forShow:thisShow];
 			
+	} else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
+		MTDownloadTableCellView *	seriesCell = (MTDownloadTableCellView *) result;
+		seriesCell.progressIndicator.leftText.stringValue = thisShow.seriesTitle;
+		seriesCell.toolTip = thisShow.seriesTitle;
+		[self updateProgressInCell:seriesCell forShow:thisShow];
     } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
         result.textField.stringValue = thisShow.tiVo.tiVo.name ;
         result.toolTip = result.textField.stringValue;
@@ -273,9 +291,6 @@
 	} else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.lengthString;
        result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.seriesTitle;
-		result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.seasonEpisode;
         result.toolTip = result.textField.stringValue;
@@ -360,13 +375,15 @@
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
  	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
 	[pboard writeObjects:selectedObjects];
-	//NSLog (@"QQQproperty list: (Files:) %@ (shows): %@", [pboard propertyListForType:(NSString *)kUTTypeFileURL],[pboard propertyListForType:kMTTivoShowPasteBoardType]);
+	DDLogVerbose (@"DraggingObjects: %@",selectedObjects);
+	//NSLod(@"Property list: (Files:) %@ (shows): %@", [pboard propertyListForType:(NSString *)kUTTypeFileURL],[pboard propertyListForType:kMTTivoShowPasteBoardType]);
 	return YES;
 }
 
 -(void) draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation {
 	//pre 10.7
 	if (operation == NSDragOperationDelete) {
+		DDLogDetail(@"User dragged to trash");
 		[myController removeFromDownloadQueue:nil];
 	}
 
@@ -383,8 +400,10 @@
 //Drag and drop Receiver
 - (NSDragOperation)tableView:(NSTableView *)aTableView validateDrop:(id < NSDraggingInfo >)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)operation {
 	if ([info draggingSource] == aTableView) {
+		DDLogDetail(@"User dragged within DL Table");
 		return NSDragOperationMove;
 	} else if ([info draggingSource] == myController.tiVoShowTable) {
+		DDLogDetail(@"User dragged from TivoShow Table");
 		return NSDragOperationCopy;
 	} else {
 		return NSDragOperationNone;
@@ -393,13 +412,12 @@
 
 -(BOOL)shows:(NSArray *)shows contain:(MTTiVo *)tiVo
 {
-	BOOL returnValue = NO;
 	for (MTTiVoShow * show in shows) {
 		if (show.tiVo  == tiVo) {
-			returnValue = YES;
+			return  YES;
 		}
 	}
-	return returnValue;
+	return NO;
 }
 
 
@@ -410,6 +428,7 @@
 	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
 	//NSLog(@"calling readObjects%@",pasteboard);
 	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
+	DDLogDetail(@"Accepting drop: %@", draggedShows);
 
 	if (row < 0) row = 0;
 	//although displayed in sorted order, need to work in actual download order
@@ -429,11 +448,13 @@
 		NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
 		NSInteger returnValue = [insertDownloadAlert runModal];
 		if (returnValue == 1) {
+			DDLogDetail(@"User did reschedule active show");
 			[((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]) rescheduleShow:@(NO)];
 			didReschedule = YES;
 		}
 	}
 	if (!didReschedule) {
+		DDLogDetail(@"moving to after completed/active shows");
 		while (insertRow < [tiVoManager downloadQueue].count && !((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).isNew) {
 			insertRow ++;
 		}
@@ -447,15 +468,18 @@
 		MTTiVoShow * realShow= [tiVoManager findRealShow:show];
 		if (realShow) [realShows addObject:realShow];
 	}
-	
+	DDLogVerbose(@"Real Shows being dragged: %@",realShows);
+
 	if( [info draggingSource] == aTableView ) {
 		//reordering self (download table)
 		NSIndexSet * destinationIndexes = [tiVoManager moveShowsInDownloadQueue:realShows toIndex:insertRow];
+		DDLogVerbose(@"moved to %@",destinationIndexes );
 		[self selectRowIndexes:destinationIndexes byExtendingSelection:NO];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
 		return  YES;
 
     } else if ([info draggingSource] == myController.tiVoShowTable) {
+		DDLogVerbose(@"Scheduling shows at %ld",(unsigned long)insertRow );
 		MTTiVoShow * insertShow = nil;
 		if (insertRow < [tiVoManager downloadQueue].count) {
 			insertShow = [tiVoManager.downloadQueue objectAtIndex:insertRow];

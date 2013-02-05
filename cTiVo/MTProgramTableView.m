@@ -15,6 +15,8 @@
 @implementation MTProgramTableView
 @synthesize  sortedShows= _sortedShows;
 
+__DDLOGHERE__
+
 -(id) initWithCoder:(NSCoder *)aDecoder
 {
 	self = [super initWithCoder:aDecoder];
@@ -38,7 +40,8 @@
 
 -(void)awakeFromNib
 {
-    self.dataSource = self;
+	DDLogDetail(@"ProgramTable awakeFromNib");
+	self.dataSource = self;
     self.delegate    = self;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
@@ -48,6 +51,7 @@
 
 -(void) reloadData {
     //Configure Table Columns depending on how many TiVos
+	DDLogDetail(@"Reload Program Table");
     NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
     if (tiVoManager.tiVoList.count == 1) {
         [tiVoColumn setHidden:YES];
@@ -82,7 +86,8 @@
 {
 	[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 	if ([keyPath compare:kMTShowCopyProtected] == NSOrderedSame) {
-		[self reloadData];
+		DDLogDetail(@"User changed ShowCopyProtected menu item");
+ 		[self reloadData];
 	}
 }
 
@@ -138,6 +143,7 @@
 -(NSArray *)sortedShows
 {
 	if (!_sortedShows) {
+		DDLogVerbose(@"Re-sorting Program table");
 		NSPredicate *protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
 		if ([[[NSUserDefaults standardUserDefaults] objectForKey:kMTShowCopyProtected] boolValue]) {
 			protectedPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
@@ -327,6 +333,7 @@
 	// Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
 	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
+	DDLogVerbose(@"Dragging Objects: %@", selectedObjects);
 	[pboard writeObjects:selectedObjects];
    return YES;
 }

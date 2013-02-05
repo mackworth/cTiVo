@@ -13,6 +13,8 @@
 
 @synthesize sortedSubscriptions = _sortedSubscriptions;
 
+__DDLOGHERE__
+
 //-(id)init
 //{
 //	self = [super init];
@@ -51,6 +53,7 @@
 
 -(void)awakeFromNib
 {//remember this can be called multiple times
+	DDLogVerbose(@"Subscription awakeFromNib");
 	self.dataSource  = self;
     self.delegate    = self;
 //    self.rowHeight = 20;
@@ -62,6 +65,7 @@
 -(NSArray *)sortedSubscriptions
 {
 	if (!_sortedSubscriptions) {
+		DDLogVerbose(@"Resorting subscription table");
         self.sortedSubscriptions =[tiVoManager.subscribedShows sortedArrayUsingDescriptors:self.sortDescriptors];
     }
     return _sortedSubscriptions;
@@ -69,6 +73,7 @@
 
 -(void) reloadData {
 	//save selection to preserve after reloadData
+	DDLogVerbose(@"Reloading subscription table");
 	NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
     NSArray * selectedSubs = [self.sortedSubscriptions objectsAtIndexes:selectedRowIndexes];
     
@@ -91,7 +96,7 @@
 }
 
 -(IBAction) unsubscribeSelectedItems:(id) sender {
-	NSLog(@"unsubscribing");
+	DDLogDetail(@"User Requested delete subscriptions");
     NSArray * itemsToRemove = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
 
 	[tiVoManager.subscribedShows  deleteSubscriptions:itemsToRemove];
@@ -203,16 +208,10 @@ static NSDateFormatter *dateFormatter;
 		[result.textField setAlignment:NSRightTextAlignment];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"FormatPopUp"] == NSOrderedSame) {
-//		result.textField.stringValue = [thisSubscription objectForKey:kMTSubscribedSeriesFormat] ;
-//        result.toolTip = result.textField.stringValue;
 		MTFormatPopUpButton * popUp = ((MTPopUpTableCellView *)result).popUpButton;
 		popUp.owner = thisSubscription;
 		popUp.formatList = tiVoManager.formatList;
-//		NSString * tempQQQQ = thisSubscription.encodeFormat.name;
 		thisSubscription.encodeFormat = [popUp selectFormatNamed:thisSubscription.encodeFormat.name];
-// 		if([tempQQQQ compare: thisSubscription.encodeFormat.name] != NSOrderedSame)
-//			NSLog(@"QQQSB popup at %@ changed from %@ to %@", thisSubscription.seriesTitle, tempQQQQ, thisSubscription.encodeFormat.name);
-
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setEnabled: [thisSubscription canAddToiTunes]];
@@ -292,7 +291,8 @@ static NSDateFormatter *dateFormatter;
 	
     switch(context) {
         case NSDraggingContextOutsideApplication:
-            return NSDragOperationDelete;
+			DDLogDetail(@"User dragged subscriptions to trash");
+			return NSDragOperationDelete;
             break;
 			
         case NSDraggingContextWithinApplication:
@@ -322,7 +322,7 @@ static NSDateFormatter *dateFormatter;
 	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
 	//NSLog(@"calling readObjects%@",pasteboard);
 	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
-//	NSLog(@"QQQdragging: %@", draggedShows);
+	DDLogDetail(@"Dragging into Subscriptions: %@", draggedShows);
 	
 	//dragged shows are copies, so we need to find the real show objects
 	NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
@@ -330,10 +330,12 @@ static NSDateFormatter *dateFormatter;
 		MTTiVoShow * realShow= [tiVoManager findRealShow:show];
 		if (realShow) [realShows addObject:realShow];
 	}
+	DDLogVerbose(@"Dragging into Subscriptions: %@", realShows);
 	
 	if( [info draggingSource] == myController.tiVoShowTable  ||
 	    [info draggingSource] == myController.downloadQueueTable) {
 		NSArray * newSubs = [tiVoManager.subscribedShows addSubscriptions: realShows];
+		DDLogVerbose(@"Created new subs: %@", newSubs);
 		
 		//now leave new subscriptions selected
 		self.sortedSubscriptions  = nil;  //reset sort with new subs

@@ -237,6 +237,19 @@ __DDLOGHERE__
 
 #pragma mark - UI support
 
+-(IBAction)togglePause:(id)sender
+{
+	self.tiVoGlobalManager.processingPaused = [self.tiVoGlobalManager.processingPaused boolValue] ? @(NO) : @(YES);
+	DDLogDetail(@"User toggled Pause %@", self.tiVoGlobalManager.processingPaused);
+	//	pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";
+	if ([self.tiVoGlobalManager.processingPaused boolValue]) {
+		[self.tiVoGlobalManager pauseQueue:@(YES)];
+	} else {
+		[self.tiVoGlobalManager unPauseQueue];
+	}
+	
+}
+
 -(void)updateTivoRefreshMenu
 {
 	DDLogDetail(@"Rebuilding TivoRefresh Menu");
@@ -290,11 +303,7 @@ __DDLOGHERE__
 	
 }
 
--(NSNumber *)numberOfUserFormats
-{
-	return [NSNumber numberWithInteger:_tiVoGlobalManager.userFormats.count];
-}
-
+#pragma mark - Preference pages
 -(IBAction)editFormats:(id)sender
 {
 //	[self.formatEditorController showWindow:nil];
@@ -321,6 +330,44 @@ __DDLOGHERE__
 	[NSApp beginSheet:self.advPreferencesController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 }
 
+-(MTPreferencesWindowController *)preferencesController;
+{
+	if (!_preferencesController) {
+		_preferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
+	}
+	return _preferencesController;
+}
+
+-(MTPreferencesWindowController *)advPreferencesController;
+{
+	if (!_advPreferencesController) {
+		_advPreferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
+		[_advPreferencesController window];
+		MTTabViewItem *advTabViewItem = [[[MTTabViewItem alloc] initWithIdentifier:@"AdvSettinge"] autorelease];
+		advTabViewItem.label = @"Advanced Settings";
+		NSViewController *thisController = [[[NSViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil] autorelease];
+		advTabViewItem.windowController = (id)thisController;
+		[_advPreferencesController.myTabView insertTabViewItem:advTabViewItem atIndex:0];
+		NSRect tabViewFrame = ((NSView *)advTabViewItem.view).frame;
+		NSRect editorViewFrame = thisController.view.frame;
+		[thisController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
+		[advTabViewItem.view addSubview:thisController.view];
+		_advPreferencesController.ignoreTabItemSelection = YES;
+		[_advPreferencesController.myTabView selectTabViewItem:advTabViewItem];
+		_advPreferencesController.ignoreTabItemSelection = NO;;
+	}
+	return _advPreferencesController;
+}
+
+
+#pragma mark - Export Formats Methods
+
+-(NSNumber *)numberOfUserFormats
+//used for menu binding
+{
+	return [NSNumber numberWithInteger:_tiVoGlobalManager.userFormats.count];
+}
+
 -(IBAction)exportFormats:(id)sender
 {
 	NSSavePanel *mySavePanel = [[[NSSavePanel alloc] init] autorelease];
@@ -343,20 +390,6 @@ __DDLOGHERE__
 		[formatsToWrite writeToFile:filename atomically:YES];
 	}
 }
-
--(IBAction)togglePause:(id)sender
-{
-	self.tiVoGlobalManager.processingPaused = [self.tiVoGlobalManager.processingPaused boolValue] ? @(NO) : @(YES);
-//	pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";
-	if ([self.tiVoGlobalManager.processingPaused boolValue]) {
-		[self.tiVoGlobalManager pauseQueue:@(YES)];
-	} else {
-		[self.tiVoGlobalManager unPauseQueue];
-	}
-	
-}
-
-#pragma mark - Table Support Methods
 
 -(NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
 {
@@ -418,38 +451,11 @@ __DDLOGHERE__
 	
 }
 
--(MTPreferencesWindowController *)preferencesController;
-{
-	if (!_preferencesController) {
-		_preferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
-	}
-	return _preferencesController;
-}
-
--(MTPreferencesWindowController *)advPreferencesController;
-{
-	if (!_advPreferencesController) {
-		_advPreferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
-		[_advPreferencesController window];
-		MTTabViewItem *advTabViewItem = [[[MTTabViewItem alloc] initWithIdentifier:@"AdvSettinge"] autorelease];
-		advTabViewItem.label = @"Advanced Settings";
-		NSViewController *thisController = [[[NSViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil] autorelease];
-		advTabViewItem.windowController = (id)thisController;
-		[_advPreferencesController.myTabView insertTabViewItem:advTabViewItem atIndex:0];
-		NSRect tabViewFrame = ((NSView *)advTabViewItem.view).frame;
-		NSRect editorViewFrame = thisController.view.frame;
-		[thisController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
-		[advTabViewItem.view addSubview:thisController.view];
-		_advPreferencesController.ignoreTabItemSelection = YES;
-		[_advPreferencesController.myTabView selectTabViewItem:advTabViewItem];
-		_advPreferencesController.ignoreTabItemSelection = NO;;
- }
-	return _advPreferencesController;
-}
-
+#pragma mark - MAK routines
 
 -(void)updateAllTiVos:(id)sender
 {
+	DDLogDetail(@"Updating All TiVos");
 	for (MTTiVo *tiVo in _tiVoGlobalManager.tiVoList) {
 		[tiVo updateShows:sender];
 	}
