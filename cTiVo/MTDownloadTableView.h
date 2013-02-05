@@ -20,4 +20,9 @@
 
 @property (nonatomic, retain) NSArray *sortedShows;
 
+
+-(BOOL)playVideo;
+-(BOOL)revealInFinder;
+-(BOOL)selectionContainsCompletedShows;
+
 @end

@@ -697,7 +697,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 											[[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
 		thisShow.simultaneousEncode = thisShow.encodeFormat.canSimulEncode &&
 											[[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
-		thisShow.skipCommercials = thisShow.encodeFormat.comSkip &&
+		thisShow.skipCommercials = [thisShow.encodeFormat.comSkip boolValue] &&
 											[[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
 		thisShow.downloadDirectory = tiVoManager.downloadDirectory;
 	}

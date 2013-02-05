@@ -2,7 +2,7 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
-		<string key="IBDocument.SystemVersion">12C3012</string>
+		<string key="IBDocument.SystemVersion">12C60</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
@@ -635,7 +635,7 @@
 				<reference key="NSMixedImage" ref="502551668"/>
 			</object>
 			<object class="NSCustomView" id="87137242">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">268</int>
 				<array class="NSMutableArray" key="NSSubviews">
 					<object class="NSTextField" id="616374902">
@@ -643,6 +643,7 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{185, 215}, {159, 17}}</string>
 						<reference key="NSSuperview" ref="87137242"/>
+						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="190679637"/>
 						<string key="NSReuseIdentifierKey">_NS:1535</string>
 						<bool key="NSEnabled">YES</bool>
@@ -692,6 +693,7 @@
 										<array class="NSMutableArray" key="NSSubviews"/>
 										<string key="NSFrameSize">{232, 205}</string>
 										<reference key="NSSuperview" ref="784425062"/>
+										<reference key="NSWindow"/>
 										<reference key="NSNextKeyView" ref="1069054822"/>
 										<string key="NSReuseIdentifierKey">_NS:13</string>
 										<bool key="NSEnabled">YES</bool>
@@ -806,6 +808,7 @@
 								</array>
 								<string key="NSFrame">{{1, 1}, {232, 205}}</string>
 								<reference key="NSSuperview" ref="190679637"/>
+								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="317615150"/>
 								<string key="NSReuseIdentifierKey">_NS:11</string>
 								<reference key="NSDocView" ref="317615150"/>
@@ -817,6 +820,7 @@
 								<int key="NSvFlags">-2147483392</int>
 								<string key="NSFrame">{{224, 17}, {15, 102}}</string>
 								<reference key="NSSuperview" ref="190679637"/>
+								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="805455164"/>
 								<string key="NSReuseIdentifierKey">_NS:58</string>
 								<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
@@ -829,6 +833,8 @@
 								<int key="NSvFlags">-2147483392</int>
 								<string key="NSFrame">{{1, 210}, {232, 16}}</string>
 								<reference key="NSSuperview" ref="190679637"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:60</string>
 								<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								<int key="NSsFlags">1</int>
@@ -839,6 +845,7 @@
 						</array>
 						<string key="NSFrame">{{147, 5}, {234, 207}}</string>
 						<reference key="NSSuperview" ref="87137242"/>
+						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="784425062"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<int key="NSsFlags">133682</int>
@@ -852,6 +859,8 @@
 					</object>
 				</array>
 				<string key="NSFrameSize">{528, 246}</string>
+				<reference key="NSSuperview"/>
+				<reference key="NSWindow"/>
 				<reference key="NSNextKeyView" ref="616374902"/>
 				<string key="NSReuseIdentifierKey">_NS:9</string>
 				<string key="NSClassName">NSView</string>
@@ -1149,6 +1158,38 @@
 						<reference key="destination" ref="684169279"/>
 					</object>
 					<int key="connectionID">1091</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">playVideo:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="666341596"/>
+					</object>
+					<int key="connectionID">1101</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">revealInFinder:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="71099702"/>
+					</object>
+					<int key="connectionID">1103</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">playVideoMenuItem</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="666341596"/>
+					</object>
+					<int key="connectionID">1104</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">showInFinderMenuItem</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="71099702"/>
+					</object>
+					<int key="connectionID">1105</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -2176,7 +2217,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">1100</int>
+			<int key="maxID">1105</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -2203,7 +2244,9 @@
 						<string key="iTunesMenuItem">NSMenuItem</string>
 						<string key="optionsMenu">NSMenu</string>
 						<string key="pauseMenuItem">NSMenuItem</string>
+						<string key="playVideoMenuItem">NSMenuItem</string>
 						<string key="refreshTiVoMenuItem">NSMenuItem</string>
+						<string key="showInFinderMenuItem">NSMenuItem</string>
 						<string key="simulEncodeItem">NSMenuItem</string>
 						<string key="skipCommercialsItem">NSMenuItem</string>
 						<string key="window">NSWindow</string>
@@ -2229,8 +2272,16 @@
 							<string key="name">pauseMenuItem</string>
 							<string key="candidateClassName">NSMenuItem</string>
 						</object>
+						<object class="IBToOneOutletInfo" key="playVideoMenuItem">
+							<string key="name">playVideoMenuItem</string>
+							<string key="candidateClassName">NSMenuItem</string>
+						</object>
 						<object class="IBToOneOutletInfo" key="refreshTiVoMenuItem">
 							<string key="name">refreshTiVoMenuItem</string>
+							<string key="candidateClassName">NSMenuItem</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="showInFinderMenuItem">
+							<string key="name">showInFinderMenuItem</string>
 							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="simulEncodeItem">

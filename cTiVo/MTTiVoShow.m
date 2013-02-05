@@ -183,7 +183,7 @@ __DDLOGHERE__
 	[pool drain];
 }
 
--(void)rescheduleShow:(NSNumber *)decrementRetries
+-(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries
 {
 	DDLogMajor(@"Stalled, %@ download of %@ with progress at %lf with previous check at %@",(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _showTitle, _processProgress, previousCheck );
 	[self cancel];
@@ -1127,7 +1127,7 @@ __DDLOGHERE__
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
 													   //Cancel and restart or delete depending on number of time we've been through this
         DDLogMajor (@"process stalled; rescheduling");
-		[self rescheduleShow:[NSNumber numberWithBool:YES]];
+		[self rescheduleShowWithDecrementRetries:@(YES)];
 	} else if ([self isInProgress]){
 		previousProcessProgress = _processProgress;
 		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
@@ -1208,7 +1208,7 @@ __DDLOGHERE__
 		@catch (NSException *exception) {
 			writingData = NO;
 			DDLogDetail(@"buffer read fail; rescheduling");
-			[self rescheduleShow:[NSNumber numberWithBool:YES]];
+			[self rescheduleShowWithDecrementRetries:!(YES)];
 			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
 			return;
 		}
@@ -1223,7 +1223,7 @@ __DDLOGHERE__
 		@catch (NSException *exception) {
 			writingData = NO;
 			DDLogDetail(@"download write fail; rescheduling");
-			[self rescheduleShow:[NSNumber numberWithBool:YES]];
+			[self rescheduleShowWithDecrementRetries:@(YES)];
 			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
 			return;
 		}
@@ -1239,7 +1239,7 @@ __DDLOGHERE__
 		@catch (NSException *exception) {
 			writingData = NO;
 			DDLogDetail(@"buffer read fail2; rescheduling");
-			[self rescheduleShow:[NSNumber numberWithBool:YES]];
+			[self rescheduleShowWithDecrementRetries:@(YES)];
 			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
 			return;
 		}
@@ -1253,7 +1253,7 @@ __DDLOGHERE__
 			@catch (NSException *exception) {
 				writingData = NO;
 				DDLogDetail(@"download write fail2; rescheduling");
-				[self rescheduleShow:[NSNumber numberWithBool:YES]];
+				[self rescheduleShowWithDecrementRetries:@(YES)];
 				[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
 				return;
 			}
@@ -1324,7 +1324,7 @@ __DDLOGHERE__
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     DDLogMajor(@"URL Connection Failed with error %@",error);
-	[self rescheduleShow:[NSNumber numberWithBool:YES]];
+	[self rescheduleShowWithDecrementRetries:@(YES)];
 }
 
 -(void)dismissAlertSheet
@@ -1385,7 +1385,7 @@ __DDLOGHERE__
 			}
 		}
 		DDLogMajor(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
-		[self performSelector:@selector(rescheduleShow:) withObject:[NSNumber numberWithBool:NO] afterDelay:kMTTiVoAccessDelay];
+		[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:kMTTiVoAccessDelay];
 	} else {
 		_fileSize = downloadedFileSize;  //More accurate file size
 		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.tiVo];

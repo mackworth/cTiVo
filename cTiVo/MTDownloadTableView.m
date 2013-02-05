@@ -148,6 +148,7 @@ __DDLOGHERE__
         NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
         [myController setValue:selectedRows[0] forKey:@"showForDetail"];
     }
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTableSelectionChanged object:nil];
 }
 
 #pragma mark - Table Data Source Protocol
@@ -420,6 +421,51 @@ __DDLOGHERE__
 	return NO;
 }
 
+-(BOOL)selectionContainsCompletedShows
+{
+	BOOL containsCompleted = NO;
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+	for (MTTiVoShow *show in selectedShows) {
+		if (show.isDone) {
+			containsCompleted = YES;
+			break;
+		}
+	}
+	return containsCompleted;
+	
+}
+
+-(BOOL)playVideo
+{
+	BOOL played = NO;
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+	for (MTTiVoShow *show in selectedShows) {
+		if (show.isDone) {
+			[show playVideo];
+			played = YES;
+			break;
+		}
+	}
+	return played;
+}
+
+-(BOOL)revealInFinder
+{
+	BOOL revealed = NO;
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+	for (MTTiVoShow *show in selectedShows) {
+		if (show.isDone) {
+			[show revealInFinder];
+			revealed = YES;
+			break;
+		}
+	}
+	return revealed;
+}
+
 
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation
 {
@@ -449,8 +495,7 @@ __DDLOGHERE__
 		NSInteger returnValue = [insertDownloadAlert runModal];
 		if (returnValue == 1) {
 			DDLogDetail(@"User did reschedule active show");
-			[((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]) rescheduleShow:@(NO)];
-			didReschedule = YES;
+			[((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]) rescheduleShowWithDecrementRetries:@(NO)];
 		}
 	}
 	if (!didReschedule) {

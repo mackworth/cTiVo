@@ -238,7 +238,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 {
     for (MTTiVoShow *show in _shows) {
         if (show.isInProgress) {
-            [show rescheduleShow:@NO];
+            [show rescheduleShowWithDecrementRetries:@NO];
         }
     }
     

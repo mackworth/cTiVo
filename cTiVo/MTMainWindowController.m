@@ -281,14 +281,24 @@ __DDLOGHERE__
 		for (NSMenuItem *mi in [menu itemArray]) {
 			[mi setAction:NSSelectorFromString(selector)];
 		}
-		if (menuTableRow < 0) { //disable row functions  Row based functions have tag=1;
+		if (menuTableRow < 0) { //disable row functions  Row based functions have tag=1 or 2;
 			for (NSMenuItem *mi in [menu itemArray]) {
-				if (mi.tag == 1) {
+				if (mi.tag == 1 || mi.tag == 2) {
 					[mi setAction:NULL];
 				}
 			}
 		} else {
 			[workingTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
+			if (workingTable == tiVoShowTable || workingTable == downloadQueueTable) {
+				MTTiVoShow *thisShow = [workingTable sortedShows][menuTableRow];
+				//diable menu items that depend on having a completed show tag = 2
+				for (NSMenuItem *mi in [menu itemArray]) {
+					if (mi.tag == 2 && !thisShow.isDone) {
+						[mi setAction:NULL];
+					}
+				}
+
+			}
 		}
 		if ([workingTable selectedRowIndexes].count == 0) { //No selection so disable group fuctions
 			for (NSMenuItem *mi in [menu itemArray]) {
@@ -351,7 +361,7 @@ __DDLOGHERE__
 		NSArray *itemsToRemove = [downloadQueueTable.sortedShows objectsAtIndexes:selectedRows];
 		if ([tiVoManager.processingPaused boolValue]) {
 			for (MTTiVoShow *show in itemsToRemove) {
-					[show rescheduleShow:@(NO)];
+					[show rescheduleShowWithDecrementRetries:@(NO)];
 			}
 		} else {
 			[tiVoManager deleteProgramsFromDownloadQueue:itemsToRemove];

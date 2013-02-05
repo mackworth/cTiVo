@@ -124,7 +124,7 @@
 
 
 #pragma mark - Methods for download/conversion work
--(void)rescheduleShow:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
+-(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
 -(void)cancel;
 -(void)download;
 -(void)decrypt;

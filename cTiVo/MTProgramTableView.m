@@ -102,6 +102,54 @@ __DDLOGHERE__
     }
 }
 
+-(BOOL)selectionContainsCompletedShows
+{
+	BOOL containsCompleted = NO;
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+	for (MTTiVoShow *show in selectedShows) {
+		if (show.isDone) {
+			containsCompleted = YES;
+			break;
+		}
+	}
+	return containsCompleted;
+	
+}
+
+
+-(BOOL)playVideo
+{
+	BOOL played = NO;
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+	for (MTTiVoShow *show in selectedShows) {
+		if (show.isDone) {
+			[show playVideo];
+			played = YES;
+			break;
+		}
+	}
+	return played;
+}
+
+-(BOOL)revealInFinder
+{
+	BOOL revealed = NO;
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+	for (MTTiVoShow *show in selectedShows) {
+		if (show.isDone) {
+			[show revealInFinder];
+			revealed = YES;
+			break;
+		}
+	}
+	return revealed;
+}
+
+
+
 
 -(void)dealloc
 {
@@ -168,6 +216,7 @@ __DDLOGHERE__
         NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
         [myController setValue:selectedRows[0] forKey:@"showForDetail"];
     }
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTableSelectionChanged object:nil];
 }
 
 -(void) tableViewColumnDidResize:(NSNotification *) notification {

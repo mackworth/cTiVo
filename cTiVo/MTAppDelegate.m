@@ -134,6 +134,7 @@ __DDLOGHERE__
 	
 	DDLogDetail(@"Starting Program");
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDoneFileMenuItems) name:kMTNotificationTableSelectionChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
 	if (![[[NSUserDefaults standardUserDefaults] objectForKey:kMTPreventSleep] boolValue]) {
 		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:NO] forKey:kMTPreventSleep];
@@ -150,6 +151,7 @@ __DDLOGHERE__
 //	_formatEditorController = nil;
 	[self showMainWindow:nil];
 	[self updateTivoRefreshMenu];
+	[self refreshDoneFileMenuItems];
 	mediaKeyQueue = [NSMutableArray new];
 	gettingMediaKey = NO;
 	signal(SIGPIPE, &signalHandler);
@@ -303,12 +305,44 @@ __DDLOGHERE__
 	
 }
 
+-(void)refreshDoneFileMenuItems
+{
+	BOOL itemsToProcess = [mainWindowController.downloadQueueTable selectionContainsCompletedShows];
+	if (!itemsToProcess) {
+		itemsToProcess = [mainWindowController.tiVoShowTable selectionContainsCompletedShows];
+	}
+	if (itemsToProcess) {
+		showInFinderMenuItem.target = self;
+		showInFinderMenuItem.action = @selector(revealInFinder:);
+		playVideoMenuItem.target = self;
+		playVideoMenuItem.action = @selector(playVideo:);
+	} else {
+		showInFinderMenuItem.action = NULL;
+		playVideoMenuItem.action = NULL;
+	}
+}
+
 #pragma mark - Preference pages
 -(IBAction)editFormats:(id)sender
 {
 //	[self.formatEditorController showWindow:nil];
 	self.preferencesController.startingTabIdentifier = @"Formats";
 	[self showPreferences:nil];
+}
+
+-(IBAction)playVideo:(id)sender
+{
+	if (![mainWindowController.downloadQueueTable playVideo]) {
+		[mainWindowController.tiVoShowTable playVideo];
+	}
+}
+
+-(IBAction)revealInFinder:(id)sender
+{
+	if (![mainWindowController.downloadQueueTable revealInFinder]) {
+		[mainWindowController.tiVoShowTable revealInFinder];
+	}
+	
 }
 
 -(IBAction)editManualTiVos:(id)sender

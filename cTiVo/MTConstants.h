@@ -21,6 +21,7 @@
 #define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"
 
 //UI Change Notifications
+#define kMTNotificationTableSelectionChanged @"MTNotificationTableSelectionChanged"
 #define kMTNotificationTiVoListUpdated @"MTNotificationTiVoListUpdated"
 #define kMTNotificationFormatListUpdated @"MTNotificationFormatListUpdated"
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"

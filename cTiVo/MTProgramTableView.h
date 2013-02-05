@@ -23,5 +23,8 @@
 
 -(NSArray *)sortedShows;
 -(IBAction)selectTivo:(id)sender;
+-(BOOL)revealInFinder;
+-(BOOL)playVideo;
+-(BOOL)selectionContainsCompletedShows;
 
 @end
