@@ -122,7 +122,7 @@ __DDLOGHERE__
     }
 }
 
-
+#pragma mark - GetDetails from Tivo and parse
 -(NSArray *)parseNames:(NSArray *)nameSet
 {
 	if (!nameSet || ![nameSet respondsToSelector:@selector(count)] || nameSet.count == 0 ) { //|| [nameSet[0] isKindOfClass:[NSString class]]) {
@@ -440,6 +440,25 @@ __DDLOGHERE__
 {
 	gotDetails = NO;
 	DDLogMajor(@"Show: %@ Parser Error %@",self.showTitle, parseError);
+}
+
+
+#pragma mark - Set up for queuing / reset
+-(void)prepForResubmit {
+	//set up initial parameters for download before submittal; can also be used to resubmit while still in DL queue
+	self.isQueued = YES;
+	if (self.isInProgress) {
+		[self cancel];
+	}
+	self.numRetriesRemaining = kMTMaxDownloadRetries;
+	self.numStartupRetriesRemaining = kMTMaxDownloadStartupRetries;
+	if (!self.downloadDirectory) {
+		self.downloadDirectory = tiVoManager.downloadDirectory;
+	}
+	[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+    NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:self.tiVo];
+    [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
+
 }
 
 
@@ -834,7 +853,7 @@ __DDLOGHERE__
 	downloadingURL = YES;
     dataDownloaded = 0.0;
     _processProgress = 0.0;
-	DDLogVerbose(@"launching URL for download");
+	DDLogVerbose(@"launching URL for download %@", _downloadURL);
 	previousProcessProgress = 0.0;
 	[activeURLConnection start];
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
@@ -1116,7 +1135,10 @@ __DDLOGHERE__
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
     }
     [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
-    _processProgress = 0.0;
+    if (_processProgress != 0.0 ) {
+		_processProgress = 0.0;
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:self];
+  	}
     
 }
 
@@ -1208,7 +1230,7 @@ __DDLOGHERE__
 		@catch (NSException *exception) {
 			writingData = NO;
 			DDLogDetail(@"buffer read fail; rescheduling");
-			[self rescheduleShowWithDecrementRetries:!(YES)];
+			[self rescheduleShowWithDecrementRetries:@(YES)];
 			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
 			return;
 		}

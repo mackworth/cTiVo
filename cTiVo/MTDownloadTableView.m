@@ -466,6 +466,35 @@ __DDLOGHERE__
 	return revealed;
 }
 
+-(void) askReschedule: (MTTiVoShow *) show {
+	//ask user if they'd like to reschedule a show that's being demoted
+	NSString *message = [NSString stringWithFormat:@"Do you want to reschedule %@?",show.showTitle];
+	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
+	NSInteger returnValue = [insertDownloadAlert runModal];
+	if (returnValue == 1) {
+		DDLogDetail(@"User did reschedule active show %@",show);
+		[show rescheduleShowWithDecrementRetries:@(NO)];
+	}
+}
+
+-(BOOL) askRestarting: (NSArray *) restartShows {
+	//ask user if they'd like to reschedule a show that's being demoted
+	if (restartShows.count ==0) return NO;
+	MTTiVoShow * exampleShow = restartShows[0];
+	NSString * message;
+	if (restartShows.count ==1) {
+		message =  [NSString stringWithFormat:@"Do you want to re-download %@?",exampleShow.showTitle];
+	} else {
+		message = [NSString stringWithFormat:@"Do you want to re-download %@ and other completed shows?",exampleShow.showTitle];
+	}
+	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Re-download" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
+	NSInteger returnValue = [insertDownloadAlert runModal];
+	if (returnValue == 1) {
+		return YES;
+	} else {
+		return NO;
+	}
+}
 
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation
 {
@@ -479,69 +508,100 @@ __DDLOGHERE__
 	if (row < 0) row = 0;
 	//although displayed in sorted order, need to work in actual download order
 	NSUInteger insertRow;
+	MTTiVoShow * insertTarget = nil;
+	
 	if (row < _sortedShows.count) {
-		insertRow = [tiVoManager.downloadQueue indexOfObject: _sortedShows[row]];
+		insertTarget = _sortedShows[row];
+		insertRow = [tiVoManager.downloadQueue indexOfObject: insertTarget];
 	} else {
-		insertRow = tiVoManager.downloadQueue.count; //just beyond end of
+		insertRow = tiVoManager.downloadQueue.count; //just beyond end of array
 	}
-	//move to after the completed/inprogress ones
-	//Check to see if user want to reschdule current download
-	BOOL didReschedule = NO;
-	if (insertRow < [tiVoManager downloadQueue].count
-			&& ((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).isDownloading
-			&& [self shows:draggedShows contain:((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).tiVo]) {
-		NSString *message = [NSString stringWithFormat:@"Do you want to reschedule %@?",((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).showTitle];
-		NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
-		NSInteger returnValue = [insertDownloadAlert runModal];
-		if (returnValue == 1) {
-			DDLogDetail(@"User did reschedule active show");
-			[((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]) rescheduleShowWithDecrementRetries:@(NO)];
-		}
-	}
-	if (!didReschedule) {
-		DDLogDetail(@"moving to after completed/active shows");
-		while (insertRow < [tiVoManager downloadQueue].count && !((MTTiVoShow *)tiVoManager.downloadQueue[insertRow]).isNew) {
-			insertRow ++;
-		}
-	}
-
-//	NSLog(@"dragging: %@", draggedShows);
 	
 	//dragged shows are copies, so we need to find the real show objects
 	NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
+	NSMutableArray * completedShowsBeingMoved =[NSMutableArray array];
 	for (MTTiVoShow * show in draggedShows) {
 		MTTiVoShow * realShow= [tiVoManager findRealShow:show];
 		if (realShow) [realShows addObject:realShow];
+		if (realShow.isDone) [completedShowsBeingMoved addObject:realShow];
+			
 	}
 	DDLogVerbose(@"Real Shows being dragged: %@",realShows);
-
+	
+	//see if we have any completed shows being re-downloaded
+	if (completedShowsBeingMoved.count>0 &&
+		(!insertTarget || insertTarget.isNew)) {
+		//we're moving at least some completedshows below the activeline
+		if([self askRestarting:completedShowsBeingMoved]) {
+			for (MTTiVoShow * show in completedShowsBeingMoved) {
+				[show prepForResubmit];
+			}
+		};
+	}
+	
+	//Now look for reschedulings. Group ould be moving up or down, with or without an active show...
+	for (MTTiVoShow * activeShow in [tiVoManager downloadQueue]) {
+		if (activeShow.isNew) break;  //we're through any active ones
+		if (activeShow.isDone) continue;
+		NSUInteger activeRow = [[tiVoManager downloadQueue] indexOfObject:activeShow];
+		//first check if a show is being moved before activeShow
+		if ([realShows containsObject: activeShow]) {
+			//I'm in group being moved ( so group is from in DL queue
+			if (insertRow > activeRow+1) {   //moving downwards
+				for (NSUInteger i = activeRow+1; i<insertRow; i++) { //check shows we're skipping over
+					MTTiVoShow * promotedShow = [[tiVoManager downloadQueue] objectAtIndex:i];
+					if (![realShows containsObject:promotedShow]) {//but if it's coming with me, no need
+						if (activeShow.tiVo == promotedShow.tiVo) {
+							[self askReschedule:activeShow];
+							break;  // no need to ask again
+						}
+					}
+				}
+			}
+	} else {
+			//I'm not being moved
+			if ((insertRow <= activeRow) &&   //shows being moved above me
+				([self shows:realShows  contain:activeShow.tiVo]))  {//and one of them is on same TiVo as me
+				[self askReschedule: activeShow];
+			}
+		}
+	}
+	
+	//	NSLog(@"dragging: %@", draggedShows);
+	
 	if( [info draggingSource] == aTableView ) {
 		//reordering self (download table)
-		NSIndexSet * destinationIndexes = [tiVoManager moveShowsInDownloadQueue:realShows toIndex:insertRow];
-		DDLogVerbose(@"moved to %@",destinationIndexes );
-		[self selectRowIndexes:destinationIndexes byExtendingSelection:NO];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-		return  YES;
+		DDLogVerbose(@"moving shows to %ld: %@", insertRow, [tiVoManager downloadQueue]);
+		[tiVoManager moveShowsInDownloadQueue:realShows toIndex:insertRow];
+		DDLogVerbose(@"moved shows to %ld: %@", insertRow, [tiVoManager downloadQueue]);
 
     } else if ([info draggingSource] == myController.tiVoShowTable) {
 		DDLogVerbose(@"Scheduling shows at %ld",(unsigned long)insertRow );
 		MTTiVoShow * insertShow = nil;
 		if (insertRow < [tiVoManager downloadQueue].count) {
 			insertShow = [tiVoManager.downloadQueue objectAtIndex:insertRow];
-//			NSLog(@"QQQ inserting before %@",insertShow.showTitle);
+			DDLogVerbose(@"Inserting before %@",insertShow.showTitle);
 		}
 		[tiVoManager downloadShowsWithCurrentOptions:realShows beforeShow:insertShow];
 		
-		//now leave new shows selected
-		NSIndexSet * showIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-			return [realShows indexOfObject:obj] !=NSNotFound;
-		}];
-		if (showIndexes.count > 0)[self selectRowIndexes:showIndexes byExtendingSelection:NO];
 		//note that dragged copies will now be dealloc'ed 								
-		return YES;
 	} else {
 		return NO;
 	}
+	
+	self.sortedShows = nil;
+	[tiVoManager sortDownloadQueue];
+	DDLogVerbose(@"afterSort: %@", [tiVoManager downloadQueue]);
+	
+	NSIndexSet * selectionIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+			return [realShows indexOfObject:obj] !=NSNotFound;
+		}];
+
+	//now leave new shows selected
+	DDLogVerbose(@"moved to %@",selectionIndexes );
+	[self selectRowIndexes:selectionIndexes byExtendingSelection:NO];
+	[self reloadData];
+	return YES;
 }
 
 

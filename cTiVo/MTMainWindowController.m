@@ -290,7 +290,7 @@ __DDLOGHERE__
 		} else {
 			[workingTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
 			if (workingTable == tiVoShowTable || workingTable == downloadQueueTable) {
-				MTTiVoShow *thisShow = [workingTable sortedShows][menuTableRow];
+				MTTiVoShow *thisShow = [workingTable performSelector: @selector(sortedShows)][menuTableRow];
 				//diable menu items that depend on having a completed show tag = 2
 				for (NSMenuItem *mi in [menu itemArray]) {
 					if (mi.tag == 2 && !thisShow.isDone) {
@@ -376,9 +376,9 @@ __DDLOGHERE__
 		[downloadQueueTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:NO];
 		[showDetailDrawer open];
 	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
-		[downloadQueueTable.sortedShows[menuTableRow] playVideo];
+		[(MTTiVoShow *) downloadQueueTable.sortedShows[menuTableRow] playVideo];
 	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
-		[downloadQueueTable.sortedShows[menuTableRow] revealInFinder];
+		[(MTTiVoShow *) downloadQueueTable.sortedShows[menuTableRow] revealInFinder];
 		
 	}
 	

@@ -103,6 +103,7 @@
 				
 @property int  	numRetriesRemaining,
 				numStartupRetriesRemaining;
+-(void) prepForResubmit;
 
 @property (nonatomic, readonly) NSString *encodeFilePath,
 										 *bufferFilePath,   //

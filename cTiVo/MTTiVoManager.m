@@ -607,14 +607,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 								 toIndex:(NSUInteger)insertIndex
 {
 	DDLogDetail(@"moving shows %@ to %ld", shows,insertIndex);
-	NSMutableIndexSet *fromIndexSet = [NSMutableIndexSet indexSet  ];
-	for (MTTiVoShow * show in shows) {
-		NSUInteger index = [[tiVoManager downloadQueue] indexOfObject :show];
-		//can't move an inprogress/canceled/failed one.
-		if (index != NSNotFound && (show.isNew)) {
-			[fromIndexSet addIndex:index];
-		}
-	}
+	NSIndexSet * fromIndexSet = [[tiVoManager downloadQueue] indexesOfObjectsPassingTest:
+								 ^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+									return [shows indexOfObject:obj] != NSNotFound;
+								 }];
 	if (fromIndexSet.count ==0) return nil;
 	
 	// If any of the removed objects come before the insertion index,
@@ -631,6 +627,16 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[dlQueue insertObjects:objectsToMove atIndexes:destinationIndexes];
 	
 	return destinationIndexes;
+}
+
+-(void) sortDownloadQueue {
+
+	[self.downloadQueue sortUsingComparator:^NSComparisonResult(MTTiVoShow * show1, MTTiVoShow* show2) {
+		int status1 = show1.downloadStatus.intValue; if (status1 == kMTStatusFailed) status1= kMTStatusDone; //sort failed/done together
+		int status2 = show2.downloadStatus.intValue;if (status2 == kMTStatusFailed) status2= kMTStatusDone;
+		return status1 > status2 ? NSOrderedAscending : status1 < status2 ? NSOrderedDescending : NSOrderedSame;
+		
+	}];
 }
 
 -(void)addProgramToDownloadQueue:(MTTiVoShow *) program {

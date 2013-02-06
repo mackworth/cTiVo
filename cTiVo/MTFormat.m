@@ -10,6 +10,8 @@
 
 @implementation MTFormat
 
+@synthesize pathForExecutable = _pathForExecutable;
+
 __DDLOGHERE__
 
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format
@@ -43,25 +45,29 @@ __DDLOGHERE__
 
 -(NSString *)pathForExecutable
 {
-	NSArray *searchPaths = [NSArray arrayWithObjects:@"/usr/local/bin/%1$@",@"/opt/local/bin/%1$@",@"/usr/local/%1$@/bin/%1$@",@"/opt/local/%1$@/bin/%1$@",@"/usr/bin/%1$@",@"%1$@", nil];
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *validPath = [[NSBundle mainBundle] pathForResource:self.encoderUsed ofType:@""];
-	if (validPath) {
-		return validPath;
-	}
-	for (NSString *searchPath in searchPaths) {
-		NSString * filePath = [[NSString stringWithFormat:searchPath,self.encoderUsed] stringByResolvingSymlinksInPath];
-		if ([fm fileExistsAtPath:filePath]){ //Its there now check that its executable
-			int permissions = [[fm attributesOfItemAtPath:filePath error:nil][NSFilePosixPermissions] shortValue];
-			if (permissions && 01) { //We have an executable file
-				DDLogVerbose(@"Found %@ in %@ (format %@)", self.encoderUsed, searchPath, self);
-				validPath = filePath;
-				break;
+	if (!_pathForExecutable) {
+		
+		NSArray *searchPaths = [NSArray arrayWithObjects:@"/usr/local/bin/%1$@",@"/opt/local/bin/%1$@",@"/usr/local/%1$@/bin/%1$@",@"/opt/local/%1$@/bin/%1$@",@"/usr/bin/%1$@",@"%1$@", nil];
+		NSFileManager *fm = [NSFileManager defaultManager];
+		NSString *validPath = [[NSBundle mainBundle] pathForResource:self.encoderUsed ofType:@""];
+		if (validPath) {
+			return validPath;
+		}
+		for (NSString *searchPath in searchPaths) {
+			NSString * filePath = [[NSString stringWithFormat:searchPath,self.encoderUsed] stringByResolvingSymlinksInPath];
+			if ([fm fileExistsAtPath:filePath]){ //Its there now check that its executable
+				int permissions = [[fm attributesOfItemAtPath:filePath error:nil][NSFilePosixPermissions] shortValue];
+				if (permissions && 01) { //We have an executable file
+					DDLogVerbose(@"Found %@ in %@ (format %@)", self.encoderUsed, searchPath, self);
+					validPath = filePath;
+					break;
+				}
 			}
 		}
+		if (!validPath) DDLogMajor(@"For format %@, couldn't find %@ in %@ ", self, self.encoderUsed, searchPaths);
+		_pathForExecutable = validPath;
 	}
-	if (!validPath) DDLogMajor(@"For format %@, couldn't find %@ in %@ ", self, self.encoderUsed, searchPaths);
-	return validPath;
+	return _pathForExecutable;
 }
 
 
@@ -197,6 +203,13 @@ __DDLOGHERE__
 -(BOOL)canSkip
 {
     return [_comSkip boolValue];
+}
+
+-(void) setEncoderUsed:(NSString *)encoderUsed {
+	if (encoderUsed == _encoderUsed) return;
+	[_encoderUsed release];
+	_encoderUsed = [encoderUsed retain];
+	_pathForExecutable = nil;
 }
 
 -(NSString *) description {

@@ -381,10 +381,11 @@ __DDLOGHERE__
 	}
 	// Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
-	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
+	NSPredicate *protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
+	NSArray	*selectedObjects = [[self.sortedShows objectsAtIndexes:rowIndexes ] filteredArrayUsingPredicate:protectedPredicate];
 	DDLogVerbose(@"Dragging Objects: %@", selectedObjects);
 	[pboard writeObjects:selectedObjects];
-   return YES;
+   return (selectedObjects.count > 0);
 }
 
 

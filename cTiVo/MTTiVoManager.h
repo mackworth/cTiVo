@@ -70,6 +70,7 @@
 -(void) deleteProgramsFromDownloadQueue:(NSArray *)programs;
 -(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) shows
 								 toIndex:(NSUInteger)insertIndex;
+-(void) sortDownloadQueue;
 
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget;
 
