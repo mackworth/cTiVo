@@ -40,6 +40,10 @@
 
 -(IBAction)selectFormat:(id)sender;
 -(IBAction)subscribe:(id) sender;
+-(BOOL) selectionContainsCompletedShows;
+-(IBAction) revealInFinder:(id) sender;
+-(IBAction) playVideo: (id) sender;
+
 -(IBAction)downloadSelectedShows:(id)sender;
 -(IBAction)removeFromDownloadQueue:(id)sender;
 -(IBAction)getDownloadDirectory:(id)sender;

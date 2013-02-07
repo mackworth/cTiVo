@@ -134,8 +134,10 @@
 -(void)getShowDetail;
 
 #pragma mark - Methods for manipulating video
--(void) playVideo;
--(void) revealInFinder;
+-(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted;
+-(BOOL) canPlayVideo;
+-(BOOL) playVideo;
+-(BOOL) revealInFinder;
 
 //Move to category on NSString
 +(NSDate *)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString;

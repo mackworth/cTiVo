@@ -334,7 +334,7 @@ __DDLOGHERE__
 	
     switch(context) {
         case NSDraggingContextOutsideApplication:
-            return NSDragOperationCopy | NSDragOperationDelete;
+            return NSDragOperationGeneric | NSDragOperationCopy | NSDragOperationMove | NSDragOperationDelete;
             break;
 			
         case NSDraggingContextWithinApplication:
@@ -375,9 +375,16 @@ __DDLOGHERE__
     // Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
  	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
+	NSLog(@"copying objects:%@",selectedObjects );
+	[pboard clearContents];
 	[pboard writeObjects:selectedObjects];
 	DDLogVerbose (@"DraggingObjects: %@",selectedObjects);
-	//NSLod(@"Property list: (Files:) %@ (shows): %@", [pboard propertyListForType:(NSString *)kUTTypeFileURL],[pboard propertyListForType:kMTTivoShowPasteBoardType]);
+	NSLog(@"property Types available: %@",[pboard types]);
+	NSLog(@"Property list: URLS: %@", [pboard
+	 readObjectsForClasses:[NSArray arrayWithObject:[NSURL class]]
+	 options:[NSDictionary dictionaryWithObject:[NSNumber
+												 numberWithBool:YES]
+										 forKey:NSPasteboardURLReadingFileURLsOnlyKey]]);
 	return YES;
 }
 
@@ -423,48 +430,51 @@ __DDLOGHERE__
 
 -(BOOL)selectionContainsCompletedShows
 {
-	BOOL containsCompleted = NO;
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
 	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
 	for (MTTiVoShow *show in selectedShows) {
-		if (show.isDone) {
-			containsCompleted = YES;
-			break;
+		if ([show videoFileURLWithEncrypted:YES]) {
+			//minor bug: we enable play video even though you can't play encrypted
+			return  YES;
 		}
 	}
-	return containsCompleted;
+	return NO;
 	
 }
 
 -(BOOL)playVideo
 {
-	BOOL played = NO;
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
 	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
 	for (MTTiVoShow *show in selectedShows) {
 		if (show.isDone) {
-			[show playVideo];
-			played = YES;
-			break;
+			if ([show playVideo])  {
+				return YES;		}
 		}
 	}
-	return played;
+	return NO;
 }
 
 -(BOOL)revealInFinder
 {
-	BOOL revealed = NO;
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
 	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+	NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:selectedShows.count];
 	for (MTTiVoShow *show in selectedShows) {
-		if (show.isDone) {
-			[show revealInFinder];
-			revealed = YES;
-			break;
+		NSURL * showURL = [show videoFileURLWithEncrypted:YES];
+		if (showURL) {
+			[showURLs addObject:showURL];
 		}
 	}
-	return revealed;
+	if (showURLs.count > 0) {
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
+		return YES;
+	} else{
+		return NO;
+	}
 }
+
+
 
 -(void) askReschedule: (MTTiVoShow *) show {
 	//ask user if they'd like to reschedule a show that's being demoted

@@ -422,7 +422,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	double secondsAtStartOfDay = now - currentSecondsOfToday;
 	double startTimeOfDayinSeconds = (int)[date timeIntervalSince1970] % secondsInADay;
 	//now advance it to a time after now
-	while (startTimeOfDayinSeconds < currentSecondsOfToday) startTimeOfDayinSeconds += (double) secondsInADay;
+	while (startTimeOfDayinSeconds <= currentSecondsOfToday) startTimeOfDayinSeconds += (double) secondsInADay;
 	return secondsAtStartOfDay + startTimeOfDayinSeconds - now;
 }
 

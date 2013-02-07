@@ -252,10 +252,10 @@ __DDLOGHERE__
 {
 	menuCursorPosition = [self.window mouseLocationOutsideOfEventStream];
 	NSTableView *workingTable = nil;
-	NSString *selector = nil;
+	SEL selector = nil;
 	if ([menu.title compare:@"ProgramTableMenu"] == NSOrderedSame) {
 		workingTable = tiVoShowTable;
-		selector = @"programMenuHandler:";
+		selector = @selector(programMenuHandler:);
 		//Update titles as appropriate
 		for (NSMenuItem *mi in [menu itemArray]) {
 			if ([mi.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
@@ -269,17 +269,17 @@ __DDLOGHERE__
 	}
 	if ([menu.title compare:@"DownloadTableMenu"] == NSOrderedSame) {
 		workingTable = downloadQueueTable;
-		selector = @"downloadMenuHandler:";
+		selector = @selector(downloadMenuHandler:);
 	}
 	if ([menu.title compare:@"SubscriptionTableMenu"] == NSOrderedSame) {
 		workingTable = subscriptionTable;
-		selector = @"subscriptionMenuHandler:";
+		selector = @selector(subscriptionMenuHandler:);
 	}
 	if (workingTable) {
 		NSPoint p = [workingTable convertPoint:menuCursorPosition fromView:nil];
 		menuTableRow = [workingTable rowAtPoint:p];
 		for (NSMenuItem *mi in [menu itemArray]) {
-			[mi setAction:NSSelectorFromString(selector)];
+			[mi setAction:selector];
 		}
 		if (menuTableRow < 0) { //disable row functions  Row based functions have tag=1 or 2;
 			for (NSMenuItem *mi in [menu itemArray]) {
@@ -288,12 +288,14 @@ __DDLOGHERE__
 				}
 			}
 		} else {
-			[workingTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
+			if (![[workingTable selectedRowIndexes] containsIndex:menuTableRow] ) {
+				[workingTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:NO];
+			}
 			if (workingTable == tiVoShowTable || workingTable == downloadQueueTable) {
 				MTTiVoShow *thisShow = [workingTable performSelector: @selector(sortedShows)][menuTableRow];
 				//diable menu items that depend on having a completed show tag = 2
 				for (NSMenuItem *mi in [menu itemArray]) {
-					if (mi.tag == 2 && !thisShow.isDone) {
+					if (mi.tag == 2 && !thisShow.canPlayVideo) {
 						[mi setAction:NULL];
 					}
 				}
@@ -314,25 +316,25 @@ __DDLOGHERE__
 
 -(IBAction)programMenuHandler:(NSMenuItem *)menu
 {
-	MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
 	if ([menu.title caseInsensitiveCompare:@"Download"] == NSOrderedSame) {
-		[tiVoShowTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
 		[self downloadSelectedShows:menu];
 	} else if ([menu.title rangeOfString:@"Refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
-		[thisShow.tiVo updateShows:nil];
+		NSMutableSet * tiVos = [NSMutableSet set];
+		for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {
+			[tiVos addObject: show.tiVo];
+		}
+		for (MTTiVo* tiVo in tiVos) {
+			[tiVo  updateShows:nil];
+		}
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
-		[tiVoShowTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:YES];
 		[self subscribe:menu];
 	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
-		self.showForDetail = thisShow;
-		[tiVoShowTable deselectAll:nil];
-		[tiVoShowTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:NO];
+		self.showForDetail = tiVoShowTable.sortedShows[menuTableRow];
 		[showDetailDrawer open];
 	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
-		[thisShow playVideo];
+		[tiVoShowTable playVideo];
 	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
-		[thisShow revealInFinder];
-		
+		[tiVoShowTable revealInFinder];
 	}
 }
 
@@ -372,16 +374,36 @@ __DDLOGHERE__
 		[tiVoManager.subscribedShows addSubscriptions:selectedShows];
 	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
 		self.showForDetail = downloadQueueTable.sortedShows[menuTableRow];
-		[downloadQueueTable deselectAll:nil];
-		[downloadQueueTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:NO];
 		[showDetailDrawer open];
 	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
-		[(MTTiVoShow *) downloadQueueTable.sortedShows[menuTableRow] playVideo];
+		[downloadQueueTable playVideo];
 	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
-		[(MTTiVoShow *) downloadQueueTable.sortedShows[menuTableRow] revealInFinder];
+		[downloadQueueTable revealInFinder];
 		
 	}
 	
+}
+
+-(BOOL) selectionContainsCompletedShows {
+	BOOL itemsToProcess = [self.downloadQueueTable selectionContainsCompletedShows ] ;
+	if (!itemsToProcess) {
+		itemsToProcess = [self.tiVoShowTable selectionContainsCompletedShows];
+	}
+	return itemsToProcess;
+}
+
+-(IBAction)revealInFinder: (id) sender
+{
+	if (![self.downloadQueueTable revealInFinder]) {
+		[self.tiVoShowTable revealInFinder];	
+	}
+ }
+
+-(IBAction)playVideo: (id) sender
+{
+	if (![self.downloadQueueTable playVideo]) {
+		[self.tiVoShowTable playVideo];
+	}
 }
 
 #pragma mark - Subscription Buttons

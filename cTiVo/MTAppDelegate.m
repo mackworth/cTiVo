@@ -307,14 +307,11 @@ __DDLOGHERE__
 
 -(void)refreshDoneFileMenuItems
 {
-	BOOL itemsToProcess = [mainWindowController.downloadQueueTable selectionContainsCompletedShows];
-	if (!itemsToProcess) {
-		itemsToProcess = [mainWindowController.tiVoShowTable selectionContainsCompletedShows];
-	}
+	BOOL itemsToProcess = [mainWindowController selectionContainsCompletedShows];
 	if (itemsToProcess) {
-		showInFinderMenuItem.target = self;
+		showInFinderMenuItem.target = mainWindowController;
 		showInFinderMenuItem.action = @selector(revealInFinder:);
-		playVideoMenuItem.target = self;
+		playVideoMenuItem.target = mainWindowController;
 		playVideoMenuItem.action = @selector(playVideo:);
 	} else {
 		showInFinderMenuItem.action = NULL;
@@ -328,21 +325,6 @@ __DDLOGHERE__
 //	[self.formatEditorController showWindow:nil];
 	self.preferencesController.startingTabIdentifier = @"Formats";
 	[self showPreferences:nil];
-}
-
--(IBAction)playVideo:(id)sender
-{
-	if (![mainWindowController.downloadQueueTable playVideo]) {
-		[mainWindowController.tiVoShowTable playVideo];
-	}
-}
-
--(IBAction)revealInFinder:(id)sender
-{
-	if (![mainWindowController.downloadQueueTable revealInFinder]) {
-		[mainWindowController.tiVoShowTable revealInFinder];
-	}
-	
 }
 
 -(IBAction)editManualTiVos:(id)sender

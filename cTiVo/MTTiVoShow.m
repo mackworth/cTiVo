@@ -330,30 +330,22 @@ __DDLOGHERE__
 
 
 - (id)pasteboardPropertyListForType:(NSString *)type {
+	NSLog(@"QQQ:pboard Type: %@",type);
 	if ([type compare:kMTTivoShowPasteBoardType] ==NSOrderedSame) {
 		return  [NSKeyedArchiver archivedDataWithRootObject:self];
-/* NOT working yet
- } else if ([type compare:(NSString *)kUTTypeFileURL] ==NSOrderedSame) {
-		if (self.downloadStatus.integerValue ==kMTStatusDone) {
-			if (self.encodeFilePath) {
-				NSArray * urls = @[[NSURL fileURLWithPath:self.encodeFilePath isDirectory:NO]];
-				//id data = [urls pasteboardPropertyListForType:(NSString *)kUTTypeFileURL];
-				NSLog(@"Returning %@", urls);
-				return urls;
-			} else {
-				return nil;
-			}
-		} else {
-			return nil;
-		}
- */
+	} else if ([type isEqualToString:(NSString *)kUTTypeFileURL] && self.encodeFilePath) {
+		NSURL *URL = [NSURL fileURLWithPath:self.encodeFilePath isDirectory:NO];
+		NSLog(@"file: %@ ==> pBoard URL: %@",self.encodeFilePath, URL);
+			id temp =  [URL pasteboardPropertyListForType:(id)kUTTypeFileURL];
+		return temp;
 	} else {
 		return nil;
 	}
 }
-
 -(NSArray *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
-	return @[kMTTivoShowPasteBoardType];// ,(NSString *)kUTTypeFileURL];  //NOT working yet
+	NSArray* result = [NSArray  arrayWithObjects: kMTTivoShowPasteBoardType , kUTTypeFileURL, nil];  //NOT working yet
+	NSLog(@"QQQ:writeable Type: %@",result);
+	return result;
 }
 
 - (NSPasteboardWritingOptions)writingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard {
@@ -1181,29 +1173,48 @@ __DDLOGHERE__
 }
 
 #pragma mark - Video manipulation methods
--(void) playVideo {
-	if (self.isDone ) {
-		NSString * showPath = self.encodeFilePath;
-		if (showPath) {
-			DDLogMajor(@"Playing video %@ ", showPath);
-			[[NSWorkspace sharedWorkspace] openFile:showPath];  //don't really care if it worked or not.	
-		}
+
+-(NSURL *) URLExists: (NSString *) path {
+	if (!path) return nil;
+	path = [path stringByExpandingTildeInPath];
+	if ([[NSFileManager defaultManager] fileExistsAtPath:path] ){
+		return [NSURL fileURLWithPath: path];
+	} else {
+		return nil;
 	}
 }
 
--(void) revealInFinder {
-	NSString * showPath = nil;
-    if (_encodeFilePath) {
-		showPath = _encodeFilePath;
-    } else  if (decryptFilePath) {
-		showPath = decryptFilePath;
-    } else if (_downloadFilePath) {
-		showPath = _downloadFilePath;
-    }
-	if (showPath) {
-		DDLogMajor(@"Revealing file %@ ", showPath);
-		[[NSWorkspace sharedWorkspace] selectFile:showPath inFileViewerRootedAtPath:self.downloadDirectory];
+-(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted {
+	if (!self.isDone) return nil;
+	NSURL *   URL =  [self URLExists: _encodeFilePath];
+	if (!URL) URL= [self URLExists: decryptFilePath];
+	if (!URL && encrypted) URL = [self URLExists: _downloadFilePath];
+	return URL;
+}
+
+-(BOOL) canPlayVideo {
+	return	self.isDone && [self videoFileURLWithEncrypted:NO];
+}
+
+-(BOOL) playVideo {
+	if (self.isDone ) {
+		NSURL * showURL =[self videoFileURLWithEncrypted:NO];
+		if (showURL) {
+			DDLogMajor(@"Playing video %@ ", showURL);
+			return [[NSWorkspace sharedWorkspace] openURL:showURL];
+		}
 	}
+	return NO;
+}
+
+-(BOOL) revealInFinder {
+	NSURL * showURL =[self videoFileURLWithEncrypted:NO];
+	if (showURL) {
+		DDLogMajor(@"Revealing file %@ ", showURL);
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ showURL ]];
+		return YES;
+	}
+	return NO;
 }
 
 #pragma mark - Misc Support Functions

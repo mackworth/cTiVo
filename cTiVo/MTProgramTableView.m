@@ -33,7 +33,7 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowCopyProtected options:NSKeyValueChangeSetting context:nil];
 	
-	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
+	[self  setDraggingSourceOperationMask:NSDragOperationMove forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
 
 }
@@ -104,51 +104,49 @@ __DDLOGHERE__
 
 -(BOOL)selectionContainsCompletedShows
 {
-	BOOL containsCompleted = NO;
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
 	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
 	for (MTTiVoShow *show in selectedShows) {
-		if (show.isDone) {
-			containsCompleted = YES;
-			break;
+		if ([show videoFileURLWithEncrypted:YES]) {
+			//minor bug: we enable play video even though you can't play encrypted
+			return  YES;
 		}
 	}
-	return containsCompleted;
+	return NO;
 	
 }
 
-
 -(BOOL)playVideo
 {
-	BOOL played = NO;
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
 	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
 	for (MTTiVoShow *show in selectedShows) {
 		if (show.isDone) {
-			[show playVideo];
-			played = YES;
-			break;
+			if ([show playVideo])  {
+				return YES;		}
 		}
 	}
-	return played;
+	return NO;
 }
 
 -(BOOL)revealInFinder
-{
-	BOOL revealed = NO;
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-	for (MTTiVoShow *show in selectedShows) {
-		if (show.isDone) {
-			[show revealInFinder];
-			revealed = YES;
-			break;
+	{
+		NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+		NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+		NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:selectedShows.count];
+		for (MTTiVoShow *show in selectedShows) {
+			NSURL * showURL = [show videoFileURLWithEncrypted:YES];
+			if (showURL) {
+				[showURLs addObject:showURL];
+			}
+		}
+		if (showURLs.count > 0) {
+			[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
+			return YES;
+		} else{
+			return NO;
 		}
 	}
-	return revealed;
-}
-
-
 
 
 -(void)dealloc
