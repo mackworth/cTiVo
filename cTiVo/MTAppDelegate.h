@@ -13,6 +13,7 @@
 #import "MTMainWindowController.h"
 #import "MTSubscriptionTableView.h"
 #import "MTPreferencesWindowController.h"
+#import "MTAdvPreferencesViewController.h"
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate> {
 	MTMainWindowController *mainWindowController;

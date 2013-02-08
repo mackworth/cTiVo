@@ -130,7 +130,8 @@
 #define kMTiTunesIcon @"iTunesIcon"                 // Whether to use video frame (versus cTivo logo) for iTUnes icon
 #define kMTPostDownloadCommand @"PostDownloadCommand" // Example: "# mv \"$file\" ~/.Trash ;";
 
-#define kMTDebugLevel @"DebugLevel"
+#define kMTDebugLevel       @"DebugLevel"
+#define kMTDebugLevelDetail @"DebugLevelDetail"
 
 //Growl notification constants (see growlRegDict file)
 #define kMTGrowlBeginDownload @"Begin Download"

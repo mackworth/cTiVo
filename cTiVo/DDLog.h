@@ -270,6 +270,7 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 + (int)logLevelForClass:(Class)aClass;
 + (int)logLevelForClassWithName:(NSString *)aClassName;
 + (void)setAllClassesLogLevelFromUserDefaults: (NSString *)defaultsKey;
++(void) writeAllClassesLogLevelToUserDefaults;
 
 + (void)setLogLevel:(int)logLevel forClass:(Class)aClass;
 + (void)setLogLevel:(int)logLevel forClassWithName:(NSString *)aClassName;

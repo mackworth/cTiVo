@@ -361,7 +361,7 @@ __DDLOGHERE__
 		[_advPreferencesController window];
 		MTTabViewItem *advTabViewItem = [[[MTTabViewItem alloc] initWithIdentifier:@"AdvSettinge"] autorelease];
 		advTabViewItem.label = @"Advanced Settings";
-		NSViewController *thisController = [[[NSViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil] autorelease];
+		NSViewController *thisController = [[[MTAdvPreferencesViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil] autorelease];
 		advTabViewItem.windowController = (id)thisController;
 		[_advPreferencesController.myTabView insertTabViewItem:advTabViewItem atIndex:0];
 		NSRect tabViewFrame = ((NSView *)advTabViewItem.view).frame;
