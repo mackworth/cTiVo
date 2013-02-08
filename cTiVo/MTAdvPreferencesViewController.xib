@@ -46,9 +46,10 @@
 					<object class="NSTextField" id="717911868">
 						<reference key="NSNextResponder" ref="1005"/>
 						<int key="NSvFlags">268</int>
-						<string key="NSFrame">{{2, 304}, {86, 17}}</string>
+						<string key="NSFrame">{{2, 344}, {86, 17}}</string>
 						<reference key="NSSuperview" ref="1005"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="336018543"/>
 						<string key="NSReuseIdentifierKey">_NS:1535</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="243178489">
@@ -86,9 +87,10 @@
 					<object class="NSPopUpButton" id="336018543">
 						<reference key="NSNextResponder" ref="1005"/>
 						<int key="NSvFlags">268</int>
-						<string key="NSFrame">{{101, 299}, {100, 26}}</string>
+						<string key="NSFrame">{{101, 339}, {100, 26}}</string>
 						<reference key="NSSuperview" ref="1005"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="675372742"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSPopUpButtonCell" key="NSCell" id="397504868">
@@ -121,19 +123,20 @@
 					<object class="NSCustomView" id="154364648">
 						<reference key="NSNextResponder" ref="1005"/>
 						<int key="NSvFlags">282</int>
-						<string key="NSFrame">{{0, 5}, {706, 286}}</string>
+						<string key="NSFrameSize">{527, 331}</string>
 						<reference key="NSSuperview" ref="1005"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<string key="NSClassName">NSView</string>
 					</object>
 					<object class="NSButton" id="675372742">
 						<reference key="NSNextResponder" ref="1005"/>
 						<int key="NSvFlags">265</int>
-						<string key="NSFrame">{{376, 303}, {194, 18}}</string>
+						<string key="NSFrame">{{315, 343}, {194, 18}}</string>
 						<reference key="NSSuperview" ref="1005"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
+						<reference key="NSNextKeyView" ref="154364648"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="202518537">
@@ -160,10 +163,10 @@
 						<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 					</object>
 				</array>
-				<string key="NSFrameSize">{588, 339}</string>
+				<string key="NSFrameSize">{527, 379}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
-				<reference key="NSNextKeyView" ref="675372742"/>
+				<reference key="NSNextKeyView" ref="717911868"/>
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSUserDefaultsController" id="9702384">
@@ -352,20 +355,17 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">MTAdvPreferencesViewController</string>
 					<string key="superclassName">MTPreferencesViewController</string>
-					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="newMasterValue:">id</string>
-						<string key="newValue:">id</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="newMasterValue:">
+					<object class="NSMutableDictionary" key="actions">
+						<string key="NS.key.0">newMasterValue:</string>
+						<string key="NS.object.0">id</string>
+					</object>
+					<object class="NSMutableDictionary" key="actionInfosByName">
+						<string key="NS.key.0">newMasterValue:</string>
+						<object class="IBActionInfo" key="NS.object.0">
 							<string key="name">newMasterValue:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="newValue:">
-							<string key="name">newValue:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-					</dictionary>
+					</object>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="debugLevelView">NSView</string>
 						<string key="masterDebugLevel">NSPopUpButton</string>

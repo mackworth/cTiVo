@@ -11,10 +11,12 @@
 
 @implementation MTiTunes
 
+__DDLOGHERE__
 
 -(SBApplication *) iTunes {
 	if (!_iTunes || ![_iTunes isRunning]){
 		_iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
+		if (!_iTunes) DDLogMajor(@"couldn't find iTunes");
 	}
 	return _iTunes;
 
@@ -27,6 +29,8 @@
 		if ([librarySources count] > 0){
 			_iTunesLibrary = [librarySources objectAtIndex:0];
 	
+		} else {
+			DDLogMajor(@"couldn't find iTunes Library ");
 		}
 	}
 	return _iTunesLibrary;
@@ -41,6 +45,8 @@
 			iTunesPlaylist * list = [allLists objectAtIndex:0];
 			if ([list exists])
 				_libraryPlayList = (iTunesLibraryPlaylist *)list;
+		} else {
+			DDLogMajor(@"couldn't find iTunes playList");
 
 		}
 	}
@@ -67,9 +73,12 @@
 			//newPlayList.specialKind = iTunesESpKMovies;
 			if (newPlayList ) {
 				[allLists  insertObject:newPlayList atIndex:[allLists count]-1];
-				if ([newPlayList exists])
+				if ([newPlayList exists]) {
 					newPlayList.name = @"Tivo Shows";
 					_tivoPlayList = newPlayList;
+				} else {
+					DDLogMajor(@"couldn't create TivoShow list");
+				}
 			}
 		}
 	}
@@ -86,7 +95,7 @@
 	
 	iTunesTrack * newTrack = [self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
 	if ([newTrack exists]) {
-		NSLog(@"Added iTunes track:  %@", show.showTitle);
+		DDLogReport(@"Added iTunes track:  %@", show.showTitle);
 
 		if (show.isMovie) {
 			newTrack.videoKind = iTunesEVdKMovie;
@@ -121,7 +130,7 @@
 	 */
 		return YES;
 	} else {
-		NSLog(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, show.encodeFormat.name, showFileURL );
+		DDLogReport(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, show.encodeFormat.name, showFileURL );
 		return NO;
 	}
     if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSync]) {
@@ -134,6 +143,7 @@
     for (iTunesSource * iPod in sources) {
         [iPod update];
     }
+	DDLogMajor(@"Updated all iTunes Devices");
 
 }
 

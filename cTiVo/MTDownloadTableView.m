@@ -315,10 +315,9 @@ __DDLOGHERE__
 		result.textField.stringValue = thisShow.episodeGenre;
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
-		NSLog(@"airdate: %@",thisShow.originalAirDateNoTime);
 		result.textField.stringValue = thisShow.originalAirDateNoTime ? thisShow.originalAirDateNoTime : @"";
 	} else {
-		NSLog(@"Unknown Column: %@ ",tableColumn.identifier);
+		DDLogReport(@"Unknown Column: %@ ",tableColumn.identifier);
 	}
     
     // return the result.

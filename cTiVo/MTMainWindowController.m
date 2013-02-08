@@ -340,11 +340,9 @@ __DDLOGHERE__
 
 
 -(IBAction)doubleClickForDetails:(id)input {
-	NSLog(@"DoubleClick input %@",input);
 	[showDetailDrawer open];
 	if (input == tiVoShowTable || input==downloadQueueTable) {
 		NSInteger rowNumber = [input clickedRow];
-		NSLog(@"clickedRow %ld",rowNumber);
 		if (rowNumber != -1) {
 			MTTiVoShow * show = [[input sortedShows] objectAtIndex:rowNumber];
 			[show revealInFinder];

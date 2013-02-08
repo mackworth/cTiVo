@@ -64,7 +64,6 @@
 	self.debugClasses = [DDLog registeredClasses] ;
 	self.popups= [NSMutableArray arrayWithCapacity:self.debugClasses.count ];
 	
-	NSLog(@"DebugClasses: %@", self.debugClasses);
 //	NSInteger const  kNumColumns = 1;
 	int numItems = (int)[self.debugClasses count];
 //	NSInteger numRows = numItems / kNumColumns;
