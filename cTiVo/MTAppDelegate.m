@@ -134,7 +134,6 @@ __DDLOGHERE__
 	
 	DDLogDetail(@"Starting Program");
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDoneFileMenuItems) name:kMTNotificationTableSelectionChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
 	if (![[[NSUserDefaults standardUserDefaults] objectForKey:kMTPreventSleep] boolValue]) {
 		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:NO] forKey:kMTPreventSleep];
@@ -151,7 +150,6 @@ __DDLOGHERE__
 //	_formatEditorController = nil;
 	[self showMainWindow:nil];
 	[self updateTivoRefreshMenu];
-	[self refreshDoneFileMenuItems];
 	mediaKeyQueue = [NSMutableArray new];
 	gettingMediaKey = NO;
 	signal(SIGPIPE, &signalHandler);
@@ -303,20 +301,6 @@ __DDLOGHERE__
 	}
 	return;
 	
-}
-
--(void)refreshDoneFileMenuItems
-{
-	BOOL itemsToProcess = [mainWindowController selectionContainsCompletedShows];
-	if (itemsToProcess) {
-		showInFinderMenuItem.target = mainWindowController;
-		showInFinderMenuItem.action = @selector(revealInFinder:);
-		playVideoMenuItem.target = mainWindowController;
-		playVideoMenuItem.action = @selector(playVideo:);
-	} else {
-		showInFinderMenuItem.action = NULL;
-		playVideoMenuItem.action = NULL;
-	}
 }
 
 #pragma mark - Preference pages
@@ -534,6 +518,12 @@ __DDLOGHERE__
 	if (!mainWindowController) {
 		mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
         _tiVoGlobalManager.mainWindow = mainWindowController.window;
+		showInFinderMenuItem.target = mainWindowController;
+		showInFinderMenuItem.action = @selector(revealInFinder:);
+		playVideoMenuItem.target = mainWindowController;
+		playVideoMenuItem.action = @selector(playVideo:);
+		mainWindowController.showInFinderMenuItem = showInFinderMenuItem;
+		mainWindowController.playVideoMenuItem = playVideoMenuItem;
 	}
 	[mainWindowController showWindow:nil];
 	

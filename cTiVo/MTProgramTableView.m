@@ -214,7 +214,6 @@ __DDLOGHERE__
         NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
         [myController setValue:selectedRows[0] forKey:@"showForDetail"];
     }
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTableSelectionChanged object:nil];
 }
 
 -(void) tableViewColumnDidResize:(NSNotification *) notification {

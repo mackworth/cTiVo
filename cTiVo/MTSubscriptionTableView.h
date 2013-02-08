@@ -12,7 +12,7 @@
 #import "MTPopUpTableCellView.h"
 @class MTMainWindowController;
 
-@interface MTSubscriptionTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource> {
+@interface MTSubscriptionTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource, MTTableViewProtocol> {
     IBOutlet MTMainWindowController *myController;
 
 }

@@ -12,7 +12,7 @@
 @class MTTiVoManager, MTMainWindowController;
 
 
-@interface MTProgramTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingSource>{
+@interface MTProgramTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingSource, MTTableViewProtocol>{
     IBOutlet MTMainWindowController *myController;
 	MTTiVoManager *tiVoManager;
     NSTableColumn *tiVoColumnHolder;

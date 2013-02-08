@@ -37,6 +37,7 @@
 @property (nonatomic, retain) NSString *selectedTiVo;
 @property (nonatomic, retain) MTTiVoShow *showForDetail;
 @property (nonatomic, readonly) MTTiVoManager *myTiVoManager;
+@property (nonatomic, assign) NSMenuItem *showInFinderMenuItem, *playVideoMenuItem;
 
 -(IBAction)selectFormat:(id)sender;
 -(IBAction)subscribe:(id) sender;

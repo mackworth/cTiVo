@@ -248,24 +248,34 @@ __DDLOGHERE__
 
 #pragma mark - Menu Delegate
 
+-(BOOL)validateMenuItem:(NSMenuItem *)menuItem
+{
+	BOOL returnValue = YES;
+	if (menuItem == _showInFinderMenuItem || menuItem == _playVideoMenuItem) {
+		BOOL itemsToProcess = [self selectionContainsCompletedShows];
+		if (!itemsToProcess) {
+			returnValue = NO;
+		}
+	}
+	if ([menuItem.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+		if (tiVoManager.tiVoList.count > 1) {
+			menuItem.title = @"Refresh this TiVo";
+		} else {
+			menuItem.title = @"Refresh TiVo";
+		}
+	}
+	return returnValue;
+}
+
+
 -(void)menuWillOpen:(NSMenu *)menu
 {
 	menuCursorPosition = [self.window mouseLocationOutsideOfEventStream];
-	NSTableView *workingTable = nil;
-	SEL selector = nil;
+	NSTableView<MTTableViewProtocol> *workingTable = nil;
+	SEL selector = NULL;
 	if ([menu.title compare:@"ProgramTableMenu"] == NSOrderedSame) {
 		workingTable = tiVoShowTable;
 		selector = @selector(programMenuHandler:);
-		//Update titles as appropriate
-		for (NSMenuItem *mi in [menu itemArray]) {
-			if ([mi.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
-				if (tiVoManager.tiVoList.count > 1) {
-					mi.title = @"Refresh this TiVo";
-				} else {
-					mi.title = @"Refresh TiVo";
-				}
-			}
-		}
 	}
 	if ([menu.title compare:@"DownloadTableMenu"] == NSOrderedSame) {
 		workingTable = downloadQueueTable;
