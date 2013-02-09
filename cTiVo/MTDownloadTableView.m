@@ -146,7 +146,10 @@ __DDLOGHERE__
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
     if (selectedRowIndexes.count == 1) {
         NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-        [myController setValue:selectedRows[0] forKey:@"showForDetail"];
+		MTTiVoShow * show = (MTTiVoShow *) selectedRows[0];
+		if (!show.protectedShow.boolValue) {
+			[myController setValue:selectedRows[0] forKey:@"showForDetail"];
+		}
     }
 }
 
@@ -157,12 +160,22 @@ __DDLOGHERE__
     return self.sortedShows.count;
 }
 
+- (void)tableView:(NSTableView *)tableView didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row
+{
+    MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
+    if ([thisShow.protectedShow boolValue]) {
+        rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleNone;
+    } else {
+        rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleRegular;
+    }
+}
+
 -(NSTableCellView *)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
 {
     NSTableCellView * result;
 	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
-    if([identifier compare: @"Programs"] == NSOrderedSame ||
-	   [identifier compare: @"Series" ] == NSOrderedSame) {
+    if([identifier isEqualToString: @"Programs"] ||
+	   [identifier isEqualToString: @"Series" ]) {
         MTDownloadTableCellView *thisCell = [[[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)] autorelease];
         //        result.textField.font = [NSFont userFontOfSize:14];
         thisCell.textField.editable = NO;
@@ -171,19 +184,19 @@ __DDLOGHERE__
         // allows it to be re-used
         thisCell.identifier = identifier;
         result = thisCell;
-    } else if([identifier compare: @"iTunes"] == NSOrderedSame) {
+    } else if([identifier isEqualToString: @"iTunes"]) {
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)] autorelease];
         thisCell.identifier = identifier;
         result = thisCell;
-    } else if([identifier compare: @"Simu"] == NSOrderedSame) {
+    } else if([identifier isEqualToString: @"Simu"]) {
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
         thisCell.identifier = identifier;
         result = thisCell;
-    } else if([identifier compare: @"Skip"] == NSOrderedSame) {
+    } else if([identifier isEqualToString: @"Skip"]) {
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)] autorelease];
         thisCell.identifier = identifier;
         result = thisCell;
-   } else if([identifier compare: @"Format"] == NSOrderedSame) {
+   } else if([identifier isEqualToString: @"Format"]) {
 		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
 	    thisCell.popUpButton.showHidden = NO;
 		thisCell.identifier = identifier;
@@ -222,30 +235,30 @@ __DDLOGHERE__
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
-	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
+	NSString *textVal = nil;
+	result.toolTip = nil;
+	if ([tableColumn.identifier isEqualToString:@"Programs"]) {
 		MTDownloadTableCellView *	programCell = (MTDownloadTableCellView *) result;
 		programCell.progressIndicator.leftText.stringValue = thisShow.showTitle ;
         programCell.toolTip = thisShow.showTitle;
 		[self updateProgressInCell:programCell forShow:thisShow];
 			
-	} else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
+	} else if ([tableColumn.identifier isEqualToString:@"Series"]) {
 		MTDownloadTableCellView *	seriesCell = (MTDownloadTableCellView *) result;
 		seriesCell.progressIndicator.leftText.stringValue = thisShow.seriesTitle;
 		seriesCell.toolTip = thisShow.seriesTitle;
 		[self updateProgressInCell:seriesCell forShow:thisShow];
-    } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
-        result.textField.stringValue = thisShow.tiVo.tiVo.name ;
-        result.toolTip = result.textField.stringValue;
+    } else if ([tableColumn.identifier isEqualToString:@"TiVo"]) {
+        textVal = thisShow.tiVoName ;
         result.textField.textColor = [NSColor blackColor];
         if (!thisShow.tiVo.isReachable && thisShow.isDownloading) {
             result.textField.textColor = [NSColor redColor];
         }
         
-    } else if ([tableColumn.identifier compare:@"Order"] == NSOrderedSame) {
-        result.textField.stringValue = [NSString stringWithFormat:@"%@",thisShow.downloadIndex] ;
-        result.toolTip = result.textField.stringValue;
+    } else if ([tableColumn.identifier isEqualToString:@"Order"]) {
+        textVal = [NSString stringWithFormat:@"%@",thisShow.downloadIndex] ;
         
-    } else if ([tableColumn.identifier compare:@"Format"] == NSOrderedSame) {
+    } else if ([tableColumn.identifier isEqualToString:@"Format"]) {
 		MTPopUpTableCellView * cell = (MTPopUpTableCellView *)result;
 		MTFormatPopUpButton *popUpButton = cell.popUpButton;
 		popUpButton.owner = thisShow;
@@ -262,65 +275,69 @@ __DDLOGHERE__
 		   popUpButton.hidden = YES;
 		   cell.textField.hidden= NO;
 		}
-    } else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
+    } else if ([tableColumn.identifier isEqualToString:@"iTunes"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisShow.addToiTunesWhenEncoded];
         [checkBox setEnabled: !thisShow.isDone &&
                               thisShow.encodeFormat.canAddToiTunes ];
          checkBox.owner = thisShow;
 
- 	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
+ 	} else if ([tableColumn.identifier isEqualToString:@"Simu"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisShow.simultaneousEncode];
         checkBox.owner = thisShow;
         [checkBox setEnabled: thisShow.isNew && thisShow.encodeFormat.canSimulEncode];
         
- 	} else if ([tableColumn.identifier compare:@"Skip"] == NSOrderedSame) {
+ 	} else if ([tableColumn.identifier isEqualToString:@"Skip"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisShow.skipCommercials];
         checkBox.owner = thisShow;
         [checkBox setEnabled: thisShow.isNew && thisShow.encodeFormat.canSkip];
         
-	} else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
+	} else if ([tableColumn.identifier isEqualToString:@"Date"]) {
 		if ([tableColumn width] > 135) {
-			result.textField.stringValue = thisShow.showMediumDateString;
+			textVal = thisShow.showMediumDateString;
 		} else {
-			result.textField.stringValue = thisShow.showDateString;
+			textVal = thisShow.showDateString;
 		}
-		result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.lengthString;
-       result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.seasonEpisode;
-        result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.isQueuedString;
-	} else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.isHDString;
+	} else if ([tableColumn.identifier isEqualToString:@"Length"]) {
+		textVal = thisShow.lengthString;
+ 	} else if ([tableColumn.identifier isEqualToString:@"Episode"]) {
+		textVal = thisShow.seasonEpisode;
+	} else if ([tableColumn.identifier isEqualToString:@"Queued"]) {
+		textVal = thisShow.isQueuedString;
+		result.textField.toolTip =@"Is program in queue to download?";
+	} else if ([tableColumn.identifier isEqualToString:@"HD"]) {
+		textVal = thisShow.isHDString;
 		result.textField.alignment = NSCenterTextAlignment;
-	} else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.channelString;
-	} else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.sizeString;
-	} else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.idString;
-	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.episodeTitle;
-		result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Station"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.stationCallsign;
-	} else if ([tableColumn.identifier compare:@"Genre"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.episodeGenre;
-        result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.originalAirDateNoTime ? thisShow.originalAirDateNoTime : @"";
+		result.textField.toolTip =@"Is program recorded in HD?";
+	} else if ([tableColumn.identifier isEqualToString:@"Channel"]) {
+		textVal = thisShow.channelString;
+	} else if ([tableColumn.identifier isEqualToString:@"Size"]) {
+		textVal = thisShow.sizeString;
+	} else if ([tableColumn.identifier isEqualToString:@"TiVoID"]) {
+		textVal = thisShow.idString;
+	} else if ([tableColumn.identifier isEqualToString:@"Title"]) {
+		textVal = thisShow.episodeTitle;
+	} else if ([tableColumn.identifier isEqualToString:@"Station"]) {
+		textVal = thisShow.stationCallsign;
+	} else if ([tableColumn.identifier isEqualToString:@"Genre"]) {
+		textVal = thisShow.episodeGenre;
+	} else if ([tableColumn.identifier isEqualToString:@"FirstAirDate"]) {
+		textVal = thisShow.originalAirDateNoTime;
 	} else {
 		DDLogReport(@"Unknown Column: %@ ",tableColumn.identifier);
 	}
-    
+	result.textField.stringValue = textVal ? textVal: @"";
+	if (!result.toolTip) result.toolTip = textVal;
     // return the result.
-    return result;
+	if ([thisShow.protectedShow boolValue]) {
+        result.textField.textColor = [NSColor grayColor];
+    } else {
+        result.textField.textColor = [NSColor blackColor];
+    }
+	
+   return result;
     
 }
   
@@ -356,7 +373,7 @@ __DDLOGHERE__
 		NSTableColumn *selectedColumn = tv.tableColumns[c];
 		BOOL isSelectedRow = [tv isRowSelected:r];
 		BOOL isOverText = NO;
-		if ([selectedColumn.identifier caseInsensitiveCompare:@"Programs"] == NSOrderedSame) { //Check if over text
+		if ([selectedColumn.identifier isEqualToString:@"Programs"]) { //Check if over text
 			MTDownloadTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
 			NSTextField *showField = showCellView.progressIndicator.leftText;
 			NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
@@ -542,7 +559,7 @@ __DDLOGHERE__
 		//we're moving at least some completedshows below the activeline
 		if([self askRestarting:completedShowsBeingMoved]) {
 			for (MTTiVoShow * show in completedShowsBeingMoved) {
-				[show prepForResubmit];
+				[show prepareForDownload: NO];
 			}
 		};
 	}

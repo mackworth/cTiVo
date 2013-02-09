@@ -82,7 +82,7 @@
 		int rowNum = (item < numItems/2) ? item: item-numItems/2;
 		
 		NSRect labelFrame = NSMakeRect(columNum*columnWidth,rowNum*(popupHeight+vertMargin)-4+vertBase,labelWidth,popupHeight);
-		NSTextField * label = [self newTextField:labelFrame];
+		NSTextField * label = [[self newTextField:labelFrame] autorelease];
 		[label setStringValue:[NSString stringWithFormat:@"%@:",className]];
 		
 		NSRect frame = NSMakeRect(columNum*columnWidth+labelWidth+horizMargin,rowNum*(popupHeight+vertMargin)+vertBase,popupWidth,popupHeight);

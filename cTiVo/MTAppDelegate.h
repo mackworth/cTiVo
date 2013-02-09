@@ -24,6 +24,7 @@
     IBOutlet NSTableView *exportTableView;
 	NSMutableArray *mediaKeyQueue;
 	BOOL gettingMediaKey;
+	NSTimer * checkingDone;
 	
 }
 

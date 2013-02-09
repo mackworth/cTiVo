@@ -47,7 +47,7 @@
 
 @property (nonatomic, retain) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
 @property (nonatomic, retain) NSMutableArray *subscribedShows;
-@property (nonatomic, retain) NSMutableArray *oldQueue; //queue from last run of program
+
 @property (nonatomic, retain) NSString *downloadDirectory;
 @property (readonly) NSString *defaultDownloadDirectory;
 
@@ -73,6 +73,8 @@
 -(void) sortDownloadQueue;
 
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget;
+-(void) checkProxyInQueue: (MTTiVoShow *) newShow;
+-(void) checkDownloadQueueForDeletedEntries: (MTTiVo *) tiVo;
 
 -(NSArray *)userFormats;
 -(NSArray *)userFormatDictionaries;
@@ -84,12 +86,14 @@
 
 -(void)writeDownloadQueueToUserDefaults;
 -(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo;
-- (void) noRecordingAlertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+
 -(BOOL)foundTiVoNamed:(NSString *)tiVoName;
 -(NSInteger)numberOfShowsToDownload;
 -(void)loadManualTiVos;
 - (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification;
 -(void)refreshAllTiVos;
+-(BOOL)anyTivoActive;
+
 -(void)pauseQueue:(NSNumber *)askUser;
 -(void)unPauseQueue;
 -(void)determineCurrentProcessingState;

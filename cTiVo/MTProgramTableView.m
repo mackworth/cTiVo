@@ -276,12 +276,12 @@ __DDLOGHERE__
 		result.textField.stringValue = thisShow.showTitle ;
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
-        result.textField.stringValue = thisShow.tiVo.tiVo.name;
+        result.textField.stringValue = thisShow.tiVoName;
         result.textField.textColor = [NSColor blackColor];
         if (!thisShow.tiVo.isReachable) {
             result.textField.textColor = [NSColor redColor];
         }
-        result.toolTip = thisShow.tiVo.tiVo.name;
+        result.toolTip = thisShow.tiVoName;
     } else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
 		if ([tableColumn width] > 135) {
 			result.textField.stringValue = thisShow.showMediumDateString;

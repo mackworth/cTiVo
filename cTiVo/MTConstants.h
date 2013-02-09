@@ -45,7 +45,9 @@
 #define kMTStatusCommercialed 6
 #define kMTStatusEncoding 7
 #define kMTStatusDone 8
+#define kMTStatusDeleted 13
 #define kMTStatusFailed 15
+//note that all "Done" status must be bigger than kMTStatusDone
 
 //Contants
 
@@ -100,6 +102,7 @@
 #define	kMTQueuePaused @"QueuePaused"			//State of pause for the download queue
 #define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address.  
 #define kMTPreventSleep @"PreventSleep"			//If true this will prevent sleep when possible
+#define kMTQuitWhileProcessing @"QuitWhileProcessing" //Don't warn user when quitting if active job
 #define kMTFormats @"Formats"                        //User defined Formats
 #define kMTHiddenFormats @"HiddenFormats"        //User defined list of built-in formats to be hidden in the UI
 #define kMTMediaKeys @"MediaKeys"                   //MAK dictionary, indexed by TiVo Name

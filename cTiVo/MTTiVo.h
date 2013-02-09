@@ -54,7 +54,7 @@
 -(void)updateShows:(id)sender;
 -(void)manageDownloads:(id)info;
 //-(void) reportNetworkFailure;
--(NSInteger)numberOfShowsInProcess;
+-(NSInteger)isProcessing;
 -(void)rescheduleAllShows;
 -(void)setupNotifications;
 

@@ -529,14 +529,75 @@ __DDLOGHERE__
 	
 }
 
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
-{
-    // Save changes in the application's user defaults before the application terminates.
+-(void) checkDone:(id) sender {
+	NSLog(@"Checking done");
+	if ( ![tiVoManager anyTivoActive] ){
+		NSLog(@"Checking finished");
+		[checkingDone invalidate]; checkingDone = nil;
+		[NSApp endSheet: [mainWindowController window]];
+		[self cleanup];
+		[NSApp replyToApplicationShouldTerminate:YES];
+	}
+}
+
+-(void) doQuit {
+	[checkingDone invalidate]; checkingDone = nil;
+	[NSApp replyToApplicationShouldTerminate:NO];
+}
+
+-(void) confirmUserQuit {
+	NSString *message = [NSString stringWithFormat:@"Shows are in process, and would need to be restarted next time. Do you wish them to finish now, or quit immediately?"];
+	NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Finish current show" alternateButton:@"Cancel" otherButton:@"Quit Immediately" informativeTextWithFormat:@""];
+	NSInteger returnValue = [quitAlert runModal];
+	switch (returnValue) { 
+	case NSAlertDefaultReturn:
+			DDLogDetail(@"User did ask to continue");
+			tiVoManager.processingPaused = @YES;
+			
+			NSRunLoop* myRunLoop = [NSRunLoop currentRunLoop];
+			// Create and schedule the  timer.
+			NSDate* futureDate = [NSDate dateWithTimeIntervalSinceNow:5.0];
+			checkingDone = [[[NSTimer alloc] initWithFireDate:futureDate
+														interval:5.0
+														  target:self
+														selector:@selector(checkDone:)
+														userInfo:nil
+														 repeats:YES] autorelease];
+			[myRunLoop addTimer:checkingDone forMode:NSRunLoopCommonModes];
+			
+			NSString *message = [NSString stringWithFormat:@"Please wait for processing to complete..."];
+			NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Cancel Quit" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
+			[quitAlert beginSheetModalForWindow:mainWindowController.window modalDelegate:self didEndSelector:@selector(doQuit) contextInfo:nil ];
+			break;
+	case NSAlertOtherReturn:
+			DDLogDetail(@"User did ask to quit");
+			[self cleanup];
+			[NSApp replyToApplicationShouldTerminate:YES];
+			break;
+	case NSAlertAlternateReturn:
+	default:
+			[NSApp replyToApplicationShouldTerminate:NO];
+			break;
+	}
+}
+
+-(void) cleanup {
+
 	DDLogDetail(@"exiting");
 	[tiVoManager writeDownloadQueueToUserDefaults];
     [[NSUserDefaults standardUserDefaults] synchronize];
-	[mediaKeyQueue release];
-    return NSTerminateNow;
+	[mediaKeyQueue release]; mediaKeyQueue = nil;
+}
+
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
+{
+	if ([tiVoManager anyTivoActive] && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTQuitWhileProcessing] ) {
+		[self performSelectorOnMainThread:@selector(confirmUserQuit) withObject:nil waitUntilDone:NO];
+		return NSTerminateLater;
+	} else {
+		[self cleanup];
+		return NSTerminateNow;
+	}
 }
 
 @end

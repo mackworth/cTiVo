@@ -20,6 +20,7 @@
 #pragma mark - Which TiVo did we come from
 @property (nonatomic, assign) MTTiVo *tiVo;
 @property (nonatomic, retain) NSString *tempTiVoName;  //used before we find TiVo
+@property (nonatomic, readonly) NSString *tiVoName; //either of above
 
 //--------------------------------------------------------------
 #pragma mark - Properties loaded in from TiVo's XML
@@ -89,8 +90,7 @@
 
 -(BOOL) isSameAs:(NSDictionary *) queueEntry;
 -(void) restoreDownloadData:(NSDictionary *) queueEntry;
-
-
+-(void) updateFromProxyShow:(MTTiVoShow *) newShow;
 
 #pragma mark - Properties for download/conversion work
 @property (nonatomic, retain) NSNumber *downloadIndex;
@@ -103,7 +103,7 @@
 				
 @property int  	numRetriesRemaining,
 				numStartupRetriesRemaining;
--(void) prepForResubmit;
+-(void) prepareForDownload: (BOOL) notifyTiVo;
 
 @property (nonatomic, readonly) NSString *encodeFilePath,
 										 *bufferFilePath,   //

@@ -219,7 +219,7 @@ __DDLOGHERE__
 	DDLogVerbose(@"encoding %@",self);
 	[encoder encodeObject:[NSNumber numberWithInteger: _showID] forKey: kMTQueueID];
 	[encoder encodeObject:_showTitle forKey: kMTQueueTitle];
-	[encoder encodeObject:_tiVo.tiVo.name forKey: kMTQueueTivo];
+	[encoder encodeObject:self.tiVoName forKey: kMTQueueTivo];
 	[encoder encodeObject:[NSNumber numberWithBool:_addToiTunesWhenEncoded] forKey: kMTSubscribediTunes];
 	[encoder encodeObject:[NSNumber numberWithBool:_simultaneousEncode] forKey: kMTSubscribedSimulEncode];
 	[encoder encodeObject:[NSNumber numberWithBool:_skipCommercials] forKey: kMTSubscribedSkipCommercials];
@@ -235,19 +235,20 @@ __DDLOGHERE__
 - (NSDictionary *) queueRecord {
 	//used for persistent queue, as we like having english-readable pref lists
 	//keep parallel with encodeWithCoder
+	//need to watch out for a nil object ending the dictionary too soon.
 	DDLogDetail(@"queueRecord for %@",self);
 	
 	NSMutableDictionary *result = [NSMutableDictionary dictionaryWithObjectsAndKeys:
 			[NSNumber numberWithInteger: _showID], kMTQueueID,
-			_showTitle, kMTQueueTitle,
-			_tiVo.tiVo.name, kMTQueueTivo,
 			[NSNumber numberWithBool:_addToiTunesWhenEncoded], kMTSubscribediTunes,
 			[NSNumber numberWithBool:_simultaneousEncode], kMTSubscribedSimulEncode,
 			[NSNumber numberWithBool:_skipCommercials], kMTSubscribedSkipCommercials,
-			_encodeFormat.name,kMTQueueFormat,
-			_downloadStatus, kMTQueueStatus,
-			_downloadDirectory, kMTQueueDirectory,
+			_showTitle, kMTQueueTitle,
+			self.tiVoName, kMTQueueTivo,
 								   nil];
+	if (_encodeFormat.name) [result setValue:_encodeFormat.name forKey:kMTQueueDownloadFile];
+	if (_downloadStatus) [result setValue:_downloadStatus forKey:kMTQueueDownloadFile];
+	if (_downloadDirectory) [result setValue:_downloadDirectory forKey:kMTQueueDownloadFile];
 	if (_downloadFilePath) [result setValue:_downloadFilePath forKey:kMTQueueDownloadFile];
 	if (_bufferFilePath) [result setValue:_bufferFilePath forKey:kMTQueueBufferFile];
 	if (_encodeFilePath) [result setValue:_encodeFilePath forKey:kMTQueueFinalFile];
@@ -256,20 +257,21 @@ __DDLOGHERE__
 }
 
 -(void) restoreDownloadData:queueEntry {
+	self.showID   = [(NSNumber *)queueEntry[kMTQueueID] intValue];
+	self.showTitle= queueEntry[kMTQueueTitle];
+	self.tempTiVoName = queueEntry[kMTQueueTivo] ;
 	_addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
 	_skipCommercials = [queueEntry[kMTSubscribedSkipCommercials ]  boolValue];
-	if (queueEntry[kMTQueueStatus] != kMTStatusNew){
-		//previously failed or completed
-		_downloadStatus = queueEntry[kMTQueueStatus];
-	}
-	if (!self.isInProgress) {
-		_simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
-		self.encodeFormat = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
-		self.downloadDirectory = queueEntry[kMTQueueDirectory];
-		_encodeFilePath = [queueEntry[kMTQueueFinalFile] retain];
-		_downloadFilePath = [queueEntry[kMTQueueDownloadFile] retain];
-		_bufferFilePath = [queueEntry[kMTQueueBufferFile] retain];
-	}
+	_downloadStatus = queueEntry[kMTQueueStatus];
+
+	_simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
+	self.encodeFormat = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
+	self.downloadDirectory = queueEntry[kMTQueueDirectory];
+	_encodeFilePath = [queueEntry[kMTQueueFinalFile] retain];
+	_downloadFilePath = [queueEntry[kMTQueueDownloadFile] retain];
+	_bufferFilePath = [queueEntry[kMTQueueBufferFile] retain];
+	_protectedShow = @YES;
+
 	DDLogDetail(@"restored %@ with %@; inProgress",self, queueEntry);
 }
 
@@ -278,8 +280,9 @@ __DDLOGHERE__
 	if ((self = [self init])) {
 		//NSString *title = [decoder decodeObjectForKey:kTitleKey];
 		//float rating = [decoder decodeFloatForKey:kRatingKey];
-		_showID   = [[decoder decodeObjectForKey: kMTQueueID] intValue];
-		_showTitle= [[decoder decodeObjectForKey: kMTQueueTitle] retain];
+		self.showID   = [[decoder decodeObjectForKey: kMTQueueID] intValue];
+		self.showTitle= [decoder decodeObjectForKey: kMTQueueTitle] ;
+		self.downloadDirectory = [decoder decodeObjectForKey: kMTQueueDirectory];
 		NSString * tivoName = [decoder decodeObjectForKey: kMTQueueTivo] ;
 		for (MTTiVo * tiVo in [tiVoManager tiVoList]) {
 			if ([tiVo.tiVo.name compare: tivoName] == NSOrderedSame) {
@@ -304,28 +307,25 @@ __DDLOGHERE__
 	return self;
 }
 
--(void) updateFromDecodedShow:(MTTiVoShow *) newShow {
+-(void) updateFromProxyShow:(MTTiVoShow *) newShow {
 	//copies details that were encoded into current show
 	//Keep parallel with InitWithCoder
 	//Assumed that showID and showTItle and TiVO are already matched
 	DDLogDetail(@"updating %@ with %@; inProgress",self, newShow);
 	_addToiTunesWhenEncoded = newShow.addToiTunesWhenEncoded;
 	_skipCommercials = newShow.skipCommercials;
-	if (!newShow.isNew){
-		//previously failed or completed, but don't stomp on inprogress
-		_downloadStatus = [newShow.downloadStatus retain];
-	}
-	if (!self.isInProgress) {
-		_simultaneousEncode = newShow.simultaneousEncode;
-		self.downloadDirectory = newShow.downloadDirectory;
-		self.encodeFormat = newShow.encodeFormat;
-		_encodeFilePath = [newShow.encodeFilePath retain];
-		_downloadFilePath = [newShow.downloadFilePath retain];
-		_bufferFilePath = [newShow.bufferFilePath retain];
-		
-	} else {
-		DDLogMajor(@"couldn't update %@ with %@; inProgress",self, newShow);
-	}
+	_downloadStatus = [newShow.downloadStatus retain];
+	_simultaneousEncode = newShow.simultaneousEncode;
+	self.downloadDirectory = newShow.downloadDirectory;
+	self.encodeFormat = newShow.encodeFormat;
+	_encodeFilePath = [newShow.encodeFilePath retain];
+	_downloadFilePath = [newShow.downloadFilePath retain];
+	_bufferFilePath = [newShow.bufferFilePath retain];
+	self.isQueued = newShow.isQueued;;
+
+	self.numRetriesRemaining = newShow.numRetriesRemaining;
+	self.numStartupRetriesRemaining = newShow.numStartupRetriesRemaining;
+	self.downloadDirectory = newShow.downloadDirectory;
 }
 
 
@@ -364,7 +364,7 @@ __DDLOGHERE__
 
 -(BOOL) isSameAs:(NSDictionary *) queueEntry {
 	NSInteger queueID = [queueEntry[kMTQueueID] integerValue];
-	BOOL result = (queueID == _showID) && ([self.tiVo.tiVo.name compare:queueEntry[kMTQueueTivo]] == NSOrderedSame);
+	BOOL result = (queueID == _showID) && ([self.tiVoName compare:queueEntry[kMTQueueTivo]] == NSOrderedSame);
 	if (result && [self.showTitle compare:queueEntry[kMTQueueTitle]] != NSOrderedSame) {
 		NSLog(@"Very odd, but reloading anyways: same ID: %ld same TiVo:%@ but different titles: <<%@>> vs <<%@>>",queueID, queueEntry[kMTQueueTivo], self.showTitle, queueEntry[kMTQueueTitle] );
 	}
@@ -436,7 +436,7 @@ __DDLOGHERE__
 
 
 #pragma mark - Set up for queuing / reset
--(void)prepForResubmit {
+-(void)prepareForDownload: (BOOL) notifyTiVo {
 	//set up initial parameters for download before submittal; can also be used to resubmit while still in DL queue
 	self.isQueued = YES;
 	if (self.isInProgress) {
@@ -448,9 +448,10 @@ __DDLOGHERE__
 		self.downloadDirectory = tiVoManager.downloadDirectory;
 	}
 	[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
-    NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:self.tiVo];
-    [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
-
+	if (notifyTiVo) {
+		NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:self.tiVo];
+		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
+	}
 }
 
 
@@ -811,7 +812,7 @@ __DDLOGHERE__
 
 //Now set up for either simul or sequential download
 	DDLogMajor(@"Starting %@ of %@", (_simultaneousEncode ? @"simul DL" : @"download"), _showTitle);
-	[tiVoManager  notifyWithTitle: [NSString stringWithFormat: @"TiVo %@ starting download...",self.tiVo.tiVo.name]
+	[tiVoManager  notifyWithTitle: [NSString stringWithFormat: @"TiVo %@ starting download...",self.tiVoName]
 													 subTitle:self.showTitle forNotification:kMTGrowlBeginDownload];
 	 if (!_simultaneousEncode ) {
         _isSimultaneousEncoding = NO;
@@ -1160,7 +1161,10 @@ __DDLOGHERE__
 }
 
 -(BOOL) isDone {
-	return ([_downloadStatus intValue] == kMTStatusDone) || ([_downloadStatus intValue] == kMTStatusFailed);
+	int status = [_downloadStatus intValue];
+	return (status == kMTStatusDone) ||
+	(status == kMTStatusFailed) ||
+	(status == kMTStatusDeleted);
 }
 
 -(BOOL) isNew {
@@ -1360,15 +1364,6 @@ __DDLOGHERE__
 	[self rescheduleShowWithDecrementRetries:@(YES)];
 }
 
--(void)dismissAlertSheet
-{
-	//Shouldn't be in the dataModel
-    NSWindow *alertWindow = [tiVoManager.mainWindow attachedSheet];
-    [NSApp endSheet:alertWindow returnCode:NSAlertFirstButtonReturn];
-    [alertWindow orderOut:self];
-    [tiVoManager noRecordingAlertDidEnd:nil returnCode:0 contextInfo:self];
-
-}
 #define kMTMinTiVoFileSize 100000
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
@@ -1409,10 +1404,8 @@ __DDLOGHERE__
 		if (dataReceived) {
 			NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
 			if (noRecording.location != NSNotFound) { //This is a missing recording
-				DDLogMajor(@"Deleted TiVo show; checking w/ user %@",dataReceived);
-				NSAlert *notFoundAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"%@ not found.  Deleting from download queue",_showTitle] defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-				[notFoundAlert beginSheetModalForWindow:tiVoManager.mainWindow modalDelegate:tiVoManager didEndSelector:@selector(noRecordingAlertDidEnd:returnCode:contextInfo:) contextInfo:self];
-				[self performSelector:@selector(dismissAlertSheet) withObject:nil afterDelay:3.0];
+				DDLogMajor(@"Deleted TiVo show; marking %@",self);
+				self.downloadStatus = [NSNumber numberWithInt: kMTStatusDeleted];
 				[self.tiVo updateShows:nil];
 				return;
 			}
@@ -1609,9 +1602,11 @@ __DDLOGHERE__
   
   if (_fileSize >= 1000000000) {
 	  return[NSString stringWithFormat:@"%0.1fGB",_fileSize/1000000000.0];
-  } else {
+  } else if (_fileSize > 0) {
 	  return[NSString stringWithFormat:@"%ldMB",((NSInteger)_fileSize)/1000000 ];
-  };
+  } else {
+	  return @"-";
+  }
 }
 
 -(NSString *) episodeGenre {
@@ -1635,11 +1630,21 @@ __DDLOGHERE__
 		case  kMTStatusCommercialed : return @"Commercials Detected";
 		case  kMTStatusEncoding : return @"Encoding";
 		case  kMTStatusDone : return @"Complete";
+		case  kMTStatusDeleted : return @"Deleted From TiVo";
 		case  kMTStatusFailed : return @"Failed";
 		default: return @"";
 	}
 }
-												 												  
+
+-(NSString *) tiVoName {
+	if (_tiVo) {
+		return _tiVo.tiVo.name;
+	} else {
+		return self.tempTiVoName;
+	}
+}
+
+
 												  
 
 #pragma mark - Custom Setters; many for parsing
@@ -1762,6 +1767,30 @@ __DDLOGHERE__
             self.skipCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
         }
     }
+}
+
+-(void)setShowTitle:(NSString *)showTitle {
+	if (_showTitle != showTitle) {
+		[_showTitle release];
+		_showTitle = [showTitle retain];
+		if (showTitle) {
+			NSRange pos = [showTitle rangeOfString: @": "];
+			//Normally this is built from episode/series; but if we got showtitle from
+			//"old" queue, we'd like to temporarily display eps/series
+			if (pos.location == NSNotFound) {
+				if (_seriesTitle.length == 0) {
+					_seriesTitle = showTitle;
+				}
+			} else {
+				if (_seriesTitle.length == 0) {
+					_seriesTitle = [showTitle substringToIndex:pos.location];
+				}
+				if (_episodeTitle.length == 0) {
+					_episodeTitle = [showTitle substringFromIndex:pos.location+pos.length];
+				}
+			}
+		}
+	}
 }
 
 -(void)setSeriesTitle:(NSString *)seriesTitle
@@ -1900,7 +1929,7 @@ __DDLOGHERE__
 
 -(NSString *)description
 {
-    return [NSString stringWithFormat:@"%@ (%@)%@",_showTitle,_tiVo.tiVo.name,[_protectedShow boolValue]?@"-Protected":@""];
+    return [NSString stringWithFormat:@"%@ (%@)%@",_showTitle,self.tiVoName,[_protectedShow boolValue]?@"-Protected":@""];
 }
 
 

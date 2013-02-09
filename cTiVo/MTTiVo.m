@@ -223,15 +223,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[self updateShowsStartingAt:0 withCount:kMTNumberShowToGetFirst];
 }
 
--(NSInteger)numberOfShowsInProcess
+-(NSInteger)isProcessing
 {
-    NSInteger n = 0;
     for (MTTiVoShow *show in _shows) {
         if (show.isInProgress) {
-            n++;
+			return YES;
         }
     }
-    return n;
+    return NO;
 }
 
 -(void)rescheduleAllShows
@@ -388,6 +387,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				[newShows addObject:currentShow];
 				NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil] autorelease];
 				[_queue addOperation:nextDetail];
+				//Now check and see if this was in the oldQueue (from last time we ran)
+				[tiVoManager checkProxyInQueue:currentShow];
+				
 			} else {
 				DDLogDetail(@"Updated show %@", currentShow.showTitle);
 				[newShows addObject:thisShow];
@@ -453,9 +455,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		isConnecting = NO;
 		self.shows = [NSMutableArray arrayWithArray:newShows];
 		if (firstUpdate) {
-			[self restoreQueue]; //performSelector:@selector(restoreQueue) withObject:nil afterDelay:10]; //should this post the TiVoShowsUpdated?
+			[tiVoManager checkDownloadQueueForDeletedEntries:self];
 			firstUpdate = NO;
 		}
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:self];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 		[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
@@ -571,68 +574,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         }
     }
     managingDownloads = NO;
-}
-
-
-#define kMTQueueShow @"MTQueueShow"
-//only used in next two methods, marks shows that have already been requeued
--(MTTiVoShow *) findNextShow:(NSInteger) index {
-	for (NSInteger nextIndex = index+1; nextIndex  < tiVoManager.oldQueue.count; nextIndex++) {
-		MTTiVoShow * nextShow = tiVoManager.oldQueue[nextIndex][kMTQueueShow];
-		if (nextShow != nil) {
-			return nextShow;
-		}
-	}
-	return nil;
-}
-
--(void) restoreQueue {
-	//find any shows in oldQueue from this TiVo to reload
-	DDLogMajor(@"Restoring Queue for %@",self);
-	NSMutableArray * showsToSubmit = nil;  //signal for not optimize
-	if ([tiVoManager downloadQueue].count == 0) {
-		//no previous shows to sort against, so we'll optimize first pass through
-		showsToSubmit= [NSMutableArray arrayWithCapacity:tiVoManager.oldQueue.count];
-	}
-	for (NSInteger index = 0; index < tiVoManager.oldQueue.count; index++) {
-		NSDictionary * queueEntry = tiVoManager.oldQueue[index];
-		//So For each queueEntry, if we haven't found it before, and it's this TiVo
-		if (queueEntry[kMTQueueShow] == nil && [self.tiVo.name compare: queueEntry [kMTQueueTivo]] == NSOrderedSame) {
-			DDLogVerbose(@"Looking for %@(%@)",queueEntry[kMTQueueTitle], queueEntry[kMTQueueID]);
-			for (MTTiVoShow * show in self.shows) {
-				//see if it's available in shows
-				DDLogVerbose(@"Checking %@ (%d)",show.showTitle, show.showID);
-				if ([show isSameAs: queueEntry]) {
-					[queueEntry setValue: show forKey:kMTQueueShow];
-					if ([[tiVoManager downloadQueue] indexOfObject:show] == NSNotFound ){
-						DDLogDetail(@"Restoring show %@",queueEntry[kMTQueueTitle]);
-						[show restoreDownloadData:queueEntry];
-						if (showsToSubmit) {
-							[showsToSubmit addObject:show];
-						} else {
-							MTTiVoShow * nextShow = [self findNextShow:index];
-							[tiVoManager addProgramsToDownloadQueue: [NSArray arrayWithObject: show] beforeShow:nextShow];
-						}
-					} else {
-						//otherwise already scheduled. probably Subscription.
-						DDLogDetail(@"Already restored: %@",show.showTitle );
-					}
-					break; //found it so move on
-				}
-			}
-		}
-	}
-	if (showsToSubmit) {
-		DDLogVerbose(@"Restoring shows %@",showsToSubmit);
-		[tiVoManager addProgramsToDownloadQueue: showsToSubmit beforeShow:nil];
-	}
-	if (LOG_DETAIL) {
-		for (NSDictionary * queueEntry in tiVoManager.oldQueue) {
-			if (queueEntry[kMTQueueShow]== nil && [self.tiVo.name compare: queueEntry [kMTQueueTivo]] == NSOrderedSame) {
-				DDLogDetail(@"TiVo no longer has show: %@", queueEntry[kMTQueueTitle]);
-			}
-		}
-	}
 }
 
 #pragma mark - Helper Methods

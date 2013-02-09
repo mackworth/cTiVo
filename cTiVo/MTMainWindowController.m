@@ -355,8 +355,10 @@ __DDLOGHERE__
 		NSInteger rowNumber = [input clickedRow];
 		if (rowNumber != -1) {
 			MTTiVoShow * show = [[input sortedShows] objectAtIndex:rowNumber];
-			[show revealInFinder];
-			[show playVideo];
+			if (!show.protectedShow.boolValue) {
+				[show revealInFinder];
+				[show playVideo];
+			}
 		}
 	}
 }

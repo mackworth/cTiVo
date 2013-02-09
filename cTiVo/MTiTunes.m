@@ -75,10 +75,10 @@ __DDLOGHERE__
 				[allLists  insertObject:newPlayList atIndex:[allLists count]-1];
 				if ([newPlayList exists]) {
 					newPlayList.name = @"Tivo Shows";
-					_tivoPlayList = newPlayList;
 				} else {
 					DDLogMajor(@"couldn't create TivoShow list");
 				}
+				_tivoPlayList = newPlayList;
 			}
 		}
 	}
