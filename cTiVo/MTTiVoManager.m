@@ -209,7 +209,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	NSString * targetTivoName = showTarget.tiVo.tiVo.name;
 	return [self.downloadQueue indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
 		MTTiVoShow * possShow = (MTTiVoShow *) obj;
-		return [targetTivoName isEqualToString:[obj tempTiVoName]] &&
+		return [targetTivoName isEqualToString:[possShow tempTiVoName]] &&
 		showTarget.showID == possShow.showID;
 		
 	}];
@@ -217,9 +217,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void) checkProxyInQueue: (MTTiVoShow *) newShow {
 	NSInteger DLIndex =[tiVoManager findProxyShowInDLQueue:newShow];
-	DDLogVerbose(@"Looking for %@ at %ld",newShow, DLIndex);
 	if (DLIndex != NSNotFound) {
 		MTTiVoShow * proxyShow = [tiVoManager downloadQueue][DLIndex];
+		DDLogVerbose(@"Found %@ at %ld on tiVo %@",newShow, DLIndex, proxyShow.tiVoName);
 		[newShow updateFromProxyShow:proxyShow];
 		[[tiVoManager downloadQueue] replaceObjectAtIndex:DLIndex withObject:newShow];
 	}

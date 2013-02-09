@@ -1543,7 +1543,7 @@ __DDLOGHERE__
 -(MTTiVo *) tiVo {
 	if (!_tiVo) {
 		for (MTTiVo * possibleTiVo in tiVoManager.tiVoList) {
-			if ([possibleTiVo.tiVo.name compare:self.tempTiVoName]) {
+			if ([possibleTiVo.tiVo.name isEqualToString:self.tempTiVoName]) {
 				self.tiVo = possibleTiVo;
 				break;
 			}
