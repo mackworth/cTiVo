@@ -11,6 +11,7 @@
 @implementation MTFormat
 
 @synthesize pathForExecutable = _pathForExecutable;
+@synthesize attributedFormatDescription = _attributedFormatDescription;
 
 __DDLOGHERE__
 
@@ -133,10 +134,20 @@ __DDLOGHERE__
 												NSForegroundColorAttributeName: formatColor}] autorelease];
 	return attTitle;
 }
+
 -(NSAttributedString *)attributedFormatDescription
 {
 	return [_isFactoryFormat boolValue] ? [[[NSAttributedString alloc] initWithString:_formatDescription attributes:@{NSForegroundColorAttributeName : [NSColor grayColor]}] autorelease] :
 	[[[NSAttributedString alloc] initWithString:_formatDescription] autorelease];
+}
+
+-(void)setAttributedFormatDescription:(NSAttributedString *)attributedFormatDescription
+{
+	if (_attributedFormatDescription != attributedFormatDescription) {
+		[_attributedFormatDescription release];
+		_attributedFormatDescription = [attributedFormatDescription retain];
+		self.formatDescription = [_attributedFormatDescription string];
+	}
 }
 
 -(NSDictionary *)toDictionary

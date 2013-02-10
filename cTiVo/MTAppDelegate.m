@@ -374,21 +374,21 @@ __DDLOGHERE__
 	[mySavePanel setTitle:@"Export User Formats"];
 	[mySavePanel setAllowedFileTypes:[NSArray arrayWithObject:@"plist"]];
     [mySavePanel setAccessoryView:formatSelectionTable];
-	
-	NSInteger ret = [mySavePanel runModal];
-	if (ret == NSFileHandlingPanelOKButton) {
-        NSMutableArray *formatsToWrite = [NSMutableArray array];
-        for (int i = 0; i < _tiVoGlobalManager.userFormats.count; i++) {
-            //Get selected formats
-            NSButton *checkbox = [exportTableView viewAtColumn:0 row:i makeIfNecessary:NO];
-            if (checkbox.state) {
-                [formatsToWrite addObject:[_tiVoGlobalManager.userFormats[i] toDictionary]];
-            }
-        }
-		DDLogVerbose(@"formats: %@",formatsToWrite);
-		NSString *filename = mySavePanel.URL.path;
-		[formatsToWrite writeToFile:filename atomically:YES];
-	}
+	[mySavePanel beginWithCompletionHandler:^(NSInteger result){
+		if (result == NSFileHandlingPanelOKButton) {
+			NSMutableArray *formatsToWrite = [NSMutableArray array];
+			for (int i = 0; i < _tiVoGlobalManager.userFormats.count; i++) {
+				//Get selected formats
+				NSButton *checkbox = [exportTableView viewAtColumn:0 row:i makeIfNecessary:NO];
+				if (checkbox.state) {
+					[formatsToWrite addObject:[_tiVoGlobalManager.userFormats[i] toDictionary]];
+				}
+			}
+			DDLogVerbose(@"formats: %@",formatsToWrite);
+			NSString *filename = mySavePanel.URL.path;
+			[formatsToWrite writeToFile:filename atomically:YES];
+		}	
+	}];
 }
 
 -(NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
@@ -438,16 +438,17 @@ __DDLOGHERE__
 -(IBAction)importFormats:(id)sender
 {
 	
-	NSArray *newFormats = nil;
 	NSOpenPanel *myOpenPanel = [[[NSOpenPanel alloc] init] autorelease];
 	[myOpenPanel setTitle:@"Import User Formats"];
 	[myOpenPanel setAllowedFileTypes:[NSArray arrayWithObject:@"plist"]];
-	NSInteger ret = [myOpenPanel runModal];
-	if (ret == NSFileHandlingPanelOKButton) {
-		NSString *filename = myOpenPanel.URL.path;
-		newFormats = [NSArray arrayWithContentsOfFile:filename];
-		[_tiVoGlobalManager addFormatsToList:newFormats];	
-	}
+	[myOpenPanel beginWithCompletionHandler:^(NSInteger ret){
+		NSArray *newFormats = nil;
+		if (ret == NSFileHandlingPanelOKButton) {
+			NSString *filename = myOpenPanel.URL.path;
+			newFormats = [NSArray arrayWithContentsOfFile:filename];
+			[_tiVoGlobalManager addFormatsToList:newFormats];
+		}
+	}];
 	
 }
 
