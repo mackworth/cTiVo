@@ -291,7 +291,12 @@
 -(IBAction)help:(id)sender
 {
 	//Get help text for encoder
-	NSString *helpFilePath = [[NSBundle mainBundle] pathForResource:@"EncoderHelpText" ofType:@"rtf"];
+	NSString *helpFilePath = nil;;
+	if (sender == encodeHelpButton) {
+		helpFilePath = [[NSBundle mainBundle] pathForResource:@"EncoderHelpText" ofType:@"rtf"];
+	} else if (sender == comSkipHelpButton) {
+		helpFilePath = [[NSBundle mainBundle] pathForResource:@"ComSkipHelpText" ofType:@"rtf"];
+	}
 	NSAttributedString *attrHelpText = [[[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL] autorelease];
 	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
 	NSButton *thisButton = (NSButton *)sender;

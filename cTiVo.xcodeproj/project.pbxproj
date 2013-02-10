@@ -24,6 +24,7 @@
 		D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */ = {isa = PBXBuildFile; fileRef = D24A8D0D16A5F3DC00DFF890 /* catToFile */; };
 		D257C6E41697400700EBE30B /* MTFormatPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */; };
 		D257C6E9169740A000EBE30B /* MTPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */; };
+		D274653516C8081C0012CFF7 /* ComSkipHelpText.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D274653416C8081C0012CFF7 /* ComSkipHelpText.rtf */; };
 		D27579BD16B4DC2B0090D137 /* MTPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D27579BB16B4DC2B0090D137 /* MTPreferencesWindowController.m */; };
 		D27579BE16B4DC2B0090D137 /* MTPreferencesWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D27579BC16B4DC2B0090D137 /* MTPreferencesWindowController.xib */; };
 		D27579C216B575A30090D137 /* MTTabViewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D27579C116B575A20090D137 /* MTTabViewItem.m */; };
@@ -113,6 +114,7 @@
 		D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTFormatPopUpButton.m; sourceTree = "<group>"; };
 		D257C6E61697409F00EBE30B /* MTPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTPopUpTableCellView.h; sourceTree = "<group>"; };
 		D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPopUpTableCellView.m; sourceTree = "<group>"; };
+		D274653416C8081C0012CFF7 /* ComSkipHelpText.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = ComSkipHelpText.rtf; sourceTree = "<group>"; };
 		D27579BA16B4DC2B0090D137 /* MTPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTPreferencesWindowController.h; sourceTree = "<group>"; };
 		D27579BB16B4DC2B0090D137 /* MTPreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPreferencesWindowController.m; sourceTree = "<group>"; };
 		D27579BC16B4DC2B0090D137 /* MTPreferencesWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTPreferencesWindowController.xib; sourceTree = "<group>"; };
@@ -342,6 +344,7 @@
 				D2CAF34216AB6FDE004E4CFA /* checkImage.png */,
 				D24A8D0D16A5F3DC00DFF890 /* catToFile */,
 				D219D5F316A503C100C79962 /* EncoderHelpText.rtf */,
+				D274653416C8081C0012CFF7 /* ComSkipHelpText.rtf */,
 				D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */,
 				D2D60BBF16766F3200CE32DE /* cTiVo.icns */,
 				1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */,
@@ -497,6 +500,7 @@
 				D22E4B1916B76DCD00619A6E /* MTAdvPreferencesViewController.xib in Resources */,
 				D2B73F3216BC485E003CB4ED /* comskip in Resources */,
 				D2B73F3616BC8A90003CB4ED /* comskip.ini in Resources */,
+				D274653516C8081C0012CFF7 /* ComSkipHelpText.rtf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

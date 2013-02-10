@@ -17,7 +17,7 @@
 @interface MTFormatEditorController : NSViewController <NSPopoverDelegate, MTTabViewItemControllerDelegate> {
 	IBOutlet MTFormatPopUpButton *formatPopUpButton;
 	NSAlert *deleteAlert, *saveOrCancelAlert, *cancelAlert;
-    IBOutlet NSButton *cancelButton, *saveButton;
+    IBOutlet NSButton *cancelButton, *saveButton, *encodeHelpButton, *comSkipHelpButton;
 	NSPopover *myPopover;
 	IBOutlet NSWindow *popoverDetachWindow;
 	IBOutlet MTHelpViewController *popoverDetachController, *helpContoller;

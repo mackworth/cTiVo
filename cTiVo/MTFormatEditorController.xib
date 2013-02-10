@@ -378,7 +378,7 @@
 					<object class="NSTextField" id="338349794">
 						<reference key="NSNextResponder" ref="331029513"/>
 						<int key="NSvFlags">268</int>
-						<string key="NSFrame">{{20, 369}, {500, 22}}</string>
+						<string key="NSFrame">{{20, 368}, {500, 22}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="992475318"/>
@@ -597,7 +597,6 @@
 						<string key="NSFrame">{{418, 19}, {102, 19}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="151665682">
@@ -846,7 +845,7 @@
 										<string key="NSFrameSize">{411, 55}</string>
 										<reference key="NSSuperview" ref="451388003"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="925642279"/>
+										<reference key="NSNextKeyView" ref="842044650"/>
 										<string key="NSReuseIdentifierKey">_NS:13</string>
 										<object class="NSTextContainer" key="NSTextContainer" id="954985744">
 											<object class="NSLayoutManager" key="NSLayoutManager">
@@ -1100,7 +1099,7 @@ wGw</bytes>
 						<string key="NSFrame">{{107, 423}, {413, 57}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="842044650"/>
+						<reference key="NSNextKeyView" ref="451388003"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<int key="NSsFlags">133138</int>
 						<reference key="NSVScroller" ref="925642279"/>
@@ -1203,7 +1202,7 @@ wGw</bytes>
 					<object class="NSTextField" id="778840383">
 						<reference key="NSNextResponder" ref="331029513"/>
 						<int key="NSvFlags">268</int>
-						<string key="NSFrame">{{21, 116}, {500, 22}}</string>
+						<string key="NSFrame">{{21, 114}, {500, 22}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="294779711"/>
@@ -1300,6 +1299,30 @@ wGw</bytes>
 						</object>
 						<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 					</object>
+					<object class="NSButton" id="271627239">
+						<reference key="NSNextResponder" ref="331029513"/>
+						<int key="NSvFlags">268</int>
+						<string key="NSFrame">{{138, 136}, {25, 25}}</string>
+						<reference key="NSSuperview" ref="331029513"/>
+						<reference key="NSWindow"/>
+						<string key="NSReuseIdentifierKey">_NS:1598</string>
+						<bool key="NSEnabled">YES</bool>
+						<object class="NSButtonCell" key="NSCell" id="593333128">
+							<int key="NSCellFlags">67108864</int>
+							<int key="NSCellFlags2">134217728</int>
+							<string key="NSContents"/>
+							<reference key="NSSupport" ref="180612610"/>
+							<string key="NSCellIdentifier">_NS:1598</string>
+							<reference key="NSControlView" ref="271627239"/>
+							<int key="NSButtonFlags">-2038415360</int>
+							<int key="NSButtonFlags2">161</int>
+							<string key="NSAlternateContents"/>
+							<string key="NSKeyEquivalent"/>
+							<int key="NSPeriodicDelay">200</int>
+							<int key="NSPeriodicInterval">25</int>
+						</object>
+						<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
+					</object>
 					<object class="NSTextField" id="819176786">
 						<reference key="NSNextResponder" ref="331029513"/>
 						<int key="NSvFlags">268</int>
@@ -1374,7 +1397,6 @@ wGw</bytes>
 					<string key="NSFrameSize">{480, 380}</string>
 					<reference key="NSSuperview"/>
 					<reference key="NSWindow"/>
-					<reference key="NSNextKeyView"/>
 					<string key="NSReuseIdentifierKey">_NS:20</string>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
@@ -1493,6 +1515,30 @@ wGw</bytes>
 						<reference key="destination" ref="21213379"/>
 					</object>
 					<int key="connectionID">2677</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">help:</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="271627239"/>
+					</object>
+					<int key="connectionID">2702</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">comSkipHelpButton</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="271627239"/>
+					</object>
+					<int key="connectionID">2703</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">encodeHelpButton</string>
+						<reference key="source" ref="1001"/>
+						<reference key="destination" ref="354591099"/>
+					</object>
+					<int key="connectionID">2704</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -2628,6 +2674,7 @@ wGw</bytes>
 							<reference ref="755114328"/>
 							<reference ref="296149271"/>
 							<reference ref="778840383"/>
+							<reference ref="271627239"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -3183,6 +3230,19 @@ wGw</bytes>
 						<reference key="object" ref="595469665"/>
 						<reference key="parent" ref="296149271"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">2700</int>
+						<reference key="object" ref="271627239"/>
+						<array class="NSMutableArray" key="children">
+							<reference ref="593333128"/>
+						</array>
+						<reference key="parent" ref="331029513"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">2701</int>
+						<reference key="object" ref="593333128"/>
+						<reference key="parent" ref="271627239"/>
+					</object>
 				</array>
 			</object>
 			<dictionary class="NSMutableDictionary" key="flattenedProperties">
@@ -3540,13 +3600,15 @@ wGw</bytes>
 				<string key="2689.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="2690.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="2691.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="2700.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="2701.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="562.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			</dictionary>
 			<dictionary class="NSMutableDictionary" key="unlocalizedProperties"/>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">2699</int>
+			<int key="maxID">2704</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -3555,6 +3617,8 @@ wGw</bytes>
 					<string key="superclassName">NSViewController</string>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="cancelButton">NSButton</string>
+						<string key="comSkipHelpButton">NSButton</string>
+						<string key="encodeHelpButton">NSButton</string>
 						<string key="formatPopUpButton">MTFormatPopUpButton</string>
 						<string key="helpContoller">MTHelpViewController</string>
 						<string key="popoverDetachController">MTHelpViewController</string>
@@ -3564,6 +3628,14 @@ wGw</bytes>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
 						<object class="IBToOneOutletInfo" key="cancelButton">
 							<string key="name">cancelButton</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="comSkipHelpButton">
+							<string key="name">comSkipHelpButton</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="encodeHelpButton">
+							<string key="name">encodeHelpButton</string>
 							<string key="candidateClassName">NSButton</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="formatPopUpButton">
