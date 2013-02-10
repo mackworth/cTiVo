@@ -57,7 +57,7 @@
 @property (nonatomic, retain) MTFormat *selectedFormat;
 @property (nonatomic) int numEncoders, totalShows, numCommercials;//Want to limit launches to two encoders.
 @property (nonatomic, assign) NSWindow *mainWindow;
-@property (nonatomic, retain) NSNumber *processingPaused;
+@property (nonatomic, retain) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
 
 
 + (MTTiVoManager *)sharedTiVoManager;

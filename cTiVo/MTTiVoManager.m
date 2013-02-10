@@ -175,6 +175,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		_videoListNeedsFilling = YES;
         updatingVideoList = NO;
 		_processingPaused = @(NO);
+		self.quitWhenCurrentDownloadsComplete = @(NO);
 		
 		[self loadGrowl];
 //		NSLog(@"Getting Host Addresses");
@@ -894,8 +895,24 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)encodeFinished
 {
 	numEncoders--;
+	if ([_quitWhenCurrentDownloadsComplete boolValue] && ![self tiVosProcessing]) {
+		//Quit here
+		[NSApp terminate:nil];
+	}
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
     DDLogMajor(@"num decoders after decrement is %d",numEncoders);
+}
+
+-(BOOL)tiVosProcessing
+{
+	BOOL returnValue = NO;
+	for (MTTiVo *tiVo in _tiVoList) {
+		if (tiVo.isProcessing) {
+			returnValue = YES;
+			break;
+		}
+	}
+	return returnValue;
 }
 
 -(void)commercialFinished

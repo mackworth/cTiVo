@@ -24,7 +24,6 @@
 	IBOutlet MTDownloadTableView *downloadQueueTable;
 	IBOutlet MTProgramTableView  *tiVoShowTable;
 	IBOutlet MTSubscriptionTableView  *subscriptionTable;
-    IBOutlet NSView *view;
 	IBOutlet NSDrawer *showDetailDrawer;
 	NSPoint menuCursorPosition;
 	NSInteger menuTableRow;
@@ -38,6 +37,7 @@
 @property (nonatomic, retain) MTTiVoShow *showForDetail;
 @property (nonatomic, readonly) MTTiVoManager *myTiVoManager;
 @property (nonatomic, assign) NSMenuItem *showInFinderMenuItem, *playVideoMenuItem;
+@property (nonatomic, retain) IBOutlet NSView *cancelQuitView;
 
 -(IBAction)selectFormat:(id)sender;
 -(IBAction)subscribe:(id) sender;
@@ -50,6 +50,7 @@
 -(IBAction)getDownloadDirectory:(id)sender;
 -(IBAction)changeSimultaneous:(id)sender;
 -(IBAction)changeiTunes:(id)sender;
+-(IBAction)dontQuit:(id)sender;
 
 
 @end

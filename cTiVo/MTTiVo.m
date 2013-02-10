@@ -482,7 +482,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //        DDLogMajor(@"%@ Delaying download until %@",self,tiVoManager.queueStartTime);
 //		return;
 //    }
-	if ([tiVoManager.processingPaused boolValue]) {
+	if ([tiVoManager.processingPaused boolValue] || [tiVoManager.quitWhenCurrentDownloadsComplete boolValue]) {
 		return;
 	}
 	if ([info isKindOfClass:[NSNotification class]]) {

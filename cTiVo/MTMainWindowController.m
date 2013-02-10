@@ -13,6 +13,7 @@
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"
 #import "MTTiVo.h"
+#import <Quartz/Quartz.h>
 
 @interface MTMainWindowController ()
 
@@ -82,6 +83,12 @@ __DDLOGHERE__
 	
 	[downloadQueueTable setTarget: self];
 	[downloadQueueTable setDoubleAction:@selector(doubleClickForDetails:)];
+	
+	CALayer *viewLayer = [CALayer layer];
+	[viewLayer setBackgroundColor:CGColorCreateGenericRGB(0.0, 0.0, 0.0, 0.4)]; //RGB plus Alpha Channel
+	[self.cancelQuitView setWantsLayer:YES]; // view's backing store is using a Core Animation Layer
+	[self.cancelQuitView setLayer:viewLayer];
+
 
 }
 
@@ -442,6 +449,16 @@ __DDLOGHERE__
 	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
 }
+
+-(IBAction)dontQuit:(id)sender
+{
+	DDLogDetail(@"User canceled Quit after processing");
+	tiVoManager.quitWhenCurrentDownloadsComplete = @(NO);
+	tiVoManager.processingPaused = @(NO);
+	[self.cancelQuitView setHidden:YES];
+}
+
+
 
 -(BOOL) confirmCancel:(NSString *) title {
     NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",title] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@""];

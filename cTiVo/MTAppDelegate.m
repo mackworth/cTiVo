@@ -540,10 +540,10 @@ __DDLOGHERE__
 	}
 }
 
--(void) doQuit {
-	[checkingDone invalidate]; checkingDone = nil;
-	[NSApp replyToApplicationShouldTerminate:NO];
-}
+//-(void) doQuit {
+//	[checkingDone invalidate]; checkingDone = nil;
+//	[NSApp replyToApplicationShouldTerminate:NO];
+//}
 
 -(void) confirmUserQuit {
 	NSString *message = [NSString stringWithFormat:@"Shows are in process, and would need to be restarted next time. Do you wish them to finish now, or quit immediately?"];
@@ -552,22 +552,25 @@ __DDLOGHERE__
 	switch (returnValue) { 
 	case NSAlertDefaultReturn:
 			DDLogDetail(@"User did ask to continue");
-			tiVoManager.processingPaused = @YES;
+			tiVoManager.processingPaused = @(YES);
+			tiVoManager.quitWhenCurrentDownloadsComplete = @(YES);
+			[mainWindowController.cancelQuitView setHidden:NO];
+			[NSApp replyToApplicationShouldTerminate:NO];
 			
-			NSRunLoop* myRunLoop = [NSRunLoop currentRunLoop];
-			// Create and schedule the  timer.
-			NSDate* futureDate = [NSDate dateWithTimeIntervalSinceNow:5.0];
-			checkingDone = [[[NSTimer alloc] initWithFireDate:futureDate
-														interval:5.0
-														  target:self
-														selector:@selector(checkDone:)
-														userInfo:nil
-														 repeats:YES] autorelease];
-			[myRunLoop addTimer:checkingDone forMode:NSRunLoopCommonModes];
-			
-			NSString *message = [NSString stringWithFormat:@"Please wait for processing to complete..."];
-			NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Cancel Quit" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-			[quitAlert beginSheetModalForWindow:mainWindowController.window modalDelegate:self didEndSelector:@selector(doQuit) contextInfo:nil ];
+//			NSRunLoop* myRunLoop = [NSRunLoop currentRunLoop];
+//			// Create and schedule the  timer.
+//			NSDate* futureDate = [NSDate dateWithTimeIntervalSinceNow:5.0];
+//			checkingDone = [[[NSTimer alloc] initWithFireDate:futureDate
+//														interval:5.0
+//														  target:self
+//														selector:@selector(checkDone:)
+//														userInfo:nil
+//														 repeats:YES] autorelease];
+//			[myRunLoop addTimer:checkingDone forMode:NSRunLoopCommonModes];
+//			
+//			NSString *message = [NSString stringWithFormat:@"Please wait for processing to complete..."];
+//			NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Cancel Quit" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
+//			[quitAlert beginSheetModalForWindow:mainWindowController.window modalDelegate:self didEndSelector:@selector(doQuit) contextInfo:nil ];
 			break;
 	case NSAlertOtherReturn:
 			DDLogDetail(@"User did ask to quit");
@@ -591,7 +594,7 @@ __DDLOGHERE__
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
-	if ([tiVoManager anyTivoActive] && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTQuitWhileProcessing] ) {
+	if ([tiVoManager anyTivoActive] && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTQuitWhileProcessing] && sender ) {
 		[self performSelectorOnMainThread:@selector(confirmUserQuit) withObject:nil waitUntilDone:NO];
 		return NSTerminateLater;
 	} else {
