@@ -32,8 +32,8 @@
     // Otherwise you need to change the color manually
     switch (style) {
         case NSBackgroundStyleLight:
-            [self.progressIndicator.leftText setTextColor:[NSColor colorWithCalibratedWhite:0.0 alpha:1.0]];
-            [self.progressIndicator.rightText setTextColor:[NSColor colorWithCalibratedWhite:0.0 alpha:1.0]];
+            [self.progressIndicator.leftText setTextColor:self.progressIndicator.foregroundTextColor];
+            [self.progressIndicator.rightText setTextColor:self.progressIndicator.foregroundTextColor];
             break;
 			
         case NSBackgroundStyleDark:

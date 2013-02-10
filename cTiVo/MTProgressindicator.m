@@ -23,8 +23,10 @@
         [_leftText setBezeled:NO];
         [_leftText setAutoresizingMask:NSViewWidthSizable ];
         [_leftText setFont: [NSFont systemFontOfSize:13.0f]];
+		[_leftText setTextColor:[NSColor redColor]];
         [_leftText.cell setWraps:NO];
         [[_leftText cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
+		_foregroundTextColor = [[NSColor blackColor] retain];
         
         _rightText = [[NSTextField alloc] initWithFrame:CGRectMake(frame.size.width -widthStatusField, 1, widthStatusField, frame.size.height-6)];
         [_rightText setFont:[NSFont userFontOfSize:10]];
@@ -62,6 +64,7 @@
 
 -(void)dealloc
 {
+	self.foregroundTextColor = nil;
     [_barColor release];
     [super dealloc];
 }

@@ -242,7 +242,11 @@ __DDLOGHERE__
 		programCell.progressIndicator.leftText.stringValue = thisShow.showTitle ;
         programCell.toolTip = thisShow.showTitle;
 		[self updateProgressInCell:programCell forShow:thisShow];
-			
+		if ([thisShow.protectedShow boolValue]) {
+			programCell.progressIndicator.foregroundTextColor = [NSColor grayColor];
+		} else {
+			programCell.progressIndicator.foregroundTextColor = [NSColor blackColor];
+		}
 	} else if ([tableColumn.identifier isEqualToString:@"Series"]) {
 		MTDownloadTableCellView *	seriesCell = (MTDownloadTableCellView *) result;
 		seriesCell.progressIndicator.leftText.stringValue = thisShow.seriesTitle;
