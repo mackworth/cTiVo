@@ -525,6 +525,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     if (!isDownloading) {
 		DDLogDetail(@"%@ Checking for new download", self);
 		for (MTTiVoShow *s in self.downloadQueue) {
+			if ([s.protectedShow boolValue]) {
+				break;
+			}
             if (s.isNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
                 if(s.tiVo.isReachable) {
                     if (s.simultaneousEncode) {

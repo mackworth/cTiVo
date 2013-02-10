@@ -888,7 +888,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo
 {
-    return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",tiVo.tiVo.name]];
+//    return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",tiVo.tiVo.name]];
+    return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"tiVoName == %@",tiVo.tiVo.name]];
 }
 
 
