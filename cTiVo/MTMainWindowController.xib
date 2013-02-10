@@ -113,18 +113,18 @@
 							<array class="NSMutableArray" key="NSSubviews">
 								<object class="NSCustomView" id="846695837">
 									<reference key="NSNextResponder" ref="882086054"/>
-									<int key="NSvFlags">-2147483380</int>
+									<int key="NSvFlags">-2147483329</int>
 									<array class="NSMutableArray" key="NSSubviews">
-										<object class="NSTextField" id="256356657">
+										<object class="NSTextField" id="751711844">
 											<reference key="NSNextResponder" ref="846695837"/>
-											<int key="NSvFlags">268</int>
+											<int key="NSvFlags">301</int>
 											<string key="NSFrame">{{169, 142}, {532, 33}}</string>
 											<reference key="NSSuperview" ref="846695837"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="594493392"/>
 											<string key="NSReuseIdentifierKey">_NS:1535</string>
 											<bool key="NSEnabled">YES</bool>
-											<object class="NSTextFieldCell" key="NSCell" id="697866475">
+											<object class="NSTextFieldCell" key="NSCell" id="412318019">
 												<int key="NSCellFlags">68157504</int>
 												<int key="NSCellFlags2">138413056</int>
 												<string key="NSContents">cTiVo will quit upon completion of current processing</string>
@@ -134,7 +134,7 @@
 													<int key="NSfFlags">16</int>
 												</object>
 												<string key="NSCellIdentifier">_NS:1535</string>
-												<reference key="NSControlView" ref="256356657"/>
+												<reference key="NSControlView" ref="751711844"/>
 												<reference key="NSBackgroundColor" ref="162790425"/>
 												<object class="NSColor" key="NSTextColor">
 													<int key="NSColorSpace">1</int>
@@ -145,7 +145,7 @@
 										</object>
 										<object class="NSButton" id="594493392">
 											<reference key="NSNextResponder" ref="846695837"/>
-											<int key="NSvFlags">268</int>
+											<int key="NSvFlags">301</int>
 											<string key="NSFrame">{{350, 106}, {170, 32}}</string>
 											<reference key="NSSuperview" ref="846695837"/>
 											<reference key="NSWindow"/>
@@ -172,7 +172,7 @@
 									<string key="NSFrame">{{0, 328}, {871, 246}}</string>
 									<reference key="NSSuperview" ref="882086054"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="256356657"/>
+									<reference key="NSNextKeyView" ref="751711844"/>
 									<string key="NSReuseIdentifierKey">_NS:9</string>
 									<string key="NSClassName">NSView</string>
 								</object>
@@ -8926,7 +8926,7 @@ wGw</bytes>
 						<reference key="object" ref="846695837"/>
 						<array class="NSMutableArray" key="children">
 							<reference ref="594493392"/>
-							<reference ref="256356657"/>
+							<reference ref="751711844"/>
 						</array>
 						<reference key="parent" ref="882086054"/>
 						<string key="objectName">Cancel Quit View</string>
@@ -8946,16 +8946,16 @@ wGw</bytes>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">900</int>
-						<reference key="object" ref="256356657"/>
+						<reference key="object" ref="751711844"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="697866475"/>
+							<reference ref="412318019"/>
 						</array>
 						<reference key="parent" ref="846695837"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">901</int>
-						<reference key="object" ref="697866475"/>
-						<reference key="parent" ref="256356657"/>
+						<reference key="object" ref="412318019"/>
+						<reference key="parent" ref="751711844"/>
 					</object>
 				</array>
 			</object>
@@ -9678,28 +9678,19 @@ wGw</bytes>
 					<string key="superclassName">NSWindowController</string>
 					<dictionary class="NSMutableDictionary" key="actions">
 						<string key="changeSimultaneous:">id</string>
-						<string key="changeSkip:">id</string>
 						<string key="changeiTunes:">id</string>
 						<string key="dontQuit:">id</string>
-						<string key="doubleClickForDetails:">id</string>
-						<string key="downloadMenuHandler:">NSMenuItem</string>
 						<string key="downloadSelectedShows:">id</string>
 						<string key="getDownloadDirectory:">id</string>
 						<string key="playVideo:">id</string>
-						<string key="programMenuHandler:">NSMenuItem</string>
 						<string key="removeFromDownloadQueue:">id</string>
 						<string key="revealInFinder:">id</string>
 						<string key="selectFormat:">id</string>
 						<string key="subscribe:">id</string>
-						<string key="subscriptionMenuHandler:">NSMenuItem</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
 						<object class="IBActionInfo" key="changeSimultaneous:">
 							<string key="name">changeSimultaneous:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="changeSkip:">
-							<string key="name">changeSkip:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 						<object class="IBActionInfo" key="changeiTunes:">
@@ -9709,14 +9700,6 @@ wGw</bytes>
 						<object class="IBActionInfo" key="dontQuit:">
 							<string key="name">dontQuit:</string>
 							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="doubleClickForDetails:">
-							<string key="name">doubleClickForDetails:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="downloadMenuHandler:">
-							<string key="name">downloadMenuHandler:</string>
-							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBActionInfo" key="downloadSelectedShows:">
 							<string key="name">downloadSelectedShows:</string>
@@ -9729,10 +9712,6 @@ wGw</bytes>
 						<object class="IBActionInfo" key="playVideo:">
 							<string key="name">playVideo:</string>
 							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="programMenuHandler:">
-							<string key="name">programMenuHandler:</string>
-							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBActionInfo" key="removeFromDownloadQueue:">
 							<string key="name">removeFromDownloadQueue:</string>
@@ -9749,10 +9728,6 @@ wGw</bytes>
 						<object class="IBActionInfo" key="subscribe:">
 							<string key="name">subscribe:</string>
 							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="subscriptionMenuHandler:">
-							<string key="name">subscriptionMenuHandler:</string>
-							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
