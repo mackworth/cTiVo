@@ -197,8 +197,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	for (NSDictionary * queueEntry in oldQueue) {
 		DDLogDetail(@"Restoring show %@",queueEntry[kMTQueueTitle]);
 		MTTiVoShow * newShow = [[[MTTiVoShow alloc] init] autorelease];
-		[newShow restoreDownloadData:queueEntry];
 		[newShow prepareForDownload:NO];
+		[newShow restoreDownloadData:queueEntry];
 		[newShows addObject:newShow];
 	}
 	DDLogVerbose(@"Restored downloadQueue: %@",newShows);
@@ -220,9 +220,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	NSInteger DLIndex =[tiVoManager findProxyShowInDLQueue:newShow];
 	if (DLIndex != NSNotFound) {
 		MTTiVoShow * proxyShow = [tiVoManager downloadQueue][DLIndex];
-		DDLogVerbose(@"Found %@ at %ld on tiVo %@",newShow, DLIndex, proxyShow.tiVoName);
+		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, DLIndex, proxyShow.tiVoName);
 		[newShow updateFromProxyShow:proxyShow];
 		[[tiVoManager downloadQueue] replaceObjectAtIndex:DLIndex withObject:newShow];
+	} else {
+		DDLogVerbose(@"Didn't find DL proxy for %@",newShow);
 	}
 }
 

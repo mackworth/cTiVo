@@ -458,13 +458,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			[tiVoManager checkDownloadQueueForDeletedEntries:self];
 			firstUpdate = NO;
 		}
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:self];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 		[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
 		//	NSLog(@"Avialable Recordings are %@",_recordings);
 		[previousShowList release]; previousShowList = nil;
 	}
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:self];
     [parser release];
 }
 
@@ -526,7 +526,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		DDLogDetail(@"%@ Checking for new download", self);
 		for (MTTiVoShow *s in self.downloadQueue) {
 			if ([s.protectedShow boolValue]) {
-				break;
+				managingDownloads = NO;
+				return;
 			}
             if (s.isNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
                 if(s.tiVo.isReachable) {

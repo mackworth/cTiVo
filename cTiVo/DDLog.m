@@ -207,7 +207,7 @@
 	NSDictionary * levels = [[NSUserDefaults standardUserDefaults] objectForKey:kMTDebugLevelDetail];
 	if (levels.count > 0) {
 		for (NSString* className in [levels allKeys]) {
-			[self setLogLevel:levels[className] forClassWithName:className];
+			[self setLogLevel:((NSNumber *)levels[className]).intValue forClassWithName:className];
 		}
 	} else {
 		int debugLevel = (int)[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel];
