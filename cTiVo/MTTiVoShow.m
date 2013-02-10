@@ -246,9 +246,9 @@ __DDLOGHERE__
 			_showTitle, kMTQueueTitle,
 			self.tiVoName, kMTQueueTivo,
 								   nil];
-	if (_encodeFormat.name) [result setValue:_encodeFormat.name forKey:kMTQueueDownloadFile];
-	if (_downloadStatus) [result setValue:_downloadStatus forKey:kMTQueueDownloadFile];
-	if (_downloadDirectory) [result setValue:_downloadDirectory forKey:kMTQueueDownloadFile];
+	if (_encodeFormat.name) [result setValue:_encodeFormat.name forKey:kMTQueueFormat];
+	if (_downloadStatus) [result setValue:_downloadStatus forKey:kMTQueueStatus];
+	if (_downloadDirectory) [result setValue:_downloadDirectory forKey:kMTQueueDirectory];
 	if (_downloadFilePath) [result setValue:_downloadFilePath forKey:kMTQueueDownloadFile];
 	if (_bufferFilePath) [result setValue:_bufferFilePath forKey:kMTQueueBufferFile];
 	if (_encodeFilePath) [result setValue:_encodeFilePath forKey:kMTQueueFinalFile];
