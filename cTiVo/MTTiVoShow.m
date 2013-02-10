@@ -1769,25 +1769,30 @@ __DDLOGHERE__
     }
 }
 
--(void)setShowTitle:(NSString *)showTitle {
+-(BOOL)reallySetShowTitle: (NSString *) showTitle {
 	if (_showTitle != showTitle) {
 		[_showTitle release];
 		_showTitle = [showTitle retain];
-		if (showTitle) {
-			NSRange pos = [showTitle rangeOfString: @": "];
-			//Normally this is built from episode/series; but if we got showtitle from
-			//"old" queue, we'd like to temporarily display eps/series
-			if (pos.location == NSNotFound) {
-				if (_seriesTitle.length == 0) {
-					_seriesTitle = showTitle;
-				}
-			} else {
-				if (_seriesTitle.length == 0) {
-					_seriesTitle = [showTitle substringToIndex:pos.location];
-				}
-				if (_episodeTitle.length == 0) {
-					_episodeTitle = [showTitle substringFromIndex:pos.location+pos.length];
-				}
+		return YES;
+	}
+	return NO;
+}
+
+-(void)setShowTitle:(NSString *)showTitle {
+	if ([self reallySetShowTitle:showTitle] && showTitle) {
+		NSRange pos = [showTitle rangeOfString: @": "];
+		//Normally this is built from episode/series; but if we got showtitle from
+		//"old" queue, we'd like to temporarily display eps/series
+		if (pos.location == NSNotFound) {
+			if (_seriesTitle.length == 0) {
+				_seriesTitle = showTitle;
+			}
+		} else {
+			if (_seriesTitle.length == 0) {
+				_seriesTitle = [[showTitle substringToIndex:pos.location] retain];
+			}
+			if (_episodeTitle.length == 0) {
+				_episodeTitle = [[showTitle substringFromIndex:pos.location+pos.length] retain];
 			}
 		}
 	}
@@ -1799,9 +1804,9 @@ __DDLOGHERE__
 		[_seriesTitle release];
 		_seriesTitle = [seriesTitle retain];
 		if (_episodeTitle.length > 0 ) {
-			self.showTitle = [NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
+			[self reallySetShowTitle:[NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle]];
 		} else {
-			self.showTitle = _seriesTitle;
+			[self reallySetShowTitle: _seriesTitle];
 		}
 	}
 }
@@ -1812,9 +1817,9 @@ __DDLOGHERE__
 		[_episodeTitle release];
 		_episodeTitle = [episodeTitle retain];
 		if (_episodeTitle.length > 0 ) {
-			self.showTitle = [NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
+			[self reallySetShowTitle:[NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle]];
 		} else {
-			self.showTitle = _seriesTitle;
+			[self reallySetShowTitle: _seriesTitle];
 		}
 	}
 }
