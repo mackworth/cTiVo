@@ -270,7 +270,7 @@ __DDLOGHERE__
 	_encodeFilePath = [queueEntry[kMTQueueFinalFile] retain];
 	_downloadFilePath = [queueEntry[kMTQueueDownloadFile] retain];
 	_bufferFilePath = [queueEntry[kMTQueueBufferFile] retain];
-	_protectedShow = @YES;
+	_protectedShow = self.isDone ? @NO : @YES;
 
 	DDLogDetail(@"restored %@ with %@; inProgress",self, queueEntry);
 }
@@ -1630,7 +1630,7 @@ __DDLOGHERE__
 		case  kMTStatusCommercialed : return @"Commercials Detected";
 		case  kMTStatusEncoding : return @"Encoding";
 		case  kMTStatusDone : return @"Complete";
-		case  kMTStatusDeleted : return @"Deleted From TiVo";
+		case  kMTStatusDeleted : return @"TiVo Deleted";
 		case  kMTStatusFailed : return @"Failed";
 		default: return @"";
 	}

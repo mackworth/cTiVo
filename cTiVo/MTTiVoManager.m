@@ -25,7 +25,7 @@
 
 @implementation MTTiVoManager
 
-@synthesize subscribedShows = _subscribedShows, numEncoders, numCommercials;
+@synthesize subscribedShows = _subscribedShows, numEncoders, numCommercials, tiVoList = _tiVoList;
 
 __DDLOGHERE__
 
@@ -231,11 +231,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)checkDownloadQueueForDeletedEntries: (MTTiVo *) tiVo {
 	NSString *targetTivoName = tiVo.tiVo.name;
 	for (MTTiVoShow * show in self.downloadQueue) {
-		if(!show.tiVo &&
-		   [targetTivoName isEqualToString:[show tempTiVoName]] &&
-		   !show.isDone) {
+		if(show.protectedShow.boolValue &&
+		   [targetTivoName isEqualToString:show.tiVoName]) {
 			DDLogDetail(@"Marking %@ as deleted", show.showTitle);
 			show.downloadStatus =@kMTStatusDeleted;
+			show.protectedShow = @NO; //let them delete from queue
 		}
 	}
 
@@ -383,12 +383,18 @@ static MTTiVoManager *sharedTiVoManager = nil;
     return addresses;
 }
 
--(NSArray *)tiVoList
-{
-	NSSortDescriptor *manualSort = [NSSortDescriptor sortDescriptorWithKey:@"manualTiVo" ascending:NO];
-	NSSortDescriptor *nameSort = [NSSortDescriptor sortDescriptorWithKey:@"tiVo.name" ascending:YES];
-	DDLogVerbose(@"resorting TiVoList %@", _tiVoList);
-	return [_tiVoList sortedArrayUsingDescriptors:[NSArray arrayWithObjects:manualSort,nameSort, nil]];
+-(NSArray *)tiVoList {
+	return _tiVoList;
+}
+
+-(void) setTiVoList: (NSArray *) tiVoList {
+	if (_tiVoList != tiVoList) {
+		[_tiVoList release];
+		NSSortDescriptor *manualSort = [NSSortDescriptor sortDescriptorWithKey:@"manualTiVo" ascending:NO];
+		NSSortDescriptor *nameSort = [NSSortDescriptor sortDescriptorWithKey:@"tiVo.name" ascending:YES];
+		_tiVoList = [[tiVoList sortedArrayUsingDescriptors:[NSArray arrayWithObjects:manualSort,nameSort, nil]] retain];
+		DDLogVerbose(@"resorting TiVoList %@", _tiVoList);
+	}
 }
 
 -(void) setupNotifications {
@@ -1057,7 +1063,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     if ([sender.name rangeOfString:@"Py"].location == NSNotFound) {
         MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
       
-        [_tiVoList addObject:newTiVo];
+        self.tiVoList = [self.tiVoList arrayByAddingObject: newTiVo];
 		DDLogMajor(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
     } else {

@@ -342,7 +342,11 @@ static NSDateFormatter *dateFormatter;
 		NSIndexSet * subIndexes = [self.sortedSubscriptions indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
 			return [newSubs indexOfObject:obj] !=NSNotFound;
 		}];
-		if (subIndexes.count > 0) [self selectRowIndexes:subIndexes byExtendingSelection:NO];
+		if (subIndexes.count > 0) {
+			[self selectRowIndexes:subIndexes byExtendingSelection:NO];
+			[self scrollRowToVisible:[subIndexes firstIndex]];
+
+		}
 		return YES;
 	} else {
 		return NO;

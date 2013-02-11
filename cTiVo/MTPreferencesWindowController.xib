@@ -2,7 +2,7 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
-		<string key="IBDocument.SystemVersion">12C60</string>
+		<string key="IBDocument.SystemVersion">12C3012</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
@@ -68,7 +68,7 @@
 										<string key="NSFrame">{{10, 33}, {478, 262}}</string>
 										<reference key="NSSuperview" ref="52606296"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="52606296"/>
+										<reference key="NSNextKeyView"/>
 									</object>
 									<string key="NSLabel">Settings</string>
 									<object class="NSColor" key="NSColor" id="485909419">
@@ -126,9 +126,10 @@
 						<object class="NSButton" id="438495953">
 							<reference key="NSNextResponder" ref="1006"/>
 							<int key="NSvFlags">289</int>
-							<string key="NSFrame">{{455, 19}, {45, 19}}</string>
+							<string key="NSFrame">{{442, 18}, {60, 19}}</string>
 							<reference key="NSSuperview" ref="1006"/>
 							<reference key="NSWindow"/>
+							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="253045192">
@@ -137,7 +138,7 @@
 								<string key="NSContents">Done</string>
 								<object class="NSFont" key="NSSupport">
 									<string key="NSName">LucidaGrande</string>
-									<double key="NSSize">12</double>
+									<double key="NSSize">13</double>
 									<int key="NSfFlags">16</int>
 								</object>
 								<string key="NSCellIdentifier">_NS:9</string>
@@ -145,7 +146,7 @@
 								<int key="NSButtonFlags">-2038153216</int>
 								<int key="NSButtonFlags2">164</int>
 								<string key="NSAlternateContents"/>
-								<string key="NSKeyEquivalent"/>
+								<string type="base64-UTF8" key="NSKeyEquivalent">Gw</string>
 								<int key="NSPeriodicDelay">400</int>
 								<int key="NSPeriodicInterval">75</int>
 							</object>
@@ -440,6 +441,8 @@
 					<string key="superclassName">NSViewController</string>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="cancelButton">NSButton</string>
+						<string key="comSkipHelpButton">NSButton</string>
+						<string key="encodeHelpButton">NSButton</string>
 						<string key="formatPopUpButton">MTFormatPopUpButton</string>
 						<string key="helpContoller">MTHelpViewController</string>
 						<string key="popoverDetachController">MTHelpViewController</string>
@@ -449,6 +452,14 @@
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
 						<object class="IBToOneOutletInfo" key="cancelButton">
 							<string key="name">cancelButton</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="comSkipHelpButton">
+							<string key="name">comSkipHelpButton</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="encodeHelpButton">
+							<string key="name">encodeHelpButton</string>
 							<string key="candidateClassName">NSButton</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="formatPopUpButton">
@@ -490,13 +501,13 @@
 					<string key="superclassName">NSViewController</string>
 					<object class="NSMutableDictionary" key="outlets">
 						<string key="NS.key.0">displayMessage</string>
-						<string key="NS.object.0">NSTextField</string>
+						<string key="NS.object.0">NSTextView</string>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
 						<string key="NS.key.0">displayMessage</string>
 						<object class="IBToOneOutletInfo" key="NS.object.0">
 							<string key="name">displayMessage</string>
-							<string key="candidateClassName">NSTextField</string>
+							<string key="candidateClassName">NSTextView</string>
 						</object>
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
@@ -526,6 +537,17 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">MTPreferencesViewController</string>
 					<string key="superclassName">NSViewController</string>
+					<object class="NSMutableDictionary" key="actions">
+						<string key="NS.key.0">setDebugLevel:</string>
+						<string key="NS.object.0">id</string>
+					</object>
+					<object class="NSMutableDictionary" key="actionInfosByName">
+						<string key="NS.key.0">setDebugLevel:</string>
+						<object class="IBActionInfo" key="NS.object.0">
+							<string key="name">setDebugLevel:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">./Classes/MTPreferencesViewController.h</string>

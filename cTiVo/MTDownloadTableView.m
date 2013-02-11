@@ -371,9 +371,10 @@ __DDLOGHERE__
 		NSPoint p = [tv convertPoint:windowPoint fromView:nil];
 		NSInteger r = [tv rowAtPoint:p];
 		NSInteger c = [tv columnAtPoint:p];
-		if (c < 0) {
-			c = 0;
-		}
+		if (c < 0) 	c = 0;
+		if (c > tv.numberOfColumns) c = tv.numberOfColumns;
+		if (r < 0) r = 0;
+		if (r > tv.numberOfRows) r = tv.numberOfRows;
 		NSTableColumn *selectedColumn = tv.tableColumns[c];
 		BOOL isSelectedRow = [tv isRowSelected:r];
 		BOOL isOverText = NO;

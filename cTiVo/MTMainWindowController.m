@@ -156,7 +156,7 @@ __DDLOGHERE__
 
 - (void) refreshAddToQueueButton: (NSNotification *) notification {
 	addToQueueButton.title = @"Download";
-	if (tiVoManager.processingPaused) {
+	if (tiVoManager.processingPaused.boolValue) {
 		addToQueueButton.title =@"Add to Queue";
 	} else {
 		for (MTTiVoShow * show in tiVoManager.downloadQueue) {

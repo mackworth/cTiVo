@@ -45,7 +45,8 @@
 
 //Shared Data
 
-@property (nonatomic, retain) NSMutableArray *tiVoList, *tiVoShows, *downloadQueue, *formatList;
+@property (nonatomic, retain) NSArray *tiVoList;
+@property (nonatomic, retain) NSMutableArray *tiVoShows, *downloadQueue, *formatList;
 @property (nonatomic, retain) NSMutableArray *subscribedShows;
 
 @property (nonatomic, retain) NSString *downloadDirectory;
