@@ -435,7 +435,8 @@
 			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
 			buildPhases = (
 				D2D60B9916766EFD00CE32DE /* Sources */,
-				D2901ADC1677AF3C001E559C /* ShellScript */,
+				D2F5300316CC0C0100C44128 /* Update SVN */,
+				D2901ADC1677AF3C001E559C /* Record Bundle Number as SVN Build Number */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
@@ -511,18 +512,33 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		D2901ADC1677AF3C001E559C /* ShellScript */ = {
+		D2901ADC1677AF3C001E559C /* Record Bundle Number as SVN Build Number */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Record Bundle Number as SVN Build Number";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "#svn update\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion `svn info | grep Revision | awk '{print $2}'`\" ${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\n";
+		};
+		D2F5300316CC0C0100C44128 /* Update SVN */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 8;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Update SVN";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "svn update\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
