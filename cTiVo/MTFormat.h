@@ -29,7 +29,8 @@
 										*iTunes,
 										*mustDownloadFirst,
                                         *isHidden,
-										*isFactoryFormat;
+										*isFactoryFormat,
+										*useTmpDirForComSkip;
 
 @property (nonatomic, retain) NSAttributedString *attributedFormatDescription;
 

@@ -173,7 +173,7 @@
 						<string key="NSFrame">{{18, 18}, {163, 18}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="1025469082"/>
+						<reference key="NSNextKeyView" ref="80214143"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="806695203">
@@ -597,6 +597,7 @@
 						<string key="NSFrame">{{418, 19}, {102, 19}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="151665682">
@@ -845,7 +846,7 @@
 										<string key="NSFrameSize">{411, 55}</string>
 										<reference key="NSSuperview" ref="451388003"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="842044650"/>
+										<reference key="NSNextKeyView" ref="925642279"/>
 										<string key="NSReuseIdentifierKey">_NS:13</string>
 										<object class="NSTextContainer" key="NSTextContainer" id="954985744">
 											<object class="NSLayoutManager" key="NSLayoutManager">
@@ -1099,7 +1100,7 @@ wGw</bytes>
 						<string key="NSFrame">{{107, 423}, {413, 57}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="451388003"/>
+						<reference key="NSNextKeyView" ref="842044650"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<int key="NSsFlags">133138</int>
 						<reference key="NSVScroller" ref="925642279"/>
@@ -1184,7 +1185,7 @@ wGw</bytes>
 						<string key="NSFrame">{{17, 141}, {118, 17}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="778840383"/>
+						<reference key="NSNextKeyView" ref="271627239"/>
 						<string key="NSReuseIdentifierKey">_NS:1535</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="595469665">
@@ -1305,6 +1306,7 @@ wGw</bytes>
 						<string key="NSFrame">{{138, 136}, {25, 25}}</string>
 						<reference key="NSSuperview" ref="331029513"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="778840383"/>
 						<string key="NSReuseIdentifierKey">_NS:1598</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="593333128">
@@ -1373,6 +1375,33 @@ wGw</bytes>
 						</object>
 						<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 					</object>
+					<object class="NSButton" id="80214143">
+						<reference key="NSNextResponder" ref="331029513"/>
+						<int key="NSvFlags">268</int>
+						<string key="NSFrame">{{198, 18}, {142, 18}}</string>
+						<reference key="NSSuperview" ref="331029513"/>
+						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="1025469082"/>
+						<string key="NSReuseIdentifierKey">_NS:9</string>
+						<bool key="NSEnabled">YES</bool>
+						<object class="NSButtonCell" key="NSCell" id="683514555">
+							<int key="NSCellFlags">-2080374784</int>
+							<int key="NSCellFlags2">268435456</int>
+							<string key="NSContents">Use /tmp directory</string>
+							<reference key="NSSupport" ref="180612610"/>
+							<string key="NSCellIdentifier">_NS:9</string>
+							<reference key="NSControlView" ref="80214143"/>
+							<int key="NSButtonFlags">1211912448</int>
+							<int key="NSButtonFlags2">2</int>
+							<reference key="NSNormalImage" ref="632761883"/>
+							<reference key="NSAlternateImage" ref="943332485"/>
+							<string key="NSAlternateContents"/>
+							<string key="NSKeyEquivalent"/>
+							<int key="NSPeriodicDelay">200</int>
+							<int key="NSPeriodicInterval">25</int>
+						</object>
+						<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
+					</object>
 				</array>
 				<string key="NSFrameSize">{540, 650}</string>
 				<reference key="NSSuperview"/>
@@ -1392,11 +1421,9 @@ wGw</bytes>
 				<nil key="NSViewClass"/>
 				<nil key="NSUserInterfaceItemIdentifier"/>
 				<object class="NSView" key="NSWindowView" id="1024275171">
-					<reference key="NSNextResponder"/>
+					<nil key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<string key="NSFrameSize">{480, 380}</string>
-					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
 					<string key="NSReuseIdentifierKey">_NS:20</string>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
@@ -2572,6 +2599,22 @@ wGw</bytes>
 					</object>
 					<int key="connectionID">2697</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">value: currentFormat.useTmpDirForComSkip</string>
+						<reference key="source" ref="80214143"/>
+						<reference key="destination" ref="1001"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="80214143"/>
+							<reference key="NSDestination" ref="1001"/>
+							<string key="NSLabel">value: currentFormat.useTmpDirForComSkip</string>
+							<string key="NSBinding">value</string>
+							<string key="NSKeyPath">currentFormat.useTmpDirForComSkip</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">2708</int>
+				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<array key="orderedObjects">
@@ -2675,6 +2718,7 @@ wGw</bytes>
 							<reference ref="296149271"/>
 							<reference ref="778840383"/>
 							<reference ref="271627239"/>
+							<reference ref="80214143"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -3243,6 +3287,19 @@ wGw</bytes>
 						<reference key="object" ref="593333128"/>
 						<reference key="parent" ref="271627239"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">2705</int>
+						<reference key="object" ref="80214143"/>
+						<array class="NSMutableArray" key="children">
+							<reference ref="683514555"/>
+						</array>
+						<reference key="parent" ref="331029513"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">2706</int>
+						<reference key="object" ref="683514555"/>
+						<reference key="parent" ref="80214143"/>
+					</object>
 				</array>
 			</object>
 			<dictionary class="NSMutableDictionary" key="flattenedProperties">
@@ -3602,13 +3659,23 @@ wGw</bytes>
 				<string key="2691.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="2700.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="2701.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<object class="NSMutableDictionary" key="2705.IBAttributePlaceholdersKey">
+					<string key="NS.key.0">ToolTip</string>
+					<object class="IBToolTipAttribute" key="NS.object.0">
+						<string key="name">ToolTip</string>
+						<reference key="object" ref="80214143"/>
+						<string key="toolTip">Only uncheck this if the encoder expects the edl file to be in the same directory as the video source file - e.g. for Turbo.264</string>
+					</object>
+				</object>
+				<string key="2705.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="2706.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="562.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			</dictionary>
 			<dictionary class="NSMutableDictionary" key="unlocalizedProperties"/>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">2704</int>
+			<int key="maxID">2708</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">

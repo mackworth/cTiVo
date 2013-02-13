@@ -110,6 +110,11 @@ __DDLOGHERE__
 		parseTermMapping = [@{@"description" : @"showDescription", @"time": @"showTime"} retain];
         [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
         previousCheck = [[NSDate date] retain];
+		//Make sure /tmp/ctivo/ directory exists
+		NSString *ctivoTmp = @"/tmp/ctivo/";
+		if (![[NSFileManager defaultManager] fileExistsAtPath:ctivoTmp]) {
+			[[NSFileManager defaultManager] createDirectoryAtPath:ctivoTmp withIntermediateDirectories:YES attributes:nil error:nil];
+		}
     }
     return self;
 }
@@ -623,9 +628,9 @@ __DDLOGHERE__
         [fm removeItemAtPath:decryptFilePath error:nil];
 		[decryptFilePath release]; decryptFilePath = nil;
     }
-	//Clean up files in /tmp
-	NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:@"/tmp/" error:nil];
-	[fm changeCurrentDirectoryPath:@"/tmp"];
+	//Clean up files in /tmp/ctivo/
+	NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:@"/tmp/ctivo" error:nil];
+	[fm changeCurrentDirectoryPath:@"/tmp/ctivo"];
 	NSString * baseName = [self showTitleForFiles];
 	for(NSString *file in tmpFiles){
 		NSRange tmpRange = [file rangeOfString:baseName];
@@ -689,7 +694,7 @@ __DDLOGHERE__
         pipe2 = [[NSPipe pipe] retain];
 		downloadFileHandle = [pipe1 fileHandleForWriting];
 		DDLogVerbose(@"downloadFileHandle %@ for %@",downloadFileHandle,self);
-        _bufferFilePath = [[NSString stringWithFormat:@"/tmp/buffer%@.bin",baseFileName] retain];
+        _bufferFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/buffer%@.bin",baseFileName] retain];
         [fm createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
         bufferFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:_bufferFilePath] retain];
         bufferFileWriteHandle = [[NSFileHandle fileHandleForWritingAtPath:_bufferFilePath] retain];
@@ -699,18 +704,18 @@ __DDLOGHERE__
         [fm createFileAtPath:_downloadFilePath contents:[NSData data] attributes:nil];
         downloadFileHandle = [[NSFileHandle fileHandleForWritingAtPath:_downloadFilePath] retain];
 		decryptFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.mpg",downloadDir ,baseFileName] retain];
-        decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/decrypting%@.txt",baseFileName] retain];
+        decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/decrypting%@.txt",baseFileName] retain];
         [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
         decryptLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath] retain];
         decryptLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath] retain];
-        commercialLogFilePath = [[NSString stringWithFormat:@"/tmp/commercial%@.txt",baseFileName] retain];
+        commercialLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/commercial%@.txt",baseFileName] retain];
         [fm createFileAtPath:commercialLogFilePath contents:[NSData data] attributes:nil];
         commercialLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:commercialLogFilePath] retain];
         commercialLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:commercialLogFilePath] retain];
         
     }
     
-    encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/encoding%@.txt",baseFileName] retain];
+    encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/encoding%@.txt",baseFileName] retain];
     [fm createFileAtPath:encodeLogFilePath contents:[NSData data] attributes:nil];
     encodeLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:encodeLogFilePath] retain];
     encodeLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath] retain];
@@ -762,9 +767,9 @@ __DDLOGHERE__
 		if (_encodeFormat.encoderVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderVideoOptions]];
 		if (_encodeFormat.encoderAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderAudioOptions]];
 		if (_encodeFormat.encoderOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderOtherOptions]];
-		if ([_encodeFormat.comSkip boolValue] && _skipCommercials) {
-			[arguments addObject:@"-edl"];
-			[arguments addObject:[NSString stringWithFormat:@"/tmp/%@.tivo.edl",self.showTitleForFiles]];
+		if ([_encodeFormat.comSkip boolValue] && _skipCommercials && _encodeFormat.edlFlag.length) {
+			[arguments addObject:_encodeFormat.edlFlag];
+			[arguments addObject:[NSString stringWithFormat:@"/tmp/ctivo/%@.tivo.edl",self.showTitleForFiles]];
 		}
 		if (_encodeFormat.outputFileFlag.length) {
 			[arguments addObject:_encodeFormat.outputFileFlag];
@@ -943,7 +948,10 @@ __DDLOGHERE__
 	[commercialTask setStandardError:commercialLogFileHandle];
 	NSMutableArray *arguments = [NSMutableArray array];
     if (_encodeFormat.comSkipOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.comSkipOptions]];
-    [arguments addObject:@"--output=/tmp/"];
+	if (_encodeFormat.useTmpDirForComSkip) {
+		[arguments addObject:@"--output=/tmp/ctivo/"];
+
+	}
 	[arguments addObject:decryptFilePath];
 	DDLogVerbose(@"comskip args: %@",arguments);
 	[commercialTask setArguments:arguments];
