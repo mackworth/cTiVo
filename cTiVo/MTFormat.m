@@ -19,7 +19,13 @@ __DDLOGHERE__
 {
 	MTFormat *newFormat = [[[MTFormat alloc] init] autorelease];
 	for(NSString *key in format) {
-		[newFormat setValue:[format objectForKey:key] forKey:key];
+		@try {
+			[newFormat setValue:[format objectForKey:key] forKey:key];
+		}
+		@catch (NSException *exception) {
+			DDLogVerbose(@"FormatWithDictionary: exception %@ trying value %@ for key %@",exception,[format objectForKey:key],key);
+		}
+		@finally {}
 	}
 	DDLogVerbose(@"New format %@ from %@", newFormat, format);
 	return newFormat;
