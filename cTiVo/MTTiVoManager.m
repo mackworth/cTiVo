@@ -692,7 +692,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	DDLogVerbose(@"moving shows %@ from %@ to %@", objectsToMove,fromIndexSet, destinationIndexes);
 	[dlQueue removeObjectsAtIndexes: fromIndexSet];
 	[dlQueue insertObjects:objectsToMove atIndexes:destinationIndexes];
-	
+	DDLogDetail(@"Posting DLUpdated notifications");
+	[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:nil];
 	return destinationIndexes;
 }
 

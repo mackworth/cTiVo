@@ -116,6 +116,7 @@
 #define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
 #define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
+#define kMTSaveTmpFiles @"SaveTmpFiles"				// Turn off AutoDelete of intermediate files (to make debugging encoders easier)
 
 //NOT IMPLEMENTED YET, but preferences imported from iTivo
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures

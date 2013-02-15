@@ -93,7 +93,6 @@ __DDLOGHERE__
 		self.mustDownloadFirst = @(YES);
 		self.isFactoryFormat = @(NO);
         self.isHidden = @(NO);
-		self.useTmpDirForComSkip = @(YES);
 		
 		keys = [[NSArray arrayWithObjects:
 						 @"formatDescription",
@@ -113,7 +112,6 @@ __DDLOGHERE__
 						 @"mustDownloadFirst",
                          @"isHidden",
 						 @"isFactoryFormat",
-						 @"useTmpDirForComSkip",
 						 nil] retain];
 	}
 	return self;
@@ -186,7 +184,6 @@ __DDLOGHERE__
 	new.mustDownloadFirst = [[_mustDownloadFirst copyWithZone:zone] autorelease];
 	new.isHidden = [[_isHidden copyWithZone:zone] autorelease];
 	new.isFactoryFormat = [[_isFactoryFormat copyWithZone:zone] autorelease];
-	new.useTmpDirForComSkip = [[_useTmpDirForComSkip copyWithZone:zone] autorelease];
 	return new;
 }
 
@@ -250,7 +247,6 @@ __DDLOGHERE__
 	self.mustDownloadFirst = nil;
     self.isHidden = nil;
 	self.isFactoryFormat = nil;
-	self.useTmpDirForComSkip = nil;
 	[super dealloc];
 }
 

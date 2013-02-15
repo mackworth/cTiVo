@@ -8,7 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		1E15E71016B4F88F00508BEC /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E15E70B16B4F88F00508BEC /* DDLog.m */; };
-		1E2724E616C8A90F00A21940 /* Elgato.applescript in Resources */ = {isa = PBXBuildFile; fileRef = 1E2724E516C8A90F00A21940 /* Elgato.applescript */; };
+		1E2724EF16C9A8B500A21940 /* elgatoScript.pl in Resources */ = {isa = PBXBuildFile; fileRef = 1E2724EE16C9A8B500A21940 /* elgatoScript.pl */; };
+		1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */; };
+		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
 		1EABE6F416B0A254004DDB61 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; };
@@ -89,7 +91,9 @@
 /* Begin PBXFileReference section */
 		1E15E70A16B4F88F00508BEC /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
 		1E15E70B16B4F88F00508BEC /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
-		1E2724E516C8A90F00A21940 /* Elgato.applescript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.applescript; path = Elgato.applescript; sourceTree = "<group>"; };
+		1E2724EE16C9A8B500A21940 /* elgatoScript.pl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.perl; path = elgatoScript.pl; sourceTree = "<group>"; };
+		1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = elgatoLaunch.scpt; sourceTree = "<group>"; };
+		1E2725C316CB63D500A21940 /* elgatoProgress.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = elgatoProgress.scpt; sourceTree = "<group>"; };
 		1E389BB616C46BA600B80EC9 /* MTAdvPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTAdvPreferencesViewController.h; sourceTree = "<group>"; };
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
 		1E791BD21697C59300E47E84 /* MTSubscription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscription.h; sourceTree = "<group>"; };
@@ -341,7 +345,9 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				1E2724E516C8A90F00A21940 /* Elgato.applescript */,
+				1E2724EE16C9A8B500A21940 /* elgatoScript.pl */,
+				1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */,
+				1E2725C316CB63D500A21940 /* elgatoProgress.scpt */,
 				D2B73F3516BC8A90003CB4ED /* comskip.ini */,
 				D2B73F3116BC485E003CB4ED /* comskip */,
 				D2CAF34216AB6FDE004E4CFA /* checkImage.png */,
@@ -482,7 +488,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E2724E616C8A90F00A21940 /* Elgato.applescript in Resources */,
 				D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */,
 				D2D60BB216766EFD00CE32DE /* Credits.rtf in Resources */,
 				D2D60BB816766EFD00CE32DE /* MainMenu.xib in Resources */,
@@ -506,6 +511,9 @@
 				D2B73F3216BC485E003CB4ED /* comskip in Resources */,
 				D2B73F3616BC8A90003CB4ED /* comskip.ini in Resources */,
 				D274653516C8081C0012CFF7 /* ComSkipHelpText.rtf in Resources */,
+				1E2724EF16C9A8B500A21940 /* elgatoScript.pl in Resources */,
+				1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */,
+				1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

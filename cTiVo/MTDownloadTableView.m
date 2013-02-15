@@ -275,7 +275,7 @@ __DDLOGHERE__
 			cell.textField.hidden= YES;
 	   } else {
 			//can't change now; just let them know what it is/was
-		   cell.textField.stringValue = thisShow.encodeFormat.name;
+		   textVal = thisShow.encodeFormat.name;
 		   popUpButton.hidden = YES;
 		   cell.textField.hidden= NO;
 		}
@@ -503,7 +503,7 @@ __DDLOGHERE__
 	NSInteger returnValue = [insertDownloadAlert runModal];
 	if (returnValue == 1) {
 		DDLogDetail(@"User did reschedule active show %@",show);
-		[show rescheduleShowWithDecrementRetries:@(NO)];
+		[show prepareForDownload: NO];
 	}
 }
 
@@ -558,17 +558,6 @@ __DDLOGHERE__
 	}
 	DDLogVerbose(@"Real Shows being dragged: %@",realShows);
 	
-	//see if we have any completed shows being re-downloaded
-	if (completedShowsBeingMoved.count>0 &&
-		(!insertTarget || insertTarget.isNew)) {
-		//we're moving at least some completedshows below the activeline
-		if([self askRestarting:completedShowsBeingMoved]) {
-			for (MTTiVoShow * show in completedShowsBeingMoved) {
-				[show prepareForDownload: NO];
-			}
-		};
-	}
-	
 	//Now look for reschedulings. Group ould be moving up or down, with or without an active show...
 	for (MTTiVoShow * activeShow in [tiVoManager downloadQueue]) {
 		if (activeShow.isNew) break;  //we're through any active ones
@@ -588,13 +577,24 @@ __DDLOGHERE__
 					}
 				}
 			}
-	} else {
+		} else {
 			//I'm not being moved
 			if ((insertRow <= activeRow) &&   //shows being moved above me
 				([self shows:realShows  contain:activeShow.tiVo]))  {//and one of them is on same TiVo as me
 				[self askReschedule: activeShow];
 			}
 		}
+	}
+
+	//see if we have any completed shows being re-downloaded
+	if (completedShowsBeingMoved.count>0 &&
+		(!insertTarget || !insertTarget.isDone)) {
+		//we're moving at least some completedshows below the activeline
+		if([self askRestarting:completedShowsBeingMoved]) {
+			for (MTTiVoShow * show in completedShowsBeingMoved) {
+				[show prepareForDownload: NO];
+			}
+		};
 	}
 	
 	//	NSLog(@"dragging: %@", draggedShows);

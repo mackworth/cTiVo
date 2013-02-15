@@ -577,66 +577,83 @@ __DDLOGHERE__
 
 -(void)cleanupFiles
 {
+	BOOL deleteFiles = ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles];
     NSFileManager *fm = [NSFileManager defaultManager];
     DDLogDetail(@"%@ cleaningup files",self.showTitle);
 	if (_downloadFilePath) {
         [downloadFileHandle closeFile];
-		DDLogVerbose(@"deleting DL %@",_downloadFilePath);
-        [fm removeItemAtPath:_downloadFilePath error:nil];
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting DL %@",_downloadFilePath);
+			[fm removeItemAtPath:_downloadFilePath error:nil];
+		}
 		[downloadFileHandle release]; downloadFileHandle = nil;
 		[_downloadFilePath release]; _downloadFilePath = nil;
     }
     if (_bufferFilePath) {
         [bufferFileReadHandle closeFile];
         [bufferFileWriteHandle closeFile];
-		DDLogVerbose(@"deleting buffer %@",_bufferFilePath);
-        [fm removeItemAtPath:_bufferFilePath error:nil];
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting buffer %@",_bufferFilePath);
+			[fm removeItemAtPath:_bufferFilePath error:nil];
+		}
 		[bufferFileReadHandle release]; bufferFileReadHandle = nil;
 		[bufferFileWriteHandle release]; bufferFileWriteHandle = nil;
 		[_bufferFilePath release]; _bufferFilePath = nil;
     }
     if (commercialLogFileHandle) {
         [commercialLogFileHandle closeFile];
- 		DDLogVerbose(@"deleting commLog %@",commercialLogFilePath);
-        [fm removeItemAtPath:commercialLogFilePath error:nil];
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting commLog %@",commercialLogFilePath);
+			[fm removeItemAtPath:commercialLogFilePath error:nil];
+		}
 		[commercialLogFileHandle release]; commercialLogFileHandle = nil;
 		[commercialLogFilePath release]; commercialLogFilePath = nil;
     }
 	if (commercialFilePath) {
         [commercialFileHandle closeFile];
- 		DDLogVerbose(@"deleting comm %@",commercialFilePath);
-       [fm removeItemAtPath:commercialFilePath error:nil];
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting comm %@",commercialFilePath);
+			[fm removeItemAtPath:commercialFilePath error:nil];
+		}
 		[commercialFileHandle release]; commercialFileHandle = nil;
 		[commercialFilePath release]; commercialFilePath = nil;
     }
     if (encodeLogFileHandle) {
         [encodeLogFileHandle closeFile];
-		DDLogVerbose(@"deleting encodeLog %@",encodeLogFilePath);
-        [fm removeItemAtPath:encodeLogFilePath error:nil];
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting encodeLog %@",encodeLogFilePath);
+			[fm removeItemAtPath:encodeLogFilePath error:nil];
+		}
 		[encodeLogFileHandle release]; encodeLogFileHandle = nil;
 		[encodeLogFilePath release]; encodeLogFilePath = nil;
     }
     if (decryptLogFileHandle) {
         [decryptLogFileHandle closeFile];
-		DDLogVerbose(@"deleting decryptLog %@",decryptLogFilePath);
-        [fm removeItemAtPath:decryptLogFilePath error:nil];
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting decryptLog %@",decryptLogFilePath);
+			[fm removeItemAtPath:decryptLogFilePath error:nil];
+		}
 		[decryptLogFileHandle release]; decryptLogFileHandle = nil;
 		[decryptLogFilePath release]; decryptLogFilePath = nil;
     }
     if (decryptFilePath) {
-		DDLogVerbose(@"deleting decrypt %@",decryptFilePath);
-        [fm removeItemAtPath:decryptFilePath error:nil];
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting decrypt %@",decryptFilePath);
+			[fm removeItemAtPath:decryptFilePath error:nil];
+		}
 		[decryptFilePath release]; decryptFilePath = nil;
     }
 	//Clean up files in /tmp/ctivo/
-	NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:@"/tmp/ctivo" error:nil];
-	[fm changeCurrentDirectoryPath:@"/tmp/ctivo"];
-	NSString * baseName = [self showTitleForFiles];
-	for(NSString *file in tmpFiles){
-		NSRange tmpRange = [file rangeOfString:baseName];
-		if(tmpRange.location != NSNotFound) {
-			DDLogDetail(@"Deleting tmp file %@", file);
-			[fm removeItemAtPath:file error:nil];
+	if (deleteFiles) {
+		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:@"/tmp/ctivo" error:nil];
+		[fm changeCurrentDirectoryPath:@"/tmp/ctivo"];
+		NSString * baseName = [self showTitleForFiles];
+		for(NSString *file in tmpFiles){
+			NSRange tmpRange = [file rangeOfString:baseName];
+			if(tmpRange.location != NSNotFound) {
+				DDLogDetail(@"Deleting tmp file %@", file);
+				[fm removeItemAtPath:file error:nil];
+			}
 		}
 	}
 }
@@ -708,6 +725,7 @@ __DDLOGHERE__
         [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
         decryptLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath] retain];
         decryptLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath] retain];
+ 		commercialFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.tivo.edl" ,baseFileName] retain];
         commercialLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/commercial%@.txt",baseFileName] retain];
         [fm createFileAtPath:commercialLogFilePath contents:[NSData data] attributes:nil];
         commercialLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:commercialLogFilePath] retain];
@@ -769,7 +787,7 @@ __DDLOGHERE__
 		if (_encodeFormat.encoderOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderOtherOptions]];
 		if ([_encodeFormat.comSkip boolValue] && _skipCommercials && _encodeFormat.edlFlag.length) {
 			[arguments addObject:_encodeFormat.edlFlag];
-			[arguments addObject:[NSString stringWithFormat:@"/tmp/ctivo/%@.tivo.edl",self.showTitleForFiles]];
+			[arguments addObject:commercialFilePath];
 		}
 		if (_encodeFormat.outputFileFlag.length) {
 			[arguments addObject:_encodeFormat.outputFileFlag];
@@ -915,9 +933,11 @@ __DDLOGHERE__
 		_processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [self setValue:[NSNumber numberWithInt:kMTStatusDecrypted] forKeyPath:@"downloadStatus"];
-		NSError *thisError = nil;
-		[[NSFileManager defaultManager] removeItemAtPath:_downloadFilePath error:&thisError];
-       [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:self.tiVo];
+		if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+			NSError *thisError = nil;
+			[[NSFileManager defaultManager] removeItemAtPath:_downloadFilePath error:&thisError];
+		}
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:self.tiVo];
 		return;
 	}
 	unsigned long long logFileSize = [decryptLogFileReadHandle seekToEndOfFile];
@@ -948,10 +968,7 @@ __DDLOGHERE__
 	[commercialTask setStandardError:commercialLogFileHandle];
 	NSMutableArray *arguments = [NSMutableArray array];
     if (_encodeFormat.comSkipOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.comSkipOptions]];
-	if (_encodeFormat.useTmpDirForComSkip) {
-		[arguments addObject:@"--output=/tmp/ctivo/"];
-
-	}
+    [arguments addObject:[NSString stringWithFormat: @"--output=%@",[commercialFilePath stringByDeletingLastPathComponent]]];
 	[arguments addObject:decryptFilePath];
 	DDLogVerbose(@"comskip args: %@",arguments);
 	[commercialTask setArguments:arguments];
@@ -967,7 +984,17 @@ __DDLOGHERE__
 	if (![commercialTask isRunning]) {
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         DDLogMajor(@"Finished detecting commercials in %@",_showTitle);
-        _processProgress = 1.0;
+		
+		NSString * newCommercialPath = [_downloadDirectory stringByAppendingPathComponent: [commercialFilePath lastPathComponent]] ;
+		NSError * error = nil;
+		[[NSFileManager defaultManager] moveItemAtPath:commercialFilePath toPath:newCommercialPath error:&error];
+		if (error) {
+			DDLogMajor(@"Error moving commercial EDL file %@ to %@: %@",commercialFilePath, newCommercialPath, error.localizedDescription);
+		} else {
+			[commercialFilePath release];
+			commercialFilePath = [newCommercialPath retain];
+		}
+		_processProgress = 1.0;
 		[commercialTask release];
 		commercialTask = nil;
         [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
@@ -1092,9 +1119,9 @@ __DDLOGHERE__
 //				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 //			}
 //		}
-		if (newProgressValue > _processProgress) {
+//if (newProgressValue > _processProgress) {
 			_processProgress = newProgressValue;
-		}
+		//		}
 	}
 	[self performSelector:@selector(trackEncodes) withObject:nil afterDelay:0.5];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];	
@@ -1110,8 +1137,9 @@ __DDLOGHERE__
     if (self.isDownloading && activeURLConnection) {
         [activeURLConnection cancel];
         activeURLConnection = nil;
-        [fm removeItemAtPath:decryptFilePath error:nil];
-    }
+		if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+			[fm removeItemAtPath:decryptFilePath error:nil];
+		}    }
     while (writingData){
         //Block until latest write data is complete - should stop quickly because isCanceled is set
     } //Wait for pipe out to complete
@@ -1127,7 +1155,9 @@ __DDLOGHERE__
     }
     if (encodeFileHandle) {
         [encodeFileHandle closeFile];
-        [fm removeItemAtPath:_encodeFilePath error:nil];
+		if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+			[fm removeItemAtPath:_encodeFilePath error:nil];
+		}
     }
     if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && self.isDownloading)) {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
@@ -1330,8 +1360,9 @@ __DDLOGHERE__
 		[bufferFileReadHandle closeFile];
 		[bufferFileReadHandle release];
 		bufferFileReadHandle = nil;
-		[[NSFileManager defaultManager] removeItemAtPath:_bufferFilePath error:nil];
-
+		if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+			[[NSFileManager defaultManager] removeItemAtPath:_bufferFilePath error:nil];
+		}
 	}
 	writingData = NO;
 }
