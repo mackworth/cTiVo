@@ -21,6 +21,10 @@
 @property (nonatomic, retain) NSNumber *addToiTunes;
 @property (nonatomic, retain) NSNumber *simultaneousEncode, *skipCommercials;
 @property (nonatomic, retain) MTFormat *encodeFormat;
+@property (nonatomic, retain) NSNumber *genTextMetaData,
+									   *genXMLMetaData,
+									   *includeAPMMetaData,
+									   *exportSubtitles;
 
 @property (readonly) BOOL canSimulEncode;
 @property (readonly) BOOL shouldSimulEncode;

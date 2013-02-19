@@ -25,7 +25,7 @@
 
 @implementation MTTiVoManager
 
-@synthesize subscribedShows = _subscribedShows, numEncoders, numCommercials, tiVoList = _tiVoList;
+@synthesize subscribedShows = _subscribedShows, numEncoders, numCommercials, numCaptions, tiVoList = _tiVoList;
 
 __DDLOGHERE__
 
@@ -170,6 +170,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		
 		numEncoders = 0;
 		numCommercials = 0;
+		numCaptions = 0;
 		queue.maxConcurrentOperationCount = 1;
 		
 		_videoListNeedsFilling = YES;
@@ -408,6 +409,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
     [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
     [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
     [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialWasCanceled object:nil];
+    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionDidFinish object:nil];
+    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
     
@@ -462,7 +465,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			for (MTTiVo *tiVo in _tiVoList) {
 				[tiVo rescheduleAllShows];
 			}
+			NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
+			[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
 		}
+		
 	}
 	[self configureSchedule];
 }
@@ -760,15 +766,18 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeShow:(MTTiVoShow *) nextShow {
 	for (MTTiVoShow * thisShow in shows) {
+		NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 		DDLogDetail(@"Adding show: %@", thisShow);
 		thisShow.encodeFormat = [self selectedFormat];
 		thisShow.addToiTunesWhenEncoded = thisShow.encodeFormat.canAddToiTunes &&
-											[[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
+											[defaults boolForKey:kMTiTunesSubmit];
 		thisShow.simultaneousEncode = thisShow.encodeFormat.canSimulEncode &&
-											[[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
+											[defaults boolForKey:kMTSimultaneousEncode];
 		thisShow.skipCommercials = [thisShow.encodeFormat.comSkip boolValue] &&
-											[[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
-		thisShow.downloadDirectory = tiVoManager.downloadDirectory;
+											[defaults boolForKey:@"RunComSkip"];
+		thisShow.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
+		thisShow.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
+		thisShow.includeAPMMetaData = [defaults objectForKey:kMTExportAtomicParsleyMetaData];
 	}
 	[self addProgramsToDownloadQueue:shows beforeShow:nextShow ];
 }
@@ -930,6 +939,13 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	numCommercials--;
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
     DDLogMajor(@"num commercials after decrement is %d",numCommercials);
+}
+
+-(void)captionFinished
+{
+	numCaptions--;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+    DDLogMajor(@"num captions after decrement is %d",numCaptions);
 }
 
 -(void)writeDownloadQueueToUserDefaults {

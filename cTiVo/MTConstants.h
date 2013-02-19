@@ -18,6 +18,8 @@
 #define kMTNotificationEncodeWasCanceled @"MTNotificationEncodeWasCanceled"
 #define kMTNotificationCommercialDidFinish @"MTNotificationCommercialDidFinish"
 #define kMTNotificationCommercialWasCanceled @"MTNotificationCommercialWasCanceled"
+#define kMTNotificationCaptionDidFinish @"MTNotificationCaptionDidFinish"
+#define kMTNotificationCaptionWasCanceled @"MTNotificationCaptionWasCanceled"
 #define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"
 
 //UI Change Notifications
@@ -44,16 +46,18 @@
 #define kMTStatusCommercialing 5
 #define kMTStatusCommercialed 6
 #define kMTStatusEncoding 7
-#define kMTStatusDone 8
+#define kMTStatusDoneOld 8		//don't reuse
+#define kMTStatusCaptioning 9
+#define kMTStatusCaptioned 10
+#define kMTStatusDone 12
 #define kMTStatusDeleted 13
 #define kMTStatusFailed 15
-//note that all "Done" status must be bigger than kMTStatusDone
 
 //Contants
 
 #define kMTMaxNumDownloaders 2		//Limit number of encoders to limit cpu usage
 #define kMTUpdateIntervalMinutes 15 //Update interval for re-checking current TiVo
-#define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show
+#define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show; default, overriden by userPref
 #define kMTMaxDownloadStartupRetries 20		// Only allow 20 retries due to a download startup failuer
 #define kMTProgressCheckDelay 60	//Check progress every 60 seconds to make sure its not stalled
 //#define kMTRetryNetworkInterval 15	//Re-Check for network connectivity every X seconds
@@ -79,6 +83,11 @@
 #define kMTQueueDownloadFile @"QueueDownloadFile"
 #define kMTQueueBufferFile @"QueueBufferFile"
 #define kMTQueueFinalFile @"QueueFileName"
+#define kMTQueueGenTextMetaData     @"QueueGenTextMetadata"
+#define kMTQueueGnXMLMetaData	    @"QueueGenTextMetadata"
+#define kMTQueueIncludeAPMMetaData  @"QueueIncludeAPMMetaData"
+#define kMTQueueExportSubtitles  @"QueueExportSubtitles"
+
 
 //Column editing userDefaults
 #define kMTProgramTableColumns @"ProgramTableColumns"
@@ -117,8 +126,9 @@
 #define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
 #define kMTSaveTmpFiles @"SaveTmpFiles"				// Turn off AutoDelete of intermediate files (to make debugging encoders easier)
+#define kMTFileNameFormat @"FileNameFormat"			//printf pattern for filenames
+#define kMTFileNameFormatNull @"FileNameFormatNull"		//printf pattern for filenames for empty fields
 
-//NOT IMPLEMENTED YET, but preferences imported from iTivo
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
 #define kMTRunComSkip @"RunComSkip"                 // Whether to run comSkip program after conversion
 #define kMTExportTivoMetaData @"ExportTivoMetaData" // Whether to export XML metadata
@@ -131,9 +141,6 @@
 #define kMTScheduledEndTime    @"ScheduledEndTime"   // NSDate when to end queue
 #define kMTScheduledSleep      @"ScheduledSleep"     // Whether to start queue to sleep after scheduled downloads
 
-#define kMTiTunesIcon @"iTunesIcon"                 // Whether to use video frame (versus cTivo logo) for iTUnes icon
-#define kMTPostDownloadCommand @"PostDownloadCommand" // Example: "# mv \"$file\" ~/.Trash ;";
-
 #define kMTDebugLevel       @"DebugLevel"
 #define kMTDebugLevelDetail @"DebugLevelDetail"
 
@@ -141,4 +148,8 @@
 #define kMTGrowlBeginDownload @"Begin Download"
 #define kMTGrowlEndDownload   @"End Download"
 #define kMTGrowlCantDownload  @"Can't Download"
+
+//NOT IMPLEMENTED
+#define kMTiTunesIcon @"iTunesIcon"                 // Whether to use video frame (versus cTivo logo) for iTUnes icon
+#define kMTPostDownloadCommand @"PostDownloadCommand" // Example: "# mv \"$file\" ~/.Trash ;";
 

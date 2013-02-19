@@ -170,12 +170,28 @@ __DDLOGHERE__
         MTSubscription *newSub = [[MTSubscription new] autorelease];
         newSub.seriesTitle = tivoShow.seriesTitle;
         newSub.lastRecordedTime = earlierTime;
-        newSub.encodeFormat = tiVoManager.selectedFormat;
-        newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
-        newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
-        newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip)];
+        if ([tiVoManager.downloadQueue containsObject:tivoShow]) {
+			//then use queued properties
+			newSub.encodeFormat = tivoShow.encodeFormat;
+			newSub.addToiTunes = tivoShow.addToiTunesWhenEncoded;
+			newSub.simultaneousEncode = tivoShow.simultaneousEncode;
+			newSub.skipCommercials = tivoShow.skipCommercials;
+			newSub.genTextMetaData = tivoShow.genTextMetaData;
+			newSub.genXMLMetaData = tivoShow.genXMLMetaData;
+			newSub.includeAPMMetaData = tivoShow.includeAPMMetaData;
+			newSub.exportSubtitles= tivoShow.exportSubtitles;
+		} else {
+			//use default properties
+			newSub.encodeFormat = tiVoManager.selectedFormat;
+			newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
+			newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
+			newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip)];
+			newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
+			newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
+			newSub.includeAPMMetaData = [defaults objectForKey:kMTExportAtomicParsleyMetaData];
+			newSub.exportSubtitles	  =[defaults objectForKey:kMTExportSubtitles];
+		}
 		DDLogVerbose(@"Subscribing %@ as: %@ ", tivoShow, newSub);
-		
 		[self addObject:newSub];
 		return newSub;
  	} else {
@@ -196,7 +212,7 @@ __DDLOGHERE__
 	MTTiVoShow * tivoShow = (MTTiVoShow *)notification.object;
 	MTSubscription * seriesMatch = [self findShow:tivoShow];
 	if (seriesMatch && tivoShow.showDate) {
-		DDLogDetail(@"UPdating time on Subscriptions: %@ to %@", seriesMatch, tivoShow.showDate);
+		DDLogDetail(@"Updating time on Subscriptions: %@ to %@", seriesMatch, tivoShow.showDate);
 		seriesMatch.lastRecordedTime = tivoShow.showDate;
 		[self saveSubscriptions];
 		

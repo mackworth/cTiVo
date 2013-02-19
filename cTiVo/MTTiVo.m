@@ -237,10 +237,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 {
     for (MTTiVoShow *show in _shows) {
         if (show.isInProgress) {
-            [show rescheduleShowWithDecrementRetries:@NO];
+            [show prepareForDownload:NO];
         }
     }
-    
+
 }
 
 -(void)updateShowsStartingAt:(int)anchor withCount:(int)count
@@ -301,7 +301,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)parserElement:(NSString*) elementName {
 	//just gives a shorter method name for DDLog
-	DDLogDetail(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
+	DDLogVerbose(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
 }
 
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
@@ -491,7 +491,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			DDLogDetail(@"%@ got manageDownload notification %@",self, notification.name);
 			[self manageDownloads];
 		} else {
-			DDLogDetail(@"%@ ignoring notification %@ for %@",notification.name, self,notification.object);
+			DDLogDetail(@"%@ ignoring notification %@ for %@",self,notification.name, notification.object);
 		}
 	} else if ([info isKindOfClass:[self class]] && info == self ) {
 			[self manageDownloads];
@@ -510,7 +510,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     managingDownloads = YES;
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
 //	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
-    BOOL isDownloading = NO, isDecrypting = NO, isCommercialing = NO;
+    BOOL isDownloading = NO, isDecrypting = NO, isCommercialing = NO, isCaptioning = NO;
     for (MTTiVoShow *s in self.downloadQueue) {
         if ([s.downloadStatus intValue] == kMTStatusDownloading) {
             isDownloading = YES;
@@ -520,6 +520,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         }
         if ([s.downloadStatus intValue] == kMTStatusCommercialing) {
             isCommercialing = YES;
+        }
+        if ([s.downloadStatus intValue] == kMTStatusCaptioning) {
+            isCaptioning= YES;
         }
     }
     if (!isDownloading) {
@@ -566,10 +569,28 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             }
         }
     }
+	if (!isCaptioning) {
+		DDLogDetail(@"%@ Checking for new caption extraction", self);
+        for (MTTiVoShow *s in self.downloadQueue) {
+            if (s.exportSubtitles.boolValue &&
+				(([s.downloadStatus intValue] == kMTStatusDecrypted && !s.skipCommercials) ||
+				 ([s.downloadStatus intValue] == kMTStatusCommercialed && s.skipCommercials))
+				&&
+				tiVoManager.numCaptions < kMTMaxNumDownloaders) {
+				DDLogDetail(@"Launching caption detection %@", s);
+				tiVoManager.numCaptions++;
+				[s caption];
+				break;
+            }
+        }
+    }
     if (tiVoManager.numEncoders < kMTMaxNumDownloaders) {
 		DDLogDetail(@"%@ Checking for new encode", self);
         for (MTTiVoShow *s in self.downloadQueue) {
-            if ((([s.downloadStatus intValue] == kMTStatusDecrypted && !s.skipCommercials) || [s.downloadStatus intValue] == kMTStatusCommercialed)
+			int status =[s.downloadStatus intValue];
+            if (((status == kMTStatusDecrypted && !s.skipCommercials && !s.exportSubtitles.boolValue) ||
+				 (status == kMTStatusCommercialed && !s.exportSubtitles.boolValue) ||
+				 (status == kMTStatusCaptioned))
 							&&
 				tiVoManager.numEncoders < kMTMaxNumDownloaders) {
 				tiVoManager.numEncoders++;

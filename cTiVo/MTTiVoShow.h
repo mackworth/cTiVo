@@ -36,6 +36,8 @@
                                     *stationCallsign,
 									*programId,
                                     *seriesId,
+									*movieYear,
+									*isEpisodic,
                                     *tvRating,
                                     *sourceType,
                                     *idGuidSource;
@@ -97,6 +99,12 @@
 
 @property (nonatomic, retain) NSString *downloadDirectory;
 @property (nonatomic, retain) MTFormat *encodeFormat;
+@property (nonatomic, retain) NSData *detailXML;
+
+@property (nonatomic, retain) NSNumber *genTextMetaData,
+									   *genXMLMetaData,
+										*includeAPMMetaData,
+										*exportSubtitles;
 @property BOOL  addToiTunesWhenEncoded,
 				simultaneousEncode,
 				skipCommercials;
@@ -130,6 +138,7 @@
 -(void)download;
 -(void)decrypt;
 -(void)commercial;
+-(void)caption;
 -(void)encode;
 -(void)getShowDetail;
 

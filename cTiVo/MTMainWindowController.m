@@ -85,8 +85,10 @@ __DDLOGHERE__
 	[downloadQueueTable setDoubleAction:@selector(doubleClickForDetails:)];
 	
 	CALayer *viewLayer = [CALayer layer];
-	[viewLayer setBackgroundColor:CGColorCreateGenericRGB(0.0, 0.0, 0.0, 0.4)]; //RGB plus Alpha Channel
+	struct CGColor * color = CGColorCreateGenericRGB(0.0, 0.0, 0.0, 0.4);
+	[viewLayer setBackgroundColor:color]; //RGB plus Alpha Channel
 	[self.cancelQuitView setWantsLayer:YES]; // view's backing store is using a Core Animation Layer
+	CFRelease(color);
 	[self.cancelQuitView setLayer:viewLayer];
 
 
@@ -380,7 +382,7 @@ __DDLOGHERE__
 		NSArray *itemsToRemove = [downloadQueueTable.sortedShows objectsAtIndexes:selectedRows];
 		if ([tiVoManager.processingPaused boolValue]) {
 			for (MTTiVoShow *show in itemsToRemove) {
-					[show rescheduleShowWithDecrementRetries:@(NO)];
+					[show prepareForDownload:YES];
 			}
 		} else {
 			[tiVoManager deleteProgramsFromDownloadQueue:itemsToRemove];
@@ -559,11 +561,83 @@ __DDLOGHERE__
 
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
-		sub.addToiTunes = [NSNumber numberWithBool:!sub.shouldAddToiTunes];
+		sub.addToiTunes = [NSNumber numberWithBool: ! sub.shouldAddToiTunes];
         [tiVoManager.subscribedShows saveSubscriptions];
         
     }
 }
+
+-(IBAction)changeXML:(id)sender
+{
+    MTCheckBox *checkbox = sender;
+	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+        //updating an individual show in download queue
+		MTTiVoShow * show = (MTTiVoShow *)checkbox.owner;
+		NSNumber *newVal = [NSNumber numberWithBool: ! show.genXMLMetaData.boolValue ];
+		show.genXMLMetaData = newVal;
+		
+    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
+		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		NSNumber *newVal = [NSNumber numberWithBool: ! sub.genXMLMetaData.boolValue ];
+		sub.genXMLMetaData = newVal;
+        [tiVoManager.subscribedShows saveSubscriptions];
+        
+    }
+}
+
+-(IBAction)changepyTiVo:(id)sender
+{
+    MTCheckBox *checkbox = sender;
+	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+        //updating an individual show in download queue
+		MTTiVoShow * show = (MTTiVoShow *)checkbox.owner;
+		NSNumber *newVal = [NSNumber numberWithBool: ! show.genTextMetaData.boolValue ];
+		show.genTextMetaData = newVal;
+		
+    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
+		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		NSNumber *newVal = [NSNumber numberWithBool: ! sub.genTextMetaData.boolValue ];
+		sub.genTextMetaData = newVal;
+        [tiVoManager.subscribedShows saveSubscriptions];
+    }
+}
+
+-(IBAction)changeMetadata:(id)sender
+{
+    MTCheckBox *checkbox = sender;
+	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+        //updating an individual show in download queue
+		MTTiVoShow * show = (MTTiVoShow *)checkbox.owner;
+		NSNumber *newVal = [NSNumber numberWithBool: ! show.includeAPMMetaData.boolValue ];
+		show.includeAPMMetaData = newVal;
+		
+    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
+		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		NSNumber *newVal = [NSNumber numberWithBool: ! sub.includeAPMMetaData.boolValue ];
+		sub.includeAPMMetaData = newVal;
+        [tiVoManager.subscribedShows saveSubscriptions];
+        
+    }
+}
+
+-(IBAction)changeSubtitle:(id)sender
+{
+    MTCheckBox *checkbox = sender;
+	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+        //updating an individual show in download queue
+		MTTiVoShow * show = (MTTiVoShow *)checkbox.owner;
+		NSNumber *newVal = [NSNumber numberWithBool: ! show.exportSubtitles.boolValue ];
+		show.exportSubtitles = newVal;
+		
+    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){ 
+		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		NSNumber *newVal = [NSNumber numberWithBool: ! sub.exportSubtitles.boolValue ];
+		sub.exportSubtitles = newVal;
+        [tiVoManager.subscribedShows saveSubscriptions];
+		
+    }
+}
+
 
 #pragma mark - Customize Columns
 
@@ -594,8 +668,9 @@ __DDLOGHERE__
 
 
 - (void)contextMenuSelected:(id)sender {
-    NSTableColumn *column = [sender representedObject][@"Column"];
-    NSTableView *table = [sender representedObject][@"Table"];
+	NSMenuItem * menuItem = (NSMenuItem *) sender;
+    NSTableColumn *column = [menuItem representedObject][@"Column"];
+    NSTableView *table = [menuItem representedObject][@"Table"];
     NSString *key = nil;
     if (table == tiVoShowTable) {
         key = kMTHideTiVoColumnPrograms;
@@ -604,15 +679,15 @@ __DDLOGHERE__
         key = kMTHideTiVoColumnDownloads;
     }
     NSString *columnIdentifier = column.identifier;
-	BOOL wasOn = ([sender state] == NSOnState);
+	BOOL wasOn = ([menuItem state] == NSOnState);
 	[column setHidden:wasOn];
     if ([columnIdentifier compare:@"TiVo"] == NSOrderedSame && key) {
         [[NSUserDefaults standardUserDefaults] setBool:wasOn forKey:key];
     }
 	if(wasOn) {
-		[sender setState: NSOffState ];
+		[menuItem setState: NSOffState ];
 	} else {
-		[sender setState: NSOnState];
+		[menuItem setState: NSOnState];
 	}
 }
 

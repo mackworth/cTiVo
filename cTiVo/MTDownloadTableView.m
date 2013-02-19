@@ -196,6 +196,22 @@ __DDLOGHERE__
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)] autorelease];
         thisCell.identifier = identifier;
         result = thisCell;
+    } else if([identifier isEqualToString: @"XML"]) {
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeXML:)] autorelease];
+        thisCell.identifier = identifier;
+        result = thisCell;
+    } else if([identifier isEqualToString: @"pyTiVo"]) {
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changepyTiVo:)] autorelease];
+        thisCell.identifier = identifier;
+        result = thisCell;
+    } else if([identifier isEqualToString: @"Metadata"]) {
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMetadata:)] autorelease];
+        thisCell.identifier = identifier;
+        result = thisCell;
+    } else if([identifier isEqualToString: @"Subtitles"]) {
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSubtitle:)] autorelease];
+        thisCell.identifier = identifier;
+        result = thisCell;
    } else if([identifier isEqualToString: @"Format"]) {
 		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
 	    thisCell.popUpButton.showHidden = NO;
@@ -282,7 +298,7 @@ __DDLOGHERE__
     } else if ([tableColumn.identifier isEqualToString:@"iTunes"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisShow.addToiTunesWhenEncoded];
-        [checkBox setEnabled: !thisShow.isDone &&
+        [checkBox setEnabled: !thisShow.isDone && !thisShow.protectedShow.boolValue &&
                               thisShow.encodeFormat.canAddToiTunes ];
          checkBox.owner = thisShow;
 
@@ -290,14 +306,34 @@ __DDLOGHERE__
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisShow.simultaneousEncode];
         checkBox.owner = thisShow;
-        [checkBox setEnabled: thisShow.isNew && thisShow.encodeFormat.canSimulEncode];
+        [checkBox setEnabled: thisShow.isNew && !thisShow.protectedShow.boolValue && thisShow.encodeFormat.canSimulEncode];
         
  	} else if ([tableColumn.identifier isEqualToString:@"Skip"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisShow.skipCommercials];
         checkBox.owner = thisShow;
-        [checkBox setEnabled: thisShow.isNew && thisShow.encodeFormat.canSkip];
+        [checkBox setEnabled: thisShow.isNew && !thisShow.protectedShow.boolValue && thisShow.encodeFormat.canSkip];
         
+ 	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setOn: thisShow.genXMLMetaData];
+        checkBox.owner = thisShow;
+		checkBox.enabled = !thisShow.isDone && !thisShow.protectedShow.boolValue;
+	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setOn: thisShow.genTextMetaData];
+        checkBox.owner = thisShow;
+		checkBox.enabled = !thisShow.isDone && !thisShow.protectedShow.boolValue;
+	} else if ([tableColumn.identifier isEqualToString:@"Subtitles"]) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setOn: thisShow.exportSubtitles];
+        checkBox.owner = thisShow;
+		checkBox.enabled = thisShow.isNew && !thisShow.protectedShow.boolValue;
+	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setOn: thisShow.includeAPMMetaData];
+        checkBox.owner = thisShow;
+		checkBox.enabled = !thisShow.isDone && !thisShow.protectedShow.boolValue;
 	} else if ([tableColumn.identifier isEqualToString:@"Date"]) {
 		if ([tableColumn width] > 135) {
 			textVal = thisShow.showMediumDateString;

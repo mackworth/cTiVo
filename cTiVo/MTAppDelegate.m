@@ -45,18 +45,18 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
             //Uncomment to cancel idle sleep
             //IOCancelPowerChange( root_port, (long)messageArgument );
             // we will allow idle sleep
-//			NSLog(@"ZZZReceived Soft Sleep Notice");
-		
+			//			NSLog(@"ZZZReceived Soft Sleep Notice");
+			
 			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTPreventSleep]) { //We want to prevent sleep if still downloading
 				if ([tiVoManager numberOfShowsToDownload]) {
-//					NSLog(@"ZZZReceived Soft Sleep Notice and cancelling");
+					//					NSLog(@"ZZZReceived Soft Sleep Notice and cancelling");
 					IOCancelPowerChange(root_port, (long)messageArgument);
 				} else { //THere are no shows pending so sleeep
-//					NSLog(@"ZZZReceived Soft Sleep Notice but no shows downloading so allowing");
+						 //					NSLog(@"ZZZReceived Soft Sleep Notice but no shows downloading so allowing");
 					IOAllowPowerChange( root_port, (long)messageArgument );
 				}
 			} else { //Cancel things and get on with it.
-//				NSLog(@"ZZZReceived Soft Sleep Notice and allowing");
+					 //				NSLog(@"ZZZReceived Soft Sleep Notice and allowing");
 				IOAllowPowerChange( root_port, (long)messageArgument );
 			}
             break;
@@ -70,7 +70,7 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
 			 kIOReturnSuccess, however the system WILL still go to sleep.
 			 */
 			
-//			NSLog(@"ZZZReceived Forced Sleep Notice and shutting down downloads");
+			//			NSLog(@"ZZZReceived Forced Sleep Notice and shutting down downloads");
 			for (MTTiVoShow *s in tiVoManager.downloadQueue) {
 				[s cancel];
 			}
@@ -79,7 +79,7 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
 			
         case kIOMessageSystemWillPowerOn:
             //System has started the wake up process...
-//			NSLog(@"ZZZReceived Wake Notice");
+			//			NSLog(@"ZZZReceived Wake Notice");
             break;
 			
         case kIOMessageSystemHasPoweredOn:
@@ -113,6 +113,7 @@ __DDLOGHERE__
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
+	NSLog(@"max allowed %d",MAC_OS_X_VERSION_MAX_ALLOWED);
 	CGEventRef event = CGEventCreate(NULL);
     CGEventFlags modifiers = CGEventGetFlags(event);
     CFRelease(event);
@@ -124,30 +125,33 @@ __DDLOGHERE__
 	} else {
 		[[NSUserDefaults standardUserDefaults]  registerDefaults:@{kMTDebugLevel: @1}];
 		[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
-
+		
 	}
-
+	
 	
 	// Insert code here to initialize your application
 	
-//	[[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTMediaKeys];  //Test code for starting from scratch
+	//	[[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTMediaKeys];  //Test code for starting from scratch
 	
 	DDLogDetail(@"Starting Program");
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
-	if (![[[NSUserDefaults standardUserDefaults] objectForKey:kMTPreventSleep] boolValue]) {
-		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:NO] forKey:kMTPreventSleep];
-	}
-	if (![[[NSUserDefaults standardUserDefaults] objectForKey:kMTShowCopyProtected] boolValue]) {
-		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:NO] forKey:kMTShowCopyProtected];
-	}
+	
+	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
+										  @NO, kMTShowCopyProtected,
+										  @NO, kMTPreventSleep,
+										  @kMTMaxDownloadRetries, kMTNumDownloadRetries,
+										  nil];
+	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
+	
+	
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueChangeSetting context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:@"RunComSkip" options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:@"SimultaneousEncode" options:NSKeyValueObservingOptionNew context:nil];
 	mainWindowController = nil;
-//	_formatEditorController = nil;
+	//	_formatEditorController = nil;
 	[self showMainWindow:nil];
 	[self updateTivoRefreshMenu];
 	mediaKeyQueue = [NSMutableArray new];
@@ -306,15 +310,15 @@ __DDLOGHERE__
 #pragma mark - Preference pages
 -(IBAction)editFormats:(id)sender
 {
-//	[self.formatEditorController showWindow:nil];
+	//	[self.formatEditorController showWindow:nil];
 	self.preferencesController.startingTabIdentifier = @"Formats";
 	[self showPreferences:nil];
 }
 
 -(IBAction)editManualTiVos:(id)sender
 {
-//	[self.manualTiVoEditorController showWindow:nil];
-//	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+	//	[self.manualTiVoEditorController showWindow:nil];
+	//	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 	self.preferencesController.startingTabIdentifier = @"TiVos";
 	[self showPreferences:nil];
 }
@@ -322,7 +326,7 @@ __DDLOGHERE__
 -(IBAction)showPreferences:(id)sender
 {
 	[NSApp beginSheet:self.preferencesController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
-
+	
 }
 
 -(IBAction)showAdvPreferences:(id)sender
@@ -387,7 +391,7 @@ __DDLOGHERE__
 			DDLogVerbose(@"formats: %@",formatsToWrite);
 			NSString *filename = mySavePanel.URL.path;
 			[formatsToWrite writeToFile:filename atomically:YES];
-		}	
+		}
 	}];
 }
 
@@ -550,43 +554,43 @@ __DDLOGHERE__
 	NSString *message = [NSString stringWithFormat:@"Shows are in process, and would need to be restarted next time. Do you wish them to finish now, or quit immediately?"];
 	NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Finish current show" alternateButton:@"Cancel" otherButton:@"Quit Immediately" informativeTextWithFormat:@""];
 	NSInteger returnValue = [quitAlert runModal];
-	switch (returnValue) { 
-	case NSAlertDefaultReturn:
+	switch (returnValue) {
+		case NSAlertDefaultReturn:
 			DDLogDetail(@"User did ask to continue");
 			tiVoManager.processingPaused = @(YES);
 			tiVoManager.quitWhenCurrentDownloadsComplete = @(YES);
 			[mainWindowController.cancelQuitView setHidden:NO];
 			[NSApp replyToApplicationShouldTerminate:NO];
 			
-//			NSRunLoop* myRunLoop = [NSRunLoop currentRunLoop];
-//			// Create and schedule the  timer.
-//			NSDate* futureDate = [NSDate dateWithTimeIntervalSinceNow:5.0];
-//			checkingDone = [[[NSTimer alloc] initWithFireDate:futureDate
-//														interval:5.0
-//														  target:self
-//														selector:@selector(checkDone:)
-//														userInfo:nil
-//														 repeats:YES] autorelease];
-//			[myRunLoop addTimer:checkingDone forMode:NSRunLoopCommonModes];
-//			
-//			NSString *message = [NSString stringWithFormat:@"Please wait for processing to complete..."];
-//			NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Cancel Quit" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-//			[quitAlert beginSheetModalForWindow:mainWindowController.window modalDelegate:self didEndSelector:@selector(doQuit) contextInfo:nil ];
+			//			NSRunLoop* myRunLoop = [NSRunLoop currentRunLoop];
+			//			// Create and schedule the  timer.
+			//			NSDate* futureDate = [NSDate dateWithTimeIntervalSinceNow:5.0];
+			//			checkingDone = [[[NSTimer alloc] initWithFireDate:futureDate
+			//														interval:5.0
+			//														  target:self
+			//														selector:@selector(checkDone:)
+			//														userInfo:nil
+			//														 repeats:YES] autorelease];
+			//			[myRunLoop addTimer:checkingDone forMode:NSRunLoopCommonModes];
+			//
+			//			NSString *message = [NSString stringWithFormat:@"Please wait for processing to complete..."];
+			//			NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Cancel Quit" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
+			//			[quitAlert beginSheetModalForWindow:mainWindowController.window modalDelegate:self didEndSelector:@selector(doQuit) contextInfo:nil ];
 			break;
-	case NSAlertOtherReturn:
+		case NSAlertOtherReturn:
 			DDLogDetail(@"User did ask to quit");
 			[self cleanup];
 			[NSApp replyToApplicationShouldTerminate:YES];
 			break;
-	case NSAlertAlternateReturn:
-	default:
+		case NSAlertAlternateReturn:
+		default:
 			[NSApp replyToApplicationShouldTerminate:NO];
 			break;
 	}
 }
 
 -(void) cleanup {
-
+	
 	DDLogDetail(@"exiting");
 	[tiVoManager writeDownloadQueueToUserDefaults];
     [[NSUserDefaults standardUserDefaults] synchronize];

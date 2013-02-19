@@ -35,7 +35,7 @@
     double percentComplete;
     MTDownloadTableCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
 	NSArray *factoryFormatList;
-    int numEncoders, numCommercials;//Want to limit launches to two encoders.
+    int numEncoders, numCommercials, numCaptions;//Want to limit launches to two encoders.
 
     BOOL volatile updatingVideoList;
 	
@@ -56,7 +56,7 @@
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic) BOOL videoListNeedsFilling;
 @property (nonatomic, retain) MTFormat *selectedFormat;
-@property (nonatomic) int numEncoders, totalShows, numCommercials;//Want to limit launches to two encoders.
+@property (nonatomic) int numEncoders, totalShows, numCommercials, numCaptions;//Want to limit launches to two encoders.
 @property (nonatomic, assign) NSWindow *mainWindow;
 @property (nonatomic, retain) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
 

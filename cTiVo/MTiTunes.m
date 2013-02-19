@@ -104,6 +104,7 @@ __DDLOGHERE__
 			newTrack.videoKind = iTunesEVdKTVShow;
 			newTrack.album = show.seriesTitle;
 			newTrack.albumArtist = show.seriesTitle;
+			newTrack.album = show.seriesTitle;
 			if (show.episodeTitle.length ==0) {
                 NSDateFormatter *dateFormat = [[[NSDateFormatter alloc] init] autorelease];
                 [dateFormat setDateStyle:NSDateFormatterShortStyle];
@@ -128,13 +129,14 @@ __DDLOGHERE__
 	 
 	 end tell
 	 */
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSync]) {
+			[self updateAllIDevices];
+		}
 		return YES;
 	} else {
 		DDLogReport(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, show.encodeFormat.name, showFileURL );
+		DDLogVerbose(@"track: %@, itunes: %@; playList: %@", newTrack, self.iTunes, self.tivoPlayList);
 		return NO;
-	}
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSync]) {
-		[self updateAllIDevices];
 	}
 }
 
