@@ -23,6 +23,7 @@
 										*outputFileFlag,
 										*edlFlag,
 										*comSkipOptions,
+										*captionOptions,
 										*regExProgress;
 
 @property (nonatomic, retain) NSNumber	*comSkip,
@@ -33,7 +34,7 @@
 
 @property (nonatomic, retain) NSAttributedString *attributedFormatDescription;
 
-@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip;
+@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip, canAtomicParsley;
 @property (nonatomic, readonly) NSString * pathForExecutable;
 
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format;

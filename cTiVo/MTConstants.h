@@ -84,7 +84,7 @@
 #define kMTQueueBufferFile @"QueueBufferFile"
 #define kMTQueueFinalFile @"QueueFileName"
 #define kMTQueueGenTextMetaData     @"QueueGenTextMetadata"
-#define kMTQueueGnXMLMetaData	    @"QueueGenTextMetadata"
+#define kMTQueueGenXMLMetaData	    @"QueueGenXMLMetadata"
 #define kMTQueueIncludeAPMMetaData  @"QueueIncludeAPMMetaData"
 #define kMTQueueExportSubtitles  @"QueueExportSubtitles"
 

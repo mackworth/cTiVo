@@ -76,6 +76,7 @@
 
 @property (nonatomic, readonly) BOOL    isMovie;
 @property (nonatomic, readonly) NSString *idString,
+										*combinedChannelString,
 										*lengthString,
 										*isQueuedString,
 										*isHDString,

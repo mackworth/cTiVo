@@ -113,7 +113,6 @@ __DDLOGHERE__
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	NSLog(@"max allowed %d",MAC_OS_X_VERSION_MAX_ALLOWED);
 	CGEventRef event = CGEventCreate(NULL);
     CGEventFlags modifiers = CGEventGetFlags(event);
     CFRelease(event);
@@ -148,8 +147,8 @@ __DDLOGHERE__
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueChangeSetting context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:@"RunComSkip" options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:@"SimultaneousEncode" options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTRunComSkip options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTSimultaneousEncode options:NSKeyValueObservingOptionNew context:nil];
 	mainWindowController = nil;
 	//	_formatEditorController = nil;
 	[self showMainWindow:nil];
@@ -193,46 +192,53 @@ __DDLOGHERE__
 		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
         BOOL canSimulEncode = ![tiVoManager.selectedFormat.mustDownloadFirst boolValue];
         BOOL canSkip = [tiVoManager.selectedFormat.comSkip boolValue];
+		BOOL canAPM = tiVoManager.selectedFormat.canAtomicParsley ;
 		NSArray *menuItems = [optionsMenu itemArray];
 		for (NSMenuItem *mi in menuItems) {
 			if ([mi isSeparatorItem]) {
-				break;
+				break;  //leave items after first separator
 			}
 			[optionsMenu removeItem:mi];
 		}
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+		if (canAPM) {
+			apmMenuItem = [[[NSMenuItem alloc] init] autorelease];
+			apmMenuItem.title = @"Add Metadata to Video File";
+			[apmMenuItem bind:@"value" toObject:defaults withKeyPath:kMTExportAtomicParsleyMetaData options:nil];
+			[optionsMenu insertItem:apmMenuItem atIndex:0];
+		}
 		if (caniTune) {
 			iTunesMenuItem = [[[NSMenuItem alloc] init] autorelease];
 			iTunesMenuItem.title = @"Add to iTunes when complete";
-			[iTunesMenuItem bind:@"value" toObject:defaults withKeyPath:@"iTunesSubmit" options:nil];
+			[iTunesMenuItem bind:@"value" toObject:defaults withKeyPath:kMTiTunesSubmit options:nil];
 			[optionsMenu insertItem:iTunesMenuItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
 		}
 		if (canSimulEncode) {
 			simulEncodeItem = [[[NSMenuItem alloc] init] autorelease];
 			simulEncodeItem.title = @"Simultaneous Encoding";
-			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:@"SimultaneousEncode" options:nil];
+			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:kMTSimultaneousEncode options:nil];
 			[optionsMenu insertItem:simulEncodeItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
 		}
 		if (canSkip) {
 			skipCommercialsItem = [[[NSMenuItem alloc] init] autorelease];
 			skipCommercialsItem.title = @"Skip Commercials";
-			[skipCommercialsItem bind:@"value" toObject:defaults withKeyPath:@"RunComSkip" options:nil];
+			[skipCommercialsItem bind:@"value" toObject:defaults withKeyPath:kMTRunComSkip options:nil];
 			[optionsMenu insertItem:skipCommercialsItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
 		}
-	} else if ([keyPath compare:@"SimultaneousEncode"] == NSOrderedSame) {
-		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:@"SimultaneousEncode"];
-		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
+	} else if ([keyPath compare:kMTSimultaneousEncode] == NSOrderedSame) {
+		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
+		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
 		if (simulEncode && runComSkip) {
-			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"RunComSkip"];
+			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTRunComSkip];
 		}
-	} else if ([keyPath compare:@"RunComSkip"] == NSOrderedSame) {
-		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:@"SimultaneousEncode"];
-		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
+	} else if ([keyPath compare:kMTRunComSkip] == NSOrderedSame) {
+		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
+		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
 		if (simulEncode && runComSkip) {
-			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"SimultaneousEncode"];
+			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSimultaneousEncode];
 		}
 	} else if ([keyPath compare:@"processingPaused"] == NSOrderedSame) {
 		pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";

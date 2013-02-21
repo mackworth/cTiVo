@@ -331,10 +331,10 @@ __DDLOGHERE__
 		checkBox.enabled = thisShow.isNew && !thisShow.protectedShow.boolValue;
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.includeAPMMetaData];
+        [checkBox setOn: thisShow.includeAPMMetaData && thisShow.encodeFormat.canAtomicParsley];
         checkBox.owner = thisShow;
-		checkBox.enabled = !thisShow.isDone && !thisShow.protectedShow.boolValue;
-	} else if ([tableColumn.identifier isEqualToString:@"Date"]) {
+		checkBox.enabled = thisShow.encodeFormat.canAtomicParsley && !thisShow.isDone && !thisShow.protectedShow.boolValue;
+  	} else if ([tableColumn.identifier isEqualToString:@"Date"]) {
 		if ([tableColumn width] > 135) {
 			textVal = thisShow.showMediumDateString;
 		} else {

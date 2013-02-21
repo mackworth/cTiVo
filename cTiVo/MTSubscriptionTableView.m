@@ -260,9 +260,9 @@ static NSDateFormatter *dateFormatter;
 		checkBox.enabled = YES;		
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisSubscription.includeAPMMetaData];
+        [checkBox setOn: thisSubscription.includeAPMMetaData && thisSubscription.encodeFormat.canAtomicParsley];
         checkBox.owner = thisSubscription;
-		checkBox.enabled = YES;
+		checkBox.enabled = thisSubscription.encodeFormat.canAtomicParsley;
     }
 	
     // return the result.

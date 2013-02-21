@@ -1305,7 +1305,7 @@ audio: 2-channel aac at 128kbs</string>
 			<key>encoderVideoOptions</key>
 			<string>HD1080p</string>
 			<key>filenameExtension</key>
-			<string>.m4v</string>
+			<string>.mp4</string>
 			<key>name</key>
 			<string>Elgato 1080p</string>
 		</dict>

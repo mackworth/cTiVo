@@ -260,7 +260,7 @@ __DDLOGHERE__
 
 -(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries
 {
-	DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",(_numRetriesRemaining > 0) ? @"restarting":@"canceled", self.showStatus, _showTitle, _processProgress, previousCheck );
+	DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _showTitle, _processProgress, previousCheck );
 	[self saveCurrentLogFile];
 	[self cancel];
 	if (_numRetriesRemaining <= 0 || _numStartupRetriesRemaining <=0) {
@@ -306,7 +306,7 @@ __DDLOGHERE__
 	[encoder encodeObject: _bufferFilePath forKey: kMTQueueBufferFile] ;
 	[encoder encodeObject: _encodeFilePath forKey: kMTQueueFinalFile] ;
 	[encoder encodeObject: _genTextMetaData forKey: kMTQueueGenTextMetaData];
-	[encoder encodeObject: _genXMLMetaData forKey:	kMTQueueGnXMLMetaData];
+	[encoder encodeObject: _genXMLMetaData forKey:	kMTQueueGenXMLMetaData];
 	[encoder encodeObject: _includeAPMMetaData forKey:	kMTQueueIncludeAPMMetaData];
 	[encoder encodeObject: _exportSubtitles forKey:	kMTQueueExportSubtitles];
 }
@@ -332,7 +332,7 @@ __DDLOGHERE__
 	if (_bufferFilePath) [result setValue:_bufferFilePath forKey: kMTQueueBufferFile];
 	if (_encodeFilePath) [result setValue:_encodeFilePath forKey: kMTQueueFinalFile];
 	if (_genTextMetaData) [result setValue:_genTextMetaData forKey: kMTQueueGenTextMetaData];
-	if (_genXMLMetaData) [result setValue:_genXMLMetaData forKey: kMTQueueGnXMLMetaData];
+	if (_genXMLMetaData) [result setValue:_genXMLMetaData forKey: kMTQueueGenXMLMetaData];
 	if (_includeAPMMetaData) [result setValue:_includeAPMMetaData forKey: kMTQueueIncludeAPMMetaData];
 	if (_exportSubtitles) [result setValue:_exportSubtitles forKey: kMTQueueExportSubtitles];
 
@@ -356,7 +356,7 @@ __DDLOGHERE__
 	_bufferFilePath = [queueEntry[kMTQueueBufferFile] retain];
 	_protectedShow = self.isDone ? @NO : @YES;
 	_genTextMetaData = [queueEntry[kMTQueueGenTextMetaData] retain]; if (!_genTextMetaData) _genTextMetaData= @(NO);
-	_genXMLMetaData = [queueEntry[kMTQueueGnXMLMetaData] retain]; if (!_genXMLMetaData) _genXMLMetaData= @(NO);
+	_genXMLMetaData = [queueEntry[kMTQueueGenXMLMetaData] retain]; if (!_genXMLMetaData) _genXMLMetaData= @(NO);
 	_includeAPMMetaData = [queueEntry[kMTQueueIncludeAPMMetaData] retain]; if (!_includeAPMMetaData) _includeAPMMetaData= @(NO);
 	_exportSubtitles = [queueEntry[kMTQueueExportSubtitles] retain]; if (!_exportSubtitles) _exportSubtitles= @(NO);
 	DDLogDetail(@"restored %@ with %@; inProgress",self, queueEntry);
@@ -390,7 +390,7 @@ __DDLOGHERE__
 		_downloadFilePath = [[decoder decodeObjectForKey:kMTQueueDownloadFile] retain];
 		_encodeFilePath = [[decoder decodeObjectForKey:kMTQueueFinalFile] retain];
 		_genTextMetaData = [[decoder decodeObjectForKey:kMTQueueGenTextMetaData] retain]; if (!_genTextMetaData) _genTextMetaData= @(NO);
-		_genXMLMetaData = [[decoder decodeObjectForKey:kMTQueueGnXMLMetaData] retain]; if (!_genXMLMetaData) _genXMLMetaData= @(NO);
+		_genXMLMetaData = [[decoder decodeObjectForKey:kMTQueueGenXMLMetaData] retain]; if (!_genXMLMetaData) _genXMLMetaData= @(NO);
 		_includeAPMMetaData = [[decoder decodeObjectForKey:kMTQueueIncludeAPMMetaData] retain]; if (!_includeAPMMetaData) _includeAPMMetaData= @(NO);
 		_exportSubtitles = [[decoder decodeObjectForKey:kMTQueueExportSubtitles] retain]; if (!_exportSubtitles) _exportSubtitles= @(NO);
 	}
@@ -817,6 +817,66 @@ __DDLOGHERE__
 	}
 	return tryDirectory;
 }
+/*
+ [title] = The Big Bang Theory – The Loobenfeld Decay
+[mainTitle] = The Big Bang Theory
+[episodeTitle] = The Loobenfeld Decay
+[channelNum] = 702
+[channel] = KCBSDT
+[min] = 00
+[hour] = 20
+[wday] = Mon
+[mday] = 24
+[month] = Mar
+[monthNum] = 03
+[year] = 2008
+[originalAirDate] = 2007-11-20
+[EpisodeNumber] = 302
+[tivoName]
+[/]
+
+
+By request some more advanced keyword processing was introduced to allow for conditional text.
+
+You can define multiple space-separated fields within square brackets.
+Fields surrounded by quotes are treated as literal text.
+A single field with no quotes should be supplied which represents a conditional keyword
+If that keyword is available for the show in question then the keyword value along with any literal text surrounding it will be included in file name.
+If the keyword evaluates to null then the entire advanced keyword becomes null.
+For example:
+[mainTitle]["_Ep#" EpisodeNumber]_[wday]_[month]_[mday]
+The advanced keyword is highlighted in bold and signifies only include “_Ep#xxx” if EpisodeNumber exists for the show in question. “_Ep#” is literal string to which the evaluated contents of EpisodeNumber keyword are appended. If EpisodeNumber does not exist then the whole advanced keyword evaluates to empty string.
+
+
+
+-(NSString *) swapKeywordsInString: (NSString *) str {
+	NSDictionary * keywords = @{
+							 @"[showTitle]": @"%$1$@",
+							@"[series ]" : @"%$1$@"
+		showTitle),				// %$1$@
+		seriesTitle),			// %$2$@
+		episodeTitle),			// %$3$@
+		episodeNumber),			// %$4$@
+		showDate),				// %$5$@
+		showMediumDateString),	// %$6$@
+		originalAirDate),		// %$7$@
+		tiVoName),				// %$8$@
+		idString),				// %$9$@
+		channelString),			// %$10$@
+		stationCallsign),		// %$11$@
+		encodeFormat.name)		// %$12$@
+								};
+	for (NSString * key in [keywords allKeys]) {
+			str = [str stringByReplacingOccurrencesOfString: key
+												  withString: keywords[key]
+													 options: NSCaseInsensitiveSearch
+													   range: NSMakeRange(0, [str length])];
+					
+	}
+	return str;
+}
+*/
+#define Null(x) x ?  x : nullString
 
 -(NSString *)showTitleForFiles
 {
@@ -825,10 +885,9 @@ __DDLOGHERE__
 	if (filenamePattern.length > 0) {
 		NSString * nullString = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormatNull];
 		if (!nullString) nullString = @"";
-#define Null(x) x ?  x : nullString 
 		baseTitle = [NSString stringWithFormat:filenamePattern,
 					 Null(self.showTitle),				// %$1$@  showTitle			Arrow: The Odyssey  or MovieTitle
-					 Null(self.seriesTitle),			// %$2$@  seriesTitle		Arrow
+					 Null(self.seriesTitle),			// %$2$@  seriesTitle		Arrow or MovieTitle
 					 Null(self.episodeTitle),			// %$3$@  episodeTitle		The Odyssey or empty
 					 Null(self.episodeNumber),			// %$4$@  episodeNumber		S04 E05  or 53
 					 Null(self.showDate),				// %$5$@  showDate			Feb 10, 2013 8-00PM
@@ -851,7 +910,7 @@ __DDLOGHERE__
 	}
 	return safeTitle;
 }
-
+#undef Null
 
 -(void)configureFiles
 {
@@ -1031,16 +1090,41 @@ __DDLOGHERE__
 		[decrypterTask setArguments:arguments];
         [decrypterTask setStandardInput:pipe1];
         [decrypterTask setStandardOutput:pipe2];
+		
+//		if (self.exportSubtitles) {
+//			captionTask = [[NSTask alloc] init];
+//			[captionTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"ccextractor" ofType:@""]];
+//			[captionTask setStandardInput:pipe2];
+//			[captionTask setStandardOutput:pipe3];
+//			[captionTask setStandardError:captionLogFileHandle];
+//			NSArray * captionArgs = [NSMutableArray array];
+//			DDLogVerbose(@"captionArgs: %@",captionArgs);
+//
+//			if (_encodeFormat.captionOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.captionOptions]];
+//			//if (_encodeFormat.ccextractionOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.ccextractionOptions]];
+//			DDLogVerbose(@"ccextraction args: %@",arguments);
+//			[captionTask setArguments:captionArgs];
+//
+//		}
+		
+
 		encoderTask = [[NSTask alloc] init];
 		[encoderTask setLaunchPath:encoderLaunchPath];
 		NSArray * encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:_encodeFilePath];
 		DDLogVerbose(@"encoderArgs: %@",encoderArgs);
 		[encoderTask setArguments:encoderArgs];
-		[encoderTask setStandardInput:pipe2];
+//		if (self.exportSubtitles) {
+//			[encoderTask setStandardInput:pipe3];
+//		} else {
+			[encoderTask setStandardInput:pipe2];
+//		}
 		[encoderTask setStandardOutput:encodeLogFileHandle];
 		[encoderTask setStandardError:encodeLogFileHandle];
-        [decrypterTask launch];
-        [encoderTask launch];
+        
+		[decrypterTask launch];
+//		if (self.exportSubtitles) [captionTask launch];
+		[encoderTask launch];
+
         _isSimultaneousEncoding = YES;
     }
 	downloadingURL = YES;
@@ -1188,8 +1272,8 @@ __DDLOGHERE__
 	[captionTask setStandardOutput:captionLogFileHandle];
 	[captionTask setStandardError:captionLogFileHandle];
 	NSMutableArray *arguments = [NSMutableArray array];
-    DDLogMajor(@"ERROR: Need to add settable ccextraction options here");
-	//if (_encodeFormat.ccextractionOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.ccextractionOptions]];
+	if (_encodeFormat.captionOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.captionOptions]];
+    //if (_encodeFormat.ccextractionOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.ccextractionOptions]];
     [arguments addObject:decryptFilePath];
 	[arguments addObject:@"-o"];
 	[arguments addObject:captionFilePath ];
@@ -1330,7 +1414,7 @@ __DDLOGHERE__
 			}
 		}
 	}
-	if (self.includeAPMMetaData) {
+	if (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley) {
 		apmTask = [[NSTask alloc] init];
 		[apmTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"AtomicParsley" ofType: @""] ];
 		NSMutableArray *apmArgs = [NSMutableArray array];
@@ -1447,7 +1531,7 @@ __DDLOGHERE__
 	//shared between DownloadEncode (simultaneous) and trackEncodes (non-simul)
 	_processProgress = 1.0;
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-	if ([[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
+	if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
 		DDLogReport(@" %@ File %@ not found after encoding complete",self, self.encodeFilePath );
 		[self rescheduleShowWithDecrementRetries:@YES];
 		
@@ -2038,6 +2122,12 @@ __DDLOGHERE__
   }
 }
 
+-(NSString *) combinedChannelString {
+	return  [NSString stringWithFormat:@"%@-%@ %@",
+			 self.stationCallsign,
+			 self.channelString,
+			 self.isHD.boolValue? @"HD": @""];
+}
 -(NSString *) episodeGenre {
     //iTunes says "there can only be one", so pick the first we see.
     NSCharacterSet * quotes = [NSCharacterSet characterSetWithCharactersInString:@"\""];
@@ -2133,9 +2223,11 @@ __DDLOGHERE__
 		if (originalAirDate.length > 4) {
 			_episodeYear = [[originalAirDate substringToIndex:4] intValue];
 		}
+		[_originalAirDateNoTime release];
 		if (originalAirDate.length >= 10) {
-			[_originalAirDateNoTime release];
-			_originalAirDate = [[originalAirDate substringToIndex:10] retain];
+			_originalAirDateNoTime = [[originalAirDate substringToIndex:10] retain];
+		} else {
+			_originalAirDateNoTime = [originalAirDate retain];
 		}
 	}
 }

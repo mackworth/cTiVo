@@ -777,7 +777,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 											[defaults boolForKey:@"RunComSkip"];
 		thisShow.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
 		thisShow.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
-		thisShow.includeAPMMetaData = [defaults objectForKey:kMTExportAtomicParsleyMetaData];
+		thisShow.includeAPMMetaData =[NSNumber numberWithBool:(thisShow.encodeFormat.canAtomicParsley && [defaults boolForKey:kMTExportAtomicParsleyMetaData])];
 	}
 	[self addProgramsToDownloadQueue:shows beforeShow:nextShow ];
 }

@@ -92,6 +92,7 @@ __DDLOGHERE__
 		self.encoderAudioOptions = @"";
 		self.encoderOtherOptions = @"";
 		self.comSkipOptions = @"";
+		self.captionOptions = @"";
 		self.inputFileFlag = @"";
 		self.outputFileFlag = @"";
 		self.comSkip = @(NO);
@@ -112,6 +113,7 @@ __DDLOGHERE__
 						 @"outputFileFlag",
 						 @"edlFlag",
 						 @"comSkipOptions",
+						 @"captionOptions",
 						 @"regExProgress",
 						 @"comSkip",
 						 @"iTunes",
@@ -184,6 +186,7 @@ __DDLOGHERE__
 	new.outputFileFlag = [[_outputFileFlag copyWithZone:zone] autorelease];
 	new.edlFlag = [[_edlFlag copyWithZone:zone] autorelease];
 	new.comSkipOptions = [[_comSkipOptions copyWithZone:zone] autorelease];
+	new.captionOptions = [[_captionOptions copyWithZone:zone] autorelease];
 	new.regExProgress = [[_regExProgress copyWithZone:zone] autorelease];
 	new.comSkip = [[_comSkip copyWithZone:zone] autorelease];
 	new.iTunes = [[_iTunes copyWithZone:zone] autorelease];
@@ -210,6 +213,12 @@ __DDLOGHERE__
 -(BOOL)canAddToiTunes
 {
     return [_iTunes boolValue];
+}
+
+-(BOOL) canAtomicParsley {
+	NSArray * allowedExtensions = @[@".mp4", @".m4v", @".mov", @".3gp"];
+	NSString * extension = [self.filenameExtension lowercaseString];
+	return [allowedExtensions containsObject: extension];
 }
 
 -(BOOL)canSimulEncode
@@ -244,6 +253,7 @@ __DDLOGHERE__
 	self.encoderAudioOptions = nil;
 	self.encoderOtherOptions = nil;
 	self.comSkipOptions = nil;
+	self.captionOptions = nil;
 	self.inputFileFlag = nil;
 	self.outputFileFlag = nil;
 	self.edlFlag = nil;
