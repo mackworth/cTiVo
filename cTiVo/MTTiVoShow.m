@@ -221,7 +221,7 @@ __DDLOGHERE__
 	switch (_downloadStatus.intValue) {
 		case  kMTStatusDownloading : {
 			if (self.simultaneousEncode) {
-				DDLogMajor(@"%@ downloaded %f of %f bytes; %ld%%",self,dataDownloaded, _fileSize, lround(_processProgress*100));
+				DDLogMajor(@"%@ simul-downloaded %f of %f bytes; %ld%%",self,dataDownloaded, _fileSize, lround(_processProgress*100));
 				NSFileHandle * logHandle = [NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath] ;
 				[self saveLogFile:logHandle];
 			} else {
@@ -275,7 +275,7 @@ __DDLOGHERE__
 		if ([decrementRetries boolValue]) {
 			_numRetriesRemaining--;
 			[tiVoManager  notifyWithTitle:@"TiVo show failed; retrying..." subTitle:self.showTitle forNotification:kMTGrowlEndDownload];
-			DDLogDetail(@"Decrementing startup retries to %d",_numRetriesRemaining);
+			DDLogDetail(@"Decrementing retries to %d",_numRetriesRemaining);
 		} else {
             _numStartupRetriesRemaining--;
 			DDLogDetail(@"Decrementing startup retries to %d",_numStartupRetriesRemaining);
@@ -1382,122 +1382,129 @@ The advanced keyword is highlighted in bold and signifies only include “_Ep#xx
 
 -(void) writeMetaDataFiles {
 	
-	NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
-	DDLogMajor(@"Writing XML to    %@",tivoMetaPath);
-	[self.detailXML writeToFile:tivoMetaPath atomically:NO];
+	if (self.genXMLMetaData.boolValue || self.genTextMetaData.boolValue) {
+		
+		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
+		DDLogMajor(@"Writing XML to    %@",tivoMetaPath);
+		[self.detailXML writeToFile:tivoMetaPath atomically:NO];
+		
+		if (self.genTextMetaData.boolValue) {
+			
+			NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
+			[[NSFileManager defaultManager] createFileAtPath:textMetaPath contents:[NSData data] attributes:nil];
+			NSFileHandle * textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
+			DDLogMajor(@"Writing pytivo metaData to    %@",textMetaPath);
+			
+			NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
+			
+			NSTask * xsltProcess = [[NSTask alloc] init];
+			[xsltProcess setLaunchPath: @"/usr/bin/xsltproc"];
+			[xsltProcess setArguments: @[ xltTemplate, tivoMetaPath]] ;
+			[xsltProcess setStandardOutput:textMetaHandle ];
+			[xsltProcess launch];
+			[xsltProcess waitUntilExit];  //should be under 1 millisecond
+			[xsltProcess release]; xsltProcess = nil;
+			
+			[self writeTextMetaData:self.seriesId		 forKey:@"seriesID"			    toFile:textMetaHandle];
+			[self writeTextMetaData:self.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
+			[self writeTextMetaData:self.stationCallsign forKey:@"callsign"				toFile:textMetaHandle];
+			[textMetaHandle closeFile];
+			
+			if (!self.genXMLMetaData.boolValue) {
+				if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+					[[NSFileManager defaultManager] removeItemAtPath:tivoMetaPath error:nil];
+				}
+			}
+		}
+	}
+}
+-(BOOL) addAtomicParsleyMetadataToDownloadFile {
+	if (! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley)) {
+		return NO;
+	}
+	DDLogMajor(@"Adding APM metaData to    %@",self);
+	apmTask = [[NSTask alloc] init];
+	[apmTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"AtomicParsley" ofType: @""] ];
+	NSMutableArray *apmArgs = [NSMutableArray array];
+	[apmArgs addObject:_encodeFilePath];
+	[apmArgs addObject:@"--overWrite"];
+	[apmArgs addObject:@"--stik"];
+	if (self.isMovie) {
+		[apmArgs addObject:@"Movie"];
+	} else {
+		[apmArgs addObject:@"TV Show"];
+	}
+	if (self.episodeTitle.length>0) {
+		[apmArgs addObject:@"--title"];
+		[apmArgs addObject:self.episodeTitle];
+	}
+	if (self.episodeGenre.length>0) {
+		[apmArgs addObject:@"--grouping"];
+		[apmArgs addObject:self.episodeGenre];
+	}
+	if (self.originalAirDate.length>0) {
+		[apmArgs addObject:@"--year"];
+		[apmArgs addObject:self.originalAirDate];
+	} else if (self.movieYear.length>0) {
+		[apmArgs addObject:@"--year"];
+		[apmArgs addObject:self.movieYear];
+	}
 	
-	if (self.genTextMetaData.boolValue) {
-		
-		NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
-		[[NSFileManager defaultManager] createFileAtPath:textMetaPath contents:[NSData data] attributes:nil];
-		NSFileHandle * textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
-		DDLogMajor(@"Writing pytivo metaData to    %@",textMetaPath);
-		
-		NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
-		
-		NSTask * xsltProcess = [[NSTask alloc] init];
-		[xsltProcess setLaunchPath: @"/usr/bin/xsltproc"];
-		[xsltProcess setArguments: @[ xltTemplate, tivoMetaPath]] ;
-		[xsltProcess setStandardOutput:textMetaHandle ];
-		[xsltProcess launch];
-		[xsltProcess waitUntilExit];  //should be under 1 millisecond
-		[xsltProcess release]; xsltProcess = nil;
-		
-		[self writeTextMetaData:self.seriesId		 forKey:@"seriesID"			    toFile:textMetaHandle];
-		[self writeTextMetaData:self.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
-		[self writeTextMetaData:self.stationCallsign forKey:@"callsign"				toFile:textMetaHandle];
-		[textMetaHandle closeFile];
-		
-		if (!self.genXMLMetaData.boolValue) {
-			if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-				[[NSFileManager defaultManager] removeItemAtPath:tivoMetaPath error:nil];
-			}
-		}
-	}
-	if (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley) {
-		apmTask = [[NSTask alloc] init];
-		[apmTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"AtomicParsley" ofType: @""] ];
-		NSMutableArray *apmArgs = [NSMutableArray array];
-		[apmArgs addObject:_encodeFilePath];
-		[apmArgs addObject:@"--overWrite"];
-		[apmArgs addObject:@"--stik"];
-		if (self.isMovie) {
-			[apmArgs addObject:@"Movie"];
+	if (self.showDescription.length > 0) {
+		if (self.showDescription.length < 230) {
+			[apmArgs addObject:@"--description"];
+			[apmArgs addObject:self.showDescription];
+			
 		} else {
-			[apmArgs addObject:@"TV Show"];
+			[apmArgs addObject:@"--longdesc"];
+			[apmArgs addObject:self.showDescription];
 		}
-		if (self.episodeTitle.length>0) {
-			[apmArgs addObject:@"--title"];
-			[apmArgs addObject:self.episodeTitle];
-		}
-		if (self.episodeGenre.length>0) {
-			[apmArgs addObject:@"--grouping"];
-			[apmArgs addObject:self.episodeGenre];
-		}
-		if (self.originalAirDate.length>0) {
-			[apmArgs addObject:@"--year"];
-			[apmArgs addObject:self.originalAirDate];
-		} else if (self.movieYear.length>0) {
-			[apmArgs addObject:@"--year"];
-			[apmArgs addObject:self.movieYear];
-		}
-		
-		if (self.showDescription.length > 0) {
-			if (self.showDescription.length < 230) {
-				[apmArgs addObject:@"--description"];
-				[apmArgs addObject:self.showDescription];
-				
-			} else {
-				[apmArgs addObject:@"--longdesc"];
-				[apmArgs addObject:self.showDescription];
-			}
-		}
-		if (self.seriesTitle.length>0) {
-			[apmArgs addObject:@"--TVShowName"];
-			[apmArgs addObject:self.seriesTitle];
-			[apmArgs addObject:@"--artist"];
-			[apmArgs addObject:self.seriesTitle];
-			[apmArgs addObject:@"--albumArtist"];
-			[apmArgs addObject:self.seriesTitle];
-		}
-		if (self.episodeNumber.length>0) {
-			[apmArgs addObject:@"--TVEpisode"];
-			[apmArgs addObject:self.episodeNumber];
-		}
-		if (self.episode > 0) {
-			NSString * epString = [NSString stringWithFormat:@"%d",self.episode];
-			[apmArgs addObject:@"--TVEpisodeNum"];
-			[apmArgs addObject:epString];
-			[apmArgs addObject:@"--tracknum"];
-			[apmArgs addObject:epString];
-		} else if (self.episodeNumber.length>0) {
-			[apmArgs addObject:@"--TVEpisodeNum"];
-			[apmArgs addObject:self.episodeNumber];
-			[apmArgs addObject:@"--tracknum"];
-			[apmArgs addObject:self.episodeNumber];
-			
-		}
-		if (self.season > 0 ) {
-			NSString * seasonString = [NSString stringWithFormat:@"%d",self.season];
-			[apmArgs addObject:@"--TVSeasonNum"];
-			[apmArgs addObject:seasonString];
-			[apmArgs addObject:@"--tracknum"];
-			[apmArgs addObject:self.episodeNumber];
-			
-		}
-		if (self.stationCallsign) {
-			[apmArgs addObject:@"--TVNetwork"];
-			[apmArgs addObject:self.stationCallsign];
-		}
-		[apmTask setArguments:apmArgs];
-		NSString * apmLogFilePath = @"/tmp/ctivo/QQQAPM.log";
-		[[NSFileManager defaultManager] createFileAtPath:apmLogFilePath contents:[NSData data] attributes:nil];
-		
-		[apmTask setStandardOutput:[NSFileHandle fileHandleForWritingAtPath:apmLogFilePath ]];
-		[apmTask launch];
-		DDLogVerbose(@"APM Arguments: %@", apmArgs);
-        [self performSelector:@selector(trackAPMProcess) withObject:nil afterDelay:1.0];
 	}
+	if (self.seriesTitle.length>0) {
+		[apmArgs addObject:@"--TVShowName"];
+		[apmArgs addObject:self.seriesTitle];
+		[apmArgs addObject:@"--artist"];
+		[apmArgs addObject:self.seriesTitle];
+		[apmArgs addObject:@"--albumArtist"];
+		[apmArgs addObject:self.seriesTitle];
+	}
+	if (self.episodeNumber.length>0) {
+		[apmArgs addObject:@"--TVEpisode"];
+		[apmArgs addObject:self.episodeNumber];
+	}
+	if (self.episode > 0) {
+		NSString * epString = [NSString stringWithFormat:@"%d",self.episode];
+		[apmArgs addObject:@"--TVEpisodeNum"];
+		[apmArgs addObject:epString];
+		[apmArgs addObject:@"--tracknum"];
+		[apmArgs addObject:epString];
+	} else if (self.episodeNumber.length>0) {
+		[apmArgs addObject:@"--TVEpisodeNum"];
+		[apmArgs addObject:self.episodeNumber];
+		[apmArgs addObject:@"--tracknum"];
+		[apmArgs addObject:self.episodeNumber];
+		
+	}
+	if (self.season > 0 ) {
+		NSString * seasonString = [NSString stringWithFormat:@"%d",self.season];
+		[apmArgs addObject:@"--TVSeasonNum"];
+		[apmArgs addObject:seasonString];
+		[apmArgs addObject:@"--tracknum"];
+		[apmArgs addObject:self.episodeNumber];
+		
+	}
+	if (self.stationCallsign) {
+		[apmArgs addObject:@"--TVNetwork"];
+		[apmArgs addObject:self.stationCallsign];
+	}
+	DDLogVerbose(@"APM Arguments: %@", apmArgs);
+	[apmTask setArguments:apmArgs];
+	NSString * apmLogFilePath = @"/tmp/ctivo/QQQAPM.log";
+	[[NSFileManager defaultManager] createFileAtPath:apmLogFilePath contents:[NSData data] attributes:nil];
+	
+	[apmTask setStandardOutput:[NSFileHandle fileHandleForWritingAtPath:apmLogFilePath ]];
+	[apmTask launch];
+	[self performSelector:@selector(trackAPMProcess) withObject:nil afterDelay:1.0];
 }
 
 -(void) trackAPMProcess {
@@ -1536,11 +1543,11 @@ The advanced keyword is highlighted in bold and signifies only include “_Ep#xx
 		[self rescheduleShowWithDecrementRetries:@YES];
 		
 	} else {
-		if (self.genXMLMetaData.boolValue || self.genTextMetaData.boolValue) {
-			[self writeMetaDataFiles];
-			//which will call finishUp after (potentially long) processing
-		} else {
+		[self writeMetaDataFiles];
+		if ( ! [self addAtomicParsleyMetadataToDownloadFile] ) {
 			[self finishUpPostEncodeProcessing];
+		} else {
+			//APM process owns call finishUp after (potentially long) processing
 		}
 	}
 }
@@ -1550,7 +1557,7 @@ The advanced keyword is highlighted in bold and signifies only include “_Ep#xx
     if([encoderTask isRunning]) {
         [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
     } else {
-        DDLogMajor(@"Finished simul enocde of %@", _showTitle);
+        DDLogMajor(@"Finished simul encode of %@", _showTitle);
 		[self postEncodeProcessing];
     }
 }
