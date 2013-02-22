@@ -1505,6 +1505,7 @@ The advanced keyword is highlighted in bold and signifies only include “_Ep#xx
 	[apmTask setStandardOutput:[NSFileHandle fileHandleForWritingAtPath:apmLogFilePath ]];
 	[apmTask launch];
 	[self performSelector:@selector(trackAPMProcess) withObject:nil afterDelay:1.0];
+	return YES;
 }
 
 -(void) trackAPMProcess {
