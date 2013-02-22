@@ -69,7 +69,6 @@
 //	NSInteger numRows = numItems / kNumColumns;
 //	NSInteger row, col;
 	[self addMenuTo:self.masterDebugLevel withCurrentLevel:[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel]];
-	NSLog(@"FrameSize: %@", NSStringFromRect(self.debugLevelView.frame));
 	for (int item =0;item < numItems; item++) {
 		NSString * className =  NSStringFromClass(self.debugClasses [item]);
 		const int vertBase = self.debugLevelView.frame.size.height-40;
@@ -87,7 +86,6 @@
 		[label setStringValue:[NSString stringWithFormat:@"%@:",className]];
 		
 		NSRect frame = NSMakeRect(columNum*columnWidth+labelWidth+horizMargin,vertBase-rowNum*(popupHeight+vertMargin),popupWidth,popupHeight);
-		NSLog(@"Labels %@ at %@ and %@",className, NSStringFromRect(labelFrame), NSStringFromRect(frame));
 		NSPopUpButton * cell = [[NSPopUpButton alloc] initWithFrame:frame pullsDown:NO];
 		
 		cell.title = className;
