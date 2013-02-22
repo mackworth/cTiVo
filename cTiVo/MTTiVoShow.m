@@ -1430,7 +1430,7 @@ The advanced keyword is highlighted in bold and signifies only include “_Ep#xx
 	[apmArgs addObject:@"--overWrite"];
 	[apmArgs addObject:@"--stik"];
 	if (self.isMovie) {
-		[apmArgs addObject:@"Movie"];
+		[apmArgs addObject:@"Short Film"];
 	} else {
 		[apmArgs addObject:@"TV Show"];
 	}
@@ -2006,7 +2006,7 @@ The advanced keyword is highlighted in bold and signifies only include “_Ep#xx
 }
 
 -(BOOL) isMovie {
-	return (!self.isEpisodic || ((self.episodeTitle.length == 0) &&
+	return (!self.isEpisodic.boolValue || ((self.episodeTitle.length == 0) &&
 	([self.episodeNumber intValue] == 0) &&
 			 (self.showLength > 70))) ;
 }

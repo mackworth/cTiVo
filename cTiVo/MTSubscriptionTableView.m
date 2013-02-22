@@ -245,22 +245,22 @@ static NSDateFormatter *dateFormatter;
         checkBox.owner = thisSubscription;
 	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisSubscription.genXMLMetaData];
+        [checkBox setOn: thisSubscription.genXMLMetaData.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;		
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisSubscription.genTextMetaData];
+        [checkBox setOn: thisSubscription.genTextMetaData.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;
 	} else if ([tableColumn.identifier isEqualToString:@"Subtitles"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisSubscription.exportSubtitles];
+        [checkBox setOn: thisSubscription.exportSubtitles.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;		
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisSubscription.includeAPMMetaData && thisSubscription.encodeFormat.canAtomicParsley];
+        [checkBox setOn: thisSubscription.includeAPMMetaData.boolValue && thisSubscription.encodeFormat.canAtomicParsley];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = thisSubscription.encodeFormat.canAtomicParsley;
     }

@@ -316,22 +316,22 @@ __DDLOGHERE__
         
  	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.genXMLMetaData];
+        [checkBox setOn: thisShow.genXMLMetaData.boolValue];
         checkBox.owner = thisShow;
 		checkBox.enabled = !thisShow.isDone && !thisShow.protectedShow.boolValue;
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.genTextMetaData];
+        [checkBox setOn: thisShow.genTextMetaData.boolValue];
         checkBox.owner = thisShow;
 		checkBox.enabled = !thisShow.isDone && !thisShow.protectedShow.boolValue;
 	} else if ([tableColumn.identifier isEqualToString:@"Subtitles"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.exportSubtitles];
+        [checkBox setOn: thisShow.exportSubtitles.boolValue];
         checkBox.owner = thisShow;
 		checkBox.enabled = thisShow.isNew && !thisShow.protectedShow.boolValue;
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.includeAPMMetaData && thisShow.encodeFormat.canAtomicParsley];
+        [checkBox setOn: thisShow.includeAPMMetaData.boolValue && thisShow.encodeFormat.canAtomicParsley];
         checkBox.owner = thisShow;
 		checkBox.enabled = thisShow.encodeFormat.canAtomicParsley && !thisShow.isDone && !thisShow.protectedShow.boolValue;
   	} else if ([tableColumn.identifier isEqualToString:@"Date"]) {

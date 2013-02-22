@@ -131,6 +131,13 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatChanged object:self];
 }
 
+-(id) valueForKey:(NSString *)key {
+	id val = [super valueForKey:key];
+	if (!val) {
+		val = @"";
+	}
+	return val;
+}
 
 -(NSAttributedString *) attributedFormatStringForFont:(NSFont *) font {
 	NSColor * formatColor = [NSColor colorWithDeviceRed:0.0
@@ -163,9 +170,6 @@ __DDLOGHERE__
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
 	for (NSString *key in keys) {
         id val = [self valueForKey:key];
-        if (!val) {
-            val = @"";
-        }
 		[tmpDict setObject:val forKey:key];
 	}
 	DDLogVerbose(@"Format %@ as dict: %@", _name, tmpDict);

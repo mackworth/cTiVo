@@ -2,7 +2,7 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
-		<string key="IBDocument.SystemVersion">12C3012</string>
+		<string key="IBDocument.SystemVersion">12C60</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
@@ -2089,7 +2089,7 @@
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="796623023"/>
-						<string key="toolTip">Will attempt to remove commercials - this is mutually exclusive with Simultaneous Recording.</string>
+						<string key="toolTip">Export text of subtitles to &lt;file&gt;.srt</string>
 					</object>
 				</object>
 				<string key="1073.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2154,7 +2154,7 @@
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="199801516"/>
-						<string key="toolTip">Will attempt to remove commercials - this is mutually exclusive with Simultaneous Recording.</string>
+						<string key="toolTip">Export TiVo information about this file in native video.xml format.</string>
 					</object>
 				</object>
 				<string key="1114.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2301,7 +2301,7 @@
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="351954164"/>
-						<string key="toolTip">Allows simultaneous downloading and encoding of video file (per show) - This is mutually exclusive with Skip Commercials</string>
+						<string key="toolTip">Exports information about this video to file.ext.txt; useful for pyTivo server (e.g. to "go back" to Tivo)</string>
 					</object>
 				</object>
 				<string key="986.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
