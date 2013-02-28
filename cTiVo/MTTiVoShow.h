@@ -86,71 +86,13 @@
 													*directors,
 													*producers;
 
+@property BOOL isQueued;
 
-//--------------------------------------------------------------
-#pragma mark - Properties/Methods for persistent queue
-@property (readonly) NSDictionary * queueRecord;  //used to write
-
--(BOOL) isSameAs:(NSDictionary *) queueEntry;
--(void) restoreDownloadData:(NSDictionary *) queueEntry;
--(void) updateFromProxyShow:(MTTiVoShow *) newShow;
-
-#pragma mark - Properties for download/conversion work
-@property (nonatomic, retain) NSNumber *downloadIndex;
-
-@property (nonatomic, retain) NSString *downloadDirectory;
-@property (nonatomic, retain) MTFormat *encodeFormat;
+@property (nonatomic, assign) BOOL	gotDetails;
 @property (nonatomic, retain) NSData *detailXML;
-
-@property (nonatomic, retain) NSNumber *genTextMetaData,
-									   *genXMLMetaData,
-										*includeAPMMetaData,
-										*exportSubtitles;
-@property BOOL  addToiTunesWhenEncoded,
-				simultaneousEncode,
-				skipCommercials;
-				
-@property int  	numRetriesRemaining,
-				numStartupRetriesRemaining;
--(void) prepareForDownload: (BOOL) notifyTiVo;
-
-@property (nonatomic, readonly) NSString *encodeFilePath,
-										 *bufferFilePath,   //
-										 *downloadFilePath;
-
-
-
-//--------------------------------------------------------------
-#pragma mark - Properties for download/conversion progress
-@property (retain) NSNumber *downloadStatus;
-@property (nonatomic, readonly)	NSString *showStatus;
-
-@property double processProgress; //Should be between 0 and 1
-
-@property BOOL isSimultaneousEncoding,
-				isQueued,
-                isSelected;//Used for refresh of table
-@property (readonly) BOOL isNew, isDownloading, isInProgress, isDone;
-
-
-#pragma mark - Methods for download/conversion work
--(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
--(void)cancel;
--(void)download;
--(void)decrypt;
--(void)commercial;
--(void)caption;
--(void)encode;
 -(void)getShowDetail;
 
-#pragma mark - Methods for manipulating video
--(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted;
--(BOOL) canPlayVideo;
--(BOOL) playVideo;
--(BOOL) revealInFinder;
-
-//Move to category on NSString
-+(NSDate *)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString;
+-(NSArray *) apmArguments;
 
 
 

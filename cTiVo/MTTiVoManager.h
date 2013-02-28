@@ -10,6 +10,7 @@
 #import "NSString+HTML.h"
 #import "MTDownloadTableCellView.h"
 #import "MTTiVoShow.h"
+#import "MTDownload.h"
 #import "MTProgramTableView.h"
 #import "MTTiVo.h"
 #import "MTSubscription.h"
@@ -18,29 +19,6 @@
 
 
 @interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
-    
-    MTNetService *tivoService ;
-    NSNetServiceBrowser *tivoBrowser;
-    NSMutableData *listingData;
-//	NSMutableDictionary *tiVoShowsDictionary;
-	NSMutableArray *updatingTiVoShows;
-	
-	NSURLConnection *programListURLConnection, *downloadURLConnection;
-	NSTask *decryptingTask, *encodingTask;
-    NSMutableDictionary *programDownloading, *programDecrypting, *programEncoding;
-	NSFileHandle *downloadFile, *stdOutFileHandle;
-	double dataDownloaded, referenceFileSize;
-	MTNetService *tivoConnectingTo;
-	NSOpenPanel *myOpenPanel;
-    double percentComplete;
-    MTDownloadTableCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
-	NSArray *factoryFormatList;
-    int numEncoders, numCommercials, numCaptions;//Want to limit launches to two encoders.
-
-    BOOL volatile updatingVideoList;
-	
-	NSOperationQueue *queue;
-    
 }
 
 //Shared Data
@@ -65,16 +43,21 @@
 
 #define tiVoManager [MTTiVoManager sharedTiVoManager]
 
--(void) addProgramToDownloadQueue:(MTTiVoShow *)program;
--(void) addProgramsToDownloadQueue:(NSArray *)programs beforeShow:(MTTiVoShow *) nextShow;
--(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeShow:(MTTiVoShow *) nextShow;
--(void) deleteProgramsFromDownloadQueue:(NSArray *)programs;
--(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) shows
+-(void) cancelAllDownloads;
+-(void) addToDownloadQueue:(NSArray *)downloads beforeDownload:(MTDownload *) nextShow;
+-(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeDownload:(MTDownload *) nextShow;
+-(void) deleteFromDownloadQueue:(NSArray *)downloads;
+-(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) downloads
 								 toIndex:(NSUInteger)insertIndex;
 -(void) sortDownloadQueue;
+-(NSArray *) currentDownloadQueueSortedBy: (NSArray*) sortDescripters;
 
+-(MTDownload *) findInDownloadQueue: (MTTiVoShow *) show;
+-(BOOL) anyShowsWaiting;
+
+-(MTDownload *) findRealDownload: (MTDownload *) proxyDownload;
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget;
--(void) checkProxyInQueue: (MTTiVoShow *) newShow;
+-(void) replaceProxyInQueue: (MTTiVoShow *) newShow;
 -(void) checkDownloadQueueForDeletedEntries: (MTTiVo *) tiVo;
 
 -(NSArray *)userFormats;

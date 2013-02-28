@@ -71,9 +71,7 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
 			 */
 			
 			//			NSLog(@"ZZZReceived Forced Sleep Notice and shutting down downloads");
-			for (MTTiVoShow *s in tiVoManager.downloadQueue) {
-				[s cancel];
-			}
+			[tiVoManager cancelAllDownloads];
             IOAllowPowerChange( root_port, (long)messageArgument );
             break;
 			

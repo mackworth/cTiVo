@@ -8,6 +8,7 @@
 
 #import "MTTiVo.h"
 #import "MTTiVoShow.h"
+#import "MTDownload.h"
 #import "NSString+HTML.h"
 #import "MTTiVoManager.h"
 
@@ -206,7 +207,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //    }
     isConnecting = YES;
 	if (previousShowList) {
-		[previousShowList release];
+		[previousShowList release]; previousShowList = nil;
 	}
 	previousShowList = [[NSMutableDictionary dictionary] retain];
 	for (MTTiVoShow * show in _shows) {
@@ -225,8 +226,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(NSInteger)isProcessing
 {
-    for (MTTiVoShow *show in _shows) {
-        if (show.isInProgress) {
+    for (MTDownload *download in self.downloadQueue) {
+        if (download.isInProgress) {
 			return YES;
         }
     }
@@ -235,9 +236,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)rescheduleAllShows
 {
-    for (MTTiVoShow *show in _shows) {
-        if (show.isInProgress) {
-            [show prepareForDownload:NO];
+    for (MTDownload *download in self.downloadQueue) {
+        if (download.isInProgress) {
+            [download prepareForDownload:NO];
         }
     }
 
@@ -388,11 +389,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil] autorelease];
 				[_queue addOperation:nextDetail];
 				//Now check and see if this was in the oldQueue (from last time we ran)
-				[tiVoManager checkProxyInQueue:currentShow];
+				[tiVoManager replaceProxyInQueue:currentShow];
 				
 			} else {
 				DDLogDetail(@"Updated show %@", currentShow.showTitle);
 				[newShows addObject:thisShow];
+				[previousShowList removeObjectForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
 			}
 			[currentShow release];
 			currentShow = nil;
@@ -460,12 +462,20 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		}
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 		[self performSelector:@selector(updateShows:) withObject:nil afterDelay:(kMTUpdateIntervalMinutes * 60.0) + 1.0];
-		//	NSLog(@"Avialable Recordings are %@",_recordings);
+		DDLogVerbose(@"Deleted shows: %@",previousShowList);
+		for (MTTiVoShow * show in [previousShowList objectEnumerator]){
+			if (show.isQueued) {
+				MTDownload * download = [tiVoManager findInDownloadQueue:show];
+				if (download.isNew) {
+					download.downloadStatus = [NSNumber numberWithInt:kMTStatusDeleted];
+				}
+			}
+		}
 		[previousShowList release]; previousShowList = nil;
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:self];
-    [parser release];
+    [parser release]; parser = nil;
 }
 
 
@@ -511,7 +521,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
 //	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
     BOOL isDownloading = NO, isDecrypting = NO, isCommercialing = NO, isCaptioning = NO;
-    for (MTTiVoShow *s in self.downloadQueue) {
+    for (MTDownload *s in self.downloadQueue) {
         if ([s.downloadStatus intValue] == kMTStatusDownloading) {
             isDownloading = YES;
         }
@@ -527,13 +537,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
     if (!isDownloading) {
 		DDLogDetail(@"%@ Checking for new download", self);
-		for (MTTiVoShow *s in self.downloadQueue) {
-			if ([s.protectedShow boolValue]) {
+		for (MTDownload *s in self.downloadQueue) {
+			if ([s.show.protectedShow boolValue]) {
 				managingDownloads = NO;
 				return;
 			}
             if (s.isNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
-                if(s.tiVo.isReachable) {
+                if(s.show.tiVo.isReachable) {  //isn't this self.isReachable?
                     if (s.simultaneousEncode) {
                         tiVoManager.numEncoders++;
                     }
@@ -549,7 +559,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
     if (!isDecrypting) {
 		DDLogDetail(@"%@ Checking for new decrypt", self);
-        for (MTTiVoShow *s in self.downloadQueue) {
+        for (MTDownload *s in self.downloadQueue) {
             if ([s.downloadStatus intValue] == kMTStatusDownloaded && !s.simultaneousEncode) {
                 [s decrypt];
                 break;
@@ -558,7 +568,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
     if (!isCommercialing) {
 		DDLogDetail(@"%@ Checking for new commercial detection", self);
-        for (MTTiVoShow *s in self.downloadQueue) {
+        for (MTDownload *s in self.downloadQueue) {
             if ([s.downloadStatus intValue] == kMTStatusDecrypted && s.skipCommercials
 						&&
 				tiVoManager.numCommercials < kMTMaxNumDownloaders) {
@@ -571,7 +581,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 	if (!isCaptioning) {
 		DDLogDetail(@"%@ Checking for new caption extraction", self);
-        for (MTTiVoShow *s in self.downloadQueue) {
+        for (MTDownload *s in self.downloadQueue) {
             if (s.exportSubtitles.boolValue &&
 				(([s.downloadStatus intValue] == kMTStatusDecrypted && !s.skipCommercials) ||
 				 ([s.downloadStatus intValue] == kMTStatusCommercialed && s.skipCommercials))
@@ -586,7 +596,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
     if (tiVoManager.numEncoders < kMTMaxNumDownloaders) {
 		DDLogDetail(@"%@ Checking for new encode", self);
-        for (MTTiVoShow *s in self.downloadQueue) {
+        for (MTDownload *s in self.downloadQueue) {
 			int status =[s.downloadStatus intValue];
             if (((status == kMTStatusDecrypted && !s.skipCommercials && !s.exportSubtitles.boolValue) ||
 				 (status == kMTStatusCommercialed && !s.exportSubtitles.boolValue) ||

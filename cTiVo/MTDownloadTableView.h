@@ -18,7 +18,7 @@
     NSTableColumn *tiVoColumnHolder;
 }
 
-@property (nonatomic, retain) NSArray *sortedShows;
+@property (nonatomic, retain) NSArray *sortedDownloads;
 
 
 -(BOOL)playVideo;

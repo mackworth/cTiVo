@@ -6,9 +6,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MTTiVoShow.h"
 
-@class iTunesApplication, iTunesSource, iTunesLibraryPlaylist, iTunesPlaylist;
+@class iTunesApplication, iTunesSource, iTunesLibraryPlaylist, iTunesPlaylist,
+		MTDownload;
 
 @interface MTiTunes : NSObject {
 	
@@ -19,7 +19,7 @@
 @property (nonatomic, strong) iTunesLibraryPlaylist *libraryPlayList;
 @property (nonatomic, strong) iTunesPlaylist *tivoPlayList;
 
--(BOOL) importIntoiTunes: (MTTiVoShow * ) show;
+-(BOOL) importIntoiTunes: (MTDownload * ) download;
 -(void) updateAllIDevices;
 //-(void) testModule;
 

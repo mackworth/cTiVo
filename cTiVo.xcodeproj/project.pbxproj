@@ -13,6 +13,8 @@
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
 		1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
+		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
+		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
 		1EABE6F416B0A254004DDB61 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
@@ -100,6 +102,10 @@
 		1E389BB616C46BA600B80EC9 /* MTAdvPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTAdvPreferencesViewController.h; sourceTree = "<group>"; };
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
 		1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = pytivo_txt.xslt; sourceTree = "<group>"; };
+		1E6F22D416DD1F4C0071D291 /* MTDownload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownload.h; sourceTree = "<group>"; };
+		1E6F22D516DD1F4C0071D291 /* MTDownload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownload.m; sourceTree = "<group>"; };
+		1E6F22D816DD3D9E0071D291 /* NSString+RFC3339Date.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+RFC3339Date.h"; sourceTree = "<group>"; };
+		1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+RFC3339Date.m"; sourceTree = "<group>"; };
 		1E791BD21697C59300E47E84 /* MTSubscription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscription.h; sourceTree = "<group>"; };
 		1E791BD31697C59300E47E84 /* MTSubscription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscription.m; sourceTree = "<group>"; };
 		1EABE6F316B0A254004DDB61 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = cTiVo/Growl.framework; sourceTree = "<group>"; };
@@ -377,6 +383,8 @@
 		D2D60BDF16766FB100CE32DE /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				1E6F22D816DD3D9E0071D291 /* NSString+RFC3339Date.h */,
+				1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */,
 				D2D60BD016766FA600CE32DE /* NSString+HTML.h */,
 				D2D60BD116766FA600CE32DE /* NSString+HTML.m */,
 				D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */,
@@ -398,6 +406,8 @@
 				D2A648F116991CD300C7DA01 /* MTTiVo.m */,
 				D2D60BCA16766FA600CE32DE /* MTTiVoManager.h */,
 				D2D60BC916766FA600CE32DE /* MTTiVoManager.m */,
+				1E6F22D416DD1F4C0071D291 /* MTDownload.h */,
+				1E6F22D516DD1F4C0071D291 /* MTDownload.m */,
 				D22BC41D1680DB5E007D699C /* MTTiVoShow.h */,
 				D22BC41E1680DB5E007D699C /* MTTiVoShow.m */,
 				1E791BD21697C59300E47E84 /* MTSubscription.h */,
@@ -597,6 +607,8 @@
 				D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */,
 				1E15E71016B4F88F00508BEC /* DDLog.m in Sources */,
 				1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */,
+				1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */,
+				1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

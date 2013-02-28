@@ -102,51 +102,6 @@ __DDLOGHERE__
     }
 }
 
--(BOOL)selectionContainsCompletedShows
-{
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-	for (MTTiVoShow *show in selectedShows) {
-		if ([show videoFileURLWithEncrypted:YES]) {
-			//minor bug: we enable play video even though you can't play encrypted
-			return  YES;
-		}
-	}
-	return NO;
-	
-}
-
--(BOOL)playVideo
-{
-	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-	for (MTTiVoShow *show in selectedShows) {
-		if (show.isDone) {
-			if ([show playVideo])  {
-				return YES;		}
-		}
-	}
-	return NO;
-}
-
--(BOOL)revealInFinder
-	{
-		NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-		NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-		NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:selectedShows.count];
-		for (MTTiVoShow *show in selectedShows) {
-			NSURL * showURL = [show videoFileURLWithEncrypted:YES];
-			if (showURL) {
-				[showURLs addObject:showURL];
-			}
-		}
-		if (showURLs.count > 0) {
-			[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
-			return YES;
-		} else{
-			return NO;
-		}
-	}
 
 
 -(void)dealloc

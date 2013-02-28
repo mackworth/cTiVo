@@ -7,7 +7,7 @@
 //
 
 #import "MTiTiVoImport.h"
-#import "MTTiVoShow.h"
+#import "NSString+RFC3339Date.h"
 
 @implementation MTiTiVoImport
 
@@ -86,7 +86,7 @@
     if ([inDate isKindOfClass:[NSDate class]]) {
         return inDate;
     } else if ([inDate isKindOfClass:[NSString class]]) {
-        return [MTTiVoShow dateForRFC3339DateTimeString:inDate ];
+        return [((NSString *)inDate) dateForRFC3339DateTimeString ];
     } else {
         return [NSDate date];
     }

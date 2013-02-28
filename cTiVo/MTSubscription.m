@@ -96,14 +96,19 @@ __DDLOGHERE__
 
 -(void) checkSubscriptionShow:(MTTiVoShow *) thisShow {
 	DDLogVerbose(@"checking Subscription for %@", thisShow);
-	if ([self isSubscribed:thisShow] && (thisShow.isNew)) {
-		DDLogDetail(@"Subscribed; adding %@", thisShow);
-       MTSubscription * subscription = [self findShow:thisShow];
-       thisShow.encodeFormat = subscription.encodeFormat;
-       thisShow.addToiTunesWhenEncoded = ([subscription canAddToiTunes] && [subscription shouldAddToiTunes]);
-       thisShow.simultaneousEncode = ([subscription canSimulEncode] && [subscription shouldSimulEncode]);
-	   thisShow.downloadDirectory = [tiVoManager downloadDirectory];  //should we have one per subscription? UI?
-	   [tiVoManager addProgramToDownloadQueue:thisShow];
+	if ([self isSubscribed:thisShow]) {
+		if ([tiVoManager findInDownloadQueue: thisShow] == nil) {
+			DDLogDetail(@"Subscribed; adding %@", thisShow);
+			MTDownload * newDownload = [[[MTDownload  alloc] init] autorelease];
+			newDownload.show= thisShow;
+			[newDownload prepareForDownload:YES];
+			MTSubscription * subscription = [self findShow:thisShow];
+			newDownload.encodeFormat = subscription.encodeFormat;
+			newDownload.addToiTunesWhenEncoded = ([subscription canAddToiTunes] && [subscription shouldAddToiTunes]);
+			newDownload.simultaneousEncode = ([subscription canSimulEncode] && [subscription shouldSimulEncode]);
+			newDownload.downloadDirectory = [tiVoManager downloadDirectory];  //should we have one per subscription? UI?
+			[tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];
+		}
 	}
 }
 
@@ -144,7 +149,7 @@ __DDLOGHERE__
 	NSMutableArray * newSubs = [NSMutableArray arrayWithCapacity:shows.count];
     DDLogDetail(@"Subscribing to %@", shows);
 	for (MTTiVoShow * thisShow in shows) {
-		MTSubscription * newSub = [self addSubscription:thisShow];
+		MTSubscription * newSub = [self subscribeShow:thisShow];
 		if (newSub) {
 			[newSubs addObject:newSub];
 		}
@@ -159,45 +164,81 @@ __DDLOGHERE__
 	}
 }
 
--(MTSubscription *) addSubscription:(MTTiVoShow *) tivoShow {
-	//set the "lastrecording" time for one second before this show, to include this show.
-	if ([self findShow:tivoShow] == nil) {
-        NSDate *earlierTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
-        if (tivoShow.showDate) {
-            earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
-        }
-		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        MTSubscription *newSub = [[MTSubscription new] autorelease];
-        newSub.seriesTitle = tivoShow.seriesTitle;
-        newSub.lastRecordedTime = earlierTime;
-        if ([tiVoManager.downloadQueue containsObject:tivoShow]) {
-			//then use queued properties
-			newSub.encodeFormat = tivoShow.encodeFormat;
-			newSub.addToiTunes = tivoShow.addToiTunesWhenEncoded;
-			newSub.simultaneousEncode = tivoShow.simultaneousEncode;
-			newSub.skipCommercials = tivoShow.skipCommercials;
-			newSub.genTextMetaData = tivoShow.genTextMetaData;
-			newSub.genXMLMetaData = tivoShow.genXMLMetaData;
-			newSub.includeAPMMetaData = tivoShow.includeAPMMetaData;
-			newSub.exportSubtitles= tivoShow.exportSubtitles;
-		} else {
-			//use default properties
-			newSub.encodeFormat = tiVoManager.selectedFormat;
-			newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
-			newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
-			newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip)];
-			newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
-			newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
-			newSub.includeAPMMetaData = [defaults objectForKey:kMTExportAtomicParsleyMetaData];
-			newSub.exportSubtitles	  =[defaults objectForKey:kMTExportSubtitles];
+-(NSArray *) addSubscriptionsDL: (NSArray *) downloads {
+	
+	NSMutableArray * newSubs = [NSMutableArray arrayWithCapacity:downloads.count];
+    DDLogDetail(@"Subscribing to %@", downloads);
+	for (MTDownload * download in downloads) {
+		MTSubscription * newSub = [self subscribeDownload:download];
+		if (newSub) {
+			[newSubs addObject:newSub];
 		}
-		DDLogVerbose(@"Subscribing %@ as: %@ ", tivoShow, newSub);
-		[self addObject:newSub];
+	}
+	if (newSubs.count > 0) {
+		[self saveSubscriptions];
+		[self checkSubscriptionsAll];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
+		return newSubs;
+	} else {
+		return nil;
+	}
+}
+
+-(MTSubscription *) createSubscription: (MTTiVoShow *) tivoShow {
+	//set the "lastrecording" time for one second before this show, to include this show.
+	NSDate *earlierTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
+	if (tivoShow.showDate) {
+		earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
+	}
+	MTSubscription *newSub = [[MTSubscription new] autorelease];
+	newSub.seriesTitle = tivoShow.seriesTitle;
+	newSub.lastRecordedTime = earlierTime;
+	[self addObject:newSub];
+	return newSub;
+}
+
+-(MTSubscription *) subscribeShow:(MTTiVoShow *) tivoShow {
+	if ([self findShow:tivoShow] == nil) {
+		MTSubscription * newSub = [self createSubscription:tivoShow];
+		//use default properties
+		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+		newSub.encodeFormat = tiVoManager.selectedFormat;
+		newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
+		newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
+		newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip)];
+		newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
+		newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
+		newSub.includeAPMMetaData = [defaults objectForKey:kMTExportAtomicParsleyMetaData];
+		newSub.exportSubtitles	  =[defaults objectForKey:kMTExportSubtitles];
+	
+		DDLogVerbose(@"Subscribing show %@ as: %@ ", tivoShow, newSub);
 		return newSub;
  	} else {
 		return nil;
 	}
 }
+
+-(MTSubscription *) subscribeDownload:(MTDownload *) download {
+	//set the "lastrecording" time for one second before this show, to include this show.
+	MTTiVoShow * tivoShow = download.show;
+	if ([self findShow:tivoShow] == nil) {
+		MTSubscription * newSub = [self createSubscription:download.show];
+		// use queued properties
+		newSub.encodeFormat = download.encodeFormat;
+		newSub.addToiTunes = [NSNumber numberWithBool: download.addToiTunesWhenEncoded ];
+		newSub.simultaneousEncode = [NSNumber numberWithBool: download.simultaneousEncode];
+		newSub.skipCommercials = [NSNumber numberWithBool: download.skipCommercials];
+		newSub.genTextMetaData = [NSNumber numberWithBool: download.genTextMetaData];
+		newSub.genXMLMetaData = [NSNumber numberWithBool: download.genXMLMetaData];
+		newSub.includeAPMMetaData = [NSNumber numberWithBool: download.includeAPMMetaData];
+		newSub.exportSubtitles= [NSNumber numberWithBool: download.exportSubtitles];
+		DDLogVerbose(@"Subscribing download %@ as: %@ ", tivoShow, newSub);
+		return newSub;
+ 	} else {
+		return nil;
+	}
+}
+
 
 -(void) deleteSubscriptions:(NSArray *) subscriptions {
 	DDLogDetail(@"Removing Subscriptions: %@", subscriptions);
@@ -209,7 +250,8 @@ __DDLOGHERE__
 
 -(void)updateSubscriptionWithDate: (NSNotification *) notification
 {
-	MTTiVoShow * tivoShow = (MTTiVoShow *)notification.object;
+	MTDownload * download = (MTDownload *)notification.object;
+	MTTiVoShow * tivoShow = download.show;
 	MTSubscription * seriesMatch = [self findShow:tivoShow];
 	if (seriesMatch && tivoShow.showDate) {
 		DDLogDetail(@"Updating time on Subscriptions: %@ to %@", seriesMatch, tivoShow.showDate);

@@ -46,7 +46,7 @@ __DDLOGHERE__
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatListUpdated object:nil];
-	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, nil]];
+	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationDelete forLocal:NO];
 
 }
@@ -352,40 +352,58 @@ static NSDateFormatter *dateFormatter;
 
 
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation {
-	NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
-	NSDictionary *options = [NSDictionary dictionary];
-	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
-	//NSLog(@"calling readObjects%@",pasteboard);
-	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
-	DDLogDetail(@"Dragging into Subscriptions: %@", draggedShows);
-	
-	//dragged shows are copies, so we need to find the real show objects
-	NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
-	for (MTTiVoShow * show in draggedShows) {
-		MTTiVoShow * realShow= [tiVoManager findRealShow:show];
-		if (realShow) [realShows addObject:realShow];
-	}
-	DDLogVerbose(@"Dragging into Subscriptions: %@", realShows);
-	
-	if( [info draggingSource] == myController.tiVoShowTable  ||
-	    [info draggingSource] == myController.downloadQueueTable) {
-		NSArray * newSubs = [tiVoManager.subscribedShows addSubscriptions: realShows];
-		DDLogVerbose(@"Created new subs: %@", newSubs);
+	NSArray * newSubs = nil;
+	if ( [info draggingSource] == myController.tiVoShowTable ){
+		NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
+		NSDictionary *options = [NSDictionary dictionary];
+		//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
+		//NSLog(@"calling readObjects%@",pasteboard);
+		NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
+		DDLogDetail(@"Dragging into Subscriptions: %@", draggedShows);
 		
-		//now leave new subscriptions selected
-		self.sortedSubscriptions  = nil;  //reset sort with new subs
-		NSIndexSet * subIndexes = [self.sortedSubscriptions indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-			return [newSubs indexOfObject:obj] !=NSNotFound;
-		}];
-		if (subIndexes.count > 0) {
-			[self selectRowIndexes:subIndexes byExtendingSelection:NO];
-			[self scrollRowToVisible:[subIndexes firstIndex]];
-
+		//dragged shows are copies, so we need to find the real show objects
+		NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
+		for (MTTiVoShow * show in draggedShows) {
+			MTTiVoShow * realShow= [tiVoManager findRealShow:show];
+			if (realShow) [realShows addObject:realShow];
 		}
-		return YES;
+		DDLogVerbose(@"Dragging into Subscriptions: %@", realShows);
+		
+		newSubs = [tiVoManager.subscribedShows addSubscriptions: realShows];
+
+	
+	} else if([info draggingSource] == myController.downloadQueueTable) {
+		NSArray	*classes = [NSArray arrayWithObject:[MTDownload class]];
+		NSDictionary *options = [NSDictionary dictionary];
+		//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
+		//NSLog(@"calling readObjects%@",pasteboard);
+		NSArray	*draggedDLs= [[info draggingPasteboard] readObjectsForClasses:classes options:options];
+		DDLogDetail(@"Dragging into Subscriptions: %@", draggedDLs);
+		
+		//dragged downloads are copies, so we need to find the real show objects
+		NSMutableArray * realDLs = [NSMutableArray arrayWithCapacity:draggedDLs.count ];
+		for (MTDownload * draggedDL in draggedDLs) {
+			MTDownload * realDL= [tiVoManager findRealDownload:draggedDL];
+			if (realDL) [realDLs addObject:realDL];
+		}
+		DDLogVerbose(@"Dragging into Subscriptions: %@", realDLs);
+		
+		newSubs = [tiVoManager.subscribedShows addSubscriptionsDL: realDLs];
 	} else {
 		return NO;
 	}
+	
+	DDLogVerbose(@"Created new subs: %@", newSubs);
+	//now leave new subscriptions selected
+	self.sortedSubscriptions  = nil;  //reset sort with new subs
+	NSIndexSet * subIndexes = [self.sortedSubscriptions indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+		return [newSubs indexOfObject:obj] !=NSNotFound;
+	}];
+	if (subIndexes.count > 0) {
+		[self selectRowIndexes:subIndexes byExtendingSelection:NO];
+		[self scrollRowToVisible:[subIndexes firstIndex]];
+	}
+	return YES;
 }
 
 

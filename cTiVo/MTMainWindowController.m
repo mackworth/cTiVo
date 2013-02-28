@@ -157,16 +157,10 @@ __DDLOGHERE__
 }
 
 - (void) refreshAddToQueueButton: (NSNotification *) notification {
-	addToQueueButton.title = @"Download";
-	if (tiVoManager.processingPaused.boolValue) {
+	if (tiVoManager.processingPaused.boolValue || [tiVoManager anyShowsWaiting]) {
 		addToQueueButton.title =@"Add to Queue";
 	} else {
-		for (MTTiVoShow * show in tiVoManager.downloadQueue) {
-			if (!show.isDone) {
-				addToQueueButton.title =@"Add to Queue";
-				break; //no real need to count them all
-			}
-		}
+		addToQueueButton.title = @"Download";
 	}
 }
 
@@ -245,10 +239,10 @@ __DDLOGHERE__
             
             subscription.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
             [tiVoManager.subscribedShows saveSubscriptions];
-       } else if ([thisButton.owner class] == [MTTiVoShow class]) {
-            MTTiVoShow * show = (MTTiVoShow *) thisButton.owner;
-           if(show.isNew) {
-                show.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
+       } else if ([thisButton.owner class] == [MTDownload class]) {
+            MTDownload * download = (MTDownload *) thisButton.owner;
+           if(download.isNew) {
+                download.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
             }
           [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationDownloadStatusChanged object:nil];
        }
@@ -310,18 +304,19 @@ __DDLOGHERE__
 			if (![[workingTable selectedRowIndexes] containsIndex:menuTableRow] ) {
 				[workingTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:NO];
 			}
-			if (workingTable == tiVoShowTable || workingTable == downloadQueueTable) {
-				MTTiVoShow *thisShow = [workingTable performSelector: @selector(sortedShows)][menuTableRow];
+			if (workingTable == downloadQueueTable) {
+				MTDownload *thisDownload = downloadQueueTable.sortedDownloads[menuTableRow];
 				//diable menu items that depend on having a completed show tag = 2
-				for (NSMenuItem *mi in [menu itemArray]) {
-					if (mi.tag == 2 && !thisShow.canPlayVideo) {
-						[mi setAction:NULL];
+				if (!thisDownload.canPlayVideo) {
+					for (NSMenuItem *mi in [menu itemArray]) {
+						if (mi.tag == 2 ) {
+							[mi setAction:NULL];
+						}
 					}
 				}
-
 			}
 		}
-		if ([workingTable selectedRowIndexes].count == 0) { //No selection so disable group fuctions
+		if ([workingTable selectedRowIndexes].count == 0) { //No selection so disable group functions
 			for (NSMenuItem *mi in [menu itemArray]) {
 				if (mi.tag == 0) {
 					[mi setAction:NULL];
@@ -350,23 +345,20 @@ __DDLOGHERE__
 	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
 		self.showForDetail = tiVoShowTable.sortedShows[menuTableRow];
 		[showDetailDrawer open];
-	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
-		[tiVoShowTable playVideo];
-	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
-		[tiVoShowTable revealInFinder];
+
 	}
 }
 
 
 -(IBAction)doubleClickForDetails:(id)input {
 	[showDetailDrawer open];
-	if (input == tiVoShowTable || input==downloadQueueTable) {
-		NSInteger rowNumber = [input clickedRow];
+	if (input==downloadQueueTable) {
+		NSInteger rowNumber = [downloadQueueTable clickedRow];
 		if (rowNumber != -1) {
-			MTTiVoShow * show = [[input sortedShows] objectAtIndex:rowNumber];
-			if (!show.protectedShow.boolValue) {
-				[show revealInFinder];
-				[show playVideo];
+			MTDownload * download = [[downloadQueueTable sortedDownloads] objectAtIndex:rowNumber];
+			if (!download.show.protectedShow.boolValue) {
+				[download revealInFinder];
+				[download playVideo];
 			}
 		}
 	}
@@ -379,20 +371,20 @@ __DDLOGHERE__
 		[self removeFromDownloadQueue:menu];
 	} else if ([menu.title caseInsensitiveCompare:@"Reschedule"] == NSOrderedSame) {
 		NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
-		NSArray *itemsToRemove = [downloadQueueTable.sortedShows objectsAtIndexes:selectedRows];
+		NSArray *itemsToRemove = [downloadQueueTable.sortedDownloads objectsAtIndexes:selectedRows];
 		if ([tiVoManager.processingPaused boolValue]) {
-			for (MTTiVoShow *show in itemsToRemove) {
-					[show prepareForDownload:YES];
+			for (MTDownload *download in itemsToRemove) {
+					[download prepareForDownload:YES];
 			}
 		} else {
-			[tiVoManager deleteProgramsFromDownloadQueue:itemsToRemove];
-			[tiVoManager addProgramsToDownloadQueue:itemsToRemove beforeShow:nil];
+			[tiVoManager deleteFromDownloadQueue:itemsToRemove];
+			[tiVoManager addToDownloadQueue:itemsToRemove beforeDownload:nil];
 		}
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
-		NSArray * selectedShows = [downloadQueueTable.sortedShows objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
+		NSArray * selectedShows = [downloadQueueTable.sortedDownloads objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
 		[tiVoManager.subscribedShows addSubscriptions:selectedShows];
 	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
-		self.showForDetail = downloadQueueTable.sortedShows[menuTableRow];
+		self.showForDetail = downloadQueueTable.sortedDownloads[menuTableRow];
 		[showDetailDrawer open];
 	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
 		[downloadQueueTable playVideo];
@@ -405,24 +397,18 @@ __DDLOGHERE__
 
 -(BOOL) selectionContainsCompletedShows {
 	BOOL itemsToProcess = [self.downloadQueueTable selectionContainsCompletedShows ] ;
-	if (!itemsToProcess) {
-		itemsToProcess = [self.tiVoShowTable selectionContainsCompletedShows];
-	}
 	return itemsToProcess;
 }
 
 -(IBAction)revealInFinder: (id) sender
 {
-	if (![self.downloadQueueTable revealInFinder]) {
-		[self.tiVoShowTable revealInFinder];	
-	}
- }
+	[self.downloadQueueTable revealInFinder];
+}
 
 -(IBAction)playVideo: (id) sender
 {
-	if (![self.downloadQueueTable playVideo]) {
-		[self.tiVoShowTable playVideo];
-	}
+	[self.downloadQueueTable playVideo];
+	
 }
 
 #pragma mark - Subscription Buttons
@@ -446,7 +432,7 @@ __DDLOGHERE__
 {
 	NSIndexSet *selectedRows = [tiVoShowTable selectedRowIndexes];
 	NSArray *selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:selectedRows];
-	[tiVoManager downloadShowsWithCurrentOptions:selectedShows beforeShow:nil];
+	[tiVoManager downloadShowsWithCurrentOptions:selectedShows beforeDownload:nil];
     
 	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
@@ -477,17 +463,17 @@ __DDLOGHERE__
 		itemsToRemove = sender;
 	}else {
 		NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
-		itemsToRemove = [downloadQueueTable.sortedShows objectsAtIndexes:selectedRows];
+		itemsToRemove = [downloadQueueTable.sortedDownloads objectsAtIndexes:selectedRows];
 	}
- 	for (MTTiVoShow * show in itemsToRemove) {
-        if (show.isInProgress) {
-            if( ![self confirmCancel:show.showTitle]) {
+ 	for (MTDownload * download in itemsToRemove) {
+        if (download.isInProgress) {
+            if( ![self confirmCancel:download.show.showTitle]) {
                 //if any cancelled, cancel the whole group
                 return;
             }
         }
     }
-	[tiVoManager deleteProgramsFromDownloadQueue:itemsToRemove];
+	[tiVoManager deleteFromDownloadQueue:itemsToRemove];
 
  	[downloadQueueTable deselectAll:nil];
 }
@@ -511,11 +497,11 @@ __DDLOGHERE__
 -(IBAction)changeSkip:(id)sender
 {
     MTCheckBox *checkbox = sender;
-	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
-		MTTiVoShow *show = (MTTiVoShow *)(checkbox.owner);
-        show.skipCommercials = ! show.skipCommercials;
-		if (show.skipCommercials) {  //Need to make sure that simul encode is not checked
-				show.simultaneousEncode = NO;
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
+		MTDownload *download = (MTDownload *)(checkbox.owner);
+        download.skipCommercials = ! download.skipCommercials;
+		if (download.skipCommercials) {  //Need to make sure that simul encode is not checked
+				download.simultaneousEncode = NO;
 		}
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
@@ -533,11 +519,11 @@ __DDLOGHERE__
 -(IBAction)changeSimultaneous:(id)sender
 {
     MTCheckBox *checkbox = sender;
-	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
-		MTTiVoShow *show = (MTTiVoShow *)(checkbox.owner);
-        show.simultaneousEncode = ! show.simultaneousEncode;
-		if (show.simultaneousEncode) {  //Need to make sure that simul encode is not checked
-				show.skipCommercials = NO;
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
+		MTDownload *download = (MTDownload *)(checkbox.owner);
+        download.simultaneousEncode = ! download.simultaneousEncode;
+		if (download.simultaneousEncode) {  //Need to make sure that simul encode is not checked
+				download.skipCommercials = NO;
 		}
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
@@ -553,11 +539,11 @@ __DDLOGHERE__
 }
 
 -(IBAction)changeiTunes:(id)sender
-{     
+{
     MTCheckBox *checkbox = sender;
-	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
         //updating an individual show in download queue
-            ((MTTiVoShow *)checkbox.owner).addToiTunesWhenEncoded = !((MTTiVoShow *)checkbox.owner).addToiTunesWhenEncoded;
+            ((MTDownload *)checkbox.owner).addToiTunesWhenEncoded = !((MTDownload *)checkbox.owner).addToiTunesWhenEncoded;
 
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
@@ -570,11 +556,11 @@ __DDLOGHERE__
 -(IBAction)changeXML:(id)sender
 {
     MTCheckBox *checkbox = sender;
-	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
         //updating an individual show in download queue
-		MTTiVoShow * show = (MTTiVoShow *)checkbox.owner;
-		NSNumber *newVal = [NSNumber numberWithBool: ! show.genXMLMetaData.boolValue ];
-		show.genXMLMetaData = newVal;
+		MTDownload * download = (MTDownload *)checkbox.owner;
+		NSNumber *newVal = [NSNumber numberWithBool: ! download.genXMLMetaData.boolValue ];
+		download.genXMLMetaData = newVal;
 		
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
@@ -588,11 +574,11 @@ __DDLOGHERE__
 -(IBAction)changepyTiVo:(id)sender
 {
     MTCheckBox *checkbox = sender;
-	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
         //updating an individual show in download queue
-		MTTiVoShow * show = (MTTiVoShow *)checkbox.owner;
-		NSNumber *newVal = [NSNumber numberWithBool: ! show.genTextMetaData.boolValue ];
-		show.genTextMetaData = newVal;
+		MTDownload * download = (MTDownload *)checkbox.owner;
+		NSNumber *newVal = [NSNumber numberWithBool: ! download.genTextMetaData.boolValue ];
+		download.genTextMetaData = newVal;
 		
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
@@ -605,11 +591,11 @@ __DDLOGHERE__
 -(IBAction)changeMetadata:(id)sender
 {
     MTCheckBox *checkbox = sender;
-	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
         //updating an individual show in download queue
-		MTTiVoShow * show = (MTTiVoShow *)checkbox.owner;
-		NSNumber *newVal = [NSNumber numberWithBool: ! show.includeAPMMetaData.boolValue ];
-		show.includeAPMMetaData = newVal;
+		MTDownload * download = (MTDownload *)checkbox.owner;
+		NSNumber *newVal = [NSNumber numberWithBool: ! download.includeAPMMetaData.boolValue ];
+		download.includeAPMMetaData = newVal;
 		
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
@@ -623,11 +609,11 @@ __DDLOGHERE__
 -(IBAction)changeSubtitle:(id)sender
 {
     MTCheckBox *checkbox = sender;
-	if ([checkbox.owner isKindOfClass:[MTTiVoShow class]]){
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
         //updating an individual show in download queue
-		MTTiVoShow * show = (MTTiVoShow *)checkbox.owner;
-		NSNumber *newVal = [NSNumber numberWithBool: ! show.exportSubtitles.boolValue ];
-		show.exportSubtitles = newVal;
+		MTDownload * download = (MTDownload *)checkbox.owner;
+		NSNumber *newVal = [NSNumber numberWithBool: ! download.exportSubtitles.boolValue ];
+		download.exportSubtitles = newVal;
 		
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){ 
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);

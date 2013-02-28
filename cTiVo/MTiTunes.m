@@ -7,7 +7,7 @@
 
 #import "MTiTunes.h"
 #import "iTunes.h"
-
+#import "MTDownload.h"
 
 @implementation MTiTunes
 
@@ -86,10 +86,11 @@ __DDLOGHERE__
 }
 
 
--(BOOL) importIntoiTunes: (MTTiVoShow * ) show {
+-(BOOL) importIntoiTunes: (MTDownload * ) download {
 	//Caller responsible for informing user of progress
 	// There can be a long delay as iTunes starts up
-	NSURL * showFileURL = [NSURL fileURLWithPath:show.encodeFilePath];
+	MTTiVoShow * show = download.show;
+	NSURL * showFileURL = [NSURL fileURLWithPath:download.encodeFilePath];
 	
 	
 	
@@ -134,7 +135,7 @@ __DDLOGHERE__
 		}
 		return YES;
 	} else {
-		DDLogReport(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, show.encodeFormat.name, showFileURL );
+		DDLogReport(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, download.encodeFormat.name, showFileURL );
 		DDLogVerbose(@"track: %@, itunes: %@; playList: %@", newTrack, self.iTunes, self.tivoPlayList);
 		return NO;
 	}

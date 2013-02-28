@@ -9,7 +9,6 @@
 #import <Cocoa/Cocoa.h>
 #import "MTFormat.h"
 #import "MTHelpViewController.h"
-#import "MTTiVoShow.h"
 #import "MTTabViewItem.h"
 
 @class MTFormatPopUpButton;

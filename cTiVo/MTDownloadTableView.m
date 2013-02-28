@@ -10,7 +10,7 @@
 #import "MTPopUpTableCellView.h"
 
 @implementation MTDownloadTableView
-@synthesize  sortedShows= _sortedShows;
+@synthesize  sortedDownloads= _sortedDownloads;
 
 __DDLOGHERE__
 
@@ -35,7 +35,7 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataDownload) name:kMTNotificationDownloadStatusChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataTiVos) name:kMTNotificationTiVoListUpdated object:nil];
-	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, nil]];
+	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
 
@@ -72,7 +72,7 @@ __DDLOGHERE__
     
 	//save selection to restore after reload
 	DDLogVerbose(@"Reloading DL table");
-	NSArray * selectedShows = [self.sortedShows objectsAtIndexes: self.selectedRowIndexes];
+	NSArray * selectedShows = [self.sortedDownloads objectsAtIndexes: self.selectedRowIndexes];
 	
 	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
     if (tiVoManager.tiVoList.count == 1) {
@@ -84,23 +84,23 @@ __DDLOGHERE__
         }
     }
 	[self sizeToFit];
-    self.sortedShows =nil;
+    self.sortedDownloads =nil;
     [super reloadData];
 	
 	//now restore selection
-	NSIndexSet * showIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+	NSIndexSet * showIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
 		return [selectedShows indexOfObject:obj] !=NSNotFound;
 	}];
 	
 	[self selectRowIndexes:showIndexes byExtendingSelection:NO];
 }
 
--(NSArray *)sortedShows
+-(NSArray *)sortedDownloads
 {
-	if (!_sortedShows) {
-        self.sortedShows = [tiVoManager.downloadQueue sortedArrayUsingDescriptors:self.sortDescriptors];
+	if (!_sortedDownloads) {
+        self.sortedDownloads = [tiVoManager currentDownloadQueueSortedBy: self.sortDescriptors];
     }
-    return _sortedShows;
+    return _sortedDownloads;
 }
 
 -(void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors
@@ -109,9 +109,9 @@ __DDLOGHERE__
 	[self reloadData];
 }
 
--(void) updateProgressInCell:(MTDownloadTableCellView *) cell forShow:(MTTiVoShow *) show {
-	cell.progressIndicator.doubleValue = show.processProgress;
-	cell.progressIndicator.rightText.stringValue = show.showStatus;
+-(void) updateProgressInCell:(MTDownloadTableCellView *) cell forDL:(MTDownload *) download {
+	cell.progressIndicator.doubleValue = download.processProgress;
+	cell.progressIndicator.rightText.stringValue = download.showStatus;
 	[cell setNeedsDisplay:YES];
 
 }
@@ -119,13 +119,13 @@ __DDLOGHERE__
 {
     NSInteger programColumnIndex = [self columnWithIdentifier:@"Programs"];
     NSInteger seriesColumnIndex = [self columnWithIdentifier:@"Series"];
-	NSArray *displayedShows = self.sortedShows;
+	NSArray *displayedShows = self.sortedDownloads;
 	for (int i=0; i< displayedShows.count; i++) {
-		MTTiVoShow *thisShow = [displayedShows objectAtIndex:i];
+		MTDownload *thisDownload = [displayedShows objectAtIndex:i];
 		MTDownloadTableCellView *programCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
-		[self updateProgressInCell: programCell forShow: thisShow];
+		[self updateProgressInCell: programCell forDL: thisDownload];
 		MTDownloadTableCellView *seriesCell = [self viewAtColumn:seriesColumnIndex row:i makeIfNecessary:NO];
-		[self updateProgressInCell: seriesCell forShow: thisShow];
+		[self updateProgressInCell: seriesCell forDL: thisDownload];
 	}
 		
 }
@@ -134,7 +134,7 @@ __DDLOGHERE__
 {
 	[self  unregisterDraggedTypes];
 	[tiVoColumnHolder release]; tiVoColumnHolder=nil;
-    self.sortedShows= nil;
+    self.sortedDownloads= nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
@@ -145,10 +145,10 @@ __DDLOGHERE__
 {
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
     if (selectedRowIndexes.count == 1) {
-        NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-		MTTiVoShow * show = (MTTiVoShow *) selectedRows[0];
+        NSArray *selectedRows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
+		MTTiVoShow * show = ((MTDownload *) selectedRows[0]).show;
 		if (!show.protectedShow.boolValue) {
-			[myController setValue:selectedRows[0] forKey:@"showForDetail"];
+			[myController setValue:show forKey:@"showForDetail"];
 		}
     }
 }
@@ -157,13 +157,13 @@ __DDLOGHERE__
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-    return self.sortedShows.count;
+    return self.sortedDownloads.count;
 }
 
 - (void)tableView:(NSTableView *)tableView didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row
 {
-    MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
-    if ([thisShow.protectedShow boolValue]) {
+    MTDownload *download = [self.sortedDownloads objectAtIndex:row];
+    if ([download.show.protectedShow boolValue]) {
         rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleNone;
     } else {
         rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleRegular;
@@ -225,7 +225,9 @@ __DDLOGHERE__
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-	MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
+	MTDownload *download = [self.sortedDownloads objectAtIndex:row];
+	MTTiVoShow * thisShow = download.show;
+	BOOL protected = thisShow.protectedShow.boolValue;
 //	NSDictionary *idMapping = [NSDictionary dictionaryWithObjectsAndKeys:@"Title",@"Programs",kMTSelectedTiVo,@"TiVo",kMTSelectedFormat,@"Format", nil];
 	
     // get an existing cell with the MyView identifier if it exists
@@ -253,87 +255,89 @@ __DDLOGHERE__
     // nameArray value at row
 	NSString *textVal = nil;
 	result.toolTip = nil;
-	if ([tableColumn.identifier isEqualToString:@"Programs"]) {
-		MTDownloadTableCellView *	programCell = (MTDownloadTableCellView *) result;
-		programCell.progressIndicator.leftText.stringValue = thisShow.showTitle ;
-        programCell.toolTip = thisShow.showTitle;
-		[self updateProgressInCell:programCell forShow:thisShow];
+	if ([tableColumn.identifier isEqualToString:@"Programs"] ||
+		[tableColumn.identifier isEqualToString:@"Series"]) {
+		NSString * cellVal;
+		if ([tableColumn.identifier isEqualToString:@"Programs"]) {
+			cellVal = thisShow.showTitle ;
+		 } else {
+			 cellVal = thisShow.seriesTitle ;
+		 }
+		MTDownloadTableCellView *	cell = (MTDownloadTableCellView *) result;
+		cell.progressIndicator.leftText.stringValue = cellVal;
+		cell.toolTip = cellVal;
+		[self updateProgressInCell:cell forDL:download];
 		if ([thisShow.protectedShow boolValue]) {
-			programCell.progressIndicator.foregroundTextColor = [NSColor grayColor];
+			cell.progressIndicator.foregroundTextColor = [NSColor grayColor];
 		} else {
-			programCell.progressIndicator.foregroundTextColor = [NSColor blackColor];
+			cell.progressIndicator.foregroundTextColor = [NSColor blackColor];
 		}
-	} else if ([tableColumn.identifier isEqualToString:@"Series"]) {
-		MTDownloadTableCellView *	seriesCell = (MTDownloadTableCellView *) result;
-		seriesCell.progressIndicator.leftText.stringValue = thisShow.seriesTitle;
-		seriesCell.toolTip = thisShow.seriesTitle;
-		[self updateProgressInCell:seriesCell forShow:thisShow];
-    } else if ([tableColumn.identifier isEqualToString:@"TiVo"]) {
+   } else if ([tableColumn.identifier isEqualToString:@"TiVo"]) {
         textVal = thisShow.tiVoName ;
         result.textField.textColor = [NSColor blackColor];
-        if (!thisShow.tiVo.isReachable && thisShow.isDownloading) {
+        if (!thisShow.tiVo.isReachable && download.isDownloading) {
             result.textField.textColor = [NSColor redColor];
         }
         
     } else if ([tableColumn.identifier isEqualToString:@"Order"]) {
-        textVal = [NSString stringWithFormat:@"%@",thisShow.downloadIndex] ;
+        textVal = [NSString stringWithFormat:@"%@",download.downloadIndex] ;
         
     } else if ([tableColumn.identifier isEqualToString:@"Format"]) {
 		MTPopUpTableCellView * cell = (MTPopUpTableCellView *)result;
 		MTFormatPopUpButton *popUpButton = cell.popUpButton;
-		popUpButton.owner = thisShow;
-       if (thisShow.isNew) {
-		    popUpButton.owner = thisShow;
+		popUpButton.owner = download;
+       if (download.isNew) {
+		    popUpButton.owner = download;
 			popUpButton.formatList = tiVoManager.formatList;
 			//ensure this format is still "available"
-			thisShow.encodeFormat = [popUpButton selectFormatNamed:thisShow.encodeFormat.name];
+			download.encodeFormat = [popUpButton selectFormatNamed:download.encodeFormat.name];
 			popUpButton.hidden = NO;
 			cell.textField.hidden= YES;
 	   } else {
 			//can't change now; just let them know what it is/was
-		   textVal = thisShow.encodeFormat.name;
+		   textVal = download.encodeFormat.name;
 		   popUpButton.hidden = YES;
 		   cell.textField.hidden= NO;
 		}
     } else if ([tableColumn.identifier isEqualToString:@"iTunes"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.addToiTunesWhenEncoded];
-        [checkBox setEnabled: !thisShow.isDone && !thisShow.protectedShow.boolValue &&
-                              thisShow.encodeFormat.canAddToiTunes ];
-         checkBox.owner = thisShow;
+        [checkBox setOn: download.addToiTunesWhenEncoded];
+        [checkBox setEnabled: !download.isDone && !protected &&
+                              download.encodeFormat.canAddToiTunes ];
+         checkBox.owner = download;
 
  	} else if ([tableColumn.identifier isEqualToString:@"Simu"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.simultaneousEncode];
-        checkBox.owner = thisShow;
-        [checkBox setEnabled: thisShow.isNew && !thisShow.protectedShow.boolValue && thisShow.encodeFormat.canSimulEncode];
+        [checkBox setOn: download.simultaneousEncode];
+        checkBox.owner = download;
+        [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSimulEncode];
         
  	} else if ([tableColumn.identifier isEqualToString:@"Skip"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.skipCommercials];
-        checkBox.owner = thisShow;
-        [checkBox setEnabled: thisShow.isNew && !thisShow.protectedShow.boolValue && thisShow.encodeFormat.canSkip];
+        [checkBox setOn: download.skipCommercials];
+        checkBox.owner = download;
+        [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSkip];
         
  	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.genXMLMetaData.boolValue];
-        checkBox.owner = thisShow;
-		checkBox.enabled = !thisShow.isDone && !thisShow.protectedShow.boolValue;
+        [checkBox setOn: download.genXMLMetaData.boolValue];
+        checkBox.owner = download;
+		checkBox.enabled = !download.isDone && !protected;
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.genTextMetaData.boolValue];
-        checkBox.owner = thisShow;
-		checkBox.enabled = !thisShow.isDone && !thisShow.protectedShow.boolValue;
+        [checkBox setOn: download.genTextMetaData.boolValue];
+        checkBox.owner = download;
+		checkBox.enabled = !download.isDone && !protected;
 	} else if ([tableColumn.identifier isEqualToString:@"Subtitles"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.exportSubtitles.boolValue];
-        checkBox.owner = thisShow;
-		checkBox.enabled = thisShow.isNew && !thisShow.protectedShow.boolValue;
+        [checkBox setOn: download.exportSubtitles.boolValue];
+        checkBox.owner = download;
+		checkBox.enabled = download.isNew && !protected;
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisShow.includeAPMMetaData.boolValue && thisShow.encodeFormat.canAtomicParsley];
-        checkBox.owner = thisShow;
-		checkBox.enabled = thisShow.encodeFormat.canAtomicParsley && !thisShow.isDone && !thisShow.protectedShow.boolValue;
+        [checkBox setOn: download.includeAPMMetaData.boolValue && download.encodeFormat.canAtomicParsley];
+        checkBox.owner = download;
+		checkBox.enabled = download.encodeFormat.canAtomicParsley && !download.isDone && !protected;
   	} else if ([tableColumn.identifier isEqualToString:@"Date"]) {
 		if ([tableColumn width] > 135) {
 			textVal = thisShow.showMediumDateString;
@@ -430,7 +434,7 @@ __DDLOGHERE__
 	}
     // Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
- 	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ];
+ 	NSArray	*selectedObjects = [self.sortedDownloads objectsAtIndexes:rowIndexes ];
 	NSLog(@"copying objects:%@",selectedObjects );
 	[pboard clearContents];
 	[pboard writeObjects:selectedObjects];
@@ -474,10 +478,10 @@ __DDLOGHERE__
 	}
 }
 
--(BOOL)shows:(NSArray *)shows contain:(MTTiVo *)tiVo
+-(BOOL)downloads:(NSArray *)downloads contain:(MTTiVo *)tiVo
 {
-	for (MTTiVoShow * show in shows) {
-		if (show.tiVo  == tiVo) {
+	for (MTDownload * download in downloads) {
+		if (download.show.tiVo  == tiVo) {
 			return  YES;
 		}
 	}
@@ -487,8 +491,8 @@ __DDLOGHERE__
 -(BOOL)selectionContainsCompletedShows
 {
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-	for (MTTiVoShow *show in selectedShows) {
+	NSArray *selectedShows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
+	for (MTDownload *show in selectedShows) {
 		if ([show videoFileURLWithEncrypted:YES]) {
 			//minor bug: we enable play video even though you can't play encrypted
 			return  YES;
@@ -501,8 +505,8 @@ __DDLOGHERE__
 -(BOOL)playVideo
 {
 	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-	for (MTTiVoShow *show in selectedShows) {
+	NSArray *selectedShows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
+	for (MTDownload *show in selectedShows) {
 		if (show.isDone) {
 			if ([show playVideo])  {
 				return YES;		}
@@ -514,9 +518,9 @@ __DDLOGHERE__
 -(BOOL)revealInFinder
 {
 	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+	NSArray *selectedShows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
 	NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:selectedShows.count];
-	for (MTTiVoShow *show in selectedShows) {
+	for (MTDownload *show in selectedShows) {
 		NSURL * showURL = [show videoFileURLWithEncrypted:YES];
 		if (showURL) {
 			[showURLs addObject:showURL];
@@ -532,26 +536,29 @@ __DDLOGHERE__
 
 
 
--(void) askReschedule: (MTTiVoShow *) show {
+-(BOOL) askReschedule: (MTDownload *) download {
 	//ask user if they'd like to reschedule a show that's being demoted
-	NSString *message = [NSString stringWithFormat:@"Do you want to reschedule %@?",show.showTitle];
+	NSString *message = [NSString stringWithFormat:@"Do you want to reschedule %@?",download.show.showTitle];
 	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
 	NSInteger returnValue = [insertDownloadAlert runModal];
 	if (returnValue == 1) {
-		DDLogDetail(@"User did reschedule active show %@",show);
-		[show prepareForDownload: NO];
+		DDLogDetail(@"User did reschedule active show %@",download);
+		[download prepareForDownload: YES];
+		return YES;
+	} else {
+		return NO;
 	}
 }
 
 -(BOOL) askRestarting: (NSArray *) restartShows {
 	//ask user if they'd like to reschedule a show that's being demoted
 	if (restartShows.count ==0) return NO;
-	MTTiVoShow * exampleShow = restartShows[0];
+	NSString * exampleShow = ((MTDownload *)restartShows[0]).show.showTitle;
 	NSString * message;
 	if (restartShows.count ==1) {
-		message =  [NSString stringWithFormat:@"Do you want to re-download %@?",exampleShow.showTitle];
+		message =  [NSString stringWithFormat:@"Do you want to re-download %@?",exampleShow];
 	} else {
-		message = [NSString stringWithFormat:@"Do you want to re-download %@ and other completed shows?",exampleShow.showTitle];
+		message = [NSString stringWithFormat:@"Do you want to re-download %@ and other completed shows?",exampleShow];
 	}
 	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Re-download" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
 	NSInteger returnValue = [insertDownloadAlert runModal];
@@ -564,108 +571,139 @@ __DDLOGHERE__
 
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation
 {
-	NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
-	NSDictionary *options = [NSDictionary dictionary];
-	//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
-	//NSLog(@"calling readObjects%@",pasteboard);
-	NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
-	DDLogDetail(@"Accepting drop: %@", draggedShows);
-
 	if (row < 0) row = 0;
 	//although displayed in sorted order, need to work in actual download order
-	NSUInteger insertRow;
-	MTTiVoShow * insertTarget = nil;
+	MTDownload * insertTarget = nil;
+	NSUInteger insertRow = [tiVoManager downloadQueue].count;
 	
-	if (row < _sortedShows.count) {
-		insertTarget = _sortedShows[row];
-		insertRow = [tiVoManager.downloadQueue indexOfObject: insertTarget];
-	} else {
-		insertRow = tiVoManager.downloadQueue.count; //just beyond end of array
+	if (row < _sortedDownloads.count) {
+		insertTarget = _sortedDownloads[row];
+		insertRow = [[tiVoManager downloadQueue] indexOfObject:insertTarget];
 	}
+
+	if ([info draggingSource] == myController.tiVoShowTable) {
+		NSArray	*classes = @[[MTTiVoShow class]];
+		NSDictionary *options = [NSDictionary dictionary];
+		NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
+		DDLogDetail(@"Accepting drop: %@", draggedShows);
 	
-	//dragged shows are copies, so we need to find the real show objects
-	NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
-	NSMutableArray * completedShowsBeingMoved =[NSMutableArray array];
-	for (MTTiVoShow * show in draggedShows) {
-		MTTiVoShow * realShow= [tiVoManager findRealShow:show];
-		if (realShow) [realShows addObject:realShow];
-		if (realShow.isDone) [completedShowsBeingMoved addObject:realShow];
+		//dragged shows are proxies, so we need to find the real show objects
+		NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
+
+		for (MTTiVoShow * show in draggedShows) {
+			MTTiVoShow * realShow= [tiVoManager findRealShow:show];
+			if (realShow) [realShows addObject:realShow];
+		}
+		DDLogVerbose(@"Scheduling shows before %@", insertTarget);
+		//need to move insertTarget below
+		
+		for (MTTiVoShow *realShow in realShows) {
 			
-	}
-	DDLogVerbose(@"Real Shows being dragged: %@",realShows);
+			for (NSUInteger activeRow = insertRow; activeRow < tiVoManager.downloadQueue.count ; activeRow++ ) {
+				MTDownload * activeDL = tiVoManager.downloadQueue[activeRow];
+				if (activeDL.isNew) continue;  
+				if (activeDL.isDone) continue;
+				if (activeDL.show.tiVo == realShow.tiVo) {
+					if (![self askReschedule:activeDL]) {
+						return NO;
+					};
+				}
+			}
+		}
+
+		
+		[tiVoManager downloadShowsWithCurrentOptions:realShows beforeDownload:insertTarget];
+		
+		self.sortedDownloads = nil;
+		[tiVoManager sortDownloadQueue];
+		DDLogVerbose(@"afterSort: %@", self.sortedDownloads);
+		
+		NSIndexSet * selectionIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+			MTDownload * download = (MTDownload *) obj;
+			return [realShows indexOfObject:download.show] !=NSNotFound;
+		}];
+		
+		//now leave new shows selected
+		DDLogVerbose(@"moved to %@",selectionIndexes );
+		[self selectRowIndexes:selectionIndexes byExtendingSelection:NO];
+		//note that dragged copies will now be dealloc'ed
 	
-	//Now look for reschedulings. Group ould be moving up or down, with or without an active show...
-	for (MTTiVoShow * activeShow in [tiVoManager downloadQueue]) {
-		if (activeShow.isNew) break;  //we're through any active ones
-		if (activeShow.isDone) continue;
-		NSUInteger activeRow = [[tiVoManager downloadQueue] indexOfObject:activeShow];
-		//first check if a show is being moved before activeShow
-		if ([realShows containsObject: activeShow]) {
-			//I'm in group being moved ( so group is from in DL queue
-			if (insertRow > activeRow+1) {   //moving downwards
-				for (NSUInteger i = activeRow+1; i<insertRow; i++) { //check shows we're skipping over
-					MTTiVoShow * promotedShow = [[tiVoManager downloadQueue] objectAtIndex:i];
-					if (![realShows containsObject:promotedShow]) {//but if it's coming with me, no need
-						if (activeShow.tiVo == promotedShow.tiVo) {
-							[self askReschedule:activeShow];
-							break;  // no need to ask again
+	} else if( [info draggingSource] == aTableView ) {
+		NSArray	*classes = @[[MTDownload class]];
+		NSDictionary *options = [NSDictionary dictionary];
+		NSArray	*draggedDLs = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
+		DDLogDetail(@"Accepting drop: %@", draggedDLs);
+				
+		//dragged downloads are proxies, so we need to find the real download objects
+		NSMutableArray * realDLs = [NSMutableArray arrayWithCapacity:draggedDLs.count ];
+		NSMutableArray * completedDownloadsBeingMoved =[NSMutableArray array];
+		for (MTDownload * download in draggedDLs) {
+			MTDownload * realDownload= [tiVoManager findRealDownload:download];
+			if (realDownload) [realDLs addObject:realDownload];
+			if (realDownload.isDone) [completedDownloadsBeingMoved addObject:download];
+		}
+		
+		//Now look for reschedulings. Group could either be moving up over an active show, or moving an active show down...
+
+		for (MTDownload * activeDL in [tiVoManager downloadQueue]) {
+			if (activeDL.isNew) break;  //we're through any active ones
+			if (activeDL.isDone) continue;
+			NSUInteger activeRow = [[tiVoManager downloadQueue] indexOfObject:activeDL];
+
+			if ([draggedDLs containsObject: activeDL]) {
+				//I'm in group being moved 
+				if (insertRow > activeRow+1) {   //moving downwards
+					for (NSUInteger i = activeRow+1; i<insertRow; i++) { //check shows we're skipping over
+						MTDownload * promotedDL = [[tiVoManager downloadQueue] objectAtIndex:i];
+						if (![realDLs containsObject:promotedDL]) {//but if it's coming with me, no need
+							if (activeDL.show.tiVo == promotedDL.show.tiVo) {
+								[self askReschedule:activeDL];
+								break;  // no need to ask again
+							}
 						}
 					}
 				}
-			}
-		} else {
-			//I'm not being moved
-			if ((insertRow <= activeRow) &&   //shows being moved above me
-				([self shows:realShows  contain:activeShow.tiVo]))  {//and one of them is on same TiVo as me
-				[self askReschedule: activeShow];
+			} else {
+				//I'm not being moved
+				if ((insertRow <= activeRow) &&   //shows being moved above me
+					([self downloads:realDLs  contain:activeDL.show.tiVo]))  {//and one of them is on same TiVo as me
+					[self askReschedule: activeDL];
+				}
 			}
 		}
-	}
-
-	//see if we have any completed shows being re-downloaded
-	if (completedShowsBeingMoved.count>0 &&
-		(!insertTarget || !insertTarget.isDone)) {
-		//we're moving at least some completedshows below the activeline
-		if([self askRestarting:completedShowsBeingMoved]) {
-			for (MTTiVoShow * show in completedShowsBeingMoved) {
-				[show prepareForDownload: NO];
-			}
-		};
-	}
-	
-	//	NSLog(@"dragging: %@", draggedShows);
-	
-	if( [info draggingSource] == aTableView ) {
-		//reordering self (download table)
-		DDLogVerbose(@"moving shows to %ld: %@", insertRow, [tiVoManager downloadQueue]);
-		[tiVoManager moveShowsInDownloadQueue:realShows toIndex:insertRow];
-		DDLogVerbose(@"moved shows to %ld: %@", insertRow, [tiVoManager downloadQueue]);
-
-    } else if ([info draggingSource] == myController.tiVoShowTable) {
-		DDLogVerbose(@"Scheduling shows at %ld",(unsigned long)insertRow );
-		MTTiVoShow * insertShow = nil;
-		if (insertRow < [tiVoManager downloadQueue].count) {
-			insertShow = [tiVoManager.downloadQueue objectAtIndex:insertRow];
-			DDLogVerbose(@"Inserting before %@",insertShow.showTitle);
-		}
-		[tiVoManager downloadShowsWithCurrentOptions:realShows beforeShow:insertShow];
+		DDLogVerbose(@"Real downloads being dragged: %@",realDLs);
 		
-		//note that dragged copies will now be dealloc'ed 								
+		//see if we have any completed shows being re-downloaded
+		if (completedDownloadsBeingMoved.count>0 &&
+			(!insertTarget || !insertTarget.isDone)) {
+			//we're moving at least some completedshows below the activeline
+			if([self askRestarting:completedDownloadsBeingMoved]) {
+				for (MTDownload * download in completedDownloadsBeingMoved) {
+					[download prepareForDownload: YES];
+				}
+			};
+		}
+		//reordering self (download table)
+		[tiVoManager moveShowsInDownloadQueue:realDLs toIndex:insertRow];
+		
+		
+		self.sortedDownloads = nil;
+		[tiVoManager sortDownloadQueue];
+		DDLogVerbose(@"afterSort: %@", self.sortedDownloads);
+		
+		NSIndexSet * selectionIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+			return [realDLs indexOfObject:obj] !=NSNotFound;
+		}];
+		
+		//now leave new shows selected
+		DDLogVerbose(@"moved to %@",selectionIndexes );
+		[self selectRowIndexes:selectionIndexes byExtendingSelection:NO];
+		
 	} else {
 		return NO;
 	}
 	
-	self.sortedShows = nil;
-	[tiVoManager sortDownloadQueue];
-	DDLogVerbose(@"afterSort: %@", [tiVoManager downloadQueue]);
-	
-	NSIndexSet * selectionIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-			return [realShows indexOfObject:obj] !=NSNotFound;
-		}];
 
-	//now leave new shows selected
-	DDLogVerbose(@"moved to %@",selectionIndexes );
-	[self selectRowIndexes:selectionIndexes byExtendingSelection:NO];
 	[self reloadData];
 	return YES;
 }

@@ -15,7 +15,32 @@
 
 
 
-@interface MTTiVoManager ()
+@interface MTTiVoManager () {
+	
+    MTNetService *tivoService ;
+    NSNetServiceBrowser *tivoBrowser;
+    NSMutableData *listingData;
+	//	NSMutableDictionary *tiVoShowsDictionary;
+	NSMutableArray *updatingTiVoShows;
+	
+	NSURLConnection *programListURLConnection, *downloadURLConnection;
+	NSTask *decryptingTask, *encodingTask;
+    NSMutableDictionary *programDownloading, *programDecrypting, *programEncoding;
+	NSFileHandle *downloadFile, *stdOutFileHandle;
+	double dataDownloaded, referenceFileSize;
+	MTNetService *tivoConnectingTo;
+	NSOpenPanel *myOpenPanel;
+    double percentComplete;
+    MTDownloadTableCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
+	NSArray *factoryFormatList;
+    int numEncoders, numCommercials, numCaptions;//Want to limit launches to two encoders.
+	
+    BOOL volatile updatingVideoList;
+	
+	NSOperationQueue *queue;
+    
+
+}
 
 @property (retain) MTNetService *updatingTiVo;
 @property (nonatomic, retain) NSArray *hostAddresses;
@@ -197,8 +222,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	NSMutableArray * newShows = [NSMutableArray arrayWithCapacity:oldQueue.count];
 	for (NSDictionary * queueEntry in oldQueue) {
 		DDLogDetail(@"Restoring show %@",queueEntry[kMTQueueTitle]);
-		MTTiVoShow * newShow = [[[MTTiVoShow alloc] init] autorelease];
-		[newShow prepareForDownload:NO];
+		MTDownload * newShow = [[[MTDownload alloc] init] autorelease];
 		[newShow restoreDownloadData:queueEntry];
 		[newShows addObject:newShow];
 	}
@@ -210,20 +234,24 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(NSInteger) findProxyShowInDLQueue:(MTTiVoShow *) showTarget {
 	NSString * targetTivoName = showTarget.tiVo.tiVo.name;
 	return [self.downloadQueue indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-		MTTiVoShow * possShow = (MTTiVoShow *) obj;
+		MTTiVoShow * possShow = ((MTDownload *) obj).show;
 		return [targetTivoName isEqualToString:[possShow tempTiVoName]] &&
 		showTarget.showID == possShow.showID;
 		
 	}];
 }
 
--(void) checkProxyInQueue: (MTTiVoShow *) newShow {
+-(void) replaceProxyInQueue: (MTTiVoShow *) newShow {
 	NSInteger DLIndex =[tiVoManager findProxyShowInDLQueue:newShow];
 	if (DLIndex != NSNotFound) {
-		MTTiVoShow * proxyShow = [tiVoManager downloadQueue][DLIndex];
-		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, DLIndex, proxyShow.tiVoName);
-		[newShow updateFromProxyShow:proxyShow];
-		[[tiVoManager downloadQueue] replaceObjectAtIndex:DLIndex withObject:newShow];
+		MTDownload * proxyDL = [tiVoManager downloadQueue][DLIndex];
+		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, DLIndex, proxyDL.show.tiVoName);
+		proxyDL.show = newShow;
+		proxyDL.show.isQueued = YES;
+		if (proxyDL.downloadStatus.integerValue == kMTStatusDeleted) {
+			DDLogDetail(@"Tivo restored previously deleted show %@",newShow);
+			[proxyDL prepareForDownload:YES];
+		}
 	} else {
 		DDLogVerbose(@"Didn't find DL proxy for %@",newShow);
 	}
@@ -231,12 +259,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void)checkDownloadQueueForDeletedEntries: (MTTiVo *) tiVo {
 	NSString *targetTivoName = tiVo.tiVo.name;
-	for (MTTiVoShow * show in self.downloadQueue) {
-		if(show.protectedShow.boolValue &&
-		   [targetTivoName isEqualToString:show.tiVoName]) {
-			DDLogDetail(@"Marking %@ as deleted", show.showTitle);
-			show.downloadStatus =@kMTStatusDeleted;
-			show.protectedShow = @NO; //let them delete from queue
+	for (MTDownload * download in self.downloadQueue) {
+		if(download.show.protectedShow.boolValue &&
+		   [targetTivoName isEqualToString:download.show.tiVoName]) {
+			DDLogDetail(@"Marking %@ as deleted", download.show.showTitle);
+			download.downloadStatus =@kMTStatusDeleted;
+			download.show.protectedShow = @NO; //let them delete from queue
 		}
 	}
 
@@ -452,6 +480,16 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	return NO;
 }
 
+
+-(BOOL) anyShowsWaiting {
+	for (MTDownload * show in tiVoManager.downloadQueue) {
+		if (!show.isDone) {
+			return YES; //no real need to count them all
+		}
+	}
+	return NO;
+}
+
 -(void)pauseQueue:(NSNumber *)askUser
 {
 	self.processingPaused = @(YES);
@@ -525,6 +563,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
         DDLogDetail(@"Starting download on tiVo %@",tiVo.tiVo.name);
         [tiVo manageDownloads:tiVo];
     }
+}
+
+-(void) cancelAllDownloads {
+	for (MTDownload *s in tiVoManager.downloadQueue) {
+		[s cancel];
+	}
 }
 
 #pragma mark - Key Value Observing
@@ -659,8 +703,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)checkShowTitleUniqueness:(MTTiVoShow *)program
 {
     //Make sure the title isn't the same and if it is add a -1 modifier
-    for (MTTiVoShow *p in _downloadQueue) {
-        if ([p.showTitle compare:program.showTitle] == NSOrderedSame) {
+    for (MTDownload *download in _downloadQueue) {
+        if ([download.show.showTitle compare:program.showTitle] == NSOrderedSame) {
 			NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
             NSTextCheckingResult *result = [ending firstMatchInString:program.showTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, program.showTitle.length)];
             if (result) {
@@ -705,53 +749,71 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void) sortDownloadQueue {
 
-	[self.downloadQueue sortUsingComparator:^NSComparisonResult(MTTiVoShow * show1, MTTiVoShow* show2) {
-		int status1 = show1.downloadStatus.intValue; if (status1 > kMTStatusDone) status1= kMTStatusDone; //sort failed/done together
-		int status2 = show2.downloadStatus.intValue;if (status2 > kMTStatusDone) status2= kMTStatusDone;
+	[self.downloadQueue sortUsingComparator:^NSComparisonResult(MTDownload * download1, MTDownload* download2) {
+		int status1 = download1.downloadStatus.intValue; if (status1 > kMTStatusDone) status1= kMTStatusDone; //sort failed/done together
+		int status2 = download2.downloadStatus.intValue;if (status2 > kMTStatusDone) status2= kMTStatusDone;
 		return status1 > status2 ? NSOrderedAscending : status1 < status2 ? NSOrderedDescending : NSOrderedSame;
 		
 	}];
 }
 
--(void)addProgramToDownloadQueue:(MTTiVoShow *) program {
-	[self addProgramsToDownloadQueue:[NSArray arrayWithObject:program] beforeShow:nil];
+-(MTDownload *) findInDownloadQueue: (MTTiVoShow *) show {
+	for (MTDownload * download in _downloadQueue) {
+		if (download.show == show) {
+			return download;
+		}
+	}
+	return nil;
 }
 
--(void)addProgramsToDownloadQueue:(NSArray *)programs beforeShow:(MTTiVoShow *) nextShow {
+-(MTDownload *) findRealDownload: (MTDownload *) proxyDownload  {
+	for (MTDownload * download in self.downloadQueue) {
+		if ([download isEqual:proxyDownload]) {
+			return download;
+		}
+	}
+	return nil;
+}
+
+-(NSArray *) currentDownloadQueueSortedBy: (NSArray *) sortDescripters {
+	return [self.downloadQueue sortedArrayUsingDescriptors:sortDescripters];
+}
+
+-(void)addToDownloadQueue:(NSArray *)newDownloads beforeDownload:(MTDownload *) nextDownload {
 	BOOL submittedAny = NO;
-	for (MTTiVoShow *program in programs){
-		if (![program.protectedShow boolValue]) {
-            BOOL programFound = NO;
-            for (MTTiVoShow *p in _downloadQueue) {
-                if (p.showID == program.showID	) {
-					if (p==program) {
-						DDLogDetail(@" %@ already in queue",p);
+	for (MTDownload *newDownload in newDownloads){
+		MTTiVoShow * newShow = newDownload.show;
+		if (![newShow.protectedShow boolValue]) {
+            BOOL showFound = NO;
+            for (MTDownload *oldDownload in _downloadQueue) {
+                if (oldDownload.show.showID == newShow.showID	) {
+					if (oldDownload.show==newShow) {
+						DDLogDetail(@" %@ already in queue",oldDownload);
 					} else {
-						DDLogReport(@"program %@ already in queue as %@ with same ID %d!",p, program, p.showID);
+						DDLogReport(@"show %@ already in queue as %@ with same ID %d!",oldDownload, newShow, newShow.showID);
 					}
-					programFound = YES;
+					showFound = YES;
 					break;
                 }
             }
-            
-            if (!programFound) {
+            if (!showFound) {
                 //Make sure the title isn't the same and if it is add a -1 modifier
                 submittedAny = YES;
-                [self checkShowTitleUniqueness:program];
-				[program prepareForDownload:NO];
-				if (nextShow) {
-                    NSUInteger index = [_downloadQueue indexOfObject:nextShow];
+                [self checkShowTitleUniqueness:newShow];
+				[newDownload prepareForDownload:NO];
+				if (nextDownload) {
+                    NSUInteger index = [_downloadQueue indexOfObject:nextDownload];
                     if (index == NSNotFound) {
-						DDLogDetail(@"Prev show not found, adding %@ at end",program);
-						[_downloadQueue addObject:program];
+						DDLogDetail(@"Prev show not found, adding %@ at end",newDownload);
+						[_downloadQueue addObject:newDownload];
                         
                     } else {
-						DDLogVerbose(@"inserting before %@ at %ld",nextShow, index);
-                        [_downloadQueue insertObject:program atIndex:index];
+						DDLogVerbose(@"inserting before %@ at %ld",nextDownload, index);
+                        [_downloadQueue insertObject:newDownload atIndex:index];
                     }
                 } else {
-					DDLogVerbose(@"adding %@ at end",program);
-                   [_downloadQueue addObject:program];
+					DDLogVerbose(@"adding %@ at end",newDownload);
+                   [_downloadQueue addObject:newDownload];
                 }
             }
         }
@@ -764,49 +826,53 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 
--(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeShow:(MTTiVoShow *) nextShow {
+-(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeDownload:(MTDownload *) nextDownload {
+	NSMutableArray * downloads = [NSMutableArray arrayWithCapacity:shows.count];
 	for (MTTiVoShow * thisShow in shows) {
 		NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 		DDLogDetail(@"Adding show: %@", thisShow);
-		thisShow.encodeFormat = [self selectedFormat];
-		thisShow.addToiTunesWhenEncoded = thisShow.encodeFormat.canAddToiTunes &&
+		MTDownload * newDownload = [[[MTDownload alloc] init] autorelease];
+		newDownload.show = thisShow;
+		newDownload.encodeFormat = [self selectedFormat];
+		newDownload.addToiTunesWhenEncoded = newDownload.encodeFormat.canAddToiTunes &&
 											[defaults boolForKey:kMTiTunesSubmit];
-		thisShow.simultaneousEncode = thisShow.encodeFormat.canSimulEncode &&
+		newDownload.simultaneousEncode = newDownload.encodeFormat.canSimulEncode &&
 											[defaults boolForKey:kMTSimultaneousEncode];
-		thisShow.skipCommercials = [thisShow.encodeFormat.comSkip boolValue] &&
+		newDownload.skipCommercials = [newDownload.encodeFormat.comSkip boolValue] &&
 											[defaults boolForKey:@"RunComSkip"];
-		thisShow.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
-		thisShow.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
-		thisShow.includeAPMMetaData =[NSNumber numberWithBool:(thisShow.encodeFormat.canAtomicParsley && [defaults boolForKey:kMTExportAtomicParsleyMetaData])];
+		newDownload.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
+		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
+		newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && [defaults boolForKey:kMTExportAtomicParsleyMetaData])];
+		[downloads addObject: newDownload];
 	}
-	[self addProgramsToDownloadQueue:shows beforeShow:nextShow ];
+	[self addToDownloadQueue:downloads beforeDownload:nextDownload ];
 }
 
--(void) deleteProgramsFromDownloadQueue:(NSArray *) programs {
+-(void) deleteFromDownloadQueue:(NSArray *) downloads {
     NSMutableIndexSet * itemsToRemove= [NSMutableIndexSet indexSet];
-	DDLogDetail(@"Delete shows: %@", programs);
-	for (MTTiVoShow * program in programs) {
+	DDLogDetail(@"Delete shows: %@", downloads);
+	for (MTDownload * download in downloads) {
 
-		NSUInteger index = [_downloadQueue indexOfObject:program];
+		NSUInteger index = [_downloadQueue indexOfObject:download];
 		if (index == NSNotFound) {
-			for (MTTiVoShow *p in _downloadQueue) {  //this is probably unncessary
-				if (p.showID == program.showID	) {
-					DDLogMajor(@"Odd: two shows with same ID: %@ in queue v %@", program, p);
-					index = [_downloadQueue indexOfObject:p];
+			for (MTDownload *oldDownload in _downloadQueue) {  //this is probably unncessary
+				if (oldDownload.show.showID == download.show.showID	) {
+					DDLogMajor(@"Odd: two shows with same ID: %@ in queue v %@", download, oldDownload);
+					index = [_downloadQueue indexOfObject:oldDownload];
 					break;
 				}
 			}
 		}
 		if (index != NSNotFound) {
-			MTTiVoShow *p = _downloadQueue[index];
-			[p cancel];
-			p.isQueued = NO;
+			MTDownload *oldDownload = _downloadQueue[index];
+			[oldDownload cancel];
+			oldDownload.show.isQueued = NO;
 			[itemsToRemove addIndex:index];
 		}
 	}
 	
 	if (itemsToRemove.count > 0) {
-		DDLogVerbose(@"Deleted shows: %@", itemsToRemove);
+		DDLogVerbose(@"Deleted downloads: %@", itemsToRemove);
 		[_downloadQueue removeObjectsAtIndexes:itemsToRemove];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadStatusChanged object:nil];
@@ -821,8 +887,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(NSInteger)numberOfShowsToDownload
 {
 	NSInteger n= 0;
-	for (MTTiVoShow *show in _downloadQueue) {
-		if (!show.isDone) {
+	for (MTDownload *download in _downloadQueue) {
+		if (!download.isDone) {
 			n++;
 		}
 	}
@@ -907,7 +973,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo
 {
 //    return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",tiVo.tiVo.name]];
-    return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"tiVoName == %@",tiVo.tiVo.name]];
+    return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"show.tiVoName == %@",tiVo.tiVo.name]];
 }
 
 
@@ -950,11 +1016,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void)writeDownloadQueueToUserDefaults {
 	NSMutableArray * downloadArray = [NSMutableArray arrayWithCapacity:_downloadQueue.count];
-	for (MTTiVoShow * show in _downloadQueue) {
-		if (show.isInProgress){
-			[show cancel];	
+	for (MTDownload * download in _downloadQueue) {
+		if (download.isInProgress){
+			[download cancel];
 		}
-		[downloadArray addObject:[show queueRecord]];
+		[downloadArray addObject:[download queueRecord]];
 								
 	}
     DDLogVerbose(@"writing DL queue: %@", downloadArray);

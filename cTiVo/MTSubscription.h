@@ -39,6 +39,7 @@
 
 -(void) checkSubscriptionsAll;
 -(NSArray *) addSubscriptions:(NSArray *) shows; //returns new subs
+-(NSArray *) addSubscriptionsDL: (NSArray *) downloads;
 -(void) deleteSubscriptions:(NSArray *) subscriptions;
 -(void) updateSubscriptionWithDate: (NSNotification *) notification;
 -(BOOL) isSubscribed:(MTTiVoShow *) tivoShow;
