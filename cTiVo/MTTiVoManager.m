@@ -566,8 +566,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 -(void) cancelAllDownloads {
-	for (MTDownload *s in tiVoManager.downloadQueue) {
-		[s cancel];
+	for (MTDownload *download in tiVoManager.downloadQueue) {
+		if (download.isInProgress){
+			[download cancel];
+		}
 	}
 }
 
@@ -1017,11 +1019,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)writeDownloadQueueToUserDefaults {
 	NSMutableArray * downloadArray = [NSMutableArray arrayWithCapacity:_downloadQueue.count];
 	for (MTDownload * download in _downloadQueue) {
-		if (download.isInProgress){
-			[download cancel];
-		}
 		[downloadArray addObject:[download queueRecord]];
-								
 	}
     DDLogVerbose(@"writing DL queue: %@", downloadArray);
 	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];

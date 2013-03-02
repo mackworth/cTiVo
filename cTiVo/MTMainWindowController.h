@@ -38,12 +38,14 @@
 @property (nonatomic, readonly) MTTiVoManager *myTiVoManager;
 @property (nonatomic, assign) NSMenuItem *showInFinderMenuItem, *playVideoMenuItem;
 @property (nonatomic, retain) IBOutlet NSView *cancelQuitView;
+@property (nonatomic, retain) IBOutlet NSView * drawerVariableFields;
 
 -(IBAction)selectFormat:(id)sender;
 -(IBAction)subscribe:(id) sender;
 -(BOOL) selectionContainsCompletedShows;
 -(IBAction) revealInFinder:(id) sender;
 -(IBAction) playVideo: (id) sender;
+-(void) playTrashSound;
 
 -(IBAction)downloadSelectedShows:(id)sender;
 -(IBAction)removeFromDownloadQueue:(id)sender;

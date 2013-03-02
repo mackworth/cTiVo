@@ -263,6 +263,8 @@ __DDLOGHERE__
 	_skipCommercials = [queueEntry[kMTSubscribedSkipCommercials ]  boolValue];
 	_downloadStatus = queueEntry[kMTQueueStatus];
 	if (_downloadStatus.integerValue == kMTStatusDoneOld) _downloadStatus = @kMTStatusDone; //temporary patch for old queues
+	if (self.isInProgress) _downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
+	
 	_simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
 	self.encodeFormat = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
 	self.downloadDirectory = queueEntry[kMTQueueDirectory];

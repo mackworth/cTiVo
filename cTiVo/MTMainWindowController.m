@@ -328,6 +328,14 @@ __DDLOGHERE__
 	}
 }
 
+- (void) openDrawer:(MTTiVoShow *) show {
+	if (show) {		
+		self.showForDetail = show;
+		[showDetailDrawer open];
+		[self.drawerVariableFields setAutoresizingMask:self.drawerVariableFields.autoresizingMask |NSViewHeightSizable]; //workaround bug in IB?
+	}
+}
+
 -(IBAction)programMenuHandler:(NSMenuItem *)menu
 {
 	if ([menu.title caseInsensitiveCompare:@"Download"] == NSOrderedSame) {
@@ -343,19 +351,23 @@ __DDLOGHERE__
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		[self subscribe:menu];
 	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
-		self.showForDetail = tiVoShowTable.sortedShows[menuTableRow];
-		[showDetailDrawer open];
+		[self openDrawer:tiVoShowTable.sortedShows[menuTableRow]];
 
 	}
 }
 
 
 -(IBAction)doubleClickForDetails:(id)input {
-	[showDetailDrawer open];
-	if (input==downloadQueueTable) {
+	if (input==tiVoShowTable) {
+		NSInteger rowNumber = [tiVoShowTable clickedRow];
+		if (rowNumber != -1) {
+			[self openDrawer:tiVoShowTable.sortedShows[rowNumber]];
+		}
+	}else if (input==downloadQueueTable) {
 		NSInteger rowNumber = [downloadQueueTable clickedRow];
 		if (rowNumber != -1) {
 			MTDownload * download = [[downloadQueueTable sortedDownloads] objectAtIndex:rowNumber];
+			[self openDrawer:download.show];
 			if (!download.show.protectedShow.boolValue) {
 				[download revealInFinder];
 				[download playVideo];
@@ -381,11 +393,11 @@ __DDLOGHERE__
 			[tiVoManager addToDownloadQueue:itemsToRemove beforeDownload:nil];
 		}
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
-		NSArray * selectedShows = [downloadQueueTable.sortedDownloads objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
-		[tiVoManager.subscribedShows addSubscriptions:selectedShows];
+		NSArray * selectedDownloads = [downloadQueueTable.sortedDownloads objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
+		[tiVoManager.subscribedShows addSubscriptionsDL:selectedDownloads];
 	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
-		self.showForDetail = downloadQueueTable.sortedDownloads[menuTableRow];
-		[showDetailDrawer open];
+		MTDownload * download = downloadQueueTable.sortedDownloads[menuTableRow];
+		[showDetailDrawer open:download.show];
 	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
 		[downloadQueueTable playVideo];
 	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
@@ -409,6 +421,13 @@ __DDLOGHERE__
 {
 	[self.downloadQueueTable playVideo];
 	
+}
+
+-(void) playTrashSound {
+	NSSound *systemSound = [[NSSound alloc] initWithContentsOfFile:@"/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/dock/drag to trash.aif" byReference:YES];
+	if (systemSound) {
+		[systemSound play];
+	}
 }
 
 #pragma mark - Subscription Buttons
@@ -474,6 +493,7 @@ __DDLOGHERE__
         }
     }
 	[tiVoManager deleteFromDownloadQueue:itemsToRemove];
+	[self playTrashSound];
 
  	[downloadQueueTable deselectAll:nil];
 }

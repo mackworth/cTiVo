@@ -387,9 +387,12 @@ __DDLOGHERE__
 }
 
 -(BOOL) isMovie {
-	return (!self.isEpisodic.boolValue || ((self.episodeTitle.length == 0) &&
-	([self.episodeNumber intValue] == 0) &&
-			 (self.showLength > 70))) ;
+	BOOL value =  (self.movieYear.length > 0) ||
+					!(self.isEpisodic.boolValue ||
+					  ((self.episodeTitle.length > 0) ||
+					   (self.episodeNumber.length > 0) ||
+					   (self.showLength < 70*60))) ;
+	return value;
 }
 
 -(NSAttributedString *)attrStringFromDictionary:(id)nameList
@@ -512,6 +515,7 @@ __DDLOGHERE__
 }
 
 -(NSString *) combinedChannelString {
+	if (!self.channelString) return @"";
 	return  [NSString stringWithFormat:@"%@-%@ %@",
 			 self.stationCallsign,
 			 self.channelString,
@@ -552,6 +556,16 @@ __DDLOGHERE__
 		//        NSLog(@"converting %@ from: %@ to %@ ", self.showTitle, newTime, self.showDate);
     }
 }
+-(void)setMovieYear:(NSString *)movieYear {
+	if (movieYear != _movieYear) {
+		[_movieYear release];
+		_movieYear = [movieYear retain];
+		if (self.originalAirDateNoTime.length == 0) {
+			[_originalAirDateNoTime release];
+			_originalAirDateNoTime = [movieYear retain];
+		}
+	}
+}
 
 -(void)setOriginalAirDate:(NSString *)originalAirDate
 {
@@ -564,8 +578,10 @@ __DDLOGHERE__
 		[_originalAirDateNoTime release];
 		if (originalAirDate.length >= 10) {
 			_originalAirDateNoTime = [[originalAirDate substringToIndex:10] retain];
-		} else {
+		} else if (originalAirDate.length > 0) {
 			_originalAirDateNoTime = [originalAirDate retain];
+		} else {
+			_originalAirDateNoTime = [_movieYear retain];
 		}
 	}
 }

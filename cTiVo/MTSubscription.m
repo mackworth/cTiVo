@@ -107,7 +107,7 @@ __DDLOGHERE__
 			newDownload.addToiTunesWhenEncoded = ([subscription canAddToiTunes] && [subscription shouldAddToiTunes]);
 			newDownload.simultaneousEncode = ([subscription canSimulEncode] && [subscription shouldSimulEncode]);
 			newDownload.downloadDirectory = [tiVoManager downloadDirectory];  //should we have one per subscription? UI?
-			[tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];
+			[tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];    //should this be on main thread
 		}
 	}
 }

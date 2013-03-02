@@ -596,6 +596,7 @@ __DDLOGHERE__
 -(void) cleanup {
 	
 	DDLogDetail(@"exiting");
+	[tiVoManager cancelAllDownloads];
 	[tiVoManager writeDownloadQueueToUserDefaults];
     [[NSUserDefaults standardUserDefaults] synchronize];
 	[mediaKeyQueue release]; mediaKeyQueue = nil;

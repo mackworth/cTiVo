@@ -12,6 +12,7 @@
 		1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */; };
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
+		1E45C8F316E11E59005C5334 /* MTStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTStringEmpty.m */; };
 		1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
 		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
 		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
@@ -101,6 +102,8 @@
 		1E2725C316CB63D500A21940 /* elgatoProgress.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = elgatoProgress.scpt; sourceTree = "<group>"; };
 		1E389BB616C46BA600B80EC9 /* MTAdvPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTAdvPreferencesViewController.h; sourceTree = "<group>"; };
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
+		1E45C8F116E11E59005C5334 /* MTStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTStringEmpty.h; sourceTree = "<group>"; };
+		1E45C8F216E11E59005C5334 /* MTStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTStringEmpty.m; sourceTree = "<group>"; };
 		1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = pytivo_txt.xslt; sourceTree = "<group>"; };
 		1E6F22D416DD1F4C0071D291 /* MTDownload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownload.h; sourceTree = "<group>"; };
 		1E6F22D516DD1F4C0071D291 /* MTDownload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownload.m; sourceTree = "<group>"; };
@@ -393,6 +396,8 @@
 				D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */,
 				1E15E70A16B4F88F00508BEC /* DDLog.h */,
 				1E15E70B16B4F88F00508BEC /* DDLog.m */,
+				1E45C8F116E11E59005C5334 /* MTStringEmpty.h */,
+				1E45C8F216E11E59005C5334 /* MTStringEmpty.m */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -609,6 +614,7 @@
 				1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */,
 				1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */,
 				1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */,
+				1E45C8F316E11E59005C5334 /* MTStringEmpty.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

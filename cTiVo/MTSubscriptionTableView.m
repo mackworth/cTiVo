@@ -100,7 +100,7 @@ __DDLOGHERE__
     NSArray * itemsToRemove = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
 
 	[tiVoManager.subscribedShows  deleteSubscriptions:itemsToRemove];
-    
+	[myController playTrashSound];
     [self deselectAll:nil];
 }
 
