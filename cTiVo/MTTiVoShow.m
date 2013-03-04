@@ -342,10 +342,7 @@ __DDLOGHERE__
 	if (self.season > 0 ) {
 		NSString * seasonString = [NSString stringWithFormat:@"%d",self.season];
 		[apmArgs addObject:@"--TVSeasonNum"];
-		[apmArgs addObject:seasonString];
-		[apmArgs addObject:@"--tracknum"];
-		[apmArgs addObject:self.episodeNumber];
-		
+		[apmArgs addObject:seasonString];		
 	}
 	if (self.stationCallsign) {
 		[apmArgs addObject:@"--TVNetwork"];
@@ -496,7 +493,18 @@ __DDLOGHERE__
 												  
 -(NSString*) isHDString {
 	return [self checkString:_isHD.boolValue];
-  
+}
+
+-(NSString*) imageString {
+	if (self.protectedShow.boolValue) {
+		if (self.fileSize > 0) {
+			return @"copyright";
+		} else {
+			//not loaded yet
+			return @"questionmark";
+		}
+	}
+	return _imageString;
 }
 
 -(NSString*) idString {

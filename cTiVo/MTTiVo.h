@@ -30,7 +30,7 @@
     int lastChangeDate;
     int itemStart;
     int itemCount;
-    BOOL parsingShow, gettingContent, gettingDetails;
+    BOOL parsingShow, gettingContent, gettingDetails, gettingIcon;
     NSMutableString *element;
     MTTiVoShow *currentShow;
     NSDictionary *elementToPropertyMap;

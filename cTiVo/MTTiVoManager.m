@@ -677,6 +677,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[_formatList addObject:newFormat];
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
+	[[NSUserDefaults standardUserDefaults] setObject:tiVoManager.userFormatDictionaries forKey:kMTFormats];
 }
 
 

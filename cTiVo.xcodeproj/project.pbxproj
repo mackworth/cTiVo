@@ -13,6 +13,14 @@
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
 		1E45C8F316E11E59005C5334 /* MTStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTStringEmpty.m */; };
+		1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7516E2C50B000F5C6E /* copyright.png */; };
+		1E684A7C16E2C50B000F5C6E /* empty.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7616E2C50B000F5C6E /* empty.png */; };
+		1E684A7D16E2C50B000F5C6E /* expired-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7716E2C50B000F5C6E /* expired-recording.png */; };
+		1E684A7E16E2C50B000F5C6E /* expires-soon-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7816E2C50B000F5C6E /* expires-soon-recording.png */; };
+		1E684A7F16E2C50B000F5C6E /* save-until-i-delete-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7916E2C50B000F5C6E /* save-until-i-delete-recording.png */; };
+		1E684A8016E2C50B000F5C6E /* suggestion-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7A16E2C50B000F5C6E /* suggestion-recording.png */; };
+		1E684A8716E3A010000F5C6E /* questionmark.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A8616E3A010000F5C6E /* questionmark.png */; };
+		1E684A8B16E3A338000F5C6E /* deleted.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A8A16E3A338000F5C6E /* deleted.png */; };
 		1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
 		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
 		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
@@ -104,6 +112,14 @@
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
 		1E45C8F116E11E59005C5334 /* MTStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTStringEmpty.h; sourceTree = "<group>"; };
 		1E45C8F216E11E59005C5334 /* MTStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTStringEmpty.m; sourceTree = "<group>"; };
+		1E684A7516E2C50B000F5C6E /* copyright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = copyright.png; sourceTree = "<group>"; };
+		1E684A7616E2C50B000F5C6E /* empty.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = empty.png; sourceTree = "<group>"; };
+		1E684A7716E2C50B000F5C6E /* expired-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expired-recording.png"; sourceTree = "<group>"; };
+		1E684A7816E2C50B000F5C6E /* expires-soon-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expires-soon-recording.png"; sourceTree = "<group>"; };
+		1E684A7916E2C50B000F5C6E /* save-until-i-delete-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "save-until-i-delete-recording.png"; sourceTree = "<group>"; };
+		1E684A7A16E2C50B000F5C6E /* suggestion-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "suggestion-recording.png"; sourceTree = "<group>"; };
+		1E684A8616E3A010000F5C6E /* questionmark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = questionmark.png; sourceTree = "<group>"; };
+		1E684A8A16E3A338000F5C6E /* deleted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = deleted.png; sourceTree = "<group>"; };
 		1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = pytivo_txt.xslt; sourceTree = "<group>"; };
 		1E6F22D416DD1F4C0071D291 /* MTDownload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownload.h; sourceTree = "<group>"; };
 		1E6F22D516DD1F4C0071D291 /* MTDownload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownload.m; sourceTree = "<group>"; };
@@ -225,6 +241,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1E684A8C16E40EA8000F5C6E /* Wiki */ = {
+			isa = PBXGroup;
+			children = (
+				D2A7269416A2005400C58C5F /* README */,
+			);
+			name = Wiki;
+			path = cTiVo;
+			sourceTree = "<group>";
+		};
 		1E791BD01697ACAA00E47E84 /* Custom NSViews */ = {
 			isa = PBXGroup;
 			children = (
@@ -284,6 +309,7 @@
 		D2D60B9216766EFD00CE32DE = {
 			isa = PBXGroup;
 			children = (
+				1E684A8C16E40EA8000F5C6E /* Wiki */,
 				D2D60BA716766EFD00CE32DE /* cTiVo */,
 				D2D60BA016766EFD00CE32DE /* Frameworks */,
 				D2D60B9E16766EFD00CE32DE /* Products */,
@@ -330,7 +356,6 @@
 				D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */,
 				D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */,
 				D2D60BCB16766FA600CE32DE /* MTConstants.h */,
-				D2A7269416A2005400C58C5F /* README */,
 				D2DA8FBA169CDAAD0053B7CB /* Data Model */,
 				D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */,
 				D278CCDA16B49A8500711FFD /* UI Classes - Preferences  */,
@@ -360,6 +385,14 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1E684A7516E2C50B000F5C6E /* copyright.png */,
+				1E684A8A16E3A338000F5C6E /* deleted.png */,
+				1E684A7616E2C50B000F5C6E /* empty.png */,
+				1E684A7716E2C50B000F5C6E /* expired-recording.png */,
+				1E684A7816E2C50B000F5C6E /* expires-soon-recording.png */,
+				1E684A8616E3A010000F5C6E /* questionmark.png */,
+				1E684A7916E2C50B000F5C6E /* save-until-i-delete-recording.png */,
+				1E684A7A16E2C50B000F5C6E /* suggestion-recording.png */,
 				1EFD685C16D200FF00CC36E5 /* AtomicParsley */,
 				D24A8D0D16A5F3DC00DFF890 /* catToFile */,
 				D2B73F3516BC8A90003CB4ED /* comskip.ini */,
@@ -541,6 +574,14 @@
 				1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */,
 				1EFD685B16D19AA100CC36E5 /* ccextractor in Resources */,
 				1EFD685D16D200FF00CC36E5 /* AtomicParsley in Resources */,
+				1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */,
+				1E684A7C16E2C50B000F5C6E /* empty.png in Resources */,
+				1E684A7D16E2C50B000F5C6E /* expired-recording.png in Resources */,
+				1E684A7E16E2C50B000F5C6E /* expires-soon-recording.png in Resources */,
+				1E684A7F16E2C50B000F5C6E /* save-until-i-delete-recording.png in Resources */,
+				1E684A8016E2C50B000F5C6E /* suggestion-recording.png in Resources */,
+				1E684A8716E3A010000F5C6E /* questionmark.png in Resources */,
+				1E684A8B16E3A338000F5C6E /* deleted.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

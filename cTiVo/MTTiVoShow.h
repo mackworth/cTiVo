@@ -40,6 +40,7 @@
 									*isEpisodic,
                                     *tvRating,
                                     *sourceType,
+									*imageString,
                                     *idGuidSource;
 
 @property (nonatomic, retain) NSNumber  *protectedShow,  //really BOOLs

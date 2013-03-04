@@ -274,7 +274,9 @@ __DDLOGHERE__
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.originalAirDateNoTime ? thisShow.originalAirDateNoTime : @"";
-	
+	} else if ([tableColumn.identifier isEqualToString:@"icon"]) {
+        NSString * imageName = thisShow.imageString;
+		result.imageView.image = [NSImage imageNamed: imageName];
 	}
     if ([thisShow.protectedShow boolValue]) {
         result.textField.textColor = [NSColor grayColor];

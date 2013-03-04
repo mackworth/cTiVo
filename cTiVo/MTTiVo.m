@@ -286,13 +286,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         currentShow = [[MTTiVoShow alloc] init];
         gettingContent = NO;
         gettingDetails = NO;
-    }
-    if ([elementName compare:@"Content"] == NSOrderedSame) {
+        gettingIcon = NO;
+    } else if ([elementName compare:@"Content"] == NSOrderedSame) {
         gettingContent = YES;
-    }
-    if ([elementName compare:@"TiVoVideoDetails"] == NSOrderedSame) {
+    } else if ([elementName compare:@"TiVoVideoDetails"] == NSOrderedSame) {
         gettingDetails = YES;
-    }
+    } else if ([elementName compare:@"CustomIcon"] == NSOrderedSame) {
+		gettingIcon = YES;
+	}
 }
 
 -(void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
@@ -321,6 +322,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			gettingDetails = NO;
 		} else if ([elementName compare:@"Content"] == NSOrderedSame) {
 			gettingContent = NO;
+		} else if ([elementName compare:@"CustomIcon"] == NSOrderedSame) {
+			gettingIcon = NO;
 		} else if (gettingDetails) {
             //Get URL for details here
 			if ([elementName caseInsensitiveCompare:@"Url"] == NSOrderedSame) {
@@ -344,6 +347,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				}
 				[currentShow setValue:[NSURL URLWithString:element] forKey:@"downloadURL"];
 				DDLogVerbose(@"Content URL is %@",currentShow.downloadURL);
+			}
+        } else if (gettingIcon) {
+            //Get URL for Content here
+			if ([elementName caseInsensitiveCompare:@"Url"] == NSOrderedSame) {
+				NSString *introURL = @"urn:tivo:image:";
+				if ([element hasPrefix: introURL]){
+					currentShow.imageString = [element substringFromIndex:introURL.length];
+				} 
+				DDLogVerbose(@"Image String is %@",currentShow.imageString);
 			}
         } else if ([elementToPropertyMap objectForKey:elementName]){
 //        [currentShow setValue:element forKey:elementToPropertyMap[elementName]];

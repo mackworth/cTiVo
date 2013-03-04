@@ -216,7 +216,13 @@ __DDLOGHERE__
 		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
 	    thisCell.popUpButton.showHidden = NO;
 		thisCell.identifier = identifier;
-       result = thisCell;
+		result = thisCell;
+	} else if([identifier isEqualToString: @"icon"]) {
+		NSTableCellView *thisCell = [[[NSTableCellView alloc] initWithFrame:NSMakeRect(0, -2, thisColumn.width, 22)] autorelease];
+		thisCell.imageView = [[NSImageView alloc] initWithFrame:thisCell.frame];
+		[thisCell addSubview:thisCell.imageView];
+		thisCell.identifier = identifier;
+		result = thisCell;
     } else {
         result = (NSTableCellView*)[super makeViewWithIdentifier:identifier owner:owner];
     }
@@ -306,7 +312,13 @@ __DDLOGHERE__
                               download.encodeFormat.canAddToiTunes ];
          checkBox.owner = download;
 
- 	} else if ([tableColumn.identifier isEqualToString:@"Simu"]) {
+	} else if ([tableColumn.identifier isEqualToString:@"icon"]) {
+        NSString * imageName = thisShow.imageString;
+		if (download.downloadStatus.intValue == kMTStatusDeleted) {
+			imageName = @"deleted";
+		}
+		result.imageView.image = [NSImage imageNamed: imageName];
+	} else if ([tableColumn.identifier isEqualToString:@"Simu"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.simultaneousEncode];
         checkBox.owner = download;
