@@ -2,7 +2,7 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
-		<string key="IBDocument.SystemVersion">12C60</string>
+		<string key="IBDocument.SystemVersion">12C3012</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
@@ -428,6 +428,25 @@
 									<reference key="NSOnImage" ref="35465992"/>
 									<reference key="NSMixedImage" ref="502551668"/>
 								</object>
+								<object class="NSMenuItem" id="1005171141">
+									<reference key="NSMenu" ref="167382952"/>
+									<string key="NSTitle">Find...</string>
+									<string key="NSKeyEquiv">f</string>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="35465992"/>
+									<reference key="NSMixedImage" ref="502551668"/>
+								</object>
+								<object class="NSMenuItem" id="908528583">
+									<reference key="NSMenu" ref="167382952"/>
+									<bool key="NSIsDisabled">YES</bool>
+									<bool key="NSIsSeparator">YES</bool>
+									<string key="NSTitle"/>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="35465992"/>
+									<reference key="NSMixedImage" ref="502551668"/>
+								</object>
 								<object class="NSMenuItem" id="633700130">
 									<reference key="NSMenu" ref="167382952"/>
 									<string key="NSTitle">Select All</string>
@@ -548,6 +567,14 @@
 								<object class="NSMenuItem" id="900987786">
 									<reference key="NSMenu" ref="135398297"/>
 									<string key="NSTitle">Show Protected Shows</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="116230324"/>
+									<reference key="NSMixedImage" ref="502551668"/>
+								</object>
+								<object class="NSMenuItem" id="11829177">
+									<reference key="NSMenu" ref="135398297"/>
+									<string key="NSTitle">Show TiVo suggestions</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="116230324"/>
@@ -1213,6 +1240,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
+						<string key="label">findShows:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="1005171141"/>
+					</object>
+					<int key="connectionID">1119</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
 						<string key="label">checkForUpdates:</string>
 						<reference key="source" ref="56197990"/>
 						<reference key="destination" ref="609285721"/>
@@ -1689,6 +1724,8 @@
 							<reference ref="203215933"/>
 							<reference ref="149633026"/>
 							<reference ref="160212896"/>
+							<reference ref="908528583"/>
+							<reference ref="1005171141"/>
 						</array>
 						<reference key="parent" ref="712013196"/>
 					</object>
@@ -1949,6 +1986,7 @@
 							<reference ref="796623023"/>
 							<reference ref="170029498"/>
 							<reference ref="199801516"/>
+							<reference ref="11829177"/>
 						</array>
 						<reference key="parent" ref="490565018"/>
 					</object>
@@ -2057,6 +2095,21 @@
 						<reference key="object" ref="199801516"/>
 						<reference key="parent" ref="135398297"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1117</int>
+						<reference key="object" ref="908528583"/>
+						<reference key="parent" ref="167382952"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1118</int>
+						<reference key="object" ref="1005171141"/>
+						<reference key="parent" ref="167382952"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1120</int>
+						<reference key="object" ref="11829177"/>
+						<reference key="parent" ref="135398297"/>
+					</object>
 				</array>
 			</object>
 			<dictionary class="NSMutableDictionary" key="flattenedProperties">
@@ -2158,6 +2211,17 @@
 					</object>
 				</object>
 				<string key="1114.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="1117.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="1118.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<object class="NSMutableDictionary" key="1120.IBAttributePlaceholdersKey">
+					<string key="NS.key.0">ToolTip</string>
+					<object class="IBToolTipAttribute" key="NS.object.0">
+						<string key="name">ToolTip</string>
+						<reference key="object" ref="11829177"/>
+						<string key="toolTip">Display copy-protected shows on TiVo,  (still not accessible)</string>
+					</object>
+				</object>
+				<string key="1120.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="129.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="130.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="131.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2320,7 +2384,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">1116</int>
+			<int key="maxID">1120</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes"/>
 		<int key="IBDocument.localizationMode">0</int>

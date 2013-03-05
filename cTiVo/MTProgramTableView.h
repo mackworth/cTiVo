@@ -12,7 +12,7 @@
 @class MTTiVoManager, MTMainWindowController;
 
 
-@interface MTProgramTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingSource, MTTableViewProtocol>{
+@interface MTProgramTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingSource, MTTableViewProtocol, NSControlTextEditingDelegate>{
     IBOutlet MTMainWindowController *myController;
 	MTTiVoManager *tiVoManager;
     NSTableColumn *tiVoColumnHolder;
@@ -20,8 +20,11 @@
 
 @property (nonatomic, retain) NSArray *sortedShows;
 @property (nonatomic, retain) NSString *selectedTiVo;
+@property (assign) IBOutlet NSTextField *findLabel;
+@property (assign) IBOutlet NSTextField *findText; //filter for displaying found subset of programs
 
 -(NSArray *)sortedShows;
 -(IBAction)selectTivo:(id)sender;
+-(IBAction)findShows:(id)sender;
 
 @end

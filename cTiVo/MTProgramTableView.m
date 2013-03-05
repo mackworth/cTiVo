@@ -112,8 +112,61 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
+#pragma find/filter support
 
 #pragma mark - Table Delegate Protocol
+
+-(void) showFindField: (BOOL) show {
+	[self.findText setHidden:!show];
+	[self.findText setEnabled:show];
+	[self.findLabel setHidden:!show];
+	if (!show) {
+		self.findText.stringValue = @"";
+		[self reloadData];
+	}
+}
+
+- (BOOL)isTextFieldInFocus:(NSTextField *)textField
+{
+	NSResponder *firstResponder = [[textField window] firstResponder];
+	BOOL inFocus = ([firstResponder isKindOfClass:[NSTextView class]]
+			   && [[textField window] fieldEditor:NO forObject:nil]!=nil
+			   && [textField isEqualTo:(id)((NSTextView *)firstResponder).delegate]
+					 );
+	
+	return inFocus;
+}
+
+-(IBAction)findShows:(id)sender {
+	if ([self isTextFieldInFocus:self.findText]) {
+		[self.window makeFirstResponder:nil];
+		[self showFindField:NO];
+	} else {
+		[self showFindField:YES];
+		[self.window makeFirstResponder:self.findText];
+	}
+}
+
+- (void)controlTextDidChange:(NSNotification *) notification {
+	if (notification.object != self.findText) {
+		DDLogMajor(@"Error invalid textField %@", notification.object);
+		return;
+	}
+	DDLogVerbose(@"FindText = %@",self.findText.stringValue);
+	[self reloadData];
+}
+
+-(void)textDidEndEditing:(NSNotification *) notification {
+	if (notification.object != self.findText) {
+		DDLogMajor(@"Error invalid textField %@", notification.object);
+		return;
+	}
+	int movementCode = notification.userInfo[@"NSTextMovement"];
+	DDLogVerbose(@"Ending FindText = %@",self.findText.stringValue);
+	if (movementCode == NSCancelTextMovement || [self.findText.stringValue isEqualToString:@""]) {
+		[self showFindField:NO];
+	}
+}
 
 -(IBAction)selectTivo:(id)sender
 {
@@ -145,19 +198,25 @@ __DDLOGHERE__
 {
 	if (!_sortedShows) {
 		DDLogVerbose(@"Re-sorting Program table");
-		NSPredicate *protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
-		if ([[[NSUserDefaults standardUserDefaults] objectForKey:kMTShowCopyProtected] boolValue]) {
-			protectedPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
-				return YES;
-			}];
+		NSPredicate *yesPredicate =	[NSPredicate predicateWithValue:YES];
+
+		NSPredicate *protectedPredicate = yesPredicate;
+		if ( ! [[[NSUserDefaults standardUserDefaults] objectForKey:kMTShowCopyProtected] boolValue]) {
+			protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
 		}
-		NSPredicate *tiVoPredicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
-			return YES;
-		}];
+		
+		NSPredicate *findPredicate = yesPredicate;
+		if (self.findText.stringValue.length > 0) {
+			findPredicate = [NSPredicate predicateWithFormat:@"showTitle contains[cd] %@",self.findText.stringValue];
+		}
+		
+		NSPredicate *tiVoPredicate = yesPredicate;
 		if (self.selectedTiVo && [tiVoManager foundTiVoNamed:self.selectedTiVo] && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
 			tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",self.selectedTiVo];
 		}
-		self.sortedShows = [[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate] filteredArrayUsingPredicate:protectedPredicate] sortedArrayUsingDescriptors:self.sortDescriptors];
+							 
+		self.sortedShows = [[[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate] 			filteredArrayUsingPredicate:findPredicate] filteredArrayUsingPredicate:protectedPredicate]
+				sortedArrayUsingDescriptors:self.sortDescriptors];
 	}
 	return _sortedShows;
 }

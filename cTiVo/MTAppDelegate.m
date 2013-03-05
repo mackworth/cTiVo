@@ -310,6 +310,10 @@ __DDLOGHERE__
 	return;
 	
 }
+-(IBAction)findShows:(id)sender {
+	[[mainWindowController tiVoShowTable] findShows:sender];
+}
+
 
 #pragma mark - Preference pages
 -(IBAction)editFormats:(id)sender
