@@ -84,6 +84,8 @@ __DDLOGHERE__
     [_addToiTunes release]; _addToiTunes = nil;
     [_simultaneousEncode release]; _simultaneousEncode = nil;
     [_encodeFormat release]; _encodeFormat = nil;
+    [_includeSuggestions release]; _includeSuggestions = nil;
+    [_includeAPMMetaData release]; _includeAPMMetaData = nil;
     [super dealloc];
 }
 @end
@@ -126,10 +128,13 @@ __DDLOGHERE__
 - (MTSubscription *) findShow: (MTTiVoShow *) show {
 	NSString * seriesSearchString = show.seriesTitle;
 	if (!seriesSearchString) return nil;
+	BOOL isNotSuggestion = ! show.isSuggestion;
     for (MTSubscription * possMatch in self) {
-        if ([possMatch.seriesTitle localizedCaseInsensitiveCompare:seriesSearchString] == NSOrderedSame) {
-			DDLogVerbose(@"found show %@ in subscription %@", show, possMatch);
-            return possMatch;
+        if (isNotSuggestion || possMatch.includeSuggestions.boolValue  ) {
+			if ([possMatch.seriesTitle localizedCaseInsensitiveCompare:seriesSearchString] == NSOrderedSame) {
+				DDLogVerbose(@"found show %@ in subscription %@", show, possMatch);
+				return possMatch;
+			}
         }
     }
     return nil;
@@ -193,6 +198,7 @@ __DDLOGHERE__
 	MTSubscription *newSub = [[MTSubscription new] autorelease];
 	newSub.seriesTitle = tivoShow.seriesTitle;
 	newSub.lastRecordedTime = earlierTime;
+	newSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
 	[self addObject:newSub];
 	return newSub;
 }
@@ -282,7 +288,9 @@ __DDLOGHERE__
                                                     
         tempSub.simultaneousEncode = sub[kMTSubscribedSimulEncode];
         if (tempSub.simultaneousEncode ==nil) tempSub.simultaneousEncode = [NSNumber numberWithBool: ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode] && tempSub.encodeFormat.canSimulEncode)];
-        DDLogVerbose(@"Loaded Sub: %@ from %@",tempSub, sub);
+		tempSub.includeSuggestions = sub[kMTSubscribedIncludeSuggestions];
+		if (tempSub.includeSuggestions ==nil) tempSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
+		DDLogVerbose(@"Loaded Sub: %@ from %@",tempSub, sub);
         [self addObject:tempSub];
     }
 }
@@ -296,6 +304,7 @@ __DDLOGHERE__
                                   sub.lastRecordedTime, kMTSubscribedDate,
                                   sub.addToiTunes, kMTSubscribediTunes,
                                   sub.simultaneousEncode, kMTSubscribedSimulEncode,
+                                  sub.includeSuggestions, kMTSubscribedIncludeSuggestions,
                                   nil];
 		DDLogVerbose(@"Saving Sub: %@ ",tempSub);
 		[tempArray addObject:tempSub];
@@ -304,20 +313,6 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
 }
 
-/*
-- (void)saveSubscriptions {
-    NSData *myEncodedObject = [NSKeyedArchiver archivedDataWithRootObject:self];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:myEncodedObject forKey:@"myEncodedObjectKey"];
-}
-
-- (MyCustomObject *)loadCustomObjectWithKey:(NSString *)key {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSData *myEncodedObject = [defaults objectForKey:key];
-    MyCustomObject *obj = (MyCustomObject *)[NSKeyedUnarchiver unarchiveObjectWithData: myEncodedObject];
-    return obj;
-}
-*/
 - (void)dealloc
 {
     

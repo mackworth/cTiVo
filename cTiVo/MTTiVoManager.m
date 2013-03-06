@@ -837,6 +837,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		MTDownload * newDownload = [[[MTDownload alloc] init] autorelease];
 		newDownload.show = thisShow;
 		newDownload.encodeFormat = [self selectedFormat];
+		newDownload.exportSubtitles = [defaults objectForKey:kMTExportSubtitles];
 		newDownload.addToiTunesWhenEncoded = newDownload.encodeFormat.canAddToiTunes &&
 											[defaults boolForKey:kMTiTunesSubmit];
 		newDownload.simultaneousEncode = newDownload.encodeFormat.canSimulEncode &&

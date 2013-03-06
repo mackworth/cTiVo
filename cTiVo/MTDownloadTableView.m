@@ -221,6 +221,7 @@ __DDLOGHERE__
 		NSTableCellView *thisCell = [[[NSTableCellView alloc] initWithFrame:NSMakeRect(0, -2, thisColumn.width, 22)] autorelease];
 		thisCell.imageView = [[NSImageView alloc] initWithFrame:thisCell.frame];
 		[thisCell addSubview:thisCell.imageView];
+		[thisCell.imageView setAutoresizingMask: NSViewMinXMargin | NSViewMaxXMargin];
 		thisCell.identifier = identifier;
 		result = thisCell;
     } else {

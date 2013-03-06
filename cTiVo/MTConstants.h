@@ -70,6 +70,7 @@
 #define kMTSubscribediTunes @"addToiTunes"
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
 #define kMTSubscribedSkipCommercials @"skipCommercials"
+#define kMTSubscribedIncludeSuggestions @"includeSuggestions"
 
 //Download queue userDefaults
 #define kMTQueue      @"Queue"
@@ -126,6 +127,7 @@
 #define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
 #define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
+#define kMTShowSuggestions @"ShowSuggestions"		// Whether to display Tivo Suggestions (and to subscribe thereto)
 #define kMTSaveTmpFiles @"SaveTmpFiles"				// Turn off AutoDelete of intermediate files (to make debugging encoders easier)
 #define kMTFileNameFormat @"FileNameFormat"			//printf pattern for filenames
 #define kMTFileNameFormatNull @"FileNameFormatNull"		//printf pattern for filenames for empty fields

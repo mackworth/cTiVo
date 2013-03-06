@@ -44,7 +44,7 @@
                                     *idGuidSource;
 
 @property (nonatomic, retain) NSNumber  *protectedShow,  //really BOOLs
-										*inProgress,
+										*inProgress,      //Is Tivo currently recording this show
 										*isHD;
 @property					  double fileSize;  //Size on TiVo;
 
@@ -76,6 +76,7 @@
 @property (nonatomic, readonly)	NSString *episodeGenre;
 
 @property (nonatomic, readonly) BOOL    isMovie;
+@property (nonatomic, readonly) BOOL    isSuggestion;
 @property (nonatomic, readonly) NSString *idString,
 										*combinedChannelString,
 										*lengthString,

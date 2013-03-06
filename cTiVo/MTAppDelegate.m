@@ -136,6 +136,7 @@ __DDLOGHERE__
 	
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
 										  @NO, kMTShowCopyProtected,
+										  @YES, kMTShowSuggestions,
 										  @NO, kMTPreventSleep,
 										  @kMTMaxDownloadRetries, kMTNumDownloadRetries,
 										  nil];

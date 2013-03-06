@@ -23,6 +23,7 @@
         _checkBox = [[[MTCheckBox alloc] initWithFrame:frame] autorelease];
         [_checkBox setButtonType:NSSwitchButton];
         [self addSubview:_checkBox];
+		[_checkBox setAutoresizingMask:NSViewMinXMargin | NSViewMaxXMargin ];
         [_checkBox setTarget:target];
         [_checkBox setAction:selector];
         [_checkBox setEnabled:NO];

@@ -32,6 +32,7 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowCopyProtected options:NSKeyValueChangeSetting context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowSuggestions options:NSKeyValueChangeSetting context:nil];
 	
 	[self  setDraggingSourceOperationMask:NSDragOperationMove forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
@@ -87,6 +88,9 @@ __DDLOGHERE__
 	[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 	if ([keyPath compare:kMTShowCopyProtected] == NSOrderedSame) {
 		DDLogDetail(@"User changed ShowCopyProtected menu item");
+ 		[self reloadData];
+	} else 	if ([keyPath compare:kMTShowSuggestions] == NSOrderedSame) {
+		DDLogDetail(@"User changed ShowSuggestions menu item");
  		[self reloadData];
 	}
 }
@@ -205,6 +209,11 @@ __DDLOGHERE__
 			protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
 		}
 		
+		NSPredicate *suggestedPredicate = yesPredicate;
+		if ( ! [[[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions] boolValue]) {
+			suggestedPredicate = [NSPredicate predicateWithFormat:@"isSuggestion == NO"];
+		}
+		
 		NSPredicate *findPredicate = yesPredicate;
 		if (self.findText.stringValue.length > 0) {
 			findPredicate = [NSPredicate predicateWithFormat:@"showTitle contains[cd] %@",self.findText.stringValue];
@@ -215,7 +224,10 @@ __DDLOGHERE__
 			tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",self.selectedTiVo];
 		}
 							 
-		self.sortedShows = [[[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate] 			filteredArrayUsingPredicate:findPredicate] filteredArrayUsingPredicate:protectedPredicate]
+		self.sortedShows = [[[[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate]
+				   filteredArrayUsingPredicate:findPredicate]
+				   filteredArrayUsingPredicate:protectedPredicate]
+				   filteredArrayUsingPredicate:suggestedPredicate]
 				sortedArrayUsingDescriptors:self.sortDescriptors];
 	}
 	return _sortedShows;

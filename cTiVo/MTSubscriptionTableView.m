@@ -116,6 +116,16 @@ __DDLOGHERE__
     [super dealloc];
 }
 
+-(void) changeSuggestions: (id) sender {
+	MTCheckBox *checkbox = sender;
+   //updating an individual show in download queue
+	MTSubscription * subscription = (MTSubscription *)checkbox.owner;
+	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSOnState];
+	subscription.includeSuggestions = newVal;
+	[tiVoManager.subscribedShows saveSubscriptions];
+}
+
+
 #pragma mark - Table Delegate Protocol
 
 -(void)tableViewSelectionDidChange:(NSNotification *)notification
@@ -167,6 +177,10 @@ __DDLOGHERE__
         result = thisCell;
     } else if([identifier isEqualToString: @"Subtitles"]) {
         MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSubtitle:)] autorelease];
+        thisCell.identifier = identifier;
+        result = thisCell;
+	} else if([identifier isEqualToString: @"Suggestions"]) {
+        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:self withAction:@selector(changeSuggestions:)] autorelease];
         thisCell.identifier = identifier;
         result = thisCell;
 	} else if([identifier compare: @"FormatPopUp"] == NSOrderedSame) {
@@ -263,7 +277,12 @@ static NSDateFormatter *dateFormatter;
         [checkBox setOn: thisSubscription.includeAPMMetaData.boolValue && thisSubscription.encodeFormat.canAtomicParsley];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = thisSubscription.encodeFormat.canAtomicParsley;
-    }
+	} else if([tableColumn.identifier isEqualToString: @"Suggestions"]) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setOn: thisSubscription.includeSuggestions.boolValue];
+        checkBox.owner = thisSubscription;
+		checkBox.enabled = YES;
+	}
 	
     // return the result.
     return result;

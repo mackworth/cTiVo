@@ -36,6 +36,7 @@
 
 @synthesize seriesTitle		 = _seriesTitle,
 			episodeTitle	 = _episodeTitle,
+			imageString		 = _imageString,
 			tempTiVoName     = _tempTiVoName;
 
 __DDLOGHERE__
@@ -572,6 +573,14 @@ __DDLOGHERE__
 			[_originalAirDateNoTime release];
 			_originalAirDateNoTime = [movieYear retain];
 		}
+	}
+}
+
+-(void) setImageString:(NSString *)imageString {
+	if (imageString != _imageString) {
+		[_imageString release];
+		_imageString = [imageString retain];
+		_isSuggestion = [@"suggestion-recording" isEqualToString:imageString];
 	}
 }
 
