@@ -1495,10 +1495,10 @@ __DDLOGHERE__
 
 #pragma mark - Misc Support Functions
 
--(void)sendNotification
+-(void)rescheduleOnMain
 {
-	NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:self.show.tiVo];
-	[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:4.0];
+	writingData = NO;
+	[self performSelectorOnMainThread:@selector(rescheduleShowWithDecrementRetries:) withObject:@YES waitUntilDone:YES];
 }
 
 -(void)writeData
@@ -1515,10 +1515,8 @@ __DDLOGHERE__
 			data = [bufferFileReadHandle readDataOfLength:chunkSize];
 		}
 		@catch (NSException *exception) {
-			writingData = NO;
-			DDLogDetail(@"buffer read fail; rescheduling");
-			[self rescheduleShowWithDecrementRetries:@(YES)];
-			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
+			[self rescheduleOnMain];
+			DDLogDetail(@"buffer read fail:%@; rescheduling", exception.reason);
 			return;
 		}
 		@finally {
@@ -1530,10 +1528,8 @@ __DDLOGHERE__
 			[downloadFileHandle writeData:data];
 		}
 		@catch (NSException *exception) {
-			writingData = NO;
-			DDLogDetail(@"download write fail; rescheduling");
-			[self rescheduleShowWithDecrementRetries:@(YES)];
-			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
+			[self rescheduleOnMain];
+			DDLogDetail(@"download write fail: %@; rescheduling", exception.reason);
 			return;
 		}
 		@finally {
@@ -1546,10 +1542,8 @@ __DDLOGHERE__
 			data = [bufferFileReadHandle readDataOfLength:chunkSize];
 		}
 		@catch (NSException *exception) {
-			writingData = NO;
-			DDLogDetail(@"buffer read fail2; rescheduling");
-			[self rescheduleShowWithDecrementRetries:@(YES)];
-			[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
+			[self rescheduleOnMain];
+			DDLogDetail(@"buffer read fail2: %@; rescheduling", exception.reason);
 			return;
 		}
 		@finally {
@@ -1560,10 +1554,8 @@ __DDLOGHERE__
 				[downloadFileHandle writeData:data];
 			}
 			@catch (NSException *exception) {
-				writingData = NO;
-				DDLogDetail(@"download write fail2; rescheduling");
-				[self rescheduleShowWithDecrementRetries:@(YES)];
-				[self performSelectorOnMainThread:@selector(sendNotification) withObject:nil waitUntilDone:NO];
+				[self rescheduleOnMain];
+				DDLogDetail(@"download write fail2: %@; rescheduling", exception.reason);
 				return;
 			}
 			@finally {

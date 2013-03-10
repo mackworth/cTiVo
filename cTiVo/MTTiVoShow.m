@@ -497,7 +497,7 @@ __DDLOGHERE__
 }
 
 -(NSString*) imageString {
-	if (self.protectedShow.boolValue) {
+	if (self.protectedShow.boolValue && !self.inProgress) {
 		if (self.fileSize > 0) {
 			return @"copyright";
 		} else {

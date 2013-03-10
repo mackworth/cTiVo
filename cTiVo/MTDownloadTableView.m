@@ -219,7 +219,7 @@ __DDLOGHERE__
 		result = thisCell;
 	} else if([identifier isEqualToString: @"icon"]) {
 		NSTableCellView *thisCell = [[[NSTableCellView alloc] initWithFrame:NSMakeRect(0, -2, thisColumn.width, 22)] autorelease];
-		thisCell.imageView = [[NSImageView alloc] initWithFrame:thisCell.frame];
+		thisCell.imageView = [[[NSImageView alloc] initWithFrame:thisCell.frame] autorelease];
 		[thisCell addSubview:thisCell.imageView];
 		[thisCell.imageView setAutoresizingMask: NSViewMinXMargin | NSViewMaxXMargin];
 		thisCell.identifier = identifier;

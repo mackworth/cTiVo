@@ -17,6 +17,7 @@
 
 @interface MTMainWindowController ()
 
+@property (nonatomic, retain) NSSound *trashSound;
 @end
 
 @implementation MTMainWindowController
@@ -424,9 +425,9 @@ __DDLOGHERE__
 }
 
 -(void) playTrashSound {
-	NSSound *systemSound = [[NSSound alloc] initWithContentsOfFile:@"/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/dock/drag to trash.aif" byReference:YES];
-	if (systemSound) {
-		[systemSound play];
+	self.trashSound = [[[NSSound alloc] initWithContentsOfFile:@"/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/dock/drag to trash.aif" byReference:YES]autorelease];
+	if (_trashSound) {
+		[self.trashSound play];
 	}
 }
 
