@@ -42,7 +42,8 @@
     double dataDownloaded;
     NSTask *encoderTask, *decrypterTask, *commercialTask, *captionTask, *apmTask;
 	NSURLConnection *activeURLConnection;
-	NSPipe *pipe1, *pipe2;
+	NSPipe *pipe1, *pipe2, *encodingPipe, *subtitlePipe;
+    NSArray *decryptStreamProcessingPipes;
 	BOOL volatile writingData, downloadingURL, pipingData, isCanceled;
 	off_t readPointer, writePointer;
     NSDate *previousCheck;
@@ -82,6 +83,9 @@ __DDLOGHERE__
 		pipingData = NO;
         pipe1 = nil;
         pipe2 = nil;
+        subtitlePipe = nil;
+        encodingPipe = nil;
+        decryptStreamProcessingPipes = nil;
 		_genTextMetaData = nil;
 		_genXMLMetaData = nil;
 		_includeAPMMetaData = nil;
@@ -513,6 +517,13 @@ __DDLOGHERE__
         [pipe2 release];
 		pipe2 = nil;
     }
+    if(decryptStreamProcessingPipes){
+        [decryptStreamProcessingPipes release];
+        decryptStreamProcessingPipes = nil;
+		encodingPipe = nil;
+		subtitlePipe = nil;
+    }
+
 }
 
 -(void)cleanupFiles
@@ -756,6 +767,14 @@ __DDLOGHERE__
         //Things require uniquely for simultaneous download
         pipe1 = [[NSPipe pipe] retain];
         pipe2 = [[NSPipe pipe] retain];
+        NSMutableArray *pipeArray = [NSMutableArray array];
+        encodingPipe = [NSPipe pipe];
+        [pipeArray addObject:encodingPipe];
+        if (self.exportSubtitles) {
+            subtitlePipe = [NSPipe pipe];
+            [pipeArray addObject:subtitlePipe];
+        }
+        decryptStreamProcessingPipes = [[NSArray alloc] initWithArray:pipeArray];
 		downloadFileHandle = [pipe1 fileHandleForWriting];
 		DDLogVerbose(@"downloadFileHandle %@ for %@",downloadFileHandle,self);
         _bufferFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/buffer%@.bin",baseFileName] retain];
@@ -777,14 +796,14 @@ __DDLOGHERE__
         [fm createFileAtPath:commercialLogFilePath contents:[NSData data] attributes:nil];
         commercialLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:commercialLogFilePath] retain];
         commercialLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:commercialLogFilePath] retain];
-        captionFilePath = [[NSString stringWithFormat:@"%@/%@.srt",downloadDir ,baseFileName] retain];
-        captionLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/caption%@.txt",baseFileName] retain];
-        [fm createFileAtPath:captionLogFilePath contents:[NSData data] attributes:nil];
-        captionLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:captionLogFilePath] retain];
-        captionLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:captionLogFilePath] retain];
         
     }
     
+    captionFilePath = [[NSString stringWithFormat:@"%@/%@.srt",downloadDir ,baseFileName] retain];
+    captionLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/caption%@.txt",baseFileName] retain];
+    [fm createFileAtPath:captionLogFilePath contents:[NSData data] attributes:nil];
+    captionLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:captionLogFilePath] retain];
+    captionLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:captionLogFilePath] retain];
     encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/encoding%@.txt",baseFileName] retain];
     [fm createFileAtPath:encodeLogFilePath contents:[NSData data] attributes:nil];
     encodeLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:encodeLogFilePath] retain];
@@ -911,21 +930,26 @@ __DDLOGHERE__
         [decrypterTask setStandardInput:pipe1];
         [decrypterTask setStandardOutput:pipe2];
 		
-		//		if (self.exportSubtitles) {
-		//			captionTask = [[NSTask alloc] init];
-		//			[captionTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"ccextractor" ofType:@""]];
-		//			[captionTask setStandardInput:pipe2];
-		//			[captionTask setStandardOutput:pipe3];
-		//			[captionTask setStandardError:captionLogFileHandle];
-		//			NSArray * captionArgs = [NSMutableArray array];
-		//			DDLogVerbose(@"captionArgs: %@",captionArgs);
-		//
-		//			if (_encodeFormat.captionOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.captionOptions]];
-		//			//if (_encodeFormat.ccextractionOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.ccextractionOptions]];
-		//			DDLogVerbose(@"ccextraction args: %@",arguments);
-		//			[captionTask setArguments:captionArgs];
-		//
-		//		}
+//		This is ready for multiple pipes once ccextractor is fixed
+		if (self.exportSubtitles) {
+			captionTask = [[NSTask alloc] init];
+			[captionTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"ccextractor" ofType:@""]];
+			[captionTask setStandardInput:subtitlePipe];
+			[captionTask setStandardOutput:captionLogFileHandle];
+			[captionTask setStandardError:captionLogFileHandle];
+			NSMutableArray * captionArgs = [NSMutableArray array];
+			
+            if (_encodeFormat.captionOptions.length) [captionArgs addObjectsFromArray:[self getArguments:_encodeFormat.captionOptions]];
+
+            [captionArgs addObject:@"-s"];
+            [captionArgs addObject:@"-debug"];
+            [captionArgs addObject:@"-"];
+            [captionArgs addObject:@"-o"];
+            [captionArgs addObject:captionFilePath ];
+			NSLog(@"captionArgs: %@",captionArgs);
+			[captionTask setArguments:captionArgs];
+
+		}
 		
 		
 		encoderTask = [[NSTask alloc] init];
@@ -933,17 +957,17 @@ __DDLOGHERE__
 		NSArray * encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:_encodeFilePath];
 		DDLogVerbose(@"encoderArgs: %@",encoderArgs);
 		[encoderTask setArguments:encoderArgs];
-		//		if (self.exportSubtitles) {
-		//			[encoderTask setStandardInput:pipe3];
-		//		} else {
-		[encoderTask setStandardInput:pipe2];
-		//		}
+		[encoderTask setStandardInput:encodingPipe];
 		[encoderTask setStandardOutput:encodeLogFileHandle];
 		[encoderTask setStandardError:encodeLogFileHandle];
         
 		[decrypterTask launch];
-		//		if (self.exportSubtitles) [captionTask launch];
 		[encoderTask launch];
+		if (captionTask) {
+			[captionTask launch];
+		}
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tee:) name:NSFileHandleReadCompletionNotification object:[pipe2 fileHandleForReading]];
+		[[pipe2 fileHandleForReading] readInBackgroundAndNotify];
 		
         _isSimultaneousEncoding = YES;
     }
@@ -954,6 +978,24 @@ __DDLOGHERE__
 	previousProcessProgress = 0.0;
 	[activeURLConnection start];
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
+}
+
+-(void)tee:(NSNotification *)notification
+{
+//	NSLog(@"Got read for tee ");
+	NSData *readData = notification.userInfo[NSFileHandleNotificationDataItem];
+	if (readData.length && !isCanceled) {
+        for (NSPipe *pipe in decryptStreamProcessingPipes) {
+//			NSLog(@"Writing data on %@",pipe == subtitlePipe ? @"subtitle" : @"encoder");
+            if (!isCanceled) [[pipe fileHandleForWriting] writeData:readData];
+        }
+		if (!isCanceled) [[pipe2 fileHandleForReading] readInBackgroundAndNotify];
+
+	} else {
+        for (NSPipe *pipe in decryptStreamProcessingPipes) {
+            [[pipe fileHandleForWriting] closeFile];
+        }
+	}
 }
 
 
@@ -1294,7 +1336,7 @@ __DDLOGHERE__
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 	if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
 		DDLogReport(@" %@ File %@ not found after encoding complete",self, self.encodeFilePath );
-		[self rescheduleShowWithDecrementRetries:@YES];
+		[self rescheduleShowWithDecrementRetries:@(YES)];
 		
 	} else {
 		[self writeMetaDataFiles];
@@ -1380,6 +1422,9 @@ __DDLOGHERE__
     }
     if(encoderTask && [encoderTask isRunning]) {
         [encoderTask terminate];
+    }
+    if(captionTask && [captionTask isRunning]) {
+        [captionTask terminate];
     }
     if(commercialTask && [commercialTask isRunning]) {
         [commercialTask terminate];
@@ -1627,7 +1672,7 @@ __DDLOGHERE__
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     DDLogMajor(@"URL Connection Failed with error %@",error);
-	[self rescheduleShowWithDecrementRetries:@(YES)];
+	[self performSelectorOnMainThread:@selector(rescheduleShowWithDecrementRetries:) withObject:@(YES) waitUntilDone:NO];
 }
 
 #define kMTMinTiVoFileSize 100000

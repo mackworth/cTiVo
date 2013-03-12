@@ -27,7 +27,6 @@
 		1EABE6F416B0A254004DDB61 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
-		1EFD685B16D19AA100CC36E5 /* ccextractor in Resources */ = {isa = PBXBuildFile; fileRef = 1EFD685A16D19AA100CC36E5 /* ccextractor */; };
 		1EFD685D16D200FF00CC36E5 /* AtomicParsley in Resources */ = {isa = PBXBuildFile; fileRef = 1EFD685C16D200FF00CC36E5 /* AtomicParsley */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
 		D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */; };
@@ -38,6 +37,7 @@
 		D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
 		D22E4B1916B76DCD00619A6E /* MTAdvPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D22E4B1716B76DCD00619A6E /* MTAdvPreferencesViewController.xib */; };
 		D235BF01168F52DE00320FA5 /* MTSubscriptionTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */; };
+		D240EF5C16EEEC3F00635E53 /* ccextractor in Resources */ = {isa = PBXBuildFile; fileRef = 1EFD685A16D19AA100CC36E5 /* ccextractor */; };
 		D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */ = {isa = PBXBuildFile; fileRef = D24A8D0D16A5F3DC00DFF890 /* catToFile */; };
 		D257C6E41697400700EBE30B /* MTFormatPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */; };
 		D257C6E9169740A000EBE30B /* MTPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */; };
@@ -572,7 +572,6 @@
 				1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */,
 				1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */,
 				1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */,
-				1EFD685B16D19AA100CC36E5 /* ccextractor in Resources */,
 				1EFD685D16D200FF00CC36E5 /* AtomicParsley in Resources */,
 				1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */,
 				1E684A7C16E2C50B000F5C6E /* empty.png in Resources */,
@@ -582,6 +581,7 @@
 				1E684A8016E2C50B000F5C6E /* suggestion-recording.png in Resources */,
 				1E684A8716E3A010000F5C6E /* questionmark.png in Resources */,
 				1E684A8B16E3A338000F5C6E /* deleted.png in Resources */,
+				D240EF5C16EEEC3F00635E53 /* ccextractor in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
