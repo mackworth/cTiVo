@@ -1,11 +1,21 @@
-#!/bin/sh
-if [ '$1' == "-" ]
-then
-eval "cat - > '$2'"
-elif [ '$2' == "-" ]
-then
-eval "cat - > '$1'"
-else
-eval "cat '$1' > '$2'"
-echo "cat '$1' > '$2'"
-fi
+#!/usr/bin/perl
+$stdin = 0;
+if ($ARGV[0] eq "-") {
+	$stdin = 1;
+	open dest, ">", $ARGV[1];
+} elsif ($ARGV[1] eq "-" ) {
+	$stdin = 1;
+	open dest, ">", $ARGV[0];
+} else {
+	open source, "<", $ARGV[0];
+	open dest, ">", $ARGV[1];
+}
+if($stdin == 0) {
+	while(<source>) {
+		print dest;
+	}
+} else {
+	while(<STDIN>) {
+		print dest;
+	}
+}
