@@ -946,7 +946,6 @@ __DDLOGHERE__
             [captionArgs addObject:@"-"];
             [captionArgs addObject:@"-o"];
             [captionArgs addObject:captionFilePath ];
-			NSLog(@"captionArgs: %@",captionArgs);
 			[captionTask setArguments:captionArgs];
 
 		}
@@ -987,14 +986,56 @@ __DDLOGHERE__
 	if (readData.length && !isCanceled) {
         for (NSPipe *pipe in decryptStreamProcessingPipes) {
 //			NSLog(@"Writing data on %@",pipe == subtitlePipe ? @"subtitle" : @"encoder");
-            if (!isCanceled) [[pipe fileHandleForWriting] writeData:readData];
+            if (!isCanceled){
+				@try {
+					[[pipe fileHandleForWriting] writeData:readData];
+				}
+				@catch (NSException *exception) {
+					DDLogDetail(@"download write fileHandleForWriting fail: %@", exception.reason);
+					if (!isCanceled) {
+						[self rescheduleOnMain];
+						DDLogDetail(@"Rescheduling");
+					}
+					return;
+					
+				}
+				@finally {
+				}
+			}
         }
-		if (!isCanceled) [[pipe2 fileHandleForReading] readInBackgroundAndNotify];
+		if (!isCanceled) {
+			@try {
+				[[pipe2 fileHandleForReading] readInBackgroundAndNotify];
+			}
+			@catch (NSException *exception) {
+				DDLogDetail(@"download read data in background fail: %@", exception.reason);
+				if (!isCanceled) {
+					[self rescheduleOnMain];
+			}
+				return;
+				
+			}
+			@finally {
+			}
+		}
 
 	} else {
         for (NSPipe *pipe in decryptStreamProcessingPipes) {
-            [[pipe fileHandleForWriting] closeFile];
-        }
+			@try{
+				[[pipe fileHandleForWriting] closeFile];
+			}
+			@catch (NSException *exception) {
+				DDLogDetail(@"download close pipe fileHandleForWriting fail: %@", exception.reason);
+				if (!isCanceled) {
+					[self rescheduleOnMain];
+					DDLogDetail(@"Rescheduling");
+				}
+				return;
+				
+			}
+			@finally {
+			}
+       }
 	}
 }
 
