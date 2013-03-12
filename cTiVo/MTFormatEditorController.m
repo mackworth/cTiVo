@@ -157,6 +157,7 @@
 
 -(void)updateForFormatChange
 {
+	self.currentFormat.name = [self checkFormatName:self.currentFormat.name];
 	[self checkShouldSave];
 	[self checkValidExecutable];
 	[self refreshFormatPopUp:nil];
@@ -200,8 +201,10 @@
 
 -(NSString *)checkFormatName:(NSString *)name
 {
+	if (!name) return nil;
 	//Make sure the title isn't the same and if it is add a -1 modifier
     for (MTFormat *f in _formatList) {
+		if (f == self.currentFormat) break;  //checking our own name
 		if ([name caseInsensitiveCompare:f.name] == NSOrderedSame) {
             NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
             NSTextCheckingResult *result = [ending firstMatchInString:name options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, name.length)];
@@ -211,10 +214,20 @@
             } else {
                 name = [name stringByAppendingString:@"-1"];
             }
-            [self checkFormatName:name];
+           return [self checkFormatName:name];
         }
     }
 	return name;
+} 
+- (BOOL)validateValue:(id *)ioValue forKeyPath:(NSString *)inKeyPath error:(out NSError **)outError {
+	// The name must not be nil, and must be at least two characters long.
+	if ([inKeyPath isEqualToString:@"currentFormat.name"]) {
+		NSLog(@"Checking on %@",*ioValue);
+		NSString *proposedName = (NSString *)*ioValue;
+		if (proposedName == nil) return NO;
+		*ioValue = [self checkFormatName:proposedName];
+	}
+	return YES;
 }
 
 #pragma mark - UI Actions

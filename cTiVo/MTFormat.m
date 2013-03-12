@@ -57,22 +57,21 @@ __DDLOGHERE__
 		NSArray *searchPaths = [NSArray arrayWithObjects:@"/usr/local/bin/%1$@",@"/opt/local/bin/%1$@",@"/usr/local/%1$@/bin/%1$@",@"/opt/local/%1$@/bin/%1$@",@"/usr/bin/%1$@",@"%1$@", nil];
 		NSFileManager *fm = [NSFileManager defaultManager];
 		NSString *validPath = [[NSBundle mainBundle] pathForResource:self.encoderUsed ofType:@""];
-		if (validPath) {
-			return validPath;
-		}
-		for (NSString *searchPath in searchPaths) {
-			NSString * filePath = [[NSString stringWithFormat:searchPath,self.encoderUsed] stringByResolvingSymlinksInPath];
-			if ([fm fileExistsAtPath:filePath]){ //Its there now check that its executable
-				int permissions = [[fm attributesOfItemAtPath:filePath error:nil][NSFilePosixPermissions] shortValue];
-				if (permissions && 01) { //We have an executable file
-					DDLogVerbose(@"Found %@ in %@ (format %@)", self.encoderUsed, searchPath, self);
-					validPath = filePath;
-					break;
+		if (!validPath) {
+			for (NSString *searchPath in searchPaths) {
+				NSString * filePath = [[NSString stringWithFormat:searchPath,self.encoderUsed] stringByResolvingSymlinksInPath];
+				if ([fm fileExistsAtPath:filePath]){ //Its there now check that its executable
+					int permissions = [[fm attributesOfItemAtPath:filePath error:nil][NSFilePosixPermissions] shortValue];
+					if (permissions && 01) { //We have an executable file
+						DDLogVerbose(@"Found %@ in %@ (format %@)", self.encoderUsed, searchPath, self);
+						validPath = filePath;
+						break;
+					}
 				}
 			}
 		}
 		if (!validPath) DDLogMajor(@"For format %@, couldn't find %@ in %@ ", self, self.encoderUsed, searchPaths);
-		_pathForExecutable = validPath;
+		_pathForExecutable = [validPath retain];
 	}
 	return _pathForExecutable;
 }

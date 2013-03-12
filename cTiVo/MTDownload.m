@@ -1206,9 +1206,10 @@ __DDLOGHERE__
 		
 		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
 		DDLogMajor(@"Writing XML to    %@",tivoMetaPath);
-		[self.detailXML writeToFile:tivoMetaPath atomically:NO];
-		
-		if (self.genTextMetaData.boolValue) {
+		if (![self.show.detailXML writeToFile:tivoMetaPath atomically:NO]) {
+			DDLogReport(@"Couldn't write XML to file %@", tivoMetaPath);
+			
+		} else if (self.genTextMetaData.boolValue) {
 			
 			NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
 			[[NSFileManager defaultManager] createFileAtPath:textMetaPath contents:[NSData data] attributes:nil];

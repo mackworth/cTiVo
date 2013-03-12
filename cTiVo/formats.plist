@@ -949,13 +949,12 @@ audio: mp2 at 192kbs</string>
 		</dict>
 		<dict>
 			<key>edlFlag</key>
-			<string>-edl</string>
+			<string></string>
 			<key>comSkipOptions</key>
 			<string></string>
 			<key>formatDescription</key>
-			<string>for playback on AppleTV
-video: 960x540 h.264 at 2Mbps
-audio: 2-channel aac at 128kbs</string>
+			<string>Experiment in streaming
+Requires VLC in /Applications</string>
 			<key>outputFileFlag</key>
 			<string></string>
 			<key>inputFileFlag</key>
@@ -981,7 +980,7 @@ audio: 2-channel aac at 128kbs</string>
 			<key>encoderVideoOptions</key>
 			<string>VLC</string>
 			<key>filenameExtension</key>
-			<string>.mp4</string>
+			<string></string>
 			<key>name</key>
 			<string>VLC</string>
 		</dict>

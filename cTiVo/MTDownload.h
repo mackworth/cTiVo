@@ -29,7 +29,6 @@
 
 @property (nonatomic, retain) NSString *downloadDirectory;
 @property (nonatomic, retain) MTFormat *encodeFormat;
-@property (nonatomic, retain) NSData *detailXML;
 
 @property (nonatomic, retain) NSNumber *genTextMetaData,
 *genXMLMetaData,
