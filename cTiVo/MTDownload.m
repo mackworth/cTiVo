@@ -80,7 +80,7 @@ __DDLOGHERE__
 		apmTask = nil;
 		writingData = NO;
 		downloadingURL = NO;
-		pipingData = NO;
+//		pipingData = NO;
         pipe1 = nil;
         pipe2 = nil;
         subtitlePipe = nil;
@@ -1584,8 +1584,8 @@ __DDLOGHERE__
 
 -(void)rescheduleOnMain
 {
-	writingData = NO;
-	[self performSelectorOnMainThread:@selector(rescheduleShowWithDecrementRetries:) withObject:@YES waitUntilDone:YES];
+	isCanceled = YES;
+	[self performSelectorOnMainThread:@selector(rescheduleShowWithDecrementRetries:) withObject:@YES waitUntilDone:NO];
 }
 
 -(void)writeData
@@ -1604,12 +1604,11 @@ __DDLOGHERE__
 		@catch (NSException *exception) {
 			[self rescheduleOnMain];
 			DDLogDetail(@"buffer read fail:%@; rescheduling", exception.reason);
-			return;
 		}
 		@finally {
 		}
 	}
-	pipingData = YES;
+//	pipingData = YES;
 	if (!isCanceled){
 		@try {
 			[downloadFileHandle writeData:data];
@@ -1617,12 +1616,11 @@ __DDLOGHERE__
 		@catch (NSException *exception) {
 			[self rescheduleOnMain];
 			DDLogDetail(@"download write fail: %@; rescheduling", exception.reason);
-			return;
 		}
 		@finally {
 		}
 	}
-	pipingData = NO;
+//	pipingData = NO;
 	dataRead = data.length;
 	while (dataRead == chunkSize && !isCanceled) {
 		@try {
@@ -1631,11 +1629,10 @@ __DDLOGHERE__
 		@catch (NSException *exception) {
 			[self rescheduleOnMain];
 			DDLogDetail(@"buffer read fail2: %@; rescheduling", exception.reason);
-			return;
 		}
 		@finally {
 		}
-		pipingData = YES;
+//		pipingData = YES;
 		if (!isCanceled) {
 			@try {
 				[downloadFileHandle writeData:data];
@@ -1643,12 +1640,11 @@ __DDLOGHERE__
 			@catch (NSException *exception) {
 				[self rescheduleOnMain];
 				DDLogDetail(@"download write fail2: %@; rescheduling", exception.reason);
-				return;
 			}
 			@finally {
 			}
 		}
-		pipingData = NO;
+//		pipingData = NO;
 		if (isCanceled) break;
 		dataRead = data.length;
 		//		dataDownloaded += data.length;
