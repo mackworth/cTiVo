@@ -653,7 +653,7 @@ __DDLOGHERE__
 		for (MTDownload * download in draggedDLs) {
 			MTDownload * realDownload= [tiVoManager findRealDownload:download];
 			if (realDownload) [realDLs addObject:realDownload];
-			if (realDownload.isDone) [completedDownloadsBeingMoved addObject:download];
+			if (realDownload.isDone) [completedDownloadsBeingMoved addObject:realDownload];
 		}
 		
 		//Now look for reschedulings. Group could either be moving up over an active show, or moving an active show down...
@@ -670,7 +670,9 @@ __DDLOGHERE__
 						MTDownload * promotedDL = [[tiVoManager downloadQueue] objectAtIndex:i];
 						if (![realDLs containsObject:promotedDL]) {//but if it's coming with me, no need
 							if (activeDL.show.tiVo == promotedDL.show.tiVo) {
-								[self askReschedule:activeDL];
+								if (![self askReschedule:activeDL]) {
+									return NO;
+								};
 								break;  // no need to ask again
 							}
 						}
@@ -680,7 +682,9 @@ __DDLOGHERE__
 				//I'm not being moved
 				if ((insertRow <= activeRow) &&   //shows being moved above me
 					([self downloads:realDLs  contain:activeDL.show.tiVo]))  {//and one of them is on same TiVo as me
-					[self askReschedule: activeDL];
+					if (![self askReschedule: activeDL] ) {
+						return NO;
+					};
 				}
 			}
 		}
@@ -694,6 +698,8 @@ __DDLOGHERE__
 				for (MTDownload * download in completedDownloadsBeingMoved) {
 					[download prepareForDownload: YES];
 				}
+			} else {
+				return NO;
 			};
 		}
 		//reordering self (download table)

@@ -138,7 +138,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
             //Hide what the user wants
             for (NSString *name in hiddenFormatNames) {
                 MTFormat *f = [self findFormat:name];
-                f.isHidden = [NSNumber numberWithBool:YES];
+                if ([name isEqualToString:f.name]) {  //confirm find didn't return a default format
+					f.isHidden = [NSNumber numberWithBool:YES];
+				}
             }
         }
 		
@@ -664,7 +666,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
             return fd;
         }
     }
-    return nil;
+    return _formatList[0];
 }
 
 -(void)addFormatsToList:(NSArray *)formats

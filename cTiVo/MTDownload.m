@@ -906,7 +906,7 @@ __DDLOGHERE__
     [self configureFiles];
     NSURLRequest *thisRequest = [NSURLRequest requestWithURL:self.show.downloadURL];
 	//    activeURLConnection = [NSURLConnection connectionWithRequest:thisRequest delegate:self];
-    activeURLConnection = [[[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] autorelease];
+    activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
 	
 	//Now set up for either simul or sequential download
 	DDLogMajor(@"Starting %@ of %@", (_simultaneousEncode ? @"simul DL" : @"download"), _show.showTitle);

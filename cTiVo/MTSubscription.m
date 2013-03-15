@@ -281,7 +281,6 @@ __DDLOGHERE__
        tempSub.lastRecordedTime = earlierTime;
         
         tempSub.encodeFormat= [tiVoManager findFormat:sub[kMTSubscribedFormat] ];
-        if (tempSub.encodeFormat ==nil) tempSub.encodeFormat = [tiVoManager selectedFormat];
         
         tempSub.addToiTunes = sub[kMTSubscribediTunes];
         if (tempSub.addToiTunes ==nil) tempSub.addToiTunes = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit] && tempSub.encodeFormat.canAddToiTunes)];

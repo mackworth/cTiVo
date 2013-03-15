@@ -186,11 +186,10 @@
 	} else {
 		for (MTFormat *f in _formatList) {
 			MTFormat *foundFormat = [tiVoManager findFormat:f.name];
-			if (!foundFormat) { //We have a new format so we should be able to save/cancel
+			if ( ! [f.name isEqualToString:foundFormat.name]) { //We have a new format so we should be able to save/cancel
 				result = YES;
 				break;
-			}
-			if (![foundFormat isSame:f]) { //We found a format that exisit but is different.
+			} else if (![foundFormat isSame:f]) { //We found a format that exisit but is different.
 				result = YES;
 				break;
 			}
@@ -220,9 +219,7 @@
 	return name;
 } 
 - (BOOL)validateValue:(id *)ioValue forKeyPath:(NSString *)inKeyPath error:(out NSError **)outError {
-	// The name must not be nil, and must be at least two characters long.
 	if ([inKeyPath isEqualToString:@"currentFormat.name"]) {
-		NSLog(@"Checking on %@",*ioValue);
 		NSString *proposedName = (NSString *)*ioValue;
 		if (proposedName == nil) return NO;
 		*ioValue = [self checkFormatName:proposedName];
