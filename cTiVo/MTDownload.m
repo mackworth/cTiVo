@@ -44,7 +44,7 @@
 	NSURLConnection *activeURLConnection;
 	NSPipe *pipe1, *pipe2, *encodingPipe, *subtitlePipe;
     NSArray *decryptStreamProcessingPipes;
-	BOOL volatile writingData, downloadingURL, pipingData, isCanceled;
+	BOOL volatile writingData, downloadingURL, isCanceled;
 	off_t readPointer, writePointer;
     NSDate *previousCheck;
 	double previousProcessProgress;
@@ -80,7 +80,6 @@ __DDLOGHERE__
 		apmTask = nil;
 		writingData = NO;
 		downloadingURL = NO;
-//		pipingData = NO;
         pipe1 = nil;
         pipe2 = nil;
         subtitlePipe = nil;
@@ -1608,7 +1607,6 @@ __DDLOGHERE__
 		@finally {
 		}
 	}
-//	pipingData = YES;
 	if (!isCanceled){
 		@try {
 			[downloadFileHandle writeData:data];
@@ -1620,7 +1618,6 @@ __DDLOGHERE__
 		@finally {
 		}
 	}
-//	pipingData = NO;
 	dataRead = data.length;
 	while (dataRead == chunkSize && !isCanceled) {
 		@try {
@@ -1632,7 +1629,6 @@ __DDLOGHERE__
 		}
 		@finally {
 		}
-//		pipingData = YES;
 		if (!isCanceled) {
 			@try {
 				[downloadFileHandle writeData:data];
@@ -1644,7 +1640,6 @@ __DDLOGHERE__
 			@finally {
 			}
 		}
-//		pipingData = NO;
 		if (isCanceled) break;
 		dataRead = data.length;
 		//		dataDownloaded += data.length;

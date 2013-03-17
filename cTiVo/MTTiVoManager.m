@@ -200,7 +200,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		numCaptions = 0;
 		queue.maxConcurrentOperationCount = 1;
 		
-		_videoListNeedsFilling = YES;
         updatingVideoList = NO;
 		_processingPaused = @(NO);
 		self.quitWhenCurrentDownloadsComplete = @(NO);
