@@ -524,8 +524,7 @@ __DDLOGHERE__
 		if (download.skipCommercials) {  //Need to make sure that simul encode is not checked
 				download.simultaneousEncode = NO;
 		}
- 		[downloadQueueTable reloadData];
-//       [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:download];
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
 		
         MTSubscription *sub = (MTSubscription *)(checkbox.owner);
@@ -547,8 +546,7 @@ __DDLOGHERE__
 		if (download.simultaneousEncode) {  //Need to make sure that simul encode is not checked
 				download.skipCommercials = NO;
 		}
-		[downloadQueueTable reloadData];
-//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:download];
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
 		
         MTSubscription *sub = (MTSubscription *)(checkbox.owner);
