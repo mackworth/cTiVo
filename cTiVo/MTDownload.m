@@ -274,7 +274,7 @@ __DDLOGHERE__
 	_encodeFilePath = [queueEntry[kMTQueueFinalFile] retain];
 	_downloadFilePath = [queueEntry[kMTQueueDownloadFile] retain];
 	_bufferFilePath = [queueEntry[kMTQueueBufferFile] retain];
-	self.show.protectedShow = self.isDone ? @NO : @YES;
+	self.show.protectedShow = @YES; //until we matchup with show or not.
 	_genTextMetaData = [queueEntry[kMTQueueGenTextMetaData] retain]; if (!_genTextMetaData) _genTextMetaData= @(NO);
 	_genXMLMetaData = [queueEntry[kMTQueueGenXMLMetaData] retain]; if (!_genXMLMetaData) _genXMLMetaData= @(NO);
 	_includeAPMMetaData = [queueEntry[kMTQueueIncludeAPMMetaData] retain]; if (!_includeAPMMetaData) _includeAPMMetaData= @(NO);
@@ -1126,7 +1126,8 @@ __DDLOGHERE__
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
 		
-		NSString * newCommercialPath = [_downloadDirectory stringByAppendingPathComponent: [commercialFilePath lastPathComponent]] ;
+		NSString * encodeDirectory = [_encodeFilePath stringByDeletingLastPathComponent];
+		NSString * newCommercialPath = [encodeDirectory stringByAppendingPathComponent: [commercialFilePath lastPathComponent]] ;
 		[[NSFileManager defaultManager] removeItemAtPath:newCommercialPath error:nil ]; //just in case already there.
 		NSError * error = nil;
 		[[NSFileManager defaultManager] moveItemAtPath:commercialFilePath toPath:newCommercialPath error:&error];
@@ -1371,11 +1372,12 @@ __DDLOGHERE__
 }
 
 -(void) postEncodeProcessing {
-	//shared between DownloadEncode (simultaneous) and trackEncodes (non-simul)
+	//shared between trackDownloadEncode (simultaneous) and trackEncodes (non-simul)
 	_processProgress = 1.0;
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 	if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
 		DDLogReport(@" %@ File %@ not found after encoding complete",self, self.encodeFilePath );
+		[self saveCurrentLogFile];
 		[self rescheduleShowWithDecrementRetries:@(YES)];
 		
 	} else {

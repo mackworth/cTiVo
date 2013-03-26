@@ -102,7 +102,14 @@ __DDLOGHERE__
 			newTrack.videoKind = iTunesEVdKMovie;
 			newTrack.name = show.showTitle;
 		} else {
-			newTrack.videoKind = iTunesEVdKTVShow;
+			NSString * fileExtension = [[download.encodeFilePath pathExtension] uppercaseString];
+			NSSet * musicTypes =[NSSet setWithObjects:@"AAC", @"MPE",@"AIF",@"WAV",@"AIFF",@"M4A",nil];
+			BOOL audioOnly = [musicTypes containsObject:fileExtension] ;
+			if (audioOnly) {
+				newTrack.videoKind = iTunesEVdKNone;
+			} else {
+				newTrack.videoKind = iTunesEVdKTVShow;
+			}
 			newTrack.album = show.seriesTitle;
 			newTrack.albumArtist = show.seriesTitle;
 			newTrack.album = show.seriesTitle;

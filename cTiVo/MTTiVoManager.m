@@ -253,6 +253,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			DDLogDetail(@"Tivo restored previously deleted show %@",newShow);
 			[proxyDL prepareForDownload:YES];
 		}
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:proxyDL];
+
 	} else {
 		DDLogVerbose(@"Didn't find DL proxy for %@",newShow);
 	}
@@ -263,8 +265,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	for (MTDownload * download in self.downloadQueue) {
 		if(download.show.protectedShow.boolValue &&
 		   [targetTivoName isEqualToString:download.show.tiVoName]) {
-			DDLogDetail(@"Marking %@ as deleted", download.show.showTitle);
-			download.downloadStatus =@kMTStatusDeleted;
+			if (! download.isDone) {
+				DDLogDetail(@"Marking %@ as deleted", download.show.showTitle);
+				download.downloadStatus =@kMTStatusDeleted;
+			}
+			download.show.imageString = @"deleted";
 			download.show.protectedShow = @NO; //let them delete from queue
 		}
 	}

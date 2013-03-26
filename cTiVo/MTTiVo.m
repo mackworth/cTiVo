@@ -481,6 +481,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				if (download.isNew) {
 					download.downloadStatus = [NSNumber numberWithInt:kMTStatusDeleted];
 				}
+				show.imageString = @"deleted";
 			}
 		}
 		[previousShowList release]; previousShowList = nil;

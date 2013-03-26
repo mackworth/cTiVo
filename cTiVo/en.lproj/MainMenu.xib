@@ -93,7 +93,7 @@
 								</object>
 								<object class="NSMenuItem" id="888887201">
 									<reference key="NSMenu" ref="110575045"/>
-									<string key="NSTitle">Preferences</string>
+									<string key="NSTitle">Preferences...</string>
 									<string key="NSKeyEquiv">,</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -103,7 +103,7 @@
 								<object class="NSMenuItem" id="286893160">
 									<reference key="NSMenu" ref="110575045"/>
 									<bool key="NSIsAlternate">YES</bool>
-									<string key="NSTitle">Adv. Preferences</string>
+									<string key="NSTitle">Adv. Preferences...</string>
 									<string key="NSKeyEquiv">,</string>
 									<int key="NSKeyEquivModMask">1572864</int>
 									<int key="NSMnemonicLoc">2147483647</int>

@@ -356,8 +356,8 @@ __DDLOGHERE__
 	if (!_advPreferencesController) {
 		_advPreferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
 		[_advPreferencesController window];
-		MTTabViewItem *advTabViewItem = [[[MTTabViewItem alloc] initWithIdentifier:@"AdvSettinge"] autorelease];
-		advTabViewItem.label = @"Advanced Settings";
+		MTTabViewItem *advTabViewItem = [[[MTTabViewItem alloc] initWithIdentifier:@"AdvPrefs"] autorelease];
+		advTabViewItem.label = @"Advanced Preferences";
 		NSViewController *thisController = [[[MTAdvPreferencesViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil] autorelease];
 		advTabViewItem.windowController = (id)thisController;
 		[_advPreferencesController.myTabView insertTabViewItem:advTabViewItem atIndex:0];

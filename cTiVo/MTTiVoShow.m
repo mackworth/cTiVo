@@ -132,20 +132,6 @@ __DDLOGHERE__
 	[pool drain];
 }
 
--(void) saveLogFile: (NSFileHandle *) logHandle {
-	if (ddLogLevel >= LOG_LEVEL_DETAIL) {		
-		unsigned long long logFileSize = [logHandle seekToEndOfFile];
-		NSInteger backup = 2000;  //how much to log
-		if (logFileSize < backup) backup = (NSInteger)logFileSize;
-		[logHandle seekToFileOffset:(logFileSize-backup)];
-		NSData *tailOfFile = [logHandle readDataOfLength:backup];
-		if (tailOfFile.length > 0) {
-			NSString * logString = [[[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding] autorelease];
-			DDLogDetail(@"logFile: %@",  logString);
-		}
-	}
-}
-
 
 #pragma mark - Queue encoding/decoding methods for persistent queue, copy/paste, and drag/drop
 
@@ -497,7 +483,7 @@ __DDLOGHERE__
 }
 
 -(NSString*) imageString {
-	if (self.protectedShow.boolValue && !self.inProgress) {
+	if (self.protectedShow.boolValue && !self.inProgress.boolValue) {
 		if (self.fileSize > 0) {
 			return @"copyright";
 		} else {
@@ -505,7 +491,11 @@ __DDLOGHERE__
 			return @"questionmark";
 		}
 	}
-	return _imageString;
+	if (_imageString.length) {
+		return _imageString;
+	} else {
+		return @"recent-recording";
+	}
 }
 
 -(NSString*) idString {
