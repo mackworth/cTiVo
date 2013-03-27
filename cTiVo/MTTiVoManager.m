@@ -670,7 +670,13 @@ static MTTiVoManager *sharedTiVoManager = nil;
             return fd;
         }
     }
-    return _formatList[0];
+	//nobody found; let's see if one got renamed
+    for (MTFormat *fd in _formatList) {
+        if ([formatName compare:fd.formerName] == NSOrderedSame) {
+            return fd;
+        }
+    }
+	return _formatList[0];
 }
 
 -(void)addFormatsToList:(NSArray *)formats

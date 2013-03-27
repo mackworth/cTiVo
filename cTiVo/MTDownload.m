@@ -91,6 +91,7 @@ __DDLOGHERE__
 		_exportSubtitles = nil;
 		
         [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
         previousCheck = [[NSDate date] retain];
 		//Make sure /tmp/ctivo/ directory exists
 		NSString *ctivoTmp = @"/tmp/ctivo/";
@@ -350,7 +351,11 @@ __DDLOGHERE__
 	return 0;
 }
 
-
+- (void) formatMayHaveChanged{
+	//if format list is updated, we need to ensure our format still exists
+	//known bug: if name of current format changed, we will not find correct one
+	self.encodeFormat = [tiVoManager findFormat:self.encodeFormat.name];
+}
 
 #pragma mark - Set up for queuing / reset
 -(void)prepareForDownload: (BOOL) notifyTiVo {
@@ -1873,6 +1878,8 @@ __DDLOGHERE__
     [previousCheck release];
     [self deallocDownloadHandling];
 	[self removeObserver:self forKeyPath:@"downloadStatus"];
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+
 	[super dealloc];
 }
 

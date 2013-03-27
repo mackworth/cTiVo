@@ -37,6 +37,8 @@
 @property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip, canAtomicParsley;
 @property (nonatomic, readonly) NSString * pathForExecutable;
 
+@property (nonatomic, retain) NSString * formerName;//only used to update existing format objects when name is edited.
+
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format;
 
 -(NSDictionary *)toDictionary;

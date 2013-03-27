@@ -196,6 +196,7 @@ __DDLOGHERE__
 	new.mustDownloadFirst = [[_mustDownloadFirst copyWithZone:zone] autorelease];
 	new.isHidden = [[_isHidden copyWithZone:zone] autorelease];
 	new.isFactoryFormat = [[_isFactoryFormat copyWithZone:zone] autorelease];
+	new.formerName = [[_formerName copyWithZone:zone] autorelease];
 	return new;
 }
 

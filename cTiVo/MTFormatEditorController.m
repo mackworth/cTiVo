@@ -62,6 +62,7 @@
 	for (MTFormat *f in tiVoManager.formatList) {
 		MTFormat *newFormat = [[f copy] autorelease];
 		[_formatList addObject:newFormat];
+		newFormat.formerName = f.name;
 		if ([tiVoManager.selectedFormat.name compare:newFormat.name] == NSOrderedSame) {
 			self.currentFormat = newFormat;
 		}
@@ -132,7 +133,7 @@
 {
 //	[NSApp endSheet:self.window];
 //	[self.window orderOut:nil];
-	[self refreshFormatList];
+	[self refreshFormatList]; //throw away all changes
  	[self refreshFormatPopUp:nil];
 	[self updateForFormatChange];
 

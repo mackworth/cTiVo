@@ -17,6 +17,13 @@
                 encodeFormat = _encodeFormat;
 __DDLOGHERE__
 
+-(id) init {
+	if ((self = [super init])) {
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
+	}
+	return self;
+}
+
 -(BOOL) canSimulEncode {
     return self.encodeFormat.canSimulEncode;
 }
@@ -71,6 +78,11 @@ __DDLOGHERE__
         }
     }
 }
+- (void) formatMayHaveChanged{
+	//if format list is updated, we need to ensure our format still exists
+	//known bug: if name of current format changed, we will not find correct one
+	self.encodeFormat = [tiVoManager findFormat:self.encodeFormat.name];
+}
 
 -(NSString *) description {
 	return [NSString stringWithFormat:@"Subscription:%@ lastAt:%@ format:%@", self.seriesTitle, self.lastRecordedTime, self.encodeFormat];
@@ -86,6 +98,7 @@ __DDLOGHERE__
     [_encodeFormat release]; _encodeFormat = nil;
     [_includeSuggestions release]; _includeSuggestions = nil;
     [_includeAPMMetaData release]; _includeAPMMetaData = nil;
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
 @end
