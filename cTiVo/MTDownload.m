@@ -774,7 +774,7 @@ __DDLOGHERE__
         NSMutableArray *pipeArray = [NSMutableArray array];
         encodingPipe = [NSPipe pipe];
         [pipeArray addObject:encodingPipe];
-        if (self.exportSubtitles) {
+        if (self.exportSubtitles.boolValue) {
             subtitlePipe = [NSPipe pipe];
             [pipeArray addObject:subtitlePipe];
         }
@@ -939,7 +939,7 @@ __DDLOGHERE__
         [decrypterTask setStandardOutput:pipe2];
 		
 //		This is ready for multiple pipes once ccextractor is fixed
-		if (self.exportSubtitles) {
+		if (self.exportSubtitles.boolValue) {
 			captionTask = [[NSTask alloc] init];
 			[captionTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"ccextractor" ofType:@""]];
 			[captionTask setStandardInput:subtitlePipe];
@@ -950,10 +950,11 @@ __DDLOGHERE__
             if (_encodeFormat.captionOptions.length) [captionArgs addObjectsFromArray:[self getArguments:_encodeFormat.captionOptions]];
 
             [captionArgs addObject:@"-s"];
-            [captionArgs addObject:@"-debug"];
+            //[captionArgs addObject:@"-debug"];
             [captionArgs addObject:@"-"];
             [captionArgs addObject:@"-o"];
             [captionArgs addObject:captionFilePath ];
+			DDLogVerbose(@"ccExtractorArgs: %@",captionArgs);
 			[captionTask setArguments:captionArgs];
 
 		}
