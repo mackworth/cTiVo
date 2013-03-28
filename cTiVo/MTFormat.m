@@ -90,6 +90,12 @@ __DDLOGHERE__
 		self.encoderVideoOptions = @"";
 		self.encoderAudioOptions = @"";
 		self.encoderOtherOptions = @"";
+		self.encoderLateVideoOptions = @"";
+		self.encoderLateAudioOptions = @"";
+		self.encoderLateOtherOptions = @"";
+		self.encoderEarlyVideoOptions = @"";
+		self.encoderEarlyAudioOptions = @"";
+		self.encoderEarlyOtherOptions = @"";
 		self.comSkipOptions = @"";
 		self.captionOptions = @"";
 		self.inputFileFlag = @"";
@@ -136,6 +142,60 @@ __DDLOGHERE__
 		val = @"";
 	}
 	return val;
+}
+
+-(void)setEncoderVideoOptions:(NSString *)encoderVideoOptions
+{
+    if (encoderVideoOptions != _encoderVideoOptions) {
+        [_encoderVideoOptions release];
+        _encoderVideoOptions = [encoderVideoOptions retain];
+        if (_encoderVideoOptions) {
+            NSArray *earlyLateOptions = [_encoderVideoOptions componentsSeparatedByString:kMTInputLocationToken];
+            if (earlyLateOptions && earlyLateOptions.count > 0) {
+                self.encoderEarlyVideoOptions = earlyLateOptions[0];
+                self.encoderLateVideoOptions = @"";
+                if (earlyLateOptions.count > 1) {
+                    self.encoderLateVideoOptions = earlyLateOptions[1];
+                }
+            }
+        }
+    }
+}
+
+-(void)setEncoderAudioOptions:(NSString *)encoderAudioOptions
+{
+    if (encoderAudioOptions != _encoderAudioOptions) {
+        [_encoderAudioOptions release];
+        _encoderAudioOptions = [encoderAudioOptions retain];
+        if (_encoderAudioOptions) {
+            NSArray *earlyLateOptions = [_encoderAudioOptions componentsSeparatedByString:kMTInputLocationToken];
+            if (earlyLateOptions && earlyLateOptions.count > 0) {
+                self.encoderEarlyAudioOptions = earlyLateOptions[0];
+                self.encoderLateAudioOptions = @"";
+                if (earlyLateOptions.count > 1) {
+                    self.encoderLateAudioOptions = earlyLateOptions[1];
+                }
+            }
+        }
+    }
+}
+
+-(void)setEncoderOtherOptions:(NSString *)encoderOtherOptions
+{
+    if (encoderOtherOptions != _encoderOtherOptions) {
+        [_encoderOtherOptions release];
+        _encoderOtherOptions = [encoderOtherOptions retain];
+        if (_encoderOtherOptions) {
+            NSArray *earlyLateOptions = [_encoderOtherOptions componentsSeparatedByString:kMTInputLocationToken];
+            if (earlyLateOptions && earlyLateOptions.count > 0) {
+                self.encoderEarlyOtherOptions = earlyLateOptions[0];
+                self.encoderLateOtherOptions = @"";
+                if (earlyLateOptions.count > 1) {
+                    self.encoderLateOtherOptions = earlyLateOptions[1];
+                }
+            }
+        }
+    }
 }
 
 -(NSAttributedString *) attributedFormatStringForFont:(NSFont *) font {

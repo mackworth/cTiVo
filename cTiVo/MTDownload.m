@@ -795,7 +795,8 @@ __DDLOGHERE__
         [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
         decryptLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath] retain];
         decryptLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath] retain];
- 		commercialFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.tivo.edl" ,baseFileName] retain];
+// 		commercialFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.tivo.edl" ,baseFileName] retain];  //0.92 version
+ 		commercialFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.edl",downloadDir ,baseFileName] retain];  //0.7 version
         commercialLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/commercial%@.txt",baseFileName] retain];
         [fm createFileAtPath:commercialLogFilePath contents:[NSData data] attributes:nil];
         commercialLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:commercialLogFilePath] retain];
@@ -857,32 +858,35 @@ __DDLOGHERE__
 -(NSMutableArray *)encodingArgumentsWithInputFile:(NSString *)inputFilePath outputFile:(NSString *)outputFilePath
 {
 	NSMutableArray *arguments = [NSMutableArray array];
-    if ([_encodeFormat.encoderVideoOptions compare: @"VLC"] == NSOrderedSame) {
-		[arguments addObject:@"-"];
-	} else {
 		
-		if (_encodeFormat.encoderVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderVideoOptions]];
-		if (_encodeFormat.encoderAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderAudioOptions]];
-		if (_encodeFormat.encoderOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderOtherOptions]];
-		if ([_encodeFormat.comSkip boolValue] && _skipCommercials && _encodeFormat.edlFlag.length) {
-			[arguments addObject:_encodeFormat.edlFlag];
-			[arguments addObject:commercialFilePath];
-		}
-		if (_encodeFormat.outputFileFlag.length) {
-			[arguments addObject:_encodeFormat.outputFileFlag];
-			[arguments addObject:outputFilePath];
-			if (_encodeFormat.inputFileFlag.length) {
-				[arguments addObject:_encodeFormat.inputFileFlag];
-			}
-			[arguments addObject:inputFilePath];
-		} else {
-			if (_encodeFormat.inputFileFlag.length) {
-				[arguments addObject:_encodeFormat.inputFileFlag];
-			}
-			[arguments addObject:inputFilePath];
-			[arguments addObject:outputFilePath];
-		}
-	}DDLogVerbose(@"encoding arguments: %@", arguments);
+    if ([_encodeFormat.comSkip boolValue] && _skipCommercials && _encodeFormat.edlFlag.length) {
+        [arguments addObject:_encodeFormat.edlFlag];
+        [arguments addObject:commercialFilePath];
+    }
+    if (_encodeFormat.outputFileFlag.length) {
+        if (_encodeFormat.encoderEarlyVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyVideoOptions]];
+        if (_encodeFormat.encoderEarlyAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyAudioOptions]];
+        if (_encodeFormat.encoderEarlyOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyOtherOptions]];
+        [arguments addObject:_encodeFormat.outputFileFlag];
+        [arguments addObject:outputFilePath];
+        if (_encodeFormat.inputFileFlag.length) {
+            [arguments addObject:_encodeFormat.inputFileFlag];
+        }
+        [arguments addObject:inputFilePath];
+    } else {
+        if (_encodeFormat.encoderEarlyVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyVideoOptions]];
+        if (_encodeFormat.encoderEarlyAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyAudioOptions]];
+        if (_encodeFormat.encoderEarlyOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyOtherOptions]];
+        if (_encodeFormat.inputFileFlag.length) {
+            [arguments addObject:_encodeFormat.inputFileFlag];
+        }
+        [arguments addObject:inputFilePath];
+        if (_encodeFormat.encoderLateVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateVideoOptions]];
+        if (_encodeFormat.encoderLateAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateAudioOptions]];
+        if (_encodeFormat.encoderLateOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateOtherOptions]];
+       [arguments addObject:outputFilePath];
+    }
+	DDLogVerbose(@"encoding arguments: %@", arguments);
 	return arguments;
 }
 
@@ -1114,8 +1118,14 @@ __DDLOGHERE__
 	[commercialTask setStandardError:commercialLogFileHandle];
 	NSMutableArray *arguments = [NSMutableArray array];
     if (_encodeFormat.comSkipOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.comSkipOptions]];
-    [arguments addObject:[NSString stringWithFormat: @"--output=%@",[commercialFilePath stringByDeletingLastPathComponent]]];
+    NSRange iniRange = [_encodeFormat.comSkipOptions rangeOfString:@"--ini="];
+    if (iniRange.location == NSNotFound) {
+        //    [arguments addObject:[NSString stringWithFormat: @"--output=%@",[commercialFilePath stringByDeletingLastPathComponent]]];  //0.92 version
+        [arguments addObject:[NSString stringWithFormat: @"--ini=%@",[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@"ini"]]];
+    }
+    
 	[arguments addObject:decryptFilePath];
+	DDLogVerbose(@"comskip Path: %@",[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]);
 	DDLogVerbose(@"comskip args: %@",arguments);
 	[commercialTask setArguments:arguments];
     _processProgress = 0.0;
@@ -1131,17 +1141,36 @@ __DDLOGHERE__
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
 		
-		NSString * encodeDirectory = [_encodeFilePath stringByDeletingLastPathComponent];
-		NSString * newCommercialPath = [encodeDirectory stringByAppendingPathComponent: [commercialFilePath lastPathComponent]] ;
-		[[NSFileManager defaultManager] removeItemAtPath:newCommercialPath error:nil ]; //just in case already there.
-		NSError * error = nil;
-		[[NSFileManager defaultManager] moveItemAtPath:commercialFilePath toPath:newCommercialPath error:&error];
-		if (error) {
-			DDLogMajor(@"Error moving commercial EDL file %@ to %@: %@",commercialFilePath, newCommercialPath, error.localizedDescription);
-		} else {
-			[commercialFilePath release];
-			commercialFilePath = [newCommercialPath retain];
-		}
+//      Needed for comskip 0.92 version
+//		NSString * encodeDirectory = [_encodeFilePath stringByDeletingLastPathComponent];
+//      Needed for comskip 0.92 version
+//		NSString * newCommercialPath = [encodeDirectory stringByAppendingPathComponent: [commercialFilePath lastPathComponent]] ;
+//		[[NSFileManager defaultManager] removeItemAtPath:newCommercialPath error:nil ]; //just in case already there.
+//		NSError * error = nil;
+//		[[NSFileManager defaultManager] moveItemAtPath:commercialFilePath toPath:newCommercialPath error:&error];
+//		if (error) {
+//			DDLogMajor(@"Error moving commercial EDL file %@ to %@: %@",commercialFilePath, newCommercialPath, error.localizedDescription);
+//		} else {
+//			[commercialFilePath release];
+//			commercialFilePath = [newCommercialPath retain];
+//		}
+        
+        //Remove for 0.92 version of comskip
+        NSString *downloadDir = [self directoryForShowInDirectory:[self downloadDirectory]];
+        
+        //go to current directory if one at show scheduling time failed
+        if (!downloadDir) {
+            downloadDir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
+        }
+        
+        //finally, go to default if not successful
+        if (!downloadDir) {
+            downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
+        }
+        NSString * baseFileName = self.showTitleForFiles;
+        [[NSFileManager defaultManager] removeItemAtPath:[NSString stringWithFormat:@"%@/%@.tivo.txt",downloadDir ,baseFileName] error:nil];
+        //END Remove for 0.92 version of comskip
+        
 		_processProgress = 1.0;
 		[commercialTask release];
 		commercialTask = nil;

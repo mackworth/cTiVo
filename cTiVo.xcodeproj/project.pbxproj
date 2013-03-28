@@ -56,6 +56,7 @@
 		D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A09C7916C77E9D00F2B86F /* Quartz.framework */; };
+		D2A1FB6B16EFA5DA00A605F7 /* ccextractor in Resources */ = {isa = PBXBuildFile; fileRef = 1EFD685A16D19AA100CC36E5 /* ccextractor */; };
 		D2A648F216991CD300C7DA01 /* MTTiVo.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A648F116991CD300C7DA01 /* MTTiVo.m */; };
 		D2A648FB16994D2A00C7DA01 /* MTSubscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E791BD31697C59300E47E84 /* MTSubscription.m */; };
 		D2A7269816A23E3D00C58C5F /* MTFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A7269716A23E3D00C58C5F /* MTFormat.m */; };

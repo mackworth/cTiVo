@@ -1308,6 +1308,44 @@ Requires VLC in /Applications</string>
 			<key>name</key>
 			<string>Elgato 1080p</string>
 		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt;-ar 44100 -ac 2 -ab 192k -f mp3 </string>
+			<key>encoderOtherOptions</key>
+			<string>-y</string>
+			<key>encoderUsed</key>
+			<string>ffmpeg</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt;-vn </string>
+			<key>filenameExtension</key>
+			<string>.mp3</string>
+			<key>formatDescription</key>
+			<string>For people who want to listen to the show audio: mp3 at 192kbps</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<false/>
+			<key>name</key>
+			<string>Audio only (ffmpeg MP3)</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string></string>
+		</dict>
 	</array>
 </dict>
 </plist>
