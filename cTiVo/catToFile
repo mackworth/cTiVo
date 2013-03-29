@@ -11,9 +11,10 @@ if ($ARGV[0] eq "-") {
 	open dest, ">", $ARGV[1];
 }
 if($stdin == 0) {
-	while(<source>) {
-		print dest;
-	}
+	rename $ARGV[0], $ARGV[1];
+	#	while(<source>) {
+	#		print dest;
+	#}
 } else {
 	while(<STDIN>) {
 		print dest;
