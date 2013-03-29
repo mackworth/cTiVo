@@ -29,6 +29,10 @@
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
 		1EFD685D16D200FF00CC36E5 /* AtomicParsley in Resources */ = {isa = PBXBuildFile; fileRef = 1EFD685C16D200FF00CC36E5 /* AtomicParsley */; };
+		D2001C251704F93F00B75D9C /* MTSrt.h in Sources */ = {isa = PBXBuildFile; fileRef = D2001C211704F93F00B75D9C /* MTSrt.h */; };
+		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
+		D2001C271704F93F00B75D9C /* MTEdl.h in Sources */ = {isa = PBXBuildFile; fileRef = D2001C231704F93F00B75D9C /* MTEdl.h */; };
+		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
 		D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */; };
 		D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
@@ -56,7 +60,6 @@
 		D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A09C7916C77E9D00F2B86F /* Quartz.framework */; };
-		D2A1FB6B16EFA5DA00A605F7 /* ccextractor in Resources */ = {isa = PBXBuildFile; fileRef = 1EFD685A16D19AA100CC36E5 /* ccextractor */; };
 		D2A648F216991CD300C7DA01 /* MTTiVo.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A648F116991CD300C7DA01 /* MTTiVo.m */; };
 		D2A648FB16994D2A00C7DA01 /* MTSubscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E791BD31697C59300E47E84 /* MTSubscription.m */; };
 		D2A7269816A23E3D00C58C5F /* MTFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A7269716A23E3D00C58C5F /* MTFormat.m */; };
@@ -135,6 +138,10 @@
 		1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Growl Registration Ticket.growlRegDict"; sourceTree = "<group>"; };
 		1EFD685A16D19AA100CC36E5 /* ccextractor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ccextractor; sourceTree = "<group>"; };
 		1EFD685C16D200FF00CC36E5 /* AtomicParsley */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = AtomicParsley; sourceTree = "<group>"; };
+		D2001C211704F93F00B75D9C /* MTSrt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTSrt.h; sourceTree = "<group>"; };
+		D2001C221704F93F00B75D9C /* MTSrt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSrt.m; sourceTree = "<group>"; };
+		D2001C231704F93F00B75D9C /* MTEdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTEdl.h; sourceTree = "<group>"; };
+		D2001C241704F93F00B75D9C /* MTEdl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTEdl.m; sourceTree = "<group>"; };
 		D202E09F169778DA00514213 /* MTiTivoImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTivoImport.h; sourceTree = "<group>"; };
 		D208560416B61B9B002F5F8C /* MTPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTPreferencesViewController.h; sourceTree = "<group>"; };
 		D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPreferencesViewController.m; sourceTree = "<group>"; };
@@ -446,6 +453,10 @@
 		D2DA8FBA169CDAAD0053B7CB /* Data Model */ = {
 			isa = PBXGroup;
 			children = (
+				D2001C211704F93F00B75D9C /* MTSrt.h */,
+				D2001C221704F93F00B75D9C /* MTSrt.m */,
+				D2001C231704F93F00B75D9C /* MTEdl.h */,
+				D2001C241704F93F00B75D9C /* MTEdl.m */,
 				D28EB0FA16B3182100AA0330 /* MTNetService.h */,
 				D28EB0F916B3182100AA0330 /* MTNetService.m */,
 				D2A648F016991CD300C7DA01 /* MTTiVo.h */,
@@ -665,6 +676,10 @@
 				1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */,
 				1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */,
 				1E45C8F316E11E59005C5334 /* MTStringEmpty.m in Sources */,
+				D2001C251704F93F00B75D9C /* MTSrt.h in Sources */,
+				D2001C261704F93F00B75D9C /* MTSrt.m in Sources */,
+				D2001C271704F93F00B75D9C /* MTEdl.h in Sources */,
+				D2001C281704F93F00B75D9C /* MTEdl.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

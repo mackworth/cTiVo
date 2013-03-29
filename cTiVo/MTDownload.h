@@ -11,6 +11,8 @@
 #import "MTTiVo.h"
 #import "MTFormat.h"
 #import "MTTiVoShow.h"
+#import "MTEdl.h"
+#import "MTSrt.h"
 
 @interface MTDownload : NSObject  <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding> {
 }

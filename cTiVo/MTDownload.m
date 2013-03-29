@@ -1402,6 +1402,13 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
 	[tiVoManager  notifyWithTitle:@"TiVo show transferred." subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
+    if (self.exportSubtitles.boolValue && self.skipCommercials) {
+        NSArray *srtEntries = [self getSrt:captionFilePath];
+        NSArray *edlEntries = [self getEdl:commercialFilePath];
+        NSArray *correctedSrts = [self processSrts:srtEntries withEdls:edlEntries];
+        [self writeSrt:correctedSrts toFilePath:captionFilePath];
+        
+    }
 	
 	[self cleanupFiles];
 }
@@ -1570,6 +1577,104 @@ __DDLOGHERE__
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 }
+
+#pragma mark - SRT/EDL handling Captions with commercial cuts
+
+-(NSArray *)getSrt:(NSString *)srtFile
+{
+	NSArray *rawSrts = [[NSString stringWithContentsOfFile:srtFile encoding:NSASCIIStringEncoding error:nil] componentsSeparatedByString:@"\r\n\r\n"];
+    NSMutableArray *strs = [NSMutableArray array];
+    for (NSString *rawSrt in rawSrts) {
+        if (rawSrt.length > 20) {
+            MTSrt *newSrt = [[MTSrt new] autorelease];
+            NSArray *lines = [rawSrt componentsSeparatedByString:@"\r\n"];
+            NSArray *times = [lines[1] componentsSeparatedByString:@" --> "];
+            NSArray *hmsStart = [times[0] componentsSeparatedByString:@":"];
+            NSArray *hmsEnd = [times[1] componentsSeparatedByString:@":"];
+            double secondsStart = [[hmsStart[2] stringByReplacingOccurrencesOfString:@"," withString:@"."] doubleValue];
+            secondsStart += 60.0 * ([hmsStart[0] doubleValue] * 60.0 + [hmsStart[1] doubleValue]);
+            double secondsEnd = [[hmsEnd[2] stringByReplacingOccurrencesOfString:@"," withString:@"."] doubleValue];
+            secondsEnd += 60.0 * ([hmsEnd[0] doubleValue] * 60.0 + [hmsEnd[1] doubleValue]);
+            newSrt.startTime = secondsStart;
+            newSrt.endTime = secondsEnd;
+            newSrt.caption = @"";
+            if (lines.count > 2) {
+                NSInteger i = 2;
+                while (i < lines.count) {
+                    newSrt.caption = [newSrt.caption stringByAppendingFormat:@"%@\r\n",lines[i]];
+                    i++;
+                }
+            }
+            [strs addObject:newSrt];
+        }
+    }
+    return [NSArray arrayWithArray:strs];
+}
+
+-(NSArray *)getEdl:(NSString *)edlFile
+{
+	NSArray *rawEdls = [[NSString stringWithContentsOfFile:edlFile encoding:NSASCIIStringEncoding error:nil] componentsSeparatedByString:@"\n"];
+    NSMutableArray *edls = [NSMutableArray array];
+    for (NSString *rawEdl in rawEdls) {
+        if (rawEdl.length > 5) {
+            MTEdl *newEdl = [[MTEdl new] autorelease];
+            NSArray *items = [rawEdl componentsSeparatedByString:@"\t"];
+            newEdl.startTime = [items[0] doubleValue];
+            newEdl.endTime = [items[1] doubleValue];
+            newEdl.edlType = [items[2] intValue];
+            
+            [edls addObject:newEdl];
+        }
+    }
+    NSLog(@"edls = %@",edls);
+    return [NSArray arrayWithArray:edls];
+	
+}
+
+-(void)writeSrt:(NSArray *)srts toFilePath:(NSString *)filePath
+{
+    [[NSFileManager defaultManager] createFileAtPath:filePath contents:[NSData data] attributes:nil];
+    NSFileHandle *srtFileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
+    NSString *output = @"";
+    int i =1;
+    for (MTSrt *srt in srts) {
+        output = [output stringByAppendingString:[srt formatedSrt:i]];
+        i++;
+    }
+    [srtFileHandle writeData:[output dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
+    [srtFileHandle closeFile];
+	
+}
+
+-(NSArray *)processSrts:(NSArray *)srts withEdls:(NSArray *)edls
+{
+    NSMutableArray *keptSrts = [NSMutableArray array];
+    for (MTSrt *srt in srts) {
+        BOOL keepSrt = YES;
+        for (MTEdl *edl in edls) {
+            if (((edl.startTime < srt.startTime && srt.startTime < edl.endTime) || (edl.startTime < srt.endTime && srt.endTime < edl.endTime))) { //The srt is  in a cut so remove
+                keepSrt = NO;
+                break;
+            }
+        }
+        if (keepSrt) { //Now calculate the offset if kept
+            double timeOffset = 0;  //This is the correction to be applied to the srt
+            for (MTEdl *edl in edls) {
+                if (srt.endTime < edl.startTime) {
+                    break;
+                } else {
+                    timeOffset += (edl.endTime - edl.startTime);
+                }
+            }
+            srt.startTime -= timeOffset;
+            srt.endTime -= timeOffset;
+            [keptSrts addObject:srt];
+        }
+    }
+	return [NSArray arrayWithArray:keptSrts];
+}
+
+
 
 #pragma mark - Video manipulation methods
 
