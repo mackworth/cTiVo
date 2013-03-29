@@ -328,9 +328,9 @@
 														</object>
 														<object class="NSTableColumn" id="1014946391">
 															<string key="NSIdentifier">date</string>
-															<double key="NSWidth">200</double>
-															<double key="NSMinWidth">40</double>
-															<double key="NSMaxWidth">200</double>
+															<double key="NSWidth">150</double>
+															<double key="NSMinWidth">120</double>
+															<double key="NSMaxWidth">150</double>
 															<object class="NSTableHeaderCell" key="NSHeaderCell">
 																<int key="NSCellFlags">75497536</int>
 																<int key="NSCellFlags2">2048</int>
@@ -370,8 +370,8 @@
 														<object class="NSTableColumn" id="473608070">
 															<string key="NSIdentifier">FormatPopUp</string>
 															<double key="NSWidth">135.984375</double>
-															<double key="NSMinWidth">10</double>
-															<double key="NSMaxWidth">230</double>
+															<double key="NSMinWidth">50</double>
+															<double key="NSMaxWidth">150</double>
 															<object class="NSTableHeaderCell" key="NSHeaderCell">
 																<int key="NSCellFlags">75497536</int>
 																<int key="NSCellFlags2">134219776</int>
@@ -1070,8 +1070,8 @@
 														<object class="NSTableColumn" id="300585388">
 															<string key="NSIdentifier">Size</string>
 															<double key="NSWidth">74</double>
-															<double key="NSMinWidth">65</double>
-															<double key="NSMaxWidth">120</double>
+															<double key="NSMinWidth">40</double>
+															<double key="NSMaxWidth">100</double>
 															<object class="NSTableHeaderCell" key="NSHeaderCell">
 																<int key="NSCellFlags">75497536</int>
 																<int key="NSCellFlags2">134219776</int>
@@ -1266,7 +1266,7 @@
 															<string key="NSIdentifier">TiVoID</string>
 															<double key="NSWidth">64</double>
 															<double key="NSMinWidth">10</double>
-															<double key="NSMaxWidth">3.4028234663852886e+38</double>
+															<double key="NSMaxWidth">100</double>
 															<object class="NSTableHeaderCell" key="NSHeaderCell">
 																<int key="NSCellFlags">75497536</int>
 																<int key="NSCellFlags2">2048</int>
@@ -1751,8 +1751,8 @@
 														<object class="NSTableColumn" id="866075953">
 															<string key="NSIdentifier">Size</string>
 															<double key="NSWidth">74</double>
-															<double key="NSMinWidth">65</double>
-															<double key="NSMaxWidth">120</double>
+															<double key="NSMinWidth">40</double>
+															<double key="NSMaxWidth">100</double>
 															<object class="NSTableHeaderCell" key="NSHeaderCell">
 																<int key="NSCellFlags">75497536</int>
 																<int key="NSCellFlags2">134219776</int>
@@ -1950,7 +1950,7 @@
 															<string key="NSIdentifier">TiVoID</string>
 															<double key="NSWidth">64</double>
 															<double key="NSMinWidth">50</double>
-															<double key="NSMaxWidth">400</double>
+															<double key="NSMaxWidth">100</double>
 															<object class="NSTableHeaderCell" key="NSHeaderCell">
 																<int key="NSCellFlags">75497536</int>
 																<int key="NSCellFlags2">2048</int>
@@ -1983,7 +1983,7 @@
 															<string key="NSIdentifier">Format</string>
 															<double key="NSWidth">140</double>
 															<double key="NSMinWidth">50</double>
-															<double key="NSMaxWidth">230</double>
+															<double key="NSMaxWidth">150</double>
 															<object class="NSTableHeaderCell" key="NSHeaderCell">
 																<int key="NSCellFlags">75497536</int>
 																<int key="NSCellFlags2">134219776</int>
@@ -5510,7 +5510,7 @@ wGw</bytes>
 								<object class="NSTextField" id="942300901">
 									<reference key="NSNextResponder" ref="678801042"/>
 									<int key="NSvFlags">266</int>
-									<string key="NSFrameSize">{200, 17}</string>
+									<string key="NSFrameSize">{150, 17}</string>
 									<reference key="NSSuperview" ref="678801042"/>
 									<reference key="NSNextKeyView" ref="766050221"/>
 									<string key="NSAntiCompressionPriority">{250, 750}</string>
@@ -5527,7 +5527,7 @@ wGw</bytes>
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{375, 1}, {200, 17}}</string>
+							<string key="NSFrame">{{375, 1}, {150, 17}}</string>
 							<reference key="NSNextKeyView" ref="942300901"/>
 						</object>
 						<reference key="destination" ref="942300901"/>
@@ -5633,7 +5633,7 @@ wGw</bytes>
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{578, 1}, {136, 17}}</string>
+							<string key="NSFrame">{{528, 1}, {136, 17}}</string>
 							<reference key="NSNextKeyView" ref="631696527"/>
 						</object>
 						<reference key="destination" ref="631696527"/>
@@ -5667,7 +5667,7 @@ wGw</bytes>
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{717, 1}, {40, 17}}</string>
+							<string key="NSFrame">{{667, 1}, {40, 17}}</string>
 							<reference key="NSNextKeyView" ref="595615851"/>
 						</object>
 						<reference key="destination" ref="595615851"/>
@@ -5701,7 +5701,7 @@ wGw</bytes>
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{760, 1}, {30, 17}}</string>
+							<string key="NSFrame">{{710, 1}, {30, 17}}</string>
 							<reference key="NSNextKeyView" ref="253489442"/>
 						</object>
 						<reference key="destination" ref="253489442"/>
@@ -7217,7 +7217,7 @@ wGw</bytes>
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								</object>
 							</array>
-							<string key="NSFrame">{{793, 1}, {30, 17}}</string>
+							<string key="NSFrame">{{743, 1}, {30, 17}}</string>
 							<reference key="NSNextKeyView" ref="535069220"/>
 						</object>
 						<reference key="destination" ref="535069220"/>
@@ -11583,20 +11583,17 @@ wGw</bytes>
 				<object class="IBPartialClassDescription">
 					<string key="className">MTSubscriptionTableView</string>
 					<string key="superclassName">NSTableView</string>
-					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="delete:">id</string>
-						<string key="unsubscribeSelectedItems:">id</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="delete:">
-							<string key="name">delete:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="unsubscribeSelectedItems:">
+					<object class="NSMutableDictionary" key="actions">
+						<string key="NS.key.0">unsubscribeSelectedItems:</string>
+						<string key="NS.object.0">id</string>
+					</object>
+					<object class="NSMutableDictionary" key="actionInfosByName">
+						<string key="NS.key.0">unsubscribeSelectedItems:</string>
+						<object class="IBActionInfo" key="NS.object.0">
 							<string key="name">unsubscribeSelectedItems:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-					</dictionary>
+					</object>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="myController">MTMainWindowController</string>
 						<string key="unsubscribeButton">NSButton</string>

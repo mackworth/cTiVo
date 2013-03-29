@@ -1234,7 +1234,19 @@ __DDLOGHERE__
 		_processProgress = 1.0;
 		[captionTask release];
 		captionTask = nil;
-        [self setValue:[NSNumber numberWithInt:kMTStatusCaptioned] forKeyPath:@"downloadStatus"];
+		if (self.exportSubtitles.boolValue && self.skipCommercials) {
+			NSArray *srtEntries = [self getSrt:captionFilePath];
+			NSArray *edlEntries = [self getEdl:commercialFilePath];
+			if (srtEntries && edlEntries) {
+				NSArray *correctedSrts = [self processSrts:srtEntries withEdls:edlEntries];
+				if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+					NSString *oldCaptionPath = [[captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
+					[[NSFileManager defaultManager] moveItemAtPath:captionFilePath toPath:oldCaptionPath error:nil];
+				}
+				if (correctedSrts) [self writeSrt:correctedSrts toFilePath:captionFilePath];
+			}
+		}
+		[self setValue:[NSNumber numberWithInt:kMTStatusCaptioned] forKeyPath:@"downloadStatus"];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:self];
 		return;
@@ -1402,13 +1414,6 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
 	[tiVoManager  notifyWithTitle:@"TiVo show transferred." subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
-    if (self.exportSubtitles.boolValue && self.skipCommercials) {
-        NSArray *srtEntries = [self getSrt:captionFilePath];
-        NSArray *edlEntries = [self getEdl:commercialFilePath];
-        NSArray *correctedSrts = [self processSrts:srtEntries withEdls:edlEntries];
-        [self writeSrt:correctedSrts toFilePath:captionFilePath];
-        
-    }
 	
 	[self cleanupFiles];
 }
@@ -1583,50 +1588,56 @@ __DDLOGHERE__
 -(NSArray *)getSrt:(NSString *)srtFile
 {
 	NSArray *rawSrts = [[NSString stringWithContentsOfFile:srtFile encoding:NSASCIIStringEncoding error:nil] componentsSeparatedByString:@"\r\n\r\n"];
-    NSMutableArray *strs = [NSMutableArray array];
+    NSMutableArray *srts = [NSMutableArray array];
+	MTSrt *lastSrt = nil;
     for (NSString *rawSrt in rawSrts) {
-        if (rawSrt.length > 20) {
-            MTSrt *newSrt = [[MTSrt new] autorelease];
-            NSArray *lines = [rawSrt componentsSeparatedByString:@"\r\n"];
-            NSArray *times = [lines[1] componentsSeparatedByString:@" --> "];
-            NSArray *hmsStart = [times[0] componentsSeparatedByString:@":"];
-            NSArray *hmsEnd = [times[1] componentsSeparatedByString:@":"];
-            double secondsStart = [[hmsStart[2] stringByReplacingOccurrencesOfString:@"," withString:@"."] doubleValue];
-            secondsStart += 60.0 * ([hmsStart[0] doubleValue] * 60.0 + [hmsStart[1] doubleValue]);
-            double secondsEnd = [[hmsEnd[2] stringByReplacingOccurrencesOfString:@"," withString:@"."] doubleValue];
-            secondsEnd += 60.0 * ([hmsEnd[0] doubleValue] * 60.0 + [hmsEnd[1] doubleValue]);
-            newSrt.startTime = secondsStart;
-            newSrt.endTime = secondsEnd;
-            newSrt.caption = @"";
-            if (lines.count > 2) {
-                NSInteger i = 2;
-                while (i < lines.count) {
-                    newSrt.caption = [newSrt.caption stringByAppendingFormat:@"%@\r\n",lines[i]];
-                    i++;
-                }
-            }
-            [strs addObject:newSrt];
+        if (rawSrt.length > kMinSrtLength) {
+            MTSrt *newSrt = [MTSrt srtFromString: rawSrt];
+			if (newSrt && lastSrt) {
+				if (newSrt.startTime <= lastSrt.endTime) {
+					DDLogReport(@"SRT file not in correct order");
+					newSrt = nil;
+				}
+			}
+            if (newSrt) {
+				[srts addObject:newSrt];
+			} else {
+				DDLogDetail(@"SRTs before bad one: %@",srts);
+				return nil;
+			}
+			lastSrt = newSrt;
         }
     }
-    return [NSArray arrayWithArray:strs];
+    DDLogVerbose(@"srts = %@",srts);
+    return [NSArray arrayWithArray:srts];
 }
 
 -(NSArray *)getEdl:(NSString *)edlFile
 {
 	NSArray *rawEdls = [[NSString stringWithContentsOfFile:edlFile encoding:NSASCIIStringEncoding error:nil] componentsSeparatedByString:@"\n"];
     NSMutableArray *edls = [NSMutableArray array];
-    for (NSString *rawEdl in rawEdls) {
-        if (rawEdl.length > 5) {
-            MTEdl *newEdl = [[MTEdl new] autorelease];
-            NSArray *items = [rawEdl componentsSeparatedByString:@"\t"];
-            newEdl.startTime = [items[0] doubleValue];
-            newEdl.endTime = [items[1] doubleValue];
-            newEdl.edlType = [items[2] intValue];
-            
-            [edls addObject:newEdl];
+	MTEdl * lastEdl = nil;
+    double cumulativeOffset = 0.0;
+	for (NSString *rawEdl in rawEdls) {
+        if (rawEdl.length > kMinEdlLength) {
+            MTEdl *newEdl = [MTEdl edlFromString:rawEdl];
+			if (newEdl && lastEdl) {
+				if (newEdl.startTime <= lastEdl.endTime) {
+					DDLogReport(@"EDL file not in correct order");
+					newEdl = nil;
+				}
+			}
+            if (newEdl) {
+				cumulativeOffset += (newEdl.endTime - newEdl.startTime);
+				newEdl.offset = cumulativeOffset;
+				[edls addObject:newEdl];
+			} else {
+				DDLogDetail(@"EDLs before bad one: %@",edls);
+				return nil;
+			}
         }
     }
-    NSLog(@"edls = %@",edls);
+    DDLogVerbose(@"edls = %@",edls);
     return [NSArray arrayWithArray:edls];
 	
 }
@@ -1648,28 +1659,31 @@ __DDLOGHERE__
 
 -(NSArray *)processSrts:(NSArray *)srts withEdls:(NSArray *)edls
 {
-    NSMutableArray *keptSrts = [NSMutableArray array];
+    if (edls.count ==0) return srts;
+	NSMutableArray *keptSrts = [NSMutableArray array];
+	NSUInteger edlIndex = 0;
     for (MTSrt *srt in srts) {
-        BOOL keepSrt = YES;
-        for (MTEdl *edl in edls) {
-            if (((edl.startTime < srt.startTime && srt.startTime < edl.endTime) || (edl.startTime < srt.endTime && srt.endTime < edl.endTime))) { //The srt is  in a cut so remove
-                keepSrt = NO;
-                break;
-            }
-        }
-        if (keepSrt) { //Now calculate the offset if kept
-            double timeOffset = 0;  //This is the correction to be applied to the srt
-            for (MTEdl *edl in edls) {
-                if (srt.endTime < edl.startTime) {
-                    break;
-                } else {
-                    timeOffset += (edl.endTime - edl.startTime);
-                }
-            }
-            srt.startTime -= timeOffset;
-            srt.endTime -= timeOffset;
-            [keptSrts addObject:srt];
-        }
+		while (edlIndex < edls.count &&  srt.startTime > ((MTEdl *)edls[edlIndex]).endTime) {
+			//relies on both edl and srt to be sorted
+			edlIndex++;
+
+		};
+		//now current edl is either crossed with srt or after it.
+		//If crossed, we delete srt; 
+		if (edlIndex < edls.count) {
+			MTEdl * edl = (MTEdl *)edls[edlIndex];
+			if (edl.startTime <= srt.endTime ) {
+			//The srt is  in a cut so remove
+				continue;
+			}
+		}
+		//if after, we use cumulative offset of "just-prior" edl
+		if (edlIndex > 0) {  //else no offset required
+			MTEdl * prevEdl = (MTEdl *)edls[edlIndex-1];
+			srt.startTime -= prevEdl.offset;
+			srt.endTime -= prevEdl.offset;
+		}
+		[keptSrts addObject:srt];
     }
 	return [NSArray arrayWithArray:keptSrts];
 }

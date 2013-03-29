@@ -10,9 +10,11 @@
 
 @interface MTSrt : NSObject
 
+#define kMinSrtLength 20
 @property (nonatomic) double startTime, endTime;
 @property (nonatomic, retain) NSString * caption;
 
++(MTSrt *) srtFromString: srtString;
 -(NSString *)formatedSrt:(int)count;
 
 @end

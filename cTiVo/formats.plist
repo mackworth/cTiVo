@@ -949,43 +949,6 @@ audio: mp2 at 192kbs</string>
 		</dict>
 		<dict>
 			<key>edlFlag</key>
-			<string></string>
-			<key>comSkipOptions</key>
-			<string></string>
-			<key>formatDescription</key>
-			<string>Experiment in streaming
-Requires VLC in /Applications</string>
-			<key>outputFileFlag</key>
-			<string></string>
-			<key>inputFileFlag</key>
-			<string></string>
-			<key>regExProgress</key>
-			<string></string>
-			<key>comSkip</key>
-			<false/>
-			<key>isHidden</key>
-			<false/>
-			<key>encoderUsed</key>
-			<string>/Applications/VLC.app/Contents/MacOS/VLC</string>
-			<key>isFactoryFormat</key>
-			<false/>
-			<key>encoderOtherOptions</key>
-			<string></string>
-			<key>mustDownloadFirst</key>
-			<false/>
-			<key>encoderAudioOptions</key>
-			<string></string>
-			<key>iTunes</key>
-			<false/>
-			<key>encoderVideoOptions</key>
-			<string>VLC</string>
-			<key>filenameExtension</key>
-			<string></string>
-			<key>name</key>
-			<string>VLC</string>
-		</dict>
-		<dict>
-			<key>edlFlag</key>
 			<string>-edl</string>
 			<key>comSkipOptions</key>
 			<string></string>
