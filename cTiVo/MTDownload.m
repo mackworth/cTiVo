@@ -1252,13 +1252,14 @@ __DDLOGHERE__
 		return;
 	}
 	double newProgressValue = 0;
+	int sizeOfFileSample = 100;
 	unsigned long long logFileSize = [captionLogFileReadHandle seekToEndOfFile];
-	if (logFileSize > 100) {
-		[captionLogFileReadHandle seekToFileOffset:(logFileSize-100)];
-		NSData *tailOfFile = [captionLogFileReadHandle readDataOfLength:100];
+	if (logFileSize > sizeOfFileSample) {
+		[captionLogFileReadHandle seekToFileOffset:(logFileSize-sizeOfFileSample)];
+		NSData *tailOfFile = [captionLogFileReadHandle readDataOfLength:sizeOfFileSample];
 		NSString *data = [[[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding] autorelease];
 		
-		NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
+		NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
 		NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
 		NSTextCheckingResult *lastItem = [values lastObject];
 		NSRange valueRange = [lastItem rangeAtIndex:1];
@@ -1283,7 +1284,7 @@ __DDLOGHERE__
     encoderTask = [[NSTask alloc] init];
     DDLogMajor(@"Starting Encode of   %@", self.show.showTitle);
     [encoderTask setLaunchPath:encoderLaunchPath];
-    if (!_encodeFormat.canSimulEncode) {  //If can't simul encode have to depend on log file for tracking
+    if (!_encodeFormat.canSimulEncode || [_encodeFormat.encoderUsed compare:@"catToFile"] == NSOrderedSame) {  //If can't simul encode have to depend on log file for tracking of if catToFile which is instant
 		DDLogVerbose(@"Using logfile tracking");
         NSMutableArray *arguments = [self encodingArgumentsWithInputFile:decryptFilePath outputFile:_encodeFilePath];
         [encoderTask setArguments:arguments];
@@ -1628,7 +1629,9 @@ __DDLOGHERE__
 				}
 			}
             if (newEdl) {
-				cumulativeOffset += (newEdl.endTime - newEdl.startTime);
+				if (newEdl.edlType == 0) { //This is for a cut edl.  Other types/action don't cut (such as 1 for mute)
+					cumulativeOffset += (newEdl.endTime - newEdl.startTime);
+				}
 				newEdl.offset = cumulativeOffset;
 				[edls addObject:newEdl];
 			} else {
@@ -1663,8 +1666,8 @@ __DDLOGHERE__
 	NSMutableArray *keptSrts = [NSMutableArray array];
 	NSUInteger edlIndex = 0;
     for (MTSrt *srt in srts) {
-		while (edlIndex < edls.count &&  srt.startTime > ((MTEdl *)edls[edlIndex]).endTime) {
-			//relies on both edl and srt to be sorted
+		while ((edlIndex < edls.count &&  srt.startTime > ((MTEdl *)edls[edlIndex]).endTime) || ( ((MTEdl *)edls[edlIndex]).edlType != 0) ) {
+			//relies on both edl and srt to be sorted and skips edl that are not cuts (type != 0)
 			edlIndex++;
 
 		};

@@ -20,7 +20,7 @@ __DDLOGHERE__
 +(MTEdl *)edlFromString:edlString {
 	NSArray *items = [edlString componentsSeparatedByString:@"\t"];
 	if (items.count < 3) {
-		DDLogReport(@"Bad EDL: no enough items: %@", edlString);
+		DDLogReport(@"Bad EDL: not enough items: %@", edlString);
 		return nil;
 	}
 	MTEdl *newEdl =  [[MTEdl new] autorelease];
