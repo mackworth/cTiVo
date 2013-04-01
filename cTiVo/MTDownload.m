@@ -1502,9 +1502,12 @@ __DDLOGHERE__
         activeURLConnection = nil;
 		if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
 			[fm removeItemAtPath:decryptFilePath error:nil];
-		}    }
-    while (writingData){
+		}
+	}
+	NSDate *now = [NSDate date];
+    while (writingData && (-1.0 * [now timeIntervalSinceNow]) > 5.0){ //Wait for no more than 5 seconds.
         //Block until latest write data is complete - should stop quickly because isCanceled is set
+		writingData = NO;
     } //Wait for pipe out to complete
     [self cleanupFiles]; //Everything but the final file
     if(decrypterTask && [decrypterTask isRunning]) {
@@ -1897,8 +1900,8 @@ __DDLOGHERE__
     //Make sure to flush the last of the buffer file into the pipe and close it.
 	if (!writingData && _isSimultaneousEncoding) {
 		//		[self performSelectorInBackground:@selector(writeData) withObject:nil];
-		writingData = YES;
 		DDLogVerbose (@"writing last data for %@",self);
+		writingData = YES;
 		[self writeData];
 	}
 	if (downloadedFileSize < kMTMinTiVoFileSize) { //Not a good download - reschedule
