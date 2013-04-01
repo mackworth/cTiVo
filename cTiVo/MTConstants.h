@@ -33,6 +33,7 @@
 //#define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
 #define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"
 #define kMTNotificationFormatChanged @"MTNotificationFormatChanged"
+#define kMTNotificationFoundMultipleTiVos @"MTNotificationFoundMultipleTiVo"
 
 //Tivo busy indicator
 #define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
@@ -95,8 +96,7 @@
 #define kMTProgramTableColumns @"ProgramTableColumns"
 #define kMTDownloadTableColumns @"DownloadTableColumns"
 #define kMTSubscriptionTableColumns @"kMTSubscriptionTableColumns"
-#define kMTHideTiVoColumnPrograms @"HideTiVoColumnPrograms"
-#define kMTHideTiVoColumnDownloads @"HideTiVoColumnDownloads"
+#define kMTHasMultipleTivos @"HasMultipleTivos"
 
 //Misc
 

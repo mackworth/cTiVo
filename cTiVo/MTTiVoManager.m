@@ -1159,6 +1159,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
         MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
       
         self.tiVoList = [self.tiVoList arrayByAddingObject: newTiVo];
+		if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
+			[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
+		}
 		DDLogMajor(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
     } else {

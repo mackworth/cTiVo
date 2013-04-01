@@ -31,12 +31,20 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDetailsLoaded object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoListUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTiVoColumn:) name:kMTNotificationFoundMultipleTiVos object:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowCopyProtected options:NSKeyValueChangeSetting context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowSuggestions options:NSKeyValueChangeSetting context:nil];
 	
 	[self  setDraggingSourceOperationMask:NSDragOperationMove forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
 
+}
+
+-(void)showTiVoColumn:(NSNotification *)notification
+{
+    NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
+	[tiVoColumn setHidden:NO];
+	
 }
 
 -(void)awakeFromNib
@@ -48,21 +56,15 @@ __DDLOGHERE__
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
     self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
     if (!tiVoColumnHolder) tiVoColumnHolder = [[self tableColumnWithIdentifier:@"TiVo"] retain];
+	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
+		[tiVoColumn setHidden:YES];
+	}
 }
 
 -(void) reloadData {
     //Configure Table Columns depending on how many TiVos
 	DDLogDetail(@"Reload Program Table");
-    NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
-    if (tiVoManager.tiVoList.count == 1) {
-        [tiVoColumn setHidden:YES];
-    } else {
-        [tiVoColumn setHidden:NO];
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTHideTiVoColumnPrograms]) {
-            [tiVoColumn setHidden:YES];
-        }
-    }
-
 	//save selection to preserve after reloadData
 	NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
     NSArray * selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];

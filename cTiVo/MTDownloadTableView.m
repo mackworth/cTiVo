@@ -36,12 +36,22 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataTiVos) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDownloadRowChanged object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTiVoColumn:) name:kMTNotificationFoundMultipleTiVos object:nil];
 	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
 
 
 }
+
+
+-(void)showTiVoColumn:(NSNotification *)notification
+{
+    NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
+	[tiVoColumn setHidden:NO];
+	
+}
+
 
 -(void) reloadDataTiVos {
 	DDLogDetail(@"Reloading DL table from TivoListUpdated");
@@ -79,6 +89,10 @@ __DDLOGHERE__
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
     if (!tiVoColumnHolder) tiVoColumnHolder = [[self tableColumnWithIdentifier:@"TiVo"] retain];
+	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
+		[tiVoColumn setHidden:YES];
+	}
 }
 
 -(void) reloadData {
@@ -87,16 +101,6 @@ __DDLOGHERE__
 	//save selection to restore after reload
 	DDLogVerbose(@"Reloading DL table");
 	NSArray * selectedShows = [self.sortedDownloads objectsAtIndexes: self.selectedRowIndexes];
-	
-	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
-    if (tiVoManager.tiVoList.count == 1) {
-        [tiVoColumn setHidden:YES];
-    } else {
-        [tiVoColumn setHidden:NO];
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTHideTiVoColumnDownloads]) {
-            [tiVoColumn setHidden:YES];
-        }
-    }
 	[self sizeToFit];
     self.sortedDownloads =nil;
     [super reloadData];

@@ -142,6 +142,10 @@ __DDLOGHERE__
 										  nil];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
 	
+	if (![[NSUserDefaults standardUserDefaults] objectForKey:kMTHasMultipleTivos]) {
+		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTHasMultipleTivos];
+	}
+	
 	
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];

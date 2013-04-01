@@ -677,20 +677,8 @@ __DDLOGHERE__
 - (void)contextMenuSelected:(id)sender {
 	NSMenuItem * menuItem = (NSMenuItem *) sender;
     NSTableColumn *column = [menuItem representedObject][@"Column"];
-    NSTableView *table = [menuItem representedObject][@"Table"];
-    NSString *key = nil;
-    if (table == tiVoShowTable) {
-        key = kMTHideTiVoColumnPrograms;
-    }
-    if (table == downloadQueueTable) {
-        key = kMTHideTiVoColumnDownloads;
-    }
-    NSString *columnIdentifier = column.identifier;
 	BOOL wasOn = ([menuItem state] == NSOnState);
 	[column setHidden:wasOn];
-    if ([columnIdentifier compare:@"TiVo"] == NSOrderedSame && key) {
-        [[NSUserDefaults standardUserDefaults] setBool:wasOn forKey:key];
-    }
 	if(wasOn) {
 		[menuItem setState: NSOffState ];
 	} else {
