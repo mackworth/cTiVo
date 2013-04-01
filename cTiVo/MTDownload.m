@@ -1505,7 +1505,7 @@ __DDLOGHERE__
 		}
 	}
 	NSDate *now = [NSDate date];
-    while (writingData && (-1.0 * [now timeIntervalSinceNow]) > 5.0){ //Wait for no more than 5 seconds.
+    while (writingData && (-1.0 * [now timeIntervalSinceNow]) < 5.0){ //Wait for no more than 5 seconds.
         //Block until latest write data is complete - should stop quickly because isCanceled is set
 		writingData = NO;
     } //Wait for pipe out to complete
