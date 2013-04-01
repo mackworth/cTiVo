@@ -347,6 +347,7 @@ __DDLOGHERE__
 		result.textField.stringValue = thisShow.originalAirDateNoTime ? thisShow.originalAirDateNoTime : @"";
 	} else if ([tableColumn.identifier isEqualToString:@"icon"]) {
         NSString * imageName = thisShow.imageString;
+		result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
 		result.imageView.image = [NSImage imageNamed: imageName];
 	}
     if ([thisShow.protectedShow boolValue]) {

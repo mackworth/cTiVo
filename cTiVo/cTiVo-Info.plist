@@ -6,6 +6,10 @@
 	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleHelpBookFolder</key>
+	<string>cTiVo.help</string>
+	<key>CFBundleHelpBookName</key>
+	<string>com.cTiVo.cTivo.help</string>
 	<key>CFBundleIconFile</key>
 	<string>cTiVo</string>
 	<key>CFBundleIdentifier</key>

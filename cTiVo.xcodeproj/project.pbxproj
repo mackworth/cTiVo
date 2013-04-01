@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1E0C5DD9170236B30015C55D /* recent-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E0C5DD8170236B30015C55D /* recent-recording.png */; };
 		1E15E71016B4F88F00508BEC /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E15E70B16B4F88F00508BEC /* DDLog.m */; };
+		1E18145E1708AC1500166E5F /* cTiVo.help in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145D1708AC1500166E5F /* cTiVo.help */; };
+		1E1814601708AF7000166E5F /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145F1708AF7000166E5F /* cTiVo.icns */; };
 		1E2724EF16C9A8B500A21940 /* elgatoScript.pl in Resources */ = {isa = PBXBuildFile; fileRef = 1E2724EE16C9A8B500A21940 /* elgatoScript.pl */; };
 		1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */; };
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
@@ -29,9 +31,7 @@
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
 		1EFD685D16D200FF00CC36E5 /* AtomicParsley in Resources */ = {isa = PBXBuildFile; fileRef = 1EFD685C16D200FF00CC36E5 /* AtomicParsley */; };
-		D2001C251704F93F00B75D9C /* MTSrt.h in Sources */ = {isa = PBXBuildFile; fileRef = D2001C211704F93F00B75D9C /* MTSrt.h */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
-		D2001C271704F93F00B75D9C /* MTEdl.h in Sources */ = {isa = PBXBuildFile; fileRef = D2001C231704F93F00B75D9C /* MTEdl.h */; };
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
 		D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */; };
@@ -80,7 +80,6 @@
 		D2D60BB216766EFD00CE32DE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BB016766EFD00CE32DE /* Credits.rtf */; };
 		D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */; };
 		D2D60BB816766EFD00CE32DE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BB616766EFD00CE32DE /* MainMenu.xib */; };
-		D2D60BC416766F3200CE32DE /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BBF16766F3200CE32DE /* cTiVo.icns */; };
 		D2D60BC516766F3200CE32DE /* formats.plist in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC016766F3200CE32DE /* formats.plist */; };
 		D2D60BC616766F3200CE32DE /* HandBrakeCLI in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC116766F3200CE32DE /* HandBrakeCLI */; };
 		D2D60BC716766F3200CE32DE /* mencoder in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC216766F3200CE32DE /* mencoder */; };
@@ -112,6 +111,8 @@
 		1E0C5DD8170236B30015C55D /* recent-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "recent-recording.png"; sourceTree = "<group>"; };
 		1E15E70A16B4F88F00508BEC /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
 		1E15E70B16B4F88F00508BEC /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
+		1E18145D1708AC1500166E5F /* cTiVo.help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cTiVo.help; sourceTree = "<group>"; };
+		1E18145F1708AF7000166E5F /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cTiVo.icns; sourceTree = "<group>"; };
 		1E2724EE16C9A8B500A21940 /* elgatoScript.pl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.perl; path = elgatoScript.pl; sourceTree = "<group>"; };
 		1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = elgatoLaunch.scpt; sourceTree = "<group>"; };
 		1E2725C316CB63D500A21940 /* elgatoProgress.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = elgatoProgress.scpt; sourceTree = "<group>"; };
@@ -213,7 +214,6 @@
 		D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.objj.h; path = MTAppDelegate.h; sourceTree = "<group>"; };
 		D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTAppDelegate.m; sourceTree = "<group>"; };
 		D2D60BB716766EFD00CE32DE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		D2D60BBF16766F3200CE32DE /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cTiVo.icns; sourceTree = "<group>"; };
 		D2D60BC016766F3200CE32DE /* formats.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = formats.plist; sourceTree = "<group>"; };
 		D2D60BC116766F3200CE32DE /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
 		D2D60BC216766F3200CE32DE /* mencoder */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = mencoder; sourceTree = "<group>"; };
@@ -399,6 +399,7 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1E18145F1708AF7000166E5F /* cTiVo.icns */,
 				1E684A7516E2C50B000F5C6E /* copyright.png */,
 				1E684A8A16E3A338000F5C6E /* deleted.png */,
 				1E684A7716E2C50B000F5C6E /* expired-recording.png */,
@@ -414,8 +415,8 @@
 				D2B73F3116BC485E003CB4ED /* comskip */,
 				1EFD685A16D19AA100CC36E5 /* ccextractor */,
 				D2CAF34216AB6FDE004E4CFA /* checkImage.png */,
+				1E18145D1708AC1500166E5F /* cTiVo.help */,
 				D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */,
-				D2D60BBF16766F3200CE32DE /* cTiVo.icns */,
 				1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */,
 				1E2724EE16C9A8B500A21940 /* elgatoScript.pl */,
 				1E2725C316CB63D500A21940 /* elgatoProgress.scpt */,
@@ -540,7 +541,7 @@
 			attributes = {
 				CLASSPREFIX = MT;
 				LastUpgradeCheck = 0450;
-				ORGANIZATIONNAME = "Scott Buchanan";
+				ORGANIZATIONNAME = cTiVo;
 			};
 			buildConfigurationList = D2D60B9716766EFD00CE32DE /* Build configuration list for PBXProject "cTiVo" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -567,7 +568,6 @@
 				D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */,
 				D2D60BB216766EFD00CE32DE /* Credits.rtf in Resources */,
 				D2D60BB816766EFD00CE32DE /* MainMenu.xib in Resources */,
-				D2D60BC416766F3200CE32DE /* cTiVo.icns in Resources */,
 				D2D60BC516766F3200CE32DE /* formats.plist in Resources */,
 				D2D60BC616766F3200CE32DE /* HandBrakeCLI in Resources */,
 				D2D60BC716766F3200CE32DE /* mencoder in Resources */,
@@ -602,6 +602,8 @@
 				1E7F5ADB1701877A003AA96C /* in-progress-recording.png in Resources */,
 				D240EF5C16EEEC3F00635E53 /* ccextractor in Resources */,
 				1E0C5DD9170236B30015C55D /* recent-recording.png in Resources */,
+				1E18145E1708AC1500166E5F /* cTiVo.help in Resources */,
+				1E1814601708AF7000166E5F /* cTiVo.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -676,9 +678,7 @@
 				1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */,
 				1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */,
 				1E45C8F316E11E59005C5334 /* MTStringEmpty.m in Sources */,
-				D2001C251704F93F00B75D9C /* MTSrt.h in Sources */,
 				D2001C261704F93F00B75D9C /* MTSrt.m in Sources */,
-				D2001C271704F93F00B75D9C /* MTEdl.h in Sources */,
 				D2001C281704F93F00B75D9C /* MTEdl.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -786,7 +786,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -804,7 +804,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
