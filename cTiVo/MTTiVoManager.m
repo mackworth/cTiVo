@@ -255,7 +255,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			DDLogDetail(@"Tivo restored previously deleted show %@",newShow);
 			[proxyDL prepareForDownload:YES];
 		}
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:proxyDL];
 
 	} else {
 		DDLogVerbose(@"Didn't find DL proxy for %@",newShow);
