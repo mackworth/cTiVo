@@ -5,7 +5,7 @@
 //  Created by Hugh Mackworth on 2/26/13.
 //  Copyright (c) 2013 Scott Buchanan. All rights reserved.
 //
-
+#define comSkip92 0
 
 #import "MTProgramTableView.h"
 #import "MTiTunes.h"
@@ -51,8 +51,7 @@
 	double previousProcessProgress;
 	
 }
-@property (nonatomic, readonly) NSString *showTitleForFiles;
-
+@property(nonatomic, retain) NSString * baseFileName;
 
 @end
 
@@ -634,9 +633,8 @@ __DDLOGHERE__
 	if (deleteFiles) {
 		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:@"/tmp/ctivo" error:nil];
 		[fm changeCurrentDirectoryPath:@"/tmp/ctivo"];
-		NSString * baseName = [self showTitleForFiles];
 		for(NSString *file in tmpFiles){
-			NSRange tmpRange = [file rangeOfString:baseName];
+			NSRange tmpRange = [file rangeOfString:self.baseFileName];
 			if(tmpRange.location != NSNotFound) {
 				DDLogDetail(@"Deleting tmp file %@", file);
 				[fm removeItemAtPath:file error:nil];
@@ -722,58 +720,67 @@ __DDLOGHERE__
  */
 #define Null(x) x ?  x : nullString
 
--(NSString *)showTitleForFiles
-{
-	NSString * baseTitle = _show.showTitle;
-	NSString * filenamePattern = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormat];
-	if (filenamePattern.length > 0) {
-		NSString * nullString = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormatNull];
-		if (!nullString) nullString = @"";
-		baseTitle = [NSString stringWithFormat:filenamePattern,
-					 Null(_show.showTitle),				// %$1$@  showTitle			Arrow: The Odyssey  or MovieTitle
-					 Null(_show.seriesTitle),			// %$2$@  seriesTitle		Arrow or MovieTitle
-					 Null(_show.episodeTitle),			// %$3$@  episodeTitle		The Odyssey or empty
-					 Null(_show.episodeNumber),			// %$4$@  episodeNumber		S04 E05  or 53
-					 Null(_show.showDate),				// %$5$@  showDate			Feb 10, 2013 8-00PM
-					 Null(_show.showMediumDateString),	// %$6$@  showMedDate		2-10-13
-					 Null(_show.originalAirDate),		// %$7$@  originalAirDate
-					 Null(_show.tiVoName),				// %$8$@  tiVoName
-					 Null(_show.idString),				// %$9$@  tiVoID
-					 Null(_show.channelString),			// %$10$@ channelString
-					 Null(_show.stationCallsign),			// %$11$@ stationCallsign
-					 Null(self.encodeFormat.name)			// %$11$@ stationCallsign
-					 ];
-		//NEED Dates without times also Series ID
-		if (baseTitle.length == 0) baseTitle = _show.showTitle;
-		if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
+-(NSString *)makeBaseFileNameForDirectory:(NSString *) downloadDir {
+	if (!self.baseFileName) {
+		// generate only once
+		NSString * baseTitle = _show.showTitle;
+		NSString * filenamePattern = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormat];
+		if (filenamePattern.length > 0) {
+			NSString * nullString = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormatNull];
+			if (!nullString) nullString = @"";
+			baseTitle = [NSString stringWithFormat:filenamePattern,
+						 Null(_show.showTitle),				// %$1$@  showTitle			Arrow: The Odyssey  or MovieTitle
+						 Null(_show.seriesTitle),			// %$2$@  seriesTitle		Arrow or MovieTitle
+						 Null(_show.episodeTitle),			// %$3$@  episodeTitle		The Odyssey or empty
+						 Null(_show.episodeNumber),			// %$4$@  episodeNumber		S04 E05  or 53
+						 Null(_show.showDate),				// %$5$@  showDate			Feb 10, 2013 8-00PM
+						 Null(_show.showMediumDateString),	// %$6$@  showMedDate		2-10-13
+						 Null(_show.originalAirDate),		// %$7$@  originalAirDate
+						 Null(_show.tiVoName),				// %$8$@  tiVoName
+						 Null(_show.idString),				// %$9$@  tiVoID
+						 Null(_show.channelString),			// %$10$@ channelString
+						 Null(_show.stationCallsign),			// %$11$@ stationCallsign
+						 Null(self.encodeFormat.name)			// %$11$@ stationCallsign
+						 ];
+			//NEED Dates without times also Series ID
+			if (baseTitle.length == 0) baseTitle = _show.showTitle;
+			if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
+		}
+		NSString * safeTitle = [baseTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+		//		safeTitle = [safeTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+		if (LOG_VERBOSE  && [safeTitle compare: _show.showTitle ]  != NSOrderedSame) {
+			DDLogVerbose(@"changed filename %@ to %@",_show.showTitle, safeTitle);
+		}
+		self.baseFileName = [self createUniqueBaseFileName:safeTitle inDownloadDir:downloadDir];
 	}
-	NSString * safeTitle = [baseTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-	safeTitle = [safeTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
-	if (LOG_VERBOSE  && [safeTitle compare: _show.showTitle ]  != NSOrderedSame) {
-		DDLogVerbose(@"changed filename %@ to %@",_show.showTitle, safeTitle);
-	}
-	return safeTitle;
+	return self.baseFileName;
 }
 #undef Null
 
--(void)createUniqueBaseFileName:(NSString **)baseFileName inDownloadDir:(NSString *)downloadDir
+-(NSString *)createUniqueBaseFileName:(NSString *)baseName inDownloadDir:(NSString *)downloadDir
 {
-    NSString *trialEncodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,*baseFileName,_encodeFormat.filenameExtension] retain];
-	nameLockFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.lck" ,*baseFileName] retain];
+    NSString *trialEncodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,_encodeFormat.filenameExtension] retain];
+	NSString *trialLockFilePath = [NSString stringWithFormat:@"/tmp/ctivo/%@.lck" ,baseName];
 	NSFileManager *fm = [NSFileManager defaultManager];
-	if ([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:nameLockFilePath]) {
+	if ([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:trialLockFilePath]) {
+		NSString * nextBase;
 		NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
-		NSTextCheckingResult *result = [ending firstMatchInString:*baseFileName options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, (*baseFileName).length)];
+		NSTextCheckingResult *result = [ending firstMatchInString:baseName options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, (baseName).length)];
 		if (result) {
-			int n = [[*baseFileName substringWithRange:[result rangeAtIndex:2]] intValue];
-			DDLogVerbose(@"found output file named %@, incrementing version number %d", *baseFileName, n);
-			*baseFileName = [[*baseFileName substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
+			int n = [[baseName substringWithRange:[result rangeAtIndex:2]] intValue];
+			DDLogVerbose(@"found output file named %@, incrementing version number %d", baseName, n);
+			nextBase = [[baseName substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
 		} else {
-			*baseFileName = [*baseFileName stringByAppendingString:@"-1"];
-			DDLogDetail(@"found output file named %@, adding version number", *baseFileName);
+			nextBase = [baseName stringByAppendingString:@"-1"];
+			DDLogDetail(@"found output file named %@, adding version number", nextBase);
 		}
-		[self createUniqueBaseFileName:baseFileName inDownloadDir:downloadDir];
+		return [self createUniqueBaseFileName:nextBase inDownloadDir:downloadDir];
 
+	} else {
+		DDLogDetail(@"Using baseFileName %@",baseName);
+		nameLockFilePath = [trialLockFilePath retain];
+		[[NSFileManager defaultManager] createFileAtPath:nameLockFilePath contents:[NSData data] attributes:nil];  //Creating the lock file
+		return baseName;
 	}
 
 }
@@ -794,13 +801,9 @@ __DDLOGHERE__
 	if (!downloadDir) {
 		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
 	}
-	NSString *baseFileName = self.showTitleForFiles;
-	[self createUniqueBaseFileName:&baseFileName inDownloadDir:downloadDir];
-	DDLogDetail(@"Using baseFileName %@",baseFileName);
-    _encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,baseFileName,_encodeFormat.filenameExtension] retain];
-	nameLockFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.lck" ,baseFileName] retain];
-	[[NSFileManager defaultManager] createFileAtPath:nameLockFilePath contents:[NSData data] attributes:nil];  //Creating the lock file
-    DDLogVerbose(@"setting encodepath: %@", _encodeFilePath);
+	self.baseFileName = [self makeBaseFileNameForDirectory:downloadDir];
+	_encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,self.baseFileName,_encodeFormat.filenameExtension] retain];
+	DDLogVerbose(@"setting encodepath: %@", _encodeFilePath);
 	NSFileManager *fm = [NSFileManager defaultManager];
     if (_simultaneousEncode) {
         //Things require uniquely for simultaneous download
@@ -816,40 +819,43 @@ __DDLOGHERE__
         decryptStreamProcessingPipes = [[NSArray alloc] initWithArray:pipeArray];
 		downloadFileHandle = [pipe1 fileHandleForWriting];
 		DDLogVerbose(@"downloadFileHandle %@ for %@",downloadFileHandle,self);
-        _bufferFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/buffer%@.bin",baseFileName] retain];
+        _bufferFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/buffer%@.bin",self.baseFileName] retain];
         [fm createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
         bufferFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:_bufferFilePath] retain];
         bufferFileWriteHandle = [[NSFileHandle fileHandleForWritingAtPath:_bufferFilePath] retain];
     } else {
         //Things require uniquely for sequential download
-        _downloadFilePath = [[NSString stringWithFormat:@"%@/%@.tivo",downloadDir ,baseFileName] retain];
+        _downloadFilePath = [[NSString stringWithFormat:@"%@/%@.tivo",downloadDir ,self.baseFileName] retain];
         [fm createFileAtPath:_downloadFilePath contents:[NSData data] attributes:nil];
         downloadFileHandle = [[NSFileHandle fileHandleForWritingAtPath:_downloadFilePath] retain];
-		decryptFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.mpg",downloadDir ,baseFileName] retain];
-        decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/decrypting%@.txt",baseFileName] retain];
+		decryptFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.mpg",downloadDir ,self.baseFileName] retain];
+        decryptLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/decrypting%@.txt",self.baseFileName] retain];
         [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
         decryptLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath] retain];
         decryptLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath] retain];
-// 		commercialFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.tivo.edl" ,baseFileName] retain];  //0.92 version
- 		commercialFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.edl",downloadDir ,baseFileName] retain];  //0.7 version
-        commercialLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/commercial%@.txt",baseFileName] retain];
+#if comSkip92
+		commercialFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.tivo.edl" ,baseFileName] retain];  //0.92 version
+#else
+ 		commercialFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.edl",downloadDir ,self.baseFileName] retain];  //0.7 version
+#endif
+        commercialLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/commercial%@.txt",self.baseFileName] retain];
         [fm createFileAtPath:commercialLogFilePath contents:[NSData data] attributes:nil];
         commercialLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:commercialLogFilePath] retain];
         commercialLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:commercialLogFilePath] retain];
         
     }
     
-    captionFilePath = [[NSString stringWithFormat:@"%@/%@.srt",downloadDir ,baseFileName] retain];
-    captionLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/caption%@.txt",baseFileName] retain];
+    captionFilePath = [[NSString stringWithFormat:@"%@/%@.srt",downloadDir ,self.baseFileName] retain];
+    captionLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/caption%@.txt",self.baseFileName] retain];
     [fm createFileAtPath:captionLogFilePath contents:[NSData data] attributes:nil];
     captionLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:captionLogFilePath] retain];
     captionLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:captionLogFilePath] retain];
-    encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/encoding%@.txt",baseFileName] retain];
+    encodeLogFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/encoding%@.txt",self.baseFileName] retain];
     [fm createFileAtPath:encodeLogFilePath contents:[NSData data] attributes:nil];
     encodeLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:encodeLogFilePath] retain];
     encodeLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath] retain];
 	
-	encodeErrorFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/encodingError%@.txt",baseFileName] retain];
+	encodeErrorFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/encodingError%@.txt",self.baseFileName] retain];
     [fm createFileAtPath:encodeErrorFilePath contents:[NSData data] attributes:nil];
     encodeErrorFileHandle = [[NSFileHandle fileHandleForWritingAtPath:encodeErrorFilePath] retain];
 }
@@ -1156,7 +1162,9 @@ __DDLOGHERE__
     if (_encodeFormat.comSkipOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.comSkipOptions]];
     NSRange iniRange = [_encodeFormat.comSkipOptions rangeOfString:@"--ini="];
     if (iniRange.location == NSNotFound) {
-        //    [arguments addObject:[NSString stringWithFormat: @"--output=%@",[commercialFilePath stringByDeletingLastPathComponent]]];  //0.92 version
+#if comSkip92  //should this be in this .ini if statement?
+		[arguments addObject:[NSString stringWithFormat: @"--output=%@",[commercialFilePath stringByDeletingLastPathComponent]]];  //0.92 version
+#endif
         [arguments addObject:[NSString stringWithFormat: @"--ini=%@",[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@"ini"]]];
     }
     
@@ -1177,36 +1185,23 @@ __DDLOGHERE__
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
 		
-//      Needed for comskip 0.92 version
-//		NSString * encodeDirectory = [_encodeFilePath stringByDeletingLastPathComponent];
-//      Needed for comskip 0.92 version
-//		NSString * newCommercialPath = [encodeDirectory stringByAppendingPathComponent: [commercialFilePath lastPathComponent]] ;
-//		[[NSFileManager defaultManager] removeItemAtPath:newCommercialPath error:nil ]; //just in case already there.
-//		NSError * error = nil;
-//		[[NSFileManager defaultManager] moveItemAtPath:commercialFilePath toPath:newCommercialPath error:&error];
-//		if (error) {
-//			DDLogMajor(@"Error moving commercial EDL file %@ to %@: %@",commercialFilePath, newCommercialPath, error.localizedDescription);
-//		} else {
-//			[commercialFilePath release];
-//			commercialFilePath = [newCommercialPath retain];
-//		}
-        
-        //Remove for 0.92 version of comskip
-        NSString *downloadDir = [self directoryForShowInDirectory:[self downloadDirectory]];
-        
-        //go to current directory if one at show scheduling time failed
-        if (!downloadDir) {
-            downloadDir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
-        }
-        
-        //finally, go to default if not successful
-        if (!downloadDir) {
-            downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
-        }
-        NSString * baseFileName = self.showTitleForFiles;
-        [[NSFileManager defaultManager] removeItemAtPath:[NSString stringWithFormat:@"%@/%@.tivo.txt",downloadDir ,baseFileName] error:nil];
-        //END Remove for 0.92 version of comskip
-        
+		NSString * encodeDirectory = [_encodeFilePath stringByDeletingLastPathComponent];
+#if comSkip92
+		NSString * newCommercialPath = [encodeDirectory stringByAppendingPathComponent: [commercialFilePath lastPathComponent]] ;
+		[[NSFileManager defaultManager] removeItemAtPath:newCommercialPath error:nil ]; //just in case already there.
+		NSError * error = nil;
+		[[NSFileManager defaultManager] moveItemAtPath:commercialFilePath toPath:newCommercialPath error:&error];
+		if (error) {
+			DDLogMajor(@"Error moving commercial EDL file %@ to %@: %@",commercialFilePath, newCommercialPath, error.localizedDescription);
+		} else {
+			[commercialFilePath release];
+			commercialFilePath = [newCommercialPath retain];
+		}
+#else
+		if( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+			[[NSFileManager defaultManager] removeItemAtPath:[NSString stringWithFormat:@"%@/%@.tivo.txt",encodeDirectory ,self.baseFileName] error:nil];
+		}
+#endif
 		_processProgress = 1.0;
 		[commercialTask release];
 		commercialTask = nil;
