@@ -38,7 +38,6 @@
 	*commercialLogFilePath,
 	*captionFilePath,
 	*captionLogFilePath,
-	*baseFileName,
 	*nameLockFilePath; //Just to check for file name uniqueness, along with the encodeFilePath
 	
     double dataDownloaded;
@@ -757,21 +756,21 @@ __DDLOGHERE__
 }
 #undef Null
 
--(void)createUniqueBaseFileName:(NSString *)inBaseFileName inDownloadDir:(NSString *)downloadDir
+-(void)createUniqueBaseFileName:(NSString **)baseFileName inDownloadDir:(NSString *)downloadDir
 {
-    NSString *trialEncodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,inBaseFileName,_encodeFormat.filenameExtension] retain];
-	nameLockFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.lck" ,inBaseFileName] retain];
+    NSString *trialEncodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,*baseFileName,_encodeFormat.filenameExtension] retain];
+	nameLockFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.lck" ,*baseFileName] retain];
 	NSFileManager *fm = [NSFileManager defaultManager];
 	if ([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:nameLockFilePath]) {
 		NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
-		NSTextCheckingResult *result = [ending firstMatchInString:inBaseFileName options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, inBaseFileName.length)];
+		NSTextCheckingResult *result = [ending firstMatchInString:*baseFileName options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, (*baseFileName).length)];
 		if (result) {
-			int n = [[inBaseFileName substringWithRange:[result rangeAtIndex:2]] intValue];
-			DDLogVerbose(@"found output file named %@, incrementing version number %d", inBaseFileName, n);
-			baseFileName = [[inBaseFileName substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
+			int n = [[*baseFileName substringWithRange:[result rangeAtIndex:2]] intValue];
+			DDLogVerbose(@"found output file named %@, incrementing version number %d", *baseFileName, n);
+			*baseFileName = [[*baseFileName substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
 		} else {
-			baseFileName = [inBaseFileName stringByAppendingString:@"-1"];
-			DDLogDetail(@"found output file named %@, adding version number", baseFileName);
+			*baseFileName = [*baseFileName stringByAppendingString:@"-1"];
+			DDLogDetail(@"found output file named %@, adding version number", *baseFileName);
 		}
 		[self createUniqueBaseFileName:baseFileName inDownloadDir:downloadDir];
 
@@ -795,8 +794,8 @@ __DDLOGHERE__
 	if (!downloadDir) {
 		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
 	}
-	baseFileName = self.showTitleForFiles;
-	[self createUniqueBaseFileName:baseFileName inDownloadDir:downloadDir];
+	NSString *baseFileName = self.showTitleForFiles;
+	[self createUniqueBaseFileName:&baseFileName inDownloadDir:downloadDir];
 	DDLogDetail(@"Using baseFileName %@",baseFileName);
     _encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,baseFileName,_encodeFormat.filenameExtension] retain];
 	nameLockFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.lck" ,baseFileName] retain];
