@@ -248,6 +248,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		MTDownload * proxyDL = [tiVoManager downloadQueue][DLIndex];
 		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, DLIndex, proxyDL.show.tiVoName);
 		proxyDL.show = newShow;
+		//this is a back door entry into queue, so need to check for uniqueness again in current environment
+		[self checkShowTitleUniqueness:newShow];
 		proxyDL.show.isQueued = YES;
 		if (proxyDL.downloadStatus.integerValue == kMTStatusDeleted) {
 			DDLogDetail(@"Tivo restored previously deleted show %@",newShow);
