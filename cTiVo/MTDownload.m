@@ -1978,6 +1978,13 @@ __DDLOGHERE__
 		default: return @"";
 	}
 }
+-(NSString *) imageString {
+	if (self.downloadStatus.intValue == kMTStatusDeleted) {
+		return @"deleted";
+	} else {
+		return self.show.imageString;
+	}
+}
 
 -(void) setEncodeFormat:(MTFormat *) encodeFormat {
     if (_encodeFormat != encodeFormat ) {

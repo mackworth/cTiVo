@@ -50,6 +50,9 @@ __DDLOGHERE__
     
 	DDLogDetail(@"MainWindow windowDidLoad");
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
+	[NSBundle loadNibNamed:@"MTMainWindowDrawer" owner:self];
+	showDetailDrawer.parentWindow = self.window;
+	
 	[tiVoListPopUp removeAllItems];
 	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
@@ -333,7 +336,7 @@ __DDLOGHERE__
 	if (show) {		
 		self.showForDetail = show;
 		[showDetailDrawer open];
-		[self.drawerVariableFields setAutoresizingMask:self.drawerVariableFields.autoresizingMask |NSViewHeightSizable]; //workaround bug in IB?
+		//[self.drawerVariableFields setAutoresizingMask:self.drawerVariableFields.autoresizingMask |NSViewHeightSizable]; //workaround bug in IB?
 	}
 }
 

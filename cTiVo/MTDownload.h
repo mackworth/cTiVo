@@ -54,7 +54,7 @@ numStartupRetriesRemaining;
 #pragma mark - Properties for download/conversion progress
 @property (retain) NSNumber *downloadStatus;
 @property (nonatomic, readonly)	NSString *showStatus;
-
+@property (nonatomic, readonly) NSString *imageString;
 @property double processProgress; //Should be between 0 and 1
 
 @property BOOL isSimultaneousEncoding;

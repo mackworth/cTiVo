@@ -86,7 +86,8 @@
 @property (nonatomic, readonly) NSAttributedString *actors,
 													*guestStars,
 													*directors,
-													*producers;
+													*producers,
+													*attribDescription;
 
 @property BOOL isQueued;
 

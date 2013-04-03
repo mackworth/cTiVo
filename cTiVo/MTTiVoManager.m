@@ -719,6 +719,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
     //Make sure the title isn't the same and if it is add a -1 modifier
     for (MTDownload *download in _downloadQueue) {
+		if (download.show == program) continue;  //no need to check oneself
         if ([download.show.showTitle compare:program.showTitle] == NSOrderedSame) {
 			NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
             NSTextCheckingResult *result = [ending firstMatchInString:program.showTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, program.showTitle.length)];

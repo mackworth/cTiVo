@@ -332,10 +332,7 @@ __DDLOGHERE__
          checkBox.owner = download;
 
 	} else if ([tableColumn.identifier isEqualToString:@"icon"]) {
-        NSString * imageName = thisShow.imageString;
-		if (download.downloadStatus.intValue == kMTStatusDeleted) {
-			imageName = @"deleted";
-		}
+        NSString * imageName = download.imageString;
 		result.imageView.image = [NSImage imageNamed: imageName];
 	} else if ([tableColumn.identifier isEqualToString:@"Simu"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;

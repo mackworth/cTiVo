@@ -1,34 +1,38 @@
-*cTiVo* is a Mac application to download shows from your TiVo Series 2, Series 3, TiVoHD, and Premiere device. Simple to set up and use, it will download shows to your mac, and convert them to many popular formats / devices. It is inspired by the great work done on iTivo, but written in Cocoa/Objective C for better performance / compatability.
+*cTiVo* is a cTiVo is a free Mac application to copy shows from your TiVo Premiere, HD, S3 or S2 devices. Simple to set up and use, it will download shows to your mac, and convert them to many popular formats / devices. It is inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance / compatibility.
 
-*cTivo* is under rapid development. We're currently at an alpha release, but converging on an initial beta; give it a try and tell us what you think. In particular, let us know if you see any problems.
+*cTiVo* is under rapid development. We're currently at an alpha release, but converging on an initial beta; give it a try and tell us what you think. In particular, let us know if you see any problems.
 ----
-==Features similar to iTivo include:==
+==Features similar to iTiVo include:==
   * Formats include h.264, mpeg-2, mpeg-1, avi, decrypt-only.
-  * Target devices include iPhone, iPod, AppleTV, Xbox 360, PlayStation 3, PSP, youtube.
+  * Target devices include iPhone, iPod, AppleTV, Xbox 360, !PlayStation 3, PSP, YouTube.
   * 'Subscriptions' to your regular shows: downloading them whenever new episodes are available.
-  * Support for different encoders, including HandBrake, mencoder, ffmpeg.
+  * Support for different encoders, including !HandBrake, mencoder, ffmpeg.
   * Download queue for batch processing.
   * Optionally show non-downloadable copy-protected shows.
   * Automatically remove commercials from downloaded shows.
   * Download queue restored when restarting app.
-  * Automatic discovery of Tivos using Bonjour.
-  * Folders optionally created for each series
+  * Automatic discovery of TiVos using Bonjour.
+  * Folders optionally created for each series.
   * Automatic updates of the software.
   * Automatically perform an 'iTunes sync' to your device when the download is completed.
-  * With appropriate configuration, in the morning, you will find all your favorite shows from your TiVo loaded onto your iPhone or iPad.
+    With appropriate configuration, in the morning, you will find all your favorite shows from your !TiVo loaded onto your iPhone or iPad.
   * Manual connect by IP address.
   * Detailed info on each show.
   * Growl or Apple notifications.
   * Scheduling of when the queue will be processed.
-  * Imports iTivo preferences, including subscriptions and Media Access Key.
+  * Built-in Elgato turbo.264 support.
+  * Generate metadata appropriate for use by tools such as pyTivoX.
+  * Create subtitle files (.srt) from the closed caption info.
+  * Display filter in program list.
+  * Imports iTiVo preferences, including subscriptions and Media Access Key.
 ----
-==Features in addition to iTivo include:==
-  * Support for multiple TiVos (with same or different Media Access Keys), all displayed/active simultaneously.
-  * Change download directories per submittal.
+==Features in addition to iTiVo include:==
+  * Support for multiple !TiVos (with same or different Media Access Keys), all displayed/active simultaneously.
+  * Change download directories for each download.
   * Customizable columns; show exactly what you want to see.
   * Change conversion formats for each download or subscription.
   * Turn on/off iTunes / simultaneous download encoding for each download or subscription.
-  * Simultaneous downloading from multiple TiVos.
+  * Simultaneous downloading from multiple !TiVos.
   * Show only the encoding formats you actually use.
   * Options to prevent sleep or quitting until processing complete.
   * More parallel processing, including downloading next show while encoding current one.
@@ -36,15 +40,12 @@
   * Completely customizable encoder options for multiple formats.
   * In scheduled use, avoids new operations when end-time reached.
   * Drag/drop and contextual menus for ease of use; submit, reschedule, delete all by dragging the shows.
-  * User-definable ports for TiVos; allows advanced users to access TiVo shows remotely (requires network reconfiguration).
-  * Fully compatible with OS X Mountain Lion (10.8) through Leopard (10.5).
+  * User-definable ports for !TiVos; allows advanced users to access !TiVo shows remotely (requires network reconfiguration).
+  * Fully compatible with OS X Mountain Lion (10.8) and Lion (10.7).
 ----
 ==iTivo features not implemented, at least not yet:==
-  * Built-in Elgato turbo support.
-  * Generate metadata appropriate for use by tools such as pyTivoX.
-  * Create subtitle files (.srt) from the closed caption info.
-  * Display filter in program list.
   * Reporting on TiVo's disk usage.
+  * cTiVo is not compatible with OS X Snow Leopard or Leopard
 ----
 ==To install:==
 

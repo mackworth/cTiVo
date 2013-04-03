@@ -393,6 +393,9 @@ __DDLOGHERE__
     
 }
 
+-(NSAttributedString *)attribDescription {
+	return [[[NSAttributedString alloc] initWithString:self.showDescription] autorelease];
+}
 
 -(NSAttributedString *)actors
 {
