@@ -394,7 +394,11 @@ __DDLOGHERE__
 }
 
 -(NSAttributedString *)attribDescription {
-	return [[[NSAttributedString alloc] initWithString:self.showDescription] autorelease];
+	NSAttributedString *attstring = [[[NSAttributedString alloc] initWithString:@""] autorelease];
+	if (self.showDescription) {
+		attstring = [[[NSAttributedString alloc] initWithString:self.showDescription] autorelease];
+	}
+	return attstring;
 }
 
 -(NSAttributedString *)actors
