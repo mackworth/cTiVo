@@ -249,7 +249,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, DLIndex, proxyDL.show.tiVoName);
 		proxyDL.show = newShow;
 		//this is a back door entry into queue, so need to check for uniqueness again in current environment
-		[self checkShowTitleUniqueness:newShow];
+//		[self checkShowTitleUniqueness:newShow];
 		proxyDL.show.isQueued = YES;
 		if (proxyDL.downloadStatus.integerValue == kMTStatusDeleted) {
 			DDLogDetail(@"Tivo restored previously deleted show %@",newShow);
@@ -716,27 +716,28 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 #pragma mark - Download Management
 
--(void)checkShowTitleUniqueness:(MTTiVoShow *)program
-{
-    //Make sure the title isn't the same and if it is add a -1 modifier
-    for (MTDownload *download in _downloadQueue) {
-		if (download.show == program) continue;  //no need to check oneself
-        if ([download.show.showTitle compare:program.showTitle] == NSOrderedSame) {
-			NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
-            NSTextCheckingResult *result = [ending firstMatchInString:program.showTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, program.showTitle.length)];
-            if (result) {
-                int n = [[program.showTitle substringWithRange:[result rangeAtIndex:2]] intValue];
-				DDLogVerbose(@"found show title %@, incrementing version number %d", program.showTitle, n);
-				program.showTitle = [[program.showTitle substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
-           } else {
-                program.showTitle = [program.showTitle stringByAppendingString:@"-1"];
-			   DDLogDetail(@"found show title %@, adding version number", program.showTitle);
-            }
-            [self checkShowTitleUniqueness:program];
-        }
-    }
+//-(void)checkShowTitleUniqueness:(MTTiVoShow *)program
+//{
+//    //Make sure the title isn't the same and if it is add a -1 modifier
+//    for (MTDownload *download in _downloadQueue) {
+//		if (download.show == program) continue;  //no need to check oneself
+//        if ([download.show.showTitle compare:program.showTitle] == NSOrderedSame) {
+//			NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
+//            NSTextCheckingResult *result = [ending firstMatchInString:program.showTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, program.showTitle.length)];
+//            if (result) {
+//                int n = [[program.showTitle substringWithRange:[result rangeAtIndex:2]] intValue];
+//				DDLogVerbose(@"found show title %@, incrementing version number %d", program.showTitle, n);
+//				program.showTitle = [[program.showTitle substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
+//           } else {
+//                program.showTitle = [program.showTitle stringByAppendingString:@"-1"];
+//			   DDLogDetail(@"found show title %@, adding version number", program.showTitle);
+//            }
+//            [self checkShowTitleUniqueness:program];
+//        }
+//    }
+//
+//}
 
-}
 -(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) shows
 								 toIndex:(NSUInteger)insertIndex
 {
@@ -816,7 +817,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
             if (!showFound) {
                 //Make sure the title isn't the same and if it is add a -1 modifier
                 submittedAny = YES;
-                [self checkShowTitleUniqueness:newShow];
+//                [self checkShowTitleUniqueness:newShow];
 				[newDownload prepareForDownload:NO];
 				if (nextDownload) {
                     NSUInteger index = [_downloadQueue indexOfObject:nextDownload];

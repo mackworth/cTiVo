@@ -37,7 +37,9 @@
 	*commercialFilePath,
 	*commercialLogFilePath,
 	*captionFilePath,
-	*captionLogFilePath;
+	*captionLogFilePath,
+	*baseFileName,
+	*nameLockFilePath; //Just to check for file name uniqueness, along with the encodeFilePath
 	
     double dataDownloaded;
     NSTask *encoderTask, *decrypterTask, *commercialTask, *captionTask, *apmTask;
@@ -72,6 +74,7 @@ __DDLOGHERE__
  		decryptFilePath = nil;
         commercialFilePath = nil;
 		captionFilePath = nil;
+		nameLockFilePath = nil;
 		_addToiTunesWhenEncoded = NO;
         _simultaneousEncode = YES;
 		encoderTask = nil;
@@ -535,6 +538,13 @@ __DDLOGHERE__
 	BOOL deleteFiles = ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles];
     NSFileManager *fm = [NSFileManager defaultManager];
     DDLogDetail(@"%@ cleaningup files",self.show.showTitle);
+	if (nameLockFilePath) {
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting Lockfile %@",nameLockFilePath);
+			[fm removeItemAtPath:nameLockFilePath error:nil];
+		}
+
+	}
 	if (_downloadFilePath) {
         [downloadFileHandle closeFile];
 		if (deleteFiles) {
@@ -747,6 +757,28 @@ __DDLOGHERE__
 }
 #undef Null
 
+-(void)createUniqueBaseFileName:(NSString *)inBaseFileName inDownloadDir:(NSString *)downloadDir
+{
+    NSString *trialEncodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,inBaseFileName,_encodeFormat.filenameExtension] retain];
+	nameLockFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.lck" ,inBaseFileName] retain];
+	NSFileManager *fm = [NSFileManager defaultManager];
+	if ([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:nameLockFilePath]) {
+		NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
+		NSTextCheckingResult *result = [ending firstMatchInString:inBaseFileName options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, inBaseFileName.length)];
+		if (result) {
+			int n = [[inBaseFileName substringWithRange:[result rangeAtIndex:2]] intValue];
+			DDLogVerbose(@"found output file named %@, incrementing version number %d", inBaseFileName, n);
+			baseFileName = [[inBaseFileName substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
+		} else {
+			baseFileName = [inBaseFileName stringByAppendingString:@"-1"];
+			DDLogDetail(@"found output file named %@, adding version number", baseFileName);
+		}
+		[self createUniqueBaseFileName:baseFileName inDownloadDir:downloadDir];
+
+	}
+
+}
+
 -(void)configureFiles
 {
 	DDLogDetail(@"configuring files for %@",self);
@@ -763,8 +795,12 @@ __DDLOGHERE__
 	if (!downloadDir) {
 		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
 	}
-	NSString * baseFileName = self.showTitleForFiles;
+	baseFileName = self.showTitleForFiles;
+	[self createUniqueBaseFileName:baseFileName inDownloadDir:downloadDir];
+	DDLogDetail(@"Using baseFileName %@",baseFileName);
     _encodeFilePath = [[NSString stringWithFormat:@"%@/%@%@",downloadDir,baseFileName,_encodeFormat.filenameExtension] retain];
+	nameLockFilePath = [[NSString stringWithFormat:@"/tmp/ctivo/%@.lck" ,baseFileName] retain];
+	[[NSFileManager defaultManager] createFileAtPath:nameLockFilePath contents:[NSData data] attributes:nil];  //Creating the lock file
     DDLogVerbose(@"setting encodepath: %@", _encodeFilePath);
 	NSFileManager *fm = [NSFileManager defaultManager];
     if (_simultaneousEncode) {
@@ -1828,6 +1864,7 @@ __DDLOGHERE__
 		bufferFileReadHandle = nil;
 		if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
 			[[NSFileManager defaultManager] removeItemAtPath:_bufferFilePath error:nil];
+			[[NSFileManager defaultManager] removeItemAtPath:nameLockFilePath error:nil];
 		}
 	}
 	writingData = NO;
