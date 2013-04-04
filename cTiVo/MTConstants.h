@@ -108,6 +108,7 @@
 #define kMTTivoShowPasteBoardType @"com.cTiVo.TivoShow"
 #define kMTDownloadPasteBoardType @"com.cTiVo.Download"
 #define kMTInputLocationToken @"<<<INPUT>>>"
+#define kMTTmpDir @"/tmp/ctivo/"
 
 
 //USER DEFAULTS

@@ -125,6 +125,7 @@ __DDLOGHERE__
 		
 	}
 	
+	[self clearTmpDirectory];
 	
 	// Insert code here to initialize your application
 	
@@ -186,6 +187,33 @@ __DDLOGHERE__
     // add the notification port to the application runloop
     CFRunLoopAddSource( CFRunLoopGetCurrent(),
 					   IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes );
+}
+
+-(void)clearTmpDirectory
+{
+	//Make sure the tmp directory exits
+	if (![[NSFileManager defaultManager] fileExistsAtPath:kMTTmpDir]) {
+		[[NSFileManager defaultManager] createDirectoryAtPath:kMTTmpDir withIntermediateDirectories:YES attributes:nil error:nil];
+	} else {
+		//Clear it if not saving intermediate files
+		if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+			NSFileManager *fm = [NSFileManager defaultManager];
+			NSError *err;
+			NSArray *filesToRemove = [fm contentsOfDirectoryAtPath:kMTTmpDir error:&err];
+			if (err) {
+				DDLogMajor(@"Could not get content of %@.  Got error %@",kMTTmpDir,err);
+			} else {
+				if (filesToRemove) {
+					for (NSString *file in filesToRemove) {
+						[fm removeItemAtPath:file error:&err];
+						if (err) {
+							DDLogMajor(@"Could not delete file %@.  Got error %@",file,err);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
