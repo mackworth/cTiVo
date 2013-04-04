@@ -1447,6 +1447,9 @@ __DDLOGHERE__
 	NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
 	setxattr([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], [tiVoName bytes], tiVoName.length, 0, 0);
 	setxattr([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);
+    
+    //Update downloadedShows of show
+    _show.downloadedShows = [_show.downloadedShows arrayByAddingObject:_encodeFilePath];
 	
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];

@@ -37,6 +37,7 @@
 @property (nonatomic) int numEncoders, totalShows, numCommercials, numCaptions;//Want to limit launches to two encoders.
 @property (nonatomic, assign) NSWindow *mainWindow;
 @property (nonatomic, retain) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
+@property (nonatomic, retain) NSDictionary *initialShowsOnDisk;
 
 
 + (MTTiVoManager *)sharedTiVoManager;
@@ -78,8 +79,8 @@
 -(void)refreshAllTiVos;
 -(BOOL)anyTivoActive;
 
--(BOOL)playVideoForDownloads:(NSArray *) downloads;
--(BOOL)revealInFinderForDownloads:(NSArray *) downloads;
+//-(BOOL)playVideoForDownloads:(NSArray *) downloads;
+//-(BOOL)revealInFinderForDownloads:(NSArray *) downloads;
 -(void)pauseQueue:(NSNumber *)askUser;
 -(void)unPauseQueue;
 -(void)determineCurrentProcessingState;

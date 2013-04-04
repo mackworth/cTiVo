@@ -56,6 +56,8 @@
 
 @property					  time_t showLength;  //length of show in seconds
 
+@property (nonatomic, retain) NSArray *downloadedShows; //Versions that have been downloaded
+
 
 
 #pragma mark - Properties loaded in from Details Page
@@ -96,6 +98,10 @@
 -(void)getShowDetail;
 
 -(NSArray *) apmArguments;
+
+-(void)playVideo:(NSString *)path;
+-(void)revealInFinder:(NSArray *)paths;
+-(void)updateDownloadedShows;
 
 
 

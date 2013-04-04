@@ -11,6 +11,7 @@
 #import "MTDownload.h"
 #import "NSString+HTML.h"
 #import "MTTiVoManager.h"
+#include <sys/xattr.h>
 
 #define kMTStringType 0
 #define kMTBoolType 1
@@ -396,6 +397,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             MTTiVoShow *thisShow = [previousShowList valueForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
 			if (!thisShow) {
 				currentShow.tiVo = self;
+				currentShow.downloadedShows = [self findPreviousDownloads:currentShow];
 				DDLogDetail(@"Added new show %@",currentShow.showTitle);
 				[newShows addObject:currentShow];
 				NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil] autorelease];
@@ -435,6 +437,22 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			
 		}
     }
+}
+
+
+-(NSArray *)findPreviousDownloads:(MTTiVoShow *)show
+{
+	NSString *downloadDir = [tiVoManager downloadDirectory];
+	if (!downloadDir) {
+		downloadDir = [tiVoManager defaultDownloadDirectory];
+	}
+    NSString *key = [NSString stringWithFormat:@"%@: %@",show.tiVoName,show.idString];
+    NSArray *shows = [tiVoManager.initialShowsOnDisk objectForKey:key];
+    if (!shows) {
+        shows = [NSArray array];
+    }
+	return shows;
+	
 }
 
 -(void)updatePortsInURLString:(NSMutableString *)elementToUpdate

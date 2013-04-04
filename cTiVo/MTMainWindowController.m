@@ -318,11 +318,11 @@ __DDLOGHERE__
 						}
 					}
 				}
-			} else if (workingTable == tiVoShowTable) {
-				MTTiVoShow * thisShow = tiVoShowTable.sortedShows[menuTableRow];
-				MTDownload *thisDownload = [tiVoManager findInDownloadQueue:thisShow];
+			}
+			if (workingTable == tiVoShowTable) {
+				MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
 				//diable menu items that depend on having a completed show tag = 2
-				if (!thisDownload || !thisDownload.canPlayVideo) {
+				if (!thisShow.downloadedShows.count) {
 					for (NSMenuItem *mi in [menu itemArray]) {
 						if (mi.tag == 2 ) {
 							[mi setAction:NULL];
@@ -330,7 +330,6 @@ __DDLOGHERE__
 					}
 				}
 			}
-
 		}
 		if ([workingTable selectedRowIndexes].count == 0) { //No selection so disable group functions
 			for (NSMenuItem *mi in [menu itemArray]) {
@@ -369,11 +368,21 @@ __DDLOGHERE__
 	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
 		[self openDrawer:tiVoShowTable.sortedShows[menuTableRow]];
 	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
-		MTDownload * download = [tiVoManager findInDownloadQueue:tiVoShowTable.sortedShows[menuTableRow]];
-		[tiVoManager playVideoForDownloads:@[download]];
-	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
-		MTDownload * download = [tiVoManager findInDownloadQueue:tiVoShowTable.sortedShows[menuTableRow]];
-		[tiVoManager revealInFinderForDownloads:@[download]];
+		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
+        //Eventually if more than 1 download present will open up choice alert (or extend menu with a right pull)
+        //For now just play the first
+        [thisShow updateDownloadedShows];
+        if (thisShow.downloadedShows.count) {
+                [thisShow playVideo:thisShow.downloadedShows[0]];
+        }
+    } else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
+		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
+        //Eventually if more than 1 download present will open up choice alert (or extend menu with a right pull)
+        //For now just play the first
+        [thisShow updateDownloadedShows];
+        if (thisShow.downloadedShows.count) {
+            [thisShow revealInFinder:thisShow.downloadedShows];
+        }
 	}
 }
 

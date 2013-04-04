@@ -64,6 +64,7 @@ __DDLOGHERE__
 		
 		self.protectedShow = @(NO); //This is the default
 		parseTermMapping = [@{@"description" : @"showDescription", @"time": @"showTime"} retain];
+		self.downloadedShows = [NSArray array];
 
     }
     return self;
@@ -618,6 +619,31 @@ __DDLOGHERE__
 	
 }
 
+-(void)updateDownloadedShows
+{
+    NSMutableArray *remainingShows = [NSMutableArray array];
+    for (NSString *showPath in _downloadedShows) {
+        if ([[NSFileManager defaultManager] fileExistsAtPath:showPath]) {
+            [remainingShows addObject:showPath];
+        }
+    }
+    self.downloadedShows = [NSArray arrayWithArray:remainingShows];
+}
+
+-(void)playVideo:(NSString *)path
+{
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL fileURLWithPath:path]];
+
+}
+
+-(void)revealInFinder:(NSArray *)paths
+{
+    for (NSString *path in paths) {
+        [[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ [NSURL fileURLWithPath:path] ]];
+    }
+
+}
+
 -(void)setInProgress:(NSNumber *)inProgress
 {
   if (_inProgress != inProgress) {
@@ -758,6 +784,7 @@ __DDLOGHERE__
 
 -(void)dealloc
 {
+	self.downloadedShows = nil;
     self.showTitle = nil;
     self.showDescription = nil;
     self.detailURL = nil;
