@@ -747,7 +747,7 @@ __DDLOGHERE__
 			if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
 		}
 		NSString * safeTitle = [baseTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-		//		safeTitle = [safeTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+		safeTitle = [safeTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
 		if (LOG_VERBOSE  && [safeTitle compare: _show.showTitle ]  != NSOrderedSame) {
 			DDLogVerbose(@"changed filename %@ to %@",_show.showTitle, safeTitle);
 		}
