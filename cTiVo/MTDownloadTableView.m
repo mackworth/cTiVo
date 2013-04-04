@@ -530,36 +530,20 @@ __DDLOGHERE__
 	
 }
 
+
 -(BOOL)playVideo
 {
 	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedShows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
-	for (MTDownload *show in selectedShows) {
-		if (show.isDone) {
-			if ([show playVideo])  {
-				return YES;		}
-		}
-	}
-	return NO;
+	NSArray *selectedDownloads = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
+	return [tiVoManager playVideoForDownloads:selectedDownloads];
 }
 
 -(BOOL)revealInFinder
 {
 	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedShows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
-	NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:selectedShows.count];
-	for (MTDownload *show in selectedShows) {
-		NSURL * showURL = [show videoFileURLWithEncrypted:YES];
-		if (showURL) {
-			[showURLs addObject:showURL];
-		}
-	}
-	if (showURLs.count > 0) {
-		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
-		return YES;
-	} else{
-		return NO;
-	}
+	NSArray *selectedDownloads = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
+	return [tiVoManager revealInFinderForDownloads:selectedDownloads];
+
 }
 
 

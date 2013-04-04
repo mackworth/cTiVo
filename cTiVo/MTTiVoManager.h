@@ -78,6 +78,8 @@
 -(void)refreshAllTiVos;
 -(BOOL)anyTivoActive;
 
+-(BOOL)playVideoForDownloads:(NSArray *) downloads;
+-(BOOL)revealInFinderForDownloads:(NSArray *) downloads;
 -(void)pauseQueue:(NSNumber *)askUser;
 -(void)unPauseQueue;
 -(void)determineCurrentProcessingState;

@@ -914,7 +914,33 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	return n;
 }
 
-#pragma mark Growl/Apple Notifications
+-(BOOL)playVideoForDownloads:(NSArray *) downloads {
+	for (MTDownload *download in downloads) {
+		if (download.isDone) {
+			if ([download playVideo])  {
+				return YES;		}
+		}
+	}
+	return NO;
+}
+
+-(BOOL)revealInFinderForDownloads:(NSArray *) downloads {
+	NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:downloads.count];
+	for (MTDownload *show in downloads) {
+		NSURL * showURL = [show videoFileURLWithEncrypted:YES];
+		if (showURL) {
+			[showURLs addObject:showURL];
+		}
+	}
+	if (showURLs.count > 0) {
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
+		return YES;
+	} else{
+		return NO;
+	}
+	
+}
+#pragma mark - Growl/Apple Notifications
 
 -(void) loadGrowl {
 	

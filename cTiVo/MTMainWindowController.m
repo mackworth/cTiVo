@@ -318,7 +318,19 @@ __DDLOGHERE__
 						}
 					}
 				}
+			} else if (workingTable == tiVoShowTable) {
+				MTTiVoShow * thisShow = tiVoShowTable.sortedShows[menuTableRow];
+				MTDownload *thisDownload = [tiVoManager findInDownloadQueue:thisShow];
+				//diable menu items that depend on having a completed show tag = 2
+				if (!thisDownload || !thisDownload.canPlayVideo) {
+					for (NSMenuItem *mi in [menu itemArray]) {
+						if (mi.tag == 2 ) {
+							[mi setAction:NULL];
+						}
+					}
+				}
 			}
+
 		}
 		if ([workingTable selectedRowIndexes].count == 0) { //No selection so disable group functions
 			for (NSMenuItem *mi in [menu itemArray]) {
@@ -356,7 +368,12 @@ __DDLOGHERE__
 		[self subscribe:menu];
 	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
 		[self openDrawer:tiVoShowTable.sortedShows[menuTableRow]];
-
+	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
+		MTDownload * download = [tiVoManager findInDownloadQueue:tiVoShowTable.sortedShows[menuTableRow]];
+		[tiVoManager playVideoForDownloads:@[download]];
+	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
+		MTDownload * download = [tiVoManager findInDownloadQueue:tiVoShowTable.sortedShows[menuTableRow]];
+		[tiVoManager revealInFinderForDownloads:@[download]];
 	}
 }
 
@@ -401,7 +418,7 @@ __DDLOGHERE__
 		[tiVoManager.subscribedShows addSubscriptionsDL:selectedDownloads];
 	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
 		MTDownload * download = downloadQueueTable.sortedDownloads[menuTableRow];
-		[showDetailDrawer open:download.show];
+		[self openDrawer:download.show];
 	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
 		[downloadQueueTable playVideo];
 	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
