@@ -110,6 +110,11 @@
 #define kMTInputLocationToken @"<<<INPUT>>>"
 #define kMTTmpDir @"/tmp/ctivo/"
 
+//XATTRs
+
+#define kMTXATTRTiVoName @"TiVoName"
+#define kMTXATTRTiVoID @"TiVoID"
+
 
 //USER DEFAULTS
 
