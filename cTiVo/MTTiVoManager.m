@@ -227,7 +227,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void)metadataQueryHandler:(id)sender
 {
-	NSLog(@"Got Metatdata Result with count %ld",[cTiVoQuery resultCount]);
+	DDLogDetail(@"Got Metatdata Result with count %ld",[cTiVoQuery resultCount]);
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
     NSData *buffer = [NSData dataWithData:[[[NSMutableData alloc] initWithLength:256] autorelease]];
 	for (int i =0; i < [cTiVoQuery resultCount]; i++) {
@@ -252,7 +252,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 	}
 	self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
-	NSLog(@"showsOnDisk = %@",self.showsOnDisk);
+	DDLogVerbose(@"showsOnDisk = %@",self.showsOnDisk);
 }
 
 -(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path
