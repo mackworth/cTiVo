@@ -114,6 +114,8 @@
 
 #define kMTXATTRTiVoName @"TiVoName"
 #define kMTXATTRTiVoID @"TiVoID"
+#define kMTXATTRSpotlight @"com.apple.metadata:kMDItemFinderComment"
+#define kMTSpotlightKeyword @"cTiVoDownload"
 
 
 //USER DEFAULTS

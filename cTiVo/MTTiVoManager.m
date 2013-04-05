@@ -39,7 +39,7 @@
     BOOL volatile updatingVideoList;
 	
 	NSOperationQueue *queue;
-    
+    NSMetadataQuery *cTiVoQuery;
 
 }
 
@@ -211,9 +211,60 @@ static MTTiVoManager *sharedTiVoManager = nil;
 //        NSLog(@"Host Addresses = %@",self.hostAddresses);
 //        NSLog(@"Host Names = %@",[[NSHost currentHost] names]);
 //        NSLog(@"Host addresses for first name %@",[[NSHost hostWithName:[[NSHost currentHost] names][0]] addresses]);
-        
+		
+		//Set up query for exisiting downloads using
+        cTiVoQuery = [[NSMetadataQuery alloc] init];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidUpdateNotification object:cTiVoQuery];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidFinishGatheringNotification object:cTiVoQuery];
+		NSPredicate *mdqueryPredicate = [NSPredicate predicateWithFormat:@"kMDItemFinderComment ==[c] 'cTiVoDownload'"];
+		[cTiVoQuery setPredicate:mdqueryPredicate];
+		[cTiVoQuery setSearchScopes:@[NSMetadataQueryUserHomeScope]];
+		[cTiVoQuery setNotificationBatchingInterval:1.0];
+		[cTiVoQuery startQuery];
 	}
 	return self;
+}
+
+-(void)metadataQueryHandler:(id)sender
+{
+	NSLog(@"Got Metatdata Result with count %ld",[cTiVoQuery resultCount]);
+	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
+    NSData *buffer = [NSData dataWithData:[[[NSMutableData alloc] initWithLength:256] autorelease]];
+	for (int i =0; i < [cTiVoQuery resultCount]; i++) {
+		NSString *filePath = [[cTiVoQuery resultAtIndex:i] valueForAttribute:NSMetadataItemPathKey];
+		ssize_t len = getxattr([filePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], (void *)[buffer bytes], 256, 0, 0);
+		if (len > 0) {
+			NSData *idData = [NSData dataWithBytes:[buffer bytes] length:(NSUInteger)len];
+			NSString  *showID = [[[NSString alloc] initWithData:idData encoding:NSUTF8StringEncoding] autorelease];
+			len = getxattr([filePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], (void *)[buffer bytes], 256, 0, 0);
+			if (len > 0) {
+				NSData *nameData = [NSData dataWithBytes:[buffer bytes] length:len];
+				NSString *tiVoName = [[[NSString alloc] initWithData:nameData encoding:NSUTF8StringEncoding] autorelease];
+				NSString *key = [NSString stringWithFormat:@"%@: %@",tiVoName,showID];
+				if ([tmpDict objectForKey:key]) {
+					NSArray *paths = [tmpDict objectForKey:key];
+					[tmpDict setObject:[paths arrayByAddingObject:filePath] forKey:key];
+				} else {
+					[tmpDict setObject:@[filePath] forKey:key];
+				}
+			}
+		}
+
+	}
+	self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
+	NSLog(@"showsOnDisk = %@",self.showsOnDisk);
+}
+
+-(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path
+{
+	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:self.showsOnDisk];
+	if ([tmpDict objectForKey:key]) {
+		NSArray *paths = [tmpDict objectForKey:key];
+		[tmpDict setObject:[paths arrayByAddingObject:path] forKey:key];
+	} else {
+		[tmpDict setObject:@[path] forKey:key];
+	}
+	self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
 }
 
 -(void) restoreOldQueue {
@@ -717,70 +768,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 #pragma mark - Download Management
 
--(NSDictionary *)getShowsFromDirectory:(NSString *)dir startingDictionary:(NSDictionary *)downloadedShows level:(int)level
-{
-    if (level > 2) { //Give up as we may be in a non-dedicated directory
-        return downloadedShows;
-    }
-	NSError *err;
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSArray *downloads = [fm contentsOfDirectoryAtPath:dir error:&err];
-    if (downloads.count > 300) { //If we have more than 300 files give up as we're probably in a non-dedicated directory like Home
-        return downloadedShows;
-    }
-    NSData *buffer = [NSData dataWithData:[[[NSMutableData alloc] initWithLength:256] autorelease]];
-	for (NSString *file in downloads) {
-        if ([file characterAtIndex:0] != '.') { //Skip hidden files
-            NSString *path = [NSString stringWithFormat:@"%@/%@",dir,file];
-            BOOL isDir;
-            [fm fileExistsAtPath:path isDirectory:&isDir];
-            if (isDir) {
-                NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:downloadedShows];
-                [tmpDict addEntriesFromDictionary:[self getShowsFromDirectory:[NSString stringWithFormat:@"%@/",path] startingDictionary:downloadedShows level:level+1]];
-                downloadedShows = [NSDictionary dictionaryWithDictionary:tmpDict];
-            } else {
-                ssize_t len = getxattr([path cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], (void *)[buffer bytes], 256, 0, 0);
-                if (len > 0) {
-                    NSData *idData = [NSData dataWithBytes:[buffer bytes] length:(NSUInteger)len];
-                    NSString  *showID = [[[NSString alloc] initWithData:idData encoding:NSUTF8StringEncoding] autorelease];
-                    len = getxattr([path cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], (void *)[buffer bytes], 256, 0, 0);
-                    if (len > 0) {
-                        NSData *nameData = [NSData dataWithBytes:[buffer bytes] length:len];
-                        NSString *tiVoName = [[[NSString alloc] initWithData:nameData encoding:NSUTF8StringEncoding] autorelease];
-                        NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:downloadedShows];
-                        NSString *key = [NSString stringWithFormat:@"%@: %@",tiVoName,showID];
-                        if ([tmpDict objectForKey:key]) {
-                            NSArray *paths = [tmpDict objectForKey:key];
-                            [tmpDict setObject:[paths arrayByAddingObject:path] forKey:key];
-                        } else {
-                            [tmpDict setObject:@[path] forKey:[NSString stringWithFormat:@"%@: %@",tiVoName,showID]];
-                        }
-                        downloadedShows = [NSDictionary dictionaryWithDictionary:tmpDict];
-                    }
-                    
-                }
-            }
-		}
-	}
-	return downloadedShows;
-}
 
-
-
--(NSDictionary *)initialShowsOnDisk
-{
-    if (!_initialShowsOnDisk) {
-        NSString *downloadDir = [tiVoManager downloadDirectory];
-        if (!downloadDir) {
-            downloadDir = [tiVoManager defaultDownloadDirectory];
-        }
-        NSDictionary *showInfo = [NSDictionary dictionary];
-        showInfo = [self getShowsFromDirectory:downloadDir  startingDictionary:showInfo level:1];
-        self.initialShowsOnDisk = showInfo;
-    }
-    return _initialShowsOnDisk;
-
-}
 
 //-(void)checkShowTitleUniqueness:(MTTiVoShow *)program
 //{

@@ -631,7 +631,7 @@ __DDLOGHERE__
 		[decryptFilePath release]; decryptFilePath = nil;
     }
 	//Clean up files in KMTTmpDir
-	if (deleteFiles) {
+	if (deleteFiles && self.baseFileName) {
 		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:kMTTmpDir error:nil];
 		[fm changeCurrentDirectoryPath:kMTTmpDir];
 		for(NSString *file in tmpFiles){
@@ -1445,11 +1445,12 @@ __DDLOGHERE__
 	//Add xattrs
 	NSData *tiVoName = [_show.tiVoName dataUsingEncoding:NSUTF8StringEncoding];
 	NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *spotlightKeyword = [kMTSpotlightKeyword dataUsingEncoding:NSUTF8StringEncoding];
 	setxattr([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], [tiVoName bytes], tiVoName.length, 0, 0);
 	setxattr([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);
+	setxattr([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRSpotlight UTF8String], [spotlightKeyword bytes], spotlightKeyword.length, 0, 0);
     
-    //Update downloadedShows of show
-    _show.downloadedShows = [_show.downloadedShows arrayByAddingObject:_encodeFilePath];
+	[tiVoManager updateShowOnDisk:_show.showKey withPath:_encodeFilePath];
 	
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];

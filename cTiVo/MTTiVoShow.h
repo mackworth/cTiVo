@@ -56,7 +56,6 @@
 
 @property					  time_t showLength;  //length of show in seconds
 
-@property (nonatomic, retain) NSArray *downloadedShows; //Versions that have been downloaded
 
 
 
@@ -70,6 +69,7 @@
 @property (nonatomic, readonly) NSString *yearString,
 										*originalAirDateNoTime,
 										 *showDateString,
+										*showKey,
 										 *showMediumDateString;
 @property						int	season, episode; //calculated from EpisodeNumber
 @property (nonatomic, readonly) NSString *seasonString;
@@ -101,7 +101,6 @@
 
 -(void)playVideo:(NSString *)path;
 -(void)revealInFinder:(NSArray *)paths;
--(void)updateDownloadedShows;
 
 
 
