@@ -252,7 +252,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 	}
 	self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	DDLogVerbose(@"showsOnDisk = %@",self.showsOnDisk);
+    
 }
 
 -(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path

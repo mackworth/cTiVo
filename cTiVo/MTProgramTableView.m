@@ -352,8 +352,12 @@ __DDLOGHERE__
 		result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
 		result.imageView.image = [NSImage imageNamed: imageName];
 	}
+    result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
     if ([thisShow.protectedShow boolValue]) {
         result.textField.textColor = [NSColor grayColor];
+    } else if ([tiVoManager.showsOnDisk objectForKey:thisShow.showKey]){
+//        result.textField.textColor = [NSColor blueColor];
+        result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];
     } else {
         result.textField.textColor = [NSColor blackColor];
     }
