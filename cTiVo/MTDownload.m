@@ -1774,7 +1774,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) revealInFinder {
-	NSURL * showURL =[self videoFileURLWithEncrypted:NO];
+	NSURL * showURL =[self videoFileURLWithEncrypted:YES];
 	if (showURL) {
 		DDLogMajor(@"Revealing file %@ ", showURL);
 		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ showURL ]];

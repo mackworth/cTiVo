@@ -521,8 +521,7 @@ __DDLOGHERE__
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
 	NSArray *selectedShows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
 	for (MTDownload *show in selectedShows) {
-		if ([show videoFileURLWithEncrypted:YES]) {
-			//minor bug: we enable play video even though you can't play encrypted
+		if ([show videoFileURLWithEncrypted:NO]) {
 			return  YES;
 		}
 	}
