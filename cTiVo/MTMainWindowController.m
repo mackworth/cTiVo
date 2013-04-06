@@ -528,7 +528,7 @@ __DDLOGHERE__
 
 -(IBAction)getDownloadDirectory:(id)sender
 {
-	NSOpenPanel *myOpenPanel = [NSOpenPanel openPanel];
+	NSOpenPanel *myOpenPanel = [[NSOpenPanel openPanel]retain];
 	[myOpenPanel setCanChooseDirectories:YES];
 	[myOpenPanel setCanChooseFiles:NO];
 	[myOpenPanel setAllowsMultipleSelection:NO];
@@ -539,6 +539,7 @@ __DDLOGHERE__
 	if (ret == NSFileHandlingPanelOKButton) {
 		tiVoManager.downloadDirectory = myOpenPanel.URL.path;
 	}
+	[myOpenPanel release];
 }
 
 #pragma mark - Download Options

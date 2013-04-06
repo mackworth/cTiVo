@@ -198,14 +198,15 @@ __DDLOGHERE__
 		//Clear it if not saving intermediate files
 		if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
 			NSFileManager *fm = [NSFileManager defaultManager];
-			NSError *err;
+			NSError *err = nil;
 			NSArray *filesToRemove = [fm contentsOfDirectoryAtPath:kMTTmpDir error:&err];
 			if (err) {
 				DDLogMajor(@"Could not get content of %@.  Got error %@",kMTTmpDir,err);
 			} else {
 				if (filesToRemove) {
 					for (NSString *file in filesToRemove) {
-						[fm removeItemAtPath:file error:&err];
+						NSString * path = [NSString pathWithComponents:@[kMTTmpDir,file]];
+						[fm removeItemAtPath:path error:&err];
 						if (err) {
 							DDLogMajor(@"Could not delete file %@.  Got error %@",file,err);
 						}

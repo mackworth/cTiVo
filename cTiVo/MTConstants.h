@@ -73,6 +73,10 @@
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
 #define kMTSubscribedSkipCommercials @"skipCommercials"
 #define kMTSubscribedIncludeSuggestions @"includeSuggestions"
+#define kMTSubscribedGenTextMetaData     @"GenTextMetadata"
+#define kMTSubscribedGenXMLMetaData	    @"GenXMLMetadata"
+#define kMTSubscribedIncludeAPMMetaData  @"IncludeAPMMetaData"
+#define kMTSubscribedExportSubtitles  @"ExportSubtitles"
 
 //Download queue userDefaults
 #define kMTQueue      @"Queue"

@@ -122,6 +122,13 @@ __DDLOGHERE__
 			newDownload.addToiTunesWhenEncoded = ([subscription canAddToiTunes] && [subscription shouldAddToiTunes]);
 			newDownload.simultaneousEncode = ([subscription canSimulEncode] && [subscription shouldSimulEncode]);
 			newDownload.downloadDirectory = [tiVoManager downloadDirectory];  //should we have one per subscription? UI?
+
+			newDownload.exportSubtitles = subscription.exportSubtitles;
+			newDownload.skipCommercials = newDownload.encodeFormat.comSkip. boolValue && subscription.skipCommercials.boolValue;
+			newDownload.genTextMetaData = subscription.genTextMetaData;
+			newDownload.genXMLMetaData = subscription.genXMLMetaData;
+			newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && subscription.includeAPMMetaData.boolValue)];
+			
 			[tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];    //should this be on main thread
 		}
 	}
@@ -224,7 +231,7 @@ __DDLOGHERE__
 		newSub.encodeFormat = tiVoManager.selectedFormat;
 		newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
 		newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
-		newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip)];
+		newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip.boolValue)];
 		newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
 		newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
 		newSub.includeAPMMetaData = [defaults objectForKey:kMTExportAtomicParsleyMetaData];
@@ -302,6 +309,17 @@ __DDLOGHERE__
         if (tempSub.simultaneousEncode ==nil) tempSub.simultaneousEncode = [NSNumber numberWithBool: ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode] && tempSub.encodeFormat.canSimulEncode)];
 		tempSub.includeSuggestions = sub[kMTSubscribedIncludeSuggestions];
 		if (tempSub.includeSuggestions ==nil) tempSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
+		tempSub.skipCommercials = sub[kMTSubscribedSkipCommercials];
+		if (tempSub.skipCommercials ==nil) tempSub.skipCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTRunComSkip];
+		tempSub.genTextMetaData = sub[kMTSubscribedGenTextMetaData];
+		if (tempSub.genTextMetaData ==nil) tempSub.genTextMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTextMetaData];
+		tempSub.genXMLMetaData = sub[kMTSubscribedGenXMLMetaData];
+		if (tempSub.genXMLMetaData ==nil) tempSub.genXMLMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTivoMetaData];
+		tempSub.includeAPMMetaData = sub[kMTSubscribedIncludeAPMMetaData];
+		if (tempSub.includeAPMMetaData ==nil) tempSub.includeAPMMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportAtomicParsleyMetaData];
+		tempSub.exportSubtitles = sub[kMTSubscribedExportSubtitles];
+		if (tempSub.exportSubtitles ==nil) tempSub.exportSubtitles = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportSubtitles];
+
 		DDLogVerbose(@"Loaded Sub: %@ from %@",tempSub, sub);
         [self addObject:tempSub];
     }
@@ -317,7 +335,12 @@ __DDLOGHERE__
                                   sub.addToiTunes, kMTSubscribediTunes,
                                   sub.simultaneousEncode, kMTSubscribedSimulEncode,
                                   sub.includeSuggestions, kMTSubscribedIncludeSuggestions,
-                                  nil];
+								  sub.skipCommercials, kMTSubscribedSkipCommercials,
+                                  sub.genTextMetaData , kMTSubscribedGenTextMetaData,
+                                  sub.genXMLMetaData, kMTSubscribedGenXMLMetaData,
+                                  sub.includeAPMMetaData, kMTSubscribedIncludeAPMMetaData,
+                                  sub.exportSubtitles, kMTSubscribedExportSubtitles,
+								  nil];
 		DDLogVerbose(@"Saving Sub: %@ ",tempSub);
 		[tempArray addObject:tempSub];
     }

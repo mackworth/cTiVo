@@ -631,10 +631,16 @@ __DDLOGHERE__
 
 -(void)revealInFinder:(NSArray *)paths
 {
-    for (NSString *path in paths) {
-        [[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ [NSURL fileURLWithPath:path] ]];
-    }
-
+   	NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:paths.count];
+	for (NSString *fileName in paths) {
+		NSURL * showURL = [NSURL fileURLWithPath:fileName];
+		if (showURL) {
+			[showURLs addObject:showURL];
+		}
+	}
+	if (showURLs.count > 0) {
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
+	}
 }
 
 -(void)setInProgress:(NSNumber *)inProgress
