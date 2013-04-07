@@ -54,6 +54,7 @@
 #define kMTStatusDone 12
 #define kMTStatusDeleted 13
 #define kMTStatusFailed 15
+#define kMTStatusMetaDataProcessing 16
 
 //Contants
 

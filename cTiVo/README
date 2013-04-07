@@ -1,9 +1,9 @@
 *cTiVo* is a cTiVo is a free Mac application to copy shows from your TiVo Premiere, HD, S3 or S2 devices. Simple to set up and use, it will download shows to your mac, and convert them to many popular formats / devices. It is inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance / compatibility.
 
-*cTiVo* is under rapid development. We're currently at an alpha release, but converging on an initial beta; give it a try and tell us what you think. In particular, let us know if you see any problems.
+*cTiVo* is an initial beta; give it a try and tell us what you think. In particular, let us know if you see any problems.
 ----
 ==Features similar to iTiVo include:==
-  * Formats include h.264, mpeg-2, mpeg-1, avi, decrypt-only.
+  * Formats include h.264, mpeg-2, mpeg-1, avi, decrypt-only, audio-only.
   * Target devices include iPhone, iPod, AppleTV, Xbox 360, !PlayStation 3, PSP, YouTube.
   * 'Subscriptions' to your regular shows: downloading them whenever new episodes are available.
   * Support for different encoders, including !HandBrake, mencoder, ffmpeg.
@@ -22,8 +22,7 @@
   * Scheduling of when the queue will be processed.
   * Built-in Elgato turbo.264 support.
   * Generate metadata appropriate for use by tools such as pyTivoX.
-  * Create subtitle files (.srt) from the closed caption info.
-  * Display filter in program list.
+  * Create subtitle files (.srt) from the closed caption info including removal of commercials.
   * Imports iTiVo preferences, including subscriptions and Media Access Key.
 ----
 ==Features in addition to iTiVo include:==
@@ -41,11 +40,13 @@
   * In scheduled use, avoids new operations when end-time reached.
   * Drag/drop and contextual menus for ease of use; submit, reschedule, delete all by dragging the shows.
   * User-definable ports for !TiVos; allows advanced users to access !TiVo shows remotely (requires network reconfiguration).
+  * Spotlight tracking of shows already downloaded by cTiVo
   * Fully compatible with OS X Mountain Lion (10.8) and Lion (10.7).
 ----
 ==iTivo features not implemented, at least not yet:==
   * Reporting on TiVo's disk usage.
   * cTiVo is not compatible with OS X Snow Leopard or Leopard
+  * Display filter in program list.
 ----
 ==To install:==
 

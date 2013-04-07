@@ -691,7 +691,7 @@ __DDLOGHERE__
 	[[table headerView] setMenu:tableHeaderContextMenu];
 	
 	for (NSTableColumn *column in [table tableColumns]) {
-        if ([column.identifier compare:@"TiVo"] != NSOrderedSame || tiVoManager.tiVoList.count > 1) {
+        if ([column.identifier compare:@"TiVo"] != NSOrderedSame || [[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
             NSString *title = [[column headerCell] title];
             NSMenuItem *item = [tableHeaderContextMenu addItemWithTitle:title action:@selector(contextMenuSelected:) keyEquivalent:@""];
             [item setTarget:self];

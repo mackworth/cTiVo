@@ -402,7 +402,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil] autorelease];
 				[_queue addOperation:nextDetail];
 				//Now check and see if this was in the oldQueue (from last time we ran)
-				[tiVoManager replaceProxyInQueue:currentShow];
+				if(firstUpdate)[tiVoManager replaceProxyInQueue:currentShow];
 				
 			} else {
 				DDLogDetail(@"Updated show %@", currentShow.showTitle);

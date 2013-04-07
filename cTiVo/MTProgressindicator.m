@@ -16,7 +16,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code here.
-        const int widthStatusField = 70;
+        const int widthStatusField = 170;
         _leftText = [[NSTextField alloc] initWithFrame:CGRectMake(0, -2, frame.size.width -widthStatusField, frame.size.height)];
         [_leftText setBackgroundColor:[NSColor clearColor]];
         [_leftText setEditable:NO];

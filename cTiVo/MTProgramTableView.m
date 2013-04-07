@@ -358,6 +358,7 @@ __DDLOGHERE__
     } else if ([tiVoManager.showsOnDisk objectForKey:thisShow.showKey]){
 //        result.textField.textColor = [NSColor blueColor];
         result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];
+        result.textField.textColor = [NSColor blackColor];
     } else {
         result.textField.textColor = [NSColor blackColor];
     }

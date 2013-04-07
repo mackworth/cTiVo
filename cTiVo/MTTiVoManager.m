@@ -218,8 +218,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidFinishGatheringNotification object:cTiVoQuery];
 		NSPredicate *mdqueryPredicate = [NSPredicate predicateWithFormat:@"kMDItemFinderComment ==[c] 'cTiVoDownload'"];
 		[cTiVoQuery setPredicate:mdqueryPredicate];
-		[cTiVoQuery setSearchScopes:@[NSMetadataQueryUserHomeScope]];
-		[cTiVoQuery setNotificationBatchingInterval:1.0];
+		[cTiVoQuery setSearchScopes:@[NSMetadataQueryLocalComputerScope]];
+		[cTiVoQuery setNotificationBatchingInterval:2.0];
 		[cTiVoQuery startQuery];
 	}
 	return self;

@@ -24,6 +24,8 @@
 	*captionFileHandle,
 	*captionLogFileHandle,
 	*captionLogFileReadHandle,
+	*apmLogFileHandle,
+	*apmLogFileReadHandle,
 	*encodeFileHandle,
 	*encodeLogFileHandle,
 	*encodeLogFileReadHandle,
@@ -39,6 +41,7 @@
 	*commercialLogFilePath,
 	*captionFilePath,
 	*captionLogFilePath,
+	*apmLogFilePath,
 	*nameLockFilePath; //Just to check for file name uniqueness, along with the encodeFilePath
 	
     double dataDownloaded;
@@ -74,6 +77,7 @@ __DDLOGHERE__
         commercialFilePath = nil;
 		captionFilePath = nil;
 		nameLockFilePath = nil;
+		apmLogFilePath = nil;
 		_addToiTunesWhenEncoded = NO;
         _simultaneousEncode = YES;
 		encoderTask = nil;
@@ -157,6 +161,10 @@ __DDLOGHERE__
 		}
 		case  kMTStatusEncoding :{
 			[self saveLogFile: encodeLogFileReadHandle];
+			break;
+		}
+		case  kMTStatusMetaDataProcessing :{
+			[self saveLogFile: apmLogFileReadHandle];
 			break;
 		}
 		default: {
@@ -321,7 +329,7 @@ __DDLOGHERE__
 }
 
 - (id)pasteboardPropertyListForType:(NSString *)type {
-	NSLog(@"QQQ:pboard Type: %@",type);
+//	NSLog(@"QQQ:pboard Type: %@",type);
 	if ([type compare:kMTDownloadPasteBoardType] ==NSOrderedSame) {
 		return  [NSKeyedArchiver archivedDataWithRootObject:self];
 	} else if ([type isEqualToString:(NSString *)kUTTypeFileURL] && self.encodeFilePath) {
@@ -335,7 +343,7 @@ __DDLOGHERE__
 }
 -(NSArray *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
 	NSArray* result = [NSArray  arrayWithObjects: kMTDownloadPasteBoardType , kUTTypeFileURL, nil];  //NOT working yet
-	NSLog(@"QQQ:writeable Type: %@",result);
+//	NSLog(@"QQQ:writeable Type: %@",result);
 	return result;
 }
 
@@ -461,6 +469,20 @@ __DDLOGHERE__
         [captionLogFileReadHandle closeFile];
         [captionLogFileReadHandle release];
         captionLogFileReadHandle = nil;
+    }
+	if (apmLogFilePath ) {
+		[apmLogFilePath release];
+		apmLogFilePath = nil;
+	}
+    if (apmLogFileHandle) {
+        [apmLogFileHandle closeFile];
+        [apmLogFileHandle release];
+        apmLogFileHandle = nil;
+    }
+    if (apmLogFileReadHandle) {
+        [apmLogFileReadHandle closeFile];
+        [apmLogFileReadHandle release];
+        apmLogFileReadHandle = nil;
     }
     if (encoderTask) {
 		if ([encoderTask isRunning]) {
@@ -595,6 +617,15 @@ __DDLOGHERE__
         [captionFileHandle closeFile];
 		[captionFileHandle release]; captionFileHandle = nil;
 		[captionFilePath release]; captionFilePath = nil;
+    }
+    if (apmLogFileHandle) {
+        [apmLogFileHandle closeFile];
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting captionLog %@",apmLogFilePath);
+			[fm removeItemAtPath:apmLogFilePath error:nil];
+		}
+		[apmLogFileHandle release]; apmLogFileHandle = nil;
+		[apmLogFilePath release]; apmLogFilePath = nil;
     }
     if (encodeLogFileHandle) {
         [encodeLogFileHandle closeFile];
@@ -851,6 +882,10 @@ __DDLOGHERE__
     [fm createFileAtPath:captionLogFilePath contents:[NSData data] attributes:nil];
     captionLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:captionLogFilePath] retain];
     captionLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:captionLogFilePath] retain];
+    apmLogFilePath = [[NSString stringWithFormat:@"%@apm%@.txt", kMTTmpDir,self.baseFileName] retain];
+    [fm createFileAtPath:apmLogFilePath contents:[NSData data] attributes:nil];
+    apmLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:apmLogFilePath] retain];
+    apmLogFileReadHandle = [[NSFileHandle fileHandleForReadingAtPath:apmLogFilePath] retain];
     encodeLogFilePath = [[NSString stringWithFormat:@"%@encoding%@.txt", kMTTmpDir, self.baseFileName] retain];
     [fm createFileAtPath:encodeLogFilePath contents:[NSData data] attributes:nil];
     encodeLogFileHandle = [[NSFileHandle fileHandleForWritingAtPath:encodeLogFilePath] retain];
@@ -1257,7 +1292,6 @@ __DDLOGHERE__
 
 -(void)trackCaption
 {
-	DDLogVerbose(@"QQQ Tracking Caption");
 	if (![captionTask isRunning]) {
 		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         DDLogMajor(@"Finished detecting captions in %@",self.show.showTitle);
@@ -1414,23 +1448,45 @@ __DDLOGHERE__
 
 	DDLogVerbose(@"APM Arguments: %@", apmArgs);
 	[apmTask setArguments:apmArgs];
-	NSString * apmLogFilePath = [NSString stringWithFormat:@"%@QQQAPM.log", kMTTmpDir ];
-	[[NSFileManager defaultManager] createFileAtPath:apmLogFilePath contents:[NSData data] attributes:nil];
+//	NSString * apmLogFilePath = [NSString stringWithFormat:@"%@QQQAPM.log", kMTTmpDir ];
+//	[[NSFileManager defaultManager] createFileAtPath:apmLogFilePath contents:[NSData data] attributes:nil];
 	
 	[apmTask setStandardOutput:[NSFileHandle fileHandleForWritingAtPath:apmLogFilePath ]];
+    _processProgress = 0.0;
+	previousProcessProgress = 0.0;
 	[apmTask launch];
+	[self setValue:[NSNumber numberWithInt:kMTStatusMetaDataProcessing] forKeyPath:@"downloadStatus"];
 	[self performSelector:@selector(trackAPMProcess) withObject:nil afterDelay:1.0];
 	return YES;
 }
 
 -(void) trackAPMProcess {
-	DDLogVerbose(@"QQQTracking APM");
+	DDLogVerbose(@"Tracking APM");
 	if (![apmTask isRunning]) {
  		DDLogMajor(@"Finished atomic Parsley in %@",self.show.showTitle);
 		[apmTask release]; apmTask = nil;
 		
 		[self finishUpPostEncodeProcessing];
 	} else {
+		double newProgressValue = 0;
+		int sizeOfFileSample = 100;
+		unsigned long long logFileSize = [apmLogFileReadHandle seekToEndOfFile];
+		if (logFileSize > sizeOfFileSample) {
+			[apmLogFileReadHandle seekToFileOffset:(logFileSize-sizeOfFileSample)];
+			NSData *tailOfFile = [apmLogFileReadHandle readDataOfLength:sizeOfFileSample];
+			NSString *data = [[[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding] autorelease];
+			
+			NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
+			NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
+			NSTextCheckingResult *lastItem = [values lastObject];
+			NSRange valueRange = [lastItem rangeAtIndex:1];
+			newProgressValue = [[data substringWithRange:valueRange] doubleValue]/100.0;
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+			if (newProgressValue > _processProgress) {
+				_processProgress = newProgressValue;
+			}
+		}
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 		[self performSelector:@selector(trackAPMProcess) withObject:nil afterDelay:0.5];
 	}
 }
@@ -1707,20 +1763,24 @@ __DDLOGHERE__
 
 -(NSArray *)processSrts:(NSArray *)srts withEdls:(NSArray *)edls
 {
-    if (edls.count ==0) return srts;
+    if (edls.count == 0) return srts;
 	NSMutableArray *keptSrts = [NSMutableArray array];
 	NSUInteger edlIndex = 0;
+	MTEdl *currentEDL = edls[edlIndex];
     for (MTSrt *srt in srts) {
-		while ((edlIndex < edls.count &&  srt.startTime > ((MTEdl *)edls[edlIndex]).endTime) || ( ((MTEdl *)edls[edlIndex]).edlType != 0) ) {
+		while (currentEDL &&  (  (srt.startTime > currentEDL.endTime) || (currentEDL.edlType != 0)  ) ){
 			//relies on both edl and srt to be sorted and skips edl that are not cuts (type != 0)
 			edlIndex++;
+			currentEDL = nil;
+			if (edlIndex < edls.count) {
+				currentEDL = edls[edlIndex];
+			}
 
 		};
 		//now current edl is either crossed with srt or after it.
 		//If crossed, we delete srt; 
-		if (edlIndex < edls.count) {
-			MTEdl * edl = (MTEdl *)edls[edlIndex];
-			if (edl.startTime <= srt.endTime ) {
+		if (currentEDL) {
+			if (currentEDL.startTime <= srt.endTime ) {
 			//The srt is  in a cut so remove
 				continue;
 			}
@@ -2018,6 +2078,7 @@ __DDLOGHERE__
 		case  kMTStatusCaptioning: return @"Subtitling";
 		case  kMTStatusDeleted : return @"TiVo Deleted";
 		case  kMTStatusFailed : return @"Failed";
+		case  kMTStatusMetaDataProcessing : return @"Adding MetaData";
 		default: return @"";
 	}
 }

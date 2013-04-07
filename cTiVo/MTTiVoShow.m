@@ -174,7 +174,7 @@ __DDLOGHERE__
 }
 
 - (id)pasteboardPropertyListForType:(NSString *)type {
-	NSLog(@"QQQ:pboard Type: %@",type);
+//	NSLog(@"QQQ:pboard Type: %@",type);
 	if ([type compare:kMTTivoShowPasteBoardType] ==NSOrderedSame) {
 		return  [NSKeyedArchiver archivedDataWithRootObject:self];
 	} else {
@@ -183,7 +183,7 @@ __DDLOGHERE__
 }
 -(NSArray *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
 	NSArray* result = [NSArray  arrayWithObjects: kMTTivoShowPasteBoardType, nil];  //NOT working yet
-	NSLog(@"QQQ:writeable Type: %@",result);
+//	NSLog(@"QQQ:writeable Type: %@",result);
 	return result;
 }
 
