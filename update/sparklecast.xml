@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+   <channel>
+      <title>cTiVo Updates</title>
+      <link>http://ctivo.googlecode.com/files/sparklecast.xml</link>
+      <description>Version 2.0 (Major new features and UI improvements)</description>
+      <language>en</language>      
+         <item>
+            <title>Version 2.0 (Major new features and UI improvements)</title>
+			<description><![CDATA[
+				<b>Version 2.0 (Major new features and UI improvements)</b><br /><br />
+				<span style="margin-left:4px">Greatly enhanced User Interface:</span>
+				<ul>
+				<li>Show table now indicates when show is available to watch</li>
+				<li>Added graphics for TiVo status</li>
+				<li>Displays when shows have been deleted on TiVo</li>
+				<li>Additional columns of information (many hidden by default to keep simple)</li>
+				<li>User selection and ordering of columns</li>
+				<li>Advanced preferences via Option key</li>
+				<li>Documentation now available online</li>
+				<li>Help command within cTiVo</li>
+				<li>Many other changes</li>
+				</ul>
+				<span style="margin-left:4px">Metadata support:</span>
+				<ul>
+				<li>Captioning (ccextractor)</li>
+				<li>Including metadata in video files (AtomicParsley)</li>
+				<li>pyTivo compatibility</li>
+				<li>Automatically adjusts caption timing when removing commercials</li>
+				</ul>
+				<span style="margin-left:4px">Other new features:</span></li>
+				<ul>
+				<li>Optional inclusion of TiVo Suggestions in displays and subscriptions</li>
+				<li>Audio-only download</li>
+				<li>Elgato turbo.264 encoder support</li>
+				<li>Spotlight tracking of downloaded shows (keyword = cTiVoDownload)</li>
+				</ul>
+				<span style="margin-left:4px">Bug fixes:</span>
+				<ul>
+				<li>Full 10.7 compatibility</li>
+				<li>Single quotes in file names</li>
+				<li>Format editing now affects existing subscriptions/downloads</li>
+				<li>Format editing fixes</li>
+				<li>Improved commercial removal with comskip </li>
+				<li>Improved speed for decrypting only downloads</li>
+				<li>Many others</li>
+				</ul>				<br />
+				<b>Version 1.3.2</b><br />
+				<ul>
+				<li>Added support for comSkip (experimental feature to remove commercials during encoding)</li>
+				<li>Improved scheduling function for daily operation</li>
+				<li>Added pause function for queue processing</li>
+				<li>Greatly improved logging functions with user control of detail level</li>
+				<li>Made Series Column behave same as Program column (for those who prefer Series/Episodes  as two columns)</li>
+				<li>Allow user to reschedule shows in progress for greater flexibility in the queue</li>
+				<li>Improved drag/drop functionality so the user can reprioritize show processing with drag/drop</li>
+				<li>Queue restoration on restart should now keep original order</li>
+				<li>Shows deleted on Tivo are marked as such</li>
+				<li>Optional confirmation on quit during downloads, including quit after download completes</li>
+				</ul>
+				
+				See <a href="http://code.google.com/p/ctivo/"> cTiVo Home </a> for more informaton.
+
+				]]>
+			</description>
+            <pubDate>Mon., Apr 8, 2013 10:10:00 -0800</pubDate>
+            <!-- <sparkle:releaseNotesLink>http://andymatuschak.org/files/notes.html</sparkle:releaseNotesLink> -->
+            <enclosure url="http://ctivo.googlecode.com/files/cTiVo_2.0Beta1_281.zip" 
+            			sparkle:version="281" sparkle:shortVersionString="2.0 Beta 1" 
+            			length="21123281" 
+            			type="application/octet-stream" 
+            			sparkle:dsaSignature="MC0CFBJKNAXD56yY6au/urZ+Z4bTzHFDAhUAr+IRBVvQPn3h0I2DFLFeZH8dkkU=" />
+         </item>
+   </channel>
+</rss>
+
