@@ -196,6 +196,7 @@
 		D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		D2B73F3116BC485E003CB4ED /* comskip */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = comskip; sourceTree = "<group>"; };
 		D2B73F3516BC8A90003CB4ED /* comskip.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = comskip.ini; sourceTree = "<group>"; };
+		D2C0381017131FC50001BA52 /* sparklecast.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = sparklecast.xml; sourceTree = "<group>"; };
 		D2C390741687FFA600D2062E /* MTiTunes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTunes.m; sourceTree = "<group>"; };
 		D2C390751687FFA600D2062E /* MTiTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTunes.h; sourceTree = "<group>"; };
 		D2CAF33F16AB43AE004E4CFA /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
@@ -321,9 +322,19 @@
 			name = "UI Classes - Preferences ";
 			sourceTree = "<group>";
 		};
+		D2C0380F17131F9A0001BA52 /* Update */ = {
+			isa = PBXGroup;
+			children = (
+				D2C0381017131FC50001BA52 /* sparklecast.xml */,
+			);
+			name = Update;
+			path = update;
+			sourceTree = "<group>";
+		};
 		D2D60B9216766EFD00CE32DE = {
 			isa = PBXGroup;
 			children = (
+				D2C0380F17131F9A0001BA52 /* Update */,
 				1E684A8C16E40EA8000F5C6E /* Wiki */,
 				D2D60BA716766EFD00CE32DE /* cTiVo */,
 				D2D60BA016766EFD00CE32DE /* Frameworks */,

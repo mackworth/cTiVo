@@ -1465,7 +1465,7 @@ __DDLOGHERE__
 	if (![apmTask isRunning]) {
  		DDLogMajor(@"Finished atomic Parsley in %@",self.show.showTitle);
 		[apmTask release]; apmTask = nil;
-		
+		_processProgress = 1.0;		
 		[self finishUpPostEncodeProcessing];
 	} else {
 		double newProgressValue = 0;

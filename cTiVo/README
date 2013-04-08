@@ -24,6 +24,7 @@
   * Generate metadata appropriate for use by tools such as pyTivoX.
   * Create subtitle files (.srt) from the closed caption info including removal of commercials.
   * Imports iTiVo preferences, including subscriptions and Media Access Key.
+  * Display filter in program list.
 ----
 ==Features in addition to iTiVo include:==
   * Support for multiple !TiVos (with same or different Media Access Keys), all displayed/active simultaneously.
@@ -46,7 +47,6 @@
 ==iTivo features not implemented, at least not yet:==
   * Reporting on TiVo's disk usage.
   * cTiVo is not compatible with OS X Snow Leopard or Leopard
-  * Display filter in program list.
 ----
 ==To install:==
 

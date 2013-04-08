@@ -51,10 +51,10 @@
 #define kMTStatusDoneOld 8		//don't reuse
 #define kMTStatusCaptioning 9
 #define kMTStatusCaptioned 10
+#define kMTStatusMetaDataProcessing 11
 #define kMTStatusDone 12
 #define kMTStatusDeleted 13
 #define kMTStatusFailed 15
-#define kMTStatusMetaDataProcessing 16
 
 //Contants
 

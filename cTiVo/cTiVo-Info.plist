@@ -37,7 +37,7 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>SUFeedURL</key>
-	<string>http://ctivo.googlecode.com/files/sparklecast.xml</string>
+	<string>http://ctivo.googlecode.com/svn/trunk/update/sparklecast.xml</string>
 	<key>SUPublicDSAKeyFile</key>
 	<string>cTiVo_sparkle_pub.pem</string>
 </dict>
