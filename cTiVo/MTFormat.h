@@ -12,7 +12,7 @@
 	NSArray *keys;
 }
 
-@property (nonatomic, retain) NSString	*formatDescription,
+@property (nonatomic, strong) NSString	*formatDescription,
 										*filenameExtension,
 										*encoderUsed,
 										*name,
@@ -32,18 +32,18 @@
 										*captionOptions,
 										*regExProgress;
 
-@property (nonatomic, retain) NSNumber	*comSkip,
+@property (nonatomic, strong) NSNumber	*comSkip,
 										*iTunes,
 										*mustDownloadFirst,
                                         *isHidden,
 										*isFactoryFormat;
 
-@property (nonatomic, retain) NSAttributedString *attributedFormatDescription;
+@property (nonatomic, strong) NSAttributedString *attributedFormatDescription;
 
 @property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip, canAtomicParsley;
 @property (nonatomic, readonly) NSString * pathForExecutable;
 
-@property (nonatomic, retain) NSString * formerName;//only used to update existing format objects when name is edited.
+@property (nonatomic, strong) NSString * formerName;//only used to update existing format objects when name is edited.
 
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format;
 

@@ -88,7 +88,7 @@ __DDLOGHERE__
     self.delegate    = self;
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-    if (!tiVoColumnHolder) tiVoColumnHolder = [[self tableColumnWithIdentifier:@"TiVo"] retain];
+    if (!tiVoColumnHolder) tiVoColumnHolder = [self tableColumnWithIdentifier:@"TiVo"];
 	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
 		[tiVoColumn setHidden:YES];
@@ -151,10 +151,8 @@ __DDLOGHERE__
 -(void)dealloc
 {
 	[self  unregisterDraggedTypes];
-	[tiVoColumnHolder release]; tiVoColumnHolder=nil;
-    self.sortedDownloads= nil;
+	 tiVoColumnHolder=nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 
 #pragma mark - Table Delegate Protocol
@@ -194,7 +192,7 @@ __DDLOGHERE__
 	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
     if([identifier isEqualToString: @"Programs"] ||
 	   [identifier isEqualToString: @"Series" ]) {
-        MTDownloadTableCellView *thisCell = [[[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)] autorelease];
+        MTDownloadTableCellView *thisCell = [[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)];
         //        result.textField.font = [NSFont userFontOfSize:14];
         thisCell.textField.editable = NO;
         
@@ -203,42 +201,43 @@ __DDLOGHERE__
         thisCell.identifier = identifier;
         result = thisCell;
     } else if([identifier isEqualToString: @"iTunes"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)];
         thisCell.identifier = identifier;
         result = thisCell;
     } else if([identifier isEqualToString: @"Simu"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)];
         thisCell.identifier = identifier;
         result = thisCell;
     } else if([identifier isEqualToString: @"Skip"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)];
         thisCell.identifier = identifier;
         result = thisCell;
     } else if([identifier isEqualToString: @"XML"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeXML:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeXML:)];
         thisCell.identifier = identifier;
         result = thisCell;
     } else if([identifier isEqualToString: @"pyTiVo"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changepyTiVo:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changepyTiVo:)];
         thisCell.identifier = identifier;
         result = thisCell;
     } else if([identifier isEqualToString: @"Metadata"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMetadata:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMetadata:)];
         thisCell.identifier = identifier;
         result = thisCell;
     } else if([identifier isEqualToString: @"Subtitles"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSubtitle:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSubtitle:)];
         thisCell.identifier = identifier;
         result = thisCell;
    } else if([identifier isEqualToString: @"Format"]) {
-		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
+		MTPopUpTableCellView *thisCell = [[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)];
 	    thisCell.popUpButton.showHidden = NO;
 		thisCell.identifier = identifier;
 		result = thisCell;
 	} else if([identifier isEqualToString: @"icon"]) {
-		NSTableCellView *thisCell = [[[NSTableCellView alloc] initWithFrame:NSMakeRect(0, -2, thisColumn.width, 22)] autorelease];
-		thisCell.imageView = [[[NSImageView alloc] initWithFrame:thisCell.frame] autorelease];
-		[thisCell addSubview:thisCell.imageView];
+		NSTableCellView *thisCell = [[NSTableCellView alloc] initWithFrame:NSMakeRect(0, -2, thisColumn.width, 22)];
+        NSImageView *tmpImageView = [[NSImageView alloc] initWithFrame:thisCell.frame];
+		thisCell.imageView = tmpImageView;
+		[thisCell addSubview:tmpImageView];
 		[thisCell.imageView setAutoresizingMask: NSViewMinXMargin | NSViewMaxXMargin];
 		thisCell.identifier = identifier;
 		result = thisCell;

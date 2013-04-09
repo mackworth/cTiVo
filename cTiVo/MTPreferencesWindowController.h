@@ -18,8 +18,8 @@
 	IBOutlet MTFormatEditorController *formatEditorController;
 }
 
-@property (nonatomic, retain) NSString *startingTabIdentifier;
-@property (nonatomic, retain) IBOutlet NSTabView *myTabView;
+@property (nonatomic, strong) NSString *startingTabIdentifier;
+@property (nonatomic, strong) IBOutlet NSTabView *myTabView;
 @property BOOL ignoreTabItemSelection;
 
 

@@ -55,7 +55,7 @@ __DDLOGHERE__
     self.allowsMultipleSelection = YES;
 	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
     self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
-    if (!tiVoColumnHolder) tiVoColumnHolder = [[self tableColumnWithIdentifier:@"TiVo"] retain];
+    if (!tiVoColumnHolder) tiVoColumnHolder = [self tableColumnWithIdentifier:@"TiVo"];
 	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
 		[tiVoColumn setHidden:YES];
@@ -112,11 +112,8 @@ __DDLOGHERE__
 
 -(void)dealloc
 {
-    [tiVoColumnHolder release];tiVoColumnHolder = nil;
-    self.selectedTiVo = nil;
-    self.sortedShows = nil;
+    tiVoColumnHolder = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 #pragma find/filter support
 
@@ -289,7 +286,7 @@ __DDLOGHERE__
         // create the new NSTextField with a frame of the {0,0} with the width of the table
         // note that the height of the frame is not really relevant, the row-height will modify the height
         // the new text field is then returned as an autoreleased object
-        result = [[[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)] autorelease];
+        result = [[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)];
         //        result.textField.font = [NSFont userFontOfSize:14];
         result.textField.editable = NO;
         // the identifier of the NSTextField instance is set to MyView. This

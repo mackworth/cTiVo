@@ -11,7 +11,7 @@
 
 @interface MTDownloadTableCellView : NSTableCellView
 
-@property (nonatomic, assign, readwrite) IBOutlet MTProgressindicator *progressIndicator;
-@property (nonatomic, assign, readwrite) IBOutlet NSTextField *downloadStage;
+@property (nonatomic, strong, readwrite) IBOutlet MTProgressindicator *progressIndicator;
+@property (nonatomic, strong, readwrite) IBOutlet NSTextField *downloadStage;
 
 @end

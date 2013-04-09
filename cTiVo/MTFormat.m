@@ -17,7 +17,7 @@ __DDLOGHERE__
 
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format
 {
-	MTFormat *newFormat = [[[MTFormat alloc] init] autorelease];
+	MTFormat *newFormat = [[MTFormat alloc] init];
 	for(NSString *key in format) {
 		@try {
 			[newFormat setValue:[format objectForKey:key] forKey:key];
@@ -71,7 +71,7 @@ __DDLOGHERE__
 			}
 		}
 		if (!validPath) DDLogMajor(@"For format %@, couldn't find %@ in %@ ", self, self.encoderUsed, searchPaths);
-		_pathForExecutable = [validPath retain];
+		_pathForExecutable = validPath;
 	}
 	return _pathForExecutable;
 }
@@ -106,7 +106,7 @@ __DDLOGHERE__
 		self.isFactoryFormat = @(NO);
         self.isHidden = @(NO);
 		
-		keys = [[NSArray arrayWithObjects:
+		keys = [NSArray arrayWithObjects:
 						 @"formatDescription",
 						 @"filenameExtension",
 						 @"encoderUsed",
@@ -125,7 +125,7 @@ __DDLOGHERE__
 						 @"mustDownloadFirst",
                          @"isHidden",
 						 @"isFactoryFormat",
-						 nil] retain];
+						 nil];
 	}
 	return self;
 }
@@ -147,8 +147,7 @@ __DDLOGHERE__
 -(void)setEncoderVideoOptions:(NSString *)encoderVideoOptions
 {
     if (encoderVideoOptions != _encoderVideoOptions) {
-        [_encoderVideoOptions release];
-        _encoderVideoOptions = [encoderVideoOptions retain];
+        _encoderVideoOptions = encoderVideoOptions;
         if (_encoderVideoOptions) {
             NSArray *earlyLateOptions = [_encoderVideoOptions componentsSeparatedByString:kMTInputLocationToken];
             if (earlyLateOptions && earlyLateOptions.count > 0) {
@@ -165,8 +164,7 @@ __DDLOGHERE__
 -(void)setEncoderAudioOptions:(NSString *)encoderAudioOptions
 {
     if (encoderAudioOptions != _encoderAudioOptions) {
-        [_encoderAudioOptions release];
-        _encoderAudioOptions = [encoderAudioOptions retain];
+        _encoderAudioOptions = encoderAudioOptions;
         if (_encoderAudioOptions) {
             NSArray *earlyLateOptions = [_encoderAudioOptions componentsSeparatedByString:kMTInputLocationToken];
             if (earlyLateOptions && earlyLateOptions.count > 0) {
@@ -183,8 +181,7 @@ __DDLOGHERE__
 -(void)setEncoderOtherOptions:(NSString *)encoderOtherOptions
 {
     if (encoderOtherOptions != _encoderOtherOptions) {
-        [_encoderOtherOptions release];
-        _encoderOtherOptions = [encoderOtherOptions retain];
+        _encoderOtherOptions = encoderOtherOptions;
         if (_encoderOtherOptions) {
             NSArray *earlyLateOptions = [_encoderOtherOptions componentsSeparatedByString:kMTInputLocationToken];
             if (earlyLateOptions && earlyLateOptions.count > 0) {
@@ -203,23 +200,22 @@ __DDLOGHERE__
 												  green:0.0
 												   blue:([_isFactoryFormat boolValue] ? 0.0: 0.6)
 												  alpha:[_isHidden boolValue] ? 0.5: 1.0];
-	NSAttributedString *attTitle = [[[NSAttributedString alloc] initWithString: _name
+	NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString: _name
 																	attributes: @{NSFontAttributeName : font,
-												NSForegroundColorAttributeName: formatColor}] autorelease];
+												NSForegroundColorAttributeName: formatColor}];
 	return attTitle;
 }
 
 -(NSAttributedString *)attributedFormatDescription
 {
-	return [_isFactoryFormat boolValue] ? [[[NSAttributedString alloc] initWithString:_formatDescription attributes:@{NSForegroundColorAttributeName : [NSColor grayColor]}] autorelease] :
-	[[[NSAttributedString alloc] initWithString:_formatDescription] autorelease];
+	return [_isFactoryFormat boolValue] ? [[NSAttributedString alloc] initWithString:_formatDescription attributes:@{NSForegroundColorAttributeName : [NSColor grayColor]}] :
+	[[NSAttributedString alloc] initWithString:_formatDescription];
 }
 
 -(void)setAttributedFormatDescription:(NSAttributedString *)attributedFormatDescription
 {
 	if (_attributedFormatDescription != attributedFormatDescription) {
-		[_attributedFormatDescription release];
-		_attributedFormatDescription = [attributedFormatDescription retain];
+		_attributedFormatDescription = attributedFormatDescription;
 		self.formatDescription = [_attributedFormatDescription string];
 	}
 }
@@ -238,25 +234,25 @@ __DDLOGHERE__
 -(id)copyWithZone:(NSZone *)zone
 {
 	MTFormat *new = [MTFormat new];
-	new.formatDescription = [[_formatDescription copyWithZone:zone] autorelease];
-	new.filenameExtension = [[_filenameExtension copyWithZone:zone] autorelease];
-	new.encoderUsed = [[_encoderUsed copyWithZone:zone] autorelease];
-	new.name = [[_name copyWithZone:zone] autorelease];
-	new.encoderVideoOptions = [[_encoderVideoOptions copyWithZone:zone] autorelease];
-	new.encoderAudioOptions = [[_encoderAudioOptions copyWithZone:zone] autorelease];
-	new.encoderOtherOptions = [[_encoderOtherOptions copyWithZone:zone] autorelease];
-	new.inputFileFlag = [[_inputFileFlag copyWithZone:zone] autorelease];
-	new.outputFileFlag = [[_outputFileFlag copyWithZone:zone] autorelease];
-	new.edlFlag = [[_edlFlag copyWithZone:zone] autorelease];
-	new.comSkipOptions = [[_comSkipOptions copyWithZone:zone] autorelease];
-	new.captionOptions = [[_captionOptions copyWithZone:zone] autorelease];
-	new.regExProgress = [[_regExProgress copyWithZone:zone] autorelease];
-	new.comSkip = [[_comSkip copyWithZone:zone] autorelease];
-	new.iTunes = [[_iTunes copyWithZone:zone] autorelease];
-	new.mustDownloadFirst = [[_mustDownloadFirst copyWithZone:zone] autorelease];
-	new.isHidden = [[_isHidden copyWithZone:zone] autorelease];
-	new.isFactoryFormat = [[_isFactoryFormat copyWithZone:zone] autorelease];
-	new.formerName = [[_formerName copyWithZone:zone] autorelease];
+	new.formatDescription = [_formatDescription copyWithZone:zone];
+	new.filenameExtension = [_filenameExtension copyWithZone:zone];
+	new.encoderUsed = [_encoderUsed copyWithZone:zone];
+	new.name = [_name copyWithZone:zone];
+	new.encoderVideoOptions = [_encoderVideoOptions copyWithZone:zone];
+	new.encoderAudioOptions = [_encoderAudioOptions copyWithZone:zone];
+	new.encoderOtherOptions = [_encoderOtherOptions copyWithZone:zone];
+	new.inputFileFlag = [_inputFileFlag copyWithZone:zone];
+	new.outputFileFlag = [_outputFileFlag copyWithZone:zone];
+	new.edlFlag = [_edlFlag copyWithZone:zone];
+	new.comSkipOptions = [_comSkipOptions copyWithZone:zone];
+	new.captionOptions = [_captionOptions copyWithZone:zone];
+	new.regExProgress = [_regExProgress copyWithZone:zone];
+	new.comSkip = [_comSkip copyWithZone:zone];
+	new.iTunes = [_iTunes copyWithZone:zone];
+	new.mustDownloadFirst = [_mustDownloadFirst copyWithZone:zone];
+	new.isHidden = [_isHidden copyWithZone:zone];
+	new.isFactoryFormat = [_isFactoryFormat copyWithZone:zone];
+	new.formerName = [_formerName copyWithZone:zone];
 	return new;
 }
 
@@ -297,8 +293,7 @@ __DDLOGHERE__
 
 -(void) setEncoderUsed:(NSString *)encoderUsed {
 	if (encoderUsed == _encoderUsed) return;
-	[_encoderUsed release];
-	_encoderUsed = [encoderUsed retain];
+	_encoderUsed = encoderUsed;
 	_pathForExecutable = nil;
 }
 
@@ -308,26 +303,10 @@ __DDLOGHERE__
 
 -(void)dealloc
 {
-	[keys release];
-	self.formatDescription = nil;
-	self.filenameExtension = nil;
 	self.encoderUsed = nil;
-	self.name = nil;
 	self.encoderVideoOptions = nil;
 	self.encoderAudioOptions = nil;
 	self.encoderOtherOptions = nil;
-	self.comSkipOptions = nil;
-	self.captionOptions = nil;
-	self.inputFileFlag = nil;
-	self.outputFileFlag = nil;
-	self.edlFlag = nil;
-	self.regExProgress = nil;
-	self.comSkip = nil;
-	self.iTunes = nil;
-	self.mustDownloadFirst = nil;
-    self.isHidden = nil;
-	self.isFactoryFormat = nil;
-	[super dealloc];
 }
 
 @end

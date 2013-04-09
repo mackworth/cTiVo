@@ -11,6 +11,6 @@
 
 @interface MTHelpViewController : NSViewController <MTTabViewItemControllerDelegate>
 
-@property (nonatomic, retain) IBOutlet NSTextView *displayMessage;
+@property (nonatomic, strong) IBOutlet NSTextView *displayMessage;
 
 @end

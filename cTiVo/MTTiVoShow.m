@@ -22,7 +22,7 @@
 	NSDictionary *parseTermMapping;
 
 }
-@property (nonatomic, retain) NSArray *vActor,
+@property (nonatomic, strong) NSArray *vActor,
 										*vExecProducer,
 										*vProgramGenre,
 										*vSeriesGenre,
@@ -63,7 +63,7 @@ __DDLOGHERE__
 		_episodeYear = 0;
 		
 		self.protectedShow = @(NO); //This is the default
-		parseTermMapping = [@{@"description" : @"showDescription", @"time": @"showTime"} retain];
+		parseTermMapping = @{@"description" : @"showDescription", @"time": @"showTime"};
 
     }
     return self;
@@ -94,8 +94,7 @@ __DDLOGHERE__
 -(void)setShowLengthString:(NSString *)showLengthString
 {
 	if (showLengthString != _showLengthString) {
-		[_showLengthString release];
-		_showLengthString = [showLengthString retain];
+		_showLengthString = showLengthString;
 		_showLength = [_showLengthString longLongValue]/1000;
 	}
 }
@@ -108,28 +107,28 @@ __DDLOGHERE__
 	}
 	DDLogVerbose(@"getting Detail for %@ at %@",self, _detailURL);
 	_gotDetails = YES;
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]	;
+	@autoreleasepool {
 //	NSString *detailURLString = [NSString stringWithFormat:@"https://%@/TiVoVideoDetails?id=%d",_tiVo.tiVo.hostName,_showID];
 //	NSLog(@"Show Detail URL %@",detailURLString);
-	NSURLResponse *detailResponse = nil;
-	NSURLRequest *detailRequest = [NSURLRequest requestWithURL:_detailURL];;
-	NSData *xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
-	DDLogVerbose(@"Got Details for %@: %@", self, [[[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	] autorelease]);	
+		NSURLResponse *detailResponse = nil;
+		NSURLRequest *detailRequest = [NSURLRequest requestWithURL:_detailURL];;
+		NSData *xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
+		DDLogVerbose(@"Got Details for %@: %@", self, [[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
 
-	parser = [[[NSXMLParser alloc] initWithData:xml] autorelease];
-	parser.delegate = self;
-	[parser parse];
-	if (!_gotDetails) {
-		DDLogMajor(@"GetDetails Fail for %@",_showTitle);
-		DDLogMajor(@"Returned XML is %@",	[[[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	] autorelease]);
-	} else {
-		DDLogDetail(@"GetDetails parsing Finished");
-	}
-	//keep XML until we convert video for metadata
-	self.detailXML = xml;
-	NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDetailsLoaded object:self];
+		parser = [[NSXMLParser alloc] initWithData:xml];
+		parser.delegate = self;
+		[parser parse];
+		if (!_gotDetails) {
+			DDLogMajor(@"GetDetails Fail for %@",_showTitle);
+			DDLogMajor(@"Returned XML is %@",	[[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
+		} else {
+			DDLogDetail(@"GetDetails parsing Finished");
+		}
+		//keep XML until we convert video for metadata
+		self.detailXML = xml;
+		NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDetailsLoaded object:self];
     [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
-	[pool drain];
+	}
 }
 
 
@@ -206,14 +205,8 @@ __DDLOGHERE__
 
 -(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
-	if (elementString) {
-		[elementString release];
-	}
 	elementString = [NSMutableString new];
 	if ([elementName compare:@"element"] != NSOrderedSame) {
-		if (elementArray) {
-			[elementArray release];
-		}
 		elementArray = [NSMutableArray new];
 	}
 }
@@ -394,14 +387,14 @@ __DDLOGHERE__
        	if (returnString.length > 0)[returnString deleteCharactersInRange:NSMakeRange(returnString.length-1, 1)];
 		
     }
-	return [[[NSAttributedString alloc] initWithString:returnString attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:11]}] autorelease];
+	return [[NSAttributedString alloc] initWithString:returnString attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:11]}];
     
 }
 
 -(NSAttributedString *)attribDescription {
-	NSAttributedString *attstring = [[[NSAttributedString alloc] initWithString:@""] autorelease];
+	NSAttributedString *attstring = [[NSAttributedString alloc] initWithString:@""];
 	if (self.showDescription) {
-		attstring = [[[NSAttributedString alloc] initWithString:self.showDescription] autorelease];
+		attstring = [[NSAttributedString alloc] initWithString:self.showDescription];
 	}
 	return attstring;
 }
@@ -558,8 +551,7 @@ __DDLOGHERE__
 
 -(void) setShowTime: (NSString *) newTime {
 	if (newTime != _showTime) {
-        [_showTime release];
-        _showTime = [newTime retain];
+        _showTime = newTime;
         NSDate *newDate =[_showTime dateForRFC3339DateTimeString];
         if (newDate) {
             self.showDate = newDate;
@@ -569,19 +561,16 @@ __DDLOGHERE__
 }
 -(void)setMovieYear:(NSString *)movieYear {
 	if (movieYear != _movieYear) {
-		[_movieYear release];
-		_movieYear = [movieYear retain];
+		_movieYear = movieYear;
 		if (self.originalAirDateNoTime.length == 0) {
-			[_originalAirDateNoTime release];
-			_originalAirDateNoTime = [movieYear retain];
+			_originalAirDateNoTime = movieYear;
 		}
 	}
 }
 
 -(void) setImageString:(NSString *)imageString {
 	if (imageString != _imageString) {
-		[_imageString release];
-		_imageString = [imageString retain];
+		_imageString = imageString;
 		_isSuggestion = [@"suggestion-recording" isEqualToString:imageString];
 	}
 }
@@ -589,18 +578,16 @@ __DDLOGHERE__
 -(void)setOriginalAirDate:(NSString *)originalAirDate
 {
 	if (originalAirDate != _originalAirDate) {
-		[_originalAirDate release];
-		_originalAirDate = [originalAirDate retain];
+		_originalAirDate = originalAirDate;
 		if (originalAirDate.length > 4) {
 			_episodeYear = [[originalAirDate substringToIndex:4] intValue];
 		}
-		[_originalAirDateNoTime release];
 		if (originalAirDate.length >= 10) {
-			_originalAirDateNoTime = [[originalAirDate substringToIndex:10] retain];
+			_originalAirDateNoTime = [originalAirDate substringToIndex:10];
 		} else if (originalAirDate.length > 0) {
-			_originalAirDateNoTime = [originalAirDate retain];
+			_originalAirDateNoTime = originalAirDate;
 		} else {
-			_originalAirDateNoTime = [_movieYear retain];
+			_originalAirDateNoTime = _movieYear;
 		}
 	}
 }
@@ -608,8 +595,7 @@ __DDLOGHERE__
 -(void)setEpisodeNumber:(NSString *)episodeNumber
 {
 	if (episodeNumber != _episodeNumber) {  // this check is mandatory
-        [_episodeNumber release];
-        _episodeNumber = [episodeNumber retain];
+        _episodeNumber = episodeNumber;
 		if (episodeNumber.length) {
 			long l = episodeNumber.length;
 			if (l > 2) {
@@ -646,8 +632,7 @@ __DDLOGHERE__
 -(void)setInProgress:(NSNumber *)inProgress
 {
   if (_inProgress != inProgress) {
-	  [_inProgress release];
-	  _inProgress = [inProgress retain];
+	  _inProgress = inProgress;
 	  if ([_inProgress boolValue]) {
 		  self.protectedShow = @(YES);
 	  }
@@ -657,8 +642,7 @@ __DDLOGHERE__
 
 -(BOOL)reallySetShowTitle: (NSString *) showTitle {
 	if (_showTitle != showTitle) {
-		[_showTitle release];
-		_showTitle = [showTitle retain];
+		_showTitle = showTitle;
 		return YES;
 	}
 	return NO;
@@ -675,10 +659,10 @@ __DDLOGHERE__
 			}
 		} else {
 			if (_seriesTitle.length == 0) {
-				_seriesTitle = [[showTitle substringToIndex:pos.location] retain];
+				_seriesTitle = [showTitle substringToIndex:pos.location];
 			}
 			if (_episodeTitle.length == 0) {
-				_episodeTitle = [[showTitle substringFromIndex:pos.location+pos.length] retain];
+				_episodeTitle = [showTitle substringFromIndex:pos.location+pos.length];
 			}
 		}
 	}
@@ -687,8 +671,7 @@ __DDLOGHERE__
 -(void)setSeriesTitle:(NSString *)seriesTitle
 {
 	if (_seriesTitle != seriesTitle) {
-		[_seriesTitle release];
-		_seriesTitle = [seriesTitle retain];
+		_seriesTitle = seriesTitle;
 		if (_episodeTitle.length > 0 ) {
 			[self reallySetShowTitle:[NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle]];
 		} else {
@@ -700,8 +683,7 @@ __DDLOGHERE__
 -(void)setEpisodeTitle:(NSString *)episodeTitle
 {
 	if (_episodeTitle != episodeTitle) {
-		[_episodeTitle release];
-		_episodeTitle = [episodeTitle retain];
+		_episodeTitle = episodeTitle;
 		if (_episodeTitle.length > 0 ) {
 			[self reallySetShowTitle:[NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle]];
 		} else {
@@ -716,11 +698,10 @@ __DDLOGHERE__
 	if (_showDescription == showDescription) {
 		return;
 	}
-	[_showDescription release];
     if ([showDescription hasSuffix: tribuneCopyright]){
-        _showDescription = [[showDescription substringToIndex:showDescription.length -tribuneCopyright.length]  retain ];
+        _showDescription = [showDescription substringToIndex:showDescription.length -tribuneCopyright.length];
     } else {
-        _showDescription = [showDescription retain];
+        _showDescription = showDescription;
 
     }
 }
@@ -730,8 +711,7 @@ __DDLOGHERE__
 	if (_vActor == vActor || ![vActor isKindOfClass:[NSArray class]]) {
 		return;
 	}
-	[_vActor release];
-	_vActor = [[self parseNames: vActor ] retain];
+	_vActor = [self parseNames: vActor ];
 }
 
 -(void)setVGuestStar:(NSArray *)vGuestStar
@@ -739,8 +719,7 @@ __DDLOGHERE__
 	if (_vGuestStar == vGuestStar || ![vGuestStar isKindOfClass:[NSArray class]]) {
 		return;
 	}
-	[_vGuestStar release];
-	_vGuestStar = [[self parseNames: vGuestStar ] retain];
+	_vGuestStar = [self parseNames: vGuestStar ];
 }
 
 -(void)setVDirector:(NSArray *)vDirector
@@ -748,8 +727,7 @@ __DDLOGHERE__
 	if (_vDirector == vDirector || ![vDirector isKindOfClass:[NSArray class]]) {
 		return;
 	}
-	[_vDirector release];
-	_vDirector = [[self parseNames: vDirector ] retain];
+	_vDirector = [self parseNames: vDirector ];
 }
 
 -(void)setVExecProducer:(NSArray *)vExecProducer
@@ -757,8 +735,7 @@ __DDLOGHERE__
 	if (_vExecProducer == vExecProducer || ![vExecProducer isKindOfClass:[NSArray class]]) {
 		return;
 	}
-	[_vExecProducer release];
-	_vExecProducer = [[self parseNames:vExecProducer] retain];
+	_vExecProducer = [self parseNames:vExecProducer];
 }
 
 
@@ -767,16 +744,14 @@ __DDLOGHERE__
 	if (_vProgramGenre == vProgramGenre || ![vProgramGenre isKindOfClass:[NSArray class]]) {
 		return;
 	}
-	[_vProgramGenre release];
-	_vProgramGenre = [vProgramGenre retain];
+	_vProgramGenre = vProgramGenre;
 }
 
 -(void)setVSeriesGenre:(NSArray *)vSeriesGenre{
 	if (_vSeriesGenre == vSeriesGenre || ![vSeriesGenre isKindOfClass:[NSArray class]]) {
 		return;
 	}
-	[_vSeriesGenre release];
-	_vSeriesGenre = [vSeriesGenre retain];
+	_vSeriesGenre = vSeriesGenre;
 }
 
 #pragma mark - Memory Management
@@ -785,20 +760,13 @@ __DDLOGHERE__
 {
     self.showTitle = nil;
     self.showDescription = nil;
-    self.detailURL = nil;
-	self.downloadURL = nil;
     self.tiVo = nil;
-	self.detailXML = nil;
 	if (elementString) {
-		[elementString release];
         elementString = nil;
 	}
 	if (elementArray) {
-		[elementArray release];
         elementArray = nil;
 	}
-	[parseTermMapping release];
-	[super dealloc];
 }
 
 -(NSString *)description

@@ -28,7 +28,7 @@
 
 @interface MTTiVo ()
 @property SCNetworkReachabilityRef reachability;
-@property (nonatomic, assign) NSArray *downloadQueue;
+@property (nonatomic, weak) NSArray *downloadQueue;
 @end
 
 @implementation MTTiVo
@@ -39,7 +39,7 @@ __DDLOGHERE__
 
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue
 {
-	return [[[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue] autorelease];
+	return [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue];
 }
 	
 -(id)init
@@ -62,7 +62,7 @@ __DDLOGHERE__
         itemStart = 0;
         itemCount = 50;
         reachabilityContext.version = 0;
-        reachabilityContext.info = self;
+        reachabilityContext.info = (__bridge void *)(self);
         reachabilityContext.retain = NULL;
         reachabilityContext.release = NULL;
         reachabilityContext.copyDescription = NULL;
@@ -121,7 +121,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 							 SCNetworkReachabilityFlags flags,
 							 void *info)
 {
-    MTTiVo *thisTivo = (MTTiVo *)info;
+    MTTiVo *thisTivo = (__bridge MTTiVo *)info;
 	thisTivo.isReachable = (flags >>17) && 1 ;
 	if (thisTivo.isReachable) {
 		thisTivo.networkAvailability = [NSDate date];
@@ -208,9 +208,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //    }
     isConnecting = YES;
 	if (previousShowList) {
-		[previousShowList release]; previousShowList = nil;
+		 previousShowList = nil;
 	}
-	previousShowList = [[NSMutableDictionary dictionary] retain];
+	previousShowList = [NSMutableDictionary dictionary];
 	for (MTTiVoShow * show in _shows) {
 		NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
 //		NSLog(@"prevID: %@ %@",idString,show.showTitle);
@@ -399,7 +399,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				currentShow.tiVo = self;
 				DDLogDetail(@"Added new show %@",currentShow.showTitle);
 				[newShows addObject:currentShow];
-				NSInvocationOperation *nextDetail = [[[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil] autorelease];
+				NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil];
 				[_queue addOperation:nextDetail];
 				//Now check and see if this was in the oldQueue (from last time we ran)
 				if(firstUpdate)[tiVoManager replaceProxyInQueue:currentShow];
@@ -409,7 +409,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				[newShows addObject:thisShow];
 				[previousShowList removeObjectForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
 			}
-			[currentShow release];
 			currentShow = nil;
             parsingShow = NO;
         }
@@ -486,11 +485,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				show.imageString = @"deleted";
 			}
 		}
-		[previousShowList release]; previousShowList = nil;
+		 previousShowList = nil;
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:self];
-    [parser release]; parser = nil;
+     parser = nil;
 }
 
 
@@ -686,7 +685,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
 	DDLogMajor(@"%@ URL Connection completed ",self);
-    DDLogVerbose(@"Data received is %@",[[[NSString alloc] initWithData:urlData encoding:NSUTF8StringEncoding] autorelease]);
+    DDLogVerbose(@"Data received is %@",[[NSString alloc] initWithData:urlData encoding:NSUTF8StringEncoding]);
 
     NSXMLParser *parser = [[NSXMLParser alloc] initWithData:urlData];
 	parser.delegate = self;
@@ -701,18 +700,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     DDLogDetail(@"Deallocing TiVo %@",self);
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	SCNetworkReachabilityUnscheduleFromRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
-	self.networkAvailability = nil;
 	if (_reachability) {
 		CFRelease(_reachability);
 	}
     _reachability = nil;
-	self.mediaKey = nil;
-	[urlData release];
-	self.shows = nil;
-	self.tiVo = nil;
-	[newShows release];
-	[elementToPropertyMap release];
-	[super dealloc];
 }
 
 @end

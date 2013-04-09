@@ -19,7 +19,7 @@
 		CGRect subFrameText = NSMakeRect(4+textIndent, -6, frame.size.width-8-textIndent, frame.size.height);
 		NSFont * cellFont = [NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSMiniControlSize]];
 		
-		_popUpButton = [[[MTFormatPopUpButton alloc] initWithFrame:subFramePopUp pullsDown:NO] autorelease];
+		_popUpButton = [[MTFormatPopUpButton alloc] initWithFrame:subFramePopUp pullsDown:NO];
  		[_popUpButton setFont: cellFont];
         [_popUpButton.cell setControlSize:NSMiniControlSize];
         [_popUpButton setAutoresizesSubviews:YES];
@@ -29,7 +29,7 @@
 		[self addSubview:_popUpButton];
 		
 		
-		NSTextField * tempTextField = [[[NSTextField alloc] initWithFrame:subFrameText]  autorelease];
+		NSTextField * tempTextField = [[NSTextField alloc] initWithFrame:subFrameText];
 		tempTextField.hidden = YES;
 		[tempTextField setEditable:NO];
 

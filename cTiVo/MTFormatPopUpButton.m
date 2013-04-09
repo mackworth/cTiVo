@@ -11,7 +11,7 @@
 @interface MTFormatPopUpButton () {
 	
 }
-@property (nonatomic, retain) NSArray *sortDescriptors;
+@property (nonatomic, strong) NSArray *sortDescriptors;
 
 @end
 
@@ -21,7 +21,7 @@
 	if (!_sortDescriptors){
 		NSSortDescriptor *user = [NSSortDescriptor sortDescriptorWithKey:@"isFactoryFormat" ascending:YES];
 		NSSortDescriptor *title = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)];
-		_sortDescriptors = [[NSArray arrayWithObjects:user,title, nil] retain];
+		_sortDescriptors = [NSArray arrayWithObjects:user,title, nil];
 		
 
 		
@@ -31,8 +31,7 @@
 }
 -(void)setFormatList:(NSArray *)formatList {
 	if (formatList != _formatList) {
-		[_formatList release];
-		_formatList = [formatList retain];
+		_formatList = formatList;
 	}
 	[self refreshMenu];  //outside as it may be due to adding item to array
 }
@@ -103,8 +102,6 @@
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
-	self.sortDescriptors = nil;
-	[_formatList release]; _formatList = nil;
-    [super dealloc];
+	 _formatList = nil;
 }
 @end

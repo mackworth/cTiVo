@@ -23,21 +23,21 @@
 
 //Shared Data
 
-@property (nonatomic, retain) NSArray *tiVoList;
-@property (nonatomic, retain) NSMutableArray *tiVoShows, *formatList;
-@property (atomic, retain) NSMutableArray *downloadQueue;
-@property (nonatomic, retain) NSMutableArray *subscribedShows;
+@property (nonatomic, strong) NSArray *tiVoList;
+@property (nonatomic, strong) NSMutableArray *tiVoShows, *formatList;
+@property (atomic, strong) NSMutableArray *downloadQueue;
+@property (nonatomic, strong) NSMutableArray *subscribedShows;
 
-@property (nonatomic, retain) NSString *downloadDirectory;
-@property (readonly) NSString *defaultDownloadDirectory;
+@property (nonatomic, strong) NSString *downloadDirectory;
+@property (weak, readonly) NSString *defaultDownloadDirectory;
 
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
-@property (nonatomic, retain) MTFormat *selectedFormat;
+@property (nonatomic, strong) MTFormat *selectedFormat;
 @property (nonatomic) int numEncoders, totalShows, numCommercials, numCaptions;//Want to limit launches to two encoders.
-@property (nonatomic, assign) NSWindow *mainWindow;
-@property (nonatomic, retain) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
-@property (nonatomic, retain) NSDictionary *showsOnDisk;
+@property (nonatomic, strong) NSWindow *mainWindow;
+@property (nonatomic, strong) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
+@property (nonatomic, strong) NSDictionary *showsOnDisk;
 
 
 + (MTTiVoManager *)sharedTiVoManager;

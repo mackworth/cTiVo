@@ -12,7 +12,7 @@
 
 #define kMinSrtLength 20
 @property (nonatomic) double startTime, endTime;
-@property (nonatomic, retain) NSString * caption;
+@property (nonatomic, strong) NSString * caption;
 
 +(MTSrt *) srtFromString: srtString;
 -(NSString *)formatedSrt:(int)count;

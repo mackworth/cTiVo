@@ -10,8 +10,8 @@
 #import "DDLog.h"
 
 @interface MTAdvPreferencesViewController ()
-@property (nonatomic, retain) NSArray * debugClasses;
-@property (nonatomic, retain) NSMutableArray * popups;
+@property (nonatomic, strong) NSArray * debugClasses;
+@property (nonatomic, strong) NSMutableArray * popups;
 @end
 
 @implementation MTAdvPreferencesViewController
@@ -82,7 +82,7 @@
 		int rowNum = (item < numItems/2) ? item: item-numItems/2;
 		
 		NSRect labelFrame = NSMakeRect(columNum*columnWidth,vertBase-rowNum*(popupHeight+vertMargin)-4,labelWidth,popupHeight);
-		NSTextField * label = [[self newTextField:labelFrame] autorelease];
+		NSTextField * label = [self newTextField:labelFrame];
 		[label setStringValue:[NSString stringWithFormat:@"%@:",className]];
 		
 		NSRect frame = NSMakeRect(columNum*columnWidth+labelWidth+horizMargin,vertBase-rowNum*(popupHeight+vertMargin),popupWidth,popupHeight);

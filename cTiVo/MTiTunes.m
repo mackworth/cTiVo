@@ -114,7 +114,7 @@ __DDLOGHERE__
 			newTrack.albumArtist = show.seriesTitle;
 			newTrack.album = show.seriesTitle;
 			if (show.episodeTitle.length ==0) {
-                NSDateFormatter *dateFormat = [[[NSDateFormatter alloc] init] autorelease];
+                NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
                 [dateFormat setDateStyle:NSDateFormatterShortStyle];
                 [dateFormat setTimeStyle:NSDateFormatterNoStyle];
 				newTrack.name = [NSString stringWithFormat:@"%@ - %@",show.showTitle, [dateFormat stringFromDate: show.showDate ]];

@@ -68,8 +68,7 @@
 -(void)setStartingTabIdentifier:(NSString *)startingTabIdentifier
 {
 	if (!(_startingTabIdentifier == startingTabIdentifier)) {
-		[_startingTabIdentifier release];
-		_startingTabIdentifier = [startingTabIdentifier retain];
+		_startingTabIdentifier = startingTabIdentifier;
 		if (_startingTabIdentifier && _startingTabIdentifier.length) {
 			NSTabViewItem *itemToSelect = [_myTabView tabViewItemAtIndex:[_myTabView indexOfTabViewItemWithIdentifier:_startingTabIdentifier]];
 			if (itemToSelect) {
@@ -143,7 +142,6 @@
 -(void)dealloc
 {
 	self.startingTabIdentifier = nil;
-	[super dealloc];
 }
 
 @end

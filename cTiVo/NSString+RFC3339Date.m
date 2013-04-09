@@ -27,7 +27,7 @@
 		
         sRFC3339DateFormatter = [[NSDateFormatter alloc] init];
 		
-        enUSPOSIXLocale = [[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease];
+        enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
 		
         [sRFC3339DateFormatter setLocale:enUSPOSIXLocale];
         [sRFC3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"];

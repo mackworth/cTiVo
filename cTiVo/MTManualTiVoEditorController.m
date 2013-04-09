@@ -59,7 +59,6 @@
 -(void)dealloc
 {
 	[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:kMTManualTiVos];
-	[super dealloc];
 }
 
 @end

@@ -48,7 +48,7 @@ __DDLOGHERE__
 		return nil;
 	}
 	
-	MTSrt * newSrt =[[MTSrt new] autorelease];
+	MTSrt * newSrt =[MTSrt new];
 	newSrt.startTime = secondsStart;
 	newSrt.endTime = secondsEnd;
 	newSrt.caption = @"";

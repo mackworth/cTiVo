@@ -26,7 +26,7 @@
 		[_leftText setTextColor:[NSColor redColor]];
         [_leftText.cell setWraps:NO];
         [[_leftText cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
-		_foregroundTextColor = [[NSColor blackColor] retain];
+		_foregroundTextColor = [NSColor blackColor];
         
         _rightText = [[NSTextField alloc] initWithFrame:CGRectMake(frame.size.width -widthStatusField, 1, widthStatusField, frame.size.height-6)];
         [_rightText setFont:[NSFont userFontOfSize:10]];
@@ -38,10 +38,8 @@
         
         [self addSubview:_rightText];
         [self addSubview:_leftText];
-        [_leftText release];
-        [_rightText release];
         _doubleValue = 0.0;
-        _barColor = [[NSColor colorWithCalibratedRed:1.0 green:.61 blue:.45 alpha:0.60] retain];
+        _barColor = [NSColor colorWithCalibratedRed:1.0 green:.61 blue:.45 alpha:0.60];
         [self setAutoresizingMask:NSViewWidthSizable ];
 
     }
@@ -62,11 +60,5 @@
 	[self setNeedsDisplay:YES];
 }
 
--(void)dealloc
-{
-	self.foregroundTextColor = nil;
-    [_barColor release];
-    [super dealloc];
-}
 
 @end

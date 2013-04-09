@@ -19,7 +19,7 @@
 
 -(IBAction) unsubscribeSelectedItems:(id) sender;
 
-@property (assign) IBOutlet NSButton *unsubscribeButton;
-@property (nonatomic, retain) NSArray *sortedSubscriptions;
+@property (weak) IBOutlet NSButton *unsubscribeButton;
+@property (nonatomic, strong) NSArray *sortedSubscriptions;
 
 @end

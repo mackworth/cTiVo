@@ -138,7 +138,7 @@
              
             //Subscriptions
             NSArray * iTivoSubscriptions = [sUD objectForKey:@"targetDataSList"];
-            NSMutableArray * cTivoSubs = [[[NSMutableArray alloc] initWithCapacity:iTivoSubscriptions.count] autorelease];
+            NSMutableArray * cTivoSubs = [[NSMutableArray alloc] initWithCapacity:iTivoSubscriptions.count];
             for (NSDictionary * sub in iTivoSubscriptions) {
                 NSDate * date= [self testDate:[sub objectForKey:@"LastDLVal"]];
                 NSString * seriesName = [sub objectForKey:@"ShowVal"];

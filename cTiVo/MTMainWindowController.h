@@ -21,24 +21,24 @@
     IBOutlet NSButton *addToQueueButton, *removeFromQueueButton, *subscribeButton;
 	IBOutlet NSTextField *loadingProgramListLabel, *downloadDirectory, *tiVoListPopUpLabel, *pausedLabel;
 	IBOutlet NSProgressIndicator *loadingProgramListIndicator, *searchingTiVosIndicator;
-	IBOutlet MTDownloadTableView *downloadQueueTable;
-	IBOutlet MTProgramTableView  *tiVoShowTable;
-	IBOutlet MTSubscriptionTableView  *subscriptionTable;
+	IBOutlet MTDownloadTableView *__weak downloadQueueTable;
+	IBOutlet MTProgramTableView  *__weak tiVoShowTable;
+	IBOutlet MTSubscriptionTableView  *__weak subscriptionTable;
 	IBOutlet NSDrawer *showDetailDrawer;
 	NSPoint menuCursorPosition;
 	NSInteger menuTableRow;
 	NSMutableArray *loadingTiVos;
 }
 
-@property (nonatomic, assign) MTDownloadTableView *downloadQueueTable;
-@property (nonatomic, assign) MTProgramTableView *tiVoShowTable;
-@property (nonatomic, assign) MTSubscriptionTableView *subscriptionTable;
-@property (nonatomic, retain) NSString *selectedTiVo;
-@property (nonatomic, retain) MTTiVoShow *showForDetail;
-@property (nonatomic, readonly) MTTiVoManager *myTiVoManager;
-@property (nonatomic, assign) NSMenuItem *showInFinderMenuItem, *playVideoMenuItem;
-@property (nonatomic, retain) IBOutlet NSView *cancelQuitView;
-@property (nonatomic, retain) IBOutlet NSView * drawerVariableFields;
+@property (nonatomic, weak) MTDownloadTableView *downloadQueueTable;
+@property (nonatomic, weak) MTProgramTableView *tiVoShowTable;
+@property (nonatomic, weak) MTSubscriptionTableView *subscriptionTable;
+@property (nonatomic, strong) NSString *selectedTiVo;
+@property (nonatomic, strong) MTTiVoShow *showForDetail;
+@property (weak, nonatomic, readonly) MTTiVoManager *myTiVoManager;
+@property (nonatomic, weak) NSMenuItem *showInFinderMenuItem, *playVideoMenuItem;
+@property (nonatomic, strong) IBOutlet NSView *cancelQuitView;
+@property (nonatomic, strong) IBOutlet NSView * drawerVariableFields;
 
 -(IBAction)selectFormat:(id)sender;
 -(IBAction)subscribe:(id) sender;

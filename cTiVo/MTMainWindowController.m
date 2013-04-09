@@ -17,7 +17,7 @@
 
 @interface MTMainWindowController ()
 
-@property (nonatomic, retain) NSSound *trashSound;
+@property (nonatomic, strong) NSSound *trashSound;
 @end
 
 @implementation MTMainWindowController
@@ -194,7 +194,7 @@ __DDLOGHERE__
         if (!ts.isReachable) {
             NSFont *thisFont = [NSFont systemFontOfSize:13];
             NSString *thisTitle = [NSString stringWithFormat:@"%@ offline",ts.tiVo.name];
-            NSAttributedString *aTitle = [[[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]] autorelease];
+            NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]];
             [thisItem setAttributedTitle:aTitle];
 
         }
@@ -212,7 +212,7 @@ __DDLOGHERE__
         if (!ts.isReachable) {
             NSFont *thisFont = [NSFont systemFontOfSize:13];
             NSString *thisTitle = [NSString stringWithFormat:@"TiVo: %@ offline",ts.tiVo.name];
-            NSAttributedString *aTitle = [[[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]] autorelease];
+            NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]];
             [tiVoListPopUpLabel setAttributedStringValue:aTitle];
 			
         }
@@ -452,7 +452,7 @@ __DDLOGHERE__
 }
 
 -(void) playTrashSound {
-	self.trashSound = [[[NSSound alloc] initWithContentsOfFile:@"/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/dock/drag to trash.aif" byReference:YES]autorelease];
+	self.trashSound = [[NSSound alloc] initWithContentsOfFile:@"/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/dock/drag to trash.aif" byReference:YES];
 	if (_trashSound) {
 		[self.trashSound play];
 	}
@@ -528,7 +528,7 @@ __DDLOGHERE__
 
 -(IBAction)getDownloadDirectory:(id)sender
 {
-	NSOpenPanel *myOpenPanel = [[NSOpenPanel openPanel]retain];
+	NSOpenPanel *myOpenPanel = [NSOpenPanel openPanel];
 	[myOpenPanel setCanChooseDirectories:YES];
 	[myOpenPanel setCanChooseFiles:NO];
 	[myOpenPanel setAllowsMultipleSelection:NO];
@@ -539,7 +539,6 @@ __DDLOGHERE__
 	if (ret == NSFileHandlingPanelOKButton) {
 		tiVoManager.downloadDirectory = myOpenPanel.URL.path;
 	}
-	[myOpenPanel release];
 }
 
 #pragma mark - Download Options
@@ -687,7 +686,7 @@ __DDLOGHERE__
 }
 
 -(void) buildColumnMenuForTable:(NSTableView *) table {
-	NSMenu *tableHeaderContextMenu = [[[NSMenu alloc] initWithTitle:@""] autorelease];
+	NSMenu *tableHeaderContextMenu = [[NSMenu alloc] initWithTitle:@""];
 	[[table headerView] setMenu:tableHeaderContextMenu];
 	
 	for (NSTableColumn *column in [table tableColumns]) {
@@ -734,10 +733,7 @@ __DDLOGHERE__
 
 -(void)dealloc
 {
-	[loadingTiVos release];
-    self.selectedTiVo = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
 }
 
 

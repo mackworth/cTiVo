@@ -53,8 +53,7 @@ __DDLOGHERE__
         BOOL simulWasDisabled = ![self canSimulEncode];
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];
-        [_encodeFormat release];
-        _encodeFormat = [encodeFormat retain];
+        _encodeFormat = encodeFormat;
         if (!self.canSimulEncode && self.shouldSimulEncode) {
             //no longer possible
             self.simultaneousEncode = [NSNumber numberWithBool:NO];
@@ -91,15 +90,8 @@ __DDLOGHERE__
 
 - (void)dealloc
 {
-    [_seriesTitle release]; _seriesTitle = nil;
-    [_lastRecordedTime release]; _lastRecordedTime = nil;
-    [_addToiTunes release]; _addToiTunes = nil;
-    [_simultaneousEncode release]; _simultaneousEncode = nil;
-    [_encodeFormat release]; _encodeFormat = nil;
-    [_includeSuggestions release]; _includeSuggestions = nil;
-    [_includeAPMMetaData release]; _includeAPMMetaData = nil;
+     _encodeFormat = nil;
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 @end
 
@@ -114,7 +106,7 @@ __DDLOGHERE__
 	if ([self isSubscribed:thisShow]) {
 		if ([tiVoManager findInDownloadQueue: thisShow] == nil) {
 			DDLogDetail(@"Subscribed; adding %@", thisShow);
-			MTDownload * newDownload = [[[MTDownload  alloc] init] autorelease];
+			MTDownload * newDownload = [[MTDownload  alloc] init];
 			newDownload.show= thisShow;
 			[newDownload prepareForDownload:YES];
 			MTSubscription * subscription = [self findShow:thisShow];
@@ -215,7 +207,7 @@ __DDLOGHERE__
 	if (tivoShow.showDate) {
 		earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
 	}
-	MTSubscription *newSub = [[MTSubscription new] autorelease];
+	MTSubscription *newSub = [MTSubscription new];
 	newSub.seriesTitle = tivoShow.seriesTitle;
 	newSub.lastRecordedTime = earlierTime;
 	newSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
@@ -292,7 +284,7 @@ __DDLOGHERE__
     
 	DDLogDetail(@"Loading subscriptions");
     for (NSDictionary * sub in tempArray) {
-        MTSubscription * tempSub = [[[MTSubscription alloc] init] autorelease];
+        MTSubscription * tempSub = [[MTSubscription alloc] init];
         tempSub.seriesTitle = sub[kMTSubscribedSeries];
 		NSDate *earlierTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
         if (sub[kMTSubscribedDate]) {
@@ -326,7 +318,7 @@ __DDLOGHERE__
 }
 
 - (void)saveSubscriptions {
-    NSMutableArray *tempArray = [[[NSMutableArray alloc] initWithCapacity:self.count] autorelease];
+    NSMutableArray *tempArray = [[NSMutableArray alloc] initWithCapacity:self.count];
     for (MTSubscription * sub in self) {
         NSDictionary * tempSub = [NSDictionary dictionaryWithObjectsAndKeys:
                                   sub.seriesTitle, kMTSubscribedSeries,
@@ -351,7 +343,6 @@ __DDLOGHERE__
 - (void)dealloc
 {
     
-    [super dealloc];
 }
 
 @end

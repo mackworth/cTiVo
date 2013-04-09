@@ -9,8 +9,8 @@
 #import "MTPreferencesViewController.h"
 
 @interface MTAdvPreferencesViewController : MTPreferencesViewController
-@property (assign) IBOutlet NSView *debugLevelView;
-@property (assign) IBOutlet NSPopUpButton *masterDebugLevel;
+@property (weak) IBOutlet NSView *debugLevelView;
+@property (weak) IBOutlet NSPopUpButton *masterDebugLevel;
 
 -(IBAction) newMasterValue:(id) sender;
 

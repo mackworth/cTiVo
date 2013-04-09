@@ -14,12 +14,13 @@
 
 @interface MTFormatEditorController ()
 
-@property (nonatomic, retain) NSDictionary *alertResponseInfo;
+@property (nonatomic, strong) NSDictionary *alertResponseInfo;
 
 @end
 
 @implementation MTFormatEditorController
 
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 
 //- (id)initWithWindow:(NSWindow *)window
 -(id)initWithCoder:(NSCoder *)aDecoder
@@ -60,7 +61,7 @@
 	formatPopUpButton.formatList = self.formatList;
 	
 	for (MTFormat *f in tiVoManager.formatList) {
-		MTFormat *newFormat = [[f copy] autorelease];
+		MTFormat *newFormat = [f copy];
 		[_formatList addObject:newFormat];
 		newFormat.formerName = f.name;
 		if ([tiVoManager.selectedFormat.name compare:newFormat.name] == NSOrderedSame) {
@@ -255,7 +256,7 @@
 {
 	[tiVoManager.formatList removeAllObjects];
 	for (MTFormat *f in _formatList) {
-		MTFormat *newFormat = [[f copy] autorelease];
+		MTFormat *newFormat = [f copy];
 		[tiVoManager.formatList addObject:newFormat];
 	}
     //Now update the tiVoManger selectedFormat object and user preference
@@ -269,7 +270,7 @@
 -(IBAction)newFormat:(id)sender
 {
 	
-	MTFormat *newFormat = [[MTFormat new] autorelease];
+	MTFormat *newFormat = [MTFormat new];
     newFormat.name = @"New Format";
     [newFormat checkAndUpdateFormatName:_formatList];
 	[self.formatList addObject:newFormat];
@@ -283,7 +284,7 @@
 
 -(IBAction)duplicateFormat:(id)sender
 {
-	MTFormat *newFormat = [[_currentFormat copy] autorelease];
+	MTFormat *newFormat = [_currentFormat copy];
     [newFormat checkAndUpdateFormatName:_formatList];
 	newFormat.isFactoryFormat = [NSNumber numberWithBool:NO];
 	[self.formatList addObject:newFormat];
@@ -309,7 +310,7 @@
 	} else if (sender == comSkipHelpButton) {
 		helpFilePath = [[NSBundle mainBundle] pathForResource:@"ComSkipHelpText" ofType:@"rtf"];
 	}
-	NSAttributedString *attrHelpText = [[[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL] autorelease];
+	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
 	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
 	NSButton *thisButton = (NSButton *)sender;
 	if (!myPopover) {
@@ -335,21 +336,11 @@
 
 -(void)popoverDidClose:(NSNotification *)notification
 {
-	[myPopover release];
 	myPopover = nil;
 }
 
 
 #pragma mark - Memory Management
 
--(void)dealloc
-{
-	if (myPopover) {
-		[myPopover release];
-	}
-	self.currentFormat = nil;
-	self.alertResponseInfo = nil;
-	[super dealloc];
-}
 
 @end

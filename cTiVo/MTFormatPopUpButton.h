@@ -11,8 +11,8 @@
 
 @interface MTFormatPopUpButton : NSPopUpButton
 
-@property (retain) id owner;
-@property (nonatomic, retain) NSArray * formatList;
+@property (strong) id owner;
+@property (nonatomic, strong) NSArray * formatList;
 @property (nonatomic, assign) BOOL showHidden;
 
 -(void) refreshMenu;

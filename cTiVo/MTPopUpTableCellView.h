@@ -11,7 +11,7 @@
 
 @interface MTPopUpTableCellView : NSTableCellView
 
-@property (nonatomic, readonly) MTFormatPopUpButton *popUpButton;
+@property (strong, nonatomic, readonly) MTFormatPopUpButton *popUpButton;
 
 - (id)initWithFrame:(NSRect)frame withTarget:(id)target withAction:(SEL)selector;
 

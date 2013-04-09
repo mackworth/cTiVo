@@ -43,8 +43,8 @@
 
 }
 
-@property (retain) MTNetService *updatingTiVo;
-@property (nonatomic, retain) NSArray *hostAddresses;
+@property (strong) MTNetService *updatingTiVo;
+@property (nonatomic, strong) NSArray *hostAddresses;
 
 @end
 
@@ -70,7 +70,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 // We don't want to allocate a new instance, so return the current one.
 + (id)allocWithZone:(NSZone*)zone {
-    return [[self sharedTiVoManager] retain];
+    return [self sharedTiVoManager];
 }
 
 // Equally, we don't want to generate multiple copies of the singleton.
@@ -124,7 +124,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			[tmpArray addObject:thisFormat];
 		}
 		factoryFormatList = [tmpArray copy];
-		_formatList = [tmpArray retain];
+		_formatList = tmpArray;
         DDLogVerbose(@"factory Formats: %@", factoryFormatList);
 		
         //Set user desired hiding of the user pref, if any
@@ -229,17 +229,17 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
 	DDLogDetail(@"Got Metatdata Result with count %ld",[cTiVoQuery resultCount]);
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
-    NSData *buffer = [NSData dataWithData:[[[NSMutableData alloc] initWithLength:256] autorelease]];
+    NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
 	for (int i =0; i < [cTiVoQuery resultCount]; i++) {
 		NSString *filePath = [[cTiVoQuery resultAtIndex:i] valueForAttribute:NSMetadataItemPathKey];
 		ssize_t len = getxattr([filePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], (void *)[buffer bytes], 256, 0, 0);
 		if (len > 0) {
 			NSData *idData = [NSData dataWithBytes:[buffer bytes] length:(NSUInteger)len];
-			NSString  *showID = [[[NSString alloc] initWithData:idData encoding:NSUTF8StringEncoding] autorelease];
+			NSString  *showID = [[NSString alloc] initWithData:idData encoding:NSUTF8StringEncoding];
 			len = getxattr([filePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], (void *)[buffer bytes], 256, 0, 0);
 			if (len > 0) {
 				NSData *nameData = [NSData dataWithBytes:[buffer bytes] length:len];
-				NSString *tiVoName = [[[NSString alloc] initWithData:nameData encoding:NSUTF8StringEncoding] autorelease];
+				NSString *tiVoName = [[NSString alloc] initWithData:nameData encoding:NSUTF8StringEncoding];
 				NSString *key = [NSString stringWithFormat:@"%@: %@",tiVoName,showID];
 				if ([tmpDict objectForKey:key]) {
 					NSArray *paths = [tmpDict objectForKey:key];
@@ -277,7 +277,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	NSMutableArray * newShows = [NSMutableArray arrayWithCapacity:oldQueue.count];
 	for (NSDictionary * queueEntry in oldQueue) {
 		DDLogDetail(@"Restoring show %@",queueEntry[kMTQueueTitle]);
-		MTDownload * newShow = [[[MTDownload alloc] init] autorelease];
+		MTDownload * newShow = [[MTDownload alloc] init];
 		[newShow restoreDownloadData:queueEntry];
 		[newShows addObject:newShow];
 	}
@@ -363,7 +363,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 				}
 			}
 			if (!newTiVo) {
-				newTiVoService = [[[MTNetService alloc] init] autorelease];
+				newTiVoService = [[MTNetService alloc] init];
 				newTiVoService.userName = manualTiVoDescription[@"userName"];
 				newTiVoService.iPAddress = manualTiVoDescription[@"iPAddress"];
 				newTiVoService.userPort = [manualTiVoDescription[@"userPort"] integerValue];
@@ -479,10 +479,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void) setTiVoList: (NSArray *) tiVoList {
 	if (_tiVoList != tiVoList) {
-		[_tiVoList release];
 		NSSortDescriptor *manualSort = [NSSortDescriptor sortDescriptorWithKey:@"manualTiVo" ascending:NO];
 		NSSortDescriptor *nameSort = [NSSortDescriptor sortDescriptorWithKey:@"tiVo.name" ascending:YES];
-		_tiVoList = [[tiVoList sortedArrayUsingDescriptors:[NSArray arrayWithObjects:manualSort,nameSort, nil]] retain];
+		_tiVoList = [tiVoList sortedArrayUsingDescriptors:[NSArray arrayWithObjects:manualSort,nameSort, nil]];
 		DDLogVerbose(@"resorting TiVoList %@", _tiVoList);
 	}
 }
@@ -714,8 +713,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     if (selectedFormat == _selectedFormat) {
         return;
     }
-    [_selectedFormat release];
-    _selectedFormat = [selectedFormat retain];
+    _selectedFormat = selectedFormat;
     [[NSUserDefaults standardUserDefaults] setObject:_selectedFormat.name forKey:kMTSelectedFormat];
 }
 
@@ -905,7 +903,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	for (MTTiVoShow * thisShow in shows) {
 		NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 		DDLogDetail(@"Adding show: %@", thisShow);
-		MTDownload * newDownload = [[[MTDownload alloc] init] autorelease];
+		MTDownload * newDownload = [[MTDownload alloc] init];
 		newDownload.show = thisShow;
 		newDownload.encodeFormat = [self selectedFormat];
 		newDownload.exportSubtitles = [defaults objectForKey:kMTExportSubtitles];
@@ -1135,7 +1133,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void) setDownloadDirectory: (NSString *) newDir {
 	if (newDir != _downloadDirectory) {
-		[_downloadDirectory release];
 		
 		if (newDir.length > 0) {
 			if (![self checkDirectory:newDir]) {
@@ -1154,7 +1151,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 		if (newDir) {
 			[[NSUserDefaults standardUserDefaults] setValue:newDir forKey:kMTDownloadDirectory];
-			_downloadDirectory = [newDir retain];
+			_downloadDirectory = newDir;
 		}
 	}
 }
@@ -1179,11 +1176,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 #pragma mark - Memory Management
 
--(void)dealloc
-{
-    // I'm never called!
-    [super dealloc];
-}
 
 
 -(NSMutableArray *)tiVoShows

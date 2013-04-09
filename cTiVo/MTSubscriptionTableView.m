@@ -112,8 +112,6 @@ __DDLOGHERE__
 {
 	[self unregisterDraggedTypes];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    self.sortedSubscriptions = nil;
-    [super dealloc];
 }
 
 -(void) changeSuggestions: (id) sender {
@@ -152,39 +150,39 @@ __DDLOGHERE__
     id result;
 	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
     if([identifier compare: @"iTunes"] == NSOrderedSame) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)];
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"Simu"] == NSOrderedSame) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)];
         thisCell.identifier = identifier;
         result = (id)thisCell;
     } else if([identifier compare: @"Skip"] == NSOrderedSame) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)];
         thisCell.identifier = identifier;
         result = (id)thisCell;
 	} else if([identifier isEqualToString: @"XML"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeXML:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeXML:)];
         thisCell.identifier = identifier;
         result = thisCell;
     } else if([identifier isEqualToString: @"pyTiVo"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changepyTiVo:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changepyTiVo:)];
         thisCell.identifier = identifier;
         result = thisCell;
     } else if([identifier isEqualToString: @"Metadata"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMetadata:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMetadata:)];
         thisCell.identifier = identifier;
         result = thisCell;
     } else if([identifier isEqualToString: @"Subtitles"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSubtitle:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSubtitle:)];
         thisCell.identifier = identifier;
         result = thisCell;
 	} else if([identifier isEqualToString: @"Suggestions"]) {
-        MTDownloadCheckTableCell *thisCell = [[[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:self withAction:@selector(changeSuggestions:)] autorelease];
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:self withAction:@selector(changeSuggestions:)];
         thisCell.identifier = identifier;
         result = thisCell;
 	} else if([identifier compare: @"FormatPopUp"] == NSOrderedSame) {
-		MTPopUpTableCellView *thisCell = [[[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)] autorelease];
+		MTPopUpTableCellView *thisCell = [[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)];
 	    thisCell.popUpButton.showHidden = NO;
 		thisCell.identifier = identifier;
 		result = (id)thisCell;
@@ -208,7 +206,7 @@ static NSDateFormatter *dateFormatter;
         // create the new NSTextField with a frame of the {0,0} with the width of the table
         // note that the height of the frame is not really relevant, the row-height will modify the height
         // the new text field is then returned as an autoreleased object
-        result = [[[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)] autorelease];
+        result = [[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)];
         //        result.textField.font = [NSFont userFontOfSize:14];
         result.textField.editable = NO;
         

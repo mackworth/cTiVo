@@ -18,10 +18,10 @@
     NSTableColumn *tiVoColumnHolder;
 }
 
-@property (nonatomic, retain) NSArray *sortedShows;
-@property (nonatomic, retain) NSString *selectedTiVo;
-@property (assign) IBOutlet NSTextField *findLabel;
-@property (assign) IBOutlet NSTextField *findText; //filter for displaying found subset of programs
+@property (nonatomic, strong) NSArray *sortedShows;
+@property (nonatomic, strong) NSString *selectedTiVo;
+@property (weak) IBOutlet NSTextField *findLabel;
+@property (weak) IBOutlet NSTextField *findText; //filter for displaying found subset of programs
 
 -(NSArray *)sortedShows;
 -(IBAction)selectTivo:(id)sender;

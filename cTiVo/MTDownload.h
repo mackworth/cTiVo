@@ -17,22 +17,22 @@
 @interface MTDownload : NSObject  <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding> {
 }
 
-@property (nonatomic, retain) MTTiVoShow * show;
+@property (nonatomic, strong) MTTiVoShow * show;
 
 //-------------------------------------------------------------
 #pragma mark - Properties/Methods for persistent queue
-@property (readonly) NSDictionary * queueRecord;  //used to write
+@property (weak, readonly) NSDictionary * queueRecord;  //used to write
 
 -(BOOL) isSameAs:(NSDictionary *) queueEntry;
 -(void) restoreDownloadData:(NSDictionary *) queueEntry;
 
 #pragma mark - Properties for download/conversion work
-@property (nonatomic, retain) NSNumber *downloadIndex;
+@property (nonatomic, strong) NSNumber *downloadIndex;
 
-@property (nonatomic, retain) NSString *downloadDirectory;
-@property (nonatomic, retain) MTFormat *encodeFormat;
+@property (nonatomic, strong) NSString *downloadDirectory;
+@property (nonatomic, strong) MTFormat *encodeFormat;
 
-@property (nonatomic, retain) NSNumber *genTextMetaData,
+@property (nonatomic, strong) NSNumber *genTextMetaData,
 *genXMLMetaData,
 *includeAPMMetaData,
 *exportSubtitles;
@@ -52,9 +52,9 @@ numStartupRetriesRemaining;
 
 //--------------------------------------------------------------
 #pragma mark - Properties for download/conversion progress
-@property (retain) NSNumber *downloadStatus;
-@property (nonatomic, readonly)	NSString *showStatus;
-@property (nonatomic, readonly) NSString *imageString;
+@property (strong) NSNumber *downloadStatus;
+@property (weak, nonatomic, readonly)	NSString *showStatus;
+@property (weak, nonatomic, readonly) NSString *imageString;
 @property double processProgress; //Should be between 0 and 1
 
 @property BOOL isSimultaneousEncoding;

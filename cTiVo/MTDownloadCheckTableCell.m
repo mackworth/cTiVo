@@ -20,7 +20,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code here.
-        _checkBox = [[[MTCheckBox alloc] initWithFrame:frame] autorelease];
+        _checkBox = [[MTCheckBox alloc] initWithFrame:frame];
         [_checkBox setButtonType:NSSwitchButton];
         [self addSubview:_checkBox];
 		[_checkBox setAutoresizingMask:NSViewMinXMargin | NSViewMaxXMargin ];

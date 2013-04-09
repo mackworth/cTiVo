@@ -18,13 +18,13 @@
 
 
 #pragma mark - Which TiVo did we come from
-@property (nonatomic, assign) MTTiVo *tiVo;
-@property (nonatomic, retain) NSString *tempTiVoName;  //used before we find TiVo
-@property (nonatomic, readonly) NSString *tiVoName; //either of above
+@property (nonatomic, weak) MTTiVo *tiVo;
+@property (nonatomic, strong) NSString *tempTiVoName;  //used before we find TiVo
+@property (weak, nonatomic, readonly) NSString *tiVoName; //either of above
 
 //--------------------------------------------------------------
 #pragma mark - Properties loaded in from TiVo's XML
-@property (nonatomic, retain) NSString 
+@property (nonatomic, strong) NSString 
 									*seriesTitle,
 									*episodeTitle,
 									*showDescription,
@@ -43,15 +43,15 @@
 									*imageString,
                                     *idGuidSource;
 
-@property (nonatomic, retain) NSNumber  *protectedShow,  //really BOOLs
+@property (nonatomic, strong) NSNumber  *protectedShow,  //really BOOLs
 										*inProgress,      //Is Tivo currently recording this show
 										*isHD;
 @property					  double fileSize;  //Size on TiVo;
 
-@property (nonatomic, retain) NSURL *downloadURL,
+@property (nonatomic, strong) NSURL *downloadURL,
 									*detailURL;
 
-@property (nonatomic, retain) NSDate *showDate;
+@property (nonatomic, strong) NSDate *showDate;
 @property					  int    showID;
 
 @property					  time_t showLength;  //length of show in seconds
@@ -65,27 +65,27 @@
 
 //--------------------------------------------------------------
 #pragma mark - Calculated properties for display 
-@property (nonatomic, retain)	NSString *showTitle;  //calculated from series: episode
+@property (nonatomic, strong)	NSString *showTitle;  //calculated from series: episode
 @property (nonatomic, readonly) NSString *yearString,
 										*originalAirDateNoTime,
 										 *showDateString,
 										*showKey,
 										 *showMediumDateString;
 @property						int	season, episode; //calculated from EpisodeNumber
-@property (nonatomic, readonly) NSString *seasonString;
-@property (nonatomic, readonly) NSString *seasonEpisode; // S02 E04 version
+@property (weak, nonatomic, readonly) NSString *seasonString;
+@property (weak, nonatomic, readonly) NSString *seasonEpisode; // S02 E04 version
 
-@property (nonatomic, readonly)	NSString *episodeGenre;
+@property (weak, nonatomic, readonly)	NSString *episodeGenre;
 
 @property (nonatomic, readonly) BOOL    isMovie;
 @property (nonatomic, readonly) BOOL    isSuggestion;
-@property (nonatomic, readonly) NSString *idString,
+@property (weak, nonatomic, readonly) NSString *idString,
 										*combinedChannelString,
 										*lengthString,
 										*isQueuedString,
 										*isHDString,
 										*sizeString;
-@property (nonatomic, readonly) NSAttributedString *actors,
+@property (weak, nonatomic, readonly) NSAttributedString *actors,
 													*guestStars,
 													*directors,
 													*producers,
@@ -94,7 +94,7 @@
 @property BOOL isQueued;
 
 @property (nonatomic, assign) BOOL	gotDetails;
-@property (nonatomic, retain) NSData *detailXML;
+@property (nonatomic, strong) NSData *detailXML;
 -(void)getShowDetail;
 
 -(NSArray *) apmArguments;

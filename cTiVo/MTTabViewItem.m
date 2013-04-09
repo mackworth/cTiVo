@@ -11,9 +11,4 @@
 @implementation MTTabViewItem
 
 
--(void)dealloc
-{
-	self.windowController = nil;
-	[super dealloc];
-}
 @end

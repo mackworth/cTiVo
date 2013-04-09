@@ -15,13 +15,13 @@
 }
 
 
-@property (nonatomic, retain) NSString *seriesTitle;
-@property (nonatomic, retain) NSDate *lastRecordedTime;
+@property (nonatomic, strong) NSString *seriesTitle;
+@property (nonatomic, strong) NSDate *lastRecordedTime;
 
-@property (nonatomic, retain) NSNumber *addToiTunes;
-@property (nonatomic, retain) NSNumber *simultaneousEncode, *skipCommercials, *includeSuggestions;
-@property (nonatomic, retain) MTFormat *encodeFormat;
-@property (nonatomic, retain) NSNumber *genTextMetaData,
+@property (nonatomic, strong) NSNumber *addToiTunes;
+@property (nonatomic, strong) NSNumber *simultaneousEncode, *skipCommercials, *includeSuggestions;
+@property (nonatomic, strong) MTFormat *encodeFormat;
+@property (nonatomic, strong) NSNumber *genTextMetaData,
 									   *genXMLMetaData,
 									   *includeAPMMetaData,
 									   *exportSubtitles;

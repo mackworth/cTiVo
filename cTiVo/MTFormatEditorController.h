@@ -22,12 +22,12 @@
 	IBOutlet MTHelpViewController *popoverDetachController, *helpContoller;
 }
 
-@property (nonatomic, retain) MTFormat *currentFormat;
-@property (nonatomic, retain) NSMutableArray *formatList;
-@property (nonatomic, retain) NSNumber *shouldSave;
-@property (nonatomic, retain) NSColor *validExecutableColor;
-@property (nonatomic, retain) NSNumber *validExecutable;
-@property (nonatomic, retain) NSString *validExecutableString;
+@property (nonatomic, strong) MTFormat *currentFormat;
+@property (nonatomic, strong) NSMutableArray *formatList;
+@property (nonatomic, strong) NSNumber *shouldSave;
+@property (nonatomic, strong) NSColor *validExecutableColor;
+@property (nonatomic, strong) NSNumber *validExecutable;
+@property (nonatomic, strong) NSString *validExecutableString;
 
 
 @end

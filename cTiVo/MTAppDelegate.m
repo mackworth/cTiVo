@@ -105,8 +105,6 @@ __DDLOGHERE__
 - (void)dealloc
 {
 	DDLogDetail(@"deallocing AppDelegate");
-	self.tiVoGlobalManager = nil;
-    [super dealloc];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
@@ -234,27 +232,27 @@ __DDLOGHERE__
 		}
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		if (canAPM) {
-			apmMenuItem = [[[NSMenuItem alloc] init] autorelease];
+			apmMenuItem = [[NSMenuItem alloc] init];
 			apmMenuItem.title = @"Add Metadata to Video File";
 			[apmMenuItem bind:@"value" toObject:defaults withKeyPath:kMTExportAtomicParsleyMetaData options:nil];
 			[optionsMenu insertItem:apmMenuItem atIndex:0];
 		}
 		if (caniTune) {
-			iTunesMenuItem = [[[NSMenuItem alloc] init] autorelease];
+			iTunesMenuItem = [[NSMenuItem alloc] init];
 			iTunesMenuItem.title = @"Add to iTunes when complete";
 			[iTunesMenuItem bind:@"value" toObject:defaults withKeyPath:kMTiTunesSubmit options:nil];
 			[optionsMenu insertItem:iTunesMenuItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
 		}
 		if (canSimulEncode) {
-			simulEncodeItem = [[[NSMenuItem alloc] init] autorelease];
+			simulEncodeItem = [[NSMenuItem alloc] init];
 			simulEncodeItem.title = @"Simultaneous Encoding";
 			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:kMTSimultaneousEncode options:nil];
 			[optionsMenu insertItem:simulEncodeItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
 		}
 		if (canSkip) {
-			skipCommercialsItem = [[[NSMenuItem alloc] init] autorelease];
+			skipCommercialsItem = [[NSMenuItem alloc] init];
 			skipCommercialsItem.title = @"Skip Commercials";
 			[skipCommercialsItem bind:@"value" toObject:defaults withKeyPath:kMTRunComSkip options:nil];
 			[optionsMenu insertItem:skipCommercialsItem atIndex:0];
@@ -312,7 +310,7 @@ __DDLOGHERE__
 		[refreshTiVoMenuItem setTarget:_tiVoGlobalManager];
 		[refreshTiVoMenuItem setAction:@selector(refreshAllTiVos)];
 		[refreshTiVoMenuItem setEnabled:YES];
-		NSMenu *thisMenu = [[[NSMenu alloc] initWithTitle:@"Refresh Tivo"] autorelease];
+		NSMenu *thisMenu = [[NSMenu alloc] initWithTitle:@"Refresh Tivo"];
 		BOOL lastTivoWasManual = NO;
 		for (MTTiVo *tiVo in _tiVoGlobalManager.tiVoList) {
 			if (!tiVo.manualTiVo && lastTivoWasManual) { //Insert a separator
@@ -320,11 +318,11 @@ __DDLOGHERE__
 				[thisMenu addItem:menuItem];
 			}
 			lastTivoWasManual = tiVo.manualTiVo;
-			NSMenuItem *thisMenuItem = [[[NSMenuItem alloc] initWithTitle:tiVo.tiVo.name action:NULL keyEquivalent:@""] autorelease];
+			NSMenuItem *thisMenuItem = [[NSMenuItem alloc] initWithTitle:tiVo.tiVo.name action:NULL keyEquivalent:@""];
 			if (!tiVo.isReachable) {
 				NSFont *thisFont = [NSFont systemFontOfSize:13];
 				NSString *thisTitle = [NSString stringWithFormat:@"%@ offline",tiVo.tiVo.name];
-				NSAttributedString *aTitle = [[[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]] autorelease];
+				NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]];
 				[thisMenuItem setAttributedTitle:aTitle];
 			} else {
 				[thisMenuItem setTarget:tiVo];
@@ -333,7 +331,7 @@ __DDLOGHERE__
 			}
 			[thisMenu addItem:thisMenuItem];
 		}
-		NSMenuItem *thisMenuItem = [[[NSMenuItem alloc] initWithTitle:@"All TiVos" action:NULL keyEquivalent:@""] autorelease];
+		NSMenuItem *thisMenuItem = [[NSMenuItem alloc] initWithTitle:@"All TiVos" action:NULL keyEquivalent:@""];
 		[thisMenuItem setTarget:self];
 		[thisMenuItem setAction:@selector(updateAllTiVos:)];
 		[thisMenuItem setEnabled:YES];
@@ -389,9 +387,9 @@ __DDLOGHERE__
 	if (!_advPreferencesController) {
 		_advPreferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
 		[_advPreferencesController window];
-		MTTabViewItem *advTabViewItem = [[[MTTabViewItem alloc] initWithIdentifier:@"AdvPrefs"] autorelease];
+		MTTabViewItem *advTabViewItem = [[MTTabViewItem alloc] initWithIdentifier:@"AdvPrefs"];
 		advTabViewItem.label = @"Advanced Preferences";
-		NSViewController *thisController = [[[MTAdvPreferencesViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil] autorelease];
+		NSViewController *thisController = [[MTAdvPreferencesViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil];
 		advTabViewItem.windowController = (id)thisController;
 		[_advPreferencesController.myTabView insertTabViewItem:advTabViewItem atIndex:0];
 		NSRect tabViewFrame = ((NSView *)advTabViewItem.view).frame;
@@ -416,7 +414,7 @@ __DDLOGHERE__
 
 -(IBAction)exportFormats:(id)sender
 {
-	NSSavePanel *mySavePanel = [[[NSSavePanel alloc] init] autorelease];
+	NSSavePanel *mySavePanel = [[NSSavePanel alloc] init];
 	[mySavePanel setTitle:@"Export User Formats"];
 	[mySavePanel setAllowedFileTypes:[NSArray arrayWithObject:@"plist"]];
     [mySavePanel setAccessoryView:formatSelectionTable];
@@ -458,7 +456,7 @@ __DDLOGHERE__
         // create the new NSTextField with a frame of the {0,0} with the width of the table
         // note that the height of the frame is not really relevant, the row-height will modify the height
         // the new text field is then returned as an autoreleased object
-        result = [[[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)] autorelease];
+        result = [[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)];
         //        result.textField.font = [NSFont userFontOfSize:14];
         result.textField.editable = NO;
         
@@ -484,7 +482,7 @@ __DDLOGHERE__
 -(IBAction)importFormats:(id)sender
 {
 	
-	NSOpenPanel *myOpenPanel = [[[NSOpenPanel alloc] init] autorelease];
+	NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
 	[myOpenPanel setTitle:@"Import User Formats"];
 	[myOpenPanel setAllowedFileTypes:[NSArray arrayWithObject:@"plist"]];
 	[myOpenPanel beginWithCompletionHandler:^(NSInteger ret){
@@ -533,7 +531,6 @@ __DDLOGHERE__
 		NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
 		
 		[input setStringValue:tiVo.mediaKey];
-		[input autorelease];
 		[keyAlert setAccessoryView:input];
 		NSInteger button = [keyAlert runModal];
 		if (button == NSAlertDefaultReturn) {
@@ -637,7 +634,7 @@ __DDLOGHERE__
 	[tiVoManager cancelAllDownloads];
 	[tiVoManager writeDownloadQueueToUserDefaults];
     [[NSUserDefaults standardUserDefaults] synchronize];
-	[mediaKeyQueue release]; mediaKeyQueue = nil;
+	 mediaKeyQueue = nil;
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender

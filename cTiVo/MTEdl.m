@@ -23,7 +23,7 @@ __DDLOGHERE__
 		DDLogReport(@"Bad EDL: not enough items: %@", edlString);
 		return nil;
 	}
-	MTEdl *newEdl =  [[MTEdl new] autorelease];
+	MTEdl *newEdl =  [MTEdl new];
 	newEdl.startTime = [items[0] doubleValue];
 	newEdl.endTime = [items[1] doubleValue];
 	if (newEdl.startTime >= newEdl.endTime ) {

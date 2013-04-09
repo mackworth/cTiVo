@@ -28,11 +28,11 @@
 	
 }
 
-@property (assign) IBOutlet NSWindow *window;
-@property (nonatomic, retain) MTPreferencesWindowController *preferencesController;
-@property (nonatomic, retain) MTPreferencesWindowController *advPreferencesController;
-@property (nonatomic, readonly) NSNumber *numberOfUserFormats;
-@property (nonatomic, retain) MTTiVoManager *tiVoGlobalManager;
+@property (weak) IBOutlet NSWindow *window;
+@property (nonatomic, strong) MTPreferencesWindowController *preferencesController;
+@property (nonatomic, strong) MTPreferencesWindowController *advPreferencesController;
+@property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
+@property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
 
 
 -(IBAction)togglePause:(id)sender;

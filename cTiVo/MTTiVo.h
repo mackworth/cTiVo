@@ -38,13 +38,13 @@
     
 }
 
-@property (nonatomic, retain) MTNetService *tiVo;
-@property (nonatomic, retain) NSMutableArray *shows;
-@property (nonatomic, retain) NSDate *networkAvailability;
-@property (nonatomic, retain) NSString *mediaKey;
-@property (nonatomic, assign) NSOperationQueue *queue;
-@property (nonatomic, retain) MTTiVoManager *tiVoManager;
-@property (nonatomic, retain) NSURLConnection *showURLConnection;
+@property (nonatomic, strong) MTNetService *tiVo;
+@property (nonatomic, strong) NSMutableArray *shows;
+@property (nonatomic, strong) NSDate *networkAvailability;
+@property (nonatomic, strong) NSString *mediaKey;
+@property (nonatomic, weak) NSOperationQueue *queue;
+@property (nonatomic, strong) MTTiVoManager *tiVoManager;
+@property (nonatomic, strong) NSURLConnection *showURLConnection;
 @property BOOL mediaKeyIsGood;
 @property BOOL isReachable, isResponding, manualTiVo, enabled;
 

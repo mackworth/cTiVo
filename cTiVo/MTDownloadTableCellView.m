@@ -15,7 +15,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code here.
-        _progressIndicator = [[MTProgressindicator alloc] initWithFrame:frame];
+        self.progressIndicator = [[MTProgressindicator alloc] initWithFrame:frame];
         [self addSubview:_progressIndicator];
     }
     
@@ -53,8 +53,7 @@
 
 -(void)dealloc
 {
-    [_downloadStage release];
-    [super dealloc];
+    self.downloadStage = nil;
 }
 
 @end
