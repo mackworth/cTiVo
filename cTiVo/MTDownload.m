@@ -1355,43 +1355,31 @@ __DDLOGHERE__
 
 -(void) writeMetaDataFiles {
 	
-	if (self.genXMLMetaData.boolValue || self.genTextMetaData.boolValue) {
-		
+	if (self.genXMLMetaData.boolValue) {
 		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
 		DDLogMajor(@"Writing XML to    %@",tivoMetaPath);
-		if (![self.show.detailXML writeToFile:tivoMetaPath atomically:NO]) {
+		if (![self.show.detailXML writeToFile:tivoMetaPath atomically:NO])
 			DDLogReport(@"Couldn't write XML to file %@", tivoMetaPath);
-			
-		} else if (self.genTextMetaData.boolValue) {
-			
-			NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
-			[[NSFileManager defaultManager] createFileAtPath:textMetaPath contents:[NSData data] attributes:nil];
-			NSFileHandle * textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
-			DDLogMajor(@"Writing pytivo metaData to    %@",textMetaPath);
-			
-			NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
-			
-			NSTask * xsltProcess = [[NSTask alloc] init];
-			[xsltProcess setLaunchPath: @"/usr/bin/xsltproc"];
-			[xsltProcess setArguments: @[ xltTemplate, tivoMetaPath]] ;
-			[xsltProcess setStandardOutput:textMetaHandle ];
-			[xsltProcess launch];
-			[xsltProcess waitUntilExit];  //should be under 1 millisecond
-			 xsltProcess = nil;
-			
+	}
+	if (self.genTextMetaData.boolValue) {
+		NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:self.show.detailXML options:0 error:nil];
+		NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
+		id returnxml = [xmldoc objectByApplyingXSLTAtURL:[NSURL fileURLWithPath:xltTemplate] arguments:nil error:nil	];
+		NSString *returnString = [[NSString alloc] initWithData:returnxml encoding:NSUTF8StringEncoding];
+		NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
+		if (![returnString writeToFile:textMetaPath atomically:NO encoding:NSUTF8StringEncoding error:nil]) {
+			DDLogReport(@"Couldn't write pyTiVo Data to file %@", textMetaPath);
+		} else {
+			NSFileHandle *textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
+			[textMetaHandle seekToEndOfFile];
 			[self writeTextMetaData:self.show.seriesId		 forKey:@"seriesID"			    toFile:textMetaHandle];
 			[self writeTextMetaData:self.show.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
 			[self writeTextMetaData:self.show.stationCallsign forKey:@"callsign"				toFile:textMetaHandle];
-			[textMetaHandle closeFile];
-			
-			if (!self.genXMLMetaData.boolValue) {
-				if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-					[[NSFileManager defaultManager] removeItemAtPath:tivoMetaPath error:nil];
-				}
-			}
 		}
 	}
+	
 }
+
 -(BOOL) addAtomicParsleyMetadataToDownloadFile {
 	if (! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley)) {
 		return NO;
