@@ -1436,22 +1436,44 @@ __DDLOGHERE__
 	}
 }
 
-
--(void) finishUpPostEncodeProcessing {
-	if (_addToiTunesWhenEncoded) {
-		DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
-		MTiTunes *iTunes = [[MTiTunes alloc] init];
-		[iTunes importIntoiTunes:self];
-	}
+-(void) addXAttrs:(NSString *) videoFilePath {
 	//Add xattrs
 	NSData *tiVoName = [_show.tiVoName dataUsingEncoding:NSUTF8StringEncoding];
 	NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
 	NSData *spotlightKeyword = [kMTSpotlightKeyword dataUsingEncoding:NSUTF8StringEncoding];
-	setxattr([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], [tiVoName bytes], tiVoName.length, 0, 0);
-	setxattr([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);
-	setxattr([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRSpotlight UTF8String], [spotlightKeyword bytes], spotlightKeyword.length, 0, 0);
+	setxattr([videoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], [tiVoName bytes], tiVoName.length, 0, 0);
+	setxattr([videoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);
+	setxattr([videoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRSpotlight UTF8String], [spotlightKeyword bytes], spotlightKeyword.length, 0, 0);
     
-	[tiVoManager updateShowOnDisk:_show.showKey withPath:_encodeFilePath];
+	[tiVoManager updateShowOnDisk:_show.showKey withPath: videoFilePath];
+}
+							   
+-(void) finishUpPostEncodeProcessing {
+	if (_addToiTunesWhenEncoded) {
+		DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
+		MTiTunes *iTunes = [[MTiTunes alloc] init];
+		NSString * iTunesPath = [iTunes importIntoiTunes:self] ;
+	
+		if (iTunesPath && iTunesPath != self.encodeFilePath) {
+			//apparently iTunes created new file
+			
+			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
+				if (![[NSUserDefaults standardUserDefaults ] boolForKey:kMTSaveTmpFiles]) {
+					if ([[NSFileManager defaultManager] removeItemAtPath:self.encodeFilePath error:nil]) {
+						DDLogMajor (@"Deleting old video file %@", self.encodeFilePath);
+					} else {
+						DDLogReport(@"Couldn't remove file at path %@",self.encodeFilePath);
+					}
+				}
+				//but remember new file for future processing
+				_encodeFilePath= iTunesPath;
+			} else {
+				//two copies now, so add xattrs to iTunes copy as well
+				[self addXAttrs:iTunesPath];
+			}
+		}
+	}
+	[self addXAttrs:self.encodeFilePath];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:_show];
 	
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];

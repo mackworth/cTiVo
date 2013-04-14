@@ -19,7 +19,11 @@
 @property (nonatomic, strong) iTunesLibraryPlaylist *libraryPlayList;
 @property (nonatomic, strong) iTunesPlaylist *tivoPlayList;
 
--(BOOL) importIntoiTunes: (MTDownload * ) download;
+-(NSString *) importIntoiTunes: (MTDownload * ) download;
+//returns nil if can't add; location of video file if it can
+//this may be a new file if iTunes copies
+//or  download.encodePath if iTunes references existing path
+
 -(void) updateAllIDevices;
 //-(void) testModule;
 

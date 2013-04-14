@@ -138,12 +138,10 @@ __DDLOGHERE__
 										  @YES, kMTShowSuggestions,
 										  @NO, kMTPreventSleep,
 										  @kMTMaxDownloadRetries, kMTNumDownloadRetries,
+										  @NO, kMTiTunesDelete,
+										  @NO, kMTHasMultipleTivos,
 										  nil];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
-	
-	if (![[NSUserDefaults standardUserDefaults] objectForKey:kMTHasMultipleTivos]) {
-		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTHasMultipleTivos];
-	}
 	
 	
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];

@@ -138,6 +138,7 @@
 #define kMTSubscriptionList @"SubscriptionList"     //Array of subscription dictionaries
 #define kMTiTunesSubmit @"iTunesSubmit"             //Whether to submit to iTunes after encoding
 #define kMTiTunesSync @"iTunesSync"                 // Whether to sync iDevices after iTunes submital
+#define kMTiTunesDelete @"iTunesDelete"				//Whether to delete original file after submitting to iTunes
 #define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
 #define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
 #define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)

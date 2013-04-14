@@ -85,31 +85,48 @@ __DDLOGHERE__
 	return _tivoPlayList;
 }
 
+-(unsigned long) deviceNumber:(NSDictionary *) attributes {
+	NSNumber * deviceNum = attributes[NSFileDeviceIdentifier];
+	return deviceNum.unsignedLongValue;
+}
 
--(BOOL) importIntoiTunes: (MTDownload * ) download {
+-(unsigned long) fileNumber:(NSDictionary *) attributes {
+	NSNumber * fileNum = attributes [NSFileSystemFileNumber];
+	return fileNum.unsignedLongValue;
+}
+
+- (BOOL) is: (NSString *) pathA sameFileAs: (NSString *) pathB {
+	NSDictionary * attributesA = [[NSFileManager defaultManager] attributesOfItemAtPath:pathA error:nil];
+	NSDictionary * attributesB = [[NSFileManager defaultManager] attributesOfItemAtPath:pathB error:nil];
+	
+	return ([self deviceNumber:attributesA] == [self deviceNumber:attributesB]) &&
+	([self fileNumber:attributesA] == [self fileNumber:attributesB]);
+}
+
+
+-(NSString *) importIntoiTunes: (MTDownload * ) download {
 	//Caller responsible for informing user of progress
 	// There can be a long delay as iTunes starts up
 	MTTiVoShow * show = download.show;
 	NSURL * showFileURL = [NSURL fileURLWithPath:download.encodeFilePath];
-	
-	
-	
-	iTunesTrack * newTrack = [self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
+
+	iTunesFileTrack * newTrack = (iTunesFileTrack *)[self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
 	if ([newTrack exists]) {
 		DDLogReport(@"Added iTunes track:  %@", show.showTitle);
+		NSString * fileExtension = [[download.encodeFilePath pathExtension] uppercaseString];
+		NSSet * musicTypes =[NSSet setWithObjects:@"AAC", @"MPE",@"AIF",@"WAV",@"AIFF",@"M4A",nil];
+		BOOL audioOnly = [musicTypes containsObject:fileExtension] ;
+		if (audioOnly) {
+			newTrack.videoKind = iTunesEVdKNone;
+		} else if (show.isMovie) {
+			newTrack.videoKind = iTunesEVdKMovie;
+		} else {
+			newTrack.videoKind = iTunesEVdKTVShow;
+		}
 
 		if (show.isMovie) {
-			newTrack.videoKind = iTunesEVdKMovie;
 			newTrack.name = show.showTitle;
 		} else {
-			NSString * fileExtension = [[download.encodeFilePath pathExtension] uppercaseString];
-			NSSet * musicTypes =[NSSet setWithObjects:@"AAC", @"MPE",@"AIF",@"WAV",@"AIFF",@"M4A",nil];
-			BOOL audioOnly = [musicTypes containsObject:fileExtension] ;
-			if (audioOnly) {
-				newTrack.videoKind = iTunesEVdKNone;
-			} else {
-				newTrack.videoKind = iTunesEVdKTVShow;
-			}
 			newTrack.album = show.seriesTitle;
 			newTrack.albumArtist = show.seriesTitle;
 			newTrack.album = show.seriesTitle;
@@ -140,11 +157,17 @@ __DDLOGHERE__
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSync]) {
 			[self updateAllIDevices];
 		}
-		return YES;
+		NSString * newLocation =  [[newTrack location] path];
+
+		if ([self is:newLocation sameFileAs:download.encodeFilePath]) {
+			return download.encodeFilePath;
+		} else {
+			return newLocation;
+		}
 	} else {
 		DDLogReport(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, download.encodeFormat.name, showFileURL );
 		DDLogVerbose(@"track: %@, itunes: %@; playList: %@", newTrack, self.iTunes, self.tivoPlayList);
-		return NO;
+		return nil;
 	}
 }
 
