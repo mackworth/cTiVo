@@ -374,6 +374,7 @@ __DDLOGHERE__
 	if (self.isInProgress) {
 		[self cancel];
 	}
+	_processProgress = 0.0;
 	self.numRetriesRemaining = [[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries];
 	self.numStartupRetriesRemaining = kMTMaxDownloadStartupRetries;
 	if (!self.downloadDirectory) {
