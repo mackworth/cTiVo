@@ -65,11 +65,11 @@
 			</description>
             <pubDate>Mon., Apr 8, 2013 10:10:00 -0800</pubDate>
             <!-- <sparkle:releaseNotesLink>http://andymatuschak.org/files/notes.html</sparkle:releaseNotesLink> -->
-            <enclosure url="http://ctivo.googlecode.com/files/cTiVo_2.0Beta1_281.zip" 
-            			sparkle:version="281" sparkle:shortVersionString="2.0 Beta 1" 
-            			length="21123281" 
+            <enclosure url="http://ctivo.googlecode.com/files/cTiVo_2.0Beta2_296.zip" 
+            			sparkle:version="296" sparkle:shortVersionString="2.0 Beta 2" 
+            			length="21123326" 
             			type="application/octet-stream" 
-            			sparkle:dsaSignature="MC0CFBJKNAXD56yY6au/urZ+Z4bTzHFDAhUAr+IRBVvQPn3h0I2DFLFeZH8dkkU=" />
+            			sparkle:dsaSignature="MCwCFEBRf53ntYztjCzsnNQiNAUCSnmiAhQ6ctDkwjKM2f4YGWydJZ7YNtC/bw==" />
          </item>
    </channel>
 </rss>
