@@ -52,9 +52,11 @@
 #define kMTStatusCaptioning 9
 #define kMTStatusCaptioned 10
 #define kMTStatusMetaDataProcessing 11
-#define kMTStatusDone 12
-#define kMTStatusDeleted 13
-#define kMTStatusFailed 15
+#define kMTStatusEncoded 12
+#define kMTStatusAddingToItunes 13
+#define kMTStatusDone 14
+#define kMTStatusDeleted 15
+#define kMTStatusFailed 16
 
 //Contants
 
@@ -109,6 +111,9 @@
 #define kMTLastName @"MTLastName"
 #define kMTAllTiVos @"All TiVos"
 #define kMTDefaultDownloadDir  @"Movies/TiVoShows/"
+#define kMTMaxBuffSize 50000000
+#define kMTMaxReadPoints 500000
+#define kMTMaxPointsBeforeWrite 500000
 
 #define kMTTivoShowPasteBoardType @"com.cTiVo.TivoShow"
 #define kMTDownloadPasteBoardType @"com.cTiVo.Download"
@@ -120,6 +125,7 @@
 #define kMTXATTRTiVoName @"TiVoName"
 #define kMTXATTRTiVoID @"TiVoID"
 #define kMTXATTRSpotlight @"com.apple.metadata:kMDItemFinderComment"
+#define kMTXATTRFileComplete @"com.ctivo.filecomplete"
 #define kMTSpotlightKeyword @"cTiVoDownload"
 
 

@@ -13,9 +13,15 @@
 #import "MTTiVoShow.h"
 #import "MTEdl.h"
 #import "MTSrt.h"
+#import "MTTask.h"
+#import "MTTaskChain.h"
 
 @interface MTDownload : NSObject  <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding> {
+    
+    ssize_t volatile totalDataRead, totalDataDownloaded;
 }
+
+@property (strong, nonatomic) MTTaskChain *activeTaskChain;
 
 @property (nonatomic, strong) MTTiVoShow * show;
 
@@ -32,6 +38,8 @@
 @property (nonatomic, strong) NSString *downloadDirectory;
 @property (nonatomic, strong) MTFormat *encodeFormat;
 
+@property BOOL volatile isCanceled;
+
 @property (nonatomic, strong) NSNumber *genTextMetaData,
 *genXMLMetaData,
 *includeAPMMetaData,
@@ -46,7 +54,10 @@ numStartupRetriesRemaining;
 
 @property (nonatomic, readonly) NSString *encodeFilePath,
 *bufferFilePath,   //
+*decryptBufferFilePath,
 *downloadFilePath;
+
+@property(nonatomic, strong) NSString * baseFileName;
 
 
 
@@ -56,6 +67,7 @@ numStartupRetriesRemaining;
 @property (weak, nonatomic, readonly)	NSString *showStatus;
 @property (weak, nonatomic, readonly) NSString *imageString;
 @property double processProgress; //Should be between 0 and 1
+@property (nonatomic) BOOL shouldSimulEncode;
 
 @property BOOL isSimultaneousEncoding;
 
@@ -66,15 +78,14 @@ numStartupRetriesRemaining;
 -(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
 -(void)cancel;
 -(void)download;
--(void)decrypt;
--(void)commercial;
--(void)caption;
--(void)encode;
+-(void) finishUpPostEncodeProcessing;
+
 
 #pragma mark - Methods for manipulating video
 -(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted;
 -(BOOL) canPlayVideo;
 -(BOOL) playVideo;
 -(BOOL) revealInFinder;
+-(void)rescheduleOnMain;
 
 @end

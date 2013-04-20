@@ -200,6 +200,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		numEncoders = 0;
 		numCommercials = 0;
 		numCaptions = 0;
+		_signalError = 0;
 		queue.maxConcurrentOperationCount = 1;
 		
         updatingVideoList = NO;

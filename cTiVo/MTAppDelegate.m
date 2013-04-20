@@ -94,6 +94,7 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
 void signalHandler(int signal)
 {
 	//Do nothing only use to intercept SIGPIPE.  Ignoring this should be fine as the the retry system should catch the failure and cancel and restart
+	tiVoManager.signalError = signal;
 	NSLog(@"Got signal %d",signal);
 }
 

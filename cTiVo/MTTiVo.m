@@ -534,19 +534,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     managingDownloads = YES;
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
 //	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
-    BOOL isDownloading = NO, isDecrypting = NO, isCommercialing = NO, isCaptioning = NO;
+    BOOL isDownloading = NO;
     for (MTDownload *s in self.downloadQueue) {
         if ([s.downloadStatus intValue] == kMTStatusDownloading) {
             isDownloading = YES;
-        }
-        if ([s.downloadStatus intValue] == kMTStatusDecrypting) {
-            isDecrypting = YES;
-        }
-        if ([s.downloadStatus intValue] == kMTStatusCommercialing) {
-            isCommercialing = YES;
-        }
-        if ([s.downloadStatus intValue] == kMTStatusCaptioning) {
-            isCaptioning= YES;
         }
     }
     if (!isDownloading) {
@@ -556,11 +547,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				managingDownloads = NO;
 				return;
 			}
-            if (s.isNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders || !s.simultaneousEncode)) {
+            if (s.isNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders)) {
                 if(s.show.tiVo.isReachable) {  //isn't this self.isReachable?
-                    if (s.simultaneousEncode) {
+//                    if (s.shouldSimulEncode) {
                         tiVoManager.numEncoders++;
-                    }
+//                    }
 					[s download];
                     //                } else {    //We'll try again in kMTRetryNetworkInterval seconds at a minimum;
                     //                    [s.tiVo reportNetworkFailure];
@@ -568,57 +559,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                     //                    [self performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTRetryNetworkInterval];
                 }
                 break;
-            }
-        }
-    }
-    if (!isDecrypting) {
-		DDLogDetail(@"%@ Checking for new decrypt", self);
-        for (MTDownload *s in self.downloadQueue) {
-            if ([s.downloadStatus intValue] == kMTStatusDownloaded && !s.simultaneousEncode) {
-                [s decrypt];
-                break;
-            }
-        }
-    }
-    if (!isCommercialing) {
-		DDLogDetail(@"%@ Checking for new commercial detection", self);
-        for (MTDownload *s in self.downloadQueue) {
-            if ([s.downloadStatus intValue] == kMTStatusDecrypted && s.skipCommercials
-						&&
-				tiVoManager.numCommercials < kMTMaxNumDownloaders) {
-				DDLogDetail(@"Launching commercial detection %@", s);
-				tiVoManager.numCommercials++;
-				[s commercial];
-               break;
-            }
-        }
-    }
-	if (!isCaptioning) {
-		DDLogDetail(@"%@ Checking for new caption extraction", self);
-        for (MTDownload *s in self.downloadQueue) {
-            if (s.exportSubtitles.boolValue &&
-				(([s.downloadStatus intValue] == kMTStatusDecrypted && !s.skipCommercials) ||
-				 ([s.downloadStatus intValue] == kMTStatusCommercialed && s.skipCommercials))
-				&&
-				tiVoManager.numCaptions < kMTMaxNumDownloaders) {
-				DDLogDetail(@"Launching caption detection %@", s);
-				tiVoManager.numCaptions++;
-				[s caption];
-				break;
-            }
-        }
-    }
-    if (tiVoManager.numEncoders < kMTMaxNumDownloaders) {
-		DDLogDetail(@"%@ Checking for new encode", self);
-        for (MTDownload *s in self.downloadQueue) {
-			int status =[s.downloadStatus intValue];
-            if (((status == kMTStatusDecrypted && !s.skipCommercials && !s.exportSubtitles.boolValue) ||
-				 (status == kMTStatusCommercialed && !s.exportSubtitles.boolValue) ||
-				 (status == kMTStatusCaptioned))
-							&&
-				tiVoManager.numEncoders < kMTMaxNumDownloaders) {
-				tiVoManager.numEncoders++;
-                [s encode];
             }
         }
     }

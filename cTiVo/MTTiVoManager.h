@@ -31,6 +31,8 @@
 @property (nonatomic, strong) NSString *downloadDirectory;
 @property (weak, readonly) NSString *defaultDownloadDirectory;
 
+@property int volatile signalError;
+
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic, strong) MTFormat *selectedFormat;
