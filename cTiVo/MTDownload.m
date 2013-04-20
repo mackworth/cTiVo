@@ -57,7 +57,7 @@ __DDLOGHERE__
 		nameLockFilePath = nil;
         captionFilePath = nil;
 		_addToiTunesWhenEncoded = NO;
-        _simultaneousEncode = YES;
+//        _simultaneousEncode = YES;
 		writingData = NO;
 		downloadingURL = NO;
 		_genTextMetaData = nil;
@@ -193,7 +193,7 @@ __DDLOGHERE__
 	DDLogVerbose(@"encoding %@",self);
 	[self.show encodeWithCoder:encoder];
 	[encoder encodeObject:[NSNumber numberWithBool:_addToiTunesWhenEncoded] forKey: kMTSubscribediTunes];
-	[encoder encodeObject:[NSNumber numberWithBool:_simultaneousEncode] forKey: kMTSubscribedSimulEncode];
+//	[encoder encodeObject:[NSNumber numberWithBool:_simultaneousEncode] forKey: kMTSubscribedSimulEncode];
 	[encoder encodeObject:[NSNumber numberWithBool:_skipCommercials] forKey: kMTSubscribedSkipCommercials];
 	[encoder encodeObject:_encodeFormat.name forKey:kMTQueueFormat];
 	[encoder encodeObject:_downloadStatus forKey: kMTQueueStatus];
@@ -216,7 +216,7 @@ __DDLOGHERE__
 	NSMutableDictionary *result = [NSMutableDictionary dictionaryWithObjectsAndKeys:
 								   [NSNumber numberWithInteger: _show.showID], kMTQueueID,
 								   [NSNumber numberWithBool:_addToiTunesWhenEncoded], kMTSubscribediTunes,
-								   [NSNumber numberWithBool:_simultaneousEncode], kMTSubscribedSimulEncode,
+//								   [NSNumber numberWithBool:_simultaneousEncode], kMTSubscribedSimulEncode,
 								   [NSNumber numberWithBool:_skipCommercials], kMTSubscribedSkipCommercials,
 								   _show.showTitle, kMTQueueTitle,
 								   self.show.tiVoName, kMTQueueTivo,
@@ -259,7 +259,7 @@ __DDLOGHERE__
 	if (_downloadStatus.integerValue == kMTStatusDoneOld) _downloadStatus = @kMTStatusDone; //temporary patch for old queues
 	if (self.isInProgress) _downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
 	
-	_simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
+//	_simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
 	self.encodeFormat = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
 	self.downloadDirectory = queueEntry[kMTQueueDirectory];
 	_encodeFilePath = queueEntry[kMTQueueFinalFile];
@@ -281,7 +281,7 @@ __DDLOGHERE__
 		self.show = [[MTTiVoShow alloc] initWithCoder:decoder ];
 		self.downloadDirectory = [decoder decodeObjectForKey: kMTQueueDirectory];
 		_addToiTunesWhenEncoded= [[decoder decodeObjectForKey: kMTSubscribediTunes] boolValue];
-		_simultaneousEncode	 =   [[decoder decodeObjectForKey: kMTSubscribedSimulEncode] boolValue];
+//		_simultaneousEncode	 =   [[decoder decodeObjectForKey: kMTSubscribedSimulEncode] boolValue];
 		_skipCommercials   =     [[decoder decodeObjectForKey: kMTSubscribedSkipCommercials] boolValue];
 		NSString * encodeName	 = [decoder decodeObjectForKey:kMTQueueFormat];
 		_encodeFormat =	[tiVoManager findFormat: encodeName]; //minor bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is then wrong for completed/failed entries
@@ -1676,13 +1676,14 @@ __DDLOGHERE__
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];
         _encodeFormat = encodeFormat;
-        if (!self.canSimulEncode && self.shouldSimulEncode) {
-            //no longer possible
-            self.simultaneousEncode = NO;
-        } else if (simulWasDisabled && [self canSimulEncode]) {
-            //newly possible, so take user default
-            self.simultaneousEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
-        }
+//        if (!self.canSimulEncode && self.shouldSimulEncode) {
+//            //no longer possible
+//            self.simultaneousEncode = NO;
+//        } else
+//			if (simulWasDisabled && [self canSimulEncode]) {
+//            //newly possible, so take user default
+//            self.simultaneousEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
+//        }
         if (!self.canAddToiTunes && self.shouldAddToiTunes) {
             //no longer possible
             self.addToiTunesWhenEncoded = NO;

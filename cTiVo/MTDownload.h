@@ -45,7 +45,7 @@
 *includeAPMMetaData,
 *exportSubtitles;
 @property BOOL  addToiTunesWhenEncoded,
-simultaneousEncode,
+//simultaneousEncode,
 skipCommercials;
 
 @property int  	numRetriesRemaining,

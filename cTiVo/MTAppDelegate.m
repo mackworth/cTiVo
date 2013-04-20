@@ -149,7 +149,7 @@ __DDLOGHERE__
     [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueChangeSetting context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTRunComSkip options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTSimultaneousEncode options:NSKeyValueObservingOptionNew context:nil];
+//	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTSimultaneousEncode options:NSKeyValueObservingOptionNew context:nil];
 	mainWindowController = nil;
 	//	_formatEditorController = nil;
 	[self showMainWindow:nil];
@@ -243,13 +243,13 @@ __DDLOGHERE__
 			[optionsMenu insertItem:iTunesMenuItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
 		}
-		if (canSimulEncode) {
-			simulEncodeItem = [[NSMenuItem alloc] init];
-			simulEncodeItem.title = @"Simultaneous Encoding";
-			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:kMTSimultaneousEncode options:nil];
-			[optionsMenu insertItem:simulEncodeItem atIndex:0];
-			//			[simulEncodeItem setEnabled:YES];
-		}
+//		if (canSimulEncode) {
+//			simulEncodeItem = [[NSMenuItem alloc] init];
+//			simulEncodeItem.title = @"Simultaneous Encoding";
+//			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:kMTSimultaneousEncode options:nil];
+//			[optionsMenu insertItem:simulEncodeItem atIndex:0];
+//			//			[simulEncodeItem setEnabled:YES];
+//		}
 		if (canSkip) {
 			skipCommercialsItem = [[NSMenuItem alloc] init];
 			skipCommercialsItem.title = @"Skip Commercials";
@@ -257,18 +257,18 @@ __DDLOGHERE__
 			[optionsMenu insertItem:skipCommercialsItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
 		}
-	} else if ([keyPath compare:kMTSimultaneousEncode] == NSOrderedSame) {
-		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
-		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
-		if (simulEncode && runComSkip) {
-			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTRunComSkip];
-		}
-	} else if ([keyPath compare:kMTRunComSkip] == NSOrderedSame) {
-		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
-		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
-		if (simulEncode && runComSkip) {
-			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSimultaneousEncode];
-		}
+//	} else if ([keyPath compare:kMTSimultaneousEncode] == NSOrderedSame) {
+//		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
+//		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
+//		if (simulEncode && runComSkip) {
+//			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTRunComSkip];
+//		}
+//	} else if ([keyPath compare:kMTRunComSkip] == NSOrderedSame) {
+//		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
+//		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
+//		if (runComSkip) {
+//			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSimultaneousEncode];
+//		}
 	} else if ([keyPath compare:@"processingPaused"] == NSOrderedSame) {
 		pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";
 	}

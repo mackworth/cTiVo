@@ -153,10 +153,10 @@ __DDLOGHERE__
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)];
         thisCell.identifier = identifier;
         result = (id)thisCell;
-    } else if([identifier compare: @"Simu"] == NSOrderedSame) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)];
-        thisCell.identifier = identifier;
-        result = (id)thisCell;
+//    } else if([identifier compare: @"Simu"] == NSOrderedSame) {
+//        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)];
+//        thisCell.identifier = identifier;
+//        result = (id)thisCell;
     } else if([identifier compare: @"Skip"] == NSOrderedSame) {
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)];
         thisCell.identifier = identifier;

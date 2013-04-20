@@ -19,7 +19,7 @@
 @property (nonatomic, strong) NSDate *lastRecordedTime;
 
 @property (nonatomic, strong) NSNumber *addToiTunes;
-@property (nonatomic, strong) NSNumber *simultaneousEncode, *skipCommercials, *includeSuggestions;
+@property (nonatomic, strong) NSNumber *skipCommercials, *includeSuggestions;
 @property (nonatomic, strong) MTFormat *encodeFormat;
 @property (nonatomic, strong) NSNumber *genTextMetaData,
 									   *genXMLMetaData,

@@ -204,10 +204,10 @@ __DDLOGHERE__
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)];
         thisCell.identifier = identifier;
         result = thisCell;
-    } else if([identifier isEqualToString: @"Simu"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
+//    } else if([identifier isEqualToString: @"Simu"]) {
+//        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)];
+//        thisCell.identifier = identifier;
+//        result = thisCell;
     } else if([identifier isEqualToString: @"Skip"]) {
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)];
         thisCell.identifier = identifier;
@@ -333,12 +333,12 @@ __DDLOGHERE__
 	} else if ([tableColumn.identifier isEqualToString:@"icon"]) {
         NSString * imageName = download.imageString;
 		result.imageView.image = [NSImage imageNamed: imageName];
-	} else if ([tableColumn.identifier isEqualToString:@"Simu"]) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: download.simultaneousEncode];
-        checkBox.owner = download;
-        [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSimulEncode];
-        
+//	} else if ([tableColumn.identifier isEqualToString:@"Simu"]) {
+//        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+//        [checkBox setOn: download.simultaneousEncode];
+//        checkBox.owner = download;
+//        [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSimulEncode];
+//        
  	} else if ([tableColumn.identifier isEqualToString:@"Skip"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.skipCommercials];

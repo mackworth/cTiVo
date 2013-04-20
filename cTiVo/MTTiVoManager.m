@@ -911,8 +911,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		newDownload.exportSubtitles = [defaults objectForKey:kMTExportSubtitles];
 		newDownload.addToiTunesWhenEncoded = newDownload.encodeFormat.canAddToiTunes &&
 											[defaults boolForKey:kMTiTunesSubmit];
-		newDownload.simultaneousEncode = newDownload.encodeFormat.canSimulEncode &&
-											[defaults boolForKey:kMTSimultaneousEncode];
+//		newDownload.simultaneousEncode = newDownload.encodeFormat.canSimulEncode &&
+//											[defaults boolForKey:kMTSimultaneousEncode];
 		newDownload.skipCommercials = [newDownload.encodeFormat.comSkip boolValue] &&
 											[defaults boolForKey:@"RunComSkip"];
 		newDownload.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
