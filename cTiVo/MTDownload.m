@@ -1543,7 +1543,6 @@ __DDLOGHERE__
         
 	if (!writingData && (!urlBuffer || urlBuffer.length > kMTMaxPointsBeforeWrite)) {  //Minimized thread creation as it's expensive
 		writingData = YES;
-		NSLog(@"Starting new thread");
 		[self performSelectorInBackground:@selector(writeData) withObject:nil];
 	}
 }
@@ -1581,7 +1580,6 @@ __DDLOGHERE__
 	if (!writingData) {
         DDLogVerbose (@"writing last data for %@",self);
 		writingData = YES;
-		NSLog(@"Starting new thread");
 		[self performSelectorInBackground:@selector(writeData) withObject:nil];
 	}
 	
