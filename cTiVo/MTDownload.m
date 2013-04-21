@@ -749,7 +749,7 @@ __DDLOGHERE__
                      nil];
         decryptTask.requiresOutputPipe = YES;
         //Not using the filebuffer so remove so it can act as a flag upon completion.
-        if (!_skipCommercials) {
+        if (!_skipCommercials && !_exportSubtitles.boolValue) {
             [[NSFileManager defaultManager] removeItemAtPath:_decryptBufferFilePath error:nil];
             _decryptBufferFilePath = nil;
         }
