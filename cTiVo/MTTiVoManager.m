@@ -495,8 +495,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	DDLogVerbose(@"setting tivoManager notifications");
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
     
-    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationShowDownloadDidFinish object:nil];
-    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationShowDownloadWasCanceled object:nil];
+    [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadDidFinish object:nil];
+    [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadWasCanceled object:nil];
 //    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
 //    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
 //    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialWasCanceled object:nil];
@@ -1079,15 +1079,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 
--(void)encodeFinished
+-(void)encodeFinished:(NSNotification *)notification
 {
 	numEncoders--;
+    DDLogMajor(@"Num encoders after decrement from notification %@ is %d ",notification.name,numEncoders);
 	if ([_quitWhenCurrentDownloadsComplete boolValue] && ![self tiVosProcessing]) {
 		//Quit here
 		[NSApp terminate:nil];
 	}
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-    DDLogMajor(@"num decoders after decrement is %d",numEncoders);
 }
 
 -(BOOL)tiVosProcessing

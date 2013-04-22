@@ -551,7 +551,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                 if(s.show.tiVo.isReachable) {  //isn't this self.isReachable?
 //                    if (s.shouldSimulEncode) {
                         tiVoManager.numEncoders++;
-                        DDLogMajor(@"Incrementing num decoders value in TiVo %@ for show %@ after is %d",self.tiVo.name,s.show.showTitle, tiVoManager.numEncoders);
+                        DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,s.show.showTitle, tiVoManager.numEncoders);
 //                    }
 					[s download];
                     //                } else {    //We'll try again in kMTRetryNetworkInterval seconds at a minimum;

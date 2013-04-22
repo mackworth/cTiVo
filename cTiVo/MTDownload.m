@@ -788,7 +788,7 @@ __DDLOGHERE__
     };
     
     encodeTask.cleanupHandler = ^(){
-        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] && !(_downloadStatus.intValue == kMTStatusDone)) {
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] && self.isCanceled) {
             if ([[NSFileManager defaultManager] fileExistsAtPath:_encodeFilePath]) {
                 [[NSFileManager defaultManager] removeItemAtPath:_encodeFilePath error:nil];
             }
@@ -852,7 +852,7 @@ __DDLOGHERE__
     };
     
     captionTask.cleanupHandler = ^(){
-        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] && self.isCanceled) {
             if ([[NSFileManager defaultManager] fileExistsAtPath:captionFilePath]) {
                 [[NSFileManager defaultManager] removeItemAtPath:captionFilePath error:nil];
             }
@@ -1070,10 +1070,10 @@ __DDLOGHERE__
 	downloadingURL = YES;
     dataDownloaded = 0.0;
     _processProgress = 0.0;
-	DDLogVerbose(@"launching URL for download %@", _show.downloadURL);
 	previousProcessProgress = 0.0;
     
 	[self.activeTaskChain run];
+	DDLogMajor(@"Starting URL %@ for show %@", _show.downloadURL,_show.showTitle);
 	[activeURLConnection start];
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
 }
@@ -1167,13 +1167,13 @@ __DDLOGHERE__
 
 -(void)cancel
 {
+    _isCanceled = YES;
     DDLogMajor(@"Canceling of         %@", self.show.showTitle);
 //    NSFileManager *fm = [NSFileManager defaultManager];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if(self.activeTaskChain.isRunning) {
         [self.activeTaskChain cancel];
     }
-    _isCanceled = YES;
 //    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:bufferFileReadHandle];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadWasCanceled object:nil];
@@ -1589,14 +1589,14 @@ __DDLOGHERE__
         DDLogDetail(@"finished loading TiVo file");
         [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
     }
-	downloadingURL = NO;
-	activeURLConnection = nil;
     //Make sure to flush the last of the buffer file into the pipe and close it.
 	if (!writingData) {
         DDLogVerbose (@"writing last data for %@",self);
 		writingData = YES;
 		[self performSelectorInBackground:@selector(writeData) withObject:nil];
 	}
+	downloadingURL = NO;
+	activeURLConnection = nil; //NOTE this MUST occur after the last call to writeData so that writeData doesn't exits before comletion of the downloaded buffer.
 	
 	if (downloadedFileSize < kMTMinTiVoFileSize) { //Not a good download - reschedule
         NSString *dataReceived = nil;
