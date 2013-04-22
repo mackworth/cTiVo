@@ -43,8 +43,7 @@
 
 @synthesize encodeFilePath   = _encodeFilePath,
 downloadFilePath = _downloadFilePath,
-bufferFilePath   = _bufferFilePath,
-isCanceled;
+bufferFilePath   = _bufferFilePath;
 
 __DDLOGHERE__
 
@@ -76,7 +75,7 @@ __DDLOGHERE__
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
-		DDLogVerbose(@"Changing DL status of %@ to %@", object, [(MTDownload *)object downloadStatus]);
+		DDLogVerbose(@"Changing DL status of %@ to %@ (%@)", object, [(MTDownload *)object showStatus], [(MTDownload *)object downloadStatus]);
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadStatusChanged object:nil];
     }
 }
@@ -770,7 +769,8 @@ __DDLOGHERE__
 	NSArray * encoderArgs = nil;
     
     encodeTask.completionHandler = ^(){
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
+        [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
         self.processProgress = 1.0;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
@@ -786,6 +786,15 @@ __DDLOGHERE__
         }
         
     };
+    
+    encodeTask.cleanupHandler = ^(){
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] && !(_downloadStatus.intValue == kMTStatusDone)) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:_encodeFilePath]) {
+                [[NSFileManager defaultManager] removeItemAtPath:_encodeFilePath error:nil];
+            }
+        }
+    };
+    
     encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:_encodeFilePath];
     
     if (!self.shouldSimulEncode)  {
@@ -838,17 +847,17 @@ __DDLOGHERE__
     captionTask.requiresOutputPipe = NO;
     
     captionTask.completionHandler = ^(){
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
         setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
     };
     
-//    captionTask.cleanupHandler = ^(){
-//        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-//            if ([[NSFileManager defaultManager] fileExistsAtPath:captionOutputFile]) {
-//                [[NSFileManager defaultManager] removeItemAtPath:captionOutputFile error:nil];
-//            }
-//        }
-//    };
+    captionTask.cleanupHandler = ^(){
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:captionFilePath]) {
+                [[NSFileManager defaultManager] removeItemAtPath:captionFilePath error:nil];
+            }
+        }
+    };
     
     NSMutableArray * captionArgs = [NSMutableArray array];
     
@@ -904,7 +913,7 @@ __DDLOGHERE__
     };
     
     commercialTask.completionHandler = ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialDidFinish object:nil];
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialDidFinish object:nil];
         DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
 //		NSString * encodeDirectory = [_encodeFilePath stringByDeletingLastPathComponent];
 //#if comSkip92
@@ -1002,9 +1011,10 @@ __DDLOGHERE__
 -(void)download
 {
 	DDLogDetail(@"Starting download for %@",self);
-	isCanceled = NO;
+	_isCanceled = NO;
     //Before starting make sure the encoder is OK.
 	if (![self encoderPath]) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:nil];  //Decrement num encoders right away
 		return;
 	}
 	DDLogVerbose(@"encoder is %@",[self encoderPath]);
@@ -1020,6 +1030,7 @@ __DDLOGHERE__
     //It shoul not be part of the processing chain.
     
     self.activeTaskChain = [MTTaskChain new];
+    self.activeTaskChain.download = self;
     NSPipe *taskInputPipe = [NSPipe pipe];
 	self.activeTaskChain.dataSource = taskInputPipe;
     taskChainInputHandle = [taskInputPipe fileHandleForWriting];
@@ -1145,6 +1156,7 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:_show];
 	
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:nil];  //Free up an encoder
     _processProgress = 1.0;
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 	[tiVoManager  notifyWithTitle:@"TiVo show transferred." subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
@@ -1157,16 +1169,18 @@ __DDLOGHERE__
 {
     DDLogMajor(@"Canceling of         %@", self.show.showTitle);
 //    NSFileManager *fm = [NSFileManager defaultManager];
-    isCanceled = YES;
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:bufferFileReadHandle];
+    if(self.activeTaskChain.isRunning) {
+        [self.activeTaskChain cancel];
+    }
+    _isCanceled = YES;
+//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:bufferFileReadHandle];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadWasCanceled object:nil];
     if (activeURLConnection) {
         [activeURLConnection cancel];
         activeURLConnection = nil;
 	}
-    if(self.activeTaskChain.isRunning) {
-        [self.activeTaskChain cancel];
-    }
     _decryptTask = _captionTask = _commercialTask = _encodeTask = _apmTask = nil;
     
 	NSDate *now = [NSDate date];
@@ -1174,17 +1188,18 @@ __DDLOGHERE__
         //Block until latest write data is complete - should stop quickly because isCanceled is set
 		writingData = NO;
     } //Wait for pipe out to complete
+    DDLogMajor(@"Waiting %lf seconds for write data to complete during cancel", (-1.0 * [now timeIntervalSinceNow]) );
     
     [self cleanupFiles]; //Everything but the final file
 //    if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && self.isDownloading)) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
 //    }
-    if ([_downloadStatus intValue] == kMTStatusCaptioning) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionWasCanceled object:self];
-    }
-    if ([_downloadStatus intValue] == kMTStatusCommercialing) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
-    }
+//    if ([_downloadStatus intValue] == kMTStatusCaptioning) {
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionWasCanceled object:self];
+//    }
+//    if ([_downloadStatus intValue] == kMTStatusCommercialing) {
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
+//    }
     [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
     if (_processProgress != 0.0 ) {
 		_processProgress = 0.0;
@@ -1395,7 +1410,7 @@ __DDLOGHERE__
 
 -(void)rescheduleOnMain
 {
-	isCanceled = YES;
+	_isCanceled = YES;
 	[self performSelectorOnMainThread:@selector(rescheduleShowWithDecrementRetries:) withObject:@YES waitUntilDone:NO];
 }
 
@@ -1406,7 +1421,7 @@ __DDLOGHERE__
 	unsigned long dataRead;
 	@autoreleasepool {
 		NSData *data = nil;
-		if (!isCanceled) {
+		if (!_isCanceled) {
 			@try {
                 // writeData supports getting its data from either an NSData buffer (urlBuffer) or a file on disk (_bufferFilePath).  This allows cTiVo to 
                 // initially try to keep the dataflow off the disk, except for final products, where possible.  But, the ability to do this depends on the 
@@ -1434,7 +1449,7 @@ __DDLOGHERE__
 			@finally {
 			}
 		}
-		if (!isCanceled){
+		if (!_isCanceled){
 			@try {
                 if (data.length) {
                     [taskChainInputHandle writeData:data];
@@ -1449,7 +1464,7 @@ __DDLOGHERE__
 		}
 		dataRead = data.length;
         totalDataRead += dataRead;
-		while (dataRead == chunkSize && !isCanceled) {
+		while (dataRead == chunkSize && !_isCanceled) {
 			@autoreleasepool {
 				@try {
                     if (bufferFileReadHandle == urlBuffer) {
@@ -1471,7 +1486,7 @@ __DDLOGHERE__
 				}
 				@finally {
 				}
-				if (!isCanceled) {
+				if (!_isCanceled) {
 					@try {
                         if (data.length) {
                             [taskChainInputHandle writeData:data];
@@ -1484,7 +1499,7 @@ __DDLOGHERE__
 					@finally {
 					}
 				}
-				if (isCanceled) break;
+				if (_isCanceled) break;
 				dataRead = data.length;
                 totalDataRead += dataRead;
 				//		dataDownloaded += data.length;
@@ -1493,7 +1508,7 @@ __DDLOGHERE__
 			}
 		}
 	}
-	if (!activeURLConnection || isCanceled) {
+	if (!activeURLConnection || _isCanceled) {
 		DDLogDetail(@"Closing taskChainHandle for show %@",self.show.showTitle);
 		[taskChainInputHandle closeFile];
 		DDLogDetail(@"closed filehandle");
@@ -1502,9 +1517,9 @@ __DDLOGHERE__
             [bufferFileReadHandle closeFile];
         }
 		bufferFileReadHandle = nil;
-        if (self.shouldSimulEncode && !isCanceled) {
-            [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
-        }
+//        if (self.shouldSimulEncode && !isCanceled) {
+//            [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
+//        }
  	}
 	writingData = NO;
 }
@@ -1584,7 +1599,12 @@ __DDLOGHERE__
 	}
 	
 	if (downloadedFileSize < kMTMinTiVoFileSize) { //Not a good download - reschedule
-		NSString *dataReceived = [NSString stringWithContentsOfFile:_bufferFilePath encoding:NSUTF8StringEncoding error:nil];
+        NSString *dataReceived = nil;
+        if (urlBuffer) {
+            dataReceived = [[NSString alloc] initWithData:urlBuffer encoding:NSUTF8StringEncoding];
+        } else {
+            dataReceived = [NSString stringWithContentsOfFile:_bufferFilePath encoding:NSUTF8StringEncoding error:nil];
+        }
 		if (dataReceived) {
 			NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
 			if (noRecording.location != NSNotFound) { //This is a missing recording

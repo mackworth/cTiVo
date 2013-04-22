@@ -144,14 +144,14 @@ __DDLOGHERE__
 
 -(void)cancel
 {
-	for (NSArray *tasks in _taskArray) {
-		for (MTTask *task in tasks) {
-			if (task.task.isRunning) {
-				[task cancel];
-			}
-            [task cleanUp];
-		}
-	}
+    for (int i=(int)_taskArray.count-1; i >=0 ; i--) {
+        for (MTTask *task in _taskArray[i]) {
+            DDLogMajor(@"Canceling task %@ for show %@",task.taskName,task.download.show.showTitle);
+            if (task.isRunning) {
+                [task cancel];
+            }
+        }
+    }
     _isRunning = NO;
 }
 
@@ -164,20 +164,13 @@ __DDLOGHERE__
         totalDataRead  = 0;
 		for (int i=(int)_taskArray.count-1; i >=0 ; i--) {
 			for (MTTask *task in _taskArray[i]) {
-                DDLogMajor(@"Starting task %@",task.taskName);
-                if (task.startupHandler) {
-                    task.startupHandler();
-                }
-				[task launch];
-                [task trackProcess];
-				
+                DDLogMajor(@"Starting task %@ for show %@",task.taskName,task.download.show.showTitle);
+				[task launch];				
 			}
 		}
 		for (NSFileHandle *fileHandle in branchFileHandles) {
             DDLogDetail(@"Setting up reading of filehandle %p",fileHandle);
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tee:) name:NSFileHandleReadCompletionNotification object:fileHandle];
-//			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startReading:) name:NSFileHandleDataAvailableNotification object:fileHandle];
-//			[fileHandle waitForDataInBackgroundAndNotify];
             [fileHandle readInBackgroundAndNotify];
 		}
 

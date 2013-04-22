@@ -34,7 +34,7 @@
     double percentComplete;
     MTDownloadTableCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
 	NSArray *factoryFormatList;
-    int numEncoders, numCommercials, numCaptions;//Want to limit launches to two encoders.
+    int numEncoders;// numCommercials, numCaptions;//Want to limit launches to two encoders.
 	
     BOOL volatile updatingVideoList;
 	
@@ -51,7 +51,7 @@
 
 @implementation MTTiVoManager
 
-@synthesize subscribedShows = _subscribedShows, numEncoders, numCommercials, numCaptions, tiVoList = _tiVoList;
+@synthesize subscribedShows = _subscribedShows, numEncoders, tiVoList = _tiVoList;
 
 __DDLOGHERE__
 
@@ -198,8 +198,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		encodeTableCell = nil;
 		
 		numEncoders = 0;
-		numCommercials = 0;
-		numCaptions = 0;
+//		numCommercials = 0;
+//		numCaptions = 0;
 		_signalError = 0;
 		queue.maxConcurrentOperationCount = 1;
 		
@@ -495,14 +495,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	DDLogVerbose(@"setting tivoManager notifications");
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
     
-    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
-    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
-    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
-    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialWasCanceled object:nil];
-    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionDidFinish object:nil];
-    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
+    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationShowDownloadDidFinish object:nil];
+    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationShowDownloadWasCanceled object:nil];
+//    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
+//    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
+//    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialWasCanceled object:nil];
+//    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionDidFinish object:nil];
+//    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
-    [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
+    [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationShowDownloadDidFinish object:nil];
     
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTQueuePaused options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
@@ -1101,19 +1102,19 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	return returnValue;
 }
 
--(void)commercialFinished
-{
-	numCommercials--;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-    DDLogMajor(@"num commercials after decrement is %d",numCommercials);
-}
-
--(void)captionFinished
-{
-	numCaptions--;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-    DDLogMajor(@"num captions after decrement is %d",numCaptions);
-}
+//-(void)commercialFinished
+//{
+//	numCommercials--;
+//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+//    DDLogMajor(@"num commercials after decrement is %d",numCommercials);
+//}
+//
+//-(void)captionFinished
+//{
+//	numCaptions--;
+//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+//    DDLogMajor(@"num captions after decrement is %d",numCaptions);
+//}
 
 -(void)writeDownloadQueueToUserDefaults {
 	NSMutableArray * downloadArray = [NSMutableArray arrayWithCapacity:_downloadQueue.count];

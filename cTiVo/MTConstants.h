@@ -14,13 +14,15 @@
 //Download Progress Notifications
 #define kMTNotificationDownloadDidFinish @"MTNotificationDownloadDidFinish"
 #define kMTNotificationDecryptDidFinish @"MTNotificationDecryptDidFinish"
-#define kMTNotificationEncodeDidFinish @"MTNotificationEncodeDidFinish"
-#define kMTNotificationEncodeWasCanceled @"MTNotificationEncodeWasCanceled"
-#define kMTNotificationCommercialDidFinish @"MTNotificationCommercialDidFinish"
-#define kMTNotificationCommercialWasCanceled @"MTNotificationCommercialWasCanceled"
-#define kMTNotificationCaptionDidFinish @"MTNotificationCaptionDidFinish"
-#define kMTNotificationCaptionWasCanceled @"MTNotificationCaptionWasCanceled"
+//#define kMTNotificationEncodeDidFinish @"MTNotificationEncodeDidFinish"
+//#define kMTNotificationEncodeWasCanceled @"MTNotificationEncodeWasCanceled"
+//#define kMTNotificationCommercialDidFinish @"MTNotificationCommercialDidFinish"
+//#define kMTNotificationCommercialWasCanceled @"MTNotificationCommercialWasCanceled"
+//#define kMTNotificationCaptionDidFinish @"MTNotificationCaptionDidFinish"
+//#define kMTNotificationCaptionWasCanceled @"MTNotificationCaptionWasCanceled"
 #define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"
+#define kMTNotificationShowDownloadDidFinish @"MTNotificationShowDownloadDidFinish"
+#define kMTNotificationShowDownloadWasCanceled @"MTNotificationShowDownloadWasCanceled"
 
 //UI Change Notifications
 

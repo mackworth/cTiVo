@@ -36,7 +36,7 @@
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic, strong) MTFormat *selectedFormat;
-@property (nonatomic) int numEncoders, totalShows, numCommercials, numCaptions;//Want to limit launches to two encoders.
+@property (nonatomic) int numEncoders, totalShows; // numCommercials, numCaptions;//Want to limit launches to two encoders.
 @property (nonatomic, strong) NSWindow *mainWindow;
 @property (nonatomic, strong) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
 @property (nonatomic, strong) NSDictionary *showsOnDisk;

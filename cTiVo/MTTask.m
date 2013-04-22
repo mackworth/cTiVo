@@ -243,7 +243,11 @@ __DDLOGHERE__
 
 -(void)launch
 {
+    if (_startupHandler) {
+        _startupHandler();
+    }
     [_task launch];
+    [self trackProcess];
 }
 
 -(void)terminate
