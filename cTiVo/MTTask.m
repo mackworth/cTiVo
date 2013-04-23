@@ -128,14 +128,13 @@ __DDLOGHERE__
 {
 	DDLogVerbose(@"Tracking %@",_taskName);
 	if (![self.task isRunning]) {
-        DDLogMajor(@"Task %@ Stopped",_taskName);
-		if (tiVoManager.signalError && !_download.isCanceled) {
-            DDLogMajor(@"Got signal in task %@",_taskName);
-			tiVoManager.signalError = 0; //Make sure we only do this once.
-            _download.isCanceled = YES;
-			[_download rescheduleShowWithDecrementRetries:@YES];
-			return;
-		}
+        DDLogMajor(@"Task %@ Stopped for show %@",_taskName,_download.show.showTitle);
+//		if (tiVoManager.signalError && !_download.isCanceled) {
+//            DDLogMajor(@"Got signal %d in task %@", tiVoManager.signalError,_taskName);
+//			tiVoManager.signalError = 0; //Make sure we only do this once.
+//			[_download rescheduleShowWithDecrementRetries:@YES];
+//			return;
+//		}
  		NSLog(@"Finished %@ in %@",_taskName,_download.show.showTitle);
 //		_download.processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];

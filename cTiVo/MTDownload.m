@@ -1167,20 +1167,25 @@ __DDLOGHERE__
 
 -(void)cancel
 {
+    if (_isCanceled) {
+        return;
+    }
     _isCanceled = YES;
     DDLogMajor(@"Canceling of         %@", self.show.showTitle);
 //    NSFileManager *fm = [NSFileManager defaultManager];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
-    if(self.activeTaskChain.isRunning) {
-        [self.activeTaskChain cancel];
-    }
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:bufferFileReadHandle];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadWasCanceled object:nil];
     if (activeURLConnection) {
         [activeURLConnection cancel];
         activeURLConnection = nil;
 	}
+    if(self.activeTaskChain.isRunning) {
+        [self.activeTaskChain cancel];
+        self.activeTaskChain = nil;
+    }
+//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:bufferFileReadHandle];
+    if (!self.isNew && !self.isDone ) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadWasCanceled object:nil];
+    }
     _decryptTask = _captionTask = _commercialTask = _encodeTask = _apmTask = nil;
     
 	NSDate *now = [NSDate date];
@@ -1410,7 +1415,7 @@ __DDLOGHERE__
 
 -(void)rescheduleOnMain
 {
-	_isCanceled = YES;
+//	_isCanceled = YES;
 	[self performSelectorOnMainThread:@selector(rescheduleShowWithDecrementRetries:) withObject:@YES waitUntilDone:NO];
 }
 
@@ -1443,8 +1448,11 @@ __DDLOGHERE__
                 }
 			}
 			@catch (NSException *exception) {
-				[self rescheduleOnMain];
-				DDLogDetail(@"buffer read fail:%@; rescheduling", exception.reason);
+                if (!_isCanceled){
+                    [self rescheduleOnMain];
+                    DDLogDetail(@"Rescheduling");
+                };
+				DDLogDetail(@"buffer read fail:%@; %@", exception.reason, _show.showTitle);
 			}
 			@finally {
 			}
@@ -1456,8 +1464,11 @@ __DDLOGHERE__
                 }
 			}
 			@catch (NSException *exception) {
-				[self rescheduleOnMain];
-				DDLogDetail(@"download write fail: %@; rescheduling", exception.reason);
+                if (!_isCanceled){
+                    [self rescheduleOnMain];
+                    DDLogDetail(@"Rescheduling");
+                };
+				DDLogDetail(@"download write fail: %@; %@", exception.reason, _show.showTitle);
 			}
 			@finally {
 			}
@@ -1481,8 +1492,11 @@ __DDLOGHERE__
                     }
 				}
 				@catch (NSException *exception) {
-					[self rescheduleOnMain];
-					DDLogDetail(@"buffer read fail2: %@; rescheduling", exception.reason);
+                    if (!_isCanceled){
+                        [self rescheduleOnMain];
+                        DDLogDetail(@"Rescheduling");
+                    };
+					DDLogDetail(@"buffer read fail2: %@; %@", exception.reason,_show.showTitle);
 				}
 				@finally {
 				}
@@ -1493,8 +1507,11 @@ __DDLOGHERE__
                         }
 					}
 					@catch (NSException *exception) {
-						[self rescheduleOnMain];
-						DDLogDetail(@"download write fail2: %@; rescheduling", exception.reason);
+						if (!_isCanceled){
+                            [self rescheduleOnMain];
+                            DDLogDetail(@"Rescheduling");
+                        };
+						DDLogDetail(@"download write fail2: %@; %@", exception.reason, _show.showTitle);
 					}
 					@finally {
 					}
