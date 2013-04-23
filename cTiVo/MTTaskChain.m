@@ -147,9 +147,7 @@ __DDLOGHERE__
     for (int i=(int)_taskArray.count-1; i >=0 ; i--) {
         for (MTTask *task in _taskArray[i]) {
             DDLogMajor(@"Canceling task %@ for show %@",task.taskName,task.download.show.showTitle);
-            if (task.isRunning) {
-                [task cancel];
-            }
+			[task cancel];
         }
     }
     _isRunning = NO;

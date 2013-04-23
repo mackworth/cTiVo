@@ -72,9 +72,7 @@ __DDLOGHERE__
 -(void)cancel
 {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
-    if ([_task isRunning]) {
-        [_task terminate];
-    }
+	[_task terminate];
     [self cleanUp];
 }
 
@@ -130,16 +128,12 @@ __DDLOGHERE__
 	DDLogVerbose(@"Tracking %@",_taskName);
 	if (![self.task isRunning]) {
         DDLogMajor(@"Task %@ Stopped for show %@",_taskName,_download.show.showTitle);
-//		if (tiVoManager.signalError && !_download.isCanceled) {
-//            DDLogMajor(@"Got signal %d in task %@", tiVoManager.signalError,_taskName);
-//			tiVoManager.signalError = 0; //Make sure we only do this once.
-//			[_download rescheduleShowWithDecrementRetries:@YES];
-//			return;
-//		}
 		DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
 //		_download.processProgress = 1.0;
 //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 		if (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal || _task.terminationStatus != _successfulExitCode) {
+			[self cleanUp];
+			_nextTaskChain = nil;
 			if (!_download.isCanceled) [_download rescheduleShowWithDecrementRetries:@YES];
 		} else {
 			if (_completionHandler) {
