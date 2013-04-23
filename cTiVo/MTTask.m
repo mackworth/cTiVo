@@ -127,7 +127,7 @@ __DDLOGHERE__
 {
 	DDLogVerbose(@"Tracking %@",_taskName);
 	if (![self.task isRunning]) {
-        DDLogMajor(@"Task %@ Stopped for show %@",_taskName,_download.show.showTitle);
+//        DDLogMajor(@"Task %@ Stopped for show %@",_taskName,_download.show.showTitle);
 		DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
 //		_download.processProgress = 1.0;
 //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];

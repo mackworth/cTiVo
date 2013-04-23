@@ -1205,7 +1205,7 @@ __DDLOGHERE__
 //    if ([_downloadStatus intValue] == kMTStatusCommercialing) {
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
 //    }
-    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+//    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
     if (_processProgress != 0.0 ) {
 		_processProgress = 0.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:self];
