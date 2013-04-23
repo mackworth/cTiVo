@@ -41,6 +41,8 @@
 
 @property BOOL requiresInputPipe, requiresOutputPipe;
 
+@property int successfulExitCode;
+
 +(MTTask *)newWithTaskName:(NSString *)name download:(MTDownload *)download;
 +(MTTask *)newWithTaskName:(NSString *)name download:(MTDownload *)download completionHandler:(void(^)(void))completionHandler;
 

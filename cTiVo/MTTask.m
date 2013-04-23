@@ -43,6 +43,7 @@ __DDLOGHERE__
 		_nextTaskChain = nil;
         _requiresInputPipe = YES;
         _requiresOutputPipe = YES;
+		_successfulExitCode = 0;
     }
     return self;
 }
@@ -135,17 +136,21 @@ __DDLOGHERE__
 //			[_download rescheduleShowWithDecrementRetries:@YES];
 //			return;
 //		}
- 		NSLog(@"Finished %@ in %@",_taskName,_download.show.showTitle);
+		DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
 //		_download.processProgress = 1.0;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		if (_completionHandler) {
-			_completionHandler();
+//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+		if (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal || _task.terminationStatus != _successfulExitCode) {
+			if (!_download.isCanceled) [_download rescheduleShowWithDecrementRetries:@YES];
+		} else {
+			if (_completionHandler) {
+				_completionHandler();
+			}
+			[self cleanUp];
+			if (_nextTaskChain) {
+				self.download.activeTaskChain = _nextTaskChain;
+				[_nextTaskChain run];
+			}
 		}
-        [self cleanUp];
-        if (_nextTaskChain) {
-            self.download.activeTaskChain = _nextTaskChain;
-            [_nextTaskChain run];
-        }
 	} else {
 		double newProgressValue = -1;
 		int sizeOfFileSample = 100;

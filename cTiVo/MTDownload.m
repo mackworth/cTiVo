@@ -154,9 +154,9 @@ __DDLOGHERE__
 
 -(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries
 {
-	DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _show.showTitle, _processProgress, previousCheck );
 	[self saveCurrentLogFiles];
 	[self cancel];
+	DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _show.showTitle, _processProgress, previousCheck );
     if (_downloadStatus.intValue == kMTStatusDone) {
         self.baseFileName = nil;
     }
@@ -1634,7 +1634,7 @@ __DDLOGHERE__
 		DDLogMajor(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
 		[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:kMTTiVoAccessDelay];
 	} else {
-		self.show.fileSize = downloadedFileSize;  //More accurate file size
+//		self.show.fileSize = downloadedFileSize;  //More accurate file size
 		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.show.tiVo];
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:4.0];
 	}
