@@ -219,7 +219,6 @@ __DDLOGHERE__
 	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
 		DDLogDetail(@"Selecting Format");
 		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
-        BOOL canSimulEncode = ![tiVoManager.selectedFormat.mustDownloadFirst boolValue];
         BOOL canSkip = [tiVoManager.selectedFormat.comSkip boolValue];
 		BOOL canAPM = tiVoManager.selectedFormat.canAtomicParsley ;
 		NSArray *menuItems = [optionsMenu itemArray];

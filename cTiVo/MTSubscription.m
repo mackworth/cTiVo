@@ -50,7 +50,6 @@ __DDLOGHERE__
 
 -(void) setEncodeFormat:(MTFormat *) encodeFormat {
     if (_encodeFormat != encodeFormat ) {
-        BOOL simulWasDisabled = ![self canSimulEncode];
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];
         _encodeFormat = encodeFormat;
