@@ -141,6 +141,7 @@ __DDLOGHERE__
 										  @kMTMaxDownloadRetries, kMTNumDownloadRetries,
 										  @NO, kMTiTunesDelete,
 										  @NO, kMTHasMultipleTivos,
+                                          @YES, kMTUseMemoryBufferForDownload,
 										  nil];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
 	

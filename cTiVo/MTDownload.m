@@ -575,30 +575,35 @@ __DDLOGHERE__
     return ddir;
 }
 
--(void)configureFiles  //Configure file paths and pointers that may be shared between multiple tasks
+-(void)configureFiles
 {
-	DDLogDetail(@"configuring files for %@",self);
+    DDLogDetail(@"configuring files for %@",self);
 	//Release all previous attached pointers
-	urlBuffer = [NSMutableData new];
-    urlReadPointer = 0;
     [self deallocDownloadHandling];
 	self.baseFileName = [self makeBaseFileNameForDirectory:self.downloadDir];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
+        _bufferFilePath = [NSString stringWithFormat:@"%@buffer%@.bin",kMTTmpDir,self.baseFileName];
+       urlBuffer = [NSMutableData new];
+        urlReadPointer = 0;
+        bufferFileReadHandle = urlBuffer;
+    } else {
+        _bufferFilePath = [NSString stringWithFormat:@"%@buffer%@.tivo",kMTTmpDir,self.baseFileName];
+        [[NSFileManager defaultManager] createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
+        bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
+        bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
+    }
 	_encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.downloadDir,self.baseFileName,_encodeFormat.filenameExtension];
 	DDLogVerbose(@"setting encodepath: %@", _encodeFilePath);
-    _bufferFilePath = [NSString stringWithFormat:@"%@buffer%@.bin",kMTTmpDir,self.baseFileName];
     _decryptBufferFilePath = [NSString stringWithFormat:@"%@buffer%@.mpg",kMTTmpDir,self.baseFileName];
-//    [[NSFileManager defaultManager] createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
     [[NSFileManager defaultManager] createFileAtPath:_decryptBufferFilePath contents:[NSData data] attributes:nil];
-    bufferFileReadHandle = urlBuffer;
-//    bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
-//	bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
     captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDir ,self.baseFileName];
-
+    
 #if comSkip92
     commercialFilePath = [NSString stringWithFormat:@"%@buffer%@.edl" ,kMTTmpDir, self.baseFileName];  //0.92 version
 #else
     commercialFilePath = [[NSString stringWithFormat:@"%@/%@.edl",downloadDir ,self.baseFileName] retain];  //0.7 version
 #endif
+
 }
 
 -(NSString *) encoderPath {
@@ -1531,6 +1536,9 @@ __DDLOGHERE__
 		DDLogDetail(@"closed filehandle");
 		taskChainInputHandle = nil;
         if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
+            if ([[_bufferFilePath substringFromIndex:_bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame && !activeURLConnection) { //We finished a complete download so mark it so
+                setxattr([_bufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+            }
             [bufferFileReadHandle closeFile];
         }
 		bufferFileReadHandle = nil;
@@ -1556,7 +1564,7 @@ __DDLOGHERE__
 		@synchronized (urlBuffer){
 			[urlBuffer appendData:data];
 			if (urlBuffer.length > kMTMaxBuffSize) {
-				DDLogMajor(@"URLBuffer length exceeded %d, switching to file based buffering",kMTMaxBuffSize);
+				DDLogReport(@"URLBuffer length exceeded %d, switching to file based buffering",kMTMaxBuffSize);
 				[[NSFileManager defaultManager] createFileAtPath:_bufferFilePath contents:[urlBuffer subdataWithRange:NSMakeRange(urlReadPointer, urlBuffer.length - urlReadPointer)] attributes:nil];
 				bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
 				bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
