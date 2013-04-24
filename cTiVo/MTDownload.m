@@ -687,7 +687,7 @@ __DDLOGHERE__
         DDLogMajor(@"catTask must be called with input file either nil, NSString or NSFileHandle");
         return nil;
     }
-    MTTask *catTask = [MTTask newWithTaskName:@"cat" download:self];
+    MTTask *catTask = [MTTask taskWithName:@"cat" download:self];
     [catTask setLaunchPath:@"/bin/cat"];
     if (outputFile && [outputFile isKindOfClass:[NSString class]]) {
         [catTask setStandardOutput:[NSFileHandle fileHandleForWritingAtPath:outputFile]];
@@ -711,7 +711,7 @@ __DDLOGHERE__
     if (_decryptTask) {
         return _decryptTask;
     }
-    MTTask *decryptTask = [MTTask newWithTaskName:@"decrypt" download:self];
+    MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
     [decryptTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
 
     decryptTask.completionHandler = ^(){
@@ -763,7 +763,7 @@ __DDLOGHERE__
     if (_encodeTask) {
         return _encodeTask;
     }
-    MTTask *encodeTask = [MTTask newWithTaskName:@"encode" download:self];
+    MTTask *encodeTask = [MTTask taskWithName:@"encode" download:self];
     [encodeTask setLaunchPath:[self encoderPath]];
     encodeTask.requiresOutputPipe = NO;
 	NSArray * encoderArgs = nil;
@@ -842,7 +842,7 @@ __DDLOGHERE__
     if (_captionTask) {
         return _captionTask;
     }
-    MTTask *captionTask = [MTTask newWithTaskName:@"caption" download:self completionHandler:nil];
+    MTTask *captionTask = [MTTask taskWithName:@"caption" download:self completionHandler:nil];
     [captionTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"ccextractor" ofType:@""]];
     captionTask.requiresOutputPipe = NO;
     
@@ -885,7 +885,7 @@ __DDLOGHERE__
     if (_commercialTask) {
         return _commercialTask;
     }
-    MTTask *commercialTask = [MTTask newWithTaskName:@"commercial" download:self completionHandler:nil];
+    MTTask *commercialTask = [MTTask taskWithName:@"commercial" download:self completionHandler:nil];
   	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]];
     commercialTask.requiresOutputPipe = NO;
     commercialTask.requiresInputPipe = NO;
@@ -980,7 +980,7 @@ __DDLOGHERE__
     if (_apmTask) {
         return _apmTask;
     }
-	MTTask *apmTask = [MTTask newWithTaskName:@"apm" download:self];
+	MTTask *apmTask = [MTTask taskWithName:@"apm" download:self];
     
     apmTask.startupHandler = ^(){
         [self setValue:[NSNumber numberWithInt:kMTStatusMetaDataProcessing] forKeyPath:@"downloadStatus"];

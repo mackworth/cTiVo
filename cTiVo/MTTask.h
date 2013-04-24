@@ -41,10 +41,10 @@
 
 @property BOOL requiresInputPipe, requiresOutputPipe;
 
-@property int successfulExitCode;
+@property int successfulExitCode, pid;
 
-+(MTTask *)newWithTaskName:(NSString *)name download:(MTDownload *)download;
-+(MTTask *)newWithTaskName:(NSString *)name download:(MTDownload *)download completionHandler:(void(^)(void))completionHandler;
++(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download;
++(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download completionHandler:(void(^)(void))completionHandler;
 
 -(void) trackProcess;
 

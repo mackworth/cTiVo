@@ -15,16 +15,17 @@
 
 __DDLOGHERE__
 
-+(MTTask *)newWithTaskName:(NSString *)name download:(MTDownload *)download completionHandler:(void(^)(void))completionHandler
++(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download completionHandler:(void(^)(void))completionHandler
 {
-	MTTask *mTTask = [MTTask newWithTaskName:name download:download];
+	MTTask *mTTask = [MTTask taskWithName:name download:download];
 	mTTask.completionHandler = completionHandler;
 	return mTTask;
 }
-+(MTTask *)newWithTaskName:(NSString *)name download:(MTDownload *)download
++(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download
 {
+    DDLogVerbose(@"Creating Task %@",name);
     MTTask *mTTask = [MTTask new];
-    mTTask.task  = [NSTask new];
+//    mTTask.task  = [NSTask new];
     mTTask.download = download;
     mTTask.taskName = name;
     return mTTask;
@@ -72,6 +73,7 @@ __DDLOGHERE__
 -(void)cancel
 {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
+    DDLogVerbose(@"Terminating task %@",_taskName);
 	[_task terminate];
     [self cleanUp];
 }
@@ -128,7 +130,7 @@ __DDLOGHERE__
 	DDLogVerbose(@"Tracking %@",_taskName);
 	if (![self.task isRunning]) {
 //        DDLogMajor(@"Task %@ Stopped for show %@",_taskName,_download.show.showTitle);
-		DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
+		NSLog(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
 //		_download.processProgress = 1.0;
 //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 		if (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal || _task.terminationStatus != _successfulExitCode) {
@@ -245,6 +247,7 @@ __DDLOGHERE__
         _startupHandler();
     }
     [_task launch];
+    _pid = [_task processIdentifier];
     [self trackProcess];
 }
 
@@ -275,6 +278,11 @@ __DDLOGHERE__
 
 -(void)dealloc
 {
+    if (_pid && !kill(_pid, 0)) {
+        DDLogVerbose(@"Killing process %@",_taskName);
+        kill(_pid , SIGKILL);
+    }
+    _task = nil;
 	[self cleanUp];
 }
 
