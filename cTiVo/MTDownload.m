@@ -537,10 +537,33 @@ __DDLOGHERE__
 
 -(NSString *)createUniqueBaseFileName:(NSString *)baseName inDownloadDir:(NSString *)downloadDir
 {
+	NSFileManager *fm = [NSFileManager defaultManager];
     NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,_encodeFormat.filenameExtension];
 	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@%@.lck" ,kMTTmpDir,baseName];
-	NSFileManager *fm = [NSFileManager defaultManager];
-	if ([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:trialLockFilePath]) {
+	_tivoFilePath = [NSString stringWithFormat:@"%@buffer%@.tivo",kMTTmpDir,baseName];
+	_mpgFilePath = [NSString stringWithFormat:@"%@buffer%@.mpg",kMTTmpDir,baseName];
+    BOOL tivoFileExists = NO;
+    if ([fm fileExistsAtPath:_tivoFilePath]) {
+        NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
+		ssize_t len = getxattr([_tivoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
+        if (len >=0) {
+            DDLogReport(@"Found Complete TiVo File @ %@",_tivoFilePath);
+            tivoFileExists = YES;
+            _downloadingShowFromTiVoFile = YES;
+        }
+    }
+    BOOL mpgFileExists = NO;
+    if ([fm fileExistsAtPath:_mpgFilePath]) {
+        NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
+		ssize_t len = getxattr([_mpgFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
+        if (len >=0) {
+            DDLogReport(@"Found Complete MPG File @ %@",_mpgFilePath);
+            mpgFileExists = YES;
+            _downloadingShowFromTiVoFile = NO;
+            _downloadingShowFromMPGFile  = YES;
+        }
+    }
+	if (([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:trialLockFilePath]) && !tivoFileExists  && !mpgFileExists) { //If .tivo file exits assume we will use this and not download.
 		NSString * nextBase;
 		NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
 		NSTextCheckingResult *result = [ending firstMatchInString:baseName options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, (baseName).length)];
@@ -584,22 +607,27 @@ __DDLOGHERE__
     DDLogDetail(@"configuring files for %@",self);
 	//Release all previous attached pointers
     [self deallocDownloadHandling];
+    NSFileManager *fm = [NSFileManager defaultManager];
 	self.baseFileName = [self makeBaseFileNameForDirectory:self.downloadDir];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
-        _bufferFilePath = [NSString stringWithFormat:@"%@buffer%@.bin",kMTTmpDir,self.baseFileName];
-       urlBuffer = [NSMutableData new];
-        urlReadPointer = 0;
-        bufferFileReadHandle = urlBuffer;
-    } else {
-        _bufferFilePath = [NSString stringWithFormat:@"%@buffer%@.tivo",kMTTmpDir,self.baseFileName];
-        [[NSFileManager defaultManager] createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
-        bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
-        bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
+    if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {  //We need to download from the TiVo
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
+            _bufferFilePath = [NSString stringWithFormat:@"%@buffer%@.bin",kMTTmpDir,self.baseFileName];
+           urlBuffer = [NSMutableData new];
+            urlReadPointer = 0;
+            bufferFileReadHandle = urlBuffer;
+        } else {
+            _bufferFilePath = [NSString stringWithFormat:@"%@buffer%@.tivo",kMTTmpDir,self.baseFileName];
+            [fm createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
+            bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
+            bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
+        }
+    }
+    _decryptBufferFilePath = [NSString stringWithFormat:@"%@buffer%@.mpg",kMTTmpDir,self.baseFileName];
+    if (!_downloadingShowFromMPGFile) {
+        [[NSFileManager defaultManager] createFileAtPath:_decryptBufferFilePath contents:[NSData data] attributes:nil];
     }
 	_encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.downloadDir,self.baseFileName,_encodeFormat.filenameExtension];
 	DDLogVerbose(@"setting encodepath: %@", _encodeFilePath);
-    _decryptBufferFilePath = [NSString stringWithFormat:@"%@buffer%@.mpg",kMTTmpDir,self.baseFileName];
-    [[NSFileManager defaultManager] createFileAtPath:_decryptBufferFilePath contents:[NSData data] attributes:nil];
     captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDir ,self.baseFileName];
     
 #if comSkip92
@@ -743,6 +771,17 @@ __DDLOGHERE__
         }
     };
     
+    if (_downloadingShowFromTiVoFile) {
+        [decryptTask setStandardError:decryptTask.logFileWriteHandle];
+        decryptTask.progressCalc = ^(NSString *data){
+            NSArray *lines = [data componentsSeparatedByString:@"\n"];
+            data = [lines objectAtIndex:lines.count-2];
+            lines = [data componentsSeparatedByString:@":"];
+            double position = [[lines objectAtIndex:0] doubleValue];
+            return (position/_show.fileSize);
+        };
+    }
+    
 //    decryptTask.cleanupHandler = ^(){
 //        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
 //            if ([[NSFileManager defaultManager] fileExistsAtPath:_bufferFilePath]) {
@@ -761,6 +800,7 @@ __DDLOGHERE__
     if (_exportSubtitles.boolValue || self.shouldSimulEncode) {  //use stdout to pipe to captions  or simultaneous encoding
         arguments = [NSMutableArray arrayWithObjects:
                      [NSString stringWithFormat:@"-m%@",_show.tiVo.mediaKey],
+                     @"-v",
                      @"--",
                      @"-",
                      nil];
@@ -842,6 +882,11 @@ __DDLOGHERE__
                 DDLogVerbose(@"Encoder progress %lf",[[data substringWithRange:valueRange] doubleValue]/100.0);
                 return  [[data substringWithRange:valueRange] doubleValue]/100.0;
             };
+            encodeTask.startupHandler = ^(){
+                _processProgress = 0.0;
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+                [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+            };
         }
     }
     
@@ -863,6 +908,19 @@ __DDLOGHERE__
     MTTask *captionTask = [MTTask taskWithName:@"caption" download:self completionHandler:nil];
     [captionTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"ccextractor" ofType:@""]];
     captionTask.requiresOutputPipe = NO;
+    
+    if (_downloadingShowFromMPGFile) {
+//        [captionTask setStandardError:captionTask.logFileWriteHandle];
+//        captionTask.trackingRegEx = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
+        if (!_encodeFormat.canSimulEncode) {
+            captionTask.startupHandler = ^(){
+                _processProgress = 0.0;
+                [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+            };
+        }
+    }
+
     
     captionTask.completionHandler = ^(){
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
@@ -1031,6 +1089,8 @@ __DDLOGHERE__
 	DDLogDetail(@"Starting download for %@",self);
 	_isCanceled = NO;
 	_isRescheduled = NO;
+    _downloadingShowFromTiVoFile = NO;
+    _downloadingShowFromMPGFile = NO;
     //Before starting make sure the encoder is OK.
 	if (![self encoderPath]) {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:nil];  //Decrement num encoders right away
@@ -1050,13 +1110,21 @@ __DDLOGHERE__
     
     self.activeTaskChain = [MTTaskChain new];
     self.activeTaskChain.download = self;
-    NSPipe *taskInputPipe = [NSPipe pipe];
-	self.activeTaskChain.dataSource = taskInputPipe;
-    taskChainInputHandle = [taskInputPipe fileHandleForWriting];
+    if (!_downloadingShowFromMPGFile && !_downloadingShowFromTiVoFile) {
+        NSPipe *taskInputPipe = [NSPipe pipe];
+        self.activeTaskChain.dataSource = taskInputPipe;
+        taskChainInputHandle = [taskInputPipe fileHandleForWriting];
+    } else if (_downloadingShowFromTiVoFile) {
+        self.activeTaskChain.dataSource = _tivoFilePath;
+        NSLog(@"Downloading from file tivo file %@",_tivoFilePath);
+    } else if (_downloadingShowFromMPGFile) {
+        NSLog(@"Downloading from file MPG file %@",_mpgFilePath);
+        self.activeTaskChain.dataSource = _mpgFilePath;
+    }
 	
     NSMutableArray *taskArray = [NSMutableArray array];
 	
-	[taskArray addObject:@[self.decryptTask]];
+	if (!_downloadingShowFromMPGFile)[taskArray addObject:@[self.decryptTask]];
 	
 	if (self.captionTask) {
 		if (self.commercialTask) {
@@ -1064,9 +1132,17 @@ __DDLOGHERE__
 			[taskArray addObject:@[self.commercialTask]];
 			[taskArray addObject:@[self.encodeTask]];
 		} else if (_encodeFormat.canSimulEncode) {
+            if(_downloadingShowFromMPGFile)self.activeTaskChain.providesProgress = YES;
 			[taskArray addObject:@[self.encodeTask,self.captionTask]];
 		} else {
-			[taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];
+            if(_downloadingShowFromMPGFile) {
+                self.activeTaskChain.providesProgress = YES;
+                NSString *junkFilePath = [NSString stringWithFormat:@"%@/junk.bin",kMTTmpDir];
+                [[NSFileManager defaultManager] createFileAtPath:junkFilePath contents:[NSData data] attributes:nil];
+                [taskArray addObject:@[self.captionTask,[self catTask:junkFilePath]]];
+            } else {
+                [taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];                
+            }
 			[taskArray addObject:@[self.encodeTask]];
 		}
 	} else {
@@ -1084,16 +1160,18 @@ __DDLOGHERE__
     totalDataRead = 0;
     totalDataDownloaded = 0;
 
-    NSURLRequest *thisRequest = [NSURLRequest requestWithURL:self.show.downloadURL];
-    activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
-	downloadingURL = YES;
+    if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {
+        NSURLRequest *thisRequest = [NSURLRequest requestWithURL:self.show.downloadURL];
+        activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
+        downloadingURL = YES;
+    }
     dataDownloaded = 0.0;
     _processProgress = 0.0;
 	previousProcessProgress = 0.0;
     
 	[self.activeTaskChain run];
 	DDLogMajor(@"Starting URL %@ for show %@", _show.downloadURL,_show.showTitle);
-	[activeURLConnection start];
+	if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile)[activeURLConnection start];
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
 }
 
@@ -1144,6 +1222,7 @@ __DDLOGHERE__
 }
 							   
 -(void) finishUpPostEncodeProcessing {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 	if (_addToiTunesWhenEncoded) {
 		DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
         _processProgress = 1.0;
@@ -1172,7 +1251,7 @@ __DDLOGHERE__
 		}
 	}
 	[self addXAttrs:self.encodeFilePath];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:_show];
+//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:_show];
 	
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:nil];  //Free up an encoder
@@ -1215,6 +1294,9 @@ __DDLOGHERE__
     DDLogMajor(@"Waiting %lf seconds for write data to complete during cancel", (-1.0 * [now timeIntervalSinceNow]) );
     
     [self cleanupFiles]; //Everything but the final file
+    if (_downloadStatus.intValue == kMTStatusDone) {
+        self.baseFileName = nil;  //Force new file for rescheduled, complete show.
+    }
 //    if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && self.isDownloading)) {
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
 //    }
@@ -1550,9 +1632,6 @@ __DDLOGHERE__
 		DDLogDetail(@"closed filehandle");
 		taskChainInputHandle = nil;
         if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
-            if ([[_bufferFilePath substringFromIndex:_bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame && !activeURLConnection) { //We finished a complete download so mark it so
-                setxattr([_bufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
-            }
             [bufferFileReadHandle closeFile];
         }
 		bufferFileReadHandle = nil;
@@ -1626,7 +1705,9 @@ __DDLOGHERE__
     //Check to make sure a reasonable file size in case there was a problem.
     if (downloadedFileSize > kMTMinTiVoFileSize) {
         DDLogDetail(@"finished loading TiVo file");
-        [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+        if (self.shouldSimulEncode) {
+            [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+        }
     }
     //Make sure to flush the last of the buffer file into the pipe and close it.
 	if (!writingData) {
@@ -1659,6 +1740,11 @@ __DDLOGHERE__
 //		self.show.fileSize = downloadedFileSize;  //More accurate file size
 		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.show.tiVo];
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:4.0];
+        if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
+            if ([[_bufferFilePath substringFromIndex:_bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame  && !_isCanceled) { //We finished a complete download so mark it so
+                setxattr([_bufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+            }
+        }
 	}
 }
 
@@ -1670,7 +1756,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) shouldSimulEncode {
-    return (_encodeFormat.canSimulEncode && !_skipCommercials);
+    return (_encodeFormat.canSimulEncode && !_skipCommercials && !_downloadingShowFromMPGFile);
 }
 
 -(BOOL) canSkipCommercials {

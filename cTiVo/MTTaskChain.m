@@ -21,6 +21,7 @@ __DDLOGHERE__
         _dataSource = nil;
 		isConfigured = NO;
         _isRunning = NO;
+        _providesProgress = NO;
 
     }
     return self;
@@ -187,7 +188,11 @@ __DDLOGHERE__
 {
 //    NSLog(@"Got read for tee ");
 	NSData *readData = notification.userInfo[NSFileHandleNotificationDataItem];
-//    totalDataRead += readData.length;
+    totalDataRead += readData.length;
+    if (_providesProgress) {
+        _download.processProgress = totalDataRead/_download.show.fileSize;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+    }
 //    NSLog(@"Total Data Read %ld",totalDataRead);
     NSArray *pipes = [teeBranches objectForKey:notification.object];
 	if (readData.length && !_download.isCanceled) {

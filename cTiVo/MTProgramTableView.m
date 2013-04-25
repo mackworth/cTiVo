@@ -28,6 +28,7 @@ __DDLOGHERE__
 
 -(void)setNotifications
 {
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationShowDownloadDidFinish object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDetailsLoaded object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoListUpdated object:nil];
@@ -404,6 +405,7 @@ __DDLOGHERE__
         NSSize cellSize = showCellView.frame.size;
         switch (alignment) {
             case NSLeftTextAlignment:
+            case NSNaturalTextAlignment:
                 if (clickInText.x < stringSize.width) {
                     isOverText = YES;
                 }

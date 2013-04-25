@@ -27,7 +27,7 @@
 
 @property (weak, nonatomic) MTDownload *download;
 
-@property BOOL isRunning;
+@property BOOL isRunning, providesProgress;
 
 -(BOOL)run;
 -(BOOL)configure;

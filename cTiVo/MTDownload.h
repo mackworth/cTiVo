@@ -38,7 +38,7 @@
 @property (nonatomic, strong) NSString *downloadDirectory;
 @property (nonatomic, strong) MTFormat *encodeFormat;
 
-@property BOOL volatile isCanceled, isRescheduled;
+@property BOOL volatile isCanceled, isRescheduled, downloadingShowFromTiVoFile, downloadingShowFromMPGFile;
 
 @property (nonatomic, strong) NSNumber *genTextMetaData,
 *genXMLMetaData,
@@ -54,6 +54,8 @@ numStartupRetriesRemaining;
 
 @property (nonatomic, readonly) NSString *encodeFilePath,
 *bufferFilePath,   //
+*tivoFilePath,  //For checkpointing
+*mpgFilePath,   //For checkpointing
 *decryptBufferFilePath,
 *downloadFilePath;
 

@@ -175,12 +175,21 @@ __DDLOGHERE__
 
 -(double)progressValueWithRx:(NSString *)data
 {
-    NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
-    NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
-    NSTextCheckingResult *lastItem = [values lastObject];
-    NSRange valueRange = [lastItem rangeAtIndex:1];
-    return ([[data substringWithRange:valueRange] doubleValue]/100.0);
+//    NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
+    NSArray *values = nil;
+    NSLog(@"tracking using data %@",data);
+    if (data) {
+        values = [_trackingRegEx matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
+    }
+    if (values && values.count) {
+        NSTextCheckingResult *lastItem = [values lastObject];
+        NSRange valueRange = [lastItem rangeAtIndex:1];
+        return ([[data substringWithRange:valueRange] doubleValue]/100.0);
 
+    } else {
+        DDLogMajor(@"Track progress with Rx failed for task %@ for show %@",_taskName,_download.show.showTitle);
+        return 0.0;
+    }
 }
 
 -(NSString *)description
