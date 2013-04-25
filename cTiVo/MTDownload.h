@@ -38,7 +38,7 @@
 @property (nonatomic, strong) NSString *downloadDirectory;
 @property (nonatomic, strong) MTFormat *encodeFormat;
 
-@property BOOL volatile isCanceled;
+@property BOOL volatile isCanceled, isRescheduled;
 
 @property (nonatomic, strong) NSNumber *genTextMetaData,
 *genXMLMetaData,

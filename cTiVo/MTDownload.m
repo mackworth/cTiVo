@@ -154,6 +154,10 @@ __DDLOGHERE__
 
 -(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries
 {
+	if (_isRescheduled) {
+		return;
+	}
+	_isRescheduled = YES;
 	[self saveCurrentLogFiles];
 	[self cancel];
 	DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _show.showTitle, _processProgress, previousCheck );
@@ -646,24 +650,33 @@ __DDLOGHERE__
 {
 	NSMutableArray *arguments = [NSMutableArray array];
 	
-    if ([_encodeFormat.comSkip boolValue] && _skipCommercials && _encodeFormat.edlFlag.length) {
-        [arguments addObject:_encodeFormat.edlFlag];
-        [arguments addObject:commercialFilePath];
-    }
     if (_encodeFormat.outputFileFlag.length) {
         if (_encodeFormat.encoderEarlyVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyVideoOptions]];
         if (_encodeFormat.encoderEarlyAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyAudioOptions]];
         if (_encodeFormat.encoderEarlyOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyOtherOptions]];
         [arguments addObject:_encodeFormat.outputFileFlag];
         [arguments addObject:outputFilePath];
+		if ([_encodeFormat.comSkip boolValue] && _skipCommercials && _encodeFormat.edlFlag.length) {
+			[arguments addObject:_encodeFormat.edlFlag];
+			[arguments addObject:commercialFilePath];
+		}
         if (_encodeFormat.inputFileFlag.length) {
             [arguments addObject:_encodeFormat.inputFileFlag];
-        }
-        [arguments addObject:inputFilePath];
+			[arguments addObject:inputFilePath];
+			if (_encodeFormat.encoderLateVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateVideoOptions]];
+			if (_encodeFormat.encoderLateAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateAudioOptions]];
+			if (_encodeFormat.encoderLateOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateOtherOptions]];
+        } else {
+			[arguments addObject:inputFilePath];
+		}
     } else {
         if (_encodeFormat.encoderEarlyVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyVideoOptions]];
         if (_encodeFormat.encoderEarlyAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyAudioOptions]];
         if (_encodeFormat.encoderEarlyOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyOtherOptions]];
+		if ([_encodeFormat.comSkip boolValue] && _skipCommercials && _encodeFormat.edlFlag.length) {
+			[arguments addObject:_encodeFormat.edlFlag];
+			[arguments addObject:commercialFilePath];
+		}
         if (_encodeFormat.inputFileFlag.length) {
             [arguments addObject:_encodeFormat.inputFileFlag];
         }
@@ -1017,6 +1030,7 @@ __DDLOGHERE__
 {
 	DDLogDetail(@"Starting download for %@",self);
 	_isCanceled = NO;
+	_isRescheduled = NO;
     //Before starting make sure the encoder is OK.
 	if (![self encoderPath]) {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:nil];  //Decrement num encoders right away
