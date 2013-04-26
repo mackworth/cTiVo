@@ -1737,7 +1737,9 @@ __DDLOGHERE__
 		DDLogMajor(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
 		[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:kMTTiVoAccessDelay];
 	} else {
-//		self.show.fileSize = downloadedFileSize;  //More accurate file size
+//		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
+		self.show.fileSize = downloadedFileSize;  //More accurate file size
+//		NSLog(@"File size after reset %lf %lf",self.show.fileSize,downloadedFileSize);
 		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.show.tiVo];
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:4.0];
         if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
