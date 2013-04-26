@@ -910,8 +910,25 @@ __DDLOGHERE__
     captionTask.requiresOutputPipe = NO;
     
     if (_downloadingShowFromMPGFile) {
-//        [captionTask setStandardError:captionTask.logFileWriteHandle];
-//        captionTask.trackingRegEx = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
+        captionTask.progressCalc = ^double(NSString *data){
+            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\d+:\\d\\d" options:NSRegularExpressionCaseInsensitive error:nil];
+            NSArray *values = nil;
+            if (data) {
+                values = [regex matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
+            }
+            if (values && values.count) {
+                NSTextCheckingResult *lastItem = [values lastObject];
+                NSRange valueRange = [lastItem rangeAtIndex:0];
+                NSString *timeString = [data substringWithRange:valueRange];
+                NSArray *components = [timeString componentsSeparatedByString:@":"];
+                double currentTimeOffset = [components[0] doubleValue] * 60.0 + [components[1] doubleValue];
+                return (currentTimeOffset/self.show.showLength);
+                
+            } else {
+                DDLogMajor(@"Track progress with Rx failed for task caption for show %@",self.show.showTitle);
+                return 0.0;
+            }
+        };
         if (!_encodeFormat.canSimulEncode) {
             captionTask.startupHandler = ^(){
                 _processProgress = 0.0;
@@ -1136,10 +1153,7 @@ __DDLOGHERE__
 			[taskArray addObject:@[self.encodeTask,self.captionTask]];
 		} else {
             if(_downloadingShowFromMPGFile) {
-                self.activeTaskChain.providesProgress = YES;
-                NSString *junkFilePath = [NSString stringWithFormat:@"%@/junk.bin",kMTTmpDir];
-                [[NSFileManager defaultManager] createFileAtPath:junkFilePath contents:[NSData data] attributes:nil];
-                [taskArray addObject:@[self.captionTask,[self catTask:junkFilePath]]];
+                [taskArray addObject:@[self.captionTask]];
             } else {
                 [taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];                
             }
@@ -1265,7 +1279,7 @@ __DDLOGHERE__
 
 -(void)cancel
 {
-    if (_isCanceled) {
+    if (_isCanceled || !self.isInProgress) {
         return;
     }
     _isCanceled = YES;

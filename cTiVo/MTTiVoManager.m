@@ -941,9 +941,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 		if (index != NSNotFound) {
 			MTDownload *oldDownload = _downloadQueue[index];
-			if (oldDownload.isInProgress) {
-				[oldDownload cancel];
-			}
+            [oldDownload cancel];
 			oldDownload.show.isQueued = NO;
 			[itemsToRemove addIndex:index];
 		}
