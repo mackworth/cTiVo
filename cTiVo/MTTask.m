@@ -130,7 +130,7 @@ __DDLOGHERE__
 	DDLogVerbose(@"Tracking %@",_taskName);
 	if (![self.task isRunning]) {
 //        DDLogMajor(@"Task %@ Stopped for show %@",_taskName,_download.show.showTitle);
-		NSLog(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
+		DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
 //		_download.processProgress = 1.0;
 //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 		if (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal || _task.terminationStatus != _successfulExitCode) {
@@ -177,7 +177,6 @@ __DDLOGHERE__
 {
 //    NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
     NSArray *values = nil;
-    NSLog(@"tracking using data %@",data);
     if (data) {
         values = [_trackingRegEx matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
     }

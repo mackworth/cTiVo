@@ -84,6 +84,7 @@ __DDLOGHERE__
             @"SourceType" : @{kMTValue : @"sourceType", kMTType : [NSNumber numberWithInt:kMTStringType]},
             @"IdGuideSource" : @{kMTValue : @"idGuidSource", kMTType : [NSNumber numberWithInt:kMTStringType]}};
 		elementToPropertyMap = [[NSDictionary alloc] initWithDictionary:elementToPropertyMap];
+		_lastDownloadEnded = [NSDate dateWithTimeIntervalSince1970:0];
 	}
 	return self;
 	
@@ -549,15 +550,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			}
             if (s.isNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders)) {
                 if(s.show.tiVo.isReachable) {  //isn't this self.isReachable?
-//                    if (s.shouldSimulEncode) {
-                        tiVoManager.numEncoders++;
-                        DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,s.show.showTitle, tiVoManager.numEncoders);
-//                    }
+					tiVoManager.numEncoders++;
+					DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,s.show.showTitle, tiVoManager.numEncoders);
 					[s download];
-                    //                } else {    //We'll try again in kMTRetryNetworkInterval seconds at a minimum;
-                    //                    [s.tiVo reportNetworkFailure];
-                    //                    NSLog(@"Could not reach %@ tivo will try later",s.tiVo.tiVo.name);
-                    //                    [self performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTRetryNetworkInterval];
                 }
                 break;
             }

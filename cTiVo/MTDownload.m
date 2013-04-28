@@ -22,7 +22,6 @@
 	
     NSString *commercialFilePath, *nameLockFilePath, *captionFilePath; //Files shared between tasks
 	
-    double dataDownloaded;
 	NSURLConnection *activeURLConnection;
 	BOOL volatile writingData, downloadingURL;
     NSDate *previousCheck;
@@ -84,7 +83,7 @@ __DDLOGHERE__
 -(void)saveCurrentLogFiles
 {
     if (_downloadStatus.intValue == kMTStatusDownloading) {
-        DDLogMajor(@"%@ downloaded %f of %f bytes; %ld%%",self,dataDownloaded, _show.fileSize, lround(_processProgress*100));
+        DDLogMajor(@"%@ downloaded %ld of %f bytes; %ld%%",self,totalDataDownloaded, _show.fileSize, lround(_processProgress*100));
     }
     for (NSArray *tasks in _activeTaskChain.taskArray) {
         for (MTTask *task in tasks) {
@@ -763,7 +762,7 @@ __DDLOGHERE__
     decryptTask.completionHandler = ^(){
         if (!self.shouldSimulEncode) {
             [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadDidFinish object:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
             if (_decryptBufferFilePath) {
                 setxattr([_decryptBufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
 
@@ -876,11 +875,26 @@ __DDLOGHERE__
             encodeTask.requiresInputPipe = NO;
             __block NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:self.encodeFormat.regExProgress options:NSRegularExpressionCaseInsensitive error:nil];
             encodeTask.progressCalc = ^double(NSString *data){
-                NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
-                NSTextCheckingResult *lastItem = [values lastObject];
-                NSRange valueRange = [lastItem rangeAtIndex:1];
-                DDLogVerbose(@"Encoder progress %lf",[[data substringWithRange:valueRange] doubleValue]/100.0);
-                return  [[data substringWithRange:valueRange] doubleValue]/100.0;
+				double returnValue = -1.0;
+				NSArray *values = nil;
+				if (data) {
+					values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
+				}
+				if (values && values.count) {
+					NSTextCheckingResult *lastItem = [values lastObject];
+					NSRange r = [lastItem range];
+					if (r.location != NSNotFound) {
+						NSRange valueRange = [lastItem rangeAtIndex:1];
+						DDLogVerbose(@"Encoder progress %lf",[[data substringWithRange:valueRange] doubleValue]/100.0);
+						returnValue =  [[data substringWithRange:valueRange] doubleValue]/100.0;
+					}
+
+				}
+				if (returnValue == -1.0) {
+					DDLogMajor(@"Encode progress with Rx failed for task caption for show %@",self.show.showTitle);
+
+				}
+				return returnValue;
             };
             encodeTask.startupHandler = ^(){
                 _processProgress = 0.0;
@@ -913,21 +927,26 @@ __DDLOGHERE__
         captionTask.progressCalc = ^double(NSString *data){
             NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\d+:\\d\\d" options:NSRegularExpressionCaseInsensitive error:nil];
             NSArray *values = nil;
+			double returnValue = -1.0;
             if (data) {
                 values = [regex matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
             }
             if (values && values.count) {
                 NSTextCheckingResult *lastItem = [values lastObject];
-                NSRange valueRange = [lastItem rangeAtIndex:0];
-                NSString *timeString = [data substringWithRange:valueRange];
-                NSArray *components = [timeString componentsSeparatedByString:@":"];
-                double currentTimeOffset = [components[0] doubleValue] * 60.0 + [components[1] doubleValue];
-                return (currentTimeOffset/self.show.showLength);
+				NSRange r = [lastItem range];
+				if (r.location != NSNotFound) {
+					NSRange valueRange = [lastItem rangeAtIndex:0];
+					NSString *timeString = [data substringWithRange:valueRange];
+					NSArray *components = [timeString componentsSeparatedByString:@":"];
+					double currentTimeOffset = [components[0] doubleValue] * 60.0 + [components[1] doubleValue];
+					returnValue = (currentTimeOffset/self.show.showLength);
+				}
                 
-            } else {
-                DDLogMajor(@"Track progress with Rx failed for task caption for show %@",self.show.showTitle);
-                return 0.0;
             }
+			if (returnValue == -1.0){
+                DDLogMajor(@"Track progress with Rx failed for task caption for show %@",self.show.showTitle);
+            }
+			return returnValue;
         };
         if (!_encodeFormat.canSimulEncode) {
             captionTask.startupHandler = ^(){
@@ -1179,13 +1198,16 @@ __DDLOGHERE__
         activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
         downloadingURL = YES;
     }
-    dataDownloaded = 0.0;
     _processProgress = 0.0;
 	previousProcessProgress = 0.0;
     
 	[self.activeTaskChain run];
 	DDLogMajor(@"Starting URL %@ for show %@", _show.downloadURL,_show.showTitle);
-	if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile)[activeURLConnection start];
+	double downloadDelay = kMTTiVoAccessDelay - [[NSDate date] timeIntervalSinceDate:self.show.tiVo.lastDownloadEnded];
+	if (downloadDelay < 0) {
+		downloadDelay = 0;
+	}
+	if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile)[activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
 }
 
@@ -1288,6 +1310,7 @@ __DDLOGHERE__
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (activeURLConnection) {
         [activeURLConnection cancel];
+		self.show.tiVo.lastDownloadEnded = [NSDate date];
         activeURLConnection = nil;
 	}
     if(self.activeTaskChain.isRunning) {
@@ -1634,7 +1657,6 @@ __DDLOGHERE__
 				if (_isCanceled) break;
 				dataRead = data.length;
                 totalDataRead += dataRead;
-				//		dataDownloaded += data.length;
 				_processProgress = totalDataRead/_show.fileSize;
 				[self performSelectorOnMainThread:@selector(updateProgress) withObject:nil waitUntilDone:NO];
 			}
@@ -1731,7 +1753,7 @@ __DDLOGHERE__
 	}
 	downloadingURL = NO;
 	activeURLConnection = nil; //NOTE this MUST occur after the last call to writeData so that writeData doesn't exits before comletion of the downloaded buffer.
-	
+	self.show.tiVo.lastDownloadEnded = [NSDate date];
 	if (downloadedFileSize < kMTMinTiVoFileSize) { //Not a good download - reschedule
         NSString *dataReceived = nil;
         if (urlBuffer) {
@@ -1755,7 +1777,7 @@ __DDLOGHERE__
 		self.show.fileSize = downloadedFileSize;  //More accurate file size
 //		NSLog(@"File size after reset %lf %lf",self.show.fileSize,downloadedFileSize);
 		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.show.tiVo];
-		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:4.0];
+		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:kMTTiVoAccessDelay];
         if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
             if ([[_bufferFilePath substringFromIndex:_bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame  && !_isCanceled) { //We finished a complete download so mark it so
                 setxattr([_bufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete

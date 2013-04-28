@@ -1087,7 +1087,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		//Quit here
 		[NSApp terminate:nil];
 	}
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
 }
 
 -(BOOL)tiVosProcessing
