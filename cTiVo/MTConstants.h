@@ -77,6 +77,7 @@
 #define kMTSubscribediTunes @"addToiTunes"
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
 #define kMTSubscribedSkipCommercials @"skipCommercials"
+#define kMTSubscribedMarkCommercials @"markCommercials"
 #define kMTSubscribedIncludeSuggestions @"includeSuggestions"
 #define kMTSubscribedGenTextMetaData     @"GenTextMetadata"
 #define kMTSubscribedGenXMLMetaData	    @"GenXMLMetadata"
@@ -130,6 +131,20 @@
 #define kMTXATTRFileComplete @"com.ctivo.filecomplete"
 #define kMTSpotlightKeyword @"cTiVoDownload"
 
+//Task Flow Types
+
+#define kMTTaskFlowNonSimu 0
+#define kMTTaskFlowNonSimuSubtitles 1
+#define kMTTaskFlowSimu 2
+#define kMTTaskFlowSimuSubtitles 3
+#define kMTTaskFlowNonSimuSkipcom 4
+#define kMTTaskFlowNonSimuSkipcomSubtitles 5
+#define kMTTaskFlowSimuSkipcom 6
+#define kMTTaskFlowSimuSkipcomSubtitles 7
+#define kMTTaskFlowNonSimuMarkcom 8
+#define kMTTaskFlowNonSimuMarkcomSubtitles 9
+#define kMTTaskFlowSimuMarkcom 10
+#define kMTTaskFlowSimuMarkcomSubtitles 11
 
 //USER DEFAULTS
 
@@ -156,9 +171,11 @@
 #define kMTUseMemoryBufferForDownload @"UseMemoryBufferForDownload" //Default is YES.  Turn off to make sure downloaded file is complete. Principally for debugging use and checkpointing.
 #define kMTFileNameFormat @"FileNameFormat"			//printf pattern for filenames
 #define kMTFileNameFormatNull @"FileNameFormatNull"		//printf pattern for filenames for empty fields
+#define kMTTmpFilesDirectory @"TmpFilesDirectory"
 
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
 #define kMTRunComSkip @"RunComSkip"                 // Whether to run comSkip program after conversion
+#define kMTMarkCommercials @"MarkCommercials"                 // Whether insert chapters for commercials when possible
 #define kMTExportTivoMetaData @"ExportTivoMetaData" // Whether to export XML metadata
 #define kMTExportSubtitles @"ExportSubtitles"       // Whether to export subtitles with ts2ami
 #define kMTExportTextMetaData @"ExportTextMetaData" // Whether to export text metadata for PyTivo

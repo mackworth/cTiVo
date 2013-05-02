@@ -212,6 +212,10 @@ __DDLOGHERE__
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)];
         thisCell.identifier = identifier;
         result = thisCell;
+    } else if([identifier isEqualToString: @"Mark"]) {
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMark:)];
+        thisCell.identifier = identifier;
+        result = thisCell;
     } else if([identifier isEqualToString: @"XML"]) {
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeXML:)];
         thisCell.identifier = identifier;
@@ -344,6 +348,12 @@ __DDLOGHERE__
         [checkBox setOn: download.skipCommercials];
         checkBox.owner = download;
         [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSkip];
+        
+ 	} else if ([tableColumn.identifier isEqualToString:@"Mark"]) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setOn: download.markCommercials];
+        checkBox.owner = download;
+        [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canMarkCommercials];
         
  	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;

@@ -17,7 +17,7 @@
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate> {
 	MTMainWindowController *mainWindowController;
-	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *simulEncodeItem, *skipCommercialsItem, *pauseMenuItem, *apmMenuItem;
+	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *markCommecialsItem, *skipCommercialsItem, *pauseMenuItem, *apmMenuItem;
 	IBOutlet NSMenuItem *playVideoMenuItem, *showInFinderMenuItem;
 	IBOutlet NSMenu *optionsMenu;
     IBOutlet NSView *formatSelectionTable;

@@ -32,12 +32,22 @@ __DDLOGHERE__
     return self.encodeFormat.comSkip.boolValue;
 }
 
+-(BOOL) canMarkCommercials {
+	NSArray * allowedExtensions = @[@".mp4", @".m4v"];
+	NSString * extension = [self.encodeFormat.filenameExtension lowercaseString];
+	return [allowedExtensions containsObject: extension];
+}
+
 //-(BOOL) shouldSimulEncode {
 //    return [_simultaneousEncode boolValue];
 //}
 //
 -(BOOL) shouldSkipCommercials {
     return [_skipCommercials boolValue];
+}
+
+-(BOOL) shouldMarkCommercials {
+    return [_markCommercials boolValue];
 }
 
 -(BOOL) canAddToiTunes {
@@ -115,7 +125,8 @@ __DDLOGHERE__
 			newDownload.downloadDirectory = [tiVoManager downloadDirectory];  //should we have one per subscription? UI?
 
 			newDownload.exportSubtitles = subscription.exportSubtitles;
-			newDownload.skipCommercials = newDownload.encodeFormat.comSkip. boolValue && subscription.skipCommercials.boolValue;
+			newDownload.skipCommercials = newDownload.encodeFormat.comSkip.boolValue && subscription.skipCommercials.boolValue;
+			newDownload.skipCommercials = newDownload.encodeFormat.canMarkCommercials && subscription.canMarkCommercials;
 			newDownload.genTextMetaData = subscription.genTextMetaData;
 			newDownload.genXMLMetaData = subscription.genXMLMetaData;
 			newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && subscription.includeAPMMetaData.boolValue)];
@@ -223,6 +234,7 @@ __DDLOGHERE__
 		newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
 //		newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
 		newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip.boolValue)];
+		newSub.markCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"MarkCommercials"] && newSub.encodeFormat.canMarkCommercials)];
 		newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
 		newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
 		newSub.includeAPMMetaData = [defaults objectForKey:kMTExportAtomicParsleyMetaData];
@@ -245,6 +257,7 @@ __DDLOGHERE__
 		newSub.addToiTunes = [NSNumber numberWithBool: download.addToiTunesWhenEncoded ];
 //		newSub.simultaneousEncode = [NSNumber numberWithBool: download.simultaneousEncode];
 		newSub.skipCommercials = [NSNumber numberWithBool: download.skipCommercials];
+		newSub.markCommercials = [NSNumber numberWithBool: download.markCommercials];
 		newSub.genTextMetaData = [NSNumber numberWithBool: download.genTextMetaData];
 		newSub.genXMLMetaData = [NSNumber numberWithBool: download.genXMLMetaData];
 		newSub.includeAPMMetaData = [NSNumber numberWithBool: download.includeAPMMetaData];
@@ -302,6 +315,8 @@ __DDLOGHERE__
 		if (tempSub.includeSuggestions ==nil) tempSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
 		tempSub.skipCommercials = sub[kMTSubscribedSkipCommercials];
 		if (tempSub.skipCommercials ==nil) tempSub.skipCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTRunComSkip];
+		tempSub.markCommercials = sub[kMTSubscribedMarkCommercials];
+		if (tempSub.markCommercials ==nil) tempSub.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMarkCommercials];
 		tempSub.genTextMetaData = sub[kMTSubscribedGenTextMetaData];
 		if (tempSub.genTextMetaData ==nil) tempSub.genTextMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTextMetaData];
 		tempSub.genXMLMetaData = sub[kMTSubscribedGenXMLMetaData];
@@ -327,6 +342,7 @@ __DDLOGHERE__
 //                                  sub.simultaneousEncode, kMTSubscribedSimulEncode,
                                   sub.includeSuggestions, kMTSubscribedIncludeSuggestions,
 								  sub.skipCommercials, kMTSubscribedSkipCommercials,
+								  sub.markCommercials, kMTSubscribedMarkCommercials,
                                   sub.genTextMetaData , kMTSubscribedGenTextMetaData,
                                   sub.genXMLMetaData, kMTSubscribedGenXMLMetaData,
                                   sub.includeAPMMetaData, kMTSubscribedIncludeAPMMetaData,

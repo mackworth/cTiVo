@@ -19,7 +19,7 @@
 @property (nonatomic, strong) NSDate *lastRecordedTime;
 
 @property (nonatomic, strong) NSNumber *addToiTunes;
-@property (nonatomic, strong) NSNumber *skipCommercials, *includeSuggestions;
+@property (nonatomic, strong) NSNumber *skipCommercials, *includeSuggestions, *markCommercials;
 @property (nonatomic, strong) MTFormat *encodeFormat;
 @property (nonatomic, strong) NSNumber *genTextMetaData,
 									   *genXMLMetaData,
@@ -31,6 +31,7 @@
 @property (readonly) BOOL canAddToiTunes;
 @property (readonly) BOOL shouldAddToiTunes;
 @property (readonly) BOOL canSkipCommercials;
+@property (readonly) BOOL canMarkCommercials;
 @property (readonly) BOOL shouldSkipCommercials;
 
 @end

@@ -57,11 +57,11 @@ __DDLOGHERE__
 	[self cleanUp];
 	_taskName = taskName;
     if (self.download) {
-        self.logFilePath = [NSString stringWithFormat:@"%@%@%@.txt",kMTTmpDir,taskName,self.download.baseFileName];
+        self.logFilePath = [NSString stringWithFormat:@"%@%@%@.txt",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
 		[[NSFileManager defaultManager] createFileAtPath:_logFilePath contents:[NSData data] attributes:nil];
         self.logFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_logFilePath];
         self.logFileReadHandle	= [NSFileHandle fileHandleForReadingAtPath:_logFilePath];
-        self.errorFilePath = [NSString stringWithFormat:@"%@%@%@.err",kMTTmpDir,taskName,self.download.baseFileName];
+        self.errorFilePath = [NSString stringWithFormat:@"%@%@%@.err",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
 		[[NSFileManager defaultManager] createFileAtPath:_errorFilePath contents:[NSData data] attributes:nil];
         self.errorFileHandle = [NSFileHandle fileHandleForWritingAtPath:_errorFilePath];
         [self setStandardOutput:self.logFileWriteHandle];
@@ -124,29 +124,35 @@ __DDLOGHERE__
 	}
 }
 
+-(void)completeProcess
+{
+    //        DDLogMajor(@"Task %@ Stopped for show %@",_taskName,_download.show.showTitle);
+    DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
+    //		_download.processProgress = 1.0;
+    //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+    if (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal || _task.terminationStatus != _successfulExitCode) {
+        [self cleanUp];
+        _nextTaskChain = nil;
+        if (!_download.isCanceled) [_download rescheduleShowWithDecrementRetries:@YES];
+    } else {
+        if (_completionHandler) {
+            _completionHandler();
+        }
+        [self cleanUp];
+        if (_nextTaskChain) {
+            self.download.activeTaskChain = _nextTaskChain;
+            [_nextTaskChain run];
+        }
+    }
+    
+}
+
 
 -(void) trackProcess
 {
 	DDLogVerbose(@"Tracking %@",_taskName);
 	if (![self.task isRunning]) {
-//        DDLogMajor(@"Task %@ Stopped for show %@",_taskName,_download.show.showTitle);
-		DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
-//		_download.processProgress = 1.0;
-//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		if (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal || _task.terminationStatus != _successfulExitCode) {
-			[self cleanUp];
-			_nextTaskChain = nil;
-			if (!_download.isCanceled) [_download rescheduleShowWithDecrementRetries:@YES];
-		} else {
-			if (_completionHandler) {
-				_completionHandler();
-			}
-			[self cleanUp];
-			if (_nextTaskChain) {
-				self.download.activeTaskChain = _nextTaskChain;
-				[_nextTaskChain run];
-			}
-		}
+        [self completeProcess];
 	} else {
 		double newProgressValue = -1;
 		int sizeOfFileSample = 100;
@@ -251,32 +257,48 @@ __DDLOGHERE__
 
 -(void)launch
 {
+    BOOL shouldLaunch = YES;
     if (_startupHandler) {
-        _startupHandler();
+        shouldLaunch = _startupHandler();
     }
-    [_task launch];
-    _pid = [_task processIdentifier];
-    [self trackProcess];
+    if (shouldLaunch) {
+        [_task launch];
+        _pid = [_task processIdentifier];
+        [self trackProcess];
+    } else {
+        if (_completionHandler) {
+            _completionHandler();
+        }
+    }
 }
 
 -(void)terminate
 {
-    [_task terminate];
+    if ([_task isRunning]) {
+        [_task terminate];
+
+    }
 }
 
 -(void)interrupt
 {
-    [_task interrupt];
+    if ([_task isRunning]) {
+        [_task interrupt];
+    }
 }
 
 -(void)suspend
 {
-    [_task suspend];
+    if ([_task isRunning]) {
+        [_task suspend];
+    }
 }
 
 -(void)waitUntilExit
 {
-    [_task waitUntilExit];
+    if ([_task isRunning]) {
+        [_task waitUntilExit];
+    }
 }
 
 -(BOOL)isRunning

@@ -286,6 +286,13 @@ __DDLOGHERE__
     return ![_mustDownloadFirst boolValue];
 }
 
+-(BOOL)canMarkCommercials
+{
+	NSArray * allowedExtensions = @[@".mp4", @".m4v"];
+	NSString * extension = [self.filenameExtension lowercaseString];
+	return [allowedExtensions containsObject: extension];
+}
+
 -(BOOL)canSkip
 {
     return [_comSkip boolValue];

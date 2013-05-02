@@ -33,7 +33,7 @@
 
 @property (nonatomic, copy) void (^completionHandler)(void);
 
-@property (nonatomic, copy) void (^startupHandler)(void);
+@property (nonatomic, copy) BOOL (^startupHandler)(void);
 
 @property (nonatomic, copy) double (^progressCalc)(NSString *data);
 

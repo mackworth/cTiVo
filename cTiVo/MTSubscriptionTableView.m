@@ -161,6 +161,10 @@ __DDLOGHERE__
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)];
         thisCell.identifier = identifier;
         result = (id)thisCell;
+    } else if([identifier compare: @"Mark"] == NSOrderedSame) {
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMark:)];
+        thisCell.identifier = identifier;
+        result = (id)thisCell;
 	} else if([identifier isEqualToString: @"XML"]) {
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeXML:)];
         thisCell.identifier = identifier;
@@ -254,6 +258,11 @@ static NSDateFormatter *dateFormatter;
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setEnabled: [thisSubscription canSkipCommercials]] ;
         [checkBox setOn:[[ thisSubscription skipCommercials]boolValue]];
+        checkBox.owner = thisSubscription;
+ 	} else if ([tableColumn.identifier compare:@"Mark"] == NSOrderedSame) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setEnabled: [thisSubscription canMarkCommercials]] ;
+        [checkBox setOn:[[ thisSubscription markCommercials]boolValue]];
         checkBox.owner = thisSubscription;
 	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;

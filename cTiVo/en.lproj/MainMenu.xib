@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
-		<string key="IBDocument.SystemVersion">12C3012</string>
+		<string key="IBDocument.SystemVersion">12D78</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
-		<string key="IBDocument.AppKitVersion">1187.34</string>
-		<string key="IBDocument.HIToolboxVersion">625.00</string>
+		<string key="IBDocument.AppKitVersion">1187.37</string>
+		<string key="IBDocument.HIToolboxVersion">626.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">3084</string>
@@ -473,7 +473,7 @@
 							<array class="NSMutableArray" key="NSMenuItems">
 								<object class="NSMenuItem" id="556773374">
 									<reference key="NSMenu" ref="135398297"/>
-									<string key="NSTitle">Simultaneous Encoding</string>
+									<string key="NSTitle">Mark Commercials</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<object class="NSCustomResource" key="NSOnImage" id="116230324">
@@ -493,14 +493,6 @@
 								<object class="NSMenuItem" id="45202828">
 									<reference key="NSMenu" ref="135398297"/>
 									<string key="NSTitle">Add to iTunes when complete</string>
-									<string key="NSKeyEquiv"/>
-									<int key="NSMnemonicLoc">2147483647</int>
-									<reference key="NSOnImage" ref="116230324"/>
-									<reference key="NSMixedImage" ref="502551668"/>
-								</object>
-								<object class="NSMenuItem" id="170029498">
-									<reference key="NSMenu" ref="135398297"/>
-									<string key="NSTitle">Add Metadata to Video file</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="116230324"/>
@@ -1152,14 +1144,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">iTunesMenuItem</string>
-						<reference key="source" ref="976324537"/>
-						<reference key="destination" ref="170029498"/>
-					</object>
-					<int key="connectionID">997</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
 						<string key="label">simulEncodeItem</string>
 						<reference key="source" ref="976324537"/>
 						<reference key="destination" ref="351954164"/>
@@ -1387,22 +1371,6 @@
 						</object>
 					</object>
 					<int key="connectionID">1128</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: values.ExportAtomicParsleyMetaData</string>
-						<reference key="source" ref="170029498"/>
-						<reference key="destination" ref="495665923"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="170029498"/>
-							<reference key="NSDestination" ref="495665923"/>
-							<string key="NSLabel">value: values.ExportAtomicParsleyMetaData</string>
-							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">values.ExportAtomicParsleyMetaData</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">1112</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -2000,7 +1968,6 @@
 							<reference ref="45202828"/>
 							<reference ref="482042351"/>
 							<reference ref="796623023"/>
-							<reference ref="170029498"/>
 							<reference ref="199801516"/>
 							<reference ref="726919820"/>
 						</array>
@@ -2099,11 +2066,6 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">1109</int>
 						<reference key="object" ref="556773374"/>
-						<reference key="parent" ref="135398297"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">987</int>
-						<reference key="object" ref="170029498"/>
 						<reference key="parent" ref="135398297"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -2385,15 +2347,6 @@
 					</object>
 				</object>
 				<string key="986.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<object class="NSMutableDictionary" key="987.IBAttributePlaceholdersKey">
-					<string key="NS.key.0">ToolTip</string>
-					<object class="IBToolTipAttribute" key="NS.object.0">
-						<string key="name">ToolTip</string>
-						<reference key="object" ref="170029498"/>
-						<string key="toolTip">Adds video file and metadata to iTunes when processing is complete (per show)</string>
-					</object>
-				</object>
-				<string key="987.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="989.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			</dictionary>
 			<dictionary class="NSMutableDictionary" key="unlocalizedProperties"/>
@@ -2431,12 +2384,12 @@
 						<string key="exportTableView">NSTableView</string>
 						<string key="formatSelectionTable">NSView</string>
 						<string key="iTunesMenuItem">NSMenuItem</string>
+						<string key="markCommecialsItem">NSMenuItem</string>
 						<string key="optionsMenu">NSMenu</string>
 						<string key="pauseMenuItem">NSMenuItem</string>
 						<string key="playVideoMenuItem">NSMenuItem</string>
 						<string key="refreshTiVoMenuItem">NSMenuItem</string>
 						<string key="showInFinderMenuItem">NSMenuItem</string>
-						<string key="simulEncodeItem">NSMenuItem</string>
 						<string key="skipCommercialsItem">NSMenuItem</string>
 						<string key="window">NSWindow</string>
 					</dictionary>
@@ -2457,6 +2410,10 @@
 							<string key="name">iTunesMenuItem</string>
 							<string key="candidateClassName">NSMenuItem</string>
 						</object>
+						<object class="IBToOneOutletInfo" key="markCommecialsItem">
+							<string key="name">markCommecialsItem</string>
+							<string key="candidateClassName">NSMenuItem</string>
+						</object>
 						<object class="IBToOneOutletInfo" key="optionsMenu">
 							<string key="name">optionsMenu</string>
 							<string key="candidateClassName">NSMenu</string>
@@ -2475,10 +2432,6 @@
 						</object>
 						<object class="IBToOneOutletInfo" key="showInFinderMenuItem">
 							<string key="name">showInFinderMenuItem</string>
-							<string key="candidateClassName">NSMenuItem</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="simulEncodeItem">
-							<string key="name">simulEncodeItem</string>
 							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="skipCommercialsItem">

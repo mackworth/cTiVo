@@ -29,6 +29,7 @@
 @property (nonatomic, strong) NSMutableArray *subscribedShows;
 
 @property (nonatomic, strong) NSString *downloadDirectory;
+@property (nonatomic, weak, readonly) NSString *tmpFilesDirectory;
 @property (weak, readonly) NSString *defaultDownloadDirectory;
 
 @property int volatile signalError;

@@ -46,7 +46,8 @@
 *exportSubtitles;
 @property BOOL  addToiTunesWhenEncoded,
 //simultaneousEncode,
-skipCommercials;
+skipCommercials,
+markCommercials;
 
 @property int  	numRetriesRemaining,
 numStartupRetriesRemaining;
@@ -69,7 +70,7 @@ numStartupRetriesRemaining;
 @property (weak, nonatomic, readonly)	NSString *showStatus;
 @property (weak, nonatomic, readonly) NSString *imageString;
 @property double processProgress; //Should be between 0 and 1
-@property (nonatomic) BOOL shouldSimulEncode;
+@property (nonatomic) BOOL shouldSimulEncode, shouldMarkCommercials;
 
 @property BOOL isSimultaneousEncoding;
 

@@ -916,6 +916,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 //											[defaults boolForKey:kMTSimultaneousEncode];
 		newDownload.skipCommercials = [newDownload.encodeFormat.comSkip boolValue] &&
 											[defaults boolForKey:@"RunComSkip"];
+		newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials &&
+											[defaults boolForKey:@"MarkCommercials"];
 		newDownload.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
 		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 		newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && [defaults boolForKey:kMTExportAtomicParsleyMetaData])];
@@ -1175,6 +1177,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 //
 //	}
 
+}
+
+-(NSString *)tmpFilesDirectory {
+
+    return [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
+ 
 }
 
 #pragma mark - Memory Management
