@@ -218,6 +218,8 @@ __DDLOGHERE__
 			NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
 			myOpenPanel.canChooseFiles = NO;
 			myOpenPanel.canChooseDirectories = YES;
+			myOpenPanel.canCreateDirectories = YES;
+			myOpenPanel.directoryURL = [NSURL fileURLWithPath:tmpdir];
 			myOpenPanel.message = message;
 			myOpenPanel.prompt = @"Choose";
 			[myOpenPanel setTitle:@"Select Temp Directory for Files"];
@@ -238,6 +240,8 @@ __DDLOGHERE__
 			NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
 			myOpenPanel.canChooseFiles = NO;
 			myOpenPanel.canChooseDirectories = YES;
+			myOpenPanel.canCreateDirectories = YES;
+			myOpenPanel.directoryURL = [NSURL fileURLWithPath:tmpdir];
 			myOpenPanel.message = message;
 			myOpenPanel.prompt = @"Choose";
 			[myOpenPanel setTitle:@"Select Temp Directory for Files"];
@@ -252,13 +256,15 @@ __DDLOGHERE__
         }
     }
     //Now check for write permission
-    NSString *testPath = [NSString stringWithFormat:@"%@/junk",tmpdir];
+    NSString *testPath = [NSString stringWithFormat:@"%@/.junk",tmpdir];
     BOOL canWrite = [fm createFileAtPath:testPath contents:[NSData data] attributes:nil];
     if (!canWrite) {
         NSString *message = [NSString stringWithFormat:@"You don't have write permission on %@.  \nPlease fix the permissions or choose a new location.",tmpdir];
 		NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
 		myOpenPanel.canChooseFiles = NO;
 		myOpenPanel.canChooseDirectories = YES;
+		myOpenPanel.canCreateDirectories = YES;
+		myOpenPanel.directoryURL = [NSURL fileURLWithPath:tmpdir];
 		myOpenPanel.message = message;
 		myOpenPanel.prompt = @"Choose";
 		[myOpenPanel setTitle:@"Select Temp Directory for Files"];
