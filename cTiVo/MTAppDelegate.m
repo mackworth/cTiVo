@@ -155,6 +155,7 @@ __DDLOGHERE__
     [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueChangeSetting context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTRunComSkip options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTmpFilesDirectory options:NSKeyValueObservingOptionNew context:nil];
 	mainWindowController = nil;
 	//	_formatEditorController = nil;
 	[self showMainWindow:nil];
@@ -212,71 +213,63 @@ __DDLOGHERE__
         }
     }
     if (!newDir || !isDir) { //Something wrong with this choice
-        if (!isDir) {
-            NSString *message = [NSString stringWithFormat:@"%@ is a file, not a directory.  Please enter a new locaiton and press 'OK' or press 'Delete' to use the current choice and delete the existing file.  Make blank and press 'OK' to use the default /tmp/ctivo",tmpdir];
-            NSAlert *tmpDirAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Tmp Directory" alternateButton:@"Delete" otherButton:nil informativeTextWithFormat:@""];
-            NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
-            
-            [input setStringValue:tmpdir];
-            [tmpDirAlert setAccessoryView:input];
-            NSInteger button = [tmpDirAlert runModal];
-            if (button == NSAlertDefaultReturn) {
-                [input validateEditing];
-                NSString *returnString = [input.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-                if (returnString.length == 0) {
-                    returnString = kMTTmpDir;
-                }
-                DDLogMajor(@"Got New Tmp Directory Default %@",returnString);
-                [[NSUserDefaults standardUserDefaults] setObject:returnString forKey:kMTTmpFilesDirectory];
-            } else {
-                //Delete the exisiting file and create a directory
-                NSError *error = nil;
-                [fm removeItemAtPath:tmpdir error:&error];
-                if (error) DDLogMajor(@"Error was %@",error);
-            }
+        if (newDir && !isDir) {
+            NSString *message = [NSString stringWithFormat:@"%@ is a file, not a directory.  \nPlease choose a new locaiton and press 'Choose' \nor press 'Cancel' to delete the existing file.",tmpdir];
+			NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
+			myOpenPanel.canChooseFiles = NO;
+			myOpenPanel.canChooseDirectories = YES;
+			myOpenPanel.message = message;
+			myOpenPanel.prompt = @"Choose";
+			[myOpenPanel setTitle:@"Select Temp Directory for Files"];
+			[myOpenPanel beginSheetModalForWindow:mainWindowController.window completionHandler:^(NSInteger ret){
+				if (ret == NSFileHandlingPanelOKButton) {
+					NSString *directoryName = myOpenPanel.URL.path;
+					[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
+				} else {
+					NSError *error = nil;
+					[fm removeItemAtPath:tmpdir error:&error];
+					if (error) DDLogMajor(@"Error was %@",error);
+				}
+				[myOpenPanel close];
+				[self validateTmpDirectory];
+			}];
         } else {
-            NSString *message = [NSString stringWithFormat:@"Unable to create directory %@.  Please choose a new location.  Make blank to use the default /tmp/ctivo",tmpdir];
-            NSAlert *tmpDirAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Tmp Directory" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-            NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
-            
-            [input setStringValue:tmpdir];
-            [tmpDirAlert setAccessoryView:input];
-            NSInteger button = [tmpDirAlert runModal];
-            if (button == NSAlertDefaultReturn) {
-                [input validateEditing];
-                NSString *returnString = [input.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-                if (returnString.length == 0) {
-                    returnString = kMTTmpDir;
-                }
-                DDLogMajor(@"Got New Tmp Directory Default %@",returnString);
-                [[NSUserDefaults standardUserDefaults] setObject:returnString forKey:kMTTmpFilesDirectory];
-            }
-
+            NSString *message = [NSString stringWithFormat:@"Unable to create directory %@. \n Please choose a new location or fix permissions.",tmpdir];
+			NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
+			myOpenPanel.canChooseFiles = NO;
+			myOpenPanel.canChooseDirectories = YES;
+			myOpenPanel.message = message;
+			myOpenPanel.prompt = @"Choose";
+			[myOpenPanel setTitle:@"Select Temp Directory for Files"];
+			[myOpenPanel beginSheetModalForWindow:mainWindowController.window completionHandler:^(NSInteger ret){
+				if (ret == NSFileHandlingPanelOKButton) {
+					NSString *directoryName = myOpenPanel.URL.path;
+					[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
+				}
+				[myOpenPanel close];
+				[self validateTmpDirectory];
+			}];
         }
-        //Check for write
-        [self validateTmpDirectory];
-        
     }
     //Now check for write permission
     NSString *testPath = [NSString stringWithFormat:@"%@/junk",tmpdir];
     BOOL canWrite = [fm createFileAtPath:testPath contents:[NSData data] attributes:nil];
     if (!canWrite) {
-        NSString *message = [NSString stringWithFormat:@"You don't have write permission on %@.  Please fix the permissions or choose a new location.  Make blank to use the default /tmp/ctivo",tmpdir];
-        NSAlert *tmpDirAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Tmp Directory" alternateButton:@"Try Again" otherButton:nil informativeTextWithFormat:@""];
-        NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
-        
-        [input setStringValue:tmpdir];
-        [tmpDirAlert setAccessoryView:input];
-        NSInteger button = [tmpDirAlert runModal];
-        if (button == NSAlertDefaultReturn) {
-            [input validateEditing];
-            NSString *returnString = [input.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            if (returnString.length == 0) {
-                returnString = kMTTmpDir;
-            }
-            NSLog(@"Got New Tmp Directory Default %@",returnString);
-            [[NSUserDefaults standardUserDefaults] setObject:returnString forKey:kMTTmpFilesDirectory];
-        }
+        NSString *message = [NSString stringWithFormat:@"You don't have write permission on %@.  \nPlease fix the permissions or choose a new location.",tmpdir];
+		NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
+		myOpenPanel.canChooseFiles = NO;
+		myOpenPanel.canChooseDirectories = YES;
+		myOpenPanel.message = message;
+		myOpenPanel.prompt = @"Choose";
+		[myOpenPanel setTitle:@"Select Temp Directory for Files"];
+		[myOpenPanel beginSheetModalForWindow:mainWindowController.window completionHandler:^(NSInteger ret){
+			if (ret == NSFileHandlingPanelOKButton) {
+				NSString *directoryName = myOpenPanel.URL.path;
+				[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
+			}
+			[myOpenPanel close];
+			[self validateTmpDirectory];
+		}];
 
     } else {
         //Clean up
@@ -380,6 +373,8 @@ __DDLOGHERE__
 		}
 	} else if ([keyPath compare:@"processingPaused"] == NSOrderedSame) {
 		pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";
+	} else if ([keyPath compare:kMTTmpFilesDirectory] == NSOrderedSame) {
+		[self validateTmpDirectory];
 	}
 }
 
