@@ -48,6 +48,7 @@
 		D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */ = {isa = PBXBuildFile; fileRef = D24A8D0D16A5F3DC00DFF890 /* catToFile */; };
 		D257C6E41697400700EBE30B /* MTFormatPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */; };
 		D257C6E9169740A000EBE30B /* MTPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */; };
+		D271F3631734BCDA00641435 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D271F3621734BCDA00641435 /* Security.framework */; };
 		D274653516C8081C0012CFF7 /* ComSkipHelpText.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D274653416C8081C0012CFF7 /* ComSkipHelpText.rtf */; };
 		D27579BD16B4DC2B0090D137 /* MTPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D27579BB16B4DC2B0090D137 /* MTPreferencesWindowController.m */; };
 		D27579BE16B4DC2B0090D137 /* MTPreferencesWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D27579BC16B4DC2B0090D137 /* MTPreferencesWindowController.xib */; };
@@ -171,6 +172,7 @@
 		D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTFormatPopUpButton.m; sourceTree = "<group>"; };
 		D257C6E61697409F00EBE30B /* MTPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTPopUpTableCellView.h; sourceTree = "<group>"; };
 		D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPopUpTableCellView.m; sourceTree = "<group>"; };
+		D271F3621734BCDA00641435 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		D274653416C8081C0012CFF7 /* ComSkipHelpText.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = ComSkipHelpText.rtf; sourceTree = "<group>"; };
 		D27579BA16B4DC2B0090D137 /* MTPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTPreferencesWindowController.h; sourceTree = "<group>"; };
 		D27579BB16B4DC2B0090D137 /* MTPreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPreferencesWindowController.m; sourceTree = "<group>"; };
@@ -269,6 +271,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D271F3631734BCDA00641435 /* Security.framework in Frameworks */,
 				D297AC28173047EE0036125A /* libstdc++.dylib in Frameworks */,
 				D240EF5E16EFE05E00635E53 /* QTKit.framework in Frameworks */,
 				D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */,
@@ -384,6 +387,7 @@
 		D2D60B9216766EFD00CE32DE = {
 			isa = PBXGroup;
 			children = (
+				D271F3621734BCDA00641435 /* Security.framework */,
 				D2C0380F17131F9A0001BA52 /* Update */,
 				1E684A8C16E40EA8000F5C6E /* Wiki */,
 				D2D60BA716766EFD00CE32DE /* cTiVo */,

@@ -39,6 +39,7 @@ __DDLOGHERE__
         self.taskName = @"";
         _startupHandler = nil;
         _completionHandler = nil;
+		_terminationHandler = nil;
         _progressCalc = nil;
         _cleanupHandler = nil;
 		_nextTaskChain = nil;
@@ -74,6 +75,9 @@ __DDLOGHERE__
 {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     DDLogVerbose(@"Terminating task %@",_taskName);
+	if (_terminationHandler) {
+		_terminationHandler();
+	}
 	[_task terminate];
     [self cleanUp];
 }

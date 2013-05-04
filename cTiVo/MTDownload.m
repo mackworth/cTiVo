@@ -776,7 +776,22 @@ __DDLOGHERE__
 
             }
         }
+		NSString *log = [NSString stringWithContentsOfFile:_decryptTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
+		NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
+		if (badMAKRange.location != NSNotFound) {
+			self.show.tiVo.mediaKeyIsGood = NO;
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationBadMAK object:self.show.tiVo];
+		}
     };
+	
+	decryptTask.terminationHandler = ^(){
+		NSString *log = [NSString stringWithContentsOfFile:_decryptTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
+		NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
+		if (badMAKRange.location != NSNotFound) {
+			self.show.tiVo.mediaKeyIsGood = NO;
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationBadMAK object:self.show.tiVo];
+		}
+	};
     
     if (_downloadingShowFromTiVoFile) {
         [decryptTask setStandardError:decryptTask.logFileWriteHandle];
@@ -1488,7 +1503,7 @@ __DDLOGHERE__
         return;
     }
     _isCanceled = YES;
-    DDLogMajor(@"Canceling of         %@", self.show.showTitle);
+    DDLogMajor(@"Canceling of %@", self.show.showTitle);
 //    NSFileManager *fm = [NSFileManager defaultManager];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (activeURLConnection) {

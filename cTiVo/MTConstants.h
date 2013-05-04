@@ -41,6 +41,9 @@
 #define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
 #define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated"
 
+//tivodecode bad MAK notification
+#define kMTNotificationBadMAK @"MTNotificationBadMAK"
+
 //Download Status
 #define kMTStatusNew 0
 #define kMTStatusDownloading 1

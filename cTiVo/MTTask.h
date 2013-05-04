@@ -31,7 +31,7 @@
 
 @property (weak, nonatomic) MTDownload *download;
 
-@property (nonatomic, copy) void (^completionHandler)(void);
+@property (nonatomic, copy) void (^completionHandler)(void), (^terminationHandler)(void);
 
 @property (nonatomic, copy) BOOL (^startupHandler)(void);
 
