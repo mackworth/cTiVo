@@ -13,5 +13,6 @@
 @property (weak) IBOutlet NSPopUpButton *masterDebugLevel;
 
 -(IBAction) newMasterValue:(id) sender;
+-(IBAction)selectTmpDir:(id)sender;
 
 @end
