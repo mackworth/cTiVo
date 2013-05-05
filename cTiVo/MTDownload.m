@@ -1162,7 +1162,7 @@ __DDLOGHERE__
 //
 //}
 
--(int)taskTreeValue
+-(int)taskFlowType
 {
   return (int)_exportSubtitles.boolValue + 2.0 * (int)_encodeFormat.canSimulEncode + 4.0 * (int) _skipCommercials + 8.0 * (int) _markCommercials;
 }
