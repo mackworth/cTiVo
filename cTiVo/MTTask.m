@@ -58,11 +58,11 @@ __DDLOGHERE__
 	[self cleanUp];
 	_taskName = taskName;
     if (self.download) {
-        self.logFilePath = [NSString stringWithFormat:@"%@%@%@.txt",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
+        self.logFilePath = [NSString stringWithFormat:@"%@/%@%@.txt",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
 		[[NSFileManager defaultManager] createFileAtPath:_logFilePath contents:[NSData data] attributes:nil];
         self.logFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_logFilePath];
         self.logFileReadHandle	= [NSFileHandle fileHandleForReadingAtPath:_logFilePath];
-        self.errorFilePath = [NSString stringWithFormat:@"%@%@%@.err",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
+        self.errorFilePath = [NSString stringWithFormat:@"%@/%@%@.err",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
 		[[NSFileManager defaultManager] createFileAtPath:_errorFilePath contents:[NSData data] attributes:nil];
         self.errorFileHandle = [NSFileHandle fileHandleForWritingAtPath:_errorFilePath];
         [self setStandardOutput:self.logFileWriteHandle];

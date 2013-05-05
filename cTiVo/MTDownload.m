@@ -550,9 +550,9 @@ __DDLOGHERE__
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
     NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,_encodeFormat.filenameExtension];
-	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@%@.lck" ,tiVoManager.tmpFilesDirectory,baseName];
-	_tivoFilePath = [NSString stringWithFormat:@"%@buffer%@.tivo",tiVoManager.tmpFilesDirectory,baseName];
-	_mpgFilePath = [NSString stringWithFormat:@"%@buffer%@.mpg",tiVoManager.tmpFilesDirectory,baseName];
+	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tiVoManager.tmpFilesDirectory,baseName];
+	_tivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,baseName];
+	_mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,baseName];
     BOOL tivoFileExists = NO;
     if ([fm fileExistsAtPath:_tivoFilePath]) {
         NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
@@ -571,7 +571,7 @@ __DDLOGHERE__
             DDLogReport(@"Found Complete MPG File @ %@",_mpgFilePath);
             mpgFileExists = YES;
             _downloadingShowFromTiVoFile = NO;
-            _downloadingShowFromMPGFile  = YES;
+            _downloadingShowFromMPGFile = YES;
         }
     }
 	if (([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:trialLockFilePath]) && !tivoFileExists  && !mpgFileExists) { //If .tivo file exits assume we will use this and not download.
@@ -622,18 +622,18 @@ __DDLOGHERE__
 	self.baseFileName = [self makeBaseFileNameForDirectory:self.downloadDir];
     if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {  //We need to download from the TiVo
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
-            _bufferFilePath = [NSString stringWithFormat:@"%@buffer%@.bin",tiVoManager.tmpFilesDirectory,self.baseFileName];
+            _bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",tiVoManager.tmpFilesDirectory,self.baseFileName];
            urlBuffer = [NSMutableData new];
             urlReadPointer = 0;
             bufferFileReadHandle = urlBuffer;
         } else {
-            _bufferFilePath = [NSString stringWithFormat:@"%@buffer%@.tivo",tiVoManager.tmpFilesDirectory,self.baseFileName];
+            _bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,self.baseFileName];
             [fm createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
             bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
             bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
         }
     }
-    _decryptBufferFilePath = [NSString stringWithFormat:@"%@buffer%@.mpg",tiVoManager.tmpFilesDirectory,self.baseFileName];
+    _decryptBufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,self.baseFileName];
     if (!_downloadingShowFromMPGFile) {
         [[NSFileManager defaultManager] createFileAtPath:_decryptBufferFilePath contents:[NSData data] attributes:nil];
     }
@@ -641,7 +641,7 @@ __DDLOGHERE__
 	DDLogVerbose(@"setting encodepath: %@", _encodeFilePath);
     captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDir ,self.baseFileName];
     
-    commercialFilePath = [NSString stringWithFormat:@"%@buffer%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version
+    commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version
 
 }
 
@@ -2049,7 +2049,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) shouldSimulEncode {
-    return (_encodeFormat.canSimulEncode && !_skipCommercials && !_downloadingShowFromMPGFile);
+    return (_encodeFormat.canSimulEncode && !_skipCommercials);// && !_downloadingShowFromMPGFile);
 }
 
 -(BOOL) canSkipCommercials {
