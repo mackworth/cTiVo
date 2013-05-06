@@ -881,6 +881,74 @@ audio: mp2 at 192kbs</string>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
+			<string>HandBrake for SD TiVos (e.g. Series 2) using the built-in iPhone &amp; iPad Touch preset equivalent</string>
+			<key>comSkip</key>
+			<false/>
+			<key>edlFlag</key>
+			<string></string>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>encoderUsed</key>
+			<string>HandBrakeCLI</string>
+			<key>name</key>
+			<string>HandBrake iPhone for SD TiVos </string>
+			<key>encoderVideoOptions</key>
+			<string>--width 640 --height 480 -e x264  -q 20.0 -a 1 -E faac -B 128 -6 dpl2 -R Auto -D 0.0 -f mp4 -x cabac=0:ref=2:me=umh:bframes=0:weightp=0:subme=6:8x8dct=0:trellis=0</string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>iTunes</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>regExProgress</key>
+			<string> ([\d.]*?) \% </string>
+			<key>isHidden</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>formatDescription</key>
+			<string>HandBrake for SD TiVos (e.g. Series 2) using the built-in AppleTV  2 preset equivalent</string>
+			<key>comSkip</key>
+			<false/>
+			<key>edlFlag</key>
+			<string></string>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>filenameExtension</key>
+			<string>.m4v</string>
+			<key>encoderUsed</key>
+			<string>HandBrakeCLI</string>
+			<key>name</key>
+			<string>HandBrake AppleTV for SD TiVos </string>
+			<key>encoderVideoOptions</key>
+			<string>--width 640 --height 480 -e x264  -q 20.0 -r 29.97 --pfr  -a 1,1 -E faac,copy:ac3 -B 160,160 -6 dpl2,auto -R Auto,Auto -D 0.0,0.0 -f mp4 -4</string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>iTunes</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>regExProgress</key>
+			<string> ([\d.]*?) \% </string>
+			<key>isHidden</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>formatDescription</key>
 			<string>Test Format for ffmpeg (ffmpeg must be on users system to see this)</string>
 			<key>comSkip</key>
 			<false/>
