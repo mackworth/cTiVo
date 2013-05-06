@@ -509,10 +509,10 @@ __DDLOGHERE__
 												  
 -(NSString*) sizeString {
   
-  if (_fileSize >= 1000000000) {
-	  return[NSString stringWithFormat:@"%0.1fGB",_fileSize/1000000000.0];
+  if (_fileSize >= 1024.0 * 1024.0 * 1024.0) {
+	  return[NSString stringWithFormat:@"%0.1fGB",_fileSize/(1024.0 * 1024.0 * 1024.0)];
   } else if (_fileSize > 0) {
-	  return[NSString stringWithFormat:@"%ldMB",((NSInteger)_fileSize)/1000000 ];
+	  return[NSString stringWithFormat:@"%ldMB",((NSInteger)_fileSize)/(1024 * 1024) ];
   } else {
 	  return @"-";
   }
