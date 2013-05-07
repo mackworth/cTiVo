@@ -1012,6 +1012,7 @@ __DDLOGHERE__
     
     if (_encodeFormat.captionOptions.length) [captionArgs addObjectsFromArray:[self getArguments:_encodeFormat.captionOptions]];
     
+    [captionArgs addObject:@"-bi"];
     [captionArgs addObject:@"-s"];
     //[captionArgs addObject:@"-debug"];
     [captionArgs addObject:@"-"];
