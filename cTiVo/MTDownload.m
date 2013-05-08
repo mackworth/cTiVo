@@ -777,20 +777,24 @@ __DDLOGHERE__
             }
         }
 		NSString *log = [NSString stringWithContentsOfFile:_decryptTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
-		NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
-		if (badMAKRange.location != NSNotFound) {
-			self.show.tiVo.mediaKeyIsGood = NO;
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationBadMAK object:self.show.tiVo];
-		}
+        if (log && log.length > 25 ) {
+            NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
+            if (badMAKRange.location != NSNotFound) {
+                self.show.tiVo.mediaKeyIsGood = NO;
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationBadMAK object:self.show.tiVo];
+            }
+        }
     };
 	
 	decryptTask.terminationHandler = ^(){
 		NSString *log = [NSString stringWithContentsOfFile:_decryptTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
-		NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
-		if (badMAKRange.location != NSNotFound) {
-			self.show.tiVo.mediaKeyIsGood = NO;
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationBadMAK object:self.show.tiVo];
-		}
+        if (log && log.length > 25 ) {
+            NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
+            if (badMAKRange.location != NSNotFound) {
+                self.show.tiVo.mediaKeyIsGood = NO;
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationBadMAK object:self.show.tiVo];
+            }
+        }
 	};
     
     if (_downloadingShowFromTiVoFile) {
@@ -2004,6 +2008,7 @@ __DDLOGHERE__
     //Make sure to flush the last of the buffer file into the pipe and close it.
 	if (!writingData) {
         DDLogVerbose (@"writing last data for %@",self);
+        activeURLConnection = nil;
 		writingData = YES;
 		[self performSelectorInBackground:@selector(writeData) withObject:nil];
 	}
