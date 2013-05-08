@@ -2080,9 +2080,10 @@ __DDLOGHERE__
 }
 
 -(BOOL) canPostDetectCommercials {
-	NSArray * allowedExtensions = @[@".mp4", @".m4v", @".mpg"];
-	NSString * extension = [_encodeFormat.filenameExtension lowercaseString];
-	return [allowedExtensions containsObject: extension];
+    return NO; //This is not working well right now because comskip isn't handling even these formats reliably.
+//	NSArray * allowedExtensions = @[@".mp4", @".m4v", @".mpg"];
+//	NSString * extension = [_encodeFormat.filenameExtension lowercaseString];
+//	return [allowedExtensions containsObject: extension];
 }
 
 
