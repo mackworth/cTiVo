@@ -84,6 +84,7 @@
 										*lengthString,
 										*isQueuedString,
 										*isHDString,
+										*uniqueID,
 										*sizeString;
 @property (weak, nonatomic, readonly) NSAttributedString *actors,
 													*guestStars,

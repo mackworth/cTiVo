@@ -509,10 +509,10 @@ __DDLOGHERE__
 												  
 -(NSString*) sizeString {
   
-  if (_fileSize >= 1024.0 * 1024.0 * 1024.0) {
-	  return[NSString stringWithFormat:@"%0.1fGB",_fileSize/(1024.0 * 1024.0 * 1024.0)];
+  if (_fileSize >= 1000000000) {
+	  return[NSString stringWithFormat:@"%0.1fGB",_fileSize/(1000000000)];
   } else if (_fileSize > 0) {
-	  return[NSString stringWithFormat:@"%ldMB",((NSInteger)_fileSize)/(1024 * 1024) ];
+	  return[NSString stringWithFormat:@"%ldMB",((NSInteger)_fileSize)/(1000000) ];
   } else {
 	  return @"-";
   }
@@ -543,6 +543,16 @@ __DDLOGHERE__
 	}
 }
 
+-(NSString *) uniqueID {
+	if ([_programId hasSuffix:@"0000"] ) {
+		NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init] ;
+		[dateFormat setDateStyle:NSDateFormatterMediumStyle];
+		[dateFormat setTimeStyle:NSDateFormatterNoStyle] ;
+		return [_programId stringByAppendingString:[dateFormat stringFromDate: _showDate] ];
+	} else {
+		return _programId;
+	}
+}
 
 												  
 
