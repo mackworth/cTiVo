@@ -455,6 +455,10 @@ __DDLOGHERE__
 	[[mainWindowController tiVoShowTable] findShows:sender];
 }
 
+- (IBAction)clearHistory:(id)sender {
+	[[mainWindowController downloadQueueTable] clearHistory:sender];
+}
+
 
 #pragma mark - Preference pages
 -(IBAction)editFormats:(id)sender

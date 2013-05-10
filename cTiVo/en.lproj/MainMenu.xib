@@ -402,6 +402,25 @@
 									<reference key="NSOnImage" ref="35465992"/>
 									<reference key="NSMixedImage" ref="502551668"/>
 								</object>
+								<object class="NSMenuItem" id="806283847">
+									<reference key="NSMenu" ref="167382952"/>
+									<string key="NSTitle">Clear Completed History...</string>
+									<string key="NSKeyEquiv">e</string>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="35465992"/>
+									<reference key="NSMixedImage" ref="502551668"/>
+								</object>
+								<object class="NSMenuItem" id="846226582">
+									<reference key="NSMenu" ref="167382952"/>
+									<bool key="NSIsDisabled">YES</bool>
+									<bool key="NSIsSeparator">YES</bool>
+									<string key="NSTitle"/>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="35465992"/>
+									<reference key="NSMixedImage" ref="502551668"/>
+								</object>
 								<object class="NSMenuItem" id="149633026">
 									<reference key="NSMenu" ref="167382952"/>
 									<string key="NSTitle">Edit Formats...</string>
@@ -1232,6 +1251,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
+						<string key="label">clearHistory:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="806283847"/>
+					</object>
+					<int key="connectionID">1135</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
 						<string key="label">checkForUpdates:</string>
 						<reference key="source" ref="56197990"/>
 						<reference key="destination" ref="609285721"/>
@@ -1435,6 +1462,22 @@
 						</object>
 					</object>
 					<int key="connectionID">1123</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: tiVoGlobalManager.anyShowsCompleted</string>
+						<reference key="source" ref="806283847"/>
+						<reference key="destination" ref="976324537"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="806283847"/>
+							<reference key="NSDestination" ref="976324537"/>
+							<string key="NSLabel">enabled: tiVoGlobalManager.anyShowsCompleted</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">tiVoGlobalManager.anyShowsCompleted</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">1138</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1710,6 +1753,8 @@
 							<reference ref="160212896"/>
 							<reference ref="908528583"/>
 							<reference ref="1005171141"/>
+							<reference ref="846226582"/>
+							<reference ref="806283847"/>
 						</array>
 						<reference key="parent" ref="712013196"/>
 					</object>
@@ -2088,6 +2133,16 @@
 						<reference key="object" ref="726919820"/>
 						<reference key="parent" ref="135398297"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1130</int>
+						<reference key="object" ref="846226582"/>
+						<reference key="parent" ref="167382952"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1131</int>
+						<reference key="object" ref="806283847"/>
+						<reference key="parent" ref="167382952"/>
+					</object>
 				</array>
 			</object>
 			<dictionary class="NSMutableDictionary" key="flattenedProperties">
@@ -2200,6 +2255,16 @@
 					</object>
 				</object>
 				<string key="1120.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="1130.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<object class="NSMutableDictionary" key="1131.IBAttributePlaceholdersKey">
+					<string key="NS.key.0">ToolTip</string>
+					<object class="IBToolTipAttribute" key="NS.object.0">
+						<string key="name">ToolTip</string>
+						<reference key="object" ref="806283847"/>
+						<string key="toolTip">Edit custom formats and menu</string>
+					</object>
+				</object>
+				<string key="1131.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="129.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="130.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="131.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2353,7 +2418,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">1129</int>
+			<int key="maxID">1138</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -2361,11 +2426,16 @@
 					<string key="className">MTAppDelegate</string>
 					<string key="superclassName">NSObject</string>
 					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="clearHistory:">id</string>
 						<string key="editFormats:">id</string>
 						<string key="findShows:">id</string>
 						<string key="togglePause:">id</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="clearHistory:">
+							<string key="name">clearHistory:</string>
+							<string key="candidateClassName">id</string>
+						</object>
 						<object class="IBActionInfo" key="editFormats:">
 							<string key="name">editFormats:</string>
 							<string key="candidateClassName">id</string>

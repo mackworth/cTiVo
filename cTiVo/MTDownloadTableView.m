@@ -398,6 +398,8 @@ __DDLOGHERE__
 		textVal = thisShow.sizeString;
 	} else if ([tableColumn.identifier isEqualToString:@"TiVoID"]) {
 		textVal = thisShow.idString;
+	} else if ([tableColumn.identifier isEqualToString:@"UniqueID"]) {
+		textVal = thisShow.uniqueID;
 	} else if ([tableColumn.identifier isEqualToString:@"Title"]) {
 		textVal = thisShow.episodeTitle;
 	} else if ([tableColumn.identifier isEqualToString:@"Station"]) {
@@ -538,6 +540,15 @@ __DDLOGHERE__
 	
 }
 
+- (IBAction)clearHistory:(id)sender {
+	NSString *message = @"Are you sure you want to delete history of completed downloads?";
+	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Delete" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@""];
+	NSInteger returnValue = [insertDownloadAlert runModal];
+	if (returnValue == 1) {
+		DDLogDetail(@"User did clear history");
+		[tiVoManager clearDownloadHistory];
+	}
+}
 
 -(BOOL)playVideo
 {

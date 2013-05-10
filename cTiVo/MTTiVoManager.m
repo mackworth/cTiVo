@@ -553,6 +553,35 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	return NO;
 }
 
+-(BOOL) anyShowsCompleted {
+	for (MTDownload * show in tiVoManager.downloadQueue) {
+		if (show.isDone) {
+			return YES; //no real need to count them all
+		}
+	}
+	return NO;
+}
+
+-(void) clearDownloadHistory {
+	NSMutableIndexSet * itemsToRemove= [NSMutableIndexSet indexSet];
+	for (unsigned int index = 0;index< tiVoManager.downloadQueue.count; index++) {
+		MTDownload * download = tiVoManager.downloadQueue[index];
+		if (download.isDone) {
+			[itemsToRemove addIndex:index];
+		}
+	}
+
+	if (itemsToRemove.count > 0) {
+		DDLogVerbose(@"Deleted history: %@", itemsToRemove);
+		[_downloadQueue removeObjectsAtIndexes:itemsToRemove];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+	} else {
+		DDLogDetail(@"No history to delete?");
+		
+	}
+
+}
+
 -(void)pauseQueue:(NSNumber *)askUser
 {
 	self.processingPaused = @(YES);

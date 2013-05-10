@@ -25,4 +25,5 @@
 -(BOOL)revealInFinder;
 -(BOOL)selectionContainsCompletedShows;
 
+- (IBAction)clearHistory:(id)sender;
 @end

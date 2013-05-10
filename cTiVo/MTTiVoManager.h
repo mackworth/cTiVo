@@ -41,6 +41,7 @@
 @property (nonatomic, strong) NSWindow *mainWindow;
 @property (nonatomic, strong) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
 @property (nonatomic, strong) NSDictionary *showsOnDisk;
+@property (nonatomic, readonly) BOOL anyShowsCompleted;
 
 
 + (MTTiVoManager *)sharedTiVoManager;
@@ -58,6 +59,7 @@
 
 -(MTDownload *) findInDownloadQueue: (MTTiVoShow *) show;
 -(BOOL) anyShowsWaiting;
+-(void) clearDownloadHistory;
 
 -(MTDownload *) findRealDownload: (MTDownload *) proxyDownload;
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget;

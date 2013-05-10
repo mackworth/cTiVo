@@ -38,5 +38,6 @@
 -(IBAction)togglePause:(id)sender;
 -(IBAction)editFormats:(id)sender;
 - (IBAction)findShows:(id)sender;
+- (IBAction)clearHistory:(id)sender;
 
 @end

@@ -544,7 +544,7 @@ __DDLOGHERE__
 }
 
 -(NSString *) uniqueID {
-	if ([_programId hasSuffix:@"0000"] ) {
+	if (![_programId hasPrefix:@"MV"] && [_programId hasSuffix:@"0000"] ) {
 		NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init] ;
 		[dateFormat setDateStyle:NSDateFormatterMediumStyle];
 		[dateFormat setTimeStyle:NSDateFormatterNoStyle] ;
