@@ -154,7 +154,7 @@ __DDLOGHERE__
 
 -(void) trackProcess
 {
-	DDLogVerbose(@"Tracking %@",_taskName);
+	DDLogVerbose(@"Tracking %@ for show %@",_taskName,_download.show.showTitle);
 	if (![self.task isRunning]) {
         [self completeProcess];
 	} else {

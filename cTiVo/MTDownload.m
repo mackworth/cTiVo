@@ -1042,6 +1042,7 @@ __DDLOGHERE__
     }
     MTTask *commercialTask = [MTTask taskWithName:@"commercial" download:self completionHandler:nil];
   	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]];
+    commercialTask.successfulExitCode = 1;
     commercialTask.requiresOutputPipe = NO;
     commercialTask.requiresInputPipe = NO;
     [commercialTask setStandardError:commercialTask.logFileWriteHandle];  //progress data is in err output
@@ -1113,7 +1114,7 @@ __DDLOGHERE__
 	NSMutableArray *arguments = [NSMutableArray array];
     if (_encodeFormat.comSkipOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.comSkipOptions]];
     NSRange iniRange = [_encodeFormat.comSkipOptions rangeOfString:@"--ini="];
-	[arguments addObject:[NSString stringWithFormat: @"--output=%@",[commercialFilePath stringByDeletingLastPathComponent]]];  //0.92 version
+//	[arguments addObject:[NSString stringWithFormat: @"--output=%@",[commercialFilePath stringByDeletingLastPathComponent]]];  //0.92 version
     if (iniRange.location == NSNotFound) {
         [arguments addObject:[NSString stringWithFormat: @"--ini=%@",[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@"ini"]]];
     }
