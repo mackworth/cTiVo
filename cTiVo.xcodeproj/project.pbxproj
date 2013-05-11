@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */; };
 		1E0C5DD9170236B30015C55D /* recent-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E0C5DD8170236B30015C55D /* recent-recording.png */; };
-		1E15E71016B4F88F00508BEC /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E15E70B16B4F88F00508BEC /* DDLog.m */; };
 		1E18145E1708AC1500166E5F /* cTiVo.help in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145D1708AC1500166E5F /* cTiVo.help */; };
 		1E1814601708AF7000166E5F /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145F1708AF7000166E5F /* cTiVo.icns */; };
 		1E2724EF16C9A8B500A21940 /* elgatoScript.pl in Resources */ = {isa = PBXBuildFile; fileRef = 1E2724EE16C9A8B500A21940 /* elgatoScript.pl */; };
@@ -28,6 +27,9 @@
 		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
 		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
 		1E7F5ADB1701877A003AA96C /* in-progress-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7F5ADA1701877A003AA96C /* in-progress-recording.png */; };
+		1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C3173DC7D100B47539 /* DDFileLogger.m */; };
+		1E9959C9173DC7D100B47539 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C5173DC7D100B47539 /* DDLog.m */; };
+		1E9959CA173DC7D100B47539 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C7173DC7D100B47539 /* DDTTYLogger.m */; };
 		1EABE6F416B0A254004DDB61 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
@@ -117,8 +119,6 @@
 /* Begin PBXFileReference section */
 		1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowDrawer.xib; sourceTree = "<group>"; };
 		1E0C5DD8170236B30015C55D /* recent-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "recent-recording.png"; sourceTree = "<group>"; };
-		1E15E70A16B4F88F00508BEC /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
-		1E15E70B16B4F88F00508BEC /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		1E18145D1708AC1500166E5F /* cTiVo.help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cTiVo.help; sourceTree = "<group>"; };
 		1E18145F1708AF7000166E5F /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cTiVo.icns; sourceTree = "<group>"; };
 		1E2724EE16C9A8B500A21940 /* elgatoScript.pl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.perl; path = elgatoScript.pl; sourceTree = "<group>"; };
@@ -143,6 +143,12 @@
 		1E791BD21697C59300E47E84 /* MTSubscription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscription.h; sourceTree = "<group>"; };
 		1E791BD31697C59300E47E84 /* MTSubscription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscription.m; sourceTree = "<group>"; };
 		1E7F5ADA1701877A003AA96C /* in-progress-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "in-progress-recording.png"; sourceTree = "<group>"; };
+		1E9959C2173DC7D100B47539 /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
+		1E9959C3173DC7D100B47539 /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
+		1E9959C4173DC7D100B47539 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
+		1E9959C5173DC7D100B47539 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
+		1E9959C6173DC7D100B47539 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
+		1E9959C7173DC7D100B47539 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
 		1EABE6F316B0A254004DDB61 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = cTiVo/Growl.framework; sourceTree = "<group>"; };
 		1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Growl Registration Ticket.growlRegDict"; sourceTree = "<group>"; };
 		1EFD685A16D19AA100CC36E5 /* ccextractor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ccextractor; sourceTree = "<group>"; };
@@ -312,6 +318,19 @@
 			name = "Custom NSViews";
 			sourceTree = "<group>";
 		};
+		1E9959C1173DC73500B47539 /* DDLogger */ = {
+			isa = PBXGroup;
+			children = (
+				1E9959C2173DC7D100B47539 /* DDFileLogger.h */,
+				1E9959C3173DC7D100B47539 /* DDFileLogger.m */,
+				1E9959C4173DC7D100B47539 /* DDLog.h */,
+				1E9959C5173DC7D100B47539 /* DDLog.m */,
+				1E9959C6173DC7D100B47539 /* DDTTYLogger.h */,
+				1E9959C7173DC7D100B47539 /* DDTTYLogger.m */,
+			);
+			name = DDLogger;
+			sourceTree = "<group>";
+		};
 		1EE4418016A4E64800796897 /* UI Classes- Format Edit */ = {
 			isa = PBXGroup;
 			children = (
@@ -448,6 +467,7 @@
 				D2DFA68B1683B9EC00CD6CE0 /* iTunesInterface */,
 				D2D60BBE16766F1100CE32DE /* Resources */,
 				D2D60BA816766EFD00CE32DE /* Supporting Files */,
+				1E9959C1173DC73500B47539 /* DDLogger */,
 				D2D60BDF16766FB100CE32DE /* Utilities */,
 			);
 			path = cTiVo;
@@ -513,8 +533,6 @@
 				D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */,
 				D202E09F169778DA00514213 /* MTiTivoImport.h */,
 				D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */,
-				1E15E70A16B4F88F00508BEC /* DDLog.h */,
-				1E15E70B16B4F88F00508BEC /* DDLog.m */,
 				1E45C8F116E11E59005C5334 /* MTStringEmpty.h */,
 				1E45C8F216E11E59005C5334 /* MTStringEmpty.m */,
 			);
@@ -748,7 +766,6 @@
 				D27579BD16B4DC2B0090D137 /* MTPreferencesWindowController.m in Sources */,
 				D27579C216B575A30090D137 /* MTTabViewItem.m in Sources */,
 				D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */,
-				1E15E71016B4F88F00508BEC /* DDLog.m in Sources */,
 				1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */,
 				1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */,
 				1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */,
@@ -759,6 +776,9 @@
 				D291436F1713467F00CE3202 /* GTMNSString+HTML.m in Sources */,
 				D2C6BB5A1714681C00289751 /* MTTask.m in Sources */,
 				D2ED1BBB1715C3BF00742F18 /* MTTaskChain.m in Sources */,
+				1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */,
+				1E9959C9173DC7D100B47539 /* DDLog.m in Sources */,
+				1E9959CA173DC7D100B47539 /* DDTTYLogger.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

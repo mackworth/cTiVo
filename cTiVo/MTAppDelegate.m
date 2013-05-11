@@ -8,6 +8,11 @@
 
 #import "MTAppDelegate.h"
 #import "MTTiVo.h"
+
+#import "DDLog.h"
+#import "DDTTYLogger.h"
+#import "DDFileLogger.h"
+
 #import <IOKit/pwr_mgt/IOPMLib.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -127,8 +132,23 @@ __DDLOGHERE__
 	// Insert code here to initialize your application
 	
 	//	[[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTMediaKeys];  //Test code for starting from scratch
-	
-	DDLogDetail(@"Starting Program");
+
+	[DDLog addLogger:[DDTTYLogger sharedInstance]];
+    [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
+#define MakeColor(r, g, b) [NSColor colorWithCalibratedRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f]
+	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(80,0,0) backgroundColor:nil forFlag:LOG_FLAG_REPORT];
+	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(160,0,0) backgroundColor:nil forFlag:LOG_FLAG_MAJOR];
+	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(0,128,0)  backgroundColor:nil forFlag:LOG_FLAG_DETAIL];
+	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(160,160,160)  backgroundColor:nil forFlag:LOG_FLAG_VERBOSE];
+	// Initialize File Logger
+    DDFileLogger *fileLogger = [[DDFileLogger alloc] init];
+    // Configure File Logger
+    [fileLogger setMaximumFileSize:(10 * 1024 * 1024)];
+    [fileLogger setRollingFrequency:(3600.0 * 24.0)];
+    [[fileLogger logFileManager] setMaximumNumberOfLogFiles:3];
+    [DDLog addLogger:fileLogger];
+
+	DDLogReport(@"Starting cTiVo");
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationBadMAK object:nil];
