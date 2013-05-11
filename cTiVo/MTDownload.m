@@ -1042,7 +1042,7 @@ __DDLOGHERE__
     }
     MTTask *commercialTask = [MTTask taskWithName:@"commercial" download:self completionHandler:nil];
   	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]];
-    commercialTask.successfulExitCode = 1;
+    commercialTask.successfulExitCodes = @[@0, @1];
     commercialTask.requiresOutputPipe = NO;
     commercialTask.requiresInputPipe = NO;
     [commercialTask setStandardError:commercialTask.logFileWriteHandle];  //progress data is in err output

@@ -41,7 +41,9 @@
 
 @property BOOL requiresInputPipe, requiresOutputPipe;
 
-@property int successfulExitCode, pid;
+@property int pid;
+
+@property (nonatomic, strong) NSArray *successfulExitCodes;
 
 +(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download;
 +(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download completionHandler:(void(^)(void))completionHandler;

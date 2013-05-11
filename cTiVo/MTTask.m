@@ -45,7 +45,7 @@ __DDLOGHERE__
 		_nextTaskChain = nil;
         _requiresInputPipe = YES;
         _requiresOutputPipe = YES;
-		_successfulExitCode = 0;
+		_successfulExitCodes = @[@0];
     }
     return self;
 }
@@ -134,7 +134,7 @@ __DDLOGHERE__
     DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
     //		_download.processProgress = 1.0;
     //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-    if (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal || _task.terminationStatus != _successfulExitCode) {
+    if (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal || ![self succcessfulExit]) {
         [self cleanUp];
         _nextTaskChain = nil;
         if (!_download.isCanceled) [_download rescheduleShowWithDecrementRetries:@YES];
@@ -149,6 +149,18 @@ __DDLOGHERE__
         }
     }
     
+}
+
+-(BOOL)succcessfulExit
+{
+	BOOL ret = NO;
+	for (NSNumber *exitCode in _successfulExitCodes) {
+		if ([exitCode intValue] == _task.terminationStatus) {
+			ret = YES;
+			break;
+		}
+	}
+	return ret;
 }
 
 
