@@ -126,7 +126,7 @@ __DDLOGHERE__
 
 			newDownload.exportSubtitles = subscription.exportSubtitles;
 			newDownload.skipCommercials = newDownload.encodeFormat.comSkip.boolValue && subscription.skipCommercials.boolValue;
-			newDownload.skipCommercials = newDownload.encodeFormat.canMarkCommercials && subscription.canMarkCommercials;
+			newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials && subscription.canMarkCommercials;
 			newDownload.genTextMetaData = subscription.genTextMetaData;
 			newDownload.genXMLMetaData = subscription.genXMLMetaData;
 			newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && subscription.includeAPMMetaData.boolValue)];

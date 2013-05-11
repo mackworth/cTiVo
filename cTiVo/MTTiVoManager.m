@@ -568,6 +568,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		MTDownload * download = tiVoManager.downloadQueue[index];
 		if (download.isDone) {
 			[itemsToRemove addIndex:index];
+			download.show.isQueued = NO;
 		}
 	}
 

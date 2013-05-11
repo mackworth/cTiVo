@@ -12,6 +12,7 @@
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 #import "DDFileLogger.h"
+#import "MTLogFormatter.h"
 
 #import <IOKit/pwr_mgt/IOPMLib.h>
 #include <ctype.h>
@@ -132,9 +133,12 @@ __DDLOGHERE__
 	// Insert code here to initialize your application
 	
 	//	[[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTMediaKeys];  //Test code for starting from scratch
+	MTLogFormatter * logFormat = [MTLogFormatter new];
 
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
-    [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
+	[[DDTTYLogger sharedInstance] setLogFormatter:logFormat];
+	
+	[[DDTTYLogger sharedInstance] setColorsEnabled:YES];
 #define MakeColor(r, g, b) [NSColor colorWithCalibratedRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f]
 	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(80,0,0) backgroundColor:nil forFlag:LOG_FLAG_REPORT];
 	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(160,0,0) backgroundColor:nil forFlag:LOG_FLAG_MAJOR];
@@ -146,6 +150,7 @@ __DDLOGHERE__
     [fileLogger setMaximumFileSize:(10 * 1024 * 1024)];
     [fileLogger setRollingFrequency:(3600.0 * 24.0)];
     [[fileLogger logFileManager] setMaximumNumberOfLogFiles:3];
+	[fileLogger setLogFormatter:logFormat];
     [DDLog addLogger:fileLogger];
 
 	DDLogReport(@"Starting cTiVo");
