@@ -26,6 +26,26 @@
     return self;
 }
 
+-(IBAction)selectTmpDir:(id)sender
+{
+	NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
+	myOpenPanel.canChooseFiles = NO;
+	myOpenPanel.canChooseDirectories = YES;
+	myOpenPanel.canCreateDirectories = YES;
+	myOpenPanel.prompt = @"Choose";
+	myOpenPanel.directoryURL = [NSURL fileURLWithPath:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTmpFilesDirectory]];
+	[myOpenPanel setTitle:@"Select Temp Directory for Files"];
+	[myOpenPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSInteger ret){
+		if (ret == NSFileHandlingPanelOKButton) {
+			NSString *directoryName = myOpenPanel.URL.path;
+			[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
+		}
+		[myOpenPanel close];
+	}];
+	
+}
+
+
 -(NSTextField *) newTextField: (NSRect) frame {
 	NSTextField *textField;
 	

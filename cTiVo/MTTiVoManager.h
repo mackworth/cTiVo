@@ -29,15 +29,19 @@
 @property (nonatomic, strong) NSMutableArray *subscribedShows;
 
 @property (nonatomic, strong) NSString *downloadDirectory;
+@property (nonatomic, weak, readonly) NSString *tmpFilesDirectory;
 @property (weak, readonly) NSString *defaultDownloadDirectory;
+
+@property int volatile signalError;
 
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic, strong) MTFormat *selectedFormat;
-@property (nonatomic) int numEncoders, totalShows, numCommercials, numCaptions;//Want to limit launches to two encoders.
+@property (nonatomic) int numEncoders, totalShows; // numCommercials, numCaptions;//Want to limit launches to two encoders.
 @property (nonatomic, strong) NSWindow *mainWindow;
 @property (nonatomic, strong) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
 @property (nonatomic, strong) NSDictionary *showsOnDisk;
+@property (nonatomic, readonly) BOOL anyShowsCompleted;
 
 
 + (MTTiVoManager *)sharedTiVoManager;
@@ -55,6 +59,7 @@
 
 -(MTDownload *) findInDownloadQueue: (MTTiVoShow *) show;
 -(BOOL) anyShowsWaiting;
+-(void) clearDownloadHistory;
 
 -(MTDownload *) findRealDownload: (MTDownload *) proxyDownload;
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget;

@@ -34,7 +34,7 @@
     double percentComplete;
     MTDownloadTableCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
 	NSArray *factoryFormatList;
-    int numEncoders, numCommercials, numCaptions;//Want to limit launches to two encoders.
+    int numEncoders;// numCommercials, numCaptions;//Want to limit launches to two encoders.
 	
     BOOL volatile updatingVideoList;
 	
@@ -44,14 +44,14 @@
 }
 
 @property (strong) MTNetService *updatingTiVo;
-@property (nonatomic, strong) NSArray *hostAddresses;
+//@property (nonatomic, strong) NSArray *hostAddresses;
 
 @end
 
 
 @implementation MTTiVoManager
 
-@synthesize subscribedShows = _subscribedShows, numEncoders, numCommercials, numCaptions, tiVoList = _tiVoList;
+@synthesize subscribedShows = _subscribedShows, numEncoders, tiVoList = _tiVoList;
 
 __DDLOGHERE__
 
@@ -187,7 +187,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		programDownloading = nil;
 		downloadURLConnection = nil;
 		programListURLConnection = nil;
-        _hostAddresses = nil;
+//        _hostAddresses = nil;
 		downloadFile = nil;
 		decryptingTask = nil;
 		encodingTask = nil;
@@ -198,8 +198,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		encodeTableCell = nil;
 		
 		numEncoders = 0;
-		numCommercials = 0;
-		numCaptions = 0;
+//		numCommercials = 0;
+//		numCaptions = 0;
+		_signalError = 0;
 		queue.maxConcurrentOperationCount = 1;
 		
         updatingVideoList = NO;
@@ -450,16 +451,16 @@ static MTTiVoManager *sharedTiVoManager = nil;
     [tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
 }
 
--(NSArray *)hostAddresses
-{
-    NSArray *ret = _hostAddresses;
-    if (!_hostAddresses) {
-        self.hostAddresses = [[NSHost currentHost] addresses];
-		DDLogDetail(@"Host Addresses:  %@",self.hostAddresses);
-        ret = _hostAddresses;
-    }
-    return ret;
-}
+//-(NSArray *)hostAddresses
+//{
+//    NSArray *ret = _hostAddresses;
+//    if (!_hostAddresses) {
+//        self.hostAddresses = [[NSHost currentHost] addresses];
+//		DDLogDetail(@"Host Addresses:  %@",self.hostAddresses);
+//        ret = _hostAddresses;
+//    }
+//    return ret;
+//}
 
 -(NSArray *)tiVoAddresses
 {
@@ -494,14 +495,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	DDLogVerbose(@"setting tivoManager notifications");
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
     
-    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeDidFinish object:nil];
-    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
-    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
-    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialWasCanceled object:nil];
-    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionDidFinish object:nil];
-    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
+    [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadDidFinish object:nil];
+    [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadWasCanceled object:nil];
+//    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
+//    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
+//    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialWasCanceled object:nil];
+//    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionDidFinish object:nil];
+//    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
-    [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationEncodeDidFinish object:nil];
+    [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationShowDownloadDidFinish object:nil];
     
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTQueuePaused options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
@@ -549,6 +551,36 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 	}
 	return NO;
+}
+
+-(BOOL) anyShowsCompleted {
+	for (MTDownload * show in tiVoManager.downloadQueue) {
+		if (show.isDone) {
+			return YES; //no real need to count them all
+		}
+	}
+	return NO;
+}
+
+-(void) clearDownloadHistory {
+	NSMutableIndexSet * itemsToRemove= [NSMutableIndexSet indexSet];
+	for (unsigned int index = 0;index< tiVoManager.downloadQueue.count; index++) {
+		MTDownload * download = tiVoManager.downloadQueue[index];
+		if (download.isDone) {
+			[itemsToRemove addIndex:index];
+			download.show.isQueued = NO;
+		}
+	}
+
+	if (itemsToRemove.count > 0) {
+		DDLogVerbose(@"Deleted history: %@", itemsToRemove);
+		[_downloadQueue removeObjectsAtIndexes:itemsToRemove];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+	} else {
+		DDLogDetail(@"No history to delete?");
+		
+	}
+
 }
 
 -(void)pauseQueue:(NSNumber *)askUser
@@ -910,10 +942,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		newDownload.exportSubtitles = [defaults objectForKey:kMTExportSubtitles];
 		newDownload.addToiTunesWhenEncoded = newDownload.encodeFormat.canAddToiTunes &&
 											[defaults boolForKey:kMTiTunesSubmit];
-		newDownload.simultaneousEncode = newDownload.encodeFormat.canSimulEncode &&
-											[defaults boolForKey:kMTSimultaneousEncode];
+//		newDownload.simultaneousEncode = newDownload.encodeFormat.canSimulEncode &&
+//											[defaults boolForKey:kMTSimultaneousEncode];
 		newDownload.skipCommercials = [newDownload.encodeFormat.comSkip boolValue] &&
 											[defaults boolForKey:@"RunComSkip"];
+		newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials &&
+											[defaults boolForKey:@"MarkCommercials"];
 		newDownload.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
 		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 		newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && [defaults boolForKey:kMTExportAtomicParsleyMetaData])];
@@ -939,7 +973,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 		if (index != NSNotFound) {
 			MTDownload *oldDownload = _downloadQueue[index];
-			[oldDownload cancel];
+            [oldDownload cancel];
 			oldDownload.show.isQueued = NO;
 			[itemsToRemove addIndex:index];
 		}
@@ -1077,15 +1111,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 
--(void)encodeFinished
+-(void)encodeFinished:(NSNotification *)notification
 {
 	numEncoders--;
+    DDLogMajor(@"Num encoders after decrement from notification %@ is %d ",notification.name,numEncoders);
 	if ([_quitWhenCurrentDownloadsComplete boolValue] && ![self tiVosProcessing]) {
 		//Quit here
 		[NSApp terminate:nil];
 	}
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-    DDLogMajor(@"num decoders after decrement is %d",numEncoders);
+//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
 }
 
 -(BOOL)tiVosProcessing
@@ -1100,19 +1134,19 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	return returnValue;
 }
 
--(void)commercialFinished
-{
-	numCommercials--;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-    DDLogMajor(@"num commercials after decrement is %d",numCommercials);
-}
-
--(void)captionFinished
-{
-	numCaptions--;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-    DDLogMajor(@"num captions after decrement is %d",numCaptions);
-}
+//-(void)commercialFinished
+//{
+//	numCommercials--;
+//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+//    DDLogMajor(@"num commercials after decrement is %d",numCommercials);
+//}
+//
+//-(void)captionFinished
+//{
+//	numCaptions--;
+//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+//    DDLogMajor(@"num captions after decrement is %d",numCaptions);
+//}
 
 -(void)writeDownloadQueueToUserDefaults {
 	NSMutableArray * downloadArray = [NSMutableArray arrayWithCapacity:_downloadQueue.count];
@@ -1175,6 +1209,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 }
 
+-(NSString *)tmpFilesDirectory {
+
+    return [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
+ 
+}
+
 #pragma mark - Memory Management
 
 
@@ -1208,44 +1248,144 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 #pragma mark - NetService delegate methods
 
+
+//#include <ifaddrs.h>
+//- (BOOL)isIPSelf:(NSData *)dataIn {
+//	struct sockaddr *realSocketAddress = (struct sockaddr *)[dataIn bytes];
+//	struct ifaddrs *ifap, *ifp;
+//
+//	if(getifaddrs(&ifap) < 0) {
+//		DDLogMajor (@"getifaddr error: %d",getifaddrs(&ifap));
+//		return NO;
+//	}
+//	
+//	for(ifp = ifap; ifp; ifp = ifp->ifa_next) {
+//		sa_family_t targetFamily = ifp->ifa_addr->sa_family;
+//		if (realSocketAddress->sa_family == targetFamily) {
+//			switch (targetFamily) {
+//				case AF_INET: {
+//					struct sockaddr_in  *socketAddress = (struct sockaddr_in *)realSocketAddress;
+//					struct in_addr targetAddress = socketAddress->sin_addr;
+//					struct in_addr myAddress = ((struct sockaddr_in*)ifp->ifa_addr)->sin_addr;
+//					DDLogVerbose(@"Checking iPv4: %s-%s (%u) vs  %u",inet_ntoa(myAddress), ifp->ifa_name, myAddress.s_addr, targetAddress.s_addr);
+//					if (myAddress.s_addr ==targetAddress.s_addr) {
+//						freeifaddrs(ifap);
+//						return YES;
+//					}
+//					break;
+//				}
+//				case AF_INET6: {
+//					struct sockaddr_in6  *socketAddress6= (struct sockaddr_in6 *)realSocketAddress;
+//					struct in6_addr targetAddress = socketAddress6->sin6_addr;
+//					struct in6_addr myAddress = ((struct sockaddr_in6*)ifp->ifa_addr)->sin6_addr;
+//					char myDest[INET6_ADDRSTRLEN];
+//					inet_ntop(AF_INET6, &targetAddress, myDest, sizeof myDest);
+//					
+//					char targetDest[INET6_ADDRSTRLEN];
+//					inet_ntop(AF_INET6, &targetAddress, targetDest, sizeof targetDest);
+//					
+//					DDLogVerbose(@"Checking: %s-%s",myDest, targetDest);
+//
+//					if (memcmp(&myAddress, &targetAddress, sizeof(myAddress))==0) {
+//						freeifaddrs(ifap);
+//						return YES;
+//					}
+//						break;
+//				}
+//				default: {
+//					DDLogVerbose(@"Unrecognized IP family: %d",targetFamily);
+//				}
+//			}
+//		}
+//	}
+//	// Free memory
+//	freeifaddrs(ifap);
+//	
+//	return NO;
+//}
+
+- (NSString *)dataToString:(NSData *) data {
+    // Helper for getting information from the TXT data
+    NSString *resultString = nil;
+    if (data) {
+        resultString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    }
+    return resultString;
+}
+
 - (void)netServiceDidResolveAddress:(NSNetService *)sender
 {
-	NSString *ipAddress = @"";
-	if ([sender addresses] && [sender addresses].count) {
-		ipAddress = [self getStringFromAddressData:[sender addresses][0]];
-		
+	NSArray * addresses = [sender addresses];
+	if (addresses.count == 0) return;
+	if (addresses.count > 1) {
+		DDLogDetail(@"more than one IP address: %@",addresses);
 	}
+	NSString *ipAddress = [self getStringFromAddressData:addresses[0]];
+		
 //    if (_tiVoList.count == 1) {  //Test code for single tivo testing
 //        return;
 //    }
-	DDLogDetail(@"Checking hostAddresses for %@",ipAddress);
-
-	for (NSString *hostAddress in self.hostAddresses) {
-		if ([hostAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
-			return;  // This filters out PyTivo instances on the current host
-		}
+//		DDLogDetail(@"Checking hostAddresses for %@",ipAddress);
+//	for (NSString *hostAddress in self.hostAddresses) { //older, slower routine
+//		if ([hostAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
+//			return;  
+//		}
+//	}
+//	for (NSData * addr in addresses) {
+//		// This filters out PyTivo instances on the current host
+//		if ([self isIPSelf:addr]) {
+//			DDLogDetail(@"Found self at %@",ipAddress);
+//			//return;
+//		}
+//	}
+	NSDictionary * TXTRecord = [NSNetService dictionaryFromTXTRecordData:sender.TXTRecordData ];
+	for (NSString * key in [TXTRecord allKeys]) {
+		DDLogDetail(@"TXTKey: %@ = %@", key, [self dataToString:TXTRecord[key]]);
 	}
 
+	NSString * platform = [self dataToString:TXTRecord[@"platform"]];
+	NSString * TSN = [self dataToString:TXTRecord[@"tsn"]];
+	NSString * identity = [self dataToString:TXTRecord[@"identity"]];
+
+	if ([TSN hasPrefix:@"A94"] || [identity hasPrefix:@"A94"]) {
+		DDLogDetail(@"Found Stream %@ - %@(%@); rejecting",TSN, sender.name, ipAddress);
+		return;
+	}
+	if ([platform hasSuffix:@"pyTivo"]) {
+		//filter out pyTivo
+		DDLogDetail(@"Found pyTivo %@(%@); rejecting ",sender.name,ipAddress);
+		return;
+	}
+	
+	if (!TSN || TSN.length == 0) {
+		DDLogDetail(@"No TSN; rejecting TiVo %@(%@)",sender.name,ipAddress);
+		return;
+	}
+
+	if (platform && ![platform hasPrefix:@"tcd"]) {
+		//filter out other non-tivos
+		DDLogDetail(@"Invalid TiVo platform %@; rejecting %@(%@) ",platform, sender.name,ipAddress);
+		return;
+	}
+	
 	for (NSString *tiVoAddress in [self tiVoAddresses]) {
-		DDLogVerbose(@"Comparing tiVo %@ address %@ to ipaddress %@",sender.name,tiVoAddress,ipAddress);
+		DDLogVerbose(@"Comparing TiVo %@ address %@ to ipaddress %@",sender.name,tiVoAddress,ipAddress);
 		if ([tiVoAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
+			DDLogDetail(@"Found duplicate TiVo at %@",ipAddress);
 			return;  // This filters out tivos that have already been found from a manual entry
 		}
 	}
     
-    if ([sender.name rangeOfString:@"Py"].location == NSNotFound) {
-        MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
-      
-        self.tiVoList = [self.tiVoList arrayByAddingObject: newTiVo];
-		if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
-			[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
-		}
-		DDLogMajor(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
-    } else {
-		DDLogMajor(@"PyAddress: %@ not in hostAddresses = %@", ipAddress, self.hostAddresses);
-    }
+	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
+  
+	self.tiVoList = [self.tiVoList arrayByAddingObject: newTiVo];
+	if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
+		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
+	}
+	DDLogMajor(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+
 }
 
 -(void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict
@@ -1260,7 +1400,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     socketAddress = (struct sockaddr_in *)[dataIn bytes];
     ipString = [NSString stringWithFormat: @"%s",
                 inet_ntoa(socketAddress->sin_addr)];  ///problem here
-	DDLogVerbose(@"Translated %d to %@", socketAddress->sin_addr.s_addr, ipString);
+	DDLogVerbose(@"Translated %u to %@", socketAddress->sin_addr.s_addr, ipString);
     return ipString;
 }
 

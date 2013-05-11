@@ -8,6 +8,12 @@
 
 #import "MTAppDelegate.h"
 #import "MTTiVo.h"
+
+#import "DDLog.h"
+#import "DDTTYLogger.h"
+#import "DDFileLogger.h"
+#import "MTLogFormatter.h"
+
 #import <IOKit/pwr_mgt/IOPMLib.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -94,6 +100,7 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
 void signalHandler(int signal)
 {
 	//Do nothing only use to intercept SIGPIPE.  Ignoring this should be fine as the the retry system should catch the failure and cancel and restart
+	tiVoManager.signalError = signal;
 	NSLog(@"Got signal %d",signal);
 }
 
@@ -123,16 +130,34 @@ __DDLOGHERE__
 		
 	}
 	
-	[self clearTmpDirectory];
-	
 	// Insert code here to initialize your application
 	
 	//	[[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTMediaKeys];  //Test code for starting from scratch
+	MTLogFormatter * logFormat = [MTLogFormatter new];
+
+	[DDLog addLogger:[DDTTYLogger sharedInstance]];
+	[[DDTTYLogger sharedInstance] setLogFormatter:logFormat];
 	
-	DDLogDetail(@"Starting Program");
+	[[DDTTYLogger sharedInstance] setColorsEnabled:YES];
+#define MakeColor(r, g, b) [NSColor colorWithCalibratedRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f]
+	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(80,0,0) backgroundColor:nil forFlag:LOG_FLAG_REPORT];
+	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(160,0,0) backgroundColor:nil forFlag:LOG_FLAG_MAJOR];
+	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(0,128,0)  backgroundColor:nil forFlag:LOG_FLAG_DETAIL];
+	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(160,160,160)  backgroundColor:nil forFlag:LOG_FLAG_VERBOSE];
+	// Initialize File Logger
+    DDFileLogger *fileLogger = [[DDFileLogger alloc] init];
+    // Configure File Logger
+    [fileLogger setMaximumFileSize:(10 * 1024 * 1024)];
+    [fileLogger setRollingFrequency:(3600.0 * 24.0)];
+    [[fileLogger logFileManager] setMaximumNumberOfLogFiles:3];
+	[fileLogger setLogFormatter:logFormat];
+    [DDLog addLogger:fileLogger];
+
+	DDLogReport(@"Starting cTiVo");
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
-	
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationBadMAK object:nil];
+
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
 										  @NO, kMTShowCopyProtected,
 										  @YES, kMTShowSuggestions,
@@ -140,27 +165,39 @@ __DDLOGHERE__
 										  @kMTMaxDownloadRetries, kMTNumDownloadRetries,
 										  @NO, kMTiTunesDelete,
 										  @NO, kMTHasMultipleTivos,
+										  @NO, kMTMarkCommercials,
+                                          @YES, kMTUseMemoryBufferForDownload,
+										  [NSString pathWithComponents:@[NSHomeDirectory(),kMTDefaultDownloadDir]],kMTDownloadDirectory,
+                                          kMTTmpDir,kMTTmpFilesDirectory,
 										  nil];
+    
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
 	
 	
+	mediaKeyQueue = [NSMutableArray new];
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueChangeSetting context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTRunComSkip options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTSimultaneousEncode options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTmpFilesDirectory options:NSKeyValueObservingOptionNew context:nil];
 	mainWindowController = nil;
 	//	_formatEditorController = nil;
 	[self showMainWindow:nil];
 	[self updateTivoRefreshMenu];
-	mediaKeyQueue = [NSMutableArray new];
 	gettingMediaKey = NO;
 	signal(SIGPIPE, &signalHandler);
 	signal(SIGABRT, &signalHandler );
 	
+    //Initialize tmp directory
+    [self validateTmpDirectory];
+	[self clearTmpDirectory];
+
 	//Turn off check mark on Pause/Resume queue menu item
 	[pauseMenuItem setOnStateImage:nil];
 	[self.tiVoGlobalManager determineCurrentProcessingState];
+    
+    
     
 	//Set up callback for sleep notification (this is 10.5 method and is still valid.  There is newer UI in 10.6 on.
 	
@@ -185,23 +222,111 @@ __DDLOGHERE__
 					   IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes );
 }
 
+-(void)validateTmpDirectory
+{
+    //Validate users choice for tmpFilesDirectory
+    NSString *tmpdir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    BOOL isDir, newDir = YES;
+    if (![fm fileExistsAtPath:tmpdir isDirectory:&isDir]) {
+        NSError *error = nil;
+        newDir = [fm createDirectoryAtPath:tmpdir withIntermediateDirectories:YES attributes:nil error:&error];
+        if (error) DDLogMajor(@"Error %@ creating new tmp directory",error);
+
+        if (newDir) {
+            isDir = YES;
+        }
+    }
+    if (!newDir || !isDir) { //Something wrong with this choice
+        if (newDir && !isDir) {
+            NSString *message = [NSString stringWithFormat:@"%@ is a file, not a directory.  \nPlease choose a new locaiton and press 'Choose' \nor press 'Cancel' to delete the existing file.",tmpdir];
+			NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
+			myOpenPanel.canChooseFiles = NO;
+			myOpenPanel.canChooseDirectories = YES;
+			myOpenPanel.canCreateDirectories = YES;
+			myOpenPanel.directoryURL = [NSURL fileURLWithPath:tmpdir];
+			myOpenPanel.message = message;
+			myOpenPanel.prompt = @"Choose";
+			[myOpenPanel setTitle:@"Select Temp Directory for Files"];
+			[myOpenPanel beginSheetModalForWindow:mainWindowController.window completionHandler:^(NSInteger ret){
+				if (ret == NSFileHandlingPanelOKButton) {
+					NSString *directoryName = myOpenPanel.URL.path;
+					[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
+				} else {
+					NSError *error = nil;
+					[fm removeItemAtPath:tmpdir error:&error];
+					if (error) DDLogMajor(@"Error was %@",error);
+				}
+				[myOpenPanel close];
+				[self validateTmpDirectory];
+			}];
+        } else {
+            NSString *message = [NSString stringWithFormat:@"Unable to create directory %@. \n Please choose a new location or fix permissions.",tmpdir];
+			NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
+			myOpenPanel.canChooseFiles = NO;
+			myOpenPanel.canChooseDirectories = YES;
+			myOpenPanel.canCreateDirectories = YES;
+			myOpenPanel.directoryURL = [NSURL fileURLWithPath:tmpdir];
+			myOpenPanel.message = message;
+			myOpenPanel.prompt = @"Choose";
+			[myOpenPanel setTitle:@"Select Temp Directory for Files"];
+			[myOpenPanel beginSheetModalForWindow:mainWindowController.window completionHandler:^(NSInteger ret){
+				if (ret == NSFileHandlingPanelOKButton) {
+					NSString *directoryName = myOpenPanel.URL.path;
+					[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
+				}
+				[myOpenPanel close];
+				[self validateTmpDirectory];
+			}];
+        }
+    }
+    //Now check for write permission
+    NSString *testPath = [NSString stringWithFormat:@"%@/.junk",tmpdir];
+    BOOL canWrite = [fm createFileAtPath:testPath contents:[NSData data] attributes:nil];
+    if (!canWrite) {
+        NSString *message = [NSString stringWithFormat:@"You don't have write permission on %@.  \nPlease fix the permissions or choose a new location.",tmpdir];
+		NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
+		myOpenPanel.canChooseFiles = NO;
+		myOpenPanel.canChooseDirectories = YES;
+		myOpenPanel.canCreateDirectories = YES;
+		myOpenPanel.directoryURL = [NSURL fileURLWithPath:tmpdir];
+		myOpenPanel.message = message;
+		myOpenPanel.prompt = @"Choose";
+		[myOpenPanel setTitle:@"Select Temp Directory for Files"];
+		[myOpenPanel beginSheetModalForWindow:mainWindowController.window completionHandler:^(NSInteger ret){
+			if (ret == NSFileHandlingPanelOKButton) {
+				NSString *directoryName = myOpenPanel.URL.path;
+				[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
+			}
+			[myOpenPanel close];
+			[self validateTmpDirectory];
+		}];
+
+    } else {
+        //Clean up
+        [fm removeItemAtPath:testPath error:nil];
+    }
+    return;
+  
+}
+
 -(void)clearTmpDirectory
 {
 	//Make sure the tmp directory exits
-	if (![[NSFileManager defaultManager] fileExistsAtPath:kMTTmpDir]) {
-		[[NSFileManager defaultManager] createDirectoryAtPath:kMTTmpDir withIntermediateDirectories:YES attributes:nil error:nil];
+	if (![[NSFileManager defaultManager] fileExistsAtPath:tiVoManager.tmpFilesDirectory]) {
+		[[NSFileManager defaultManager] createDirectoryAtPath:tiVoManager.tmpFilesDirectory withIntermediateDirectories:YES attributes:nil error:nil];
 	} else {
 		//Clear it if not saving intermediate files
 		if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
 			NSFileManager *fm = [NSFileManager defaultManager];
 			NSError *err = nil;
-			NSArray *filesToRemove = [fm contentsOfDirectoryAtPath:kMTTmpDir error:&err];
+			NSArray *filesToRemove = [fm contentsOfDirectoryAtPath:tiVoManager.tmpFilesDirectory error:&err];
 			if (err) {
-				DDLogMajor(@"Could not get content of %@.  Got error %@",kMTTmpDir,err);
+				DDLogMajor(@"Could not get content of %@.  Got error %@",tiVoManager.tmpFilesDirectory,err);
 			} else {
 				if (filesToRemove) {
 					for (NSString *file in filesToRemove) {
-						NSString * path = [NSString pathWithComponents:@[kMTTmpDir,file]];
+						NSString * path = [NSString pathWithComponents:@[tiVoManager.tmpFilesDirectory,file]];
 						[fm removeItemAtPath:path error:&err];
 						if (err) {
 							DDLogMajor(@"Could not delete file %@.  Got error %@",file,err);
@@ -218,9 +343,9 @@ __DDLOGHERE__
 	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
 		DDLogDetail(@"Selecting Format");
 		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
-        BOOL canSimulEncode = ![tiVoManager.selectedFormat.mustDownloadFirst boolValue];
         BOOL canSkip = [tiVoManager.selectedFormat.comSkip boolValue];
-		BOOL canAPM = tiVoManager.selectedFormat.canAtomicParsley ;
+		BOOL canMark = tiVoManager.selectedFormat.canMarkCommercials;
+//		BOOL canAPM = tiVoManager.selectedFormat.canAtomicParsley ;
 		NSArray *menuItems = [optionsMenu itemArray];
 		for (NSMenuItem *mi in menuItems) {
 			if ([mi isSeparatorItem]) {
@@ -229,12 +354,12 @@ __DDLOGHERE__
 			[optionsMenu removeItem:mi];
 		}
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-		if (canAPM) {
-			apmMenuItem = [[NSMenuItem alloc] init];
-			apmMenuItem.title = @"Add Metadata to Video File";
-			[apmMenuItem bind:@"value" toObject:defaults withKeyPath:kMTExportAtomicParsleyMetaData options:nil];
-			[optionsMenu insertItem:apmMenuItem atIndex:0];
-		}
+//		if (canAPM) {
+//			apmMenuItem = [[NSMenuItem alloc] init];
+//			apmMenuItem.title = @"Add Metadata to Video File";
+//			[apmMenuItem bind:@"value" toObject:defaults withKeyPath:kMTExportAtomicParsleyMetaData options:nil];
+//			[optionsMenu insertItem:apmMenuItem atIndex:0];
+//		}
 		if (caniTune) {
 			iTunesMenuItem = [[NSMenuItem alloc] init];
 			iTunesMenuItem.title = @"Add to iTunes when complete";
@@ -242,13 +367,14 @@ __DDLOGHERE__
 			[optionsMenu insertItem:iTunesMenuItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
 		}
-		if (canSimulEncode) {
-			simulEncodeItem = [[NSMenuItem alloc] init];
-			simulEncodeItem.title = @"Simultaneous Encoding";
-			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:kMTSimultaneousEncode options:nil];
-			[optionsMenu insertItem:simulEncodeItem atIndex:0];
-			//			[simulEncodeItem setEnabled:YES];
-		}
+//		if (canSimulEncode) {
+//			simulEncodeItem = [[NSMenuItem alloc] init];
+//			simulEncodeItem.title = @"Simultaneous Encoding";
+//			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:kMTSimultaneousEncode options:nil];
+//			[optionsMenu insertItem:simulEncodeItem atIndex:0];
+//			//			[simulEncodeItem setEnabled:YES];
+//		}
+		
 		if (canSkip) {
 			skipCommercialsItem = [[NSMenuItem alloc] init];
 			skipCommercialsItem.title = @"Skip Commercials";
@@ -256,20 +382,30 @@ __DDLOGHERE__
 			[optionsMenu insertItem:skipCommercialsItem atIndex:0];
 			//			[simulEncodeItem setEnabled:YES];
 		}
-	} else if ([keyPath compare:kMTSimultaneousEncode] == NSOrderedSame) {
-		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
+		
+		if (canMark) {
+			markCommecialsItem = [[NSMenuItem alloc] init];
+			markCommecialsItem.title = @"Mark Commercials";
+			[markCommecialsItem bind:@"value" toObject:defaults withKeyPath:kMTMarkCommercials options:nil];
+			[optionsMenu insertItem:markCommecialsItem atIndex:0];
+			//			[simulEncodeItem setEnabled:YES];
+		}
+	} else if ([keyPath compare:kMTMarkCommercials] == NSOrderedSame) {
+		BOOL markCom = [[NSUserDefaults standardUserDefaults] boolForKey:kMTMarkCommercials];
 		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
-		if (simulEncode && runComSkip) {
+		if (markCom && runComSkip) {
 			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTRunComSkip];
 		}
 	} else if ([keyPath compare:kMTRunComSkip] == NSOrderedSame) {
-		BOOL simulEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
+		BOOL markCom = [[NSUserDefaults standardUserDefaults] boolForKey:kMTMarkCommercials];
 		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
-		if (simulEncode && runComSkip) {
-			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSimultaneousEncode];
+		if (markCom && runComSkip) {
+			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTMarkCommercials];
 		}
 	} else if ([keyPath compare:@"processingPaused"] == NSOrderedSame) {
 		pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";
+	} else if ([keyPath compare:kMTTmpFilesDirectory] == NSOrderedSame) {
+		[self validateTmpDirectory];
 	}
 }
 
@@ -342,6 +478,10 @@ __DDLOGHERE__
 }
 -(IBAction)findShows:(id)sender {
 	[[mainWindowController tiVoShowTable] findShows:sender];
+}
+
+- (IBAction)clearHistory:(id)sender {
+	[[mainWindowController downloadQueueTable] clearHistory:sender];
 }
 
 
@@ -525,7 +665,7 @@ __DDLOGHERE__
 		if (!tiVo.mediaKeyIsGood && tiVo.mediaKey.length > 0) {
 			message = [NSString stringWithFormat:@"Incorrect Media Key for %@",tiVo.tiVo.name];
 		}
-		NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
+		NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@""];
 		NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
 		
 		[input setStringValue:tiVo.mediaKey];

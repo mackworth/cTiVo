@@ -149,7 +149,7 @@
                                           date, kMTSubscribedDate,
                                           format, kMTSubscribedFormat,
                                           [NSNumber numberWithBool: iTunes ],kMTSubscribediTunes,
-                                           [NSNumber numberWithBool: simulEncode ],kMTSimultaneousEncode,
+//                                           [NSNumber numberWithBool: simulEncode ],kMTSimultaneousEncode,
                                           nil]
                      ];
                 }

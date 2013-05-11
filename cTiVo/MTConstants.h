@@ -14,13 +14,15 @@
 //Download Progress Notifications
 #define kMTNotificationDownloadDidFinish @"MTNotificationDownloadDidFinish"
 #define kMTNotificationDecryptDidFinish @"MTNotificationDecryptDidFinish"
-#define kMTNotificationEncodeDidFinish @"MTNotificationEncodeDidFinish"
-#define kMTNotificationEncodeWasCanceled @"MTNotificationEncodeWasCanceled"
-#define kMTNotificationCommercialDidFinish @"MTNotificationCommercialDidFinish"
-#define kMTNotificationCommercialWasCanceled @"MTNotificationCommercialWasCanceled"
-#define kMTNotificationCaptionDidFinish @"MTNotificationCaptionDidFinish"
-#define kMTNotificationCaptionWasCanceled @"MTNotificationCaptionWasCanceled"
+//#define kMTNotificationEncodeDidFinish @"MTNotificationEncodeDidFinish"
+//#define kMTNotificationEncodeWasCanceled @"MTNotificationEncodeWasCanceled"
+//#define kMTNotificationCommercialDidFinish @"MTNotificationCommercialDidFinish"
+//#define kMTNotificationCommercialWasCanceled @"MTNotificationCommercialWasCanceled"
+//#define kMTNotificationCaptionDidFinish @"MTNotificationCaptionDidFinish"
+//#define kMTNotificationCaptionWasCanceled @"MTNotificationCaptionWasCanceled"
 #define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"
+#define kMTNotificationShowDownloadDidFinish @"MTNotificationShowDownloadDidFinish"
+#define kMTNotificationShowDownloadWasCanceled @"MTNotificationShowDownloadWasCanceled"
 
 //UI Change Notifications
 
@@ -39,6 +41,9 @@
 #define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
 #define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated"
 
+//tivodecode bad MAK notification
+#define kMTNotificationBadMAK @"MTNotificationBadMAK"
+
 //Download Status
 #define kMTStatusNew 0
 #define kMTStatusDownloading 1
@@ -52,9 +57,11 @@
 #define kMTStatusCaptioning 9
 #define kMTStatusCaptioned 10
 #define kMTStatusMetaDataProcessing 11
-#define kMTStatusDone 12
-#define kMTStatusDeleted 13
-#define kMTStatusFailed 15
+#define kMTStatusEncoded 12
+#define kMTStatusAddingToItunes 13
+#define kMTStatusDone 14
+#define kMTStatusDeleted 15
+#define kMTStatusFailed 16
 
 //Contants
 
@@ -62,7 +69,7 @@
 #define kMTUpdateIntervalMinutes 15 //Update interval for re-checking current TiVo
 #define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show; default, overriden by userPref
 #define kMTMaxDownloadStartupRetries 20		// Only allow 20 retries due to a download startup failuer
-#define kMTProgressCheckDelay 60	//Check progress every 60 seconds to make sure its not stalled
+#define kMTProgressCheckDelay 120	//Check progress every 60 seconds to make sure its not stalled
 //#define kMTRetryNetworkInterval 15	//Re-Check for network connectivity every X seconds
 #define kMTTiVoAccessDelay 7		//Seconds to wait after TiVo is found on network
 
@@ -73,6 +80,7 @@
 #define kMTSubscribediTunes @"addToiTunes"
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
 #define kMTSubscribedSkipCommercials @"skipCommercials"
+#define kMTSubscribedMarkCommercials @"markCommercials"
 #define kMTSubscribedIncludeSuggestions @"includeSuggestions"
 #define kMTSubscribedGenTextMetaData     @"GenTextMetadata"
 #define kMTSubscribedGenXMLMetaData	    @"GenXMLMetadata"
@@ -109,6 +117,9 @@
 #define kMTLastName @"MTLastName"
 #define kMTAllTiVos @"All TiVos"
 #define kMTDefaultDownloadDir  @"Movies/TiVoShows/"
+#define kMTMaxBuffSize 50000000
+#define kMTMaxReadPoints 500000
+#define kMTMaxPointsBeforeWrite 500000
 
 #define kMTTivoShowPasteBoardType @"com.cTiVo.TivoShow"
 #define kMTDownloadPasteBoardType @"com.cTiVo.Download"
@@ -120,8 +131,23 @@
 #define kMTXATTRTiVoName @"TiVoName"
 #define kMTXATTRTiVoID @"TiVoID"
 #define kMTXATTRSpotlight @"com.apple.metadata:kMDItemFinderComment"
+#define kMTXATTRFileComplete @"com.ctivo.filecomplete"
 #define kMTSpotlightKeyword @"cTiVoDownload"
 
+//Task Flow Types
+
+#define kMTTaskFlowNonSimu 0
+#define kMTTaskFlowNonSimuSubtitles 1
+#define kMTTaskFlowSimu 2
+#define kMTTaskFlowSimuSubtitles 3
+#define kMTTaskFlowNonSimuSkipcom 4
+#define kMTTaskFlowNonSimuSkipcomSubtitles 5
+#define kMTTaskFlowSimuSkipcom 6
+#define kMTTaskFlowSimuSkipcomSubtitles 7
+#define kMTTaskFlowNonSimuMarkcom 8
+#define kMTTaskFlowNonSimuMarkcomSubtitles 9
+#define kMTTaskFlowSimuMarkcom 10
+#define kMTTaskFlowSimuMarkcomSubtitles 11
 
 //USER DEFAULTS
 
@@ -145,11 +171,14 @@
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
 #define kMTShowSuggestions @"ShowSuggestions"		// Whether to display Tivo Suggestions (and to subscribe thereto)
 #define kMTSaveTmpFiles @"SaveTmpFiles"				// Turn off AutoDelete of intermediate files (to make debugging encoders easier)
+#define kMTUseMemoryBufferForDownload @"UseMemoryBufferForDownload" //Default is YES.  Turn off to make sure downloaded file is complete. Principally for debugging use and checkpointing.
 #define kMTFileNameFormat @"FileNameFormat"			//printf pattern for filenames
 #define kMTFileNameFormatNull @"FileNameFormatNull"		//printf pattern for filenames for empty fields
+#define kMTTmpFilesDirectory @"TmpFilesDirectory"
 
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
 #define kMTRunComSkip @"RunComSkip"                 // Whether to run comSkip program after conversion
+#define kMTMarkCommercials @"MarkCommercials"                 // Whether insert chapters for commercials when possible
 #define kMTExportTivoMetaData @"ExportTivoMetaData" // Whether to export XML metadata
 #define kMTExportSubtitles @"ExportSubtitles"       // Whether to export subtitles with ts2ami
 #define kMTExportTextMetaData @"ExportTextMetaData" // Whether to export text metadata for PyTivo

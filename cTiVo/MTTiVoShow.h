@@ -84,6 +84,7 @@
 										*lengthString,
 										*isQueuedString,
 										*isHDString,
+										*episodeID,
 										*sizeString;
 @property (weak, nonatomic, readonly) NSAttributedString *actors,
 													*guestStars,
@@ -97,7 +98,7 @@
 @property (nonatomic, strong) NSData *detailXML;
 -(void)getShowDetail;
 
--(NSArray *) apmArguments;
+//-(NSArray *) apmArguments;
 
 -(void)playVideo:(NSString *)path;
 -(void)revealInFinder:(NSArray *)paths;

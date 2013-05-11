@@ -47,6 +47,7 @@
 @property (nonatomic, strong) NSURLConnection *showURLConnection;
 @property BOOL mediaKeyIsGood;
 @property BOOL isReachable, isResponding, manualTiVo, enabled;
+@property (nonatomic, strong) NSDate *lastDownloadEnded;
 
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
 

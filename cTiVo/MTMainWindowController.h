@@ -50,7 +50,7 @@
 -(IBAction)downloadSelectedShows:(id)sender;
 -(IBAction)removeFromDownloadQueue:(id)sender;
 -(IBAction)getDownloadDirectory:(id)sender;
--(IBAction)changeSimultaneous:(id)sender;
+//-(IBAction)changeSimultaneous:(id)sender;
 -(IBAction)changeiTunes:(id)sender;
 -(IBAction)dontQuit:(id)sender;
 

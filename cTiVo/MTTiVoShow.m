@@ -258,78 +258,78 @@ __DDLOGHERE__
 }
 
 
--(NSArray *) apmArguments {
-	NSMutableArray * apmArgs = [NSMutableArray array];
-
-	[apmArgs addObject:@"--overWrite"];
-	[apmArgs addObject:@"--stik"];
-	if (self.isMovie) {
-		[apmArgs addObject:@"Short Film"];
-	} else {
-		[apmArgs addObject:@"TV Show"];
-	}
-	if (self.episodeTitle.length>0) {
-		[apmArgs addObject:@"--title"];
-		[apmArgs addObject:self.episodeTitle];
-	}
-	if (self.episodeGenre.length>0) {
-		[apmArgs addObject:@"--grouping"];
-		[apmArgs addObject:self.episodeGenre];
-	}
-	if (self.originalAirDate.length>0) {
-		[apmArgs addObject:@"--year"];
-		[apmArgs addObject:self.originalAirDate];
-	} else if (self.movieYear.length>0) {
-		[apmArgs addObject:@"--year"];
-		[apmArgs addObject:self.movieYear];
-	}
-	
-	if (self.showDescription.length > 0) {
-		if (self.showDescription.length < 230) {
-			[apmArgs addObject:@"--description"];
-			[apmArgs addObject:self.showDescription];
-			
-		} else {
-			[apmArgs addObject:@"--longdesc"];
-			[apmArgs addObject:self.showDescription];
-		}
-	}
-	if (self.seriesTitle.length>0) {
-		[apmArgs addObject:@"--TVShowName"];
-		[apmArgs addObject:self.seriesTitle];
-		[apmArgs addObject:@"--artist"];
-		[apmArgs addObject:self.seriesTitle];
-		[apmArgs addObject:@"--albumArtist"];
-		[apmArgs addObject:self.seriesTitle];
-	}
-	if (self.episodeNumber.length>0) {
-		[apmArgs addObject:@"--TVEpisode"];
-		[apmArgs addObject:self.episodeNumber];
-	}
-	if (self.episode > 0) {
-		NSString * epString = [NSString stringWithFormat:@"%d",self.episode];
-		[apmArgs addObject:@"--TVEpisodeNum"];
-		[apmArgs addObject:epString];
-		[apmArgs addObject:@"--tracknum"];
-		[apmArgs addObject:epString];
-	} else if (self.episodeNumber.length>0) {
-		[apmArgs addObject:@"--TVEpisodeNum"];
-		[apmArgs addObject:self.episodeNumber];
-		[apmArgs addObject:@"--tracknum"];
-		[apmArgs addObject:self.episodeNumber];
-		
-	}
-	if (self.season > 0 ) {
-		NSString * seasonString = [NSString stringWithFormat:@"%d",self.season];
-		[apmArgs addObject:@"--TVSeasonNum"];
-		[apmArgs addObject:seasonString];		
-	}
-	if (self.stationCallsign) {
-		[apmArgs addObject:@"--TVNetwork"];
-		[apmArgs addObject:self.stationCallsign];
-	}
-	return apmArgs;
-}
+//-(NSArray *) apmArguments {
+//	NSMutableArray * apmArgs = [NSMutableArray array];
+//
+//	[apmArgs addObject:@"--overWrite"];
+//	[apmArgs addObject:@"--stik"];
+//	if (self.isMovie) {
+//		[apmArgs addObject:@"Short Film"];
+//	} else {
+//		[apmArgs addObject:@"TV Show"];
+//	}
+//	if (self.episodeTitle.length>0) {
+//		[apmArgs addObject:@"--title"];
+//		[apmArgs addObject:self.episodeTitle];
+//	}
+//	if (self.episodeGenre.length>0) {
+//		[apmArgs addObject:@"--grouping"];
+//		[apmArgs addObject:self.episodeGenre];
+//	}
+//	if (self.originalAirDate.length>0) {
+//		[apmArgs addObject:@"--year"];
+//		[apmArgs addObject:self.originalAirDate];
+//	} else if (self.movieYear.length>0) {
+//		[apmArgs addObject:@"--year"];
+//		[apmArgs addObject:self.movieYear];
+//	}
+//	
+//	if (self.showDescription.length > 0) {
+//		if (self.showDescription.length < 230) {
+//			[apmArgs addObject:@"--description"];
+//			[apmArgs addObject:self.showDescription];
+//			
+//		} else {
+//			[apmArgs addObject:@"--longdesc"];
+//			[apmArgs addObject:self.showDescription];
+//		}
+//	}
+//	if (self.seriesTitle.length>0) {
+//		[apmArgs addObject:@"--TVShowName"];
+//		[apmArgs addObject:self.seriesTitle];
+//		[apmArgs addObject:@"--artist"];
+//		[apmArgs addObject:self.seriesTitle];
+//		[apmArgs addObject:@"--albumArtist"];
+//		[apmArgs addObject:self.seriesTitle];
+//	}
+//	if (self.episodeNumber.length>0) {
+//		[apmArgs addObject:@"--TVEpisode"];
+//		[apmArgs addObject:self.episodeNumber];
+//	}
+//	if (self.episode > 0) {
+//		NSString * epString = [NSString stringWithFormat:@"%d",self.episode];
+//		[apmArgs addObject:@"--TVEpisodeNum"];
+//		[apmArgs addObject:epString];
+//		[apmArgs addObject:@"--tracknum"];
+//		[apmArgs addObject:epString];
+//	} else if (self.episodeNumber.length>0) {
+//		[apmArgs addObject:@"--TVEpisodeNum"];
+//		[apmArgs addObject:self.episodeNumber];
+//		[apmArgs addObject:@"--tracknum"];
+//		[apmArgs addObject:self.episodeNumber];
+//		
+//	}
+//	if (self.season > 0 ) {
+//		NSString * seasonString = [NSString stringWithFormat:@"%d",self.season];
+//		[apmArgs addObject:@"--TVSeasonNum"];
+//		[apmArgs addObject:seasonString];		
+//	}
+//	if (self.stationCallsign) {
+//		[apmArgs addObject:@"--TVNetwork"];
+//		[apmArgs addObject:self.stationCallsign];
+//	}
+//	return apmArgs;
+//}
 
 #pragma mark - Custom Getters
 
@@ -510,9 +510,9 @@ __DDLOGHERE__
 -(NSString*) sizeString {
   
   if (_fileSize >= 1000000000) {
-	  return[NSString stringWithFormat:@"%0.1fGB",_fileSize/1000000000.0];
+	  return[NSString stringWithFormat:@"%0.1fGB",_fileSize/(1000000000)];
   } else if (_fileSize > 0) {
-	  return[NSString stringWithFormat:@"%ldMB",((NSInteger)_fileSize)/1000000 ];
+	  return[NSString stringWithFormat:@"%ldMB",((NSInteger)_fileSize)/(1000000) ];
   } else {
 	  return @"-";
   }
@@ -543,6 +543,17 @@ __DDLOGHERE__
 	}
 }
 
+-(NSString *) episodeID {
+
+	if (![_programId hasPrefix:@"MV"] && [_programId hasSuffix:@"0000"] ) {
+		NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init] ;
+		[dateFormat setDateStyle:NSDateFormatterShortStyle];
+		[dateFormat setTimeStyle:NSDateFormatterNoStyle] ;
+		return [NSString stringWithFormat: @"%@-%@",_programId, [dateFormat stringFromDate: _showDate] ];
+	} else {
+		return _programId;
+	}
+}
 
 												  
 

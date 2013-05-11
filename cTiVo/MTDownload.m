@@ -5,57 +5,43 @@
 //  Created by Hugh Mackworth on 2/26/13.
 //  Copyright (c) 2013 Scott Buchanan. All rights reserved.
 //
-#define comSkip92 1
 
 #import "MTProgramTableView.h"
 #import "MTiTunes.h"
 #import "MTTiVoManager.h"
 #import "MTDownload.h"
 #include <sys/xattr.h>
+#include "mp4v2.h"
+
+typedef struct MP4Chapters_s {
+    MP4Chapter_t *chapters;
+    int count;
+} MP4Chapters;
+
 
 @interface MTDownload () {
 	
-	NSFileHandle    *downloadFileHandle,
-	*decryptLogFileHandle,
-	*decryptLogFileReadHandle,
-	*commercialFileHandle,
-	*commercialLogFileHandle,
-	*commercialLogFileReadHandle,
-	*captionFileHandle,
-	*captionLogFileHandle,
-	*captionLogFileReadHandle,
-	*apmLogFileHandle,
-	*apmLogFileReadHandle,
-	*encodeFileHandle,
-	*encodeLogFileHandle,
-	*encodeLogFileReadHandle,
-	*encodeErrorFileHandle,
-	*bufferFileReadHandle,
-	*bufferFileWriteHandle;
+	NSFileHandle  *bufferFileWriteHandle;
+    id bufferFileReadHandle;
+    
+    NSFileHandle *taskChainInputHandle;
 	
-	NSString		*decryptFilePath,
-	*decryptLogFilePath,
-	*encodeLogFilePath,
-	*encodeErrorFilePath,
-	*commercialFilePath,
-	*commercialLogFilePath,
-	*captionFilePath,
-	*captionLogFilePath,
-	*apmLogFilePath,
-	*nameLockFilePath; //Just to check for file name uniqueness, along with the encodeFilePath
+    NSString *commercialFilePath, *nameLockFilePath, *captionFilePath; //Files shared between tasks
 	
-    double dataDownloaded;
-    NSTask *encoderTask, *decrypterTask, *commercialTask, *captionTask, *apmTask;
 	NSURLConnection *activeURLConnection;
-	NSPipe *pipe1, *pipe2, *encodingPipe, *subtitlePipe;
-    NSArray *decryptStreamProcessingPipes;
-	BOOL volatile writingData, downloadingURL, isCanceled;
-	off_t readPointer, writePointer;
+	BOOL volatile writingData, downloadingURL;
     NSDate *previousCheck;
 	double previousProcessProgress;
+    NSMutableData *urlBuffer;
+    ssize_t urlReadPointer;
 	
 }
-@property(nonatomic, strong) NSString * baseFileName;
+
+@property (strong, nonatomic) NSString *downloadDir;
+
+@property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
+
+@property (nonatomic) int taskFlowType;
 
 @end
 
@@ -72,38 +58,23 @@ __DDLOGHERE__
 {
     self = [super init];
     if (self) {
-        encoderTask = nil;
- 		decryptFilePath = nil;
+// 		decryptFilePath = nil;
         commercialFilePath = nil;
-		captionFilePath = nil;
 		nameLockFilePath = nil;
-		apmLogFilePath = nil;
+        captionFilePath = nil;
 		_addToiTunesWhenEncoded = NO;
-        _simultaneousEncode = YES;
-		encoderTask = nil;
-		decrypterTask = nil;
-		captionTask = nil;
-		apmTask = nil;
+//        _simultaneousEncode = YES;
 		writingData = NO;
 		downloadingURL = NO;
-        pipe1 = nil;
-        pipe2 = nil;
-        subtitlePipe = nil;
-        encodingPipe = nil;
-        decryptStreamProcessingPipes = nil;
 		_genTextMetaData = nil;
 		_genXMLMetaData = nil;
 		_includeAPMMetaData = nil;
 		_exportSubtitles = nil;
+        urlReadPointer = 0;
 		
         [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
         previousCheck = [NSDate date];
-		//Make sure kMTTmpDir directory exists
-//		NSString *ctivoTmp = kMTTmpDir;
-//		if (![[NSFileManager defaultManager] fileExistsAtPath:ctivoTmp]) {
-//			[[NSFileManager defaultManager] createDirectoryAtPath:ctivoTmp withIntermediateDirectories:YES attributes:nil error:nil];
-//		}
     }
     return self;
 }
@@ -111,76 +82,95 @@ __DDLOGHERE__
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
-		DDLogVerbose(@"Changing DL status of %@ to %@", object, [(MTDownload *)object downloadStatus]);
+		DDLogMajor(@"Changing DL status of %@ to %@ (%@)", object, [(MTDownload *)object showStatus], [(MTDownload *)object downloadStatus]);
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadStatusChanged object:nil];
     }
 }
 
 
--(void) saveLogFile: (NSFileHandle *) logHandle {
-	if (ddLogLevel >= LOG_LEVEL_DETAIL) {
-		unsigned long long logFileSize = [logHandle seekToEndOfFile];
-		NSInteger backup = 2000;  //how much to log
-		if (logFileSize < backup) backup = (NSInteger)logFileSize;
-		[logHandle seekToFileOffset:(logFileSize-backup)];
-		NSData *tailOfFile = [logHandle readDataOfLength:backup];
-		if (tailOfFile.length > 0) {
-			NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-			DDLogDetail(@"logFile: %@",  logString);
-		}
-	}
+-(void)saveCurrentLogFiles
+{
+    if (_downloadStatus.intValue == kMTStatusDownloading) {
+        DDLogMajor(@"%@ downloaded %ld of %f bytes; %ld%%",self,totalDataDownloaded, _show.fileSize, lround(_processProgress*100));
+    }
+    for (NSArray *tasks in _activeTaskChain.taskArray) {
+        for (MTTask *task in tasks) {
+            [task saveLogFile];
+        }
+    }
 }
 
--(void) saveCurrentLogFile {
-	switch (_downloadStatus.intValue) {
-		case  kMTStatusDownloading : {
-			if (self.simultaneousEncode) {
-				DDLogMajor(@"%@ simul-downloaded %f of %f bytes; %ld%%",self,dataDownloaded, _show.fileSize, lround(_processProgress*100));
-				NSFileHandle * logHandle = [NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath] ;
-				[self saveLogFile:logHandle];
-			} else {
-				DDLogMajor(@"%@ downloaded %f of %f bytes; %ld%%",self,dataDownloaded, _show.fileSize, lround(_processProgress*100));
-				[self saveLogFile:encodeLogFileReadHandle];
-				NSFileHandle * logHandle = [NSFileHandle fileHandleForReadingAtPath:encodeErrorFilePath] ;
-				[self saveLogFile:logHandle];
-				
-			}
-			break;
-		}
-		case  kMTStatusDecrypting : {
-			[self saveLogFile: decryptLogFileReadHandle];
-			break;
-		}
-		case  kMTStatusCommercialing :{
-			[self saveLogFile: commercialLogFileReadHandle];
-			break;
-		}
-		case  kMTStatusCaptioning :{
-			[self saveLogFile: captionLogFileReadHandle];
-			break;
-		}
-		case  kMTStatusEncoding :{
-			[self saveLogFile: encodeLogFileReadHandle];
-			break;
-		}
-		case  kMTStatusMetaDataProcessing :{
-			[self saveLogFile: apmLogFileReadHandle];
-			break;
-		}
-		default: {
-			DDLogMajor (@"%@ Strange failure;",self );
-		}
-			
-			
-	}
-}
+//-(void) saveLogFile: (NSFileHandle *) logHandle {
+//	if (ddLogLevel >= LOG_LEVEL_DETAIL) {
+//		unsigned long long logFileSize = [logHandle seekToEndOfFile];
+//		NSInteger backup = 2000;  //how much to log
+//		if (logFileSize < backup) backup = (NSInteger)logFileSize;
+//		[logHandle seekToFileOffset:(logFileSize-backup)];
+//		NSData *tailOfFile = [logHandle readDataOfLength:backup];
+//		if (tailOfFile.length > 0) {
+//			NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
+//			DDLogDetail(@"logFile: %@",  logString);
+//		}
+//	}
+//}
 
+//-(void) saveCurrentLogFile {
+//	switch (_downloadStatus.intValue) {
+//		case  kMTStatusDownloading : {
+//			if (self.simultaneousEncode) {
+//				DDLogMajor(@"%@ simul-downloaded %f of %f bytes; %ld%%",self,dataDownloaded, _show.fileSize, lround(_processProgress*100));
+//				NSFileHandle * logHandle = [NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath] ;
+//				[self saveLogFile:logHandle];
+//			} else {
+//				DDLogMajor(@"%@ downloaded %f of %f bytes; %ld%%",self,dataDownloaded, _show.fileSize, lround(_processProgress*100));
+//				[self saveLogFile:encodeLogFileReadHandle];
+//				NSFileHandle * logHandle = [NSFileHandle fileHandleForReadingAtPath:encodeErrorFilePath] ;
+//				[self saveLogFile:logHandle];
+//				
+//			}
+//			break;
+//		}
+//		case  kMTStatusDecrypting : {
+//			[self saveLogFile: decryptLogFileReadHandle];
+//			break;
+//		}
+//		case  kMTStatusCommercialing :{
+//			[self saveLogFile: commercialLogFileReadHandle];
+//			break;
+//		}
+//		case  kMTStatusCaptioning :{
+//			//			[self saveLogFile: captionLogFileReadHandle];
+//			break;
+//		}
+//		case  kMTStatusEncoding :{
+//			[self saveLogFile: encodeLogFileReadHandle];
+//			break;
+//		}
+//		case  kMTStatusMetaDataProcessing :{
+//			//			[self saveLogFile: apmLogFileReadHandle];
+//			break;
+//		}
+//		default: {
+//			DDLogMajor (@"%@ Strange failure;",self );
+//		}
+//			
+//			
+//	}
+//}
+//
 
 -(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries
 {
-	DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _show.showTitle, _processProgress, previousCheck );
-	[self saveCurrentLogFile];
+	if (_isRescheduled) {
+		return;
+	}
+	_isRescheduled = YES;
+	[self saveCurrentLogFiles];
 	[self cancel];
+	DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _show.showTitle, _processProgress, previousCheck );
+    if (_downloadStatus.intValue == kMTStatusDone) {
+        self.baseFileName = nil;
+    }
 	if (_numRetriesRemaining <= 0 || _numStartupRetriesRemaining <=0) {
 		[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
 		_processProgress = 1.0;
@@ -213,8 +203,9 @@ __DDLOGHERE__
 	DDLogVerbose(@"encoding %@",self);
 	[self.show encodeWithCoder:encoder];
 	[encoder encodeObject:[NSNumber numberWithBool:_addToiTunesWhenEncoded] forKey: kMTSubscribediTunes];
-	[encoder encodeObject:[NSNumber numberWithBool:_simultaneousEncode] forKey: kMTSubscribedSimulEncode];
+//	[encoder encodeObject:[NSNumber numberWithBool:_simultaneousEncode] forKey: kMTSubscribedSimulEncode];
 	[encoder encodeObject:[NSNumber numberWithBool:_skipCommercials] forKey: kMTSubscribedSkipCommercials];
+	[encoder encodeObject:[NSNumber numberWithBool:_markCommercials] forKey: kMTSubscribedMarkCommercials];
 	[encoder encodeObject:_encodeFormat.name forKey:kMTQueueFormat];
 	[encoder encodeObject:_downloadStatus forKey: kMTQueueStatus];
 	[encoder encodeObject: _downloadDirectory forKey: kMTQueueDirectory];
@@ -232,12 +223,13 @@ __DDLOGHERE__
 	//keep parallel with encodeWithCoder
 	//need to watch out for a nil object ending the dictionary too soon.
 	DDLogDetail(@"queueRecord for %@",self);
-
+	
 	NSMutableDictionary *result = [NSMutableDictionary dictionaryWithObjectsAndKeys:
 								   [NSNumber numberWithInteger: _show.showID], kMTQueueID,
 								   [NSNumber numberWithBool:_addToiTunesWhenEncoded], kMTSubscribediTunes,
-								   [NSNumber numberWithBool:_simultaneousEncode], kMTSubscribedSimulEncode,
+//								   [NSNumber numberWithBool:_simultaneousEncode], kMTSubscribedSimulEncode,
 								   [NSNumber numberWithBool:_skipCommercials], kMTSubscribedSkipCommercials,
+								   [NSNumber numberWithBool:_markCommercials], kMTSubscribedMarkCommercials,
 								   _show.showTitle, kMTQueueTitle,
 								   self.show.tiVoName, kMTQueueTivo,
 								   nil];
@@ -271,15 +263,16 @@ __DDLOGHERE__
 	self.show.showID   = [(NSNumber *)queueEntry[kMTQueueID] intValue];
 	self.show.showTitle= queueEntry[kMTQueueTitle];
 	self.show.tempTiVoName = queueEntry[kMTQueueTivo] ;
-
+	
 	[self prepareForDownload:NO];
 	_addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
 	_skipCommercials = [queueEntry[kMTSubscribedSkipCommercials ]  boolValue];
+	_markCommercials = [queueEntry[kMTSubscribedMarkCommercials ]  boolValue];
 	_downloadStatus = queueEntry[kMTQueueStatus];
 	if (_downloadStatus.integerValue == kMTStatusDoneOld) _downloadStatus = @kMTStatusDone; //temporary patch for old queues
 	if (self.isInProgress) _downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
 	
-	_simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
+//	_simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
 	self.encodeFormat = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
 	self.downloadDirectory = queueEntry[kMTQueueDirectory];
 	_encodeFilePath = queueEntry[kMTQueueFinalFile];
@@ -301,8 +294,9 @@ __DDLOGHERE__
 		self.show = [[MTTiVoShow alloc] initWithCoder:decoder ];
 		self.downloadDirectory = [decoder decodeObjectForKey: kMTQueueDirectory];
 		_addToiTunesWhenEncoded= [[decoder decodeObjectForKey: kMTSubscribediTunes] boolValue];
-		_simultaneousEncode	 =   [[decoder decodeObjectForKey: kMTSubscribedSimulEncode] boolValue];
+//		_simultaneousEncode	 =   [[decoder decodeObjectForKey: kMTSubscribedSimulEncode] boolValue];
 		_skipCommercials   =     [[decoder decodeObjectForKey: kMTSubscribedSkipCommercials] boolValue];
+		_markCommercials   =     [[decoder decodeObjectForKey: kMTSubscribedMarkCommercials] boolValue];
 		NSString * encodeName	 = [decoder decodeObjectForKey:kMTQueueFormat];
 		_encodeFormat =	[tiVoManager findFormat: encodeName]; //minor bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is then wrong for completed/failed entries
 		_downloadStatus		 = [decoder decodeObjectForKey: kMTQueueStatus];
@@ -320,16 +314,19 @@ __DDLOGHERE__
 
 
 -(BOOL) isEqual:(id)object {
+	if (![object isKindOfClass:MTDownload.class]) {
+		return NO;
+	}
 	MTDownload * dl = (MTDownload *) object;
 	return ([self.show isEqual:dl.show] &&
 			[self.encodeFormat isEqual: dl.encodeFormat] &&
 			(self.downloadFilePath == dl.downloadFilePath || [self.downloadFilePath isEqual:dl.downloadFilePath]) &&
 			(self.downloadDirectory == dl.downloadDirectory || [self.downloadDirectory isEqual:dl.downloadDirectory]));
-
+	
 }
 
 - (id)pasteboardPropertyListForType:(NSString *)type {
-//	NSLog(@"QQQ:pboard Type: %@",type);
+	//	NSLog(@"QQQ:pboard Type: %@",type);
 	if ([type compare:kMTDownloadPasteBoardType] ==NSOrderedSame) {
 		return  [NSKeyedArchiver archivedDataWithRootObject:self];
 	} else if ([type isEqualToString:(NSString *)kUTTypeFileURL] && self.encodeFilePath) {
@@ -343,7 +340,7 @@ __DDLOGHERE__
 }
 -(NSArray *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
 	NSArray* result = [NSArray  arrayWithObjects: kMTDownloadPasteBoardType , kUTTypeFileURL, nil];  //NOT working yet
-//	NSLog(@"QQQ:writeable Type: %@",result);
+	//	NSLog(@"QQQ:writeable Type: %@",result);
 	return result;
 }
 
@@ -394,131 +391,19 @@ __DDLOGHERE__
 
 -(void)deallocDownloadHandling
 {
-    if (_downloadFilePath) {
-        _downloadFilePath = nil;
-    }
-    if (downloadFileHandle && downloadFileHandle != [pipe1 fileHandleForWriting]) {
-        downloadFileHandle = nil;
-    }
-    if (decrypterTask) {
-		if ([decrypterTask isRunning]) {
-			[decrypterTask terminate];
-		}
-        decrypterTask = nil;
-    }
-    if (decryptFilePath) {
-        decryptFilePath = nil;
-    }
-    if (decryptLogFilePath) {
-        decryptLogFilePath = nil;
-    }
-    if (decryptLogFileHandle) {
-        [decryptLogFileHandle closeFile];
-        decryptLogFileHandle = nil;
-    }
-    if (decryptLogFileReadHandle) {
-        [decryptLogFileReadHandle closeFile];
-        decryptLogFileReadHandle = nil;
-    }
-    if (commercialFilePath) {
-        commercialFilePath = nil;
-    }
-    if (commercialFileHandle) {
-        commercialFileHandle = nil;
-    }
-    if (commercialLogFilePath) {
-        commercialLogFilePath = nil;
-    }
-    if (commercialLogFileHandle) {
-        [commercialLogFileHandle closeFile];
-        commercialLogFileHandle = nil;
-    }
-    if (commercialLogFileReadHandle) {
-        [commercialLogFileReadHandle closeFile];
-        commercialLogFileReadHandle = nil;
-    }
-    if (captionFilePath) {
-        captionFilePath = nil;
-    }
-    if (captionFileHandle) {
-        captionFileHandle = nil;
-    }
-    if (captionLogFilePath) {
-        captionLogFilePath = nil;
-    }
-    if (captionLogFileHandle) {
-        [captionLogFileHandle closeFile];
-        captionLogFileHandle = nil;
-    }
-    if (captionLogFileReadHandle) {
-        [captionLogFileReadHandle closeFile];
-        captionLogFileReadHandle = nil;
-    }
-	if (apmLogFilePath ) {
-		apmLogFilePath = nil;
-	}
-    if (apmLogFileHandle) {
-        [apmLogFileHandle closeFile];
-        apmLogFileHandle = nil;
-    }
-    if (apmLogFileReadHandle) {
-        [apmLogFileReadHandle closeFile];
-        apmLogFileReadHandle = nil;
-    }
-    if (encoderTask) {
-		if ([encoderTask isRunning]) {
-			[encoderTask terminate];
-		}
-        encoderTask = nil;
-    }
-    if (_encodeFilePath) {
-        _encodeFilePath = nil;
-    }
-    if (encodeFileHandle) {
-        [encodeFileHandle closeFile];
-        encodeFileHandle = nil;
-    }
-    if (encodeLogFilePath) {
-        encodeLogFilePath = nil;
-    }
-    if (encodeLogFileHandle) {
-        [encodeLogFileHandle closeFile];
-        encodeLogFileHandle = nil;
-    }
-    if (encodeErrorFilePath) {
-        encodeErrorFilePath = nil;
-    }
-    if (encodeErrorFileHandle) {
-        [encodeErrorFileHandle closeFile];
-        encodeErrorFileHandle = nil;
-    }
-    if (encodeLogFileReadHandle) {
-        [encodeLogFileReadHandle closeFile];
-        encodeLogFileReadHandle = nil;
-    }
-    if (_bufferFilePath) {
-        _bufferFilePath = nil;
-    }
-    if (bufferFileReadHandle) {
-        [bufferFileReadHandle closeFile];
+    commercialFilePath = nil;
+    commercialFilePath = nil;
+    _encodeFilePath = nil;
+    _bufferFilePath = nil;
+    if (bufferFileReadHandle ) {
+        if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) [bufferFileReadHandle closeFile];
         bufferFileReadHandle = nil;
     }
     if (bufferFileWriteHandle) {
         [bufferFileWriteHandle closeFile];
         bufferFileWriteHandle = nil;
     }
-    if (pipe1) {
-		pipe1 = nil;
-    }
-    if (pipe2) {
-		pipe2 = nil;
-    }
-    if(decryptStreamProcessingPipes){
-        decryptStreamProcessingPipes = nil;
-		encodingPipe = nil;
-		subtitlePipe = nil;
-    }
-
+	
 }
 
 -(void)cleanupFiles
@@ -531,107 +416,12 @@ __DDLOGHERE__
 			DDLogVerbose(@"deleting Lockfile %@",nameLockFilePath);
 			[fm removeItemAtPath:nameLockFilePath error:nil];
 		}
-
+		
 	}
-	if (_downloadFilePath) {
-        [downloadFileHandle closeFile];
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting DL %@",_downloadFilePath);
-			[fm removeItemAtPath:_downloadFilePath error:nil];
-		}
-		 downloadFileHandle = nil;
-		 _downloadFilePath = nil;
-    }
-    if (_bufferFilePath) {
-        [bufferFileReadHandle closeFile];
-        [bufferFileWriteHandle closeFile];
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting buffer %@",_bufferFilePath);
-			[fm removeItemAtPath:_bufferFilePath error:nil];
-		}
-		 bufferFileReadHandle = nil;
-		 bufferFileWriteHandle = nil;
-		 _bufferFilePath = nil;
-    }
-    if (commercialLogFileHandle) {
-        [commercialLogFileHandle closeFile];
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting commLog %@",commercialLogFilePath);
-			[fm removeItemAtPath:commercialLogFilePath error:nil];
-		}
-		 commercialLogFileHandle = nil;
-		 commercialLogFilePath = nil;
-    }
-	if (commercialFilePath) {
-        [commercialFileHandle closeFile];
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting comm %@",commercialFilePath);
-			[fm removeItemAtPath:commercialFilePath error:nil];
-		}
-		 commercialFileHandle = nil;
-		 commercialFilePath = nil;
-    }
-    if (captionLogFileHandle) {
-        [captionLogFileHandle closeFile];
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting captionLog %@",captionLogFilePath);
-			[fm removeItemAtPath:captionLogFilePath error:nil];
-		}
-		 captionLogFileHandle = nil;
-		 captionLogFilePath = nil;
-    }
-	if (captionFilePath) {
-        [captionFileHandle closeFile];
-		 captionFileHandle = nil;
-		 captionFilePath = nil;
-    }
-    if (apmLogFileHandle) {
-        [apmLogFileHandle closeFile];
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting captionLog %@",apmLogFilePath);
-			[fm removeItemAtPath:apmLogFilePath error:nil];
-		}
-		 apmLogFileHandle = nil;
-		 apmLogFilePath = nil;
-    }
-    if (encodeLogFileHandle) {
-        [encodeLogFileHandle closeFile];
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting encodeLog %@",encodeLogFilePath);
-			[fm removeItemAtPath:encodeLogFilePath error:nil];
-		}
-		 encodeLogFileHandle = nil;
-		 encodeLogFilePath = nil;
-    }
-    if (encodeErrorFileHandle) {
-        [encodeErrorFileHandle closeFile];
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting encodeError %@",encodeErrorFilePath);
-			[fm removeItemAtPath:encodeErrorFilePath error:nil];
-		}
-		 encodeErrorFileHandle = nil;
-		 encodeErrorFilePath = nil;
-    }
-    if (decryptLogFileHandle) {
-        [decryptLogFileHandle closeFile];
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting decryptLog %@",decryptLogFilePath);
-			[fm removeItemAtPath:decryptLogFilePath error:nil];
-		}
-		 decryptLogFileHandle = nil;
-		 decryptLogFilePath = nil;
-    }
-    if (decryptFilePath) {
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting decrypt %@",decryptFilePath);
-			[fm removeItemAtPath:decryptFilePath error:nil];
-		}
-		 decryptFilePath = nil;
-    }
-	//Clean up files in KMTTmpDir
+	//Clean up files in TmpFilesDirectory
 	if (deleteFiles && self.baseFileName) {
-		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:kMTTmpDir error:nil];
-		[fm changeCurrentDirectoryPath:kMTTmpDir];
+		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:tiVoManager.tmpFilesDirectory error:nil];
+		[fm changeCurrentDirectoryPath:tiVoManager.tmpFilesDirectory];
 		for(NSString *file in tmpFiles){
 			NSRange tmpRange = [file rangeOfString:self.baseFileName];
 			if(tmpRange.location != NSNotFound) {
@@ -758,10 +548,33 @@ __DDLOGHERE__
 
 -(NSString *)createUniqueBaseFileName:(NSString *)baseName inDownloadDir:(NSString *)downloadDir
 {
-    NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,_encodeFormat.filenameExtension];
-	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@%@.lck" ,kMTTmpDir,baseName];
 	NSFileManager *fm = [NSFileManager defaultManager];
-	if ([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:trialLockFilePath]) {
+    NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,_encodeFormat.filenameExtension];
+	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tiVoManager.tmpFilesDirectory,baseName];
+	_tivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,baseName];
+	_mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,baseName];
+    BOOL tivoFileExists = NO;
+    if ([fm fileExistsAtPath:_tivoFilePath]) {
+        NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
+		ssize_t len = getxattr([_tivoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
+        if (len >=0) {
+            DDLogReport(@"Found Complete TiVo File @ %@",_tivoFilePath);
+            tivoFileExists = YES;
+            _downloadingShowFromTiVoFile = YES;
+        }
+    }
+    BOOL mpgFileExists = NO;
+    if ([fm fileExistsAtPath:_mpgFilePath]) {
+        NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
+		ssize_t len = getxattr([_mpgFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
+        if (len >=0) {
+            DDLogReport(@"Found Complete MPG File @ %@",_mpgFilePath);
+            mpgFileExists = YES;
+            _downloadingShowFromTiVoFile = NO;
+            _downloadingShowFromMPGFile = YES;
+        }
+    }
+	if (([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:trialLockFilePath]) && !tivoFileExists  && !mpgFileExists) { //If .tivo file exits assume we will use this and not download.
 		NSString * nextBase;
 		NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
 		NSTextCheckingResult *result = [ending firstMatchInString:baseName options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, (baseName).length)];
@@ -774,93 +587,62 @@ __DDLOGHERE__
 			DDLogDetail(@"found output file named %@, adding version number", nextBase);
 		}
 		return [self createUniqueBaseFileName:nextBase inDownloadDir:downloadDir];
-
+		
 	} else {
 		DDLogDetail(@"Using baseFileName %@",baseName);
 		nameLockFilePath = trialLockFilePath;
 		[[NSFileManager defaultManager] createFileAtPath:nameLockFilePath contents:[NSData data] attributes:nil];  //Creating the lock file
 		return baseName;
 	}
+	
+}
 
+-(NSString *)downloadDir
+{
+ 	NSString *ddir = [self directoryForShowInDirectory:[self downloadDirectory]];
+	
+	//go to current directory if one at show scheduling time failed
+	if (!ddir) {
+		ddir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
+	}
+    
+	//finally, go to default if not successful
+	if (!ddir) {
+		ddir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
+	}
+    return ddir;
 }
 
 -(void)configureFiles
 {
-	DDLogDetail(@"configuring files for %@",self);
+    DDLogDetail(@"configuring files for %@",self);
 	//Release all previous attached pointers
     [self deallocDownloadHandling];
-	NSString *downloadDir = [self directoryForShowInDirectory:[self downloadDirectory]];
-	
-	//go to current directory if one at show scheduling time failed
-	if (!downloadDir) {
-		downloadDir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
-	}
-    
-	//finally, go to default if not successful
-	if (!downloadDir) {
-		downloadDir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
-	}
-	self.baseFileName = [self makeBaseFileNameForDirectory:downloadDir];
-	_encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,self.baseFileName,_encodeFormat.filenameExtension];
-	DDLogVerbose(@"setting encodepath: %@", _encodeFilePath);
-	NSFileManager *fm = [NSFileManager defaultManager];
-    if (_simultaneousEncode) {
-        //Things require uniquely for simultaneous download
-        pipe1 = [NSPipe pipe];
-        pipe2 = [NSPipe pipe];
-        NSMutableArray *pipeArray = [NSMutableArray array];
-        encodingPipe = [NSPipe pipe];
-        [pipeArray addObject:encodingPipe];
-        if (self.exportSubtitles.boolValue) {
-            subtitlePipe = [NSPipe pipe];
-            [pipeArray addObject:subtitlePipe];
+    NSFileManager *fm = [NSFileManager defaultManager];
+	self.baseFileName = [self makeBaseFileNameForDirectory:self.downloadDir];
+    if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {  //We need to download from the TiVo
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
+            _bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",tiVoManager.tmpFilesDirectory,self.baseFileName];
+           urlBuffer = [NSMutableData new];
+            urlReadPointer = 0;
+            bufferFileReadHandle = urlBuffer;
+        } else {
+            _bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,self.baseFileName];
+            [fm createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
+            bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
+            bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
         }
-        decryptStreamProcessingPipes = [[NSArray alloc] initWithArray:pipeArray];
-		downloadFileHandle = [pipe1 fileHandleForWriting];
-		DDLogVerbose(@"downloadFileHandle %@ for %@",downloadFileHandle,self);
-        _bufferFilePath = [NSString stringWithFormat:@"%@buffer%@.bin",kMTTmpDir,self.baseFileName];
-        [fm createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
-        bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
-        bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
-    } else {
-        //Things require uniquely for sequential download
-        _downloadFilePath = [NSString stringWithFormat:@"%@/%@.tivo",downloadDir ,self.baseFileName];
-        [fm createFileAtPath:_downloadFilePath contents:[NSData data] attributes:nil];
-        downloadFileHandle = [NSFileHandle fileHandleForWritingAtPath:_downloadFilePath];
-		decryptFilePath = [NSString stringWithFormat:@"%@/%@.tivo.mpg",downloadDir ,self.baseFileName];
-        decryptLogFilePath = [NSString stringWithFormat:@"%@decrypting%@.txt",kMTTmpDir,self.baseFileName];
-        [fm createFileAtPath:decryptLogFilePath contents:[NSData data] attributes:nil];
-        decryptLogFileHandle = [NSFileHandle fileHandleForWritingAtPath:decryptLogFilePath];
-        decryptLogFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:decryptLogFilePath];
-#if comSkip92
-		commercialFilePath = [NSString stringWithFormat:@"%@%@.tivo.edl" ,kMTTmpDir, self.baseFileName];  //0.92 version
-#else
- 		commercialFilePath = [[NSString stringWithFormat:@"%@/%@.tivo.edl",downloadDir ,self.baseFileName] retain];  //0.7 version
-#endif
-        commercialLogFilePath = [NSString stringWithFormat:@"%@commercial%@.txt", kMTTmpDir,self.baseFileName];
-        [fm createFileAtPath:commercialLogFilePath contents:[NSData data] attributes:nil];
-        commercialLogFileHandle = [NSFileHandle fileHandleForWritingAtPath:commercialLogFilePath];
-        commercialLogFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:commercialLogFilePath];
-        
     }
+    _decryptBufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,self.baseFileName];
+    if (!_downloadingShowFromMPGFile) {
+        [[NSFileManager defaultManager] createFileAtPath:_decryptBufferFilePath contents:[NSData data] attributes:nil];
+    }
+	_encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.downloadDir,self.baseFileName,_encodeFormat.filenameExtension];
+	DDLogVerbose(@"setting encodepath: %@", _encodeFilePath);
+    captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDir ,self.baseFileName];
     
-    captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",downloadDir ,self.baseFileName];
-    captionLogFilePath = [NSString stringWithFormat:@"%@caption%@.txt", kMTTmpDir,self.baseFileName];
-    [fm createFileAtPath:captionLogFilePath contents:[NSData data] attributes:nil];
-    captionLogFileHandle = [NSFileHandle fileHandleForWritingAtPath:captionLogFilePath];
-    captionLogFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:captionLogFilePath];
-    apmLogFilePath = [NSString stringWithFormat:@"%@apm%@.txt", kMTTmpDir,self.baseFileName];
-    [fm createFileAtPath:apmLogFilePath contents:[NSData data] attributes:nil];
-    apmLogFileHandle = [NSFileHandle fileHandleForWritingAtPath:apmLogFilePath];
-    apmLogFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:apmLogFilePath];
-    encodeLogFilePath = [NSString stringWithFormat:@"%@encoding%@.txt", kMTTmpDir, self.baseFileName];
-    [fm createFileAtPath:encodeLogFilePath contents:[NSData data] attributes:nil];
-    encodeLogFileHandle = [NSFileHandle fileHandleForWritingAtPath:encodeLogFilePath];
-    encodeLogFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:encodeLogFilePath];
-	
-	encodeErrorFilePath = [NSString stringWithFormat:@"%@encodingError%@.txt", kMTTmpDir, self.baseFileName];
-    [fm createFileAtPath:encodeErrorFilePath contents:[NSData data] attributes:nil];
-    encodeErrorFileHandle = [NSFileHandle fileHandleForWritingAtPath:encodeErrorFilePath];
+    commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version
+
 }
 
 -(NSString *) encoderPath {
@@ -902,25 +684,34 @@ __DDLOGHERE__
 -(NSMutableArray *)encodingArgumentsWithInputFile:(NSString *)inputFilePath outputFile:(NSString *)outputFilePath
 {
 	NSMutableArray *arguments = [NSMutableArray array];
-		
-    if ([_encodeFormat.comSkip boolValue] && _skipCommercials && _encodeFormat.edlFlag.length) {
-        [arguments addObject:_encodeFormat.edlFlag];
-        [arguments addObject:commercialFilePath];
-    }
+	
     if (_encodeFormat.outputFileFlag.length) {
         if (_encodeFormat.encoderEarlyVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyVideoOptions]];
         if (_encodeFormat.encoderEarlyAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyAudioOptions]];
         if (_encodeFormat.encoderEarlyOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyOtherOptions]];
         [arguments addObject:_encodeFormat.outputFileFlag];
         [arguments addObject:outputFilePath];
+		if ([_encodeFormat.comSkip boolValue] && _skipCommercials && _encodeFormat.edlFlag.length) {
+			[arguments addObject:_encodeFormat.edlFlag];
+			[arguments addObject:commercialFilePath];
+		}
         if (_encodeFormat.inputFileFlag.length) {
             [arguments addObject:_encodeFormat.inputFileFlag];
-        }
-        [arguments addObject:inputFilePath];
+			[arguments addObject:inputFilePath];
+			if (_encodeFormat.encoderLateVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateVideoOptions]];
+			if (_encodeFormat.encoderLateAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateAudioOptions]];
+			if (_encodeFormat.encoderLateOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateOtherOptions]];
+        } else {
+			[arguments addObject:inputFilePath];
+		}
     } else {
         if (_encodeFormat.encoderEarlyVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyVideoOptions]];
         if (_encodeFormat.encoderEarlyAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyAudioOptions]];
         if (_encodeFormat.encoderEarlyOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderEarlyOtherOptions]];
+		if ([_encodeFormat.comSkip boolValue] && _skipCommercials && _encodeFormat.edlFlag.length) {
+			[arguments addObject:_encodeFormat.edlFlag];
+			[arguments addObject:commercialFilePath];
+		}
         if (_encodeFormat.inputFileFlag.length) {
             [arguments addObject:_encodeFormat.inputFileFlag];
         }
@@ -928,422 +719,627 @@ __DDLOGHERE__
         if (_encodeFormat.encoderLateVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateVideoOptions]];
         if (_encodeFormat.encoderLateAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateAudioOptions]];
         if (_encodeFormat.encoderLateOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateOtherOptions]];
-       [arguments addObject:outputFilePath];
+		[arguments addObject:outputFilePath];
     }
 	DDLogVerbose(@"encoding arguments: %@", arguments);
 	return arguments;
+}
+
+-(MTTask *)catTask:(NSString *)outputFilePath
+{
+    return [self catTask:outputFilePath withInputFile:nil];
+}
+
+-(MTTask *)catTask:(id)outputFile withInputFile:(id)inputFile
+{
+    if (outputFile && !([outputFile isKindOfClass:[NSString class]] || [outputFile isKindOfClass:[NSFileHandle class]])) {
+        DDLogMajor(@"catTask must be called with output file either nil, NSString or NSFileHandle");
+        return nil;
+    }
+    if (inputFile && !([inputFile isKindOfClass:[NSString class]] || [inputFile isKindOfClass:[NSFileHandle class]])) {
+        DDLogMajor(@"catTask must be called with input file either nil, NSString or NSFileHandle");
+        return nil;
+    }
+    MTTask *catTask = [MTTask taskWithName:@"cat" download:self];
+    [catTask setLaunchPath:@"/bin/cat"];
+    if (outputFile && [outputFile isKindOfClass:[NSString class]]) {
+        [catTask setStandardOutput:[NSFileHandle fileHandleForWritingAtPath:outputFile]];
+        catTask.requiresOutputPipe = NO;
+    } else if(outputFile){
+        [catTask setStandardOutput:outputFile];
+        catTask.requiresOutputPipe = NO;
+    }
+    if (inputFile && [inputFile isKindOfClass:[NSString class]]) {
+        [catTask setStandardInput:[NSFileHandle fileHandleForReadingAtPath:inputFile]];
+        catTask.requiresInputPipe = NO;
+    } else if (inputFile) {
+        [catTask setStandardInput:inputFile];
+        catTask.requiresInputPipe = NO;
+    }
+    return catTask;
+}
+
+-(MTTask *)decryptTask  //Decrypting is done in parallel with download so no progress indicators are needed.
+{
+    if (_decryptTask) {
+        return _decryptTask;
+    }
+    MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
+    [decryptTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
+
+    decryptTask.completionHandler = ^(){
+        if (!self.shouldSimulEncode) {
+            [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
+            if (_decryptBufferFilePath) {
+                setxattr([_decryptBufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+
+            }
+        }
+		NSString *log = [NSString stringWithContentsOfFile:_decryptTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
+        if (log && log.length > 25 ) {
+            NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
+            if (badMAKRange.location != NSNotFound) {
+                self.show.tiVo.mediaKeyIsGood = NO;
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationBadMAK object:self.show.tiVo];
+            }
+        }
+    };
+	
+	decryptTask.terminationHandler = ^(){
+		NSString *log = [NSString stringWithContentsOfFile:_decryptTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
+        if (log && log.length > 25 ) {
+            NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
+            if (badMAKRange.location != NSNotFound) {
+                self.show.tiVo.mediaKeyIsGood = NO;
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationBadMAK object:self.show.tiVo];
+            }
+        }
+	};
+    
+    if (_downloadingShowFromTiVoFile) {
+        [decryptTask setStandardError:decryptTask.logFileWriteHandle];
+        decryptTask.progressCalc = ^(NSString *data){
+            NSArray *lines = [data componentsSeparatedByString:@"\n"];
+            data = [lines objectAtIndex:lines.count-2];
+            lines = [data componentsSeparatedByString:@":"];
+            double position = [[lines objectAtIndex:0] doubleValue];
+            return (position/_show.fileSize);
+        };
+    }
+    
+//    decryptTask.cleanupHandler = ^(){
+//        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+//            if ([[NSFileManager defaultManager] fileExistsAtPath:_bufferFilePath]) {
+//                [[NSFileManager defaultManager] removeItemAtPath:_bufferFilePath error:nil];
+//            }
+//        }
+//    };
+
+	NSArray *arguments = [NSArray arrayWithObjects:
+						  [NSString stringWithFormat:@"-m%@",self.show.tiVo.mediaKey],
+						  [NSString stringWithFormat:@"-o%@",_decryptBufferFilePath],
+						  @"-v",
+                          [NSString stringWithFormat:@"-"],
+						  nil];
+    decryptTask.requiresOutputPipe = NO;
+    if (_exportSubtitles.boolValue || self.shouldSimulEncode) {  //use stdout to pipe to captions  or simultaneous encoding
+        arguments = [NSMutableArray arrayWithObjects:
+                     [NSString stringWithFormat:@"-m%@",_show.tiVo.mediaKey],
+                     @"-v",
+                     @"--",
+                     @"-",
+                     nil];
+        decryptTask.requiresOutputPipe = YES;
+        //Not using the filebuffer so remove so it can act as a flag upon completion.
+        if (!_skipCommercials && !_exportSubtitles.boolValue && !_markCommercials) {
+            if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+                [[NSFileManager defaultManager] removeItemAtPath:_decryptBufferFilePath error:nil];
+            };
+            _decryptBufferFilePath = nil;
+        }
+    }
+    [decryptTask setArguments:arguments];
+    _decryptTask = decryptTask;
+    return _decryptTask;
+}
+
+-(MTTask *)encodeTask
+{
+    if (_encodeTask) {
+        return _encodeTask;
+    }
+    MTTask *encodeTask = [MTTask taskWithName:@"encode" download:self];
+    [encodeTask setLaunchPath:[self encoderPath]];
+    encodeTask.requiresOutputPipe = NO;
+	NSArray * encoderArgs = nil;
+    
+    encodeTask.completionHandler = ^(){
+        [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
+        self.processProgress = 1.0;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
+            DDLogReport(@" %@ File %@ not found after encoding complete",self, self.encodeFilePath );
+            [self saveCurrentLogFiles];
+            [self rescheduleShowWithDecrementRetries:@(YES)];
+            
+        } else if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
+            [self writeMetaDataFiles];
+//            if ( ! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley) ) {
+                [self finishUpPostEncodeProcessing];
+//            }
+        }
+        
+    };
+    
+    encodeTask.cleanupHandler = ^(){
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] && self.isCanceled) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:_encodeFilePath]) {
+                [[NSFileManager defaultManager] removeItemAtPath:_encodeFilePath error:nil];
+            }
+        }
+    };
+    
+    encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:_encodeFilePath];
+    
+    if (!self.shouldSimulEncode)  {
+        if (self.encodeFormat.canSimulEncode) {  //Need to setup up the startup for sequential processing to use the writeData progress tracking
+            encodeTask.requiresInputPipe = YES;
+            __block NSPipe *encodePipe = [NSPipe new];
+            [encodeTask setStandardInput:encodePipe];
+            encodeTask.startupHandler = ^BOOL(){
+                if ([[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
+                    NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
+                    ssize_t len = getxattr([self.encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
+                    if (len >=0) {
+                        DDLogReport(@"Found Complete Encoded File @ %@.  Skipping encoding",self.encodeFilePath);
+                        return NO;
+                    }
+                }
+
+                bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_decryptBufferFilePath];
+                taskChainInputHandle = [encodePipe fileHandleForWriting];
+                _processProgress = 0.0;
+                previousProcessProgress = 0.0;
+                totalDataRead = 0.0;
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+                [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                [self performSelectorInBackground:@selector(writeData) withObject:nil];
+                return YES;
+            };
+
+        } else {
+            encoderArgs = [self encodingArgumentsWithInputFile:_decryptBufferFilePath outputFile:_encodeFilePath];
+            encodeTask.requiresInputPipe = NO;
+            __block NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:self.encodeFormat.regExProgress options:NSRegularExpressionCaseInsensitive error:nil];
+            encodeTask.progressCalc = ^double(NSString *data){
+				double returnValue = -1.0;
+				NSArray *values = nil;
+				if (data) {
+					values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
+				}
+				if (values && values.count) {
+					NSTextCheckingResult *lastItem = [values lastObject];
+					NSRange r = [lastItem range];
+					if (r.location != NSNotFound) {
+						NSRange valueRange = [lastItem rangeAtIndex:1];
+						DDLogVerbose(@"Encoder progress %lf",[[data substringWithRange:valueRange] doubleValue]/100.0);
+						returnValue =  [[data substringWithRange:valueRange] doubleValue]/100.0;
+					}
+
+				}
+				if (returnValue == -1.0) {
+					DDLogMajor(@"Encode progress with Rx failed for task encoder for show %@",self.show.showTitle);
+
+				}
+				return returnValue;
+            };
+            encodeTask.startupHandler = ^BOOL(){
+                _processProgress = 0.0;
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+                [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                return YES;
+            };
+        }
+    }
+    
+    
+    [encodeTask setArguments:encoderArgs];
+    DDLogVerbose(@"encoderArgs: %@",encoderArgs);
+    _encodeTask = encodeTask;
+    return _encodeTask;
+}
+
+-(MTTask *)captionTask  //Captioning is done in parallel with download so no progress indicators are needed.
+{
+    if (!_exportSubtitles.boolValue) {
+        return nil;
+    }
+    if (_captionTask) {
+        return _captionTask;
+    }
+    MTTask *captionTask = [MTTask taskWithName:@"caption" download:self completionHandler:nil];
+    [captionTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"ccextractor" ofType:@""]];
+    captionTask.requiresOutputPipe = NO;
+    
+    if (_downloadingShowFromMPGFile) {
+        captionTask.progressCalc = ^double(NSString *data){
+            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\d+:\\d\\d" options:NSRegularExpressionCaseInsensitive error:nil];
+            NSArray *values = nil;
+			double returnValue = -1.0;
+            if (data) {
+                values = [regex matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
+            }
+            if (values && values.count) {
+                NSTextCheckingResult *lastItem = [values lastObject];
+				NSRange r = [lastItem range];
+				if (r.location != NSNotFound) {
+					NSRange valueRange = [lastItem rangeAtIndex:0];
+					NSString *timeString = [data substringWithRange:valueRange];
+					NSArray *components = [timeString componentsSeparatedByString:@":"];
+					double currentTimeOffset = [components[0] doubleValue] * 60.0 + [components[1] doubleValue];
+					returnValue = (currentTimeOffset/self.show.showLength);
+				}
+                
+            }
+			if (returnValue == -1.0){
+                DDLogMajor(@"Track progress with Rx failed for task caption for show %@",self.show.showTitle);
+            }
+			return returnValue;
+        };
+        if (!_encodeFormat.canSimulEncode) {
+            captionTask.startupHandler = ^BOOL(){
+                _processProgress = 0.0;
+                [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+                return YES;
+            };
+        }
+    }
+
+    
+    captionTask.completionHandler = ^(){
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
+        setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+    };
+    
+    captionTask.cleanupHandler = ^(){
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] && self.isCanceled) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:captionFilePath]) {
+                [[NSFileManager defaultManager] removeItemAtPath:captionFilePath error:nil];
+            }
+        }
+    };
+    
+    NSMutableArray * captionArgs = [NSMutableArray array];
+    
+    if (_encodeFormat.captionOptions.length) [captionArgs addObjectsFromArray:[self getArguments:_encodeFormat.captionOptions]];
+    
+    [captionArgs addObject:@"-bi"];
+    [captionArgs addObject:@"-utf8"];
+    [captionArgs addObject:@"-s"];
+    //[captionArgs addObject:@"-debug"];
+    [captionArgs addObject:@"-"];
+    [captionArgs addObject:@"-o"];
+    [captionArgs addObject:captionFilePath];
+    DDLogVerbose(@"ccExtractorArgs: %@",captionArgs);
+    [captionTask setArguments:captionArgs];
+    DDLogVerbose(@"Caption Task = %@",captionTask);
+    _captionTask = captionTask;
+    return captionTask;
+    
+
+}
+
+-(MTTask *)commercialTask
+{
+    if (!_skipCommercials && !_markCommercials) {
+        return nil;
+    }
+    if (_commercialTask) {
+        return _commercialTask;
+    }
+    MTTask *commercialTask = [MTTask taskWithName:@"commercial" download:self completionHandler:nil];
+  	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]];
+    commercialTask.successfulExitCodes = @[@0, @1];
+    commercialTask.requiresOutputPipe = NO;
+    commercialTask.requiresInputPipe = NO;
+    [commercialTask setStandardError:commercialTask.logFileWriteHandle];  //progress data is in err output
+    
+    
+//    commercialTask.cleanupHandler = ^(){
+//        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+//            if ([[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
+//                [[NSFileManager defaultManager] removeItemAtPath:commercialFilePath error:nil];
+//            }
+//        }
+//    };
+    if (self.taskFlowType != kMTTaskFlowNonSimuMarkcom && self.taskFlowType != kMTTaskFlowNonSimuMarkcomSubtitles) {  // For these cases the encoding tasks is the driver
+        commercialTask.startupHandler = ^BOOL(){
+            self.processProgress = 0.0;
+            [self setValue:[NSNumber numberWithInt:kMTStatusCommercialing] forKeyPath:@"downloadStatus"];
+            return YES;
+        };
+
+        commercialTask.progressCalc = ^double(NSString *data){
+            NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)\\%" options:NSRegularExpressionCaseInsensitive error:nil];
+            NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
+            NSTextCheckingResult *lastItem = [values lastObject];
+            NSRange valueRange = [lastItem rangeAtIndex:1];
+            return [[data substringWithRange:valueRange] doubleValue]/100.0;
+        };
+
+    
+        commercialTask.completionHandler = ^{
+            DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
+             if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
+                 if (!self.shouldSimulEncode) {
+                            self.processProgress = 1.0;
+                        }
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+                        [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
+                        if (self.exportSubtitles.boolValue && self.skipCommercials) {
+                            NSArray *srtEntries = [self getSrt:captionFilePath];
+                            NSArray *edlEntries = [self getEdl:commercialFilePath];
+                            if (srtEntries && edlEntries) {
+                                NSArray *correctedSrts = [self processSrts:srtEntries withEdls:edlEntries];
+                                if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+                                    NSString *oldCaptionPath = [[captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
+                                    [[NSFileManager defaultManager] moveItemAtPath:captionFilePath toPath:oldCaptionPath error:nil];
+                                }
+                                if (correctedSrts) [self writeSrt:correctedSrts toFilePath:captionFilePath];
+                            }
+                        }
+             } else {
+                 self.processProgress = 1.0;
+                 [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+                 [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
+                 [self writeMetaDataFiles];
+//                 if ( ! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley) ) {
+                     [self finishUpPostEncodeProcessing];
+//                 }
+             }
+            setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+            setxattr([commercialFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+            
+        };
+    } else {
+        commercialTask.completionHandler = ^{
+            DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
+        };
+    }
+
+
+	NSMutableArray *arguments = [NSMutableArray array];
+    if (_encodeFormat.comSkipOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.comSkipOptions]];
+    NSRange iniRange = [_encodeFormat.comSkipOptions rangeOfString:@"--ini="];
+//	[arguments addObject:[NSString stringWithFormat: @"--output=%@",[commercialFilePath stringByDeletingLastPathComponent]]];  //0.92 version
+    if (iniRange.location == NSNotFound) {
+        [arguments addObject:[NSString stringWithFormat: @"--ini=%@",[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@"ini"]]];
+    }
+    
+    if ((self.taskFlowType == kMTTaskFlowSimuMarkcom || self.taskFlowType == kMTTaskFlowSimuMarkcomSubtitles) && [self canPostDetectCommercials]) {
+        [arguments addObject:_encodeFilePath]; //Run on the final file for these conditions
+        commercialFilePath = [NSString stringWithFormat:@"%@/%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version
+   } else {
+        [arguments addObject:_decryptBufferFilePath];// Run this on the output of tivodecode
+    }
+	DDLogVerbose(@"comskip Path: %@",[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]);
+	DDLogVerbose(@"comskip args: %@",arguments);
+	[commercialTask setArguments:arguments];
+    _commercialTask = commercialTask;
+    return _commercialTask;
+  
+}
+
+//-(MTTask *)apmTask
+//{
+//    if (! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley)) {
+//		return nil;
+//	}
+//    if (_apmTask) {
+//        return _apmTask;
+//    }
+//	MTTask *apmTask = [MTTask taskWithName:@"apm" download:self];
+//    
+//    apmTask.startupHandler = ^BOOL(){
+//        [self setValue:[NSNumber numberWithInt:kMTStatusMetaDataProcessing] forKeyPath:@"downloadStatus"];
+//        self.processProgress = 0.0;
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+//        return YES;
+//    };
+//    
+//    apmTask.completionHandler = ^(){[self finishUpPostEncodeProcessing];};
+//    
+//	[apmTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"AtomicParsley" ofType: @""] ];
+//    apmTask.requiresOutputPipe = NO;
+//    apmTask.requiresInputPipe = NO;
+//	NSMutableArray *apmArgs =[NSMutableArray array];
+//	[apmArgs addObject:_encodeFilePath];
+//	[apmArgs addObjectsFromArray:[self.show apmArguments]];
+//	
+//	DDLogVerbose(@"APM Arguments: %@", apmArgs);
+//	[apmTask setArguments:apmArgs];
+//	
+//	[apmTask setStandardOutput:apmTask.logFileWriteHandle];
+//    apmTask.trackingRegEx = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
+//    _apmTask = apmTask;
+//    return _apmTask;
+//
+//}
+
+-(int)taskFlowType
+{
+  return (int)_exportSubtitles.boolValue + 2.0 * (int)_encodeFormat.canSimulEncode + 4.0 * (int) _skipCommercials + 8.0 * (int) _markCommercials;
 }
 
 
 -(void)download
 {
 	DDLogDetail(@"Starting download for %@",self);
-	isCanceled = NO;
+	_isCanceled = NO;
+	_isRescheduled = NO;
+    _downloadingShowFromTiVoFile = NO;
+    _downloadingShowFromMPGFile = NO;
     //Before starting make sure the encoder is OK.
-	NSString *encoderLaunchPath = [self encoderPath];
-	if (!encoderLaunchPath) {
+	if (![self encoderPath]) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:nil];  //Decrement num encoders right away
 		return;
 	}
-	DDLogVerbose(@"encoder is %@",encoderLaunchPath);
+	DDLogVerbose(@"encoder is %@",[self encoderPath]);
 	
     [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
-	if (!_show.gotDetails) {
-		//		[self.show getShowDetail];
-		//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-	}
-    if (_simultaneousEncode && !_encodeFormat.canSimulEncode) {  //last chance check
-		DDLogMajor(@"Odd; simultaneousEncode is wrong");
-		_simultaneousEncode = NO;
-    }
+    
+    //Tivodecode is always run.  The output of the tivodecode task will always to to a file to act as a buffer for differeing download and encoding speeds.
+    //The file will be a mpg file in the tmp directory (the buffer file path)
+    
     [self configureFiles];
-    NSURLRequest *thisRequest = [NSURLRequest requestWithURL:self.show.downloadURL];
-	//    activeURLConnection = [NSURLConnection connectionWithRequest:thisRequest delegate:self];
-    activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
-	
-	//Now set up for either simul or sequential download
-	DDLogMajor(@"Starting %@ of %@", (_simultaneousEncode ? @"simul DL" : @"download"), _show.showTitle);
-	[tiVoManager  notifyWithTitle: [NSString stringWithFormat: @"TiVo %@ starting download...",self.show.tiVoName]
-						 subTitle:self.show.showTitle forNotification:kMTGrowlBeginDownload];
-	if (!_simultaneousEncode ) {
-        _isSimultaneousEncoding = NO;
-    } else { //We'll build the full piped download chain here
-		DDLogDetail(@"building pipeline");
-		//Decrypting section of full pipeline
-        decrypterTask  = [[NSTask alloc] init];
-        NSString *tivodecoderLaunchPath = [[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""];
-		[decrypterTask setLaunchPath:tivodecoderLaunchPath];
-		NSMutableArray *arguments = [NSMutableArray arrayWithObjects:
-									 [NSString stringWithFormat:@"-m%@",_show.tiVo.mediaKey],
-									 @"--",
-									 @"-",
-									 nil];
-        DDLogVerbose(@"decrypterArgs: %@",arguments);
-		[decrypterTask setArguments:arguments];
-        [decrypterTask setStandardInput:pipe1];
-        [decrypterTask setStandardOutput:pipe2];
-		
-//		This is ready for multiple pipes once ccextractor is fixed
-		if (self.exportSubtitles.boolValue) {
-			captionTask = [[NSTask alloc] init];
-			[captionTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"ccextractor" ofType:@""]];
-			[captionTask setStandardInput:subtitlePipe];
-			[captionTask setStandardOutput:captionLogFileHandle];
-			[captionTask setStandardError:captionLogFileHandle];
-			NSMutableArray * captionArgs = [NSMutableArray array];
-			
-            if (_encodeFormat.captionOptions.length) [captionArgs addObjectsFromArray:[self getArguments:_encodeFormat.captionOptions]];
-
-            [captionArgs addObject:@"-s"];
-            //[captionArgs addObject:@"-debug"];
-            [captionArgs addObject:@"-"];
-            [captionArgs addObject:@"-o"];
-            [captionArgs addObject:captionFilePath ];
-			DDLogVerbose(@"ccExtractorArgs: %@",captionArgs);
-			[captionTask setArguments:captionArgs];
-
-		}
-		
-		
-		encoderTask = [[NSTask alloc] init];
-		[encoderTask setLaunchPath:encoderLaunchPath];
-		NSArray * encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:_encodeFilePath];
-		DDLogVerbose(@"encoderArgs: %@",encoderArgs);
-		[encoderTask setArguments:encoderArgs];
-		[encoderTask setStandardInput:encodingPipe];
-		[encoderTask setStandardOutput:encodeLogFileHandle];
-		[encoderTask setStandardError:encodeLogFileHandle];
-        
-		[decrypterTask launch];
-		[encoderTask launch];
-		if (captionTask) {
-			[captionTask launch];
-		}
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tee:) name:NSFileHandleReadCompletionNotification object:[pipe2 fileHandleForReading]];
-		[[pipe2 fileHandleForReading] readInBackgroundAndNotify];
-		
-        _isSimultaneousEncoding = YES;
+    
+    //decrypt task is a special task as it is always run and always to a file due to buffering requirement for the URL connection to the Tivo.
+    //It shoul not be part of the processing chain.
+    
+    self.activeTaskChain = [MTTaskChain new];
+    self.activeTaskChain.download = self;
+    if (!_downloadingShowFromMPGFile && !_downloadingShowFromTiVoFile) {
+        NSPipe *taskInputPipe = [NSPipe pipe];
+        self.activeTaskChain.dataSource = taskInputPipe;
+        taskChainInputHandle = [taskInputPipe fileHandleForWriting];
+    } else if (_downloadingShowFromTiVoFile) {
+        self.activeTaskChain.dataSource = _tivoFilePath;
+        NSLog(@"Downloading from file tivo file %@",_tivoFilePath);
+    } else if (_downloadingShowFromMPGFile) {
+        NSLog(@"Downloading from file MPG file %@",_mpgFilePath);
+        self.activeTaskChain.dataSource = _mpgFilePath;
     }
-	downloadingURL = YES;
-    dataDownloaded = 0.0;
+	
+    NSMutableArray *taskArray = [NSMutableArray array];
+	
+	if (!_downloadingShowFromMPGFile)[taskArray addObject:@[self.decryptTask]];
+    
+    switch (self.taskFlowType) {
+        case kMTTaskFlowNonSimu:  //Just encode with non-simul encoder
+        case kMTTaskFlowSimu:  //Just encode with simul encoder
+           [taskArray addObject:@[self.encodeTask]];
+            break;
+            
+        case kMTTaskFlowNonSimuSubtitles:  //Encode with non-simul encoder and subtitles
+            if(_downloadingShowFromMPGFile) {
+                [taskArray addObject:@[self.captionTask]];
+            } else {
+                [taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];
+            }
+			[taskArray addObject:@[self.encodeTask]];
+            break;
+            
+        case kMTTaskFlowSimuSubtitles:  //Encode with simul encoder and subtitles
+            if(_downloadingShowFromMPGFile)self.activeTaskChain.providesProgress = YES;
+			[taskArray addObject:@[self.encodeTask,self.captionTask]];
+            break;
+            
+        case kMTTaskFlowNonSimuSkipcom:  //Encode with non-simul encoder skipping commercials
+        case kMTTaskFlowSimuSkipcom:  //Encode with simul encoder skipping commercials
+			[taskArray addObject:@[self.commercialTask]];
+            [taskArray addObject:@[self.encodeTask]];
+            break;
+            
+        case kMTTaskFlowNonSimuSkipcomSubtitles:  //Encode with non-simul encoder skipping commercials and subtitles
+        case kMTTaskFlowSimuSkipcomSubtitles:  //Encode with simul encoder skipping commercials and subtitles
+			[taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];
+			[taskArray addObject:@[self.commercialTask]];
+			[taskArray addObject:@[self.encodeTask]];
+            break;
+            
+        case kMTTaskFlowNonSimuMarkcom:  //Encode with non-simul encoder marking commercials
+            [taskArray addObject:@[self.encodeTask, self.commercialTask]];
+            break;
+            
+        case kMTTaskFlowNonSimuMarkcomSubtitles:  //Encode with non-simul encoder marking commercials and subtitles
+            if(_downloadingShowFromMPGFile) {
+                [taskArray addObject:@[self.captionTask]];
+            } else {
+                [taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];
+            }
+            [taskArray addObject:@[self.encodeTask, self.commercialTask]];
+            break;
+            
+        case kMTTaskFlowSimuMarkcom:  //Encode with simul encoder marking commercials
+            if(_downloadingShowFromMPGFile) {
+                [taskArray addObject:@[self.encodeTask]];
+            } else {
+                if ([self canPostDetectCommercials]) {
+                    [taskArray addObject:@[self.encodeTask]];
+                } else {
+                    [taskArray addObject:@[self.encodeTask,[self catTask:_decryptBufferFilePath] ]];
+                }
+            }
+            [taskArray addObject:@[self.commercialTask]];
+           break;
+            
+        case kMTTaskFlowSimuMarkcomSubtitles:  //Encode with simul encoder marking commercials and subtitles
+            if(_downloadingShowFromMPGFile) {
+                [taskArray addObject:@[self.captionTask,self.encodeTask]];
+            } else {
+                if ([self canPostDetectCommercials]) {
+                    [taskArray addObject:@[self.encodeTask, self.captionTask]];
+                } else {
+                    [taskArray addObject:@[self.encodeTask, self.captionTask,[self catTask:_decryptBufferFilePath]]];
+                }
+            }
+            [taskArray addObject:@[self.commercialTask]];
+           break;
+            
+        default:
+            break;
+    }
+	
+//	if (self.captionTask) {
+//		if (self.commercialTask) {
+//			[taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];
+//			[taskArray addObject:@[self.commercialTask]];
+//			[taskArray addObject:@[self.encodeTask]];
+//		} else if (_encodeFormat.canSimulEncode) {
+//            if(_downloadingShowFromMPGFile)self.activeTaskChain.providesProgress = YES;
+//			[taskArray addObject:@[self.encodeTask,self.captionTask]];
+//		} else {
+//            if(_downloadingShowFromMPGFile) {
+//                [taskArray addObject:@[self.captionTask]];
+//            } else {
+//                [taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];                
+//            }
+//			[taskArray addObject:@[self.encodeTask]];
+//		}
+//	} else {
+//		if (self.commercialTask) {
+//			[taskArray addObject:@[self.commercialTask]];
+//		}
+//		[taskArray addObject:@[self.encodeTask]];
+//	}
+//	if (self.apmTask) {
+//		[taskArray addObject:@[self.apmTask]];
+//	}
+	
+	self.activeTaskChain.taskArray = [NSArray arrayWithArray:taskArray];
+    
+    totalDataRead = 0;
+    totalDataDownloaded = 0;
+
+    if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {
+        NSURLRequest *thisRequest = [NSURLRequest requestWithURL:self.show.downloadURL];
+        activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
+        downloadingURL = YES;
+    }
     _processProgress = 0.0;
-	DDLogVerbose(@"launching URL for download %@", _show.downloadURL);
 	previousProcessProgress = 0.0;
-	[activeURLConnection start];
+    
+	[self.activeTaskChain run];
+	DDLogMajor(@"Starting URL %@ for show %@", _show.downloadURL,_show.showTitle);
+	double downloadDelay = kMTTiVoAccessDelay - [[NSDate date] timeIntervalSinceDate:self.show.tiVo.lastDownloadEnded];
+	if (downloadDelay < 0) {
+		downloadDelay = 0;
+	}
+	if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile)[activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
-}
-
--(void)tee:(NSNotification *)notification
-{
-//	NSLog(@"Got read for tee ");
-	NSData *readData = notification.userInfo[NSFileHandleNotificationDataItem];
-	if (readData.length && !isCanceled) {
-        for (NSPipe *pipe in decryptStreamProcessingPipes) {
-//			NSLog(@"Writing data on %@",pipe == subtitlePipe ? @"subtitle" : @"encoder");
-            if (!isCanceled){
-				@try {
-					[[pipe fileHandleForWriting] writeData:readData];
-				}
-				@catch (NSException *exception) {
-					DDLogDetail(@"download write fileHandleForWriting fail: %@", exception.reason);
-					if (!isCanceled) {
-						[self rescheduleOnMain];
-						DDLogDetail(@"Rescheduling");
-					}
-					return;
-					
-				}
-				@finally {
-				}
-			}
-        }
-		if (!isCanceled) {
-			@try {
-				[[pipe2 fileHandleForReading] readInBackgroundAndNotify];
-			}
-			@catch (NSException *exception) {
-				DDLogDetail(@"download read data in background fail: %@", exception.reason);
-				if (!isCanceled) {
-					[self rescheduleOnMain];
-			}
-				return;
-				
-			}
-			@finally {
-			}
-		}
-
-	} else {
-        for (NSPipe *pipe in decryptStreamProcessingPipes) {
-			@try{
-				[[pipe fileHandleForWriting] closeFile];
-			}
-			@catch (NSException *exception) {
-				DDLogDetail(@"download close pipe fileHandleForWriting fail: %@", exception.reason);
-				if (!isCanceled) {
-					[self rescheduleOnMain];
-					DDLogDetail(@"Rescheduling");
-				}
-				return;
-				
-			}
-			@finally {
-			}
-       }
-	}
-}
-
-
--(void)decrypt
-{
-	DDLogMajor(@"Starting Decrypt of  %@", self.show.showTitle);
-	decrypterTask = [[NSTask alloc] init];
-	[decrypterTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
-	[decrypterTask setStandardOutput:decryptLogFileHandle];
-	[decrypterTask setStandardError:decryptLogFileHandle];
-    // tivodecode -m0636497662 -o Two\ and\ a\ Half\ Men.mpg -v Two\ and\ a\ Half\ Men.TiVo
-    
-	NSArray *arguments = [NSArray arrayWithObjects:
-						  [NSString stringWithFormat:@"-m%@",self.show.tiVo.mediaKey],
-						  [NSString stringWithFormat:@"-o%@",decryptFilePath],
-						  @"-v",
-						  _downloadFilePath,
-						  nil];
-    DDLogVerbose(@"decrypt args: %@",arguments);
-	_processProgress = 0.0;
-	previousProcessProgress = 0.0;
-	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
- 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-    [self setValue:[NSNumber numberWithInt:kMTStatusDecrypting] forKeyPath:@"downloadStatus"];
-	[decrypterTask setArguments:arguments];
-	[decrypterTask launch];
-	[self performSelector:@selector(trackDecrypts) withObject:nil afterDelay:0.3];
-	
-}
-
--(void)trackDecrypts
-{
-	if (![decrypterTask isRunning]) {
-		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-        DDLogMajor(@"Finished Decrypt of  %@", self.show.showTitle);
-		_processProgress = 1.0;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        [self setValue:[NSNumber numberWithInt:kMTStatusDecrypted] forKeyPath:@"downloadStatus"];
-		if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-			NSError *thisError = nil;
-			[[NSFileManager defaultManager] removeItemAtPath:_downloadFilePath error:&thisError];
-		}
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:self.show.tiVo];
-		return;
-	}
-	unsigned long long logFileSize = [decryptLogFileReadHandle seekToEndOfFile];
-	if (logFileSize > 100) {
-		[decryptLogFileReadHandle seekToFileOffset:(logFileSize-100)];
-		NSData *tailOfFile = [decryptLogFileReadHandle readDataOfLength:100];
-		NSString *data = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-		NSArray *lines = [data componentsSeparatedByString:@"\n"];
-		data = [lines objectAtIndex:lines.count-2];
-		lines = [data componentsSeparatedByString:@":"];
-		double position = [[lines objectAtIndex:0] doubleValue];
-		_processProgress = position/_show.fileSize;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		
-	}
-	[self performSelector:@selector(trackDecrypts) withObject:nil afterDelay:0.3];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-	
-}
-
--(void)commercial
-{
-	DDLogMajor(@"Starting commskip of  %@", self.show.showTitle);
-	commercialTask = [[NSTask alloc] init];
-	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]];
-	[commercialTask setStandardOutput:commercialLogFileHandle];
-	[commercialTask setStandardError:commercialLogFileHandle];
-	NSMutableArray *arguments = [NSMutableArray array];
-    if (_encodeFormat.comSkipOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.comSkipOptions]];
-    NSRange iniRange = [_encodeFormat.comSkipOptions rangeOfString:@"--ini="];
-#if comSkip92
-	[arguments addObject:[NSString stringWithFormat: @"--output=%@",[commercialFilePath stringByDeletingLastPathComponent]]];  //0.92 version
-#endif
-    if (iniRange.location == NSNotFound) {
-        [arguments addObject:[NSString stringWithFormat: @"--ini=%@",[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@"ini"]]];
-    }
-    
-	[arguments addObject:decryptFilePath];
-	DDLogVerbose(@"comskip Path: %@",[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]);
-	DDLogVerbose(@"comskip args: %@",arguments);
-	[commercialTask setArguments:arguments];
-    _processProgress = 0.0;
-	previousProcessProgress = 0.0;
-	[commercialTask launch];
-	[self setValue:[NSNumber numberWithInt:kMTStatusCommercialing] forKeyPath:@"downloadStatus"];
-	[self performSelector:@selector(trackCommercial) withObject:nil afterDelay:3.0];
-}
-
--(void)trackCommercial
-{
-	if (![commercialTask isRunning]) {
-		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-        DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
-		
-		NSString * encodeDirectory = [_encodeFilePath stringByDeletingLastPathComponent];
-#if comSkip92
-		NSString * newCommercialPath = [encodeDirectory stringByAppendingPathComponent: [commercialFilePath lastPathComponent]] ;
-		[[NSFileManager defaultManager] removeItemAtPath:newCommercialPath error:nil ]; //just in case already there.
-		NSError * error = nil;
-		[[NSFileManager defaultManager] moveItemAtPath:commercialFilePath toPath:newCommercialPath error:&error];
-		if (error) {
-			DDLogMajor(@"Error moving commercial EDL file %@ to %@: %@",commercialFilePath, newCommercialPath, error.localizedDescription);
-		} else {
-			commercialFilePath = newCommercialPath;
-		}
-#else
-		if( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-			[[NSFileManager defaultManager] removeItemAtPath:[NSString stringWithFormat:@"%@/%@.tivo.txt",encodeDirectory ,self.baseFileName] error:nil];
-		}
-#endif
-		_processProgress = 1.0;
-		commercialTask = nil;
-        [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialDidFinish object:self];
-		return;
-	}
-	double newProgressValue = 0;
-	unsigned long long logFileSize = [commercialLogFileReadHandle seekToEndOfFile];
-	if (logFileSize > 100) {
-		[commercialLogFileReadHandle seekToFileOffset:(logFileSize-100)];
-		NSData *tailOfFile = [commercialLogFileReadHandle readDataOfLength:100];
-		NSString *data = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-		
-		NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)\\%" options:NSRegularExpressionCaseInsensitive error:nil];
-		NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
-		NSTextCheckingResult *lastItem = [values lastObject];
-		NSRange valueRange = [lastItem rangeAtIndex:1];
-		newProgressValue = [[data substringWithRange:valueRange] doubleValue]/100.0;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		if (newProgressValue > _processProgress) {
-			_processProgress = newProgressValue;
-		}
-	}
-	[self performSelector:@selector(trackCommercial) withObject:nil afterDelay:0.5];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-	
-}
-
--(void)caption
-{
-	DDLogMajor(@"Starting captioning of  %@", self.show.showTitle);
-	captionTask = [[NSTask alloc] init];
-	[captionTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"ccextractor" ofType:@""]];
-	[captionTask setStandardOutput:captionLogFileHandle];
-	[captionTask setStandardError:captionLogFileHandle];
-	NSMutableArray *arguments = [NSMutableArray array];
-	if (_encodeFormat.captionOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.captionOptions]];
-    //if (_encodeFormat.ccextractionOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.ccextractionOptions]];
-    [arguments addObject:decryptFilePath];
-	[arguments addObject:@"-o"];
-	[arguments addObject:captionFilePath ];
-	DDLogVerbose(@"ccextraction args: %@",arguments);
-	[captionTask setArguments:arguments];
-    _processProgress = 0.0;
-	previousProcessProgress = 0.0;
-	[captionTask launch];
-	[self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
-	[self performSelector:@selector(trackCaption) withObject:nil afterDelay:1];
-}
-
--(void)trackCaption
-{
-	if (![captionTask isRunning]) {
-		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-        DDLogMajor(@"Finished detecting captions in %@",self.show.showTitle);
-		
-		_processProgress = 1.0;
-		captionTask = nil;
-		if (self.exportSubtitles.boolValue && self.skipCommercials) {
-			NSArray *srtEntries = [self getSrt:captionFilePath];
-			NSArray *edlEntries = [self getEdl:commercialFilePath];
-			if (srtEntries && edlEntries) {
-				NSArray *correctedSrts = [self processSrts:srtEntries withEdls:edlEntries];
-				if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-					NSString *oldCaptionPath = [[captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
-					[[NSFileManager defaultManager] moveItemAtPath:captionFilePath toPath:oldCaptionPath error:nil];
-				}
-				if (correctedSrts) [self writeSrt:correctedSrts toFilePath:captionFilePath];
-			}
-		}
-		[self setValue:[NSNumber numberWithInt:kMTStatusCaptioned] forKeyPath:@"downloadStatus"];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:self];
-		return;
-	}
-	double newProgressValue = 0;
-	int sizeOfFileSample = 100;
-	unsigned long long logFileSize = [captionLogFileReadHandle seekToEndOfFile];
-	if (logFileSize > sizeOfFileSample) {
-		[captionLogFileReadHandle seekToFileOffset:(logFileSize-sizeOfFileSample)];
-		NSData *tailOfFile = [captionLogFileReadHandle readDataOfLength:sizeOfFileSample];
-		NSString *data = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-		
-		NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
-		NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
-		NSTextCheckingResult *lastItem = [values lastObject];
-		NSRange valueRange = [lastItem rangeAtIndex:1];
-		newProgressValue = [[data substringWithRange:valueRange] doubleValue]/100.0;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		if (newProgressValue > _processProgress) {
-			_processProgress = newProgressValue;
-		}
-	}
-	[self performSelector:@selector(trackCaption) withObject:nil afterDelay:0.5];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-	
-}
-
--(void)encode
-{
-	NSString *encoderLaunchPath = [self encoderPath];
-	if (!encoderLaunchPath) {
-		return;
-	}
-	
-    encoderTask = [[NSTask alloc] init];
-    DDLogMajor(@"Starting Encode of   %@", self.show.showTitle);
-    [encoderTask setLaunchPath:encoderLaunchPath];
-    if (!_encodeFormat.canSimulEncode || [_encodeFormat.encoderUsed compare:@"catToFile"] == NSOrderedSame) {  //If can't simul encode have to depend on log file for tracking of if catToFile which is instant
-		DDLogVerbose(@"Using logfile tracking");
-        NSMutableArray *arguments = [self encodingArgumentsWithInputFile:decryptFilePath outputFile:_encodeFilePath];
-        [encoderTask setArguments:arguments];
-        [encoderTask setStandardOutput:encodeLogFileHandle];
-        [encoderTask setStandardError:encodeErrorFileHandle];
-        _processProgress = 0.0;
-        previousProcessProgress = 0.0;
-        [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        [encoderTask launch];
-        [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-        [self performSelector:@selector(trackEncodes) withObject:nil afterDelay:0.5];
-    } else { //if can simul encode we can ignore the log file and just track an input pipe - more accurate and more general (even though we're not simultaneously downloading/encoding this time.
- 		DDLogVerbose(@"Using pipe tracking");
-        pipe1 = [NSPipe pipe];
-        bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:decryptFilePath];
-        NSMutableArray *arguments = [self encodingArgumentsWithInputFile:@"-" outputFile:_encodeFilePath];
-        [encoderTask setArguments:arguments];
-        [encoderTask setStandardInput:pipe1];
-        [encoderTask setStandardOutput:encodeLogFileHandle];
-        [encoderTask setStandardError:encodeErrorFileHandle];
-        downloadFileHandle = [pipe1 fileHandleForWriting];
-        _processProgress = 0.0;
-        previousProcessProgress = 0.0;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-        [encoderTask launch];
-        [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-        [self performSelectorInBackground:@selector(writeData) withObject:nil];
-        [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:3.0];
-    }
 }
 
 
@@ -1378,63 +1374,6 @@ __DDLOGHERE__
 			[self writeTextMetaData:self.show.stationCallsign forKey:@"callsign"				toFile:textMetaHandle];
 		}
 	}
-	
-}
-
--(BOOL) addAtomicParsleyMetadataToDownloadFile {
-	if (! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley)) {
-		return NO;
-	}
-	DDLogMajor(@"Adding APM metaData to    %@",self);
-	apmTask = [[NSTask alloc] init];
-	[apmTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"AtomicParsley" ofType: @""] ];
-	NSMutableArray *apmArgs =[NSMutableArray array];
-	[apmArgs addObject:_encodeFilePath];
-	[apmArgs addObjectsFromArray:[self.show apmArguments]];
-
-	DDLogVerbose(@"APM Arguments: %@", apmArgs);
-	[apmTask setArguments:apmArgs];
-//	NSString * apmLogFilePath = [NSString stringWithFormat:@"%@QQQAPM.log", kMTTmpDir ];
-//	[[NSFileManager defaultManager] createFileAtPath:apmLogFilePath contents:[NSData data] attributes:nil];
-	
-	[apmTask setStandardOutput:[NSFileHandle fileHandleForWritingAtPath:apmLogFilePath ]];
-    _processProgress = 0.0;
-	previousProcessProgress = 0.0;
-	[apmTask launch];
-	[self setValue:[NSNumber numberWithInt:kMTStatusMetaDataProcessing] forKeyPath:@"downloadStatus"];
-	[self performSelector:@selector(trackAPMProcess) withObject:nil afterDelay:1.0];
-	return YES;
-}
-
--(void) trackAPMProcess {
-	DDLogVerbose(@"Tracking APM");
-	if (![apmTask isRunning]) {
- 		DDLogMajor(@"Finished atomic Parsley in %@",self.show.showTitle);
-		 apmTask = nil;
-		_processProgress = 1.0;		
-		[self finishUpPostEncodeProcessing];
-	} else {
-		double newProgressValue = 0;
-		int sizeOfFileSample = 100;
-		unsigned long long logFileSize = [apmLogFileReadHandle seekToEndOfFile];
-		if (logFileSize > sizeOfFileSample) {
-			[apmLogFileReadHandle seekToFileOffset:(logFileSize-sizeOfFileSample)];
-			NSData *tailOfFile = [apmLogFileReadHandle readDataOfLength:sizeOfFileSample];
-			NSString *data = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-			
-			NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
-			NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
-			NSTextCheckingResult *lastItem = [values lastObject];
-			NSRange valueRange = [lastItem rangeAtIndex:1];
-			newProgressValue = [[data substringWithRange:valueRange] doubleValue]/100.0;
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-			if (newProgressValue > _processProgress) {
-				_processProgress = newProgressValue;
-			}
-		}
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		[self performSelector:@selector(trackAPMProcess) withObject:nil afterDelay:0.5];
-	}
 }
 
 -(void) addXAttrs:(NSString *) videoFilePath {
@@ -1448,13 +1387,350 @@ __DDLOGHERE__
     
 	[tiVoManager updateShowOnDisk:_show.showKey withPath: videoFilePath];
 }
-							   
+
+-(void) writeError:(NSString *) errMsg for: (MTSrt *) srt {
+	DDLogReport(@"At %0.1f secs, %@ subtitle: %@",
+				srt.startTime,
+				errMsg,
+				srt.caption);
+}
+
+-(NSString *) languageFromFileName:(NSString *) filePath {
+	NSString * fileName = [filePath lastPathComponent];
+	NSArray * fileComponents = [fileName componentsSeparatedByString:@"."];
+	if (fileComponents.count > 3) {
+		return fileComponents[2];
+	} else {
+		return @"eng";
+	}
+}
+
+#define MAXLINE 2048
+
+inline static void assignWord(uint8* buffer, int word) {
+	buffer[0] = word >> 8 & 0xff;
+	buffer[1] = word & 0xff;
+}
+
+static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL italics, BOOL bold, BOOL underline, unsigned char red, unsigned char blue, unsigned char green   )
+{
+    assignWord(&style[0], startChar);
+    assignWord(&style[2], endChar);
+    assignWord(&style[4], 1);//font ID; only support 1 font now
+    style[6] = (underline << 2) | (italics<< 1) | bold;
+	style[7] = 24;      // font-size
+    style[8] = red;     // r
+    style[9] = blue;     // g
+    style[10] = green;    // b
+    style[11] = 255;    // no alpha in srt font color
+	
+    return style;
+}
+
+
+-(unsigned int) makeStyleHeader: (UInt8 *) buffer  forNumStyles: (int) styleCount {
+    unsigned int styleSize = 10 + (styleCount * 12);
+    assignWord(&buffer[0],0);
+    assignWord(&buffer[2],styleSize);
+    memcpy    (&buffer[4], "styl", 4);
+    assignWord(&buffer[8],styleCount);
+    return styleSize;
+}
+
+-(NSString *) makeStyleData: (UInt8 *) buffer size: (unsigned int *) sizebuffer forString: (NSString*) string
+{
+	NSMutableString * returnString = [NSMutableString stringWithCapacity:string.length];
+	NSScanner *scanner = [NSScanner scannerWithString:string];
+    int styleCount = 0;
+	
+    int italic = 0;
+    int bold = 0;
+    int underlined = 0;
+	unsigned char red = 255;  //default white
+	unsigned char blue = 255;
+	unsigned char green = 255;
+	BOOL customColor = NO;
+    // Parse the tags in the line, remove them and create a style record for every style change
+    
+	while (YES) {
+		//invariant: startPoint points to beginning of a text range (without <>) and styleAttribs are set properly for the next group of chars
+		__autoreleasing NSString * textChars = @"";
+		[scanner setCharactersToBeSkipped:nil];
+		[scanner scanUpToString:@"<" intoString:&textChars];
+		DDLogVerbose(@"subtitleText = %@",textChars);
+		if ((italic || bold || underlined || customColor) && textChars.length > 0) {
+            makeStyleRecord(&buffer [ 10 + (12 * styleCount)], (int)returnString.length, (int)(returnString.length+textChars.length), italic>0, bold>0, underlined>0, red, blue, green );
+            styleCount++;
+        }
+		[returnString appendString:textChars];
+		if ([scanner isAtEnd]) {
+			break;
+		}
+		__autoreleasing NSString * tagChars = @"";
+		[scanner scanString:@"<" intoString:nil];
+		[scanner scanUpToString:@">" intoString:&tagChars];
+		[scanner scanString:@">" intoString:nil];
+		tagChars = [tagChars lowercaseString];
+		DDLogVerbose(@"subtitleTag = <%@>",tagChars);
+		//now work on next one
+		
+		unichar tagType = ' '; //for end of string case
+
+		if (tagChars.length > 0) {
+			tagType = [tagChars characterAtIndex: 0];
+		}
+		NSScanner * tagScanner = [NSScanner scannerWithString:tagChars];
+		switch (tagType) {
+			case 'i':
+				italic++;
+				break;
+			case 'b':
+				bold++;
+				break;
+			case 'u':
+				underlined++;
+				break;
+			case 'f': {
+				//e.g. <font color="#ffff00">
+				NSScanner * tagScanner = [NSScanner scannerWithString:tagChars];
+				unsigned int hexColor= 0;
+				if ([tagScanner scanString: @"font color" intoString: nil]) {
+					if ([tagScanner scanString: @"=" intoString: nil]) {
+						if ([tagScanner scanString: @"\"#" intoString: nil])  {
+							if ([tagScanner scanHexInt:&hexColor]) {
+								red = (unsigned char) hexColor >> 16;
+								green = (unsigned char) hexColor >> 8;
+								blue = (unsigned char) hexColor;
+								//DDLogVerbose(@"new color= %d:%d:%d", red, green, blue);
+							}
+						}
+					}
+				}
+				break;
+			}
+			case '/': {
+				//an end tag
+				unichar tagEndType = ' ';  //for end of string case
+				if (string.length > 1) { //normal case
+					tagEndType = [tagChars characterAtIndex: 1];
+				}
+				switch (tagEndType) {
+					case 'i':
+						italic--;
+						break;
+					case 'b':
+						bold--;
+						break;
+					case 'u':
+						underlined--;
+						break;
+					case 'f': {
+						if ([tagScanner scanString: @"/font color" intoString:nil] ) {
+							red = 255;  //back to white
+							green = 255;
+							blue = 255;
+						}
+						break;
+					}
+					default:
+						//unrecognized end tag; leave it alone
+						[returnString appendFormat:@"</%@>", tagChars];
+						break;
+				}
+				break;
+			}
+			default:
+				//unrecognized tag; leave it alone
+				[returnString appendFormat:@"<%@>", tagChars];
+				break;
+		
+			};
+        }
+	
+    if (styleCount > 0 )
+        *sizebuffer = [self makeStyleHeader:buffer forNumStyles:styleCount];
+//	DDLogVerbose(@"clean string = %@",returnString);
+//	NSMutableString * outStr = [NSMutableString new];
+//	for (int i = 0; i <  *sizebuffer; i++ ) {
+//		[outStr appendFormat: @"%u[%c] ",buffer[i], buffer[i]];
+//	}
+//	DDLogVerbose(@"data[%d] = %@", *sizebuffer, outStr);
+    return [NSString stringWithString:returnString];
+}
+
+-(unsigned int) subtitle:(UInt8 *)buffer fromString:(NSString*) caption {
+    UInt8 tempStyleBuffer[MAXLINE];
+    unsigned int styleLength = 0;
+	char * stringStartLoc = (char *) &buffer[2];
+	caption = [caption stringByReplacingOccurrencesOfString:@"\r\n" withString:@"\n"];
+    caption = [caption stringByReplacingOccurrencesOfString:@"\r" withString:@"\n"];
+    caption = [self makeStyleData: tempStyleBuffer size: &styleLength forString:caption];
+	
+	if (![caption getCString:stringStartLoc maxLength:MAXLINE encoding:NSUTF8StringEncoding]) {
+	}
+
+    unsigned int stringLength = (unsigned int) strlen(stringStartLoc);
+    assignWord( &buffer[0], stringLength);
+    memcpy(&buffer[2+stringLength], tempStyleBuffer, styleLength);
+	return 2 + stringLength + styleLength;
+}
+	
+
+-(void)embedSubtitles: (MP4FileHandle *) encodedFile {
+	//MP4WriteSample expects two bytes of length followed by string followed by style info.
+	uint8_t data[MAXLINE*2+2];
+	uint8_t blankData[2] = {0,0};
+	DDLogVerbose(@"Embedding subtitles");
+
+	double last = 0.0;
+	NSArray * srtEntries = [self getSrt:captionFilePath];
+	if (srtEntries.count > 0) {
+			
+		MP4TrackId textTrack = MP4AddSubtitleTrack(encodedFile,1000,0,0);  //timescale;height;width
+		const char * language = [[self languageFromFileName:captionFilePath] cStringUsingEncoding:NSUTF8StringEncoding];
+		MP4SetTrackLanguage(
+							encodedFile,
+							textTrack,
+							language);
+		
+		
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "tkhd.alternate_group", 2);
+		
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.horizontalJustification", 1);
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.verticalJustification", 0);
+		
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.bgColorAlpha", 255);
+		
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontID", 1);
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontSize", 24);
+		
+		const uint8_t textColor[4] = { 255,255,255,255 };
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorRed", textColor[0]);
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorGreen", textColor[1]);
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorBlue", textColor[2]);
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorAlpha", textColor[3]);
+		
+		for (MTSrt* srt in srtEntries) {
+			if (last < srt.startTime) {
+				//fill in gap from previous one with an empty caption
+				//Write blank
+				if (!MP4WriteSample(encodedFile,
+									textTrack,
+									blankData, 2,
+									(srt.startTime-last)*1000, 0, false )) {
+					[self writeError:@"can't write gap before" for:  srt];
+					break;
+				}
+			}
+			//DDLogVerbose(@"Embedding srt: %@", srt);
+			MP4Duration duration = (srt.endTime - srt.startTime)*1000;
+			unsigned int len = [self subtitle:data fromString:srt.caption];
+				//Write subtitle
+//			NSMutableString * outStr = [NSMutableString new];
+//			for (int i = 0; i <  len; i++ ) {
+//				[outStr appendFormat: @"%u[%c] ",data[i], data[i]];
+//			}
+//			DDLogVerbose(@"data[%d] = %@", len, outStr);
+			if (!MP4WriteSample( encodedFile, textTrack, data, len, duration, 0, false )) {
+				[self writeError:@"can't write" for:  srt];
+				break;
+			}
+			last = srt.endTime;
+		}
+	}
+}
+
+-(const MP4Tags * ) metaDataTags {
+	const MP4Tags *tags = MP4TagsAlloc();
+	uint8_t mediaType = 10;
+	if (_show.isMovie) {
+		mediaType = 9;
+	}
+	MP4TagsSetMediaType(tags, &mediaType);
+	if (_show.episodeTitle.length>0) {
+		MP4TagsSetName(tags,[_show.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	if (_show.episodeGenre.length>0) {
+		MP4TagsSetGenre(tags,[_show.episodeGenre cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	if (_show.originalAirDate.length>0) {
+		MP4TagsSetReleaseDate(tags,[_show.originalAirDate cStringUsingEncoding:NSUTF8StringEncoding]);
+	} else if (_show.movieYear.length>0) {
+		MP4TagsSetReleaseDate(tags,[_show.movieYear	cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	
+	if (_show.showDescription.length > 0) {
+		if (_show.showDescription.length < 230) {
+			MP4TagsSetDescription(tags,[_show.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+			
+		} else {
+			MP4TagsSetLongDescription(tags,[_show.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+		}
+	}
+	if (_show.seriesTitle.length>0) {
+		MP4TagsSetTVShow(tags,[_show.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+		MP4TagsSetArtist(tags,[_show.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+		MP4TagsSetAlbumArtist(tags,[_show.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	if (_show.episodeNumber.length>0) {
+		uint32_t episodeNumber = [_show.episodeNumber intValue];
+		MP4TagsSetTVEpisode(tags, &episodeNumber);
+	}
+	if (_show.episode > 0) {
+		uint32_t episodeNumber = _show.episode;
+		MP4TagsSetTVEpisode(tags, &episodeNumber);
+		//				NSString * epString = [NSString stringWithFormat:@"%d",self.episode];
+		//				[apmArgs addObject:@"--tracknum"];
+		//				[apmArgs addObject:epString];
+	} else if (_show.episodeNumber.length>0) {
+		uint32_t episodeNumber =  [_show.episodeNumber intValue];
+		MP4TagsSetTVEpisode(tags, &episodeNumber);
+		//				[apmArgs addObject:@"--tracknum"];
+		//				[apmArgs addObject:self.episodeNumber];
+		
+	}
+	if (_show.season > 0 ) {
+		uint32_t showSeason =  _show.season;
+		MP4TagsSetTVSeason(tags, &showSeason);
+	}
+	if (_show.stationCallsign) {
+		MP4TagsSetTVNetwork(tags, [_show.stationCallsign cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	return tags;
+}
+
+
 -(void) finishUpPostEncodeProcessing {
+	NSDate *startTime = [NSDate date];
+	NSLog(@"QQQStarting finishing @ %@",startTime);
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
+
+    if (self.shouldMarkCommercials || self.encodeFormat.canAtomicParsley || self.shouldEmbedSubtitles)
+    {
+        MP4FileHandle *encodedFile = MP4Modify([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding],0);
+		if (self.shouldMarkCommercials) {
+			MP4Chapters *chapters = [self createChapters];
+			if (chapters && encodedFile) {
+				MP4SetChapters(encodedFile, chapters->chapters, chapters->count, MP4ChapterTypeQt);
+			}
+		}
+		if (self.shouldEmbedSubtitles) {
+			[self embedSubtitles:encodedFile];
+		}
+		if (self.encodeFormat.canAtomicParsley) {
+			MP4TagsStore([self metaDataTags], encodedFile);
+		}
+		
+		MP4Close(encodedFile, 0);
+    }
 	if (_addToiTunesWhenEncoded) {
 		DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
+        _processProgress = 1.0;
+        [self setValue:[NSNumber numberWithInt:kMTStatusAddingToItunes] forKeyPath:@"downloadStatus"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 		MTiTunes *iTunes = [[MTiTunes alloc] init];
 		NSString * iTunesPath = [iTunes importIntoiTunes:self] ;
-	
+		
 		if (iTunesPath && iTunesPath != self.encodeFilePath) {
 			//apparently iTunes created new file
 			
@@ -1475,135 +1751,65 @@ __DDLOGHERE__
 		}
 	}
 	[self addXAttrs:self.encodeFilePath];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:_show];
-	
+//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:_show];
+	NSLog(@"QQQIt Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], _show.showTitle);
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:nil];  //Free up an encoder
+    _processProgress = 1.0;
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:self];
 	[tiVoManager  notifyWithTitle:@"TiVo show transferred." subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
 	
 	[self cleanupFiles];
-}
-
--(void) postEncodeProcessing {
-	//shared between trackDownloadEncode (simultaneous) and trackEncodes (non-simul)
-	_processProgress = 1.0;
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-	if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
-		DDLogReport(@" %@ File %@ not found after encoding complete",self, self.encodeFilePath );
-		[self saveCurrentLogFile];
-		[self rescheduleShowWithDecrementRetries:@(YES)];
-		
-	} else {
-		[self writeMetaDataFiles];
-		if ( ! [self addAtomicParsleyMetadataToDownloadFile] ) {
-			[self finishUpPostEncodeProcessing];
-		} else {
-			//APM process owns call finishUp after (potentially long) processing
-		}
-	}
-}
-
--(void)trackDownloadEncode
-{
-    if([encoderTask isRunning]) {
-        [self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
-    } else {
-        DDLogMajor(@"Finished simul encode of %@", self.show.showTitle);
-		[self postEncodeProcessing];
-    }
-}
-
--(void)trackEncodes
-{
-	if (![encoderTask isRunning]) {
-		DDLogMajor(@"Finished Encode of   %@",self.show.showTitle);
-		encoderTask = nil;
-		[self postEncodeProcessing];
-		return;
-	}
-	double newProgressValue = 0;
-	unsigned long long logFileSize = [encodeLogFileReadHandle seekToEndOfFile];
-	if (logFileSize > 100) {
-		[encodeLogFileReadHandle seekToFileOffset:(logFileSize-100)];
-		NSData *tailOfFile = [encodeLogFileReadHandle readDataOfLength:100];
-		NSString *data = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-		NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:_encodeFormat.regExProgress options:NSRegularExpressionCaseInsensitive error:nil];
-		//		if ([_encodeFormat.encoderUsed caseInsensitiveCompare:@"mencoder"] == NSOrderedSame) {
-		//			NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"\\((.*?)\\%\\)" options:NSRegularExpressionCaseInsensitive error:nil];
-		NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
-		NSTextCheckingResult *lastItem = [values lastObject];
-		NSRange valueRange = [lastItem rangeAtIndex:1];
-		newProgressValue = [[data substringWithRange:valueRange] doubleValue]/100.0;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		//		}
-		//		if ([_encodeFormat.encoderUsed caseInsensitiveCompare:@"HandBrakeCLI"] == NSOrderedSame) {
-		//			NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@" ([\\d.]*?) \\% " options:NSRegularExpressionCaseInsensitive error:nil];
-		//			NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
-		//			if (values.count) {
-		//				NSTextCheckingResult *lastItem = [values lastObject];
-		//				NSRange valueRange = [lastItem rangeAtIndex:1];
-		//				newProgressValue = [[data substringWithRange:valueRange] doubleValue]/102.0;
-		//				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		//			}
-		//		}
-		//if (newProgressValue > _processProgress) {
-		_processProgress = newProgressValue;
-		//		}
-	}
-	[self performSelector:@selector(trackEncodes) withObject:nil afterDelay:0.5];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+    //Reset tasks
+    _decryptTask = _captionTask = _commercialTask = _encodeTask  = nil;
 }
 
 
 -(void)cancel
 {
-    DDLogMajor(@"Canceling of         %@", self.show.showTitle);
-    NSFileManager *fm = [NSFileManager defaultManager];
-    isCanceled = YES;
+    if (_isCanceled || !self.isInProgress) {
+        return;
+    }
+    _isCanceled = YES;
+    DDLogMajor(@"Canceling of %@", self.show.showTitle);
+//    NSFileManager *fm = [NSFileManager defaultManager];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
-    if (self.isDownloading && activeURLConnection) {
+    if (activeURLConnection) {
         [activeURLConnection cancel];
+		self.show.tiVo.lastDownloadEnded = [NSDate date];
         activeURLConnection = nil;
-		if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-			[fm removeItemAtPath:decryptFilePath error:nil];
-		}
 	}
+    if(self.activeTaskChain.isRunning) {
+        [self.activeTaskChain cancel];
+        self.activeTaskChain = nil;
+    }
+//    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:bufferFileReadHandle];
+    if (!self.isNew && !self.isDone ) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadWasCanceled object:nil];
+    }
+    _decryptTask = _captionTask = _commercialTask = _encodeTask  = nil;
+    
 	NSDate *now = [NSDate date];
     while (writingData && (-1.0 * [now timeIntervalSinceNow]) < 5.0){ //Wait for no more than 5 seconds.
         //Block until latest write data is complete - should stop quickly because isCanceled is set
 		writingData = NO;
     } //Wait for pipe out to complete
+    DDLogMajor(@"Waiting %lf seconds for write data to complete during cancel", (-1.0 * [now timeIntervalSinceNow]) );
+    
     [self cleanupFiles]; //Everything but the final file
-    if(decrypterTask && [decrypterTask isRunning]) {
-        [decrypterTask terminate];
+    if (_downloadStatus.intValue == kMTStatusDone) {
+        self.baseFileName = nil;  //Force new file for rescheduled, complete show.
     }
-    if(encoderTask && [encoderTask isRunning]) {
-        [encoderTask terminate];
-    }
-    if(captionTask && [captionTask isRunning]) {
-        [captionTask terminate];
-    }
-    if(commercialTask && [commercialTask isRunning]) {
-        [commercialTask terminate];
-    }
-	
-    if (encodeFileHandle) {
-        [encodeFileHandle closeFile];
-		if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-			[fm removeItemAtPath:_encodeFilePath error:nil];
-		}
-    }
-    if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && self.isDownloading)) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
-    }
-    if ([_downloadStatus intValue] == kMTStatusCaptioning) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionWasCanceled object:self];
-    }
-    if ([_downloadStatus intValue] == kMTStatusCommercialing) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
-    }
-    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+//    if ([_downloadStatus intValue] == kMTStatusEncoding || (_simultaneousEncode && self.isDownloading)) {
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
+//    }
+//    if ([_downloadStatus intValue] == kMTStatusCaptioning) {
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionWasCanceled object:self];
+//    }
+//    if ([_downloadStatus intValue] == kMTStatusCommercialing) {
+//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
+//    }
+//    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
     if (_processProgress != 0.0 ) {
 		_processProgress = 0.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:self];
@@ -1616,7 +1822,7 @@ __DDLOGHERE__
 -(void)checkStillActive
 {
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
-													   //Cancel and restart or delete depending on number of time we've been through this
+		//Cancel and restart or delete depending on number of time we've been through this
         DDLogMajor (@"process stalled; rescheduling");
 		[self rescheduleShowWithDecrementRetries:@(YES)];
 	} else if ([self isInProgress]){
@@ -1655,7 +1861,7 @@ __DDLOGHERE__
 
 -(NSArray *)getSrt:(NSString *)srtFile
 {
-	NSArray *rawSrts = [[NSString stringWithContentsOfFile:srtFile encoding:NSASCIIStringEncoding error:nil] componentsSeparatedByString:@"\r\n\r\n"];
+	NSArray *rawSrts = [[NSString stringWithContentsOfFile:srtFile encoding:NSUTF8StringEncoding error:nil] componentsSeparatedByString:@"\r\n\r\n"];
     NSMutableArray *srts = [NSMutableArray array];
 	MTSrt *lastSrt = nil;
     for (NSString *rawSrt in rawSrts) {
@@ -1678,6 +1884,63 @@ __DDLOGHERE__
     }
     DDLogVerbose(@"srts = %@",srts);
     return [NSArray arrayWithArray:srts];
+}
+
+-(MP4Chapters *)createChapters
+{
+    if (![[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
+        return NULL;  //Files don't exist to process
+    }
+    NSArray *edls = [self getEdl:commercialFilePath];
+    if (!edls || edls.count == 0) {
+        return NULL;  //No edls available to process
+    }
+    //Convert edls to MP4Chapter
+    MP4Chapters *chapters = malloc(sizeof(MP4Chapters));
+    MP4Chapter_t *chapterList = malloc((edls.count * 2 + 1) * sizeof(MP4Chapter_t)); //This is the most there could be
+    chapters->chapters = chapterList;
+    int edlOffset = 0;
+    int showOffset = 0;
+    int chapterOffset = 0;
+    MTEdl *currentEDL = edls[edlOffset];
+    if (currentEDL.startTime > 0.0) { //We need a first chapter which is the show
+        chapterList[chapterOffset].duration = (MP4Duration)((currentEDL.startTime) * 1000.0);
+        sprintf(chapterList[chapterOffset].title,"%s %d",[_show.showTitle cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
+        chapterOffset++;
+        showOffset++;
+    }
+    for (edlOffset = 0; edlOffset < edls.count; edlOffset++) {
+        currentEDL = edls[edlOffset];
+        double endTime = currentEDL.endTime;
+        if (endTime > _show.showLength) {
+            endTime = _show.showLength;
+        }
+        chapterList[chapterOffset].duration = (MP4Duration)((endTime - currentEDL.startTime) * 1000.0);
+        sprintf(chapterList[chapterOffset].title,"%s %d","Commercial", edlOffset+1);
+        chapterOffset++;
+        if (currentEDL.endTime < _show.showLength && (edlOffset + 1) < edls.count) { //Continuing
+            MTEdl *nextEDL = edls[edlOffset + 1];
+            chapterList[chapterOffset].duration = (MP4Duration)((nextEDL.startTime - currentEDL.endTime) * 1000.0);
+            sprintf(chapterList[chapterOffset].title,"%s %d",[_show.showTitle cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
+            chapterOffset++;
+            showOffset++;           
+        } else if (currentEDL.endTime < _show.showLength) { // There's show left but no more commercials so just complete the show chapter
+            chapterList[chapterOffset].duration = (MP4Duration)((_show.showLength - currentEDL.endTime) * 1000.0);
+            sprintf(chapterList[chapterOffset].title,"%s %d",[_show.showTitle cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
+            chapterOffset++;
+            showOffset++;
+            
+        }
+    }
+    //Loging fuction for testing
+    
+    for (int i = 0; i < chapterOffset ; i++) {
+        NSLog(@"Chapter %d: duration %llu, title: %s",i+1,chapterList[i].duration, chapterList[i].title);
+    }
+    
+    chapters->count = chapterOffset;
+    return chapters;
+    
 }
 
 -(NSArray *)getEdl:(NSString *)edlFile
@@ -1722,7 +1985,7 @@ __DDLOGHERE__
         output = [output stringByAppendingString:[srt formatedSrt:i]];
         i++;
     }
-    [srtFileHandle writeData:[output dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
+    [srtFileHandle writeData:[output dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
     [srtFileHandle closeFile];
 	
 }
@@ -1741,13 +2004,13 @@ __DDLOGHERE__
 			if (edlIndex < edls.count) {
 				currentEDL = edls[edlIndex];
 			}
-
+			
 		};
 		//now current edl is either crossed with srt or after it.
-		//If crossed, we delete srt; 
+		//If crossed, we delete srt;
 		if (currentEDL) {
 			if (currentEDL.startTime <= srt.endTime ) {
-			//The srt is  in a cut so remove
+				//The srt is  in a cut so remove
 				continue;
 			}
 		}
@@ -1779,7 +2042,7 @@ __DDLOGHERE__
 -(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted {
 	if (!self.isDone) return nil;
 	NSURL *   URL =  [self URLExists: _encodeFilePath];
-	if (!URL) URL= [self URLExists: decryptFilePath];
+//	if (!URL) URL= [self URLExists: decryptFilePath];
 	if (!URL && encrypted) URL = [self URLExists: _downloadFilePath];
 	return URL;
 }
@@ -1813,84 +2076,128 @@ __DDLOGHERE__
 
 -(void)rescheduleOnMain
 {
-	isCanceled = YES;
+//	_isCanceled = YES;
 	[self performSelectorOnMainThread:@selector(rescheduleShowWithDecrementRetries:) withObject:@YES waitUntilDone:NO];
 }
 
 -(void)writeData
 {
 	//	writingData = YES;
-	int chunkSize = 10000;
+	int chunkSize = 50000;
 	unsigned long dataRead;
 	@autoreleasepool {
 		NSData *data = nil;
-		if (!isCanceled) {
+		if (!_isCanceled) {
 			@try {
-				data = [bufferFileReadHandle readDataOfLength:chunkSize];
+                // writeData supports getting its data from either an NSData buffer (urlBuffer) or a file on disk (_bufferFilePath).  This allows cTiVo to 
+                // initially try to keep the dataflow off the disk, except for final products, where possible.  But, the ability to do this depends on the 
+                // processor being able to keep up with the data flow from the TiVo which is often not the case due to either a slow processor, fast network 
+                // connection, of different tasks competing for processor resources.  When the processor falls too far behind and the memory buffer will 
+                // become too large cTiVo will fall back to using files on the disk as a data buffer.
+                
+                if (bufferFileReadHandle == urlBuffer) {
+                    @synchronized(urlBuffer) {
+                        long sizeToWrite = urlBuffer.length - urlReadPointer;
+                        if (sizeToWrite > chunkSize) {
+                            sizeToWrite = chunkSize;
+                        }
+                        data = [urlBuffer subdataWithRange:NSMakeRange(urlReadPointer, sizeToWrite)];
+                        urlReadPointer += sizeToWrite;
+                    }
+                } else {
+                    data = [bufferFileReadHandle readDataOfLength:chunkSize];
+                }
 			}
 			@catch (NSException *exception) {
-				[self rescheduleOnMain];
-				DDLogDetail(@"buffer read fail:%@; rescheduling", exception.reason);
+                if (!_isCanceled){
+                    [self rescheduleOnMain];
+                    DDLogDetail(@"Rescheduling");
+                };
+				DDLogDetail(@"buffer read fail:%@; %@", exception.reason, _show.showTitle);
 			}
 			@finally {
 			}
 		}
-		if (!isCanceled){
+		if (!_isCanceled){
 			@try {
-				[downloadFileHandle writeData:data];
+                if (data.length) {
+                    [taskChainInputHandle writeData:data];
+                }
 			}
 			@catch (NSException *exception) {
-				[self rescheduleOnMain];
-				DDLogDetail(@"download write fail: %@; rescheduling", exception.reason);
+                if (!_isCanceled){
+                    [self rescheduleOnMain];
+                    DDLogDetail(@"Rescheduling");
+                };
+				DDLogDetail(@"download write fail: %@; %@", exception.reason, _show.showTitle);
 			}
 			@finally {
 			}
 		}
 		dataRead = data.length;
-		while (dataRead == chunkSize && !isCanceled) {
+        totalDataRead += dataRead;
+		while (dataRead == chunkSize && !_isCanceled) {
 			@autoreleasepool {
 				@try {
-					data = [bufferFileReadHandle readDataOfLength:chunkSize];
+                    if (bufferFileReadHandle == urlBuffer) {
+                        @synchronized(urlBuffer) {
+                            long sizeToWrite = urlBuffer.length - urlReadPointer;
+                            if (sizeToWrite > chunkSize) {
+                                sizeToWrite = chunkSize;
+                            }
+                            data = [urlBuffer subdataWithRange:NSMakeRange(urlReadPointer, sizeToWrite)];
+                            urlReadPointer += sizeToWrite;
+                        }
+                    } else {
+                        data = [bufferFileReadHandle readDataOfLength:chunkSize];
+                    }
 				}
 				@catch (NSException *exception) {
-					[self rescheduleOnMain];
-					DDLogDetail(@"buffer read fail2: %@; rescheduling", exception.reason);
+                    if (!_isCanceled){
+                        [self rescheduleOnMain];
+                        DDLogDetail(@"Rescheduling");
+                    };
+					DDLogDetail(@"buffer read fail2: %@; %@", exception.reason,_show.showTitle);
 				}
 				@finally {
 				}
-				if (!isCanceled) {
+				if (!_isCanceled) {
 					@try {
-						[downloadFileHandle writeData:data];
+                        if (data.length) {
+                            [taskChainInputHandle writeData:data];
+                        }
 					}
 					@catch (NSException *exception) {
-						[self rescheduleOnMain];
-						DDLogDetail(@"download write fail2: %@; rescheduling", exception.reason);
+						if (!_isCanceled){
+                            [self rescheduleOnMain];
+                            DDLogDetail(@"Rescheduling");
+                        };
+						DDLogDetail(@"download write fail2: %@; %@", exception.reason, _show.showTitle);
 					}
 					@finally {
 					}
 				}
-				if (isCanceled) break;
+				if (_isCanceled) break;
 				dataRead = data.length;
-				//		dataDownloaded += data.length;
-				_processProgress = (double)[bufferFileReadHandle offsetInFile]/_show.fileSize;
+                totalDataRead += dataRead;
+				_processProgress = totalDataRead/_show.fileSize;
 				[self performSelectorOnMainThread:@selector(updateProgress) withObject:nil waitUntilDone:NO];
 			}
 		}
 	}
-	if (!activeURLConnection || isCanceled) {
-		DDLogDetail(@"Closing downloadFileHandle %@ which %@ from pipe1 for show %@", downloadFileHandle, (downloadFileHandle != [pipe1 fileHandleForWriting]) ? @"is not" : @"is", self.show.showTitle);
-		[downloadFileHandle closeFile];
+	if (!activeURLConnection || _isCanceled) {
+		DDLogDetail(@"Closing taskChainHandle for show %@",self.show.showTitle);
+		[taskChainInputHandle closeFile];
 		DDLogDetail(@"closed filehandle");
-		if (downloadFileHandle != [pipe1 fileHandleForWriting]) {
-		}
-		downloadFileHandle = nil;
-		[bufferFileReadHandle closeFile];
+		taskChainInputHandle = nil;
+        if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
+            [bufferFileReadHandle closeFile];
+        }
 		bufferFileReadHandle = nil;
-		if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-			[[NSFileManager defaultManager] removeItemAtPath:_bufferFilePath error:nil];
-			[[NSFileManager defaultManager] removeItemAtPath:nameLockFilePath error:nil];
-		}
-	}
+//        if (self.shouldSimulEncode && !isCanceled) {
+//            [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
+//        }
+ 	}
 	writingData = NO;
 }
 
@@ -1898,16 +2205,35 @@ __DDLOGHERE__
 
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
-    if (!_isSimultaneousEncoding) {
-        [downloadFileHandle writeData:data];
-        dataDownloaded += data.length;
-        _processProgress = dataDownloaded/_show.fileSize;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		
-    } else {
-        [bufferFileWriteHandle writeData:data];
-    }
-	if (!writingData && _isSimultaneousEncoding) {
+    totalDataDownloaded += data.length;
+	if (urlBuffer) {
+        // cTiVo's URL connection supports sending its data to either an NSData buffer (urlBuffer) or a file on disk (_bufferFilePath).  This allows cTiVo to 
+        // initially try to keep the dataflow off the disk, except for final products, where possible.  But, the ability to do this depends on the processor 
+        // being able to keep up with the data flow from the TiVo which is often not the case due to either a slow processor, fast network connection, of
+        // different tasks competing for processor resources.  When the processor falls too far behind and the memory buffer will become too large
+        // cTiVo will fall back to using files on the disk as a data buffer.
+
+		@synchronized (urlBuffer){
+			[urlBuffer appendData:data];
+			if (urlBuffer.length > kMTMaxBuffSize) {
+				DDLogReport(@"URLBuffer length exceeded %d, switching to file based buffering",kMTMaxBuffSize);
+				[[NSFileManager defaultManager] createFileAtPath:_bufferFilePath contents:[urlBuffer subdataWithRange:NSMakeRange(urlReadPointer, urlBuffer.length - urlReadPointer)] attributes:nil];
+				bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
+				bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
+				[bufferFileWriteHandle seekToEndOfFile];
+				urlBuffer = nil;
+                urlReadPointer = 0;
+			}
+			if (urlBuffer && urlReadPointer > kMTMaxReadPoints) {  //Only compress the buffer occasionally for better performance.  
+				[urlBuffer replaceBytesInRange:NSMakeRange(0, urlReadPointer) withBytes:NULL length:0];
+				urlReadPointer = 0;
+			}
+		};
+	} else {
+		[bufferFileWriteHandle writeData:data];
+	}
+        
+	if (!writingData && (!urlBuffer || urlBuffer.length > kMTMaxPointsBeforeWrite)) {  //Minimized thread creation as it's expensive
 		writingData = YES;
 		[self performSelectorInBackground:@selector(writeData) withObject:nil];
 	}
@@ -1933,39 +2259,32 @@ __DDLOGHERE__
 #define kMTMinTiVoFileSize 100000
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-	double downloadedFileSize = 0;
+	double downloadedFileSize = totalDataDownloaded;
 	DDLogDetail(@"finished loading file");
-    if (!_isSimultaneousEncoding) {
-        downloadedFileSize = (double)[downloadFileHandle offsetInFile];
-        downloadFileHandle = nil;
-		//Check to make sure a reasonable file size in case there was a problem.
-		if (downloadedFileSize > kMTMinTiVoFileSize) {
-			DDLogDetail(@"finished loading file");
-			[self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
-			[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-		}
-    } else {
-        downloadedFileSize = (double)[bufferFileWriteHandle offsetInFile];
-        [bufferFileWriteHandle closeFile];
-		//Check to make sure a reasonable file size in case there was a problem.
-		if (downloadedFileSize > kMTMinTiVoFileSize) {
-			DDLogDetail(@"finished loading simul encode file");
-			[self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-			[self performSelector:@selector(trackDownloadEncode) withObject:nil afterDelay:0.3];
-		}
+    //Check to make sure a reasonable file size in case there was a problem.
+    if (downloadedFileSize > kMTMinTiVoFileSize) {
+        DDLogDetail(@"finished loading TiVo file");
+        if (self.shouldSimulEncode) {
+            [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+        }
     }
-	downloadingURL = NO;
-	activeURLConnection = nil;
-	
     //Make sure to flush the last of the buffer file into the pipe and close it.
-	if (!writingData && _isSimultaneousEncoding) {
-		//		[self performSelectorInBackground:@selector(writeData) withObject:nil];
-		DDLogVerbose (@"writing last data for %@",self);
+	if (!writingData) {
+        DDLogVerbose (@"writing last data for %@",self);
+        activeURLConnection = nil;
 		writingData = YES;
-		[self writeData];
+		[self performSelectorInBackground:@selector(writeData) withObject:nil];
 	}
+	downloadingURL = NO;
+	activeURLConnection = nil; //NOTE this MUST occur after the last call to writeData so that writeData doesn't exits before comletion of the downloaded buffer.
+	self.show.tiVo.lastDownloadEnded = [NSDate date];
 	if (downloadedFileSize < kMTMinTiVoFileSize) { //Not a good download - reschedule
-		NSString *dataReceived = [NSString stringWithContentsOfFile:_bufferFilePath encoding:NSUTF8StringEncoding error:nil];
+        NSString *dataReceived = nil;
+        if (urlBuffer) {
+            dataReceived = [[NSString alloc] initWithData:urlBuffer encoding:NSUTF8StringEncoding];
+        } else {
+            dataReceived = [NSString stringWithContentsOfFile:_bufferFilePath encoding:NSUTF8StringEncoding error:nil];
+        }
 		if (dataReceived) {
 			NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
 			if (noRecording.location != NSNotFound) { //This is a missing recording
@@ -1978,9 +2297,16 @@ __DDLOGHERE__
 		DDLogMajor(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
 		[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:kMTTiVoAccessDelay];
 	} else {
+//		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
 		self.show.fileSize = downloadedFileSize;  //More accurate file size
+//		NSLog(@"File size after reset %lf %lf",self.show.fileSize,downloadedFileSize);
 		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.show.tiVo];
-		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:4.0];
+		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:kMTTiVoAccessDelay];
+        if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
+            if ([[_bufferFilePath substringFromIndex:_bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame  && !_isCanceled) { //We finished a complete download so mark it so
+                setxattr([_bufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+            }
+        }
 	}
 }
 
@@ -1992,7 +2318,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) shouldSimulEncode {
-    return _simultaneousEncode;
+    return (_encodeFormat.canSimulEncode && !_skipCommercials);// && !_downloadingShowFromMPGFile);
 }
 
 -(BOOL) canSkipCommercials {
@@ -2003,6 +2329,16 @@ __DDLOGHERE__
     return _skipCommercials;
 }
 
+-(BOOL) shouldMarkCommercials
+{
+    return (_encodeFormat.canMarkCommercials && _markCommercials);
+}
+
+-(BOOL) shouldEmbedSubtitles
+{
+    return (_encodeFormat.canMarkCommercials && _exportSubtitles);
+}
+
 -(BOOL) canAddToiTunes {
     return self.encodeFormat.canAddToiTunes;
 }
@@ -2010,6 +2346,15 @@ __DDLOGHERE__
 -(BOOL) shouldAddToiTunes {
     return _addToiTunesWhenEncoded;
 }
+
+-(BOOL) canPostDetectCommercials {
+    return NO; //This is not working well right now because comskip isn't handling even these formats reliably.
+//	NSArray * allowedExtensions = @[@".mp4", @".m4v", @".mpg"];
+//	NSString * extension = [_encodeFormat.filenameExtension lowercaseString];
+//	return [allowedExtensions containsObject: extension];
+}
+
+
 
 #pragma mark - Custom Getters
 
@@ -2022,20 +2367,22 @@ __DDLOGHERE__
 
 -(NSString *) showStatus {
 	switch (_downloadStatus.intValue) {
-		case  kMTStatusNew : return @"";
-		case  kMTStatusDownloading : return @"Downloading";
-		case  kMTStatusDownloaded : return @"Downloaded";
-		case  kMTStatusDecrypting : return @"Decrypting";
-		case  kMTStatusDecrypted : return @"Decrypted";
-		case  kMTStatusCommercialing : return @"Detecting Commercials";
-		case  kMTStatusCommercialed : return @"Commercials Detected";
-		case  kMTStatusEncoding : return @"Encoding";
-		case  kMTStatusDone : return @"Complete";
-		case  kMTStatusCaptioned: return @"Subtitled";
-		case  kMTStatusCaptioning: return @"Subtitling";
-		case  kMTStatusDeleted : return @"TiVo Deleted";
-		case  kMTStatusFailed : return @"Failed";
-		case  kMTStatusMetaDataProcessing : return @"Adding MetaData";
+		case  kMTStatusNew :				return @"";
+		case  kMTStatusDownloading :		return @"Downloading";
+		case  kMTStatusDownloaded :			return @"Downloaded";
+		case  kMTStatusDecrypting :			return @"Decrypting";
+		case  kMTStatusDecrypted :			return @"Decrypted";
+		case  kMTStatusCommercialing :		return @"Detecting Ads";
+		case  kMTStatusCommercialed :		return @"Ads Detected";
+		case  kMTStatusEncoding :			return @"Encoding";
+		case  kMTStatusEncoded :			return @"Encoded";
+        case  kMTStatusAddingToItunes:		return @"Adding To iTunes";
+		case  kMTStatusDone :				return @"Complete";
+		case  kMTStatusCaptioned:			return @"Subtitled";
+		case  kMTStatusCaptioning:			return @"Subtitling";
+		case  kMTStatusDeleted :			return @"TiVo Deleted";
+		case  kMTStatusFailed :				return @"Failed";
+		case  kMTStatusMetaDataProcessing:	return @"Adding MetaData";
 		default: return @"";
 	}
 }
@@ -2049,17 +2396,9 @@ __DDLOGHERE__
 
 -(void) setEncodeFormat:(MTFormat *) encodeFormat {
     if (_encodeFormat != encodeFormat ) {
-        BOOL simulWasDisabled = ![self canSimulEncode];
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];
         _encodeFormat = encodeFormat;
-        if (!self.canSimulEncode && self.shouldSimulEncode) {
-            //no longer possible
-            self.simultaneousEncode = NO;
-        } else if (simulWasDisabled && [self canSimulEncode]) {
-            //newly possible, so take user default
-            self.simultaneousEncode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode];
-        }
         if (!self.canAddToiTunes && self.shouldAddToiTunes) {
             //no longer possible
             self.addToiTunesWhenEncoded = NO;
@@ -2078,7 +2417,6 @@ __DDLOGHERE__
 }
 
 
-
 #pragma mark - Memory Management
 
 -(void)dealloc
@@ -2087,7 +2425,7 @@ __DDLOGHERE__
     [self deallocDownloadHandling];
 	[self removeObserver:self forKeyPath:@"downloadStatus"];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-
+	
 }
 
 -(NSString *)description

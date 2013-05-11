@@ -40,7 +40,7 @@
 
 @property (nonatomic, strong) NSAttributedString *attributedFormatDescription;
 
-@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip, canAtomicParsley;
+@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip, canAtomicParsley, canMarkCommercials;
 @property (nonatomic, readonly) NSString * pathForExecutable;
 
 @property (nonatomic, strong) NSString * formerName;//only used to update existing format objects when name is edited.

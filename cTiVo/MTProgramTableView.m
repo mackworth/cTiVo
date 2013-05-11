@@ -28,6 +28,7 @@ __DDLOGHERE__
 
 -(void)setNotifications
 {
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationShowDownloadDidFinish object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDetailsLoaded object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoListUpdated object:nil];
@@ -334,6 +335,8 @@ __DDLOGHERE__
 		result.textField.stringValue = thisShow.sizeString;
 	} else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.idString;
+	} else if ([tableColumn.identifier compare:@"EpisodeID"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.episodeID;
 	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.episodeTitle;
 		result.toolTip = result.textField.stringValue;
@@ -392,18 +395,37 @@ __DDLOGHERE__
 		if (c < 0) {
 			c = 0;
 		}
-		NSTableColumn *selectedColumn = tv.tableColumns[c];
+//		NSTableColumn *selectedColumn = tv.tableColumns[c];
+//        NSTableCellView *selectedCell = selectedColumn.dataCell;
 		BOOL isSelectedRow = [tv isRowSelected:r];
 		BOOL isOverText = NO;
-		if ([selectedColumn.identifier caseInsensitiveCompare:@"Programs"] == NSOrderedSame) { //Check if over text
-			NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
-			NSTextField *showField = showCellView.textField;
-			NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
-			NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
-			if (clickInText.x < stringSize.width) {
-				isOverText = YES;
-			}
-		}
+        NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+        NSTextAlignment alignment = showCellView.textField.alignment;
+        NSTextField *showField = showCellView.textField;
+        NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+        NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
+        NSSize cellSize = showCellView.frame.size;
+        switch (alignment) {
+            case NSLeftTextAlignment:
+            case NSNaturalTextAlignment:
+                if (clickInText.x < stringSize.width) {
+                    isOverText = YES;
+                }
+                break;
+            case NSRightTextAlignment:
+                if (clickInText.x > cellSize.width - stringSize.width) {
+                    isOverText = YES;
+                }
+                break;
+            case NSCenterTextAlignment:
+                if (clickInText.x < (cellSize.width + stringSize.width)/2.0 && clickInText.x > (cellSize.width - stringSize.width)/2.0) {
+                    isOverText = YES;
+                }
+                break;
+                
+            default:
+                break;
+        }
 		if (!isSelectedRow && !isOverText) {
 			return NO;
 		}
