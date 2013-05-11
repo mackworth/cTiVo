@@ -391,6 +391,9 @@ __DDLOGHERE__
 		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
 		NSPoint p = [tv convertPoint:windowPoint fromView:nil];
 		NSInteger r = [tv rowAtPoint:p];
+		if (r < 0) {
+			r = 0;
+		}
 		NSInteger c = [tv columnAtPoint:p];
 		if (c < 0) {
 			c = 0;
@@ -402,30 +405,32 @@ __DDLOGHERE__
         NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
         NSTextAlignment alignment = showCellView.textField.alignment;
         NSTextField *showField = showCellView.textField;
-        NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
-        NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
-        NSSize cellSize = showCellView.frame.size;
-        switch (alignment) {
-            case NSLeftTextAlignment:
-            case NSNaturalTextAlignment:
-                if (clickInText.x < stringSize.width) {
-                    isOverText = YES;
-                }
-                break;
-            case NSRightTextAlignment:
-                if (clickInText.x > cellSize.width - stringSize.width) {
-                    isOverText = YES;
-                }
-                break;
-            case NSCenterTextAlignment:
-                if (clickInText.x < (cellSize.width + stringSize.width)/2.0 && clickInText.x > (cellSize.width - stringSize.width)/2.0) {
-                    isOverText = YES;
-                }
-                break;
-                
-            default:
-                break;
-        }
+		if (showField) {
+			NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+			NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
+			NSSize cellSize = showCellView.frame.size;
+			switch (alignment) {
+				case NSLeftTextAlignment:
+				case NSNaturalTextAlignment:
+					if (clickInText.x < stringSize.width) {
+						isOverText = YES;
+					}
+					break;
+				case NSRightTextAlignment:
+					if (clickInText.x > cellSize.width - stringSize.width) {
+						isOverText = YES;
+					}
+					break;
+				case NSCenterTextAlignment:
+					if (clickInText.x < (cellSize.width + stringSize.width)/2.0 && clickInText.x > (cellSize.width - stringSize.width)/2.0) {
+						isOverText = YES;
+					}
+					break;
+					
+				default:
+					break;
+			}
+		}
 		if (!isSelectedRow && !isOverText) {
 			return NO;
 		}
