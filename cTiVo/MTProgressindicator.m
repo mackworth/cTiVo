@@ -16,7 +16,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code here.
-        const int widthStatusField = 170;
+        const int widthStatusField = 80;
         _leftText = [[NSTextField alloc] initWithFrame:CGRectMake(0, -2, frame.size.width -widthStatusField, frame.size.height)];
         [_leftText setBackgroundColor:[NSColor clearColor]];
         [_leftText setEditable:NO];
@@ -35,6 +35,7 @@
         [_rightText setEditable:NO];
         [_rightText setBezeled:NO];
         [_rightText setAutoresizingMask:NSViewMinXMargin ];
+		[[_rightText cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
         
         [self addSubview:_rightText];
         [self addSubview:_leftText];

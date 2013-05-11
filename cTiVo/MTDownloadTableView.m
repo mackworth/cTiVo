@@ -398,8 +398,8 @@ __DDLOGHERE__
 		textVal = thisShow.sizeString;
 	} else if ([tableColumn.identifier isEqualToString:@"TiVoID"]) {
 		textVal = thisShow.idString;
-	} else if ([tableColumn.identifier isEqualToString:@"UniqueID"]) {
-		textVal = thisShow.uniqueID;
+	} else if ([tableColumn.identifier isEqualToString:@"EpisodeID"]) {
+		textVal = thisShow.episodeID;
 	} else if ([tableColumn.identifier isEqualToString:@"Title"]) {
 		textVal = thisShow.episodeTitle;
 	} else if ([tableColumn.identifier isEqualToString:@"Station"]) {

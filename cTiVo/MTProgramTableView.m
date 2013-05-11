@@ -335,8 +335,8 @@ __DDLOGHERE__
 		result.textField.stringValue = thisShow.sizeString;
 	} else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.idString;
-	} else if ([tableColumn.identifier compare:@"UniqueID"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.uniqueID;
+	} else if ([tableColumn.identifier compare:@"EpisodeID"] == NSOrderedSame) {
+		result.textField.stringValue = thisShow.episodeID;
 	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
 		result.textField.stringValue = thisShow.episodeTitle;
 		result.toolTip = result.textField.stringValue;

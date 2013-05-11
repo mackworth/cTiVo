@@ -543,12 +543,13 @@ __DDLOGHERE__
 	}
 }
 
--(NSString *) uniqueID {
+-(NSString *) episodeID {
+
 	if (![_programId hasPrefix:@"MV"] && [_programId hasSuffix:@"0000"] ) {
 		NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init] ;
-		[dateFormat setDateStyle:NSDateFormatterMediumStyle];
+		[dateFormat setDateStyle:NSDateFormatterShortStyle];
 		[dateFormat setTimeStyle:NSDateFormatterNoStyle] ;
-		return [_programId stringByAppendingString:[dateFormat stringFromDate: _showDate] ];
+		return [NSString stringWithFormat: @"%@-%@",_programId, [dateFormat stringFromDate: _showDate] ];
 	} else {
 		return _programId;
 	}

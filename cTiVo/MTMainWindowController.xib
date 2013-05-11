@@ -674,7 +674,6 @@
 											<string key="NSFrame">{{224, 17}, {15, 102}}</string>
 											<reference key="NSSuperview" ref="719796418"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView"/>
 											<string key="NSReuseIdentifierKey">_NS:58</string>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 											<reference key="NSTarget" ref="719796418"/>
@@ -1258,7 +1257,7 @@
 															<bool key="NSHidden">YES</bool>
 														</object>
 														<object class="NSTableColumn" id="613034630">
-															<string key="NSIdentifier">UniqueID</string>
+															<string key="NSIdentifier">EpisodeID</string>
 															<double key="NSWidth">64</double>
 															<double key="NSMinWidth">50</double>
 															<double key="NSMaxWidth">160</double>
@@ -1283,11 +1282,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<reference key="NSTableView" ref="969919815"/>
 															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
-																<string key="NSKey">uniqueID</string>
+																<string key="NSKey">episodeID</string>
 																<bool key="NSAscending">YES</bool>
 																<string key="NSSelector">compare:</string>
 															</object>
-															<string key="NSHeaderToolTip">Unique episode ID across TiVos</string>
+															<string key="NSHeaderToolTip">Episode ID valid across TiVos; used for subscriptions</string>
 															<bool key="NSHidden">YES</bool>
 														</object>
 														<object class="NSTableColumn" id="463514535">
@@ -2008,7 +2007,7 @@
 															<bool key="NSHidden">YES</bool>
 														</object>
 														<object class="NSTableColumn" id="909757981">
-															<string key="NSIdentifier">UniqueID</string>
+															<string key="NSIdentifier">EpisodeID</string>
 															<double key="NSWidth">64</double>
 															<double key="NSMinWidth">50</double>
 															<double key="NSMaxWidth">160</double>
@@ -2033,11 +2032,11 @@
 															<bool key="NSIsResizeable">YES</bool>
 															<reference key="NSTableView" ref="629789127"/>
 															<object class="NSSortDescriptor" key="NSSortDescriptorPrototype">
-																<string key="NSKey">show.uniqueID</string>
+																<string key="NSKey">show.episodeID</string>
 																<bool key="NSAscending">YES</bool>
 																<string key="NSSelector">compare:</string>
 															</object>
-															<string key="NSHeaderToolTip">Unique episode ID across TiVos</string>
+															<string key="NSHeaderToolTip">Episode ID valid across TiVos; used for subscriptions</string>
 															<bool key="NSHidden">YES</bool>
 														</object>
 														<object class="NSTableColumn" id="701843703">

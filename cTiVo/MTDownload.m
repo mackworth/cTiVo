@@ -2367,22 +2367,22 @@ static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL it
 
 -(NSString *) showStatus {
 	switch (_downloadStatus.intValue) {
-		case  kMTStatusNew : return @"";
-		case  kMTStatusDownloading : return @"Downloading";
-		case  kMTStatusDownloaded : return @"Downloaded";
-		case  kMTStatusDecrypting : return @"Decrypting";
-		case  kMTStatusDecrypted : return @"Decrypted";
-		case  kMTStatusCommercialing : return @"Detecting Commercials";
-		case  kMTStatusCommercialed : return @"Commercials Detected";
-		case  kMTStatusEncoding : return @"Encoding";
-		case  kMTStatusEncoded : return @"Encoded";
-        case  kMTStatusAddingToItunes: return @"Adding To iTunes";
-		case  kMTStatusDone : return @"Complete";
-		case  kMTStatusCaptioned: return @"Subtitled";
-		case  kMTStatusCaptioning: return @"Subtitling";
-		case  kMTStatusDeleted : return @"TiVo Deleted";
-		case  kMTStatusFailed : return @"Failed";
-		case  kMTStatusMetaDataProcessing : return @"Adding MetaData";
+		case  kMTStatusNew :				return @"";
+		case  kMTStatusDownloading :		return @"Downloading";
+		case  kMTStatusDownloaded :			return @"Downloaded";
+		case  kMTStatusDecrypting :			return @"Decrypting";
+		case  kMTStatusDecrypted :			return @"Decrypted";
+		case  kMTStatusCommercialing :		return @"Detecting Ads";
+		case  kMTStatusCommercialed :		return @"Ads Detected";
+		case  kMTStatusEncoding :			return @"Encoding";
+		case  kMTStatusEncoded :			return @"Encoded";
+        case  kMTStatusAddingToItunes:		return @"Adding To iTunes";
+		case  kMTStatusDone :				return @"Complete";
+		case  kMTStatusCaptioned:			return @"Subtitled";
+		case  kMTStatusCaptioning:			return @"Subtitling";
+		case  kMTStatusDeleted :			return @"TiVo Deleted";
+		case  kMTStatusFailed :				return @"Failed";
+		case  kMTStatusMetaDataProcessing:	return @"Adding MetaData";
 		default: return @"";
 	}
 }
