@@ -247,7 +247,7 @@ __DDLOGHERE__
 	NSInteger queueID = [queueEntry[kMTQueueID] integerValue];
 	BOOL result = (queueID == _show.showID) && ([self.show.tiVoName compare:queueEntry[kMTQueueTivo]] == NSOrderedSame);
 	if (result && [self.show.showTitle compare:queueEntry[kMTQueueTitle]] != NSOrderedSame) {
-		NSLog(@"Very odd, but reloading anyways: same ID: %ld same TiVo:%@ but different titles: <<%@>> vs <<%@>>",queueID, queueEntry[kMTQueueTivo], self.show.showTitle, queueEntry[kMTQueueTitle] );
+		DDLogReport(@"Very odd, but reloading anyways: same ID: %ld same TiVo:%@ but different titles: <<%@>> vs <<%@>>",queueID, queueEntry[kMTQueueTivo], self.show.showTitle, queueEntry[kMTQueueTitle] );
 	}
 	return result;
 	
@@ -258,6 +258,7 @@ __DDLOGHERE__
 	self.show.showID   = [(NSNumber *)queueEntry[kMTQueueID] intValue];
 	self.show.showTitle= queueEntry[kMTQueueTitle];
 	self.show.tempTiVoName = queueEntry[kMTQueueTivo] ;
+	self.encodeFormat = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
 	
 	[self prepareForDownload:NO];
 	_addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
@@ -268,7 +269,6 @@ __DDLOGHERE__
 	if (self.isInProgress) _downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
 	
 //	_simultaneousEncode = [queueEntry[kMTSimultaneousEncode] boolValue];
-	self.encodeFormat = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
 	self.downloadDirectory = queueEntry[kMTQueueDirectory];
 	_encodeFilePath = queueEntry[kMTQueueFinalFile];
 	_downloadFilePath = queueEntry[kMTQueueDownloadFile];

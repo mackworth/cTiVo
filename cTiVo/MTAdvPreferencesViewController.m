@@ -81,16 +81,22 @@
 
 -(void) awakeFromNib {
 	
+	[self addMenuTo:self.masterDebugLevel withCurrentLevel:[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel]];
+
 	self.debugClasses = [DDLog registeredClasses] ;
 	self.popups= [NSMutableArray arrayWithCapacity:self.debugClasses.count ];
+	NSMutableArray * classNames = [NSMutableArray arrayWithCapacity:self.debugClasses.count];
+	for (Class class in self.debugClasses) {
+		NSString * className =  NSStringFromClass(class);
+		if ([className hasPrefix:@"NSKVONotifying"]) continue;
+		[classNames addObject:className];
+	}
+	[classNames sortUsingSelector:  @selector(localizedCaseInsensitiveCompare:)];
 	
-//	NSInteger const  kNumColumns = 1;
-	int numItems = (int)[self.debugClasses count];
-//	NSInteger numRows = numItems / kNumColumns;
-//	NSInteger row, col;
-	[self addMenuTo:self.masterDebugLevel withCurrentLevel:[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel]];
-	for (int item =0;item < numItems; item++) {
-		NSString * className =  NSStringFromClass(self.debugClasses [item]);
+	int numItems = (int)[classNames count];
+	int itemNum = 0;
+	for (NSString * className in classNames) {
+		Class class =  NSClassFromString(className);
 		const int vertBase = self.debugLevelView.frame.size.height-40;
 		const int labelWidth = 150;
 		const int popupHeight = 25;
@@ -98,12 +104,16 @@
 		const int vertMargin = 5;
 		const int horizMargin = 10;
 		const int columnWidth = labelWidth+vertMargin+popupWidth+vertMargin*4;
-		int columNum = (item < numItems/2)? 0:1;
-		int rowNum = (item < numItems/2) ? item: item-numItems/2;
+		int columNum = (itemNum < numItems/2)? 0:1;
+		int rowNum = (itemNum < numItems/2) ? itemNum: itemNum-numItems/2;
 		
 		NSRect labelFrame = NSMakeRect(columNum*columnWidth,vertBase-rowNum*(popupHeight+vertMargin)-4,labelWidth,popupHeight);
 		NSTextField * label = [self newTextField:labelFrame];
-		[label setStringValue:[NSString stringWithFormat:@"%@:",className]];
+		NSString * displayName = [NSString stringWithFormat:@"%@:",className];
+		if ([displayName hasPrefix:@"MT"]) {
+			displayName = [displayName substringFromIndex:2]; //delete "MT"
+		}
+		[label setStringValue:displayName];
 		
 		NSRect frame = NSMakeRect(columNum*columnWidth+labelWidth+horizMargin,vertBase-rowNum*(popupHeight+vertMargin),popupWidth,popupHeight);
 		NSPopUpButton * cell = [[NSPopUpButton alloc] initWithFrame:frame pullsDown:NO];
@@ -111,13 +121,14 @@
 		cell.title = className;
 		cell.font= 	[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
 
-		[self addMenuTo:cell withCurrentLevel: [DDLog logLevelForClass:self.debugClasses [item]]];
+		[self addMenuTo:cell withCurrentLevel: [DDLog logLevelForClass:class]];
 		cell.target = self;
 		cell.action = @selector(newValue:);
 		
 		[self.debugLevelView addSubview:label];
 		[self.debugLevelView addSubview:cell];
 		[self.popups addObject: cell];
+		itemNum++;
 	}
 	
 //	for (row = 0; row < numRows; row++) {
