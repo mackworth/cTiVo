@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#include "mp4v2.h"
 
 @interface MTEdl : NSObject
 
@@ -19,3 +20,12 @@
 +(MTEdl *)edlFromString:edlString;
 
 @end
+
+@interface NSArray (MTEDLList)
+
++(NSArray *)getFromEDLFile:(NSString *)edlFile;
+
+-(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length;
+
+@end
+

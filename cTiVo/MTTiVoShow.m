@@ -12,6 +12,7 @@
 #import "MTiTunes.h"
 #import "MTTiVoManager.h"
 #import "NSString+RFC3339Date.h"
+#import "mp4v2.h"
 
 @interface MTTiVoShow () {
 	
@@ -444,6 +445,65 @@ __DDLOGHERE__
 		}
 	}
 	return _tiVo;
+}
+
+-(const MP4Tags * ) metaDataTags {
+	const MP4Tags *tags = MP4TagsAlloc();
+	uint8_t mediaType = 10;
+	if (self.isMovie) {
+		mediaType = 9;
+	}
+	MP4TagsSetMediaType(tags, &mediaType);
+	if (self.episodeTitle.length>0) {
+		MP4TagsSetName(tags,[self.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	if (self.episodeGenre.length>0) {
+		MP4TagsSetGenre(tags,[self.episodeGenre cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	if (self.originalAirDate.length>0) {
+		MP4TagsSetReleaseDate(tags,[self.originalAirDate cStringUsingEncoding:NSUTF8StringEncoding]);
+	} else if (self.movieYear.length>0) {
+		MP4TagsSetReleaseDate(tags,[self.movieYear	cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	
+	if (self.showDescription.length > 0) {
+		if (self.showDescription.length < 230) {
+			MP4TagsSetDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+			
+		} else {
+			MP4TagsSetLongDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+		}
+	}
+	if (self.seriesTitle.length>0) {
+		MP4TagsSetTVShow(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+		MP4TagsSetArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+		MP4TagsSetAlbumArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	if (self.episodeNumber.length>0) {
+		uint32_t episodeNumber = [self.episodeNumber intValue];
+		MP4TagsSetTVEpisode(tags, &episodeNumber);
+	}
+	if (self.episode > 0) {
+		uint32_t episodeNumber = self.episode;
+		MP4TagsSetTVEpisode(tags, &episodeNumber);
+		//				NSString * epString = [NSString stringWithFormat:@"%d",self.episode];
+		//				[apmArgs addObject:@"--tracknum"];
+		//				[apmArgs addObject:epString];
+	} else if (self.episodeNumber.length>0) {
+		uint32_t episodeNumber =  [self.episodeNumber intValue];
+		MP4TagsSetTVEpisode(tags, &episodeNumber);
+		//				[apmArgs addObject:@"--tracknum"];
+		//				[apmArgs addObject:self.episodeNumber];
+		
+	}
+	if (self.season > 0 ) {
+		uint32_t showSeason =  self.season;
+		MP4TagsSetTVSeason(tags, &showSeason);
+	}
+	if (self.stationCallsign) {
+		MP4TagsSetTVNetwork(tags, [self.stationCallsign cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	return tags;
 }
 
 -(NSString *)showDateString

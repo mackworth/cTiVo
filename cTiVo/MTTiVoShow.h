@@ -10,6 +10,7 @@
 #import "iTunes.h"
 #import "MTTiVo.h"
 #import "MTFormat.h"
+#import "mp4v2.h"
 
 @class MTProgramTableView;
 
@@ -103,6 +104,7 @@
 -(void)playVideo:(NSString *)path;
 -(void)revealInFinder:(NSArray *)paths;
 
+-(const MP4Tags * ) metaDataTags;
 
 
 @end

@@ -11,5 +11,7 @@
 
 @interface MTLogFormatter : NSObject<DDLogFormatter> {
 	NSDateFormatter *dateFormatter;
+	NSCalendar *calendar;
+	NSUInteger calendarUnitFlags;
 }
 @end

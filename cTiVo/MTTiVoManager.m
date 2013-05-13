@@ -576,6 +576,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		DDLogVerbose(@"Deleted history: %@", itemsToRemove);
 		[_downloadQueue removeObjectsAtIndexes:itemsToRemove];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	} else {
 		DDLogDetail(@"No history to delete?");
 		

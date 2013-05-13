@@ -13,11 +13,6 @@
 #include <sys/xattr.h>
 #include "mp4v2.h"
 
-typedef struct MP4Chapters_s {
-    MP4Chapter_t *chapters;
-    int count;
-} MP4Chapters;
-
 
 @interface MTDownload () {
 	
@@ -1080,15 +1075,15 @@ __DDLOGHERE__
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
                         [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
                         if (self.exportSubtitles.boolValue && self.skipCommercials) {
-                            NSArray *srtEntries = [self getSrt:captionFilePath];
-                            NSArray *edlEntries = [self getEdl:commercialFilePath];
+                            NSArray *srtEntries = [NSArray getFromSRTFile:captionFilePath];
+                            NSArray *edlEntries = [NSArray getFromEDLFile:commercialFilePath];
                             if (srtEntries && edlEntries) {
-                                NSArray *correctedSrts = [self processSrts:srtEntries withEdls:edlEntries];
+                                NSArray *correctedSrts = [srtEntries processWithEDLs:edlEntries];
                                 if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
                                     NSString *oldCaptionPath = [[captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
                                     [[NSFileManager defaultManager] moveItemAtPath:captionFilePath toPath:oldCaptionPath error:nil];
                                 }
-                                if (correctedSrts) [self writeSrt:correctedSrts toFilePath:captionFilePath];
+                                if (correctedSrts) [correctedSrts writeToSRTFilePath:captionFilePath];
                             }
                         }
              } else {
@@ -1207,9 +1202,9 @@ __DDLOGHERE__
         taskChainInputHandle = [taskInputPipe fileHandleForWriting];
     } else if (_downloadingShowFromTiVoFile) {
         self.activeTaskChain.dataSource = _tivoFilePath;
-        NSLog(@"Downloading from file tivo file %@",_tivoFilePath);
+        DDLogMajor(@"Downloading from file tivo file %@",_tivoFilePath);
     } else if (_downloadingShowFromMPGFile) {
-        NSLog(@"Downloading from file MPG file %@",_mpgFilePath);
+        DDLogMajor(@"Downloading from file MPG file %@",_mpgFilePath);
         self.activeTaskChain.dataSource = _mpgFilePath;
     }
 	
@@ -1388,337 +1383,30 @@ __DDLOGHERE__
 	[tiVoManager updateShowOnDisk:_show.showKey withPath: videoFilePath];
 }
 
--(void) writeError:(NSString *) errMsg for: (MTSrt *) srt {
-	DDLogReport(@"At %0.1f secs, %@ subtitle: %@",
-				srt.startTime,
-				errMsg,
-				srt.caption);
-}
-
--(NSString *) languageFromFileName:(NSString *) filePath {
-	NSString * fileName = [filePath lastPathComponent];
-	NSArray * fileComponents = [fileName componentsSeparatedByString:@"."];
-	if (fileComponents.count > 3) {
-		return fileComponents[2];
-	} else {
-		return @"eng";
-	}
-}
-
-#define MAXLINE 2048
-
-inline static void assignWord(uint8* buffer, int word) {
-	buffer[0] = word >> 8 & 0xff;
-	buffer[1] = word & 0xff;
-}
-
-static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL italics, BOOL bold, BOOL underline, unsigned char red, unsigned char blue, unsigned char green   )
-{
-    assignWord(&style[0], startChar);
-    assignWord(&style[2], endChar);
-    assignWord(&style[4], 1);//font ID; only support 1 font now
-    style[6] = (underline << 2) | (italics<< 1) | bold;
-	style[7] = 24;      // font-size
-    style[8] = red;     // r
-    style[9] = blue;     // g
-    style[10] = green;    // b
-    style[11] = 255;    // no alpha in srt font color
-	
-    return style;
-}
-
-
--(unsigned int) makeStyleHeader: (UInt8 *) buffer  forNumStyles: (int) styleCount {
-    unsigned int styleSize = 10 + (styleCount * 12);
-    assignWord(&buffer[0],0);
-    assignWord(&buffer[2],styleSize);
-    memcpy    (&buffer[4], "styl", 4);
-    assignWord(&buffer[8],styleCount);
-    return styleSize;
-}
-
--(NSString *) makeStyleData: (UInt8 *) buffer size: (unsigned int *) sizebuffer forString: (NSString*) string
-{
-	NSMutableString * returnString = [NSMutableString stringWithCapacity:string.length];
-	NSScanner *scanner = [NSScanner scannerWithString:string];
-    int styleCount = 0;
-	
-    int italic = 0;
-    int bold = 0;
-    int underlined = 0;
-	unsigned char red = 255;  //default white
-	unsigned char blue = 255;
-	unsigned char green = 255;
-	BOOL customColor = NO;
-    // Parse the tags in the line, remove them and create a style record for every style change
-    
-	while (YES) {
-		//invariant: startPoint points to beginning of a text range (without <>) and styleAttribs are set properly for the next group of chars
-		__autoreleasing NSString * textChars = @"";
-		[scanner setCharactersToBeSkipped:nil];
-		[scanner scanUpToString:@"<" intoString:&textChars];
-		DDLogVerbose(@"subtitleText = %@",textChars);
-		if ((italic || bold || underlined || customColor) && textChars.length > 0) {
-            makeStyleRecord(&buffer [ 10 + (12 * styleCount)], (int)returnString.length, (int)(returnString.length+textChars.length), italic>0, bold>0, underlined>0, red, blue, green );
-            styleCount++;
-        }
-		[returnString appendString:textChars];
-		if ([scanner isAtEnd]) {
-			break;
-		}
-		__autoreleasing NSString * tagChars = @"";
-		[scanner scanString:@"<" intoString:nil];
-		[scanner scanUpToString:@">" intoString:&tagChars];
-		[scanner scanString:@">" intoString:nil];
-		tagChars = [tagChars lowercaseString];
-		DDLogVerbose(@"subtitleTag = <%@>",tagChars);
-		//now work on next one
-		
-		unichar tagType = ' '; //for end of string case
-
-		if (tagChars.length > 0) {
-			tagType = [tagChars characterAtIndex: 0];
-		}
-		NSScanner * tagScanner = [NSScanner scannerWithString:tagChars];
-		switch (tagType) {
-			case 'i':
-				italic++;
-				break;
-			case 'b':
-				bold++;
-				break;
-			case 'u':
-				underlined++;
-				break;
-			case 'f': {
-				//e.g. <font color="#ffff00">
-				NSScanner * tagScanner = [NSScanner scannerWithString:tagChars];
-				unsigned int hexColor= 0;
-				if ([tagScanner scanString: @"font color" intoString: nil]) {
-					if ([tagScanner scanString: @"=" intoString: nil]) {
-						if ([tagScanner scanString: @"\"#" intoString: nil])  {
-							if ([tagScanner scanHexInt:&hexColor]) {
-								red = (unsigned char) hexColor >> 16;
-								green = (unsigned char) hexColor >> 8;
-								blue = (unsigned char) hexColor;
-								//DDLogVerbose(@"new color= %d:%d:%d", red, green, blue);
-							}
-						}
-					}
-				}
-				break;
-			}
-			case '/': {
-				//an end tag
-				unichar tagEndType = ' ';  //for end of string case
-				if (string.length > 1) { //normal case
-					tagEndType = [tagChars characterAtIndex: 1];
-				}
-				switch (tagEndType) {
-					case 'i':
-						italic--;
-						break;
-					case 'b':
-						bold--;
-						break;
-					case 'u':
-						underlined--;
-						break;
-					case 'f': {
-						if ([tagScanner scanString: @"/font color" intoString:nil] ) {
-							red = 255;  //back to white
-							green = 255;
-							blue = 255;
-						}
-						break;
-					}
-					default:
-						//unrecognized end tag; leave it alone
-						[returnString appendFormat:@"</%@>", tagChars];
-						break;
-				}
-				break;
-			}
-			default:
-				//unrecognized tag; leave it alone
-				[returnString appendFormat:@"<%@>", tagChars];
-				break;
-		
-			};
-        }
-	
-    if (styleCount > 0 )
-        *sizebuffer = [self makeStyleHeader:buffer forNumStyles:styleCount];
-//	DDLogVerbose(@"clean string = %@",returnString);
-//	NSMutableString * outStr = [NSMutableString new];
-//	for (int i = 0; i <  *sizebuffer; i++ ) {
-//		[outStr appendFormat: @"%u[%c] ",buffer[i], buffer[i]];
-//	}
-//	DDLogVerbose(@"data[%d] = %@", *sizebuffer, outStr);
-    return [NSString stringWithString:returnString];
-}
-
--(unsigned int) subtitle:(UInt8 *)buffer fromString:(NSString*) caption {
-    UInt8 tempStyleBuffer[MAXLINE];
-    unsigned int styleLength = 0;
-	char * stringStartLoc = (char *) &buffer[2];
-	caption = [caption stringByReplacingOccurrencesOfString:@"\r\n" withString:@"\n"];
-    caption = [caption stringByReplacingOccurrencesOfString:@"\r" withString:@"\n"];
-    caption = [self makeStyleData: tempStyleBuffer size: &styleLength forString:caption];
-	
-	if (![caption getCString:stringStartLoc maxLength:MAXLINE encoding:NSUTF8StringEncoding]) {
-	}
-
-    unsigned int stringLength = (unsigned int) strlen(stringStartLoc);
-    assignWord( &buffer[0], stringLength);
-    memcpy(&buffer[2+stringLength], tempStyleBuffer, styleLength);
-	return 2 + stringLength + styleLength;
-}
-	
-
--(void)embedSubtitles: (MP4FileHandle *) encodedFile {
-	//MP4WriteSample expects two bytes of length followed by string followed by style info.
-	uint8_t data[MAXLINE*2+2];
-	uint8_t blankData[2] = {0,0};
-	DDLogVerbose(@"Embedding subtitles");
-
-	double last = 0.0;
-	NSArray * srtEntries = [self getSrt:captionFilePath];
-	if (srtEntries.count > 0) {
-			
-		MP4TrackId textTrack = MP4AddSubtitleTrack(encodedFile,1000,0,0);  //timescale;height;width
-		const char * language = [[self languageFromFileName:captionFilePath] cStringUsingEncoding:NSUTF8StringEncoding];
-		MP4SetTrackLanguage(
-							encodedFile,
-							textTrack,
-							language);
-		
-		
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "tkhd.alternate_group", 2);
-		
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.horizontalJustification", 1);
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.verticalJustification", 0);
-		
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.bgColorAlpha", 255);
-		
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontID", 1);
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontSize", 24);
-		
-		const uint8_t textColor[4] = { 255,255,255,255 };
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorRed", textColor[0]);
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorGreen", textColor[1]);
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorBlue", textColor[2]);
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorAlpha", textColor[3]);
-		
-		for (MTSrt* srt in srtEntries) {
-			if (last < srt.startTime) {
-				//fill in gap from previous one with an empty caption
-				//Write blank
-				if (!MP4WriteSample(encodedFile,
-									textTrack,
-									blankData, 2,
-									(srt.startTime-last)*1000, 0, false )) {
-					[self writeError:@"can't write gap before" for:  srt];
-					break;
-				}
-			}
-			//DDLogVerbose(@"Embedding srt: %@", srt);
-			MP4Duration duration = (srt.endTime - srt.startTime)*1000;
-			unsigned int len = [self subtitle:data fromString:srt.caption];
-				//Write subtitle
-//			NSMutableString * outStr = [NSMutableString new];
-//			for (int i = 0; i <  len; i++ ) {
-//				[outStr appendFormat: @"%u[%c] ",data[i], data[i]];
-//			}
-//			DDLogVerbose(@"data[%d] = %@", len, outStr);
-			if (!MP4WriteSample( encodedFile, textTrack, data, len, duration, 0, false )) {
-				[self writeError:@"can't write" for:  srt];
-				break;
-			}
-			last = srt.endTime;
-		}
-	}
-}
-
--(const MP4Tags * ) metaDataTags {
-	const MP4Tags *tags = MP4TagsAlloc();
-	uint8_t mediaType = 10;
-	if (_show.isMovie) {
-		mediaType = 9;
-	}
-	MP4TagsSetMediaType(tags, &mediaType);
-	if (_show.episodeTitle.length>0) {
-		MP4TagsSetName(tags,[_show.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-	if (_show.episodeGenre.length>0) {
-		MP4TagsSetGenre(tags,[_show.episodeGenre cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-	if (_show.originalAirDate.length>0) {
-		MP4TagsSetReleaseDate(tags,[_show.originalAirDate cStringUsingEncoding:NSUTF8StringEncoding]);
-	} else if (_show.movieYear.length>0) {
-		MP4TagsSetReleaseDate(tags,[_show.movieYear	cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-	
-	if (_show.showDescription.length > 0) {
-		if (_show.showDescription.length < 230) {
-			MP4TagsSetDescription(tags,[_show.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
-			
-		} else {
-			MP4TagsSetLongDescription(tags,[_show.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
-		}
-	}
-	if (_show.seriesTitle.length>0) {
-		MP4TagsSetTVShow(tags,[_show.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-		MP4TagsSetArtist(tags,[_show.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-		MP4TagsSetAlbumArtist(tags,[_show.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-	if (_show.episodeNumber.length>0) {
-		uint32_t episodeNumber = [_show.episodeNumber intValue];
-		MP4TagsSetTVEpisode(tags, &episodeNumber);
-	}
-	if (_show.episode > 0) {
-		uint32_t episodeNumber = _show.episode;
-		MP4TagsSetTVEpisode(tags, &episodeNumber);
-		//				NSString * epString = [NSString stringWithFormat:@"%d",self.episode];
-		//				[apmArgs addObject:@"--tracknum"];
-		//				[apmArgs addObject:epString];
-	} else if (_show.episodeNumber.length>0) {
-		uint32_t episodeNumber =  [_show.episodeNumber intValue];
-		MP4TagsSetTVEpisode(tags, &episodeNumber);
-		//				[apmArgs addObject:@"--tracknum"];
-		//				[apmArgs addObject:self.episodeNumber];
-		
-	}
-	if (_show.season > 0 ) {
-		uint32_t showSeason =  _show.season;
-		MP4TagsSetTVSeason(tags, &showSeason);
-	}
-	if (_show.stationCallsign) {
-		MP4TagsSetTVNetwork(tags, [_show.stationCallsign cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-	return tags;
-}
-
 
 -(void) finishUpPostEncodeProcessing {
 	NSDate *startTime = [NSDate date];
-	NSLog(@"QQQStarting finishing @ %@",startTime);
+	DDLogReport(@"Starting finishing @ %@",startTime);
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 
-    if (self.shouldMarkCommercials || self.encodeFormat.canAtomicParsley || self.shouldEmbedSubtitles)
-    {
+    if (self.shouldMarkCommercials || self.encodeFormat.canAtomicParsley || self.shouldEmbedSubtitles) {
         MP4FileHandle *encodedFile = MP4Modify([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding],0);
 		if (self.shouldMarkCommercials) {
-			MP4Chapters *chapters = [self createChapters];
-			if (chapters && encodedFile) {
-				MP4SetChapters(encodedFile, chapters->chapters, chapters->count, MP4ChapterTypeQt);
+			if ([[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
+				NSArray *edls = [NSArray getFromEDLFile:commercialFilePath];
+				if ( edls.count > 0) {
+					[edls addAsChaptersToMP4File: encodedFile forShow: _show.showTitle withLength: _show.showLength ];
+				}
 			}
 		}
 		if (self.shouldEmbedSubtitles) {
-			[self embedSubtitles:encodedFile];
+			NSArray * srtEntries = [NSArray getFromSRTFile:captionFilePath];
+			if (srtEntries.count > 0) {
+				[srtEntries embedSubtitlesInMP4File:encodedFile forLanguage:[MTSrt languageFromFileName:captionFilePath]];
+			}
 		}
 		if (self.encodeFormat.canAtomicParsley) {
-			MP4TagsStore([self metaDataTags], encodedFile);
+			MP4TagsStore([self.show metaDataTags], encodedFile);
 		}
 		
 		MP4Close(encodedFile, 0);
@@ -1752,7 +1440,7 @@ static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL it
 	}
 	[self addXAttrs:self.encodeFilePath];
 //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:_show];
-	NSLog(@"QQQIt Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], _show.showTitle);
+	DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], _show.showTitle);
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:nil];  //Free up an encoder
     _processProgress = 1.0;
@@ -1855,174 +1543,6 @@ static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL it
 -(void)updateProgress
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-}
-
-#pragma mark - SRT/EDL handling Captions with commercial cuts
-
--(NSArray *)getSrt:(NSString *)srtFile
-{
-	NSArray *rawSrts = [[NSString stringWithContentsOfFile:srtFile encoding:NSUTF8StringEncoding error:nil] componentsSeparatedByString:@"\r\n\r\n"];
-    NSMutableArray *srts = [NSMutableArray array];
-	MTSrt *lastSrt = nil;
-    for (NSString *rawSrt in rawSrts) {
-        if (rawSrt.length > kMinSrtLength) {
-            MTSrt *newSrt = [MTSrt srtFromString: rawSrt];
-			if (newSrt && lastSrt) {
-				if (newSrt.startTime <= lastSrt.endTime) {
-					DDLogReport(@"SRT file not in correct order");
-					newSrt = nil;
-				}
-			}
-            if (newSrt) {
-				[srts addObject:newSrt];
-			} else {
-				DDLogDetail(@"SRTs before bad one: %@",srts);
-				return nil;
-			}
-			lastSrt = newSrt;
-        }
-    }
-    DDLogVerbose(@"srts = %@",srts);
-    return [NSArray arrayWithArray:srts];
-}
-
--(MP4Chapters *)createChapters
-{
-    if (![[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
-        return NULL;  //Files don't exist to process
-    }
-    NSArray *edls = [self getEdl:commercialFilePath];
-    if (!edls || edls.count == 0) {
-        return NULL;  //No edls available to process
-    }
-    //Convert edls to MP4Chapter
-    MP4Chapters *chapters = malloc(sizeof(MP4Chapters));
-    MP4Chapter_t *chapterList = malloc((edls.count * 2 + 1) * sizeof(MP4Chapter_t)); //This is the most there could be
-    chapters->chapters = chapterList;
-    int edlOffset = 0;
-    int showOffset = 0;
-    int chapterOffset = 0;
-    MTEdl *currentEDL = edls[edlOffset];
-    if (currentEDL.startTime > 0.0) { //We need a first chapter which is the show
-        chapterList[chapterOffset].duration = (MP4Duration)((currentEDL.startTime) * 1000.0);
-        sprintf(chapterList[chapterOffset].title,"%s %d",[_show.showTitle cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
-        chapterOffset++;
-        showOffset++;
-    }
-    for (edlOffset = 0; edlOffset < edls.count; edlOffset++) {
-        currentEDL = edls[edlOffset];
-        double endTime = currentEDL.endTime;
-        if (endTime > _show.showLength) {
-            endTime = _show.showLength;
-        }
-        chapterList[chapterOffset].duration = (MP4Duration)((endTime - currentEDL.startTime) * 1000.0);
-        sprintf(chapterList[chapterOffset].title,"%s %d","Commercial", edlOffset+1);
-        chapterOffset++;
-        if (currentEDL.endTime < _show.showLength && (edlOffset + 1) < edls.count) { //Continuing
-            MTEdl *nextEDL = edls[edlOffset + 1];
-            chapterList[chapterOffset].duration = (MP4Duration)((nextEDL.startTime - currentEDL.endTime) * 1000.0);
-            sprintf(chapterList[chapterOffset].title,"%s %d",[_show.showTitle cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
-            chapterOffset++;
-            showOffset++;           
-        } else if (currentEDL.endTime < _show.showLength) { // There's show left but no more commercials so just complete the show chapter
-            chapterList[chapterOffset].duration = (MP4Duration)((_show.showLength - currentEDL.endTime) * 1000.0);
-            sprintf(chapterList[chapterOffset].title,"%s %d",[_show.showTitle cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
-            chapterOffset++;
-            showOffset++;
-            
-        }
-    }
-    //Loging fuction for testing
-    
-    for (int i = 0; i < chapterOffset ; i++) {
-        NSLog(@"Chapter %d: duration %llu, title: %s",i+1,chapterList[i].duration, chapterList[i].title);
-    }
-    
-    chapters->count = chapterOffset;
-    return chapters;
-    
-}
-
--(NSArray *)getEdl:(NSString *)edlFile
-{
-	NSArray *rawEdls = [[NSString stringWithContentsOfFile:edlFile encoding:NSASCIIStringEncoding error:nil] componentsSeparatedByString:@"\n"];
-    NSMutableArray *edls = [NSMutableArray array];
-	MTEdl * lastEdl = nil;
-    double cumulativeOffset = 0.0;
-	for (NSString *rawEdl in rawEdls) {
-        if (rawEdl.length > kMinEdlLength) {
-            MTEdl *newEdl = [MTEdl edlFromString:rawEdl];
-			if (newEdl && lastEdl) {
-				if (newEdl.startTime <= lastEdl.endTime) {
-					DDLogReport(@"EDL file not in correct order");
-					newEdl = nil;
-				}
-			}
-            if (newEdl) {
-				if (newEdl.edlType == 0) { //This is for a cut edl.  Other types/action don't cut (such as 1 for mute)
-					cumulativeOffset += (newEdl.endTime - newEdl.startTime);
-				}
-				newEdl.offset = cumulativeOffset;
-				[edls addObject:newEdl];
-			} else {
-				DDLogDetail(@"EDLs before bad one: %@",edls);
-				return nil;
-			}
-        }
-    }
-    DDLogVerbose(@"edls = %@",edls);
-    return [NSArray arrayWithArray:edls];
-	
-}
-
--(void)writeSrt:(NSArray *)srts toFilePath:(NSString *)filePath
-{
-    [[NSFileManager defaultManager] createFileAtPath:filePath contents:[NSData data] attributes:nil];
-    NSFileHandle *srtFileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
-    NSString *output = @"";
-    int i =1;
-    for (MTSrt *srt in srts) {
-        output = [output stringByAppendingString:[srt formatedSrt:i]];
-        i++;
-    }
-    [srtFileHandle writeData:[output dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
-    [srtFileHandle closeFile];
-	
-}
-
--(NSArray *)processSrts:(NSArray *)srts withEdls:(NSArray *)edls
-{
-    if (edls.count == 0) return srts;
-	NSMutableArray *keptSrts = [NSMutableArray array];
-	NSUInteger edlIndex = 0;
-	MTEdl *currentEDL = edls[edlIndex];
-    for (MTSrt *srt in srts) {
-		while (currentEDL &&  (  (srt.startTime > currentEDL.endTime) || (currentEDL.edlType != 0)  ) ){
-			//relies on both edl and srt to be sorted and skips edl that are not cuts (type != 0)
-			edlIndex++;
-			currentEDL = nil;
-			if (edlIndex < edls.count) {
-				currentEDL = edls[edlIndex];
-			}
-			
-		};
-		//now current edl is either crossed with srt or after it.
-		//If crossed, we delete srt;
-		if (currentEDL) {
-			if (currentEDL.startTime <= srt.endTime ) {
-				//The srt is  in a cut so remove
-				continue;
-			}
-		}
-		//if after, we use cumulative offset of "just-prior" edl
-		if (edlIndex > 0) {  //else no offset required
-			MTEdl * prevEdl = (MTEdl *)edls[edlIndex-1];
-			srt.startTime -= prevEdl.offset;
-			srt.endTime -= prevEdl.offset;
-		}
-		[keptSrts addObject:srt];
-    }
-	return [NSArray arrayWithArray:keptSrts];
 }
 
 
