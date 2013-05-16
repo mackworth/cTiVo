@@ -73,6 +73,7 @@
 -(NSDictionary *)currentMediaKeys;
 //-(void)manageDownloads;
 -(void)addFormatsToList:(NSArray *)formats;
+-(void)addEncFormatToList: (NSString *) filename ;
 
 -(void)writeDownloadQueueToUserDefaults;
 -(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo;

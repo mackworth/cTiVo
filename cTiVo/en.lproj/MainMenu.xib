@@ -2184,7 +2184,7 @@
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="684169279"/>
-						<string key="toolTip">Reload Now Playing from TiVo</string>
+						<string key="toolTip">Stops/starts all queue processing</string>
 					</object>
 				</object>
 				<string key="1078.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2194,7 +2194,7 @@
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="666341596"/>
-						<string key="toolTip">Reload Now Playing from TiVo</string>
+						<string key="toolTip">Launches current show in system video player</string>
 					</object>
 				</object>
 				<string key="1098.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2203,7 +2203,7 @@
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="71099702"/>
-						<string key="toolTip">Reload Now Playing from TiVo</string>
+						<string key="toolTip">Opens folder containing video</string>
 					</object>
 				</object>
 				<string key="1099.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2212,7 +2212,7 @@
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="482042351"/>
-						<string key="toolTip">Will attempt to remove commercials - this is mutually exclusive with Simultaneous Recording.</string>
+						<string key="toolTip">Will attempt to remove commercials.  Mutually exclusive with Mark Commercials.</string>
 					</object>
 				</object>
 				<string key="1106.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2231,7 +2231,7 @@
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="556773374"/>
-						<string key="toolTip">Allows simultaneous downloading and encoding of video file (per show) - This is mutually exclusive with Skip Commercials</string>
+						<string key="toolTip">Create chapter markers to easily skip commercials while viewing. Mutually exclusive with Skip Commercials.</string>
 					</object>
 				</object>
 				<string key="1109.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>

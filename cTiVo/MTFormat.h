@@ -46,6 +46,7 @@
 @property (nonatomic, strong) NSString * formerName;//only used to update existing format objects when name is edited.
 
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format;
++(MTFormat *) formatWithEncFile: (NSString *) filename;
 
 -(NSDictionary *)toDictionary;
 -(BOOL)isSame:(MTFormat *)testFormat;

@@ -153,7 +153,7 @@ __DDLOGHERE__
 	[fileLogger setLogFormatter:logFormat];
     [DDLog addLogger:fileLogger];
 
-	DDLogReport(@"Starting cTiVo");
+	DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationBadMAK object:nil];
@@ -163,6 +163,7 @@ __DDLOGHERE__
 										  @YES, kMTShowSuggestions,
 										  @NO, kMTPreventSleep,
 										  @kMTMaxDownloadRetries, kMTNumDownloadRetries,
+										  @kMTUpdateIntervalMinDefault, kMTUpdateIntervalMinutes,
 										  @NO, kMTiTunesDelete,
 										  @NO, kMTHasMultipleTivos,
 										  @NO, kMTMarkCommercials,
@@ -622,13 +623,17 @@ __DDLOGHERE__
 	
 	NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
 	[myOpenPanel setTitle:@"Import User Formats"];
-	[myOpenPanel setAllowedFileTypes:[NSArray arrayWithObject:@"plist"]];
+	[myOpenPanel setAllowedFileTypes:@[@"plist",@"enc"]];
 	[myOpenPanel beginWithCompletionHandler:^(NSInteger ret){
 		NSArray *newFormats = nil;
 		if (ret == NSFileHandlingPanelOKButton) {
 			NSString *filename = myOpenPanel.URL.path;
-			newFormats = [NSArray arrayWithContentsOfFile:filename];
-			[_tiVoGlobalManager addFormatsToList:newFormats];
+			if ([[[filename pathExtension ]lowercaseString] isEqual: @"plist"]) {
+				newFormats = [NSArray arrayWithContentsOfFile:filename];
+				[_tiVoGlobalManager addFormatsToList:newFormats];
+			} else {
+				[_tiVoGlobalManager addEncFormatToList:filename];
+			}
 		}
 	}];
 	

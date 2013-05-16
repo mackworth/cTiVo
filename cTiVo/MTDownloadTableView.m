@@ -32,6 +32,8 @@ __DDLOGHERE__
 -(void)setNotifications
 {
 	DDLogDetail(@"Setting up notifications");
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataDownload) name:kMTNotificationDownloadStatusChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataTiVos) name:kMTNotificationTiVoListUpdated object:nil];

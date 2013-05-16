@@ -185,10 +185,10 @@ __DDLOGHERE__
             }
             if (newProgressValue != -1) {
                 DDLogVerbose(@"New progress value for %@ is %lf",_taskName,newProgressValue);
-            }
-			if (newProgressValue > _download.processProgress) {
-				_download.processProgress = newProgressValue;
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+				if ((newProgressValue != _download.processProgress) && (newProgressValue != 0)) {
+					_download.processProgress = newProgressValue;
+					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+				}
 			}
 		}
 		[self performSelector:@selector(trackProcess) withObject:nil afterDelay:0.5];

@@ -716,7 +716,6 @@ __DDLOGHERE__
         if (_encodeFormat.encoderLateOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:_encodeFormat.encoderLateOtherOptions]];
 		[arguments addObject:outputFilePath];
     }
-	DDLogVerbose(@"encoding arguments: %@", arguments);
 	return arguments;
 }
 
@@ -925,7 +924,7 @@ __DDLOGHERE__
 
 				}
 				if (returnValue == -1.0) {
-					DDLogMajor(@"Encode progress with Rx failed for task encoder for show %@",self.show.showTitle);
+					DDLogMajor(@"Encode progress with Rx failed for task encoder for show %@\nEncoder report: %@",self.show.showTitle, data);
 
 				}
 				return returnValue;
@@ -1511,9 +1510,10 @@ __DDLOGHERE__
 {
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
 		//Cancel and restart or delete depending on number of time we've been through this
-        DDLogMajor (@"process stalled; rescheduling");
+        DDLogMajor (@"process stalled at %0.1f; rescheduling ", _processProgress);
 		[self rescheduleShowWithDecrementRetries:@(YES)];
 	} else if ([self isInProgress]){
+        DDLogVerbose (@"process check OK; %0.2f", _processProgress);
 		previousProcessProgress = _processProgress;
 		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
 	}
@@ -1849,6 +1849,10 @@ __DDLOGHERE__
     return _skipCommercials;
 }
 
+-(BOOL) canMarkCommercials {
+    return self.encodeFormat.canMarkCommercials;
+}
+
 -(BOOL) shouldMarkCommercials
 {
     return (_encodeFormat.canMarkCommercials && _markCommercials);
@@ -1918,6 +1922,7 @@ __DDLOGHERE__
     if (_encodeFormat != encodeFormat ) {
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];
+        BOOL markWasDisabled = ![self canMarkCommercials];
         _encodeFormat = encodeFormat;
         if (!self.canAddToiTunes && self.shouldAddToiTunes) {
             //no longer possible
@@ -1932,6 +1937,13 @@ __DDLOGHERE__
         } else if (skipWasDisabled && [self canSkipCommercials]) {
             //newly possible, so take user default
             self.skipCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
+        }
+        if (!self.canMarkCommercials && self.shouldMarkCommercials) {
+            //no longer possible
+            self.markCommercials = NO;
+        } else if (markWasDisabled && [self canMarkCommercials]) {
+            //newly possible, so take user default
+            self.markCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:@"MarkCommercials"];
         }
     }
 }

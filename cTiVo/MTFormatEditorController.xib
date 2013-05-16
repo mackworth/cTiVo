@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1080</int>
-		<string key="IBDocument.SystemVersion">12C3012</string>
+		<string key="IBDocument.SystemVersion">12D78</string>
 		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
-		<string key="IBDocument.AppKitVersion">1187.34</string>
-		<string key="IBDocument.HIToolboxVersion">625.00</string>
+		<string key="IBDocument.AppKitVersion">1187.37</string>
+		<string key="IBDocument.HIToolboxVersion">626.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">3084</string>
@@ -3645,7 +3645,7 @@ wGw</bytes>
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="294779711"/>
-						<string key="toolTip">Can use pipes to decrypt and encode during download</string>
+						<string key="toolTip">Allow use of pipes to decrypt and encode during download</string>
 					</object>
 				</object>
 				<string key="2478.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3674,7 +3674,7 @@ wGw</bytes>
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="1051039738"/>
-						<string key="toolTip">Use a commercial skipping process - not yet implemented</string>
+						<string key="toolTip">Encoder supports the commercial skipping process</string>
 					</object>
 				</object>
 				<string key="2482.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3771,7 +3771,7 @@ wGw</bytes>
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="778840383"/>
-						<string key="toolTip">Other command-line options</string>
+						<string key="toolTip">Options to be added to comskip command line</string>
 					</object>
 				</object>
 				<string key="2689.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3793,7 +3793,7 @@ wGw</bytes>
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="1038999252"/>
-						<string key="toolTip">Other command-line options</string>
+						<string key="toolTip">Options to be added to ccExtractor (e.g. -sc to convert UPPERCASE to Sentence case)</string>
 					</object>
 				</object>
 				<string key="2710.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>

@@ -30,6 +30,109 @@ __DDLOGHERE__
 	DDLogVerbose(@"New format %@ from %@", newFormat, format);
 	return newFormat;
 }
++(MTFormat *) formatWithEncFile: (NSString *) filename {
+
+	MTFormat *newFormat = [[MTFormat alloc] init];
+	newFormat.name = [@"ENC: " stringByAppendingString:[[filename lastPathComponent] stringByDeletingPathExtension ]];
+	newFormat.isHidden = @NO;
+	NSString * encodeString =[NSString stringWithContentsOfFile:filename encoding:NSUTF8StringEncoding error:nil];
+	
+	__block NSString * key = nil;
+	[encodeString enumerateLinesUsingBlock:^(NSString *line, BOOL *stop) {
+		line = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		if (line.length == 0) return;
+		if ([line hasPrefix:@"#"]) return;  //comment line
+		if ([line hasPrefix:@"<"]) {  //found a key 
+			key = [[line substringWithRange:NSMakeRange(1, line.length-2)] lowercaseString];
+			return;
+		}
+		//assuming key from previous line, now we have value
+		if ([key isEqualToString:@"description"]) {
+			newFormat.formatDescription = line;
+		} else if ([key isEqualToString:@"command"]) {
+			NSUInteger location = [line rangeOfString:@" "].location;
+			NSString *encoder = line;
+			NSString *parameters = nil;
+			if (location != NSNotFound) {
+				encoder = [[line substringToIndex:location] lowercaseString];
+				parameters = [line substringFromIndex:location+1];
+			}
+			NSUInteger encodeIndex = [@[@"ffmpeg",@"mencoder",@"handbrake",@"perl"] indexOfObject:encoder];
+			if (encodeIndex != NSNotFound) {
+				
+				if ([encoder isEqualToString:@"handbrake"]) encoder = @"HandBrakeCLI";
+				switch (encodeIndex) {
+					case 0: //ffmpeg
+						newFormat.comSkip = @NO;
+						newFormat.edlFlag = @"-edl";
+						newFormat.comSkipOptions = @"";
+						newFormat.mustDownloadFirst = @YES;
+						newFormat.outputFileFlag= @"";
+						newFormat.inputFileFlag = @"-i";
+						newFormat.regExProgress =  @"" ;
+						newFormat.encoderUsed = @"ffmpeg";
+						break;
+					case 1: //mencoder
+						newFormat.comSkip = @YES; 
+						newFormat.edlFlag = @"-edl";
+						newFormat.comSkipOptions = @"";
+						newFormat.mustDownloadFirst = @NO;
+						newFormat.outputFileFlag= @"-o";
+						newFormat.inputFileFlag = @"";
+						newFormat.regExProgress = @"";
+						newFormat.encoderUsed = @"mencoder";
+						break;
+					case 2: //handbrake
+						newFormat.comSkip = @NO;
+						newFormat.edlFlag = @"";
+						newFormat.comSkipOptions = @"";
+						newFormat.mustDownloadFirst = @YES;
+						newFormat.outputFileFlag= @"-o";
+						newFormat.inputFileFlag = @"-i";
+						newFormat.regExProgress =  @"([\\d.]*?) \\%" ;
+						newFormat.encoderUsed = @"HandBrakeCLI";
+						break;
+					case 3: //perl
+							//Not supported
+						newFormat.name = nil;
+						*stop = YES;
+						DDLogReport(@"Perl ENC files not supported");
+						break;
+					default:
+						break;
+				}
+				parameters = [parameters stringByReplacingOccurrencesOfString:@"CPU_CORES" withString:@"auto"];
+				if ([parameters rangeOfString:@"PWD"].location != NSNotFound) {
+					[newFormat.description stringByAppendingFormat:@"\nError: PWD keyword not supported: %@", parameters];
+				}
+				if ([parameters rangeOfString:@"SRTFILE"].location != NSNotFound) {
+					[newFormat.description stringByAppendingFormat:@"\nError: SRTFILE keyword not supported:%@", parameters];
+				}
+				if (newFormat.outputFileFlag.length > 0) {
+					parameters = [parameters stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@" %@ ",newFormat.outputFileFlag] withString:@""];
+				} else if (![parameters hasSuffix:@"OUTPUT"]) {
+					//output must be at end
+					[newFormat.description stringByAppendingFormat:@"\nError: with no output flag, OUTPUT must be at end:%@", parameters];
+				}
+				parameters = [parameters stringByReplacingOccurrencesOfString:@"OUTPUT" withString:@""];
+				parameters = [parameters stringByReplacingOccurrencesOfString:@"INPUT" withString:kMTInputLocationToken];
+				if (newFormat.inputFileFlag.length > 0) {
+					parameters = [parameters stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%@ ",newFormat.inputFileFlag] withString:@""];
+				}
+				newFormat.encoderOtherOptions = parameters;
+			}
+		} else if ([key isEqualToString:@"extension"]) {
+			newFormat.filenameExtension = [@"." stringByAppendingString:line];
+			newFormat.iTunes = [@[@"mpg", @"mp4", @"mov", @"m4v"] indexOfObject:[line lowercaseString]]!= NSNotFound ? @YES : @NO;
+		}
+	}];
+	if (newFormat.name && newFormat.encoderVideoOptions && newFormat.filenameExtension) {
+		DDLogReport (@"Loaded new Format from ENC file. \n Was: %@ \nIs:%@", encodeString, [newFormat toDictionary]);
+		return newFormat;
+	} else {
+		return nil;
+	}
+}
 
 -(void)checkAndUpdateFormatName:(NSArray *)formatList
 {

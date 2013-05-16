@@ -25,7 +25,7 @@ use sigtrap 'handler' => \&cleanAndExit, 'normal-signals';
 my $launchElgato = "/usr/bin/osascript \"" . $program_dir. "elgatoLaunch.scpt\" \"" . join ('" "', @ARGV) ."\"";
 print $launchElgato ."\n";
 
-my $counter = 1;
+my $counter = 2;
 my $launchResponse = "";
 while (1) {
 	$launchResponse = `$launchElgato`;
@@ -47,7 +47,7 @@ if ($launchResponse =~ /Not Found/) {
 $turboAppName = $launchResponse;   #launch is required to send back turbo's app Name
 
 my $checkElgato = "/usr/bin/osascript \"" . $program_dir. "elgatoProgress.scpt\" \"$launchResponse\"";
-print $checkElgato ."\n";
+print $checkElgato ."\n%%1\n";  #signal start, while turbo still launching
 
 while (1) {
 	my $progressResponse =`$checkElgato`;

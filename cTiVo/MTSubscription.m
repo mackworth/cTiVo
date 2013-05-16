@@ -62,6 +62,7 @@ __DDLOGHERE__
     if (_encodeFormat != encodeFormat ) {
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];
+        BOOL markWasDisabled = ![self canMarkCommercials];
         _encodeFormat = encodeFormat;
 //        if (!self.canSimulEncode && self.shouldSimulEncode) {
 //            //no longer possible
@@ -83,6 +84,13 @@ __DDLOGHERE__
         } else if (skipWasDisabled && [self canSkipCommercials]) {
             //newly possible, so take user default
             self.skipCommercials = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"] && self.encodeFormat.comSkip)];
+        }
+        if (!self.canMarkCommercials && self.shouldMarkCommercials) {
+            //no longer possible
+            self.markCommercials = NO;
+        } else if (markWasDisabled && [self canMarkCommercials]) {
+            //newly possible, so take user default
+            self.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:@"MarkCommercials"];
         }
     }
 }

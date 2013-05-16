@@ -66,7 +66,7 @@
 //Contants
 
 #define kMTMaxNumDownloaders 2		//Limit number of encoders to limit cpu usage
-#define kMTUpdateIntervalMinutes 15 //Update interval for re-checking current TiVo
+#define kMTUpdateIntervalMinDefault 15 //Default Update interval for re-checking current TiVo
 #define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show; default, overriden by userPref
 #define kMTMaxDownloadStartupRetries 20		// Only allow 20 retries due to a download startup failuer
 #define kMTProgressCheckDelay 120	//Check progress every 60 seconds to make sure its not stalled
@@ -177,6 +177,8 @@
 #define kMTTmpFilesDirectory @"TmpFilesDirectory"
 
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
+#define kMTUpdateIntervalMinutes @"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes
+
 #define kMTRunComSkip @"RunComSkip"                 // Whether to run comSkip program after conversion
 #define kMTMarkCommercials @"MarkCommercials"                 // Whether insert chapters for commercials when possible
 #define kMTExportTivoMetaData @"ExportTivoMetaData" // Whether to export XML metadata

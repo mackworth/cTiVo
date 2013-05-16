@@ -36,9 +36,7 @@
 	NSArray *factoryFormatList;
     int numEncoders;// numCommercials, numCaptions;//Want to limit launches to two encoders.
 	
-    BOOL volatile updatingVideoList;
-	
-	NSOperationQueue *queue;
+    NSOperationQueue *queue;
     NSMetadataQuery *cTiVoQuery;
 
 }
@@ -203,7 +201,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		_signalError = 0;
 		queue.maxConcurrentOperationCount = 1;
 		
-        updatingVideoList = NO;
 		_processingPaused = @(NO);
 		self.quitWhenCurrentDownloadsComplete = @(NO);
 		
@@ -764,6 +761,13 @@ static MTTiVoManager *sharedTiVoManager = nil;
         }
     }
 	return _formatList[0];
+}
+-(void)addEncFormatToList: (NSString *) filename {
+	MTFormat * newFormat = [MTFormat formatWithEncFile:filename];
+	[newFormat checkAndUpdateFormatName:tiVoManager.formatList];
+	if (newFormat) [_formatList addObject:newFormat];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
+	[[NSUserDefaults standardUserDefaults] setObject:tiVoManager.userFormatDictionaries forKey:kMTFormats];	
 }
 
 -(void)addFormatsToList:(NSArray *)formats

@@ -61,11 +61,7 @@ __DDLOGHERE__
 	[defaultCenter addObserver:self selector:@selector(buildColumnMenuForTables) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoShowsUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
-    [defaultCenter addObserver:self selector:@selector(reloadProgramData) name:kMTNotificationTiVoShowsUpdated object:nil];
-	[defaultCenter addObserver:downloadQueueTable selector:@selector(reloadData) name:kMTNotificationTiVoListUpdated object:nil];
-	[defaultCenter addObserver:downloadQueueTable selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(refreshAddToQueueButton:) name:kMTNotificationDownloadQueueUpdated object:nil];
-    [defaultCenter addObserver:downloadQueueTable selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
 	
 	//Spinner Progress Handling 
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdating object:nil];
@@ -143,11 +139,6 @@ __DDLOGHERE__
         [loadingProgramListIndicator stopAnimation:nil];
         loadingProgramListLabel.stringValue = @"";
     }
-}
-
--(void)reloadProgramData
-{
-	[tiVoShowTable reloadData];
 }
 
 #pragma mark - Notification Responsders
@@ -407,6 +398,7 @@ __DDLOGHERE__
 
 -(IBAction)downloadMenuHandler:(NSMenuItem *)menu
 {
+	DDLogMajor(@"User specified to %@",menu.title);
 	if ([menu.title caseInsensitiveCompare:@"Delete"] == NSOrderedSame) {
 		[self removeFromDownloadQueue:menu];
 	} else if ([menu.title caseInsensitiveCompare:@"Reschedule"] == NSOrderedSame) {
@@ -417,8 +409,17 @@ __DDLOGHERE__
 					[download prepareForDownload:YES];
 			}
 		} else {
-			[tiVoManager deleteFromDownloadQueue:itemsToRemove];
-			[tiVoManager addToDownloadQueue:itemsToRemove beforeDownload:nil];
+			//Can't reschedule items that haven't loaded yet.
+			NSMutableArray * realItemsToRemove = [NSMutableArray arrayWithArray:itemsToRemove];
+			for (MTDownload *download in itemsToRemove) {
+				if (download.show.protectedShow.boolValue) {
+					//A proxy DL waiting for "real" show
+					[download prepareForDownload:YES];
+					[realItemsToRemove removeObject:download];
+				}
+			}
+			[tiVoManager deleteFromDownloadQueue:realItemsToRemove];
+			[tiVoManager addToDownloadQueue:realItemsToRemove beforeDownload:nil];
 		}
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		NSArray * selectedDownloads = [downloadQueueTable.sortedDownloads objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
