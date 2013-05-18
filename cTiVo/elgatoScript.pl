@@ -10,6 +10,10 @@ use strict;
 use File::Spec;
 use File::BaseName;
 
+local $SIG{'INT' } = \&cleanAndExit;  local $SIG{'QUIT'} = \&cleanAndExit;
+local $SIG{'HUP' } = \&cleanAndExit;  local $SIG{'TRAP'} = \&cleanAndExit;
+local $SIG{'ABRT'} = \&cleanAndExit;  local $SIG{'STOP'} = \&cleanAndExit;
+
 if ($#ARGV < 0) {
 	@ARGV = ( "\"AppleTV\"", "-edl", "test.tivo.edl", "\"-i\"", "test.tivo.mpg", "test.tivo.mp4");
 }
@@ -64,7 +68,8 @@ while (1) {
 # kill -QUIT
 # kill -TERM
 sub cleanAndExit(){
-	print "Terminating encoder, cleaning up and exiting\n";
+	my $signame = shift;
+	print "Due to signal SIG$signame, terminating encoder, cleaning up and exiting\n";
 	if ($turboAppName ne "") {
 		print "Terminating encoder, cleaning up and exiting\n";
 		my $killElgato = "/usr/bin/osascript \"" . $program_dir. "elgatoQuit.scpt\" \"" . $turboAppName ."\"";
