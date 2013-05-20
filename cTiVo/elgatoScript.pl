@@ -10,24 +10,26 @@ use strict;
 use File::Spec;
 use File::BaseName;
 
-local $SIG{'INT' } = \&cleanAndExit;  local $SIG{'QUIT'} = \&cleanAndExit;
-local $SIG{'HUP' } = \&cleanAndExit;  local $SIG{'TRAP'} = \&cleanAndExit;
-local $SIG{'ABRT'} = \&cleanAndExit;  local $SIG{'STOP'} = \&cleanAndExit;
 
 if ($#ARGV < 0) {
-	@ARGV = ( "\"AppleTV\"", "-edl", "test.tivo.edl", "\"-i\"", "test.tivo.mpg", "test.tivo.mp4");
+	@ARGV = ( "AppleTV",  "-i", "/tmp/ctivo/test.mpg", "test.mp4"); #"-edl", "test.tivo.edl",
 }
 use Cwd();
-
+foreach (@ARGV) {
+	print $_ . "\n";
+}
 my $programPath = Cwd::abs_path($0);
 my ($volume, $directory, $fileName) = File::Spec->splitpath($programPath);
 my $program_dir= $volume . $directory;
 
 my $turboAppName = "";
+local $SIG{'INT' } = \&cleanAndExit;  local $SIG{'QUIT'} = \&cleanAndExit;
+local $SIG{'HUP' } = \&cleanAndExit;  local $SIG{'TRAP'} = \&cleanAndExit;
+local $SIG{'ABRT'} = \&cleanAndExit;  local $SIG{'STOP'} = \&cleanAndExit;
 use sigtrap 'handler' => \&cleanAndExit, 'normal-signals';
 
 my $launchElgato = "/usr/bin/osascript \"" . $program_dir. "elgatoLaunch.scpt\" \"" . join ('" "', @ARGV) ."\"";
-print $launchElgato ."\n";
+print $launchElgato ."\n1%\n";  #signal start, while turbo still launching
 
 my $counter = 2;
 my $launchResponse = "";
@@ -46,12 +48,13 @@ print $launchResponse ."\n";
 
 if ($launchResponse =~ /Not Found/) {
 	print "turbo HD encoder not available"."\n";
-	return;
+	exit 1;
+
 }
 $turboAppName = $launchResponse;   #launch is required to send back turbo's app Name
-
+print $turboAppName . "\n";
 my $checkElgato = "/usr/bin/osascript \"" . $program_dir. "elgatoProgress.scpt\" \"$launchResponse\"";
-print $checkElgato ."\n%%1\n";  #signal start, while turbo still launching
+print $checkElgato ."\n" . $counter ."%\n";  #signal start, while turbo still launching
 
 while (1) {
 	my $progressResponse =`$checkElgato`;
@@ -69,7 +72,7 @@ while (1) {
 # kill -TERM
 sub cleanAndExit(){
 	my $signame = shift;
-	print "Due to signal SIG$signame, terminating encoder, cleaning up and exiting\n";
+	print "Due to signal SIG$signame\n";
 	if ($turboAppName ne "") {
 		print "Terminating encoder, cleaning up and exiting\n";
 		my $killElgato = "/usr/bin/osascript \"" . $program_dir. "elgatoQuit.scpt\" \"" . $turboAppName ."\"";

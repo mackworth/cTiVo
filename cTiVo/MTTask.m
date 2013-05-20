@@ -79,7 +79,8 @@ __DDLOGHERE__
 		_terminationHandler();
 	}
 	[_task terminate];
-    [self cleanUp];
+	//following line has important side effect that it lets the task do whatever it needs to do to terminate before killing it dead in dealloc
+	[self performSelector:@selector(saveLogFile) withObject:self afterDelay:2.0];
 }
 
 -(void)cleanUp
@@ -111,20 +112,26 @@ __DDLOGHERE__
     }
 
 }
-
--(void) saveLogFile
-{
-    NSFileHandle *logHandle = [NSFileHandle fileHandleForReadingAtPath:_logFilePath];
-	if (ddLogLevel >= LOG_LEVEL_DETAIL) {
-		unsigned long long logFileSize = [logHandle seekToEndOfFile];
+-(void) saveLogFileType:(NSString *) type fromPath: (NSString *) path {
+	NSFileHandle *logHandle = [NSFileHandle fileHandleForReadingAtPath:path];
+	unsigned long long logFileSize = [logHandle seekToEndOfFile];
+	if (logFileSize > 0) {
 		NSInteger backup = 2000;  //how much to log
 		if (logFileSize < backup) backup = (NSInteger)logFileSize;
 		[logHandle seekToFileOffset:(logFileSize-backup)];
 		NSData *tailOfFile = [logHandle readDataOfLength:backup];
 		if (tailOfFile.length > 0) {
 			NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-			DDLogDetail(@"logFile for task %@: %@", _taskName,  logString);
+			DDLogDetail(@"%@File for task %@: %@",type, _taskName,  logString);
 		}
+	}
+}
+
+-(void) saveLogFile
+{
+	if (ddLogLevel >= LOG_LEVEL_DETAIL) {
+		[self saveLogFileType:@"log" fromPath:_logFilePath];
+		[self saveLogFileType:@"err" fromPath:_errorFilePath];
 	}
 }
 
@@ -135,6 +142,7 @@ __DDLOGHERE__
     //		_download.processProgress = 1.0;
     //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
     if (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal || ![self succcessfulExit]) {
+		[self saveLogFile];
         [self cleanUp];
         _nextTaskChain = nil;
         if (!_download.isCanceled) [_download rescheduleShowWithDecrementRetries:@YES];
@@ -324,11 +332,11 @@ __DDLOGHERE__
 
 -(void)dealloc
 {
-    if (_pid && !kill(_pid, 0)) {
+	if (_pid && !kill(_pid, 0)) {
         DDLogVerbose(@"Killing process %@",_taskName);
         kill(_pid , SIGKILL);
     }
-    _task = nil;
+	_task = nil;
 	[self cleanUp];
 }
 
