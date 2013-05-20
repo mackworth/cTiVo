@@ -50,7 +50,7 @@ __DDLOGHERE__
 
 -(void)awakeFromNib
 {
-	DDLogDetail(@"ProgramTable awakeFromNib");
+	DDLogVerbose(@"ProgramTable awakeFromNib");
 	self.dataSource = self;
     self.delegate    = self;
     self.allowsMultipleSelection = YES;

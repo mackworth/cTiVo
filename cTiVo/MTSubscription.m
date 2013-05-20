@@ -133,8 +133,8 @@ __DDLOGHERE__
 			newDownload.downloadDirectory = [tiVoManager downloadDirectory];  //should we have one per subscription? UI?
 
 			newDownload.exportSubtitles = subscription.exportSubtitles;
-			newDownload.skipCommercials = newDownload.encodeFormat.comSkip.boolValue && subscription.skipCommercials.boolValue;
-			newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials && subscription.canMarkCommercials;
+			newDownload.skipCommercials = subscription.shouldSkipCommercials && subscription.canSkipCommercials;
+			newDownload.markCommercials = subscription.shouldMarkCommercials && subscription.canMarkCommercials ;
 			newDownload.genTextMetaData = subscription.genTextMetaData;
 			newDownload.genXMLMetaData = subscription.genXMLMetaData;
 			newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && subscription.includeAPMMetaData.boolValue)];

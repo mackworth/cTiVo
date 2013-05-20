@@ -85,7 +85,7 @@ __DDLOGHERE__
 
 -(void)awakeFromNib
 {  //remember: called multiple times for each new cell loaded
- 	DDLogDetail(@"DL Table awakeFromNib");
+ 	DDLogVerbose(@"DL Table awakeFromNib");
    self.dataSource = self;
     self.delegate    = self;
     self.allowsMultipleSelection = YES;

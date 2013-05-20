@@ -1068,23 +1068,23 @@ __DDLOGHERE__
         commercialTask.completionHandler = ^{
             DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
              if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
-                 if (!self.shouldSimulEncode) {
-                            self.processProgress = 1.0;
-                        }
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-                        [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
-                        if (self.exportSubtitles.boolValue && self.skipCommercials) {
-                            NSArray *srtEntries = [NSArray getFromSRTFile:captionFilePath];
-                            NSArray *edlEntries = [NSArray getFromEDLFile:commercialFilePath];
-                            if (srtEntries && edlEntries) {
-                                NSArray *correctedSrts = [srtEntries processWithEDLs:edlEntries];
-                                if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-                                    NSString *oldCaptionPath = [[captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
-                                    [[NSFileManager defaultManager] moveItemAtPath:captionFilePath toPath:oldCaptionPath error:nil];
-                                }
-                                if (correctedSrts) [correctedSrts writeToSRTFilePath:captionFilePath];
-                            }
-                        }
+				 if (!self.shouldSimulEncode) {
+					self.processProgress = 1.0;
+				 }
+				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+				[self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
+				if (self.exportSubtitles.boolValue && self.skipCommercials) {
+					NSArray *srtEntries = [NSArray getFromSRTFile:captionFilePath];
+					NSArray *edlEntries = [NSArray getFromEDLFile:commercialFilePath];
+					if (srtEntries && edlEntries) {
+						NSArray *correctedSrts = [srtEntries processWithEDLs:edlEntries];
+						if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+							NSString *oldCaptionPath = [[captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
+							[[NSFileManager defaultManager] moveItemAtPath:captionFilePath toPath:oldCaptionPath error:nil];
+						}
+						if (correctedSrts) [correctedSrts writeToSRTFilePath:captionFilePath];
+					}
+				}
              } else {
                  self.processProgress = 1.0;
                  [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
@@ -1178,7 +1178,7 @@ __DDLOGHERE__
     _downloadingShowFromMPGFile = NO;
     //Before starting make sure the encoder is OK.
 	if (![self encoderPath]) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:nil];  //Decrement num encoders right away
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
 		return;
 	}
 	DDLogVerbose(@"encoder is %@",[self encoderPath]);
@@ -1441,7 +1441,7 @@ __DDLOGHERE__
 //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:_show];
 	DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], _show.showTitle);
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:nil];  //Free up an encoder
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:self];  //Currently Free up an encoder/ notify subscription module / update UI
     _processProgress = 1.0;
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 	[tiVoManager  notifyWithTitle:@"TiVo show transferred." subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];

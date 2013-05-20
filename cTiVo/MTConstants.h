@@ -8,11 +8,11 @@
 
 //Queue change notifications
 #define kMTNotificationTiVoShowsUpdated @"MTNotificationTiVoShowsUpdated"
-#define kMTNotificationDownloadQueueUpdated @"MTNotificationDownloadQueueUpdated"
+#define kMTNotificationDownloadQueueUpdated @"MTNotificationDownloadQueueUpdated"  //optional object: Tivo that cause it
 #define kMTNotificationSubscriptionsUpdated @"MTNotificationSubscriptionsUpdated"
 
 //Download Progress Notifications
-#define kMTNotificationDownloadDidFinish @"MTNotificationDownloadDidFinish"
+#define kMTNotificationDownloadDidFinish @"MTNotificationDownloadDidFinish"    //object = MTTiVo that just finished a transfer
 #define kMTNotificationDecryptDidFinish @"MTNotificationDecryptDidFinish"
 //#define kMTNotificationEncodeDidFinish @"MTNotificationEncodeDidFinish"
 //#define kMTNotificationEncodeWasCanceled @"MTNotificationEncodeWasCanceled"
@@ -21,28 +21,28 @@
 //#define kMTNotificationCaptionDidFinish @"MTNotificationCaptionDidFinish"
 //#define kMTNotificationCaptionWasCanceled @"MTNotificationCaptionWasCanceled"
 #define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"
-#define kMTNotificationShowDownloadDidFinish @"MTNotificationShowDownloadDidFinish"
+#define kMTNotificationShowDownloadDidFinish @"MTNotificationShowDownloadDidFinish"     //object = MTDownload that just finished its entire process
 #define kMTNotificationShowDownloadWasCanceled @"MTNotificationShowDownloadWasCanceled"
 
 //UI Change Notifications
 
-#define kMTNotificationTiVoListUpdated @"MTNotificationTiVoListUpdated"
+#define kMTNotificationTiVoListUpdated @"MTNotificationTiVoListUpdated"  //optional object: which Tivo changed/added; not used
 #define kMTNotificationFormatListUpdated @"MTNotificationFormatListUpdated"
-#define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"
+#define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"  //optional object: which MTDownload; not used, 
 #define kMTNotificationNetworkChanged @"MTNotificationNetworkChanged"
-#define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"
-#define kMTNotificationDownloadRowChanged @"NotificationDownloadRowChanged"
+#define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"  //object: which MTTiVoShow was loaded
+#define kMTNotificationDownloadRowChanged @"NotificationDownloadRowChanged"  //object: which MTDownload was changed
 //#define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
-#define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"
-#define kMTNotificationFormatChanged @"MTNotificationFormatChanged"
+#define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"  //object: which MTTiVo needs a key
+#define kMTNotificationFormatChanged @"MTNotificationFormatChanged"     //object: which MTFormat changed
 #define kMTNotificationFoundMultipleTiVos @"MTNotificationFoundMultipleTiVo"
 
 //Tivo busy indicator
-#define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"
-#define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated"
+#define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"  //object: which MTTivo is updating
+#define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated" //object: which MTTivo is updated
 
 //tivodecode bad MAK notification
-#define kMTNotificationBadMAK @"MTNotificationBadMAK"
+#define kMTNotificationBadMAK @"MTNotificationBadMAK" //object: which MTTiVo needs a key
 
 //Download Status
 #define kMTStatusNew 0
