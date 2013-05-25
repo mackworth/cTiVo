@@ -48,6 +48,7 @@
 @property BOOL mediaKeyIsGood;
 @property BOOL isReachable, isResponding, manualTiVo, enabled;
 @property (nonatomic, strong) NSDate *lastDownloadEnded;
+@property (nonatomic, strong) 	NSDate *currentNPLStarted;
 
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
 
@@ -58,5 +59,7 @@
 -(NSInteger)isProcessing;
 -(void)rescheduleAllShows;
 -(void)setupNotifications;
+
+-(void) saveLastLoadTime:(NSDate *) newDate;
 
 @end

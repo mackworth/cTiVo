@@ -108,10 +108,14 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		_tiVoList = [NSMutableArray new];
 		queue = [NSOperationQueue new];
 		_downloadQueue = [NSMutableArray new];
-        
+		
+        _lastLoadedTivoTimes = [[defaults dictionaryForKey:kMTTiVoLastLoadTimes] mutableCopy];
+		if (!_lastLoadedTivoTimes) {
+			_lastLoadedTivoTimes = [NSMutableDictionary new];
+		}
         [self loadManualTiVos];
         [self searchForBonjourTiVos];
-
+		
 		NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
 		NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
 		_formatList = [NSMutableArray arrayWithArray:[formats objectForKey:@"formats"]];
@@ -308,9 +312,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			DDLogDetail(@"Tivo restored previously deleted show %@",newShow);
 			[proxyDL prepareForDownload:YES];
 		}
-
-	} else {
-		DDLogVerbose(@"Didn't find DL proxy for %@",newShow);
 	}
 }
 
@@ -500,8 +501,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 //    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionDidFinish object:nil];
 //    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
-    [defaultCenter addObserver:self.subscribedShows selector:@selector(updateSubscriptionWithDate:) name:kMTNotificationShowDownloadDidFinish object:nil];
-    
+    [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
+
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTQueuePaused options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
@@ -895,8 +896,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		MTTiVoShow * newShow = newDownload.show;
 		if (![newShow.protectedShow boolValue]) {
             BOOL showFound = NO;
-            for (MTDownload *oldDownload in _downloadQueue) {
-                if (oldDownload.show.showID == newShow.showID	) {
+            //if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups]) {
+			for (MTDownload *oldDownload in _downloadQueue) {
+				if (oldDownload.show.showID == newShow.showID	) {
 					if (oldDownload.show==newShow) {
 						DDLogDetail(@" %@ already in queue",oldDownload);
 					} else {
@@ -904,8 +906,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 					}
 					showFound = YES;
 					break;
-                }
-            }
+				}
+			}
             if (!showFound) {
                 //Make sure the title isn't the same and if it is add a -1 modifier
                 submittedAny = YES;
@@ -1160,6 +1162,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
     DDLogVerbose(@"writing DL queue: %@", downloadArray);
 	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];
+	
+	[[NSUserDefaults standardUserDefaults] setObject:_lastLoadedTivoTimes forKey:kMTTiVoLastLoadTimes];
+	
+	[self.subscribedShows saveSubscriptions];
+
 }
 
 #pragma mark - Handle directory
@@ -1219,9 +1226,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
     return [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
  
 }
-
-#pragma mark - Memory Management
-
 
 
 -(NSMutableArray *)tiVoShows

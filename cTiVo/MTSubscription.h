@@ -9,14 +9,22 @@
 #import <Foundation/Foundation.h>
 #import "MTTiVoShow.h"
 #import "MTFormat.h"
+@class MTDownload;
 
 @interface MTSubscription : NSObject {
     
 }
 
 
-@property (nonatomic, strong) NSString *seriesTitle;
-@property (nonatomic, strong) NSDate *lastRecordedTime;
+@property (nonatomic, strong) NSString * displayTitle;
+@property (nonatomic, strong) NSRegularExpression *subscriptionRegex;
+@property (nonatomic, strong) NSDate *createdTime;
+@property (readonly) NSDate *displayDate;
+@property (nonatomic, strong) NSString *preferredTiVo;
+@property (nonatomic, strong) NSNumber *HDOnly;
+@property (nonatomic, strong) NSNumber *SDOnly;
+@property (nonatomic, strong) NSMutableArray *prevRecorded;
+//Dictionary with keys; showTitle, episodeID, startTime, TivoName
 
 @property (nonatomic, strong) NSNumber *addToiTunes;
 @property (nonatomic, strong) NSNumber *skipCommercials, *includeSuggestions, *markCommercials;
@@ -34,16 +42,19 @@
 @property (readonly) BOOL canMarkCommercials;
 @property (readonly) BOOL shouldSkipCommercials;
 
+-(BOOL) isSubscribed:(MTTiVoShow *) tivoShow;
+-(MTDownload *) downloadForShow: (MTTiVoShow *) thisShow;
+
 @end
 
 @interface NSMutableArray (MTSubscriptionList)
 
--(void) checkSubscriptionsAll;
+-(void) checkSubscription: (NSNotification *) notification;
 -(NSArray *) addSubscriptions:(NSArray *) shows; //returns new subs
 -(NSArray *) addSubscriptionsDL: (NSArray *) downloads;
+-(MTSubscription *) addSubscriptionsString: (NSString *) pattern;
 -(void) deleteSubscriptions:(NSArray *) subscriptions;
--(void) updateSubscriptionWithDate: (NSNotification *) notification;
--(BOOL) isSubscribed:(MTTiVoShow *) tivoShow;
+
 -(void) saveSubscriptions;
 -(void) loadSubscriptions;
 

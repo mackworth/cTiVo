@@ -168,6 +168,7 @@ __DDLOGHERE__
 										  @NO, kMTHasMultipleTivos,
 										  @NO, kMTMarkCommercials,
                                           @YES, kMTUseMemoryBufferForDownload,
+										  // @NO, kMTAllowDups, future
 										  [NSString pathWithComponents:@[NSHomeDirectory(),kMTDefaultDownloadDir]],kMTDownloadDirectory,
                                           kMTTmpDir,kMTTmpFilesDirectory,
 										  nil];
@@ -240,7 +241,7 @@ __DDLOGHERE__
     }
     if (!newDir || !isDir) { //Something wrong with this choice
         if (newDir && !isDir) {
-            NSString *message = [NSString stringWithFormat:@"%@ is a file, not a directory.  \nPlease choose a new locaiton and press 'Choose' \nor press 'Cancel' to delete the existing file.",tmpdir];
+            NSString *message = [NSString stringWithFormat:@"%@ is a file, not a directory.  \nPlease choose a new location and press 'Choose' \nor press 'Cancel' to delete the existing file.",tmpdir];
 			NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
 			myOpenPanel.canChooseFiles = NO;
 			myOpenPanel.canChooseDirectories = YES;
@@ -492,6 +493,25 @@ __DDLOGHERE__
 	//	[self.formatEditorController showWindow:nil];
 	self.preferencesController.startingTabIdentifier = @"Formats";
 	[self showPreferences:nil];
+}
+
+-(IBAction)createManualSubscription:(id)sender {
+	NSString *message = @"Enter Series Name for new Subscription:";
+	NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Subscription" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Note: enter ALL to record all TiVo shows."];
+	NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
+	
+	[input setStringValue:@""];
+	[keyAlert setAccessoryView:input];
+	NSInteger button = [keyAlert runModal];
+	if (button == NSAlertDefaultReturn) {
+		[input validateEditing];
+		DDLogDetail(@"Got new Subscription %@",input.stringValue);
+		MTSubscription * sub = [[tiVoManager subscribedShows] addSubscriptionsString:input.stringValue];
+		if (!sub) {
+			NSAlert * badSub = [NSAlert alertWithMessageText:@"Invalid Subscription" defaultButton:@"Cancel" alternateButton:@"" otherButton:nil informativeTextWithFormat:@"The subscription pattern may be badly formed, or it may already covered by another subscription."];
+			[badSub runModal];
+		}
+	}
 }
 
 -(IBAction)editManualTiVos:(id)sender

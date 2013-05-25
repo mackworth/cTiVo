@@ -567,6 +567,7 @@ __DDLOGHERE__
 		//		if ([sub.skipCommercials boolValue]) { //Need to make sure simultaneous encode is off
 		//			sub.simultaneousEncode = @(NO);
 		//		}
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
         [tiVoManager.subscribedShows saveSubscriptions];
         
     }
@@ -592,6 +593,7 @@ __DDLOGHERE__
 		if ([sub.markCommercials boolValue]) {
 			sub.skipCommercials = @NO;
 		}
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
 		//		if ([sub.skipCommercials boolValue]) { //Need to make sure simultaneous encode is off
 		//			sub.simultaneousEncode = @(NO);
 		//		}

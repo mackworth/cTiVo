@@ -32,6 +32,7 @@
 #define kMTNotificationNetworkChanged @"MTNotificationNetworkChanged"
 #define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"  //object: which MTTiVoShow was loaded
 #define kMTNotificationDownloadRowChanged @"NotificationDownloadRowChanged"  //object: which MTDownload was changed
+#define kMTNotificationSubscriptionChanged @"NotificationSubscriptionChanged"  //object: which MTSubscription was changed
 //#define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
 #define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"  //object: which MTTiVo needs a key
 #define kMTNotificationFormatChanged @"MTNotificationFormatChanged"     //object: which MTFormat changed
@@ -75,7 +76,7 @@
 
 //Subscribed Show userDefaults
 #define kMTSubscribedSeries @"MTSubscribedSeries"
-#define kMTSubscribedDate	@"MTSubscribedSeriesDate"
+#define kMTCreatedDate	@"MTSubscribedSeriesDate"   //used to be kMTSubscribedDate"
 #define kMTSubscribedFormat @"MTSubscribedSeriesFormat"
 #define kMTSubscribediTunes @"addToiTunes"
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
@@ -86,6 +87,11 @@
 #define kMTSubscribedGenXMLMetaData	    @"GenXMLMetadata"
 #define kMTSubscribedIncludeAPMMetaData  @"IncludeAPMMetaData"
 #define kMTSubscribedExportSubtitles  @"ExportSubtitles"
+#define kMTSubscribedPreferredTiVo  @"PreferredTiVo"
+#define kMTSubscribedHDOnly  @"HDOnly"
+#define kMTSubscribedSDOnly  @"SDOnly"
+#define kMTSubscribedPrevRecorded @"PrevRecorded"
+#define kMTSubscribedRegExPattern @"RegExPattern"
 
 //Download queue userDefaults
 #define kMTQueue      @"Queue"
@@ -162,11 +168,13 @@
 #define kMTSelectedFormat @"SelectedFormat"         //Name of currently selected format for conversion
 #define kMTDownloadDirectory  @"DownloadDirectory"  //Pathname for directory for dowloaded files
 #define kMTSubscriptionList @"SubscriptionList"     //Array of subscription dictionaries
+#define kMTTiVoLastLoadTimes @"TiVoLastLoadTImes"   //Array of Date each tivo last processed
 #define kMTiTunesSubmit @"iTunesSubmit"             //Whether to submit to iTunes after encoding
 #define kMTiTunesSync @"iTunesSync"                 // Whether to sync iDevices after iTunes submital
 #define kMTiTunesDelete @"iTunesDelete"				//Whether to delete original file after submitting to iTunes
 #define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
 #define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
+//Future? #define kMTAllowDups @"AllowDups"					//Whether to allow duplicate entries in downloads/subscriptions (e.g. for different formats)
 #define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
 #define kMTShowSuggestions @"ShowSuggestions"		// Whether to display Tivo Suggestions (and to subscribe thereto)

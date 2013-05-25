@@ -146,7 +146,7 @@
                 if (seriesName && date) {
                     [cTivoSubs addObject:[NSDictionary  dictionaryWithObjectsAndKeys:
                                           seriesName,kMTSubscribedSeries,
-                                          date, kMTSubscribedDate,
+                                          date, kMTCreatedDate,
                                           format, kMTSubscribedFormat,
                                           [NSNumber numberWithBool: iTunes ],kMTSubscribediTunes,
 //                                           [NSNumber numberWithBool: simulEncode ],kMTSimultaneousEncode,

@@ -437,6 +437,15 @@
 									<reference key="NSOnImage" ref="35465992"/>
 									<reference key="NSMixedImage" ref="502551668"/>
 								</object>
+								<object class="NSMenuItem" id="121839106">
+									<reference key="NSMenu" ref="167382952"/>
+									<string key="NSTitle">New Manual Subscription...</string>
+									<string key="NSKeyEquiv">n</string>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="35465992"/>
+									<reference key="NSMixedImage" ref="502551668"/>
+								</object>
 								<object class="NSMenuItem" id="203215933">
 									<reference key="NSMenu" ref="167382952"/>
 									<bool key="NSIsDisabled">YES</bool>
@@ -625,8 +634,7 @@
 								<object class="NSMenuItem" id="975719493">
 									<reference key="NSMenu" ref="835318025"/>
 									<string key="NSTitle">Main Window</string>
-									<string key="NSKeyEquiv">n</string>
-									<int key="NSKeyEquivModMask">1048576</int>
+									<string key="NSKeyEquiv"/>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="35465992"/>
 									<reference key="NSMixedImage" ref="502551668"/>
@@ -1259,6 +1267,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
+						<string key="label">createManualSubscription:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="121839106"/>
+					</object>
+					<int key="connectionID">1142</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
 						<string key="label">checkForUpdates:</string>
 						<reference key="source" ref="56197990"/>
 						<reference key="destination" ref="609285721"/>
@@ -1755,6 +1771,7 @@
 							<reference ref="1005171141"/>
 							<reference ref="846226582"/>
 							<reference ref="806283847"/>
+							<reference ref="121839106"/>
 						</array>
 						<reference key="parent" ref="712013196"/>
 					</object>
@@ -2143,6 +2160,11 @@
 						<reference key="object" ref="806283847"/>
 						<reference key="parent" ref="167382952"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">1140</int>
+						<reference key="object" ref="121839106"/>
+						<reference key="parent" ref="167382952"/>
+					</object>
 				</array>
 			</object>
 			<dictionary class="NSMutableDictionary" key="flattenedProperties">
@@ -2163,7 +2185,7 @@
 					<object class="IBToolTipAttribute" key="NS.object.0">
 						<string key="name">ToolTip</string>
 						<reference key="object" ref="160212896"/>
-						<string key="toolTip">Edit custom formats and menu</string>
+						<string key="toolTip">Edit list of manually entered TiVos</string>
 					</object>
 				</object>
 				<string key="1022.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2265,6 +2287,15 @@
 					</object>
 				</object>
 				<string key="1131.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<object class="NSMutableDictionary" key="1140.IBAttributePlaceholdersKey">
+					<string key="NS.key.0">ToolTip</string>
+					<object class="IBToolTipAttribute" key="NS.object.0">
+						<string key="name">ToolTip</string>
+						<reference key="object" ref="121839106"/>
+						<string key="toolTip">Create a new subscription by typing in name of show</string>
+					</object>
+				</object>
+				<string key="1140.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="129.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="130.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="131.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2418,7 +2449,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">1138</int>
+			<int key="maxID">1142</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -2427,7 +2458,9 @@
 					<string key="superclassName">NSObject</string>
 					<dictionary class="NSMutableDictionary" key="actions">
 						<string key="clearHistory:">id</string>
+						<string key="createManualSubscription:">id</string>
 						<string key="editFormats:">id</string>
+						<string key="editManualTiVos:">id</string>
 						<string key="findShows:">id</string>
 						<string key="togglePause:">id</string>
 					</dictionary>
@@ -2436,8 +2469,16 @@
 							<string key="name">clearHistory:</string>
 							<string key="candidateClassName">id</string>
 						</object>
+						<object class="IBActionInfo" key="createManualSubscription:">
+							<string key="name">createManualSubscription:</string>
+							<string key="candidateClassName">id</string>
+						</object>
 						<object class="IBActionInfo" key="editFormats:">
 							<string key="name">editFormats:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="editManualTiVos:">
+							<string key="name">editManualTiVos:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 						<object class="IBActionInfo" key="findShows:">

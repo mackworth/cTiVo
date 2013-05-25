@@ -8,8 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
-#import "MTDownloadCheckTableCell.h"
-#import "MTPopUpTableCellView.h"
+
 @class MTMainWindowController;
 
 @interface MTSubscriptionTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource, MTTableViewProtocol> {

@@ -25,6 +25,7 @@
 
 @property (nonatomic, strong) NSArray *tiVoList;
 @property (nonatomic, strong) NSMutableArray *tiVoShows, *formatList;
+@property (nonatomic, strong) NSMutableDictionary *lastLoadedTivoTimes;
 @property (atomic, strong) NSMutableArray *downloadQueue;
 @property (nonatomic, strong) NSMutableArray *subscribedShows;
 
@@ -48,6 +49,7 @@
 
 #define tiVoManager [MTTiVoManager sharedTiVoManager]
 
+//---------------Download Queue Manager methods ----------
 -(void) cancelAllDownloads;
 -(void) addToDownloadQueue:(NSArray *)downloads beforeDownload:(MTDownload *) nextShow;
 -(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeDownload:(MTDownload *) nextShow;
@@ -59,37 +61,41 @@
 
 -(MTDownload *) findInDownloadQueue: (MTTiVoShow *) show;
 -(BOOL) anyShowsWaiting;
+-(NSInteger)numberOfShowsToDownload;
 -(void) clearDownloadHistory;
 
+//---------------Download Queue userDefaults writing/reading  ----------
+-(void)writeDownloadQueueToUserDefaults;
 -(MTDownload *) findRealDownload: (MTDownload *) proxyDownload;
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget;
 -(void) replaceProxyInQueue: (MTTiVoShow *) newShow;
 -(void) checkDownloadQueueForDeletedEntries: (MTTiVo *) tiVo;
 
+-(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo;
+
+//---------------Download Queue starting/stopping ----------
+-(void)pauseQueue:(NSNumber *)askUser;
+-(void)unPauseQueue;
+-(void)determineCurrentProcessingState;
+
+//---------------Format Management methods ----------
 -(NSArray *)userFormats;
 -(NSArray *)userFormatDictionaries;
 -(NSArray *)hiddenBuiltinFormatNames;
 -(MTFormat *) findFormat:(NSString *) formatName;
--(NSDictionary *)currentMediaKeys;
-//-(void)manageDownloads;
 -(void)addFormatsToList:(NSArray *)formats;
 -(void)addEncFormatToList: (NSString *) filename ;
 
--(void)writeDownloadQueueToUserDefaults;
--(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo;
-
+//---------------TiVo Management methods ----------
+-(NSDictionary *)currentMediaKeys;
 -(BOOL)foundTiVoNamed:(NSString *)tiVoName;
--(NSInteger)numberOfShowsToDownload;
 -(void)loadManualTiVos;
-- (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification;
 -(void)refreshAllTiVos;
 -(BOOL)anyTivoActive;
 
-//-(BOOL)playVideoForDownloads:(NSArray *) downloads;
-//-(BOOL)revealInFinderForDownloads:(NSArray *) downloads;
--(void)pauseQueue:(NSNumber *)askUser;
--(void)unPauseQueue;
--(void)determineCurrentProcessingState;
+
+//---------------Other methods ----------
+- (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification;   //Growl notification
 -(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path;
 
 @end

@@ -84,6 +84,7 @@ __DDLOGHERE__
             @"SourceType" : @{kMTValue : @"sourceType", kMTType : [NSNumber numberWithInt:kMTStringType]},
             @"IdGuideSource" : @{kMTValue : @"idGuidSource", kMTType : [NSNumber numberWithInt:kMTStringType]}};
 		elementToPropertyMap = [[NSDictionary alloc] initWithDictionary:elementToPropertyMap];
+		_currentNPLStarted = nil;
 		_lastDownloadEnded = [NSDate dateWithTimeIntervalSince1970:0];
 	}
 	return self;
@@ -142,6 +143,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadDidFinish object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDecryptDidFinish object:nil];
 	
+}
+
+-(void) saveLastLoadTime:(NSDate *) newDate{
+	if (!newDate) return;
+	NSDate * currentDate = tiVoManager.lastLoadedTivoTimes[self.tiVo.name];
+
+	if (!currentDate || [newDate isGreaterThan: currentDate]) {
+		tiVoManager.lastLoadedTivoTimes[self.tiVo.name] = newDate;
+	}
+
 }
 
 -(NSString * ) description {
@@ -223,6 +234,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[newShows removeAllObjects];
 //	[_shows removeAllObjects];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
+	if (self.currentNPLStarted) {
+		[self saveLastLoadTime:self.currentNPLStarted];
+	}
+	self.currentNPLStarted = [NSDate date];
 	[self updateShowsStartingAt:0 withCount:kMTNumberShowToGetFirst];
 }
 
@@ -400,6 +415,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				currentShow.tiVo = self;
 				DDLogDetail(@"Added new show %@",currentShow.showTitle);
 				[newShows addObject:currentShow];
+				if (currentShow.inProgress.boolValue) {
+					//can't use actual npl time, must use just before earliest in-progress so when it finishes, we'll pick it up next time
+					NSDate * backUpToTime = [ currentShow.showDate dateByAddingTimeInterval:-1]; 
+					if ([backUpToTime isLessThan:self.currentNPLStarted]) {
+						self.currentNPLStarted = backUpToTime;  
+					}
+				}
 				NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil];
 				[_queue addOperation:nextDetail];
 				//Now check and see if this was in the oldQueue (from last time we ran)

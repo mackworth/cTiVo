@@ -8,6 +8,9 @@
 
 #import "MTSubscriptionTableView.h"
 #import "MTMainWindowController.h"
+#import "MTPopUpTableCellView.h"
+#import "MTTiVoPopUpTableCellView.h"
+#import "MTDownloadCheckTableCell.h"
 
 @implementation MTSubscriptionTableView
 
@@ -44,6 +47,7 @@ __DDLOGHERE__
 //
 -(void)setNotifications
 {
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSubscription:) name:kMTNotificationSubscriptionChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatListUpdated object:nil];
 	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, nil]];
@@ -116,10 +120,45 @@ __DDLOGHERE__
 
 -(void) changeSuggestions: (id) sender {
 	MTCheckBox *checkbox = sender;
-   //updating an individual show in download queue
+	//updating an individual show in download queue
 	MTSubscription * subscription = (MTSubscription *)checkbox.owner;
 	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSOnState];
 	subscription.includeSuggestions = newVal;
+	[tiVoManager.subscribedShows saveSubscriptions];
+}
+
+-(IBAction)selectTivoPopUp:(id)sender
+{
+	MTTiVoPopUpButton *thisButton = (MTTiVoPopUpButton *)sender;
+	if ([thisButton.owner class] == [MTSubscription class]) {
+		MTSubscription * subscription = (MTSubscription *) thisButton.owner;
+		
+		subscription.preferredTiVo = [thisButton selectedItem].representedObject;
+		[tiVoManager.subscribedShows saveSubscriptions];
+	}
+}
+
+-(void) changeHDOnly: (id) sender {
+	MTCheckBox *checkbox = sender;
+	MTSubscription * subscription = (MTSubscription *)checkbox.owner;
+	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSOnState];
+	subscription.HDOnly = newVal;
+	if (newVal.boolValue) {
+		subscription.SDOnly = @NO;
+	}
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:subscription];
+	[tiVoManager.subscribedShows saveSubscriptions];
+}
+
+-(void) changeSDOnly: (id) sender {
+	MTCheckBox *checkbox = sender;
+	MTSubscription * subscription = (MTSubscription *)checkbox.owner;
+	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSOnState];
+	subscription.SDOnly = newVal;
+	if (newVal.boolValue) {
+		subscription.HDOnly = @NO;
+	}
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:subscription];
 	[tiVoManager.subscribedShows saveSubscriptions];
 }
 
@@ -136,6 +175,16 @@ __DDLOGHERE__
 {
     return 18.0;
 }
+
+-(void)reloadSubscription:(NSNotification *)notification{
+	MTSubscription *thisSubcription = notification.object;
+	NSInteger row = [self.sortedSubscriptions indexOfObject:thisSubcription];
+    if (row != NSNotFound) {
+        NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
+        [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];	
+    }
+}
+
 
 
 #pragma mark - Table Data Source Protocol
@@ -185,10 +234,22 @@ __DDLOGHERE__
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:self withAction:@selector(changeSuggestions:)];
         thisCell.identifier = identifier;
         result = thisCell;
+	} else if([identifier isEqualToString: @"HDOnly"]) {
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:self withAction:@selector(changeHDOnly:)];
+        thisCell.identifier = identifier;
+        result = thisCell;
+	} else if([identifier isEqualToString: @"SDOnly"]) {
+        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:self withAction:@selector(changeSDOnly:)];
+        thisCell.identifier = identifier;
+        result = thisCell;
 	} else if([identifier compare: @"FormatPopUp"] == NSOrderedSame) {
 		MTPopUpTableCellView *thisCell = [[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)];
 	    thisCell.popUpButton.showHidden = NO;
 		thisCell.identifier = identifier;
+		result = (id)thisCell;
+	} else if([identifier compare: @"TiVoPopUp"] == NSOrderedSame) {
+		MTTiVoPopUpTableCellView *thisCell = [[MTTiVoPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:self withAction:@selector(selectTivoPopUp:)];
+	   thisCell.identifier = identifier;
 		result = (id)thisCell;
 	} else {
         result =[super makeViewWithIdentifier:identifier owner:owner];
@@ -224,7 +285,7 @@ static NSDateFormatter *dateFormatter;
     // nameArray value at row
 	
 	if ([tableColumn.identifier compare:@"series"] == NSOrderedSame) {
-		result.textField.stringValue = thisSubscription.seriesTitle ;
+		result.textField.stringValue = thisSubscription.displayTitle ;
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"date"] == NSOrderedSame) {
  
@@ -234,9 +295,7 @@ static NSDateFormatter *dateFormatter;
             [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
             
         }
-        NSDate * lastDate = [thisSubscription.lastRecordedTime dateByAddingTimeInterval:1]; //display one second later to avoid second we stole above.
-
-		result.textField.stringValue = [dateFormatter stringFromDate: lastDate ];
+		result.textField.stringValue = [dateFormatter stringFromDate: thisSubscription.displayDate ];
 		[result.textField setAlignment:NSRightTextAlignment];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"FormatPopUp"] == NSOrderedSame) {
@@ -244,6 +303,10 @@ static NSDateFormatter *dateFormatter;
 		popUp.owner = thisSubscription;
 		popUp.formatList = tiVoManager.formatList;
 		thisSubscription.encodeFormat = [popUp selectFormatNamed:thisSubscription.encodeFormat.name];
+	} else if ([tableColumn.identifier compare:@"TiVoPopUp"] == NSOrderedSame) {
+		MTTiVoPopUpButton * popUp = ((MTTiVoPopUpTableCellView *)result).popUpButton;
+		popUp.owner = thisSubscription;
+		popUp.currentTivo = thisSubscription.preferredTiVo;
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setEnabled: [thisSubscription canAddToiTunes]];
@@ -289,8 +352,18 @@ static NSDateFormatter *dateFormatter;
         [checkBox setOn: thisSubscription.includeSuggestions.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;
+	}  else if([tableColumn.identifier isEqualToString: @"HDOnly"]) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setOn: thisSubscription.HDOnly.boolValue];
+        checkBox.owner = thisSubscription;
+		checkBox.enabled = YES;
+	}  else if([tableColumn.identifier isEqualToString: @"SDOnly"]) {
+        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        [checkBox setOn: thisSubscription.SDOnly.boolValue];
+        checkBox.owner = thisSubscription;
+		checkBox.enabled = YES;
 	}
-	
+
     // return the result.
     return result;
     

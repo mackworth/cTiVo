@@ -37,6 +37,8 @@
 
 -(IBAction)togglePause:(id)sender;
 -(IBAction)editFormats:(id)sender;
+-(IBAction)editManualTiVos:(id)sender;
+-(IBAction)createManualSubscription:(id)sender;
 - (IBAction)findShows:(id)sender;
 - (IBAction)clearHistory:(id)sender;
 
