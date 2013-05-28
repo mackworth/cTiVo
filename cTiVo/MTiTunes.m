@@ -138,6 +138,7 @@ __DDLOGHERE__
 			} else {
 				newTrack.name = show.episodeTitle;
 			}
+			if (show.episodeNumber.integerValue >0) newTrack.trackNumber = show.episodeNumber.integerValue;
 			newTrack.episodeID = [NSString stringWithFormat:@"%d", show.showID];
             newTrack.episodeNumber = show.episode;
             newTrack.seasonNumber = show.season;

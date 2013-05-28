@@ -26,14 +26,14 @@
 }
 
 -(void) setCurrentTivo: (NSString *) currentTivo {
+	_currentTivo = currentTivo;
 	[self selectItemWithTitle: currentTivo];
 	[self refreshMenu];
-
 }
 
 -(void) refreshMenu {
 	NSString * currSelection = (NSString *)self.selectedItem.title;
-	
+	if (!currSelection) currSelection = _currentTivo;
 	[self removeAllItems];
 	[self addItemWithTitle:@"Any TiVo"];
 	NSMenuItem * anyTivo = [self lastItem];

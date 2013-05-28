@@ -855,7 +855,6 @@ __DDLOGHERE__
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
             DDLogReport(@" %@ File %@ not found after encoding complete",self, self.encodeFilePath );
-            [self saveCurrentLogFiles];
             [self rescheduleShowWithDecrementRetries:@(YES)];
             
         } else if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {

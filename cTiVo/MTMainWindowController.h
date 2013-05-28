@@ -38,7 +38,6 @@
 @property (weak, nonatomic, readonly) MTTiVoManager *myTiVoManager;
 @property (nonatomic, weak) NSMenuItem *showInFinderMenuItem, *playVideoMenuItem;
 @property (nonatomic, strong) IBOutlet NSView *cancelQuitView;
-@property (nonatomic, strong) IBOutlet NSView * drawerVariableFields;
 
 -(IBAction)selectFormat:(id)sender;
 -(IBAction)subscribe:(id) sender;

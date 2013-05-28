@@ -785,6 +785,14 @@ __DDLOGHERE__
 	return YES;
 }
 
+#pragma mark - Split View Delegate
+- (CGFloat)splitView:(NSSplitView *)splitView constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex {
+	//all three tables have same minimum
+	return proposedMin + 120;
+}
 
-
+- (CGFloat)splitView:(NSSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex;
+{
+    return proposedMaximumPosition - 120;
+}
 @end

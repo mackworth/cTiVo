@@ -10,8 +10,6 @@
 #import "MTTiVoManager.h"
 #import "MTFormatPopUpButton.h"
 
-#define tiVoManager [MTTiVoManager sharedTiVoManager]
-
 @interface MTFormatEditorController ()
 
 @property (nonatomic, strong) NSDictionary *alertResponseInfo;
