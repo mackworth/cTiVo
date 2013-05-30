@@ -775,7 +775,8 @@ __DDLOGHERE__
             NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
             if (badMAKRange.location != NSNotFound) {
                 self.show.tiVo.mediaKeyIsGood = NO;
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationBadMAK object:self.show.tiVo];
+                NSNotification *badMAKNotification = [NSNotification notificationWithName:kMTNotificationBadMAK object:self.show.tiVo];
+                [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:badMAKNotification waitUntilDone:NO];
             }
         }
     };
@@ -786,7 +787,8 @@ __DDLOGHERE__
             NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
             if (badMAKRange.location != NSNotFound) {
                 self.show.tiVo.mediaKeyIsGood = NO;
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationBadMAK object:self.show.tiVo];
+                NSNotification *badMAKNotification = [NSNotification notificationWithName:kMTNotificationBadMAK object:self.show.tiVo];
+                [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:badMAKNotification waitUntilDone:NO];
             }
         }
 	};
