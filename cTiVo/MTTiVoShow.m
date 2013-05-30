@@ -446,7 +446,7 @@ __DDLOGHERE__
 	return _tiVo;
 }
 
--(const MP4Tags * ) metaDataTags: (NSImage* ) image {
+-(const MP4Tags * ) metaDataTagsWithImage: (NSImage* ) image {
 	const MP4Tags *tags = MP4TagsAlloc();
 	uint8_t mediaType = 10;
 	if (self.isMovie) {
