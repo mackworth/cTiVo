@@ -30,6 +30,7 @@
 		1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C3173DC7D100B47539 /* DDFileLogger.m */; };
 		1E9959C9173DC7D100B47539 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C5173DC7D100B47539 /* DDLog.m */; };
 		1E9959CA173DC7D100B47539 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C7173DC7D100B47539 /* DDTTYLogger.m */; };
+		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1EABE6F416B0A254004DDB61 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
@@ -152,6 +153,7 @@
 		1E9959C5173DC7D100B47539 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		1E9959C6173DC7D100B47539 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
 		1E9959C7173DC7D100B47539 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
+		1E9A10EE1757200000863C44 /* cTiVo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cTiVo.png; sourceTree = "<group>"; };
 		1EABE6F316B0A254004DDB61 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = cTiVo/Growl.framework; sourceTree = "<group>"; };
 		1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Growl Registration Ticket.growlRegDict"; sourceTree = "<group>"; };
 		1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLogFormatter.h; sourceTree = "<group>"; };
@@ -504,6 +506,7 @@
 			isa = PBXGroup;
 			children = (
 				1E18145F1708AF7000166E5F /* cTiVo.icns */,
+				1E9A10EE1757200000863C44 /* cTiVo.png */,
 				1E684A7516E2C50B000F5C6E /* copyright.png */,
 				1E684A8A16E3A338000F5C6E /* deleted.png */,
 				1E684A7716E2C50B000F5C6E /* expired-recording.png */,
@@ -714,6 +717,7 @@
 				1E1814601708AF7000166E5F /* cTiVo.icns in Resources */,
 				1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */,
 				D2B4B4F41732D69C005B97F1 /* elgatoQuit.scpt in Resources */,
+				1E9A10EF1757200000863C44 /* cTiVo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

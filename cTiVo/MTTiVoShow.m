@@ -341,19 +341,17 @@ __DDLOGHERE__
 												  
 -(NSString *) seasonEpisode {
     
-    int e = _episode;
-    int s = _season;
-    NSString *episode = @"";
-    if (e > 0) {
-        if (s > 0 && s < 100 && e < 100) {
-            episode = [NSString stringWithFormat:@"S%0.2dE%0.2d",s,e ];
-        } else {
-            episode	 = [NSString stringWithFormat:@"%d",e];
-        }
-    } else if ([_episodeNumber compare:@"0"] != NSOrderedSame){
-        episode = _episodeNumber;
+    NSString *returnString = @"";
+    if (_episode > 0) {
+		if (_season > 0) {
+			returnString = [NSString stringWithFormat:@"S%0.2dE%0.2d",_season,_episode ];
+		} else {
+			returnString = [NSString stringWithFormat:@"%d",_episode];
+		}
+     } else {
+        returnString = _episodeNumber;
     }
-    return episode;
+    return returnString;
 }
 
 -(NSString *) seriesFromProgram:(NSString *) name {
@@ -371,9 +369,10 @@ __DDLOGHERE__
 
 -(BOOL) isMovie {
 	BOOL value =  (self.movieYear.length > 0) ||
+				  ([self.episodeID hasPrefix:@"MV"]) ||
 					!(self.isEpisodic.boolValue ||
 					  ((self.episodeTitle.length > 0) ||
-					   (self.episodeNumber.length > 0) ||
+					   (self.episode > 0) ||
 					   (self.showLength < 70*60))) ;
 	return value;
 }
@@ -447,7 +446,7 @@ __DDLOGHERE__
 	return _tiVo;
 }
 
--(const MP4Tags * ) metaDataTags {
+-(const MP4Tags * ) metaDataTags: (NSImage* ) image {
 	const MP4Tags *tags = MP4TagsAlloc();
 	uint8_t mediaType = 10;
 	if (self.isMovie) {
@@ -503,6 +502,19 @@ __DDLOGHERE__
 	if (self.stationCallsign) {
 		MP4TagsSetTVNetwork(tags, [self.stationCallsign cStringUsingEncoding:NSUTF8StringEncoding]);
 	}
+	
+	if (image) {
+		NSData *PNGData  = [NSBitmapImageRep representationOfImageRepsInArray: [image representations]
+																	usingType:NSPNGFileType properties:nil];
+		MP4TagArtwork artwork;
+		
+		artwork.data = (void *)[PNGData bytes];
+		artwork.size = (uint32_t)[PNGData length];
+		artwork.type = MP4_ART_PNG;
+		
+		MP4TagsAddArtwork(tags, &artwork);
+	}
+	
 	return tags;
 }
 
@@ -670,8 +682,9 @@ __DDLOGHERE__
 		if (episodeNumber.length) {
 			long l = episodeNumber.length;
 			if (l > 2) {
-				_episode = [[episodeNumber substringFromIndex:l-2] intValue];
-				_season = [[episodeNumber substringToIndex:l-2] intValue];
+				int epDigits = (l > 4) ? 3:2; 
+					_episode = [[episodeNumber substringFromIndex:l-epDigits] intValue];
+					_season = [[episodeNumber substringToIndex:l-epDigits] intValue];
 			} else {
 				_episode = [episodeNumber intValue];
 			}

@@ -104,7 +104,7 @@
 -(void)playVideo:(NSString *)path;
 -(void)revealInFinder:(NSArray *)paths;
 
--(const MP4Tags * ) metaDataTags;
+-(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image;
 
 
 @end

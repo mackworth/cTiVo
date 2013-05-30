@@ -1335,6 +1335,54 @@ __DDLOGHERE__
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
 }
 
+- (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
+	DDLogVerbose(@"Checking %@_%@ artwork in %@", prefix, suffix, directory);
+	NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directory error:nil];
+	
+	for (NSString *filename in dirContents) {
+		if (!prefix || [filename hasPrefix:prefix]) {
+			NSString * extension = [[filename pathExtension] lowercaseString];
+			if ([[NSImage imageFileTypes] indexOfObject:extension] != NSNotFound) {
+				NSString * base = [filename stringByDeletingPathExtension];
+				if (!suffix || [base hasSuffix:suffix]){
+					return [[NSImage alloc] initWithContentsOfFile:[directory stringByAppendingPathComponent: filename]];
+				}
+			}
+		}
+	}
+	return nil;
+}
+
+- (NSImage *) findArtWork {
+	NSString *currentDir   = self.downloadDir;
+	NSString *thumbnailDir = [currentDir stringByAppendingPathComponent:@"thumbnails"];
+	NSArray * directories;
+	
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs]) {
+		NSString *parentDir = [currentDir stringByDeletingLastPathComponent];
+		NSString *parentThumbDir = [parentDir stringByAppendingPathComponent:@"thumbnails"];
+		directories = @[currentDir, thumbnailDir, parentDir, parentThumbDir];
+	} else {
+		directories = @[currentDir, thumbnailDir];
+	}
+
+	if (self.show.season > 0) {
+		NSString * season = [NSString stringWithFormat:@"S%0.2d",self.show.season];
+		for (NSString * dir in directories) {
+			NSImage * artwork = [self artworkWithPrefix:self.show.seriesTitle andSuffix:season InPath:dir ];
+			if (artwork) return artwork;
+		}
+	}
+	for (NSString * dir in directories) {
+		NSImage * artwork = [self artworkWithPrefix:self.show.seriesTitle andSuffix:nil InPath:dir ];
+		if (artwork) return artwork;
+	}
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesIcon]) {
+		return [NSImage imageNamed:@"cTiVo.png"];  //from iTivo; use our logo for any new video files.
+	}
+	return nil;
+}
+
 
 -(void) writeTextMetaData:(NSString*) value forKey: (NSString *) key toFile: (NSFileHandle *) handle {
 	if ( key && value) {
@@ -1381,12 +1429,15 @@ __DDLOGHERE__
 	[tiVoManager updateShowOnDisk:_show.showKey withPath: videoFilePath];
 }
 
-
 -(void) finishUpPostEncodeProcessing {
 	NSDate *startTime = [NSDate date];
 	DDLogReport(@"Starting finishing @ %@",startTime);
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-
+	NSImage * artwork = nil;
+	if (self.encodeFormat.canAtomicParsley || _addToiTunesWhenEncoded) {
+		//see if we can find artwork for this series
+		artwork = [self findArtWork];
+	}
     if (self.shouldMarkCommercials || self.encodeFormat.canAtomicParsley || self.shouldEmbedSubtitles) {
         MP4FileHandle *encodedFile = MP4Modify([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding],0);
 		if (self.shouldMarkCommercials) {
@@ -1404,7 +1455,7 @@ __DDLOGHERE__
 			}
 		}
 		if (self.encodeFormat.canAtomicParsley) {
-			MP4TagsStore([self.show metaDataTags], encodedFile);
+			MP4TagsStore([self.show metaDataTagsWithImage: artwork], encodedFile);
 		}
 		
 		MP4Close(encodedFile, 0);
@@ -1415,7 +1466,7 @@ __DDLOGHERE__
         [self setValue:[NSNumber numberWithInt:kMTStatusAddingToItunes] forKeyPath:@"downloadStatus"];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
 		MTiTunes *iTunes = [[MTiTunes alloc] init];
-		NSString * iTunesPath = [iTunes importIntoiTunes:self] ;
+		NSString * iTunesPath = [iTunes importIntoiTunes:self withArt:artwork] ;
 		
 		if (iTunesPath && iTunesPath != self.encodeFilePath) {
 			//apparently iTunes created new file

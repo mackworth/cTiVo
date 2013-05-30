@@ -167,7 +167,8 @@ __DDLOGHERE__
 										  @NO, kMTiTunesDelete,
 										  @NO, kMTHasMultipleTivos,
 										  @NO, kMTMarkCommercials,
-                                          @YES, kMTUseMemoryBufferForDownload,
+                                          @YES, kMTiTunesIcon,
+										  @YES, kMTUseMemoryBufferForDownload,
 										  // @NO, kMTAllowDups, future
 										  [NSString pathWithComponents:@[NSHomeDirectory(),kMTDefaultDownloadDir]],kMTDownloadDirectory,
                                           kMTTmpDir,kMTTmpFilesDirectory,

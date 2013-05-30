@@ -104,7 +104,7 @@ __DDLOGHERE__
 }
 
 
--(NSString *) importIntoiTunes: (MTDownload * ) download {
+-(NSString *) importIntoiTunes: (MTDownload * ) download withArt:(NSImage *) image {
 	//Caller responsible for informing user of progress
 	// There can be a long delay as iTunes starts up
 	MTTiVoShow * show = download.show;
@@ -127,9 +127,8 @@ __DDLOGHERE__
 		if (show.isMovie) {
 			newTrack.name = show.showTitle;
 		} else {
-			newTrack.album = show.seriesTitle;
+			newTrack.album = [NSString stringWithFormat: @"%@, Season %d",show.seriesTitle, show.season];
 			newTrack.albumArtist = show.seriesTitle;
-			newTrack.album = show.seriesTitle;
 			if (show.episodeTitle.length ==0) {
                 NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
                 [dateFormat setDateStyle:NSDateFormatterShortStyle];
@@ -138,7 +137,7 @@ __DDLOGHERE__
 			} else {
 				newTrack.name = show.episodeTitle;
 			}
-			if (show.episodeNumber.integerValue >0) newTrack.trackNumber = show.episodeNumber.integerValue;
+			if (show.episode >0) newTrack.trackNumber = show.episode;
 			newTrack.episodeID = [NSString stringWithFormat:@"%d", show.showID];
             newTrack.episodeNumber = show.episode;
             newTrack.seasonNumber = show.season;
@@ -149,6 +148,12 @@ __DDLOGHERE__
 		newTrack.show = show.seriesTitle;
 		newTrack.year = show.episodeYear;
 		newTrack.genre = show.episodeGenre;
+		if (image) {
+			//don't ask me why this works...
+			iTunesArtwork	*artwork = [[newTrack artworks] objectAtIndex:0];
+			artwork.data = image;
+		}
+
 	/* haven't bothered with:
 	 tell application "Finder"
 	 set comment of this_item2 to (((show_name as string) & " - " & episodeName as string) & " - " & file_description as string)

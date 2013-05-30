@@ -60,7 +60,6 @@ __DDLOGHERE__
 			NSUInteger encodeIndex = [@[@"ffmpeg",@"mencoder",@"handbrake",@"perl"] indexOfObject:encoder];
 			if (encodeIndex != NSNotFound) {
 				
-				if ([encoder isEqualToString:@"handbrake"]) encoder = @"HandBrakeCLI";
 				switch (encodeIndex) {
 					case 0: //ffmpeg
 						newFormat.comSkip = @NO;
