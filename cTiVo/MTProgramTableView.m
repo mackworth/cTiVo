@@ -150,10 +150,9 @@ __DDLOGHERE__
 		[self.window makeFirstResponder:self.findText];
 	}
 }
-
-- (void)controlTextDidChange:(NSNotification *) notification {
-	if (notification.object != self.findText) {
-		DDLogMajor(@"Error invalid textField %@", notification.object);
+-(IBAction)changedSearchText:(id)sender {
+	if (sender != self.findText) {
+		DDLogMajor(@"Error invalid textField %@", sender);
 		return;
 	}
 	DDLogVerbose(@"FindText = %@",self.findText.stringValue);

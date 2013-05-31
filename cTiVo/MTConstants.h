@@ -167,6 +167,7 @@
 #define kMTSelectedTiVo @"SelectedTiVo"             //Name of currently selected TiVo
 #define kMTSelectedFormat @"SelectedFormat"         //Name of currently selected format for conversion
 #define kMTDownloadDirectory  @"DownloadDirectory"  //Pathname for directory for dowloaded files
+#define kMTThumbnailsDirectory  @"ThumbnailsDirectory"  //Pathname for directory for dowloaded files (not in UI)
 #define kMTSubscriptionList @"SubscriptionList"     //Array of subscription dictionaries
 #define kMTTiVoLastLoadTimes @"TiVoLastLoadTImes"   //Array of Date each tivo last processed
 #define kMTiTunesSubmit @"iTunesSubmit"             //Whether to submit to iTunes after encoding

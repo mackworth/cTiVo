@@ -1338,16 +1338,23 @@ __DDLOGHERE__
 }
 
 - (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
-	DDLogVerbose(@"Checking %@_%@ artwork in %@", prefix, suffix, directory);
-	NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directory error:nil];
-	
+	NSString * realDirectory = [directory stringByStandardizingPath];
+	DDLogVerbose(@"Checking for %@_%@ artwork in %@", prefix, suffix, realDirectory);
+	NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:realDirectory error:nil];
 	for (NSString *filename in dirContents) {
 		if (!prefix || [filename hasPrefix:prefix]) {
 			NSString * extension = [[filename pathExtension] lowercaseString];
 			if ([[NSImage imageFileTypes] indexOfObject:extension] != NSNotFound) {
 				NSString * base = [filename stringByDeletingPathExtension];
 				if (!suffix || [base hasSuffix:suffix]){
-					return [[NSImage alloc] initWithContentsOfFile:[directory stringByAppendingPathComponent: filename]];
+					NSString * path = [realDirectory stringByAppendingPathComponent: filename];
+					DDLogDetail(@"found artwork for %@ in %@",self.show.seriesTitle, path);
+					NSImage * image = [[NSImage alloc] initWithContentsOfFile:path];
+					if (image) {
+						return image;
+					} else {
+						DDLogReport(@"Couldn't load artwork for %@ from %@",self.show.seriesTitle, path);
+					}
 				}
 			}
 		}
@@ -1360,14 +1367,17 @@ __DDLOGHERE__
 	NSString *thumbnailDir = [currentDir stringByAppendingPathComponent:@"thumbnails"];
 	NSArray * directories;
 	
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs]) {
+	NSString * userThumbnailDir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
+	if (userThumbnailDir) {
+		directories = @[userThumbnailDir];
+	} else if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs]) {
 		NSString *parentDir = [currentDir stringByDeletingLastPathComponent];
 		NSString *parentThumbDir = [parentDir stringByAppendingPathComponent:@"thumbnails"];
 		directories = @[currentDir, thumbnailDir, parentDir, parentThumbDir];
 	} else {
 		directories = @[currentDir, thumbnailDir];
 	}
-
+	
 	if (self.show.season > 0) {
 		NSString * season = [NSString stringWithFormat:@"S%0.2d",self.show.season];
 		for (NSString * dir in directories) {
@@ -1382,6 +1392,7 @@ __DDLOGHERE__
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesIcon]) {
 		return [NSImage imageNamed:@"cTiVo.png"];  //from iTivo; use our logo for any new video files.
 	}
+	DDLogDetail(@"artwork for %@ not found",self.show.seriesTitle);
 	return nil;
 }
 

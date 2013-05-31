@@ -21,10 +21,10 @@
 @property (nonatomic, strong) NSArray *sortedShows;
 @property (nonatomic, strong) NSString *selectedTiVo;
 @property (weak) IBOutlet NSTextField *findLabel;
-@property (weak) IBOutlet NSTextField *findText; //filter for displaying found subset of programs
+@property (weak) IBOutlet NSSearchField *findText; //filter for displaying found subset of programs
 
 -(NSArray *)sortedShows;
 -(IBAction)selectTivo:(id)sender;
 -(IBAction)findShows:(id)sender;
-
+-(IBAction)changedSearchText:(id) sender;
 @end

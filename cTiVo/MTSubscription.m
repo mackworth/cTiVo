@@ -138,6 +138,7 @@ __DDLOGHERE__
 	
 	//Check if we've already recorded it
 	for (NSDictionary * prevShow in self.prevRecorded ) {
+		DDLogVerbose(@"check Recorded: %@ v. %@",prevShow[@"episodeID"], tivoShow.episodeID);  //QQQ debug only; pullout
 		if ([prevShow[@"episodeID"] isEqualToString: tivoShow.episodeID]) {
 			DDLogVerbose(@"Already recorded: %@ ",prevShow);
 			return NO;
@@ -176,6 +177,7 @@ __DDLOGHERE__
 			index++;
 		}
 	}
+	DDLogVerbose(@"remembering Recording %ld: %@", index, thisRecording);
 	[self.prevRecorded insertObject:thisRecording atIndex:index];
 	return newDownload;
 }
@@ -224,6 +226,7 @@ __DDLOGHERE__
 	for (NSString * tivoName in [tiVoManager.lastLoadedTivoTimes allKeys]) {
 		NSDate * tivoTime=  tiVoManager.lastLoadedTivoTimes[tivoName];
 		if ((tivoTime != [NSDate distantPast] && [tivoTime timeIntervalSinceNow] >= 60*60*24*90)) {
+			DDLogReport(@"tivo %@ away too long; removing from list",tivoName);
 			[tiVoManager.lastLoadedTivoTimes removeObjectForKey: tivoName];
 			continue;
 		}
@@ -231,6 +234,7 @@ __DDLOGHERE__
 			returnDate = tivoTime;
 		};
 	}
+	DDLogVerbose(@"oldest Tivo = %@",returnDate);
 	return returnDate;
 	
 }
@@ -376,10 +380,12 @@ __DDLOGHERE__
 
 -(MTSubscription *) createSubscription: (MTTiVoShow *) tivoShow {
 	//set the "lastrecording" time for one second before this show, to include this show.
+	DDLogVerbose(@"creating Subscription based on Show %@", tivoShow);
 	NSDate *earlierTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
 	if (tivoShow.showDate) {
 		earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
 	}
+	DDLogVerbose(@"Subscription time of %@",earlierTime);
 	NSRegularExpression * tempRegex = [self matchFull:tivoShow.seriesTitle];
 	
 	if (!tempRegex) return nil;
@@ -510,6 +516,7 @@ __DDLOGHERE__
 			}
 		}
 		if (removeSubs.count > 0) {
+			DDLogDetail(@"removing old subs older than %@: %@",cutoffDate,removeSubs);
 			[sub.prevRecorded removeObjectsInArray:removeSubs];
 		}
 		
