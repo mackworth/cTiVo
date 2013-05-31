@@ -37,6 +37,7 @@
 
 @synthesize seriesTitle		 = _seriesTitle,
 			episodeTitle	 = _episodeTitle,
+			episodeID    	 = _episodeID,
 			imageString		 = _imageString,
 			tempTiVoName     = _tempTiVoName;
 
@@ -615,19 +616,21 @@ __DDLOGHERE__
 	}
 }
 
--(NSString *) episodeID {
-
-	if (![_programId hasPrefix:@"MV"] && [_programId hasSuffix:@"0000"] ) {
+-(void) setProgramId:(NSString *)programId {
+	if (programId != _programId) {
+		_programId = programId;
+		_episodeID = programId;
+		if (_episodeID.length == 12) {
+			_episodeID = [NSString stringWithFormat:@"%@00%@",[_episodeID substringToIndex:2],[_episodeID substringFromIndex:2]];
+		}
+		if (![_episodeID hasPrefix:@"MV"] && [_episodeID hasSuffix:@"0000"] ) {
 			NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init] ;
 			[dateFormat setDateStyle:NSDateFormatterShortStyle];
 			[dateFormat setTimeStyle:NSDateFormatterNoStyle] ;
-			return [NSString stringWithFormat: @"%@-%@",_programId, [dateFormat stringFromDate: _showDate] ];
-	} else {
-		return _programId;
+			_episodeID = [NSString stringWithFormat: @"%@-%@",_episodeID, [dateFormat stringFromDate: _showDate] ];
+		}
 	}
 }
-
-												  
 
 #pragma mark - Custom Setters; many for parsing
 

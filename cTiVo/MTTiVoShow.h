@@ -36,7 +36,8 @@
                                     *channelString,
                                     *stationCallsign,
 									*programId,
-                                    *seriesId,
+									*episodeID,
+									*seriesId,
 									*movieYear,
 									*isEpisodic,
                                     *tvRating,
@@ -85,7 +86,6 @@
 										*lengthString,
 										*isQueuedString,
 										*isHDString,
-										*episodeID,
 										*sizeString;
 @property (weak, nonatomic, readonly) NSAttributedString *actors,
 													*guestStars,

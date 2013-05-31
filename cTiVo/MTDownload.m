@@ -1342,10 +1342,11 @@ __DDLOGHERE__
 	DDLogVerbose(@"Checking for %@_%@ artwork in %@", prefix, suffix, realDirectory);
 	NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:realDirectory error:nil];
 	for (NSString *filename in dirContents) {
-		if (!prefix || [filename hasPrefix:prefix]) {
-			NSString * extension = [[filename pathExtension] lowercaseString];
+		NSString *lowerCaseFilename = [filename lowercaseString];
+		if (!prefix || [lowerCaseFilename hasPrefix:prefix]) {
+			NSString * extension = [lowerCaseFilename pathExtension];
 			if ([[NSImage imageFileTypes] indexOfObject:extension] != NSNotFound) {
-				NSString * base = [filename stringByDeletingPathExtension];
+				NSString * base = [lowerCaseFilename stringByDeletingPathExtension];
 				if (!suffix || [base hasSuffix:suffix]){
 					NSString * path = [realDirectory stringByAppendingPathComponent: filename];
 					DDLogDetail(@"found artwork for %@ in %@",self.show.seriesTitle, path);
@@ -1366,7 +1367,9 @@ __DDLOGHERE__
 	NSString *currentDir   = self.downloadDir;
 	NSString *thumbnailDir = [currentDir stringByAppendingPathComponent:@"thumbnails"];
 	NSArray * directories;
-	
+	NSString * legalSeriesName = [self.show.seriesTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+	legalSeriesName = [[legalSeriesName stringByReplacingOccurrencesOfString:@":" withString:@"-"] lowercaseString];
+
 	NSString * userThumbnailDir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
 	if (userThumbnailDir) {
 		directories = @[userThumbnailDir];
@@ -1381,12 +1384,12 @@ __DDLOGHERE__
 	if (self.show.season > 0) {
 		NSString * season = [NSString stringWithFormat:@"S%0.2d",self.show.season];
 		for (NSString * dir in directories) {
-			NSImage * artwork = [self artworkWithPrefix:self.show.seriesTitle andSuffix:season InPath:dir ];
+			NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:season InPath:dir ];
 			if (artwork) return artwork;
 		}
 	}
 	for (NSString * dir in directories) {
-		NSImage * artwork = [self artworkWithPrefix:self.show.seriesTitle andSuffix:nil InPath:dir ];
+		NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
 		if (artwork) return artwork;
 	}
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesIcon]) {

@@ -230,7 +230,7 @@ __DDLOGHERE__
 			[tiVoManager.lastLoadedTivoTimes removeObjectForKey: tivoName];
 			continue;
 		}
-		if ([returnDate isLessThan: tivoTime] ) {
+		if ([returnDate isGreaterThan: tivoTime] ) {
 			returnDate = tivoTime;
 		};
 	}
@@ -543,7 +543,8 @@ __DDLOGHERE__
 		DDLogVerbose(@"Saving Sub: %@ ",tempSub);
 		[tempArray addObject:tempSub];
     }
-    [[NSUserDefaults standardUserDefaults] setObject:tempArray forKey:kMTSubscriptionList];
+	[[NSUserDefaults standardUserDefaults] setObject:tiVoManager.lastLoadedTivoTimes forKey:kMTTiVoLastLoadTimes];
+	[[NSUserDefaults standardUserDefaults] setObject:tempArray forKey:kMTSubscriptionList];
 	//May not be necessary   [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
 }
 

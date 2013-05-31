@@ -352,7 +352,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			MTNetService *newTiVoService = nil;
 			MTTiVo *newTiVo = nil;
 			for (MTTiVo *tivo in manualTiVoList) {
-				if ([tivo.tiVo.iPAddress compare:manualTiVoDescription[@"iPAddress"]] == NSOrderedSame) {
+				if ((newTiVo.tiVo.userPort == tivo.tiVo.userPort) && [tivo.tiVo.iPAddress compare:manualTiVoDescription[@"iPAddress"]] == NSOrderedSame) {
 					DDLogDetail(@"Already have manual TiVo %@ - Updating values", tivo);
 					newTiVo = tivo;
 					newTiVo.tiVo.userName = manualTiVoDescription[@"userName"];
@@ -1162,9 +1162,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
     DDLogVerbose(@"writing DL queue: %@", downloadArray);
 	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];
-	
-	[[NSUserDefaults standardUserDefaults] setObject:_lastLoadedTivoTimes forKey:kMTTiVoLastLoadTimes];
-	
+		
 	[self.subscribedShows saveSubscriptions];
 
 }
