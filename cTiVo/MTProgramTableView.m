@@ -32,7 +32,8 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDetailsLoaded object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoListUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTiVoColumn:) name:kMTNotificationFoundMultipleTiVos object:nil];
+ 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTiVoColumn:) name:kMTNotificationFoundMultipleTiVos object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshAddToQueueButton:) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowCopyProtected options:NSKeyValueChangeSetting context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowSuggestions options:NSKeyValueChangeSetting context:nil];
 	
@@ -232,11 +233,22 @@ __DDLOGHERE__
 	return _sortedShows;
 }
 
+- (void) refreshAddToQueueButton: (NSNotification *) notification {
+	if (tiVoManager.processingPaused.boolValue || [tiVoManager anyShowsWaiting]) {
+		addToQueueButton.title =@"Add to Queue";
+	} else {
+		addToQueueButton.title = @"Download";
+	}
+}
+
 -(void)tableViewSelectionDidChange:(NSNotification *)notification
 {
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    if (selectedRowIndexes.count == 1) {
-        NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
+	NSInteger numRows = [self numberOfSelectedRows];
+	[addToQueueButton setEnabled:numRows != 0];
+	[subscribeButton setEnabled: numRows != 0];
+    if (numRows == 1) {
+		NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+		NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
         [myController setValue:selectedRows[0] forKey:@"showForDetail"];
     }
 }

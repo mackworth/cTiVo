@@ -14,6 +14,7 @@
 
 @interface MTProgramTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingSource, MTTableViewProtocol, NSControlTextEditingDelegate>{
     IBOutlet MTMainWindowController *myController;
+	IBOutlet NSButton *addToQueueButton, *subscribeButton;
 	MTTiVoManager *tiVoManager;
     NSTableColumn *tiVoColumnHolder;
 }

@@ -260,7 +260,7 @@ __DDLOGHERE__
 }
 
 -(void) checkSubscriptionsNew:(NSArray *) newSubs {
-	//Called after one or more subscriptions have been created. Ignores tivoLoadTimes to incorporate all current shows
+	//Called after one or more subscriptions have been created or when reapplying. Ignores tivoLoadTimes to incorporate all current shows
 	DDLogVerbose(@"checking New Subscriptions");
 	for (MTTiVoShow * thisShow in tiVoManager.tiVoShows.reverseObjectEnumerator) {
 		for (MTSubscription * possMatch in newSubs) {
@@ -270,6 +270,12 @@ __DDLOGHERE__
 			}
 		}
 
+	}
+}
+-(void) clearHistory:(NSArray *) subscriptions {
+	for (MTSubscription * sub in subscriptions) {
+		sub.prevRecorded = [NSMutableArray new];
+		sub.createdTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
 	}
 }
 

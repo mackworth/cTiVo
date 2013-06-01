@@ -55,8 +55,16 @@
 		}
 	}
 	if (currSelection) {
-		//no longer in list
-		[self selectItem:anyTivo]; //set to any tivo
+		if (currSelection.length == 0) {
+			//name of @"" => any tivo
+			[self selectItem:anyTivo]; 
+		} else {
+			//no longer in list, but it needs to be...
+			[self addItemWithTitle:currSelection];
+			NSMenuItem *thisItem = [self lastItem];
+			thisItem.RepresentedObject = currSelection;
+			[self selectItem:thisItem];
+		}
 	}
 }
 

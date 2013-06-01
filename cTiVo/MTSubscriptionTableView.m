@@ -48,6 +48,7 @@ __DDLOGHERE__
 -(void)setNotifications
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSubscription:) name:kMTNotificationSubscriptionChanged object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableViewSelectionDidChange:) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatListUpdated object:nil];
 	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, nil]];
@@ -102,10 +103,17 @@ __DDLOGHERE__
 -(IBAction) unsubscribeSelectedItems:(id) sender {
 	DDLogDetail(@"User Requested delete subscriptions");
     NSArray * itemsToRemove = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
+    [self deselectAll:nil];
 
 	[tiVoManager.subscribedShows  deleteSubscriptions:itemsToRemove];
 	[myController playTrashSound];
-    [self deselectAll:nil];
+}
+
+-(IBAction) reapplySelectedItems:(id) sender {
+	DDLogDetail(@"User Requested reapply subscriptions");
+    NSArray * itemsToApply = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
+	[tiVoManager.subscribedShows clearHistory:itemsToApply];
+	[tiVoManager.subscribedShows checkSubscriptionsNew:itemsToApply];
 }
 
 -(IBAction)delete:(id)sender{

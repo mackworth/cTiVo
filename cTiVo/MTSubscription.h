@@ -49,11 +49,13 @@
 
 @interface NSMutableArray (MTSubscriptionList)
 
--(void) checkSubscription: (NSNotification *) notification;
+-(void) checkSubscription: (NSNotification *) notification;  //Notification.object should be show to check
+-(void) checkSubscriptionsNew:(NSArray *) newSubs;
 -(NSArray *) addSubscriptions:(NSArray *) shows; //returns new subs
 -(NSArray *) addSubscriptionsDL: (NSArray *) downloads;
 -(MTSubscription *) addSubscriptionsString: (NSString *) pattern;
 -(void) deleteSubscriptions:(NSArray *) subscriptions;
+-(void) clearHistory:(NSArray *) subscriptions;
 
 -(void) saveSubscriptions;
 -(void) loadSubscriptions;

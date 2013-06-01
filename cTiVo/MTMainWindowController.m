@@ -61,14 +61,12 @@ __DDLOGHERE__
 	[defaultCenter addObserver:self selector:@selector(buildColumnMenuForTables) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoShowsUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
-	[defaultCenter addObserver:self selector:@selector(refreshAddToQueueButton:) name:kMTNotificationDownloadQueueUpdated object:nil];
 	
 	//Spinner Progress Handling 
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdating object:nil];
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(networkChanged:) name:kMTNotificationNetworkChanged object:nil];
 	
-    [defaultCenter addObserver:self selector:@selector(tableSelectionChanged:) name:NSTableViewSelectionDidChangeNotification object:nil];
     [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidMoveNotification object:nil];
      [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
 	[tiVoManager addObserver:self forKeyPath:@"downloadDirectory" options:NSKeyValueObservingOptionInitial context:nil];
@@ -149,14 +147,6 @@ __DDLOGHERE__
 	[formatListPopUp refreshMenu];
 	[tiVoManager setValue:[formatListPopUp selectFormatNamed:tiVoManager.selectedFormat.name] forKey:@"selectedFormat"];
 
-}
-
-- (void) refreshAddToQueueButton: (NSNotification *) notification {
-	if (tiVoManager.processingPaused.boolValue || [tiVoManager anyShowsWaiting]) {
-		addToQueueButton.title =@"Add to Queue";
-	} else {
-		addToQueueButton.title = @"Download";
-	}
 }
 
 -(void)refreshTiVoListPopup:(NSNotification *)notification
@@ -465,8 +455,9 @@ __DDLOGHERE__
 {
 	if ([menu.title caseInsensitiveCompare:@"Unsubscribe"] == NSOrderedSame) {
 		[subscriptionTable unsubscribeSelectedItems:menu];
+	} else if ([menu.title caseInsensitiveCompare:@"Re-Apply to Shows"] == NSOrderedSame) {
+		[subscriptionTable reapplySelectedItems:menu];
 	}
-	
 }
 
 -(IBAction)subscribe:(id) sender {
@@ -749,22 +740,6 @@ __DDLOGHERE__
 	} else {
 		[menuItem setState: NSOnState];
 	}
-}
-
-#pragma mark - Table View Notification Handling
-
--(void)tableSelectionChanged:(NSNotification *)notification
-{
-    [addToQueueButton setEnabled:NO];
-    [removeFromQueueButton setEnabled:NO];
-	[subscribeButton setEnabled:NO];
-    if ([downloadQueueTable numberOfSelectedRows]) {
-        [removeFromQueueButton setEnabled:YES];
-    }
-    if ([tiVoShowTable numberOfSelectedRows]) {
-        [addToQueueButton setEnabled:YES];
-        [subscribeButton setEnabled:YES];
-    }
 }
 
 #pragma mark - Memory Management
