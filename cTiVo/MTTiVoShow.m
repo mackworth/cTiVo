@@ -187,7 +187,17 @@ __DDLOGHERE__
         if (episodeNumber.length) self.episodeNumber = episodeNumber;
         if (seasonNumber.length) self.season = [seasonNumber intValue];
         if (artwork.length) self.tvdbArtworkLocation = artwork;
+//		NSLog(@"Got jpg of size %ld for show %@",[self getTVDBArtwork].length,self);
     }
+}
+
+-(NSData *)getTVDBArtwork
+{
+	if (!_tvdbArtworkLocation || _tvdbArtworkLocation.length == 0) {
+		return nil;
+	}
+	NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/banners/%@",_tvdbArtworkLocation] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	return [NSData dataWithContentsOfURL:[NSURL URLWithString:urlString]];
 }
 
 -(NSString *)getStringForPattern:(NSString *)pattern fromString:(NSString *)string
