@@ -38,6 +38,7 @@
 	
     NSOperationQueue *queue;
     NSMetadataQuery *cTiVoQuery;
+	BOOL volatile loadingManualTiVos;
 
 }
 
@@ -224,6 +225,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[cTiVoQuery setSearchScopes:@[NSMetadataQueryLocalComputerScope]];
 		[cTiVoQuery setNotificationBatchingInterval:2.0];
 		[cTiVoQuery startQuery];
+		loadingManualTiVos = NO;
 	}
 	return self;
 }
@@ -337,6 +339,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)loadManualTiVos
 {
 //    BOOL didFindTiVo = NO;
+	if (loadingManualTiVos) {
+		return;
+	}
+	loadingManualTiVos = YES;
 	DDLogDetail(@"LoadingTivos");
 	NSMutableArray *bonjourTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == NO"]]];
 	NSMutableArray *manualTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
@@ -352,7 +358,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			MTNetService *newTiVoService = nil;
 			MTTiVo *newTiVo = nil;
 			for (MTTiVo *tivo in manualTiVoList) {
-				if ((newTiVo.tiVo.userPort == tivo.tiVo.userPort) && [tivo.tiVo.iPAddress compare:manualTiVoDescription[@"iPAddress"]] == NSOrderedSame) {
+				if ((newTiVo.tiVo.userPortSSL == tivo.tiVo.userPortSSL)  && (newTiVo.tiVo.userPort == tivo.tiVo.userPort) && [tivo.tiVo.iPAddress compare:manualTiVoDescription[@"iPAddress"]] == NSOrderedSame) {
 					DDLogDetail(@"Already have manual TiVo %@ - Updating values", tivo);
 					newTiVo = tivo;
 					newTiVo.tiVo.userName = manualTiVoDescription[@"userName"];
@@ -415,6 +421,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[_tivoServices removeAllObjects];
 		[tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
 	}
+	loadingManualTiVos = NO;
 }
 
 
