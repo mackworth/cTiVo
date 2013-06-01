@@ -159,7 +159,7 @@
 
 //USER DEFAULTS
 
-#define KMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information
+#define kMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information
 #define	kMTQueuePaused @"QueuePaused"			//State of pause for the download queue
 #define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address.  
 #define kMTPreventSleep @"PreventSleep"			//If true this will prevent sleep when possible

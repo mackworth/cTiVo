@@ -172,7 +172,8 @@ __DDLOGHERE__
 										  // @NO, kMTAllowDups, future
 										  [NSString pathWithComponents:@[NSHomeDirectory(),kMTDefaultDownloadDir]],kMTDownloadDirectory,
                                           kMTTmpDir,kMTTmpFilesDirectory,
-                                          @{},KMTTheTVDBCache,
+                                          @{},kMTTheTVDBCache,
+										  @YES,kMTGetEpisodeArt,
 										  nil];
     
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
@@ -798,7 +799,7 @@ __DDLOGHERE__
 	DDLogDetail(@"exiting");
 	[tiVoManager cancelAllDownloads];
 	[tiVoManager writeDownloadQueueToUserDefaults];
-    [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.tvdbCache forKey:KMTTheTVDBCache];
+    [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.tvdbCache forKey:kMTTheTVDBCache];
     [[NSUserDefaults standardUserDefaults] synchronize];
 	 mediaKeyQueue = nil;
 }
