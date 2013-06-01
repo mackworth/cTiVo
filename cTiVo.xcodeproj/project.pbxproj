@@ -65,6 +65,8 @@
 		D2901AE91677BB0E001E559C /* MTDownloadTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */; };
 		D291436E1713467A00CE3202 /* NSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD116766FA600CE32DE /* NSString+HTML.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		D291436F1713467F00CE3202 /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		D295CE83175A6AE500D010B8 /* NSString+Helpers.h in Sources */ = {isa = PBXBuildFile; fileRef = D295CE81175A6AE500D010B8 /* NSString+Helpers.h */; };
+		D295CE84175A6AE500D010B8 /* NSString+Helpers.m in Sources */ = {isa = PBXBuildFile; fileRef = D295CE82175A6AE500D010B8 /* NSString+Helpers.m */; };
 		D297AC221730296C0036125A /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC1A1730296C0036125A /* libmp4v2.a */; };
 		D297AC28173047EE0036125A /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC27173047EE0036125A /* libstdc++.dylib */; };
 		D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = D2995CA5168B8BB200B960B9 /* MTCheckBox.m */; };
@@ -203,6 +205,8 @@
 		D28EB0FA16B3182100AA0330 /* MTNetService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTNetService.h; sourceTree = "<group>"; };
 		D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadTableCellView.h; sourceTree = "<group>"; };
 		D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadTableCellView.m; sourceTree = "<group>"; };
+		D295CE81175A6AE500D010B8 /* NSString+Helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = "NSString+Helpers.h"; sourceTree = "<group>"; };
+		D295CE82175A6AE500D010B8 /* NSString+Helpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Helpers.m"; sourceTree = "<group>"; };
 		D297AC131730296C0036125A /* chapter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chapter.h; sourceTree = "<group>"; };
 		D297AC141730296C0036125A /* file.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = file.h; sourceTree = "<group>"; };
 		D297AC151730296C0036125A /* file_prop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = file_prop.h; sourceTree = "<group>"; };
@@ -547,6 +551,8 @@
 				1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */,
 				D2D60BD016766FA600CE32DE /* NSString+HTML.h */,
 				D2D60BD116766FA600CE32DE /* NSString+HTML.m */,
+				D295CE81175A6AE500D010B8 /* NSString+Helpers.h */,
+				D295CE82175A6AE500D010B8 /* NSString+Helpers.m */,
 				D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */,
 				D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */,
 				D202E09F169778DA00514213 /* MTiTivoImport.h */,
@@ -801,6 +807,8 @@
 				1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */,
 				1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */,
 				1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */,
+				D295CE83175A6AE500D010B8 /* NSString+Helpers.h in Sources */,
+				D295CE84175A6AE500D010B8 /* NSString+Helpers.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

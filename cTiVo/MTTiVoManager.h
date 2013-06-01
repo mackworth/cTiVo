@@ -28,6 +28,8 @@
 @property (nonatomic, strong) NSMutableDictionary *lastLoadedTivoTimes;
 @property (atomic, strong) NSMutableArray *downloadQueue;
 @property (nonatomic, strong) NSMutableArray *subscribedShows;
+@property (nonatomic, strong) NSMutableDictionary *tvdbSeriesIdMapping;
+@property (nonatomic, strong) NSMutableDictionary *tvdbCache;
 
 @property (nonatomic, strong) NSString *downloadDirectory;
 @property (nonatomic, weak, readonly) NSString *tmpFilesDirectory;

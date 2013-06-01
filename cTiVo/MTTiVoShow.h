@@ -58,6 +58,8 @@
 
 @property					  time_t showLength;  //length of show in seconds
 
+@property (nonatomic, strong) NSString *tvdbArtworkLocation;
+
 
 
 
@@ -103,6 +105,7 @@
 
 -(void)playVideo:(NSString *)path;
 -(void)revealInFinder:(NSArray *)paths;
+-(void)getTheTVDBDetails;
 
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image;
 

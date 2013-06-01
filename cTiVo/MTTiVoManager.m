@@ -226,6 +226,19 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[cTiVoQuery setNotificationBatchingInterval:2.0];
 		[cTiVoQuery startQuery];
 		loadingManualTiVos = NO;
+        _tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
+        _tvdbCache = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:KMTTheTVDBCache]];
+        //Clean up old entries
+        NSMutableArray *keysToDelete = [NSMutableArray array];
+        for (NSString *key in _tvdbCache) {
+            NSDate *d = [[_tvdbCache objectForKey:key] objectForKey:@"date"];
+            if (-1.0 * [d timeIntervalSinceDate:[NSDate date]] > 60.0 * 60.0 * 24.0 * 30.0) { //Too old so throw out
+                [keysToDelete addObject:key];
+            }
+        }
+        for (NSString *key in keysToDelete) {
+            [_tvdbCache removeObjectForKey:key];
+        }
 	}
 	return self;
 }

@@ -13,6 +13,7 @@
 #import "MTTiVoManager.h"
 #import "NSString+RFC3339Date.h"
 #import "mp4v2.h"
+#import "NSString+Helpers.h"
 
 @interface MTTiVoShow () {
 	
@@ -63,6 +64,7 @@ __DDLOGHERE__
 		_seriesTitle = @"";
 //		_originalAirDate = @"";
 		_episodeYear = 0;
+        _tvdbArtworkLocation = nil;
 		
 		self.protectedShow = @(NO); //This is the default
 		parseTermMapping = @{@"description" : @"showDescription", @"time": @"showTime"};
@@ -128,9 +130,82 @@ __DDLOGHERE__
 		}
 		//keep XML until we convert video for metadata
 		self.detailXML = xml;
+		if(self.episodeNumber.length == 0 || self.seasonString.length == 0 || [[NSUserDefaults standardUserDefaults] boolForKey:kMTGetEpisodeArt]){
+			[self getTheTVDBDetails];
+		}
 		NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDetailsLoaded object:self];
     [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	}
+}
+
+-(void)getTheTVDBDetails
+{
+    if (self.seriesId.length && [self.seriesId startsWith:@"SH"]) { //if we have a series get the other informaiton
+        NSString *episodeNumber = nil, *seasonNumber = nil, *artwork = nil;
+        NSDictionary *episodeEntry = [tiVoManager.tvdbCache objectForKey:self.episodeID];
+        if (episodeEntry) { // We already have this information
+            episodeNumber = [episodeEntry objectForKey:@"episode"];
+            seasonNumber = [episodeEntry objectForKey:@"season"];
+            artwork = [episodeEntry objectForKey:@"artwork"];
+        } else {
+            NSString *seriesIDTVDB = [tiVoManager.tvdbSeriesIdMapping objectForKey:_seriesTitle];  // see if we've already done this
+            if (!seriesIDTVDB) {
+                NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeries.php?seriesname=%@",_seriesTitle] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                NSURL *url = [NSURL URLWithString:urlString];
+                DDLogDetail(@"Getting details for %@ using %@",self,urlString);
+                NSString *seriesID = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
+                //This can result in multiple series return only 1 of which is correct.  First break up into Series
+                NSArray *serieses = [seriesID componentsSeparatedByString:@"<Series>"];
+                for (NSString *series in serieses) {
+                    NSString *seriesName = [[self getStringForPattern:@"<SeriesName>(.*)<\\/SeriesName>" fromString:series] stringByConvertingHTMLToPlainText];
+                    if (seriesName && [seriesName caseInsensitiveCompare:self.seriesTitle] == NSOrderedSame) {
+                        seriesIDTVDB = [self getStringForPattern:@"<seriesid>(\\d*)" fromString:series];
+                        break;
+                    }
+                }
+                if (seriesIDTVDB) {
+                    [tiVoManager.tvdbSeriesIdMapping setObject:seriesIDTVDB forKey:_seriesTitle];
+                }
+            }
+            //Now get the details
+            NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetEpisodeByAirDate.php?apikey=%@&seriesid=%@&airdate=%@",kMTTheTVDBAPIKey,seriesIDTVDB,self.originalAirDateNoTime] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+            DDLogDetail(@"urlString %@",urlString);
+            NSURL *url = [NSURL URLWithString:urlString];
+            NSString *episodeInfo = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
+            episodeNumber = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo];
+            seasonNumber = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo];
+            artwork = [self getStringForPattern:@"<filename>(.*)<\\/filename>" fromString:episodeInfo];
+            DDLogMajor(@"Got episode %@, season %@ and artwork %@ from %@",episodeNumber, seasonNumber, artwork, self);
+			if (!seasonNumber) seasonNumber = @"";
+			if (!episodeNumber) episodeNumber = @"";
+			if (!artwork) artwork = @"";
+			[tiVoManager.tvdbCache setObject:@{ @"season":seasonNumber,
+												@"episode":episodeNumber,
+												@"artwork":artwork,
+												@"date":[NSDate date]} forKey:self.episodeID];
+        }
+        if (episodeNumber.length) self.episodeNumber = episodeNumber;
+        if (seasonNumber.length) self.season = [seasonNumber intValue];
+        if (artwork.length) self.tvdbArtworkLocation = artwork;
+    }
+}
+
+-(NSString *)getStringForPattern:(NSString *)pattern fromString:(NSString *)string
+{
+    NSError *error = nil;
+    NSString *answer = nil;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
+    if (error) {
+        NSLog(@"GetStringFormPattern error %@",error.userInfo);
+        return nil;
+    }
+    NSTextCheckingResult *result = [regex firstMatchInString:string options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, string.length)];
+    if (result && [result numberOfRanges] > 1) {
+        NSRange rangeOfanswer = [result rangeAtIndex:1];
+        answer = [string substringWithRange:rangeOfanswer];
+    }
+    return answer;
+    
 }
 
 
@@ -258,80 +333,6 @@ __DDLOGHERE__
 	_gotDetails = NO;
 	DDLogMajor(@"Show: %@ Parser Error %@",self.showTitle, parseError);
 }
-
-
-//-(NSArray *) apmArguments {
-//	NSMutableArray * apmArgs = [NSMutableArray array];
-//
-//	[apmArgs addObject:@"--overWrite"];
-//	[apmArgs addObject:@"--stik"];
-//	if (self.isMovie) {
-//		[apmArgs addObject:@"Short Film"];
-//	} else {
-//		[apmArgs addObject:@"TV Show"];
-//	}
-//	if (self.episodeTitle.length>0) {
-//		[apmArgs addObject:@"--title"];
-//		[apmArgs addObject:self.episodeTitle];
-//	}
-//	if (self.episodeGenre.length>0) {
-//		[apmArgs addObject:@"--grouping"];
-//		[apmArgs addObject:self.episodeGenre];
-//	}
-//	if (self.originalAirDate.length>0) {
-//		[apmArgs addObject:@"--year"];
-//		[apmArgs addObject:self.originalAirDate];
-//	} else if (self.movieYear.length>0) {
-//		[apmArgs addObject:@"--year"];
-//		[apmArgs addObject:self.movieYear];
-//	}
-//	
-//	if (self.showDescription.length > 0) {
-//		if (self.showDescription.length < 230) {
-//			[apmArgs addObject:@"--description"];
-//			[apmArgs addObject:self.showDescription];
-//			
-//		} else {
-//			[apmArgs addObject:@"--longdesc"];
-//			[apmArgs addObject:self.showDescription];
-//		}
-//	}
-//	if (self.seriesTitle.length>0) {
-//		[apmArgs addObject:@"--TVShowName"];
-//		[apmArgs addObject:self.seriesTitle];
-//		[apmArgs addObject:@"--artist"];
-//		[apmArgs addObject:self.seriesTitle];
-//		[apmArgs addObject:@"--albumArtist"];
-//		[apmArgs addObject:self.seriesTitle];
-//	}
-//	if (self.episodeNumber.length>0) {
-//		[apmArgs addObject:@"--TVEpisode"];
-//		[apmArgs addObject:self.episodeNumber];
-//	}
-//	if (self.episode > 0) {
-//		NSString * epString = [NSString stringWithFormat:@"%d",self.episode];
-//		[apmArgs addObject:@"--TVEpisodeNum"];
-//		[apmArgs addObject:epString];
-//		[apmArgs addObject:@"--tracknum"];
-//		[apmArgs addObject:epString];
-//	} else if (self.episodeNumber.length>0) {
-//		[apmArgs addObject:@"--TVEpisodeNum"];
-//		[apmArgs addObject:self.episodeNumber];
-//		[apmArgs addObject:@"--tracknum"];
-//		[apmArgs addObject:self.episodeNumber];
-//		
-//	}
-//	if (self.season > 0 ) {
-//		NSString * seasonString = [NSString stringWithFormat:@"%d",self.season];
-//		[apmArgs addObject:@"--TVSeasonNum"];
-//		[apmArgs addObject:seasonString];		
-//	}
-//	if (self.stationCallsign) {
-//		[apmArgs addObject:@"--TVNetwork"];
-//		[apmArgs addObject:self.stationCallsign];
-//	}
-//	return apmArgs;
-//}
 
 #pragma mark - Custom Getters
 
