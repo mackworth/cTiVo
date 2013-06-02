@@ -9,6 +9,12 @@
 #import "MTDownloadTableView.h"
 #import "MTPopUpTableCellView.h"
 
+@interface MTDownloadTableView ()
+
+@property (nonatomic) BOOL showingProgramsColumn;
+
+@end
+
 @implementation MTDownloadTableView
 @synthesize  sortedDownloads= _sortedDownloads;
 
@@ -144,9 +150,14 @@ __DDLOGHERE__
 	for (int i=0; i< displayedShows.count; i++) {
 		MTDownload *thisDownload = [displayedShows objectAtIndex:i];
 		MTDownloadTableCellView *programCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
-		[self updateProgressInCell: programCell forDL: thisDownload];
 		MTDownloadTableCellView *seriesCell = [self viewAtColumn:seriesColumnIndex row:i makeIfNecessary:NO];
-		[self updateProgressInCell: seriesCell forDL: thisDownload];
+		[self updateProgressInCell: programCell forDL: thisDownload];
+		if (!self.showingProgramsColumn) {
+			[self updateProgressInCell: seriesCell forDL: thisDownload];
+		} else {
+			seriesCell.progressIndicator.doubleValue = 0.0;
+			seriesCell.progressIndicator.rightText.stringValue = @"";
+		}
 	}
 		
 }
@@ -188,6 +199,13 @@ __DDLOGHERE__
     } else {
         rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleRegular;
     }
+}
+
+-(BOOL)showingProgramsColumn
+{
+	NSTableColumn *programColumn = [self tableColumnWithIdentifier:@"Programs"];
+	return !programColumn.isHidden;
+	
 }
 
 -(NSTableCellView *)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
@@ -298,7 +316,10 @@ __DDLOGHERE__
 		MTDownloadTableCellView *	cell = (MTDownloadTableCellView *) result;
 		cell.progressIndicator.leftText.stringValue = cellVal;
 		cell.toolTip = cellVal;
-		[self updateProgressInCell:cell forDL:download];
+		if ([tableColumn.identifier isEqualToString:@"Programs"] ||
+			([tableColumn.identifier isEqualToString:@"Series"] && !self.showingProgramsColumn)) {
+			[self updateProgressInCell:cell forDL:download];
+		}
 		if ([thisShow.protectedShow boolValue]) {
 			cell.progressIndicator.foregroundTextColor = [NSColor grayColor];
 		} else {
