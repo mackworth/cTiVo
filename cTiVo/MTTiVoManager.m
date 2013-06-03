@@ -227,7 +227,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[cTiVoQuery startQuery];
 		loadingManualTiVos = NO;
         _tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
-        _tvdbCache = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTheTVDBCache]];
+		_tvdbCache = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTheTVDBCache]];
         //Clean up old entries
         NSMutableArray *keysToDelete = [NSMutableArray array];
         for (NSString *key in _tvdbCache) {

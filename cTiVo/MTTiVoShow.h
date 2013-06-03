@@ -106,6 +106,7 @@
 -(void)playVideo:(NSString *)path;
 -(void)revealInFinder:(NSArray *)paths;
 -(void)getTheTVDBDetails;
+-(void)retrieveTVDBArtworkIntoPath: (NSString *) path;
 
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image;
 

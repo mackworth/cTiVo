@@ -65,7 +65,6 @@
 		D2901AE91677BB0E001E559C /* MTDownloadTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */; };
 		D291436E1713467A00CE3202 /* NSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD116766FA600CE32DE /* NSString+HTML.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		D291436F1713467F00CE3202 /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		D295CE83175A6AE500D010B8 /* NSString+Helpers.h in Sources */ = {isa = PBXBuildFile; fileRef = D295CE81175A6AE500D010B8 /* NSString+Helpers.h */; };
 		D295CE84175A6AE500D010B8 /* NSString+Helpers.m in Sources */ = {isa = PBXBuildFile; fileRef = D295CE82175A6AE500D010B8 /* NSString+Helpers.m */; };
 		D297AC221730296C0036125A /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC1A1730296C0036125A /* libmp4v2.a */; };
 		D297AC28173047EE0036125A /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC27173047EE0036125A /* libstdc++.dylib */; };
@@ -807,7 +806,6 @@
 				1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */,
 				1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */,
 				1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */,
-				D295CE83175A6AE500D010B8 /* NSString+Helpers.h in Sources */,
 				D295CE84175A6AE500D010B8 /* NSString+Helpers.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

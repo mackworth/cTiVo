@@ -638,6 +638,9 @@ __DDLOGHERE__
     
     commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version
 
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTGetEpisodeArt]) {
+		[self.show retrieveTVDBArtworkIntoPath: [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:self.baseFileName]];
+	}
 }
 
 -(NSString *) encoderPath {
@@ -1382,12 +1385,26 @@ __DDLOGHERE__
 	}
 	
 	if (self.show.season > 0) {
+		//first check for user-specified, episode-specific art
+		if (self.show.episodeNumber.length > 0) {
+			for (NSString * dir in directories) {
+				NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:[[self.show seasonEpisode] lowercaseString] InPath:dir ];
+				if (artwork) return artwork;
+			}
+			
+			//then for downloaded temp art
+			NSString * dir = tiVoManager.tmpFilesDirectory;
+			NSImage * artwork = [self artworkWithPrefix: _baseFileName andSuffix:[[self.show seasonEpisode] lowercaseString] InPath:dir ];
+			if (artwork) return artwork;
+		}
+		//then for season-specific art
 		NSString * season = [NSString stringWithFormat:@"S%0.2d",self.show.season];
 		for (NSString * dir in directories) {
 			NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:season InPath:dir ];
 			if (artwork) return artwork;
 		}
 	}
+	//finally for series-level art
 	for (NSString * dir in directories) {
 		NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
 		if (artwork) return artwork;
