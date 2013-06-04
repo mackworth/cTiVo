@@ -429,6 +429,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				
 			} else {
 				DDLogDetail(@"Updated show %@", currentShow.showTitle);
+				if (!thisShow.gotDetails || !thisShow.gotTVDBDetails) {
+					NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil];
+					[_queue addOperation:nextDetail];
+
+				}
 				[newShows addObject:thisShow];
 				[previousShowList removeObjectForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
 			}

@@ -97,7 +97,7 @@
 
 @property BOOL isQueued;
 
-@property (nonatomic, assign) BOOL	gotDetails;
+@property (nonatomic, assign) BOOL	gotDetails, gotTVDBDetails;
 @property (nonatomic, strong) NSData *detailXML;
 -(void)getShowDetail;
 

@@ -50,6 +50,7 @@ __DDLOGHERE__
     if (self) {
         _showID = 0;
 		_gotDetails = NO;
+		_gotTVDBDetails = NO;
 		elementString = nil;
 		_vActor = nil;
 		_vExecProducer = nil;
@@ -107,6 +108,9 @@ __DDLOGHERE__
 -(void)getShowDetail
 {
 	if (_gotDetails) {
+		if (!_gotTVDBDetails) {
+			[self getTheTVDBDetails];
+		}
 		return;
 	}
 	DDLogVerbose(@"getting Detail for %@ at %@",self, _detailURL);
@@ -183,17 +187,21 @@ static NSMutableDictionary * theTVDBResults;  //just for debuggin tvdb results; 
 
 -(void)getTheTVDBDetails
 {
+	if (_gotTVDBDetails) {
+		return;
+	}
     if (!theTVDBResults) {
 		theTVDBResults = [NSMutableDictionary dictionaryWithDictionary:@{@"NoEpiList":[NSMutableDictionary dictionary],@"SerNotFoundList":[NSMutableDictionary dictionary]}];
 	}
 	if (self.seriesId.length && [self.seriesId startsWith:@"SH"]) { //if we have a series get the other informaiton
         NSString *episodeNumber = nil, *seasonNumber = nil, *artwork = nil;
-        NSDictionary *episodeEntry = nil; //[tiVoManager.tvdbCache objectForKey:self.episodeID];
+        NSDictionary *episodeEntry = [tiVoManager.tvdbCache objectForKey:self.episodeID];
         DDLogVerbose(@"%@ %@",episodeEntry? @"Already had": @"Need to get",self.showTitle);
 		if (episodeEntry) { // We already have this information
             episodeNumber = [episodeEntry objectForKey:@"episode"];
             seasonNumber = [episodeEntry objectForKey:@"season"];
             artwork = [episodeEntry objectForKey:@"artwork"];
+			_gotTVDBDetails = YES;
 			theTVDBResults[@"Cached"] = @([theTVDBResults[@"Cached"] intValue] + 1);
         } else {
             NSString *seriesIDTVDB = [tiVoManager.tvdbSeriesIdMapping objectForKey:_seriesTitle];  // see if we've already done this
@@ -228,24 +236,27 @@ static NSMutableDictionary * theTVDBResults;  //just for debuggin tvdb results; 
 				DDLogDetail(@"urlString %@",urlString);
 				NSURL *url = [NSURL URLWithString:urlString];
 				NSString *episodeInfo = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
-				episodeNumber = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo];
-				seasonNumber = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo];
-				artwork = [self getStringForPattern:@"<filename>(.*)<\\/filename>" fromString:episodeInfo];
-				if (!seasonNumber) {
-					seasonNumber = @"";
-					DDLogMajor(@"No episode info for %@ on %@ for %@",self.showTitle, self.originalAirDateNoTime, self.episodeID);
-					theTVDBResults[@"NoEpiCount"] = @([theTVDBResults[@"NoEpiCount"] intValue] + 1);
-					[((NSMutableDictionary *)theTVDBResults[@"NoEpiList"]) setValue:  self.seriesId forKey:self.showTitle  ];
-				} else {
-					DDLogMajor(@"Got episode %@, season %@ and artwork %@ from %@",episodeNumber, seasonNumber, artwork, self);
-					theTVDBResults[@"EpiFound"] = @([theTVDBResults[@"EpiFound"] intValue] + 1);
+				if (episodeInfo) {
+					episodeNumber = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo];
+					seasonNumber = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo];
+					artwork = [self getStringForPattern:@"<filename>(.*)<\\/filename>" fromString:episodeInfo];
+					if (!seasonNumber) {
+						seasonNumber = @"";
+						DDLogMajor(@"No episode info for %@ on %@ for %@",self.showTitle, self.originalAirDateNoTime, self.episodeID);
+						theTVDBResults[@"NoEpiCount"] = @([theTVDBResults[@"NoEpiCount"] intValue] + 1);
+						[((NSMutableDictionary *)theTVDBResults[@"NoEpiList"]) setValue:  self.seriesId forKey:self.showTitle  ];
+					} else {
+						DDLogMajor(@"Got episode %@, season %@ and artwork %@ from %@",episodeNumber, seasonNumber, artwork, self);
+						theTVDBResults[@"EpiFound"] = @([theTVDBResults[@"EpiFound"] intValue] + 1);
+					}
+					if (!episodeNumber) episodeNumber = @"";
+					if (!artwork) artwork = @"";
+					[tiVoManager.tvdbCache setObject:@{ @"season":seasonNumber,
+					 @"episode":episodeNumber,
+					 @"artwork":artwork,
+					 @"date":[NSDate date]} forKey:self.episodeID];
+					_gotTVDBDetails = YES;
 				}
-				if (!episodeNumber) episodeNumber = @"";
-				if (!artwork) artwork = @"";
-				[tiVoManager.tvdbCache setObject:@{ @"season":seasonNumber,
-													@"episode":episodeNumber,
-													@"artwork":artwork,
-													@"date":[NSDate date]} forKey:self.episodeID];
 			}
        }
         BOOL updateEpisode = NO;
