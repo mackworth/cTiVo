@@ -121,12 +121,15 @@ __DDLOGHERE__
         NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,_tiVo.tiVo.name,_showID];
         NSData *xml = nil;
         if ([[NSFileManager defaultManager] fileExistsAtPath:detailFilePath]) {
+			NSLog(@"downloading details from file");
             xml = [NSData dataWithContentsOfFile:detailFilePath];
         } else {
             NSURLResponse *detailResponse = nil;
             NSURLRequest *detailRequest = [NSURLRequest requestWithURL:_detailURL];;
             xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
-            [xml writeToFile:detailFilePath atomically:YES];
+			if (![_inProgress boolValue]) {
+				[xml writeToFile:detailFilePath atomically:YES];
+			}
         }
 		DDLogVerbose(@"Got Details for %@: %@", self, [[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
 
