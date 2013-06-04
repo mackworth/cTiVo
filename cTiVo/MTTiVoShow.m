@@ -269,14 +269,13 @@ static NSMutableDictionary * theTVDBResults;  //just for debuggin tvdb results; 
 				}
 			}
        }
-        BOOL updateEpisode = NO;
 		if (episodeNumber.length) {
 			if (self.episode >0) {
 				if ([episodeNumber intValue] != self.episode) {
 					DDLogMajor (@"TheTVDB has different %@ Episode info: %@ v our %d for %@ on %@",self.seriesTitle, episodeNumber, self.episode, self.seriesId, self.originalAirDate);
 				}
 			} else {
-				updateEpisode = YES;
+				self.episode = [episodeNumber intValue];
 			}
 		}
         if (seasonNumber.length) {
@@ -285,12 +284,8 @@ static NSMutableDictionary * theTVDBResults;  //just for debuggin tvdb results; 
 					DDLogMajor (@"TheTVDB has different %@ season info: %@ v our %d for %@ on %@",self.seriesTitle, seasonNumber, self.season, self.seriesId, self.originalAirDate);
 				}
 			} else {
-				updateEpisode = YES;
+				self.season = [seasonNumber intValue];
 			}
-		}
-		if (updateEpisode) {
-			self.episodeNumber = [NSString stringWithFormat:@"%d", [seasonNumber intValue]*1000 + [episodeNumber intValue]];  //as if we're getting info from tivo
-
 		}
         if (artwork.length) self.tvdbArtworkLocation = artwork;
 		DDLogVerbose(@"QQQ TVDB: %@",theTVDBResults);
