@@ -225,6 +225,19 @@ __DDLOGHERE__
     // add the notification port to the application runloop
     CFRunLoopAddSource( CFRunLoopGetCurrent(),
 					   IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes );
+    
+    //Make sure details directory is available
+    NSFileManager *fm = [NSFileManager defaultManager];
+    BOOL isDir;
+    BOOL fileExists = [fm fileExistsAtPath:kMTTmpDetailsDir isDirectory:&isDir];
+    if (fileExists && !isDir) {
+        [fm removeItemAtPath:kMTTmpDetailsDir error:nil];
+        fileExists = NO;
+    }
+    if (!fileExists) {
+        [fm createDirectoryAtPath:kMTTmpDetailsDir withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    
 }
 
 -(void)validateTmpDirectory

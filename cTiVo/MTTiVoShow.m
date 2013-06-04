@@ -118,9 +118,16 @@ __DDLOGHERE__
 	@autoreleasepool {
 //	NSString *detailURLString = [NSString stringWithFormat:@"https://%@/TiVoVideoDetails?id=%d",_tiVo.tiVo.hostName,_showID];
 //	NSLog(@"Show Detail URL %@",detailURLString);
-		NSURLResponse *detailResponse = nil;
-		NSURLRequest *detailRequest = [NSURLRequest requestWithURL:_detailURL];;
-		NSData *xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
+        NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,_tiVo.tiVo.name,_showID];
+        NSData *xml = nil;
+        if ([[NSFileManager defaultManager] fileExistsAtPath:detailFilePath]) {
+            xml = [NSData dataWithContentsOfFile:detailFilePath];
+        } else {
+            NSURLResponse *detailResponse = nil;
+            NSURLRequest *detailRequest = [NSURLRequest requestWithURL:_detailURL];;
+            xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
+            [xml writeToFile:detailFilePath atomically:YES];
+        }
 		DDLogVerbose(@"Got Details for %@: %@", self, [[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
 
 		parser = [[NSXMLParser alloc] initWithData:xml];
