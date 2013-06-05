@@ -719,10 +719,25 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void)resetAllDetails
 {
- 	for (MTTiVo *tiVo in _tiVoList) {
+	DDLogMajor(@"Resetting the caches!");
+	//Remove TVDB Cache
+    [[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTTheTVDBCache];
+	self.tvdbCache =  [NSMutableDictionary dictionary];
+	self.tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
+	self.theTVDBStatistics = nil;
+	
+    //Remove TiVo Detail Cache
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSArray *files = [fm contentsOfDirectoryAtPath:kMTTmpDetailsDir error:nil];
+    for (NSString *file in files) {
+        NSString *filePath = [NSString stringWithFormat:@"%@/%@",kMTTmpDetailsDir,file];
+        [fm removeItemAtPath:filePath error:nil];
+    }
+	for (MTTiVo *tiVo in _tiVoList) {
         [tiVo resetAllDetails];
 	}
-   
+	[self refreshAllTiVos];
+
 }
 
 
