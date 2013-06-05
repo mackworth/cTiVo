@@ -280,6 +280,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		
 }
 
+-(void)resetAllDetails
+{
+    for (MTTiVoShow *show in _shows) {
+        show.gotTVDBDetails = NO;
+        show.gotDetails = NO;
+    }
+}
+
 #pragma mark - NSXMLParser Delegate Methods
 
 -(void)parserDidStartDocument:(NSXMLParser *)parser

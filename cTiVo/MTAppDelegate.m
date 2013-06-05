@@ -241,7 +241,7 @@ __DDLOGHERE__
 		for (NSString *file in files) {
 			NSString *filePath = [NSString stringWithFormat:@"%@/%@",kMTTmpDetailsDir,file];
 			NSDictionary *attrs = [fm attributesOfItemAtPath:filePath error:nil];
-			NSDate *creationDate = [attrs objectForKey: NSFileCreationDate];
+			NSDate *creationDate = [attrs objectForKey: NSFileModificationDate];
 			if ([[NSDate date] timeIntervalSinceDate:creationDate] > 3600 * 24 * 30) {
 				[fm removeItemAtPath:filePath error:nil];
 				NSLog(@"Removed file %@",filePath);

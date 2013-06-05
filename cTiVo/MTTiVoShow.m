@@ -123,6 +123,9 @@ __DDLOGHERE__
         if ([[NSFileManager defaultManager] fileExistsAtPath:detailFilePath]) {
 			DDLogDetail(@"downloading details from file %@", detailFilePath);
             xml = [NSData dataWithContentsOfFile:detailFilePath];
+            NSMutableDictionary *attr = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:detailFilePath error:nil]];
+            [attr setObject:[NSDate date] forKey:NSFileModificationDate];
+            [[NSFileManager defaultManager] setAttributes:attr ofItemAtPath:detailFilePath error:nil];
         } else {
             NSURLResponse *detailResponse = nil;
             NSURLRequest *detailRequest = [NSURLRequest requestWithURL:_detailURL];;

@@ -61,5 +61,7 @@
 -(void)setupNotifications;
 
 -(void) saveLastLoadTime:(NSDate *) newDate;
+-(void)resetAllDetails;
+
 
 @end

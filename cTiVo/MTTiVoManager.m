@@ -717,6 +717,14 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 }
 
+-(void)resetAllDetails
+{
+ 	for (MTTiVo *tiVo in _tiVoList) {
+        [tiVo resetAllDetails];
+	}
+   
+}
+
 
 -(NSMutableArray *) subscribedShows {
     

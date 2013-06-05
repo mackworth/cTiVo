@@ -93,6 +93,8 @@
 -(BOOL)foundTiVoNamed:(NSString *)tiVoName;
 -(void)loadManualTiVos;
 -(void)refreshAllTiVos;
+-(void)resetAllDetails;
+
 -(BOOL)anyTivoActive;
 
 
