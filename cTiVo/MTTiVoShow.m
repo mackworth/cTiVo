@@ -121,7 +121,7 @@ __DDLOGHERE__
         NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,_tiVo.tiVo.name,_showID];
         NSData *xml = nil;
         if ([[NSFileManager defaultManager] fileExistsAtPath:detailFilePath]) {
-			NSLog(@"downloading details from file");
+			DDLogDetail(@"downloading details from file %@", detailFilePath);
             xml = [NSData dataWithContentsOfFile:detailFilePath];
         } else {
             NSURLResponse *detailResponse = nil;
@@ -142,9 +142,7 @@ __DDLOGHERE__
 		} else {
 			DDLogDetail(@"GetDetails parsing Finished");
 		}
-		//keep XML until we convert video for metadata
-		self.detailXML = xml;
-		if(self.episodeNumber.length == 0 || self.seasonString.length == 0 || [[NSUserDefaults standardUserDefaults] boolForKey:kMTGetEpisodeArt]){
+		if(self.episodeNumber.length == 0 || self.seasonString.length == 0 ){
 			[self getTheTVDBDetails];
 		}
 		NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDetailsLoaded object:self];
@@ -201,20 +199,23 @@ static NSMutableDictionary * theTVDBResults;  //just for debuggin tvdb results; 
 		return;
 	}
     if (!theTVDBResults) {
-		theTVDBResults = [NSMutableDictionary dictionaryWithDictionary:@{@"NoEpiList":[NSMutableDictionary dictionary],@"SerNotFoundList":[NSMutableDictionary dictionary]}];
+		theTVDBResults = [NSMutableDictionary dictionaryWithDictionary:@{
+						  @"WrongSeaEpsList":[NSMutableDictionary dictionary],
+						  @"NoEpisodeList":[NSMutableDictionary dictionary],
+						  @"NoSeriesList":[NSMutableDictionary dictionary]}];
 	}
 	if (self.seriesId.length && [self.seriesId startsWith:@"SH"]) { //if we have a series get the other informaiton
-        NSString *episodeNumber = nil, *seasonNumber = nil, *artwork = nil;
+        NSString *episodeNum = nil, *seasonNum = nil, *artwork = nil;
         NSDictionary *episodeEntry = [tiVoManager.tvdbCache objectForKey:self.episodeID];
         DDLogVerbose(@"%@ %@",episodeEntry? @"Already had": @"Need to get",self.showTitle);
-		if (episodeEntry) { // We already have this information
-            episodeNumber = [episodeEntry objectForKey:@"episode"];
-            seasonNumber = [episodeEntry objectForKey:@"season"];
+		NSString *seriesIDTVDB = [tiVoManager.tvdbSeriesIdMapping objectForKey:_seriesTitle]; // see if we've already done this
+		if (episodeEntry) { // We already have this information 
+            episodeNum = [episodeEntry objectForKey:@"episode"];
+            seasonNum = [episodeEntry objectForKey:@"season"];
             artwork = [episodeEntry objectForKey:@"artwork"];
 			_gotTVDBDetails = YES;
 			theTVDBResults[@"Cached"] = @([theTVDBResults[@"Cached"] intValue] + 1);
         } else {
-            NSString *seriesIDTVDB = [tiVoManager.tvdbSeriesIdMapping objectForKey:_seriesTitle];  // see if we've already done this
             if (!seriesIDTVDB) {
 				NSString *longSeriesID = self.seriesId;
 				NSString *seriesID = nil;  //signal same as longseries
@@ -247,53 +248,58 @@ static NSMutableDictionary * theTVDBResults;  //just for debuggin tvdb results; 
 				NSURL *url = [NSURL URLWithString:urlString];
 				NSString *episodeInfo = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
 				if (episodeInfo) {
-					episodeNumber = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo];
-					seasonNumber = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo];
+					episodeNum = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo];
+					seasonNum = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo];
 					artwork = [self getStringForPattern:@"<filename>(.*)<\\/filename>" fromString:episodeInfo];
-					if (!seasonNumber) {
-						seasonNumber = @"";
-						DDLogMajor(@"No episode info for %@ on %@ for %@",self.showTitle, self.originalAirDateNoTime, self.episodeID);
-						theTVDBResults[@"NoEpiCount"] = @([theTVDBResults[@"NoEpiCount"] intValue] + 1);
-						[((NSMutableDictionary *)theTVDBResults[@"NoEpiList"]) setValue:  self.seriesId forKey:self.showTitle  ];
+					if (!seasonNum) {
+						seasonNum = @"";
+						NSString * details = [NSString stringWithFormat:@"%@ on %@ for %@ (%@)",self.showTitle, self.originalAirDateNoTime, self.episodeID, seriesIDTVDB];
+						DDLogMajor(@"No episode info for %@ ",details);
+						theTVDBResults[@"NoEpisodeCount"] = @([theTVDBResults[@"NoEpisodeCount"] intValue] + 1);
+						[((NSMutableDictionary *)theTVDBResults[@"NoEpisodeList"]) setValue:  details forKey:self.showTitle  ];
 					} else {
-						DDLogMajor(@"Got episode %@, season %@ and artwork %@ from %@",episodeNumber, seasonNumber, artwork, self);
+						DDLogMajor(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, self);
 						theTVDBResults[@"EpiFound"] = @([theTVDBResults[@"EpiFound"] intValue] + 1);
 					}
-					if (!episodeNumber) episodeNumber = @"";
+					if (!episodeNum) episodeNum = @"";
 					if (!artwork) artwork = @"";
-					[tiVoManager.tvdbCache setObject:@{ @"season":seasonNumber,
-					 @"episode":episodeNumber,
+					[tiVoManager.tvdbCache setObject:@{ @"season":seasonNum,
+					 @"episode":episodeNum,
 					 @"artwork":artwork,
 					 @"date":[NSDate date]} forKey:self.episodeID];
 					_gotTVDBDetails = YES;
 				}
 			}
        }
-		if (episodeNumber.length) {
-			if (self.episode >0) {
-				if ([episodeNumber intValue] != self.episode) {
-					DDLogMajor (@"TheTVDB has different %@ Episode info: %@ v our %d for %@ on %@",self.seriesTitle, episodeNumber, self.episode, self.seriesId, self.originalAirDate);
+		if (episodeNum.length && seasonNum.length) {
+			if (self.episode >0 && self.season > 0) {
+				//both sources have sea/epi; so compare for report
+				if ([episodeNum intValue] != self.episode || [seasonNum intValue] != self.season) {
+					NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d for %@(%@) on %@",seasonNum,episodeNum, self.season, self.episode, self.seriesId, seriesIDTVDB ? seriesIDTVDB : @"", self.originalAirDate ];
+					DDLogMajor (@"TheTVDB has different Sea/Eps info for %@: %@", self.showTitle, details );
+					theTVDBResults[@"WrongSeaEpsCount"] = @([theTVDBResults[@"WrongSeaEpsCount"] intValue] + 1);
+					[((NSMutableDictionary *)theTVDBResults[@"WrongInfoList"]) setValue:  details forKey:self.showTitle  ];
 				}
 			} else {
-				self.episode = [episodeNumber intValue];
+				self.episode = [episodeNum intValue];
+				self.season = [seasonNum intValue];
+				theTVDBResults[@"NewSEInfo"] = @([theTVDBResults[@"NewSEInfo"] intValue] + 1);
+				DDLogDetail(@"Adding TVDB season/episode  %@ to show %@",self.episodeNumber, self.showTitle);
 			}
 		}
-        if (seasonNumber.length) {
-			if (self.season>0) {
-				if ([seasonNumber intValue] != self.season) {
-					DDLogMajor (@"TheTVDB has different %@ season info: %@ v our %d for %@ on %@",self.seriesTitle, seasonNumber, self.season, self.seriesId, self.originalAirDate);
-				}
-			} else {
-				self.season = [seasonNumber intValue];
-			}
-		}
+
         if (artwork.length) self.tvdbArtworkLocation = artwork;
-		DDLogVerbose(@"QQQ TVDB: %@",theTVDBResults);
+		if (self.tiVo.queue.operationCount ==1) {  //we're the last one to load on this tivo, so print out stats.
+			DDLogMajor(@"Statistics for TVDB since start of program: %@",theTVDBResults);
+		}
     }
 }
 
 -(void)retrieveTVDBArtworkIntoPath: (NSString *) path
 {
+	if(_gotTVDBDetails) {
+		[self getTheTVDBDetails];
+	}
 	if (_tvdbArtworkLocation.length == 0 ||
 		self.episodeNumber.length == 0 ||
 		self.season == 0) {
@@ -328,7 +334,7 @@ static NSMutableDictionary * theTVDBResults;  //just for debuggin tvdb results; 
     NSString *answer = nil;
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
     if (error) {
-        NSLog(@"GetStringFormPattern error %@",error.userInfo);
+        DDLogReport(@"GetStringFormPattern error %@",error.userInfo);
         return nil;
     }
     NSTextCheckingResult *result = [regex firstMatchInString:string options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, string.length)];

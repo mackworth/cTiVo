@@ -1383,7 +1383,7 @@ __DDLOGHERE__
 	} else {
 		directories = @[currentDir, thumbnailDir];
 	}
-	
+
 	if (self.show.season > 0) {
 		//first check for user-specified, episode-specific art
 		if (self.show.episodeNumber.length > 0) {
@@ -1426,14 +1426,19 @@ __DDLOGHERE__
 
 -(void) writeMetaDataFiles {
 	
+	NSString * detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.show.tiVoName,self.show.showID];
+
 	if (self.genXMLMetaData.boolValue) {
 		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
 		DDLogMajor(@"Writing XML to    %@",tivoMetaPath);
-		if (![self.show.detailXML writeToFile:tivoMetaPath atomically:NO])
-			DDLogReport(@"Couldn't write XML to file %@", tivoMetaPath);
+		if (![[NSFileManager defaultManager] copyItemAtPath: detailFilePath toPath:tivoMetaPath error:nil]) {
+		
+				DDLogReport(@"Couldn't write XML to file %@", tivoMetaPath);
+		}
 	}
-	if (self.genTextMetaData.boolValue) {
-		NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:self.show.detailXML options:0 error:nil];
+	if (self.genTextMetaData.boolValue && [[NSFileManager defaultManager] fileExistsAtPath:detailFilePath]) {
+		NSData * xml = [NSData dataWithContentsOfFile:detailFilePath];
+		NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:xml options:0 error:nil];
 		NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
 		id returnxml = [xmldoc objectByApplyingXSLTAtURL:[NSURL fileURLWithPath:xltTemplate] arguments:nil error:nil	];
 		NSString *returnString = [[NSString alloc] initWithData:returnxml encoding:NSUTF8StringEncoding];
