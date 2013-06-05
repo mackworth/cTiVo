@@ -236,7 +236,19 @@ __DDLOGHERE__
     }
     if (!fileExists) {
         [fm createDirectoryAtPath:kMTTmpDetailsDir withIntermediateDirectories:YES attributes:nil error:nil];
-    }
+    } else {  //Get rid of 'old' file
+		NSArray *files = [fm contentsOfDirectoryAtPath:kMTTmpDetailsDir error:nil];
+		for (NSString *file in files) {
+			NSString *filePath = [NSString stringWithFormat:@"%@/%@",kMTTmpDetailsDir,file];
+			NSDictionary *attrs = [fm attributesOfItemAtPath:filePath error:nil];
+			NSDate *creationDate = [attrs objectForKey: NSFileCreationDate];
+			if ([[NSDate date] timeIntervalSinceDate:creationDate] > 3600 * 24 * 30) {
+				[fm removeItemAtPath:filePath error:nil];
+				NSLog(@"Removed file %@",filePath);
+			}
+		}
+		
+	}
     
 }
 

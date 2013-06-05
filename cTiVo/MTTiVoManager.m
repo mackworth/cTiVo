@@ -232,7 +232,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
         NSMutableArray *keysToDelete = [NSMutableArray array];
         for (NSString *key in _tvdbCache) {
             NSDate *d = [[_tvdbCache objectForKey:key] objectForKey:@"date"];
-            if (-1.0 * [d timeIntervalSinceDate:[NSDate date]] > 60.0 * 60.0 * 24.0 * 30.0) { //Too old so throw out
+            if ([[NSDate date] timeIntervalSinceDate:d] > 60.0 * 60.0 * 24.0 * 30.0) { //Too old so throw out
                 [keysToDelete addObject:key];
             }
         }
