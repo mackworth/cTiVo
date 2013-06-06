@@ -39,7 +39,8 @@
 
 @property (nonatomic, copy) void (^cleanupHandler)();
 
-@property BOOL requiresInputPipe, requiresOutputPipe;
+@property BOOL requiresInputPipe, requiresOutputPipe, shouldReschedule;
+@property (nonatomic) BOOL taskFailed;
 
 @property int pid;
 

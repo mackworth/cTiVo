@@ -767,7 +767,7 @@ audio: mp2 at 192kbs</string>
 			<key>iTunes</key>
 			<false/>
 			<key>mustDownloadFirst</key>
-			<true/>
+			<false/>
 			<key>outputFileFlag</key>
 			<string>-o</string>
 			<key>inputFileFlag</key>
@@ -807,7 +807,7 @@ audio: mp2 at 192kbs</string>
 			<key>inputFileFlag</key>
 			<string>-i</string>
 			<key>regExProgress</key>
-			<string> ([\d.]*?) \% </string>
+			<string> ([\d\.]*?) \%</string>
 			<key>isHidden</key>
 			<false/>
 		</dict>
@@ -841,7 +841,7 @@ audio: mp2 at 192kbs</string>
 			<key>inputFileFlag</key>
 			<string>-i</string>
 			<key>regExProgress</key>
-			<string> ([\d.]*?) \% </string>
+			<string> ([\d\.]*?) \%</string>
 			<key>isHidden</key>
 			<false/>
 		</dict>
@@ -875,7 +875,7 @@ audio: mp2 at 192kbs</string>
 			<key>inputFileFlag</key>
 			<string>-i</string>
 			<key>regExProgress</key>
-			<string> ([\d.]*?) \% </string>
+			<string> ([\d\.]*?) \%</string>
 			<key>isHidden</key>
 			<false/>
 		</dict>
@@ -909,7 +909,7 @@ audio: mp2 at 192kbs</string>
 			<key>inputFileFlag</key>
 			<string>-i</string>
 			<key>regExProgress</key>
-			<string> ([\d.]*?) \% </string>
+			<string> ([\d\.]*?) \%</string>
 			<key>isHidden</key>
 			<true/>
 		</dict>
@@ -943,7 +943,7 @@ audio: mp2 at 192kbs</string>
 			<key>inputFileFlag</key>
 			<string>-i</string>
 			<key>regExProgress</key>
-			<string> ([\d.]*?) \% </string>
+			<string> ([\d\.]*?) \%</string>
 			<key>isHidden</key>
 			<true/>
 		</dict>

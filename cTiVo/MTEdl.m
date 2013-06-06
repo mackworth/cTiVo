@@ -114,8 +114,10 @@ __DDLOGHERE__
     }
 	if (chapterList && encodedFile) {
 		MP4SetChapters(encodedFile, chapterList, chapterOffset, MP4ChapterTypeQt);
+        free(chapterList);
 		return YES;
 	} else {
+        free(chapterList);
 		return NO;
 	}
     

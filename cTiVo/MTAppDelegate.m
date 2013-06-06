@@ -731,9 +731,9 @@ __DDLOGHERE__
 			[input validateEditing];
 			NSLog(@"Got Media Key %@",input.stringValue);
 			tiVo.mediaKey = input.stringValue;
-			[mediaKeyQueue removeObject:tiVo];
 			[tiVo updateShows:nil]; //Assume if needed and got a key we should reload
 		}
+        [mediaKeyQueue removeObject:tiVo];
 	}
 	gettingMediaKey = NO;
 	[[NSUserDefaults standardUserDefaults] setObject:[_tiVoGlobalManager currentMediaKeys] forKey:kMTMediaKeys];

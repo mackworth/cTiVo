@@ -25,7 +25,7 @@
 	
 	NSURLConnection *activeURLConnection;
 	BOOL volatile writingData, downloadingURL;
-    NSDate *previousCheck;
+    NSDate *previousCheck, *progressAt100Percent;
 	double previousProcessProgress;
     NSMutableData *urlBuffer;
     ssize_t urlReadPointer;
@@ -932,7 +932,7 @@ __DDLOGHERE__
 					NSRange r = [lastItem range];
 					if (r.location != NSNotFound) {
 						NSRange valueRange = [lastItem rangeAtIndex:1];
-						DDLogVerbose(@"Encoder progress %lf",[[data substringWithRange:valueRange] doubleValue]/100.0);
+						DDLogVerbose(@"Encoder progress found data %@ with value %lf",[data substringWithRange:valueRange],[[data substringWithRange:valueRange] doubleValue]/100.0);
 						returnValue =  [[data substringWithRange:valueRange] doubleValue]/100.0;
 					}
 
@@ -1053,16 +1053,21 @@ __DDLOGHERE__
     commercialTask.successfulExitCodes = @[@0, @1];
     commercialTask.requiresOutputPipe = NO;
     commercialTask.requiresInputPipe = NO;
+    commercialTask.shouldReschedule  = NO;  //If comskip fails continue just without commercial inputs
     [commercialTask setStandardError:commercialTask.logFileWriteHandle];  //progress data is in err output
     
     
-//    commercialTask.cleanupHandler = ^(){
-//        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-//            if ([[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
-//                [[NSFileManager defaultManager] removeItemAtPath:commercialFilePath error:nil];
-//            }
-//        }
-//    };
+    commercialTask.cleanupHandler = ^(){
+        if (_commercialTask.taskFailed) {
+            NSLog(@"Commercial Task failed - Skipping removal of commercials for %@",self.show.showTitle);
+            if ([[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
+                [[NSFileManager defaultManager] removeItemAtPath:commercialFilePath error:nil];
+            }
+            NSData *zeroData = [NSData data];
+            [zeroData writeToFile:commercialFilePath atomically:YES];
+        }
+    };
+
     if (self.taskFlowType != kMTTaskFlowNonSimuMarkcom && self.taskFlowType != kMTTaskFlowNonSimuMarkcomSubtitles) {  // For these cases the encoding tasks is the driver
         commercialTask.startupHandler = ^BOOL(){
             self.processProgress = 0.0;
@@ -1193,6 +1198,7 @@ __DDLOGHERE__
 	_isRescheduled = NO;
     _downloadingShowFromTiVoFile = NO;
     _downloadingShowFromMPGFile = NO;
+    progressAt100Percent = nil;  //Reset end of progress failure delay
     //Before starting make sure the encoder is OK.
 	if (![self encoderPath]) {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
@@ -1615,8 +1621,19 @@ __DDLOGHERE__
 {
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
 		//Cancel and restart or delete depending on number of time we've been through this
-        DDLogMajor (@"process stalled at %0.1f; rescheduling ", _processProgress);
-		[self rescheduleShowWithDecrementRetries:@(YES)];
+        DDLogMajor (@"process stalled at %0.1f; rescheduling show %@ ", _processProgress, self.show.showTitle);
+        BOOL reschedule = YES;
+        if (_processProgress == 1.0) {
+            reschedule = NO;
+            DDLogMajor(@"Checking extented wait for 100%% progress stall (Handbrake) for show %@",self.show.showTitle);
+            if (!progressAt100Percent) {  //This is the first time here so record as the start of 100 % period
+                DDLogMajor(@"Starting extented wait for 100%% progress stall (Handbrake) for show %@",self.show.showTitle);
+                progressAt100Percent = [NSDate date];
+            } else if ([[NSDate date] timeIntervalSinceDate:progressAt100Percent] > kMTProgressFailDelayAt100Percent){
+                reschedule = YES;
+            }
+        }
+		if (reschedule) [self rescheduleShowWithDecrementRetries:@(YES)];
 	} else if ([self isInProgress]){
         DDLogVerbose (@"process check OK; %0.2f", _processProgress);
 		previousProcessProgress = _processProgress;
@@ -1924,6 +1941,8 @@ __DDLOGHERE__
 	} else {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
 		self.show.fileSize = downloadedFileSize;  //More accurate file size
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:self];
 //		NSLog(@"File size after reset %lf %lf",self.show.fileSize,downloadedFileSize);
 		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.show.tiVo];
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:kMTTiVoAccessDelay];
