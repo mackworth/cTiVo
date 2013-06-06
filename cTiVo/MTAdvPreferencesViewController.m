@@ -146,6 +146,17 @@
 //	}
 
 }
+-(IBAction)TVDBStatistics:(id)sender {
+	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithString:[tiVoManager.theTVDBStatistics description]];
+	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
+	NSButton *thisButton = (NSButton *)sender;
+	[myTextView setAutomaticLinkDetectionEnabled:YES];
+	[myTextView setString:[tiVoManager.theTVDBStatistics description]];
+	[myTextView checkTextInDocument:nil];
+	//	[self.helpController.displayMessage insertText:helpText];
+	[popoverDetachController.displayMessage.textStorage setAttributedString:attrHelpText];
+	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+}
 
 -(IBAction) newMasterValue:(id) sender {
 	NSPopUpButton * cell =  (NSPopUpButton *) sender;
