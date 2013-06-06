@@ -337,7 +337,7 @@ __DDLOGHERE__
 		}
 
         if (artwork.length) self.tvdbArtworkLocation = artwork;
-		DDLogMajor(@"Remaining Operations: %ld",self.tiVo.queue.operationCount);
+		DDLogVerbose(@"Remaining Operations: %ld",self.tiVo.queue.operationCount);
 		if (self.tiVo.queue.operationCount ==1) {  //we're the last one to load on this tivo, so print out stats.
 			DDLogMajor(@"Statistics for TVDB since start or reset: %@",tiVoManager.theTVDBStatistics);
 		}

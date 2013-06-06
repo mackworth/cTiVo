@@ -1341,6 +1341,8 @@ __DDLOGHERE__
 }
 
 - (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
+	prefix = [prefix lowercaseString];
+	suffix = [suffix lowercaseString];
 	NSString * realDirectory = [directory stringByStandardizingPath];
 	DDLogVerbose(@"Checking for %@_%@ artwork in %@", prefix, suffix, realDirectory);
 	NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:realDirectory error:nil];
@@ -1371,7 +1373,7 @@ __DDLOGHERE__
 	NSString *thumbnailDir = [currentDir stringByAppendingPathComponent:@"thumbnails"];
 	NSArray * directories;
 	NSString * legalSeriesName = [self.show.seriesTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-	legalSeriesName = [[legalSeriesName stringByReplacingOccurrencesOfString:@":" withString:@"-"] lowercaseString];
+	legalSeriesName = [legalSeriesName stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
 
 	NSString * userThumbnailDir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
 	if (userThumbnailDir) {
@@ -1388,13 +1390,13 @@ __DDLOGHERE__
 		//first check for user-specified, episode-specific art
 		if (self.show.episodeNumber.length > 0) {
 			for (NSString * dir in directories) {
-				NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:[[self.show seasonEpisode] lowercaseString] InPath:dir ];
+				NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:self.show.seasonEpisode  InPath:dir ];
 				if (artwork) return artwork;
 			}
 			
 			//then for downloaded temp art
 			NSString * dir = tiVoManager.tmpFilesDirectory;
-			NSImage * artwork = [self artworkWithPrefix: _baseFileName andSuffix:[[self.show seasonEpisode] lowercaseString] InPath:dir ];
+			NSImage * artwork = [self artworkWithPrefix: _baseFileName  andSuffix:[self.show seasonEpisode] InPath:dir ];
 			if (artwork) return artwork;
 		}
 		//then for season-specific art

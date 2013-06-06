@@ -122,6 +122,7 @@ __DDLOGHERE__
 	
     CGEventFlags flags = (kCGEventFlagMaskAlternate | kCGEventFlagMaskControl);
     if ((modifiers & flags) == flags) {
+		[[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTDebugLevelDetail];
 		[[NSUserDefaults standardUserDefaults] setObject:@15 forKey:kMTDebugLevel];
 		[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
 	} else {
