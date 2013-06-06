@@ -30,8 +30,10 @@
 @property (nonatomic, strong) NSNumber *skipCommercials, *includeSuggestions, *markCommercials;
 @property (nonatomic, strong) MTFormat *encodeFormat;
 @property (nonatomic, strong) NSNumber *genTextMetaData,
+#ifndef deleteXML
 									   *genXMLMetaData,
 									   *includeAPMMetaData,
+#endif
 									   *exportSubtitles;
 
 @property (readonly) BOOL canSimulEncode;

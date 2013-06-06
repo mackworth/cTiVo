@@ -162,8 +162,10 @@ __DDLOGHERE__
 	newDownload.skipCommercials = self.shouldSkipCommercials && self.canSkipCommercials;
 	newDownload.markCommercials = self.shouldMarkCommercials && self.canMarkCommercials ;
 	newDownload.genTextMetaData = self.genTextMetaData;
+#ifndef deleteXML
 	newDownload.genXMLMetaData = self.genXMLMetaData;
 	newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && self.includeAPMMetaData.boolValue)];
+#endif
 	NSDictionary *thisRecording = @{
 		 @"showTitle": thisShow.showTitle ,
 		 @"episodeID": thisShow.episodeID,
@@ -418,8 +420,10 @@ __DDLOGHERE__
 		newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip.boolValue)];
 		newSub.markCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"MarkCommercials"] && newSub.encodeFormat.canMarkCommercials)];
 		newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
+#ifndef deleteXML
 		newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
 		newSub.includeAPMMetaData = [defaults objectForKey:kMTExportAtomicParsleyMetaData];
+#endif
 		newSub.exportSubtitles	  =[defaults objectForKey:kMTExportSubtitles];
 	
 		DDLogVerbose(@"Subscribing show %@ as: %@ ", tivoShow, newSub);
@@ -441,8 +445,10 @@ __DDLOGHERE__
 		newSub.skipCommercials = [NSNumber numberWithBool: download.skipCommercials];
 		newSub.markCommercials = [NSNumber numberWithBool: download.markCommercials];
 		newSub.genTextMetaData = [NSNumber numberWithBool: download.genTextMetaData];
+#ifndef deleteXML
 		newSub.genXMLMetaData = [NSNumber numberWithBool: download.genXMLMetaData];
 		newSub.includeAPMMetaData = [NSNumber numberWithBool: download.includeAPMMetaData];
+#endif
 		newSub.exportSubtitles= [NSNumber numberWithBool: download.exportSubtitles];
 		DDLogVerbose(@"Subscribing download %@ as: %@ ", tivoShow, newSub);
 		return newSub;
@@ -490,10 +496,12 @@ __DDLOGHERE__
 		if (tempSub.markCommercials ==nil) tempSub.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMarkCommercials];
 		tempSub.genTextMetaData = sub[kMTSubscribedGenTextMetaData];
 		if (tempSub.genTextMetaData ==nil) tempSub.genTextMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTextMetaData];
+#ifndef deleteXML
 		tempSub.genXMLMetaData = sub[kMTSubscribedGenXMLMetaData];
 		if (tempSub.genXMLMetaData ==nil) tempSub.genXMLMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTivoMetaData];
 		tempSub.includeAPMMetaData = sub[kMTSubscribedIncludeAPMMetaData];
 		if (tempSub.includeAPMMetaData ==nil) tempSub.includeAPMMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportAtomicParsleyMetaData];
+#endif
 		tempSub.exportSubtitles = sub[kMTSubscribedExportSubtitles];
 		if (tempSub.exportSubtitles ==nil) tempSub.exportSubtitles = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportSubtitles];
 		tempSub.preferredTiVo = sub[kMTSubscribedPreferredTiVo];
@@ -537,8 +545,10 @@ __DDLOGHERE__
 								  sub.skipCommercials, kMTSubscribedSkipCommercials,
 								  sub.markCommercials, kMTSubscribedMarkCommercials,
                                   sub.genTextMetaData , kMTSubscribedGenTextMetaData,
+#ifndef deleteXML
                                   sub.genXMLMetaData, kMTSubscribedGenXMLMetaData,
                                   sub.includeAPMMetaData, kMTSubscribedIncludeAPMMetaData,
+#endif
                                   sub.exportSubtitles, kMTSubscribedExportSubtitles,
 								  sub.preferredTiVo, kMTSubscribedPreferredTiVo,
 								  sub.HDOnly,kMTSubscribedHDOnly,

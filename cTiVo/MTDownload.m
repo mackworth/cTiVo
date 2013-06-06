@@ -62,8 +62,10 @@ __DDLOGHERE__
 		writingData = NO;
 		downloadingURL = NO;
 		_genTextMetaData = nil;
+#ifndef deleteXML
 		_genXMLMetaData = nil;
 		_includeAPMMetaData = nil;
+#endif
 		_exportSubtitles = nil;
         urlReadPointer = 0;
 		
@@ -208,8 +210,10 @@ __DDLOGHERE__
 	[encoder encodeObject: _bufferFilePath forKey: kMTQueueBufferFile] ;
 	[encoder encodeObject: _encodeFilePath forKey: kMTQueueFinalFile] ;
 	[encoder encodeObject: _genTextMetaData forKey: kMTQueueGenTextMetaData];
+#ifndef deleteXML
 	[encoder encodeObject: _genXMLMetaData forKey:	kMTQueueGenXMLMetaData];
 	[encoder encodeObject: _includeAPMMetaData forKey:	kMTQueueIncludeAPMMetaData];
+#endif
 	[encoder encodeObject: _exportSubtitles forKey:	kMTQueueExportSubtitles];
 }
 
@@ -235,8 +239,10 @@ __DDLOGHERE__
 	if (_bufferFilePath) [result setValue:_bufferFilePath forKey: kMTQueueBufferFile];
 	if (_encodeFilePath) [result setValue:_encodeFilePath forKey: kMTQueueFinalFile];
 	if (_genTextMetaData) [result setValue:_genTextMetaData forKey: kMTQueueGenTextMetaData];
+#ifndef deleteXML
 	if (_genXMLMetaData) [result setValue:_genXMLMetaData forKey: kMTQueueGenXMLMetaData];
 	if (_includeAPMMetaData) [result setValue:_includeAPMMetaData forKey: kMTQueueIncludeAPMMetaData];
+#endif
 	if (_exportSubtitles) [result setValue:_exportSubtitles forKey: kMTQueueExportSubtitles];
 	
 	DDLogVerbose(@"queueRecord for %@ is %@",self,result);
@@ -275,8 +281,10 @@ __DDLOGHERE__
 	_bufferFilePath = queueEntry[kMTQueueBufferFile];
 	self.show.protectedShow = @YES; //until we matchup with show or not.
 	_genTextMetaData = queueEntry[kMTQueueGenTextMetaData]; if (!_genTextMetaData) _genTextMetaData= @(NO);
+#ifndef deleteXML
 	_genXMLMetaData = queueEntry[kMTQueueGenXMLMetaData]; if (!_genXMLMetaData) _genXMLMetaData= @(NO);
 	_includeAPMMetaData = queueEntry[kMTQueueIncludeAPMMetaData]; if (!_includeAPMMetaData) _includeAPMMetaData= @(NO);
+#endif
 	_exportSubtitles = queueEntry[kMTQueueExportSubtitles]; if (!_exportSubtitles) _exportSubtitles= @(NO);
 	DDLogDetail(@"restored %@ with %@; inProgress",self, queueEntry);
 }
@@ -299,8 +307,10 @@ __DDLOGHERE__
 		_downloadFilePath = [decoder decodeObjectForKey:kMTQueueDownloadFile];
 		_encodeFilePath = [decoder decodeObjectForKey:kMTQueueFinalFile];
 		_genTextMetaData = [decoder decodeObjectForKey:kMTQueueGenTextMetaData]; if (!_genTextMetaData) _genTextMetaData= @(NO);
+#ifndef deleteXML
 		_genXMLMetaData = [decoder decodeObjectForKey:kMTQueueGenXMLMetaData]; if (!_genXMLMetaData) _genXMLMetaData= @(NO);
 		_includeAPMMetaData = [decoder decodeObjectForKey:kMTQueueIncludeAPMMetaData]; if (!_includeAPMMetaData) _includeAPMMetaData= @(NO);
+#endif
 		_exportSubtitles = [decoder decodeObjectForKey:kMTQueueExportSubtitles]; if (!_exportSubtitles) _exportSubtitles= @(NO);
 	}
 	DDLogDetail(@"initWithCoder for %@",self);
@@ -1094,7 +1104,9 @@ __DDLOGHERE__
                  [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
                  [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
                  [self writeMetaDataFiles];
-//                 if ( ! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley) ) {
+#ifndef deleteXML
+				 //                 if ( ! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley) ) {
+#endif
                      [self finishUpPostEncodeProcessing];
 //                 }
              }
@@ -1130,7 +1142,7 @@ __DDLOGHERE__
     return _commercialTask;
   
 }
-
+#ifndef deleteXML
 //-(MTTask *)apmTask
 //{
 //    if (! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley)) {
@@ -1166,6 +1178,7 @@ __DDLOGHERE__
 //    return _apmTask;
 //
 //}
+#endif
 
 -(int)taskFlowType
 {
@@ -1291,7 +1304,8 @@ __DDLOGHERE__
             break;
     }
 	
-//	if (self.captionTask) {
+#ifndef deleteXML
+	//	if (self.captionTask) {
 //		if (self.commercialTask) {
 //			[taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];
 //			[taskArray addObject:@[self.commercialTask]];
@@ -1316,7 +1330,7 @@ __DDLOGHERE__
 //	if (self.apmTask) {
 //		[taskArray addObject:@[self.apmTask]];
 //	}
-	
+#endif
 	self.activeTaskChain.taskArray = [NSArray arrayWithArray:taskArray];
     
     totalDataRead = 0;
@@ -1429,7 +1443,7 @@ __DDLOGHERE__
 -(void) writeMetaDataFiles {
 	
 	NSString * detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.show.tiVoName,self.show.showID];
-
+#ifndef deleteXML
 	if (self.genXMLMetaData.boolValue) {
 		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
 		DDLogMajor(@"Writing XML to    %@",tivoMetaPath);
@@ -1438,6 +1452,7 @@ __DDLOGHERE__
 				DDLogReport(@"Couldn't write XML to file %@", tivoMetaPath);
 		}
 	}
+#endif
 	if (self.genTextMetaData.boolValue && [[NSFileManager defaultManager] fileExistsAtPath:detailFilePath]) {
 		NSData * xml = [NSData dataWithContentsOfFile:detailFilePath];
 		NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:xml options:0 error:nil];

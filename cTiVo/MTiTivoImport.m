@@ -168,18 +168,20 @@
             // Whether to run comSkip program after conversion
             [sUD setBool:   0 != [sUD integerForKey:kITComSkip]     forKey:kMTRunComSkip ];
             
-            // Whether to export XML metadata
-            [sUD setBool:   [sUD boolForKey:kITtivoMetaData]        forKey:kMTExportTivoMetaData ];
             
             // Whether to export subtitles with ts2ami
             [sUD setBool:   0 != [sUD boolForKey:kITsubtitles]      forKey:kMTExportSubtitles ];
             
             // Whether to export text metadata for PyTivo
             [sUD setBool:   [sUD boolForKey:kITTxtMetaData]         forKey:kMTExportTextMetaData ];
-            
+
+#ifndef deleteXML
+			// Whether to export XML metadata
+            [sUD setBool:   [sUD boolForKey:kITtivoMetaData]        forKey:kMTExportTivoMetaData ];
+           
             // Whether to export metadata with Atomic Parsley
             [sUD setBool:   [sUD boolForKey:kITAPMetaData]          forKey:kMTExportAtomicParsleyMetaData ];
-            
+#endif            
             //---------------
             // Whether to run queue at a scheduled time;
             [sUD setBool:   [sUD boolForKey:kITuseTime]             forKey:kMTScheduledOperations ];

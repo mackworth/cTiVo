@@ -385,12 +385,14 @@ __DDLOGHERE__
 			[optionsMenu removeItem:mi];
 		}
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-//		if (canAPM) {
+#ifndef deleteXML
+		//		if (canAPM) {
 //			apmMenuItem = [[NSMenuItem alloc] init];
 //			apmMenuItem.title = @"Add Metadata to Video File";
 //			[apmMenuItem bind:@"value" toObject:defaults withKeyPath:kMTExportAtomicParsleyMetaData options:nil];
 //			[optionsMenu insertItem:apmMenuItem atIndex:0];
 //		}
+#endif
 		if (caniTune) {
 			iTunesMenuItem = [[NSMenuItem alloc] init];
 			iTunesMenuItem.title = @"Add to iTunes when complete";

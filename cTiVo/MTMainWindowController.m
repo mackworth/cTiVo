@@ -629,7 +629,7 @@ __DDLOGHERE__
         
     }
 }
-
+#ifndef deleteXML
 -(IBAction)changeXML:(id)sender
 {
     MTCheckBox *checkbox = sender;
@@ -648,23 +648,6 @@ __DDLOGHERE__
     }
 }
 
--(IBAction)changepyTiVo:(id)sender
-{
-    MTCheckBox *checkbox = sender;
-	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
-        //updating an individual show in download queue
-		MTDownload * download = (MTDownload *)checkbox.owner;
-		NSNumber *newVal = [NSNumber numberWithBool: ! download.genTextMetaData.boolValue ];
-		download.genTextMetaData = newVal;
-		
-    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
-		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
-		NSNumber *newVal = [NSNumber numberWithBool: ! sub.genTextMetaData.boolValue ];
-		sub.genTextMetaData = newVal;
-        [tiVoManager.subscribedShows saveSubscriptions];
-    }
-}
-
 -(IBAction)changeMetadata:(id)sender
 {
     MTCheckBox *checkbox = sender;
@@ -680,6 +663,26 @@ __DDLOGHERE__
 		sub.includeAPMMetaData = newVal;
         [tiVoManager.subscribedShows saveSubscriptions];
         
+    }
+}
+
+
+#endif
+
+-(IBAction)changepyTiVo:(id)sender
+{
+    MTCheckBox *checkbox = sender;
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
+        //updating an individual show in download queue
+		MTDownload * download = (MTDownload *)checkbox.owner;
+		NSNumber *newVal = [NSNumber numberWithBool: ! download.genTextMetaData.boolValue ];
+		download.genTextMetaData = newVal;
+		
+    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
+		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		NSNumber *newVal = [NSNumber numberWithBool: ! sub.genTextMetaData.boolValue ];
+		sub.genTextMetaData = newVal;
+        [tiVoManager.subscribedShows saveSubscriptions];
     }
 }
 

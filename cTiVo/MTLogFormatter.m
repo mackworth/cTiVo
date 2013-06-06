@@ -54,8 +54,7 @@
 	int milliseconds = (int)((epoch - floor(epoch)) * 1000);
 	
 	char ts[24];
-	int len;
-	len = snprintf(ts, 24, "%04ld-%02ld-%02ld %02ld:%02ld:%02ld:%03d", // yyyy-MM-dd HH:mm:ss:SSS
+	snprintf(ts, 24, "%04ld-%02ld-%02ld %02ld:%02ld:%02ld:%03d", // yyyy-MM-dd HH:mm:ss:SSS
 				   (long)components.year,
 				   (long)components.month,
 				   (long)components.day,

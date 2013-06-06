@@ -45,6 +45,8 @@
 //tivodecode bad MAK notification
 #define kMTNotificationBadMAK @"MTNotificationBadMAK" //object: which MTTiVo needs a key
 
+#define deleteXML 1   //placeholder to store deleted code in case we decide to restore XML export; need to add to downloadTable, subTable, menu and pref NIBx also
+
 //Download Status
 #define kMTStatusNew 0
 #define kMTStatusDownloading 1
@@ -85,7 +87,9 @@
 #define kMTSubscribedMarkCommercials @"markCommercials"
 #define kMTSubscribedIncludeSuggestions @"includeSuggestions"
 #define kMTSubscribedGenTextMetaData     @"GenTextMetadata"
+#ifndef deleteXML
 #define kMTSubscribedGenXMLMetaData	    @"GenXMLMetadata"
+#endif
 #define kMTSubscribedIncludeAPMMetaData  @"IncludeAPMMetaData"
 #define kMTSubscribedExportSubtitles  @"ExportSubtitles"
 #define kMTSubscribedPreferredTiVo  @"PreferredTiVo"
@@ -107,7 +111,9 @@
 #define kMTQueueBufferFile @"QueueBufferFile"
 #define kMTQueueFinalFile @"QueueFileName"
 #define kMTQueueGenTextMetaData     @"QueueGenTextMetadata"
+#ifndef deleteXML
 #define kMTQueueGenXMLMetaData	    @"QueueGenXMLMetadata"
+#endif
 #define kMTQueueIncludeAPMMetaData  @"QueueIncludeAPMMetaData"
 #define kMTQueueExportSubtitles  @"QueueExportSubtitles"
 #define kMTGetEpisodeArt @"GetEpisodeArt"
@@ -194,10 +200,13 @@
 
 #define kMTRunComSkip @"RunComSkip"                 // Whether to run comSkip program after conversion
 #define kMTMarkCommercials @"MarkCommercials"                 // Whether insert chapters for commercials when possible
-#define kMTExportTivoMetaData @"ExportTivoMetaData" // Whether to export XML metadata
 #define kMTExportSubtitles @"ExportSubtitles"       // Whether to export subtitles with ts2ami
 #define kMTExportTextMetaData @"ExportTextMetaData" // Whether to export text metadata for PyTivo
+
+#ifndef deleteXML
+#define kMTExportTivoMetaData @"ExportTivoMetaData" // Whether to export XML metadata
 #define kMTExportAtomicParsleyMetaData @"ExportAtomicParsleyMetaData" // Whether to export metadata with Atomic Parsley
+#endif
 
 #define kMTScheduledOperations @"ScheduledOperations"// Whether to run queue at a scheduled time;
 #define kMTScheduledStartTime  @"ScheduledStartTime" // NSDate when to start queue

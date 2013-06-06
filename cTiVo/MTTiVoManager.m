@@ -998,9 +998,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
 											[defaults boolForKey:@"RunComSkip"];
 		newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials &&
 											[defaults boolForKey:@"MarkCommercials"];
-		newDownload.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
 		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
+#ifndef deleteXML
+		newDownload.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
 		newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && [defaults boolForKey:kMTExportAtomicParsleyMetaData])];
+#endif
 		[downloads addObject: newDownload];
 	}
 	[self addToDownloadQueue:downloads beforeDownload:nextDownload ];

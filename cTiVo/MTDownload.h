@@ -41,8 +41,10 @@
 @property BOOL volatile isCanceled, isRescheduled, downloadingShowFromTiVoFile, downloadingShowFromMPGFile;
 
 @property (nonatomic, strong) NSNumber *genTextMetaData,
+#ifndef deleteXML
 *genXMLMetaData,
 *includeAPMMetaData,
+#endif
 *exportSubtitles;
 @property BOOL  addToiTunesWhenEncoded,
 //simultaneousEncode,

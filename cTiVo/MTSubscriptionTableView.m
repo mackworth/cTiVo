@@ -222,18 +222,22 @@ __DDLOGHERE__
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMark:)];
         thisCell.identifier = identifier;
         result = (id)thisCell;
+#ifndef deleteXML
 	} else if([identifier isEqualToString: @"XML"]) {
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeXML:)];
         thisCell.identifier = identifier;
         result = thisCell;
+#endif
     } else if([identifier isEqualToString: @"pyTiVo"]) {
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changepyTiVo:)];
         thisCell.identifier = identifier;
         result = thisCell;
+#ifndef deleteXML
     } else if([identifier isEqualToString: @"Metadata"]) {
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMetadata:)];
         thisCell.identifier = identifier;
         result = thisCell;
+#endif
     } else if([identifier isEqualToString: @"Subtitles"]) {
         MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSubtitle:)];
         thisCell.identifier = identifier;
@@ -335,11 +339,13 @@ static NSDateFormatter *dateFormatter;
         [checkBox setEnabled: [thisSubscription canMarkCommercials]] ;
         [checkBox setOn:[[ thisSubscription markCommercials]boolValue]];
         checkBox.owner = thisSubscription;
+#ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisSubscription.genXMLMetaData.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;		
+#endif
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisSubscription.genTextMetaData.boolValue];
@@ -350,11 +356,13 @@ static NSDateFormatter *dateFormatter;
         [checkBox setOn: thisSubscription.exportSubtitles.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;		
+#ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisSubscription.includeAPMMetaData.boolValue && thisSubscription.encodeFormat.canAtomicParsley];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = thisSubscription.encodeFormat.canAtomicParsley;
+#endif
 	} else if([tableColumn.identifier isEqualToString: @"Suggestions"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: thisSubscription.includeSuggestions.boolValue];
