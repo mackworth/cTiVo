@@ -638,34 +638,42 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 -(double) secondsUntilNextTimeOfDay:(NSDate *) date {
-	//find the next timeOfDay that the timeOfDay represented by date will occur (could be a category on NSDate)
-	const int secondsInADay = 3600 * 24;
-	double now = [[NSDate date] timeIntervalSince1970];
-	double currentSecondsOfToday = (int)now % secondsInADay;
-	double secondsAtStartOfDay = now - currentSecondsOfToday;
-	double startTimeOfDayinSeconds = (int)[date timeIntervalSince1970] % secondsInADay;
-	//now advance it to a time after now
-	while (startTimeOfDayinSeconds <= currentSecondsOfToday) startTimeOfDayinSeconds += (double) secondsInADay;
-	return secondsAtStartOfDay + startTimeOfDayinSeconds - now;
+	NSCalendar *myCalendar = [NSCalendar currentCalendar];
+	NSDateComponents *currentComponents = [myCalendar components:(NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit) fromDate:[NSDate date]];
+	NSDateComponents *targetComponents = [myCalendar components:(NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit) fromDate:date];
+	NSLog(@"Current Components are %@",currentComponents);
+	NSLog(@"Target Componenets are %@",targetComponents);
+	double currentSeconds = (double)currentComponents.hour * 3600.0 +(double) currentComponents.minute * 60.0 + (double) currentComponents.second;
+	double targetSeconds = (double)targetComponents.hour * 3600.0 + (double)targetComponents.minute * 60.0 + (double) targetComponents.second;
+	if (targetSeconds < currentSeconds) {
+		targetSeconds += 3600 * 24;
+	}
+	return targetSeconds - currentSeconds;
 }
 
 -(void)setQueueStartTime
 {
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(unPauseQueue) object:nil];
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]) return;
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]){
+		DDLogDetail(@"Will not be restarting queue");
+		return;
+	}
 	NSDate* startDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
 	double targetSeconds = [self secondsUntilNextTimeOfDay:startDate];
-	DDLogDetail(@"Will start queue in %f seconds, due to beginDate of %@",targetSeconds, startDate);
+	DDLogDetail(@"Will start queue in %f seconds (%f hours), due to beginDate of %@",targetSeconds, (targetSeconds/3600.0), startDate);
 	[self performSelector:@selector(unPauseQueue) withObject:nil afterDelay:targetSeconds];
 }
 
 -(void)setQueueEndTime
 {
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(pauseQueue:) object:@(NO)];
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]) return;
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]) {
+		DDLogDetail(@"Will not be pausing queue");
+		return;
+	}
 	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
 	double targetSeconds = [self secondsUntilNextTimeOfDay:endDate];
-	DDLogDetail(@"Will pause queue in %f seconds, due to endDate of %@",targetSeconds, endDate);
+	DDLogDetail(@"Will pause queue in %f seconds (%f hours), due to endDate of %@",targetSeconds, (targetSeconds/3600.0), endDate);
 	[self performSelector:@selector(pauseQueue:) withObject:@(NO) afterDelay:targetSeconds];
 }
 
