@@ -39,8 +39,7 @@
 									*episodeID,
 									*seriesId,
 									*movieYear,
-									*isEpisodic,
-                                    *tvRating,
+									 *tvRating,
                                     *sourceType,
 									*imageString,
                                     *idGuidSource;

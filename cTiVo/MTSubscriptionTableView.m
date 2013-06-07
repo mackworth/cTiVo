@@ -132,7 +132,6 @@ __DDLOGHERE__
 	MTSubscription * subscription = (MTSubscription *)checkbox.owner;
 	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSOnState];
 	subscription.includeSuggestions = newVal;
-	[tiVoManager.subscribedShows saveSubscriptions];
 }
 
 -(IBAction)selectTivoPopUp:(id)sender
@@ -142,7 +141,6 @@ __DDLOGHERE__
 		MTSubscription * subscription = (MTSubscription *) thisButton.owner;
 		
 		subscription.preferredTiVo = [thisButton selectedItem].representedObject;
-		[tiVoManager.subscribedShows saveSubscriptions];
 	}
 }
 
@@ -155,7 +153,6 @@ __DDLOGHERE__
 		subscription.SDOnly = @NO;
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:subscription];
-	[tiVoManager.subscribedShows saveSubscriptions];
 }
 
 -(void) changeSDOnly: (id) sender {
@@ -167,7 +164,6 @@ __DDLOGHERE__
 		subscription.HDOnly = @NO;
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:subscription];
-	[tiVoManager.subscribedShows saveSubscriptions];
 }
 
 

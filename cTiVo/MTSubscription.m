@@ -313,7 +313,6 @@ __DDLOGHERE__
 	}
 	if (newSubs.count > 0) {
 		[self checkSubscriptionsNew:newSubs];
-		[self saveSubscriptions];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
 		return newSubs;
 	} else {
@@ -333,7 +332,6 @@ __DDLOGHERE__
 	}
 	if (newSubs.count > 0) {
 		[self checkSubscriptionsNew:newSubs];
-		[self saveSubscriptions];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
 		return newSubs;
 	} else {
@@ -370,7 +368,6 @@ __DDLOGHERE__
 		//for manual titles, we allow regex matching without being the entire series
 		newSub.subscriptionRegex = tempRegex;				
 		[self checkSubscriptionsNew:@[newSub]];
-		[self saveSubscriptions];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
 		return newSub;
 	} else {
@@ -460,7 +457,6 @@ __DDLOGHERE__
 -(void) deleteSubscriptions:(NSArray *) subscriptions {
 	DDLogDetail(@"Removing Subscriptions: %@", subscriptions);
 	[self  removeObjectsInArray:subscriptions];
-	[self saveSubscriptions];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
 }
 

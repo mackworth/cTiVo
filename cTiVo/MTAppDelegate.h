@@ -25,7 +25,7 @@
 	NSMutableArray *mediaKeyQueue;
 	BOOL gettingMediaKey;
 	NSTimer * checkingDone;
-	
+	NSTimer * saveQueueTimer;
 }
 
 @property (weak) IBOutlet NSWindow *window;

@@ -223,7 +223,6 @@ __DDLOGHERE__
             MTSubscription * subscription = (MTSubscription *) thisButton.owner;
             
             subscription.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
-            [tiVoManager.subscribedShows saveSubscriptions];
        } else if ([thisButton.owner class] == [MTDownload class]) {
             MTDownload * download = (MTDownload *) thisButton.owner;
            if(download.isNew) {
@@ -559,8 +558,7 @@ __DDLOGHERE__
 		//			sub.simultaneousEncode = @(NO);
 		//		}
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
-        [tiVoManager.subscribedShows saveSubscriptions];
-        
+                
     }
 }
 
@@ -588,8 +586,7 @@ __DDLOGHERE__
 		//		if ([sub.skipCommercials boolValue]) { //Need to make sure simultaneous encode is off
 		//			sub.simultaneousEncode = @(NO);
 		//		}
-        [tiVoManager.subscribedShows saveSubscriptions];
-        
+                
     }
 }
 
@@ -610,8 +607,7 @@ __DDLOGHERE__
 //		if ([sub.simultaneousEncode boolValue]) { //Need to make sure simultaneous encode is off
 //			sub.skipCommercials = @(NO);
 //		}
-//        [tiVoManager.subscribedShows saveSubscriptions];
-//        
+//        //        
 //    }
 //}
 
@@ -625,8 +621,7 @@ __DDLOGHERE__
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
 		sub.addToiTunes = [NSNumber numberWithBool: ! sub.shouldAddToiTunes];
-        [tiVoManager.subscribedShows saveSubscriptions];
-        
+                
     }
 }
 #ifndef deleteXML
@@ -643,8 +638,7 @@ __DDLOGHERE__
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
 		NSNumber *newVal = [NSNumber numberWithBool: ! sub.genXMLMetaData.boolValue ];
 		sub.genXMLMetaData = newVal;
-        [tiVoManager.subscribedShows saveSubscriptions];
-        
+                
     }
 }
 
@@ -661,8 +655,7 @@ __DDLOGHERE__
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
 		NSNumber *newVal = [NSNumber numberWithBool: ! sub.includeAPMMetaData.boolValue ];
 		sub.includeAPMMetaData = newVal;
-        [tiVoManager.subscribedShows saveSubscriptions];
-        
+                
     }
 }
 
@@ -682,8 +675,7 @@ __DDLOGHERE__
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
 		NSNumber *newVal = [NSNumber numberWithBool: ! sub.genTextMetaData.boolValue ];
 		sub.genTextMetaData = newVal;
-        [tiVoManager.subscribedShows saveSubscriptions];
-    }
+	}
 }
 
 -(IBAction)changeSubtitle:(id)sender
@@ -699,8 +691,7 @@ __DDLOGHERE__
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
 		NSNumber *newVal = [NSNumber numberWithBool: ! sub.exportSubtitles.boolValue ];
 		sub.exportSubtitles = newVal;
-        [tiVoManager.subscribedShows saveSubscriptions];
-		
+        		
     }
 }
 

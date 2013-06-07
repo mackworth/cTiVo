@@ -1209,6 +1209,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];
 		
 	[self.subscribedShows saveSubscriptions];
+	[[NSUserDefaults standardUserDefaults] synchronize];
 
 }
 

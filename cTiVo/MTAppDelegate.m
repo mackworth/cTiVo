@@ -250,7 +250,8 @@ __DDLOGHERE__
 		}
 		
 	}
-    
+	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: ([[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0) + 1.0 target:tiVoManager selector:@selector(writeDownloadQueueToUserDefaults) userInfo:nil repeats:YES];
+
 }
 
 -(void)validateTmpDirectory
@@ -825,10 +826,10 @@ __DDLOGHERE__
 -(void) cleanup {
 	
 	DDLogDetail(@"exiting");
+	[saveQueueTimer invalidate];
 	[tiVoManager cancelAllDownloads];
 	[tiVoManager writeDownloadQueueToUserDefaults];
     [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.tvdbCache forKey:kMTTheTVDBCache];
-    [[NSUserDefaults standardUserDefaults] synchronize];
 	 mediaKeyQueue = nil;
 }
 

@@ -561,10 +561,9 @@ __DDLOGHERE__
 -(BOOL) isMovie {
 	BOOL value =  (self.movieYear.length > 0) ||
 				  ([self.episodeID hasPrefix:@"MV"]) ||
-					!(self.isEpisodic.boolValue ||
-					  ((self.episodeTitle.length > 0) ||
+					!((self.episodeTitle.length > 0) ||
 					   (self.episode > 0) ||
-					   (self.showLength < 70*60))) ;
+					   (self.showLength < 70*60)) ;
 	return value;
 }
 
