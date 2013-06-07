@@ -12,6 +12,7 @@
 </string>
 		<string>End Download</string>
 		<string>Can&apos;t Download</string>
+		<string>Commercial Detection Failed</string>
 	</array>
 	<key>AllNotifications</key>
 	<array>
@@ -19,6 +20,7 @@
 </string>
 		<string>End Download</string>
 		<string>Can&apos;t Download</string>
+		<string>Commercial Detection Failed</string>
 	</array>
 </dict>
 </plist>

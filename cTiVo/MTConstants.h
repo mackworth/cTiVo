@@ -221,6 +221,7 @@
 #define kMTGrowlBeginDownload @"Begin Download"
 #define kMTGrowlEndDownload   @"End Download"
 #define kMTGrowlCantDownload  @"Can't Download"
+#define kMTGrowlCommercialDetFailed @"Commercial Detection Failed"
 
 //NOT IMPLEMENTED
 #define kMTiTunesIcon @"iTunesIcon"                 // Whether to use video frame (versus cTivo logo) for iTUnes icon

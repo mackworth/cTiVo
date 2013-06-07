@@ -1059,7 +1059,9 @@ __DDLOGHERE__
     
     commercialTask.cleanupHandler = ^(){
         if (_commercialTask.taskFailed) {
-            NSLog(@"Commercial Task failed - Skipping removal of commercials for %@",self.show.showTitle);
+            DDLogMajor(@"Commercial Task failed - Skipping removal of commercials for %@",self.show.showTitle);
+			[tiVoManager  notifyWithTitle:@"Commercials Failed.  Skipping." subTitle:self.show.showTitle forNotification:kMTGrowlCommercialDetFailed];
+
             if ([[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
                 [[NSFileManager defaultManager] removeItemAtPath:commercialFilePath error:nil];
             }
