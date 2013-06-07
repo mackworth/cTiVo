@@ -1115,6 +1115,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 //Note that any new notification types need to be added to constants.h, but especially Growl Registration Ticket.growRegDict
 - (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification {
+	[self notifyWithTitle:title subTitle:subTitle isSticky:NO forNotification:notification];
+}
+
+- (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notification {
 	DDLogMajor(@"Growl: %@/%@: %@", title, subTitle, notification);
 	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
 	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
@@ -1123,7 +1127,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			notificationName: notification
 					iconData: nil  //use our app logo
 					priority: 0
-					isSticky: NO
+					isSticky: sticky
 				clickContext: nil
 		 ];
 	

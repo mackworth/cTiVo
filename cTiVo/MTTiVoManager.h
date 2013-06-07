@@ -100,6 +100,7 @@
 
 
 //---------------Other methods ----------
+- (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky: (BOOL) sticky forNotification: (NSString *) notification; //Gowl notification with Sticky
 - (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification;   //Growl notification
 -(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path;
 
