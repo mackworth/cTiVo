@@ -579,6 +579,10 @@ __DDLOGHERE__
             _downloadingShowFromMPGFile = YES;
         }
     }
+	if (tivoFileExists || mpgFileExists) {  //we're using an exisiting file so start the next download
+		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.show.tiVo];
+		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:kMTTiVoAccessDelay];
+	}
 	if (([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:trialLockFilePath]) && !tivoFileExists  && !mpgFileExists) { //If .tivo file exits assume we will use this and not download.
 		NSString * nextBase;
 		NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
@@ -905,7 +909,10 @@ __DDLOGHERE__
                         return NO;
                     }
                 }
-
+				
+				if (bufferFileReadHandle && [bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
+					[bufferFileReadHandle closeFile];
+				}
                 bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_decryptBufferFilePath];
                 taskChainInputHandle = [encodePipe fileHandleForWriting];
                 _processProgress = 0.0;

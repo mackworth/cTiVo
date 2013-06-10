@@ -641,8 +641,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	NSCalendar *myCalendar = [NSCalendar currentCalendar];
 	NSDateComponents *currentComponents = [myCalendar components:(NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit) fromDate:[NSDate date]];
 	NSDateComponents *targetComponents = [myCalendar components:(NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit) fromDate:date];
-	NSLog(@"Current Components are %@",currentComponents);
-	NSLog(@"Target Componenets are %@",targetComponents);
 	double currentSeconds = (double)currentComponents.hour * 3600.0 +(double) currentComponents.minute * 60.0 + (double) currentComponents.second;
 	double targetSeconds = (double)targetComponents.hour * 3600.0 + (double)targetComponents.minute * 60.0 + (double) targetComponents.second;
 	if (targetSeconds < currentSeconds) {
