@@ -512,7 +512,7 @@ __DDLOGHERE__
         }
     }
 	[tiVoManager deleteFromDownloadQueue:itemsToRemove];
-	[self playTrashSound];
+	if (itemsToRemove.count)[self playTrashSound];
 
  	[downloadQueueTable deselectAll:nil];
 }

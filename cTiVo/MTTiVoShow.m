@@ -68,7 +68,12 @@ __DDLOGHERE__
         _tvdbArtworkLocation = nil;
 		
 		self.protectedShow = @(NO); //This is the default
-		parseTermMapping = @{@"description" : @"showDescription", @"time": @"showTime"};
+		parseTermMapping = @{
+					   @"description" : @"",  //mark to not load these values
+					   @"time": @"showTime",  //maybe this one also
+					   @"seriesTitle" : @"",
+					   @"episodeTitle" : @""
+		};
 
     }
     return self;
@@ -522,7 +527,7 @@ __DDLOGHERE__
 	}
 	if ([elementName compare:@"element"] == NSOrderedSame) {
 		[elementArray addObject:elementString];
-	} else {
+	} else if (elementName.length != 0) {
 		id item;
 		if (elementArray.count) {
 			item = [NSArray arrayWithArray:elementArray];
