@@ -42,9 +42,6 @@
 #define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"  //object: which MTTivo is updating
 #define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated" //object: which MTTivo is updated
 
-//tivodecode bad MAK notification
-#define kMTNotificationBadMAK @"MTNotificationBadMAK" //object: which MTTiVo needs a key
-
 #define deleteXML 1   //placeholder to store deleted code in case we decide to restore XML export; need to add to downloadTable, subTable, menu and pref NIBx also
 
 //Download Status
@@ -222,6 +219,7 @@
 #define kMTGrowlEndDownload   @"End Download"
 #define kMTGrowlCantDownload  @"Can't Download"
 #define kMTGrowlCommercialDetFailed @"Commercial Detection Failed"
+#define kMTGrowlTivodecodeFailed @"Tivodecode Failed"
 
 //NOT IMPLEMENTED
 #define kMTiTunesIcon @"iTunesIcon"                 // Whether to use video frame (versus cTivo logo) for iTUnes icon

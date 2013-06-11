@@ -791,10 +791,12 @@ __DDLOGHERE__
         if (log && log.length > 25 ) {
             NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
             if (badMAKRange.location != NSNotFound) {
-                self.show.tiVo.mediaKeyIsGood = NO;
-                NSNotification *badMAKNotification = [NSNotification notificationWithName:kMTNotificationBadMAK object:self.show.tiVo];
-                [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:badMAKNotification waitUntilDone:NO];
+                DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
+
+            } else {
+                DDLogMajor(@"tivodecode failed with unknown error message");
             }
+            [tiVoManager  notifyWithTitle:@"Decoding Failed" subTitle:[NSString stringWithFormat:@"Decoding of tivo file failed for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
         }
     };
 	
@@ -803,10 +805,11 @@ __DDLOGHERE__
         if (log && log.length > 25 ) {
             NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
             if (badMAKRange.location != NSNotFound) {
-                self.show.tiVo.mediaKeyIsGood = NO;
-                NSNotification *badMAKNotification = [NSNotification notificationWithName:kMTNotificationBadMAK object:self.show.tiVo];
-                [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:badMAKNotification waitUntilDone:NO];
+                DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
+            } else {
+                DDLogMajor(@"tivodecode failed with unknown error message");
             }
+            [tiVoManager  notifyWithTitle:@"Decoding Failed" subTitle:[NSString stringWithFormat:@"Decoding of tivo file failed for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
         }
 	};
     
