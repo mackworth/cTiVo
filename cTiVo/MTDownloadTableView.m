@@ -191,15 +191,6 @@ __DDLOGHERE__
     return self.sortedDownloads.count;
 }
 
-- (void)tableView:(NSTableView *)tableView didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row
-{
-    MTDownload *download = [self.sortedDownloads objectAtIndex:row];
-    if ([download.show.protectedShow boolValue]) {
-        rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleNone;
-    } else {
-        rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleRegular;
-    }
-}
 
 -(BOOL)showingProgramsColumn
 {

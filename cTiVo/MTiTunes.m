@@ -111,6 +111,7 @@ __DDLOGHERE__
 	NSURL * showFileURL = [NSURL fileURLWithPath:download.encodeFilePath];
 
 	iTunesFileTrack * newTrack = (iTunesFileTrack *)[self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
+	NSError * error = newTrack.lastError;
 	if ([newTrack exists]) {
 		DDLogReport(@"Added iTunes track:  %@", show.showTitle);
 		NSString * fileExtension = [[download.encodeFilePath pathExtension] uppercaseString];
@@ -127,7 +128,11 @@ __DDLOGHERE__
 		if (show.isMovie) {
 			newTrack.name = show.showTitle;
 		} else {
-			newTrack.album = [NSString stringWithFormat: @"%@, Season %d",show.seriesTitle, show.season];
+			if (show.season > 0) {
+				newTrack.album = [NSString stringWithFormat: @"%@, Season %d",show.seriesTitle, show.season];
+			} else {
+				newTrack.album =  show.seriesTitle;
+			}
 			newTrack.albumArtist = show.seriesTitle;
 			if (show.episodeTitle.length ==0) {
                 NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
@@ -171,7 +176,7 @@ __DDLOGHERE__
 			return newLocation;
 		}
 	} else {
-		DDLogReport(@"Couldn't add iTunes track: %@ (%@)from %@", show.showTitle, download.encodeFormat.name, showFileURL );
+		DDLogReport(@"Couldn't add iTunes track: %@ (%@)from %@ because %@", show.showTitle, download.encodeFormat.name, showFileURL, [error localizedDescription] );
 		DDLogVerbose(@"track: %@, itunes: %@; playList: %@", newTrack, self.iTunes, self.tivoPlayList);
 		return nil;
 	}

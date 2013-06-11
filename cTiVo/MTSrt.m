@@ -352,8 +352,8 @@ static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL it
             MTSrt *newSrt = [MTSrt srtFromString: rawSrt];
 			if (newSrt && lastSrt) {
 				if (newSrt.startTime <= lastSrt.endTime) {
-					DDLogReport(@"SRT file not in correct order");
-					newSrt = nil;
+					DDLogReport(@"SRT file not in correct order: %f", newSrt.startTime);
+					newSrt.startTime = lastSrt.endTime;
 				}
 			}
             if (newSrt) {

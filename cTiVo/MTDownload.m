@@ -262,7 +262,7 @@ __DDLOGHERE__
 -(void) restoreDownloadData:queueEntry {
 	self.show = [[MTTiVoShow alloc] init];
 	self.show.showID   = [(NSNumber *)queueEntry[kMTQueueID] intValue];
-	self.show.showTitle= queueEntry[kMTQueueTitle];
+	[self.show setShowSeriesAndEpisodeFrom: queueEntry[kMTQueueTitle]];
 	self.show.tempTiVoName = queueEntry[kMTQueueTivo] ;
 	self.encodeFormat = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
 	
@@ -1373,7 +1373,7 @@ __DDLOGHERE__
 	prefix = [prefix lowercaseString];
 	suffix = [suffix lowercaseString];
 	NSString * realDirectory = [directory stringByStandardizingPath];
-	DDLogVerbose(@"Checking for %@_%@ artwork in %@", prefix, suffix, realDirectory);
+	DDLogVerbose(@"Checking for %@_%@ artwork in %@", prefix, suffix ? suffix:@"", realDirectory);
 	NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:realDirectory error:nil];
 	for (NSString *filename in dirContents) {
 		NSString *lowerCaseFilename = [filename lowercaseString];
@@ -1538,7 +1538,7 @@ __DDLOGHERE__
 		MTiTunes *iTunes = [[MTiTunes alloc] init];
 		NSString * iTunesPath = [iTunes importIntoiTunes:self withArt:artwork] ;
 		
-		if (iTunesPath && iTunesPath != self.encodeFilePath) {
+		if (iTunesPath && ![iTunesPath isEqualToString: self.encodeFilePath]) {
 			//apparently iTunes created new file
 			
 			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {

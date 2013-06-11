@@ -39,7 +39,7 @@
 }
 
 @property (nonatomic, strong) MTNetService *tiVo;
-@property (nonatomic, strong) NSMutableArray *shows;
+@property (strong) NSArray *shows;
 @property (nonatomic, strong) NSDate *networkAvailability;
 @property (nonatomic, strong) NSString *mediaKey;
 @property (nonatomic, weak) NSOperationQueue *queue;

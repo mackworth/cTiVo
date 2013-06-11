@@ -46,7 +46,7 @@ __DDLOGHERE__
 {
 	self = [super init];
 	if (self) {
-		self.shows = [NSMutableArray array];
+		self.shows = [NSArray array];
 		urlData = [NSMutableData new];
 		newShows = [NSMutableArray new];
 		_tiVo = nil;
@@ -498,13 +498,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	if (itemStart+itemCount < totalItemsOnTivo) {
 		DDLogDetail(@"TiVo %@ finished batch", self);
 		if (newShows.count > _shows.count) {
-			self.shows = [NSMutableArray arrayWithArray:newShows];
+			self.shows = [NSArray arrayWithArray:newShows];
 		}
 		[self updateShowsStartingAt:itemStart + itemCount withCount:kMTNumberShowToGet];
 	} else {
 		DDLogMajor(@"TiVo %@ completed parsing", self);
 		isConnecting = NO;
-		self.shows = [NSMutableArray arrayWithArray:newShows];
+		self.shows = [NSArray arrayWithArray:newShows];
 		if (firstUpdate) {
 			[tiVoManager checkDownloadQueueForDeletedEntries:self];
 			firstUpdate = NO;

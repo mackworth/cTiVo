@@ -363,6 +363,7 @@ __DDLOGHERE__
 	//download only if we don't have it already
 	if (![[NSFileManager defaultManager] fileExistsAtPath:destination]) {
 		NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/banners/%@",_tvdbArtworkLocation] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+		DDLogDetail(@"downloading artwork at %@",urlString);
 		NSURLRequest *theRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]
 												cachePolicy:NSURLRequestUseProtocolCachePolicy
 											timeoutInterval:60.0];
@@ -415,6 +416,28 @@ __DDLOGHERE__
 		   [self.tiVoName isEqual: show.tiVoName];
 }
 
+-(void) setShowSeriesAndEpisodeFrom:(NSString *) newTitle {
+	if (newTitle) {
+		self.showTitle = newTitle;
+
+		NSRange pos = [newTitle rangeOfString: @": "];
+		//Normally this is built from episode/series; but if we got showtitle from
+		//"old" queue, we'd like to temporarily display eps/series
+		if (pos.location == NSNotFound) {
+			if (_seriesTitle.length == 0) {
+				self.seriesTitle = newTitle;
+			}
+		} else {
+			if (_seriesTitle.length == 0) {
+				self.seriesTitle = [newTitle substringToIndex:pos.location];
+			}
+			if (_episodeTitle.length == 0) {
+				self.episodeTitle = [newTitle substringFromIndex:pos.location+pos.length];
+			}
+		}
+	}
+}
+
 
 - (id)initWithCoder:(NSCoder *)decoder {
 	//keep parallel with updateFromDecodedShow
@@ -422,7 +445,7 @@ __DDLOGHERE__
 		//NSString *title = [decoder decodeObjectForKey:kTitleKey];
 		//float rating = [decoder decodeFloatForKey:kRatingKey];
 		self.showID   = [[decoder decodeObjectForKey: kMTQueueID] intValue];
-		self.showTitle= [decoder decodeObjectForKey: kMTQueueTitle] ;
+		[self setShowSeriesAndEpisodeFrom:[decoder decodeObjectForKey: kMTQueueTitle] ] ;
 		NSString * tivoName = [decoder decodeObjectForKey: kMTQueueTivo] ;
 		for (MTTiVo * tiVo in [tiVoManager tiVoList]) {
 			if ([tiVo.tiVo.name compare: tivoName] == NSOrderedSame) {
@@ -656,10 +679,11 @@ __DDLOGHERE__
 	}
 	
 	if (self.showDescription.length > 0) {
-		if (self.showDescription.length < 230) {
+		if (self.showDescription.length < 255) {
 			MP4TagsSetDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
 			
 		} else {
+			MP4TagsSetDescription(tags,[[self.showDescription  substringToIndex:255] cStringUsingEncoding:NSUTF8StringEncoding]);
 			MP4TagsSetLongDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
 		}
 	}
@@ -679,6 +703,10 @@ __DDLOGHERE__
 	if (self.season > 0 ) {
 		uint32_t showSeason =  self.season;
 		MP4TagsSetTVSeason(tags, &showSeason);
+		MP4TagsSetAlbum(tags,[[NSString stringWithFormat: @"%@, Season %d",self.seriesTitle, self.season] cStringUsingEncoding:NSUTF8StringEncoding]) ;
+	} else {
+		MP4TagsSetAlbum(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]) ;
+
 	}
 	if (self.stationCallsign) {
 		MP4TagsSetTVNetwork(tags, [self.stationCallsign cStringUsingEncoding:NSUTF8StringEncoding]);
@@ -907,42 +935,14 @@ __DDLOGHERE__
 }
 
 
--(BOOL)reallySetShowTitle: (NSString *) showTitle {
-	if (_showTitle != showTitle) {
-		_showTitle = showTitle;
-		return YES;
-	}
-	return NO;
-}
-
--(void)setShowTitle:(NSString *)showTitle {
-	if ([self reallySetShowTitle:showTitle] && showTitle) {
-		NSRange pos = [showTitle rangeOfString: @": "];
-		//Normally this is built from episode/series; but if we got showtitle from
-		//"old" queue, we'd like to temporarily display eps/series
-		if (pos.location == NSNotFound) {
-			if (_seriesTitle.length == 0) {
-				_seriesTitle = showTitle;
-			}
-		} else {
-			if (_seriesTitle.length == 0) {
-				_seriesTitle = [showTitle substringToIndex:pos.location];
-			}
-			if (_episodeTitle.length == 0) {
-				_episodeTitle = [showTitle substringFromIndex:pos.location+pos.length];
-			}
-		}
-	}
-}
-
 -(void)setSeriesTitle:(NSString *)seriesTitle
 {
 	if (_seriesTitle != seriesTitle) {
 		_seriesTitle = seriesTitle;
 		if (_episodeTitle.length > 0 ) {
-			[self reallySetShowTitle:[NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle]];
+			self.showTitle =[NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
 		} else {
-			[self reallySetShowTitle: _seriesTitle];
+			self.showTitle =_seriesTitle;
 		}
 	}
 }
@@ -952,9 +952,9 @@ __DDLOGHERE__
 	if (_episodeTitle != episodeTitle) {
 		_episodeTitle = episodeTitle;
 		if (_episodeTitle.length > 0 ) {
-			[self reallySetShowTitle:[NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle]];
+			self.showTitle =[NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
 		} else {
-			[self reallySetShowTitle: _seriesTitle];
+			self.showTitle =_seriesTitle;
 		}
 	}
 }

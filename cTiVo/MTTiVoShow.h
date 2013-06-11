@@ -68,7 +68,7 @@
 
 //--------------------------------------------------------------
 #pragma mark - Calculated properties for display 
-@property (nonatomic, strong)	NSString *showTitle;  //calculated from series: episode
+@property (strong)	NSString *showTitle;  //calculated from series: episode
 @property (nonatomic, readonly) NSString *yearString,
 										*originalAirDateNoTime,
 										 *showDateString,
@@ -101,6 +101,7 @@
 -(void)getShowDetail;
 
 //-(NSArray *) apmArguments;
+-(void) setShowSeriesAndEpisodeFrom:(NSString *) newTitle ;
 
 -(void)playVideo:(NSString *)path;
 -(void)revealInFinder:(NSArray *)paths;

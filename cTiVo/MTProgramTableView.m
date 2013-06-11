@@ -223,11 +223,11 @@ __DDLOGHERE__
 		if (self.selectedTiVo && [tiVoManager foundTiVoNamed:self.selectedTiVo] && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
 			tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",self.selectedTiVo];
 		}
-							 
-		self.sortedShows = [[[[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate]
-				   filteredArrayUsingPredicate:findPredicate]
-				   filteredArrayUsingPredicate:protectedPredicate]
-				   filteredArrayUsingPredicate:suggestedPredicate]
+		NSArray * whichShows = [[[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate]
+					 filteredArrayUsingPredicate:findPredicate]
+					filteredArrayUsingPredicate:protectedPredicate]
+				   filteredArrayUsingPredicate:suggestedPredicate];
+		self.sortedShows = [whichShows
 				sortedArrayUsingDescriptors:self.sortDescriptors];
 	}
 	return _sortedShows;
