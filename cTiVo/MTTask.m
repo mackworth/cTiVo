@@ -11,6 +11,13 @@
 #import "MTTaskChain.h"
 #import "MTTiVoManager.h"
 
+@interface MTTask ()
+{
+    BOOL launched;
+}
+
+@end
+
 @implementation MTTask
 
 __DDLOGHERE__
@@ -47,6 +54,7 @@ __DDLOGHERE__
         _requiresOutputPipe = YES;
         _shouldReschedule = YES;
 		_successfulExitCodes = @[@0];
+        launched = NO;
     }
     return self;
 }
@@ -139,7 +147,7 @@ __DDLOGHERE__
 -(void)completeProcess
 {
     //        DDLogMajor(@"Task %@ Stopped for show %@",_taskName,_download.show.showTitle);
-    DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus, (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit");
+    DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus,[self reasonForTermination]);
     //		_download.processProgress = 1.0;
     //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
     if (self.taskFailed) {
@@ -177,9 +185,22 @@ __DDLOGHERE__
 	
 }
 
+-(NSString *)reasonForTermination
+{
+    if (launched) {
+        return (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit";
+    } else {
+        return @"not launched";
+    }
+}
+
 -(BOOL)taskFailed
 {
-    return _task.terminationReason == NSTaskTerminationReasonUncaughtSignal || ![self succcessfulExit] ;
+    if (!launched) {
+        return NO;
+    } else {
+        return _task.terminationReason == NSTaskTerminationReasonUncaughtSignal || ![self succcessfulExit] ;
+    }
 }
 
 -(BOOL)succcessfulExit
@@ -310,6 +331,7 @@ __DDLOGHERE__
     }
     if (shouldLaunch) {
         [_task launch];
+        launched = YES;
         _pid = [_task processIdentifier];
         [self trackProcess];
     } else {
