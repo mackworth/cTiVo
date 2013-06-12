@@ -563,9 +563,13 @@ __DDLOGHERE__
         NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
 		ssize_t len = getxattr([_tivoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
         if (len >=0) {
-            DDLogReport(@"Found Complete TiVo File @ %@",_tivoFilePath);
-            tivoFileExists = YES;
-            _downloadingShowFromTiVoFile = YES;
+            NSString *tiVoID = [[NSString alloc] initWithData:[NSData dataWithBytes:[buffer bytes] length:len] encoding:NSUTF8StringEncoding];
+            if ([tiVoID compare:_show.idString] == NSOrderedSame) {
+                DDLogReport(@"Found Complete TiVo File @ %@",_tivoFilePath);
+                tivoFileExists = YES;
+                _downloadingShowFromTiVoFile = YES;
+
+            }
         }
     }
     BOOL mpgFileExists = NO;
@@ -573,10 +577,13 @@ __DDLOGHERE__
         NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
 		ssize_t len = getxattr([_mpgFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
         if (len >=0) {
-            DDLogReport(@"Found Complete MPG File @ %@",_mpgFilePath);
-            mpgFileExists = YES;
-            _downloadingShowFromTiVoFile = NO;
-            _downloadingShowFromMPGFile = YES;
+            NSString *tiVoID = [[NSString alloc] initWithData:[NSData dataWithBytes:[buffer bytes] length:len] encoding:NSUTF8StringEncoding];
+            if ([tiVoID compare:_show.idString] == NSOrderedSame) {
+                DDLogReport(@"Found Complete MPG File @ %@",_mpgFilePath);
+                mpgFileExists = YES;
+                _downloadingShowFromTiVoFile = NO;
+                _downloadingShowFromMPGFile = YES;
+            }
         }
     }
 	if (tivoFileExists || mpgFileExists) {  //we're using an exisiting file so start the next download
@@ -783,7 +790,8 @@ __DDLOGHERE__
             [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
             [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
             if (_decryptBufferFilePath) {
-                setxattr([_decryptBufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+                NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
+                setxattr([_decryptBufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with show ID
 
             }
         }
@@ -905,8 +913,11 @@ __DDLOGHERE__
                     NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
                     ssize_t len = getxattr([self.encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
                     if (len >=0) {
-                        DDLogReport(@"Found Complete Encoded File @ %@.  Skipping encoding",self.encodeFilePath);
-                        return NO;
+                        NSString *tiVoID = [[NSString alloc] initWithData:[NSData dataWithBytes:[buffer bytes] length:len] encoding:NSUTF8StringEncoding];
+                        if ([tiVoID compare:_show.idString] == NSOrderedSame) {
+                           DDLogReport(@"Found Complete Encoded File @ %@.  Skipping encoding",self.encodeFilePath);
+                            return NO;
+                        }
                     }
                 }
 				
@@ -1016,7 +1027,8 @@ __DDLOGHERE__
     
     captionTask.completionHandler = ^BOOL(){
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
-        setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+        NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
+        setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete
 		return YES;
     };
     
@@ -1125,8 +1137,9 @@ __DDLOGHERE__
                      [self finishUpPostEncodeProcessing];
 //                 }
              }
-            setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
-            setxattr([commercialFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+            NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
+            setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with show ID
+            setxattr([commercialFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with Show ID
             return YES;
         };
     } else {
@@ -1846,7 +1859,7 @@ __DDLOGHERE__
         if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
             [bufferFileReadHandle closeFile];
         }
-		bufferFileReadHandle = nil;
+//		bufferFileReadHandle = nil;
 //        if (self.shouldSimulEncode && !isCanceled) {
 //            [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
 //        }
@@ -1959,9 +1972,11 @@ __DDLOGHERE__
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:kMTTiVoAccessDelay];
         if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
             if ([[_bufferFilePath substringFromIndex:_bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame  && !_isCanceled) { //We finished a complete download so mark it so
-                setxattr([_bufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+                NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
+                setxattr([_bufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with show ID
             }
         }
+        bufferFileReadHandle = nil;
 	}
 }
 
