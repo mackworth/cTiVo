@@ -31,9 +31,9 @@
 
 @property (weak, nonatomic) MTDownload *download;
 
-@property (nonatomic, copy) void (^completionHandler)(void), (^terminationHandler)(void);
+@property (nonatomic, copy) void (^terminationHandler)(void);
 
-@property (nonatomic, copy) BOOL (^startupHandler)(void);
+@property (nonatomic, copy) BOOL (^startupHandler)(void), (^completionHandler)(void);
 
 @property (nonatomic, copy) double (^progressCalc)(NSString *data);
 
@@ -47,7 +47,7 @@
 @property (nonatomic, strong) NSArray *successfulExitCodes;
 
 +(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download;
-+(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download completionHandler:(void(^)(void))completionHandler;
++(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download completionHandler:(BOOL(^)(void))completionHandler;
 
 -(void) trackProcess;
 

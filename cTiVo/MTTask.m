@@ -15,7 +15,7 @@
 
 __DDLOGHERE__
 
-+(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download completionHandler:(void(^)(void))completionHandler
++(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download completionHandler:(BOOL(^)(void))completionHandler
 {
 	MTTask *mTTask = [MTTask taskWithName:name download:download];
 	mTTask.completionHandler = completionHandler;
@@ -143,21 +143,13 @@ __DDLOGHERE__
     //		_download.processProgress = 1.0;
     //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
     if (self.taskFailed) {
-        NSLog(@"Task %@ failed",self.taskName);
-		[self saveLogFile];
-        [self cleanUp];
-        if (!_download.isCanceled && _shouldReschedule){
-            _nextTaskChain = nil;
-            [_download rescheduleShowWithDecrementRetries:@YES];
-        } else {
-            if (_nextTaskChain) {
-                self.download.activeTaskChain = _nextTaskChain;
-                [_nextTaskChain run];
-            }
-        }
+		[self failedTaskCompletion];
     } else {
         if (_completionHandler) {
-            _completionHandler();
+			if(!_completionHandler()) { //The task actually failed
+				[self failedTaskCompletion];
+				return;
+			}
         }
         [self cleanUp];
         if (_nextTaskChain) {
@@ -166,6 +158,23 @@ __DDLOGHERE__
         }
     }
     
+}
+
+-(void)failedTaskCompletion
+{
+	NSLog(@"Task %@ failed",self.taskName);
+	[self saveLogFile];
+	[self cleanUp];
+	if (!_download.isCanceled && _shouldReschedule){  // _shouldReschedule is for failure of non-critical tasks
+		_nextTaskChain = nil;
+		[_download rescheduleShowWithDecrementRetries:@YES];
+	} else {
+		if (_nextTaskChain) {
+			self.download.activeTaskChain = _nextTaskChain;
+			[_nextTaskChain run];
+		}
+	}
+	
 }
 
 -(BOOL)taskFailed

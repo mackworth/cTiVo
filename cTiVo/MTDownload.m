@@ -778,7 +778,7 @@ __DDLOGHERE__
     MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
     [decryptTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
 
-    decryptTask.completionHandler = ^(){
+    decryptTask.completionHandler = ^BOOL(){
         if (!self.shouldSimulEncode) {
             [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
             [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
@@ -792,12 +792,10 @@ __DDLOGHERE__
             NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
             if (badMAKRange.location != NSNotFound) {
                 DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
-
-            } else {
-                DDLogMajor(@"tivodecode failed with unknown error message");
+                [tiVoManager  notifyWithTitle:@"Decoding Failed" subTitle:[NSString stringWithFormat:@"Decoding of tivo file failed for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
             }
-            [tiVoManager  notifyWithTitle:@"Decoding Failed" subTitle:[NSString stringWithFormat:@"Decoding of tivo file failed for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
         }
+		return YES;
     };
 	
 	decryptTask.terminationHandler = ^(){
@@ -806,10 +804,8 @@ __DDLOGHERE__
             NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
             if (badMAKRange.location != NSNotFound) {
                 DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
-            } else {
-                DDLogMajor(@"tivodecode failed with unknown error message");
+                [tiVoManager  notifyWithTitle:@"Decoding Failed" subTitle:[NSString stringWithFormat:@"Decoding of tivo file failed for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
             }
-            [tiVoManager  notifyWithTitle:@"Decoding Failed" subTitle:[NSString stringWithFormat:@"Decoding of tivo file failed for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
         }
 	};
     
@@ -870,7 +866,7 @@ __DDLOGHERE__
     encodeTask.requiresOutputPipe = NO;
 	NSArray * encoderArgs = nil;
     
-    encodeTask.completionHandler = ^(){
+    encodeTask.completionHandler = ^BOOL(){
         [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
         self.processProgress = 1.0;
@@ -878,6 +874,7 @@ __DDLOGHERE__
         if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
             DDLogReport(@" %@ File %@ not found after encoding complete",self, self.encodeFilePath );
             [self rescheduleShowWithDecrementRetries:@(YES)];
+			return NO;
             
         } else if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
             [self writeMetaDataFiles];
@@ -885,7 +882,7 @@ __DDLOGHERE__
                 [self finishUpPostEncodeProcessing];
 //            }
         }
-        
+        return YES;
     };
     
     encodeTask.cleanupHandler = ^(){
@@ -1017,9 +1014,10 @@ __DDLOGHERE__
     }
 
     
-    captionTask.completionHandler = ^(){
+    captionTask.completionHandler = ^BOOL(){
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
         setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
+		return YES;
     };
     
     captionTask.cleanupHandler = ^(){
@@ -1096,7 +1094,7 @@ __DDLOGHERE__
         };
 
     
-        commercialTask.completionHandler = ^{
+        commercialTask.completionHandler = ^BOOL{
             DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
              if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
 				 if (!self.shouldSimulEncode) {
@@ -1129,11 +1127,12 @@ __DDLOGHERE__
              }
             setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
             setxattr([commercialFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [[NSData data] bytes], 0, 0, 0);  //This is for a checkpoint and tell us the file is complete
-            
+            return YES;
         };
     } else {
-        commercialTask.completionHandler = ^{
+        commercialTask.completionHandler = ^BOOL{
             DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
+			return YES;
         };
     }
 
