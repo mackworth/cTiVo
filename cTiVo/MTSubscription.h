@@ -44,7 +44,7 @@
 @property (readonly) BOOL canMarkCommercials;
 @property (readonly) BOOL shouldSkipCommercials;
 
--(BOOL) isSubscribed:(MTTiVoShow *) tivoShow;
+-(BOOL) isSubscribed:(MTTiVoShow *) tivoShow ignoreDate:(BOOL) ignoreDate;
 -(MTDownload *) downloadForShow: (MTTiVoShow *) thisShow;
 
 @end

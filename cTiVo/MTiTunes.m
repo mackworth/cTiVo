@@ -107,6 +107,7 @@ __DDLOGHERE__
 -(NSString *) importIntoiTunes: (MTDownload * ) download withArt:(NSImage *) image {
 	//Caller responsible for informing user of progress
 	// There can be a long delay as iTunes starts up
+	//maintain source code parallel with MTTivoShow.m>metadataTagsWithImage
 	MTTiVoShow * show = download.show;
 	NSURL * showFileURL = [NSURL fileURLWithPath:download.encodeFilePath];
 
@@ -130,28 +131,37 @@ __DDLOGHERE__
 		} else {
 			if (show.season > 0) {
 				newTrack.album = [NSString stringWithFormat: @"%@, Season %d",show.seriesTitle, show.season];
+				newTrack.seasonNumber = show.season;
 			} else {
 				newTrack.album =  show.seriesTitle;
 			}
 			newTrack.albumArtist = show.seriesTitle;
+			newTrack.artist =show.seriesTitle;
 			if (show.episodeTitle.length ==0) {
-                NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
-                [dateFormat setDateStyle:NSDateFormatterShortStyle];
-                [dateFormat setTimeStyle:NSDateFormatterNoStyle];
-				newTrack.name = [NSString stringWithFormat:@"%@ - %@",show.showTitle, [dateFormat stringFromDate: show.showDate ]];
+				NSString * dateString = show.originalAirDateNoTime;
+				if (dateString.length == 0) {
+					NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+					[dateFormat setDateStyle:NSDateFormatterShortStyle];
+					[dateFormat setTimeStyle:NSDateFormatterNoStyle];
+					dateString =  [dateFormat stringFromDate: show.showDate ];
+				}
+				newTrack.name = [NSString stringWithFormat:@"%@ - %@",show.showTitle, dateString];
 			} else {
 				newTrack.name = show.episodeTitle;
 			}
-			if (show.episode >0) newTrack.trackNumber = show.episode;
-			newTrack.episodeID = [NSString stringWithFormat:@"%d", show.showID];
-            newTrack.episodeNumber = show.episode;
-            newTrack.seasonNumber = show.season;
-		}
+			if (show.episode > 0) {
+				newTrack.episodeNumber = show.episode;
+				newTrack.trackNumber = show.episode;
+			}
+ 		}
+		newTrack.episodeID = show.episodeID;
 		newTrack.comment = show.showDescription;
 		newTrack.longDescription = show.showDescription;
 		newTrack.objectDescription = show.showDescription;
 		newTrack.show = show.seriesTitle;
 		newTrack.year = show.episodeYear;
+		//Can't set release date for some reason
+		//No tv  channel concept
 		newTrack.genre = show.episodeGenre;
 		if (image) {
 			//don't ask me why this works...

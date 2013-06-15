@@ -1432,7 +1432,7 @@ __DDLOGHERE__
 
 	if (self.show.season > 0) {
 		//first check for user-specified, episode-specific art
-		if (self.show.episodeNumber.length > 0) {
+		if (self.show.seasonEpisode.length > 0) {
 			for (NSString * dir in directories) {
 				NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:self.show.seasonEpisode  InPath:dir ];
 				if (artwork) return artwork;

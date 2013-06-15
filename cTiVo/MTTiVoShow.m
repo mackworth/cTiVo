@@ -279,9 +279,9 @@ __DDLOGHERE__
 					[tiVoManager.tvdbSeriesIdMapping setObject:@"" forKey:_seriesTitle];
 					DDLogDetail(@"TheTVDB series not found: %@: %@ ",self.seriesTitle, self.seriesId);
 					tiVoManager.theTVDBStatistics[kMTVDBNoSeries@"Count"] = @([tiVoManager.theTVDBStatistics[kMTVDBNoSeries@"Count"] intValue] + 1);
-					[((NSMutableDictionary *)tiVoManager.theTVDBStatistics[kMTVDBNoSeries@"List"]) setValue: self.seriesId forKey:self.seriesTitle ];
+					[((NSMutableDictionary *)tiVoManager.theTVDBStatistics[kMTVDBNoSeries@"List"]) setValue: epSeriesID forKey:self.seriesTitle ];
 				}
-			
+
             }
             if (seriesIDTVDB.length) {
 				//Now get the details
@@ -339,7 +339,7 @@ __DDLOGHERE__
 				self.episode = [episodeNum intValue];
 				self.season = [seasonNum intValue];
 				tiVoManager.theTVDBStatistics[kMTVDBNewInfo] = @([tiVoManager.theTVDBStatistics[kMTVDBNewInfo] intValue] + 1);
-				DDLogVerbose(@"Adding TVDB season/episode  %@ to show %@",self.episodeNumber, self.showTitle);
+				DDLogVerbose(@"Adding TVDB season/episode %d/%d to show %@",self.season, self.episode, self.showTitle);
 			}
 		}
 
@@ -357,8 +357,7 @@ __DDLOGHERE__
 		[self getTheTVDBDetails];
 	}
 	if (_tvdbArtworkLocation.length == 0 ||
-		self.episodeNumber.length == 0 ||
-		self.season == 0) {
+		self.seasonEpisode.length == 0 ) {
 		return;
 	}
 	NSString * extension = [_tvdbArtworkLocation pathExtension];
@@ -665,56 +664,83 @@ __DDLOGHERE__
 }
 
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage* ) image {
+	//maintain source code parallel with MTiTunes.m>importIntoiTunes
 	const MP4Tags *tags = MP4TagsAlloc();
 	uint8_t mediaType = 10;
 	if (self.isMovie) {
 		mediaType = 9;
+		MP4TagsSetMediaType(tags, &mediaType);
+		MP4TagsSetName(tags,[self.showTitle cStringUsingEncoding:NSUTF8StringEncoding]) ;
+	} else {
+		mediaType = 10;
+		MP4TagsSetMediaType(tags, &mediaType);
+		if (self.season > 0 ) {
+			uint32_t showSeason =  self.season;
+			MP4TagsSetTVSeason(tags, &showSeason);
+			MP4TagsSetAlbum(tags,[[NSString stringWithFormat: @"%@, Season %d",self.seriesTitle, self.season] cStringUsingEncoding:NSUTF8StringEncoding]) ;
+		} else {
+			MP4TagsSetAlbum(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]) ;
+			
+		}
+		if (self.seriesTitle.length>0) {
+			MP4TagsSetTVShow(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+			MP4TagsSetArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+			MP4TagsSetAlbumArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+		}
+		if (self.episodeTitle.length==0) {
+			NSString * dateString = self.originalAirDateNoTime;
+			if (dateString.length == 0) {
+				NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+				[dateFormat setDateStyle:NSDateFormatterShortStyle];
+				[dateFormat setTimeStyle:NSDateFormatterNoStyle];
+				dateString =  [dateFormat stringFromDate: self.showDate ];
+			}
+			MP4TagsSetName(tags,[[NSString stringWithFormat:@"%@ - %@",self.showTitle, dateString] cStringUsingEncoding:NSUTF8StringEncoding]);
+		} else {
+			MP4TagsSetName(tags,[self.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+		}
+		uint32_t episodeNum = self.episode;
+		if (episodeNum == 0) {
+			episodeNum =  [self.episodeNumber intValue];
+		}
+		if (episodeNum> 0) {
+			MP4TagsSetTVEpisode(tags, &episodeNum);
+			MP4TagTrack track;
+			track.index = episodeNum;
+			track.total = 0;
+			MP4TagsSetTrack(tags, &track);
+			
+		}
 	}
-	MP4TagsSetMediaType(tags, &mediaType);
-	if (self.episodeTitle.length>0) {
-		MP4TagsSetName(tags,[self.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+	if (self.episodeID) {
+		MP4TagsSetTVEpisodeID(tags, [self.episodeID cStringUsingEncoding:NSUTF8StringEncoding]);
 	}
-	if (self.episodeGenre.length>0) {
-		MP4TagsSetGenre(tags,[self.episodeGenre cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-	if (self.originalAirDate.length>0) {
-		MP4TagsSetReleaseDate(tags,[self.originalAirDateNoTime cStringUsingEncoding:NSUTF8StringEncoding]);
-	} else if (self.movieYear.length>0) {
-		MP4TagsSetReleaseDate(tags,[self.movieYear	cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-	
 	if (self.showDescription.length > 0) {
 		if (self.showDescription.length < 255) {
 			MP4TagsSetDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
-			
+			MP4TagsSetComments(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);			
 		} else {
 			MP4TagsSetDescription(tags,[[self.showDescription  substringToIndex:255] cStringUsingEncoding:NSUTF8StringEncoding]);
 			MP4TagsSetLongDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+			MP4TagsSetComments(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
 		}
 	}
 	if (self.seriesTitle.length>0) {
-		MP4TagsSetTVShow(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-		MP4TagsSetArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-		MP4TagsSetAlbumArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+		MP4TagsSetTVShow(tags, [self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
 	}
-	if (self.episode > 0) {
-		uint32_t episodeNum = self.episode;
-		MP4TagsSetTVEpisode(tags, &episodeNum);
-	} else if (self.episodeNumber.length>0) {
-		uint32_t episodeNum =  [self.episodeNumber intValue];
-		MP4TagsSetTVEpisode(tags, &episodeNum);
-		
+	//no year equivalent?
+	NSString * releaseDate = self.originalAirDate;
+	if (releaseDate.length == 0) {
+		releaseDate = self.movieYear;
 	}
-	if (self.season > 0 ) {
-		uint32_t showSeason =  self.season;
-		MP4TagsSetTVSeason(tags, &showSeason);
-		MP4TagsSetAlbum(tags,[[NSString stringWithFormat: @"%@, Season %d",self.seriesTitle, self.season] cStringUsingEncoding:NSUTF8StringEncoding]) ;
-	} else {
-		MP4TagsSetAlbum(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]) ;
-
+	if (releaseDate.length>0) {
+		MP4TagsSetReleaseDate(tags,[releaseDate cStringUsingEncoding:NSUTF8StringEncoding]);
 	}
 	if (self.stationCallsign) {
 		MP4TagsSetTVNetwork(tags, [self.stationCallsign cStringUsingEncoding:NSUTF8StringEncoding]);
+	}
+	if (self.episodeGenre.length>0) {
+		MP4TagsSetGenre(tags,[self.episodeGenre cStringUsingEncoding:NSUTF8StringEncoding]);
 	}
 	
 	if (image) {
@@ -897,7 +923,9 @@ __DDLOGHERE__
         _episodeNumber = episodeNumber;
 		if (episodeNumber.length) {
 			long l = episodeNumber.length;
-			if (l > 2) {
+			if (l > 2 && l < 6) {
+				//3,4,5 ok: 3 = SEE 4= SSEE 5 = SSEEE
+				//4 might be corrected by tvdb to SEEE
 				int epDigits = (l > 4) ? 3:2; 
 					_episode = [[episodeNumber substringFromIndex:l-epDigits] intValue];
 					_season = [[episodeNumber substringToIndex:l-epDigits] intValue];

@@ -107,9 +107,11 @@
                 //Current MAK  (No place to put MAK if no Tivo
                 NSString * MAK = [sUD objectForKey:kITMAK];
                 if (MAK.length > 0 && [currentTivo compare:@"My Tivos"] != NSOrderedSame) {
-                    NSMutableDictionary * MAKs = [sUD objectForKey:kMTMediaKeys];
+                    NSDictionary * MAKs = [sUD objectForKey:kMTMediaKeys];
                     if (MAKs) {
-                        [MAKs setValue:MAK forKey:currentTivo];
+                        NSMutableDictionary * newMAKs = [NSMutableDictionary  dictionaryWithDictionary:MAKs];
+						[newMAKs  setValue:MAK forKey:currentTivo];
+						MAKs = [NSDictionary dictionaryWithDictionary:newMAKs];
                     } else {
                         MAKs = [NSDictionary dictionaryWithObject:MAK  forKey:currentTivo];
                     }

@@ -97,7 +97,7 @@ __DDLOGHERE__
 	self.encodeFormat = [tiVoManager findFormat:self.encodeFormat.name];
 }
 
--(BOOL) isSubscribed:(MTTiVoShow *) tivoShow {
+-(BOOL) isSubscribed:(MTTiVoShow *) tivoShow ignoreDate:(BOOL)ignoreDate {
 	//check for protected shows
 	if ( tivoShow.protectedShow.boolValue) {
 		return NO;
@@ -114,12 +114,13 @@ __DDLOGHERE__
 												   range:NSMakeRange(0,tivoShow.seriesTitle.length)] == 0){
 		return NO;
 	}
-	
-	//kept for transition from iTivo && cTivo2.0; also for brand new subscriptions
-	BOOL afterLast = (tivoShow.showDate != nil) && [self.createdTime isLessThan: tivoShow.showDate];
-	DDLogVerbose(@"%@ for %@, date:%@ prev:%@", afterLast ? @"YES": @"NO",tivoShow.showTitle, tivoShow.showDate, self.createdTime);
-	if (!afterLast) {
-		return NO;
+	if (!ignoreDate) {
+		//kept for transition from iTivo && cTivo2.0; also for brand new subscriptions
+		BOOL afterLast = (tivoShow.showDate != nil) && [self.createdTime isLessThan: tivoShow.showDate];
+		DDLogVerbose(@"%@ for %@, date:%@ prev:%@", afterLast ? @"YES": @"NO",tivoShow.showTitle, tivoShow.showDate, self.createdTime);
+		if (!afterLast) {
+			return NO;
+		}
 	}
 	
 	//Now check that we're on the right Tivo, if specified
@@ -251,7 +252,7 @@ __DDLOGHERE__
 	if ([thisShow.showDate isGreaterThan: earliestTime]) {
 		DDLogVerbose(@"Subscription check: recent enough %@", thisShow);
 		for (MTSubscription * possMatch in self) {
-			if ([possMatch isSubscribed:thisShow]) {
+			if ([possMatch isSubscribed:thisShow ignoreDate:NO]) {
 				MTDownload * newDownload = [possMatch downloadForShow:thisShow];
 				[tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];    
 			}
@@ -266,7 +267,7 @@ __DDLOGHERE__
 	DDLogVerbose(@"checking New Subscriptions");
 	for (MTTiVoShow * thisShow in tiVoManager.tiVoShows.reverseObjectEnumerator) {
 		for (MTSubscription * possMatch in newSubs) {
-			if ([possMatch isSubscribed:thisShow]) {
+			if ([possMatch isSubscribed:thisShow ignoreDate:YES]) {
 				MTDownload * newDownload = [possMatch downloadForShow:thisShow];
 				[tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];    
 			}
