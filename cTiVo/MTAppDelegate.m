@@ -249,7 +249,24 @@ __DDLOGHERE__
 		}
 		
 	}
+	[self updateManualTiVosWithID];
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: ([[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0) + 1.0 target:tiVoManager selector:@selector(writeDownloadQueueToUserDefaults) userInfo:nil repeats:YES];
+
+}
+
+-(void)updateManualTiVosWithID
+{
+	NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
+	if (manualTiVoDescriptions && manualTiVoDescriptions.count && ![manualTiVoDescriptions[0] objectForKey:@"id"]) {
+		int idNum = 1;
+		NSMutableArray *newManualTiVos = [NSMutableArray array];
+		for (NSDictionary *mTiVo in manualTiVoDescriptions) {
+			NSMutableDictionary *newMTiVo = [NSMutableDictionary dictionaryWithDictionary:mTiVo];
+			newMTiVo[@"id"] = [NSNumber numberWithInt:idNum++];
+			[newManualTiVos addObject:newMTiVo];
+		}
+		[[NSUserDefaults standardUserDefaults] setObject:newManualTiVos forKey:kMTManualTiVos];
+	}
 
 }
 

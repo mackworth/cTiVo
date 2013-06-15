@@ -86,6 +86,7 @@ __DDLOGHERE__
 		elementToPropertyMap = [[NSDictionary alloc] initWithDictionary:elementToPropertyMap];
 		_currentNPLStarted = nil;
 		_lastDownloadEnded = [NSDate dateWithTimeIntervalSince1970:0];
+		_manualTiVoID = -1;
 	}
 	return self;
 	
@@ -112,7 +113,10 @@ __DDLOGHERE__
 //			DDLogDetail(@"Failed to get MAK for %@",tiVo);
 //			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
 //		} else {
-		[self updateShows:nil];
+        if (![tiVo isKindOfClass:[MTNetService class]]) {
+            [self updateShows:nil];
+
+        }
 //		}
 		[self setupNotifications];
 	}
@@ -203,7 +207,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		return;
 	}
 	DDLogMajor(@"Updating Tivo %@", self);
-	if (isConnecting) {
+	if (isConnecting || ([self.tiVo isKindOfClass:[MTNetService class]] && !self.enabled)) {
 		return;
 	}
 //	if (!sender && [[NSDate date] compare:[_lastUpdated dateByAddingTimeInterval:kMTUpdateIntervalMinutes * 60]] == NSOrderedAscending) {

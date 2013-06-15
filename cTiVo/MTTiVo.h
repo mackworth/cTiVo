@@ -49,6 +49,7 @@
 @property BOOL isReachable, isResponding, manualTiVo, enabled;
 @property (nonatomic, strong) NSDate *lastDownloadEnded;
 @property (nonatomic, strong) 	NSDate *currentNPLStarted;
+@property int manualTiVoID;
 
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
 

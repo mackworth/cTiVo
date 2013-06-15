@@ -48,10 +48,13 @@
 -(IBAction)add:(id)sender
 {
 	if (((NSArray *)arrayController.content).count == 0) { //No template to check
-		[[NSUserDefaults standardUserDefaults] setObject:@[@{@"enabled" : [NSNumber numberWithBool:NO], @"userName" : @"TiVo Name", @"iPAddress" : @"0.0.0.0", @"userPort" : @"80", @"userPortSSL" : @"443"}] forKey:kMTManualTiVos];
+		[[NSUserDefaults standardUserDefaults] setObject:@[@{@"enabled" : [NSNumber numberWithBool:NO], @"userName" : @"TiVo Name", @"iPAddress" : @"0.0.0.0", @"userPort" : @"80", @"userPortSSL" : @"443", @"id" : @1}] forKey:kMTManualTiVos];
 	} else {
         NSMutableArray *manualTiVos = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:kMTManualTiVos]];
-        [manualTiVos addObject:@{@"enabled" : [NSNumber numberWithBool:NO], @"userName" : @"TiVo Name", @"iPAddress" : @"0.0.0.0", @"userPort" : @"80", @"userPortSSL" : @"443"}];
+		NSSortDescriptor *idDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"id" ascending:NO];
+		NSArray *sortedByID = [manualTiVos sortedArrayUsingDescriptors:@[idDescriptor]];
+		NSNumber *newID = [NSNumber numberWithInt:[[sortedByID[0] objectForKey:@"id"] intValue]+1];
+        [manualTiVos addObject:@{@"enabled" : [NSNumber numberWithBool:NO], @"userName" : @"TiVo Name", @"iPAddress" : @"0.0.0.0", @"userPort" : @"80", @"userPortSSL" : @"443", @"id" : newID}];
 		[[NSUserDefaults standardUserDefaults] setObject:manualTiVos forKey:kMTManualTiVos];
 	}
 }
