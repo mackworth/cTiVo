@@ -180,6 +180,7 @@ __DDLOGHERE__
 	
 	
 	mediaKeyQueue = [NSMutableArray new];
+	[self updateManualTiVosWithID];
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueChangeSetting context:nil];
@@ -249,7 +250,6 @@ __DDLOGHERE__
 		}
 		
 	}
-	[self updateManualTiVosWithID];
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: ([[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0) + 1.0 target:tiVoManager selector:@selector(writeDownloadQueueToUserDefaults) userInfo:nil repeats:YES];
 
 }
