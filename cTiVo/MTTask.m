@@ -49,7 +49,7 @@ __DDLOGHERE__
 		_terminationHandler = nil;
         _progressCalc = nil;
         _cleanupHandler = nil;
-		_nextTaskChain = nil;
+//		_nextTaskChain = nil;
         _requiresInputPipe = YES;
         _requiresOutputPipe = YES;
         _shouldReschedule = YES;
@@ -160,10 +160,10 @@ __DDLOGHERE__
 			}
         }
         [self cleanUp];
-        if (_nextTaskChain) {
-            self.download.activeTaskChain = _nextTaskChain;
-            [_nextTaskChain run];
-        }
+//        if (_nextTaskChain) {
+//            self.download.activeTaskChain = _nextTaskChain;
+//            [_nextTaskChain run];
+//        }
     }
     
 }
@@ -174,13 +174,13 @@ __DDLOGHERE__
 	[self saveLogFile];
 	[self cleanUp];
 	if (!_download.isCanceled && _shouldReschedule){  // _shouldReschedule is for failure of non-critical tasks
-		_nextTaskChain = nil;
+//		_nextTaskChain = nil;
 		[_download rescheduleShowWithDecrementRetries:@YES];
-	} else {
-		if (_nextTaskChain) {
-			self.download.activeTaskChain = _nextTaskChain;
-			[_nextTaskChain run];
-		}
+//	} else {
+//		if (_nextTaskChain) {
+//			self.download.activeTaskChain = _nextTaskChain;
+//			[_nextTaskChain run];
+//		}
 	}
 	
 }
@@ -199,7 +199,7 @@ __DDLOGHERE__
     if (!launched) {
         return NO;
     } else {
-        return _task.terminationReason == NSTaskTerminationReasonUncaughtSignal || ![self succcessfulExit] ;
+        return  ![self succcessfulExit] ;
     }
 }
 
@@ -282,7 +282,7 @@ __DDLOGHERE__
     desc = [desc stringByAppendingFormat:@"\n%@ completionHandler",_completionHandler ? @"Has" : @"Does not have"];
     desc = [desc stringByAppendingFormat:@"\n%@ progressCalc",_progressCalc ? @"Has" : @"Does not have"];
     desc = [desc stringByAppendingFormat:@"\n%@ startupHandler",_startupHandler ? @"Has" : @"Does not have"];
-    desc = [desc stringByAppendingFormat:@"\n%@ a following task chain",_nextTaskChain ? @"Has" : @"Does not have"];
+//    desc = [desc stringByAppendingFormat:@"\n%@ a following task chain",_nextTaskChain ? @"Has" : @"Does not have"];
     return desc;
 }
 

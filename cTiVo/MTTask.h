@@ -27,7 +27,7 @@
 
 @property (strong, nonatomic) NSRegularExpression *trackingRegEx;
 
-@property (strong, nonatomic) MTTaskChain *nextTaskChain;
+//@property (strong, nonatomic) MTTaskChain *nextTaskChain;
 
 @property (weak, nonatomic) MTDownload *download;
 

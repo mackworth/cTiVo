@@ -22,6 +22,7 @@
 @property (strong, nonatomic) NSArray *taskArray;   //An array of arrays of tasks to be chained in order.  Single branching is allow so that one tasks output can be piped to two tasks.
                                                     //If the chain continues after a branch it is assumed that the first task in the multiple branch is the source for the next array of tasks.
 
+@property (strong, nonatomic) MTTaskChain *nextTaskChain;
 
 @property (strong, nonatomic) id dataSource, dataSink;  //These should be either NSFileHandle or NSPipe
 
@@ -32,5 +33,6 @@
 -(BOOL)run;
 -(BOOL)configure;
 -(void)cancel;
+-(void)trackProgress;
 
 @end

@@ -784,6 +784,7 @@ __DDLOGHERE__
     }
     MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
     [decryptTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
+    decryptTask.successfulExitCodes = @[@0,@6];
 
     decryptTask.completionHandler = ^BOOL(){
         if (!self.shouldSimulEncode) {
@@ -1368,6 +1369,7 @@ __DDLOGHERE__
 
     if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {
         NSURLRequest *thisRequest = [NSURLRequest requestWithURL:self.show.downloadURL];
+        NSLog(@"Download URL = %@",self.show.downloadURL);
         activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
         downloadingURL = YES;
     }
@@ -1859,7 +1861,7 @@ __DDLOGHERE__
         if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
             [bufferFileReadHandle closeFile];
         }
-//		bufferFileReadHandle = nil;
+		bufferFileReadHandle = nil;
 //        if (self.shouldSimulEncode && !isCanceled) {
 //            [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
 //        }
@@ -1976,7 +1978,7 @@ __DDLOGHERE__
                 setxattr([_bufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with show ID
             }
         }
-        bufferFileReadHandle = nil;
+//        bufferFileReadHandle = nil;
 	}
 }
 

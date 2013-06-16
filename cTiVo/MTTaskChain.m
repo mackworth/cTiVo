@@ -110,8 +110,8 @@ __DDLOGHERE__
 					[nextChain addObject:_taskArray[k]];
 				}
 				if (nextChain.count) {
-					currentTask.nextTaskChain = [MTTaskChain new];
-                    currentTask.nextTaskChain.taskArray = nextChain;
+					self.nextTaskChain = [MTTaskChain new];
+                    self.nextTaskChain.taskArray = nextChain;
                     [newTaskArray removeObjectsInArray:nextChain];
                     _taskArray = [NSArray arrayWithArray:newTaskArray];
 				}
@@ -145,6 +145,7 @@ __DDLOGHERE__
 
 -(void)cancel
 {
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
     for (int i=(int)_taskArray.count-1; i >=0 ; i--) {
         for (MTTask *task in _taskArray[i]) {
             DDLogMajor(@"Canceling task %@ for show %@",task.taskName,task.download.show.showTitle);
@@ -175,6 +176,7 @@ __DDLOGHERE__
 
 	}
     _isRunning = YES;
+    [self performSelector:@selector(trackProgress) withObject:nil afterDelay:0.5];
 	return isConfigured;
 }
 
@@ -182,6 +184,31 @@ __DDLOGHERE__
 {
     [(NSFileHandle *)(notification.object) readInBackgroundAndNotify];
 
+}
+
+
+-(void)trackProgress //See if any tasks in this chain are running
+{
+    BOOL isRunning = NO;
+    DDLogDetail(@"Tracking task chain");
+    for (NSArray *taskset in _taskArray) {
+        for(MTTask *task in taskset) {
+            if ([task.task isRunning]) {
+                isRunning = YES;
+                break;
+            }
+        }
+    }
+    if (!isRunning) {
+        //We need to move on
+        if (_nextTaskChain) {
+            self.download.activeTaskChain = _nextTaskChain;
+            [_nextTaskChain run];
+        }
+    } else {
+        [self performSelector:@selector(trackProgress) withObject:nil afterDelay:0.5];
+
+    }
 }
 
 -(void)tee:(NSNotification *)notification
@@ -232,6 +259,7 @@ __DDLOGHERE__
 		}
 		
 	} else {
+        NSLog(@"Quitting because data length is %ld and canceled is %@",readData.length, _download.isCanceled ? @"is cancelled" : @"is not cancelled");
         for (NSPipe *pipe in pipes) {
 			@try{
 				[[pipe fileHandleForWriting] closeFile];
