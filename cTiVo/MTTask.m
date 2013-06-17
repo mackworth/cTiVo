@@ -199,7 +199,7 @@ __DDLOGHERE__
     if (!launched) {
         return NO;
     } else {
-        return  ![self succcessfulExit] ;
+        return _task.terminationReason == NSTaskTerminationReasonUncaughtSignal || ![self succcessfulExit] ;
     }
 }
 
