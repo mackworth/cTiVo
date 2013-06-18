@@ -1088,6 +1088,7 @@ __DDLOGHERE__
             }
             NSData *zeroData = [NSData data];
             [zeroData writeToFile:commercialFilePath atomically:YES];
+			_commercialTask.completionHandler();
         }
     };
 
