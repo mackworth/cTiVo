@@ -110,7 +110,7 @@ __DDLOGHERE__
     //Loging fuction for testing
     
     for (int i = 0; i < chapterOffset ; i++) {
-        NSLog(@"Chapter %d: duration %llu, title: %s",i+1,chapterList[i].duration, chapterList[i].title);
+        DDLogDetail(@"Chapter %d: duration %llu, title: %s",i+1,chapterList[i].duration, chapterList[i].title);
     }
 	if (chapterList && encodedFile) {
 		MP4SetChapters(encodedFile, chapterList, chapterOffset, MP4ChapterTypeQt);

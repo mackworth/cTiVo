@@ -193,7 +193,7 @@ __DDLOGHERE__
     DDLogDetail(@"Tracking task chain");
     for (NSArray *taskset in _taskArray) {
         for(MTTask *task in taskset) {
-            if ([task.task isRunning]) {
+            if (task.taskRunning) {
                 isRunning = YES;
                 break;
             }

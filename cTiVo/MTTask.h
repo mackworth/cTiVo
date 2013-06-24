@@ -40,7 +40,7 @@
 @property (nonatomic, copy) void (^cleanupHandler)();
 
 @property BOOL requiresInputPipe, requiresOutputPipe, shouldReschedule;
-@property (nonatomic) BOOL taskFailed;
+@property (nonatomic) BOOL taskFailed, taskRunning;
 
 @property int pid;
 

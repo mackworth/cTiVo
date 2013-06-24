@@ -55,6 +55,7 @@ __DDLOGHERE__
         _shouldReschedule = YES;
 		_successfulExitCodes = @[@0];
         launched = NO;
+        _taskRunning = NO;
     }
     return self;
 }
@@ -156,6 +157,7 @@ __DDLOGHERE__
         if (_completionHandler) {
 			if(!_completionHandler()) { //The task actually failed
 				[self failedTaskCompletion];
+                _taskRunning = NO;
 				return;
 			}
         }
@@ -165,7 +167,7 @@ __DDLOGHERE__
 //            [_nextTaskChain run];
 //        }
     }
-    
+    _taskRunning = NO;
 }
 
 -(void)failedTaskCompletion
@@ -332,6 +334,7 @@ __DDLOGHERE__
     if (shouldLaunch) {
         [_task launch];
         launched = YES;
+        _taskRunning = YES;
         _pid = [_task processIdentifier];
         [self trackProcess];
     } else {
@@ -372,7 +375,7 @@ __DDLOGHERE__
 
 -(BOOL)isRunning
 {
-    return [_task isRunning];
+    return _taskRunning;
 }
 
 -(void)dealloc

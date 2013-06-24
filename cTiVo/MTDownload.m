@@ -1370,7 +1370,6 @@ __DDLOGHERE__
 
     if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {
         NSURLRequest *thisRequest = [NSURLRequest requestWithURL:self.show.downloadURL];
-        NSLog(@"Download URL = %@",self.show.downloadURL);
         activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
         downloadingURL = YES;
     }
