@@ -1952,12 +1952,18 @@ __DDLOGHERE__
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     DDLogMajor(@"URL Connection Failed with error %@",error);
+	if (bufferFileWriteHandle) {
+		[bufferFileWriteHandle closeFile];
+	}
 	[self rescheduleOnMain];
 }
 
 #define kMTMinTiVoFileSize 100000
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
+	if (bufferFileWriteHandle) {
+		[bufferFileWriteHandle closeFile];
+	}
 	double downloadedFileSize = totalDataDownloaded;
 	DDLogDetail(@"finished loading file");
     //Check to make sure a reasonable file size in case there was a problem.
