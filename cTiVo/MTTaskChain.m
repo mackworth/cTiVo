@@ -40,16 +40,16 @@ __DDLOGHERE__
 	// Check for misconfigured chains
 	
    if (_taskArray.count == 0) {
-	   NSLog(@"Task chain with no content found");
+	   DDLogMajor(@"Task chain with no content found");
         return NO; //nothing to do
     }
 	if (((NSArray *)[_taskArray lastObject]).count > 1 && _dataSink) { //Can't use the same datasink for multiple
-		NSLog(@"Can't use a TaskChain dataSink for multiple tasks");
+		DDLogMajor(@"Can't use a TaskChain dataSink for multiple tasks");
 		return NO;
 	}
 	if (_dataSource && [_dataSource isKindOfClass:[NSString class]]) {
 		if (![[NSFileManager defaultManager] fileExistsAtPath:_dataSource]) {
-			NSLog(@"Specified file path not found for taskChain");
+			DDLogMajor(@"Specified file path not found for taskChain");
 			return NO;	
 		}
 	}
@@ -259,7 +259,7 @@ __DDLOGHERE__
 		}
 		
 	} else {
-        NSLog(@"Quitting because data length is %ld and canceled is %@",readData.length, _download.isCanceled ? @"is cancelled" : @"is not cancelled");
+        DDLogMajor(@"Quitting because data length is %ld and canceled is %@",readData.length, _download.isCanceled ? @"is cancelled" : @"is not cancelled");
         for (NSPipe *pipe in pipes) {
 			@try{
 				[[pipe fileHandleForWriting] closeFile];

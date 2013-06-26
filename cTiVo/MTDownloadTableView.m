@@ -511,16 +511,15 @@ __DDLOGHERE__
     // Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
  	NSArray	*selectedObjects = [self.sortedDownloads objectsAtIndexes:rowIndexes ];
-	NSLog(@"copying objects:%@",selectedObjects );
 	[pboard clearContents];
 	[pboard writeObjects:selectedObjects];
 	DDLogVerbose (@"DraggingObjects: %@",selectedObjects);
-	NSLog(@"property Types available: %@",[pboard types]);
-	NSLog(@"Property list: URLS: %@", [pboard
-	 readObjectsForClasses:[NSArray arrayWithObject:[NSURL class]]
-	 options:[NSDictionary dictionaryWithObject:[NSNumber
-												 numberWithBool:YES]
-										 forKey:NSPasteboardURLReadingFileURLsOnlyKey]]);
+//	NSLog(@"property Types available: %@",[pboard types]);
+//	NSLog(@"Property list: URLS: %@", [pboard
+//	 readObjectsForClasses:[NSArray arrayWithObject:[NSURL class]]
+//	 options:[NSDictionary dictionaryWithObject:[NSNumber
+//												 numberWithBool:YES]
+//										 forKey:NSPasteboardURLReadingFileURLsOnlyKey]]);
 	return YES;
 }
 

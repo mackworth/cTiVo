@@ -168,7 +168,8 @@ __DDLOGHERE__
     if (_downloadStatus.intValue == kMTStatusDone) {
         self.baseFileName = nil;
     }
-	if (_numRetriesRemaining <= 0 || _numStartupRetriesRemaining <=0) {
+	if (([decrementRetries boolValue] && _numRetriesRemaining <= 0) ||
+		(![decrementRetries boolValue] && _numStartupRetriesRemaining <=0)) {
 		[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
 		_processProgress = 1.0;
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
@@ -336,7 +337,6 @@ __DDLOGHERE__
 		return  [NSKeyedArchiver archivedDataWithRootObject:self];
 	} else if ([type isEqualToString:(NSString *)kUTTypeFileURL] && self.encodeFilePath) {
 		NSURL *URL = [NSURL fileURLWithPath:self.encodeFilePath isDirectory:NO];
-		NSLog(@"file: %@ ==> pBoard URL: %@",self.encodeFilePath, URL);
 		id temp =  [URL pasteboardPropertyListForType:(id)kUTTypeFileURL];
 		return temp;
 	} else {
@@ -345,7 +345,6 @@ __DDLOGHERE__
 }
 -(NSArray *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
 	NSArray* result = [NSArray  arrayWithObjects: kMTDownloadPasteBoardType , kUTTypeFileURL, nil];  //NOT working yet
-	//	NSLog(@"QQQ:writeable Type: %@",result);
 	return result;
 }
 
@@ -1219,7 +1218,37 @@ __DDLOGHERE__
 
 -(void)download
 {
-	DDLogDetail(@"Starting download for %@",self);
+	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+	DDLogVerbose(@"Starting download for %@; Format: %@; %@%@%@%@%@%@%@%@",
+				self,
+				self.encodeFormat.name ,
+				self.skipCommercials ?
+					@" Skip commercials;" :
+					(self.markCommercials ?
+					 @" Mark commercials;" :
+					 @""),
+				self.addToiTunesWhenEncoded ?
+					@" Add to iTunes;" :
+					@"",
+				self.genTextMetaData.boolValue ?
+					@" Generate XML;" :
+					@"",
+				self.exportSubtitles.boolValue ?
+					@" Generate Subtitles;" :
+					@"",
+				[defaults boolForKey:kMTiTunesDelete] ?
+					@"" :
+					@" Keep after iTunes;",
+				[defaults boolForKey:kMTSaveTmpFiles] ?
+					@" Save Temp files;" :
+					@"",
+				[defaults boolForKey:kMTUseMemoryBufferForDownload]?
+					@"" :
+					@" No Memory Buffer;",
+				[defaults boolForKey:kMTGetEpisodeArt] ?
+					@" " :
+					@" No TVDB art;"				
+				);
 	_isCanceled = NO;
 	_isRescheduled = NO;
     _downloadingShowFromTiVoFile = NO;
@@ -1651,13 +1680,15 @@ __DDLOGHERE__
         BOOL reschedule = YES;
         if (_processProgress == 1.0) {
             reschedule = NO;
-            DDLogMajor(@"Checking extented wait for 100%% progress stall (Handbrake) for show %@",self.show.showTitle);
-            if (!progressAt100Percent) {  //This is the first time here so record as the start of 100 % period
-                DDLogMajor(@"Starting extented wait for 100%% progress stall (Handbrake) for show %@",self.show.showTitle);
+			if (!progressAt100Percent) {  //This is the first time here so record as the start of 100 % period
+                DDLogMajor(@"Starting extended wait for 100%% progress stall (Handbrake) for show %@",self.show.showTitle);
                 progressAt100Percent = [NSDate date];
             } else if ([[NSDate date] timeIntervalSinceDate:progressAt100Percent] > kMTProgressFailDelayAt100Percent){
+                DDLogReport(@"Failed extended wait for 100%% progress stall (Handbrake) for show %@",self.show.showTitle);
                 reschedule = YES;
-            }
+            } else {
+				DDLogVerbose(@"In extended wait for Handbrake");
+			}
         }
 		if (reschedule) [self rescheduleShowWithDecrementRetries:@(YES)];
 	} else if ([self isInProgress]){
@@ -1921,7 +1952,7 @@ __DDLOGHERE__
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     DDLogMajor(@"URL Connection Failed with error %@",error);
-	[self performSelectorOnMainThread:@selector(rescheduleShowWithDecrementRetries:) withObject:@(YES) waitUntilDone:NO];
+	[self rescheduleOnMain];
 }
 
 #define kMTMinTiVoFileSize 100000

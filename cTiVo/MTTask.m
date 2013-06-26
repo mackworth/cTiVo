@@ -172,7 +172,7 @@ __DDLOGHERE__
 
 -(void)failedTaskCompletion
 {
-	NSLog(@"Task %@ failed",self.taskName);
+	DDLogMajor(@"Task %@ failed",self.taskName);
 	[self saveLogFile];
 	[self cleanUp];
 	if (!_download.isCanceled && _shouldReschedule){  // _shouldReschedule is for failure of non-critical tasks

@@ -73,6 +73,7 @@
 #define kMTProgressFailDelayAt100Percent (7 * 60.0) //Added to account for encoders (Handbrake) have have a lot of post-processing after 100%
 //#define kMTRetryNetworkInterval 15	//Re-Check for network connectivity every X seconds
 #define kMTTiVoAccessDelay 7		//Seconds to wait after TiVo is found on network
+#define kMTTiVoAccessDelayServerFailure 60		//Seconds to wait after TiVo reports Download server problem
 #define kMTTheTVDBAPIKey @"DB85D57BFFC7DD85"  //API Key for theTVDB
 
 //Subscribed Show userDefaults

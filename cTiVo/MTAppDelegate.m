@@ -245,7 +245,7 @@ __DDLOGHERE__
 			NSDate *creationDate = [attrs objectForKey: NSFileModificationDate];
 			if ([[NSDate date] timeIntervalSinceDate:creationDate] > 3600 * 24 * 30) {
 				[fm removeItemAtPath:filePath error:nil];
-				NSLog(@"Removed file %@",filePath);
+				DDLogVerbose(@"Removed file %@",filePath);
 			}
 		}
 		
@@ -746,7 +746,7 @@ __DDLOGHERE__
 		NSInteger button = [keyAlert runModal];
 		if (button == NSAlertDefaultReturn) {
 			[input validateEditing];
-			NSLog(@"Got Media Key %@",input.stringValue);
+			DDLogDetail(@"Got Media Key %@",input.stringValue);
 			tiVo.mediaKey = input.stringValue;
 			[tiVo updateShows:nil]; //Assume if needed and got a key we should reload
 		}
@@ -785,9 +785,9 @@ __DDLOGHERE__
 }
 
 -(void) checkDone:(id) sender {
-	NSLog(@"Checking done");
+	DDLogVerbose(@"Checking done");
 	if ( ![tiVoManager anyTivoActive] ){
-		NSLog(@"Checking finished");
+		DDLogDetail(@"Checking finished");
 		[checkingDone invalidate]; checkingDone = nil;
 		[NSApp endSheet: [mainWindowController window]];
 		[self cleanup];

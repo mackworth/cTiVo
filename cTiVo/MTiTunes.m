@@ -155,9 +155,11 @@ __DDLOGHERE__
 			}
  		}
 		newTrack.episodeID = show.episodeID;
-		newTrack.comment = show.showDescription;
-		newTrack.longDescription = show.showDescription;
-		newTrack.objectDescription = show.showDescription;
+		NSString * descrip = show.showDescription;
+		if (!descrip)  descrip = @"";
+		newTrack.comment = descrip;
+		newTrack.longDescription = descrip;
+		newTrack.objectDescription = descrip;
 		newTrack.show = show.seriesTitle;
 		newTrack.year = show.episodeYear;
 		//Can't set release date for some reason
