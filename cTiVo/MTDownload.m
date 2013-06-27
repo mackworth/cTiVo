@@ -1407,12 +1407,16 @@ __DDLOGHERE__
     
 	[self.activeTaskChain run];
 	DDLogMajor(@"Starting URL %@ for show %@", _show.downloadURL,_show.showTitle);
-	double downloadDelay = kMTTiVoAccessDelay - [[NSDate date] timeIntervalSinceDate:self.show.tiVo.lastDownloadEnded];
+	double downloadDelay = kMTTiVoAccessDelayServerFailure - [[NSDate date] timeIntervalSinceDate:self.show.tiVo.lastDownloadEnded];
 	if (downloadDelay < 0) {
 		downloadDelay = 0;
 	}
-	if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile)[activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
-	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
+	if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile)
+	{
+		DDLogMajor(@"Will start download of %@ in %lf seconds",self.show.showTitle,downloadDelay);
+		[activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
+	}
+	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay + downloadDelay];
 }
 
 - (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
