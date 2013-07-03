@@ -408,9 +408,9 @@ __DDLOGHERE__
 #ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: download.includeAPMMetaData.boolValue && download.encodeFormat.canAtomicParsley];
+        [checkBox setOn: download.includeAPMMetaData.boolValue && download.encodeFormat.canAcceptMetaData];
         checkBox.owner = download;
-		checkBox.enabled = download.encodeFormat.canAtomicParsley && !download.isDone && !protected;
+		checkBox.enabled = download.encodeFormat.canAcceptMetaData && !download.isDone && !protected;
 #endif
   	} else if ([tableColumn.identifier isEqualToString:@"Date"]) {
 		if ([tableColumn width] > 135) {

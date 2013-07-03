@@ -886,7 +886,7 @@ __DDLOGHERE__
             
         } else if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
             [self writeMetaDataFiles];
-//            if ( ! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley) ) {
+//            if ( ! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAcceptMetaData) ) {
                 [self finishUpPostEncodeProcessing];
 //            }
         }
@@ -1133,7 +1133,7 @@ __DDLOGHERE__
                  [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
                  [self writeMetaDataFiles];
 #ifndef deleteXML
-				 //                 if ( ! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley) ) {
+				 //                 if ( ! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAcceptMetaData) ) {
 #endif
                      [self finishUpPostEncodeProcessing];
 //                 }
@@ -1172,43 +1172,6 @@ __DDLOGHERE__
     return _commercialTask;
   
 }
-#ifndef deleteXML
-//-(MTTask *)apmTask
-//{
-//    if (! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAtomicParsley)) {
-//		return nil;
-//	}
-//    if (_apmTask) {
-//        return _apmTask;
-//    }
-//	MTTask *apmTask = [MTTask taskWithName:@"apm" download:self];
-//    
-//    apmTask.startupHandler = ^BOOL(){
-//        [self setValue:[NSNumber numberWithInt:kMTStatusMetaDataProcessing] forKeyPath:@"downloadStatus"];
-//        self.processProgress = 0.0;
-//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-//        return YES;
-//    };
-//    
-//    apmTask.completionHandler = ^(){[self finishUpPostEncodeProcessing];};
-//    
-//	[apmTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"AtomicParsley" ofType: @""] ];
-//    apmTask.requiresOutputPipe = NO;
-//    apmTask.requiresInputPipe = NO;
-//	NSMutableArray *apmArgs =[NSMutableArray array];
-//	[apmArgs addObject:_encodeFilePath];
-//	[apmArgs addObjectsFromArray:[self.show apmArguments]];
-//	
-//	DDLogVerbose(@"APM Arguments: %@", apmArgs);
-//	[apmTask setArguments:apmArgs];
-//	
-//	[apmTask setStandardOutput:apmTask.logFileWriteHandle];
-//    apmTask.trackingRegEx = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)%" options:NSRegularExpressionCaseInsensitive error:nil];
-//    _apmTask = apmTask;
-//    return _apmTask;
-//
-//}
-#endif
 
 -(int)taskFlowType
 {
@@ -1554,11 +1517,11 @@ __DDLOGHERE__
 	DDLogReport(@"Starting finishing @ %@",startTime);
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 	NSImage * artwork = nil;
-	if (self.encodeFormat.canAtomicParsley || _addToiTunesWhenEncoded) {
+	if (self.encodeFormat.canAcceptMetaData || _addToiTunesWhenEncoded) {
 		//see if we can find artwork for this series
 		artwork = [self findArtWork];
 	}
-    if (self.shouldMarkCommercials || self.encodeFormat.canAtomicParsley || self.shouldEmbedSubtitles) {
+    if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
         MP4FileHandle *encodedFile = MP4Modify([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding],0);
 		if (self.shouldMarkCommercials) {
 			if ([[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
@@ -1574,7 +1537,7 @@ __DDLOGHERE__
 				[srtEntries embedSubtitlesInMP4File:encodedFile forLanguage:[MTSrt languageFromFileName:captionFilePath]];
 			}
 		}
-		if (self.encodeFormat.canAtomicParsley) {
+		if (self.encodeFormat.canAcceptMetaData) {
 			MP4TagsStore([self.show metaDataTagsWithImage: artwork], encodedFile);
 		}
 		

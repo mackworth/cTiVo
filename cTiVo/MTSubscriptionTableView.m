@@ -355,9 +355,9 @@ static NSDateFormatter *dateFormatter;
 #ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: thisSubscription.includeAPMMetaData.boolValue && thisSubscription.encodeFormat.canAtomicParsley];
+        [checkBox setOn: thisSubscription.includeAPMMetaData.boolValue && thisSubscription.encodeFormat.canAcceptMetaData];
         checkBox.owner = thisSubscription;
-		checkBox.enabled = thisSubscription.encodeFormat.canAtomicParsley;
+		checkBox.enabled = thisSubscription.encodeFormat.canAcceptMetaData;
 #endif
 	} else if([tableColumn.identifier isEqualToString: @"Suggestions"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;

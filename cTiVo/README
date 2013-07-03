@@ -1,6 +1,30 @@
 *cTiVo* is a free Mac application to copy shows from your TiVo Premiere, HD, S3 or S2 devices. Simple to set up and use, it will download shows to your mac, and convert them to many popular formats / devices. It is inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance / compatibility.
 
 *cTiVo* is an initial beta; give it a try and tell us what you think. In particular, let us know if you see any problems.
+
+*Version 2.1 Alpha 1* New Features (no particular order)
+
+2.1 Alpha 1 is currently only released as a manual download.  After a few weeks in the wild we will push out a update via the automatic update.
+
+  * cTiVo now automatically configures an optimum workflow based on user selections so that the simultaneous encoding selection by the user is no longer necessary
+  * Commercials can now be marked as chapters on mp4 files regardless of the capability of the encoder.
+  * Subtitles are now embedded in the video file for mp4 including advanced formatting and glyphs
+  * Improved elGato support
+  * Improved UI for specification of tmp directory in Advanced Preferences
+  * Greatly improved logging for debugging support
+  * Update to HandbrakeCLI 0.99
+  * Greatly improved subscription handling including in multiple TiVo settings.  Users have the ability to specify TiVo or quality preference.  Users can also specify All to subscribe to all shows being recorded.
+  * Improved support for artwork
+  * Improved handing of Manual TiVo network access
+  * cTiVo now accesses TheTVDB.com to try to find missing episode/season information and missing artwork.
+  * Improved speed through added buffering of TiVo information
+  * Main window now allows the user to adjust window sizes
+  * Added robustness against certain TiVo network issues
+  * Many other bug fixes and UI enhancements
+  * cTiVo is now code-signed for additional security.
+
+----
+*Current 2.0 release*
 ----
 ==Features similar to iTiVo include:==
   * Formats include h.264, mpeg-2, mpeg-1, avi, decrypt-only, audio-only.

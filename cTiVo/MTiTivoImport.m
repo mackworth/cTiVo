@@ -182,7 +182,7 @@
             [sUD setBool:   [sUD boolForKey:kITtivoMetaData]        forKey:kMTExportTivoMetaData ];
            
             // Whether to export metadata with Atomic Parsley
-            [sUD setBool:   [sUD boolForKey:kITAPMetaData]          forKey:kMTExportAtomicParsleyMetaData ];
+            [sUD setBool:   [sUD boolForKey:kITAPMetaData]          forKey:kMTExportMetaData ];
 #endif            
             //---------------
             // Whether to run queue at a scheduled time;

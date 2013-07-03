@@ -37,7 +37,6 @@
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */; };
 		1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49974174D898D0022E084 /* MTTiVoPopUpTableCellView.m */; };
-		1EFD685D16D200FF00CC36E5 /* AtomicParsley in Resources */ = {isa = PBXBuildFile; fileRef = 1EFD685C16D200FF00CC36E5 /* AtomicParsley */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
@@ -164,7 +163,6 @@
 		1ED49973174D898D0022E084 /* MTTiVoPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoPopUpTableCellView.h; sourceTree = "<group>"; };
 		1ED49974174D898D0022E084 /* MTTiVoPopUpTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoPopUpTableCellView.m; sourceTree = "<group>"; };
 		1EFD685A16D19AA100CC36E5 /* ccextractor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ccextractor; sourceTree = "<group>"; };
-		1EFD685C16D200FF00CC36E5 /* AtomicParsley */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = AtomicParsley; sourceTree = "<group>"; };
 		D2001C211704F93F00B75D9C /* MTSrt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTSrt.h; sourceTree = "<group>"; };
 		D2001C221704F93F00B75D9C /* MTSrt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSrt.m; sourceTree = "<group>"; };
 		D2001C231704F93F00B75D9C /* MTEdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTEdl.h; sourceTree = "<group>"; };
@@ -508,7 +506,6 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				1EFD685C16D200FF00CC36E5 /* AtomicParsley */,
 				D24A8D0D16A5F3DC00DFF890 /* catToFile */,
 				1EFD685A16D19AA100CC36E5 /* ccextractor */,
 				D2CAF34216AB6FDE004E4CFA /* checkImage.png */,
@@ -707,7 +704,6 @@
 				1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */,
 				1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */,
 				1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */,
-				1EFD685D16D200FF00CC36E5 /* AtomicParsley in Resources */,
 				1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */,
 				1E684A7D16E2C50B000F5C6E /* expired-recording.png in Resources */,
 				1E684A7E16E2C50B000F5C6E /* expires-soon-recording.png in Resources */,

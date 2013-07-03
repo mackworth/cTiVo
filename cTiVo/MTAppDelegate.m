@@ -251,6 +251,14 @@ __DDLOGHERE__
 		
 	}
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: ([[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0) + 1.0 target:tiVoManager selector:@selector(writeDownloadQueueToUserDefaults) userInfo:nil repeats:YES];
+	
+	//Update atomicparsley default to metatdata default
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	if ([defaults objectForKey:@"ExportAtomicParsleyMetaData"]) {  //Old name
+		NSNumber *md = [defaults objectForKey:@"ExportAtomicParsleyMetaData"];
+		[defaults removeObjectForKey:@"ExportAtomicParsleyMetaData"];
+		[defaults setObject:md forKey:@"ExportMetaData"];
+	}
 
 }
 
@@ -393,7 +401,7 @@ __DDLOGHERE__
 		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
         BOOL canSkip = [tiVoManager.selectedFormat.comSkip boolValue];
 		BOOL canMark = tiVoManager.selectedFormat.canMarkCommercials;
-//		BOOL canAPM = tiVoManager.selectedFormat.canAtomicParsley ;
+//		BOOL canAPM = tiVoManager.selectedFormat.canAcceptMetaData ;
 		NSArray *menuItems = [optionsMenu itemArray];
 		for (NSMenuItem *mi in menuItems) {
 			if ([mi isSeparatorItem]) {
@@ -406,7 +414,7 @@ __DDLOGHERE__
 		//		if (canAPM) {
 //			apmMenuItem = [[NSMenuItem alloc] init];
 //			apmMenuItem.title = @"Add Metadata to Video File";
-//			[apmMenuItem bind:@"value" toObject:defaults withKeyPath:kMTExportAtomicParsleyMetaData options:nil];
+//			[apmMenuItem bind:@"value" toObject:defaults withKeyPath:kMTExportMetaData options:nil];
 //			[optionsMenu insertItem:apmMenuItem atIndex:0];
 //		}
 #endif

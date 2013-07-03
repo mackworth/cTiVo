@@ -204,7 +204,7 @@
 
 #ifndef deleteXML
 #define kMTExportTivoMetaData @"ExportTivoMetaData" // Whether to export XML metadata
-#define kMTExportAtomicParsleyMetaData @"ExportAtomicParsleyMetaData" // Whether to export metadata with Atomic Parsley
+#define kMTExportMetaData @"ExportMetaData" // Whether to export metadata with Atomic Parsley
 #endif
 
 #define kMTScheduledOperations @"ScheduledOperations"// Whether to run queue at a scheduled time;

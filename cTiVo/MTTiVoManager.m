@@ -993,7 +993,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 #ifndef deleteXML
 		newDownload.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
-		newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && [defaults boolForKey:kMTExportAtomicParsleyMetaData])];
+		newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAcceptMetaData && [defaults boolForKey:kMTExportMetaData])];
 #endif
 		[downloads addObject: newDownload];
 	}

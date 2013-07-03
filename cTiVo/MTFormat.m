@@ -377,7 +377,7 @@ __DDLOGHERE__
     return [_iTunes boolValue];
 }
 
--(BOOL) canAtomicParsley {
+-(BOOL) canAcceptMetaData {
 	NSArray * allowedExtensions = @[@".mp4", @".m4v", @".mov", @".3gp"];
 	NSString * extension = [self.filenameExtension lowercaseString];
 	return [allowedExtensions containsObject: extension];

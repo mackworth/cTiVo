@@ -165,7 +165,7 @@ __DDLOGHERE__
 	newDownload.genTextMetaData = self.genTextMetaData;
 #ifndef deleteXML
 	newDownload.genXMLMetaData = self.genXMLMetaData;
-	newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAtomicParsley && self.includeAPMMetaData.boolValue)];
+	newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAcceptMetaData && self.includeAPMMetaData.boolValue)];
 #endif
 	NSDictionary *thisRecording = @{
 		 @"showTitle": thisShow.showTitle ,
@@ -420,7 +420,7 @@ __DDLOGHERE__
 		newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
 #ifndef deleteXML
 		newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
-		newSub.includeAPMMetaData = [defaults objectForKey:kMTExportAtomicParsleyMetaData];
+		newSub.includeAPMMetaData = [defaults objectForKey:kMTExportMetaData];
 #endif
 		newSub.exportSubtitles	  =[defaults objectForKey:kMTExportSubtitles];
 	
@@ -497,7 +497,7 @@ __DDLOGHERE__
 		tempSub.genXMLMetaData = sub[kMTSubscribedGenXMLMetaData];
 		if (tempSub.genXMLMetaData ==nil) tempSub.genXMLMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTivoMetaData];
 		tempSub.includeAPMMetaData = sub[kMTSubscribedIncludeAPMMetaData];
-		if (tempSub.includeAPMMetaData ==nil) tempSub.includeAPMMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportAtomicParsleyMetaData];
+		if (tempSub.includeAPMMetaData ==nil) tempSub.includeAPMMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportMetaData];
 #endif
 		tempSub.exportSubtitles = sub[kMTSubscribedExportSubtitles];
 		if (tempSub.exportSubtitles ==nil) tempSub.exportSubtitles = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportSubtitles];
