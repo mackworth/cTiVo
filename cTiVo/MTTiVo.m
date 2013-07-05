@@ -641,7 +641,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[showURLConnection cancel];
 		self.showURLConnection = nil;
 		isConnecting = NO;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
+		if (password.length!= 0) {
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
+		}
 	}
 }
 

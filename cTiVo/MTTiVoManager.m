@@ -1364,6 +1364,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 - (void)netServiceDidResolveAddress:(NSNetService *)sender
 {
+    [sender stop];
 	NSArray * addresses = [sender addresses];
 	if (addresses.count == 0) return;
 	if (addresses.count > 1) {
@@ -1434,7 +1435,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	DDLogMajor(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
-    [sender stop];
 
 }
 
