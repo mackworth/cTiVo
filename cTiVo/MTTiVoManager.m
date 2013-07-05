@@ -1434,12 +1434,14 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	DDLogMajor(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+    [sender stop];
 
 }
 
 -(void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict
 {
     DDLogReport(@"Service %@ failed to resolve",sender.name);
+    [sender stop];
 }
 
 - (NSString *)getStringFromAddressData:(NSData *)dataIn {
