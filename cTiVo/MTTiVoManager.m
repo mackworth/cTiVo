@@ -390,6 +390,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			}
 		}
 		if (editedCurrentTiVo) {
+			//Turn off label in UI
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:currentMTiVo];
+			//RE-update shows
 			[currentMTiVo updateShows:nil];
 		}
 		if (!foundCurrentTiVo) {
