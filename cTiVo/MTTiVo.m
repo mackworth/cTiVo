@@ -203,7 +203,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 {
 	if (_mediaKey.length == 0) {
 		DDLogDetail(@"Failed to get MAK for %@",self);
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"new"}];
 		return;
 	}
 	DDLogMajor(@"Updating Tivo %@", self);
@@ -630,7 +630,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-	NSString *password = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys][_tiVo.name];
+	NSString *password = self.mediaKey;
 	if (challenge.previousFailureCount == 0) {
 		DDLogDetail(@"%@ password ask",self);
 		NSURLCredential *myCredential = [NSURLCredential credentialWithUser:@"tivo" password:password persistence:NSURLCredentialPersistenceForSession];
@@ -641,9 +641,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[showURLConnection cancel];
 		self.showURLConnection = nil;
 		isConnecting = NO;
-		if (password.length!= 0) {
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:self];
-		}
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"incorrect"}];
 	}
 }
 

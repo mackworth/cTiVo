@@ -840,6 +840,19 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[[NSUserDefaults standardUserDefaults] setValue:tmpDict forKey:kMTMediaKeys];
 }
 
+-(NSString *)getAMediaKey
+{
+	NSString *key = nil;
+	NSArray *currentTiVoList = [NSArray arrayWithArray:_tiVoList];
+	for (MTTiVo *tiVo in currentTiVoList) {
+		if (tiVo.mediaKey && tiVo.mediaKey.length) {
+			key = tiVo.mediaKey;
+			break;
+		}
+	}
+	return key;
+}
+
 #pragma mark - Download Management
 
 
@@ -1437,6 +1450,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
 
 }
+
 
 -(void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict
 {

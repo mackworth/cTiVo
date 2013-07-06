@@ -733,19 +733,32 @@ __DDLOGHERE__
 	if (gettingMediaKey || mediaKeyQueue.count == 0) {  //If we're in the middle of a get or nothing to get return
 		return;
 	}
-	MTTiVo *tiVo = [mediaKeyQueue objectAtIndex:0]; //Pop off the first in the queue
 	gettingMediaKey = YES;
-	DDLogDetail(@"Getting MAK for %@",tiVo);
-	if ( tiVo.mediaKey.length == 0 && _tiVoGlobalManager.tiVoList.count && tiVo != (MTTiVo *)[_tiVoGlobalManager.tiVoList objectAtIndex:0]) {
-		tiVo.mediaKey = ((MTTiVo *)[_tiVoGlobalManager.tiVoList objectAtIndex:0]).mediaKey;
-		[mediaKeyQueue removeObject:tiVo];
-		DDLogDetail(@"Trying key for tivo %@ to %@",tiVo.tiVo.name,tiVo.mediaKey);
-		[tiVo updateShows:nil];
-	}  else {
-		NSString *message = [NSString stringWithFormat:@"Need Media Key for %@",tiVo.tiVo.name];
-		if (!tiVo.mediaKeyIsGood && tiVo.mediaKey.length > 0) {
-			message = [NSString stringWithFormat:@"Incorrect Media Key for %@",tiVo.tiVo.name];
+	NSDictionary *request = [mediaKeyQueue objectAtIndex:0]; //Pop off the first in the queue
+	MTTiVo *tiVo = request[@"tivo"]; //Pop off the first in the queue
+	NSString *reason = request[@"reason"];
+	if ([reason isEqualToString:@"new"]) {
+		NSString *newKey = [_tiVoGlobalManager getAMediaKey];
+		if (newKey) {
+			tiVo.mediaKey = newKey;
+		} else {
+			//Get from user
+			NSString *message = [NSString stringWithFormat:@"Need %@ Media Key for %@",reason,tiVo.tiVo.name];
+			NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@""];
+			NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
+			
+			[input setStringValue:tiVo.mediaKey];
+			[keyAlert setAccessoryView:input];
+			NSInteger button = [keyAlert runModal];
+			if (button == NSAlertDefaultReturn) {
+				[input validateEditing];
+				DDLogDetail(@"Got Media Key %@",input.stringValue);
+				tiVo.mediaKey = input.stringValue;
+			}
 		}
+		
+	} else {
+		NSString *message = [NSString stringWithFormat:@"Incorrect %@ Media Key for %@",reason,tiVo.tiVo.name];
 		NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@""];
 		NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
 		
@@ -756,10 +769,12 @@ __DDLOGHERE__
 			[input validateEditing];
 			DDLogDetail(@"Got Media Key %@",input.stringValue);
 			tiVo.mediaKey = input.stringValue;
-			[tiVo updateShows:nil]; //Assume if needed and got a key we should reload
 		}
-        [mediaKeyQueue removeObject:tiVo];
+		
 	}
+	[mediaKeyQueue removeObject:request];
+	[tiVo updateShows:nil];
+	
 	gettingMediaKey = NO;
 	[[NSUserDefaults standardUserDefaults] setObject:[_tiVoGlobalManager currentMediaKeys] forKey:kMTMediaKeys];
 	[self getMediaKeyFromUser:nil];//Process rest of queue
