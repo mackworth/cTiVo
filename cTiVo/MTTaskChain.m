@@ -22,6 +22,7 @@ __DDLOGHERE__
 		isConfigured = NO;
         _isRunning = NO;
         _providesProgress = NO;
+		_beingRescheduled = NO;
 
     }
     return self;
@@ -119,6 +120,11 @@ __DDLOGHERE__
 			}
 		}
 	}
+	for (NSArray *tasks in _taskArray) {
+		for (MTTask *task in tasks) {
+			task.myTaskChain = self;
+		}
+	}
 	if (_dataSink) {
 		((MTTask *)currentTasks[0]).task.standardOutput = _dataSink;
 	}
@@ -201,7 +207,7 @@ __DDLOGHERE__
     }
     if (!isRunning) {
         //We need to move on
-        if (_nextTaskChain) {
+        if (_nextTaskChain && !_beingRescheduled) {
             self.download.activeTaskChain = _nextTaskChain;
             [_nextTaskChain run];
         }

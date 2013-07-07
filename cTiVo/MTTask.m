@@ -49,7 +49,6 @@ __DDLOGHERE__
 		_terminationHandler = nil;
         _progressCalc = nil;
         _cleanupHandler = nil;
-//		_nextTaskChain = nil;
         _requiresInputPipe = YES;
         _requiresOutputPipe = YES;
         _shouldReschedule = YES;
@@ -147,10 +146,7 @@ __DDLOGHERE__
 
 -(void)completeProcess
 {
-    //        DDLogMajor(@"Task %@ Stopped for show %@",_taskName,_download.show.showTitle);
     DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus,[self reasonForTermination]);
-    //		_download.processProgress = 1.0;
-    //		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
     if (self.taskFailed) {
 		[self failedTaskCompletion];
     } else {
@@ -162,10 +158,6 @@ __DDLOGHERE__
 			}
         }
         [self cleanUp];
-//        if (_nextTaskChain) {
-//            self.download.activeTaskChain = _nextTaskChain;
-//            [_nextTaskChain run];
-//        }
     }
     _taskRunning = NO;
 }
@@ -176,13 +168,8 @@ __DDLOGHERE__
 	[self saveLogFile];
 	[self cleanUp];
 	if (!_download.isCanceled && _shouldReschedule){  // _shouldReschedule is for failure of non-critical tasks
-//		_nextTaskChain = nil;
+		_myTaskChain.beingRescheduled = YES;
 		[_download rescheduleShowWithDecrementRetries:@YES];
-//	} else {
-//		if (_nextTaskChain) {
-//			self.download.activeTaskChain = _nextTaskChain;
-//			[_nextTaskChain run];
-//		}
 	}
 	
 }
