@@ -1377,6 +1377,7 @@ __DDLOGHERE__
 	if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile)
 	{
 		DDLogMajor(@"Will start download of %@ in %lf seconds",self.show.showTitle,downloadDelay);
+		[activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	}
 	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay + downloadDelay];
