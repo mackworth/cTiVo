@@ -108,7 +108,16 @@
 -(void)getTheTVDBDetails;
 -(void)retrieveTVDBArtworkIntoPath: (NSString *) path;
 
--(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image;
+
+typedef enum {
+	HDTypeNotAvailable = -1,
+	HDTypeStandard = 0,
+	HDType720p = 1,
+	HDType1080p = 2
+} HDTypes;
+
+
+-(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image andResolution:(HDTypes) hdType;
 
 
 @end

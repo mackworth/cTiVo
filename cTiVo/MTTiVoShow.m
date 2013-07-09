@@ -663,7 +663,7 @@ __DDLOGHERE__
 	return _tiVo;
 }
 
--(const MP4Tags * ) metaDataTagsWithImage: (NSImage* ) image {
+-(const MP4Tags * ) metaDataTagsWithImage: (NSImage* ) image andResolution:(HDTypes) hdType {
 	//maintain source code parallel with MTiTunes.m>importIntoiTunes
 	const MP4Tags *tags = MP4TagsAlloc();
 	uint8_t mediaType = 10;
@@ -712,9 +712,15 @@ __DDLOGHERE__
 			
 		}
 	}
-	if (self.episodeID) {
+	if (self.episodeID.length >0) {
 		MP4TagsSetTVEpisodeID(tags, [self.episodeID cStringUsingEncoding:NSUTF8StringEncoding]);
+		if (self.episodeID.length >2) {
+			NSRange digitPart = NSMakeRange(2, self.episodeID.length-2);
+			uint32 digits = [[self.episodeID substringWithRange:digitPart] intValue];
+			MP4TagsSetContentID(tags, &digits);
+		}
 	}
+	
 	if (self.showDescription.length > 0) {
 		if (self.showDescription.length < 255) {
 			MP4TagsSetDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
@@ -755,6 +761,10 @@ __DDLOGHERE__
 		MP4TagsAddArtwork(tags, &artwork);
 	}
 	
+	if (hdType != HDTypeNotAvailable ) {
+		uint8_t myHDType = (uint8_t) hdType;
+		MP4TagsSetHDVideo(tags, &myHDType);
+	}
 	return tags;
 }
 

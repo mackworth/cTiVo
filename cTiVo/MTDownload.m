@@ -950,8 +950,8 @@ __DDLOGHERE__
 					NSRange r = [lastItem range];
 					if (r.location != NSNotFound) {
 						NSRange valueRange = [lastItem rangeAtIndex:1];
-						DDLogVerbose(@"Encoder progress found data %@ with value %lf",[data substringWithRange:valueRange],[[data substringWithRange:valueRange] doubleValue]/100.0);
 						returnValue =  [[data substringWithRange:valueRange] doubleValue]/100.0;
+						DDLogVerbose(@"Encoder progress found data %lf",returnValue);
 					}
 
 				}
@@ -1182,7 +1182,8 @@ __DDLOGHERE__
 -(void)download
 {
 	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-	DDLogVerbose(@"Starting download for %@; Format: %@; %@%@%@%@%@%@%@%@",
+	DDLogDetail(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@",
+				self.taskFlowType,
 				self,
 				self.encodeFormat.name ,
 				self.skipCommercials ?
@@ -1513,6 +1514,31 @@ __DDLOGHERE__
 	[tiVoManager updateShowOnDisk:_show.showKey withPath: videoFilePath];
 }
 
+-(HDTypes) hdTypeForMP4File:(MP4FileHandle *) fileHandle {
+	int i, tracksCount = MP4GetNumberOfTracks(fileHandle, 0, 0);
+	
+	for (i=0; i< tracksCount; i++) {
+		MP4TrackId trackId = MP4FindTrackId(fileHandle, i, 0, 0);
+		const char* type = MP4GetTrackType(fileHandle, trackId);
+		
+		if (MP4_IS_VIDEO_TRACK_TYPE(type)) {
+			uint16 height = MP4GetTrackVideoHeight(fileHandle, trackId);
+			if (height == 0) {
+				return HDTypeNotAvailable;
+			} else  if (height <=  480) {
+				return HDTypeStandard;
+			} else if (height <= 720 ) {
+				return HDType720p;
+			} else if (height <= 10000) {
+				return HDType1080p;
+			} else {
+				return HDTypeNotAvailable;
+			}
+		}
+	}
+	return HDTypeNotAvailable;
+}
+
 -(void) finishUpPostEncodeProcessing {
 	NSDate *startTime = [NSDate date];
 	DDLogReport(@"Starting finishing @ %@",startTime);
@@ -1539,7 +1565,8 @@ __DDLOGHERE__
 			}
 		}
 		if (self.encodeFormat.canAcceptMetaData) {
-			MP4TagsStore([self.show metaDataTagsWithImage: artwork], encodedFile);
+			HDTypes hdType = [self hdTypeForMP4File:encodedFile ];
+			MP4TagsStore([self.show metaDataTagsWithImage: artwork andResolution:hdType], encodedFile );
 		}
 		
 		MP4Close(encodedFile, 0);
