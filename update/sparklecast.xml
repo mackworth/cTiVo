@@ -3,11 +3,32 @@
    <channel>
       <title>cTiVo Updates</title>
       <link>http://ctivo.googlecode.com/files/sparklecast.xml</link>
-      <description>Version 2.0 (Major new features and UI improvements)</description>
+      <description>Version 2.1 (More Major new features and UI improvements)</description>
       <language>en</language>      
          <item>
-            <title>Version 2.0 (Major new features and UI improvements)</title>
+            <title>Version 2.1 (More Major new features and UI improvements)</title>
 			<description><![CDATA[
+				<b>Version 2.1 (More Major new features and UI improvements)</b><br /><br />
+				<ul>
+				<li>cTiVo now automatically configures an optimum workflow based on user selections so that the simultaneous encoding selection by the user is no longer necessary</li>
+				<li>Commercials can now be marked as chapters on mp4 files regardless of the capability of the encoder.</li>
+				<li>Subtitles are now embedded in the video file for mp4 including advanced formatting and glyphs</li>
+				<li>Improved elGato support</li>
+				<li>Improved UI for specification of tmp directory in Advanced Preferences</li>
+				<li>Greatly improved logging for debugging support</li>
+				<li>Update to HandbrakeCLI 0.99</li>
+				<li>Greatly improved subscription handling including in multiple TiVo settings.  Users have the ability to specify TiVo or quality preference.  Users can also specify All to subscribe to all shows being recorded.</li>
+				<li>Improved support for artwork</li>
+				<li>Improved handing of Manual TiVo network access</li>
+				<li>cTiVo now accesses TheTVDB.com to try to find missing episode/season information and missing artwork.</li>
+				<li>Improved speed through added buffering of TiVo information</li>
+				<li>Main window now allows the user to adjust window sizes</li>
+				<li>Added robustness against certain TiVo network issues</li>
+				<li>Many other bug fixes and UI enhancements</li>
+				<li>cTiVo is now code-signed for additional security.</li>
+				</ul>
+                <br />
+                
 				<b>Version 2.0 (Major new features and UI improvements)</b><br /><br />
 				<span style="margin-left:4px">Greatly enhanced User Interface:</span>
 				<ul>
@@ -45,19 +66,6 @@
 				<li>Improved speed for decrypting only downloads</li>
 				<li>Many others</li>
 				</ul>				<br />
-				<b>Version 1.3.2</b><br />
-				<ul>
-				<li>Added support for comSkip (experimental feature to remove commercials during encoding)</li>
-				<li>Improved scheduling function for daily operation</li>
-				<li>Added pause function for queue processing</li>
-				<li>Greatly improved logging functions with user control of detail level</li>
-				<li>Made Series Column behave same as Program column (for those who prefer Series/Episodes  as two columns)</li>
-				<li>Allow user to reschedule shows in progress for greater flexibility in the queue</li>
-				<li>Improved drag/drop functionality so the user can reprioritize show processing with drag/drop</li>
-				<li>Queue restoration on restart should now keep original order</li>
-				<li>Shows deleted on Tivo are marked as such</li>
-				<li>Optional confirmation on quit during downloads, including quit after download completes</li>
-				</ul>
 				
 				See <a href="http://code.google.com/p/ctivo/"> cTiVo Home </a> for more informaton.
 
@@ -65,11 +73,11 @@
 			</description>
             <pubDate>Mon., Apr 8, 2013 10:10:00 -0800</pubDate>
             <!-- <sparkle:releaseNotesLink>http://andymatuschak.org/files/notes.html</sparkle:releaseNotesLink> -->
-            <enclosure url="http://ctivo.googlecode.com/files/cTiVo_2.0Beta2_296.zip" 
-            			sparkle:version="296" sparkle:shortVersionString="2.0 Beta 2" 
-            			length="21123326" 
+            <enclosure url="http://ctivo.googlecode.com/files/cTiVo_2.1_439.zip" 
+            			sparkle:version="439" sparkle:shortVersionString="2.1" 
+            			length="16888128" 
             			type="application/octet-stream" 
-            			sparkle:dsaSignature="MCwCFEBRf53ntYztjCzsnNQiNAUCSnmiAhQ6ctDkwjKM2f4YGWydJZ7YNtC/bw==" />
+            			sparkle:dsaSignature="MC4CFQDMkPBcMB8+IfhoDkwepvO0vdEErAIVAK7spviPYx1NZ7PQmXKmIgRVCw9N" />
          </item>
    </channel>
 </rss>
