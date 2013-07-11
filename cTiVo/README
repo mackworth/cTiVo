@@ -1,79 +1,62 @@
-*cTiVo* is a free Mac application to copy shows from your TiVo Premiere, HD, S3 or S2 devices. Simple to set up and use, it will download shows to your mac, and convert them to many popular formats / devices. It is inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance / compatibility.
+*cTiVo* is a free Mac application to download shows from your !TiVo (Premiere, HD, S3 or S2 devices) and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, but very flexible. 
 
-*cTiVo* is an initial beta; give it a try and tell us what you think. In particular, let us know if you see any problems.
+cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your !!TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
 
-*Version 2.1 Alpha 1* New Features (no particular order)
+cTiVo is inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance and  compatibility. Current or former users of iTiVo will find a detailed comparison and upgrade path described in [iTiVoUsers iTivo Users].
 
-2.1 Alpha 1 is currently only released as a manual download.  After a few weeks in the wild we will push out a update via the automatic update.
-
-  * cTiVo now automatically configures an optimum workflow based on user selections so that the simultaneous encoding selection by the user is no longer necessary
-  * Commercials can now be marked as chapters on mp4 files regardless of the capability of the encoder.
-  * Subtitles are now embedded in the video file for mp4 including advanced formatting and glyphs
-  * Improved elGato support
-  * Improved UI for specification of tmp directory in Advanced Preferences
-  * Greatly improved logging for debugging support
-  * Update to HandbrakeCLI 0.99
-  * Greatly improved subscription handling including in multiple TiVo settings.  Users have the ability to specify TiVo or quality preference.  Users can also specify All to subscribe to all shows being recorded.
-  * Improved support for artwork
-  * Improved handing of Manual TiVo network access
-  * cTiVo now accesses TheTVDB.com to try to find missing episode/season information and missing artwork.
-  * Improved speed through added buffering of TiVo information
-  * Main window now allows the user to adjust window sizes
-  * Added robustness against certain TiVo network issues
-  * Many other bug fixes and UI enhancements
-  * cTiVo is now code-signed for additional security.
-
-----
-*Current 2.0 release*
-----
-==Features similar to iTiVo include:==
-  * Formats include h.264, mpeg-2, mpeg-1, avi, decrypt-only, audio-only.
-  * Target devices include iPhone, iPod, AppleTV, Xbox 360, !PlayStation 3, PSP, YouTube.
-  * 'Subscriptions' to your regular shows: downloading them whenever new episodes are available.
-  * Support for different encoders, including !HandBrake, mencoder, ffmpeg.
-  * Download queue for batch processing.
-  * Optionally show non-downloadable copy-protected shows.
-  * Automatically remove commercials from downloaded shows.
-  * Download queue restored when restarting app.
-  * Automatic discovery of TiVos using Bonjour.
-  * Folders optionally created for each series.
-  * Automatic updates of the software.
-  * Automatically perform an 'iTunes sync' to your device when the download is completed.
-    With appropriate configuration, in the morning, you will find all your favorite shows from your !TiVo loaded onto your iPhone or iPad.
-  * Manual connect by IP address.
-  * Detailed info on each show.
-  * Growl or Apple notifications.
-  * Scheduling of when the queue will be processed.
-  * Built-in Elgato turbo.264 support.
-  * Generate metadata appropriate for use by tools such as pyTivoX.
-  * Create subtitle files (.srt) from the closed caption info including removal of commercials.
-  * Imports iTiVo preferences, including subscriptions and Media Access Key.
-  * Display filter in program list.
-----
-==Features in addition to iTiVo include:==
-  * Support for multiple !TiVos (with same or different Media Access Keys), all displayed/active simultaneously.
-  * Change download directories for each download.
-  * Customizable columns; show exactly what you want to see.
-  * Change conversion formats for each download or subscription.
-  * Turn on/off iTunes / simultaneous download encoding for each download or subscription.
-  * Simultaneous downloading from multiple !TiVos.
-  * Show only the encoding formats you actually use.
-  * Options to prevent sleep or quitting until processing complete.
-  * More parallel processing, including downloading next show while encoding current one.
-  * Sorting download and subscription queues.
-  * Completely customizable encoder options for multiple formats.
-  * In scheduled use, avoids new operations when end-time reached.
+==Automatic Download and Conversions==
+  * Auto-discovery of all your !TiVos using Bonjour.
   * Drag/drop and contextual menus for ease of use; submit, reschedule, delete all by dragging the shows.
-  * User-definable ports for !TiVos; allows advanced users to access !TiVo shows remotely (requires network reconfiguration).
-  * Spotlight tracking of shows already downloaded by cTiVo
-  * Fully compatible with OS X Mountain Lion (10.8) and Lion (10.7).
+  * Download queue for batch processing, restored on restart.
+  * 'Subscriptions' to your regular shows: automatically downloading shows whenever new episodes are available.
+  * Removes commercials from downloaded shows, or mark for quick skip in player.
+  * Extracts closed caption info, adjusted for removal of commercials; adds to MPEG and creates subtitle files.
+  * Generate metadata appropriate for use by tools such as pyTivo.
+  * Adds episode-specific artwork from theTVDB (if available).
+  * Copies shows to iTunes with all data about the show (metadata) transferred as well.
+  * Performs an 'iTunes sync' to your device when the download is completed. 
+  * Maximum parallel processing, including downloading from multiple !TiVos simultaneously.
+  * Wide selection of predefined video Formats.
+  * Target devices include iPhone, iPad, AppleTV, Xbox 360, !PlayStation 3, PSP, !YouTube.
+  * Imports iTiVo preferences, including subscriptions and Media Access Key.
 ----
-==iTivo features not implemented, at least not yet:==
-  * Reporting on TiVo's disk usage.
-  * cTiVo is not compatible with OS X Snow Leopard or Leopard
+==Complete Control Over Process==
+  * Change conversion formats for each download or subscription.
+  * Change commercial handling/captioning/metadata/iTunes submittal for each download or subscription.
+  * Change download directories for each download.
+  * Create custom Formats with completely customizable encoder options for multiple formats.
+  * Show only the encoding formats you actually use.
+  * Support for different encoders, including !HandBrake, mencoder, ffmpeg, Elgato Turbo.264.
+  * Scheduling of when the queue will be processed.
+  * Options to prevent sleep or quitting until processing complete.
+  * Access remote !!TiVos (requires network reconfiguration).
+  * Folders optionally created for each series.
+----
+==Information About Your Shows==
+  * Customizable columns about shows, downloads and subscriptions; show exactly what you want to see and no more.
+  * Detailed info available for each show.
+  * Contextual menus to play downloaded video, show in Finder, etc.
+  * See which shows have already been downloaded with Spotlight tracking of shows already downloaded by cTiVo.
+  * Filter which shows are seen by keywords or TiVo.
+  * Show/Hide copy-protected shows and !TiVo suggestions.
+  * Growl or Apple notifications when downloads complete.
+----
+==Major New Features in Version 2.1 ==
+  * cTiVo now automatically configures an optimum workflow so that simultaneous-encoding decision is no longer necessary.
+  * Commercials can now be marked as chapters on MPEG files, regardless of the capability of the encoder.
+  * Subtitles are now embedded in the video file for MPEG (including advanced formatting and glyphs).
+  * Update to HandbrakeCLI 0.99.
+  * Greatly improved subscriptions, including handling multiple !TiVos.  
+  * Subscribe to ALL to download all shows recorded.
+  * Improved support for artwork.
+  * cTiVo now accesses TheTVDB.com to try to find missing episode/season information and artwork.
+  * cTiVo is now code-signed for additional security.
+  * Many other bug fixes and UI enhancements (see Wiki for updated documentation).
 ----
 ==To install:==
 
-Download the *cTiVo* application, and drag it to your Applications Folder
+Download the *cTiVo* application, and drag it to your Applications Folder.
 
-*cTiVo* is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions (other than above not-implemented yet)  at https://code.google.com/p/ctivo/issues/list.
+cTiVo is fully compatible with OS X Mountain Lion (10.8) and Lion (10.7); not compatible with Snow Leopard or earlier.
+
+*cTiVo* is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at https://code.google.com/p/ctivo/issues/list.
