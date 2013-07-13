@@ -716,7 +716,9 @@ __DDLOGHERE__
 		MP4TagsSetTVEpisodeID(tags, [self.episodeID cStringUsingEncoding:NSUTF8StringEncoding]);
 		if (self.episodeID.length >2) {
 			NSRange digitPart = NSMakeRange(2, self.episodeID.length-2);
-			uint32 digits = [[self.episodeID substringWithRange:digitPart] intValue];
+			NSUInteger bigDigits = [[self.episodeID substringWithRange:digitPart] integerValue];
+			uint32 digits = (uint32)(bigDigits & ULONG_MAX); //modulo to wrap around over 4G
+			DDLogDetail(@"%lu => %u", bigDigits, digits);
 			MP4TagsSetContentID(tags, &digits);
 		}
 	}
