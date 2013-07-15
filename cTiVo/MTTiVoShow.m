@@ -714,11 +714,11 @@ __DDLOGHERE__
 	}
 	if (self.episodeID.length >0) {
 		MP4TagsSetTVEpisodeID(tags, [self.episodeID cStringUsingEncoding:NSUTF8StringEncoding]);
-		if (self.episodeID.length >2) {
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesContentIDExperiment ] & (self.episodeID.length >2)) {
 			NSRange digitPart = NSMakeRange(2, self.episodeID.length-2);
 			NSUInteger bigDigits = [[self.episodeID substringWithRange:digitPart] integerValue];
 			uint32 digits = (uint32)(bigDigits & ULONG_MAX); //modulo to wrap around over 4G
-			DDLogDetail(@"%lu => %u", bigDigits, digits);
+			DDLogDetail(@"ContentID: %lu => %u", bigDigits, digits);
 			MP4TagsSetContentID(tags, &digits);
 		}
 	}

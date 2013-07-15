@@ -174,6 +174,7 @@ __DDLOGHERE__
                                           kMTTmpDir,kMTTmpFilesDirectory,
                                           @{},kMTTheTVDBCache,
 										  @YES,kMTGetEpisodeArt,
+										  @NO, kMTiTunesContentIDExperiment,
 										  nil];
     
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];

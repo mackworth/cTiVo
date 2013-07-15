@@ -1549,7 +1549,7 @@ __DDLOGHERE__
 		artwork = [self findArtWork];
 	}
     if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
-        MP4FileHandle *encodedFile = MP4Modify([_encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding],0);
+        MP4FileHandle *encodedFile = MP4Modify([_encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
 		if (self.shouldMarkCommercials) {
 			if ([[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
 				NSArray *edls = [NSArray getFromEDLFile:commercialFilePath];
@@ -1566,8 +1566,10 @@ __DDLOGHERE__
 		}
 		if (self.encodeFormat.canAcceptMetaData) {
 			HDTypes hdType = [self hdTypeForMP4File:encodedFile ];
-			MP4TagsStore([self.show metaDataTagsWithImage: artwork andResolution:hdType], encodedFile );
-		}
+			const MP4Tags* tags = [self.show metaDataTagsWithImage: artwork andResolution:hdType];
+			MP4TagsStore(tags, encodedFile );
+			MP4TagsFree(tags);
+}
 		
 		MP4Close(encodedFile, 0);
     }
@@ -1581,7 +1583,18 @@ __DDLOGHERE__
 		
 		if (iTunesPath && ![iTunesPath isEqualToString: self.encodeFilePath]) {
 			//apparently iTunes created new file
-			
+//			MP4FileHandle *iTunesFileHandle = MP4Modify([iTunesPath cStringUsingEncoding:NSUTF8StringEncoding],0);
+//			const MP4Tags* tags2 = MP4TagsAlloc();
+//			MP4TagsFetch( tags2, iTunesFileHandle );
+//			uint32 iTunesContentID = *tags2->contentID;
+//			if (iTunesContentID != realContentID) {
+//				DDLogMajor(@"replacing iTunes ContentID: %u with %u",iTunesContentID, realContentID);
+//				MP4TagsSetContentID(tags2, &realContentID);
+//				MP4TagsStore(tags2, iTunesFileHandle);
+//			}
+//			MP4TagsFree(tags2);
+//			MP4Close(iTunesFileHandle, 0);
+
 			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
 				if (![[NSUserDefaults standardUserDefaults ] boolForKey:kMTSaveTmpFiles]) {
 					if ([[NSFileManager defaultManager] removeItemAtPath:self.encodeFilePath error:nil]) {
