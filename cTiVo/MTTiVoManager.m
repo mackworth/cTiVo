@@ -675,7 +675,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void) cancelAllDownloads {
 	for (MTDownload *download in tiVoManager.downloadQueue) {
 		if (download.isInProgress){
-			[download cancel];
+			[download rescheduleShowWithDecrementRetries:@NO];
 		}
 	}
 }
