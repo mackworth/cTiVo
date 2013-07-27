@@ -395,7 +395,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			//RE-update shows
 			[currentMTiVo updateShows:nil];
 		}
-		if (!foundCurrentTiVo) {
+		if (!foundCurrentTiVo && [mTiVo[@"enabled"] boolValue]) {
 			MTNetService *newTiVoService = [[MTNetService alloc] init];
 			newTiVoService.userName = mTiVo[@"userName"];
 			newTiVoService.iPAddress = mTiVo[@"iPAddress"];
