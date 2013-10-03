@@ -4,7 +4,8 @@ cTiVo provides complete hands-off operation: once you choose or subscribe to you
 
 cTiVo is inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance and  compatibility. Current or former users of iTiVo will find a detailed comparison and upgrade path described in [iTiVoUsers iTivo Users].
 
-==Automatic Download and Conversions==
+#Automatic Download and Conversions
+
   * Auto-discovery of all your !TiVos using Bonjour.
   * Drag/drop and contextual menus for ease of use; submit, reschedule, delete all by dragging the shows.
   * Download queue for batch processing, restored on restart.
