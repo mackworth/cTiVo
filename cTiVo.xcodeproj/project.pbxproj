@@ -132,6 +132,7 @@
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
 		1E45C8F116E11E59005C5334 /* MTStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTStringEmpty.h; sourceTree = "<group>"; };
 		1E45C8F216E11E59005C5334 /* MTStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTStringEmpty.m; sourceTree = "<group>"; };
+		1E5C5C1A17FDF0B80056E794 /* readme.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme.md; sourceTree = "<group>"; };
 		1E684A7516E2C50B000F5C6E /* copyright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = copyright.png; sourceTree = "<group>"; };
 		1E684A7716E2C50B000F5C6E /* expired-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expired-recording.png"; sourceTree = "<group>"; };
 		1E684A7816E2C50B000F5C6E /* expires-soon-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expires-soon-recording.png"; sourceTree = "<group>"; };
@@ -424,6 +425,7 @@
 		D2D60B9216766EFD00CE32DE = {
 			isa = PBXGroup;
 			children = (
+				1E5C5C1A17FDF0B80056E794 /* readme.md */,
 				D271F3621734BCDA00641435 /* Security.framework */,
 				D2C0380F17131F9A0001BA52 /* Update */,
 				1E684A8C16E40EA8000F5C6E /* Wiki */,
