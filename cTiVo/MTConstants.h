@@ -167,7 +167,8 @@
 
 #define kMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information
 #define	kMTQueuePaused @"QueuePaused"			//State of pause for the download queue
-#define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address.  
+#define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address.
+#define kMTTiVos @"TiVos"           //List of defined tiVos both discovered and manually defined.
 #define kMTPreventSleep @"PreventSleep"			//If true this will prevent sleep when possible
 #define kMTQuitWhileProcessing @"QuitWhileProcessing" //Don't warn user when quitting if active job
 #define kMTFormats @"Formats"                        //User defined Formats
@@ -215,6 +216,19 @@
 
 #define kMTDebugLevel       @"DebugLevel"
 #define kMTDebugLevelDetail @"DebugLevelDetail"
+
+//List of keys in TiVo Preference Dictionary
+#define kMTTiVoEnabled @"enabled"
+#define kMTTiVoMediaKey @"mediaKey"
+#define kMTTiVoUserName @"userName"
+   //Manual Tivo's Only
+#define kMTTiVoID @"id"
+#define kMTTiVoIPAddress @"IPAddress"
+#define kMTTiVoUserPort @"userPort"
+#define kMTTiVoUserPortSSL @"userPortSSL"
+#define kMTTiVoManualTiVo @"manualTiVo"
+#define kMTTiVoNullKey @"00000000"
+
 
 //Growl notification constants (see growlRegDict file)
 #define kMTGrowlBeginDownload @"Begin Download"

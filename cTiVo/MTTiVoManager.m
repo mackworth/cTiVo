@@ -114,8 +114,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		if (!_lastLoadedTivoTimes) {
 			_lastLoadedTivoTimes = [NSMutableDictionary new];
 		}
-        [self loadManualTiVos];
-        [self searchForBonjourTiVos];
 		
 		NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
 		NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
@@ -160,10 +158,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		//Make sure there's a selected format, espeically on first launch
 		
 		_selectedFormat = nil;
-        if (![defaults objectForKey:kMTSelectedFormat]) {
-            //What? No previous format,must be our first run. Let's see if there's any iTivo prefs.
-            [MTiTiVoImport checkForiTiVoPrefs];
-        }
+//        if (![defaults objectForKey:kMTSelectedFormat]) {
+//            //What? No previous format,must be our first run. Let's see if there's any iTivo prefs.
+//            [MTiTiVoImport checkForiTiVoPrefs];
+//        }
 		if (([defaults boolForKey:kMTRunComSkip] && [defaults boolForKey:kMTSimultaneousEncode])) [defaults setBool:NO forKey:kMTRunComSkip];  //patch for iTivo imports
 
 		if ([defaults objectForKey:kMTSelectedFormat]) {
@@ -239,6 +237,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
         for (NSString *key in keysToDelete) {
             [_tvdbCache removeObjectForKey:key];
         }
+		_currentMediaKeys = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys];
 	}
 	return self;
 }
@@ -349,7 +348,33 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 #pragma mark - TiVo Search Methods
 
--(void)loadManualTiVos
+//-(void)loadManualTiVos
+//{
+//    
+//    NSArray *startingTiVos = self.savedTiVos;
+//	NSMutableArray *manualTiVoList = [NSMutableArray array];
+//    
+//    for (NSDictionary *tiVo in startingTiVos) {
+//        if ([tiVo[kMTTiVoManualTiVo] boolValue] && [tiVo[kMTTiVoEnabled] boolValue]) {
+//            MTNetService *newTiVoService = [[MTNetService alloc] init];
+//			newTiVoService.userName = tiVo[kMTTiVoUserName];
+//			newTiVoService.iPAddress = tiVo[kMTTiVoIPAddress];
+//			newTiVoService.userPort = [tiVo[kMTTiVoUserPort] intValue];
+//			newTiVoService.userPortSSL = [tiVo[kMTTiVoUserPortSSL] intValue];
+//			MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:newTiVoService withOperationQueue:queue];
+//			newTiVo.manualTiVoID = [tiVo[kMTTiVoID] intValue];
+//			newTiVo.manualTiVo = YES;
+//			newTiVo.enabled = YES;
+//			DDLogDetail(@"Adding new manual TiVo %@",newTiVo);
+//			[newTiVo updateShows:nil];
+//            [manualTiVoList addObject:newTiVo];
+//
+//        }
+//    }
+//    self.tiVoList = [NSArray arrayWithArray:manualTiVoList];
+//}
+
+-(void) loadManualTiVos
 {
 //    BOOL didFindTiVo = NO;
 	if (loadingManualTiVos) {
@@ -358,63 +383,53 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	loadingManualTiVos = YES;
 	DDLogDetail(@"LoadingTivos");
 	NSMutableArray *bonjourTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == NO"]]];
-	NSMutableArray *manualTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
+	NSArray *manualTiVoList = [NSArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
 //	[_tiVoList removeObjectsInArray:manualTiVoList];
 	DDLogVerbose(@"MANUALTIVOS %@",manualTiVoList);
-	NSArray *manualTiVoDescriptions = [self getManualTiVoDescriptions];
+//	NSArray *manualTiVoDescriptions = [self getManualTiVoDescriptions];
+    NSArray *manualTiVoDescriptions = self.savedManualTiVos;
 	
 	//Update rebuild manualTiVoList reusing what can be reused.
 	NSMutableArray *newManualTiVoList = [NSMutableArray array];
 	for (NSDictionary *mTiVo in manualTiVoDescriptions) {
-		BOOL foundCurrentTiVo = NO;
-		BOOL editedCurrentTiVo = NO;
-		MTTiVo *currentMTiVo = nil;
-		for (currentMTiVo in manualTiVoList) {
-			if (currentMTiVo.manualTiVoID == [mTiVo[@"id"] intValue]) {
-                DDLogVerbose(@"Found current manual tivo %@",currentMTiVo.tiVo.name);
-				foundCurrentTiVo = YES;
-				if (currentMTiVo.enabled != [mTiVo[@"enabled"] boolValue] || //If anything has changed then update and record change with editedCurrentTiVo
-					[currentMTiVo.tiVo.iPAddress caseInsensitiveCompare:mTiVo[@"iPAddress"]] != NSOrderedSame ||
-					[currentMTiVo.tiVo.userName compare:mTiVo[@"userName"]] != NSOrderedSame ||
-					currentMTiVo.tiVo.userPort != [mTiVo[@"userPort"] intValue] ||
-					currentMTiVo.tiVo.userPortSSL != [mTiVo[@"userPortSSL"] intValue]
-					) {
-					currentMTiVo.tiVo.iPAddress = mTiVo[@"iPAddress"];
-					currentMTiVo.tiVo.userName = mTiVo[@"userName"];
-					currentMTiVo.tiVo.userPort = [mTiVo[@"userPort"] intValue];
-					currentMTiVo.tiVo.userPortSSL = [mTiVo[@"userPortSSL"] intValue];
-					currentMTiVo.enabled = [mTiVo[@"enabled"] boolValue];
-					editedCurrentTiVo = YES;
-				}
-				break;
-			}
-		}
-		if (editedCurrentTiVo) {
-			//Turn off label in UI
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:currentMTiVo];
-			//RE-update shows
-			[currentMTiVo updateShows:nil];
-		}
-		if (!foundCurrentTiVo && [mTiVo[@"enabled"] boolValue]) {
-			MTNetService *newTiVoService = [[MTNetService alloc] init];
-			newTiVoService.userName = mTiVo[@"userName"];
-			newTiVoService.iPAddress = mTiVo[@"iPAddress"];
-			newTiVoService.userPort = [mTiVo[@"userPort"] intValue];
-			newTiVoService.userPortSSL = [mTiVo[@"userPortSSL"] intValue];
-			MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:newTiVoService withOperationQueue:queue];
-			newTiVo.manualTiVoID = [mTiVo[@"id"] intValue];
-			newTiVo.manualTiVo = YES;
-			newTiVo.enabled = [mTiVo[@"enabled"] boolValue];
-			DDLogDetail(@"Adding new manual TiVo %@",newTiVo);
-			[newTiVo updateShows:nil];
-            if (newTiVo.enabled) {
-                [newManualTiVoList addObject:newTiVo];
+        if ([mTiVo[kMTTiVoEnabled] boolValue]) { //Don't do anything if not enabled
+            MTTiVo *targetMTTiVo = nil;
+            BOOL shouldUpdateTiVo = NO;
+            for (MTTiVo *currentMTiVo in manualTiVoList) { // See if there is a current TiVo that matches (by ID as name may change)
+                if (currentMTiVo.manualTiVoID == [mTiVo[kMTTiVoID] intValue]) targetMTTiVo = currentMTiVo; //Found a TiVo to edit
             }
-		} else {
-            if (currentMTiVo.enabled) {
-                [newManualTiVoList addObject:currentMTiVo];
+            if (!targetMTTiVo) { //Create a new MTTiVo
+                targetMTTiVo = [MTTiVo manualTiVoWithDescription:mTiVo withOperationQueue:queue];
+                if(targetMTTiVo){
+                    shouldUpdateTiVo = YES;
+                    DDLogDetail(@"Adding new manual TiVo %@",targetMTTiVo);
+                }
             }
-		}
+            if (targetMTTiVo) {
+                if ([targetMTTiVo.tiVo.iPAddress caseInsensitiveCompare:mTiVo[kMTTiVoIPAddress]] != NSOrderedSame ||  //Update if required, incl. a new MTTiVo
+                           [targetMTTiVo.tiVo.userName compare:mTiVo[kMTTiVoUserName]] != NSOrderedSame ||
+                           targetMTTiVo.tiVo.userPort != [mTiVo[kMTTiVoUserPort] intValue] ||
+                           targetMTTiVo.tiVo.userPortSSL != [mTiVo[kMTTiVoUserPortSSL] intValue] ||
+                           ![targetMTTiVo.mediaKey isEqualToString:mTiVo[kMTTiVoMediaKey]]
+                           ) { // If there's a change then edit it and update
+                    targetMTTiVo.tiVo.iPAddress = mTiVo[kMTTiVoIPAddress];
+                    targetMTTiVo.tiVo.userName = mTiVo[kMTTiVoUserName];
+                    targetMTTiVo.tiVo.userPort = [mTiVo[kMTTiVoUserPort] intValue];
+                    targetMTTiVo.tiVo.userPortSSL = [mTiVo[kMTTiVoUserPortSSL] intValue];
+                    targetMTTiVo.enabled = [mTiVo[kMTTiVoEnabled] boolValue];
+                    targetMTTiVo.mediaKey = mTiVo[kMTTiVoMediaKey];
+                    DDLogDetail(@"Updated manual TiVo %@",targetMTTiVo);
+                    shouldUpdateTiVo = YES;
+                }
+                if (shouldUpdateTiVo) {
+                    //Turn off label in UI
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:targetMTTiVo];
+                    //RE-update shows
+                    [targetMTTiVo updateShows:nil];
+                }
+                [newManualTiVoList addObject:targetMTTiVo];
+            }
+        }
 	}
 	
 //	//Re build _tivoList
@@ -434,8 +449,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	NSMutableArray *itemsToRemove = [NSMutableArray array];
     for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
 		if (manualTiVoDescription.count != 6 ||
-			((NSString *)manualTiVoDescription[@"userName"]).length == 0 ||
-			((NSString *)manualTiVoDescription[@"iPAddress"]).length == 0) {
+			((NSString *)manualTiVoDescription[kMTTiVoUserName]).length == 0 ||
+			((NSString *)manualTiVoDescription[kMTTiVoIPAddress]).length == 0) {
 			[itemsToRemove addObject:manualTiVoDescription];
 			continue;
 		}
@@ -447,6 +462,64 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	return [NSArray arrayWithArray:manualTiVoDescriptions];
 }
+
+-(NSArray *)savedTiVos
+{
+    return [[NSUserDefaults standardUserDefaults] objectForKey:kMTTiVos];
+}
+
+-(void)updateTiVoDefaults:(MTTiVo *)tiVo
+{
+    DDLogDetail(@"Updating TiVo Defaults with tivo %@",tiVo);
+    NSArray *currentSavedTiVos = tiVoManager.savedTiVos;
+    NSMutableArray *updatedSavedTiVos = [NSMutableArray new];
+    for (NSDictionary *savedTiVo in currentSavedTiVos) {
+        if ([savedTiVo[kMTTiVoUserName] isEqualToString:tiVo.tiVo.name]) {
+            [updatedSavedTiVos addObject:[tiVo defaultsDictionary]];
+        } else {
+            [updatedSavedTiVos addObject:savedTiVo];
+        }
+    }
+    DDLogVerbose(@"Saving new tivos %@",updatedSavedTiVos);
+    [[NSUserDefaults standardUserDefaults] setValue:updatedSavedTiVos forKeyPath:kMTTiVos];
+}
+
+-(int) nextManualTiVoID
+{
+    NSArray *manualTiVos = self.savedTiVos;
+    int retValue = 1;
+    for (NSDictionary *manualTiVo in manualTiVos) {
+        if ([manualTiVo[kMTTiVoID] intValue] > retValue) {
+            retValue = [manualTiVo[kMTTiVoID] intValue];
+        }
+    }
+    return retValue+1;
+}
+
+-(NSArray *)savedManualTiVos
+{
+    NSArray *allTiVos = self.savedTiVos;
+    NSMutableArray *manualTiVos = [NSMutableArray new];
+    for (NSDictionary *tiVo in allTiVos) {
+        if ([tiVo[kMTTiVoManualTiVo] boolValue]) {
+            [manualTiVos addObject:tiVo];
+        }
+    }
+    return [NSArray arrayWithArray:manualTiVos];
+}
+
+-(NSArray *)savedBonjourTiVos
+{
+    NSArray *allTiVos = self.savedTiVos;
+    NSMutableArray *bonjourTiVos = [NSMutableArray new];
+    for (NSDictionary *tiVo in allTiVos) {
+        if (![tiVo[kMTTiVoManualTiVo] boolValue]) {
+            [bonjourTiVos addObject:tiVo];
+        }
+    }
+    return [NSArray arrayWithArray:bonjourTiVos];
+}
+
 
 
 -(void)searchForBonjourTiVos
@@ -482,8 +555,16 @@ static MTTiVoManager *sharedTiVoManager = nil;
     return addresses;
 }
 
+-(NSArray *)allTiVos
+{
+    return _tiVoList;
+}
+
 -(NSArray *)tiVoList {
-	return _tiVoList;
+    NSPredicate *enabledTiVos = [NSPredicate predicateWithFormat:@"enabled == YES"];
+//    NSArray *enabledTiVoList = [_tiVoList filteredArrayUsingPredicate:enabledTiVos];
+//    NSLog(@"return %lu enabled tivos",enabledTiVoList.count);
+	return [_tiVoList filteredArrayUsingPredicate:enabledTiVos];
 }
 
 -(void) setTiVoList: (NSArray *) tiVoList {
@@ -516,6 +597,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTMediaKeys options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
 }
 
 #pragma mark - Scheduling routine
@@ -668,7 +751,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
     for (MTTiVo *tiVo in _tiVoList) {
         DDLogDetail(@"Starting download on tiVo %@",tiVo.tiVo.name);
-        [tiVo manageDownloads:tiVo];
+		[tiVo manageDownloads:tiVo];
     }
 }
 
@@ -700,13 +783,43 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	if ([keyPath compare:kMTScheduledStartTime] == NSOrderedSame) {
 		[self configureSchedule];
 	}
+	if ([keyPath compare:kMTMediaKeys] == NSOrderedSame) {
+		_currentMediaKeys = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys];
+        [self refreshAllTiVos];
+	}
+    if ([keyPath isEqualToString:kMTTiVos]){
+        [self updateTiVos];
+    }
+}
+
+-(void)updateTiVos
+{
+    //Make sure enabled state and media key are correct for network tivos and
+    //mediakey, enabled, ports and hostname for manual tivos
+    for (MTTiVo *tiVo in _tiVoList) {
+        for (NSDictionary *savedTiVo in self.savedTiVos) {
+            if ([savedTiVo[kMTTiVoUserName] isEqualToString:tiVo.tiVo.name]) {
+                if (tiVo.manualTiVo) {
+                    tiVo.tiVo.userPort = [savedTiVo[kMTTiVoUserPort] intValue];
+                    tiVo.tiVo.userPortSSL = [savedTiVo[kMTTiVoUserPortSSL] intValue];
+                    tiVo.mediaKey = savedTiVo[kMTTiVoMediaKey];
+                    tiVo.tiVo.iPAddress = savedTiVo[kMTTiVoIPAddress];
+                    tiVo.enabled = [savedTiVo[kMTTiVoEnabled] boolValue];
+                } else {
+                    tiVo.mediaKey = savedTiVo[kMTTiVoMediaKey];
+                    tiVo.enabled = [savedTiVo[kMTTiVoEnabled] boolValue];
+                }
+            }
+        }
+    }
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
 }
 
 -(void)refreshAllTiVos
 {
 	DDLogMajor(@"Refreshing all Tivos");
 	for (MTTiVo *tiVo in _tiVoList) {
-		if (tiVo.isReachable) {
+		if (tiVo.isReachable && tiVo.enabled) {
 			[tiVo updateShows:nil];
 		}
 	}
@@ -825,28 +938,28 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 #pragma mark - Media Key Support
 
--(NSDictionary *)currentMediaKeys
-{
-	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
-	for (MTTiVo *thisTiVo in _tiVoList) {
-		[tmpDict setObject:thisTiVo.mediaKey forKey:thisTiVo.tiVo.name];
-	}
-	return [NSDictionary dictionaryWithDictionary:tmpDict];
-}
+//-(NSDictionary *)currentMediaKeys
+//{
+//	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
+//	for (MTTiVo *thisTiVo in [self allTiVos]) {
+//		[tmpDict setObject:thisTiVo.mediaKey forKey:thisTiVo.tiVo.name];
+//	}
+//	return [NSDictionary dictionaryWithDictionary:tmpDict];
+//}
 
--(void)updateMediaKeysDefaults
-{
-	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
-	for (MTTiVo *tiVo in _tiVoList) {
-		[tmpDict setValue:tiVo.mediaKey forKey:tiVo.tiVo.name];
-	}
-	[[NSUserDefaults standardUserDefaults] setValue:tmpDict forKey:kMTMediaKeys];
-}
-
+//-(void)updateMediaKeysDefaults
+//{
+//	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
+//	for (MTTiVo *tiVo in [self allTiVos]) {
+//		[tmpDict setValue:tiVo.mediaKey forKey:tiVo.tiVo.name];
+//	}
+//	[[NSUserDefaults standardUserDefaults] setValue:tmpDict forKey:kMTMediaKeys];
+//}
+//
 -(NSString *)getAMediaKey
 {
 	NSString *key = nil;
-	NSArray *currentTiVoList = [NSArray arrayWithArray:_tiVoList];
+	NSArray *currentTiVoList = [NSArray arrayWithArray:[self allTiVos]];
 	for (MTTiVo *tiVo in currentTiVoList) {
 		if (tiVo.mediaKey && tiVo.mediaKey.length) {
 			key = tiVo.mediaKey;
@@ -1151,7 +1264,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
     int total = 0;
     for (MTTiVo *tiVo in _tiVoList) {
-        total += tiVo.shows.count;
+       if (tiVo.enabled) total += tiVo.shows.count;
     }
     return total;
 }
@@ -1289,7 +1402,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	NSMutableArray *totalShows = [NSMutableArray array];
 	DDLogVerbose(@"reloading shows");
 	for (MTTiVo *tv in _tiVoList) {
-		[totalShows addObjectsFromArray:tv.shows];
+		if (tv.enabled) {
+			[totalShows addObjectsFromArray:tv.shows];
+
+		}
 	}
 	return totalShows;
 }
@@ -1443,8 +1559,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
     
 	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
+
+    [newTiVo updateShows:nil];
   
-	self.tiVoList = [self.tiVoList arrayByAddingObject: newTiVo];
+	self.tiVoList = [_tiVoList arrayByAddingObject: newTiVo];
 	if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];

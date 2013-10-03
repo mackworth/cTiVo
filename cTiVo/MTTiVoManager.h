@@ -35,6 +35,9 @@
 @property (nonatomic, strong) NSString *downloadDirectory;
 @property (nonatomic, weak, readonly) NSString *tmpFilesDirectory;
 @property (weak, readonly) NSString *defaultDownloadDirectory;
+@property (weak, readonly) NSArray *savedTiVos;
+@property (weak, readonly) NSArray *savedManualTiVos;
+@property (weak, readonly) NSArray *savedBonjourTiVos;
 
 @property int volatile signalError;
 
@@ -46,6 +49,7 @@
 @property (nonatomic, strong) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
 @property (nonatomic, strong) NSDictionary *showsOnDisk;
 @property (nonatomic, readonly) BOOL anyShowsCompleted;
+@property (nonatomic, strong) NSArray *currentMediaKeys;
 
 
 + (MTTiVoManager *)sharedTiVoManager;
@@ -90,13 +94,15 @@
 -(void)addEncFormatToList: (NSString *) filename ;
 
 //---------------TiVo Management methods ----------
--(NSDictionary *)currentMediaKeys;
 -(BOOL)foundTiVoNamed:(NSString *)tiVoName;
 -(void)loadManualTiVos;
+-(void)searchForBonjourTiVos;
 -(void)refreshAllTiVos;
 -(void)resetAllDetails;
-
+-(NSArray *)allTiVos;
 -(BOOL)anyTivoActive;
+-(int) nextManualTiVoID;
+-(void)updateTiVoDefaults:(MTTiVo *)tiVo;
 
 
 //---------------Other methods ----------

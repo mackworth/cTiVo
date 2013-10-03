@@ -11,3 +11,8 @@
 @interface MTStringEmpty : NSValueTransformer
 
 @end
+
+@interface MTEmptyString : NSValueTransformer
+
+@end
+

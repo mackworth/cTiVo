@@ -156,7 +156,7 @@ __DDLOGHERE__
 
 	DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUser:) name:kMTNotificationMediaKeyNeeded object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
 
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
 										  @NO, kMTShowCopyProtected,
@@ -179,10 +179,19 @@ __DDLOGHERE__
     
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
 	
+	if (![[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedFormat]) {
+		//What? No previous format,must be our first run. Let's see if there's any iTivo prefs.
+		[MTiTiVoImport checkForiTiVoPrefs];
+	}
 	
 	mediaKeyQueue = [NSMutableArray new];
-	[self updateManualTiVosWithID];
+//	[self updateManualTiVosWithID];
+//    [self updateMediaKeysWithEnabled];
+    [self updateTiVos];
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
+    [_tiVoGlobalManager loadManualTiVos];
+    [_tiVoGlobalManager searchForBonjourTiVos];
+
     [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueChangeSetting context:nil];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueChangeSetting context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTRunComSkip options:NSKeyValueObservingOptionNew context:nil];
@@ -260,12 +269,72 @@ __DDLOGHERE__
 		[defaults removeObjectForKey:@"ExportAtomicParsleyMetaData"];
 		[defaults setObject:md forKey:@"ExportMetaData"];
 	}
+//    manualTiVoArrayController = [NSArrayController new];
+//    [manualTiVoArrayController bind:@"content" toObject:[NSUserDefaults standardUserDefaults] withKeyPath:@"TiVos" options:nil];
+//    
+//    [manualTiVoArrayController setFilterPredicate:[NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary *bindings){
+//        NSDictionary *tiVo = (NSDictionary *)item;
+//        return [tiVo[kMTTiVoManualTiVo] boolValue];
+//    }]];
+//    networkTiVoArrayController = [NSArrayController new];
+//    [networkTiVoArrayController bind:@"content" toObject:[NSUserDefaults standardUserDefaults] withKeyPath:@"TiVos" options:nil];
+//    [networkTiVoArrayController setFilterPredicate:[NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary *bindings){
+//        NSDictionary *tiVo = (NSDictionary *)item;
+//        return ![tiVo[kMTTiVoManualTiVo] boolValue];
+//    }]];
+
 
 }
 
--(void)updateManualTiVosWithID
+/* 
+Routine to update and combine both the manual tivo preferences and the media keys, all of which are TiVo related into 1 preference
+ array for TiVos to eliminate duplication and simplify maintanence.  This only needs to be done once.
+ 
+ */
+
+-(void)updateTiVos
 {
-	NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if ([defaults objectForKey:kMTTiVos]) return;  //We've already done this.
+    NSArray *manualTiVos = [self updateManualTiVosWithID];
+	NSDictionary  *mk = [defaults objectForKey:kMTMediaKeys];
+    NSMutableDictionary *mediaKeys = [NSMutableDictionary dictionaryWithDictionary:[defaults objectForKey:kMTMediaKeys]];
+    NSDictionary *mediaKeyFixed = [defaults objectForKey:kMTMediaKeys];
+    NSMutableArray *newTiVoList = [NSMutableArray array];
+    for (NSDictionary *manualTiVo in manualTiVos) {
+        NSMutableDictionary *newManualTiVo = [NSMutableDictionary dictionaryWithDictionary:manualTiVo];
+        //correct for change from iPAddress to IPAddress
+        if (newManualTiVo[@"iPAddress"]) {
+            newManualTiVo[kMTTiVoIPAddress] = newManualTiVo[@"iPAddress"];
+            [newManualTiVo removeObjectForKey:@"iPAddress"];
+        }
+        newManualTiVo[kMTTiVoManualTiVo] = @YES;
+        NSString *tname = [manualTiVo objectForKey:kMTTiVoUserName];
+        for (NSString *key in mediaKeyFixed) {
+            if ([key isEqualTo:tname]) {
+                newManualTiVo[kMTTiVoMediaKey] = mediaKeys[key];
+                [mediaKeys removeObjectForKey:key];
+            }
+        }
+        [newTiVoList addObject:newManualTiVo];  //Updated manual tivo added to TiVo list
+    }
+    for (NSString *name in mediaKeys) {
+        [newTiVoList addObject:@{kMTTiVoEnabled : @YES, kMTTiVoUserName : name, kMTTiVoMediaKey : mediaKeys[name]}];
+    }
+    [defaults removeObjectForKey:kMTMediaKeys];
+    [defaults removeObjectForKey:kMTManualTiVos];
+    [defaults setValue:newTiVoList forKeyPath:kMTTiVos];
+    [defaults synchronize];
+    
+}
+
+/*
+ Routine to update the manual tivo list with an ID.  This only needs to be done once.
+ 
+ */
+-(NSArray *)updateManualTiVosWithID
+{
+	NSArray *manualTiVoDescriptions = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos];
 	if (manualTiVoDescriptions && manualTiVoDescriptions.count && ![manualTiVoDescriptions[0] objectForKey:@"id"]) {
 		int idNum = 1;
 		NSMutableArray *newManualTiVos = [NSMutableArray array];
@@ -274,9 +343,35 @@ __DDLOGHERE__
 			newMTiVo[@"id"] = [NSNumber numberWithInt:idNum++];
 			[newManualTiVos addObject:newMTiVo];
 		}
-		[[NSUserDefaults standardUserDefaults] setObject:newManualTiVos forKey:kMTManualTiVos];
-	}
+        return [NSArray arrayWithArray:newManualTiVos];
+	} else {
+        return manualTiVoDescriptions;
+    }
+}
 
+-(void)updateMediaKeysWithEnabled
+{
+    id mediaKeys = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys];
+    if ([mediaKeys isKindOfClass:[NSArray class]]) {
+        return;
+    }
+    NSMutableArray *newMediaKeys = [NSMutableArray array];
+    BOOL modified = NO;
+    if (mediaKeys && ((NSDictionary *)mediaKeys).count) {
+        for (NSString *name in mediaKeys) {
+            id obj = [mediaKeys objectForKey:name];
+            if ([obj isKindOfClass:[NSString class]]) {
+                [newMediaKeys addObject:@{@"Name":name, @"MediaKey":obj, @"Enabled":@YES}];
+                modified = YES;
+            } else {
+                [newMediaKeys addObject:obj];
+            }
+        }
+    }
+    if (modified) {
+        [[NSUserDefaults standardUserDefaults] setObject:newMediaKeys forKey:kMTMediaKeys];
+        tiVoManager.currentMediaKeys = newMediaKeys;
+    }
 }
 
 -(void)validateTmpDirectory
@@ -726,6 +821,11 @@ __DDLOGHERE__
 	}
 }
 
+-(void)getMediaKeyFromUserOnMainThread:(NSNotification *)notification
+{
+    [self performSelectorOnMainThread:@selector(getMediaKeyFromUser:) withObject:notification waitUntilDone:YES];
+}
+
 -(void)getMediaKeyFromUser:(NSNotification *)notification
 {
 	if (notification && notification.object) {  //If sent a new tiVo then add to queue to start
@@ -737,49 +837,121 @@ __DDLOGHERE__
 	gettingMediaKey = YES;
 	NSDictionary *request = [mediaKeyQueue objectAtIndex:0]; //Pop off the first in the queue
 	MTTiVo *tiVo = request[@"tivo"]; //Pop off the first in the queue
+    if (!tiVo.enabled) {
+        gettingMediaKey = NO;
+        [mediaKeyQueue removeObject:request];
+        return;
+    }
 	NSString *reason = request[@"reason"];
+    NSString *message = nil;
 	if ([reason isEqualToString:@"new"]) {
-		NSString *newKey = [_tiVoGlobalManager getAMediaKey];
-		if (newKey) {
-			tiVo.mediaKey = newKey;
-		} else {
-			//Get from user
-			NSString *message = [NSString stringWithFormat:@"Need %@ Media Key for %@",reason,tiVo.tiVo.name];
-			NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@""];
-			NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
-			
-			[input setStringValue:tiVo.mediaKey];
-			[keyAlert setAccessoryView:input];
-			NSInteger button = [keyAlert runModal];
-			if (button == NSAlertDefaultReturn) {
-				[input validateEditing];
-				DDLogDetail(@"Got Media Key %@",input.stringValue);
-				tiVo.mediaKey = input.stringValue;
-			}
-		}
-		
+        [tiVo getMediaKey];
+        if (tiVo.mediaKey.length ==0) {
+            message = [NSString stringWithFormat:@"Need %@ Media Key for %@",reason,tiVo.tiVo.name];
+        }
 	} else {
-		NSString *message = [NSString stringWithFormat:@"Incorrect %@ Media Key for %@",reason,tiVo.tiVo.name];
-		NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@""];
-		NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
-		
-		[input setStringValue:tiVo.mediaKey];
-		[keyAlert setAccessoryView:input];
-		NSInteger button = [keyAlert runModal];
-		if (button == NSAlertDefaultReturn) {
-			[input validateEditing];
-			DDLogDetail(@"Got Media Key %@",input.stringValue);
-			tiVo.mediaKey = input.stringValue;
-		}
-		
+		message = [NSString stringWithFormat:@"Incorrect %@ Media Key for %@",reason,tiVo.tiVo.name];
 	}
+    if (message) {
+        NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:@"Ignore TiVo" otherButton:nil informativeTextWithFormat:@""];
+        NSView *accView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 50)];
+        NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(10, 14, 200, 24)];
+        [accView addSubview:input];
+        NSButton *helpButton = [NSButton new];
+        [helpButton setButtonType:NSMomentaryPushInButton];
+        [helpButton setBezelStyle:NSRoundedBezelStyle];
+        [helpButton setTitle:@"Help"];
+        [helpButton sizeToFit];
+        [helpButton setFrame:NSMakeRect(220, 13, 70, 24) ];
+        [helpButton setTarget:self];
+        [helpButton setAction:@selector(help:)];
+        [accView addSubview:helpButton];
+        
+        [input setStringValue:tiVo.mediaKey];
+        [keyAlert setAccessoryView:accView];
+        NSInteger button = [keyAlert runModal];
+        if (button == NSAlertDefaultReturn) {
+            [input validateEditing];
+            DDLogDetail(@"Got Media Key %@",input.stringValue);
+            tiVo.mediaKey = input.stringValue;
+            [tiVoManager updateTiVoDefaults:tiVo];
+        } else {
+            tiVo.enabled = NO;
+//            tiVo.mediaKey = input.stringValue;
+        }
+    }
+
 	[mediaKeyQueue removeObject:request];
+    //Now update user defaults
+    NSMutableArray *savedTiVos = [NSMutableArray arrayWithArray:tiVoManager.savedTiVos];
+    NSDictionary *savedTiVo;
+    NSMutableDictionary *newSavedTiVo = nil;
+    for (savedTiVo in savedTiVos) {
+        if ([tiVo.tiVo.name isEqualToString:savedTiVo[kMTTiVoUserName]]) {
+            newSavedTiVo = [NSMutableDictionary dictionaryWithDictionary:savedTiVo];
+            newSavedTiVo[kMTTiVoMediaKey] = tiVo.mediaKey;
+            break;
+        }
+    }
+    [savedTiVos removeObject:savedTiVo];
+    if (newSavedTiVo) {
+        savedTiVo = [NSDictionary dictionaryWithDictionary:newSavedTiVo];
+    } else {
+        if (tiVo.manualTiVo) {
+            savedTiVo = @{kMTTiVoUserName : tiVo.tiVo.name, kMTTiVoIPAddress : tiVo.tiVo.iPAddress, kMTTiVoUserPort : [NSNumber numberWithInt:tiVo.tiVo.userPort], kMTTiVoUserPortSSL : [NSNumber numberWithInt:tiVo.tiVo.userPortSSL], kMTTiVoMediaKey : tiVo.mediaKey, kMTTiVoManualTiVo : @YES, kMTTiVoID : [NSNumber numberWithInt:[tiVoManager nextManualTiVoID]] , kMTTiVoEnabled : @YES };
+        } else {
+            savedTiVo = @{kMTTiVoUserName : tiVo.tiVo.name, kMTTiVoMediaKey : tiVo.mediaKey, kMTTiVoManualTiVo : @NO, kMTTiVoEnabled : @YES };
+        }
+    }
+    [savedTiVos addObject:savedTiVo];
+    [[NSUserDefaults standardUserDefaults] setValue:savedTiVos forKeyPath:kMTTiVos];
 	[tiVo updateShows:nil];
 	
 	gettingMediaKey = NO;
-	[[NSUserDefaults standardUserDefaults] setObject:[_tiVoGlobalManager currentMediaKeys] forKey:kMTMediaKeys];
 	[self getMediaKeyFromUser:nil];//Process rest of queue
 }
+
+-(NSAlert *)alertWithMessage:(NSString *)message andTiVo:(MTTiVo *)tiVo
+{
+    NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:@"Ignore TiVo" otherButton:nil informativeTextWithFormat:@""];
+    NSView *accView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 50)];
+    NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(10, 14, 200, 24)];
+    [accView addSubview:input];
+    NSButton *helpButton = [NSButton new];
+    [helpButton setButtonType:NSMomentaryPushInButton];
+    [helpButton setBezelStyle:NSRoundedBezelStyle];
+    [helpButton setTitle:@"Help"];
+    [helpButton sizeToFit];
+    [helpButton setFrame:NSMakeRect(220, 13, 70, 24) ];
+    [helpButton setTarget:self];
+    [helpButton setAction:@selector(help:)];
+    [accView addSubview:helpButton];
+    
+    [input setStringValue:tiVo.mediaKey];
+    [keyAlert setAccessoryView:accView];
+    return keyAlert;
+
+}
+
+-(void)help:(id)sender
+{
+	//Get help text for encoder
+	NSString *helpFilePath = [[NSBundle mainBundle] pathForResource:@"MAKHelpFile" ofType:@"rtf"];
+	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
+	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
+	NSButton *thisButton = (NSButton *)sender;
+    NSPopover *myPopover = [[NSPopover alloc] init];
+    myPopover.delegate = self;
+    myPopover.behavior = NSPopoverBehaviorTransient;
+    MTHelpViewController *helpContoller = [[MTHelpViewController alloc] initWithNibName:@"MTHelpViewController" bundle:nil];
+    myPopover.contentViewController = helpContoller;
+    [helpContoller loadView];
+    [helpContoller.displayMessage.textStorage setAttributedString:attrHelpText];
+//	[self.helpController.displayMessage insertText:helpText];
+	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+}
+
+
 
 
 #pragma mark - Application Support
