@@ -1,5 +1,5 @@
-# Configuration options designed for advanced users
-
+#Advanced Topics
+##Configuration options designed for advanced users
 
 This document is to cover some interesting topics that are intended for advanced users only.
 
@@ -34,10 +34,10 @@ If you'd like to configure a different video encoder, or provide different param
 - **Name of the Format** as displayed in the menu. This must be unique versus all other built-in or user formats.
 - **File Extension for Encoded File**. cTiVo will use this to generate the filenames. Some encoders ignore an incorrect extension, and put the correct one in, which will cause problems, so be sure this is correct.
 - **Description**. This is just a short human-readable reminder of what the other options mean.
-- **Input Filename/Output Filename/Edit List Switch: these are passed in the command line to the encoder (see [Arguments][])
-- **Encoder to Use**: See [Encoder To Use][]
+- **Input Filename/Output Filename/Edit List Switch:** these are passed in the command line to the encoder (see [Arguments](#arguments)
+- **Encoder to Use**: See [Encoder To Use](#encoder-to-use)
 - **Regex for Encoder Log**: If the encoder cannot support simultaneous encoding (e.g. HandBrakeCLI), the encoder should provide in its standard output the percentage complete as a number from 0-100.  You will need to provide a regex expression for extracting this number from the last few lines of the standard output.  For example, HandBrakeCLI writes its progress as 87 %, so the regex is `([\%` This will only be used when doing sequential downloading, decrypting, and encoding.  When doing simultaneous encoding, the data flow through the pipes is used to measure progress.
-- **Video/Audio/Other Options for Encoder: These are passed on the command line to the encoder; see [Arguments][].
+- **Video/Audio/Other Options for Encoder:** These are passed on the command line to the encoder; see [Arguments](arguments).
 - **Comskip Options**: ComSkip is an experimental feature for cTiVo; See [the comskip project](http://www.kaashoek.com/comskip/). Included in this implementation is a configuration file (comskip.ini), which can be found on the [cTivo  source code page](../cTiVo/comskip.ini). In addition to other command line parameters, you can replace the built-in comskip.ini with your own comskip.ini file by entering "--ini=\<full path\>/comskip.ini" providing the full path to your own file.
 - **ccExtractor Options**: ccExtractor exports subtitles from the video stream into a .srt text file. See  [the ccExtractor project](http://ccextractor.sourceforge.net/using-ccextractor/command-line-usage.html)
 - **Can run download and encode at same time** should be set only if the encoder can run as a final stage of a pipeline (stdin being the source pipe).
@@ -106,6 +106,7 @@ To give as much control to you as possible, if more than one of these artwork ty
 # Advanced Settings
 
 There are a few preferences that are intended for debugging purposes or for very advanced users only. These are hidden, but can be activated by holding down the Option key while pulling down the cTiVo menu and selecting Adv Preferences (alternatively Option-Cmd-Comma). 
+
 ![](cTivoAdvancedPreferencesScreen.png)
 
 ## Debug Levels
@@ -207,7 +208,7 @@ As an example, if you want all shows beginning with House and you just entered H
 
 If you want the subscription table to look a little better, you can add <Display Name> after the regex and it will display that string rather than the regex used.  So, you might use ^House<All House shows> in the example above. 
 
-As another example, the shortcut ALL to download all recorded shows is implemented with `.*`\<\<\<ALL SHOWS>>>, so dot-star will matches all seriesm and it will display as \<\<ALL SHOWS>> in the list. 
+As another example, the shortcut ALL to download all recorded shows is implemented with .*\<\<\<ALL SHOWS>>>, so dot-star will matches all series, and it will display as \<\<ALL SHOWS>> in the list.
 
 # Log Files
 

@@ -1,10 +1,11 @@
-# An overview of cTiVo operation and controls
+#Overview
+## An overview of cTiVo operation and controls
 
 In this document, we describe the following parts of cTiVo operation:
-- [Normal Use][]
-- [Controls and Buttons][]
-- [Clicking Away][]
-- [Menu Items][]
+- [Normal Use](#normal-use)
+- [Controls and Buttons](#controls-and-buttons)
+- [Clicking Away](#clicking-away)
+- [Menu Items](#menu-items)
 
 ## Normal use
 

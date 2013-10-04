@@ -1,4 +1,5 @@
-# Q&A on different video Formats
+#Video Formats
+## Q&A on different video Formats
 
 Note that cTiVo lets you show/hide individual video formats. We have hidden some of the formats described below as they are not commonly used. To show them again, simply go to the Edit>Edit Formats menu item, select the format from the pull-down list and change the hidden field. Note also that you can edit any individual built-in format by duplicating it in the Edit>Edit Formats menu. See [Advanced Topics](Advanced-Topics.md) for more information.
 

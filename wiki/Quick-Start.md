@@ -1,4 +1,5 @@
-# How to get cTiVo running quickly
+#Quick Start
+## How to get cTiVo running quickly
 
 Note: this page assumes you are familiar with TiVo and how to set up software. If you need more detailed instructions, please see [Installation](installation.md), or the references below. Or see the special instructions for [iTiVo users](iTiVo-Users).
 

@@ -1,4 +1,5 @@
-# How to configure cTiVo operation
+#Configuration
+## How to configure cTiVo operation
 
 Although cTiVo should be easy to approach and use, it is also intended to be very configurable, letting the user set things up just the way they want.
 
