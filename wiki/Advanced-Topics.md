@@ -5,13 +5,13 @@ This document is to cover some interesting topics that are intended for advanced
 
 Sections:  
 
-- [Manual TiVos][]
-- [Edit Formats][]
-- [Artwork][]
-- [Advanced Settings][]
-- [theTVDB][]
-- [Advanced Subscriptions ][]
-- [Log Files ][]
+- [Manual TiVos](#manual-tivos)
+- [Edit Formats](#edit=formats)
+- [Artwork](#artwork)
+- [Advanced Settings](#advanced-settings)
+- [theTVDB](#thetvdb)
+- [Advanced Subscriptions ](#advanced-subscriptions)
+- [Log Files ](#log-files)
 
 # Manual TiVos
 
@@ -85,7 +85,7 @@ OR, if no outputFileFlag:
     	<<inputFileName>>
     	<<outputFileName>>
 ```` 
-If you are debugging a format, you can use the advance preferences to increase the debugging level. See [Log Files][] below for more information. You can also set the "Don't Delete tmp files" option, which will save the subsidiary program log files (from your encoder, comskip, etc) for your perusal. Be sure to set it back when finished debugging as it will generate massive temp files.
+If you are debugging a format, you can use the advance preferences to increase the debugging level. See [Log Files](#log-files) below for more information. You can also set the "Don't Delete tmp files" option, which will save the subsidiary program log files (from your encoder, comskip, etc) for your perusal. Be sure to set it back when finished debugging as it will generate massive temp files.
 
 # Artwork
 
