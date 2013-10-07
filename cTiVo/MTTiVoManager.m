@@ -434,8 +434,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 				if ([targetTiVo.tiVo.name isEqualToString: mTiVo[kMTTiVoUserName]] ) {
 					if (!targetTiVo.enabled  ||  ![targetTiVo.mediaKey isEqualToString:mTiVo[kMTTiVoMediaKey]]) {
 						//Turn off label in UI
-						[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:targetTiVo];
 						//RE-update shows
+						[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:targetTiVo];
+						targetTiVo.enabled = YES;
+						targetTiVo.mediaKey = mTiVo[kMTTiVoMediaKey];
 						[targetTiVo updateShows:nil];
 						break;
 					}
