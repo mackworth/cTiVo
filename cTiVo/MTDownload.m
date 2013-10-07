@@ -1698,7 +1698,11 @@ __DDLOGHERE__
 				DDLogVerbose(@"In extended wait for Handbrake");
 			}
         }
-		if (reschedule) [self rescheduleShowWithDecrementRetries:@(YES)];
+		if (reschedule) {
+			[self rescheduleShowWithDecrementRetries:@(YES)];
+		} else {
+			[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
+		}
 	} else if ([self isInProgress]){
         DDLogVerbose (@"process check OK; %0.2f", _processProgress);
 		previousProcessProgress = _processProgress;

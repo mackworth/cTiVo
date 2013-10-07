@@ -53,10 +53,7 @@ __DDLOGHERE__
 	[NSBundle loadNibNamed:@"MTMainWindowDrawer" owner:self];
 	showDetailDrawer.parentWindow = self.window;
 	
-	[tiVoListPopUp removeAllItems];
-	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-    [searchingTiVosIndicator startAnimation:nil];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(buildColumnMenuForTables) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoShowsUpdated object:nil];
@@ -184,11 +181,17 @@ __DDLOGHERE__
 		}
 		
 	}
-    if (tiVoManager.tiVoList.count == 1) {
+    if (tiVoManager.tiVoList.count == 0) {
+		[tiVoListPopUp setHidden:YES];
+		tiVoListPopUpLabel.stringValue = @"Searching for TiVos...";
+		tiVoListPopUpLabel.hidden = NO;
+		[searchingTiVosIndicator startAnimation:nil];
+	} else if (tiVoManager.tiVoList.count == 1) {
         [searchingTiVosIndicator stopAnimation:nil];
 		MTTiVo *ts = tiVoManager.tiVoList[0];
         [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
-        [tiVoListPopUp setHidden:YES];
+		[tiVoListPopUpLabel setHidden:NO];
+		[tiVoListPopUp setHidden:YES];
         tiVoListPopUpLabel.stringValue = [NSString stringWithFormat:@"TiVo: %@ (%ld)",ts.tiVo.name,ts.shows.count];
         if (!ts.isReachable) {
             NSFont *thisFont = [NSFont systemFontOfSize:13];

@@ -30,6 +30,7 @@ __DDLOGHERE__
 -(BOOL)windowShouldClose:(id)sender
 {
 	[self.view.window makeFirstResponder:self.view]; //This closes out handing editing.
+	[tiVoManager refreshAllTiVos];
 	return YES;
 }
 
@@ -54,7 +55,7 @@ __DDLOGHERE__
         [self loadContent:manualTiVoArrayController];
         [self loadContent:networkTiVoArrayController];
 		[tiVoManager loadManualTiVos];
-        DDLogCDetail(@"manual tivos %@",manualTiVoArrayController.arrangedObjects);
+        DDLogDetail(@"manual tivos %@",manualTiVoArrayController.arrangedObjects);
         [manualTiVoArrayController rearrangeObjects];
         [networkTiVoArrayController rearrangeObjects];
 	}
@@ -72,26 +73,12 @@ __DDLOGHERE__
 
 -(IBAction)addManual:(id)sender
 {
-    NSMutableArray *tiVos = [NSMutableArray new];
-    if ([[NSUserDefaults standardUserDefaults] objectForKey:kMTTiVos]) {
-        tiVos = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTiVos]];
-    }
-	if (((NSArray *)manualTiVoArrayController.arrangedObjects).count == 0) { //No template to check
-		[tiVos addObject:@{@"enabled" : [NSNumber numberWithBool:NO], kMTTiVoUserName : @"TiVo Name", kMTTiVoIPAddress : @"0.0.0.0", kMTTiVoUserPort : @"80", kMTTiVoUserPortSSL : @"443", kMTTiVoID : @1, kMTTiVoManualTiVo : @YES, kMTTiVoMediaKey : @""} ];
-	} else {
-        NSMutableArray *manualTiVos = manualTiVoArrayController.arrangedObjects;
-		NSSortDescriptor *idDescriptor = [NSSortDescriptor sortDescriptorWithKey:kMTTiVoID ascending:NO];
-		NSArray *sortedByID = [manualTiVos sortedArrayUsingDescriptors:@[idDescriptor]];
-		NSNumber *newID = [NSNumber numberWithInt:[[sortedByID[0] objectForKey:kMTTiVoID] intValue]+1];
-        [tiVos addObject:@{@"enabled" : [NSNumber numberWithBool:NO], kMTTiVoUserName : @"TiVo Name", kMTTiVoIPAddress : @"0.0.0.0", kMTTiVoUserPort : @"80", kMTTiVoUserPortSSL : @"443", kMTTiVoID : newID, kMTTiVoManualTiVo : @YES, kMTTiVoMediaKey : @""}];
-    }
+    NSMutableArray *tiVos = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTiVos]];
+	if (!tiVos) tiVos = [NSMutableArray new];
+	
+	[tiVos addObject:@{@"enabled" : [NSNumber numberWithBool:NO], kMTTiVoUserName : @"TiVo Name", kMTTiVoIPAddress : @"0.0.0.0", kMTTiVoUserPort : @"80", kMTTiVoUserPortSSL : @"443", kMTTiVoID : @([tiVoManager nextManualTiVoID]), kMTTiVoManualTiVo : @YES, kMTTiVoMediaKey : @""}];
     [[NSUserDefaults standardUserDefaults] setValue:tiVos forKeyPath:kMTTiVos];
 }
 
-
--(void)dealloc
-{
-	[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:kMTManualTiVos];
-}
 
 @end

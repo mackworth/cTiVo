@@ -134,7 +134,7 @@ __DDLOGHERE__
 			SCNetworkReachabilitySetCallback(_reachability, tivoNetworkCallback, &reachabilityContext);
 			didSchedule = SCNetworkReachabilityScheduleWithRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
 		}
-		_isReachable = YES;
+		_isReachable = didSchedule;
 		DDLogMajor(@"%@ reachability for tivo %@",didSchedule ? @"Scheduled" : @"Failed to schedule", _tiVo.name);
 		[self performSelectorOnMainThread:@selector(getMediaKey) withObject:nil waitUntilDone:YES];
 		[self checkEnabled];
@@ -249,7 +249,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)checkEnabled
 {
-	DDLogDetail(@"Checking Enabled for %@", self);
+	DDLogVerbose(@"Checking Enabled for %@", self);
     NSArray *savedTiVos = tiVoManager.savedTiVos;
     if (savedTiVos.count == 0) {
         DDLogVerbose(@"No saved TiVos to check for enabled");
@@ -258,8 +258,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     for (NSDictionary *tiVo in savedTiVos) {
         if ([tiVo[kMTTiVoUserName] isEqualTo:self.tiVo.name]) {
 			self.enabled = [tiVo[kMTTiVoEnabled] boolValue];
+			DDLogDetail(@"%@ is%@ Enabled", self,self.enabled ? @"": @" not");
+			return;
 		}
 	}
+	DDLogReport(@"Warning: didn't find %@ in %@", self, savedTiVos);
 }
 
 -(void)getMediaKey
@@ -289,8 +292,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)updateShows:(id)sender
 {
 	DDLogDetail(@"Updating Tivo %@", self);
-	if (isConnecting || ([self.tiVo isKindOfClass:[MTNetService class]] && !self.enabled)) {
-        NSLog(@"Was Connecting or Disabled");
+	if (isConnecting || !self.enabled) {
+        DDLogDetail(@"But was %@", isConnecting? @"Connecting": @"Disabled");
 		return;
 	}
 	if (showURLConnection) {

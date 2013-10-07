@@ -156,6 +156,7 @@ __DDLOGHERE__
 
 	DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(trackListUpdates) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
 
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -186,7 +187,6 @@ __DDLOGHERE__
 	
 	mediaKeyQueue = [NSMutableArray new];
 //	[self updateManualTiVosWithID];
-//    [self updateMediaKeysWithEnabled];
     [self updateTiVos];
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
     [_tiVoGlobalManager loadManualTiVos];
@@ -285,6 +285,10 @@ __DDLOGHERE__
 
 
 }
+-(void) trackListUpdates {
+	NSLog(@"trackListUpdates");
+	
+}
 
 /* 
 Routine to update and combine both the manual tivo preferences and the media keys, all of which are TiVo related into 1 preference
@@ -297,7 +301,6 @@ Routine to update and combine both the manual tivo preferences and the media key
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if ([defaults objectForKey:kMTTiVos]) return;  //We've already done this.
     NSArray *manualTiVos = [self updateManualTiVosWithID];
-	NSDictionary  *mk = [defaults objectForKey:kMTMediaKeys];
     NSMutableDictionary *mediaKeys = [NSMutableDictionary dictionaryWithDictionary:[defaults objectForKey:kMTMediaKeys]];
     NSDictionary *mediaKeyFixed = [defaults objectForKey:kMTMediaKeys];
     NSMutableArray *newTiVoList = [NSMutableArray array];
@@ -346,31 +349,6 @@ Routine to update and combine both the manual tivo preferences and the media key
         return [NSArray arrayWithArray:newManualTiVos];
 	} else {
         return manualTiVoDescriptions;
-    }
-}
-
--(void)updateMediaKeysWithEnabled
-{
-    id mediaKeys = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMediaKeys];
-    if ([mediaKeys isKindOfClass:[NSArray class]]) {
-        return;
-    }
-    NSMutableArray *newMediaKeys = [NSMutableArray array];
-    BOOL modified = NO;
-    if (mediaKeys && ((NSDictionary *)mediaKeys).count) {
-        for (NSString *name in mediaKeys) {
-            id obj = [mediaKeys objectForKey:name];
-            if ([obj isKindOfClass:[NSString class]]) {
-                [newMediaKeys addObject:@{@"Name":name, @"MediaKey":obj, @"Enabled":@YES}];
-                modified = YES;
-            } else {
-                [newMediaKeys addObject:obj];
-            }
-        }
-    }
-    if (modified) {
-        [[NSUserDefaults standardUserDefaults] setObject:newMediaKeys forKey:kMTMediaKeys];
-        tiVoManager.currentMediaKeys = newMediaKeys;
     }
 }
 
@@ -847,10 +825,10 @@ Routine to update and combine both the manual tivo preferences and the media key
 	if ([reason isEqualToString:@"new"]) {
         [tiVo getMediaKey];
         if (tiVo.mediaKey.length ==0) {
-            message = [NSString stringWithFormat:@"Need %@ Media Key for %@",reason,tiVo.tiVo.name];
+            message = [NSString stringWithFormat:@"Need new Media Key for %@",tiVo.tiVo.name];
         }
 	} else {
-		message = [NSString stringWithFormat:@"Incorrect %@ Media Key for %@",reason,tiVo.tiVo.name];
+		message = [NSString stringWithFormat:@"Incorrect Media Key for %@",tiVo.tiVo.name];
 	}
     if (message) {
         NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:@"Ignore TiVo" otherButton:nil informativeTextWithFormat:@""];
@@ -874,38 +852,16 @@ Routine to update and combine both the manual tivo preferences and the media key
             [input validateEditing];
             DDLogDetail(@"Got Media Key %@",input.stringValue);
             tiVo.mediaKey = input.stringValue;
-            [tiVoManager updateTiVoDefaults:tiVo];
+ 			tiVo.enabled = YES;
+			[tiVo updateShows:nil];
         } else {
             tiVo.enabled = NO;
 //            tiVo.mediaKey = input.stringValue;
         }
     }
-
 	[mediaKeyQueue removeObject:request];
-    //Now update user defaults
-    NSMutableArray *savedTiVos = [NSMutableArray arrayWithArray:tiVoManager.savedTiVos];
-    NSDictionary *savedTiVo;
-    NSMutableDictionary *newSavedTiVo = nil;
-    for (savedTiVo in savedTiVos) {
-        if ([tiVo.tiVo.name isEqualToString:savedTiVo[kMTTiVoUserName]]) {
-            newSavedTiVo = [NSMutableDictionary dictionaryWithDictionary:savedTiVo];
-            newSavedTiVo[kMTTiVoMediaKey] = tiVo.mediaKey;
-            break;
-        }
-    }
-    [savedTiVos removeObject:savedTiVo];
-    if (newSavedTiVo) {
-        savedTiVo = [NSDictionary dictionaryWithDictionary:newSavedTiVo];
-    } else {
-        if (tiVo.manualTiVo) {
-            savedTiVo = @{kMTTiVoUserName : tiVo.tiVo.name, kMTTiVoIPAddress : tiVo.tiVo.iPAddress, kMTTiVoUserPort : [NSNumber numberWithInt:tiVo.tiVo.userPort], kMTTiVoUserPortSSL : [NSNumber numberWithInt:tiVo.tiVo.userPortSSL], kMTTiVoMediaKey : tiVo.mediaKey, kMTTiVoManualTiVo : @YES, kMTTiVoID : [NSNumber numberWithInt:[tiVoManager nextManualTiVoID]] , kMTTiVoEnabled : @YES };
-        } else {
-            savedTiVo = @{kMTTiVoUserName : tiVo.tiVo.name, kMTTiVoMediaKey : tiVo.mediaKey, kMTTiVoManualTiVo : @NO, kMTTiVoEnabled : @YES };
-        }
-    }
-    [savedTiVos addObject:savedTiVo];
-    [[NSUserDefaults standardUserDefaults] setValue:savedTiVos forKeyPath:kMTTiVos];
-	[tiVo updateShows:nil];
+	[tiVoManager updateTiVoDefaults:tiVo];
+
 	
 	gettingMediaKey = NO;
 	[self getMediaKeyFromUser:nil];//Process rest of queue
@@ -968,7 +924,6 @@ Routine to update and combine both the manual tivo preferences and the media key
 {
 	if (!mainWindowController) {
 		mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
-        _tiVoGlobalManager.mainWindow = mainWindowController.window;
 		showInFinderMenuItem.target = mainWindowController;
 		showInFinderMenuItem.action = @selector(revealInFinder:);
 		playVideoMenuItem.target = mainWindowController;

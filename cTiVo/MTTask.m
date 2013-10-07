@@ -30,7 +30,7 @@ __DDLOGHERE__
 }
 +(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download
 {
-    DDLogVerbose(@"Creating Task %@",name);
+    DDLogDetail(@"Creating Task %@",name);
     MTTask *mTTask = [MTTask new];
 //    mTTask.task  = [NSTask new];
     mTTask.download = download;
@@ -83,7 +83,7 @@ __DDLOGHERE__
 -(void)cancel
 {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
-    DDLogVerbose(@"Terminating task %@",_taskName);
+    DDLogDetail(@"Terminating task %@",_taskName);
 	if (_terminationHandler) {
 		_terminationHandler();
 	}
@@ -138,7 +138,7 @@ __DDLOGHERE__
 
 -(void) saveLogFile
 {
-	if (ddLogLevel >= LOG_LEVEL_DETAIL) {
+	if (ddLogLevel >= LOG_LEVEL_REPORT) {
 		[self saveLogFileType:@"log" fromPath:_logFilePath];
 		[self saveLogFileType:@"err" fromPath:_errorFilePath];
 	}
@@ -368,7 +368,7 @@ __DDLOGHERE__
 -(void)dealloc
 {
 	if (_pid && !kill(_pid, 0)) {
-        DDLogVerbose(@"Killing process %@",_taskName);
+        DDLogDetail(@"Killing process %@",_taskName);
         kill(_pid , SIGKILL);
     }
 	_task = nil;

@@ -167,13 +167,11 @@
 
 #define kMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information
 #define	kMTQueuePaused @"QueuePaused"			//State of pause for the download queue
-#define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address.
 #define kMTTiVos @"TiVos"           //List of defined tiVos both discovered and manually defined.
 #define kMTPreventSleep @"PreventSleep"			//If true this will prevent sleep when possible
 #define kMTQuitWhileProcessing @"QuitWhileProcessing" //Don't warn user when quitting if active job
 #define kMTFormats @"Formats"                        //User defined Formats
 #define kMTHiddenFormats @"HiddenFormats"        //User defined list of built-in formats to be hidden in the UI
-#define kMTMediaKeys @"MediaKeys"                   //MAK dictionary, indexed by TiVo Name
 #define kMTSelectedTiVo @"SelectedTiVo"             //Name of currently selected TiVo
 #define kMTSelectedFormat @"SelectedFormat"         //Name of currently selected format for conversion
 #define kMTDownloadDirectory  @"DownloadDirectory"  //Pathname for directory for dowloaded files
@@ -216,6 +214,10 @@
 
 #define kMTDebugLevel       @"DebugLevel"
 #define kMTDebugLevelDetail @"DebugLevelDetail"
+
+//Obsolete keys, but kept for upgrade path
+#define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address. -replaced by MTTiVos
+#define kMTMediaKeys @"MediaKeys"                   //MAK dictionary, indexed by TiVo Name  --replaced by MTTiVos
 
 //List of keys in TiVo Preference Dictionary
 #define kMTTiVoEnabled @"enabled"
