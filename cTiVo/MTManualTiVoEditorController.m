@@ -30,7 +30,6 @@ __DDLOGHERE__
 -(BOOL)windowShouldClose:(id)sender
 {
 	[self.view.window makeFirstResponder:self.view]; //This closes out handing editing.
-	[tiVoManager refreshAllTiVos];
 	return YES;
 }
 
