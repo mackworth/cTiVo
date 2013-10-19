@@ -511,6 +511,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     }
 	if (!foundTiVo) {
 		DDLogReport(@"Warning: didn't find tivo %@",tiVo);
+        [updatedSavedTiVos addObject:tiVoDict];
 	}
     DDLogVerbose(@"Saving new tivos %@",updatedSavedTiVos);
     [[NSUserDefaults standardUserDefaults] setValue:updatedSavedTiVos forKeyPath:kMTTiVos];

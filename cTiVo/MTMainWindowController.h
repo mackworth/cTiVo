@@ -15,7 +15,7 @@
 @class MTSubscriptionTableView;
 @class MTFormatPopUpButton;
 
-@interface MTMainWindowController : NSWindowController <NSMenuDelegate> {
+@interface MTMainWindowController : NSWindowController <NSMenuDelegate, NSPopoverDelegate> {
 	IBOutlet NSPopUpButton *tiVoListPopUp;
 	IBOutlet MTFormatPopUpButton *formatListPopUp;
 	IBOutlet NSTextField *loadingProgramListLabel, *downloadDirectory, *tiVoListPopUpLabel, *pausedLabel;

@@ -13,6 +13,7 @@
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"
 #import "MTTiVo.h"
+#import "MTHelpViewController.h"
 #import <Quartz/Quartz.h>
 
 @interface MTMainWindowController ()
@@ -186,8 +187,10 @@ __DDLOGHERE__
 		tiVoListPopUpLabel.stringValue = @"Searching for TiVos...";
 		tiVoListPopUpLabel.hidden = NO;
 		[searchingTiVosIndicator startAnimation:nil];
+        [self performSelector:@selector(popupHelpIfNotTiVosAfterInterval) withObject:Nil afterDelay:kMTTimeToHelpIfNoTiVoFound];
 	} else if (tiVoManager.tiVoList.count == 1) {
         [searchingTiVosIndicator stopAnimation:nil];
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(popupHelpIfNotTiVosAfterInterval) object:nil];
 		MTTiVo *ts = tiVoManager.tiVoList[0];
         [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
 		[tiVoListPopUpLabel setHidden:NO];
@@ -202,7 +205,8 @@ __DDLOGHERE__
         }
     } else if (tiVoManager.tiVoList.count > 1){
         [searchingTiVosIndicator stopAnimation:nil];
-       [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d shows)",kMTAllTiVos,tiVoManager.totalShows]];
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(popupHelpIfNotTiVosAfterInterval) object:nil];
+      [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d shows)",kMTAllTiVos,tiVoManager.totalShows]];
         if ([kMTAllTiVos compare:_selectedTiVo] == NSOrderedSame) {
             [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
         }
@@ -210,6 +214,24 @@ __DDLOGHERE__
         [tiVoListPopUpLabel setHidden:NO];
         tiVoListPopUpLabel.stringValue = @"Filter TiVo:";
     }
+}
+
+-(void)popupHelpIfNotTiVosAfterInterval
+{
+   	//Get help text for encoder
+	NSString *helpFilePath = [[NSBundle mainBundle] pathForResource:@"FindTiVoHelpFile" ofType:@"rtf"];
+	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
+	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
+    NSPopover *myPopover = [[NSPopover alloc] init];
+    myPopover.delegate = self;
+    myPopover.behavior = NSPopoverBehaviorTransient;
+    MTHelpViewController *helpContoller = [[MTHelpViewController alloc] initWithNibName:@"MTHelpViewController" bundle:nil];
+    myPopover.contentViewController = helpContoller;
+    [helpContoller loadView];
+    [helpContoller.displayMessage.textStorage setAttributedString:attrHelpText];
+    //	[self.helpController.displayMessage insertText:helpText];
+	[myPopover showRelativeToRect:searchingTiVosIndicator.bounds ofView:searchingTiVosIndicator preferredEdge:NSMaxXEdge];
+ 
 }
 
 #pragma mark - UI Actions

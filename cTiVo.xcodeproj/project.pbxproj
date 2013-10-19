@@ -41,6 +41,7 @@
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
 		D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */; };
+		D209B6AA1813305E004E733B /* FindTiVoHelpFile.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D209B6A91813305E004E733B /* FindTiVoHelpFile.rtf */; };
 		D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
 		D219D5E916A4F88D00C79962 /* MTHelpViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */; };
 		D219D5EA16A4F88D00C79962 /* MTHelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D219D5E816A4F88D00C79962 /* MTHelpViewController.m */; };
@@ -172,6 +173,7 @@
 		D208560416B61B9B002F5F8C /* MTPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTPreferencesViewController.h; sourceTree = "<group>"; };
 		D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPreferencesViewController.m; sourceTree = "<group>"; };
 		D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTPreferencesViewController.xib; sourceTree = "<group>"; };
+		D209B6A91813305E004E733B /* FindTiVoHelpFile.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = FindTiVoHelpFile.rtf; sourceTree = "<group>"; };
 		D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressindicator.h; sourceTree = "<group>"; };
 		D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressindicator.m; sourceTree = "<group>"; };
 		D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTHelpViewController.xib; sourceTree = "<group>"; };
@@ -508,6 +510,7 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				D209B6A91813305E004E733B /* FindTiVoHelpFile.rtf */,
 				D2574E8517FE30EC00BBAB5C /* MAKHelpFile.rtf */,
 				D24A8D0D16A5F3DC00DFF890 /* catToFile */,
 				1EFD685A16D19AA100CC36E5 /* ccextractor */,
@@ -709,6 +712,7 @@
 				1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */,
 				1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */,
 				1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */,
+				D209B6AA1813305E004E733B /* FindTiVoHelpFile.rtf in Resources */,
 				1E684A7D16E2C50B000F5C6E /* expired-recording.png in Resources */,
 				1E684A7E16E2C50B000F5C6E /* expires-soon-recording.png in Resources */,
 				1E684A7F16E2C50B000F5C6E /* save-until-i-delete-recording.png in Resources */,

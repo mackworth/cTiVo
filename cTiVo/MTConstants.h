@@ -133,6 +133,7 @@
 #define kMTMaxBuffSize 50000000
 #define kMTMaxReadPoints 500000
 #define kMTMaxPointsBeforeWrite 500000
+#define kMTTimeToHelpIfNoTiVoFound 15
 
 #define kMTTivoShowPasteBoardType @"com.cTiVo.TivoShow"
 #define kMTDownloadPasteBoardType @"com.cTiVo.Download"
