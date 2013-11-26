@@ -679,12 +679,14 @@ Routine to update and combine both the manual tivo preferences and the media key
 		MTTabViewItem *advTabViewItem = [[MTTabViewItem alloc] initWithIdentifier:@"AdvPrefs"];
 		advTabViewItem.label = @"Advanced Preferences";
 		NSViewController *thisController = [[MTAdvPreferencesViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil];
+        [thisController loadView];
 		advTabViewItem.windowController = (id)thisController;
 		[_advPreferencesController.myTabView insertTabViewItem:advTabViewItem atIndex:0];
 		NSRect tabViewFrame = ((NSView *)advTabViewItem.view).frame;
 		NSRect editorViewFrame = thisController.view.frame;
 		[thisController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
 		[advTabViewItem.view addSubview:thisController.view];
+        [_advPreferencesController.window setFrame:[_advPreferencesController getNewWindowRect:advTabViewItem] display:NO];
 		_advPreferencesController.ignoreTabItemSelection = YES;
 		[_advPreferencesController.myTabView selectTabViewItem:advTabViewItem];
 		_advPreferencesController.ignoreTabItemSelection = NO;;

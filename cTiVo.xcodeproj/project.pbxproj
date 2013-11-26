@@ -636,12 +636,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
 			buildPhases = (
+				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				D2D60B9916766EFD00CE32DE /* Sources */,
 				D2F5300316CC0C0100C44128 /* Update SVN */,
-				D2901ADC1677AF3C001E559C /* Record Bundle Number as SVN Build Number */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
+				D2AA030A1833F09B00AEE326 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -733,19 +734,32 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		D2901ADC1677AF3C001E559C /* Record Bundle Number as SVN Build Number */ = {
+		D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Record Bundle Number as SVN Build Number";
+			name = "Record Bundle Number as GIT commit count";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#svn update\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion `svn info | grep Revision | awk '{print $2}'`\" ${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\n";
+			shellScript = "/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion `git log | grep ^commit | wc | awk '{print $1}'`\" ${PRODUCT_SETTINGS_PATH}\n";
+		};
+		D2AA030A1833F09B00AEE326 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${FRAMEWORKS_FOLDER_PATH}\"\nIDENTITY=\"Developer ID Application: Hugh Mackworth\"\ncodesign --verbose --force --sign \"$IDENTITY\" \"$LOCATION/Sparkle.framework/Versions/A\"\ncodesign --verbose --force --sign \"$IDENTITY\" \"$LOCATION/Growl.framework/Versions/A\"\n";
 		};
 		D2F5300316CC0C0100C44128 /* Update SVN */ = {
 			isa = PBXShellScriptBuildPhase;
