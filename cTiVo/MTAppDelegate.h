@@ -14,18 +14,22 @@
 #import "MTSubscriptionTableView.h"
 #import "MTPreferencesWindowController.h"
 #import "MTAdvPreferencesViewController.h"
+#import "MTiTivoImport.h"
+#import "MTHelpViewController.h"
 
-@interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate> {
+@interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSPopoverDelegate> {
 	MTMainWindowController *mainWindowController;
 	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *markCommecialsItem, *skipCommercialsItem, *pauseMenuItem, *apmMenuItem;
 	IBOutlet NSMenuItem *playVideoMenuItem, *showInFinderMenuItem;
 	IBOutlet NSMenu *optionsMenu;
     IBOutlet NSView *formatSelectionTable;
     IBOutlet NSTableView *exportTableView;
+//    IBOutlet NSArrayController *manualTiVoArrayController, *networkTiVoArrayController;
 	NSMutableArray *mediaKeyQueue;
 	BOOL gettingMediaKey;
 	NSTimer * checkingDone;
 	NSTimer * saveQueueTimer;
+    
 }
 
 @property (weak) IBOutlet NSWindow *window;

@@ -10,7 +10,7 @@
 #import "MTTabViewItem.h"
 
 @interface MTManualTiVoEditorController : NSViewController <MTTabViewItemControllerDelegate> {
-	IBOutlet NSArrayController *arrayController;
+	IBOutlet NSArrayController *manualTiVoArrayController, *networkTiVoArrayController;
 }
 
 

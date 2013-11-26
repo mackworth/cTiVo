@@ -13,6 +13,7 @@
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"
 #import "MTTiVo.h"
+#import "MTHelpViewController.h"
 #import <Quartz/Quartz.h>
 
 @interface MTMainWindowController ()
@@ -53,10 +54,7 @@ __DDLOGHERE__
 	[NSBundle loadNibNamed:@"MTMainWindowDrawer" owner:self];
 	showDetailDrawer.parentWindow = self.window;
 	
-	[tiVoListPopUp removeAllItems];
-	[tiVoListPopUp addItemWithTitle:@"Searching for TiVos..."];
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-    [searchingTiVosIndicator startAnimation:nil];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(buildColumnMenuForTables) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(refreshTiVoListPopup:) name:kMTNotificationTiVoShowsUpdated object:nil];
@@ -184,11 +182,19 @@ __DDLOGHERE__
 		}
 		
 	}
-    if (tiVoManager.tiVoList.count == 1) {
+    if (tiVoManager.tiVoList.count == 0) {
+		[tiVoListPopUp setHidden:YES];
+		tiVoListPopUpLabel.stringValue = @"Searching for TiVos...";
+		tiVoListPopUpLabel.hidden = NO;
+		[searchingTiVosIndicator startAnimation:nil];
+        [self performSelector:@selector(popupHelpIfNotTiVosAfterInterval) withObject:Nil afterDelay:kMTTimeToHelpIfNoTiVoFound];
+	} else if (tiVoManager.tiVoList.count == 1) {
         [searchingTiVosIndicator stopAnimation:nil];
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(popupHelpIfNotTiVosAfterInterval) object:nil];
 		MTTiVo *ts = tiVoManager.tiVoList[0];
         [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
-        [tiVoListPopUp setHidden:YES];
+		[tiVoListPopUpLabel setHidden:NO];
+		[tiVoListPopUp setHidden:YES];
         tiVoListPopUpLabel.stringValue = [NSString stringWithFormat:@"TiVo: %@ (%ld)",ts.tiVo.name,ts.shows.count];
         if (!ts.isReachable) {
             NSFont *thisFont = [NSFont systemFontOfSize:13];
@@ -199,7 +205,8 @@ __DDLOGHERE__
         }
     } else if (tiVoManager.tiVoList.count > 1){
         [searchingTiVosIndicator stopAnimation:nil];
-       [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d shows)",kMTAllTiVos,tiVoManager.totalShows]];
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(popupHelpIfNotTiVosAfterInterval) object:nil];
+      [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d shows)",kMTAllTiVos,tiVoManager.totalShows]];
         if ([kMTAllTiVos compare:_selectedTiVo] == NSOrderedSame) {
             [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
         }
@@ -207,6 +214,24 @@ __DDLOGHERE__
         [tiVoListPopUpLabel setHidden:NO];
         tiVoListPopUpLabel.stringValue = @"Filter TiVo:";
     }
+}
+
+-(void)popupHelpIfNotTiVosAfterInterval
+{
+   	//Get help text for encoder
+	NSString *helpFilePath = [[NSBundle mainBundle] pathForResource:@"FindTiVoHelpFile" ofType:@"rtf"];
+	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
+	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
+    NSPopover *myPopover = [[NSPopover alloc] init];
+    myPopover.delegate = self;
+    myPopover.behavior = NSPopoverBehaviorTransient;
+    MTHelpViewController *helpContoller = [[MTHelpViewController alloc] initWithNibName:@"MTHelpViewController" bundle:nil];
+    myPopover.contentViewController = helpContoller;
+    [helpContoller loadView];
+    [helpContoller.displayMessage.textStorage setAttributedString:attrHelpText];
+    //	[self.helpController.displayMessage insertText:helpText];
+	[myPopover showRelativeToRect:searchingTiVosIndicator.bounds ofView:searchingTiVosIndicator preferredEdge:NSMaxXEdge];
+ 
 }
 
 #pragma mark - UI Actions

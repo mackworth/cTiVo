@@ -30,6 +30,7 @@
     int lastChangeDate;
     int itemStart;
     int itemCount;
+    int authenticationTries;
     BOOL parsingShow, gettingContent, gettingDetails, gettingIcon;
     NSMutableString *element;
     MTTiVoShow *currentShow;
@@ -52,8 +53,10 @@
 @property int manualTiVoID;
 
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
++(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual;
++(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue;
 
--(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
+-(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual;
 -(void)updateShows:(id)sender;
 -(void)manageDownloads:(id)info;
 //-(void) reportNetworkFailure;
@@ -63,6 +66,7 @@
 
 -(void) saveLastLoadTime:(NSDate *) newDate;
 -(void)resetAllDetails;
-
+-(void)getMediaKey;
+-(NSDictionary *)defaultsDictionary;
 
 @end

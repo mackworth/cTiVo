@@ -22,5 +22,7 @@
 @property (nonatomic, strong) IBOutlet NSTabView *myTabView;
 @property BOOL ignoreTabItemSelection;
 
+-(NSRect)getNewWindowRect:(MTTabViewItem *)tabViewItem;
+
 
 @end

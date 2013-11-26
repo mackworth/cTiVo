@@ -41,6 +41,7 @@
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
 		D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */; };
+		D209B6AA1813305E004E733B /* FindTiVoHelpFile.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D209B6A91813305E004E733B /* FindTiVoHelpFile.rtf */; };
 		D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
 		D219D5E916A4F88D00C79962 /* MTHelpViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */; };
 		D219D5EA16A4F88D00C79962 /* MTHelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D219D5E816A4F88D00C79962 /* MTHelpViewController.m */; };
@@ -51,6 +52,7 @@
 		D240EF5C16EEEC3F00635E53 /* ccextractor in Resources */ = {isa = PBXBuildFile; fileRef = 1EFD685A16D19AA100CC36E5 /* ccextractor */; };
 		D240EF5E16EFE05E00635E53 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D240EF5D16EFE05E00635E53 /* QTKit.framework */; };
 		D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */ = {isa = PBXBuildFile; fileRef = D24A8D0D16A5F3DC00DFF890 /* catToFile */; };
+		D2574E8617FE30EC00BBAB5C /* MAKHelpFile.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D2574E8517FE30EC00BBAB5C /* MAKHelpFile.rtf */; };
 		D257C6E41697400700EBE30B /* MTFormatPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */; };
 		D257C6E9169740A000EBE30B /* MTPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E7169740A000EBE30B /* MTPopUpTableCellView.m */; };
 		D271F3631734BCDA00641435 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D271F3621734BCDA00641435 /* Security.framework */; };
@@ -173,6 +175,7 @@
 		D208560416B61B9B002F5F8C /* MTPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTPreferencesViewController.h; sourceTree = "<group>"; };
 		D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPreferencesViewController.m; sourceTree = "<group>"; };
 		D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTPreferencesViewController.xib; sourceTree = "<group>"; };
+		D209B6A91813305E004E733B /* FindTiVoHelpFile.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = FindTiVoHelpFile.rtf; sourceTree = "<group>"; };
 		D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressindicator.h; sourceTree = "<group>"; };
 		D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressindicator.m; sourceTree = "<group>"; };
 		D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTHelpViewController.xib; sourceTree = "<group>"; };
@@ -186,6 +189,7 @@
 		D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionTableView.m; sourceTree = "<group>"; };
 		D240EF5D16EFE05E00635E53 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		D24A8D0D16A5F3DC00DFF890 /* catToFile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = catToFile; sourceTree = "<group>"; };
+		D2574E8517FE30EC00BBAB5C /* MAKHelpFile.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = MAKHelpFile.rtf; sourceTree = "<group>"; };
 		D257C6E11697400600EBE30B /* MTFormatPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTFormatPopUpButton.h; sourceTree = "<group>"; };
 		D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTFormatPopUpButton.m; sourceTree = "<group>"; };
 		D257C6E61697409F00EBE30B /* MTPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTPopUpTableCellView.h; sourceTree = "<group>"; };
@@ -510,6 +514,8 @@
 		D2D60BBE16766F1100CE32DE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				D209B6A91813305E004E733B /* FindTiVoHelpFile.rtf */,
+				D2574E8517FE30EC00BBAB5C /* MAKHelpFile.rtf */,
 				D24A8D0D16A5F3DC00DFF890 /* catToFile */,
 				1EFD685A16D19AA100CC36E5 /* ccextractor */,
 				D2CAF34216AB6FDE004E4CFA /* checkImage.png */,
@@ -634,12 +640,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
 			buildPhases = (
+				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				D2D60B9916766EFD00CE32DE /* Sources */,
 				D2F5300316CC0C0100C44128 /* Update SVN */,
-				D2901ADC1677AF3C001E559C /* Record Bundle Number as SVN Build Number */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
+				D2AA030A1833F09B00AEE326 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -697,6 +704,7 @@
 				D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */,
 				D2CAF34316AB6FDE004E4CFA /* checkImage.png in Resources */,
 				1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */,
+				D2574E8617FE30EC00BBAB5C /* MAKHelpFile.rtf in Resources */,
 				D2D2C6F016B3816B001AFE75 /* MTManualTiVoEditorController.xib in Resources */,
 				D27579BE16B4DC2B0090D137 /* MTPreferencesWindowController.xib in Resources */,
 				D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */,
@@ -709,6 +717,7 @@
 				1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */,
 				1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */,
 				1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */,
+				D209B6AA1813305E004E733B /* FindTiVoHelpFile.rtf in Resources */,
 				1E684A7D16E2C50B000F5C6E /* expired-recording.png in Resources */,
 				1E684A7E16E2C50B000F5C6E /* expires-soon-recording.png in Resources */,
 				1E684A7F16E2C50B000F5C6E /* save-until-i-delete-recording.png in Resources */,
@@ -729,19 +738,32 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		D2901ADC1677AF3C001E559C /* Record Bundle Number as SVN Build Number */ = {
+		D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Record Bundle Number as SVN Build Number";
+			name = "Record Bundle Number as GIT commit count";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#svn update\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion `svn info | grep Revision | awk '{print $2}'`\" ${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\n";
+			shellScript = "/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion `git log | grep ^commit | wc | awk '{print $1 + 50}'`\" ${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\n";
+		};
+		D2AA030A1833F09B00AEE326 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${FRAMEWORKS_FOLDER_PATH}\"\nIDENTITY=\"Developer ID Application: Hugh Mackworth\"\ncodesign --verbose --force --sign \"$IDENTITY\" \"$LOCATION/Sparkle.framework/Versions/A\"\ncodesign --verbose --force --sign \"$IDENTITY\" \"$LOCATION/Growl.framework/Versions/A\"\n";
 		};
 		D2F5300316CC0C0100C44128 /* Update SVN */ = {
 			isa = PBXShellScriptBuildPhase;
