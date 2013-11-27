@@ -191,23 +191,26 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(NSString * ) description
 {
     if (self.manualTiVo) {
-        return [NSString stringWithFormat:@"Name: %@ \n IPAddress: %@ \n UserPort: %d \n UserPortSSL %d \n MediaKey: %@ \n Enabled: %@ \n Manual:%@",
+        return [NSString stringWithFormat:@"Name: %@, IPAddress: %@, Manual: %@",
+//        return [NSString stringWithFormat:@"Name: %@ \n IPAddress: %@ \n UserPort: %d \n UserPortSSL %d \n MediaKey: %@ \n Enabled: %@ \n Manual:%@",
             self.tiVo.name,
             self.tiVo.iPAddress,
-            self.tiVo.userPort,
-            self.tiVo.userPortSSL,
-            self.mediaKey,
-            self.enabled ? @"Yes" : @"No",
+//            self.tiVo.userPort,
+//            self.tiVo.userPortSSL,
+//            self.mediaKey,
+//            self.enabled ? @"Yes" : @"No",
             self.manualTiVo ? @"Yes" : @"No"
             ];
     } else {
-        return [NSString stringWithFormat:@"Name: %@\n MediaKey: %@\nEnabled: %@\nManual:%@",
+		return [NSString stringWithFormat:@"Name: %@, Manual:%@",
+
+//        return [NSString stringWithFormat:@"Name: %@\n MediaKey: %@\nEnabled: %@\nManual:%@",
                 self.tiVo.name,
-                self.mediaKey,
-                self.enabled ? @"Yes" : @"No",
+//                self.mediaKey,
+//                self.enabled ? @"Yes" : @"No",
                 self.manualTiVo ? @"Yes" : @"No"
                 ];
-        
+//
     }
 }
 
