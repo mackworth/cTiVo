@@ -611,7 +611,7 @@ __DDLOGHERE__
 -(NSAttributedString *)attribDescription {
 	NSAttributedString *attstring = [[NSAttributedString alloc] initWithString:@""];
 	if (self.showDescription) {
-		attstring = [[NSAttributedString alloc] initWithString:self.showDescription];
+		attstring = [[NSAttributedString alloc] initWithString:self.showDescription attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:11]}];
 	}
 	return attstring;
 }
