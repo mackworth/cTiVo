@@ -116,7 +116,7 @@ __DDLOGHERE__
 		return;  
 	}
     MTTiVo * tivo = (MTTiVo *) notification.object;
-	DDLogDetail(@"LoadingIndicator: %@ for %@",notification.name, tivo);
+	DDLogDetail(@"LoadingIndicator: %@ for %@",notification.name, tivo.tiVo.name);
     if ([notification.name  compare:kMTNotificationShowListUpdating] == NSOrderedSame) {
 		if ([loadingTiVos indexOfObject:tivo] == NSNotFound) {
 			[loadingTiVos addObject:tivo];
@@ -127,8 +127,7 @@ __DDLOGHERE__
     
 	if (loadingTiVos.count) {
         [loadingProgramListIndicator startAnimation:nil];
-        //note: this relies on [MTTivo description]
-        NSString *message =[NSString stringWithFormat: @"Updating %@",[loadingTiVos componentsJoinedByString:@", "]];
+        NSString *message =[NSString stringWithFormat: @"Updating %@",[[loadingTiVos valueForKeyPath:@"tiVo.name" ] componentsJoinedByString:@", "]];
 
         loadingProgramListLabel.stringValue = message;
     } else {
