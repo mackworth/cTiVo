@@ -64,11 +64,10 @@
 	return textField;
 }
 
--(void) addMenuTo:(NSPopUpButton*) cell withCurrentLevel: (NSInteger) currentLevel{
-
+-(void) addDebugMenuTo:(NSPopUpButton*) cell withCurrentLevel: (NSInteger) currentLevel{
 	NSArray * debugNames = @[@"None",@"Normal" ,@"Major" ,@"Detail" , @"Verbose"];
 	int debugLevels[] = {LOG_LEVEL_OFF, LOG_LEVEL_REPORT, LOG_LEVEL_MAJOR, LOG_LEVEL_DETAIL, LOG_LEVEL_VERBOSE};
-
+	
 	[cell addItemsWithTitles: debugNames];
 	for (int index = 0; index < cell.numberOfItems; index++) {
 		//	for (NSMenuItem * item in [cell itemArray]) {
@@ -79,14 +78,58 @@
 		}
 	}
 }
+-(void) addKeywordMenuTo:(NSPopUpButton*) cell{
+	NSArray * keyWords = @[
+						   @"Title",  //these values must be same as those in keyword processing
+						   @"MainTitle",
+						   @"EpisodeTitle",
+						   @"ChannelNum",
+						   @"Channel",
+						   @"StartTime",
+						   @"Min",
+						   @"Hour",
+						   @"Wday",
+						   @"Mday",
+						   @"Month",
+						   @"MonthNum",
+						   @"Year",
+						   @"OriginalAirDate",
+						   @"Episode",
+						   @"Season",
+						   @"EpisodeNumber",
+						   @"SeriesEpNumber",
+						   @"TiVoName",
+						   @"MovieYear",
+						   @"TVDBseriesID",
+						   @"• Plex Default",  //• means replace whole field;
+						   @"• Complex Example",//these must match below
+						   @"• cTiVo Default"
+						   ];
+	[cell addItemsWithTitles: keyWords];
+	for (NSMenuItem * item in cell.itemArray) {
+		item.representedObject = [NSString stringWithFormat:@"[%@]",item.title];
+	}
+	//and fixup the ones that are special
+	NSMenuItem * plex = [cell itemWithTitle:@"• Plex Default"];
+	plex.representedObject = @"[mainTitle] - [seriesEpNumber] - [episodeTitle]";
+	
+	NSMenuItem * complex = [cell itemWithTitle:@"• Complex Example"];
+	complex.representedObject =
+	@"[mainTitle / seriesEpNumber \" - \" episodeTitle][\"MOVIES\"  / mainTitle \" (\" movieYear \")";
+
+	NSMenuItem * example = [cell itemWithTitle:@"• cTiVo Default"];
+	example.representedObject = @"";
+}
+
 
 -(void) resetAllPopups: (int) newVal {
 }
 
 -(void) awakeFromNib {
 	
-	[self addMenuTo:self.masterDebugLevel withCurrentLevel:[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel]];
-
+	[self addDebugMenuTo:self.masterDebugLevel withCurrentLevel:[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel]];
+	[self addKeywordMenuTo:self.keywordPopup];
+	
 	self.debugClasses = [DDLog registeredClasses] ;
 	self.popups= [NSMutableArray arrayWithCapacity:self.debugClasses.count ];
 	self.classNames = [NSMutableArray arrayWithCapacity:self.debugClasses.count];
@@ -102,12 +145,13 @@
 	for (NSString * className in self.classNames) {
 		Class class =  NSClassFromString(className);
 		const int vertBase = self.debugLevelView.frame.size.height-40;
-		const int labelWidth = 150;
+		const int horizBase = self.debugLevelView.frame.size.width;
+		const int labelWidth = 160;
 		const int popupHeight = 25;
 		const int popupWidth = 80;
 		const int vertMargin = 5;
 		const int horizMargin = 10;
-		const int columnWidth = labelWidth+vertMargin+popupWidth+vertMargin*4;
+		const int columnWidth = horizBase/2;
 		int columNum = (itemNum < numItems/2)? 0:1;
 		int rowNum = (itemNum < numItems/2) ? itemNum: itemNum-numItems/2;
 		
@@ -125,7 +169,7 @@
 		cell.title = className;
 		cell.font= 	[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
 
-		[self addMenuTo:cell withCurrentLevel: [DDLog logLevelForClass:class]];
+		[self addDebugMenuTo:cell withCurrentLevel: [DDLog logLevelForClass:class]];
 		cell.target = self;
 		cell.action = @selector(newValue:);
 		
@@ -156,6 +200,25 @@
 	//	[self.helpController.displayMessage insertText:helpText];
 	[popoverDetachController.displayMessage.textStorage setAttributedString:attrHelpText];
 	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+}
+
+-(IBAction) keywordSelected:(id)sender {
+	NSPopUpButton * cell =  (NSPopUpButton *) sender;
+	NSString * keyword = [cell.selectedItem representedObject];
+	NSText * editor = [self.fileNameField currentEditor];
+	NSInteger currentLen = self.fileNameField.stringValue.length;
+	if (!editor) {
+		//not selected, so select, at end of text
+		[self.view.window makeFirstResponder:self.fileNameField];
+		editor = [self.fileNameField currentEditor];
+		[editor setSelectedRange:NSMakeRange(currentLen,0)];
+	}
+	if ([cell.selectedItem.title hasPrefix:@"•"]) {
+		//whole template, so replace whole string
+		[editor setSelectedRange:NSMakeRange(0,currentLen)];
+	}
+	[editor insertText:keyword];
+
 }
 
 -(IBAction) newMasterValue:(id) sender {
@@ -190,6 +253,15 @@
         return;
     }
     [tiVoManager resetAllDetails];
+}
+
+- (BOOL)windowShouldClose:(id)sender {
+	//notified by PreferenceWindowController that we're going to close, so save the currently edited textField
+	NSResponder * responder = [self.view.window firstResponder];
+	if ([responder class] == [NSTextView class] ) {
+		[self.view.window makeFirstResponder:nil ];
+	}
+	return YES;
 }
 
 

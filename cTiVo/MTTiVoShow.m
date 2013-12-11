@@ -336,6 +336,7 @@ __DDLOGHERE__
 					tiVoManager.theTVDBStatistics[kMTVDBRightInfo] = @([tiVoManager.theTVDBStatistics[kMTVDBRightInfo] intValue] + 1);
 				}
 			} else {
+				self.episodeNumber = [NSString stringWithFormat:@"%d%02d",[seasonNum intValue], [episodeNum intValue]];
 				self.episode = [episodeNum intValue];
 				self.season = [seasonNum intValue];
 				tiVoManager.theTVDBStatistics[kMTVDBNewInfo] = @([tiVoManager.theTVDBStatistics[kMTVDBNewInfo] intValue] + 1);
