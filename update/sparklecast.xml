@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"  xmlns:dc="http://purl.org/dc/elements/1.1/">
-   <channel>
-      <title>cTiVo Updates</title>
-      <link>http://ctivo.googlecode.com/files/sparklecast.xml</link>
-      <description>Version 2.1 (More Major new features and UI improvements)</description>
-      <language>en</language>      
-         <item>
-            <title>Version 2.1 (More Major new features and UI improvements)</title>
+    <channel>
+        <title>cTiVo Updates</title>
+        <link>http://ctivo.googlecode.com/files/sparklecast.xml</link>
+        <description>Version 2.2 (Addresses users having trouble with MAK key entry)</description>
+        <language>en</language>
+        <item>
+            <title>Version 2.2 (Addresses users having trouble with MAK key entry)</title>
 			<description><![CDATA[
+                <b>Version 2.2 (Addresses users having trouble with MAK key entry)</b><br /><br />
+				<ul>
+				<li>Improved handling of initial MAK entry</li>
+                <li>Users can now enable and disable any TiVo with the TiVo preferences UI</li>
+                </ul>
+                <br />
 				<b>Version 2.1 (More Major new features and UI improvements)</b><br /><br />
 				<ul>
 				<li>cTiVo now automatically configures an optimum workflow based on user selections so that the simultaneous encoding selection by the user is no longer necessary</li>
@@ -29,56 +35,19 @@
 				</ul>
                 <br />
                 
-				<b>Version 2.0 (Major new features and UI improvements)</b><br /><br />
-				<span style="margin-left:4px">Greatly enhanced User Interface:</span>
-				<ul>
-				<li>Show table now indicates when show is available to watch</li>
-				<li>Added graphics for TiVo status</li>
-				<li>Displays when shows have been deleted on TiVo</li>
-				<li>Additional columns of information (many hidden by default to keep simple)</li>
-				<li>User selection and ordering of columns</li>
-				<li>Advanced preferences via Option key</li>
-				<li>Documentation now available online</li>
-				<li>Help command within cTiVo</li>
-				<li>Many other changes</li>
-				</ul>
-				<span style="margin-left:4px">Metadata support:</span>
-				<ul>
-				<li>Captioning (ccextractor)</li>
-				<li>Including metadata in video files (AtomicParsley)</li>
-				<li>pyTivo compatibility</li>
-				<li>Automatically adjusts caption timing when removing commercials</li>
-				</ul>
-				<span style="margin-left:4px">Other new features:</span></li>
-				<ul>
-				<li>Optional inclusion of TiVo Suggestions in displays and subscriptions</li>
-				<li>Audio-only download</li>
-				<li>Elgato turbo.264 encoder support</li>
-				<li>Spotlight tracking of downloaded shows (keyword = cTiVoDownload)</li>
-				</ul>
-				<span style="margin-left:4px">Bug fixes:</span>
-				<ul>
-				<li>Full 10.7 compatibility</li>
-				<li>Single quotes in file names</li>
-				<li>Format editing now affects existing subscriptions/downloads</li>
-				<li>Format editing fixes</li>
-				<li>Improved commercial removal with comskip </li>
-				<li>Improved speed for decrypting only downloads</li>
-				<li>Many others</li>
-				</ul>				<br />
 				
-				See <a href="http://code.google.com/p/ctivo/"> cTiVo Home </a> for more informaton.
-
-				]]>
+				See <a href="https://github.com/dscottbuch/cTiVo/wiki"> cTiVo Home </a> for more informaton.
+                
+            ]]>
 			</description>
             <pubDate>Mon., Apr 8, 2013 10:10:00 -0800</pubDate>
             <!-- <sparkle:releaseNotesLink>http://andymatuschak.org/files/notes.html</sparkle:releaseNotesLink> -->
-            <enclosure url="http://ctivo.googlecode.com/files/cTiVo_2.1_439.zip" 
-            			sparkle:version="439" sparkle:shortVersionString="2.1" 
-            			length="16888128" 
-            			type="application/octet-stream" 
-            			sparkle:dsaSignature="MC4CFQDMkPBcMB8+IfhoDkwepvO0vdEErAIVAK7spviPYx1NZ7PQmXKmIgRVCw9N" />
-         </item>
-   </channel>
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/v2.2.451/cTiVo_2.2.451.zip"
+            sparkle:version="451" sparkle:shortVersionString="2.2"
+            length="16755956"
+            type="application/octet-stream"
+            sparkle:dsaSignature="MC0CFAzammomyeYz0FdDbhita99ZYVlVAhUAwAz2Xn/2posuRLtgEe2dQi1mrIE=" />
+        </item>
+    </channel>
 </rss>
 
