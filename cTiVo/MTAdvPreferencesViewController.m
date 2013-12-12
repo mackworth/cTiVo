@@ -102,6 +102,7 @@
 						   @"MovieYear",
 						   @"TVDBseriesID",
 						   @"• Plex Default",  //• means replace whole field;
+						   @"• Plex Folders",
 						   @"• Complex Example",//these must match below
 						   @"• cTiVo Default"
 						   ];
@@ -113,9 +114,12 @@
 	NSMenuItem * plex = [cell itemWithTitle:@"• Plex Default"];
 	plex.representedObject = @"[mainTitle] - [seriesEpNumber] - [episodeTitle]";
 	
+	NSMenuItem * plex2 = [cell itemWithTitle:@"• Plex Folders"];
+	plex2.representedObject = 	@"[mainTitle / \"Season \" season / mainTitle \" - \" seriesEpNumber \" - \" episodeTitle][\"Movies\"  / mainTitle \" (\" movieYear \")\"]";
+	
 	NSMenuItem * complex = [cell itemWithTitle:@"• Complex Example"];
 	complex.representedObject =
-	@"[mainTitle / seriesEpNumber \" - \" episodeTitle][\"MOVIES\"  / mainTitle \" (\" movieYear \")";
+	@"[mainTitle / seriesEpNumber \" - \" episodeTitle][\"Movies\"  / mainTitle \" (\" movieYear \")\"]";
 
 	NSMenuItem * example = [cell itemWithTitle:@"• cTiVo Default"];
 	example.representedObject = @"";

@@ -32,7 +32,8 @@
 	
 }
 
-@property (strong, nonatomic) NSString *downloadDir;
+@property (strong, nonatomic) NSString *downloadDir,
+					*keywordPathPart; // any extra layers of directories due to keyword template
 
 @property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
 
@@ -438,9 +439,13 @@ __DDLOGHERE__
 
 -(NSString *) directoryForShowInDirectory:(NSString*) tryDirectory  {
 	//Check that download directory (including show directory) exists.  If create it.  If unsuccessful return nil
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs] && ![self.show isMovie]){
-		tryDirectory = [tryDirectory stringByAppendingPathComponent:self.show.seriesTitle];
-		DDLogVerbose(@"Opening Series-specific folder %@",tryDirectory);
+	tryDirectory = [tryDirectory stringByAppendingPathComponent:self.keywordPathPart];
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs]) {
+		NSString *whichFolder = ([self.show isMovie])  ? @"Movies"  : self.show.seriesTitle;
+		if ( ! [tryDirectory.lastPathComponent isEqualToString:whichFolder]){
+			tryDirectory = [tryDirectory stringByAppendingPathComponent:whichFolder];
+			DDLogVerbose(@"Using sub folder %@",tryDirectory);
+		}
 	}
 	if (![[NSFileManager defaultManager] fileExistsAtPath: tryDirectory]) { // try to create it
 		DDLogDetail(@"Creating folder %@",tryDirectory);
@@ -590,7 +595,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		 
 		 
 	 NSDictionary * keywords = @{  //lowercase so we can just lowercase keyword when found
-		 @"/":				@"/",						//allows [/] for subdirs
+		 @"/":				@"|||",						//allows [/] for subdirs
 		 @"title":			NULLT(self.show.showTitle) ,
 		 @"maintitle":		NULLT(self.show.seriesTitle),
 		 @"episodetitle":	NULLT(self.show.episodeTitle),
@@ -632,30 +637,35 @@ NSString * fourChar(long n, BOOL allowZero) {
 			 [scanner scanString:@"]" intoString:nil];
 		 }
 	 }
-	 return [NSString stringWithString:outStr];
+	 NSString * finalStr = [outStr stringByReplacingOccurrencesOfString:@"/" withString:@"-"]; //remove accidental directory markers
+	 finalStr = [finalStr stringByReplacingOccurrencesOfString:@"|||" withString:@"/"];  ///insert intentional ones
+	 return finalStr;
  }
 
 //#define Null(x) x ?  x : nullString
 //
--(NSString *)makeBaseFileNameForDirectory:(NSString *) downloadDir {
+-(void)configureBaseFileNameAndDirectory {
 	if (!self.baseFileName) {
 		// generate only once
-		NSString * baseTitle = _show.showTitle;
+		NSString * baseTitle  = [_show.showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
 		NSString * filenamePattern = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormat];
-		if (filenamePattern.length > 0) {
-			baseTitle = [self swapKeywordsInString:filenamePattern];
-			DDLogMajor(@"With file pattern %@ for show %@ got %@", filenamePattern, self.show, baseTitle);
-			if (baseTitle.length == 0) baseTitle = _show.showTitle;
-			if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
+		if (filenamePattern.length >0) {
+			//we have a pattern, so generate a name that way
+			NSString *keyBaseTitle = [self swapKeywordsInString:filenamePattern];
+			DDLogMajor(@"With file pattern %@ for show %@, got %@", filenamePattern, self.show, keyBaseTitle);
+			if (keyBaseTitle.length >0) {
+				baseTitle = [keyBaseTitle lastPathComponent];
+				//note that self.downloadDir depends on keywordPathPart being set
+				self.keywordPathPart = [keyBaseTitle stringByDeletingLastPathComponent];
+			}
 		}
-		NSString * safeTitle = [baseTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-		safeTitle = [safeTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
-		if (LOG_DETAIL  && [safeTitle compare: _show.showTitle ]  != NSOrderedSame) {
-			DDLogDetail(@"changed filename %@ to %@",_show.showTitle, safeTitle);
+		if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
+		baseTitle = [baseTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+		if (LOG_DETAIL  && [baseTitle compare: _show.showTitle ]  != NSOrderedSame) {
+			DDLogDetail(@"changed filename %@ to %@",_show.showTitle, baseTitle);
 		}
-		self.baseFileName = [self createUniqueBaseFileName:safeTitle inDownloadDir:downloadDir];
+		self.baseFileName = [self createUniqueBaseFileName:baseTitle inDownloadDir:self.downloadDir];
 	}
-	return self.baseFileName;
 }
 #undef Null
 
@@ -721,19 +731,21 @@ NSString * fourChar(long n, BOOL allowZero) {
 	
 }
 
--(NSString *)downloadDir
+-(NSString *)downloadDir  //not valid until after configureBaseFileNameAndDirectory has been called
+						  //layered on top of downloadDirectory to add subdirs and check for existence/create if necessary
+						  //maybe should change to update downloadDirectory at configureFiles time to avoid reassembling subdirs?
 {
- 	NSString *ddir = [self directoryForShowInDirectory:[self downloadDirectory]];
-	
-	//go to current directory if one at show scheduling time failed
-	if (!ddir) {
-		ddir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
-	}
-    
-	//finally, go to default if not successful
-	if (!ddir) {
-		ddir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
-	}
+		NSString *ddir = [self directoryForShowInDirectory:[self downloadDirectory]];
+		
+		//go to current directory if one at show scheduling time failed
+		if (!ddir) {
+			ddir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
+		}
+		
+		//finally, go to default if not successful
+		if (!ddir) {
+			ddir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
+		}
     return ddir;
 }
 
@@ -743,7 +755,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 	//Release all previous attached pointers
     [self deallocDownloadHandling];
     NSFileManager *fm = [NSFileManager defaultManager];
-	self.baseFileName = [self makeBaseFileNameForDirectory:self.downloadDir];
+	[self configureBaseFileNameAndDirectory];
     if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {  //We need to download from the TiVo
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
             _bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",tiVoManager.tmpFilesDirectory,self.baseFileName];
