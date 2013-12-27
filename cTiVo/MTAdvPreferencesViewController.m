@@ -85,7 +85,6 @@
 						   @"EpisodeTitle",
 						   @"ChannelNum",
 						   @"Channel",
-						   @"StartTime",
 						   @"Min",
 						   @"Hour",
 						   @"Wday",
@@ -94,12 +93,13 @@
 						   @"MonthNum",
 						   @"Year",
 						   @"OriginalAirDate",
-						   @"Episode",
 						   @"Season",
+						   @"Episode",
 						   @"EpisodeNumber",
 						   @"SeriesEpNumber",
-						   @"TiVoName",
+						   @"StartTime",
 						   @"MovieYear",
+						   @"TiVoName",
 						   @"TVDBseriesID",
 						   @"• Plex Default",  //• means replace whole field;
 						   @"• Plex Folders",
@@ -108,18 +108,18 @@
 						   ];
 	[cell addItemsWithTitles: keyWords];
 	for (NSMenuItem * item in cell.itemArray) {
-		item.representedObject = [NSString stringWithFormat:@"[%@]",item.title];
+		item.representedObject = item.title;
 	}
 	//and fixup the ones that are special
 	NSMenuItem * plex = [cell itemWithTitle:@"• Plex Default"];
-	plex.representedObject = @"[mainTitle] - [seriesEpNumber] - [episodeTitle]";
+	plex.representedObject = @"[MainTitle] - [SeriesEpNumber] - [EpisodeTitle]";
 	
 	NSMenuItem * plex2 = [cell itemWithTitle:@"• Plex Folders"];
-	plex2.representedObject = 	@"[mainTitle / \"Season \" season / mainTitle \" - \" seriesEpNumber \" - \" episodeTitle][\"Movies\"  / mainTitle \" (\" movieYear \")\"]";
+	plex2.representedObject = 	@"[MainTitle / \"Season \" Season / MainTitle \" - \" SeriesEpNumber \" - \" EpisodeTitle][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]";
 	
 	NSMenuItem * complex = [cell itemWithTitle:@"• Complex Example"];
 	complex.representedObject =
-	@"[mainTitle / seriesEpNumber \" - \" episodeTitle][\"Movies\"  / mainTitle \" (\" movieYear \")\"]";
+	@"[MainTitle / SeriesEpNumber \" - \" EpisodeTitle][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]";
 
 	NSMenuItem * example = [cell itemWithTitle:@"• cTiVo Default"];
 	example.representedObject = @"";
@@ -210,16 +210,32 @@
 	NSPopUpButton * cell =  (NSPopUpButton *) sender;
 	NSString * keyword = [cell.selectedItem representedObject];
 	NSText * editor = [self.fileNameField currentEditor];
-	NSInteger currentLen = self.fileNameField.stringValue.length;
+	NSString * current = self.fileNameField.stringValue;
 	if (!editor) {
 		//not selected, so select, at end of text
 		[self.view.window makeFirstResponder:self.fileNameField];
 		editor = [self.fileNameField currentEditor];
-		[editor setSelectedRange:NSMakeRange(currentLen,0)];
+		[editor setSelectedRange:NSMakeRange(current.length,0)];
 	}
 	if ([cell.selectedItem.title hasPrefix:@"•"]) {
 		//whole template, so replace whole string
-		[editor setSelectedRange:NSMakeRange(0,currentLen)];
+		[editor setSelectedRange:NSMakeRange(0,current.length)];
+	} else {
+		//normally we add brackets around individual keywords, but not if we're inside one already
+		NSUInteger cursorLoc = editor.selectedRange.location;
+		NSRange beforeCursor = NSMakeRange(0,cursorLoc);
+		NSInteger lastLeft = [current rangeOfString:@"[" options:NSBackwardsSearch range:beforeCursor].location;
+		NSInteger lastRight = [current rangeOfString:@"]" options:NSBackwardsSearch range:beforeCursor].location;
+		if (lastLeft == NSNotFound ||  //might be inside a [, but only if
+			(lastRight != NSNotFound && lastRight > lastLeft)) { //we don't have a ] after it
+			keyword = [NSString stringWithFormat:@"[%@]",keyword];
+		} else {
+			//inside a bracket, so we may want a space-delimited keywords
+			unichar priorCh = [current characterAtIndex:cursorLoc-1];
+			if (priorCh != '[' && priorCh != ' ') {
+				keyword =[NSString stringWithFormat:@" %@ ",keyword];
+			}
+		}
 	}
 	[editor insertText:keyword];
 
