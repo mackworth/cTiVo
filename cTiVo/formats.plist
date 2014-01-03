@@ -116,7 +116,7 @@ audio: aac at 128kbs</string>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for archival at super quality
+			<string>for archival at high quality
 video: original resolution h.264 at 10Mbps
 audio: aac at 256kbps</string>
 			<key>comSkip</key>
@@ -130,9 +130,9 @@ audio: aac at 256kbps</string>
 			<key>encoderUsed</key>
 			<string>mencoder</string>
 			<key>name</key>
-			<string>Quicktime (H.264   10Mbps)</string>
+			<string>Quicktime (H.264   Constant Quality - High)</string>
 			<key>encoderVideoOptions</key>
-			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts bitrate=10000:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale</string>
+			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts crf=18:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale,yadif=0</string>
 			<key>encoderAudioOptions</key>
 			<string>-oac faac -faacopts mpeg=4:object=2:raw:br=256</string>
 			<key>encoderOtherOptions</key>
@@ -152,7 +152,7 @@ audio: aac at 256kbps</string>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for archival at high quality
+			<string>for archival at medium quality
 video: original resolution h.264 at 5Mbps
 audio: aac at 192kbs</string>
 			<key>comSkip</key>
@@ -166,9 +166,9 @@ audio: aac at 192kbs</string>
 			<key>encoderUsed</key>
 			<string>mencoder</string>
 			<key>name</key>
-			<string>Quicktime (H.264   5Mbps)</string>
+			<string>Quicktime (H.264   Constant Quality - Medium)</string>
 			<key>encoderVideoOptions</key>
-			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts bitrate=5000:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale</string>
+			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts crf=22:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale,yadif=0</string>
 			<key>encoderAudioOptions</key>
 			<string>-oac faac -faacopts mpeg=4:object=2:raw:br=192</string>
 			<key>encoderOtherOptions</key>
@@ -188,7 +188,7 @@ audio: aac at 192kbs</string>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for archival at medium quality
+			<string>for archival at lower quality
 video: original h.264 at 3Mbps
 audio: aac at 192kbs</string>
 			<key>comSkip</key>
@@ -202,9 +202,9 @@ audio: aac at 192kbs</string>
 			<key>encoderUsed</key>
 			<string>mencoder</string>
 			<key>name</key>
-			<string>Quicktime (H.264   3Mbps)</string>
+			<string>Quicktime (H.264   Constant Quality - Low)</string>
 			<key>encoderVideoOptions</key>
-			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts bitrate=3000:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale</string>
+			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts crf=25:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale,yadif=0</string>
 			<key>encoderAudioOptions</key>
 			<string>-oac faac -faacopts mpeg=4:object=2:raw:br=192</string>
 			<key>encoderOtherOptions</key>

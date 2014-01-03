@@ -65,9 +65,9 @@ __DDLOGHERE__
         }
         switch (typeOfChange) {
             case 0:
-                if (newValuesEnabled == 0) {
-                    [[NSUserDefaults standardUserDefaults] setObject:oldValues forKey:kMTTiVos];
-                }
+//                if (newValuesEnabled == 0) {
+//                    [[NSUserDefaults standardUserDefaults] setObject:newValues forKey:kMTTiVos];
+//                }
                 break;
             case 1:
                 if (newValuesEnabled == 0) {

@@ -66,7 +66,7 @@
                         </subviews>
                     </customView>
                     <textField toolTip="Where to store downloaded programs" verticalHuggingPriority="750" id="10">
-                        <rect key="frame" x="657.00000034192715" y="690" width="209" height="22"/>
+                        <rect key="frame" x="657.00000069216492" y="690" width="209" height="22"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" id="67">
                             <font key="font" metaFont="system"/>

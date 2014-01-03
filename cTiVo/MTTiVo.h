@@ -46,17 +46,17 @@
 @property (nonatomic, weak) NSOperationQueue *queue;
 @property (nonatomic, strong) MTTiVoManager *tiVoManager;
 @property (nonatomic, strong) NSURLConnection *showURLConnection;
-@property BOOL mediaKeyIsGood;
+@property BOOL mediaKeyIsGood,storeMediaKeyInKeychain;
 @property BOOL isReachable, isResponding, manualTiVo, enabled;
 @property (nonatomic, strong) NSDate *lastDownloadEnded;
 @property (nonatomic, strong) 	NSDate *currentNPLStarted;
 @property int manualTiVoID;
 
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
-+(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual;
++(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;
 +(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue;
 
--(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual;
+-(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;
 -(void)updateShows:(id)sender;
 -(void)manageDownloads:(id)info;
 //-(void) reportNetworkFailure;

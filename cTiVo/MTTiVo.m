@@ -39,12 +39,12 @@ __DDLOGHERE__
 
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue
 {
-    return [MTTiVo tiVoWithTiVo:tiVo withOperationQueue:queue manual:NO];
+    return [MTTiVo tiVoWithTiVo:tiVo withOperationQueue:queue manual:NO  withID:0];
 }
 
-+(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual
++(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID
     {
-	return [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue manual:isManual];
+	return [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue manual:isManual withID:(int)manualTiVoID];
 }
 
 +(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue
@@ -61,11 +61,12 @@ __DDLOGHERE__
     tiVo.userPort = [description[kMTTiVoUserPort] intValue];
     tiVo.userName = description[kMTTiVoUserName];
     tiVo.iPAddress = description[kMTTiVoIPAddress];
-    MTTiVo *thisTiVo = [MTTiVo tiVoWithTiVo:tiVo withOperationQueue:queue manual:YES];
+    MTTiVo *thisTiVo = [MTTiVo tiVoWithTiVo:tiVo withOperationQueue:queue manual:YES withID:[description[kMTTiVoID] intValue]];
     if (!(description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqualTo:kMTTiVoNullKey]) {
         thisTiVo.mediaKey = description[kMTTiVoMediaKey];
     }
     thisTiVo.enabled = [description[kMTTiVoEnabled] boolValue];
+    thisTiVo.manualTiVoID = [description[kMTTiVoID] intValue];
     return thisTiVo;
 }
 	
@@ -86,6 +87,7 @@ __DDLOGHERE__
         _manualTiVo = NO;
 		firstUpdate = YES;
 		_enabled = YES;
+        _storeMediaKeyInKeychain = NO;
         itemStart = 0;
         itemCount = 50;
         reachabilityContext.version = 0;
@@ -119,14 +121,16 @@ __DDLOGHERE__
 	
 }
 
--(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual
+-(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID
 {
 	self = [self init];
 	if (self) {
 		DDLogDetail(@"Creating TiVo %@",tiVo);
 		self.tiVo = tiVo;
         self.manualTiVo = isManual;
+        self.manualTiVoID = manualTiVoID;
 		self.queue = queue;
+        NSLog(@"testing reachability for tivo %@ with address %@",self.tiVo.name, self.tiVo.addresses[0]);
         _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [self.tiVo.addresses[0] bytes]);
 		self.networkAvailability = [NSDate date];
 		BOOL didSchedule = NO;
@@ -138,15 +142,15 @@ __DDLOGHERE__
 		DDLogMajor(@"%@ reachability for tivo %@",didSchedule ? @"Scheduled" : @"Failed to schedule", _tiVo.name);
 		[self performSelectorOnMainThread:@selector(getMediaKey) withObject:nil waitUntilDone:YES];
 		[self checkEnabled];
-		if (_mediaKey.length == 0 || [_mediaKey isEqualToString:kMTTiVoNullKey]) {
-			DDLogDetail(@"Failed to get MAK for %@",tiVo);
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"new"}];
+//		if (_mediaKey.length == 0 || [_mediaKey isEqualToString:kMTTiVoNullKey]) {
+//			DDLogDetail(@"Failed to get MAK for %@",tiVo);
+//			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"new"}];
 //		} else {
 //            if (![tiVo isKindOfClass:[MTNetService class]]) {
 //                [self updateShows:nil];
 //
 //            }
-		}
+//		}
 		[self setupNotifications];
 	}
 	return self;
@@ -704,20 +708,33 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
 	DDLogVerbose(@"TiVo %@ sent data",self);
+    if(self.manualTiVo) _isReachable = YES;
 	[urlData appendData:data];
 }
 
-- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
-//    return [protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust];
-	return YES;  //Ignore self-signed certificate
-}
+//- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
+////    return [protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust];
+//	return YES;  //Ignore self-signed certificate
+//}
 
-- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+- (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
 	NSString *password = self.mediaKey;
 	if (challenge.previousFailureCount == 0) {
 		DDLogDetail(@"%@ password ask",self);
-		NSURLCredential *myCredential = [NSURLCredential credentialWithUser:@"tivo" password:password persistence:NSURLCredentialPersistenceForSession];
-		[challenge.sender useCredential:myCredential forAuthenticationChallenge:challenge];
+        if (challenge.proposedCredential) {
+            self.mediaKey = challenge.proposedCredential.password;
+            [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:NO];
+
+            [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
+        } else {
+            NSURLCredentialPersistence persistance = NSURLCredentialPersistenceForSession;
+            if (self.storeMediaKeyInKeychain) {
+                persistance = NSURLCredentialPersistencePermanent;
+            }
+            NSURLCredential *myCredential = [NSURLCredential credentialWithUser:@"tivo" password:password persistence:persistance];
+            [challenge.sender useCredential:myCredential forAuthenticationChallenge:challenge];
+        }
 	} else {
 		DDLogDetail(@"%@ challenge failed",self);
 		[challenge.sender cancelAuthenticationChallenge:challenge];
@@ -728,11 +745,29 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	}
 }
 
+
+//- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+//	NSString *password = self.mediaKey;
+//	if (challenge.previousFailureCount == 0) {
+//		DDLogDetail(@"%@ password ask",self);
+//		NSURLCredential *myCredential = [NSURLCredential credentialWithUser:@"tivo" password:password persistence:NSURLCredentialPersistenceForSession];
+//		[challenge.sender useCredential:myCredential forAuthenticationChallenge:challenge];
+//	} else {
+//		DDLogDetail(@"%@ challenge failed",self);
+//		[challenge.sender cancelAuthenticationChallenge:challenge];
+//		[showURLConnection cancel];
+//		self.showURLConnection = nil;
+//		isConnecting = NO;
+//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"incorrect"}];
+//	}
+//}
+
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     DDLogReport(@"URL Connection Failed with error %@",error);
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
 //    [self reportNetworkFailure];
+    if(self.manualTiVo) _isReachable = NO;
     self.showURLConnection = nil;
     
     isConnecting = NO;

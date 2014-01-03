@@ -498,8 +498,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     for (NSDictionary *savedTiVo in currentSavedTiVos) {
 		NSDictionary * dictToAdd = savedTiVo;
         if ([savedTiVo[kMTTiVoManualTiVo] boolValue]) {
-			if (tiVo.manualTiVo &&
-				([savedTiVo[kMTTiVoID] intValue] == tiVo.manualTiVoID)) {
+			if (tiVo.manualTiVo && ([savedTiVo[kMTTiVoID] intValue] == tiVo.manualTiVoID)) {
 				dictToAdd = tiVoDict;
 				foundTiVo = YES;
 			}

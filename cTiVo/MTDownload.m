@@ -2071,16 +2071,36 @@ NSString * fourChar(long n, BOOL allowZero) {
 	}
 }
 
-- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
-    return YES;
+- (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge.proposedCredential) {
+        [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
+    }else {
+        if (self.show.tiVo.mediaKey && self.show.tiVo.mediaKey.length) {
+            [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:self.show.tiVo.mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
+            
+        } else {
+            [challenge.sender cancelAuthenticationChallenge:challenge];
+            DDLogMajor(@"URL Connection Authentication Failed");
+            if (bufferFileWriteHandle) {
+                [bufferFileWriteHandle closeFile];
+            }
+            [self rescheduleOnMain];
+        }
+    }
+    
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    //    [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-    DDLogDetail(@"Show password check");
-    [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:self.show.tiVo.mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
-    [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
-}
+//- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
+//    return YES;
+//}
+//
+//- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+//    //    [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
+//    DDLogDetail(@"Show password check");
+//    [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:self.show.tiVo.mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
+//    [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+//}
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
@@ -2136,7 +2156,12 @@ NSString * fourChar(long n, BOOL allowZero) {
 		[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:kMTTiVoAccessDelay];
 	} else {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
-		self.show.fileSize = downloadedFileSize;  //More accurate file size
+		if (downloadedFileSize < self.show.fileSize * 0.85f) {  //hmm, doesn't look like it's big enough
+			[tiVoManager  notifyWithTitle: @"Warning: Show may be damaged/incomplete."
+								 subTitle:self.show.showTitle forNotification:kMTGrowlCantDownload];
+		} else {
+			self.show.fileSize = downloadedFileSize;  //More accurate file size
+		}
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:self];
 //		NSLog(@"File size after reset %lf %lf",self.show.fileSize,downloadedFileSize);
