@@ -191,8 +191,7 @@
 #define kMTShowSuggestions @"ShowSuggestions"		// Whether to display Tivo Suggestions (and to subscribe thereto)
 #define kMTSaveTmpFiles @"SaveTmpFiles"				// Turn off AutoDelete of intermediate files (to make debugging encoders easier)
 #define kMTUseMemoryBufferForDownload @"UseMemoryBufferForDownload" //Default is YES.  Turn off to make sure downloaded file is complete. Principally for debugging use and checkpointing.
-#define kMTFileNameFormat @"FileNameFormat"			//printf pattern for filenames
-#define kMTFileNameFormatNull @"FileNameFormatNull"		//printf pattern for filenames for empty fields
+#define kMTFileNameFormat @"FileNameFormat"			//keyword pattern for filenames
 #define kMTTmpFilesDirectory @"TmpFilesDirectory"
 
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures

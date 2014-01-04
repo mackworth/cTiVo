@@ -174,6 +174,7 @@ __DDLOGHERE__
 										  [NSString pathWithComponents:@[NSHomeDirectory(),kMTDefaultDownloadDir]],kMTDownloadDirectory,
                                           kMTTmpDir,kMTTmpFilesDirectory,
                                           @{},kMTTheTVDBCache,
+										  @"",kMTFileNameFormat,
 										  @YES,kMTGetEpisodeArt,
 										  @NO, kMTiTunesContentIDExperiment,
 										  nil];

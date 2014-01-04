@@ -64,11 +64,10 @@
 	return textField;
 }
 
--(void) addMenuTo:(NSPopUpButton*) cell withCurrentLevel: (NSInteger) currentLevel{
-
+-(void) addDebugMenuTo:(NSPopUpButton*) cell withCurrentLevel: (NSInteger) currentLevel{
 	NSArray * debugNames = @[@"None",@"Normal" ,@"Major" ,@"Detail" , @"Verbose"];
 	int debugLevels[] = {LOG_LEVEL_OFF, LOG_LEVEL_REPORT, LOG_LEVEL_MAJOR, LOG_LEVEL_DETAIL, LOG_LEVEL_VERBOSE};
-
+	
 	[cell addItemsWithTitles: debugNames];
 	for (int index = 0; index < cell.numberOfItems; index++) {
 		//	for (NSMenuItem * item in [cell itemArray]) {
@@ -79,14 +78,62 @@
 		}
 	}
 }
+-(void) addKeywordMenuTo:(NSPopUpButton*) cell{
+	NSArray * keyWords = @[
+						   @"Title",  //these values must be same as those in keyword processing
+						   @"MainTitle",
+						   @"EpisodeTitle",
+						   @"ChannelNum",
+						   @"Channel",
+						   @"Min",
+						   @"Hour",
+						   @"Wday",
+						   @"Mday",
+						   @"Month",
+						   @"MonthNum",
+						   @"Year",
+						   @"OriginalAirDate",
+						   @"Season",
+						   @"Episode",
+						   @"EpisodeNumber",
+						   @"SeriesEpNumber",
+						   @"StartTime",
+						   @"MovieYear",
+						   @"TiVoName",
+						   @"TVDBseriesID",
+						   @"• Plex Default",  //• means replace whole field;
+						   @"• Plex Folders",
+						   @"• Complex Example",//these must match below
+						   @"• cTiVo Default"
+						   ];
+	[cell addItemsWithTitles: keyWords];
+	for (NSMenuItem * item in cell.itemArray) {
+		item.representedObject = item.title;
+	}
+	//and fixup the ones that are special
+	NSMenuItem * plex = [cell itemWithTitle:@"• Plex Default"];
+	plex.representedObject = @"[MainTitle] - [SeriesEpNumber] - [EpisodeTitle]";
+	
+	NSMenuItem * plex2 = [cell itemWithTitle:@"• Plex Folders"];
+	plex2.representedObject = 	@"[MainTitle / \"Season \" Season / MainTitle \" - \" SeriesEpNumber \" - \" EpisodeTitle][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]";
+	
+	NSMenuItem * complex = [cell itemWithTitle:@"• Complex Example"];
+	complex.representedObject =
+	@"[MainTitle / SeriesEpNumber \" - \" EpisodeTitle][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]";
+
+	NSMenuItem * example = [cell itemWithTitle:@"• cTiVo Default"];
+	example.representedObject = @"";
+}
+
 
 -(void) resetAllPopups: (int) newVal {
 }
 
 -(void) awakeFromNib {
 	
-	[self addMenuTo:self.masterDebugLevel withCurrentLevel:[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel]];
-
+	[self addDebugMenuTo:self.masterDebugLevel withCurrentLevel:[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel]];
+	[self addKeywordMenuTo:self.keywordPopup];
+	
 	self.debugClasses = [DDLog registeredClasses] ;
 	self.popups= [NSMutableArray arrayWithCapacity:self.debugClasses.count ];
 	self.classNames = [NSMutableArray arrayWithCapacity:self.debugClasses.count];
@@ -102,12 +149,13 @@
 	for (NSString * className in self.classNames) {
 		Class class =  NSClassFromString(className);
 		const int vertBase = self.debugLevelView.frame.size.height-40;
-		const int labelWidth = 150;
+		const int horizBase = self.debugLevelView.frame.size.width;
+		const int labelWidth = 160;
 		const int popupHeight = 25;
 		const int popupWidth = 80;
 		const int vertMargin = 5;
 		const int horizMargin = 10;
-		const int columnWidth = labelWidth+vertMargin+popupWidth+vertMargin*4;
+		const int columnWidth = horizBase/2;
 		int columNum = (itemNum < numItems/2)? 0:1;
 		int rowNum = (itemNum < numItems/2) ? itemNum: itemNum-numItems/2;
 		
@@ -125,7 +173,7 @@
 		cell.title = className;
 		cell.font= 	[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
 
-		[self addMenuTo:cell withCurrentLevel: [DDLog logLevelForClass:class]];
+		[self addDebugMenuTo:cell withCurrentLevel: [DDLog logLevelForClass:class]];
 		cell.target = self;
 		cell.action = @selector(newValue:);
 		
@@ -156,6 +204,41 @@
 	//	[self.helpController.displayMessage insertText:helpText];
 	[popoverDetachController.displayMessage.textStorage setAttributedString:attrHelpText];
 	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+}
+
+-(IBAction) keywordSelected:(id)sender {
+	NSPopUpButton * cell =  (NSPopUpButton *) sender;
+	NSString * keyword = [cell.selectedItem representedObject];
+	NSText * editor = [self.fileNameField currentEditor];
+	NSString * current = self.fileNameField.stringValue;
+	if (!editor) {
+		//not selected, so select, at end of text
+		[self.view.window makeFirstResponder:self.fileNameField];
+		editor = [self.fileNameField currentEditor];
+		[editor setSelectedRange:NSMakeRange(current.length,0)];
+	}
+	if ([cell.selectedItem.title hasPrefix:@"•"]) {
+		//whole template, so replace whole string
+		[editor setSelectedRange:NSMakeRange(0,current.length)];
+	} else {
+		//normally we add brackets around individual keywords, but not if we're inside one already
+		NSUInteger cursorLoc = editor.selectedRange.location;
+		NSRange beforeCursor = NSMakeRange(0,cursorLoc);
+		NSInteger lastLeft = [current rangeOfString:@"[" options:NSBackwardsSearch range:beforeCursor].location;
+		NSInteger lastRight = [current rangeOfString:@"]" options:NSBackwardsSearch range:beforeCursor].location;
+		if (lastLeft == NSNotFound ||  //might be inside a [, but only if
+			(lastRight != NSNotFound && lastRight > lastLeft)) { //we don't have a ] after it
+			keyword = [NSString stringWithFormat:@"[%@]",keyword];
+		} else {
+			//inside a bracket, so we may want a space-delimited keywords
+			unichar priorCh = [current characterAtIndex:cursorLoc-1];
+			if (priorCh != '[' && priorCh != ' ') {
+				keyword =[NSString stringWithFormat:@" %@ ",keyword];
+			}
+		}
+	}
+	[editor insertText:keyword];
+
 }
 
 -(IBAction) newMasterValue:(id) sender {
@@ -190,6 +273,15 @@
         return;
     }
     [tiVoManager resetAllDetails];
+}
+
+- (BOOL)windowShouldClose:(id)sender {
+	//notified by PreferenceWindowController that we're going to close, so save the currently edited textField
+	NSResponder * responder = [self.view.window firstResponder];
+	if ([responder class] == [NSTextView class] ) {
+		[self.view.window makeFirstResponder:nil ];
+	}
+	return YES;
 }
 
 

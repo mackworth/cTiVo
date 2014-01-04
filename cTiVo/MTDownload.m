@@ -32,7 +32,8 @@
 	
 }
 
-@property (strong, nonatomic) NSString *downloadDir;
+@property (strong, nonatomic) NSString *downloadDir,
+					*keywordPathPart; // any extra layers of directories due to keyword template
 
 @property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
 
@@ -438,9 +439,13 @@ __DDLOGHERE__
 
 -(NSString *) directoryForShowInDirectory:(NSString*) tryDirectory  {
 	//Check that download directory (including show directory) exists.  If create it.  If unsuccessful return nil
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs] && ![self.show isMovie]){
-		tryDirectory = [tryDirectory stringByAppendingPathComponent:self.show.seriesTitle];
-		DDLogVerbose(@"Opening Series-specific folder %@",tryDirectory);
+	tryDirectory = [tryDirectory stringByAppendingPathComponent:self.keywordPathPart];
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs]) {
+		NSString *whichFolder = ([self.show isMovie])  ? @"Movies"  : self.show.seriesTitle;
+		if ( ! [tryDirectory.lastPathComponent isEqualToString:whichFolder]){
+			tryDirectory = [tryDirectory stringByAppendingPathComponent:whichFolder];
+			DDLogVerbose(@"Using sub folder %@",tryDirectory);
+		}
 	}
 	if (![[NSFileManager defaultManager] fileExistsAtPath: tryDirectory]) { // try to create it
 		DDLogDetail(@"Creating folder %@",tryDirectory);
@@ -451,8 +456,9 @@ __DDLOGHERE__
 	}
 	return tryDirectory;
 }
-
+#pragma mark - Keyword Processing:
 /*
+ From KMTTG:
  [title] = The Big Bang Theory – The Loobenfeld Decay
  [mainTitle] = The Big Bang Theory
  [episodeTitle] = The Loobenfeld Decay
@@ -482,71 +488,184 @@ __DDLOGHERE__
  [mainTitle]["_Ep#" EpisodeNumber]_[wday]_[month]_[mday]
  The advanced keyword is highlighted in bold and signifies only include “_Ep#xxx” if EpisodeNumber exists for the show in question. “_Ep#” is literal string to which the evaluated contents of EpisodeNumber keyword are appended. If EpisodeNumber does not exist then the whole advanced keyword evaluates to empty string.
  
- 
- 
- -(NSString *) swapKeywordsInString: (NSString *) str {
- NSDictionary * keywords = @{
- @"[showTitle]": @"%$1$@",
- @"[series ]" : @"%$1$@"
- showTitle),				// %$1$@
- seriesTitle),			// %$2$@
- episodeTitle),			// %$3$@
- episodeNumber),			// %$4$@
- showDate),				// %$5$@
- showMediumDateString),	// %$6$@
- originalAirDate),		// %$7$@
- tiVoName),				// %$8$@
- idString),				// %$9$@
- channelString),			// %$10$@
- stationCallsign),		// %$11$@
- encodeFormat.name)		// %$12$@
- };
- for (NSString * key in [keywords allKeys]) {
- str = [str stringByReplacingOccurrencesOfString: key
- withString: keywords[key]
- options: NSCaseInsensitiveSearch
- range: NSMakeRange(0, [str length])];
- 
- }
- return str;
- }
  */
-#define Null(x) x ?  x : nullString
+//Test routines. A good place is in MTTiVoShow when Remaining Operations= 1, so we've downloaded all TVDB info
+//calling line:
+//[self testFileNames];
+//-(void)testFileName: (NSString *) testString {
+//	MTDownload * testDownload = [[MTDownload alloc] init];
+//	for (MTTiVoShow * show in self.tiVo.shows) {
+//		testDownload.show = show;
+//		DDLogMajor(@"ANSWER:%@",[testDownload swapKeywordsInString:testString]);
+//		
+//	}
+//}
+//
+//-(void)testFileNames {
+//	NSArray * testStrings  = @[
+//							   @" [mainTitle [\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday]",
+//							   //							   @" [mainTitle] [\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday",
+//							   @" [mainTitle] [\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday",
+//							   //							   @" [mainTitle] [\"_Ep# EpisodeNumber]_[wday]_[month]_[mday]",
+//							   //							   @" [mainTitle] [\"_Ep#\" EpisodeNumber \"\"]_[wday]_[]_[mday]",
+//							   //							   @" [mainTitle][\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday]",
+//							   @"[mainTitle][\" (\" movieYear \")][\" (\" SeriesEpNumber \")\"][\" - \" episodeTitle]",
+//							   @"[mainTitle / seriesEpNumber \" - \" episodeTitle][\"MOVIES\"  / mainTitle \" (\" movieYear \")"
+//							   ];
+//	for (NSString * str in testStrings) {
+//		DDLogMajor(@"FOR TEST STRING %@",str);
+//		[self testFileName:str];
+//	}
+//}
+//
 
--(NSString *)makeBaseFileNameForDirectory:(NSString *) downloadDir {
+- (NSString *) replacementForKeyword:(NSString *) key usingDictionary: (NSDictionary*) keys {
+	NSMutableString * outStr = [NSMutableString string];
+
+	NSScanner *scanner = [NSScanner scannerWithString:key];
+	[scanner setCharactersToBeSkipped:nil];
+    NSCharacterSet * whitespaceSet = [NSCharacterSet whitespaceCharacterSet];
+
+	while (![scanner isAtEnd]) {
+		[scanner scanCharactersFromSet:whitespaceSet intoString:nil];
+		//get any literal characters
+		while ([scanner scanString:@"\"" intoString:nil]) {
+			NSString * tempString;
+			if ([scanner scanUpToString: @"\"" intoString:&tempString]) {
+				[outStr appendString:tempString];
+			} //else no chars scanned before quote (or end of line), so ignore this quote
+			[scanner scanString:@"\"" intoString:nil];
+			[scanner scanCharactersFromSet:whitespaceSet intoString:nil];
+		}
+		//not space or quote, so get keyword and replace with value from Dictionary
+		NSString * foundKey;
+		if ([scanner scanUpToString:@" " intoString:&foundKey]) {
+			foundKey = foundKey.lowercaseString;
+			if ([keys[foundKey] length] == 0) {
+				DDLogDetail(@"No key: %@",foundKey);
+				//found invalid or empty key so entire conditional fails and should be empty; ignore everything else
+				return @"";
+			} else {
+				DDLogVerbose(@"Swapping key %@ with %@",foundKey, keys[foundKey]);
+				[outStr appendString:keys[foundKey]];
+			}
+		} //else no chars scanned before ] (or end of line) so ignore this
+	}
+	return [NSString stringWithString:outStr];
+}
+
+NSString * twoChar(long n, BOOL allowZero) {
+	if (!allowZero && n == 0) return @"";
+	return [NSString stringWithFormat:@"%02ld", n];
+}
+NSString * fourChar(long n, BOOL allowZero) {
+	if (!allowZero && n == 0) return @"";
+	return [NSString stringWithFormat:@"%04ld", n];
+}
+
+#define NULLT(x) (x ? x : @"")
+
+ -(NSString *) swapKeywordsInString: (NSString *) str {
+	NSDateComponents *components = [[NSCalendar currentCalendar]
+									components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear |NSCalendarUnitWeekday  |
+									NSCalendarUnitMinute | NSCalendarUnitHour
+											fromDate:self.show.showDate];
+	 
+	 NSString * originalAirDate =self.show.originalAirDateNoTime;
+	 if (!originalAirDate) {
+		 originalAirDate = [NSString stringWithFormat:@"%@-%@-%@",
+											fourChar([components year], NO),
+											twoChar([components month], NO),
+											twoChar([components day], NO)];
+	 }
+	 NSString * monthName = [components month]> 0 ?
+								[[[[NSDateFormatter alloc] init] shortMonthSymbols]
+													   objectAtIndex:[components month]-1] :
+								@"";
+	 
+	 NSString *TVDBseriesID = [tiVoManager.tvdbSeriesIdMapping objectForKey:self.show.seriesTitle]; // see if we've already done this
+	 
+	 if (!TVDBseriesID) {
+		 NSDictionary *TVDBepisodeEntry = [tiVoManager.tvdbCache objectForKey:self.show.episodeID];
+		 //could provide these ,too?
+		 // NSNumber * TVDBepisodeNum = [TVDBepisodeEntry objectForKey:@"episode"];
+		 //NSNumber * TVDBseasonNum = [TVDBepisodeEntry objectForKey:@"season"];
+		TVDBseriesID = [TVDBepisodeEntry objectForKey:@"series"];
+	 }
+		 
+		 
+	 NSDictionary * keywords = @{  //lowercase so we can just lowercase keyword when found
+		 @"/":				@"|||",						//allows [/] for subdirs
+		 @"title":			NULLT(self.show.showTitle) ,
+		 @"maintitle":		NULLT(self.show.seriesTitle),
+		 @"episodetitle":	NULLT(self.show.episodeTitle),
+		 @"channelnum":		NULLT(self.show.channelString),
+		 @"channel":		NULLT(self.show.stationCallsign),
+		 @"starttime":		NULLT(self.show.showTime),
+		 @"min":			twoChar([components minute], YES),
+		 @"hour":			twoChar([components hour], YES),
+		 @"wday":			twoChar([components weekday], NO),
+		 @"mday":			twoChar([components day], NO),
+		 @"month":			monthName,
+		 @"monthnum":		twoChar([components month], NO),
+		 @"year": 			fourChar([components year], NO),
+		 @"originalairdate": originalAirDate,
+		 @"episode":		twoChar(self.show.episode, NO),
+		 @"season":			twoChar(self.show.season, NO),
+		 @"episodenumber":	NULLT(self.show.episodeNumber),
+		 @"seriesepnumber": NULLT(self.show.seasonEpisode),
+		 @"tivoname":		NULLT(self.show.tiVoName),
+		 @"movieyear":		NULLT(self.show.movieYear),
+		 @"tvdbseriesid":	NULLT(TVDBseriesID)
+		 };
+	 DDLogDetail(@"keywords: %@",keywords);
+	 NSMutableString * outStr = [NSMutableString string];
+	 
+	 NSScanner *scanner = [NSScanner scannerWithString:str];
+	 [scanner setCharactersToBeSkipped:nil];
+	 
+	 while (![scanner isAtEnd]) {
+		 NSString * tempString;
+		 //get any literal characters
+		 if ([scanner scanUpToString: @"[" intoString:&tempString]) {
+			 [outStr appendString:tempString];
+		 }
+		 //get keyword and replace with values
+		 if ([scanner scanString:@"[" intoString:nil]) {
+			 [scanner scanUpToString: @"]" intoString:&tempString];
+			 [outStr appendString: [self replacementForKeyword:tempString usingDictionary:keywords]];
+			 [scanner scanString:@"]" intoString:nil];
+		 }
+	 }
+	 NSString * finalStr = [outStr stringByReplacingOccurrencesOfString:@"/" withString:@"-"]; //remove accidental directory markers
+	 finalStr = [finalStr stringByReplacingOccurrencesOfString:@"|||" withString:@"/"];  ///insert intentional ones
+	 return finalStr;
+ }
+
+//#define Null(x) x ?  x : nullString
+//
+-(void)configureBaseFileNameAndDirectory {
 	if (!self.baseFileName) {
 		// generate only once
-		NSString * baseTitle = _show.showTitle;
+		NSString * baseTitle  = [_show.showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
 		NSString * filenamePattern = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormat];
-		if (filenamePattern.length > 0) {
-			NSString * nullString = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormatNull];
-			if (!nullString) nullString = @"";
-			baseTitle = [NSString stringWithFormat:filenamePattern,
-						 Null(_show.showTitle),				// %$1$@  showTitle			Arrow: The Odyssey  or MovieTitle
-						 Null(_show.seriesTitle),			// %$2$@  seriesTitle		Arrow or MovieTitle
-						 Null(_show.episodeTitle),			// %$3$@  episodeTitle		The Odyssey or empty
-						 Null(_show.episodeNumber),			// %$4$@  episodeNumber		S04 E05  or 53
-						 Null(_show.showDate),				// %$5$@  showDate			Feb 10, 2013 8-00PM
-						 Null(_show.showMediumDateString),	// %$6$@  showMedDate		2-10-13
-						 Null(_show.originalAirDate),		// %$7$@  originalAirDate
-						 Null(_show.tiVoName),				// %$8$@  tiVoName
-						 Null(_show.idString),				// %$9$@  tiVoID
-						 Null(_show.channelString),			// %$10$@ channelString
-						 Null(_show.stationCallsign),			// %$11$@ stationCallsign
-						 Null(self.encodeFormat.name)			// %$11$@ stationCallsign
-						 ];
-			//NEED Dates without times also Series ID
-			if (baseTitle.length == 0) baseTitle = _show.showTitle;
-			if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
+		if (filenamePattern.length >0) {
+			//we have a pattern, so generate a name that way
+			NSString *keyBaseTitle = [self swapKeywordsInString:filenamePattern];
+			DDLogMajor(@"With file pattern %@ for show %@, got %@", filenamePattern, self.show, keyBaseTitle);
+			if (keyBaseTitle.length >0) {
+				baseTitle = [keyBaseTitle lastPathComponent];
+				//note that self.downloadDir depends on keywordPathPart being set
+				self.keywordPathPart = [keyBaseTitle stringByDeletingLastPathComponent];
+			}
 		}
-		NSString * safeTitle = [baseTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-		safeTitle = [safeTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
-		if (LOG_VERBOSE  && [safeTitle compare: _show.showTitle ]  != NSOrderedSame) {
-			DDLogVerbose(@"changed filename %@ to %@",_show.showTitle, safeTitle);
+		if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
+		baseTitle = [baseTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+		if (LOG_DETAIL  && [baseTitle compare: _show.showTitle ]  != NSOrderedSame) {
+			DDLogDetail(@"changed filename %@ to %@",_show.showTitle, baseTitle);
 		}
-		self.baseFileName = [self createUniqueBaseFileName:safeTitle inDownloadDir:downloadDir];
+		self.baseFileName = [self createUniqueBaseFileName:baseTitle inDownloadDir:self.downloadDir];
 	}
-	return self.baseFileName;
 }
 #undef Null
 
@@ -612,19 +731,21 @@ __DDLOGHERE__
 	
 }
 
--(NSString *)downloadDir
+-(NSString *)downloadDir  //not valid until after configureBaseFileNameAndDirectory has been called
+						  //layered on top of downloadDirectory to add subdirs and check for existence/create if necessary
+						  //maybe should change to update downloadDirectory at configureFiles time to avoid reassembling subdirs?
 {
- 	NSString *ddir = [self directoryForShowInDirectory:[self downloadDirectory]];
-	
-	//go to current directory if one at show scheduling time failed
-	if (!ddir) {
-		ddir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
-	}
-    
-	//finally, go to default if not successful
-	if (!ddir) {
-		ddir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
-	}
+		NSString *ddir = [self directoryForShowInDirectory:[self downloadDirectory]];
+		
+		//go to current directory if one at show scheduling time failed
+		if (!ddir) {
+			ddir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
+		}
+		
+		//finally, go to default if not successful
+		if (!ddir) {
+			ddir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
+		}
     return ddir;
 }
 
@@ -634,7 +755,7 @@ __DDLOGHERE__
 	//Release all previous attached pointers
     [self deallocDownloadHandling];
     NSFileManager *fm = [NSFileManager defaultManager];
-	self.baseFileName = [self makeBaseFileNameForDirectory:self.downloadDir];
+	[self configureBaseFileNameAndDirectory];
     if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {  //We need to download from the TiVo
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
             _bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",tiVoManager.tmpFilesDirectory,self.baseFileName];

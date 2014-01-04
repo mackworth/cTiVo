@@ -299,6 +299,9 @@
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
+                    <connections>
+                        <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="XfP-JO-UhQ"/>
+                    </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="159" userLabel="Episode Label">
                     <rect key="frame" x="65" y="368" width="49" height="14"/>
@@ -308,6 +311,13 @@
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
+                    <connections>
+                        <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="k5q-1z-Arq">
+                            <dictionary key="options">
+                                <bool key="NSRaisesForNotApplicableKeys" value="NO"/>
+                            </dictionary>
+                        </binding>
+                    </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="165" userLabel="Episode Number Label">
                     <rect key="frame" x="19" y="346" width="95" height="14"/>
@@ -317,6 +327,9 @@
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
+                    <connections>
+                        <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="pUO-OG-tNP"/>
+                    </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="171" userLabel="Season Label">
                     <rect key="frame" x="69" y="324" width="45" height="14"/>
@@ -326,6 +339,9 @@
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
+                    <connections>
+                        <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="OFQ-xw-ANb"/>
+                    </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="177" userLabel="Description Label">
                     <rect key="frame" x="45" y="282" width="69" height="14"/>
@@ -670,5 +686,6 @@
                 <constraint firstItem="231" firstAttribute="height" secondItem="244" secondAttribute="height" id="oDw-9L-rsr"/>
             </constraints>
         </customView>
+        <userDefaultsController representsSharedInstance="YES" id="bBo-BX-KKt"/>
     </objects>
 </document>
