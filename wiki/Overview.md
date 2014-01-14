@@ -17,7 +17,7 @@ To use, just drag one or more shows from the top table to either the download or
 
 Shows will start downloading immediately; although as the shows are quite large, it can take 30-50 minutes per hour of programs downloaded. You will see a progress bar ticking away as it goes through its download/encoding stages. Note that you don't have to leave the window open; you can close it entirely, and cTiVo will keep running in the background. Just use the menu item Window>Main Window to restore the window.
 
-![](Images/cTivoScreen.png)
+![](Images/cTiVoScreen.png)
 ## Controls and Buttons
 
 - **!TiVo Name/Filter TiVo**: In the upper left corner is the name of your TiVo, or if you have more than one, a list of them. The default is to display all shows from all TiVos, but if you wish to see only one at a time, you can select it here. This control shows the number of shows available on this TiVo.
@@ -45,6 +45,7 @@ Shows will start downloading immediately; although as the shows are quite large,
 - **File>Pause/Resume Queue** will pause or resume further processing of the queue. A big red "Paused" will appear when the queue is not running to warn you that nothing is currently happening. If any show is active, you will have the choice of finishing the current job, or stopping it immediately for later restart. You'll get the same choice upon Quitting as well.
 - **File>Refresh TiVo** lets you immediately reload the show list from the TiVo to see if there's any new ones. (Otherwise, it's on a 15-minute refresh rate). If you have more than one, you can refresh all or just one.
 - **File>Import/Export Formats** lets you create a small text file describing your custom format. This can be used to share formats with others.
+
 ![](Images/cTiVoEditMenu.png)
 - **Edit>Clear Completed History** (Cmd-E) will remove the records for all completed downloads from your download table, successful or not.
 - **Edit>Edit Formats** is for advanced users who wish to use new encoders or tune the parameters for encoders. You can also show/hide any of the factory-provided formats.

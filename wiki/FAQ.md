@@ -16,6 +16,8 @@ Some formats are not intended for playing on your computer, and Quicktime is una
    See Edit Video Formats in [Advanced Topics](Advanced-Topics.md) 
 ###What does the column "Tivo Status" mean?
 These are the icons displayed by TiVo on its NowPlaying status along with a couple we've added for clarity. 
+![](Images/in-progress-recording.png)
+
 <table>
     <tr> <td>![](Images/in-progress-recording.png)</td><td>Recording Now</td></tr>
     <tr> <td>![](Images/save-until-i-delete-recording.png)</td><td>Save until Deleted</td></tr>
@@ -43,7 +45,7 @@ Several things affect the speed of the download:
 
 To give you an estimate over a wired connection, from a TiVo HD (aka Series3), converting to iPhone simultaneous encode, you might see a 1.8MBps connection and get a 3.0-gigabyte 30-minute show in about 30  mins. Use those settings as a starting point. If you're seeing MUCH worse times, then something is wrong. You can see the speed of your network connection by running Activity Monitor (Applications>Utilities>Activity Monitor>Network tab).
 ###What should I do if I need it to download faster?
-   With today's processors, you'll probably be encoding as fast as you can download. On slower machines, if you're ok with using up more hard drive space, you might probably select the 'Decrypted TiVo Show' format. Then  install [http://www.mplayerosx.ch MPlayer OSX Extended](https://ctivo.googlecode.com/svn/trunk/cTiVo/questionmark.png])  or [VLC](http://www.videolan.org/vlc/index.html) to view the downloaded movie. It will download as fast as the TiVo will allow, and do no conversion whatsoever.
+   With today's processors, you'll probably be encoding as fast as you can download. On slower machines, if you're ok with using up more hard drive space, you might probably select the 'Decrypted TiVo Show' format. Then  install [MPlayer](http://www.mplayerosx.ch]) or [VLC](http://www.videolan.org/vlc/index.html) to view the downloaded movie. It will download as fast as the TiVo will allow, and do no conversion whatsoever.
 ###What are the different stages that cTiVo goes through?
    Depending on the options that you've set, cTiVo goes through many different steps to prepare your video.  Note that there are resource constraints that will prevent the program from attempting all in parallel. For example, we only download one show at a time from each TiVo as trying to do more will be counterproductive. Thus a show might pause mid-way through processing until further resources are available.
   Download => Decrypt => Ads Detect => Subtitle Extraction => Video Encoding => Adding Metadata => Adding to iTunes ==> Complete 
