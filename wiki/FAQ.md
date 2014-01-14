@@ -19,7 +19,7 @@ These are the icons displayed by TiVo on its NowPlaying status along with a coup
 ![](Images/in-progress-recording.png)
 
 <table>
-    <tr> <td>![](Images/in-progress-recording.png)</td><td>Recording Now</td></tr>
+    <tr> <td><img src = "Images/in-progress-recording.png" alt= ""/></td><td>Recording Now</td></tr>
     <tr> <td>![](Images/save-until-i-delete-recording.png)</td><td>Save until Deleted</td></tr>
     <tr> <td>![](Images/recent-recording.png)</td><td>Recently recorded `*`</td></tr>
     <tr> <td>![](Images/expires-soon-recording.png)</td><td>Expires Soon</td></tr>
