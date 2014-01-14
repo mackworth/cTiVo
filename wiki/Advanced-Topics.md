@@ -18,7 +18,7 @@ Sections:
 
 Normally, cTiVo discovers TiVos on the local network automatically using a network technology called BonJour. Normally this will work fine, but if you need to enter a TiVo address manually or wish to access your TiVos remotely, you'll need to enter their information here. Simply use the Edit>Edit Manual TiVos menu item. This will show any TiVos you've previously entered. Use the + button to add a new one, or the - button to delete one. If you'd like to temporarily delete one, just uncheck the "Enabled" button. You can get the TiVo's current local IP address from its Networks and Settings screen, although this may change over time, especially when your TiVo is restarted. For the local network, you should always use the ports provided (80/443)
 
-![](cTiVoManualTivosScreen.png)
+![](Images/cTiVoManualTivosScreen.png)
 
 Interestingly, you may also be able to use cTiVo remotely, although this can take considerable network ability and patience.  Patience both in the sense of trial and error as well as in the upload bandwidth available on your connection to the Internet. You will need to set your router to pass external accesses to your main IP address through to your TiVo. As you may be doing this for other devices as well, we also let you adjust the ports cTiVo uses to match whatever port mapping you're doing in your router.  If you didn't understand this paragraph so far, then you probably shouldn't be doing this. Note that whether this violates your terms of service with your cable company, TiVo Inc, your internet provider, any random film studio in Hollywood, or anybody else is entirely up to you. 
 
@@ -26,7 +26,7 @@ Interestingly, you may also be able to use cTiVo remotely, although this can tak
 
 If you'd like to configure a different video encoder, or provide different parameters to the built-in ones than we have configured, then you can use the Edit>Edit Formats menu item. This gives you a screen where you can configure a new encoder format, or use an existing format as a template. 
 
-![](cTiVosFormatsScreen.png)
+![](Images/cTiVosFormatsScreen.png)
 
 - Start by selecting the closest format from the Formats pulldown.
 - If it's a built-in format (or you wish to have two versions of your own format), Duplicate it to create a new one that you will modify with your new parameters. You cannot edit a built-in format without duplicating it. You could create one from scratch with New, but it's probably easier to modify an existing one in most cases. Obviously, if you no longer want a user-defined format, you can Delete it here as well.
@@ -108,7 +108,7 @@ To give as much control to you as possible, if more than one of these artwork ty
 
 There are a few preferences that are intended for debugging purposes or for very advanced users only. These are hidden, but can be activated by holding down the Option key while pulling down the cTiVo menu and selecting Adv Preferences (alternatively Option-Cmd-Comma). 
 
-![](cTivoAdvancedPreferencesScreen.png)
+![](Images/cTivoAdvancedPreferencesScreen.png)
 
 ## Debug Levels
 
@@ -321,7 +321,7 @@ And you can put these together:
 	==>`The Big Bang Theory/Season 07/The Big Bang Theory - S07E01 - The Hofstadter Insufficiency.mp4`
 	==>`Movies/Machete (2010)`
 
-#A couple of final notes:
+##A couple of final notes:
 * Capitalization is irrelevant in keywords. 
 * Quotes are not allowed inside quotes.
 * Brackets cannot be used as text.

@@ -8,7 +8,7 @@ The two most important configuration parameters are on top of the screen: the vi
 ## Options
 
 In addition to the Format/Download directory choices above, you can set many other options. The "Options" menu lets you set many of the download parameters quickly. These can also be set in the "Preferences" screen. Note that these options apply to any new downloads/subscriptions, but once it's in the queue, or subscribed, you can change these options and not affect ones in progress.
-![](cTiVoOptionsMenu.png)
+![](Images/cTiVoOptionsMenu.png)
 
 These are grouped in two main groups: the Recording/Metadata handling options which apply to each individual download and the General settings that apply to the entire program:
 
@@ -33,7 +33,7 @@ These are the preferences that apply to the operation of the entire program, not
 - **Sync iTunes Devices** will ask iTunes to start a device sync after cTivo has loaded a new show. If your devices are set to automatically load the latest videos, this will ensure that your shows are available on your devices as soon as possible.
 ### Settings in Preferences screen
 
-![](cTivoAdvancedPreferencesScreen.png)
+![](Images/cTivoAdvancedPreferencesScreen.png)
 
 These are in addition to the ones that are also in the Options menu above.
 - **Warn if Quitting during download** is just a user preference. Some folks don't like warning messages when quitting. However, if you quit during a download or encoding, you will lose any work done on that download, and cTiVo will have to restart the job when it is next run. If you enable the warning, we will give you the option to finish the current job before then quitting.
