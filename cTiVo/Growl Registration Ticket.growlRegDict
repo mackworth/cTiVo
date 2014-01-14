@@ -13,6 +13,7 @@
 		<string>End Download</string>
 		<string>Can&apos;t Download</string>
 		<string>Commercial Detection Failed</string>
+		<string>Possible Problem</string>
         <string>Tivodecode Failed</string>
 	</array>
 	<key>AllNotifications</key>
@@ -22,6 +23,7 @@
 		<string>End Download</string>
 		<string>Can&apos;t Download</string>
 		<string>Commercial Detection Failed</string>
+		<string>Possible Problem</string>
         <string>Tivodecode Failed</string>
 	</array>
 </dict>

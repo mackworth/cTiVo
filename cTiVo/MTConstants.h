@@ -236,6 +236,7 @@
 #define kMTGrowlBeginDownload @"Begin Download"
 #define kMTGrowlEndDownload   @"End Download"
 #define kMTGrowlCantDownload  @"Can't Download"
+#define kMTGrowlPossibleProblem  @"Possible Problem"
 #define kMTGrowlCommercialDetFailed @"Commercial Detection Failed"
 #define kMTGrowlTivodecodeFailed @"Tivodecode Failed"
 

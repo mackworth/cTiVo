@@ -117,7 +117,7 @@ audio: aac at 128kbs</string>
 		<dict>
 			<key>formatDescription</key>
 			<string>for archival at high quality
-video: original resolution h.264 at 10Mbps
+video: original resolution h.264 at RF18
 audio: aac at 256kbps</string>
 			<key>comSkip</key>
 			<true/>
@@ -130,7 +130,7 @@ audio: aac at 256kbps</string>
 			<key>encoderUsed</key>
 			<string>mencoder</string>
 			<key>name</key>
-			<string>Quicktime (H.264   Constant Quality - High)</string>
+			<string>H.264 High Quality </string>
 			<key>encoderVideoOptions</key>
 			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts crf=18:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale,yadif=0</string>
 			<key>encoderAudioOptions</key>
@@ -153,7 +153,7 @@ audio: aac at 256kbps</string>
 		<dict>
 			<key>formatDescription</key>
 			<string>for archival at medium quality
-video: original resolution h.264 at 5Mbps
+video: original resolution h.264 at RF22
 audio: aac at 192kbs</string>
 			<key>comSkip</key>
 			<true/>
@@ -166,7 +166,7 @@ audio: aac at 192kbs</string>
 			<key>encoderUsed</key>
 			<string>mencoder</string>
 			<key>name</key>
-			<string>Quicktime (H.264   Constant Quality - Medium)</string>
+			<string>H.264 Medium Quality</string>
 			<key>encoderVideoOptions</key>
 			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts crf=22:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale,yadif=0</string>
 			<key>encoderAudioOptions</key>
@@ -189,7 +189,7 @@ audio: aac at 192kbs</string>
 		<dict>
 			<key>formatDescription</key>
 			<string>for archival at lower quality
-video: original h.264 at 3Mbps
+video: original h.264 at RF25
 audio: aac at 192kbs</string>
 			<key>comSkip</key>
 			<true/>
@@ -202,7 +202,7 @@ audio: aac at 192kbs</string>
 			<key>encoderUsed</key>
 			<string>mencoder</string>
 			<key>name</key>
-			<string>Quicktime (H.264   Constant Quality - Low)</string>
+			<string>H.264 Low Quality</string>
 			<key>encoderVideoOptions</key>
 			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts crf=25:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale,yadif=0</string>
 			<key>encoderAudioOptions</key>
@@ -238,7 +238,7 @@ audio: aac at 128kbs</string>
 			<key>encoderUsed</key>
 			<string>mencoder</string>
 			<key>name</key>
-			<string>Quicktime (H.264   1Mbps)</string>
+			<string>H.264 Small 1Mbps</string>
 			<key>encoderVideoOptions</key>
 			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts bitrate=1000:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale</string>
 			<key>encoderAudioOptions</key>
@@ -274,7 +274,7 @@ audio: aac at 128kbs</string>
 			<key>encoderUsed</key>
 			<string>mencoder</string>
 			<key>name</key>
-			<string>Quicktime (H.264   256kbps)</string>
+			<string>H.264 Very Small 256kbps</string>
 			<key>encoderVideoOptions</key>
 			<string>-of lavf -lavfopts format=ipod -ovc x264 -x264encopts bitrate=128:bframes=0:level_idc=41:threads=auto:global_header -vf harddup,scale</string>
 			<key>encoderAudioOptions</key>
@@ -1359,7 +1359,8 @@ audio: mp2 at 192kbs</string>
 			<key>filenameExtension</key>
 			<string>.mp3</string>
 			<key>formatDescription</key>
-			<string>For people who want to listen to the show audio: mp3 at 192kbps</string>
+			<string>For people who want to listen to the show
+audio: mp3 at 192kbps</string>
 			<key>iTunes</key>
 			<true/>
 			<key>inputFileFlag</key>

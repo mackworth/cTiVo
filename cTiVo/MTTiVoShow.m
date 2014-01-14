@@ -818,7 +818,7 @@ __DDLOGHERE__
 			return @"copyright";
 		} else {
 			//not loaded yet
-			return @"questionmark";
+			return @"status-unknown";
 		}
 	}
 	if (_imageString.length) {

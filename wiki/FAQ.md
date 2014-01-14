@@ -25,7 +25,7 @@ These are the icons displayed by TiVo on its NowPlaying status along with a coup
     <tr> <td>![](../cTiVo/deleted.png)</td><td>Deleted at TiVo `*`</td></tr>
     <tr> <td>![](../cTiVo/suggestion-recording.png)</td><td>TiVo Suggestion</td></tr>
     <tr> <td>![](../cTiVo/copyright.png)</td><td>Copying prevented `*`</td></tr>
-    <tr> <td>![](../cTiVo/questionmark.png)</td><td>Status Not Loaded Yet `*` </td></tr>
+    <tr> <td>![](../cTiVo/status-unknown.png)</td><td>Status Not Loaded Yet `*` </td></tr>
 </table>
 
 `*` = Ones we've added 

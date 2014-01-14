@@ -12,6 +12,7 @@ Sections:
 - [theTVDB](#thetvdb)
 - [Advanced Subscriptions ](#advanced-subscriptions)
 - [Log Files ](#log-files)
+- [Filename Templates](#filename-templates)
 
 # Manual TiVos
 
@@ -248,3 +249,82 @@ In addition, there are the User Interface Components, which log user requests, a
 While diagnosing an issue, you probably want to set all components to at least Major, with relevant ones to Detail and the one you're most interested in to Verbose. 
 
 For example, if you're interested in debugging a new encoding format, most of the debug activity you'll be interested in will be in Download, so set that one and Format to Verbose.  In the event of a failure, this will include the recent entries in the sub-program's (e.g. encoder, comskip etc) log files to help you diagnose the issue. Beyond the Normal level, the logs are primarily intended as a guide to which part of the code is being executed, so it's best to read them in conjunction with the source code. One string to filter on is "DL Status", which shows the transitions each show makes from one phase to the next. To get maximum information about a download, also set Task and TaskChain to Detail or Verbose, although this generates a lot of data.
+
+# Filename Templates
+
+By default, cTiVo will save the downloaded files as `SeriesName- EpisodeTitle.ext`; for example, `The Big Bang Theory- The Hofstadter Insufficiency.mp4`. However, for some environments, a different filename format might be desired. For example, Plex likes to see filenames like `The Big Bang Theory - S07E01 - The Hofstadter Insufficiency.mp4`.
+
+To make filenames configurable to whatever format you choose, you can provide cTiVo a filename template with embedded keywords in [brackets]. cTiVo will then use that template, replacing each keyword with the appropriate value for the show being downloaded. (FYI, This system is based on [KMTTG’s ](http://sourceforge.net/p/kmttg/wiki/File_Naming/) filenaming format to make it easy to move back and forth from that system.) 
+
+You set this Filename Template in cTiVo’s Advanced Preferences. Just type it into the template; although for easy entry, you can use the pulldown menu on the right to fill in individual keywords. In addition, at the bottom of the list, we have also provided a few default formats; for example, two Plex formats: one for a shared directory, one for a structured directory with individual folders for each show and each season of a show.
+
+The keywords below refer to the same example, specifically using the seventh season, first episode of _Big Bang Theory_ called _The Hofstadter Insufficiency_ first aired on 9/26/13, recorded on a TiVo named _Main_ on Thursday, 10/17/13 at 8:00pm on channel 706 KOINDT.
+
+The keywords available, and the results for this case are:
+````
+[title] = The Big Bang Theory – The Hofstadter Insufficiency
+[mainTitle] = The Big Bang Theory
+[episodeTitle] = The Hofstadter Insufficiency
+[channelNum] = 706
+[channel] = KOINDT
+[min] = 00
+[hour] = 20
+[wday] = Thu
+[mday] = 17
+[month] = Oct
+[monthNum] = 10
+[year] = 2013
+[originalAirDate] = 2013-09-26
+[season] = 07
+[episode] = 01
+[EpisodeNumber] = 701
+[SeriesEpNumber] = S07E01
+[startTime] = 2013-10-17T04-00-00Z  //“zulu” time
+[TivoName] = Main	                      
+[movieYear] = 	                    //non-Movies don’t have a movieYear  
+[TVDBSeriesID] = 80379              //from website tvdb.com 
+[/] = subdirectory separator        //see below
+````
+
+Example templates:
+cTiVo default: 
+	`[mainTitle]- [episodeTitle]         //or just a blank field`
+	==>`The Big Bang Theory- The Hofstadter Insufficiency.mp4`
+
+Plex:
+	`[mainTitle] - [SeriesEpNumber] - [episodeTitle]`
+	==>`The Big Bang Theory - S07E01 - The Hofstadter Insufficiency.mp4`
+
+Other:
+	`[title] (Recorded [month] [mday],[year],[channel])`
+	==>`The Big Bang Theory- The Hofstadter Insufficiency (Recorded Oct 10, 2013, KOINDT).mp4`
+
+If that’s not complicated enough for you, just wait; there’s more! 
+
+You can include a subdirectory separator keyword `[/]` to separate your downloaded files into separate subdirectories. For example, `[mainTitle][/][seriesEpNumber]` would create a subdirectory of your cTiVo folder for each separate series, wherein each show would be just named like `S02E01.mp4` (maybe not a good idea). This feature allows you to emulate (or modify) cTiVo’s Create SubFolders for Series option. As an aside, the subFolders option occurs “first”, so you could use that option to divide the main folder into series folders, and then use the subdirectory keyword to divide those folders into seasons, if you wished.
+
+Example: emulate cTiVo subdir Feature:
+	`[mainTitle][/][mainTitle]- [episodeTitle]`
+	==>`The Big Bang Theory/The Big Bang Theory- The Hofstadter Insufficiency.mp4`
+
+And more!
+
+Depending on various issues, certain fields may not be available. The most obvious example is that movies don’t have season/episode information, but do have 'movieYear' information. So you can create a compound keyword, which contains one or more keywords separated by spaces as well as literal text in quotes. If ANY of the keywords included in the compound keyword are empty, then the ENTIRE compound keyword becomes empty. So, the compound keyword `[" (" SeriesEpNumber ") “]` would become `(S07E01)` for our episode above, but be omitted for a movie. Alternatively, the compound keyword `[“ (“ movieYear “ )”]` would represent `(2013)` for a movie released that year, but be omitted entirely for our episode of Big Bang, as `movieYear`would be blank.  
+
+Example: naming a show with either season information OR movie information, as available:
+	`[mainTitle][" (" movieYear “)"] [" (" SeriesEpNumber ") "][" - " episodeTitle]
+	==>`The Big Bang Theory - S07E01 - The Hofstadter Insufficiency.mp4`
+	==>`Machete (2010)`
+
+And you can put these together:
+	`[mainTitle / "Season " season / mainTitle " - " seriesEpNumber " - " episodeTitle]["Movies"  / mainTitle " (" movieYear ")"]`
+	==>`The Big Bang Theory/Season 07/The Big Bang Theory - S07E01 - The Hofstadter Insufficiency.mp4`
+	==>`Movies/Machete (2010)`
+
+#A couple of final notes:
+* Capitalization is irrelevant in keywords. 
+* Quotes are not allowed inside quotes.
+* Brackets cannot be used as text.
+* Colons are converted to dashes.
+* You cannot control the extension of the filename here; that is determined by the format you choose.
+

@@ -370,6 +370,7 @@ __DDLOGHERE__
 	} else if ([tableColumn.identifier isEqualToString:@"icon"]) {
         NSString * imageName = download.imageString;
 		result.imageView.image = [NSImage imageNamed: imageName];
+		result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
 //	} else if ([tableColumn.identifier isEqualToString:@"Simu"]) {
 //        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
 //        [checkBox setOn: download.simultaneousEncode];
@@ -424,11 +425,11 @@ __DDLOGHERE__
 		textVal = thisShow.seasonEpisode;
 	} else if ([tableColumn.identifier isEqualToString:@"Queued"]) {
 		textVal = thisShow.isQueuedString;
-		result.textField.toolTip =@"Is program in queue to download?";
+		result.toolTip =@"Is program in queue to download?";
 	} else if ([tableColumn.identifier isEqualToString:@"HD"]) {
 		textVal = thisShow.isHDString;
 		result.textField.alignment = NSCenterTextAlignment;
-		result.textField.toolTip =@"Is program recorded in HD?";
+		result.toolTip =@"Is program recorded in HD?";
 	} else if ([tableColumn.identifier isEqualToString:@"Channel"]) {
 		textVal = thisShow.channelString;
 	} else if ([tableColumn.identifier isEqualToString:@"Size"]) {

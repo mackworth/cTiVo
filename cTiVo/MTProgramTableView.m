@@ -362,6 +362,7 @@ __DDLOGHERE__
         NSString * imageName = thisShow.imageString;
 		result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
 		result.imageView.image = [NSImage imageNamed: imageName];
+		result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
 	}
     result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
     if ([thisShow.protectedShow boolValue]) {

@@ -181,7 +181,7 @@ __DDLOGHERE__
 	} else {
 		if ([decrementRetries boolValue]) {
 			_numRetriesRemaining--;
-			[tiVoManager  notifyWithTitle:@"TiVo show failed; retrying..." subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
+			[tiVoManager  notifyWithTitle:@"TiVo show failed; retrying..." subTitle:self.show.showTitle forNotification:kMTGrowlCantDownload];
 			DDLogDetail(@"Decrementing retries to %d",_numRetriesRemaining);
 		} else {
             _numStartupRetriesRemaining--;
@@ -2158,7 +2158,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
 		if (downloadedFileSize < self.show.fileSize * 0.85f) {  //hmm, doesn't look like it's big enough
 			[tiVoManager  notifyWithTitle: @"Warning: Show may be damaged/incomplete."
-								 subTitle:self.show.showTitle forNotification:kMTGrowlCantDownload];
+								 subTitle:self.show.showTitle forNotification:kMTGrowlPossibleProblem];
+			DDLogMajor(@"Show %@ supposed to be %f bytes, actually %f bytes", self.show,self.show.fileSize, downloadedFileSize);
 		} else {
 			self.show.fileSize = downloadedFileSize;  //More accurate file size
 		}

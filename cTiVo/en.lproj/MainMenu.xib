@@ -200,25 +200,34 @@ CA
                 <menuItem title="Options" id="971">
                     <menu key="submenu" title="Options" id="972">
                         <items>
-                            <menuItem title="Mark Commercials" onStateImage="checkImage" toolTip="Create chapter markers to easily skip commercials while viewing. Mutually exclusive with Skip Commercials." id="1109">
+                            <menuItem title="Mark Commercials" toolTip="Create chapter markers to easily skip commercials while viewing. Mutually exclusive with Skip Commercials." id="1109">
                                 <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <binding destination="926" name="value" keyPath="values.MarkCommercials" id="mAh-YP-JUC"/>
+                                </connections>
                             </menuItem>
-                            <menuItem title="Skip Commercials" onStateImage="checkImage" toolTip="Will attempt to remove commercials.  Mutually exclusive with Mark Commercials." id="1106">
+                            <menuItem title="Skip Commercials" toolTip="Will attempt to remove commercials.  Mutually exclusive with Mark Commercials." id="1106">
                                 <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <binding destination="926" name="value" keyPath="values.RunComSkip" id="qQj-dE-L8i"/>
+                                </connections>
                             </menuItem>
-                            <menuItem title="Add to iTunes when complete" onStateImage="checkImage" toolTip="Adds video file and metadata to iTunes when processing is complete (per show)" id="1108">
+                            <menuItem title="Add to iTunes when complete" toolTip="Adds video file and metadata to iTunes when processing is complete (per show)" id="1108">
                                 <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <binding destination="926" name="value" keyPath="values.iTunesSubmit" id="HHC-dP-tGv"/>
+                                </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="1107">
                                 <attributedString key="attributedTitle"/>
                             </menuItem>
-                            <menuItem title="Export Subtitles" onStateImage="checkImage" toolTip="Export text of subtitles to &lt;file>.srt" id="1073">
+                            <menuItem title="Export Subtitles" toolTip="Export text of subtitles to &lt;file>.srt" id="1073">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.ExportSubtitles" id="1116"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Export pyTivo Metadata" onStateImage="checkImage" toolTip="Exports information about this video to file.ext.txt; useful for pyTivo server (e.g. to &quot;go back&quot; to Tivo)" id="986">
+                            <menuItem title="Export pyTivo Metadata" toolTip="Exports information about this video to file.ext.txt; useful for pyTivo server (e.g. to &quot;go back&quot; to Tivo)" id="986">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.ExportTextMetaData" id="1128">
@@ -231,31 +240,31 @@ CA
                             <menuItem isSeparatorItem="YES" id="989">
                                 <attributedString key="attributedTitle"/>
                             </menuItem>
-                            <menuItem title="Disable Sleep" onStateImage="checkImage" toolTip="Disables sleep while queue is processing" id="934">
+                            <menuItem title="Disable Sleep" toolTip="Disables sleep while queue is processing" id="934">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.PreventSleep" id="961"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Show Protected Shows" onStateImage="checkImage" toolTip="Display TiVo's suggestions in queue" id="962">
+                            <menuItem title="Show Protected Shows" toolTip="Display TiVo's suggestions in queue" id="962">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.ShowCopyProtected" id="965"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Show TiVo Suggestions" onStateImage="checkImage" toolTip="Show TiVo's suggestions in list" id="1120">
+                            <menuItem title="Show TiVo Suggestions" toolTip="Show TiVo's suggestions in list" id="1120">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.ShowSuggestions" id="1123"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Create Sub-Folder per Series" onStateImage="checkImage" toolTip="Create a separate sub-folder in download folder for each series" id="968">
+                            <menuItem title="Create Sub-Folder per Series" toolTip="Create a separate sub-folder in download folder for each series" id="968">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.MakeSubDirs" id="970"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Sync iTunes devices" onStateImage="checkImage" toolTip="After adding to iTunes, have it sync devices to ensure video files available" id="1012">
+                            <menuItem title="Sync iTunes devices" toolTip="After adding to iTunes, have it sync devices to ensure video files available" id="1012">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.iTunesSync" id="1015"/>
@@ -321,13 +330,14 @@ CA
             <connections>
                 <outlet property="exportTableView" destination="904" id="925"/>
                 <outlet property="formatSelectionTable" destination="919" id="920"/>
+                <outlet property="iTunesMenuItem" destination="1108" id="7GA-ju-aod"/>
+                <outlet property="markCommercialsItem" destination="1109" id="tQK-EL-TeA"/>
                 <outlet property="optionsMenu" destination="972" id="1021"/>
                 <outlet property="pauseMenuItem" destination="1078" id="1090"/>
                 <outlet property="playVideoMenuItem" destination="1098" id="1104"/>
                 <outlet property="refreshTiVoMenuItem" destination="876" id="882"/>
                 <outlet property="showInFinderMenuItem" destination="1099" id="1105"/>
-                <outlet property="simulEncodeItem" destination="986" id="1020"/>
-                <outlet property="skipCommercialsItem" destination="1073" id="1077"/>
+                <outlet property="skipCommercialsItem" destination="1106" id="qMr-xa-n71"/>
             </connections>
         </customObject>
         <customObject id="420" customClass="NSFontManager"/>
@@ -439,7 +449,4 @@ CA
         <userDefaultsController representsSharedInstance="YES" id="926"/>
         <menuItem title="Preferences" keyEquivalent="," id="1067"/>
     </objects>
-    <resources>
-        <image name="checkImage" width="12" height="14"/>
-    </resources>
 </document>

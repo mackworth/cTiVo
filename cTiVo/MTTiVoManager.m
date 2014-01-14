@@ -919,6 +919,18 @@ static MTTiVoManager *sharedTiVoManager = nil;
             return fd;
         }
     }
+	//Now do lookup on hardwired ones that got renamed!!
+	NSDictionary *  oldFormats =
+		@{@"Quicktime (H.264   10Mbps)" : @"H.264 High Quality ",
+		  @"Quicktime (H.264   5Mbps)" : @"H.264 Medium Quality",
+		  @"Quicktime (H.264   3Mbps)" : @"H.264 Low Quality",
+		  @"Quicktime (H.264   1Mbps)" : @"H.264 Small 1Mbps",
+		  @"Quicktime (H.264   256kbps)" : @"H.264 Very Small 256kbps"
+		  };
+	
+	if (oldFormats[formatName]) {
+		return [self findFormat:oldFormats[formatName]]; //recursion will stop assuming no circularity in oldFormats
+	}
 	return _formatList[0];
 }
 -(void)addEncFormatToList: (NSString *) filename {

@@ -476,53 +476,9 @@ Routine to update and combine both the manual tivo preferences and the media key
 		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
         BOOL canSkip = [tiVoManager.selectedFormat.comSkip boolValue];
 		BOOL canMark = tiVoManager.selectedFormat.canMarkCommercials;
-//		BOOL canAPM = tiVoManager.selectedFormat.canAcceptMetaData ;
-		NSArray *menuItems = [optionsMenu itemArray];
-		for (NSMenuItem *mi in menuItems) {
-			if ([mi isSeparatorItem]) {
-				break;  //leave items after first separator
-			}
-			[optionsMenu removeItem:mi];
-		}
-		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-#ifndef deleteXML
-		//		if (canAPM) {
-//			apmMenuItem = [[NSMenuItem alloc] init];
-//			apmMenuItem.title = @"Add Metadata to Video File";
-//			[apmMenuItem bind:@"value" toObject:defaults withKeyPath:kMTExportMetaData options:nil];
-//			[optionsMenu insertItem:apmMenuItem atIndex:0];
-//		}
-#endif
-		if (caniTune) {
-			iTunesMenuItem = [[NSMenuItem alloc] init];
-			iTunesMenuItem.title = @"Add to iTunes when complete";
-			[iTunesMenuItem bind:@"value" toObject:defaults withKeyPath:kMTiTunesSubmit options:nil];
-			[optionsMenu insertItem:iTunesMenuItem atIndex:0];
-			//			[simulEncodeItem setEnabled:YES];
-		}
-//		if (canSimulEncode) {
-//			simulEncodeItem = [[NSMenuItem alloc] init];
-//			simulEncodeItem.title = @"Simultaneous Encoding";
-//			[simulEncodeItem bind:@"value" toObject:defaults withKeyPath:kMTSimultaneousEncode options:nil];
-//			[optionsMenu insertItem:simulEncodeItem atIndex:0];
-//			//			[simulEncodeItem setEnabled:YES];
-//		}
-		
-		if (canSkip) {
-			skipCommercialsItem = [[NSMenuItem alloc] init];
-			skipCommercialsItem.title = @"Skip Commercials";
-			[skipCommercialsItem bind:@"value" toObject:defaults withKeyPath:kMTRunComSkip options:nil];
-			[optionsMenu insertItem:skipCommercialsItem atIndex:0];
-			//			[simulEncodeItem setEnabled:YES];
-		}
-		
-		if (canMark) {
-			markCommecialsItem = [[NSMenuItem alloc] init];
-			markCommecialsItem.title = @"Mark Commercials";
-			[markCommecialsItem bind:@"value" toObject:defaults withKeyPath:kMTMarkCommercials options:nil];
-			[optionsMenu insertItem:markCommecialsItem atIndex:0];
-			//			[simulEncodeItem setEnabled:YES];
-		}
+		[iTunesMenuItem setHidden:!caniTune];
+		[skipCommercialsItem setHidden:!canSkip];
+		[markCommercialsItem setHidden:!canMark];
 	} else if ([keyPath compare:kMTMarkCommercials] == NSOrderedSame) {
 		BOOL markCom = [[NSUserDefaults standardUserDefaults] boolForKey:kMTMarkCommercials];
 		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
