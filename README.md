@@ -57,6 +57,6 @@ cTiVo is inspired by the great work done on iTiVo, but written in Cocoa/Objectiv
 
 Download the [cTiVo application](https://code.google.com/p/ctivo/downloads/detail?name=cTiVo_2.1_439.zip&can=2&q=), and drag it to your Applications Folder.
 
-cTiVo is fully compatible with OS X Mountain Lion (10.8) and Lion (10.7); not compatible with Snow Leopard or earlier.
+cTiVo is fully compatible with OS X Mavericks (10.9), Mountain Lion (10.8), and Lion (10.7); not compatible with Snow Leopard or earlier.
 
 *cTiVo* is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at https://code.google.com/p/ctivo/issues/list.
