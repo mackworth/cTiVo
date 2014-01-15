@@ -52,6 +52,7 @@ Shows will start downloading immediately; although as the shows are quite large,
 - **Edit>Edit Manual TiVos** lets you add/edit TiVos manually. Normally, cTiVo discovers TiVos on the local network automatically using a network technology called [Bonjour](http://www.apple.com/support/bonjour/). If you need to enter a TiVo address manually or wish to access TiVo's remotely, you'll need to enter their information here.
 - **Edit>New Manual Subscription** (Cmd-N) lets you create a subscription by just typing the show's name. Note that it will record any show whose name contains the text you provide here. For example, House would match House, House Hunting, and Warehouse 13. (Regular subscriptions created from an existing show have to match the entire name.) In particular, you can type ALL here to download every show your TiVo subscribes to. See [Advanced Topics](Advanced-Topics.md) for more information.
 - **Edit>Find** shows/hides a Find box that lets you search the list of shows for a particular text.
+
 ## Drawer contents
 
 If you double-click on a show, cTiVo will open a drawer on the side of the main table with more information that TiVo has about that show. It will only display information relevant to that show; in particular, it displays different information for movies vs TV shows. You can close the drawer with the close button on its top.
