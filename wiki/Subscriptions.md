@@ -13,7 +13,7 @@ With 2.1, subscriptions now operate correctly across multiple TiVos. We use the 
 
 ## Manual subscriptions
 
-You can also enter the name of a series without having a sample episode. Just go to Edit>New Manual Subscription (Cmd-N) and type the name of the series. This also allows you to match multiple series. So if you like House Hunters International as well as House Hunters, you can just put in House Hunters and any show with that exact text in its series name will be recorded. As an interesting option, you can simply enter ALL here to subscribe to all shows recorded by your TiVo. Finally, if you know what "regular expressions" means, and wish to control your subscriptions beyond this simple description, see [Advanced Subscriptions](AdvancedTopics#Advanced_Subscriptions)
+You can also enter the name of a series without having a sample episode. Just go to Edit>New Manual Subscription (Cmd-N) and type the name of the series. This also allows you to match multiple series. So if you like House Hunters International as well as House Hunters, you can just put in House Hunters and any show with that exact text in its series name will be recorded. As an interesting option, you can simply enter ALL here to subscribe to all shows recorded by your TiVo. Finally, if you know what "regular expressions" means, and wish to control your subscriptions beyond this simple description, see [Advanced Subscriptions](Advanced-Topics.md#advanced-subscriptions)
 
 ## Limiting subscriptions
 
