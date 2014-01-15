@@ -49,7 +49,7 @@ Shows will start downloading immediately; although as the shows are quite large,
 ![](Images/cTiVoEditMenu.png)
 - **Edit>Clear Completed History** (Cmd-E) will remove the records for all completed downloads from your download table, successful or not.
 - **Edit>Edit Formats** is for advanced users who wish to use new encoders or tune the parameters for encoders. You can also show/hide any of the factory-provided formats.
-- **Edit>Edit Manual TiVos** lets you add/edit TiVos manually. Normally, cTiVo discovers TiVos on the local network automatically using a network technology called [Bonjour](http://www.apple.com/support/bonjour/). If you need to enter a TiVo address manually or wish to access TiVo's remotely, you'll need to enter their information here.
+- **Edit>Edit TiVos** lets you add/edit TiVos manually. Normally, cTiVo discovers TiVos on the local network automatically using a network technology called [Bonjour](http://www.apple.com/support/bonjour/). If you need to enter a TiVo address manually or wish to access TiVo's remotely, you'll need to enter their information here. You can also enable/disable Bonjour or manual TiVos here as well.
 - **Edit>New Manual Subscription** (Cmd-N) lets you create a subscription by just typing the show's name. Note that it will record any show whose name contains the text you provide here. For example, House would match House, House Hunting, and Warehouse 13. (Regular subscriptions created from an existing show have to match the entire name.) In particular, you can type ALL here to download every show your TiVo subscribes to. See [Advanced Topics](Advanced-Topics.md) for more information.
 - **Edit>Find** shows/hides a Find box that lets you search the list of shows for a particular text.
 
