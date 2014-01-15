@@ -16,21 +16,21 @@ Some formats are not intended for playing on your computer, and Quicktime is una
    See Edit Video Formats in [Advanced Topics](Advanced-Topics.md) 
 ###What does the column "Tivo Status" mean?
 These are the icons displayed by TiVo on its NowPlaying status along with a couple we've added for clarity. 
-![](Images/in-progress-recording.png)
-
+<!-- The following should use Markdown img refs ()[Images/xyz.png], but github has an odd bug -->
+<!-- Same with **; no markdown interp in cells, at least sometimes. -->
 <table>
-    <tr> <td><img src = "Images/in-progress-recording.png" alt= ""/></td><td>Recording Now</td></tr>
-    <tr> <td>![](Images/in-progress-recording.png)</td><td>Save until Deleted</td></tr>
-    <tr> <td>![](Images/recent-recording.png)</td><td>Recently recorded `*`</td></tr>
-    <tr> <td>![](Images/expires-soon-recording.png)</td><td>Expires Soon</td></tr>
-    <tr> <td>![](Images/expired-recording.png)</td><td>Expired</td></tr>
-    <tr> <td>![](Images/deleted.png)</td><td>Deleted at TiVo `*`</td></tr>
-    <tr> <td>![](Images/suggestion-recording.png)</td><td>TiVo Suggestion</td></tr>
-    <tr> <td>![](Images/copyright.png)</td><td>Copying prevented `*`</td></tr>
-    <tr> <td>![](Images/status-unknown.png)</td><td>Status Not Loaded Yet `*` </td></tr>
+    <tr> <td><img src="Images/in-progress-recording.png" alt= ""/></td><td>Recording Now</td></tr>
+    <tr> <td><img src="Images/save-until-i-delete-recording.png" alt-""/></td><td>Save until I delete</td></tr>
+    <tr> <td><img src="Images/recent-recording.png" alt-""/></td><td>Recently recorded **</td></tr>
+    <tr> <td><img src="Images/expires-soon-recording.png" alt-""/></td><td>Expires Soon</td></tr>
+    <tr> <td><img src="Images/expired-recording.png" alt-""/></td><td>Expired</td></tr>
+    <tr> <td><img src="Images/deleted.png" alt-""/></td><td>Deleted at TiVo **</td></tr>
+    <tr> <td><img src="Images/suggestion-recording.png" alt-""/></td><td>TiVo Suggestion</td></tr>
+    <tr> <td><img src="Images/copyright.png" alt-""/></td><td>Copying prevented **</td></tr>
+    <tr> <td><img src="Images/status-unknown.png" alt-""/></td><td>Status Not Loaded Yet ** </td></tr>
 </table>
 
-`*` = Ones we've added 
+** = Ones we've added 
 
 ###Is it supposed to be this slow?
  First, yes. Video files are huge, especially HD.
@@ -43,13 +43,13 @@ Several things affect the speed of the download:
 - The processing speed of your computer. Your CPU is used to convert the movies once they get to the computer.
 - Format you are converting to. Higher-resolution, higher-quality formats take more processing power from your computer.
 
-To give you an estimate over a wired connection, from a TiVo HD (aka Series3), converting to iPhone simultaneous encode, you might see a 1.8MBps connection and get a 3.0-gigabyte 30-minute show in about 30  mins. Use those settings as a starting point. If you're seeing MUCH worse times, then something is wrong. You can see the speed of your network connection by running Activity Monitor (Applications>Utilities>Activity Monitor>Network tab).
+To give you an estimate over a wired connection, from a TiVo HD (aka Series3), converting to iPhone, you might see a 1.8MBps connection and get a 3.0-gigabyte 30-minute show in about 30 mins. Use those settings as a starting point. If you're seeing MUCH worse times, then something is wrong. You can see the speed of your network connection by running Activity Monitor (Applications>Utilities>Activity Monitor>Network tab).
 ###What should I do if I need it to download faster?
-   With today's processors, you'll probably be encoding as fast as you can download. On slower machines, if you're ok with using up more hard drive space, you might probably select the 'Decrypted TiVo Show' format. Then  install [MPlayer](http://www.mplayerosx.ch]) or [VLC](http://www.videolan.org/vlc/index.html) to view the downloaded movie. It will download as fast as the TiVo will allow, and do no conversion whatsoever.
+   With today's processors, you'll probably be encoding as fast as you can download. On slower machines, if you're ok with using up more hard drive space, you might probably select the 'Decrypted TiVo Show' format. Then install [MPlayer](http://www.mplayerosx.ch]) or [VLC](http://www.videolan.org/vlc/index.html) to view the downloaded movie. It will download as fast as the TiVo will allow, and do no conversion whatsoever.
 ###What are the different stages that cTiVo goes through?
    Depending on the options that you've set, cTiVo goes through many different steps to prepare your video.  Note that there are resource constraints that will prevent the program from attempting all in parallel. For example, we only download one show at a time from each TiVo as trying to do more will be counterproductive. Thus a show might pause mid-way through processing until further resources are available.
   Download => Decrypt => Ads Detect => Subtitle Extraction => Video Encoding => Adding Metadata => Adding to iTunes ==> Complete 
-   We optimize to do as many of these as possible in parallel, so several of these steps may be combined into one; for example, the download might say "Downloading" until the download is complete, then say "Encoding", even though much of the file may already be decrypted/encoded. Shows can also be marked as "Failed" or "TiVo Deleted", meaning that the show is no longer available on the TiVo. A blank entry means that it's not been started yet (or has failed and is scheduled for automatic retry).
+   We optimize to do as many of these as possible in parallel, so several of these steps may be combined into one; for example, the download might say "Downloading" until the download is complete, then say "Encoding" for a few seconds, as much of the file may already be decrypted/encoded. Shows can also be marked as "Failed" or "TiVo Deleted", meaning that the show is no longer available on the TiVo. A blank entry means that it's not been started yet (or has failed and is scheduled for automatic retry).
 ###My shows aren't downloading; although I can see the list and can request a download, every show tries several times, then gives up.
 This symptom may mean that your TiVo's internal file server has crashed. It's quite delicate, and certain combinations of operations (which we try to avoid) can cause problems. Try restarting your TiVo (TiVo Central > Messages & Settings > Restart or Reset System > Restart the TiVo; doing this while recording will cancel recording) and see if the problem is fixed. If it does and yet reoccurs later, let us know.
 ###My program crashes / I get mencoder or tivodecode errors, etc.
