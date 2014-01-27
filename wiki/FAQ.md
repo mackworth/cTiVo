@@ -52,6 +52,18 @@ To give you an estimate over a wired connection, from a TiVo HD (aka Series3), c
    We optimize to do as many of these as possible in parallel, so several of these steps may be combined into one; for example, the download might say "Downloading" until the download is complete, then say "Encoding" for a few seconds, as much of the file may already be decrypted/encoded. Shows can also be marked as "Failed" or "TiVo Deleted", meaning that the show is no longer available on the TiVo. A blank entry means that it's not been started yet (or has failed and is scheduled for automatic retry).
 ###My shows aren't downloading; although I can see the list and can request a download, every show tries several times, then gives up.
 This symptom may mean that your TiVo's internal file server has crashed. It's quite delicate, and certain combinations of operations (which we try to avoid) can cause problems. Try restarting your TiVo (TiVo Central > Messages & Settings > Restart or Reset System > Restart the TiVo; doing this while recording will cancel recording) and see if the problem is fixed. If it does and yet reoccurs later, let us know.
+###How do I find/submit my logs?
+If you're having problems, you may need to review and/or submit your logs. cTiVo stores its log files in ~/Preferences/Logs/cTiVo and can be reviewed with any text editor. To compress them into a zip file to submit for an issue:
+
+To get us the logs:
+  1. Go to Preferences(Cmd-comma), 
+  2. Set Log Level to Detailed (Lower left corner). 
+  3. Run a show or shows showing the problem.  
+  4. Go to your Library (in Finder, hold down Option and click the Go menu and select Library). 
+  5. Open the Logs folder.
+  6. Select the cTiVo folder and right-Click "Compress cTiVo"; this will create a cTiVo.Zip file.
+  7. Submit that file to the issues tab with a description of the problem.
+
 ###My program crashes / I get mencoder or tivodecode errors, etc.
  The short version: sorry; let us know, and we'll try to fix it.
 The long version: cTiVo is actually a front-end for several programs written by multiple people. See the About cTivo menu item for more details. Many of these programs are not perfect, and cTiVo may have its own bugs. If you report bugs in the *Issues* tab above, we will get around to checking it out. However, the bug may be related to underlying programs which we have no control over.  One thing to always try is a different download format, or a different encoder (for example, HandBrake iPhone instead of iPhone). Comskip in particular, is very prone to crashing or failing. When this happens, we put up an error message, but we continue with the processing, simply not marking/skipping commercials.
