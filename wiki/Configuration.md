@@ -37,7 +37,7 @@ The followiing are preferences that apply to the operation of the entire program
 
 ### Settings in Preferences screen
 
-![](Images/cTivoAdvancedPreferencesScreen.png)
+![](Images/cTivoPreferencesScreen.png)
 
 These are in addition to the ones that are also in the Options menu above.
 - **Warn if Quitting during download** is just a user preference. Some folks don't like warning messages when quitting. However, if you quit during a download or encoding, you will lose any work done on that download, and cTiVo will have to restart the job when it is next run. If you enable the warning, we will give you the option to finish the current job before then quitting.
