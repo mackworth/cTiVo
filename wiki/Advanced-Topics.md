@@ -5,39 +5,22 @@ This document is to cover some interesting topics that are intended for advanced
 
 Sections:  
 
-- [Artwork](#artwork)
 - [Manual TiVos](#manual-tivos)
 - [Edit Formats](#edit=formats)
+- [Artwork](#artwork)
 - [Advanced Settings](#advanced-settings)
 - [theTVDB](#thetvdb)
 - [Advanced Subscriptions ](#advanced-subscriptions)
 - [Log Files ](#log-files)
 - [Filename Templates](#filename-templates)
 
-# Artwork
-
-For MPEG files (.MPG, .MP4, .MOV, or .M4V), cTivo can embed a still picture inside the file to represent it in iTunes, iOS devices, or other players that understand this standard. By default, this picture is one of the first frames of the video, but you have many choices available. First, in Preferences, you can specify that all videos should have the same cTiVo icon, representing that it came from your TiVo. Secondly, in Preferences, you can enable cTiVo retrieving fan-generated, episode-specific artwork from theTVDB.com (although this is dependent on the series/episode being in the database). See [theTVDB](#thetvdb) below for more information. Third, you can create a "thumbnails" directory in your download folder containing artwork that is added to episodes as they are generated. These files can be in almost any format supported by the OS, but the filename has to be in a specific syntax.
-
-The filename must start with the series title (e.g. "The Daily Show with Jon Stewart") with any slashes or colons replaced with dashes. Then you can create a series-generic file (no suffix), a season-specific file (suffix of Snn, or an episode-specific file (suffix of SnnEnn). 
-
-These local files can be stored in the download directory itself or in a "thumbnails" subdirectory of the download directory. If you have enabled series-specific subdirectories within the download directory, they can also be in that directory, or in a "thumbnails" subdirectory of that subdirectory. 
-
-To give as much control to you as possible, if more than one of these artwork types are available, it will use the first one it finds in the following order:
-
-- Local episode-specific (SnnEnn)
-- theTVDB artwork (if enabled and available)
-- Local season-specific (S00)
-- Local series-generic
-- cTiVo icon (if enabled)
-- Initial frame from video
-
 # Manual TiVos
 
-Normally, cTiVo discovers TiVos on the local network automatically using a network technology called BonJour. Normally this will work fine, but if you need to enter a TiVo address manually or wish to access your TiVos remotely, you'll need to enter their information here. Simply use the Edit>Edit TiVos menu item. This will show any TiVos you've previously entered. Use the + button to add a new one, or the - button to delete one. If you'd like to temporarily delete one, just uncheck the "Enabled" button. You can get the TiVo's current local IP address from its Networks and Settings screen, although this may change over time, especially when your TiVo is restarted. For the local network, you should always use the ports provided (80/443). You can also disable any BonJour TiVos you don't want to interact with here as well, or change their Media Keys if needed.
+Normally, cTiVo discovers TiVos on the local network automatically using a network technology called BonJour. Normally this will work fine, but if you need to enter a TiVo address manually or wish to access your TiVos remotely, you'll need to enter their information here. Simply use the Edit>Edit Manual TiVos menu item. This will show any TiVos you've previously entered. Use the + button to add a new one, or the - button to delete one. If you'd like to temporarily delete one, just uncheck the "Enabled" button. You can get the TiVo's current local IP address from its Networks and Settings screen, although this may change over time, especially when your TiVo is restarted. For the local network, you should always use the ports provided (80/443)
 
 ![](Images/cTiVoManualTivosScreen.png)
 
-Interestingly, you may also be able to use cTiVo remotely, although this can take considerable network ability and patience.  Patience both in the sense of trial and error as well as in the upload bandwidth available on your connection to the Internet. You will need to set your router to pass external accesses to your main IP address through to your TiVo. As you may be doing this for other devices as well, we also let you adjust the ports cTiVo uses to match whatever port mapping you're doing in your router.  If you didn't understand this paragraph so far, then you probably need to find someone that does to help you. Note that whether this violates your terms of service with your cable company, TiVo Inc, your internet provider, any random film studio in Hollywood, or anybody else is entirely up to you. 
+Interestingly, you may also be able to use cTiVo remotely, although this can take considerable network ability and patience.  Patience both in the sense of trial and error as well as in the upload bandwidth available on your connection to the Internet. You will need to set your router to pass external accesses to your main IP address through to your TiVo. As you may be doing this for other devices as well, we also let you adjust the ports cTiVo uses to match whatever port mapping you're doing in your router.  If you didn't understand this paragraph so far, then you probably shouldn't be doing this. Note that whether this violates your terms of service with your cable company, TiVo Inc, your internet provider, any random film studio in Hollywood, or anybody else is entirely up to you. 
 
 # Edit Formats
 
@@ -55,14 +38,14 @@ If you'd like to configure a different video encoder, or provide different param
 - **Input Filename/Output Filename/Edit List Switch:** these are passed in the command line to the encoder (see [Arguments](#arguments)
 - **Encoder to Use**: See [Encoder To Use](#encoder-to-use)
 - **Regex for Encoder Log**: If the encoder cannot support simultaneous encoding (e.g. HandBrakeCLI), the encoder should provide in its standard output the percentage complete as a number from 0-100.  You will need to provide a regex expression for extracting this number from the last few lines of the standard output.  For example, HandBrakeCLI writes its progress as 87 %, so the regex is `([\%` This will only be used when doing sequential downloading, decrypting, and encoding.  When doing simultaneous encoding, the data flow through the pipes is used to measure progress.
-- **Video/Audio/Other Options for Encoder:** These are passed on the command line to the encoder; see [Arguments](#arguments).
+- **Video/Audio/Other Options for Encoder:** These are passed on the command line to the encoder; see [Arguments](arguments).
 - **Comskip Options**: ComSkip is an experimental feature for cTiVo; See [the comskip project](http://www.kaashoek.com/comskip/). Included in this implementation is a configuration file (comskip.ini), which can be found on the [cTivo  source code page](../cTiVo/comskip.ini). In addition to other command line parameters, you can replace the built-in comskip.ini with your own comskip.ini file by entering "--ini=\<full path\>/comskip.ini" providing the full path to your own file.
 - **ccExtractor Options**: ccExtractor exports subtitles from the video stream into a .srt text file. See  [the ccExtractor project](http://ccextractor.sourceforge.net/using-ccextractor/command-line-usage.html)
 - **Can run download and encode at same time** should be set only if the encoder can run as a final stage of a pipeline (stdin being the source pipe).
 
-- **Can be added to iTunes** means that the file format generated is compatible with iTunes, and will simply enable or disable that option for the user.
+ - **Can be added to iTunes** means that the file format generated is compatible with iTunes, and will simply enable or disable that option for the user.
 
-- **Can Skip Commercials** means whether to enable that option for the user. If enabled, the encoder must handle the edl as generated by comSkip.
+ - **Can Skip Commercials** means whether to enable that option for the user. If enabled, the encoder must handle the edl as generated by comSkip.
 
 ## Encoder to Use
 
@@ -105,49 +88,64 @@ OR, if no outputFileFlag:
 ```` 
 If you are debugging a format, you can use the advance preferences to increase the debugging level. See [Log Files](#log-files) below for more information. You can also set the "Don't Delete tmp files" option, which will save the subsidiary program log files (from your encoder, comskip, etc) for your perusal. Be sure to set it back when finished debugging as it will generate massive temp files.
 
+# Artwork
+
+For MPEG files (.MPG, .MP4, .MOV, or .M4V), cTivo can embed a still picture inside the file to represent it in iTunes, iOS devices, or other players that understand this standard. By default, this picture is one of the first frames of the video, but you have many choices available. First, in Preferences, you can specify that all videos should have the same cTiVo icon, representing that it came from your TiVo. Secondly, in Preferences, you can enable cTiVo retrieving fan-generated, episode-specific artwork from theTVDB.com (although this is dependent on the series/episode being in the database). Third, you can create a "thumbnails" directory in your download folder containing artwork that is added to episodes as they are generated. These files can be in almost any format supported by the OS, but the filename has to be in a specific syntax.
+
+The filename must start with the series title (e.g. "The Daily Show with Jon Stewart") with any slashes or colons replaced with dashes. Then you can create a series-generic file (no suffix), a season-specific file (suffix of Snn, or an episode-specific file (suffix of SnnEnn). 
+
+These local files can be stored in the download directory itself or in a "thumbnails" subdirectory of the download directory. If you have enabled series-specific subdirectories within the download directory, they can also be in that directory, or in a "thumbnails" subdirectory of that subdirectory. 
+To give as much control to you as possible, if more than one of these artwork types are available, it will use the first one it finds in the following order:
+
+- Local episode-specific (SnnEnn)
+- theTVDB artwork (if enabled and available)
+- Local season-specific (S00)
+- Local series-generic
+- cTiVo icon (if enabled)
+- Initial frame from video
+
 # Advanced Settings
 
 There are a few preferences that are intended for debugging purposes or for very advanced users only. These are hidden, but can be activated by holding down the Option key while pulling down the cTiVo menu and selecting Adv Preferences (alternatively Option-Cmd-Comma). 
 
 ![](Images/cTivoAdvancedPreferencesScreen.png)
 
-### Debug Levels
+## Debug Levels
+
 This will increase the level of detail written to the Console log from major events to verbose. As "verbose" is indeed very verbose, you can also set the debug level separately for each of the major modules in the program. This would mainly be of use while reading the source code or under the direction of someone helping you debug a problem. 
 
-### Disable Drag to Select in UI
+## Disable Drag to Select in UI
+
 OSX has an inconsistency of what "click on a filename and drag across multiple files" means.  This can either mean "drag the first file", or "select multiple files". Our default is the latter, but you can change it with this option.
 
-### Don't Delete tmp Files
+## Don't Delete tmp Files
+
 During its processing, cTiVo creates several intermediate files, which are deleted upon completion. The video files are typically in the download directory, and the others (sub-program log files, etc) are in the /tmp/cTiVo/ directory. For debugging purposes, this option lets you turn off the automatic deletion. Setting this option can burn up your hard drive very quickly, so be sure to disable after debugging.
 
-### Download Retries
+## Download Retries
+
 If cTivo encounters a failure (network not available, encoder problem, etc), it will retry automatically. This option lets you change the number of times it retries before giving up entirely; default is 3.
 
-### Don't use memory buffer for downloads
+## Don't use memory buffer for downloads
+
 For performance reasons, cTiVo will normally download the TiVo file into memory rather than writing it to a temporary file. Sometimes for debugging purposes, it's convenient to have it write these files directly to disk, and this option enables that.
 
-### TiVo Refresh Rate
+## TiVo Refresh Rate
+
 How often (in minutes) should cTivo check the Now Playing list of your TiVos
 
-### Temporary Files Directory
+## Temporary Files Directory
 While the video files are stored in the download directory, during processing many other files are stored in a working directory. By default this is in /tmp/ctivo, and is emptied as each transaction is finished and when cTivo starts up. You can change this directory here.
 
-###Filename Template
-See [Filename Templates](#filename-templates) for more information.
+## View TVDB Stats
 
-### Keywords
-This control will insert keywords into the Filename Template field to make it easier to build.
+Displays the results of theTVDB lookups since cTiVo has started, or since an Empty Cache command. See [below for more on interpreting this information.
 
-### View TVDB Stats
-Displays the results of theTVDB lookups since cTiVo has started, or since an Empty Cache command. See [theTVDB](#thetvdb) below for more on interpreting this information.
+## Empty Cache
 
-### Empty Cache
-Empty Cache erases the caches stored in the program and reloads the information contained. The two caches are theTVDB information and the detailed XML loaded from the !TiVo for each show. If you think something is wrong with the information being displayed, this might be useful, but more important is to reset theTVDB statistics to go directly to the source. See [theTVDB](#thetvdb) below for more information.
+Empty Cache erases the caches stored in the program and reloads the information contained. The two caches are theTVDB information and the detailed XML loaded from the !TiVo for each show. If you think something is wrong with the information being displayed this might be useful, but more important is to reset theTVDB statistics to go directly to the source. See [theTVDB](theTVDB]) below for more information.
 
-### Module Debug Levels
-The remaining controls let you set debug levels for each individual module.  
-
-# TheTVDB
+## TheTVDB
 
 For some reason, TiVo has recently not been filling in the season/episode information on many shows. Oddly, this information may be available in the user interface, but not delivered to cTiVo. We attempt to work around this by accessing theTVDB.com and looking up an episode to fill in the season/episode information or to get access to the fan-generated artwork available there. Fair warning: the following paragraphs on how this all works may be more information that you want!
 
@@ -323,7 +321,7 @@ And you can put these together:
 	==>`The Big Bang Theory/Season 07/The Big Bang Theory - S07E01 - The Hofstadter Insufficiency.mp4`
 	==>`Movies/Machete (2010)`
 
-###A few final notes on filename templates
+##A couple of final notes:
 * Capitalization is irrelevant in keywords. 
 * Quotes are not allowed inside quotes.
 * Brackets cannot be used as text.

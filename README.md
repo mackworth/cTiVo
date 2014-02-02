@@ -1,4 +1,4 @@
-**cTiVo** is a free Mac application to download shows from your TiVo (Roamio, Premiere, HD, S3 or S2 devices) and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, but very flexible. 
+**cTiVo** is a free Mac application to download shows from your TiVo (Premiere, HD, S3 or S2 devices) and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, but very flexible. 
 
 cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
 
@@ -9,7 +9,7 @@ cTiVo is inspired by the great work done on iTiVo, but written in Cocoa/Objectiv
   * Drag/drop and contextual menus for ease of use; submit, reschedule, delete all by dragging the shows.
   * Download queue for batch processing, restored on restart.
   * 'Subscriptions' to your regular shows: automatically downloading shows whenever new episodes are available.
-  * Removes commercials from downloaded shows, or marks for quick skip in player.
+  * Removes commercials from downloaded shows, or mark for quick skip in player.
   * Extracts closed caption info, adjusted for removal of commercials; adds to MPEG and creates subtitle files.
   * Generate metadata appropriate for use by tools such as pyTivo.
   * Adds episode-specific artwork from theTVDB (if available).
@@ -31,7 +31,6 @@ cTiVo is inspired by the great work done on iTiVo, but written in Cocoa/Objectiv
   * Options to prevent sleep or quitting until processing complete.
   * Access remote TiVos (requires network reconfiguration).
   * Folders optionally created for each series.
-  * Filename Template for integration with your media system.
 
 ##Information About Your Shows
   * Customizable columns about shows, downloads and subscriptions; show exactly what you want to see and no more.
