@@ -66,7 +66,7 @@
                         </subviews>
                     </customView>
                     <textField toolTip="Where to store downloaded programs" verticalHuggingPriority="750" id="10">
-                        <rect key="frame" x="657.00000069216503" y="690" width="209" height="22"/>
+                        <rect key="frame" x="657.00000105091567" y="690" width="209" height="22"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" id="67">
                             <font key="font" metaFont="system"/>
@@ -189,7 +189,7 @@
                                                                         <imageView id="1279">
                                                                             <rect key="frame" x="0.0" y="0.0" width="25" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="center" imageScaling="proportionallyDown" image="questionmark" id="1282"/>
+                                                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="center" imageScaling="proportionallyDown" image="status-unknown" id="1282"/>
                                                                         </imageView>
                                                                     </subviews>
                                                                     <connections>
@@ -2279,6 +2279,6 @@
         </menu>
     </objects>
     <resources>
-        <image name="questionmark" width="16" height="16"/>
+        <image name="status-unknown" width="16" height="16"/>
     </resources>
 </document>
