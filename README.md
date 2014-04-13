@@ -1,4 +1,4 @@
-**cTiVo** is a free Mac application to download shows from your TiVo (Premiere, HD, S3 or S2 devices) and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, but very flexible. 
+**cTiVo** is a free Mac application to download shows from your TiVo (Roamio, Premiere, HD, S3 or S2 devices) and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, but very flexible. 
 
 cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
 
@@ -55,8 +55,8 @@ cTiVo is inspired by the great work done on iTiVo, but written in Cocoa/Objectiv
 
 ##To install:
 
-Download the [cTiVo application](https://code.google.com/p/ctivo/downloads/detail?name=cTiVo_2.1_439.zip&can=2&q=), and drag it to your Applications Folder.
+Download the [cTiVo application](https://github.com/dscottbuch/cTiVo/releases), and drag it to your Applications Folder.
 
 cTiVo is fully compatible with OS X Mavericks (10.9), Mountain Lion (10.8), and Lion (10.7); not compatible with Snow Leopard or earlier.
 
-*cTiVo* is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at https://code.google.com/p/ctivo/issues/list.
+*cTiVo* is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/dscottbuch/cTiVo/releases).
