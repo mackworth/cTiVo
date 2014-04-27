@@ -2,12 +2,21 @@
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"  xmlns:dc="http://purl.org/dc/elements/1.1/">
     <channel>
         <title>cTiVo Updates</title>
-        <link>http://ctivo.googlecode.com/files/sparklecast.xml</link>
-        <description>Version 2.2 (Addresses users having trouble with MAK key entry)</description>
+        <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
+        <description>Version 2.3.1 (User control of output filenames, Full screen, Keychain)</description>
         <language>en</language>
         <item>
-            <title>Version 2.2 (Addresses users having trouble with MAK key entry)</title>
+            <title>Version 2.3.1 (User control of output filenames, Full screen, Keychain)</title>
 			<description><![CDATA[
+                <b>Version 2.3.1 (User control of output filenames, Full screen, Keychain)</b><br /><br />
+                <ul>
+                <li>Ability to specify output filename and structure - similar to kmttg</li>
+                <li>New retina-compatible graphics - thanks Patrick</li>
+                <li>Bugs fixed on manual TiVos and MAK on initial setup</li>
+                <li>Support for OS X Keychain</li>
+                <li>Quicktime formats now use constant quality instead of constant bit rate</li>
+                <li>Full screen command and support</li>
+                </ul>
                 <b>Version 2.2 (Addresses users having trouble with MAK key entry)</b><br /><br />
 				<ul>
 				<li>Improved handling of initial MAK entry</li>
@@ -42,11 +51,11 @@
 			</description>
             <pubDate>Mon., Apr 8, 2013 10:10:00 -0800</pubDate>
             <!-- <sparkle:releaseNotesLink>http://andymatuschak.org/files/notes.html</sparkle:releaseNotesLink> -->
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/v2.2.451/cTiVo_2.2.451.zip"
-            sparkle:version="451" sparkle:shortVersionString="2.2"
-            length="16755956"
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/v2.3.1.468/cTiVo_2.3.1_468.zip"
+            sparkle:version="468" sparkle:shortVersionString="2.3.1"
+            length="16799062"
             type="application/octet-stream"
-            sparkle:dsaSignature="MC0CFAzammomyeYz0FdDbhita99ZYVlVAhUAwAz2Xn/2posuRLtgEe2dQi1mrIE=" />
+            sparkle:dsaSignature="MC4CFQCIOuldRDTy03sSvMV1GRaGWNnCsgIVAJkTmPzyc80rFAC9wpG/i+6MuMNR" />
         </item>
     </channel>
 </rss>
