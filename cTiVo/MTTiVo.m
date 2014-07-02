@@ -279,7 +279,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     BOOL foundMediaKey = NO;
     NSArray *savedTiVos = tiVoManager.savedTiVos;
     if (savedTiVos.count == 0) {
-        NSLog(@"No Media Key to Crib");
+        DDLogDetail(@"No Media Key to Crib");
         return;
     }
 

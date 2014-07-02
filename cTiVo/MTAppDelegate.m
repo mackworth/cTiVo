@@ -9,7 +9,6 @@
 #import "MTAppDelegate.h"
 #import "MTTiVo.h"
 
-#import "DDLog.h"
 #import "DDTTYLogger.h"
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
@@ -386,7 +385,7 @@ Routine to update and combine both the manual tivo preferences and the media key
 				} else {
 					NSError *error = nil;
 					[fm removeItemAtPath:tmpdir error:&error];
-					if (error) DDLogMajor(@"Error was %@",error);
+					if (error) DDLogMajor(@"Can't remove %@, Error was %@",tmpdir, error);
 				}
 				[myOpenPanel close];
 				[self validateTmpDirectory];
@@ -503,7 +502,7 @@ Routine to update and combine both the manual tivo preferences and the media key
 -(IBAction)togglePause:(id)sender
 {
 	self.tiVoGlobalManager.processingPaused = [self.tiVoGlobalManager.processingPaused boolValue] ? @(NO) : @(YES);
-	DDLogDetail(@"User toggled Pause %@", self.tiVoGlobalManager.processingPaused);
+	DDLogMajor(@"User toggled Pause %@", self.tiVoGlobalManager.processingPaused);
 	//	pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";
 	if ([self.tiVoGlobalManager.processingPaused boolValue]) {
 		[self.tiVoGlobalManager pauseQueue:@(YES)];
@@ -516,7 +515,7 @@ Routine to update and combine both the manual tivo preferences and the media key
 -(void)updateTivoRefreshMenu
 {
 	DDLogDetail(@"Rebuilding TivoRefresh Menu");
-	DDLogVerbose(@"Tivos: %@",_tiVoGlobalManager.tiVoList);
+	DDLogVerbose(@"Tivos: %@",[_tiVoGlobalManager.tiVoList maskMediaKeys]);
 	if (_tiVoGlobalManager.tiVoList.count == 0) {
 		[refreshTiVoMenuItem setEnabled:NO];
 	} else if (_tiVoGlobalManager.tiVoList.count ==1) {
@@ -592,7 +591,7 @@ Routine to update and combine both the manual tivo preferences and the media key
 	NSInteger button = [keyAlert runModal];
 	if (button == NSAlertDefaultReturn) {
 		[input validateEditing];
-		DDLogDetail(@"Got new Subscription %@",input.stringValue);
+		DDLogMajor(@"Got new Subscription %@",input.stringValue);
 		MTSubscription * sub = [[tiVoManager subscribedShows] addSubscriptionsString:input.stringValue];
 		if (!sub) {
 			NSAlert * badSub = [NSAlert alertWithMessageText:@"Invalid Subscription" defaultButton:@"Cancel" alternateButton:@"" otherButton:nil informativeTextWithFormat:@"The subscription pattern may be badly formed, or it may already covered by another subscription."];
@@ -818,7 +817,7 @@ Routine to update and combine both the manual tivo preferences and the media key
         NSInteger button = [keyAlert runModal];
         if (button == NSAlertDefaultReturn) {
             [input validateEditing];
-            DDLogDetail(@"Got Media Key %@",input.stringValue);
+            DDLogDetail(@"Got New Media Key" );
             tiVo.mediaKey = input.stringValue;
  			tiVo.enabled = YES;
 			[tiVo updateShows:nil];
@@ -963,7 +962,7 @@ Routine to update and combine both the manual tivo preferences and the media key
 
 -(void) cleanup {
 	
-	DDLogDetail(@"exiting");
+	DDLogReport(@"cTiVo exiting");
 	[saveQueueTimer invalidate];
 	[tiVoManager cancelAllDownloads];
 	[tiVoManager writeDownloadQueueToUserDefaults];
@@ -973,7 +972,8 @@ Routine to update and combine both the manual tivo preferences and the media key
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
-	if ([tiVoManager anyTivoActive] && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTQuitWhileProcessing] && sender ) {
+    DDLogDetail(@"Asked to Quit");
+    if ([tiVoManager anyTivoActive] && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTQuitWhileProcessing] && sender ) {
 		[self performSelectorOnMainThread:@selector(confirmUserQuit) withObject:nil waitUntilDone:NO];
 		return NSTerminateLater;
 	} else {

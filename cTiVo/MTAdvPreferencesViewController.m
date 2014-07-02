@@ -7,7 +7,6 @@
 //
 
 #import "MTAdvPreferencesViewController.h"
-#import "DDLog.h"
 #import "MTTiVoManager.h"
 
 #define tiVoManager [MTTiVoManager sharedTiVoManager]

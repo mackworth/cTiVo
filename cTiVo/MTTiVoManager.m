@@ -512,7 +512,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		DDLogReport(@"Warning: didn't find tivo %@",tiVo);
         [updatedSavedTiVos addObject:tiVoDict];
 	}
-    DDLogVerbose(@"Saving new tivos %@",updatedSavedTiVos);
+    DDLogVerbose(@"Saving new tivos %@",[updatedSavedTiVos maskMediaKeys]);
     [[NSUserDefaults standardUserDefaults] setValue:updatedSavedTiVos forKeyPath:kMTTiVos];
 }
 
@@ -1251,7 +1251,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 - (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notification {
-	DDLogMajor(@"Growl: %@/%@: %@", title, subTitle, notification);
+	DDLogReport(@"Notify: %@/%@: %@", title, subTitle, notification);
 	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
 	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
 		[GAB notifyWithTitle: title
@@ -1568,7 +1568,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		DDLogDetail(@"Invalid TiVo platform %@; rejecting %@(%@) ",platform, sender.name,ipAddress);
 		return;
 	}
-	
+    
 	for (NSString *tiVoAddress in [self tiVoAddresses]) {
 		DDLogVerbose(@"Comparing TiVo %@ address %@ to ipaddress %@",sender.name,tiVoAddress,ipAddress);
 		if ([tiVoAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
@@ -1578,7 +1578,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
     
 	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
-
+    
     [newTiVo updateShows:nil];
   
 	self.tiVoList = [_tiVoList arrayByAddingObject: newTiVo];
@@ -1609,5 +1609,20 @@ static MTTiVoManager *sharedTiVoManager = nil;
     return ipString;
 }
 
+
+@end
+
+@implementation NSObject (maskMediaKeys)
+
+-(NSString *) maskMediaKeys {
+    NSString * outString =[self description];
+    for (MTTiVo * tiVo in tiVoManager.tiVoList) {
+        NSString * mediaKey = tiVo.mediaKey;
+        NSString * maskedKey = [NSString stringWithFormat:@"<<%@MediaKey>>",tiVo.tiVo.name];
+        outString = [outString stringByReplacingOccurrencesOfString:mediaKey                                        withString:maskedKey];
+    }
+    return outString;
+}
+    
 
 @end

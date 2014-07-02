@@ -86,7 +86,7 @@ __DDLOGHERE__
         [self loadContent:manualTiVoArrayController];
         [self loadContent:networkTiVoArrayController];
         [tiVoManager loadManualTiVos];
-        DDLogDetail(@"manual tivos %@",manualTiVoArrayController.arrangedObjects);
+        DDLogDetail(@"manual tivos %@",[manualTiVoArrayController.arrangedObjects maskMediaKeys]);
         [manualTiVoArrayController rearrangeObjects];
         [networkTiVoArrayController rearrangeObjects];
     }

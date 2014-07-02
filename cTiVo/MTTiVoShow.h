@@ -50,7 +50,7 @@
 @property					  double fileSize;  //Size on TiVo;
 
 @property (nonatomic, strong) NSURL *downloadURL,
-									*detailURL;
+*detailURL;
 
 @property (nonatomic, strong) NSDate *showDate;
 @property					  int    showID;

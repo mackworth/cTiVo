@@ -23,7 +23,7 @@ __DDLOGHERE__
 			[newFormat setValue:[format objectForKey:key] forKey:key];
 		}
 		@catch (NSException *exception) {
-			DDLogVerbose(@"FormatWithDictionary: exception %@ trying value %@ for key %@",exception,[format objectForKey:key],key);
+			DDLogMajor(@"FormatWithDictionary: exception %@ trying value %@ for key %@",exception,[format objectForKey:key],key);
 		}
 		@finally {}
 	}
@@ -172,7 +172,10 @@ __DDLOGHERE__
 				}
 			}
 		}
-		if (!validPath) DDLogMajor(@"For format %@, couldn't find %@ in %@ ", self, self.encoderUsed, searchPaths);
+        if (!validPath) {
+            DDLogMajor(@"For format %@, couldn't find %@ in %@ ", self, self.encoderUsed, searchPaths);
+            self.isHidden = @YES;
+        }
 		_pathForExecutable = validPath;
 	}
 	return _pathForExecutable;

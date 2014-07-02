@@ -16,6 +16,8 @@
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
 		1E45C8F316E11E59005C5334 /* MTStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTStringEmpty.m */; };
+		1E59368919648C860008780B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
+		1E59368C19648CFF0008780B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
 		1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7516E2C50B000F5C6E /* copyright.png */; };
 		1E684A7D16E2C50B000F5C6E /* expired-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7716E2C50B000F5C6E /* expired-recording.png */; };
 		1E684A7E16E2C50B000F5C6E /* expires-soon-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7816E2C50B000F5C6E /* expires-soon-recording.png */; };
@@ -39,7 +41,6 @@
 		1E964CA7188313ED00C19046 /* checkImage2.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964CA5188313ED00C19046 /* checkImage2.png */; };
 		1E964CA8188313ED00C19046 /* checkImage2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964CA6188313ED00C19046 /* checkImage2@2x.png */; };
 		1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C3173DC7D100B47539 /* DDFileLogger.m */; };
-		1E9959C9173DC7D100B47539 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C5173DC7D100B47539 /* DDLog.m */; };
 		1E9959CA173DC7D100B47539 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C7173DC7D100B47539 /* DDTTYLogger.m */; };
 		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1EABE6F416B0A254004DDB61 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -144,6 +145,10 @@
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
 		1E45C8F116E11E59005C5334 /* MTStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTStringEmpty.h; sourceTree = "<group>"; };
 		1E45C8F216E11E59005C5334 /* MTStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTStringEmpty.m; sourceTree = "<group>"; };
+		1E5936821964867E0008780B /* MTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLog.h; sourceTree = "<group>"; };
+		1E59368319648C180008780B /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
+		1E59368819648C860008780B /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
+		1E59368B19648CFF0008780B /* MTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLog.m; sourceTree = "<group>"; };
 		1E5C5C1A17FDF0B80056E794 /* readme.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme.md; sourceTree = "<group>"; };
 		1E5C5C1B17FE18BB0056E794 /* wiki */ = {isa = PBXFileReference; lastKnownFileType = folder; path = wiki; sourceTree = "<group>"; };
 		1E684A7516E2C50B000F5C6E /* copyright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = copyright.png; sourceTree = "<group>"; };
@@ -174,8 +179,6 @@
 		1E964CA6188313ED00C19046 /* checkImage2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkImage2@2x.png"; sourceTree = "<group>"; };
 		1E9959C2173DC7D100B47539 /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
 		1E9959C3173DC7D100B47539 /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
-		1E9959C4173DC7D100B47539 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
-		1E9959C5173DC7D100B47539 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		1E9959C6173DC7D100B47539 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
 		1E9959C7173DC7D100B47539 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
 		1E9A10EE1757200000863C44 /* cTiVo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cTiVo.png; sourceTree = "<group>"; };
@@ -392,10 +395,12 @@
 		1E9959C1173DC73500B47539 /* DDLogger */ = {
 			isa = PBXGroup;
 			children = (
+				1E59368319648C180008780B /* DDLog.h */,
+				1E59368819648C860008780B /* DDLog.m */,
 				1E9959C2173DC7D100B47539 /* DDFileLogger.h */,
 				1E9959C3173DC7D100B47539 /* DDFileLogger.m */,
-				1E9959C4173DC7D100B47539 /* DDLog.h */,
-				1E9959C5173DC7D100B47539 /* DDLog.m */,
+				1E5936821964867E0008780B /* MTLog.h */,
+				1E59368B19648CFF0008780B /* MTLog.m */,
 				1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */,
 				1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */,
 				1E9959C6173DC7D100B47539 /* DDTTYLogger.h */,
@@ -835,6 +840,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E59368919648C860008780B /* DDLog.m in Sources */,
 				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
 				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
 				D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */,
@@ -872,9 +878,9 @@
 				D2C6BB5A1714681C00289751 /* MTTask.m in Sources */,
 				D2ED1BBB1715C3BF00742F18 /* MTTaskChain.m in Sources */,
 				1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */,
-				1E9959C9173DC7D100B47539 /* DDLog.m in Sources */,
 				1E9959CA173DC7D100B47539 /* DDTTYLogger.m in Sources */,
 				1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */,
+				1E59368C19648CFF0008780B /* MTLog.m in Sources */,
 				1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */,
 				1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */,
 				D295CE84175A6AE500D010B8 /* NSString+Helpers.m in Sources */,

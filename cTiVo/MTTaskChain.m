@@ -196,7 +196,7 @@ __DDLOGHERE__
 -(void)trackProgress //See if any tasks in this chain are running
 {
     BOOL isRunning = NO;
-    DDLogDetail(@"Tracking task chain");
+    DDLogVerbose(@"Tracking task chain");
     for (NSArray *taskset in _taskArray) {
         for(MTTask *task in taskset) {
             if (task.taskRunning) {
@@ -228,6 +228,11 @@ __DDLOGHERE__
     }
 //    NSLog(@"Total Data Read %ld",totalDataRead);
     NSArray *pipes = [teeBranches objectForKey:notification.object];
+    if (readData.length) {
+        DDLogVerbose(@"Got %ld bytes", readData.length);
+    } else {
+        DDLogMajor(@"Got 0 bytes, and is %@cancelled",_download.isCanceled ? @"" : @"not ");
+    }
 	if (readData.length && !_download.isCanceled) {
         for (NSPipe *pipe in pipes ) {
 			//			NSLog(@"Writing data on %@",pipe == subtitlePipe ? @"subtitle" : @"encoder");
@@ -236,7 +241,7 @@ __DDLOGHERE__
 					[[pipe fileHandleForWriting] writeData:readData];
 				}
 				@catch (NSException *exception) {
-					DDLogDetail(@"download write fileHandleForWriting fail: %@", exception.reason);
+					DDLogMajor(@"download write fileHandleForWriting fail: %@", exception.reason);
 					if (!_download.isCanceled) {
 						[_download rescheduleOnMain];
 						DDLogDetail(@"Rescheduling");
@@ -265,7 +270,7 @@ __DDLOGHERE__
 		}
 		
 	} else {
-        DDLogMajor(@"Quitting because data length is %ld and canceled is %@",readData.length, _download.isCanceled ? @"is cancelled" : @"is not cancelled");
+        DDLogMajor(@"Really Quitting because data length is %ld and is %@cancelled",readData.length, _download.isCanceled ? @"" : @"not ");
         for (NSPipe *pipe in pipes) {
 			@try{
 				[[pipe fileHandleForWriting] closeFile];
@@ -283,7 +288,7 @@ __DDLOGHERE__
 			@finally {
 			}
 		}
-	}
+    }
 }
 
 -(void)dealloc

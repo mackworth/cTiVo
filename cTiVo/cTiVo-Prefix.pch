@@ -5,6 +5,6 @@
 #ifdef __OBJC__
 //#define MAC_OS_X_VERSION_MAX_ALLOWED  MAC_OS_X_VERSION_10_6
 	#import <Cocoa/Cocoa.h>
-    #import "DDLog.h"
+    #import "MTLog.h"
     #import "MTConstants.h"
 #endif

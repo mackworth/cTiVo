@@ -118,11 +118,11 @@ __DDLOGHERE__
 		}
 		return;
 	}
-	DDLogDetail(@"getting Detail for %@ at %@",self, _detailURL);
+	DDLogDetail(@"getting Detail for %@ at %@",self, _detailURL );
 	_gotDetails = YES;
 	@autoreleasepool {
 //	NSString *detailURLString = [NSString stringWithFormat:@"https://%@/TiVoVideoDetails?id=%d",_tiVo.tiVo.hostName,_showID];
-//	NSLog(@"Show Detail URL %@",detailURLString);
+//	NSLog(@"Show Detail URL %@", detailURLString );
         NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,_tiVo.tiVo.name,_showID];
         NSData *xml = nil;
         if ([[NSFileManager defaultManager] fileExistsAtPath:detailFilePath]) {
@@ -984,7 +984,7 @@ __DDLOGHERE__
 -(void)setSeriesTitle:(NSString *)seriesTitle
 {
 	if (_seriesTitle != seriesTitle) {
-		_seriesTitle = seriesTitle;
+        _seriesTitle =seriesTitle;
 		if (_episodeTitle.length > 0 ) {
 			self.showTitle =[NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
 		} else {

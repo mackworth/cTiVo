@@ -131,7 +131,7 @@ __DDLOGHERE__
 		NSData *tailOfFile = [logHandle readDataOfLength:backup];
 		if (tailOfFile.length > 0) {
 			NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-			DDLogDetail(@"%@File for task %@: %@",type, _taskName,  logString);
+			DDLogDetail(@"%@File for task %@: %@",type, _taskName,  [logString maskMediaKeys]);
 		}
 	}
 }
@@ -367,7 +367,7 @@ __DDLOGHERE__
 
 -(void)dealloc
 {
-	if (_pid && !kill(_pid, 0)) {
+    if (_pid && !kill(_pid, 0)) {
         DDLogDetail(@"Killing process %@",_taskName);
         kill(_pid , SIGKILL);
     }

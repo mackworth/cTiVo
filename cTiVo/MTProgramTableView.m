@@ -66,7 +66,7 @@ __DDLOGHERE__
 
 -(void) reloadData {
     //Configure Table Columns depending on how many TiVos
-	DDLogDetail(@"Reload Program Table");
+	DDLogVerbose(@"Reload Program Table");
 	//save selection to preserve after reloadData
 	NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
     NSArray * selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];

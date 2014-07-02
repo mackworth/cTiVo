@@ -112,3 +112,9 @@
 
 
 @end
+
+@interface NSObject (maskMediaKeys)
+//strip out all mediakeys in debug log
+-(NSString *) maskMediaKeys;
+
+@end

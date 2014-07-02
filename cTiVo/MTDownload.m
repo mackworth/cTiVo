@@ -182,10 +182,10 @@ __DDLOGHERE__
 		if ([decrementRetries boolValue]) {
 			_numRetriesRemaining--;
 			[tiVoManager  notifyWithTitle:@"TiVo show failed; retrying..." subTitle:self.show.showTitle forNotification:kMTGrowlCantDownload];
-			DDLogDetail(@"Decrementing retries to %d",_numRetriesRemaining);
+			DDLogDetail(@"Decrementing retries to %@",@(_numRetriesRemaining));
 		} else {
             _numStartupRetriesRemaining--;
-			DDLogDetail(@"Decrementing startup retries to %d",_numStartupRetriesRemaining);
+			DDLogDetail(@"Decrementing startup retries to %@",@(_numStartupRetriesRemaining));
 		}
 		[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
 	}
@@ -377,7 +377,7 @@ __DDLOGHERE__
 		[self cancel];
 	}
 	_processProgress = 0.0;
-	self.numRetriesRemaining = [[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries];
+	self.numRetriesRemaining = (int) [[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries];
 	self.numStartupRetriesRemaining = kMTMaxDownloadStartupRetries;
 	if (!self.downloadDirectory) {
 		self.downloadDirectory = tiVoManager.downloadDirectory;
@@ -430,7 +430,7 @@ __DDLOGHERE__
 		for(NSString *file in tmpFiles){
 			NSRange tmpRange = [file rangeOfString:self.baseFileName];
 			if(tmpRange.location != NSNotFound) {
-				DDLogDetail(@"Deleting tmp file %@", file);
+				DDLogVerbose(@"Deleting tmp file %@", file);
 				[fm removeItemAtPath:file error:nil];
 			}
 		}
@@ -542,7 +542,7 @@ __DDLOGHERE__
 		if ([scanner scanUpToString:@" " intoString:&foundKey]) {
 			foundKey = foundKey.lowercaseString;
 			if ([keys[foundKey] length] == 0) {
-				DDLogDetail(@"No key: %@",foundKey);
+				DDLogMajor(@"No key: %@",foundKey);
 				//found invalid or empty key so entire conditional fails and should be empty; ignore everything else
 				return @"";
 			} else {
@@ -618,7 +618,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		 @"movieyear":		NULLT(self.show.movieYear),
 		 @"tvdbseriesid":	NULLT(TVDBseriesID)
 		 };
-	 DDLogDetail(@"keywords: %@",keywords);
+	 DDLogVerbose(@"keywords: %@",keywords);
 	 NSMutableString * outStr = [NSMutableString string];
 	 
 	 NSScanner *scanner = [NSScanner scannerWithString:str];
@@ -637,7 +637,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 			 [scanner scanString:@"]" intoString:nil];
 		 }
 	 }
-	 NSString * finalStr = [outStr stringByReplacingOccurrencesOfString:@"/" withString:@"-"]; //remove accidental directory markers
+     NSString * finalStr = [outStr stringByReplacingOccurrencesOfString:@"/" withString:@"-"]; //remove accidental directory markers
 	 finalStr = [finalStr stringByReplacingOccurrencesOfString:@"|||" withString:@"/"];  ///insert intentional ones
 	 return finalStr;
  }
@@ -652,7 +652,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		if (filenamePattern.length >0) {
 			//we have a pattern, so generate a name that way
 			NSString *keyBaseTitle = [self swapKeywordsInString:filenamePattern];
-			DDLogMajor(@"With file pattern %@ for show %@, got %@", filenamePattern, self.show, keyBaseTitle);
+			DDLogDetail(@"With file pattern %@ for show %@, got %@", filenamePattern, self.show, keyBaseTitle);
 			if (keyBaseTitle.length >0) {
 				baseTitle = [keyBaseTitle lastPathComponent];
 				//note that self.downloadDir depends on keywordPathPart being set
@@ -669,6 +669,30 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 #undef Null
 
+-(void) markCompleteCTiVoFile:(NSString *) path {
+    if (path ) {
+        NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
+        setxattr([path cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with show ID
+    }
+}
+
+
+-(BOOL) isCompleteCTiVoFile: (NSString *) path forFileType: (NSString *) fileType {
+    NSFileManager *fm = [NSFileManager defaultManager];
+    if ([fm fileExistsAtPath:path]) {
+        NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
+		ssize_t len = getxattr([path cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
+        if (len >=0) {
+            NSString *tiVoID = [[NSString alloc] initWithData:[NSData dataWithBytes:[buffer bytes] length:len] encoding:NSUTF8StringEncoding];
+            if ([tiVoID compare:_show.idString] == NSOrderedSame) {
+                DDLogMajor(@"Found Complete %@ File at %@", fileType, path);
+                return YES;
+            }
+        }
+    }
+    return NO;
+}
+
 -(NSString *)createUniqueBaseFileName:(NSString *)baseName inDownloadDir:(NSString *)downloadDir
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
@@ -676,33 +700,14 @@ NSString * fourChar(long n, BOOL allowZero) {
 	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tiVoManager.tmpFilesDirectory,baseName];
 	_tivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,baseName];
 	_mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,baseName];
-    BOOL tivoFileExists = NO;
-    if ([fm fileExistsAtPath:_tivoFilePath]) {
-        NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
-		ssize_t len = getxattr([_tivoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
-        if (len >=0) {
-            NSString *tiVoID = [[NSString alloc] initWithData:[NSData dataWithBytes:[buffer bytes] length:len] encoding:NSUTF8StringEncoding];
-            if ([tiVoID compare:_show.idString] == NSOrderedSame) {
-                DDLogReport(@"Found Complete TiVo File @ %@",_tivoFilePath);
-                tivoFileExists = YES;
-                _downloadingShowFromTiVoFile = YES;
+    BOOL tivoFileExists = [self isCompleteCTiVoFile:_tivoFilePath forFileType:@"TiVo"];
+    
+    _downloadingShowFromTiVoFile = tivoFileExists;
 
-            }
-        }
-    }
-    BOOL mpgFileExists = NO;
-    if ([fm fileExistsAtPath:_mpgFilePath]) {
-        NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
-		ssize_t len = getxattr([_mpgFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
-        if (len >=0) {
-            NSString *tiVoID = [[NSString alloc] initWithData:[NSData dataWithBytes:[buffer bytes] length:len] encoding:NSUTF8StringEncoding];
-            if ([tiVoID compare:_show.idString] == NSOrderedSame) {
-                DDLogReport(@"Found Complete MPG File @ %@",_mpgFilePath);
-                mpgFileExists = YES;
-                _downloadingShowFromTiVoFile = NO;
-                _downloadingShowFromMPGFile = YES;
-            }
-        }
+    BOOL mpgFileExists = [self isCompleteCTiVoFile: _mpgFilePath forFileType:@"MPEG"];
+    if (mpgFileExists) {
+         _downloadingShowFromTiVoFile = NO;
+         _downloadingShowFromMPGFile = YES;
     }
 	if (tivoFileExists || mpgFileExists) {  //we're using an exisiting file so start the next download
 		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.show.tiVo];
@@ -718,7 +723,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 			nextBase = [[baseName substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
 		} else {
 			nextBase = [baseName stringByAppendingString:@"-1"];
-			DDLogDetail(@"found output file named %@, adding version number", nextBase);
+			DDLogVerbose(@"found output file named %@, adding version number", nextBase);
 		}
 		return [self createUniqueBaseFileName:nextBase inDownloadDir:downloadDir];
 		
@@ -759,26 +764,31 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {  //We need to download from the TiVo
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
             _bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",tiVoManager.tmpFilesDirectory,self.baseFileName];
+            DDLogVerbose(@"downloading to memory; buffer: %@", _bufferFilePath);
            urlBuffer = [NSMutableData new];
             urlReadPointer = 0;
             bufferFileReadHandle = urlBuffer;
         } else {
             _bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,self.baseFileName];
+            DDLogVerbose(@"downloading to file: %@", _bufferFilePath);
             [fm createFileAtPath:_bufferFilePath contents:[NSData data] attributes:nil];
             bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
             bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
         }
     }
     _decryptBufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,self.baseFileName];
+    DDLogVerbose(@"setting decrypt path: %@", _decryptBufferFilePath);
     if (!_downloadingShowFromMPGFile) {
         [[NSFileManager defaultManager] createFileAtPath:_decryptBufferFilePath contents:[NSData data] attributes:nil];
     }
 	_encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.downloadDir,self.baseFileName,_encodeFormat.filenameExtension];
 	DDLogVerbose(@"setting encodepath: %@", _encodeFilePath);
     captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDir ,self.baseFileName];
+    DDLogVerbose(@"setting captionFilePath: %@", captionFilePath);
     
     commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version
-
+    DDLogVerbose(@"setting commercialFilePath: %@", commercialFilePath);
+    
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTGetEpisodeArt]) {
 		[self.show retrieveTVDBArtworkIntoPath: [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:self.baseFileName]];
 	}
@@ -793,6 +803,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
         return nil;
     } else {
+        DDLogVerbose(@"using encoder: %@", encoderLaunchPath);
 		return encoderLaunchPath;
 	}
 }
@@ -814,7 +825,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		}
 		[arguments addObject:[argString substringWithRange:[tr rangeAtIndex:j]]];
 	}
-	DDLogVerbose(@"arguments: %@", arguments);
+	DDLogVerbose(@"arguments: %@", [arguments maskMediaKeys]);
 	return arguments;
 	
 }
@@ -896,6 +907,17 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
     return catTask;
 }
+-(void) checkDecodeLog {
+    NSString *log = [NSString stringWithContentsOfFile:_decryptTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
+    if (log && log.length > 25 ) {
+        NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
+        if (badMAKRange.location != NSNotFound) {
+            DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
+            DDLogVerbose(@"log file: %@",[log maskMediaKeys]);
+            [tiVoManager  notifyWithTitle:@"Decoding Failed" subTitle:[NSString stringWithFormat:@"Decoding of tivo file failed for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
+        }
+    }
+}
 
 -(MTTask *)decryptTask  //Decrypting is done in parallel with download so no progress indicators are needed.
 {
@@ -911,31 +933,16 @@ NSString * fourChar(long n, BOOL allowZero) {
             [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
             [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
             if (_decryptBufferFilePath) {
-                NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
-                setxattr([_decryptBufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with show ID
-
+                [self markCompleteCTiVoFile: _decryptBufferFilePath ];
             }
         }
-		NSString *log = [NSString stringWithContentsOfFile:_decryptTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
-        if (log && log.length > 25 ) {
-            NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
-            if (badMAKRange.location != NSNotFound) {
-                DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
-                [tiVoManager  notifyWithTitle:@"Decoding Failed" subTitle:[NSString stringWithFormat:@"Decoding of tivo file failed for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
-            }
-        }
+        
+        [self checkDecodeLog];
 		return YES;
     };
 	
 	decryptTask.terminationHandler = ^(){
-		NSString *log = [NSString stringWithContentsOfFile:_decryptTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
-        if (log && log.length > 25 ) {
-            NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
-            if (badMAKRange.location != NSNotFound) {
-                DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
-                [tiVoManager  notifyWithTitle:@"Decoding Failed" subTitle:[NSString stringWithFormat:@"Decoding of tivo file failed for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
-            }
-        }
+        [self checkDecodeLog];
 	};
     
     if (_downloadingShowFromTiVoFile) {
@@ -1030,16 +1037,8 @@ NSString * fourChar(long n, BOOL allowZero) {
             __block NSPipe *encodePipe = [NSPipe new];
             [encodeTask setStandardInput:encodePipe];
             encodeTask.startupHandler = ^BOOL(){
-                if ([[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
-                    NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
-                    ssize_t len = getxattr([self.encodeFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
-                    if (len >=0) {
-                        NSString *tiVoID = [[NSString alloc] initWithData:[NSData dataWithBytes:[buffer bytes] length:len] encoding:NSUTF8StringEncoding];
-                        if ([tiVoID compare:_show.idString] == NSOrderedSame) {
-                           DDLogReport(@"Found Complete Encoded File @ %@.  Skipping encoding",self.encodeFilePath);
-                            return NO;
-                        }
-                    }
+                if ([self isCompleteCTiVoFile:self.encodeFilePath forFileType:@"Encoded"]){
+                    return NO;
                 }
 				
 				if (bufferFileReadHandle && [bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
@@ -1093,7 +1092,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     
     [encodeTask setArguments:encoderArgs];
-    DDLogVerbose(@"encoderArgs: %@",encoderArgs);
+    DDLogDetail(@"encoderArgs: %@",encoderArgs);
     _encodeTask = encodeTask;
     return _encodeTask;
 }
@@ -1148,8 +1147,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     captionTask.completionHandler = ^BOOL(){
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
-        NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
-        setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete
+        [self markCompleteCTiVoFile:captionFilePath];
 		return YES;
     };
     
@@ -1200,7 +1198,6 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     commercialTask.cleanupHandler = ^(){
         if (_commercialTask.taskFailed) {
-            DDLogMajor(@"Commercial Task failed - Skipping removal of commercials for %@",self.show.showTitle);
 			[tiVoManager  notifyWithTitle:@"Detecting Commercials Failed" subTitle:[NSString stringWithFormat:@"Skipping commercials for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlCommercialDetFailed];
 
             if ([[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
@@ -1259,9 +1256,8 @@ NSString * fourChar(long n, BOOL allowZero) {
                      [self finishUpPostEncodeProcessing];
 //                 }
              }
-            NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
-            setxattr([captionFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with show ID
-            setxattr([commercialFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with Show ID
+            [self markCompleteCTiVoFile:captionFilePath];
+            [self markCompleteCTiVoFile:commercialFilePath];
             return YES;
         };
     } else {
@@ -1303,20 +1299,24 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(void)download
 {
 	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-	DDLogDetail(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@",
+	DDLogDetail(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@",
 				self.taskFlowType,
 				self,
 				self.encodeFormat.name ,
+				self.encodeFormat.canSimulEncode ?
+                    @"simul encode" :
+                    @"",
 				self.skipCommercials ?
 					@" Skip commercials;" :
-					(self.markCommercials ?
+                    @"",
+                self.markCommercials ?
 					 @" Mark commercials;" :
-					 @""),
+					 @"",
 				self.addToiTunesWhenEncoded ?
 					@" Add to iTunes;" :
 					@"",
 				self.genTextMetaData.boolValue ?
-					@" Generate XML;" :
+					@" Generate Metadata;" :
 					@"",
 				self.exportSubtitles.boolValue ?
 					@" Generate Subtitles;" :
@@ -1616,9 +1616,9 @@ NSString * fourChar(long n, BOOL allowZero) {
 		} else {
 			NSFileHandle *textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
 			[textMetaHandle seekToEndOfFile];
-			[self writeTextMetaData:self.show.seriesId		 forKey:@"seriesID"			    toFile:textMetaHandle];
+			[self writeTextMetaData:self.show.seriesId		  forKey:@"seriesID"			toFile:textMetaHandle];
 			[self writeTextMetaData:self.show.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
-			[self writeTextMetaData:self.show.stationCallsign forKey:@"callsign"				toFile:textMetaHandle];
+			[self writeTextMetaData:self.show.stationCallsign forKey:@"callsign"		    toFile:textMetaHandle];
 		}
 	}
 }
@@ -1805,7 +1805,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 {
 	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
 		//Cancel and restart or delete depending on number of time we've been through this
-        DDLogMajor (@"process stalled at %0.1f; rescheduling show %@ ", _processProgress, self.show.showTitle);
+        DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", _processProgress*100.0, self.show.showTitle);
         BOOL reschedule = YES;
         if (_processProgress == 1.0) {
             reschedule = NO;
@@ -2104,7 +2104,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    DDLogMajor(@"URL Connection Failed with error %@",error);
+    DDLogMajor(@"URL Connection Failed with error %@",[error maskMediaKeys]);
 	if (bufferFileWriteHandle) {
 		[bufferFileWriteHandle closeFile];
 	}
@@ -2170,8 +2170,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:kMTTiVoAccessDelay];
         if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
             if ([[_bufferFilePath substringFromIndex:_bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame  && !_isCanceled) { //We finished a complete download so mark it so
-                NSData *tiVoID = [_show.idString dataUsingEncoding:NSUTF8StringEncoding];
-                setxattr([_bufferFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with show ID
+                [self markCompleteCTiVoFile:_bufferFilePath];
             }
         }
 //        bufferFileReadHandle = nil;

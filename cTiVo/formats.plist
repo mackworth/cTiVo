@@ -518,7 +518,7 @@ audio: aac at 128kbs
 		<dict>
 			<key>formatDescription</key>
 			<string>for Sony PS3
-video: 1920x1080 h.264 at 1.5Mbps
+video:  h.264 at 1.5Mbps; resolution unchanged
 audio: aac at 128kbs
 *UNTESTED*</string>
 			<key>comSkip</key>
