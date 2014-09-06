@@ -420,7 +420,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)parserElement:(NSString*) elementName {
 	//just gives a shorter method name for DDLog
-	DDLogVerbose(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
+	DDLogDetail(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
 }
 
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
@@ -675,7 +675,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				managingDownloads = NO;
 				return;
 			}
-            if (s.isNew && (tiVoManager.numEncoders < kMTMaxNumDownloaders)) {
+            if (s.isNew && (tiVoManager.numEncoders < [[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxNumDownloaders])) {
                 if(s.show.tiVo.isReachable) {  //isn't this self.isReachable?
 					tiVoManager.numEncoders++;
 					DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,s.show.showTitle, tiVoManager.numEncoders);

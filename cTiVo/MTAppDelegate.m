@@ -176,7 +176,9 @@ __DDLOGHERE__
 										  @"",kMTFileNameFormat,
 										  @YES,kMTGetEpisodeArt,
 										  @NO, kMTiTunesContentIDExperiment,
-										  nil];
+										  @NO, kMTTrustTVDB,
+                                          @2, kMTMaxNumDownloaders,
+                                          nil];
     
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
 	

@@ -56,20 +56,22 @@ xmlns="http://www.w3.org/1999/XSL/Transform">
 
 <template match="vActor|vGuestStar|vDirector|vExecProducer|vProducer|vWriter|vHost|vChoreographer|vProgramGenre|vSeriesGenre">
   <for-each select="element">
-    <for-each select="parent::*">
-      <if test="not(@id)">
-        <value-of select="name()"/>
-      </if>
-      <value-of select="./@id"/>
-    </for-each>
-    <text> : </text>
-    <value-of select="."/>
-    <text>
+    <if test= "string(.)">
+      <for-each select="parent::*">
+        <if test="not(@id)">
+          <value-of select="name()"/>
+        </if>
+        <value-of select="./@id"/>
+      </for-each>
+      <text> : </text>
+      <value-of select="."/>
+      <text>
 </text>
+    </if>
   </for-each>
 </template>
 
-<template match="showing">
+<template match="vActualShowing">
 </template>
 
 <template match="*">

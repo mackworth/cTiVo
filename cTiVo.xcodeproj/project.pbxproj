@@ -15,6 +15,7 @@
 		1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */; };
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
+		1E3E8FBD19B92E6500D59F82 /* MTGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3E8FBC19B92E6500D59F82 /* MTGradientView.m */; };
 		1E45C8F316E11E59005C5334 /* MTStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTStringEmpty.m */; };
 		1E59368919648C860008780B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
 		1E59368C19648CFF0008780B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
@@ -143,6 +144,8 @@
 		1E2725C316CB63D500A21940 /* elgatoProgress.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = elgatoProgress.scpt; sourceTree = "<group>"; };
 		1E389BB616C46BA600B80EC9 /* MTAdvPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTAdvPreferencesViewController.h; sourceTree = "<group>"; };
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
+		1E3E8FBB19B92E6500D59F82 /* MTGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTGradientView.h; sourceTree = "<group>"; };
+		1E3E8FBC19B92E6500D59F82 /* MTGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTGradientView.m; sourceTree = "<group>"; };
 		1E45C8F116E11E59005C5334 /* MTStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTStringEmpty.h; sourceTree = "<group>"; };
 		1E45C8F216E11E59005C5334 /* MTStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTStringEmpty.m; sourceTree = "<group>"; };
 		1E5936821964867E0008780B /* MTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLog.h; sourceTree = "<group>"; };
@@ -644,6 +647,8 @@
 		D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */ = {
 			isa = PBXGroup;
 			children = (
+				1E3E8FBB19B92E6500D59F82 /* MTGradientView.h */,
+				1E3E8FBC19B92E6500D59F82 /* MTGradientView.m */,
 				D2D60BCD16766FA600CE32DE /* MTDownloadTableView.h */,
 				D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */,
 				D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */,
@@ -709,6 +714,11 @@
 				CLASSPREFIX = MT;
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = cTiVo;
+				TargetAttributes = {
+					D2D60B9C16766EFD00CE32DE = {
+						DevelopmentTeam = E8XXXD4S77;
+					};
+				};
 			};
 			buildConfigurationList = D2D60B9716766EFD00CE32DE /* Build configuration list for PBXProject "cTiVo" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -851,6 +861,7 @@
 				D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */,
 				D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */,
 				D2DFA68F1683C27600CD6CE0 /* MTDownloadCheckTableCell.m in Sources */,
+				1E3E8FBD19B92E6500D59F82 /* MTGradientView.m in Sources */,
 				D2C390761687FFA600D2062E /* MTiTunes.m in Sources */,
 				D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */,
 				D235BF01168F52DE00320FA5 /* MTSubscriptionTableView.m in Sources */,
@@ -984,6 +995,7 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1011,6 +1023,7 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

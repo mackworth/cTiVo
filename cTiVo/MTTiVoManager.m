@@ -605,6 +605,15 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(printTVDBStats)
+                                                 name:kMTNotificationShowListUpdated
+                                               object:nil];
+    
+}
+
+-(void)printTVDBStats {
+    DDLogMajor(@"Statistics for TVDB since start or reset: %@",self.theTVDBStatistics);
 }
 
 #pragma mark - Scheduling routine

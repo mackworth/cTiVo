@@ -2,21 +2,21 @@
 $stdin = 0;
 if ($ARGV[0] eq "-") {
 	$stdin = 1;
-	open dest, ">", $ARGV[1];
+	open dest, ">", $ARGV[1] or exit 1;  # die "Unable to open destination 1 for pipe";
 } elsif ($ARGV[1] eq "-" ) {
 	$stdin = 1;
-	open dest, ">", $ARGV[0];
+	open dest, ">", $ARGV[0] or exit 2;  # die "Unable to open destination 2 for pipe";
 } else {
-	open source, "<", $ARGV[0];
-	open dest, ">", $ARGV[1];
+	open source, "<", $ARGV[0] or exit 3;  # die "Unable to open source for rename";
+	open dest, ">", $ARGV[1] or exit 4;  # die "Unable to open destination for rename";
 }
 if($stdin == 0) {
-	rename $ARGV[0], $ARGV[1];
+	rename $ARGV[0], $ARGV[1] or exit 5; # die "Unable to rename: $!";
 	#	while(<source>) {
 	#		print dest;
 	#}
 } else {
 	while(<STDIN>) {
-		print dest;
+		print dest or exit 6;  # die "Unable to copy from stdin to dest"
 	}
 }

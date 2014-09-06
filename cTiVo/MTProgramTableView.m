@@ -256,8 +256,8 @@ __DDLOGHERE__
 -(void) tableViewColumnDidResize:(NSNotification *) notification {
 
 	NSTableColumn * column = notification.userInfo[@"NSTableColumn"];
-	if ([column.identifier compare:@"Date" ] ==NSOrderedSame) {
-		NSInteger columnNum = [self columnWithIdentifier:@"Date"];
+    if (([column.identifier compare:@"Date" ] ==NSOrderedSame) || ([column.identifier compare:@"icon" ] ==NSOrderedSame)) {
+        NSInteger columnNum = [self columnWithIdentifier:column.identifier];
 		[self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.sortedShows.count)]
 							 columnIndexes:[NSIndexSet indexSetWithIndex:columnNum]];
 	}
@@ -361,7 +361,8 @@ __DDLOGHERE__
 	} else if ([tableColumn.identifier isEqualToString:@"icon"]) {
         NSString * imageName = thisShow.imageString;
 		result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
-		result.imageView.image = [NSImage imageNamed: imageName];
+		result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
+        result.imageView.image = [NSImage imageNamed: imageName];
 		result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
 	}
     result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];

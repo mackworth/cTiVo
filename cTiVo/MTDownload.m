@@ -1413,6 +1413,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             
         case kMTTaskFlowNonSimuMarkcomSubtitles:  //Encode with non-simul encoder marking commercials and subtitles
             if(_downloadingShowFromMPGFile) {
+                assert(self.captionTask);
                 [taskArray addObject:@[self.captionTask]];
             } else {
                 [taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];
@@ -1619,6 +1620,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 			[self writeTextMetaData:self.show.seriesId		  forKey:@"seriesID"			toFile:textMetaHandle];
 			[self writeTextMetaData:self.show.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
 			[self writeTextMetaData:self.show.stationCallsign forKey:@"callsign"		    toFile:textMetaHandle];
+            [self writeTextMetaData:self.show.episodeNumber   forKey:@"episodeNumber"       toFile:textMetaHandle];
 		}
 	}
 }
