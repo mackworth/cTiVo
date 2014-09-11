@@ -182,10 +182,10 @@ __DDLOGHERE__
 		if ([decrementRetries boolValue]) {
 			_numRetriesRemaining--;
 			[tiVoManager  notifyWithTitle:@"TiVo show failed; retrying..." subTitle:self.show.showTitle forNotification:kMTGrowlCantDownload];
-			DDLogDetail(@"Decrementing retries to %d",_numRetriesRemaining);
+			DDLogDetail(@"Decrementing retries to %ld",(long)_numRetriesRemaining);
 		} else {
             _numStartupRetriesRemaining--;
-			DDLogDetail(@"Decrementing startup retries to %d",_numStartupRetriesRemaining);
+			DDLogDetail(@"Decrementing startup retries to %ld",(long)_numStartupRetriesRemaining);
 		}
 		[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
 	}
