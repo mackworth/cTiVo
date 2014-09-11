@@ -51,7 +51,7 @@
 skipCommercials,
 markCommercials;
 
-@property int  	numRetriesRemaining,
+@property NSInteger  	numRetriesRemaining,
 numStartupRetriesRemaining;
 -(void) prepareForDownload: (BOOL) notifyTiVo;
 
