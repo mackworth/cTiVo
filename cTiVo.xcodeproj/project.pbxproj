@@ -800,18 +800,19 @@
 			shellPath = /bin/sh;
 			shellScript = "/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion `git log | grep ^commit | wc | awk '{print $1 + 50}'`\" ${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\n";
 		};
-		D2AA030A1833F09B00AEE326 /* ShellScript */ = {
+		D2AA030A1833F09B00AEE326 /* Sign Bundled Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Sign Bundled Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${FRAMEWORKS_FOLDER_PATH}\"\nIDENTITY=\"Developer ID Application: Hugh Mackworth\"\ncodesign --verbose --force --sign \"$IDENTITY\" \"$LOCATION/Sparkle.framework/Versions/A\"\ncodesign --verbose --force --sign \"$IDENTITY\" \"$LOCATION/Growl.framework/Versions/A\"\n";
+			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${FRAMEWORKS_FOLDER_PATH}\"\n\n# By default, use the configured code signing identity for the project/target\nIDENTITY=\"${CODE_SIGN_IDENTITY}\"\nif [ \"$IDENTITY\" == \"\" ]\nthen\n    # If a code signing identity is not specified, use ad hoc signing\n    IDENTITY=\"-\"\nfi\ncodesign --verbose --force --sign \"$IDENTITY\" \"$LOCATION/Sparkle.framework/Versions/A\"\ncodesign --verbose --force --sign \"$IDENTITY\" \"$LOCATION/Growl.framework/Versions/A\"\n";
 		};
 		D2F5300316CC0C0100C44128 /* Update SVN */ = {
 			isa = PBXShellScriptBuildPhase;
