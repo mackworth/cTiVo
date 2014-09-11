@@ -68,7 +68,7 @@
 #define kMTUpdateIntervalMinDefault 15 //Default Update interval for re-checking current TiVo
 #define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show; default, overriden by userPref
 #define kMTMaxDownloadStartupRetries 20		// Only allow 20 retries due to a download startup failuer
-#define kMTProgressCheckDelay (2 * 60.0)	//Check progress every 60 seconds to make sure its not stalled
+//#define kMTProgressCheckDelay (2 * 60.0)	//Check progress every 60 seconds to make sure its not stalled
 #define kMTProgressFailDelayAt100Percent (7 * 60.0) //Added to account for encoders (Handbrake) have have a lot of post-processing after 100%
 //#define kMTRetryNetworkInterval 15	//Re-Check for network connectivity every X seconds
 #define kMTTiVoAccessDelay 7		//Seconds to wait after TiVo is found on network
@@ -176,7 +176,7 @@
 #define kMTSelectedTiVo @"SelectedTiVo"             //Name of currently selected TiVo
 #define kMTSelectedFormat @"SelectedFormat"         //Name of currently selected format for conversion
 #define kMTDownloadDirectory  @"DownloadDirectory"  //Pathname for directory for dowloaded files
-#define kMTThumbnailsDirectory  @"ThumbnailsDirectory"  //Pathname for directory for dowloaded files (not in UI)
+#define kMTThumbnailsDirectory  @"ThumbnailsDirectory"  //Pathname for directory for dowloaded files (no GUI)
 #define kMTSubscriptionList @"SubscriptionList"     //Array of subscription dictionaries
 #define kMTTiVoLastLoadTimes @"TiVoLastLoadTImes"   //Array of Date each tivo last processed
 #define kMTiTunesSubmit @"iTunesSubmit"             //Whether to submit to iTunes after encoding
@@ -185,21 +185,22 @@
 #define kMTiTunesContentIDExperiment @"iTunesContentID"  //Whether to add episodeID as contentID for iTunes; doesn't seem to work
 #define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
 #define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
-//Future? #define kMTAllowDups @"AllowDups"					//Whether to allow duplicate entries in downloads/subscriptions (e.g. for different formats)
+//Future? #define kMTAllowDups @"AllowDups"			//Whether to allow duplicate entries in downloads/subscriptions (e.g. for different formats)
 #define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
 #define kMTShowSuggestions @"ShowSuggestions"		// Whether to display Tivo Suggestions (and to subscribe thereto)
 #define kMTSaveTmpFiles @"SaveTmpFiles"				// Turn off AutoDelete of intermediate files (to make debugging encoders easier)
 #define kMTUseMemoryBufferForDownload @"UseMemoryBufferForDownload" //Default is YES.  Turn off to make sure downloaded file is complete. Principally for debugging use and checkpointing.
 #define kMTFileNameFormat @"FileNameFormat"			//keyword pattern for filenames
-#define kMTTmpFilesDirectory @"TmpFilesDirectory"
+#define kMTTmpFilesDirectory @"TmpFilesDirectory"   //Where are temporary files saved
 
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
-#define kMTUpdateIntervalMinutes @"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes
-#define kMTMaxNumDownloaders @"MaxNumberDownloaders"	//Limit number of encoders to limit cpu usage  //
+#define kMTUpdateIntervalMinutes @"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes (No GUI)
+#define kMTMaxNumDownloaders @"MaxNumberDownloaders"	//Limit number of encoders to limit cpu usage (No GUI) //
+#define kMTMaxProgressDelay @"MaxProgressDelay"      //Maximum time of no encoder progress before giving up (No GUI)  //
 
 #define kMTRunComSkip @"RunComSkip"                 // Whether to run comSkip program after conversion
-#define kMTMarkCommercials @"MarkCommercials"                 // Whether insert chapters for commercials when possible
+#define kMTMarkCommercials @"MarkCommercials"        // Whether insert chapters for commercials when possible
 #define kMTExportSubtitles @"ExportSubtitles"       // Whether to export subtitles with ts2ami
 #define kMTExportTextMetaData @"ExportTextMetaData" // Whether to export text metadata for PyTivo
 

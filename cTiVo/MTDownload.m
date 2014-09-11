@@ -32,12 +32,12 @@
 	
 }
 
-@property (strong, nonatomic) NSString *downloadDir,
-					*keywordPathPart; // any extra layers of directories due to keyword template
+@property (nonatomic, readonly) NSString *downloadDir;
+@property (strong, nonatomic) NSString *keywordPathPart; // any extra layers of directories due to keyword template
 
 @property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
 
-@property (nonatomic) int taskFlowType;
+@property (nonatomic, readonly) int taskFlowType;
 
 @end
 
@@ -182,7 +182,7 @@ __DDLOGHERE__
 		if ([decrementRetries boolValue]) {
 			_numRetriesRemaining--;
 			[tiVoManager  notifyWithTitle:@"TiVo show failed; retrying..." subTitle:self.show.showTitle forNotification:kMTGrowlCantDownload];
-			DDLogDetail(@"Decrementing retries to %@",@(_numRetriesRemaining));
+			DDLogDetail(@"Decrementing retries to %ld",(long)_numRetriesRemaining);
 		} else {
             _numStartupRetriesRemaining--;
 			DDLogDetail(@"Decrementing startup retries to %@",@(_numStartupRetriesRemaining));
@@ -321,15 +321,23 @@ __DDLOGHERE__
 
 
 -(BOOL) isEqual:(id)object {
-	if (![object isKindOfClass:MTDownload.class]) {
+	if (object == self) return YES;
+    if (!object || ![object isKindOfClass:MTDownload.class]) {
 		return NO;
 	}
 	MTDownload * dl = (MTDownload *) object;
 	return ([self.show isEqual:dl.show] &&
 			[self.encodeFormat isEqual: dl.encodeFormat] &&
-			(self.downloadFilePath == dl.downloadFilePath || [self.downloadFilePath isEqual:dl.downloadFilePath]) &&
-			(self.downloadDirectory == dl.downloadDirectory || [self.downloadDirectory isEqual:dl.downloadDirectory]));
+			(self.downloadFilePath == dl.downloadFilePath || [self.downloadFilePath isEqualToString:dl.downloadFilePath]) &&
+			(self.downloadDirectory == dl.downloadDirectory || [self.downloadDirectory isEqualToString:dl.downloadDirectory]));
 	
+}
+
+-(NSUInteger) hash {
+    return [self.show hash] ^
+    [self.encodeFormat hash] ^
+    [self.downloadFilePath hash] ^
+    [self.downloadDirectory hash];
 }
 
 - (id)pasteboardPropertyListForType:(NSString *)type {
@@ -563,7 +571,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 	return [NSString stringWithFormat:@"%04ld", n];
 }
 
-#define NULLT(x) (x ? x : @"")
+#define NULLT(x) (x ?: @"")
 
  -(NSString *) swapKeywordsInString: (NSString *) str {
 	NSDateComponents *components = [[NSCalendar currentCalendar]
@@ -817,8 +825,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 	NSArray *matches = [regex matchesInString:argString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, argString.length)];
 	NSMutableArray *arguments = [NSMutableArray array];
 	for (NSTextCheckingResult *tr in matches) {
-		int j;
-		for (j=1; j<tr.numberOfRanges; j++) {
+		NSUInteger j;
+		for ( j=1; j<tr.numberOfRanges; j++) {
 			if ([tr rangeAtIndex:j].location != NSNotFound) {
 				break;
 			}
@@ -959,7 +967,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 //    decryptTask.cleanupHandler = ^(){
 //        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
 //            if ([[NSFileManager defaultManager] fileExistsAtPath:_bufferFilePath]) {
-//                [[NSFileManager defaultManager] removeItemAtPath:_bufferFilePath error:nil];
+//                [[NSFileManager defaultManager] removeItemAtPath:_bufferFilePath error:nil]; 
 //            }
 //        }
 //    };
@@ -1099,9 +1107,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(MTTask *)captionTask  //Captioning is done in parallel with download so no progress indicators are needed.
 {
-    if (!_exportSubtitles.boolValue) {
-        return nil;
-    }
+    NSAssert(_exportSubtitles.boolValue,@"captionTask not requested");
     if (_captionTask) {
         return _captionTask;
     }
@@ -1181,9 +1187,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(MTTask *)commercialTask
 {
-    if (!_skipCommercials && !_markCommercials) {
-        return nil;
-    }
+    NSAssert(_skipCommercials || _markCommercials ,@"Commercial Task not requested?");
+
     if (_commercialTask) {
         return _commercialTask;
     }
@@ -1292,7 +1297,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(int)taskFlowType
 {
-  return (int)_exportSubtitles.boolValue + 2.0 * (int)_encodeFormat.canSimulEncode + 4.0 * (int) _skipCommercials + 8.0 * (int) _markCommercials;
+  return (int)_exportSubtitles.boolValue + 2 * (int)_encodeFormat.canSimulEncode + 4 * (int) _skipCommercials + 8 * (int) _markCommercials;
 }
 
 
@@ -1503,14 +1508,14 @@ NSString * fourChar(long n, BOOL allowZero) {
 		[activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	}
-	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay + downloadDelay];
+	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay] + downloadDelay];
 }
 
 - (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
 	prefix = [prefix lowercaseString];
 	suffix = [suffix lowercaseString];
 	NSString * realDirectory = [directory stringByStandardizingPath];
-	DDLogVerbose(@"Checking for %@_%@ artwork in %@", prefix, suffix ? suffix:@"", realDirectory);
+	DDLogVerbose(@"Checking for %@_%@ artwork in %@", prefix, suffix ?:@"", realDirectory);
 	NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:realDirectory error:nil];
 	for (NSString *filename in dirContents) {
 		NSString *lowerCaseFilename = [filename lowercaseString];
@@ -1638,9 +1643,9 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 -(HDTypes) hdTypeForMP4File:(MP4FileHandle *) fileHandle {
-	int i, tracksCount = MP4GetNumberOfTracks(fileHandle, 0, 0);
+	uint32_t tracksCount = MP4GetNumberOfTracks(fileHandle, 0, 0);
 	
-	for (i=0; i< tracksCount; i++) {
+	for (uint16_t i=0; i< tracksCount; i++) {
 		MP4TrackId trackId = MP4FindTrackId(fileHandle, i, 0, 0);
 		const char* type = MP4GetTrackType(fileHandle, trackId);
 		
@@ -1824,12 +1829,12 @@ NSString * fourChar(long n, BOOL allowZero) {
 		if (reschedule) {
 			[self rescheduleShowWithDecrementRetries:@(YES)];
 		} else {
-			[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
+			[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
 		}
 	} else if ([self isInProgress]){
         DDLogVerbose (@"process check OK; %0.2f", _processProgress);
 		previousProcessProgress = _processProgress;
-		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:kMTProgressCheckDelay];
+		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
 	}
     previousCheck = [NSDate date];
 }
@@ -1917,8 +1922,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(void)writeData
 {
 	//	writingData = YES;
-	int chunkSize = 50000;
-	unsigned long dataRead;
+    long chunkSize = 50000;
+    long dataRead;
 	@autoreleasepool {
 		NSData *data = nil;
 		if (!_isCanceled) {

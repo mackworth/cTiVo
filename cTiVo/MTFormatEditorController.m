@@ -18,7 +18,6 @@
 
 @implementation MTFormatEditorController
 
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 
 //- (id)initWithWindow:(NSWindow *)window
 -(id)initWithCoder:(NSCoder *)aDecoder
@@ -84,7 +83,7 @@
 	}
 }
 
-- (void) alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void) alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
 	if (alert == deleteAlert) {
 		if (returnCode == 1) {
@@ -118,6 +117,8 @@
 	}
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 -(void)alertResponse:(NSDictionary *)info
 {
 	id target = (id)info[@"Target"];
@@ -125,7 +126,7 @@
 	id argument = (id)info[@"Argument"];
 	[target performSelector:selector withObject:argument];
 }
-
+#pragma clang diagnostic pop
 
 
 -(void)close
@@ -340,5 +341,8 @@
 
 #pragma mark - Memory Management
 
+-(void) dealloc {
+    myPopover.delegate = nil;
+}
 
 @end

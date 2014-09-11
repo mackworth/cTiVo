@@ -178,7 +178,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
 		DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
 		
-
+        self.tvdbCache = [[NSUserDefaults standardUserDefaults] objectForKey:kMTTheTVDBCache];
+        //Note tvDBCache never shrinks currently. Should add last used date?
 		programEncoding = nil;
 		programDecrypting = nil;
 		programDownloading = nil;
@@ -242,7 +243,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	DDLogDetail(@"Got Metatdata Result with count %ld",[cTiVoQuery resultCount]);
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
     NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
-	for (int i =0; i < [cTiVoQuery resultCount]; i++) {
+	for (NSUInteger i =0; i < [cTiVoQuery resultCount]; i++) {
 		NSString *filePath = [[cTiVoQuery resultAtIndex:i] valueForAttribute:NSMetadataItemPathKey];
 		ssize_t len = getxattr([filePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], (void *)[buffer bytes], 256, 0, 0);
 		if (len > 0) {
@@ -412,8 +413,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 							   ) { // If there's a change then edit it and update
 						targetMTTiVo.tiVo.iPAddress = mTiVo[kMTTiVoIPAddress];
 						targetMTTiVo.tiVo.userName = mTiVo[kMTTiVoUserName];
-						targetMTTiVo.tiVo.userPort = [mTiVo[kMTTiVoUserPort] intValue];
-						targetMTTiVo.tiVo.userPortSSL = [mTiVo[kMTTiVoUserPortSSL] intValue];
+						targetMTTiVo.tiVo.userPort = [mTiVo[kMTTiVoUserPort] shortValue];
+						targetMTTiVo.tiVo.userPortSSL = [mTiVo[kMTTiVoUserPortSSL] shortValue];
 						targetMTTiVo.enabled = [mTiVo[kMTTiVoEnabled] boolValue];
 						targetMTTiVo.mediaKey = mTiVo[kMTTiVoMediaKey];
 						DDLogDetail(@"Updated manual TiVo %@",targetMTTiVo);
@@ -812,8 +813,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			for (NSDictionary *savedTiVo in self.savedTiVos) {
 				if ([savedTiVo[kMTTiVoID] intValue] == tiVo.manualTiVoID) {
 					tiVo.tiVo.userName = savedTiVo[kMTTiVoUserName];
-					tiVo.tiVo.userPort = [savedTiVo[kMTTiVoUserPort] intValue];
-					tiVo.tiVo.userPortSSL = [savedTiVo[kMTTiVoUserPortSSL] intValue];
+					tiVo.tiVo.userPort = [savedTiVo[kMTTiVoUserPort] shortValue];
+					tiVo.tiVo.userPortSSL = [savedTiVo[kMTTiVoUserPortSSL] shortValue];
 					tiVo.mediaKey = savedTiVo[kMTTiVoMediaKey];
 					tiVo.tiVo.iPAddress = savedTiVo[kMTTiVoIPAddress];
 					tiVo.enabled = [savedTiVo[kMTTiVoEnabled] boolValue];
@@ -1325,6 +1326,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		[NSApp terminate:nil];
 	}
 //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+    NSNotification *restartNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:restartNotification afterDelay:2];
 }
 
 -(BOOL)tiVosProcessing
@@ -1556,7 +1559,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	NSString * platform = [self dataToString:TXTRecord[@"platform"]];
 	NSString * TSN = [self dataToString:TXTRecord[@"tsn"]];
 	NSString * identity = [self dataToString:TXTRecord[@"identity"]];
-
+    NSString * version= [self dataToString:TXTRecord[@"swversion"]];
+    
 	if ([TSN hasPrefix:@"A94"] || [identity hasPrefix:@"A94"]) {
 		DDLogDetail(@"Found Stream %@ - %@(%@); rejecting",TSN, sender.name, ipAddress);
 		return;
@@ -1564,6 +1568,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	if ([platform hasSuffix:@"pyTivo"]) {
 		//filter out pyTivo
 		DDLogDetail(@"Found pyTivo %@(%@); rejecting ",sender.name,ipAddress);
+		return;
+	}
+    
+	if ([version hasSuffix:@"1.95a"]) {
+		//filter out tivo desktop
+		DDLogDetail(@"Found old TiVo Desktop %@(%@) ",sender.name,ipAddress);
 		return;
 	}
 	

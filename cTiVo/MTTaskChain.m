@@ -73,7 +73,7 @@ __DDLOGHERE__
 	}
 	MTTask *currentTask = nil;
 	NSMutableArray *inputPipes = [NSMutableArray array];
-	for (int i=0; i < _taskArray.count; i++) {
+	for (NSUInteger i=0; i < _taskArray.count; i++) {
         fileHandleToTee = nil;
 		currentTasks = _taskArray[i];
 		if (currentTasks.count ==1 ) {
@@ -84,7 +84,7 @@ __DDLOGHERE__
 			}
 		} else {
 			fileHandleToTee = sourceToTee;
-			for (int j=0; j< currentTasks.count; j++) {
+			for (NSUInteger j=0; j< currentTasks.count; j++) {
 				MTTask *nextTask = currentTasks[j];
                 if (nextTask.requiresInputPipe) {
                     NSPipe *pipe = [NSPipe new];
@@ -107,7 +107,7 @@ __DDLOGHERE__
 			} else {
 				NSMutableArray *nextChain = [NSMutableArray array];
                 NSMutableArray *newTaskArray = [NSMutableArray arrayWithArray:_taskArray];
-				for (int k = i+1; k<_taskArray.count; k++) {
+				for (NSUInteger k = i+1; k<_taskArray.count; k++) {
 					[nextChain addObject:_taskArray[k]];
 				}
 				if (nextChain.count) {
@@ -238,7 +238,7 @@ __DDLOGHERE__
 			//			NSLog(@"Writing data on %@",pipe == subtitlePipe ? @"subtitle" : @"encoder");
             if (!_download.isCanceled){
 				@try {
-					[[pipe fileHandleForWriting] writeData:readData];
+                    [[pipe fileHandleForWriting] writeData:readData];
 				}
 				@catch (NSException *exception) {
 					DDLogMajor(@"download write fileHandleForWriting fail: %@", exception.reason);

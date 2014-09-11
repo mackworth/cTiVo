@@ -33,7 +33,7 @@
 -(void) restoreDownloadData:(NSDictionary *) queueEntry;
 
 #pragma mark - Properties for download/conversion work
-@property (nonatomic, strong) NSNumber *downloadIndex;
+@property (nonatomic, readonly) NSNumber *downloadIndex;
 
 @property (nonatomic, strong) NSString *downloadDirectory;
 @property (nonatomic, strong) MTFormat *encodeFormat;
@@ -51,7 +51,7 @@
 skipCommercials,
 markCommercials;
 
-@property int  	numRetriesRemaining,
+@property NSInteger  	numRetriesRemaining,
 numStartupRetriesRemaining;
 -(void) prepareForDownload: (BOOL) notifyTiVo;
 
@@ -72,7 +72,7 @@ numStartupRetriesRemaining;
 @property (weak, nonatomic, readonly)	NSString *showStatus;
 @property (weak, nonatomic, readonly) NSString *imageString;
 @property double processProgress; //Should be between 0 and 1
-@property (nonatomic) BOOL shouldSimulEncode, shouldMarkCommercials;
+@property (nonatomic, readonly) BOOL shouldSimulEncode, shouldMarkCommercials;
 
 @property BOOL isSimultaneousEncoding;
 

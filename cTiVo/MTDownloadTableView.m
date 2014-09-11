@@ -11,7 +11,7 @@
 
 @interface MTDownloadTableView ()
 
-@property (nonatomic) BOOL showingProgramsColumn;
+@property (nonatomic, readonly) BOOL showingProgramsColumn;
 
 @end
 
@@ -94,7 +94,7 @@ __DDLOGHERE__
 -(void)reloadEpisode:(NSNotification *)notification
 {
 	MTDownload *thisDownload = notification.object;
-	NSInteger row = [self.sortedDownloads indexOfObject:thisDownload];
+	NSUInteger row = [self.sortedDownloads indexOfObject:thisDownload];
     if (row != NSNotFound) {
         NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
         [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
@@ -160,7 +160,7 @@ __DDLOGHERE__
     NSInteger programColumnIndex = [self columnWithIdentifier:@"Programs"];
     NSInteger seriesColumnIndex = [self columnWithIdentifier:@"Series"];
 	NSArray *displayedShows = self.sortedDownloads;
-	for (int i=0; i< displayedShows.count; i++) {
+	for (NSUInteger i=0; i< displayedShows.count; i++) {
 		MTDownload *thisDownload = [displayedShows objectAtIndex:i];
 		MTDownloadTableCellView *programCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
 		MTDownloadTableCellView *seriesCell = [self viewAtColumn:seriesColumnIndex row:i makeIfNecessary:NO];
@@ -449,7 +449,7 @@ __DDLOGHERE__
 	} else {
 		DDLogReport(@"Unknown Column: %@ ",tableColumn.identifier);
 	}
-	result.textField.stringValue = textVal ? textVal: @"";
+	result.textField.stringValue = textVal ?: @"";
 	if (!result.toolTip) result.toolTip = textVal;
     // return the result.
 	if ([thisShow.protectedShow boolValue]) {
@@ -659,13 +659,13 @@ __DDLOGHERE__
 
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation
 {
-	if (row < 0) row = 0;
+	NSUInteger realRow = (row < 0) ? 0: row ;
 	//although displayed in sorted order, need to work in actual download order
 	MTDownload * insertTarget = nil;
 	NSUInteger insertRow = [tiVoManager downloadQueue].count;
 	
-	if (row < _sortedDownloads.count) {
-		insertTarget = _sortedDownloads[row];
+	if (realRow < _sortedDownloads.count) {
+		insertTarget = _sortedDownloads[realRow];
 		insertRow = [[tiVoManager downloadQueue] indexOfObject:insertTarget];
 	}
 

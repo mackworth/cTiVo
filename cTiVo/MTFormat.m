@@ -10,8 +10,6 @@
 
 @implementation MTFormat
 
-@synthesize pathForExecutable = _pathForExecutable;
-@synthesize attributedFormatDescription = _attributedFormatDescription;
 
 __DDLOGHERE__
 
@@ -315,14 +313,6 @@ __DDLOGHERE__
 {
 	return [_isFactoryFormat boolValue] ? [[NSAttributedString alloc] initWithString:_formatDescription attributes:@{NSForegroundColorAttributeName : [NSColor grayColor]}] :
 	[[NSAttributedString alloc] initWithString:_formatDescription];
-}
-
--(void)setAttributedFormatDescription:(NSAttributedString *)attributedFormatDescription
-{
-	if (_attributedFormatDescription != attributedFormatDescription) {
-		_attributedFormatDescription = attributedFormatDescription;
-		self.formatDescription = [_attributedFormatDescription string];
-	}
 }
 
 -(NSDictionary *)toDictionary

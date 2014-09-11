@@ -125,7 +125,7 @@ __DDLOGHERE__
 	NSFileHandle *logHandle = [NSFileHandle fileHandleForReadingAtPath:path];
 	unsigned long long logFileSize = [logHandle seekToEndOfFile];
 	if (logFileSize > 0) {
-		NSInteger backup = 2000;  //how much to log
+		NSUInteger backup = 2000;  //how much to log
 		if (logFileSize < backup) backup = (NSInteger)logFileSize;
 		[logHandle seekToFileOffset:(logFileSize-backup)];
 		NSData *tailOfFile = [logHandle readDataOfLength:backup];
@@ -212,7 +212,7 @@ __DDLOGHERE__
         [self completeProcess];
 	} else {
 		double newProgressValue = -1;
-		int sizeOfFileSample = 100;
+		NSUInteger sizeOfFileSample = 100;
 		unsigned long long logFileSize = [self.logFileReadHandle seekToEndOfFile];
 		if (logFileSize > sizeOfFileSample) {
 			[self.logFileReadHandle seekToFileOffset:(logFileSize-sizeOfFileSample)];

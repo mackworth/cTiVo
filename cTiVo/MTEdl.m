@@ -70,7 +70,7 @@ __DDLOGHERE__
 	
 }
 
--(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length;{
+-(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length {
 	if (self.count == 0) return NO;
     //Convert edls to MP4Chapter
     MP4Chapter_t *chapterList = malloc((self.count * 2 + 1) * sizeof(MP4Chapter_t)); //This is the most there could be
@@ -84,7 +84,7 @@ __DDLOGHERE__
         chapterOffset++;
         showOffset++;
     }
-    for (edlOffset = 0; edlOffset < self.count; edlOffset++) {
+    for (edlOffset = 0; edlOffset < (int)self.count; edlOffset++) {
         currentEDL = self[edlOffset];
         double endTime = currentEDL.endTime;
         if (endTime > length) {
@@ -93,7 +93,7 @@ __DDLOGHERE__
         chapterList[chapterOffset].duration = (MP4Duration)((endTime - currentEDL.startTime) * 1000.0);
         sprintf(chapterList[chapterOffset].title,"%s %d","Commercial", edlOffset+1);
         chapterOffset++;
-        if (currentEDL.endTime < length && (edlOffset + 1) < self.count) { //Continuing
+        if (currentEDL.endTime < length && (edlOffset + 1) < (int) self.count) { //Continuing
             MTEdl *nextEDL = self[edlOffset + 1];
             chapterList[chapterOffset].duration = (MP4Duration)((nextEDL.startTime - currentEDL.endTime) * 1000.0);
             sprintf(chapterList[chapterOffset].title,"%s %d",[showName cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);

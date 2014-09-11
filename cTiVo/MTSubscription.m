@@ -442,12 +442,12 @@ __DDLOGHERE__
 //		newSub.simultaneousEncode = [NSNumber numberWithBool: download.simultaneousEncode];
 		newSub.skipCommercials = [NSNumber numberWithBool: download.skipCommercials];
 		newSub.markCommercials = [NSNumber numberWithBool: download.markCommercials];
-		newSub.genTextMetaData = [NSNumber numberWithBool: download.genTextMetaData];
+		newSub.genTextMetaData = download.genTextMetaData;
 #ifndef deleteXML
 		newSub.genXMLMetaData = [NSNumber numberWithBool: download.genXMLMetaData];
 		newSub.includeAPMMetaData = [NSNumber numberWithBool: download.includeAPMMetaData];
 #endif
-		newSub.exportSubtitles= [NSNumber numberWithBool: download.exportSubtitles];
+		newSub.exportSubtitles=  download.exportSubtitles;
 		DDLogVerbose(@"Subscribing download %@ as: %@ ", tivoShow, newSub);
 		return newSub;
  	} else {

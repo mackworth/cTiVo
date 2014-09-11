@@ -147,14 +147,14 @@
 	int itemNum = 0;
 	for (NSString * className in self.classNames) {
 		Class class =  NSClassFromString(className);
-		const int vertBase = self.debugLevelView.frame.size.height-40;
-		const int horizBase = self.debugLevelView.frame.size.width;
+		const CGFloat vertBase = self.debugLevelView.frame.size.height-40;
+		const CGFloat horizBase = self.debugLevelView.frame.size.width;
 		const int labelWidth = 160;
 		const int popupHeight = 25;
 		const int popupWidth = 80;
 		const int vertMargin = 5;
 		const int horizMargin = 10;
-		const int columnWidth = horizBase/2;
+		const CGFloat columnWidth = horizBase/2;
 		int columNum = (itemNum < numItems/2)? 0:1;
 		int rowNum = (itemNum < numItems/2) ? itemNum: itemNum-numItems/2;
 		
@@ -247,8 +247,8 @@
 	for (Class class in [DDLog registeredClasses]) {
 		[class ddSetLogLevel:newVal];
 	}
-	for (NSPopUpButton * cell in self.popups) {
-		[cell selectItemWithTag:newVal];
+	for (NSPopUpButton * myCell in self.popups) {
+		[myCell selectItemWithTag:newVal];
 	}
 	[DDLog writeAllClassesLogLevelToUserDefaults];
 }

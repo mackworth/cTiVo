@@ -28,7 +28,7 @@
 
 @interface MTTiVo ()
 @property SCNetworkReachabilityRef reachability;
-@property (nonatomic, weak) NSArray *downloadQueue;
+@property (nonatomic, readonly) NSArray *downloadQueue;
 @end
 
 @implementation MTTiVo
@@ -57,8 +57,8 @@ __DDLOGHERE__
         return nil;
     }
     MTNetService *tiVo = [MTNetService new];
-    tiVo.userPortSSL = [description[kMTTiVoUserPortSSL] intValue];
-    tiVo.userPort = [description[kMTTiVoUserPort] intValue];
+    tiVo.userPortSSL = [description[kMTTiVoUserPortSSL]shortValue];
+    tiVo.userPort = [description[kMTTiVoUserPort] shortValue];
     tiVo.userName = description[kMTTiVoUserName];
     tiVo.iPAddress = description[kMTTiVoIPAddress];
     MTTiVo *thisTiVo = [MTTiVo tiVoWithTiVo:tiVo withOperationQueue:queue manual:YES withID:[description[kMTTiVoID] intValue]];

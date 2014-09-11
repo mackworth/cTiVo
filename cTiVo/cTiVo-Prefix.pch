@@ -8,3 +8,4 @@
     #import "MTLog.h"
     #import "MTConstants.h"
 #endif
+#pragma clang diagnostic ignored "-Wunused-parameter"

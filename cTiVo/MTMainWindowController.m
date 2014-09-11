@@ -784,7 +784,7 @@ __DDLOGHERE__
 	return proposedMin + 120;
 }
 
-- (CGFloat)splitView:(NSSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex;
+- (CGFloat)splitView:(NSSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex
 {
     return proposedMaximumPosition - 120;
 }

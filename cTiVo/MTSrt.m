@@ -62,9 +62,9 @@ __DDLOGHERE__
 }
 
 -(NSString *) secondsToString: (double) seconds {
-   int hrs = seconds/3600.0;
-    int min = (seconds - hrs * 3600)/60;
-    float sec = seconds - hrs * 3600 - min * 60;
+   int hrs = (int)(seconds/3600.0);
+    int min = (int)((seconds - hrs * 3600)/60);
+    double sec = seconds - hrs * 3600 - min * 60;
     NSString *result = [NSString stringWithFormat:@"%02d:%02d:%06.3f",hrs,min,sec];
     result = [result stringByReplacingOccurrencesOfString:@"." withString:@","];
 	return result;
@@ -103,17 +103,17 @@ __DDLOGHERE__
 	}
 }
 
-inline static void assignWord(uint8* buffer, int word) {
+inline static void assignWord(uint8* buffer, uint word) {
 	buffer[0] = word >> 8 & 0xff;
 	buffer[1] = word & 0xff;
 }
 
-static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL italics, BOOL bold, BOOL underline, unsigned char red, unsigned char blue, unsigned char green   )
+static UInt8* makeStyleRecord(UInt8 * style, uint startChar, uint endChar, BOOL italics, BOOL bold, BOOL underline, unsigned char red, unsigned char blue, unsigned char green   )
 {
     assignWord(&style[0], startChar);
     assignWord(&style[2], endChar);
     assignWord(&style[4], 1);//font ID; only support 1 font now
-    style[6] = (underline << 2) | (italics<< 1) | bold;
+    style[6] = (UInt8)((underline << 2) | (italics<< 1) | bold);
 	style[7] = 24;      // font-size
     style[8] = red;     // r
     style[9] = blue;     // g
@@ -123,8 +123,8 @@ static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL it
     return style;
 }
 
--(unsigned int) makeStyleHeader: (UInt8 *) buffer  forNumStyles: (int) styleCount {
-    unsigned int styleSize = 10 + (styleCount * 12);
+-(uint) makeStyleHeader: (UInt8 *) buffer  forNumStyles: (uint) styleCount {
+    uint styleSize = 10 + (styleCount * 12);
     assignWord(&buffer[0],0);
     assignWord(&buffer[2],styleSize);
     memcpy    (&buffer[4], "styl", 4);
@@ -135,7 +135,7 @@ static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL it
 -(NSString *) makeStyleData: (UInt8 *) buffer size: (unsigned int *) sizebuffer forString: (NSString*) string {
 	NSMutableString * returnString = [NSMutableString stringWithCapacity:string.length];
 	NSScanner *scanner = [NSScanner scannerWithString:string];
-    int styleCount = 0;
+    uint styleCount = 0;
 	
     int italic = 0;
     int bold = 0;
@@ -153,7 +153,7 @@ static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL it
 		[scanner scanUpToString:@"<" intoString:&textChars];
 		DDLogVerbose(@"subtitleText = %@",textChars);
 		if ((italic || bold || underlined || customColor) && textChars.length > 0) {
-            makeStyleRecord(&buffer [ 10 + (12 * styleCount)], (int)returnString.length, (int)(returnString.length+textChars.length), italic>0, bold>0, underlined>0, red, blue, green );
+            makeStyleRecord(&buffer [ 10 + (12 * styleCount)], (uint)returnString.length, (uint)(returnString.length+textChars.length), italic>0, bold>0, underlined>0, red, blue, green );
             styleCount++;
         }
 		[returnString appendString:textChars];
@@ -186,7 +186,6 @@ static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL it
 				break;
 			case 'f': {
 				//e.g. <font color="#ffff00">
-				NSScanner * tagScanner = [NSScanner scannerWithString:tagChars];
 				unsigned int hexColor= 0;
 				if ([tagScanner scanString: @"font color" intoString: nil]) {
 					if ([tagScanner scanString: @"=" intoString: nil]) {
@@ -318,14 +317,16 @@ static UInt8* makeStyleRecord(UInt8 * style, int startChar, int endChar, BOOL it
 				//Write blank
 				if (!MP4WriteSample(encodedFile,
 									textTrack,
-									blankData, 2,
-									(srt.startTime-last)*1000, 0, false )) {
+									blankData,
+                                    2,
+									(unsigned long long)((srt.startTime-last)*1000),
+                                    0, false )) {
 					[srt writeError:@"can't write gap before" ];
 					break;
 				}
 			}
 			//DDLogVerbose(@"Embedding srt: %@", srt);
-			MP4Duration duration = (srt.endTime - srt.startTime)*1000;
+			MP4Duration duration = (unsigned long long)((srt.endTime - srt.startTime)*1000);
 			unsigned int len = [srt subtitleMP4:data];
 			//Write subtitle
 			//			NSMutableString * outStr = [NSMutableString new];

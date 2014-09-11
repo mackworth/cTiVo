@@ -24,7 +24,8 @@
 //Shared Data
 
 @property (nonatomic, strong) NSArray *tiVoList;
-@property (nonatomic, strong) NSMutableArray *tiVoShows, *formatList;
+@property (nonatomic, readonly) NSArray *tiVoShows;
+@property (nonatomic, strong) NSMutableArray  *formatList;
 @property (nonatomic, strong) NSMutableDictionary *lastLoadedTivoTimes;
 @property (atomic, strong) NSMutableArray *downloadQueue;
 @property (nonatomic, strong) NSMutableArray *subscribedShows;
@@ -44,7 +45,8 @@
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic, strong) MTFormat *selectedFormat;
-@property (nonatomic) int numEncoders, totalShows; // numCommercials, numCaptions;//Want to limit launches to two encoders.
+@property (nonatomic) int numEncoders;
+@property (nonatomic,readonly) int totalShows; // numCommercials, numCaptions;//Want to limit launches to two encoders.
 @property (nonatomic, strong) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
 @property (nonatomic, strong) NSDictionary *showsOnDisk;
 @property (nonatomic, readonly) BOOL anyShowsCompleted;

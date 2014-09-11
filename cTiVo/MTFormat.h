@@ -38,10 +38,10 @@
                                         *isHidden,
 										*isFactoryFormat;
 
-@property (nonatomic, strong) NSAttributedString *attributedFormatDescription;
+@property (nonatomic, readonly) NSAttributedString *attributedFormatDescription;
 
 @property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip, canAcceptMetaData, canMarkCommercials;
-@property (nonatomic, readonly) NSString * pathForExecutable;
+@property (nonatomic, strong) NSString * pathForExecutable;
 
 @property (nonatomic, strong) NSString * formerName;//only used to update existing format objects when name is edited.
 

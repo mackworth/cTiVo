@@ -108,8 +108,8 @@
 	NSSize viewSize = ((NSViewController *)tabViewItem.windowController).view.frame.size;
 	NSSize newSize = NSMakeSize(viewSize.width+40, viewSize.height + 100);
 	NSRect frame = self.window.frame;
-	float newXOrigin = frame.origin.x + (frame.size.width - newSize.width)/2.0;
-	float newYOrigin = frame.origin.y + frame.size.height - newSize.height;
+	double newXOrigin = frame.origin.x + (frame.size.width - newSize.width)/2.0;
+	double newYOrigin = frame.origin.y + frame.size.height - newSize.height;
 	return NSMakeRect(newXOrigin, newYOrigin, newSize.width, newSize.height);
 }
 

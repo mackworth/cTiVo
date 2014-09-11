@@ -15,7 +15,6 @@
 		1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */; };
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
-		1E3E8FBD19B92E6500D59F82 /* MTGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3E8FBC19B92E6500D59F82 /* MTGradientView.m */; };
 		1E45C8F316E11E59005C5334 /* MTStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTStringEmpty.m */; };
 		1E59368919648C860008780B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
 		1E59368C19648CFF0008780B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
@@ -45,7 +44,7 @@
 		1E9959CA173DC7D100B47539 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C7173DC7D100B47539 /* DDTTYLogger.m */; };
 		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1EABE6F416B0A254004DDB61 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; };
+		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */; };
@@ -85,7 +84,7 @@
 		D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = D2995CA5168B8BB200B960B9 /* MTCheckBox.m */; };
 		D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */; };
 		D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
-		D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
+		D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A09C7916C77E9D00F2B86F /* Quartz.framework */; };
 		D2A648F216991CD300C7DA01 /* MTTiVo.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A648F116991CD300C7DA01 /* MTTiVo.m */; };
 		D2A648FB16994D2A00C7DA01 /* MTSubscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E791BD31697C59300E47E84 /* MTSubscription.m */; };
@@ -144,8 +143,6 @@
 		1E2725C316CB63D500A21940 /* elgatoProgress.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = elgatoProgress.scpt; sourceTree = "<group>"; };
 		1E389BB616C46BA600B80EC9 /* MTAdvPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTAdvPreferencesViewController.h; sourceTree = "<group>"; };
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
-		1E3E8FBB19B92E6500D59F82 /* MTGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTGradientView.h; sourceTree = "<group>"; };
-		1E3E8FBC19B92E6500D59F82 /* MTGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTGradientView.m; sourceTree = "<group>"; };
 		1E45C8F116E11E59005C5334 /* MTStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTStringEmpty.h; sourceTree = "<group>"; };
 		1E45C8F216E11E59005C5334 /* MTStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTStringEmpty.m; sourceTree = "<group>"; };
 		1E5936821964867E0008780B /* MTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLog.h; sourceTree = "<group>"; };
@@ -163,7 +160,7 @@
 		1E684A8A16E3A338000F5C6E /* deleted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = deleted.png; sourceTree = "<group>"; };
 		1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = pytivo_txt.xslt; sourceTree = "<group>"; };
 		1E6F22D416DD1F4C0071D291 /* MTDownload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownload.h; sourceTree = "<group>"; };
-		1E6F22D516DD1F4C0071D291 /* MTDownload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownload.m; sourceTree = "<group>"; };
+		1E6F22D516DD1F4C0071D291 /* MTDownload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTDownload.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		1E6F22D816DD3D9E0071D291 /* NSString+RFC3339Date.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+RFC3339Date.h"; sourceTree = "<group>"; };
 		1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+RFC3339Date.m"; sourceTree = "<group>"; };
 		1E791BD21697C59300E47E84 /* MTSubscription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscription.h; sourceTree = "<group>"; };
@@ -299,7 +296,7 @@
 		D2D60BC316766F3200CE32DE /* tivodecode */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = tivodecode; sourceTree = "<group>"; };
 		D2D60BC916766FA600CE32DE /* MTTiVoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoManager.m; sourceTree = "<group>"; };
 		D2D60BCA16766FA600CE32DE /* MTTiVoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTTiVoManager.h; sourceTree = "<group>"; };
-		D2D60BCB16766FA600CE32DE /* MTConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTConstants.h; sourceTree = "<group>"; };
+		D2D60BCB16766FA600CE32DE /* MTConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; lineEnding = 0; path = MTConstants.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadTableView.m; sourceTree = "<group>"; };
 		D2D60BCD16766FA600CE32DE /* MTDownloadTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownloadTableView.h; sourceTree = "<group>"; };
 		D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgramTableView.m; sourceTree = "<group>"; };
@@ -647,14 +644,8 @@
 		D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */ = {
 			isa = PBXGroup;
 			children = (
-				1E3E8FBB19B92E6500D59F82 /* MTGradientView.h */,
-				1E3E8FBC19B92E6500D59F82 /* MTGradientView.m */,
 				D2D60BCD16766FA600CE32DE /* MTDownloadTableView.h */,
 				D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */,
-				D2901AE71677BB0E001E559C /* MTDownloadTableCellView.h */,
-				D2901AE81677BB0E001E559C /* MTDownloadTableCellView.m */,
-				D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */,
-				D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */,
 				D279D3E8167A32FA007F0677 /* MTMainWindowController.h */,
 				D279D3E9167A32FA007F0677 /* MTMainWindowController.m */,
 				D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */,
@@ -688,12 +679,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
 			buildPhases = (
-				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				D2D60B9916766EFD00CE32DE /* Sources */,
 				D2F5300316CC0C0100C44128 /* Update SVN */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
+				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				D2AA030A1833F09B00AEE326 /* ShellScript */,
 			);
 			buildRules = (
@@ -712,7 +703,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = MT;
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = cTiVo;
 				TargetAttributes = {
 					D2D60B9C16766EFD00CE32DE = {
@@ -861,7 +852,6 @@
 				D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */,
 				D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */,
 				D2DFA68F1683C27600CD6CE0 /* MTDownloadCheckTableCell.m in Sources */,
-				1E3E8FBD19B92E6500D59F82 /* MTGradientView.m in Sources */,
 				D2C390761687FFA600D2062E /* MTiTunes.m in Sources */,
 				D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */,
 				D235BF01168F52DE00320FA5 /* MTSubscriptionTableView.m in Sources */,
@@ -938,7 +928,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = NO;
 				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Installer: Hugh Mackworth (E8XXXD4S77)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -958,6 +948,14 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-Wall",
+					"-Wextra",
+					"-Wnewline-eof",
+					"-Wshadow",
+					"-Wundef",
+					"-Wdeprecated-implementations",
+				);
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -972,9 +970,10 @@
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = NO;
 				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Installer: Hugh Mackworth (E8XXXD4S77)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -985,6 +984,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_CFLAGS = (
+					"-Wall",
+					"-Wextra",
+					"-Wnewline-eof",
+					"-Wshadow",
+					"-Wundef",
+					"-Wdeprecated-implementations",
+				);
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -993,7 +1000,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1021,7 +1027,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;

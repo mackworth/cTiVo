@@ -174,7 +174,7 @@ __DDLOGHERE__
 	//type is just for debugging
 	if (zapItID == nil) return nil;
 	DDLogVerbose(@"Trying TVDB: %@==>%@",self.seriesId, zapItID);
-	NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeriesByRemoteID.php?zap2it=%@",zapItID] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeriesByRemoteID.php?zap2it=%@&language=all",zapItID] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 	NSURL *url = [NSURL URLWithString:urlString];
 	DDLogVerbose(@"Getting %@ details for %@ using %@",type, self, urlString);
 	NSString *TVDBText = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
@@ -208,7 +208,7 @@ __DDLOGHERE__
 }
 
 -(NSString *) retrieveTVDBIdFromSeriesName  {
-	NSString * urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeries.php?seriesname=%@",_seriesTitle] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	NSString * urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeries.php?seriesname=%@&language=all",_seriesTitle] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 	NSURL *url = [NSURL URLWithString:urlString];
 	DDLogDetail(@"Getting series for %@ using %@",self,urlString);
 	NSString *seriesID = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
@@ -423,9 +423,15 @@ __DDLOGHERE__
 
 -(BOOL) isEqual:(id)object {
 	MTTiVoShow * show = (MTTiVoShow *) object;
-	return [self.showTitle isEqual: show.showTitle] &&
+	return [self.showTitle isEqualToString: show.showTitle] &&
 			self. showID == show.showID &&
-		   [self.tiVoName isEqual: show.tiVoName];
+		   [self.tiVoName isEqualToString: show.tiVoName];
+}
+
+-(NSUInteger) hash {
+    return [self.showTitle hash] ^
+            self.showID ^
+             [self.tiVoName hash];
 }
 
 -(void) setShowSeriesAndEpisodeFrom:(NSString *) newTitle {
@@ -707,14 +713,14 @@ __DDLOGHERE__
 		} else {
 			MP4TagsSetName(tags,[self.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
 		}
-		uint32_t episodeNum = self.episode;
+		uint32_t episodeNum = (uint32_t) self.episode;
 		if (episodeNum == 0) {
-			episodeNum =  [self.episodeNumber intValue];
+			episodeNum = (uint32_t) [self.episodeNumber integerValue];
 		}
 		if (episodeNum> 0) {
 			MP4TagsSetTVEpisode(tags, &episodeNum);
 			MP4TagTrack track;
-			track.index = episodeNum;
+			track.index = (uint16)episodeNum;
 			track.total = 0;
 			MP4TagsSetTrack(tags, &track);
 			
