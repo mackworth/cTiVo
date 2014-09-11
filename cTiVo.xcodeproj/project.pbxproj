@@ -678,12 +678,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
 			buildPhases = (
-				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				D2D60B9916766EFD00CE32DE /* Sources */,
 				D2F5300316CC0C0100C44128 /* Update SVN */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
+				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				D2AA030A1833F09B00AEE326 /* ShellScript */,
 			);
 			buildRules = (
