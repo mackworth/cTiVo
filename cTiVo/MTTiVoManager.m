@@ -413,8 +413,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 							   ) { // If there's a change then edit it and update
 						targetMTTiVo.tiVo.iPAddress = mTiVo[kMTTiVoIPAddress];
 						targetMTTiVo.tiVo.userName = mTiVo[kMTTiVoUserName];
-						targetMTTiVo.tiVo.userPort = [mTiVo[kMTTiVoUserPort] shortValue];
-						targetMTTiVo.tiVo.userPortSSL = [mTiVo[kMTTiVoUserPortSSL] shortValue];
+						targetMTTiVo.tiVo.userPort = (short)[mTiVo[kMTTiVoUserPort] intValue];
+						targetMTTiVo.tiVo.userPortSSL = (short)[mTiVo[kMTTiVoUserPortSSL] intValue];
 						targetMTTiVo.enabled = [mTiVo[kMTTiVoEnabled] boolValue];
 						targetMTTiVo.mediaKey = mTiVo[kMTTiVoMediaKey];
 						DDLogDetail(@"Updated manual TiVo %@",targetMTTiVo);
@@ -813,8 +813,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			for (NSDictionary *savedTiVo in self.savedTiVos) {
 				if ([savedTiVo[kMTTiVoID] intValue] == tiVo.manualTiVoID) {
 					tiVo.tiVo.userName = savedTiVo[kMTTiVoUserName];
-					tiVo.tiVo.userPort = [savedTiVo[kMTTiVoUserPort] shortValue];
-					tiVo.tiVo.userPortSSL = [savedTiVo[kMTTiVoUserPortSSL] shortValue];
+					tiVo.tiVo.userPort = (short)[savedTiVo[kMTTiVoUserPort] intValue];
+					tiVo.tiVo.userPortSSL = (short)[savedTiVo[kMTTiVoUserPortSSL] intValue];
 					tiVo.mediaKey = savedTiVo[kMTTiVoMediaKey];
 					tiVo.tiVo.iPAddress = savedTiVo[kMTTiVoIPAddress];
 					tiVo.enabled = [savedTiVo[kMTTiVoEnabled] boolValue];

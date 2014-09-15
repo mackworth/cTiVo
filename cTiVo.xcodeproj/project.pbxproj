@@ -49,6 +49,8 @@
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */; };
 		1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49974174D898D0022E084 /* MTTiVoPopUpTableCellView.m */; };
+		1EDE323A19C502980052E6C6 /* tivo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323819C502980052E6C6 /* tivo.png */; };
+		1EDE323B19C502980052E6C6 /* tivo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323919C502980052E6C6 /* tivo@2x.png */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
@@ -190,6 +192,8 @@
 		1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoPopUpButton.m; sourceTree = "<group>"; };
 		1ED49973174D898D0022E084 /* MTTiVoPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoPopUpTableCellView.h; sourceTree = "<group>"; };
 		1ED49974174D898D0022E084 /* MTTiVoPopUpTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoPopUpTableCellView.m; sourceTree = "<group>"; };
+		1EDE323819C502980052E6C6 /* tivo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tivo.png; sourceTree = "<group>"; };
+		1EDE323919C502980052E6C6 /* tivo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tivo@2x.png"; sourceTree = "<group>"; };
 		1EFD685A16D19AA100CC36E5 /* ccextractor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ccextractor; sourceTree = "<group>"; };
 		D2001C211704F93F00B75D9C /* MTSrt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTSrt.h; sourceTree = "<group>"; };
 		D2001C221704F93F00B75D9C /* MTSrt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSrt.m; sourceTree = "<group>"; };
@@ -388,6 +392,8 @@
 				1E964C9A1882768A00C19046 /* save-until-i-delete-recording@2x.png */,
 				1E684A7A16E2C50B000F5C6E /* suggestion-recording.png */,
 				1E964C9B1882768A00C19046 /* suggestion-recording@2x.png */,
+				1EDE323819C502980052E6C6 /* tivo.png */,
+				1EDE323919C502980052E6C6 /* tivo@2x.png */,
 			);
 			name = Images;
 			sourceTree = "<group>";
@@ -685,7 +691,7 @@
 				D2D60B9B16766EFD00CE32DE /* Resources */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
 				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
-				D2AA030A1833F09B00AEE326 /* ShellScript */,
+				D2AA030A1833F09B00AEE326 /* Sign Bundled Frameworks */,
 			);
 			buildRules = (
 			);
@@ -762,6 +768,7 @@
 				1E964C9D1882768A00C19046 /* deleted@2x.png in Resources */,
 				1E2724EF16C9A8B500A21940 /* elgatoScript.pl in Resources */,
 				1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */,
+				1EDE323A19C502980052E6C6 /* tivo.png in Resources */,
 				1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */,
 				1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */,
 				1E964C9F1882768A00C19046 /* expires-soon-recording@2x.png in Resources */,
@@ -770,6 +777,7 @@
 				1E964C9C1882768A00C19046 /* copyright@2x.png in Resources */,
 				1E964CA21882768A00C19046 /* recent-recording@2x.png in Resources */,
 				1E684A7D16E2C50B000F5C6E /* expired-recording.png in Resources */,
+				1EDE323B19C502980052E6C6 /* tivo@2x.png in Resources */,
 				1E684A7E16E2C50B000F5C6E /* expires-soon-recording.png in Resources */,
 				1E684A7F16E2C50B000F5C6E /* save-until-i-delete-recording.png in Resources */,
 				1E964CA11882768A00C19046 /* status-unknown@2x.png in Resources */,

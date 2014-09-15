@@ -94,10 +94,9 @@ __DDLOGHERE__
 {
 	if ([keyPath compare:@"downloadDirectory"] == NSOrderedSame) {
 		DDLogDetail(@"changing downloadDirectory");
-		downloadDirectory.stringValue = tiVoManager.downloadDirectory;
 		NSString *dir = tiVoManager.downloadDirectory;
 		if (!dir) dir = @"Directory not available!";
-		downloadDirectory.stringValue = dir;
+		downloadDirectory.title   = dir;
 		downloadDirectory.toolTip = dir;
 	}
 }
@@ -211,7 +210,7 @@ __DDLOGHERE__
         }
         [tiVoListPopUp setHidden:NO];
         [tiVoListPopUpLabel setHidden:NO];
-        tiVoListPopUpLabel.stringValue = @"Filter TiVo:";
+        tiVoListPopUpLabel.stringValue = @"Select TiVo:";
     }
 }
 
@@ -767,16 +766,6 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-
-#pragma mark - Text Editing Delegate
-
--(BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor
-{
-    if (control == downloadDirectory) {
-        tiVoManager.downloadDirectory = control.stringValue;
-    }
-	return YES;
-}
 
 #pragma mark - Split View Delegate
 - (CGFloat)splitView:(NSSplitView *)splitView constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex {

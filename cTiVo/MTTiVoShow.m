@@ -863,6 +863,13 @@ __DDLOGHERE__
 			 self.channelString,
 			 self.isHD.boolValue? @"HD": @""];
 }
+
+-(NSNumber *) channelNumber {
+    NSInteger channel = self.channelString.integerValue;
+    if (!channel) return @(NSIntegerMax);
+    return @(channel);
+
+}
 -(NSString *) episodeGenre {
     //iTunes says "there can only be one", so pick the first we see.
     NSCharacterSet * quotes = [NSCharacterSet characterSetWithCharactersInString:@"\""];

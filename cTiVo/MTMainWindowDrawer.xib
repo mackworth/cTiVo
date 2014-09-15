@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="14A343f" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment version="1070" defaultVersion="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
+        <deployment version="1070" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6245"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTMainWindowController">
@@ -11,7 +11,7 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <drawer trailingOffset="15" id="4">
             <size key="contentSize" width="200" height="600"/>
             <size key="minContentSize" width="100" height="600"/>
@@ -22,11 +22,9 @@
         </drawer>
         <customView translatesAutoresizingMaskIntoConstraints="NO" id="3" userLabel="Drawer Content View">
             <rect key="frame" x="0.0" y="0.0" width="315" height="573"/>
-            <autoresizingMask key="autoresizingMask"/>
             <subviews>
-                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="9">
+                <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9">
                     <rect key="frame" x="227" y="525" width="74" height="32"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="10">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
@@ -35,9 +33,8 @@
                         <action selector="close:" target="4" id="641"/>
                     </connections>
                 </button>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="19" userLabel="Title Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="19" userLabel="Title Text">
                     <rect key="frame" x="118" y="500" width="179" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="21"/>
                     </constraints>
@@ -50,9 +47,8 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.showTitle" id="30"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="50" userLabel="Channel Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="50" userLabel="Channel Text">
                     <rect key="frame" x="118" y="478" width="179" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="54"/>
                     </constraints>
@@ -70,9 +66,8 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="67" userLabel="ShowDate Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="67" userLabel="ShowDate Text">
                     <rect key="frame" x="118" y="456" width="179" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="71"/>
                     </constraints>
@@ -90,9 +85,8 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="350" translatesAutoresizingMaskIntoConstraints="NO" id="108" userLabel="OriginalAirDate Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="350" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="108" userLabel="OriginalAirDate Text">
                     <rect key="frame" x="118" y="434" width="179" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="109"/>
                     </constraints>
@@ -106,9 +100,8 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.originalAirDateNoTime" id="730"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="84" userLabel="Year Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="84" userLabel="Year Text">
                     <rect key="frame" x="118" y="434" width="179" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="86"/>
                     </constraints>
@@ -126,9 +119,8 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.movieYear" id="567"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="92" userLabel="Genre Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="92" userLabel="Genre Text">
                     <rect key="frame" x="118" y="412" width="179" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="93"/>
                     </constraints>
@@ -147,9 +139,8 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.episodeGenre" id="646"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="100" userLabel="Series Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="100" userLabel="Series Text">
                     <rect key="frame" x="118" y="390" width="179" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="102"/>
                     </constraints>
@@ -167,9 +158,8 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.seriesTitle" id="645"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="117" userLabel="Episode Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="117" userLabel="Episode Text">
                     <rect key="frame" x="118" y="368" width="179" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="119"/>
                     </constraints>
@@ -187,9 +177,8 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="125" userLabel="EpisodeNumber Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="125" userLabel="EpisodeNumber Text">
                     <rect key="frame" x="118" y="346" width="179" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="126"/>
                     </constraints>
@@ -207,9 +196,8 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="133" userLabel="Season Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="133" userLabel="Season Text">
                     <rect key="frame" x="118" y="324" width="179" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="135"/>
                     </constraints>
@@ -227,36 +215,32 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="31" userLabel="Title Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="31" userLabel="Title Label">
                     <rect key="frame" x="63" y="500" width="51" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Title:" id="32">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="51" userLabel="Channel Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="51" userLabel="Channel Label">
                     <rect key="frame" x="63" y="478" width="51" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Channel:" id="53">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="68" userLabel="ShowDate Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="68" userLabel="ShowDate Label">
                     <rect key="frame" x="44" y="456" width="70" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Show Date:" id="70">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="141" userLabel="OriginalAirDate Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="141" userLabel="OriginalAirDate Label">
                     <rect key="frame" x="17" y="434" width="97" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Original Air Date:" id="142">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -266,9 +250,8 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="728"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="356" userLabel="Year Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="356" userLabel="Year Label">
                     <rect key="frame" x="68" y="434" width="46" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Year:" id="357">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -282,18 +265,16 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="147" userLabel="Genre Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="147" userLabel="Genre Label">
                     <rect key="frame" x="68" y="412" width="46" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Genre:" id="148">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="153" userLabel="Series Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="153" userLabel="Series Label">
                     <rect key="frame" x="69" y="390" width="45" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Series:" id="154">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -303,9 +284,8 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="XfP-JO-UhQ"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="159" userLabel="Episode Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="159" userLabel="Episode Label">
                     <rect key="frame" x="65" y="368" width="49" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Episode:" id="160">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -319,9 +299,8 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="165" userLabel="Episode Number Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="165" userLabel="Episode Number Label">
                     <rect key="frame" x="19" y="346" width="95" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Episode Number:" id="166">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -331,9 +310,8 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="pUO-OG-tNP"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="171" userLabel="Season Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="171" userLabel="Season Label">
                     <rect key="frame" x="69" y="324" width="45" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Season:" id="172">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -343,55 +321,49 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="OFQ-xw-ANb"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="177" userLabel="Description Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="177" userLabel="Description Label">
                     <rect key="frame" x="45" y="282" width="69" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Description:" id="178">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="272" userLabel="Actors Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="272" userLabel="Actors Label">
                     <rect key="frame" x="69" y="225" width="45" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Actors:" id="273">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="280" userLabel="Guest Stars Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="280" userLabel="Guest Stars Label">
                     <rect key="frame" x="47" y="168" width="67" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Guest Stars:" id="281">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="287" userLabel="DIrectors Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="287" userLabel="DIrectors Label">
                     <rect key="frame" x="58" y="111" width="56" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Directors:" id="288">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="295" userLabel="Producers Label">
+                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="295" userLabel="Producers Label">
                     <rect key="frame" x="54" y="54" width="60" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Producers:" id="296">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="1" verticalCompressionResistancePriority="250" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="183" userLabel="Description Text">
+                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="1" verticalCompressionResistancePriority="250" misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="183" userLabel="Description Text">
                     <rect key="frame" x="120" y="247" width="175" height="49"/>
-                    <autoresizingMask key="autoresizingMask"/>
-                    <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="lWb-hj-Cnb">
+                    <clipView key="contentView" misplaced="YES" drawsBackground="NO" copiesOnScroll="NO" id="lWb-hj-Cnb">
                         <rect key="frame" x="1" y="1" width="173" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -428,10 +400,9 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
-                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="201" userLabel="Actors Text">
+                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="201" userLabel="Actors Text">
                     <rect key="frame" x="120" y="190" width="175" height="49"/>
-                    <autoresizingMask key="autoresizingMask"/>
-                    <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="pI5-Tl-iQm">
+                    <clipView key="contentView" misplaced="YES" drawsBackground="NO" copiesOnScroll="NO" id="pI5-Tl-iQm">
                         <rect key="frame" x="1" y="1" width="173" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -468,10 +439,9 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
-                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="231" userLabel="GuestStars Text">
+                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="231" userLabel="GuestStars Text">
                     <rect key="frame" x="120" y="133" width="175" height="49"/>
-                    <autoresizingMask key="autoresizingMask"/>
-                    <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="0uY-RI-059">
+                    <clipView key="contentView" misplaced="YES" drawsBackground="NO" copiesOnScroll="NO" id="0uY-RI-059">
                         <rect key="frame" x="1" y="1" width="173" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -508,10 +478,9 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
-                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="244" userLabel="Directors Text">
+                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="244" userLabel="Directors Text">
                     <rect key="frame" x="120" y="76" width="175" height="49"/>
-                    <autoresizingMask key="autoresizingMask"/>
-                    <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="KuS-QA-J7V">
+                    <clipView key="contentView" misplaced="YES" drawsBackground="NO" copiesOnScroll="NO" id="KuS-QA-J7V">
                         <rect key="frame" x="1" y="1" width="173" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -548,10 +517,9 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
-                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="257" userLabel="Producers Text">
+                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="257" userLabel="Producers Text">
                     <rect key="frame" x="120" y="20" width="175" height="48"/>
-                    <autoresizingMask key="autoresizingMask"/>
-                    <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="dh9-sg-Zpi">
+                    <clipView key="contentView" misplaced="YES" drawsBackground="NO" copiesOnScroll="NO" id="dh9-sg-Zpi">
                         <rect key="frame" x="1" y="1" width="173" height="46"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>

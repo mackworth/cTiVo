@@ -57,8 +57,8 @@ __DDLOGHERE__
         return nil;
     }
     MTNetService *tiVo = [MTNetService new];
-    tiVo.userPortSSL = [description[kMTTiVoUserPortSSL]shortValue];
-    tiVo.userPort = [description[kMTTiVoUserPort] shortValue];
+    tiVo.userPortSSL = (short)[description[kMTTiVoUserPortSSL] intValue];
+    tiVo.userPort = (short)[description[kMTTiVoUserPort] intValue];
     tiVo.userName = description[kMTTiVoUserName];
     tiVo.iPAddress = description[kMTTiVoIPAddress];
     MTTiVo *thisTiVo = [MTTiVo tiVoWithTiVo:tiVo withOperationQueue:queue manual:YES withID:[description[kMTTiVoID] intValue]];
@@ -286,7 +286,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     if (savedTiVos[0][kMTTiVoMediaKey] && ![savedTiVos[0][kMTTiVoMediaKey] isEqualToString:kMTTiVoNullKey]) self.mediaKey = savedTiVos[0][kMTTiVoMediaKey];
     
     for (NSDictionary *tiVo in savedTiVos) {
-        if ([tiVo[kMTTiVoUserName] isEqualTo:self.tiVo.name] && ![tiVo[kMTTiVoMediaKey] isEqualToString:kMTTiVoNullKey] && [tiVo[kMTTiVoMediaKey] length] > 0) {
+        if ([tiVo[kMTTiVoUserName] isEqual:self.tiVo.name] && ![tiVo[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey] && [tiVo[kMTTiVoMediaKey] length] > 0) {
             self.mediaKey = tiVo[kMTTiVoMediaKey];
             foundMediaKey = YES;
         }

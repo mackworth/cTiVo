@@ -290,8 +290,7 @@ __DDLOGHERE__
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     // get an existing cell with the MyView identifier if it exists
-    NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
-//    NSLog(@"%@ ==> %@",tableColumn.identifier, result.textField);
+   NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
 	MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
     // There is no existing cell to reuse so we will create a new one
  	if (result == nil) {
@@ -310,76 +309,79 @@ __DDLOGHERE__
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
-	if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.showTitle ;
-        result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
-        result.textField.stringValue = thisShow.tiVoName;
+    
+    NSString * textVal = @"";
+    result.toolTip = @"";
+    if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
+       textVal = thisShow.showTitle?: @"" ;
+        result.toolTip = textVal;
+    } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
+        textVal = thisShow.tiVoName;
         result.textField.textColor = [NSColor blackColor];
         if (!thisShow.tiVo.isReachable) {
             result.textField.textColor = [NSColor redColor];
         }
         result.toolTip = thisShow.tiVoName;
     } else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
-		if ([tableColumn width] > 135) {
-			result.textField.stringValue = thisShow.showMediumDateString;
-		} else {
-			result.textField.stringValue = thisShow.showDateString;
-		}
-			result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.lengthString;
-		result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.seriesTitle;
-		result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.seasonEpisode;
-        result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.isQueuedString;
-	} else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.isHDString;
-		result.textField.alignment = NSCenterTextAlignment;
-	} else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.channelString;
-	} else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.sizeString;
-	} else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.idString;
-	} else if ([tableColumn.identifier compare:@"EpisodeID"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.episodeID;
-	} else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.episodeTitle;
-		result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"Station"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.stationCallsign;
-	} else if ([tableColumn.identifier compare:@"Genre"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.episodeGenre;
-        result.toolTip = result.textField.stringValue;
-	} else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
-		result.textField.stringValue = thisShow.originalAirDateNoTime ?: @"";
-	} else if ([tableColumn.identifier isEqualToString:@"icon"]) {
+        if ([tableColumn width] > 135) {
+            textVal = thisShow.showMediumDateString;
+        } else {
+            textVal = thisShow.showDateString;
+        }
+        result.toolTip = textVal;
+    } else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
+        textVal = thisShow.lengthString;
+        result.toolTip = textVal;
+    } else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
+        textVal = thisShow.seriesTitle;
+        result.toolTip = textVal;
+    } else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
+        textVal = thisShow.seasonEpisode;
+        result.toolTip = textVal;
+    } else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
+        textVal = thisShow.isQueuedString;
+    } else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
+        textVal = thisShow.isHDString;
+        result.textField.alignment = NSCenterTextAlignment;
+    } else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
+        textVal = thisShow.channelString;
+    } else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
+        textVal = thisShow.sizeString;
+    } else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
+        textVal = thisShow.idString;
+    } else if ([tableColumn.identifier compare:@"EpisodeID"] == NSOrderedSame) {
+        textVal = thisShow.episodeID;
+    } else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
+        textVal = thisShow.episodeTitle;
+        result.toolTip = textVal;
+    } else if ([tableColumn.identifier compare:@"Station"] == NSOrderedSame) {
+        textVal = thisShow.stationCallsign;
+    } else if ([tableColumn.identifier compare:@"Genre"] == NSOrderedSame) {
+        textVal = thisShow.episodeGenre;
+        result.toolTip = textVal;
+    } else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
+        textVal = thisShow.originalAirDateNoTime ?: @"";
+    } else if ([tableColumn.identifier isEqualToString:@"icon"]) {
         NSString * imageName = thisShow.imageString;
-		result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
-		result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
+        result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
+        result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
         result.imageView.image = [NSImage imageNamed: imageName];
-		result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
-	}
+        result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
+    }
+    result.textField.stringValue = textVal ?: @"";
     result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
     if ([thisShow.protectedShow boolValue]) {
         result.textField.textColor = [NSColor grayColor];
     } else if ([tiVoManager.showsOnDisk objectForKey:thisShow.showKey]){
-//        result.textField.textColor = [NSColor blueColor];
+        //        result.textField.textColor = [NSColor blueColor];
         result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];
         result.textField.textColor = [NSColor blackColor];
     } else {
         result.textField.textColor = [NSColor blackColor];
     }
-
+    
     // return the result.
     return result;
-    
 }
 
 #pragma mark Drag N Drop support
