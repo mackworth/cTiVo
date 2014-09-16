@@ -12,6 +12,7 @@
 #import "DDTTYLogger.h"
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
+#import <Crashlytics/Crashlytics.h>
 
 #import <IOKit/pwr_mgt/IOPMLib.h>
 #include <ctype.h>
@@ -115,7 +116,16 @@ __DDLOGHERE__
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	CGEventRef event = CGEventCreate(NULL);
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTCrashlyticsOptOut]) {
+         [Crashlytics startWithAPIKey:
+     //Note the following line brings in the API key from Crashlytics, which is not included in this repository for confidentiality reasons. You can either get one's own key, or not include Crashlytics.
+     //To include your own key, the format of MTCrashlytics.m is simply @"KeyFirstPart". In addition, you'll need to create a file Crashlytics.sh with the full key in
+     //  Format:   Crashlytics.framework/run KeyFirstPart KeySecondPart
+     //To remove Crashlytics entirely, just remove this line, the include above, the Crashlytics framework, and the buildphase that calls the Crashlytics.sh program
+#include "MTCrashlyticsKey.m"
+     ];
+    }
+    CGEventRef event = CGEventCreate(NULL);
     CGEventFlags modifiers = CGEventGetFlags(event);
     CFRelease(event);
 	

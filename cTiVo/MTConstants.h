@@ -216,6 +216,7 @@
 
 #define kMTDebugLevel       @"DebugLevel"
 #define kMTDebugLevelDetail @"DebugLevelDetail"
+#define kMTCrashlyticsOptOut @"CrashlyticsOptOut"
 
 //Obsolete keys, but kept for upgrade path
 #define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address. -replaced by MTTiVos
