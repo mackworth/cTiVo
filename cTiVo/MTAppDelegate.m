@@ -653,6 +653,13 @@ Routine to update and combine both the manual tivo preferences and the media key
 	return _advPreferencesController;
 }
 
+-(IBAction)showLogs:(id)sender {
+    NSURL * showURL =[NSURL fileURLWithPath:[@"~/Library/Logs/cTiVo" stringByExpandingTildeInPath] isDirectory:YES];
+    if (showURL) {
+        DDLogMajor(@"Showing logs at %@ ", showURL);
+        [[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ showURL ]];
+    }
+}
 
 #pragma mark - Export Formats Methods
 

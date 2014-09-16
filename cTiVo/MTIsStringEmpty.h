@@ -1,5 +1,5 @@
 //
-//  MTStringEmpty.h
+//  MTIsStringEmpty.h
 //  cTiVo
 //
 //  Created by Hugh Mackworth on 3/1/13.
@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MTStringEmpty : NSValueTransformer
+@interface MTIsStringEmpty : NSValueTransformer
 
 @end
 

@@ -161,13 +161,14 @@ __DDLOGHERE__
 #define kMTVDBNoEpisode @"Episode Not Found"
 #define kMTVDBEpisode @"Episode Found"
 #define kMTVDBCached @"Episode Found in Cache"
+#define kMTVDBNotSeries @"Not a series"
 #define kMTVDBNewInfo @"Season/Episode Info Added"
 #define kMTVDBWrongInfo @"Season/Episode Info Mismatch"
 #define kMTVDBRightInfo @"Season/Episode Info Match"
-#define KMTVDBSeriesFoundWithEP @"Series Found EP"
-#define KMTVDBSeriesFoundWithSH @"Series Found SH"
-#define KMTVDBSeriesFoundWithShort @"Series Found SHShort"
-#define KMTVDBSeriesFoundName @"Series Found by Name"
+#define kMTVDBSeriesFoundWithEP @"Series Found EP"
+#define kMTVDBSeriesFoundWithSH @"Series Found SH"
+#define kMTVDBSeriesFoundWithShort @"Series Found SHShort"
+#define kMTVDBSeriesFoundName @"Series Found by Name"
 #define kMTVDBNoSeries @"Series Not Found"
 
 -(NSString *) retrieveTVDBIdFromZap2itId: (NSString *) zapItID ofType:(NSString *) type {
@@ -207,6 +208,15 @@ __DDLOGHERE__
 	return showURL;
 }
 
+-(NSString *) tvdbURLForSeries {
+    NSString * tvdbID = [tiVoManager.tvdbSeriesIdMapping objectForKey:_seriesTitle];
+    if (tvdbID) {
+        return [self urlForReporting:tvdbID];
+    } else {
+        return @"";
+    }
+}
+
 -(NSString *) retrieveTVDBIdFromSeriesName  {
 	NSString * urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeries.php?seriesname=%@&language=all",_seriesTitle] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 	NSURL *url = [NSURL URLWithString:urlString];
@@ -223,8 +233,8 @@ __DDLOGHERE__
 			if (tvdbID) {
 				NSString * details = [NSString stringWithFormat:@"tvdb has %@ for our %@; %@ ", zap2ID, [self episodeIDForReporting],[self urlForReporting:tvdbID]  ];
 				DDLogVerbose(@"Had to search by name %@, %@",self.showTitle, details);
-				tiVoManager.theTVDBStatistics[KMTVDBSeriesFoundName@"Count"] = @([tiVoManager.theTVDBStatistics[KMTVDBSeriesFoundName@"Count"] intValue] + 1);
-				[((NSMutableDictionary *)tiVoManager.theTVDBStatistics[KMTVDBSeriesFoundName@"List"]) setValue:  details forKey:self.showTitle  ];
+				tiVoManager.theTVDBStatistics[kMTVDBSeriesFoundName@" Count"] = @([tiVoManager.theTVDBStatistics[kMTVDBSeriesFoundName@" Count"] intValue] + 1);
+				[((NSMutableDictionary *)tiVoManager.theTVDBStatistics[kMTVDBSeriesFoundName @" List"]) setValue:  details forKey:self.showTitle  ];
 				return tvdbID;
 			} else {
 				return nil;
@@ -242,10 +252,10 @@ __DDLOGHERE__
 	}
     if (!tiVoManager.theTVDBStatistics) {
 		tiVoManager.theTVDBStatistics = [NSMutableDictionary dictionaryWithDictionary:@{
-										 kMTVDBWrongInfo@"List":[NSMutableDictionary dictionary],
-										 kMTVDBNoEpisode@"List":[NSMutableDictionary dictionary],
-										 KMTVDBSeriesFoundName@"List":[NSMutableDictionary dictionary],
-										 kMTVDBNoSeries@"List":[NSMutableDictionary dictionary]}];
+										 kMTVDBWrongInfo @" List":[NSMutableDictionary dictionary],
+										 kMTVDBNoEpisode @" List":[NSMutableDictionary dictionary],
+                                         kMTVDBSeriesFoundName @" List":[NSMutableDictionary dictionary],
+										 kMTVDBNoSeries @" List":[NSMutableDictionary dictionary]}];
 	}
 	if (self.seriesId.length && [self.seriesId startsWith:@"SH"]) { //if we have a series get the other informaiton
         NSString *episodeNum = nil, *seasonNum = nil, *artwork = nil;
@@ -256,7 +266,10 @@ __DDLOGHERE__
             episodeNum = [episodeEntry objectForKey:@"episode"];
             seasonNum = [episodeEntry objectForKey:@"season"];
             artwork = [episodeEntry objectForKey:@"artwork"];
-            if (!seriesIDTVDB) seriesIDTVDB = [episodeEntry objectForKey:@"series"];
+            if (!seriesIDTVDB) {
+                seriesIDTVDB = [episodeEntry objectForKey:@"series"];
+                [tiVoManager.tvdbSeriesIdMapping setObject:seriesIDTVDB forKey:_seriesTitle];
+            }
 			_gotTVDBDetails = YES;
 			tiVoManager.theTVDBStatistics[kMTVDBCached] = @([tiVoManager.theTVDBStatistics[kMTVDBCached] intValue] + 1);
         } else {
@@ -270,9 +283,9 @@ __DDLOGHERE__
 				NSString * epSeriesID = [NSString stringWithFormat:@"EP%@",[longSeriesID substringFromIndex:2]];
 				
 				
-				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:epSeriesID ofType:KMTVDBSeriesFoundWithEP];
-				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:longSeriesID ofType:KMTVDBSeriesFoundWithSH];
-				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:seriesID ofType:KMTVDBSeriesFoundWithShort];
+				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:epSeriesID ofType:kMTVDBSeriesFoundWithEP];
+				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:longSeriesID ofType:kMTVDBSeriesFoundWithSH];
+				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:seriesID ofType:kMTVDBSeriesFoundWithShort];
 				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromSeriesName];
 				
 				if (seriesIDTVDB) {
@@ -281,8 +294,10 @@ __DDLOGHERE__
 				} else {
 					[tiVoManager.tvdbSeriesIdMapping setObject:@"" forKey:_seriesTitle];
 					DDLogDetail(@"TheTVDB series not found: %@: %@ ",self.seriesTitle, self.seriesId);
-					tiVoManager.theTVDBStatistics[kMTVDBNoSeries@"Count"] = @([tiVoManager.theTVDBStatistics[kMTVDBNoSeries@"Count"] intValue] + 1);
-					[((NSMutableDictionary *)tiVoManager.theTVDBStatistics[kMTVDBNoSeries@"List"]) setValue: epSeriesID forKey:self.seriesTitle ];
+					tiVoManager.theTVDBStatistics[kMTVDBNoSeries@" Count"] = @([tiVoManager.theTVDBStatistics[kMTVDBNoSeries@" Count"] intValue] + 1);
+					[((NSMutableDictionary *)tiVoManager.theTVDBStatistics[kMTVDBNoSeries @" List"]) setValue: epSeriesID forKey:self.seriesTitle ];
+                    _gotTVDBDetails = YES;
+                    return; //really can't get them.
 				}
 
             }
@@ -296,16 +311,7 @@ __DDLOGHERE__
 					episodeNum = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo];
 					seasonNum = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo];
 					artwork = [self getStringForPattern:@"<filename>(.*)<\\/filename>" fromString:episodeInfo];
-					if (!seasonNum) {
-						seasonNum = @"";
-						NSString * details = [NSString stringWithFormat:@"%@ aired %@ %@ ",[self episodeIDForReporting ], self.originalAirDateNoTime, [self urlForReporting:seriesIDTVDB] ];
-						DDLogDetail(@"No episode info for %@ %@ ",self.episodeTitle, details);
-						tiVoManager.theTVDBStatistics[kMTVDBNoEpisode @"Count"] = @([tiVoManager.theTVDBStatistics[kMTVDBNoEpisode @"Count"] intValue] + 1);
-						[((NSMutableDictionary *)tiVoManager.theTVDBStatistics[kMTVDBNoEpisode@"List"]) setValue:  details forKey:self.showTitle  ];
-					} else {
-						DDLogDetail(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, self);
-						tiVoManager.theTVDBStatistics[kMTVDBEpisode] = @([tiVoManager.theTVDBStatistics[kMTVDBEpisode] intValue] + 1);
-					}
+					if (!seasonNum) seasonNum = @"";
 					if (!episodeNum) episodeNum = @"";
 					if (!artwork) artwork = @"";
 					if (!seriesIDTVDB) seriesIDTVDB = @"";
@@ -318,10 +324,12 @@ __DDLOGHERE__
 					 } forKey:self.episodeID];
 					_gotTVDBDetails = YES;
 				}
-			}
+            }
        }
         if (episodeNum.length && seasonNum.length && [episodeNum intValue] > 0 && [seasonNum intValue] > 0) {
 			//special case due to parsing of tivo's season/episode combined string
+            DDLogDetail(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, self);
+            tiVoManager.theTVDBStatistics[kMTVDBEpisode] = @([tiVoManager.theTVDBStatistics[kMTVDBEpisode] intValue] + 1);
 			if (self.season > 0 && self.season/10 == [seasonNum intValue]  && [episodeNum intValue] == self.episode) {
 				//must have mis-parsed, so let's fix
 				NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d aired %@ %@ ",seasonNum, episodeNum, self.season, self.episode, self.originalAirDateNoTime,  [self urlForReporting:seriesIDTVDB]];
@@ -333,8 +341,8 @@ __DDLOGHERE__
 				if ([episodeNum intValue] != self.episode || [seasonNum intValue] != self.season) {
 					NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d; %@ aired %@; %@ ",seasonNum, episodeNum, self.season, self.episode, [self episodeIDForReporting], self.originalAirDateNoTime,  [self urlForReporting:seriesIDTVDB]];
 					DDLogDetail(@"TheTVDB has different Sea/Eps info for %@: %@ %@", self.showTitle, details, [[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB] ? @"updating": @"leaving" );
-					tiVoManager.theTVDBStatistics[kMTVDBWrongInfo@"Count"] = @([tiVoManager.theTVDBStatistics[kMTVDBWrongInfo@"Count"] intValue] + 1);
-					[((NSMutableDictionary *)tiVoManager.theTVDBStatistics[kMTVDBWrongInfo@"List"]) setValue:  details forKey:self.showTitle  ];
+					tiVoManager.theTVDBStatistics[kMTVDBWrongInfo@" Count"] = @([tiVoManager.theTVDBStatistics[kMTVDBWrongInfo@" Count"] intValue] + 1);
+					[((NSMutableDictionary *)tiVoManager.theTVDBStatistics[kMTVDBWrongInfo@" List"]) setValue:  details forKey:self.showTitle  ];
                     if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB]) {
                         //user asked us to prefer TVDB
                         self.episodeNumber = [NSString stringWithFormat:@"%d%02d",
@@ -352,10 +360,17 @@ __DDLOGHERE__
 				tiVoManager.theTVDBStatistics[kMTVDBNewInfo] = @([tiVoManager.theTVDBStatistics[kMTVDBNewInfo] intValue] + 1);
 				DDLogVerbose(@"Adding TVDB season/episode %d/%d to show %@",self.season, self.episode, self.showTitle);
 			}
-		}
+        } else {
+            NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self episodeIDForReporting ], self.originalAirDateNoTime, self.season, self.episode, [self urlForReporting:seriesIDTVDB] ];
+            DDLogDetail(@"No episode info for %@ %@ ",self.episodeTitle, details);
+            tiVoManager.theTVDBStatistics[kMTVDBNoEpisode @" Count"] = @([tiVoManager.theTVDBStatistics[kMTVDBNoEpisode @" Count"] intValue] + 1);
+            [((NSMutableDictionary *)tiVoManager.theTVDBStatistics[kMTVDBNoEpisode @" List"]) setValue:  details forKey:self.showTitle  ];
+        }
 
         if (artwork.length) self.tvdbArtworkLocation = artwork;
 
+    } else {
+       tiVoManager.theTVDBStatistics[kMTVDBNotSeries] = @([tiVoManager.theTVDBStatistics[kMTVDBNotSeries] intValue] + 1);
     }
 }
 
@@ -891,17 +906,24 @@ __DDLOGHERE__
 -(void) setProgramId:(NSString *)programId {
 	if (programId != _programId) {
 		_programId = programId;
-		_episodeID = programId;
+        _episodeID = nil;
+    }
+}
+
+-(NSString *) episodeID {
+    if (!_episodeID) {
+		_episodeID = _programId;
 		if (_episodeID.length == 12) {
 			_episodeID = [NSString stringWithFormat:@"%@00%@",[_episodeID substringToIndex:2],[_episodeID substringFromIndex:2]];
 		}
 		if (![_episodeID hasPrefix:@"MV"] && [_episodeID hasSuffix:@"0000"] ) {
-			NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init] ;
-			[dateFormat setDateStyle:NSDateFormatterShortStyle];
-			[dateFormat setTimeStyle:NSDateFormatterNoStyle] ;
+                NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init] ;
+                [dateFormat setDateStyle:NSDateFormatterShortStyle];
+                [dateFormat setTimeStyle:NSDateFormatterNoStyle] ;
 			_episodeID = [NSString stringWithFormat: @"%@-%@",_episodeID, [dateFormat stringFromDate: _showDate] ];
 		}
 	}
+    return _episodeID;
 }
 
 #pragma mark - Custom Setters; many for parsing

@@ -45,5 +45,6 @@
 -(IBAction)createManualSubscription:(id)sender;
 - (IBAction)findShows:(id)sender;
 - (IBAction)clearHistory:(id)sender;
+-(IBAction)showLogs:(id)sender;
 
 @end

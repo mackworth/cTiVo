@@ -178,9 +178,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
 		DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
 		
-        self.tvdbCache = [[NSUserDefaults standardUserDefaults] objectForKey:kMTTheTVDBCache];
-        //Note tvDBCache never shrinks currently. Should add last used date?
-		programEncoding = nil;
+
+ 		programEncoding = nil;
 		programDecrypting = nil;
 		programDownloading = nil;
 		downloadURLConnection = nil;

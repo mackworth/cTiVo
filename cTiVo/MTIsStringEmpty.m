@@ -1,10 +1,10 @@
-@interface MTStringEmpty : NSValueTransformer {
+@interface MTIsStringEmpty : NSValueTransformer {
 	
 }
 
 @end
 
-@implementation MTStringEmpty
+@implementation MTIsStringEmpty
 
 + (Class)transformedValueClass { return [NSNumber class]; }
 + (BOOL)allowsReverseTransformation { return NO; }

@@ -321,6 +321,24 @@ BOOL doesAppRunInBackground(void);
     return (hasProperPrefix && hasProperDate && hasProperSuffix);
 }
 
+- (BOOL)isOldLogFile:(NSString *)fileName
+{
+    BOOL hasProperPrefix = [fileName hasPrefix:@"log-"];
+    BOOL hasProperSuffix = [fileName hasSuffix:@".txt"];
+    BOOL hasProperMiddle = NO;
+    
+    if (hasProperPrefix && hasProperSuffix)
+    {
+        NSUInteger lengthOfMiddle = fileName.length - @"log-".length - @".txt".length;
+        
+        hasProperMiddle = lengthOfMiddle == 6;
+        
+    }
+    
+    return (hasProperPrefix && hasProperMiddle && hasProperSuffix);
+
+}
+
 - (NSDateFormatter *)logFileDateFormatter
 {
     NSMutableDictionary *dictionary = [[NSThread currentThread]
@@ -370,6 +388,12 @@ BOOL doesAppRunInBackground(void);
             NSString *filePath = [logsDirectory stringByAppendingPathComponent:fileName];
             
             [unsortedLogFilePaths addObject:filePath];
+        } else if ([self isOldLogFile: fileName]) {
+            NSString *filePath = [logsDirectory stringByAppendingPathComponent:fileName];
+            NSLogInfo(@"DDLogFileManagerDefault: Deleting old format log file: %@", fileName);
+            
+            [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
+            
         }
     }
     
