@@ -187,7 +187,7 @@ __DDLOGHERE__
 										  @YES,kMTGetEpisodeArt,
 										  @NO, kMTiTunesContentIDExperiment,
 										  @NO, kMTTrustTVDB,
-                                          @2, kMTMaxNumDownloaders,
+                                          @2, kMTMaxNumEncoders,
                                           @120, kMTMaxProgressDelay,
                                           nil];
     

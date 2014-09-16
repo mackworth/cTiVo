@@ -675,7 +675,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				managingDownloads = NO;
 				return;
 			}
-            if (s.isNew && (tiVoManager.numEncoders < [[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxNumDownloaders])) {
+            if (s.isNew && (tiVoManager.numEncoders < [[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxNumEncoders])) {
                 if(s.show.tiVo.isReachable) {  //isn't this self.isReachable?
 					tiVoManager.numEncoders++;
 					DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,s.show.showTitle, tiVoManager.numEncoders);

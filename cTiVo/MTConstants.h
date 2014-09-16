@@ -196,7 +196,7 @@
 
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
 #define kMTUpdateIntervalMinutes @"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes (No GUI)
-#define kMTMaxNumDownloaders @"MaxNumberDownloaders"	//Limit number of encoders to limit cpu usage (No GUI) //
+#define kMTMaxNumEncoders @"MaxNumberEncoders"	//Limit number of encoders to limit cpu usage (No GUI) //
 #define kMTMaxProgressDelay @"MaxProgressDelay"      //Maximum time of no encoder progress before giving up (No GUI)  //
 
 #define kMTRunComSkip @"RunComSkip"                 // Whether to run comSkip program after conversion
