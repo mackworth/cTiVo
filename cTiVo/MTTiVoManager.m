@@ -18,7 +18,6 @@
 
 @interface MTTiVoManager () {
 	
-    MTNetService *tivoService ;
     NSNetServiceBrowser *tivoBrowser;
     NSMutableData *listingData;
 	//	NSMutableDictionary *tiVoShowsDictionary;
@@ -1455,6 +1454,17 @@ static MTTiVoManager *sharedTiVoManager = nil;
     [_tivoServices addObject:netService];
     netService.delegate = self;
     [netService resolveWithTimeout:6.0];
+}
+
+- (void)netServiceBrowser:(NSNetServiceBrowser *)browser
+             didNotSearch:(NSDictionary *)errorDict
+{
+    DDLogReport(@"Bonjour service not found: %@",errorDict);
+}
+
+- (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing {
+    DDLogReport(@"Removing Service: %@",aNetService.name);
+
 }
 
 #pragma mark - NetService delegate methods
