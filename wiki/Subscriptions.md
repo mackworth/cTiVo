@@ -5,7 +5,7 @@ One of the main features of cTiVo is the ability to subscribe to a series. Subsc
 
 ## Creating a subscription
 
-The simplest way to create a subscription, just set cTivo's options the way you like them, and then just drag any episode of the series from either the show table or download table into the subscription table. cTiVo will create a subscription, and look for any episodes of that series in the show list after the one you dragged. More importantly, whenever cTiVo is running, it will download any further episodes using those options. Although cTiVo will obviously not download any shows when it is not running, when it next runs, it will find any shows it has not previously downloaded.
+The simplest way to create a subscription, just set cTiVo's options the way you like them, and then just drag any episode of the series from either the show table or download table into the subscription table. cTiVo will create a subscription, and look for any episodes of that series in the show list after the one you dragged. More importantly, whenever cTiVo is running, it will download any further episodes using those options. Although cTiVo will obviously not download any shows when it is not running, when it next runs, it will find any shows it has not previously downloaded.
 
 Note that video files are enormous (HD files are about 5-7GB per hour), and you will need to be careful about not running out of disk space. You'll need at least twice the space of the largest individual file. On the other hand, after downloading and converting, they might only be 1GB per hour.
 

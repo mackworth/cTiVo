@@ -5,14 +5,30 @@ This document is to cover some interesting topics that are intended for advanced
 
 Sections:  
 
+- [Artwork](#artwork)
 - [Manual TiVos](#manual-tivos)
 - [Edit Formats](#edit=formats)
-- [Artwork](#artwork)
 - [Advanced Settings](#advanced-settings)
 - [theTVDB](#thetvdb)
 - [Advanced Subscriptions ](#advanced-subscriptions)
-- [Log Files ](#log-files)
 - [Filename Templates](#filename-templates)
+- [Hidden options](#hidden-options)
+
+# Artwork
+
+For MPEG files (.MPG, .MP4, .MOV, or .M4V), cTiVo can embed a still picture inside the file to represent it in iTunes, iOS devices, or other players that understand this standard. By default, this picture is one of the first frames of the video, but you have many choices available. First, in Preferences, you can specify that all videos should have the same cTiVo icon, representing that it came from your TiVo. Secondly, in Preferences, you can enable cTiVo retrieving fan-generated, episode-specific artwork from theTVDB.com (although this is dependent on the series/episode being in the database). Third, you can create a "thumbnails" directory in your download folder containing artwork that is added to episodes as they are generated. These files can be in almost any format supported by the OS, but the filename has to be in a specific syntax.
+
+The filename must start with the series title (e.g. "The Daily Show with Jon Stewart") with any slashes or colons replaced with dashes. Then you can create a series-generic file (no suffix), a season-specific file (suffix of Snn, or an episode-specific file (suffix of SnnEnn). 
+
+These local files can be stored in the download directory itself or in a "thumbnails" subdirectory of the download directory. If you have enabled series-specific subdirectories within the download directory, they can also be in that directory, or in a "thumbnails" subdirectory of that subdirectory. 
+To give as much control to you as possible, if more than one of these artwork types are available, it will use the first one it finds in the following order:
+
+- Local episode-specific (SnnEnn)
+- theTVDB artwork (if enabled and available)
+- Local season-specific (S00)
+- Local series-generic
+- cTiVo icon (if enabled)
+- Initial frame from video
 
 # Manual TiVos
 
@@ -39,7 +55,7 @@ If you'd like to configure a different video encoder, or provide different param
 - **Encoder to Use**: See [Encoder To Use](#encoder-to-use)
 - **Regex for Encoder Log**: If the encoder cannot support simultaneous encoding (e.g. HandBrakeCLI), the encoder should provide in its standard output the percentage complete as a number from 0-100.  You will need to provide a regex expression for extracting this number from the last few lines of the standard output.  For example, HandBrakeCLI writes its progress as 87 %, so the regex is `([\%` This will only be used when doing sequential downloading, decrypting, and encoding.  When doing simultaneous encoding, the data flow through the pipes is used to measure progress.
 - **Video/Audio/Other Options for Encoder:** These are passed on the command line to the encoder; see [Arguments](#arguments).
-- **Comskip Options**: ComSkip is an experimental feature for cTiVo; See [the comskip project](http://www.kaashoek.com/comskip/). Included in this implementation is a configuration file (comskip.ini), which can be found on the [cTivo  source code page](../cTiVo/comskip.ini). In addition to other command line parameters, you can replace the built-in comskip.ini with your own comskip.ini file by entering "--ini=\<full path\>/comskip.ini" providing the full path to your own file.
+- **Comskip Options**: ComSkip is an experimental feature for cTiVo; See [the comskip project](http://www.kaashoek.com/comskip/). Included in this implementation is a configuration file (comskip.ini), which can be found on the [cTiVo  source code page](../cTiVo/comskip.ini). In addition to other command line parameters, you can replace the built-in comskip.ini with your own comskip.ini file by entering "--ini=\<full path\>/comskip.ini" providing the full path to your own file.
 - **ccExtractor Options**: ccExtractor exports subtitles from the video stream into a .srt text file. See  [the ccExtractor project](http://ccextractor.sourceforge.net/using-ccextractor/command-line-usage.html)
 - **Can run download and encode at same time** should be set only if the encoder can run as a final stage of a pipeline (stdin being the source pipe).
 
@@ -88,62 +104,53 @@ OR, if no outputFileFlag:
 ```` 
 If you are debugging a format, you can use the advance preferences to increase the debugging level. See [Log Files](#log-files) below for more information. You can also set the "Don't Delete tmp files" option, which will save the subsidiary program log files (from your encoder, comskip, etc) for your perusal. Be sure to set it back when finished debugging as it will generate massive temp files.
 
-# Artwork
-
-For MPEG files (.MPG, .MP4, .MOV, or .M4V), cTivo can embed a still picture inside the file to represent it in iTunes, iOS devices, or other players that understand this standard. By default, this picture is one of the first frames of the video, but you have many choices available. First, in Preferences, you can specify that all videos should have the same cTiVo icon, representing that it came from your TiVo. Secondly, in Preferences, you can enable cTiVo retrieving fan-generated, episode-specific artwork from theTVDB.com (although this is dependent on the series/episode being in the database). Third, you can create a "thumbnails" directory in your download folder containing artwork that is added to episodes as they are generated. These files can be in almost any format supported by the OS, but the filename has to be in a specific syntax.
-
-The filename must start with the series title (e.g. "The Daily Show with Jon Stewart") with any slashes or colons replaced with dashes. Then you can create a series-generic file (no suffix), a season-specific file (suffix of Snn, or an episode-specific file (suffix of SnnEnn). 
-
-These local files can be stored in the download directory itself or in a "thumbnails" subdirectory of the download directory. If you have enabled series-specific subdirectories within the download directory, they can also be in that directory, or in a "thumbnails" subdirectory of that subdirectory. 
-To give as much control to you as possible, if more than one of these artwork types are available, it will use the first one it finds in the following order:
-
-- Local episode-specific (SnnEnn)
-- theTVDB artwork (if enabled and available)
-- Local season-specific (S00)
-- Local series-generic
-- cTiVo icon (if enabled)
-- Initial frame from video
-
 # Advanced Settings
 
 There are a few preferences that are intended for debugging purposes or for very advanced users only. These are hidden, but can be activated by holding down the Option key while pulling down the cTiVo menu and selecting Adv Preferences (alternatively Option-Cmd-Comma). 
 
-![](Images/cTivoAdvancedPreferencesScreen.png)
+![](Images/cTiVoAdvancedPreferencesScreen.png)
 
-## Debug Levels
+### Debug Levels
 
-This will increase the level of detail written to the Console log from major events to verbose. As "verbose" is indeed very verbose, you can also set the debug level separately for each of the major modules in the program. This would mainly be of use while reading the source code or under the direction of someone helping you debug a problem. 
+This will increase the level of detail written to the Console log from major events to verbose for all modules. As "verbose" is indeed very verbose, you can also set the debug level separately for each of the major modules in the program at the bottom of this screen. This would mainly be of use while reading the source code or under the direction of someone helping you debug a problem. See (Logging)[Troubleshooting.md#Logging] for more information. 
 
-## Disable Drag to Select in UI
+### Disable Drag to Select in UI
 
-OSX has an inconsistency of what "click on a filename and drag across multiple files" means.  This can either mean "drag the first file", or "select multiple files". Our default is the latter, but you can change it with this option.
+OS X has an inconsistency of what "click on a filename and then drag across multiple files" means.  This can either mean "drag the first file", or "select multiple files". Our default is the latter, but you can change it with this option.
 
-## Don't Delete tmp Files
+### Don't Delete tmp Files
 
-During its processing, cTiVo creates several intermediate files, which are deleted upon completion. The video files are typically in the download directory, and the others (sub-program log files, etc) are in the /tmp/cTiVo/ directory. For debugging purposes, this option lets you turn off the automatic deletion. Setting this option can burn up your hard drive very quickly, so be sure to disable after debugging.
+During its processing, cTiVo creates several intermediate files, which are deleted upon completion. The video files are typically in the download directory, and the others (sub-program log files, etc) are in the /tmp/cTiVo/ directory. For debugging purposes, this option lets you turn off the automatic deletion. Setting this option can burn up your hard drive space very quickly, so be sure to disable after debugging!
 
-## Download Retries
+### Download Retries
 
-If cTivo encounters a failure (network not available, encoder problem, etc), it will retry automatically. This option lets you change the number of times it retries before giving up entirely; default is 3.
+If cTiVo encounters a failure (network not available, encoder problem, etc), it will retry automatically. This option lets you change the number of times it retries before giving up entirely; default is 3.
 
-## Don't use memory buffer for downloads
+### Don't use memory buffer for downloads
 
 For performance reasons, cTiVo will normally download the TiVo file into memory rather than writing it to a temporary file. Sometimes for debugging purposes, it's convenient to have it write these files directly to disk, and this option enables that.
 
-## TiVo Refresh Rate
+### TiVo Refresh Rate
 
-How often (in minutes) should cTivo check the Now Playing list of your TiVos
+How often (in minutes) should cTiVo check the Now Playing list of your TiVos
 
-## Temporary Files Directory
-While the video files are stored in the download directory, during processing many other files are stored in a working directory. By default this is in /tmp/ctivo, and is emptied as each transaction is finished and when cTivo starts up. You can change this directory here.
+### Opt-out of Crashlytics reporting
 
-## View TVDB Stats
+If cTiVo crashes, it will report where in the program that occurred on the next startup, unless this option is checked.
 
-Displays the results of theTVDB lookups since cTiVo has started, or since an Empty Cache command. See [below for more on interpreting this information.
+### Temporary Files Directory
+While the video files are stored in the download directory, during processing many other files are stored in a working directory. By default this is in /tmp/ctivo, and is emptied as each transaction is finished and when cTiVo starts up. You can change this directory here.
 
-## Empty Cache
+### View TVDB Statistics
 
-Empty Cache erases the caches stored in the program and reloads the information contained. The two caches are theTVDB information and the detailed XML loaded from the !TiVo for each show. If you think something is wrong with the information being displayed this might be useful, but more important is to reset theTVDB statistics to go directly to the source. See [theTVDB](theTVDB]) below for more information.
+Displays the results of theTVDB lookups since cTiVo has started, or since an Empty Cache command. See [theTVDB](#thetvdb) for more on interpreting this information.
+
+### Empty Caches
+
+Empty Caches erases the caches stored in the program and reloads the information contained. The two caches are theTVDB information and the detailed XML loaded from the TiVo for each show. Be warned that if you have hundreds of shows on your TiVos, this will generate a lot of network traffic. If you think something is wrong with the information being displayed this might be useful, but more important reason for this command is to reset theTVDB statistics to go directly to the source rather than using the cache. See [theTVDB](theTVDB) below for more information.
+
+### Module Debug Levels
+The remaining controls let you set debug levels for each individual module.  See [Logging](Troubleshooting.md#logging) for more information.
 
 ## TheTVDB
 
@@ -211,45 +218,6 @@ If you want the subscription table to look a little better, you can add <Display
 
 As another example, the shortcut ALL to download all recorded shows is implemented with .*\<\<\<ALL SHOWS>>>, so dot-star will matches all series, and it will display as \<\<ALL SHOWS>> in the list.
 
-# Log Files
-
-cTiVo stores its main log files at ~/Library/Logs/cTiVo.  The last four files are kept with up to 10M each. They are named with random numbers, so use the creation date to figure out the order. These files can be opened in any text editor, or the Console application, which provides a nice filter option.
-
-As there's an enormous amount of data flowing through cTiVo, we let you control the amount of logs generated by the different parts of the program. There are five levels:
-
-- None: No output generated
-- Normal: General tracking of events
-- Major: Key points in the work flow
-- Detail: Detailed work flow
-- Verbose: Logs of all major data elements
-
-Go to Advanced Preferences (Option-Cmd-Comma) to set these levels. 
-The main objects in the program, at least the ones that generate log information, are:
-
-- AppDelegate: The main program
-- TivoManager: Holder of the major data items and cross-!TiVo activity
-- TiVo: Communicating with an individual TiVo
-- TiVoShow: A show as stored on a TiVo
-- Download: A request to copy a show to the Mac
-- Format: Which encoder and parameters to use for a download
-- EDL: Edit Decision List (generated by comskip to indicated where commercials begin/end)
-- SRT: Sub Rip Text (subtitle format as generated by ccextractor )
-- iTunes: Communication object with iTunes
-- Task: An individual activity, such as commercialing, or decoding to be monitored
-- TaskChain: A set of Tasks to be executed in parallel
-- Subscription: A request to store all episodes of a series
-
-In addition, there are the User Interface Components, which log user requests, and 
-
-- MainWindowController
-- ProgramTableView
-- DownloadTableView
-- SubscriptionTableView
-
-While diagnosing an issue, you probably want to set all components to at least Major, with relevant ones to Detail and the one you're most interested in to Verbose. 
-
-For example, if you're interested in debugging a new encoding format, most of the debug activity you'll be interested in will be in Download, so set that one and Format to Verbose.  In the event of a failure, this will include the recent entries in the sub-program's (e.g. encoder, comskip etc) log files to help you diagnose the issue. Beyond the Normal level, the logs are primarily intended as a guide to which part of the code is being executed, so it's best to read them in conjunction with the source code. One string to filter on is "DL Status", which shows the transitions each show makes from one phase to the next. To get maximum information about a download, also set Task and TaskChain to Detail or Verbose, although this generates a lot of data.
-
 # Filename Templates
 
 By default, cTiVo will save the downloaded files as `SeriesName- EpisodeTitle.ext`; for example, `The Big Bang Theory- The Hofstadter Insufficiency.mp4`. However, for some environments, a different filename format might be desired. For example, Plex likes to see filenames like `The Big Bang Theory - S07E01 - The Hofstadter Insufficiency.mp4`.
@@ -312,7 +280,7 @@ And more!
 Depending on various issues, certain fields may not be available. The most obvious example is that movies don’t have season/episode information, but do have 'movieYear' information. So you can create a compound keyword, which contains one or more keywords separated by spaces as well as literal text in quotes. If ANY of the keywords included in the compound keyword are empty, then the ENTIRE compound keyword becomes empty. So, the compound keyword `[" (" SeriesEpNumber ") “]` would become `(S07E01)` for our episode above, but be omitted for a movie. Alternatively, the compound keyword `[“ (“ movieYear “ )”]` would represent `(2013)` for a movie released that year, but be omitted entirely for our episode of Big Bang, as `movieYear`would be blank.  
 
 Example: naming a show with either season information OR movie information, as available:
-	`[mainTitle][" (" movieYear “)"] [" (" SeriesEpNumber ") "][" - " episodeTitle]
+	`[mainTitle][" (" movieYear “)"] [" (" SeriesEpNumber ") "][" - " episodeTitle]`
 	==>`The Big Bang Theory - S07E01 - The Hofstadter Insufficiency.mp4`
 	==>`Machete (2010)`
 
@@ -328,3 +296,10 @@ And you can put these together:
 * Colons are converted to dashes.
 * You cannot control the extension of the filename here; that is determined by the format you choose.
 
+# Hidden Options
+
+There are a few options that are not presented in the user interface. This choice is based on not many people choosing this option OR not much testing being done. These options are subject to being removed at any time, particularly if any support problems emerge.
+
+@"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes (No GUI)
+#define kMTMaxNumEncoders @"MaxNumberEncoders"	//Limit number of encoders to limit cpu usage (No GUI) //
+#define kMTMaxProgressDelay @"MaxProgressDelay"

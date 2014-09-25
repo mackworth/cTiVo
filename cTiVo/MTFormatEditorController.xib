@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="14A361c" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1070" defaultVersion="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6245"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTFormatEditorController">
@@ -17,7 +17,7 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <view id="2448">
             <rect key="frame" x="0.0" y="0.0" width="541" height="700"/>
             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -36,7 +36,7 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="2578" id="2574">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="system"/>
+                        <font key="font" metaFont="menu"/>
                         <menu key="menu" title="OtherViews" id="2575">
                             <items>
                                 <menuItem title="Item 1" state="on" id="2578"/>
@@ -57,12 +57,12 @@
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
+                        <binding destination="-2" name="value" keyPath="currentFormat.comSkip" id="2660"/>
                         <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" id="2628">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
-                        <binding destination="-2" name="value" keyPath="currentFormat.comSkip" id="2660"/>
                     </connections>
                 </button>
                 <button toolTip="Indicates that the output files are compatible with iTunes" id="2484">
@@ -73,12 +73,12 @@
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
+                        <binding destination="-2" name="value" keyPath="currentFormat.iTunes" id="2644"/>
                         <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" id="2657">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
-                        <binding destination="-2" name="value" keyPath="currentFormat.iTunes" id="2644"/>
                     </connections>
                 </button>
                 <button toolTip="Allow use of pipes to decrypt and encode during download" id="2478">
@@ -110,6 +110,11 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
+                        <binding destination="-2" name="value" keyPath="currentFormat.filenameExtension" id="2720">
+                            <dictionary key="options">
+                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
+                            </dictionary>
+                        </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2662">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
@@ -118,11 +123,6 @@
                         <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2662" id="2663">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="value" keyPath="currentFormat.filenameExtension" id="2720">
-                            <dictionary key="options">
-                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
                             </dictionary>
                         </binding>
                     </connections>
@@ -190,6 +190,11 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
+                        <binding destination="-2" name="value" keyPath="currentFormat.encoderUsed" id="2724">
+                            <dictionary key="options">
+                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
+                            </dictionary>
+                        </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2648">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
@@ -201,11 +206,6 @@
                             </dictionary>
                         </binding>
                         <binding destination="-2" name="textColor" keyPath="validExecutableColor" id="2652"/>
-                        <binding destination="-2" name="value" keyPath="currentFormat.encoderUsed" id="2724">
-                            <dictionary key="options">
-                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
-                            </dictionary>
-                        </binding>
                     </connections>
                 </textField>
                 <textField toolTip="Video-related command-line options " verticalHuggingPriority="750" id="2464">
@@ -250,7 +250,7 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="Delete" bezelStyle="roundedRect" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2606">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="titleBar" size="12"/>
+                        <font key="font" metaFont="cellTitle"/>
                         <connections>
                             <action selector="deleteFormat:" target="-2" id="2669"/>
                         </connections>
@@ -268,7 +268,7 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="Duplicate" bezelStyle="roundedRect" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2608">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="titleBar" size="12"/>
+                        <font key="font" metaFont="cellTitle"/>
                     </buttonCell>
                     <connections>
                         <action selector="duplicateFormat:" target="-2" id="2673"/>
@@ -279,7 +279,7 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="New" bezelStyle="roundedRect" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2569">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="titleBar" size="12"/>
+                        <font key="font" metaFont="cellTitle"/>
                     </buttonCell>
                     <connections>
                         <action selector="newFormat:" target="-2" id="2674"/>
@@ -290,7 +290,7 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="Cancel" bezelStyle="roundedRect" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2603">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="titleBar" size="12"/>
+                        <font key="font" metaFont="cellTitle"/>
                         <connections>
                             <binding destination="-2" name="enabled" keyPath="shouldSave" id="2626"/>
                         </connections>
@@ -305,7 +305,7 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="Save" bezelStyle="roundedRect" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2612">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="titleBar" size="12"/>
+                        <font key="font" metaFont="cellTitle"/>
                     </buttonCell>
                     <connections>
                         <action selector="saveFormats:" target="-2" id="2670"/>
@@ -321,6 +321,11 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
+                        <binding destination="-2" name="value" keyPath="currentFormat.inputFileFlag" id="2721">
+                            <dictionary key="options">
+                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
+                            </dictionary>
+                        </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2655">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
@@ -329,11 +334,6 @@
                         <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2655" id="2656">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="value" keyPath="currentFormat.inputFileFlag" id="2721">
-                            <dictionary key="options">
-                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
                             </dictionary>
                         </binding>
                     </connections>
@@ -391,27 +391,27 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
-                        <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2683">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
                         <binding destination="-2" name="enabled2" keyPath="currentFormat.comSkip" previousBinding="2684" id="2687">
                             <dictionary key="options">
-                                <integer key="NSNotApplicablePlaceholder" value="-1"/>
-                                <integer key="NSNoSelectionPlaceholder" value="-1"/>
                                 <integer key="NSMultipleValuesPlaceholder" value="-1"/>
+                                <integer key="NSNoSelectionPlaceholder" value="-1"/>
+                                <integer key="NSNotApplicablePlaceholder" value="-1"/>
                                 <integer key="NSNullPlaceholder" value="-1"/>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2683" id="2684">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
                         <binding destination="-2" name="value" keyPath="currentFormat.edlFlag" id="2723">
                             <dictionary key="options">
                                 <bool key="NSContinuouslyUpdatesValue" value="YES"/>
+                            </dictionary>
+                        </binding>
+                        <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2683">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">NSNegateBoolean</string>
+                            </dictionary>
+                        </binding>
+                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2683" id="2684">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
                     </connections>
@@ -440,17 +440,17 @@
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
-                        <binding destination="-2" name="enabled2" keyPath="currentFormat.mustDownloadFirst" previousBinding="2622" id="2623">
-                            <dictionary key="options">
-                                <integer key="NSNotApplicablePlaceholder" value="-1"/>
-                                <integer key="NSNoSelectionPlaceholder" value="-1"/>
-                                <integer key="NSMultipleValuesPlaceholder" value="-1"/>
-                                <integer key="NSNullPlaceholder" value="-1"/>
-                            </dictionary>
-                        </binding>
                         <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2621" id="2622">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
+                            </dictionary>
+                        </binding>
+                        <binding destination="-2" name="enabled2" keyPath="currentFormat.mustDownloadFirst" previousBinding="2622" id="2623">
+                            <dictionary key="options">
+                                <integer key="NSMultipleValuesPlaceholder" value="-1"/>
+                                <integer key="NSNoSelectionPlaceholder" value="-1"/>
+                                <integer key="NSNotApplicablePlaceholder" value="-1"/>
+                                <integer key="NSNullPlaceholder" value="-1"/>
                             </dictionary>
                         </binding>
                         <binding destination="-2" name="value" keyPath="currentFormat.regExProgress" id="2725">
@@ -469,7 +469,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Format provided by cTivo program." verticalHuggingPriority="750" id="2459">
+                <textField toolTip="Format provided by cTiVo program." verticalHuggingPriority="750" id="2459">
                     <rect key="frame" x="17" y="642" width="178" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="This is a Built-In Format" id="2601">
@@ -504,8 +504,8 @@
                                 <connections>
                                     <binding destination="-2" name="attributedString" keyPath="currentFormat.attributedFormatDescription" id="2654">
                                         <dictionary key="options">
-                                            <bool key="NSConditionallySetsEditable" value="NO"/>
                                             <bool key="NSAlwaysPresentsApplicationModalAlerts" value="YES"/>
+                                            <bool key="NSConditionallySetsEditable" value="NO"/>
                                         </dictionary>
                                     </binding>
                                     <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2625">
@@ -536,6 +536,11 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
+                        <binding destination="-2" name="value" keyPath="currentFormat.encoderVideoOptions" id="2726">
+                            <dictionary key="options">
+                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
+                            </dictionary>
+                        </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2650">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
@@ -544,11 +549,6 @@
                         <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2650" id="2651">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="value" keyPath="currentFormat.encoderVideoOptions" id="2726">
-                            <dictionary key="options">
-                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
                             </dictionary>
                         </binding>
                     </connections>
@@ -562,6 +562,11 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
+                        <binding destination="-2" name="value" keyPath="currentFormat.encoderAudioOptions" id="2727">
+                            <dictionary key="options">
+                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
+                            </dictionary>
+                        </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2638">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
@@ -570,11 +575,6 @@
                         <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2638" id="2639">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="value" keyPath="currentFormat.encoderAudioOptions" id="2727">
-                            <dictionary key="options">
-                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
                             </dictionary>
                         </binding>
                     </connections>
@@ -588,6 +588,11 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
+                        <binding destination="-2" name="value" keyPath="currentFormat.encoderOtherOptions" id="2728">
+                            <dictionary key="options">
+                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
+                            </dictionary>
+                        </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2629">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
@@ -596,11 +601,6 @@
                         <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2629" id="2630">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="value" keyPath="currentFormat.encoderOtherOptions" id="2728">
-                            <dictionary key="options">
-                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
                             </dictionary>
                         </binding>
                     </connections>
@@ -623,27 +623,27 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
-                        <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2692">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
                         <binding destination="-2" name="enabled2" keyPath="currentFormat.comSkip" previousBinding="2693" id="2697">
                             <dictionary key="options">
-                                <integer key="NSNotApplicablePlaceholder" value="-1"/>
-                                <integer key="NSNoSelectionPlaceholder" value="-1"/>
                                 <integer key="NSMultipleValuesPlaceholder" value="-1"/>
+                                <integer key="NSNoSelectionPlaceholder" value="-1"/>
+                                <integer key="NSNotApplicablePlaceholder" value="-1"/>
                                 <integer key="NSNullPlaceholder" value="-1"/>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2692" id="2693">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
                         <binding destination="-2" name="value" keyPath="currentFormat.comSkipOptions" id="2729">
                             <dictionary key="options">
                                 <bool key="NSContinuouslyUpdatesValue" value="YES"/>
+                            </dictionary>
+                        </binding>
+                        <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2692">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">NSNegateBoolean</string>
+                            </dictionary>
+                        </binding>
+                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2692" id="2693">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
                     </connections>
@@ -666,6 +666,11 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
+                        <binding destination="-2" name="value" keyPath="currentFormat.captionOptions" id="2730">
+                            <dictionary key="options">
+                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
+                            </dictionary>
+                        </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2714">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
@@ -674,11 +679,6 @@
                         <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2714" id="2715">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="value" keyPath="currentFormat.captionOptions" id="2730">
-                            <dictionary key="options">
-                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
                             </dictionary>
                         </binding>
                     </connections>
@@ -694,7 +694,7 @@
                         <binding destination="-2" name="value" keyPath="currentFormat.isHidden" id="2640"/>
                     </connections>
                 </button>
-                <box autoresizesSubviews="NO" verticalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" id="2461">
+                <box verticalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" id="2461">
                     <rect key="frame" x="-1" y="629" width="541" height="5"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
@@ -743,7 +743,7 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="Done" bezelStyle="roundedRect" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2620">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="titleBar" size="12"/>
+                        <font key="font" metaFont="cellTitle"/>
                     </buttonCell>
                     <connections>
                         <action selector="cancelFormatEdit:" target="-2" id="2675"/>

@@ -44,7 +44,6 @@
 		1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C3173DC7D100B47539 /* DDFileLogger.m */; };
 		1E9959CA173DC7D100B47539 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C7173DC7D100B47539 /* DDTTYLogger.m */; };
 		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
-		1EABE6F416B0A254004DDB61 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
@@ -86,7 +85,6 @@
 		D297AC28173047EE0036125A /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC27173047EE0036125A /* libstdc++.dylib */; };
 		D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = D2995CA5168B8BB200B960B9 /* MTCheckBox.m */; };
 		D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */; };
-		D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A09C7916C77E9D00F2B86F /* Quartz.framework */; };
 		D2A648F216991CD300C7DA01 /* MTTiVo.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A648F116991CD300C7DA01 /* MTTiVo.m */; };
@@ -143,8 +141,8 @@
 		1E18145D1708AC1500166E5F /* cTiVo.help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cTiVo.help; sourceTree = "<group>"; };
 		1E18145F1708AF7000166E5F /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cTiVo.icns; sourceTree = "<group>"; };
 		1E2724EE16C9A8B500A21940 /* elgatoScript.pl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.perl; path = elgatoScript.pl; sourceTree = "<group>"; };
-		1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = elgatoLaunch.scpt; sourceTree = "<group>"; };
-		1E2725C316CB63D500A21940 /* elgatoProgress.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = elgatoProgress.scpt; sourceTree = "<group>"; };
+		1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; lineEnding = 1; path = elgatoLaunch.scpt; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.simpleColoring; };
+		1E2725C316CB63D500A21940 /* elgatoProgress.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; lineEnding = 1; path = elgatoProgress.scpt; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.simpleColoring; };
 		1E389BB616C46BA600B80EC9 /* MTAdvPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTAdvPreferencesViewController.h; sourceTree = "<group>"; };
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
 		1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTIsStringEmpty.h; sourceTree = "<group>"; };
@@ -170,7 +168,7 @@
 		1E6F22D816DD3D9E0071D291 /* NSString+RFC3339Date.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+RFC3339Date.h"; sourceTree = "<group>"; };
 		1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+RFC3339Date.m"; sourceTree = "<group>"; };
 		1E791BD21697C59300E47E84 /* MTSubscription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscription.h; sourceTree = "<group>"; };
-		1E791BD31697C59300E47E84 /* MTSubscription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscription.m; sourceTree = "<group>"; };
+		1E791BD31697C59300E47E84 /* MTSubscription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTSubscription.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		1E7F5ADA1701877A003AA96C /* in-progress-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "in-progress-recording.png"; sourceTree = "<group>"; };
 		1E964C931882768900C19046 /* copyright@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "copyright@2x.png"; sourceTree = "<group>"; };
 		1E964C941882768A00C19046 /* deleted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "deleted@2x.png"; sourceTree = "<group>"; };
@@ -271,8 +269,8 @@
 		D2A7269916A25DEB00C58C5F /* MTFormatEditorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTFormatEditorController.h; sourceTree = "<group>"; };
 		D2A7269A16A25DEB00C58C5F /* MTFormatEditorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTFormatEditorController.m; sourceTree = "<group>"; };
 		D2A7269B16A25DEB00C58C5F /* MTFormatEditorController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTFormatEditorController.xib; sourceTree = "<group>"; };
-		D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTiTivoImport.m; sourceTree = "<group>"; };
-		D2B4B4F31732D69C005B97F1 /* elgatoQuit.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = elgatoQuit.scpt; sourceTree = "<group>"; };
+		D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTiTivoImport.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		D2B4B4F31732D69C005B97F1 /* elgatoQuit.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; lineEnding = 1; path = elgatoQuit.scpt; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.simpleColoring; };
 		D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		D2B73F3116BC485E003CB4ED /* comskip */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = comskip; sourceTree = "<group>"; };
 		D2B73F3516BC8A90003CB4ED /* comskip.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = comskip.ini; sourceTree = "<group>"; };
@@ -296,7 +294,7 @@
 		D2D60BAF16766EFD00CE32DE /* cTiVo-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "cTiVo-Prefix.pch"; sourceTree = "<group>"; };
 		D2D60BB116766EFD00CE32DE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.objj.h; path = MTAppDelegate.h; sourceTree = "<group>"; };
-		D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTAppDelegate.m; sourceTree = "<group>"; };
+		D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTAppDelegate.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D2D60BB716766EFD00CE32DE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		D2D60BC016766F3200CE32DE /* formats.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = formats.plist; sourceTree = "<group>"; };
 		D2D60BC116766F3200CE32DE /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
@@ -332,10 +330,8 @@
 				D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */,
 				D2CAF34016AB43AE004E4CFA /* IOKit.framework in Frameworks */,
 				D2B6706D169CA91F009CB164 /* SystemConfiguration.framework in Frameworks */,
-				D2995CAD168D0EE700B960B9 /* Sparkle.framework in Frameworks */,
 				D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */,
 				D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */,
-				1EABE6F416B0A254004DDB61 /* Growl.framework in Frameworks */,
 				1E07865019C7F5EB00A68051 /* Crashlytics.framework in Frameworks */,
 				D297AC221730296C0036125A /* libmp4v2.a in Frameworks */,
 			);
@@ -699,7 +695,7 @@
 				D2D60B9B16766EFD00CE32DE /* Resources */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
 				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
-				1E07864E19C7F3CE00A68051 /* ShellScript */,
+				1E07864E19C7F3CE00A68051 /* Run Script */,
 				D2AA030A1833F09B00AEE326 /* Sign Bundled Frameworks */,
 			);
 			buildRules = (
@@ -809,13 +805,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		1E07864E19C7F3CE00A68051 /* ShellScript */ = {
+		1E07864E19C7F3CE00A68051 /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Run Script";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1001,7 +998,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = NO;
 				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1060,7 +1057,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
