@@ -17,15 +17,15 @@ Some formats are not intended for playing on your computer, and Quicktime is una
 ###What does the column "Tivo Status" mean?
 These are the icons displayed by TiVo on its NowPlaying status along with a couple we've added for clarity. 
 <table>
-    <tr> <td><img src="Images/in-progress-recording.png></td><td>Recording Now</td></tr>
-    <tr> <td><img src="Images/save-until-i-delete-recording.png></td><td>Save until Deleted</td></tr>
-    <tr> <td><img src="Images/recent-recording.png></td><td>Recently recorded `*`</td></tr>
-    <tr> <td><img src="Images/expires-soon-recording.png></td><td>Expires Soon</td></tr>
-    <tr> <td><img src="Images/expired-recording.png></td><td>Expired</td></tr>
-    <tr> <td><img src="Images/deleted.png></td><td>Deleted at TiVo `*`</td></tr>
-    <tr> <td><img src="Images/suggestion-recording.png></td><td>TiVo Suggestion</td></tr>
-    <tr> <td><img src="Images/copyright.png></td><td>Copying prevented `*`</td></tr>
-    <tr> <td><img src="Images/status-unknown.png></td><td>Status Not Loaded Yet `*` </td></tr>
+    <tr> <td><img src="Images/in-progress-recording.png"></td><td>Recording Now</td></tr>
+    <tr> <td><img src="Images/save-until-i-delete-recording.png"></td><td>Save until Deleted</td></tr>
+    <tr> <td><img src="Images/recent-recording.png"></td><td>Recently recorded `*`</td></tr>
+    <tr> <td><img src="Images/expires-soon-recording.png"></td><td>Expires Soon</td></tr>
+    <tr> <td><img src="Images/expired-recording.png"></td><td>Expired</td></tr>
+    <tr> <td><img src="Images/deleted.png"></td><td>Deleted at TiVo `*`</td></tr>
+    <tr> <td><img src="Images/suggestion-recording.png"></td><td>TiVo Suggestion</td></tr>
+    <tr> <td><img src="Images/copyright.png"></td><td>Copying prevented `*`</td></tr>
+    <tr> <td><img src="Images/status-unknown.png"></td><td>Status Not Loaded Yet `*` </td></tr>
 </table>
 
 `*` = Ones we've added 
