@@ -298,8 +298,9 @@ And you can put these together:
 
 # Hidden Options
 
-There are a few options that are not presented in the user interface. This choice is based on not many people choosing this option OR not much testing being done. These options are subject to being removed at any time, particularly if any support problems emerge.
+There are a few options that are not presented in the user interface. This choice is based on not many people choosing this option OR not much testing being done. These options are subject to being removed at any time, particularly if any support problems emerge. To set these, use the OS X `defaults` command, e.g. `defaults write com.cTiVo.ctivo MaxNumberEncoders 3`
 
-@"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes (No GUI)
-#define kMTMaxNumEncoders @"MaxNumberEncoders"	//Limit number of encoders to limit cpu usage (No GUI) //
-#define kMTMaxProgressDelay @"MaxProgressDelay"
+* UpdateIntervalMinutes* - How many minutes to wait between tivo refreshes; 
+* MaxNumberEncoders* - Maximum number of simultaneous encoders (to limit cpu usage); default is 2
+* MaxProgressDelay* - How long to wait between status updates before declaring an encoder has crashed in seconds; default is 120
+* ThumbnailsDirectory* - Where to look for artwork thumbnails; default is either `<download directory>` or `<download directory>/thumbnails`
