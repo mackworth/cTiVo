@@ -51,7 +51,8 @@
 @property (nonatomic, strong) NSDictionary *showsOnDisk;
 @property (nonatomic, readonly) BOOL anyShowsCompleted;
 @property (nonatomic, strong) NSArray *currentMediaKeys;
-
+@property (nonatomic, readonly) double aggregateSpeed; //sum of the speed of all downloads .
+@property (nonatomic, readonly)  NSTimeInterval aggregateTimeLeft; 
 
 + (MTTiVoManager *)sharedTiVoManager;
 

@@ -14,4 +14,8 @@
 
 -(BOOL)startsWith:(NSString *)string;
 
++ (NSString *)stringFromTimeInterval:(NSTimeInterval)interval;
+
++ (NSString *)stringFromBytesPerSecond: (double) speed;
+
 @end

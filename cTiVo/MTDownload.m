@@ -10,6 +10,7 @@
 #import "MTiTunes.h"
 #import "MTTiVoManager.h"
 #import "MTDownload.h"
+#import "NSString+Helpers.h"
 #include <sys/xattr.h>
 #include "mp4v2.h"
 
@@ -38,6 +39,10 @@
 @property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
 
 @property (nonatomic, readonly) int taskFlowType;
+@property (nonatomic, strong) NSDate *startTime;
+@property (nonatomic, assign) double startProgress;
+@property (nonatomic, strong) NSTimer * progressTimer;
+@property (nonatomic, assign) int numZeroSpeeds;
 
 @end
 
@@ -82,7 +87,60 @@ __DDLOGHERE__
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
 		DDLogMajor(@"Changing DL status of %@ to %@ (%@)", object, [(MTDownload *)object showStatus], [(MTDownload *)object downloadStatus]);
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadStatusChanged object:nil];
+         if (!self.progressTimer && self.isInProgress) {
+             [self launchPerformanceTimer];
+          } else {
+            [self cancelPerformanceTimer];        }
     }
+}
+
+-(void) launchPerformanceTimer {
+    //start Timer after 5 seconds
+    __weak __typeof__(self) weakSelf = self;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        __strong __typeof__(self) strongSelf = weakSelf;
+        strongSelf.startTime = [NSDate date];
+        strongSelf.startProgress = self.processProgress;
+        strongSelf.progressTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updatePerformance) userInfo:nil repeats:YES];
+    });
+}
+
+-(void) cancelPerformanceTimer {
+    [self.progressTimer invalidate]; self.progressTimer = nil;
+    self.startTime = nil;
+}
+
+-(void) updatePerformance {
+    if (self.startTime == nil) {
+        [self cancelPerformanceTimer];
+    } else {
+        NSTimeInterval timeSoFar = -[self.startTime timeIntervalSinceNow];
+        double recentSpeed =  self.show.fileSize * (_processProgress-self.startProgress)/timeSoFar;
+        if (recentSpeed == 0.0) {
+            self.numZeroSpeeds ++;
+        } else {
+            self.numZeroSpeeds = 0;
+        }
+        if (self.numZeroSpeeds > 3) {
+            _speed = 0.0;
+        } else if (_speed == 0.0) {
+            _speed = recentSpeed;
+        } else {
+            const double kSMOOTHING_FACTOR = 0.03;
+            double newSpeed = kSMOOTHING_FACTOR * recentSpeed + (1-kSMOOTHING_FACTOR) * _speed;
+            DDLogVerbose(@"Speed was %0.1f; is %0.1f; ==> %0.1f",_speed/1000, recentSpeed/1000, newSpeed/1000);
+            _speed = newSpeed; //exponential decay on older average
+        }
+        self.startTime = [NSDate date];
+        self.startProgress = self.processProgress;
+    }
+}
+
+-(NSTimeInterval) timeLeft {
+    if (!self.isInProgress) return 0.0;
+    double mySpeed = self.speed;
+    if (mySpeed == 0.0) return 0.0;
+    return self.show.fileSize *(1-_processProgress) /mySpeed;
 }
 
 
@@ -2055,7 +2113,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		@synchronized (urlBuffer){
 			[urlBuffer appendData:data];
 			if (urlBuffer.length > kMTMaxBuffSize) {
-				DDLogReport(@"URLBuffer length exceeded %d, switching to file based buffering",kMTMaxBuffSize);
+				DDLogMajor(@"URLBuffer length exceeded %d, switching to file based buffering",kMTMaxBuffSize);
 				[[NSFileManager defaultManager] createFileAtPath:_bufferFilePath contents:[urlBuffer subdataWithRange:NSMakeRange(urlReadPointer, urlBuffer.length - urlReadPointer)] attributes:nil];
 				bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
 				bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_bufferFilePath];
@@ -2308,9 +2366,13 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(void)dealloc
 {
     self.encodeFormat = nil;
-    [self deallocDownloadHandling];
+    if (_progressTimer) {
+        [_progressTimer invalidate];
+        _progressTimer = nil;
+    }
 	[self removeObserver:self forKeyPath:@"downloadStatus"];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self deallocDownloadHandling];
 	
 }
 

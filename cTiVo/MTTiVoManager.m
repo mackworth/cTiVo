@@ -31,8 +31,7 @@
 	MTNetService *tivoConnectingTo;
 	NSOpenPanel *myOpenPanel;
     double percentComplete;
-    MTDownloadTableCellView *downloadTableCell, *decryptTableCell, *encodeTableCell;
-	NSArray *factoryFormatList;
+ 	NSArray *factoryFormatList;
     int numEncoders;// numCommercials, numCaptions;//Want to limit launches to two encoders.
 	
     NSOperationQueue *queue;
@@ -189,9 +188,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		encodingTask = nil;
 		stdOutFileHandle = nil;
 		tivoConnectingTo = nil;
-		decryptTableCell = nil;
-		downloadTableCell = nil;
-		encodeTableCell = nil;
 		
 		numEncoders = 0;
 //		numCommercials = 0;
@@ -775,6 +771,31 @@ static MTTiVoManager *sharedTiVoManager = nil;
 			[download rescheduleShowWithDecrementRetries:@NO];
 		}
 	}
+}
+
+-(double) aggregateSpeed {
+    double speed = 0.0;
+    for (MTDownload *download in tiVoManager.downloadQueue) {
+        if (download.isInProgress){
+            speed += download.speed;
+        }
+    }
+    return speed;
+}
+
+-(NSTimeInterval) aggregateTimeLeft {
+    double speed = self.aggregateSpeed;
+    if (speed == 0.0) return 0.0;
+    
+    double work = 0.0;
+    for (MTDownload *download in tiVoManager.downloadQueue) {
+        if (download.isInProgress){
+            work += download.show.fileSize * (1.0-download.processProgress);
+        } else if (!download.isDone) {
+            work += download.show.fileSize;
+        }
+    }
+    return work/speed;
 }
 
 #pragma mark - Key Value Observing

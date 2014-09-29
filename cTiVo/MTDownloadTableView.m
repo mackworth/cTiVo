@@ -8,11 +8,12 @@
 
 #import "MTDownloadTableView.h"
 #import "MTPopUpTableCellView.h"
+#import "NSString+Helpers.h"
 
 @interface MTDownloadTableView ()
 
 @property (nonatomic, readonly) BOOL showingProgramsColumn;
-
+@property (nonatomic, strong) NSTimer *updateTimer;
 @end
 
 @implementation MTDownloadTableView
@@ -40,7 +41,7 @@ __DDLOGHERE__
 	DDLogDetail(@"Setting up notifications");
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableViewSelectionDidChange:) name:kMTNotificationDownloadQueueUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
+    //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataDownload) name:kMTNotificationDownloadStatusChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataTiVos) name:kMTNotificationTiVoListUpdated object:nil];
@@ -133,6 +134,17 @@ __DDLOGHERE__
 	}];
 	
 	[self selectRowIndexes:showIndexes byExtendingSelection:NO];
+    if (tiVoManager.anyTivoActive) {
+        if (!self.updateTimer) {
+            self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(updateProgress) userInfo:nil repeats:YES];
+        }
+    } else {
+        if (self.updateTimer) {
+            [self.updateTimer invalidate];
+            self.updateTimer = nil;
+        }
+    }
+    
 }
 
 -(NSArray *)sortedDownloads
@@ -152,7 +164,15 @@ __DDLOGHERE__
 -(void) updateProgressInCell:(MTDownloadTableCellView *) cell forDL:(MTDownload *) download {
 	cell.progressIndicator.doubleValue = download.processProgress;
 	cell.progressIndicator.rightText.stringValue = download.showStatus;
-	[cell setNeedsDisplay:YES];
+    NSTimeInterval myTimeLeft = download.timeLeft;
+    if (myTimeLeft != 0.0) {
+        NSString * timeLeft = [NSString stringFromTimeInterval:  myTimeLeft];
+        NSString * mySpeed = [NSString stringFromBytesPerSecond: download.speed];
+        cell.toolTip = [NSString stringWithFormat:@"%@; Estimated time left: %@",mySpeed, timeLeft];
+    } else {
+        cell.toolTip = download.show.showTitle;
+    }
+    [cell setNeedsDisplay:YES];
 
 }
 -(void)updateProgress
@@ -172,7 +192,15 @@ __DDLOGHERE__
 			seriesCell.progressIndicator.rightText.stringValue = @"";
 		}
 	}
-		
+    double myTimeLeft = tiVoManager.aggregateTimeLeft;
+    if (myTimeLeft == 0.0) {
+        [self.performanceLabel setHidden:YES];
+    } else {
+        [self.performanceLabel setHidden:NO];
+        NSString * timeLeft = [NSString stringFromTimeInterval:  myTimeLeft];
+        NSString * mySpeed = [NSString stringFromBytesPerSecond: tiVoManager.aggregateSpeed];
+        self.performanceLabel.stringValue  = [NSString stringWithFormat:@"%@; Estimated time left: %@",mySpeed, timeLeft];
+    }
 }
 
 -(void)dealloc
@@ -180,6 +208,11 @@ __DDLOGHERE__
 	[self  unregisterDraggedTypes];
 	 tiVoColumnHolder=nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    if (self.updateTimer) {
+        [self.updateTimer invalidate];
+        self.updateTimer = nil;
+    }
+
 }
 
 #pragma mark - Table Delegate Protocol

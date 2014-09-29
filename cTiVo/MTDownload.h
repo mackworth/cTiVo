@@ -72,6 +72,8 @@ numStartupRetriesRemaining;
 @property (weak, nonatomic, readonly)	NSString *showStatus;
 @property (weak, nonatomic, readonly) NSString *imageString;
 @property double processProgress; //Should be between 0 and 1
+@property (nonatomic, readonly) NSTimeInterval timeLeft;
+@property (nonatomic, readonly) double speed;  //bytes/second
 @property (nonatomic, readonly) BOOL shouldSimulEncode, shouldMarkCommercials;
 
 @property BOOL isSimultaneousEncoding;
