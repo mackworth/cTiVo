@@ -557,22 +557,14 @@ __DDLOGHERE__
 	return YES;
 }
 
--(void) draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation {
-	//pre 10.7
-	if (operation == NSDragOperationDelete) {
-		DDLogDetail(@"User dragged to trash");
-		[myController removeFromDownloadQueue:nil];
-	}
-
-}
-/* post 10.7,but redundant with above
+// post 10.7,but redundant with above
 - (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
 	//post 10.7
 	if (operation == NSDragOperationDelete) {
 		[myController removeFromDownloadQueue:nil];
 	}
 }
-*/
+
 
 //Drag and drop Receiver
 - (NSDragOperation)tableView:(NSTableView *)aTableView validateDrop:(id < NSDraggingInfo >)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)operation {

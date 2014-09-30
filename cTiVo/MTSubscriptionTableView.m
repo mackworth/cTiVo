@@ -384,20 +384,15 @@ static NSDateFormatter *dateFormatter;
 #pragma mark drag and drop routines
 
 //Drag&drop source (for now,just for delete)
--(void) draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation {
-	//pre 10.7
-	if (operation == NSDragOperationDelete) {
-		[self unsubscribeSelectedItems:nil];
-	}
-}
-/* //should use this for 10.7 and after, but redundant with above
+
+ //should use this for 10.7 and after, but redundant with above
 - (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
 	
 	if (operation == NSDragOperationDelete) {
 		[self unsubscribeSelectedItems:nil];
 	}
 }
-*/
+
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
     // Drag and drop support:  nothing to do here, as we're only a "source" to drag to trash
