@@ -112,7 +112,7 @@ There are a few preferences that are intended for debugging purposes or for very
 
 ### Debug Levels
 
-This will increase the level of detail written to the Console log from major events to verbose for all modules. As "verbose" is indeed very verbose, you can also set the debug level separately for each of the major modules in the program at the bottom of this screen. This would mainly be of use while reading the source code or under the direction of someone helping you debug a problem. See (Logging)[Troubleshooting.md#Logging] for more information. 
+This will increase the level of detail written to the Console log from Major events to Verbose for all modules. As "verbose" is indeed very verbose, you can also set the debug level separately for each of the major modules in the program at the bottom of this screen. This would mainly be of use while reading the source code or under the direction of someone helping you debug a problem. See (Logging)[Troubleshooting.md#Logging] for more information. Note if you have a problem during startup, you can hold down Control and Option during launch to change all modules to Verbose. Be sure to set it back when you're all finished as Verbose is very verbose.
 
 ### Disable Drag to Select in UI
 
@@ -298,9 +298,9 @@ And you can put these together:
 
 # Hidden Options
 
-There are a few options that are not presented in the user interface. This choice is based on not many people choosing this option OR not much testing being done. These options are subject to being removed at any time, particularly if any support problems emerge. To set these, use the OS X `defaults` command, e.g. `defaults write com.cTiVo.ctivo MaxNumberEncoders 3`
+There are a few options that are not presented in the user interface. This choice is based on not many people choosing this option OR not much testing being done. These options are subject to being removed at any time, particularly if any support problems emerge. To set these, use the OS X `defaults` command in Terminal, e.g. `defaults write com.cTiVo.ctivo MaxNumberEncoders 3`, then use `defaults read com.cTiVo.ctivo` to lock them in.
 
-* UpdateIntervalMinutes* - How many minutes to wait between tivo refreshes; 
+* UpdateIntervalMinutes* - How many minutes to wait between tivo refreshes; default is 15 
 * MaxNumberEncoders* - Maximum number of simultaneous encoders (to limit cpu usage); default is 2
 * MaxProgressDelay* - How long to wait between status updates before declaring an encoder has crashed in seconds; default is 120
-* ThumbnailsDirectory* - Where to look for artwork thumbnails; default is either `<download directory>` or `<download directory>/thumbnails`
+* ThumbnailsDirectory* - Where to look for artwork thumbnails; default is either `<download directory>` or `<download directory>/thumbnails`; delete entirely to restore to default
