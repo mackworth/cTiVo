@@ -217,8 +217,8 @@ __DDLOGHERE__
     }
 }
 
--(NSString *) retrieveTVDBIdFromSeriesName  {
-	NSString * urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeries.php?seriesname=%@&language=all",_seriesTitle] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+-(NSString *) retrieveTVDBIdFromSeriesName: (NSString *) name  {
+	NSString * urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeries.php?seriesname=%@&language=all",name] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 	NSURL *url = [NSURL URLWithString:urlString];
 	DDLogDetail(@"Getting series for %@ using %@",self,urlString);
 	NSString *seriesID = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
@@ -227,7 +227,7 @@ __DDLOGHERE__
 	DDLogVerbose(@"Series for %@: %@",self,serieses);
 	for (NSString *series in serieses) {
 		NSString *seriesName = [[self getStringForPattern:@"<SeriesName>(.*)<\\/SeriesName>" fromString:series] stringByConvertingHTMLToPlainText];
-		if (seriesName && [seriesName caseInsensitiveCompare:self.seriesTitle] == NSOrderedSame) {
+		if (seriesName && [seriesName caseInsensitiveCompare:name] == NSOrderedSame) {
 			NSString * tvdbID= [self getStringForPattern:@"<seriesid>(\\d*)" fromString:series];
 			NSString * zap2ID= [self getStringForPattern:@"<zap2it_id>(.*)</zap2it_id>" fromString:series];
 			if (tvdbID) {
@@ -286,8 +286,15 @@ __DDLOGHERE__
 				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:epSeriesID ofType:kMTVDBSeriesFoundWithEP];
 				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:longSeriesID ofType:kMTVDBSeriesFoundWithSH];
 				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:seriesID ofType:kMTVDBSeriesFoundWithShort];
-				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromSeriesName];
-				
+                if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromSeriesName:self.seriesTitle];
+                //Don't give up yet; look for "Series: subseries" format
+                if (!seriesIDTVDB)  {
+                    NSArray * splitName = [self.seriesTitle componentsSeparatedByString:@":"];
+                    if (splitName.count > 1) {
+                        seriesIDTVDB = [self retrieveTVDBIdFromSeriesName:splitName[0]];
+                    }
+                }
+                
 				if (seriesIDTVDB) {
 					DDLogDetail(@"Got TVDB for %@: %@ ",self, seriesIDTVDB);
 					[tiVoManager.tvdbSeriesIdMapping setObject:seriesIDTVDB forKey:_seriesTitle];

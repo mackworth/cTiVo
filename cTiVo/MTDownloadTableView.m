@@ -136,12 +136,13 @@ __DDLOGHERE__
 	[self selectRowIndexes:showIndexes byExtendingSelection:NO];
     if (tiVoManager.anyTivoActive) {
         if (!self.updateTimer) {
-            self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(updateProgress) userInfo:nil repeats:YES];
+            self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(updateProgress) userInfo:nil repeats:YES];
         }
     } else {
         if (self.updateTimer) {
             [self.updateTimer invalidate];
             self.updateTimer = nil;
+            [self updateProgress];
         }
     }
     
@@ -192,14 +193,18 @@ __DDLOGHERE__
 			seriesCell.progressIndicator.rightText.stringValue = @"";
 		}
 	}
-    double myTimeLeft = tiVoManager.aggregateTimeLeft;
-    if (myTimeLeft == 0.0) {
+    if (!tiVoManager.anyTivoActive) {
         [self.performanceLabel setHidden:YES];
     } else {
-        [self.performanceLabel setHidden:NO];
-        NSString * timeLeft = [NSString stringFromTimeInterval:  myTimeLeft];
-        NSString * mySpeed = [NSString stringFromBytesPerSecond: tiVoManager.aggregateSpeed];
-        self.performanceLabel.stringValue  = [NSString stringWithFormat:@"%@; Estimated time left: %@",mySpeed, timeLeft];
+        double myTimeLeft = tiVoManager.aggregateTimeLeft;
+        if (myTimeLeft == 0.0) {
+            [self.performanceLabel setHidden:YES];  //unlikely if a TiVo is active
+        } else {
+            [self.performanceLabel setHidden:NO];
+            NSString * timeLeft = [NSString stringFromTimeInterval:  myTimeLeft];
+            NSString * mySpeed = [NSString stringFromBytesPerSecond: tiVoManager.aggregateSpeed];
+            self.performanceLabel.stringValue  = [NSString stringWithFormat:@"%@; Estimated time left: %@",mySpeed, timeLeft];
+        }
     }
 }
 

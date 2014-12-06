@@ -819,7 +819,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/Users/hugh/Documents/Develop/cTiVo\\ github/cTiVo/Crashlytics.sh";
+			shellScript = $SRCROOT/cTiVo/Crashlytics.sh;
 		};
 		D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */ = {
 			isa = PBXShellScriptBuildPhase;

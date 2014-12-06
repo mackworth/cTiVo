@@ -16,6 +16,24 @@
 #import "MTHelpViewController.h"
 #import <Quartz/Quartz.h>
 
+@implementation NSView (HS)
+
+-(NSView *)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode
+{
+    Class vibrantClass=NSClassFromString(@"NSVisualEffectView");
+    if (vibrantClass) { //supported
+        NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
+        [vibrant setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+        [vibrant setBlendingMode:mode];
+            [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
+        return vibrant;
+    } else {
+        return self;
+    }
+}
+
+@end
+
 @interface MTMainWindowController ()
 
 @property (nonatomic, strong) NSSound *trashSound;
@@ -42,7 +60,7 @@ __DDLOGHERE__
 -(void)awakeFromNib
 {
 	DDLogDetail(@"MainWindow awakeFromNib");
-	[self refreshFormatListPopup];
+    [self refreshFormatListPopup];
 }
 
 - (void)windowDidLoad
@@ -51,6 +69,10 @@ __DDLOGHERE__
     
 	DDLogDetail(@"MainWindow windowDidLoad");
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
+    
+    [self.window.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+    
+
 	[NSBundle loadNibNamed:@"MTMainWindowDrawer" owner:self];
 	showDetailDrawer.parentWindow = self.window;
 	

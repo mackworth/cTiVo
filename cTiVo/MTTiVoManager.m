@@ -739,6 +739,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		return;
 	}
 	NSDate* startDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
+    if (!startDate) startDate = [NSDate date];
 	double targetSeconds = [self secondsUntilNextTimeOfDay:startDate];
 	DDLogDetail(@"Will start queue in %f seconds (%f hours), due to beginDate of %@",targetSeconds, (targetSeconds/3600.0), startDate);
 	[self performSelector:@selector(unPauseQueue) withObject:nil afterDelay:targetSeconds];
