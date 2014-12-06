@@ -300,8 +300,8 @@ And you can put these together:
 
 There are a few options that are not presented in the user interface. This choice is based on not many people choosing this option OR not much testing being done. These options are subject to being removed at any time, particularly if any support problems emerge. To set these, use the OS X `defaults` command in Terminal, e.g. `defaults write com.cTiVo.ctivo MaxNumberEncoders 3`, then use `defaults read com.cTiVo.ctivo` to lock them in.
 
-* UpdateIntervalMinutes* - How many minutes to wait between tivo refreshes; default is 15
+* UpdateIntervalMinutes* - How many minutes to wait between TiVo refreshes; default is 15
 * MaxNumberEncoders* - Maximum number of simultaneous encoders (to limit cpu usage); default is 2
 * MaxProgressDelay* - How long to wait between status updates before declaring an encoder has crashed in seconds; default is 120
-* ThumbnailsDirectory* - Where to look for artwork thumbnails; default is either `<download directory>` or `<download directory>/thumbnails`
-* iTunesContentID* - If set to 1, cTiVo will mark shows' "ContentID" in iTunes using the episode number. This has the benefit of merging HD/SD versions of a single show into one entry in iTunes. One warning is that there is a small statistical chance of two shows mapping onto the same contentID, which means that only one will appear in iTunes. The other video will still exist, but will be masked by the first one in iTunes UI.
+* ThumbnailsDirectory* - Where to look for artwork thumbnails; default is either `<download directory>` or `<download directory>/thumbnails`; delete entirely to restore to default
+* iTunesContentID* - If set to 1, cTiVo will mark shows' "ContentID" in iTunes using the episode number. This has the benefit of merging HD/SD versions of a single show into one entry in iTunes. One warning is that there is a small statistical chance of two shows mapping onto the same contentID, which means that only one will appear in iTunes. The other video will still exist, but will be masked by the first one in iTunes UI.* ThumbnailsDirectory* - Where to look for artwork thumbnails; default is either `<download directory>` or `<download directory>/thumbnails`; delete entirely to restore to default
