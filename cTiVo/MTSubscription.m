@@ -150,7 +150,7 @@ __DDLOGHERE__
 }
 
 
--(MTDownload *) downloadForShow: (MTTiVoShow *) thisShow {
+-(MTDownload *) downloadForSubscribedShow: (MTTiVoShow *) thisShow {
 	DDLogDetail(@"Subscribed; adding %@", thisShow);
 	MTDownload * newDownload = [[MTDownload  alloc] init];
 	newDownload.show= thisShow;
@@ -199,6 +199,214 @@ __DDLOGHERE__
 	}
 	return tempDate;
 }
+
+#pragma mark - create Subscriptions
+
+#define kMTSubSeries 0
+#define kMTSubRegExPattern 1
+#define kMTSubFormat 2
+#define kMTSubDate 3
+#define kMTSubTiVo 4
+#define kMTSubMin 5
+
+#define kMTSubStringsArray  @[@"iTunes", @"skipAds", @"markAds",  @"suggestions",  @"pyTiVo",  @"subtitles",  @"HDOnly",  @"SDOnly"]
+#define kMTSubiTunes 0
+#define kMTSubSkipAds 1
+#define kMTSubMarkAds 2
+#define kMTSubSuggestions 3
+#define kMTSubPyTiVo 4
+#define kMTSubCaptions 5
+#define kMTSubHD 6
+#define kMTSubSD 7
+
++(instancetype) subscriptionFromString:(NSString *) str {
+    //set the "lastrecording" time for one second before this show, to include this show.
+    NSArray * strArray = [str componentsSeparatedByString:@"\t"];
+    if (strArray.count < kMTSubMin ) {
+        DDLogReport(@"Importing Subscription: Not enough fields in %@",str);
+        return nil;  //improperly formatted subscription text
+    }
+
+#warning need check in next line
+     //future: || [[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups] ||
+        MTSubscription *newSub = [MTSubscription new];
+
+        //required fields:
+        newSub.displayTitle = strArray[kMTSubSeries];
+        newSub.subscriptionRegex = [NSRegularExpression regularExpressionWithPattern:strArray[kMTSubRegExPattern]options:NSRegularExpressionCaseInsensitive error:nil];
+        if (!newSub.subscriptionRegex) {
+            DDLogReport(@"Importing subscription %@; faulty regex %@",str,strArray[kMTSubRegExPattern]);
+            return nil;
+        }
+        newSub.encodeFormat = [tiVoManager findFormat:strArray[kMTSubFormat] ];
+        newSub.createdTime = [NSDate dateWithString:strArray[kMTSubDate]];
+        if (newSub.createdTime) newSub.createdTime = [NSDate date];
+        newSub.preferredTiVo= strArray[kMTSubTiVo];
+
+        newSub.addToiTunes = @NO;
+        newSub.skipCommercials = @NO;
+        newSub.markCommercials = @NO;
+        newSub.includeSuggestions = @NO;
+        newSub.genTextMetaData = @NO;
+        newSub.exportSubtitles=  @NO;
+        newSub.HDOnly= @NO;
+        newSub.SDOnly= @NO;
+
+        for (NSUInteger i = kMTSubMin; i < strArray.count; i++ ) {
+            NSString * keyWord = ((NSString *)strArray[i]).lowercaseString;
+            if (keyWord.length > 0 &&
+                [kMTSubStringsArray indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+                NSString * s = (NSString *) obj;
+                return[keyWord isEqualToString:s.lowercaseString];
+            }] != NSNotFound) {
+                switch (i) {
+                    case kMTSubiTunes:      newSub.addToiTunes = @YES;          break;
+                    case kMTSubSkipAds:     newSub.skipCommercials = @YES;      break;
+                    case kMTSubMarkAds:     newSub.markCommercials = @YES;      break;
+                    case kMTSubSuggestions: newSub.includeSuggestions = @YES;   break;
+                    case kMTSubPyTiVo:      newSub.genTextMetaData = @YES;      break;
+                    case kMTSubCaptions:    newSub.exportSubtitles=  @YES;      break;
+                    case kMTSubHD:          newSub.HDOnly= @YES;                break;
+                    case kMTSubSD:          newSub.SDOnly= @YES;                break;
+                    default:  break;
+                }
+            }
+        }
+        DDLogVerbose(@"Subscribing string %@ as: %@ ", str, newSub);
+        return newSub;
+//    } else {
+//        return nil;
+//    }
+}
+
++(NSRegularExpression *) matchFull:(NSString *) showName {
+    NSString * pattern = [NSString stringWithFormat:@"^%@$", [NSRegularExpression escapedPatternForString:showName]];
+    NSError * error = nil;
+    NSRegularExpression * tempRegex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
+    if (error) return nil;
+    return tempRegex;
+}
+
++ (instancetype) subscriptionFromDictionary: (NSDictionary *) sub {
+    MTSubscription * tempSub = [[MTSubscription alloc] init];
+
+    tempSub.displayTitle = sub[kMTSubscribedSeries];
+    NSString * regexPattern = sub[kMTSubscribedRegExPattern];
+    if(regexPattern) {
+        tempSub.subscriptionRegex = [NSRegularExpression regularExpressionWithPattern:regexPattern options:NSRegularExpressionCaseInsensitive error:nil];
+    } else {
+        tempSub.subscriptionRegex = [self matchFull:sub[kMTSubscribedSeries]];
+    }
+
+    tempSub.createdTime = sub[kMTCreatedDate];
+
+    tempSub.encodeFormat= [tiVoManager findFormat:sub[kMTSubscribedFormat] ];
+
+    tempSub.addToiTunes = sub[kMTSubscribediTunes];
+    if (tempSub.addToiTunes ==nil) tempSub.addToiTunes = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit] && tempSub.encodeFormat.canAddToiTunes)];
+
+    //        tempSub.simultaneousEncode = sub[kMTSubscribedSimulEncode];
+    //        if (tempSub.simultaneousEncode ==nil) tempSub.simultaneousEncode = [NSNumber numberWithBool: ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode] && tempSub.encodeFormat.canSimulEncode)];
+    tempSub.includeSuggestions = sub[kMTSubscribedIncludeSuggestions];
+    if (tempSub.includeSuggestions ==nil) tempSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
+    tempSub.skipCommercials = sub[kMTSubscribedSkipCommercials];
+    if (tempSub.skipCommercials ==nil) tempSub.skipCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTRunComSkip];
+    tempSub.markCommercials = sub[kMTSubscribedMarkCommercials];
+    if (tempSub.markCommercials ==nil) tempSub.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMarkCommercials];
+    tempSub.genTextMetaData = sub[kMTSubscribedGenTextMetaData];
+    if (tempSub.genTextMetaData ==nil) tempSub.genTextMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTextMetaData];
+#ifndef deleteXML
+    tempSub.genXMLMetaData = sub[kMTSubscribedGenXMLMetaData];
+    if (tempSub.genXMLMetaData ==nil) tempSub.genXMLMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTivoMetaData];
+    tempSub.includeAPMMetaData = sub[kMTSubscribedIncludeAPMMetaData];
+    if (tempSub.includeAPMMetaData ==nil) tempSub.includeAPMMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportMetaData];
+#endif
+    tempSub.exportSubtitles = sub[kMTSubscribedExportSubtitles];
+    if (tempSub.exportSubtitles ==nil) tempSub.exportSubtitles = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportSubtitles];
+    tempSub.preferredTiVo = sub[kMTSubscribedPreferredTiVo];
+    if (!tempSub.preferredTiVo) tempSub.preferredTiVo = @"";
+    tempSub.HDOnly = sub[kMTSubscribedHDOnly];
+    if (!tempSub.HDOnly) tempSub.HDOnly = @NO;
+    tempSub.SDOnly = sub[kMTSubscribedSDOnly ];
+    if (!tempSub.SDOnly) tempSub.SDOnly = @NO;
+    if (sub[	kMTSubscribedPrevRecorded]) {
+        tempSub.prevRecorded = [sub[	kMTSubscribedPrevRecorded] mutableCopy];
+    }
+    DDLogVerbose(@"Loaded Sub: %@ from %@",tempSub, sub);
+    return tempSub;
+}
+
++(MTSubscription *) subscriptionFromShow: (MTTiVoShow *) tivoShow {
+    //set the "lastrecording" time for one second before this show, to include this show.
+    DDLogVerbose(@"creating Subscription based on Show %@", tivoShow);
+    NSDate *earlierTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
+    if (tivoShow.showDate) {
+        earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
+    }
+    DDLogVerbose(@"Subscription time of %@",earlierTime);
+    NSRegularExpression * tempRegex = [self matchFull:tivoShow.seriesTitle];
+
+    if (!tempRegex) return nil;
+    MTSubscription *newSub = [MTSubscription new];
+    newSub.displayTitle = tivoShow.seriesTitle;
+    newSub.subscriptionRegex = tempRegex;
+    newSub.createdTime = earlierTime;
+    newSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
+    newSub.preferredTiVo= @"";
+    newSub.HDOnly= @NO;
+    newSub.SDOnly= @NO;
+    return newSub;
+}
+
+-(NSString *) subscribeString  {
+    NSMutableArray * outString = [NSMutableArray arrayWithCapacity:12];
+
+    outString[kMTSubSeries] = self.displayTitle;
+    outString[kMTSubRegExPattern] = self.subscriptionRegex.pattern;
+    outString[kMTSubFormat] = self.encodeFormat.name;
+    outString[kMTSubDate] = [self.displayDate descriptionWithLocale:nil ];
+    outString[kMTSubTiVo] = self.preferredTiVo;
+
+    if (self.addToiTunes.boolValue )        [outString addObject: kMTSubStringsArray [kMTSubiTunes]];
+    if (self.skipCommercials.boolValue )    [outString addObject: kMTSubStringsArray [kMTSubSkipAds]];
+    if (self.markCommercials.boolValue )    [outString addObject: kMTSubStringsArray [kMTSubMarkAds]];
+    if (self.includeSuggestions.boolValue ) [outString addObject: kMTSubStringsArray [kMTSubSuggestions]];
+    if (self.genTextMetaData.boolValue )    [outString addObject: kMTSubStringsArray [kMTSubPyTiVo]];
+    if (self.exportSubtitles.boolValue )    [outString addObject: kMTSubStringsArray [kMTSubCaptions]];
+    if (self.HDOnly.boolValue )             [outString addObject: kMTSubStringsArray [kMTSubHD]];
+    if (self.SDOnly.boolValue )             [outString addObject: kMTSubStringsArray [kMTSubSD]];
+    return [outString componentsJoinedByString:@"\t"];
+}
+
+#pragma mark - Pastboard routines
+
+- (id)pasteboardPropertyListForType:(NSString *)type {
+    //	NSLog(@"QQQ:pboard Type: %@",type);
+    if ( [type isEqualToString:NSPasteboardTypeString]) {
+        return [self subscribeString] ;
+    } else {
+        return nil;
+    }
+}
+-(NSArray *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
+    NSArray* result = [NSArray  arrayWithObjects: NSPasteboardTypeString, nil];
+    return result;
+}
+
+- (NSPasteboardWritingOptions)writingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard {
+    return 0;
+}
+
++ (NSArray *)readableTypesForPasteboard:(NSPasteboard *)pasteboard {
+    return @[kMTDownloadPasteBoardType, NSPasteboardTypeString];
+
+}
++ (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard {
+    if ([type compare:kMTDownloadPasteBoardType] ==NSOrderedSame)
+        return NSPasteboardReadingAsKeyedArchive;
+    return 0;
+}
+
 	
 - (void)dealloc {
      _encodeFormat = nil;
@@ -207,363 +415,3 @@ __DDLOGHERE__
 @end
 
 
-@implementation NSMutableArray (MTSubscriptionList)
-
-
-#pragma mark - Subscription Management
-
--(void) initialLastLoadedTimes { //called when TivoList changes
-	for (MTTiVo * tivo in tiVoManager.tiVoList) {  //ensure all are in the dictionary
-		if (!tiVoManager.lastLoadedTivoTimes[tivo.tiVo.name]) {
-			tiVoManager.lastLoadedTivoTimes[tivo.tiVo.name] = [NSDate distantPast];  //first time, so mark as not processed yet
-		}
-	}
-}
-
-- (NSDate *) oldestPossibleSubscriptionTime {
-	//returns the oldest time our tivos have been seen.
-	//used to expire old subscriptions
-	//incidentally drops really old tivos (over 90 days)
-	//note that this may return "distant past" if a tivo has been seen, but not fully processed yet
-	NSDate * returnDate = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*7]; //keep at least 7 days
-	for (NSString * tivoName in [tiVoManager.lastLoadedTivoTimes allKeys]) {
-		NSDate * tivoTime=  tiVoManager.lastLoadedTivoTimes[tivoName];
-		if ((tivoTime != [NSDate distantPast] && [tivoTime timeIntervalSinceNow] >= 60*60*24*90)) {
-			DDLogReport(@"tivo %@ away too long; removing from list",tivoName);
-			[tiVoManager.lastLoadedTivoTimes removeObjectForKey: tivoName];
-			continue;
-		}
-		if ([returnDate isGreaterThan: tivoTime] ) {
-			returnDate = tivoTime;
-		};
-	}
-	DDLogVerbose(@"oldest Tivo = %@",returnDate);
-	return returnDate;
-	
-}
-
-
--(void) checkSubscription: (NSNotification *) notification {
-	//called by system when a new show appears in listing, including all shows at startup
-	MTTiVoShow * thisShow = (MTTiVoShow *) notification.object;
-	NSDate * earliestTime = [tiVoManager. lastLoadedTivoTimes[thisShow.tiVoName] dateByAddingTimeInterval:-60*60*12];
-	//any show that started within twelve hours of last checkin is worth looking at.
-	//note that theoretically, 12 hours could be replace by thisshow.duration if we parsed Tivos'  PT00H0M0S format;
-	if ([thisShow.showDate isGreaterThan: earliestTime]) {
-		DDLogVerbose(@"Subscription check: recent enough %@", thisShow);
-		for (MTSubscription * possMatch in self) {
-			if ([possMatch isSubscribed:thisShow ignoreDate:NO]) {
-				MTDownload * newDownload = [possMatch downloadForShow:thisShow];
-				[tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];    
-			}
-		}
-	} else {
-		DDLogVerbose(@"Subscription check: too old: %@", thisShow);
-	}
-}
-
--(void) checkSubscriptionsNew:(NSArray *) newSubs {
-	//Called after one or more subscriptions have been created or when reapplying. Ignores tivoLoadTimes to incorporate all current shows
-	DDLogVerbose(@"checking New Subscriptions");
-	for (MTTiVoShow * thisShow in tiVoManager.tiVoShows.reverseObjectEnumerator) {
-		for (MTSubscription * possMatch in newSubs) {
-			if ([possMatch isSubscribed:thisShow ignoreDate:YES]) {
-				MTDownload * newDownload = [possMatch downloadForShow:thisShow];
-				[tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];    
-			}
-		}
-
-	}
-}
--(void) clearHistory:(NSArray *) subscriptions {
-	for (MTSubscription * sub in subscriptions) {
-		sub.prevRecorded = [NSMutableArray new];
-		sub.createdTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
-	}
-}
-
-- (MTSubscription *) findShow: (MTTiVoShow *) show {
-	NSString * seriesSearchString = show.seriesTitle;
-	if (!seriesSearchString) return nil;
-	BOOL isNotSuggestion = ! show.isSuggestion;
-    for (MTSubscription * possMatch in self) {
-        if (isNotSuggestion || possMatch.includeSuggestions.boolValue  ) {
-			if ([possMatch.subscriptionRegex
-				     numberOfMatchesInString:seriesSearchString
-				     options:0
-					 range:NSMakeRange(0,seriesSearchString.length)
-				 ] > 0) {
-				DDLogVerbose(@"found show %@ in subscription %@", show, possMatch);
-				return possMatch;
-			}
-        }
-    }
-    return nil;
-}
-
-
--(NSArray *) addSubscriptions: (NSArray *) shows {
-	
-	NSMutableArray * newSubs = [NSMutableArray arrayWithCapacity:shows.count];
-    DDLogDetail(@"Subscribing to shows %@", shows);
-	for (MTTiVoShow * thisShow in shows) {
-		MTSubscription * newSub = [self subscribeShow:thisShow];
-		if (newSub) {
-			[newSubs addObject:newSub];
-		}
-	}
-	if (newSubs.count > 0) {
-		[self checkSubscriptionsNew:newSubs];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
-		return newSubs;
-	} else {
-		return nil;
-	}
-}
-
--(NSArray *) addSubscriptionsDL: (NSArray *) downloads {
-	
-	NSMutableArray * newSubs = [NSMutableArray arrayWithCapacity:downloads.count];
-    DDLogDetail(@"Subscribing to downloads %@", downloads);
-	for (MTDownload * download in downloads) {
-		MTSubscription * newSub = [self subscribeDownload:download];
-		if (newSub) {
-			[newSubs addObject:newSub];
-		}
-	}
-	if (newSubs.count > 0) {
-		[self checkSubscriptionsNew:newSubs];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
-		return newSubs;
-	} else {
-		return nil;
-	}
-}
-
--(MTSubscription *) addSubscriptionsString: (NSString *) pattern {
-	NSString * regexPattern = pattern;
-	NSString * regexName = pattern;
-	//now see if we have a "regexString<regexName>" 
-	
-	if ([[pattern stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet] ] isEqualToString:@"ALL"]) {
-		regexPattern = @".*";
-		regexName = @" <<ALL SHOWS>> ";
-	} else {
-		NSRegularExpression * inputParse =  [NSRegularExpression regularExpressionWithPattern:@"^(.*)<(.*)>\\s*" options:0 error:nil];
-		NSTextCheckingResult * textResult = [inputParse firstMatchInString:pattern options:0 range:NSMakeRange(0, pattern.length)];
-		if (textResult) {
-			regexPattern = [pattern substringWithRange:[textResult rangeAtIndex:1]];
-			regexName = [pattern substringWithRange:[textResult rangeAtIndex:2]];
-		}
-	}
-	DDLogDetail(@"Subscribing to string %@ with pattern %@", regexName, regexPattern);
-	NSRegularExpression *tempRegex = [NSRegularExpression regularExpressionWithPattern:regexPattern options:NSRegularExpressionCaseInsensitive error:nil];
-	if (!tempRegex) return nil;
-	MTTiVoShow * pseudoShow = [MTTiVoShow new]; //just a dummy to carry seriesTitle and Date
-	pseudoShow.seriesTitle = regexName;
-	
-	pseudoShow.showDate = [NSDate dateWithTimeIntervalSince1970:0];
-
-	MTSubscription * newSub = [self subscribeShow:pseudoShow ];
-	if (newSub) {
-		//for manual titles, we allow regex matching without being the entire series
-		newSub.subscriptionRegex = tempRegex;				
-		[self checkSubscriptionsNew:@[newSub]];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
-		return newSub;
-	} else {
-		return nil;
-	}
-}
-
--(NSRegularExpression *) matchFull:(NSString *) showName {
-	NSString * pattern = [NSString stringWithFormat:@"^%@$", [NSRegularExpression escapedPatternForString:showName]];
-	NSError * error = nil;
-	NSRegularExpression * tempRegex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
-	if (error) return nil;
-	return tempRegex;
-}
-
--(MTSubscription *) createSubscription: (MTTiVoShow *) tivoShow {
-	//set the "lastrecording" time for one second before this show, to include this show.
-	DDLogVerbose(@"creating Subscription based on Show %@", tivoShow);
-	NSDate *earlierTime = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
-	if (tivoShow.showDate) {
-		earlierTime = [tivoShow.showDate  dateByAddingTimeInterval:-1];
-	}
-	DDLogVerbose(@"Subscription time of %@",earlierTime);
-	NSRegularExpression * tempRegex = [self matchFull:tivoShow.seriesTitle];
-	
-	if (!tempRegex) return nil;
-	MTSubscription *newSub = [MTSubscription new];
-	newSub.displayTitle = tivoShow.seriesTitle;
-	newSub.subscriptionRegex = tempRegex;
-	newSub.createdTime = earlierTime;
-	newSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
-	newSub.preferredTiVo= @"";
-	newSub.HDOnly= @NO;
-	newSub.SDOnly= @NO;
-	[self addObject:newSub];
-	return newSub;
-}
-
--(MTSubscription *) subscribeShow:(MTTiVoShow *) tivoShow {
-	if ([self findShow:tivoShow] == nil) {      //future: || [[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups] || 
-		MTSubscription * newSub = [self createSubscription:tivoShow];
-		//use default properties
-		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-		newSub.encodeFormat = tiVoManager.selectedFormat;
-		newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
-//		newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
-		newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip.boolValue)];
-		newSub.markCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"MarkCommercials"] && newSub.encodeFormat.canMarkCommercials)];
-		newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
-#ifndef deleteXML
-		newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
-		newSub.includeAPMMetaData = [defaults objectForKey:kMTExportMetaData];
-#endif
-		newSub.exportSubtitles	  =[defaults objectForKey:kMTExportSubtitles];
-	
-		DDLogVerbose(@"Subscribing show %@ as: %@ ", tivoShow, newSub);
-		return newSub;
-	} else {
-	return nil;
-	}
-}
-
--(MTSubscription *) subscribeDownload:(MTDownload *) download {
-	//set the "lastrecording" time for one second before this show, to include this show.
-	MTTiVoShow * tivoShow = download.show;
-	if ([self findShow:tivoShow] == nil) {//future: || [[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups] ||
-		MTSubscription * newSub = [self createSubscription:download.show];
-		// use queued properties
-		newSub.encodeFormat = download.encodeFormat;
-		newSub.addToiTunes = [NSNumber numberWithBool: download.addToiTunesWhenEncoded ];
-//		newSub.simultaneousEncode = [NSNumber numberWithBool: download.simultaneousEncode];
-		newSub.skipCommercials = [NSNumber numberWithBool: download.skipCommercials];
-		newSub.markCommercials = [NSNumber numberWithBool: download.markCommercials];
-		newSub.genTextMetaData = download.genTextMetaData;
-#ifndef deleteXML
-		newSub.genXMLMetaData = [NSNumber numberWithBool: download.genXMLMetaData];
-		newSub.includeAPMMetaData = [NSNumber numberWithBool: download.includeAPMMetaData];
-#endif
-		newSub.exportSubtitles=  download.exportSubtitles;
-		DDLogVerbose(@"Subscribing download %@ as: %@ ", tivoShow, newSub);
-		return newSub;
- 	} else {
-		return nil;
-	}
-}
-
--(void) deleteSubscriptions:(NSArray *) subscriptions {
-	DDLogDetail(@"Removing Subscriptions: %@", subscriptions);
-	[self  removeObjectsInArray:subscriptions];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
-}
-
--(void) loadSubscriptions {
-    NSArray * tempArray = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSubscriptionList];
-    [self removeAllObjects];
-    
-	DDLogDetail(@"Loading subscriptions");
-    for (NSDictionary * sub in tempArray) {
-        MTSubscription * tempSub = [[MTSubscription alloc] init];
-		tempSub.displayTitle = sub[kMTSubscribedSeries];
-		NSString * regexPattern = sub[kMTSubscribedRegExPattern];
-		if(regexPattern) {
-			tempSub.subscriptionRegex = [NSRegularExpression regularExpressionWithPattern:regexPattern options:NSRegularExpressionCaseInsensitive error:nil];
-		} else {
-			tempSub.subscriptionRegex = [self matchFull:sub[kMTSubscribedSeries]];			
-		}
-
-       tempSub.createdTime = sub[kMTCreatedDate];
-        
-        tempSub.encodeFormat= [tiVoManager findFormat:sub[kMTSubscribedFormat] ];
-        
-        tempSub.addToiTunes = sub[kMTSubscribediTunes];
-        if (tempSub.addToiTunes ==nil) tempSub.addToiTunes = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit] && tempSub.encodeFormat.canAddToiTunes)];
-                                                    
-//        tempSub.simultaneousEncode = sub[kMTSubscribedSimulEncode];
-//        if (tempSub.simultaneousEncode ==nil) tempSub.simultaneousEncode = [NSNumber numberWithBool: ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode] && tempSub.encodeFormat.canSimulEncode)];
-		tempSub.includeSuggestions = sub[kMTSubscribedIncludeSuggestions];
-		if (tempSub.includeSuggestions ==nil) tempSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
-		tempSub.skipCommercials = sub[kMTSubscribedSkipCommercials];
-		if (tempSub.skipCommercials ==nil) tempSub.skipCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTRunComSkip];
-		tempSub.markCommercials = sub[kMTSubscribedMarkCommercials];
-		if (tempSub.markCommercials ==nil) tempSub.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMarkCommercials];
-		tempSub.genTextMetaData = sub[kMTSubscribedGenTextMetaData];
-		if (tempSub.genTextMetaData ==nil) tempSub.genTextMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTextMetaData];
-#ifndef deleteXML
-		tempSub.genXMLMetaData = sub[kMTSubscribedGenXMLMetaData];
-		if (tempSub.genXMLMetaData ==nil) tempSub.genXMLMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTivoMetaData];
-		tempSub.includeAPMMetaData = sub[kMTSubscribedIncludeAPMMetaData];
-		if (tempSub.includeAPMMetaData ==nil) tempSub.includeAPMMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportMetaData];
-#endif
-		tempSub.exportSubtitles = sub[kMTSubscribedExportSubtitles];
-		if (tempSub.exportSubtitles ==nil) tempSub.exportSubtitles = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportSubtitles];
-		tempSub.preferredTiVo = sub[kMTSubscribedPreferredTiVo];
-		if (!tempSub.preferredTiVo) tempSub.preferredTiVo = @"";
-		tempSub.HDOnly = sub[kMTSubscribedHDOnly];
-		if (!tempSub.HDOnly) tempSub.HDOnly = @NO;
-		tempSub.SDOnly = sub[kMTSubscribedSDOnly ];
-		if (!tempSub.SDOnly) tempSub.SDOnly = @NO;
-		if (sub[	kMTSubscribedPrevRecorded]) {
-			tempSub.prevRecorded = [sub[	kMTSubscribedPrevRecorded] mutableCopy];
-		}		DDLogVerbose(@"Loaded Sub: %@ from %@",tempSub, sub);
-        [self addObject:tempSub];
-    }
-}
-
-- (void)saveSubscriptions {
-    NSMutableArray *tempArray = [[NSMutableArray alloc] initWithCapacity:self.count];
-	NSDate * cutoffDate = [self oldestPossibleSubscriptionTime];
-    for (MTSubscription * sub in self) {
-		NSMutableArray * removeSubs= [NSMutableArray new];
-		for (NSDictionary * recording in sub.prevRecorded) {
-			if (recording == sub.prevRecorded[0]) continue; //save youngest to display last recorded date
-			if ([recording[@"startTime"] isLessThan: cutoffDate]) {
-				//too old; no need to remember this one.
-				[removeSubs addObject:recording];
-			}
-		}
-		if (removeSubs.count > 0) {
-			DDLogDetail(@"removing old subs older than %@: %@",cutoffDate,removeSubs);
-			[sub.prevRecorded removeObjectsInArray:removeSubs];
-		}
-		
-		NSString * pattern = [sub.subscriptionRegex pattern];
-        NSDictionary * tempSub = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  sub.displayTitle, kMTSubscribedSeries,
-								  pattern, kMTSubscribedRegExPattern,
-                                  sub.encodeFormat.name, kMTSubscribedFormat,
-                                  sub.createdTime, kMTCreatedDate,
-                                  sub.addToiTunes, kMTSubscribediTunes,
-                                  sub.includeSuggestions, kMTSubscribedIncludeSuggestions,
-								  sub.skipCommercials, kMTSubscribedSkipCommercials,
-								  sub.markCommercials, kMTSubscribedMarkCommercials,
-                                  sub.genTextMetaData , kMTSubscribedGenTextMetaData,
-#ifndef deleteXML
-                                  sub.genXMLMetaData, kMTSubscribedGenXMLMetaData,
-                                  sub.includeAPMMetaData, kMTSubscribedIncludeAPMMetaData,
-#endif
-                                  sub.exportSubtitles, kMTSubscribedExportSubtitles,
-								  sub.preferredTiVo, kMTSubscribedPreferredTiVo,
-								  sub.HDOnly,kMTSubscribedHDOnly,
-								  sub.SDOnly,kMTSubscribedSDOnly,
-								  sub.prevRecorded,
-								      kMTSubscribedPrevRecorded,
-								  nil];
-		DDLogVerbose(@"Saving Sub: %@ ",tempSub);
-		[tempArray addObject:tempSub];
-    }
-	[[NSUserDefaults standardUserDefaults] setObject:tiVoManager.lastLoadedTivoTimes forKey:kMTTiVoLastLoadTimes];
-	[[NSUserDefaults standardUserDefaults] setObject:tempArray forKey:kMTSubscriptionList];
-	//May not be necessary   [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
-}
-
-- (void)dealloc
-{
-    
-}
-
-@end

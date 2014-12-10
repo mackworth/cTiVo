@@ -8,6 +8,7 @@
 
 #import "MTAppDelegate.h"
 #import "MTTiVo.h"
+#import "MTSubscriptionList.h"
 
 #import "DDTTYLogger.h"
 #import "DDFileLogger.h"
@@ -514,10 +515,9 @@ Routine to update and combine both the manual tivo preferences and the media key
 
 -(IBAction)togglePause:(id)sender
 {
-	self.tiVoGlobalManager.processingPaused = [self.tiVoGlobalManager.processingPaused boolValue] ? @(NO) : @(YES);
 	DDLogMajor(@"User toggled Pause %@", self.tiVoGlobalManager.processingPaused);
 	//	pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";
-	if ([self.tiVoGlobalManager.processingPaused boolValue]) {
+	if (![self.tiVoGlobalManager.processingPaused boolValue]) {
 		[self.tiVoGlobalManager pauseQueue:@(YES)];
 	} else {
 		[self.tiVoGlobalManager unPauseQueue];
@@ -605,11 +605,13 @@ Routine to update and combine both the manual tivo preferences and the media key
 	if (button == NSAlertDefaultReturn) {
 		[input validateEditing];
 		DDLogMajor(@"Got new Subscription %@",input.stringValue);
-		MTSubscription * sub = [[tiVoManager subscribedShows] addSubscriptionsString:input.stringValue];
-		if (!sub) {
+		NSArray * subs = [[tiVoManager subscribedShows]  addSubscriptionsPatterns:@[input.stringValue]];
+		if (subs.count > 0) {
 			NSAlert * badSub = [NSAlert alertWithMessageText:@"Invalid Subscription" defaultButton:@"Cancel" alternateButton:@"" otherButton:nil informativeTextWithFormat:@"The subscription pattern may be badly formed, or it may already covered by another subscription."];
 			[badSub runModal];
-		}
+        } else {
+
+        }
 	}
 }
 

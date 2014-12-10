@@ -406,12 +406,14 @@ __DDLOGHERE__
 		NSURL *URL = [NSURL fileURLWithPath:self.encodeFilePath isDirectory:NO];
 		id temp =  [URL pasteboardPropertyListForType:(id)kUTTypeFileURL];
 		return temp;
+    } else if ( [type isEqualToString:NSPasteboardTypeString]) {
+        return [self.show pasteboardPropertyListForType:type] ;
 	} else {
 		return nil;
 	}
 }
 -(NSArray *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
-	NSArray* result = [NSArray  arrayWithObjects: kMTDownloadPasteBoardType , kUTTypeFileURL, nil];  //NOT working yet
+	NSArray* result = @[kMTDownloadPasteBoardType , (NSString *)kUTTypeFileURL, NSPasteboardTypeString];  
 	return result;
 }
 

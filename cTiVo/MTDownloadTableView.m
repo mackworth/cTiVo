@@ -30,11 +30,6 @@ __DDLOGHERE__
 	return self;
 }
 
--(IBAction) delete:(id)sender {
-	DDLogDetail(@"user request to delete shows");
-	[myController removeFromDownloadQueue:sender];
-}
-
 
 -(void)setNotifications
 {
@@ -687,142 +682,160 @@ __DDLOGHERE__
 	}
 }
 
+-(BOOL) insertShowsFromPasteboard:(NSPasteboard*) pboard atRow: (NSUInteger) row {
+    MTDownload * insertTarget = nil;
+    NSUInteger insertRow = [tiVoManager downloadQueue].count;
+
+    if (row < _sortedDownloads.count) {
+        insertTarget = _sortedDownloads[row];
+        insertRow = [[tiVoManager downloadQueue] indexOfObject:insertTarget];
+    }
+    
+    NSArray	*classes = @[[MTTiVoShow class]];
+    NSDictionary *options = [NSDictionary dictionary];
+    NSArray	*draggedShows = [pboard readObjectsForClasses:classes options:options];
+    DDLogDetail(@"Accepting drop: %@", draggedShows);
+
+    //dragged shows are proxies, so we need to find the real show objects
+    NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
+
+    for (MTTiVoShow * show in draggedShows) {
+        MTTiVoShow * realShow= [tiVoManager findRealShow:show];
+        if (realShow) [realShows addObject:realShow];
+    }
+    DDLogVerbose(@"Scheduling shows before %@", insertTarget);
+    //need to move insertTarget below
+
+    for (MTTiVoShow *realShow in realShows) {
+
+        for (NSUInteger activeRow = insertRow; activeRow < tiVoManager.downloadQueue.count ; activeRow++ ) {
+            MTDownload * activeDL = tiVoManager.downloadQueue[activeRow];
+            if (activeDL.isNew) continue;
+            if (activeDL.isDone) continue;
+            if (activeDL.show.tiVo == realShow.tiVo) {
+                if (![self askReschedule:activeDL]) {
+                    return NO;
+                };
+            }
+        }
+    }
+
+
+    [tiVoManager downloadShowsWithCurrentOptions:realShows beforeDownload:insertTarget];
+
+    self.sortedDownloads = nil;
+    [tiVoManager sortDownloadQueue];
+    DDLogVerbose(@"afterSort: %@", self.sortedDownloads);
+
+    NSIndexSet * selectionIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+        MTDownload * download = (MTDownload *) obj;
+        return [realShows indexOfObject:download.show] !=NSNotFound;
+    }];
+
+    //now leave new shows selected
+    DDLogVerbose(@"moved to %@",selectionIndexes );
+    [self selectRowIndexes:selectionIndexes byExtendingSelection:NO];
+    //note that dragged copies will now be dealloc'ed
+    return YES;
+}
+
+-(BOOL) insertDownloadsFromPasteboard:(NSPasteboard*) pboard atRow: (NSUInteger) row {
+    MTDownload * insertTarget = nil;
+    NSUInteger insertRow = [tiVoManager downloadQueue].count;
+
+    if (row < _sortedDownloads.count) {
+        insertTarget = _sortedDownloads[row];
+        insertRow = [[tiVoManager downloadQueue] indexOfObject:insertTarget];
+    }
+    NSArray	*classes = @[[MTDownload class]];
+    NSDictionary *options = [NSDictionary dictionary];
+    NSArray	*draggedDLs = [pboard readObjectsForClasses:classes options:options];
+    DDLogDetail(@"Accepting drop: %@", draggedDLs);
+
+    //dragged downloads are proxies, so we need to find the real download objects
+    NSMutableArray * realDLs = [NSMutableArray arrayWithCapacity:draggedDLs.count ];
+    NSMutableArray * completedDownloadsBeingMoved =[NSMutableArray array];
+    for (MTDownload * download in draggedDLs) {
+        MTDownload * realDownload= [tiVoManager findRealDownload:download];
+        if (realDownload) [realDLs addObject:realDownload];
+        if (realDownload.isDone) [completedDownloadsBeingMoved addObject:realDownload];
+    }
+
+    //Now look for reschedulings. Group could either be moving up over an active show, or moving an active show down...
+
+    for (MTDownload * activeDL in [tiVoManager downloadQueue]) {
+        if (activeDL.isNew) break;  //we're through any active ones
+        if (activeDL.isDone) continue;
+        NSUInteger activeRow = [[tiVoManager downloadQueue] indexOfObject:activeDL];
+
+        if ([draggedDLs containsObject: activeDL]) {
+            //I'm in group being moved
+            if (insertRow > activeRow+1) {   //moving downwards
+                for (NSUInteger i = activeRow+1; i<insertRow; i++) { //check shows we're skipping over
+                    MTDownload * promotedDL = [[tiVoManager downloadQueue] objectAtIndex:i];
+                    if (![realDLs containsObject:promotedDL]) {//but if it's coming with me, no need
+                        if (activeDL.show.tiVo == promotedDL.show.tiVo) {
+                            if (![self askReschedule:activeDL]) {
+                                return NO;
+                            };
+                            break;  // no need to ask again
+                        }
+                    }
+                }
+            }
+        } else {
+            //I'm not being moved
+            if ((insertRow <= activeRow) &&   //shows being moved above me
+                ([self downloads:realDLs  contain:activeDL.show.tiVo]))  {//and one of them is on same TiVo as me
+                if (![self askReschedule: activeDL] ) {
+                    return NO;
+                };
+            }
+        }
+    }
+    DDLogVerbose(@"Real downloads being dragged: %@",realDLs);
+
+    //see if we have any completed shows being re-downloaded
+    if (completedDownloadsBeingMoved.count>0 &&
+        (!insertTarget || !insertTarget.isDone)) {
+        //we're moving at least some completedshows below the activeline
+        if([self askRestarting:completedDownloadsBeingMoved]) {
+            for (MTDownload * download in completedDownloadsBeingMoved) {
+                [download prepareForDownload: YES];
+            }
+        } else {
+            return NO;
+        };
+    }
+    //reordering self (download table)
+    [tiVoManager moveShowsInDownloadQueue:realDLs toIndex:insertRow];
+
+
+    self.sortedDownloads = nil;
+    [tiVoManager sortDownloadQueue];
+    DDLogVerbose(@"afterSort: %@", self.sortedDownloads);
+    
+    NSIndexSet * selectionIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+        return [realDLs indexOfObject:obj] !=NSNotFound;
+    }];
+    
+    //now leave new shows selected
+    DDLogVerbose(@"moved to %@",selectionIndexes );
+    [self selectRowIndexes:selectionIndexes byExtendingSelection:NO];
+    return YES;
+
+}
+
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation
 {
 	NSUInteger realRow = (row < 0) ? 0: row ;
 	//although displayed in sorted order, need to work in actual download order
-	MTDownload * insertTarget = nil;
-	NSUInteger insertRow = [tiVoManager downloadQueue].count;
-	
-	if (realRow < _sortedDownloads.count) {
-		insertTarget = _sortedDownloads[realRow];
-		insertRow = [[tiVoManager downloadQueue] indexOfObject:insertTarget];
-	}
-
 	if ([info draggingSource] == myController.tiVoShowTable) {
-		NSArray	*classes = @[[MTTiVoShow class]];
-		NSDictionary *options = [NSDictionary dictionary];
-		NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
-		DDLogDetail(@"Accepting drop: %@", draggedShows);
-	
-		//dragged shows are proxies, so we need to find the real show objects
-		NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
+        return [self insertShowsFromPasteboard:[info draggingPasteboard] atRow:realRow ];
 
-		for (MTTiVoShow * show in draggedShows) {
-			MTTiVoShow * realShow= [tiVoManager findRealShow:show];
-			if (realShow) [realShows addObject:realShow];
-		}
-		DDLogVerbose(@"Scheduling shows before %@", insertTarget);
-		//need to move insertTarget below
-		
-		for (MTTiVoShow *realShow in realShows) {
-			
-			for (NSUInteger activeRow = insertRow; activeRow < tiVoManager.downloadQueue.count ; activeRow++ ) {
-				MTDownload * activeDL = tiVoManager.downloadQueue[activeRow];
-				if (activeDL.isNew) continue;  
-				if (activeDL.isDone) continue;
-				if (activeDL.show.tiVo == realShow.tiVo) {
-					if (![self askReschedule:activeDL]) {
-						return NO;
-					};
-				}
-			}
-		}
-
-		
-		[tiVoManager downloadShowsWithCurrentOptions:realShows beforeDownload:insertTarget];
-		
-		self.sortedDownloads = nil;
-		[tiVoManager sortDownloadQueue];
-		DDLogVerbose(@"afterSort: %@", self.sortedDownloads);
-		
-		NSIndexSet * selectionIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-			MTDownload * download = (MTDownload *) obj;
-			return [realShows indexOfObject:download.show] !=NSNotFound;
-		}];
-		
-		//now leave new shows selected
-		DDLogVerbose(@"moved to %@",selectionIndexes );
-		[self selectRowIndexes:selectionIndexes byExtendingSelection:NO];
-		//note that dragged copies will now be dealloc'ed
-	
 	} else if( [info draggingSource] == aTableView ) {
-		NSArray	*classes = @[[MTDownload class]];
-		NSDictionary *options = [NSDictionary dictionary];
-		NSArray	*draggedDLs = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
-		DDLogDetail(@"Accepting drop: %@", draggedDLs);
-				
-		//dragged downloads are proxies, so we need to find the real download objects
-		NSMutableArray * realDLs = [NSMutableArray arrayWithCapacity:draggedDLs.count ];
-		NSMutableArray * completedDownloadsBeingMoved =[NSMutableArray array];
-		for (MTDownload * download in draggedDLs) {
-			MTDownload * realDownload= [tiVoManager findRealDownload:download];
-			if (realDownload) [realDLs addObject:realDownload];
-			if (realDownload.isDone) [completedDownloadsBeingMoved addObject:realDownload];
-		}
-		
-		//Now look for reschedulings. Group could either be moving up over an active show, or moving an active show down...
+        return [self insertDownloadsFromPasteboard:[info draggingPasteboard] atRow:realRow];
 
-		for (MTDownload * activeDL in [tiVoManager downloadQueue]) {
-			if (activeDL.isNew) break;  //we're through any active ones
-			if (activeDL.isDone) continue;
-			NSUInteger activeRow = [[tiVoManager downloadQueue] indexOfObject:activeDL];
-
-			if ([draggedDLs containsObject: activeDL]) {
-				//I'm in group being moved 
-				if (insertRow > activeRow+1) {   //moving downwards
-					for (NSUInteger i = activeRow+1; i<insertRow; i++) { //check shows we're skipping over
-						MTDownload * promotedDL = [[tiVoManager downloadQueue] objectAtIndex:i];
-						if (![realDLs containsObject:promotedDL]) {//but if it's coming with me, no need
-							if (activeDL.show.tiVo == promotedDL.show.tiVo) {
-								if (![self askReschedule:activeDL]) {
-									return NO;
-								};
-								break;  // no need to ask again
-							}
-						}
-					}
-				}
-			} else {
-				//I'm not being moved
-				if ((insertRow <= activeRow) &&   //shows being moved above me
-					([self downloads:realDLs  contain:activeDL.show.tiVo]))  {//and one of them is on same TiVo as me
-					if (![self askReschedule: activeDL] ) {
-						return NO;
-					};
-				}
-			}
-		}
-		DDLogVerbose(@"Real downloads being dragged: %@",realDLs);
-		
-		//see if we have any completed shows being re-downloaded
-		if (completedDownloadsBeingMoved.count>0 &&
-			(!insertTarget || !insertTarget.isDone)) {
-			//we're moving at least some completedshows below the activeline
-			if([self askRestarting:completedDownloadsBeingMoved]) {
-				for (MTDownload * download in completedDownloadsBeingMoved) {
-					[download prepareForDownload: YES];
-				}
-			} else {
-				return NO;
-			};
-		}
-		//reordering self (download table)
-		[tiVoManager moveShowsInDownloadQueue:realDLs toIndex:insertRow];
-		
-		
-		self.sortedDownloads = nil;
-		[tiVoManager sortDownloadQueue];
-		DDLogVerbose(@"afterSort: %@", self.sortedDownloads);
-		
-		NSIndexSet * selectionIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-			return [realDLs indexOfObject:obj] !=NSNotFound;
-		}];
-		
-		//now leave new shows selected
-		DDLogVerbose(@"moved to %@",selectionIndexes );
-		[self selectRowIndexes:selectionIndexes byExtendingSelection:NO];
-		
 	} else {
 		return NO;
 	}
@@ -831,6 +844,53 @@ __DDLOGHERE__
 	[self reloadData];
 	return YES;
 }
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
+    if ([menuItem action]==@selector(copy:) ||
+        [menuItem action]==@selector(cut:)  ||
+        [menuItem action]==@selector(delete:)) {
+        return (self.numberOfSelectedRows >0);
+    } else  if ([menuItem action]==@selector(paste:)) {
+        NSPasteboard * pboard = [NSPasteboard generalPasteboard];
+        return  ([pboard.types containsObject:kMTTivoShowPasteBoardType] ||
+                 [pboard.types containsObject:kMTDownloadPasteBoardType]);
+    }
+    return YES;
+}
+
+-(IBAction)copy: (id) sender {
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+    NSArray *selectedShows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
+    if (selectedShows.count > 0) {
+        MTDownload * firstDownload = selectedShows[0];
+
+        NSPasteboard * pboard = [NSPasteboard generalPasteboard];
+        [pboard declareTypes:[firstDownload writableTypesForPasteboard:pboard] owner:nil];
+        [pboard writeObjects:selectedShows];
+    }
+}
+
+-(IBAction)cut: (id) sender {
+    [self copy:sender];
+    [self delete:sender];
+
+}
+
+-(IBAction)paste: (id) sender {
+    NSUInteger row = [self selectedRowIndexes].firstIndex;
+    NSPasteboard * pboard = [NSPasteboard generalPasteboard];
+    if ([pboard.types containsObject:kMTDownloadPasteBoardType]) {
+        [self insertDownloadsFromPasteboard:pboard atRow:row];
+    } else if ([pboard.types containsObject:kMTTivoShowPasteBoardType]) {
+        [self insertShowsFromPasteboard:pboard atRow:row];
+    }
+}
+
+-(IBAction) delete:(id)sender {
+    DDLogDetail(@"user request to delete shows");
+    [myController removeFromDownloadQueue:sender];
+}
+
 
 
 @end

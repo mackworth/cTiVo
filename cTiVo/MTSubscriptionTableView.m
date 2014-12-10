@@ -11,6 +11,7 @@
 #import "MTPopUpTableCellView.h"
 #import "MTTiVoPopUpTableCellView.h"
 #import "MTDownloadCheckTableCell.h"
+#import "MTSubscriptionList.h"
 
 @implementation MTSubscriptionTableView
 
@@ -51,7 +52,7 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableViewSelectionDidChange:) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatListUpdated object:nil];
-	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, nil]];
+	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, NSPasteboardTypeString, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationDelete forLocal:NO];
 
 }
@@ -114,16 +115,6 @@ __DDLOGHERE__
     NSArray * itemsToApply = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
 	[tiVoManager.subscribedShows clearHistory:itemsToApply];
 	[tiVoManager.subscribedShows checkSubscriptionsNew:itemsToApply];
-}
-
--(IBAction)delete:(id)sender{
-    [self unsubscribeSelectedItems:sender];
-}
-
--(void)dealloc
-{
-	[self unregisterDraggedTypes];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void) changeSuggestions: (id) sender {
@@ -389,10 +380,15 @@ static NSDateFormatter *dateFormatter;
 - (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
 	
 	if (operation == NSDragOperationDelete) {
+        DDLogDetail(@"User dragged subscriptions to trash");
 		[self unsubscribeSelectedItems:nil];
-	}
+    }
 }
 
+//- (id<NSPasteboardWriting>)tableView:(NSTableView *)tableView
+//              pasteboardWriterForRow:(NSInteger)row {
+//
+//}
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
     // Drag and drop support:  nothing to do here, as we're only a "source" to drag to trash
@@ -425,6 +421,7 @@ static NSDateFormatter *dateFormatter;
 		}
 	}
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
+    [pboard writeObjects:[self.sortedSubscriptions objectsAtIndexes:rowIndexes]];
 	return YES;
 }
 
@@ -432,8 +429,7 @@ static NSDateFormatter *dateFormatter;
 	
     switch(context) {
         case NSDraggingContextOutsideApplication:
-			DDLogDetail(@"User dragged subscriptions to trash");
-			return NSDragOperationDelete;
+			return NSDragOperationDelete || NSDragOperationCopy;
             break;
 			
         case NSDraggingContextWithinApplication:
@@ -451,65 +447,144 @@ static NSDateFormatter *dateFormatter;
 	} else if ([info draggingSource] == myController.tiVoShowTable ||
 			   [info draggingSource] == myController.downloadQueueTable) {
 		return NSDragOperationCopy;
-	} else {
+	} else if ([[info draggingPasteboard].types containsObject:NSPasteboardTypeString]){
+        return NSDragOperationCopy;
+    } else {
 		return NSDragOperationNone;
 	}
 }
 
+-(NSArray *)insertShowsFromPasteboard:(NSPasteboard *) pboard atRow:(NSUInteger) row {
+    NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
+    NSDictionary *options = [NSDictionary dictionary];
+    //NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
+    //NSLog(@"calling readObjects%@",pasteboard);
+    NSArray	*draggedShows = [pboard readObjectsForClasses:classes options:options];
+    if (draggedShows.count == 0) return nil;
+    DDLogDetail(@"Dragging into Subscriptions: %@", draggedShows);
+
+    //dragged shows are copies, so we need to find the real show objects
+    NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
+    for (MTTiVoShow * show in draggedShows) {
+        MTTiVoShow * realShow= [tiVoManager findRealShow:show];
+        if (realShow) [realShows addObject:realShow];
+    }
+    DDLogVerbose(@"Dragging into Subscriptions: %@", realShows);
+
+    return [tiVoManager.subscribedShows addSubscriptionsShows: realShows];
+}
+
+-(NSArray *)insertDownloadsFromPasteboard:(NSPasteboard *) pboard atRow:(NSUInteger) row {
+    NSArray	*classes = [NSArray arrayWithObject:[MTDownload class]];
+    NSDictionary *options = [NSDictionary dictionary];
+    //NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
+    //NSLog(@"calling readObjects%@",pasteboard);
+    NSArray	*draggedDLs= [pboard readObjectsForClasses:classes options:options];
+    if (draggedDLs.count == 0) return nil;
+    DDLogDetail(@"Dragging into Subscriptions: %@", draggedDLs);
+
+    //dragged downloads are copies, so we need to find the real show objects
+    NSMutableArray * realDLs = [NSMutableArray arrayWithCapacity:draggedDLs.count ];
+    for (MTDownload * draggedDL in draggedDLs) {
+        MTDownload * realDL= [tiVoManager findRealDownload:draggedDL];
+        if (realDL) [realDLs addObject:realDL];
+    }
+    DDLogVerbose(@"Dragging into Subscriptions: %@", realDLs);
+
+    return  [tiVoManager.subscribedShows addSubscriptionsDL: realDLs];
+}
+
+-(NSArray *) insertStringsFromPasteboard:(NSPasteboard *) pboard atRow:(NSUInteger) row {
+    NSArray	*classes = [NSArray arrayWithObject:[NSString class]];
+    NSDictionary *options = [NSDictionary dictionary];
+    //NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
+    //NSLog(@"calling readObjects%@",pasteboard);
+    NSArray	*draggedStrings= [pboard readObjectsForClasses:classes options:options];
+    if (draggedStrings.count == 0)  return nil;
+
+    DDLogDetail(@"Dragging into Subscriptions: %@", draggedStrings);
+    return [tiVoManager.subscribedShows addSubscriptionsFormattedStrings: draggedStrings];
+
+}
+-(void) selectSubs: (NSArray *) subs  {
+    self.sortedSubscriptions  = nil;  //reset sort with new subs
+    NSIndexSet * subIndexes = [self.sortedSubscriptions indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+        return [subs indexOfObject:obj] !=NSNotFound;
+    }];
+    if (subIndexes.count > 0) {
+        [self selectRowIndexes:subIndexes byExtendingSelection:NO];
+        [self scrollRowToVisible:[subIndexes firstIndex]];
+    }
+}
 
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation {
-	NSArray * newSubs = nil;
+    NSArray * newSubs = nil;
 	if ( [info draggingSource] == myController.tiVoShowTable ){
-		NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
-		NSDictionary *options = [NSDictionary dictionary];
-		//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
-		//NSLog(@"calling readObjects%@",pasteboard);
-		NSArray	*draggedShows = [[info draggingPasteboard] readObjectsForClasses:classes options:options];
-		DDLogDetail(@"Dragging into Subscriptions: %@", draggedShows);
-		
-		//dragged shows are copies, so we need to find the real show objects
-		NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
-		for (MTTiVoShow * show in draggedShows) {
-			MTTiVoShow * realShow= [tiVoManager findRealShow:show];
-			if (realShow) [realShows addObject:realShow];
-		}
-		DDLogVerbose(@"Dragging into Subscriptions: %@", realShows);
-		
-		newSubs = [tiVoManager.subscribedShows addSubscriptions: realShows];
-
-	
+        newSubs = [self insertShowsFromPasteboard:[info draggingPasteboard]  atRow:row];
 	} else if([info draggingSource] == myController.downloadQueueTable) {
-		NSArray	*classes = [NSArray arrayWithObject:[MTDownload class]];
-		NSDictionary *options = [NSDictionary dictionary];
-		//NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
-		//NSLog(@"calling readObjects%@",pasteboard);
-		NSArray	*draggedDLs= [[info draggingPasteboard] readObjectsForClasses:classes options:options];
-		DDLogDetail(@"Dragging into Subscriptions: %@", draggedDLs);
-		
-		//dragged downloads are copies, so we need to find the real show objects
-		NSMutableArray * realDLs = [NSMutableArray arrayWithCapacity:draggedDLs.count ];
-		for (MTDownload * draggedDL in draggedDLs) {
-			MTDownload * realDL= [tiVoManager findRealDownload:draggedDL];
-			if (realDL) [realDLs addObject:realDL];
-		}
-		DDLogVerbose(@"Dragging into Subscriptions: %@", realDLs);
-		
-		newSubs = [tiVoManager.subscribedShows addSubscriptionsDL: realDLs];
-	} else {
-		return NO;
-	}
-	
+        newSubs = [self insertDownloadsFromPasteboard:[info draggingPasteboard]  atRow:row];
+    } else if ([[info draggingPasteboard].types containsObject:NSPasteboardTypeString]){
+        newSubs = [self insertStringsFromPasteboard:[info draggingPasteboard]  atRow:row];
+      }
+    if (newSubs.count == 0) return NO;
 	DDLogVerbose(@"Created new subs: %@", newSubs);
 	//now leave new subscriptions selected
-	self.sortedSubscriptions  = nil;  //reset sort with new subs
-	NSIndexSet * subIndexes = [self.sortedSubscriptions indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-		return [newSubs indexOfObject:obj] !=NSNotFound;
-	}];
-	if (subIndexes.count > 0) {
-		[self selectRowIndexes:subIndexes byExtendingSelection:NO];
-		[self scrollRowToVisible:[subIndexes firstIndex]];
-	}
+    [self selectSubs: newSubs];
 	return YES;
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
+    if ([menuItem action]==@selector(copy:) ||
+        [menuItem action]==@selector(cut:)  ||
+        [menuItem action]==@selector(delete:)) {
+        return (self.numberOfSelectedRows >0);
+    } else  if ([menuItem action]==@selector(paste:)) {
+        NSPasteboard * pboard = [NSPasteboard generalPasteboard];
+        return  ([pboard.types containsObject:kMTTivoShowPasteBoardType] ||
+                 [pboard.types containsObject:kMTDownloadPasteBoardType] ||
+                  [pboard.types containsObject:NSPasteboardTypeString]);
+    }
+    return YES;
+}
+
+-(IBAction)copy: (id) sender {
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+    NSArray *selectedSubs = [self.sortedSubscriptions objectsAtIndexes:selectedRowIndexes];
+    if (selectedSubs.count > 0) {
+        MTSubscription * firstSub = selectedSubs[0];
+
+        NSPasteboard * pboard = [NSPasteboard generalPasteboard];
+        [pboard declareTypes:[firstSub writableTypesForPasteboard:pboard] owner:nil];
+        [pboard writeObjects:selectedSubs];
+    }
+}
+
+-(IBAction)cut: (id) sender {
+    [self copy:sender];
+    [self delete:sender];
+}
+
+-(IBAction)paste: (id) sender {
+    NSUInteger row = [self selectedRowIndexes].firstIndex;
+    NSPasteboard * pboard = [NSPasteboard generalPasteboard];
+    if ([pboard.types containsObject:kMTDownloadPasteBoardType]) {
+        [self insertDownloadsFromPasteboard:pboard atRow:row];
+    } else if ([pboard.types containsObject:kMTTivoShowPasteBoardType]) {
+        [self insertShowsFromPasteboard:pboard atRow:row];
+    } else if ([pboard.types containsObject:NSPasteboardTypeString]) {
+      [self insertStringsFromPasteboard:pboard atRow:row];
+        }
+}
+
+-(IBAction)delete:(id)sender{
+    DDLogMajor(@"user request to delete subscriptions");
+    [self unsubscribeSelectedItems:sender];
+}
+
+-(void)dealloc
+{
+    [self unregisterDraggedTypes];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 

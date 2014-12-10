@@ -11,7 +11,7 @@
 #import "MTFormat.h"
 @class MTDownload;
 
-@interface MTSubscription : NSObject {
+@interface MTSubscription : NSObject < NSPasteboardWriting, NSPasteboardReading> {
     
 }
 
@@ -44,22 +44,13 @@
 @property (readonly) BOOL canMarkCommercials;
 @property (readonly) BOOL shouldSkipCommercials;
 
++(MTSubscription *) subscriptionFromString:(NSString *) str;
++(MTSubscription *) subscriptionFromDictionary: (NSDictionary *) sub;
++(MTSubscription *) subscriptionFromShow: (MTTiVoShow *) tivoShow;
+
+
 -(BOOL) isSubscribed:(MTTiVoShow *) tivoShow ignoreDate:(BOOL) ignoreDate;
--(MTDownload *) downloadForShow: (MTTiVoShow *) thisShow;
+-(MTDownload *) downloadForSubscribedShow: (MTTiVoShow *) thisShow;
 
 @end
 
-@interface NSMutableArray (MTSubscriptionList)
-
--(void) checkSubscription: (NSNotification *) notification;  //Notification.object should be show to check
--(void) checkSubscriptionsNew:(NSArray *) newSubs;
--(NSArray *) addSubscriptions:(NSArray *) shows; //returns new subs
--(NSArray *) addSubscriptionsDL: (NSArray *) downloads;
--(MTSubscription *) addSubscriptionsString: (NSString *) pattern;
--(void) deleteSubscriptions:(NSArray *) subscriptions;
--(void) clearHistory:(NSArray *) subscriptions;
-
--(void) saveSubscriptions;
--(void) loadSubscriptions;
-
-@end

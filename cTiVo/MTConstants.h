@@ -93,7 +93,7 @@
 #define kMTSubscribedPreferredTiVo  @"PreferredTiVo"
 #define kMTSubscribedHDOnly  @"HDOnly"
 #define kMTSubscribedSDOnly  @"SDOnly"
-#define kMTSubscribedPrevRecorded @"PrevRecorded"
+#define kMTSubscribedPrevRecorded @"PrevRecorded" //not used
 #define kMTSubscribedRegExPattern @"RegExPattern"
 
 //Download queue userDefaults

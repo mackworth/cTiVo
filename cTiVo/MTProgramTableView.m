@@ -391,7 +391,7 @@ __DDLOGHERE__
 	
     switch(context) {
         case NSDraggingContextOutsideApplication:
-            return NO;  //could theoretically allow, as completed shows are also here.
+            return NSDragOperationCopy;  //could theoretically allow, as completed shows are also here.
             break;
 			
         case NSDraggingContextWithinApplication:
@@ -458,6 +458,27 @@ __DDLOGHERE__
 	DDLogVerbose(@"Dragging Objects: %@", selectedObjects);
 	[pboard writeObjects:selectedObjects];
    return (selectedObjects.count > 0);
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
+    if ([menuItem action]==@selector(copy:)) {
+        return (self.numberOfSelectedRows >0);
+    } 
+    return YES;
+}
+
+-(IBAction)copy: (id) sender {
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+    NSPredicate *protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
+    NSArray	*selectedShows = [[self.sortedShows objectsAtIndexes:selectedRowIndexes ] filteredArrayUsingPredicate:protectedPredicate];
+
+    if (selectedShows.count > 0) {
+        MTTiVoShow * firstShow = selectedShows[0];
+
+        NSPasteboard * pboard = [NSPasteboard generalPasteboard];
+        [pboard declareTypes:[firstShow writableTypesForPasteboard:pboard] owner:nil];
+        [[NSPasteboard generalPasteboard] writeObjects:selectedShows];
+   }
 }
 
 

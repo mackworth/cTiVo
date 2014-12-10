@@ -9,6 +9,8 @@
 #import "MTTiVoManager.h"
 #import "MTiTivoImport.h"
 #import "MTSubscription.h"
+#import "MTSubscriptionList.h"
+
 #import <Growl/Growl.h>
 
 #include <arpa/inet.h>
@@ -686,22 +688,26 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void)pauseQueue:(NSNumber *)askUser
 {
-	self.processingPaused = @(YES);
-//	return;
 	if ([self anyTivoActive] && [askUser boolValue]) {
-		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton:@"Complete stage of current shows" otherButton:nil informativeTextWithFormat:@""];
+		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete stage of current shows" informativeTextWithFormat:@""];
 		NSInteger returnValue = [scheduleAlert runModal];
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
-		if (returnValue == 1) {
+		if (returnValue == NSAlertDefaultReturn) {
 			//We're rescheduling shows
 			for (MTTiVo *tiVo in _tiVoList) {
 				[tiVo rescheduleAllShows];
 			}
 			NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
 			[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
-		}
-		
-	}
+            self.processingPaused = @(YES);
+        } else if (returnValue == NSAlertAlternateReturn) {
+            //no action:  self.processingPaused = @(NO);
+        } else { //NSAlertOtherReturn
+            self.processingPaused = @(YES);
+        }
+    } else {
+        self.processingPaused = @(YES);
+    }
 	[self configureSchedule];
 }
 

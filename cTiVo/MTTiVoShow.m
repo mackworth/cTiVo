@@ -503,16 +503,33 @@ __DDLOGHERE__
 
 - (id)pasteboardPropertyListForType:(NSString *)type {
 //	NSLog(@"QQQ:pboard Type: %@",type);
-	if ([type compare:kMTTivoShowPasteBoardType] ==NSOrderedSame) {
+	if ([type isEqualToString:kMTTivoShowPasteBoardType]) {
 		return  [NSKeyedArchiver archivedDataWithRootObject:self];
-	} else {
-		return nil;
-	}
+    } else if ( [type isEqualToString:(NSString *)kUTTypeFileURL]) {
+        NSArray * files = [tiVoManager.showsOnDisk objectForKey:self.showKey];
+        if (files.count > 0) {
+            NSURL *URL = [NSURL fileURLWithPath:files[0] isDirectory:NO];
+            id temp =  [URL pasteboardPropertyListForType:(id)kUTTypeFileURL];
+            return temp;
+        } else {
+           return nil;
+        }
+    } else if ( [type isEqualToString:NSPasteboardTypeString]) {
+        NSString * episodePart = self.seasonEpisode.length >0 ?
+                                        [NSString stringWithFormat:@"\t(%@)",self.seasonEpisode] :
+                                        @""; //skip empty episode info
+        return [NSString stringWithFormat:@"%@\t%@%@" ,self.showDateString, self.showTitle, episodePart] ;
+    } else {
+        return nil;
+    }
 }
+
 -(NSArray *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
-	NSArray* result = [NSArray  arrayWithObjects: kMTTivoShowPasteBoardType, nil];  //NOT working yet
-//	NSLog(@"QQQ:writeable Type: %@",result);
-	return result;
+    if ([tiVoManager.showsOnDisk objectForKey:self.showKey]) {
+        return @[kMTTivoShowPasteBoardType, (NSString *)kUTTypeFileURL, NSPasteboardTypeString];
+    } else {
+        return @[kMTTivoShowPasteBoardType, NSPasteboardTypeString];
+    }
 }
 
 - (NSPasteboardWritingOptions)writingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard {

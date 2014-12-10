@@ -10,10 +10,12 @@
 #import "MTDownloadTableView.h"
 #import "MTProgramTableView.h"
 #import "MTSubscriptionTableView.h"
+#import "MTSubscriptionList.h"
+#import "MTHelpViewController.h"
+
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"
 #import "MTTiVo.h"
-#import "MTHelpViewController.h"
 #import <Quartz/Quartz.h>
 
 @implementation NSView (HS)
@@ -506,7 +508,7 @@ __DDLOGHERE__
 
 -(IBAction)subscribe:(id) sender {
 	NSArray * selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:tiVoShowTable.selectedRowIndexes];
-	[tiVoManager.subscribedShows addSubscriptions:selectedShows];
+	[tiVoManager.subscribedShows addSubscriptionsShows:selectedShows];
 }
 
 #pragma mark - Download Buttons
