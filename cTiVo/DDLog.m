@@ -502,7 +502,8 @@ static unsigned int numProcessors;
         Class class = classes[i];
 
         if ([self isRegisteredClass:class]) {
-            [result addObject:class];
+            if ([NSStringFromClass(class) hasPrefix:@"MT"]) {            [result addObject:class];
+            }
         }
     }
     

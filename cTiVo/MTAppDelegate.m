@@ -103,7 +103,7 @@ void signalHandler(int signal)
 {
 	//Do nothing only use to intercept SIGPIPE.  Ignoring this should be fine as the the retry system should catch the failure and cancel and restart
 	tiVoManager.signalError = signal;
-	NSLog(@"Got signal %d",signal);
+    //NSLog(@"Got signal %d",signal); not safe
 }
 
 @implementation MTAppDelegate

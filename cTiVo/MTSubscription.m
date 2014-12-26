@@ -226,8 +226,6 @@ __DDLOGHERE__
         DDLogReport(@"Importing Subscription: Not enough fields in %@",str);
         return nil;  //improperly formatted subscription text
     }
-
-#warning need check in next line
      //future: || [[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups] ||
         MTSubscription *newSub = [MTSubscription new];
 
