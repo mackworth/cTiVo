@@ -13,7 +13,7 @@
 #import "NSString+Helpers.h"
 #include <sys/xattr.h>
 #include "mp4v2.h"
-
+#include "NSNotificationCenter+Threads.h"
 
 @interface MTDownload () {
 	
@@ -86,7 +86,7 @@ __DDLOGHERE__
 {
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
 		DDLogMajor(@"Changing DL status of %@ to %@ (%@)", object, [(MTDownload *)object showStatus], [(MTDownload *)object downloadStatus]);
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadStatusChanged object:nil];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadStatusChanged object:nil];
          if (!self.progressTimer && self.isInProgress) {
              [self launchPerformanceTimer];
           } else {
@@ -122,6 +122,7 @@ __DDLOGHERE__
             self.numZeroSpeeds = 0;
         }
         if (self.numZeroSpeeds > 3) {
+            //not getting much data; hide meter
             _speed = 0.0;
         } else if (_speed == 0.0) {
             _speed = recentSpeed;
@@ -231,8 +232,7 @@ __DDLOGHERE__
 		(![decrementRetries boolValue] && _numStartupRetriesRemaining <=0)) {
 		[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
 		_processProgress = 1.0;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
-		
+        [self progressUpdated];
 		[tiVoManager  notifyWithTitle: @"TiVo show failed; cancelled."
 							 subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
 		
@@ -247,9 +247,8 @@ __DDLOGHERE__
 		}
 		[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
 	}
-    NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:self.show.tiVo];
-    [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
-	
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
+
 }
 
 #pragma mark - Queue encoding/decoding methods for persistent queue, copy/paste, and drag/drop
@@ -452,8 +451,7 @@ __DDLOGHERE__
 	}
 	[self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
 	if (notifyTiVo) {
-		NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:self.show.tiVo];
-		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
 	}
 }
 
@@ -778,8 +776,7 @@ NSString * fourChar(long n, BOOL allowZero) {
          _downloadingShowFromMPGFile = YES;
     }
 	if (tivoFileExists || mpgFileExists) {  //we're using an exisiting file so start the next download
-		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.show.tiVo];
-		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:kMTTiVoAccessDelay];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTransferDidFinish object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
 	}
 	if (([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:trialLockFilePath]) && !tivoFileExists  && !mpgFileExists) { //If .tivo file exits assume we will use this and not download.
 		NSString * nextBase;
@@ -868,7 +865,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         DDLogDetail(@"Encoding of %@ failed for %@ format, encoder %@ not found",_show.showTitle,_encodeFormat.name,_encodeFormat.encoderUsed);
         [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
         _processProgress = 1.0;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:nil];
         return nil;
     } else {
         DDLogVerbose(@"using encoder: %@", encoderLaunchPath);
@@ -999,7 +996,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     decryptTask.completionHandler = ^BOOL(){
         if (!self.shouldSimulEncode) {
             [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDecryptDidFinish object:nil];
+            [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationDecryptDidFinish object:nil];
             if (_decryptBufferFilePath) {
                 [self markCompleteCTiVoFile: _decryptBufferFilePath ];
             }
@@ -1074,7 +1071,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
         self.processProgress = 1.0;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        [self progressUpdated];
         if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
             DDLogReport(@" %@ File %@ not found after encoding complete",self, self.encodeFilePath );
             [self rescheduleShowWithDecrementRetries:@(YES)];
@@ -1117,7 +1114,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 _processProgress = 0.0;
                 previousProcessProgress = 0.0;
                 totalDataRead = 0.0;
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+                [self progressUpdated];
                 [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
                 [self performSelectorInBackground:@selector(writeData) withObject:nil];
                 return YES;
@@ -1151,7 +1148,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             };
             encodeTask.startupHandler = ^BOOL(){
                 _processProgress = 0.0;
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+                [self progressUpdated];
                 [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
                 return YES;
             };
@@ -1204,7 +1201,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             captionTask.startupHandler = ^BOOL(){
                 _processProgress = 0.0;
                 [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+                [self progressUpdated];
                 return YES;
             };
         }
@@ -1296,7 +1293,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 				 if (!self.shouldSimulEncode) {
 					self.processProgress = 1.0;
 				 }
-				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+				[self progressUpdated];
 				[self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
 				if (self.exportSubtitles.boolValue && self.skipCommercials) {
 					NSArray *srtEntries = [NSArray getFromSRTFile:captionFilePath];
@@ -1312,7 +1309,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 				}
              } else {
                  self.processProgress = 1.0;
-                 [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+                 [self progressUpdated];
                  [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
                  [self writeMetaDataFiles];
 #ifndef deleteXML
@@ -1406,7 +1403,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     progressAt100Percent = nil;  //Reset end of progress failure delay
     //Before starting make sure the encoder is OK.
 	if (![self encoderPath]) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
 		return;
 	}
 	DDLogVerbose(@"encoder is %@",[self encoderPath]);
@@ -1765,7 +1762,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
         _processProgress = 1.0;
         [self setValue:[NSNumber numberWithInt:kMTStatusAddingToItunes] forKeyPath:@"downloadStatus"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        [self progressUpdated];
 		MTiTunes *iTunes = [[MTiTunes alloc] init];
 		NSString * iTunesPath = [iTunes importIntoiTunes:self withArt:artwork] ;
 		
@@ -1803,9 +1800,9 @@ NSString * fourChar(long n, BOOL allowZero) {
 //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:_show];
 	DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], _show.showTitle);
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadDidFinish object:self];  //Currently Free up an encoder/ notify subscription module / update UI
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  //Currently Free up an encoder/ notify subscription module / update UI
     _processProgress = 1.0;
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+	[self progressUpdated];
 	[tiVoManager  notifyWithTitle:@"TiVo show transferred." subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
 	
 	[self cleanupFiles];
@@ -1834,7 +1831,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
 //    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:bufferFileReadHandle];
     if (!self.isNew && !self.isDone ) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowDownloadWasCanceled object:nil];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];
     }
     _decryptTask = _captionTask = _commercialTask = _encodeTask  = nil;
     
@@ -1861,8 +1858,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 //    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
     if (_processProgress != 0.0 ) {
 		_processProgress = 0.0;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:self];
-  	}
+        [self progressUpdated];
+    }
     
 }
 
@@ -1919,9 +1916,9 @@ NSString * fourChar(long n, BOOL allowZero) {
 	return ([_downloadStatus intValue] == kMTStatusNew);
 }
 
--(void)updateProgress
+-(void)progressUpdated
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:nil];
 }
 
 
@@ -1981,20 +1978,21 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(void)writeData
 {
+    // writeData supports getting its data from either an NSData buffer (urlBuffer) or a file on disk (_bufferFilePath).  This allows cTiVo to
+    // initially try to keep the dataflow off the disk, except for final products, where possible.  But, the ability to do this depends on the
+    // processor being able to keep up with the data flow from the TiVo which is often not the case due to either a slow processor, fast network
+    // connection, of different tasks competing for processor resources.  When the processor falls too far behind and the memory buffer will
+    // become too large cTiVo will fall back to using files on the disk as a data buffer.
+
+
 	//	writingData = YES;
-    long chunkSize = 50000;
-    long dataRead;
-	@autoreleasepool {
-		NSData *data = nil;
-		if (!_isCanceled) {
+    const long chunkSize = 50000;
+    long dataRead = chunkSize; //to start loop
+    while (dataRead == chunkSize && !_isCanceled) {
+        @autoreleasepool {
+            NSData *data = nil;
 			@try {
-                // writeData supports getting its data from either an NSData buffer (urlBuffer) or a file on disk (_bufferFilePath).  This allows cTiVo to 
-                // initially try to keep the dataflow off the disk, except for final products, where possible.  But, the ability to do this depends on the 
-                // processor being able to keep up with the data flow from the TiVo which is often not the case due to either a slow processor, fast network 
-                // connection, of different tasks competing for processor resources.  When the processor falls too far behind and the memory buffer will 
-                // become too large cTiVo will fall back to using files on the disk as a data buffer.
-                
-                if (bufferFileReadHandle == urlBuffer) {
+                 if (bufferFileReadHandle == urlBuffer) {
                     @synchronized(urlBuffer) {
                         long sizeToWrite = urlBuffer.length - urlReadPointer;
                         if (sizeToWrite > chunkSize) {
@@ -2016,11 +2014,18 @@ NSString * fourChar(long n, BOOL allowZero) {
 			}
 			@finally {
 			}
-		}
-		if (!_isCanceled){
+            if (_isCanceled || data.length == 0) break;
 			@try {
-                if (data.length) {
-                    [taskChainInputHandle writeData:data];
+                //crashes in the event of a bad pipe
+                //[taskChainInputHandle writeData:data];
+                ssize_t amountSent= write ([taskChainInputHandle fileDescriptor], [data bytes], [data length]);
+                if (amountSent < 0 || ((NSUInteger)amountSent != [data length])) {
+                    if (!_isCanceled){
+                        [self rescheduleOnMain];
+                        DDLogDetail(@"Rescheduling");
+                    };
+                    DDLogDetail(@"download write fail2; tried %lul bytes; wrote %zd", (unsigned long)[data length], amountSent);
+                    break;
                 }
 			}
 			@catch (NSException *exception) {
@@ -2029,61 +2034,17 @@ NSString * fourChar(long n, BOOL allowZero) {
                     DDLogDetail(@"Rescheduling");
                 };
 				DDLogDetail(@"download write fail: %@; %@", exception.reason, _show.showTitle);
+                break;
 			}
 			@finally {
 			}
-		}
-		dataRead = data.length;
-        totalDataRead += dataRead;
-		while (dataRead == chunkSize && !_isCanceled) {
-			@autoreleasepool {
-				@try {
-                    if (bufferFileReadHandle == urlBuffer) {
-                        @synchronized(urlBuffer) {
-                            long sizeToWrite = urlBuffer.length - urlReadPointer;
-                            if (sizeToWrite > chunkSize) {
-                                sizeToWrite = chunkSize;
-                            }
-                            data = [urlBuffer subdataWithRange:NSMakeRange(urlReadPointer, sizeToWrite)];
-                            urlReadPointer += sizeToWrite;
-                        }
-                    } else {
-                        data = [bufferFileReadHandle readDataOfLength:chunkSize];
-                    }
-				}
-				@catch (NSException *exception) {
-                    if (!_isCanceled){
-                        [self rescheduleOnMain];
-                        DDLogDetail(@"Rescheduling");
-                    };
-					DDLogDetail(@"buffer read fail2: %@; %@", exception.reason,_show.showTitle);
-				}
-				@finally {
-				}
-				if (!_isCanceled) {
-					@try {
-                        if (data.length) {
-                            [taskChainInputHandle writeData:data];
-                        }
-					}
-					@catch (NSException *exception) {
-						if (!_isCanceled){
-                            [self rescheduleOnMain];
-                            DDLogDetail(@"Rescheduling");
-                        };
-						DDLogDetail(@"download write fail2: %@; %@", exception.reason, _show.showTitle);
-					}
-					@finally {
-					}
-				}
-				if (_isCanceled) break;
-				dataRead = data.length;
-                totalDataRead += dataRead;
-				_processProgress = totalDataRead/_show.fileSize;
-				[self performSelectorOnMainThread:@selector(updateProgress) withObject:nil waitUntilDone:NO];
-			}
-		}
-	}
+
+            dataRead = data.length;
+            totalDataRead += dataRead;
+            _processProgress = totalDataRead/_show.fileSize;
+            [self progressUpdated];
+        }
+    }
 	if (!activeURLConnection || _isCanceled) {
 		DDLogDetail(@"Closing taskChainHandle for show %@",self.show.showTitle);
 		[taskChainInputHandle closeFile];
@@ -2230,12 +2191,12 @@ NSString * fourChar(long n, BOOL allowZero) {
 		} else {
 			self.show.fileSize = downloadedFileSize;  //More accurate file size
 		}
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:self];
-//		NSLog(@"File size after reset %lf %lf",self.show.fileSize,downloadedFileSize);
-		NSNotification *not = [NSNotification notificationWithName:kMTNotificationDownloadDidFinish object:self.show.tiVo];
-		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:not afterDelay:kMTTiVoAccessDelay];
-        if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self.show];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadRowChanged object:self];
+ //		NSLog(@"File size after reset %lf %lf",self.show.fileSize,downloadedFileSize);
+
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTransferDidFinish object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
+         if ([bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
             if ([[_bufferFilePath substringFromIndex:_bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame  && !_isCanceled) { //We finished a complete download so mark it so
                 [self markCompleteCTiVoFile:_bufferFilePath];
             }

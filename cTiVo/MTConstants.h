@@ -12,7 +12,7 @@
 #define kMTNotificationSubscriptionsUpdated @"MTNotificationSubscriptionsUpdated"
 
 //Download Progress Notifications
-#define kMTNotificationDownloadDidFinish @"MTNotificationDownloadDidFinish"    //object = MTTiVo that just finished a transfer
+#define kMTNotificationTransferDidFinish @"MTNotificationTransferDidFinish"    //object = MTTiVo that just finished a transfer
 #define kMTNotificationDecryptDidFinish @"MTNotificationDecryptDidFinish"
 //#define kMTNotificationEncodeDidFinish @"MTNotificationEncodeDidFinish"
 //#define kMTNotificationEncodeWasCanceled @"MTNotificationEncodeWasCanceled"

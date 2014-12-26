@@ -11,6 +11,8 @@
 #import "MTDownload.h"
 #import "NSString+HTML.h"
 #import "MTTiVoManager.h"
+#import "NSNotificationCenter+Threads.h"
+
 #include <sys/xattr.h>
 
 #define kMTStringType 0
@@ -169,15 +171,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[thisTivo performSelector:@selector(manageDownloads:) withObject:thisTivo afterDelay:kMTTiVoAccessDelay+2];
 		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
 	} 
-    [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkChanged object:nil];
-	DDLogCReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
+    [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationNetworkChanged object:nil];
+    DDLogCReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
 }
 
 -(void)setupNotifications
 {
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadQueueUpdated object:nil];
-	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadDidFinish object:nil];
+	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationTransferDidFinish object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDecryptDidFinish object:nil];
 	
 }
@@ -324,7 +326,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     DDLogVerbose(@"Previous shows were: %@:",previousShowList);
 	[newShows removeAllObjects];
 //	[_shows removeAllObjects];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdating object:self];
+	[NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationShowListUpdating object:self];
 	if (self.currentNPLStarted) {
 		[self saveLastLoadTime:self.currentNPLStarted];
 	}
@@ -601,7 +603,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			[tiVoManager checkDownloadQueueForDeletedEntries:self];
 			firstUpdate = NO;
 		}
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowListUpdated object:self];
 		[self performSelector:@selector(updateShows:) withObject:nil afterDelay:([[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0) + 1.0];
 		DDLogVerbose(@"Deleted shows: %@",previousShowList);
 		for (MTTiVoShow * show in [previousShowList objectEnumerator]){
@@ -615,8 +617,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		}
 		 previousShowList = nil;
 	}
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:self];
+	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoShowsUpdated object:nil];
+	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self];
      parser = nil;
 }
 
@@ -742,7 +744,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[showURLConnection cancel];
 		self.showURLConnection = nil;
 		isConnecting = NO;
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"incorrect"}];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"incorrect"}];
 	}
 }
 
@@ -766,7 +768,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     DDLogReport(@"URL Connection Failed with error %@",error);
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:self];
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowListUpdated object:self];
 //    [self reportNetworkFailure];
     if(self.manualTiVo) _isReachable = NO;
     self.showURLConnection = nil;

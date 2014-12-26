@@ -14,6 +14,7 @@
 #import "NSString+RFC3339Date.h"
 #import "mp4v2.h"
 #import "NSString+Helpers.h"
+#import "NSNotificationCenter+Threads.h"
 
 @interface MTTiVoShow () {
 	
@@ -152,8 +153,7 @@ __DDLOGHERE__
 		}
 		[self getTheTVDBDetails];
 
-		NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDetailsLoaded object:self];
-    [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
 	}
 }
 #pragma mark - access theTVDB

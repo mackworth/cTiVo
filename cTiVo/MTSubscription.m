@@ -378,7 +378,7 @@ __DDLOGHERE__
     return [outString componentsJoinedByString:@"\t"];
 }
 
-#pragma mark - Pastboard routines
+#pragma mark - Pasteboard routines
 
 - (id)pasteboardPropertyListForType:(NSString *)type {
     //	NSLog(@"QQQ:pboard Type: %@",type);

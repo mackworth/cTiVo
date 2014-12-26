@@ -8,6 +8,7 @@
 
 #import "MTTaskChain.h"
 #import "MTDownload.h"
+#import "NSNotificationCenter+Threads.h"
 
 @implementation MTTaskChain
 
@@ -224,7 +225,7 @@ __DDLOGHERE__
     totalDataRead += readData.length;
     if (_providesProgress) {
         _download.processProgress = totalDataRead/_download.show.fileSize;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationProgressUpdated object:nil];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:nil];
     }
 //    NSLog(@"Total Data Read %ld",totalDataRead);
     NSArray *pipes = [teeBranches objectForKey:notification.object];
@@ -238,10 +239,19 @@ __DDLOGHERE__
 			//			NSLog(@"Writing data on %@",pipe == subtitlePipe ? @"subtitle" : @"encoder");
             if (!_download.isCanceled){
 				@try {
-                    [[pipe fileHandleForWriting] writeData:readData];
+                    //should be just the following, but it ignores @try/@catch
+                    //[[pipe fileHandleForWriting] writeData:readData];
+                    ssize_t amountSent= write ([[pipe fileHandleForWriting] fileDescriptor], [readData bytes], [readData length]);
+                    if (amountSent < 0 || ((NSUInteger)amountSent != [readData length])) {
+                        if (!_download.isCanceled){
+                            [_download rescheduleOnMain];
+                            DDLogDetail(@"Rescheduling");
+                        };
+                        DDLogDetail(@"download tee: write fail2; tried %lul bytes; wrote %zd", (unsigned long)[readData length], amountSent);
+                    }
 				}
 				@catch (NSException *exception) {
-					DDLogMajor(@"download write fileHandleForWriting fail: %@", exception.reason);
+					DDLogMajor(@"download tee: write fail: Bug in Encoder? %@", exception.reason);
 					if (!_download.isCanceled) {
 						[_download rescheduleOnMain];
 						DDLogDetail(@"Rescheduling");

@@ -13,6 +13,7 @@
 #import "DDTTYLogger.h"
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
+#import "NSNotificationCenter+Threads.h"
 #import <Crashlytics/Crashlytics.h>
 
 #import <IOKit/pwr_mgt/IOPMLib.h>
@@ -89,7 +90,7 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
 			
         case kIOMessageSystemHasPoweredOn:
             //System has finished waking up...
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:nil];
 			break;
 			
         default:
@@ -606,7 +607,7 @@ Routine to update and combine both the manual tivo preferences and the media key
 		[input validateEditing];
 		DDLogMajor(@"Got new Subscription %@",input.stringValue);
 		NSArray * subs = [[tiVoManager subscribedShows]  addSubscriptionsPatterns:@[input.stringValue]];
-		if (subs.count > 0) {
+		if (subs.count == 0) {
 			NSAlert * badSub = [NSAlert alertWithMessageText:@"Invalid Subscription" defaultButton:@"Cancel" alternateButton:@"" otherButton:nil informativeTextWithFormat:@"The subscription pattern may be badly formed, or it may already covered by another subscription."];
 			[badSub runModal];
         } else {
