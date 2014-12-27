@@ -89,7 +89,7 @@ __DDLOGHERE__
 - (MTSubscription *) findShow: (MTTiVoShow *) show {
     MTSubscription * possMatch = [self findSubscriptionNamed:show.seriesTitle checkSuggestion:show.isSuggestion];
     if (possMatch) DDLogVerbose(@"found show %@ in subscription %@", show, possMatch);
-    return nil;
+    return possMatch;
 }
 
 -(MTSubscription *) findSubscriptionNamed: (NSString *) seriesSearchString checkSuggestion: (BOOL) followSubsSuggestionValue {
