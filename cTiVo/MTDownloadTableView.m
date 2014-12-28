@@ -490,7 +490,8 @@ __DDLOGHERE__
     } else {
         result.textField.textColor = [NSColor blackColor];
     }
-	
+	   DDLogMajor(@"Cell for %@ at %@: %@",thisShow.showTitle,tableColumn.identifier, result.textField.stringValue);
+
    return result;
     
 }

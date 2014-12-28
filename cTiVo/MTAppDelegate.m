@@ -115,6 +115,71 @@ __DDLOGHERE__
 {
 	DDLogDetail(@"deallocing AppDelegate");
 }
+typedef NS_ENUM(NSUInteger, LogStateType) {
+    logNotSeen,
+    logSeenDownload,
+    logSeenClipView
+};
+
+LogStateType logState = logNotSeen;
+NSInteger numTimes = 0;
+
+-(void)logNotify: (NSNotification *) notification {
+    id obj  = notification.object;
+    LogStateType thisType = logNotSeen;
+
+    MTDownloadTableView * download = nil;
+    if ([obj class] == [NSClipView class]) {
+        thisType = logSeenClipView;
+        NSClipView * clip = obj;
+        if ([clip.documentView class] == [MTDownloadTableView class]) {
+            download = clip.documentView;
+        }
+    } else if ([obj class] == [MTDownloadTableView class]) {
+        thisType = logSeenDownload;
+        download =  ((MTDownloadTableView *) obj);
+    } else {
+        thisType = logNotSeen;
+    }
+
+    //state machine to count twenty iterations of Download/ClipView notifications
+    if        (logState == logNotSeen      && thisType == logSeenDownload) {
+        logState = logSeenDownload;
+    } else if (logState == logSeenDownload && thisType == logSeenClipView) {
+        logState = logSeenClipView;
+    } else if (logState == logSeenClipView && thisType == logSeenDownload) {
+        numTimes ++;
+        logState = logSeenDownload;
+        if (numTimes == 20) {
+            DDLogReport(@"Seen %ld iterations of Download/ClipView; so exiting",(long)numTimes);
+            [NSApp terminate:nil ];
+        }
+    } else {
+        logState = logNotSeen;
+        numTimes = 0;
+    }
+
+    if (download != nil  &&
+        (thisType == logSeenClipView || thisType ==logSeenDownload)) {
+        DDLogReport(@"Notify %@ %@%@: %@\nstack: %@",([NSThread isMainThread] ? @"": @" NOT MAIN"), download, (download == obj ? @"":[@" via " stringByAppendingString:[obj description]]), notification,[NSThread callStackSymbols]);
+    } else if (![notification.name isEqualToString:@"NSViewFrameDidChangeNotification"]) {
+        DDLogReport(@"Notify%@: %@",([NSThread isMainThread] ? @"": @" NOT MAIN"),notification);
+    }
+}
+
+-(void) setupNotifications {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:NSViewFrameDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadQueueUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadQueueUpdated object:nil];
+    //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadStatusChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationFormatListUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationTiVoListUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadRowChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDetailsLoaded object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationFoundMultipleTiVos object:nil];
+
+}
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
@@ -159,13 +224,13 @@ __DDLOGHERE__
 	// Initialize File Logger
     DDFileLogger *fileLogger = [[DDFileLogger alloc] init];
     // Configure File Logger
-    [fileLogger setMaximumFileSize:(10 * 1024 * 1024)];
+    [fileLogger setMaximumFileSize:(40 * 1024 * 1024)];
     [fileLogger setRollingFrequency:(3600.0 * 24.0)];
     [[fileLogger logFileManager] setMaximumNumberOfLogFiles:3];
 	[fileLogger setLogFormatter:logFormat];
     [DDLog addLogger:fileLogger];
 
-	DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
+	DDLogReport(@"Starting cTiVo ExtraLogging; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(trackListUpdates) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
@@ -228,7 +293,7 @@ __DDLOGHERE__
 	[pauseMenuItem setOnStateImage:nil];
 	[self.tiVoGlobalManager determineCurrentProcessingState];
     
-    
+    [self setupNotifications];
     
 	//Set up callback for sleep notification (this is 10.5 method and is still valid.  There is newer UI in 10.6 on.
 	

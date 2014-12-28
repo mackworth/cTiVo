@@ -18,6 +18,7 @@
 		1E37CBEC19D7EBA200661D7D /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
 		1E3D27E01A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */; };
+		1E3D27E51A4F5992006B9CC4 /* Crashlytics.sh in Resources */ = {isa = PBXBuildFile; fileRef = 1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */; };
 		1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */; };
 		1E4A38481A37C0F4001D84A7 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */; };
 		1E59368919648C860008780B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
@@ -150,6 +151,7 @@
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
 		1E3D27DE1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNotificationCenter+Threads.h"; sourceTree = "<group>"; };
 		1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNotificationCenter+Threads.m"; sourceTree = "<group>"; };
+		1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = Crashlytics.sh; sourceTree = "<group>"; };
 		1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTIsStringEmpty.h; sourceTree = "<group>"; };
 		1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTIsStringEmpty.m; sourceTree = "<group>"; };
 		1E4A38461A37C0F4001D84A7 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
@@ -161,7 +163,7 @@
 		1E5C5C1A17FDF0B80056E794 /* readme.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme.md; sourceTree = "<group>"; };
 		1E5C5C1B17FE18BB0056E794 /* wiki */ = {isa = PBXFileReference; lastKnownFileType = folder; path = wiki; sourceTree = "<group>"; };
 		1E6349E419C899CF00E650D0 /* Crashlytics.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = Crashlytics.sh; path = cTiVo/Crashlytics.sh; sourceTree = "<group>"; };
-		1E6349E519C89AB700E650D0 /* MTCrashlyticsKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MTCrashlyticsKey.m; path = cTiVo/MTCrashlyticsKey.m; sourceTree = "<group>"; };
+		1E6349E519C89AB700E650D0 /* MTCrashlyticsKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTCrashlyticsKey.m; sourceTree = "<group>"; };
 		1E684A7516E2C50B000F5C6E /* copyright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = copyright.png; sourceTree = "<group>"; };
 		1E684A7716E2C50B000F5C6E /* expired-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expired-recording.png"; sourceTree = "<group>"; };
 		1E684A7816E2C50B000F5C6E /* expires-soon-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expires-soon-recording.png"; sourceTree = "<group>"; };
@@ -418,6 +420,8 @@
 				1E59368B19648CFF0008780B /* MTLog.m */,
 				1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */,
 				1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */,
+				1E6349E519C89AB700E650D0 /* MTCrashlyticsKey.m */,
+				1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */,
 				1E9959C6173DC7D100B47539 /* DDTTYLogger.h */,
 				1E9959C7173DC7D100B47539 /* DDTTYLogger.m */,
 			);
@@ -533,7 +537,6 @@
 				D2D60BA116766EFD00CE32DE /* Cocoa.framework */,
 				D2D60BA316766EFD00CE32DE /* Other Frameworks */,
 				1E6349E419C899CF00E650D0 /* Crashlytics.sh */,
-				1E6349E519C89AB700E650D0 /* MTCrashlyticsKey.m */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -772,6 +775,7 @@
 				D219D5F416A503C100C79962 /* EncoderHelpText.rtf in Resources */,
 				1E964CA7188313ED00C19046 /* checkImage2.png in Resources */,
 				D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */,
+				1E3D27E51A4F5992006B9CC4 /* Crashlytics.sh in Resources */,
 				1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */,
 				1E964C9E1882768A00C19046 /* expired-recording@2x.png in Resources */,
 				D2574E8617FE30EC00BBAB5C /* MAKHelpFile.rtf in Resources */,
