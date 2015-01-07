@@ -694,7 +694,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
 		if (returnValue == NSAlertDefaultReturn) {
 			//We're rescheduling shows
-#warning do this in background?
             for (MTTiVo *tiVo in _tiVoList) {
 				[tiVo rescheduleAllShows];
 			}

@@ -484,9 +484,6 @@ __DDLOGHERE__
     } else {
         result.textField.textColor = [NSColor blackColor];
     }
-#ifdef intenseLogging
-	   DDLogMajor(@"Cell for %@ at %@: %@",thisShow.showTitle,tableColumn.identifier, result.textField.stringValue);
-#endif
 
    return result;
     
