@@ -86,5 +86,6 @@ VERBOSE is reused
 @interface DDLog (UserDefaults)
 +(void)setAllClassesLogLevelFromUserDefaults: (NSString *)defaultsKey;
 + (void) writeAllClassesLogLevelToUserDefaults;
++(void)setAllClassesLogLevel: (int) debugLevel;
 
 @end

@@ -26,6 +26,15 @@ __DDLOGHERE__
 	self = [super initWithCoder:aDecoder];
 	if (self) {
 		[self setNotifications];
+        self.dataSource = self;
+        self.delegate    = self;
+        self.allowsMultipleSelection = YES;
+        self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
+        if (!tiVoColumnHolder) tiVoColumnHolder = [self tableColumnWithIdentifier:@"TiVo"];
+        NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
+            [tiVoColumn setHidden:YES];
+        }
 	}
 	return self;
 }
@@ -98,21 +107,6 @@ __DDLOGHERE__
     }
 }
 
-
--(void)awakeFromNib
-{  //remember: called multiple times for each new cell loaded
- 	DDLogVerbose(@"DL Table awakeFromNib");
-   self.dataSource = self;
-    self.delegate    = self;
-    self.allowsMultipleSelection = YES;
-	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-    if (!tiVoColumnHolder) tiVoColumnHolder = [self tableColumnWithIdentifier:@"TiVo"];
-	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
-		[tiVoColumn setHidden:YES];
-	}
-}
-
 -(void) reloadData {
     //Configure Table Columns depending on how many TiVos
     
@@ -164,7 +158,7 @@ __DDLOGHERE__
     if (myTimeLeft != 0.0) {
         NSString * timeLeft = [NSString stringFromTimeInterval:  myTimeLeft];
         NSString * mySpeed = [NSString stringFromBytesPerSecond: download.speed];
-        cell.toolTip = [NSString stringWithFormat:@"%@; Estimated time left: %@",mySpeed, timeLeft];
+        cell.toolTip = [NSString stringWithFormat:@"%@; %0.0f%%; Est time left: %@",mySpeed, download.processProgress* 100, timeLeft];
     } else {
         cell.toolTip = download.show.showTitle;
     }
@@ -490,7 +484,9 @@ __DDLOGHERE__
     } else {
         result.textField.textColor = [NSColor blackColor];
     }
+#ifdef intenseLogging
 	   DDLogMajor(@"Cell for %@ at %@: %@",thisShow.showTitle,tableColumn.identifier, result.textField.stringValue);
+#endif
 
    return result;
     

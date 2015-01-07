@@ -115,6 +115,8 @@ __DDLOGHERE__
 {
 	DDLogDetail(@"deallocing AppDelegate");
 }
+
+#ifdef intenseLogging
 typedef NS_ENUM(NSUInteger, LogStateType) {
     logNotSeen,
     logSeenDownload,
@@ -125,61 +127,79 @@ LogStateType logState = logNotSeen;
 NSInteger numTimes = 0;
 
 -(void)logNotify: (NSNotification *) notification {
+    if ([notification.name isEqualToString:NSFileHandleReadCompletionNotification]) return; //don't print out data being read
+
     id obj  = notification.object;
     LogStateType thisType = logNotSeen;
-
-    MTDownloadTableView * download = nil;
+    NSTableView * tableView = nil;
     if ([obj class] == [NSClipView class]) {
         thisType = logSeenClipView;
         NSClipView * clip = obj;
-        if ([clip.documentView class] == [MTDownloadTableView class]) {
-            download = clip.documentView;
+        if ([clip.documentView isKindOfClass: [NSTableView class]]) {
+            tableView = clip.documentView;
         }
-    } else if ([obj class] == [MTDownloadTableView class]) {
+    } else if ([obj isKindOfClass: [NSTableView class]]) {
         thisType = logSeenDownload;
-        download =  ((MTDownloadTableView *) obj);
+
+        tableView =  ((NSTableView *) obj);
     } else {
         thisType = logNotSeen;
     }
 
-    //state machine to count twenty iterations of Download/ClipView notifications
-    if        (logState == logNotSeen      && thisType == logSeenDownload) {
-        logState = logSeenDownload;
-    } else if (logState == logSeenDownload && thisType == logSeenClipView) {
-        logState = logSeenClipView;
-    } else if (logState == logSeenClipView && thisType == logSeenDownload) {
+//    //state machine to count twenty iterations of Download/ClipView notifications
+//    if        (logState == logNotSeen      && thisType == logSeenDownload) {
+//        logState = logSeenDownload;
+//    } else if (logState == logSeenDownload && thisType == logSeenClipView) {
+//        logState = logSeenClipView;
+//    } else if (logState == logSeenClipView && thisType == logSeenDownload) {
+    if (thisType == logSeenClipView || thisType == logSeenDownload) {
         numTimes ++;
-        logState = logSeenDownload;
-        if (numTimes == 20) {
+        //        logState = logSeenDownload;
+        if (numTimes == 140) {
             DDLogReport(@"Seen %ld iterations of Download/ClipView; so exiting",(long)numTimes);
+            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTQuitWhileProcessing];
             [NSApp terminate:nil ];
         }
     } else {
-        logState = logNotSeen;
+        //        logState = logNotSeen;
         numTimes = 0;
     }
 
-    if (download != nil  &&
-        (thisType == logSeenClipView || thisType ==logSeenDownload)) {
-        DDLogReport(@"Notify %@ %@%@: %@\nstack: %@",([NSThread isMainThread] ? @"": @" NOT MAIN"), download, (download == obj ? @"":[@" via " stringByAppendingString:[obj description]]), notification,[NSThread callStackSymbols]);
-    } else if (![notification.name isEqualToString:@"NSViewFrameDidChangeNotification"]) {
+    if (tableView != nil  &&
+        (thisType == logSeenClipView || thisType ==logSeenDownload) &&
+        [notification.name isEqualToString:NSViewFrameDidChangeNotification]) {
+
+        NSString * numTimesStr = numTimes>1 ? [NSString stringWithFormat:@"(%@)",@(numTimes)]:@"";
+        NSString * subtree = [mainWindowController isWindowLoaded] ? [[[mainWindowController window] contentView] performSelector:@selector(_subtreeDescription) withObject:nil] : @"not loaded";
+        DDLogReport(@"Notify %@ %@%@%@ %@\nstack: %@\n Window = %@",([NSThread isMainThread] ? @"": @" NOT MAIN"), numTimesStr, tableView, (tableView == obj ? @"":[@" via " stringByAppendingString:[obj description]]), notification,[NSThread callStackSymbols], subtree);
+
+
+    } else if (!([notification.name isEqualToString:NSMenuDidAddItemNotification] ||
+               [notification.name isEqualToString:NSMenuDidChangeItemNotification ])) {
         DDLogReport(@"Notify%@: %@",([NSThread isMainThread] ? @"": @" NOT MAIN"),notification);
+    } else {
+        //   DDLogReport(@"Notify: MenuDidAdd/Change Item");
     }
 }
 
 -(void) setupNotifications {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:NSViewFrameDidChangeNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadQueueUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadQueueUpdated object:nil];
-    //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadStatusChanged object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationFormatListUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationTiVoListUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadRowChanged object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDetailsLoaded object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationFoundMultipleTiVos object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:nil object:nil];
+    /*
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:NSViewFrameDidChangeNotification object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadQueueUpdated object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadQueueUpdated object:nil];
+     //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadStatusChanged object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationFormatListUpdated object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationTiVoListUpdated object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDownloadRowChanged object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationDetailsLoaded object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logNotify:) name:kMTNotificationFoundMultipleTiVos object:nil];
+
+     */
 
 }
+#endif
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
@@ -192,13 +212,19 @@ NSInteger numTimes = 0;
 #include "MTCrashlyticsKey.m"
      ];
     }
+#ifdef intenseLogging 
+    [DDLog setAllClassesLogLevel:15];
+    [DDLog setLogLevel:7 forClassWithName:@"MTTiVo"];
+    [DDLog setLogLevel:7 forClassWithName:@"MTTiVoShow"];
+
+#else
     CGEventRef event = CGEventCreate(NULL);
     CGEventFlags modifiers = CGEventGetFlags(event);
     CFRelease(event);
 	
     CGEventFlags flags = (kCGEventFlagMaskAlternate | kCGEventFlagMaskControl);
     if ((modifiers & flags) == flags) {
-		[[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTDebugLevelDetail];
+        [[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTDebugLevelDetail];
 		[[NSUserDefaults standardUserDefaults] setObject:@15 forKey:kMTDebugLevel];
 		[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
 	} else {
@@ -206,7 +232,8 @@ NSInteger numTimes = 0;
 		[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
 		
 	}
-	
+#endif
+    
 	// Insert code here to initialize your application
 	
 	//	[[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTMediaKeys];  //Test code for starting from scratch
@@ -224,13 +251,26 @@ NSInteger numTimes = 0;
 	// Initialize File Logger
     DDFileLogger *fileLogger = [[DDFileLogger alloc] init];
     // Configure File Logger
-    [fileLogger setMaximumFileSize:(40 * 1024 * 1024)];
+#ifdef intenseLogging
+    [fileLogger setMaximumFileSize:(80 * 1024 * 1024)];
+    fileLogger.doNotReuseLogFiles = YES;
+#else
+     [fileLogger setMaximumFileSize:(20 * 1024 * 1024)];
+#endif
+    [fileLogger.logFileManager setLogFilesDiskQuota:0]; //only delete max files
     [fileLogger setRollingFrequency:(3600.0 * 24.0)];
     [[fileLogger logFileManager] setMaximumNumberOfLogFiles:3];
 	[fileLogger setLogFormatter:logFormat];
     [DDLog addLogger:fileLogger];
 
-	DDLogReport(@"Starting cTiVo ExtraLogging; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
+#ifdef intenseLogging
+    DDLogReport(@"Starting cTiVo Way Too Much Logging; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
+#ifdef intenseLogging
+    [self setupNotifications];
+#endif
+#else
+     DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
+#endif
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(trackListUpdates) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
@@ -292,8 +332,6 @@ NSInteger numTimes = 0;
 	//Turn off check mark on Pause/Resume queue menu item
 	[pauseMenuItem setOnStateImage:nil];
 	[self.tiVoGlobalManager determineCurrentProcessingState];
-    
-    [self setupNotifications];
     
 	//Set up callback for sleep notification (this is 10.5 method and is still valid.  There is newer UI in 10.6 on.
 	
@@ -632,7 +670,8 @@ Routine to update and combine both the manual tivo preferences and the media key
 			}
 			[thisMenu addItem:thisMenuItem];
 		}
-		NSMenuItem *thisMenuItem = [[NSMenuItem alloc] initWithTitle:@"All TiVos" action:NULL keyEquivalent:@""];
+        [thisMenu addItem:[NSMenuItem separatorItem]];
+        NSMenuItem *thisMenuItem = [[NSMenuItem alloc] initWithTitle:@"All TiVos" action:NULL keyEquivalent:@""];
 		[thisMenuItem setTarget:self];
 		[thisMenuItem setAction:@selector(updateAllTiVos:)];
 		[thisMenuItem setEnabled:YES];
@@ -732,7 +771,13 @@ Routine to update and combine both the manual tivo preferences and the media key
 }
 
 -(IBAction)showLogs:(id)sender {
-    NSURL * showURL =[NSURL fileURLWithPath:[@"~/Library/Logs/cTiVo" stringByExpandingTildeInPath] isDirectory:YES];
+    NSURL * showURL =[NSURL fileURLWithPath:[
+#ifdef intenseLogging
+                                             @"~/Library/Logs/cTiVo"
+#else
+                                             @"~/Library/Logs/cTiVoLogging"
+#endif
+                                             stringByExpandingTildeInPath] isDirectory:YES];
     if (showURL) {
         DDLogMajor(@"Showing logs at %@ ", showURL);
         [[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ showURL ]];
@@ -1015,7 +1060,7 @@ Routine to update and combine both the manual tivo preferences and the media key
 	NSInteger returnValue = [quitAlert runModal];
 	switch (returnValue) {
 		case NSAlertDefaultReturn:
-			DDLogDetail(@"User did ask to continue");
+			DDLogMajor(@"User did ask to continue");
 			tiVoManager.processingPaused = @(YES);
 			tiVoManager.quitWhenCurrentDownloadsComplete = @(YES);
 			[mainWindowController.cancelQuitView setHidden:NO];
@@ -1037,7 +1082,7 @@ Routine to update and combine both the manual tivo preferences and the media key
 			//			[quitAlert beginSheetModalForWindow:mainWindowController.window modalDelegate:self didEndSelector:@selector(doQuit) contextInfo:nil ];
 			break;
 		case NSAlertOtherReturn:
-			DDLogDetail(@"User did ask to quit");
+			DDLogMajor(@"User did ask to quit");
 			[self cleanup];
 			[NSApp replyToApplicationShouldTerminate:YES];
 			break;
@@ -1050,17 +1095,17 @@ Routine to update and combine both the manual tivo preferences and the media key
 
 -(void) cleanup {
 	
-	DDLogReport(@"cTiVo exiting");
 	[saveQueueTimer invalidate];
 	[tiVoManager cancelAllDownloads];
 	[tiVoManager writeDownloadQueueToUserDefaults];
     [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.tvdbCache forKey:kMTTheTVDBCache];
 	 mediaKeyQueue = nil;
+    DDLogReport(@"cTiVo exiting");
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
-    DDLogDetail(@"Asked to Quit");
+    DDLogMajor(@"Asked to Quit");
     if ([tiVoManager anyTivoActive] && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTQuitWhileProcessing] && sender ) {
 		[self performSelectorOnMainThread:@selector(confirmUserQuit) withObject:nil waitUntilDone:NO];
 		return NSTerminateLater;

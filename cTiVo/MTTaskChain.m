@@ -238,29 +238,41 @@ __DDLOGHERE__
         for (NSPipe *pipe in pipes ) {
 			//			NSLog(@"Writing data on %@",pipe == subtitlePipe ? @"subtitle" : @"encoder");
             if (!_download.isCanceled){
-				@try {
-                    //should be just the following, but it ignores @try/@catch
-                    //[[pipe fileHandleForWriting] writeData:readData];
+               //should be just the following, but writedata ignores @try/@catch
+                 // @try {
+                //  [[pipe fileHandleForWriting] writeData:readData];
+                // @catch (NSException *exception) {
+                NSInteger numTries = 3;
+
+                while (numTries > 0 && readData.length> 0) {
                     ssize_t amountSent= write ([[pipe fileHandleForWriting] fileDescriptor], [readData bytes], [readData length]);
-                    if (amountSent < 0 || ((NSUInteger)amountSent != [readData length])) {
+                    if (amountSent < 0) {
                         if (!_download.isCanceled){
                             [_download rescheduleOnMain];
                             DDLogDetail(@"Rescheduling");
                         };
-                        DDLogDetail(@"download tee: write fail2; tried %lul bytes; wrote %zd", (unsigned long)[readData length], amountSent);
+                        DDLogReport(@"write fail3; tried %lu bytes; error: %zd", (unsigned long)[readData length], amountSent);
+                        numTries = 0; //give up
+                    } else {
+                        NSInteger amountLeft = [readData length]- amountSent;
+
+                        if (amountLeft > 0) {
+                            DDLogMajor(@"pipe full, retrying; tried %lu bytes; wrote %zd", (unsigned long)[readData length], amountSent);
+                            sleep(1);  //probably too long, but this is quite rare
+                            numTries--;
+                        }
+                        NSRange remaining = NSMakeRange(amountSent, amountLeft);
+                        readData = [readData subdataWithRange:remaining];
                     }
-				}
-				@catch (NSException *exception) {
-					DDLogMajor(@"download tee: write fail: Bug in Encoder? %@", exception.reason);
-					if (!_download.isCanceled) {
-						[_download rescheduleOnMain];
-						DDLogDetail(@"Rescheduling");
-					}
-					return;
-					
-				}
-				@finally {
-				}
+                }
+                if (readData.length >0) {
+                    DDLogReport(@"Write Fail4: couldn't write to pipe after three tries; encoder crashed?");
+                    if (!_download.isCanceled) {
+                        [_download rescheduleOnMain];
+                        DDLogDetail(@"Rescheduling");
+                    }
+
+                }
 			}
         }
 		if (!_download.isCanceled) {

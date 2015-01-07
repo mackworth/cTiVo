@@ -132,8 +132,12 @@ __DDLOGHERE__
         self.manualTiVo = isManual;
         self.manualTiVoID = manualTiVoID;
 		self.queue = queue;
-        NSLog(@"testing reachability for tivo %@ with address %@",self.tiVo.name, self.tiVo.addresses[0]);
-        _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [self.tiVo.addresses[0] bytes]);
+        DDLogMajor(@"testing reachability for tivo %@ with address %@",self.tiVo.name, self.tiVo.addresses[0]);
+        if (isManual) {
+            _reachability = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [self.tiVo.iPAddress UTF8String]);
+        } else {
+            _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [self.tiVo.addresses[0] bytes]);
+        }
 		self.networkAvailability = [NSDate date];
 		BOOL didSchedule = NO;
 		if (_reachability) {
@@ -163,8 +167,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 							 void *info)
 {
     MTTiVo *thisTivo = (__bridge MTTiVo *)info;
-	thisTivo.isReachable = (flags >>17) && 1 ;
-	if (thisTivo.isReachable) {
+    BOOL isReachable = ((flags & kSCNetworkFlagsReachable) != 0);
+    BOOL needsConnection = ((flags & kSCNetworkFlagsConnectionRequired) != 0);
+
+    thisTivo.isReachable = isReachable && !needsConnection ;
+    if (thisTivo.isReachable) {
 		thisTivo.networkAvailability = [NSDate date];
 		[NSObject cancelPreviousPerformRequestsWithTarget:thisTivo selector:@selector(manageDownloads:) object:thisTivo];
 //        NSLog(@"QQQcalling managedownloads from MTTiVo:tivoNetworkCallback with delay+2");

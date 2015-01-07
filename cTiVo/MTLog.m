@@ -48,5 +48,11 @@
 	}
 }
 
++(void)setAllClassesLogLevel:(int) debugLevel {
+    for (Class class in [DDLog registeredClasses]) {
+        [self setLogLevel:debugLevel forClass:class];
+    }
+
+}
 
 @end

@@ -90,7 +90,7 @@ __DDLOGHERE__
     [defaultCenter addObserver:self selector:@selector(networkChanged:) name:kMTNotificationNetworkChanged object:nil];
 	
     [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidMoveNotification object:nil];
-     [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
+    [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
 	[tiVoManager addObserver:self forKeyPath:@"downloadDirectory" options:NSKeyValueObservingOptionInitial context:nil];
 	
 	[tiVoManager determineCurrentProcessingState];
@@ -122,7 +122,7 @@ __DDLOGHERE__
 		if (!dir) dir = @"Directory not available!";
 		downloadDirectory.title   = dir;
 		downloadDirectory.toolTip = dir;
-	}
+    }
 }
 
 -(void)networkChanged:(NSNotification *)notification
@@ -228,7 +228,8 @@ __DDLOGHERE__
     } else if (tiVoManager.tiVoList.count > 1){
         [searchingTiVosIndicator stopAnimation:nil];
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(popupHelpIfNotTiVosAfterInterval) object:nil];
-      [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d shows)",kMTAllTiVos,tiVoManager.totalShows]];
+        [tiVoListPopUp.menu addItem:[NSMenuItem separatorItem]];
+        [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d shows)",kMTAllTiVos,tiVoManager.totalShows]];
         if ([kMTAllTiVos compare:_selectedTiVo] == NSOrderedSame) {
             [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
         }

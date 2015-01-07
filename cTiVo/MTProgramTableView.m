@@ -22,6 +22,17 @@ __DDLOGHERE__
 	self = [super initWithCoder:aDecoder];
 	if (self) {
 		[self setNotifications];
+        DDLogVerbose(@"ProgramTable init");
+        self.dataSource = self;
+        self.delegate    = self;
+        self.allowsMultipleSelection = YES;
+        self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
+        self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
+        if (!tiVoColumnHolder) tiVoColumnHolder = [self tableColumnWithIdentifier:@"TiVo"];
+        NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
+            [tiVoColumn setHidden:YES];
+        }
 	}
 	return self;
 }
@@ -47,21 +58,6 @@ __DDLOGHERE__
     NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
 	[tiVoColumn setHidden:NO];
 	
-}
-
--(void)awakeFromNib
-{
-	DDLogVerbose(@"ProgramTable awakeFromNib");
-	self.dataSource = self;
-    self.delegate    = self;
-    self.allowsMultipleSelection = YES;
-	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-    self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
-    if (!tiVoColumnHolder) tiVoColumnHolder = [self tableColumnWithIdentifier:@"TiVo"];
-	NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
-		[tiVoColumn setHidden:YES];
-	}
 }
 
 -(void) reloadData {

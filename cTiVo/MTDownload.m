@@ -116,6 +116,7 @@ __DDLOGHERE__
     } else {
         NSTimeInterval timeSoFar = -[self.startTime timeIntervalSinceNow];
         double recentSpeed =  self.show.fileSize * (_processProgress-self.startProgress)/timeSoFar;
+        if (recentSpeed < 0.0) recentSpeed = 0.0;
         if (recentSpeed == 0.0) {
             self.numZeroSpeeds ++;
         } else {
@@ -124,7 +125,7 @@ __DDLOGHERE__
         if (self.numZeroSpeeds > 3) {
             //not getting much data; hide meter
             _speed = 0.0;
-        } else if (_speed == 0.0) {
+        } else if (_speed <= 0.0) {
             _speed = recentSpeed;
         } else {
             const double kSMOOTHING_FACTOR = 0.03;
@@ -228,7 +229,13 @@ __DDLOGHERE__
     if (_downloadStatus.intValue == kMTStatusDone) {
         self.baseFileName = nil;
     }
-	if (([decrementRetries boolValue] && _numRetriesRemaining <= 0) ||
+    if (_downloadStatus.intValue == kMTStatusDeleted) {
+        _numRetriesRemaining = 0;
+        _processProgress = 1.0;
+        [self progressUpdated];
+        [tiVoManager  notifyWithTitle: @"TiVo deleted program; download cancelled."
+                             subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
+    } else if (([decrementRetries boolValue] && _numRetriesRemaining <= 0) ||
 		(![decrementRetries boolValue] && _numStartupRetriesRemaining <=0)) {
 		[self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
 		_processProgress = 1.0;
@@ -1724,6 +1731,20 @@ NSString * fourChar(long n, BOOL allowZero) {
 	return HDTypeNotAvailable;
 }
 
+-(NSString *) moveFile:(NSString *) path ToiTunes: (NSString *)iTunesPath forType:(NSString *) typeString{
+    if (!path) return nil;
+    if (!iTunesPath) return nil;
+    if (![[NSFileManager defaultManager] fileExistsAtPath:path])  return nil;
+    NSString *newPath = [iTunesPath stringByAppendingPathComponent:[path lastPathComponent]];
+    if ([[NSFileManager defaultManager] moveItemAtPath:path toPath: newPath error:nil]) {
+        DDLogDetail (@"Moved %@ file to iTunes: %@", typeString, newPath);
+        return newPath;
+    } else {
+        DDLogReport(@"Couldn't move %@ file from path %@ to iTunes %@",typeString, path, newPath);
+        return nil;
+    }
+}
+
 -(void) finishUpPostEncodeProcessing {
 	NSDate *startTime = [NSDate date];
 	DDLogReport(@"Starting finishing @ %@",startTime);
@@ -1781,6 +1802,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 //			MP4Close(iTunesFileHandle, 0);
 
 			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
+                //delete old file
 				if (![[NSUserDefaults standardUserDefaults ] boolForKey:kMTSaveTmpFiles]) {
 					if ([[NSFileManager defaultManager] removeItemAtPath:self.encodeFilePath error:nil]) {
 						DDLogMajor (@"Deleting old video file %@", self.encodeFilePath);
@@ -1788,10 +1810,22 @@ NSString * fourChar(long n, BOOL allowZero) {
 						DDLogReport(@"Couldn't remove file at path %@",self.encodeFilePath);
 					}
 				}
-				//but remember new file for future processing
+                //move caption, commercial, and pytivo metadata files along with video
+                NSString * iTunesDirectory = [iTunesPath stringByDeletingLastPathComponent];
+                if (self.shouldEmbedSubtitles) {
+                    captionFilePath = [self moveFile:captionFilePath ToiTunes:iTunesDirectory forType:@"caption SRT"] ?: captionFilePath;
+                }
+                if (self.shouldMarkCommercials) {
+                    commercialFilePath = [self moveFile:commercialFilePath ToiTunes:iTunesDirectory forType:@"commercial EDL"] ?: commercialFilePath;
+                }
+                if (self.genTextMetaData.boolValue) {
+                    NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
+                    [self moveFile:textMetaPath ToiTunes:iTunesDirectory forType:@"metadata TXT"];
+                }
+                //but remember new file for future processing
 				_encodeFilePath= iTunesPath;
 			} else {
-				//two copies now, so add xattrs to iTunes copy as well
+				//two copies now, so add xattrs to iTunes copy as well; leave captions/metadata/commercials with original
 				[self addXAttrs:iTunesPath];
 			}
 		}
@@ -1838,7 +1872,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 	NSDate *now = [NSDate date];
     while (writingData && (-1.0 * [now timeIntervalSinceNow]) < 5.0){ //Wait for no more than 5 seconds.
         //Block until latest write data is complete - should stop quickly because isCanceled is set
-		writingData = NO;
+        //writingData = NO;
     } //Wait for pipe out to complete
     DDLogMajor(@"Waiting %lf seconds for write data to complete during cancel", (-1.0 * [now timeIntervalSinceNow]) );
     
@@ -2015,31 +2049,40 @@ NSString * fourChar(long n, BOOL allowZero) {
 			@finally {
 			}
             if (_isCanceled || data.length == 0) break;
-			@try {
-                //crashes in the event of a bad pipe
-                //[taskChainInputHandle writeData:data];
+            dataRead = data.length;
+              //should just be following line, but it crashes program in the event of a bad pipe
+              //@try
+              //[taskChainInputHandle writeData:data];
+              //@catch
+
+            NSInteger numTries = 3;
+            while (numTries > 0 && data.length > 0) {
                 ssize_t amountSent= write ([taskChainInputHandle fileDescriptor], [data bytes], [data length]);
-                if (amountSent < 0 || ((NSUInteger)amountSent != [data length])) {
+                NSInteger amountLeft = [data length]- amountSent;
+                if (amountSent < 0) {
+                    DDLogReport(@"write fail1; tried %lu bytes; error: %zd", (unsigned long)[data length], amountSent);
                     if (!_isCanceled){
                         [self rescheduleOnMain];
-                        DDLogDetail(@"Rescheduling");
                     };
-                    DDLogDetail(@"download write fail2; tried %lul bytes; wrote %zd", (unsigned long)[data length], amountSent);
-                    break;
+                    numTries = 0; //give up
+                } else {
+                    if (amountLeft > 0) {
+                        DDLogMajor(@"write pipe full, retrying; tried %lu bytes; wrote %zd", (unsigned long)[data length], amountSent);
+                        sleep(1);  //probably too long, but this is quite rare
+                        numTries--;
+                    }
+                    NSRange remaining = NSMakeRange(amountSent, amountLeft);
+                    data = [data subdataWithRange:remaining];
                 }
-			}
-			@catch (NSException *exception) {
-                if (!_isCanceled){
+            }
+            if (data.length > 0) {//already reported error
+                DDLogReport(@"Write Fail2: couldn't write to pipe after three tries");
+                if (!_isCanceled) {
                     [self rescheduleOnMain];
                     DDLogDetail(@"Rescheduling");
-                };
-				DDLogDetail(@"download write fail: %@; %@", exception.reason, _show.showTitle);
-                break;
-			}
-			@finally {
-			}
+                }
+            }
 
-            dataRead = data.length;
             totalDataRead += dataRead;
             _processProgress = totalDataRead/_show.fileSize;
             [self progressUpdated];
@@ -2176,7 +2219,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 			if (noRecording.location != NSNotFound) { //This is a missing recording
 				DDLogMajor(@"Deleted TiVo show; marking %@",self);
 				self.downloadStatus = [NSNumber numberWithInt: kMTStatusDeleted];
-				[self.show.tiVo updateShows:nil];
+                [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
+                [self.show.tiVo updateShows:nil];
 				return;
 			}
 		}

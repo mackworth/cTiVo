@@ -32,7 +32,6 @@
     
 }
 
-@property (weak) IBOutlet NSWindow *window;
 @property (nonatomic, strong) MTPreferencesWindowController *preferencesController;
 @property (nonatomic, strong) MTPreferencesWindowController *advPreferencesController;
 @property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;

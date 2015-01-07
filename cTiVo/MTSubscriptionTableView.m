@@ -23,7 +23,7 @@ __DDLOGHERE__
 //{
 //	self = [super init];
 //	if (self) {
-//		[self setNotifications];
+        //        [self setNotifications];
 //	}
 //	return self;
 //}
@@ -33,6 +33,11 @@ __DDLOGHERE__
 	self = [super initWithCoder:aDecoder];
 	if (self) {
 		[self setNotifications];
+        self.dataSource  = self;
+        self.delegate    = self;
+        //    self.rowHeight = 20;
+        self.allowsMultipleSelection = YES;
+        self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
 	}
 	return self;
 }
@@ -48,24 +53,14 @@ __DDLOGHERE__
 //
 -(void)setNotifications
 {
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSubscription:) name:kMTNotificationSubscriptionChanged object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSubscription:) name:kMTNotificationSubscriptionChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableViewSelectionDidChange:) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatListUpdated object:nil];
 	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, NSPasteboardTypeString, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationDelete forLocal:NO];
 
-}
-
--(void)awakeFromNib
-{//remember this can be called multiple times
-	DDLogVerbose(@"Subscription awakeFromNib");
-	self.dataSource  = self;
-    self.delegate    = self;
-//    self.rowHeight = 20;
-    self.allowsMultipleSelection = YES;
-	self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-    self.sortedSubscriptions = nil;
 }
 
 -(NSArray *)sortedSubscriptions
@@ -583,6 +578,7 @@ static NSDateFormatter *dateFormatter;
 
 -(void)dealloc
 {
+    DDLogDetail(@"deallocing subscriptionTable %@",self);
     [self unregisterDraggedTypes];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }

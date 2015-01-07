@@ -694,7 +694,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
 		if (returnValue == NSAlertDefaultReturn) {
 			//We're rescheduling shows
-			for (MTTiVo *tiVo in _tiVoList) {
+#warning do this in background?
+            for (MTTiVo *tiVo in _tiVoList) {
 				[tiVo rescheduleAllShows];
 			}
 			NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
@@ -783,7 +784,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(double) aggregateSpeed {
     double speed = 0.0;
     for (MTDownload *download in tiVoManager.downloadQueue) {
-        if (download.isInProgress){
+        if (download.downloadStatus.intValue == kMTStatusDownloading || download.downloadStatus.intValue == kMTStatusEncoding) {
             speed += download.speed;
         }
     }
@@ -796,7 +797,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
     
     double work = 0.0;
     for (MTDownload *download in tiVoManager.downloadQueue) {
-        if (download.isInProgress){
+        if (download.downloadStatus.intValue == kMTStatusDownloading || download.downloadStatus.intValue == kMTStatusEncoding){
             work += download.show.fileSize * (1.0-download.processProgress);
         } else if (!download.isDone) {
             work += download.show.fileSize;
