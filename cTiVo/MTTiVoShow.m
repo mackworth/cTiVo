@@ -179,7 +179,8 @@ __DDLOGHERE__
 	NSURL *url = [NSURL URLWithString:urlString];
 	DDLogVerbose(@"Getting %@ details for %@ using %@",type, self, urlString);
 	NSString *TVDBText = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
-	NSString*seriesIDTVDB = [self getStringForPattern:@"<seriesid>(\\d*)" fromString:TVDBText];
+    if (!TVDBText) return nil;
+	NSString *seriesIDTVDB = [self getStringForPattern:@"<seriesid>(\\d*)" fromString:TVDBText];
 	if (seriesIDTVDB) {
 		[tiVoManager.tvdbSeriesIdMapping setObject:seriesIDTVDB forKey:_seriesTitle];
 		DDLogVerbose(@"Got series by %@ for %@ using %@", type, self, zapItID);

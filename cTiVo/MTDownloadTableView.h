@@ -9,7 +9,6 @@
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
 #import "MTMainWindowController.h"
-#import "MTDownloadTableCellView.h"
 #import "MTDownloadCheckTableCell.h"
 #import "MTProgressindicator.h"
 

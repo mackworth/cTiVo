@@ -184,72 +184,6 @@ __DDLOGHERE__
     return self.sortedSubscriptions.count;
 }
 
--(id)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
-{
-    id result;
-	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
-    if([identifier compare: @"iTunes"] == NSOrderedSame) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)];
-        thisCell.identifier = identifier;
-        result = (id)thisCell;
-//    } else if([identifier compare: @"Simu"] == NSOrderedSame) {
-//        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)];
-//        thisCell.identifier = identifier;
-//        result = (id)thisCell;
-    } else if([identifier compare: @"Skip"] == NSOrderedSame) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)];
-        thisCell.identifier = identifier;
-        result = (id)thisCell;
-    } else if([identifier compare: @"Mark"] == NSOrderedSame) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMark:)];
-        thisCell.identifier = identifier;
-        result = (id)thisCell;
-#ifndef deleteXML
-	} else if([identifier isEqualToString: @"XML"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeXML:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-#endif
-    } else if([identifier isEqualToString: @"pyTiVo"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changepyTiVo:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-#ifndef deleteXML
-    } else if([identifier isEqualToString: @"Metadata"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMetadata:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-#endif
-    } else if([identifier isEqualToString: @"Subtitles"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSubtitle:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-	} else if([identifier isEqualToString: @"Suggestions"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:self withAction:@selector(changeSuggestions:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-	} else if([identifier isEqualToString: @"HDOnly"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:self withAction:@selector(changeHDOnly:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-	} else if([identifier isEqualToString: @"SDOnly"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:self withAction:@selector(changeSDOnly:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-	} else if([identifier compare: @"FormatPopUp"] == NSOrderedSame) {
-		MTPopUpTableCellView *thisCell = [[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)];
-	    thisCell.popUpButton.showHidden = NO;
-		thisCell.identifier = identifier;
-		result = (id)thisCell;
-	} else if([identifier compare: @"TiVoPopUp"] == NSOrderedSame) {
-		MTTiVoPopUpTableCellView *thisCell = [[MTTiVoPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:self withAction:@selector(selectTivoPopUp:)];
-	   thisCell.identifier = identifier;
-		result = (id)thisCell;
-	} else {
-        result =[super makeViewWithIdentifier:identifier owner:owner];
-    }
-    return result;
-}
 
 static NSDateFormatter *dateFormatter;
 
@@ -299,64 +233,81 @@ static NSDateFormatter *dateFormatter;
 		thisSubscription.encodeFormat = [popUp selectFormatNamed:thisSubscription.encodeFormat.name];
 	} else if ([tableColumn.identifier compare:@"TiVoPopUp"] == NSOrderedSame) {
 		MTTiVoPopUpButton * popUp = ((MTTiVoPopUpTableCellView *)result).popUpButton;
+        popUp.target = self;
+        popUp.action = @selector(selectTivoPopUp:);
 		popUp.owner = thisSubscription;
 		popUp.currentTivo = thisSubscription.preferredTiVo;
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        checkBox.target = myController;
+        checkBox.action = @selector(changeiTunes:);
         [checkBox setEnabled: [thisSubscription canAddToiTunes]];
         [checkBox setOn:[thisSubscription shouldAddToiTunes] && [thisSubscription canAddToiTunes]];
         checkBox.owner = thisSubscription;
- 	} else if ([tableColumn.identifier compare:@"Simu"] == NSOrderedSame) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setEnabled: [thisSubscription canSimulEncode]] ;
-        [checkBox setOn:[ thisSubscription shouldSimulEncode]];
-        checkBox.owner = thisSubscription;
  	} else if ([tableColumn.identifier compare:@"Skip"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        checkBox.target = myController;
+        checkBox.action = @selector(changeSkip:);
         [checkBox setEnabled: [thisSubscription canSkipCommercials]] ;
         [checkBox setOn:[[ thisSubscription skipCommercials]boolValue]];
         checkBox.owner = thisSubscription;
  	} else if ([tableColumn.identifier compare:@"Mark"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        checkBox.target = myController;
+        checkBox.action = @selector(changeMark:);
         [checkBox setEnabled: [thisSubscription canMarkCommercials]] ;
         [checkBox setOn:[[ thisSubscription markCommercials]boolValue]];
         checkBox.owner = thisSubscription;
 #ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        checkBox.target = myController;
+        checkBox.action = @selector(changeXML:);
         [checkBox setOn: thisSubscription.genXMLMetaData.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;		
 #endif
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        checkBox.target = myController;
+        checkBox.action = @selector(changepyTiVo:);
         [checkBox setOn: thisSubscription.genTextMetaData.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;
 	} else if ([tableColumn.identifier isEqualToString:@"Subtitles"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        checkBox.target = myController;
+        checkBox.action = @selector(changeSubtitle:);
         [checkBox setOn: thisSubscription.exportSubtitles.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;		
 #ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        checkBox.target = myController;
+        checkBox.action = @selector(changeMetadata:);
         [checkBox setOn: thisSubscription.includeAPMMetaData.boolValue && thisSubscription.encodeFormat.canAcceptMetaData];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = thisSubscription.encodeFormat.canAcceptMetaData;
 #endif
 	} else if([tableColumn.identifier isEqualToString: @"Suggestions"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        checkBox.target = self;
+        checkBox.action = @selector(changeSuggestions:);
         [checkBox setOn: thisSubscription.includeSuggestions.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;
 	}  else if([tableColumn.identifier isEqualToString: @"HDOnly"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        checkBox.target = self;
+        checkBox.action = @selector(changeHDOnly:);
         [checkBox setOn: thisSubscription.HDOnly.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;
 	}  else if([tableColumn.identifier isEqualToString: @"SDOnly"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+        checkBox.target = self;
+        checkBox.action = @selector(changeSDOnly:);
         [checkBox setOn: thisSubscription.SDOnly.boolValue];
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;

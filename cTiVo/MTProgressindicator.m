@@ -16,43 +16,34 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code here.
-        const int widthStatusField = 80;
-        _leftText = [[NSTextField alloc] initWithFrame:CGRectMake(0, -2, frame.size.width -widthStatusField, frame.size.height)];
-        [_leftText setBackgroundColor:[NSColor clearColor]];
-        [_leftText setEditable:NO];
-        [_leftText setBezeled:NO];
-        [_leftText setAutoresizingMask:NSViewWidthSizable ];
-        [_leftText setFont: [NSFont systemFontOfSize:13.0f]];
-		[_leftText setTextColor:[NSColor redColor]];
-        [_leftText.cell setWraps:NO];
-        [[_leftText cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
-		_foregroundTextColor = [NSColor blackColor];
-        
-        _rightText = [[NSTextField alloc] initWithFrame:CGRectMake(frame.size.width -widthStatusField, 1, widthStatusField, frame.size.height-6)];
-        [_rightText setFont:[NSFont userFontOfSize:10]];
-        [_rightText setAlignment:NSRightTextAlignment];
-        [_rightText setBackgroundColor:[NSColor clearColor]];
-        [_rightText setEditable:NO];
-        [_rightText setBezeled:NO];
-        [_rightText setAutoresizingMask:NSViewMinXMargin ];
-		[[_rightText cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
-        
-        [self addSubview:_rightText];
-        [self addSubview:_leftText];
-        _doubleValue = 0.0;
-        _barColor = [NSColor colorWithCalibratedRed:1.0 green:.61 blue:.45 alpha:0.60];
-        [self setAutoresizingMask:NSViewWidthSizable ];
-
+        [self setItemPropertiesToDefault:self ];
     }
     
     return self;
 }
+-(void) awakeFromNib {
+    [self setItemPropertiesToDefault:self];
+}
+
+
+- (void)setItemPropertiesToDefault:sender
+{
+    self.displayProgress = YES;
+
+    _foregroundTextColor = [NSColor blackColor];
+ 
+    _doubleValue = 0.0;
+    _barColor = [NSColor colorWithCalibratedRed:1.0 green:.61 blue:.45 alpha:0.60];
+    [self setAutoresizingMask:NSViewWidthSizable  ];
+}
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-    NSBezierPath *thisPath = [NSBezierPath bezierPathWithRect:CGRectMake(0, 0, self.frame.size.width * _doubleValue, self.frame.size.height)];
-    [_barColor set];
-    [thisPath fill];
+    if (self.displayProgress) {
+        NSBezierPath *thisPath = [NSBezierPath bezierPathWithRect:CGRectMake(0, 0, self.frame.size.width * _doubleValue, self.frame.size.height)];
+        [_barColor set];
+        [thisPath fill];
+    }
 }
 
 -(void)setDoubleValue:(double)doubleValue
@@ -61,5 +52,42 @@
 	[self setNeedsDisplay:YES];
 }
 
+- (void)setBackgroundStyle:(NSBackgroundStyle)style
+{
+    [super setBackgroundStyle:style];
+
+    // If the cell's text color is black, this sets it to white
+    //    [((NSCell *)self.progressIndicator.leftText.cell) setBackgroundStyle:style];
+
+    // Otherwise you need to change the color manually
+    switch (style) {
+        case NSBackgroundStyleLight:
+            [self.leftText setTextColor:self.foregroundTextColor];
+            [self.rightText setTextColor:self.foregroundTextColor];
+            break;
+
+        case NSBackgroundStyleDark:
+        default:
+            [self.leftText setTextColor:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0]];
+            [self.rightText setTextColor:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0]];
+            break;
+    }
+}
+
+
+-(void) setDisplayProgress: (BOOL) displayProgress {
+    const int widthStatusField  = 70;
+    if (displayProgress != _displayProgress) {
+        _displayProgress = displayProgress;
+        if (displayProgress) {
+            _leftText.frame = CGRectMake(0, 3, self.frame.size.width -widthStatusField, self.frame.size.height);
+            _rightText.hidden = NO;
+        } else {
+            _leftText.frame = CGRectMake(0, 3, self.bounds.size.width, self.frame.size.height);
+            _rightText.hidden = YES;
+        }
+        [self setNeedsDisplay:YES];
+    }
+}
 
 @end

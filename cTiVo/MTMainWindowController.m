@@ -276,7 +276,7 @@ __DDLOGHERE__
            if(download.isNew) {
                 download.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
             }
-          [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationDownloadStatusChanged object:nil];
+          [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationDownloadStatusChanged object:download];
        }
      }
 }

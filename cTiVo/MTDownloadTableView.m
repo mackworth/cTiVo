@@ -46,7 +46,7 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableViewSelectionDidChange:) name:kMTNotificationDownloadQueueUpdated object:nil];
     //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataDownload) name:kMTNotificationDownloadStatusChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDownloadStatusChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataTiVos) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDownloadRowChanged object:nil];
@@ -73,11 +73,8 @@ __DDLOGHERE__
 	[self reloadData];
 	
 }
--(void) reloadDataDownload {
-	DDLogDetail(@"Reloading DL table from DownloadStatusChanged");
-	[self reloadData];
-	
-}
+
+
 -(void) reloadDataFormat{
 	DDLogDetail(@"Reloading DL table from FormatStatusChanged");
 	[self reloadData];
@@ -99,11 +96,15 @@ __DDLOGHERE__
 -(void)reloadEpisode:(NSNotification *)notification
 {
 	MTDownload *thisDownload = notification.object;
-	NSUInteger row = [self.sortedDownloads indexOfObject:thisDownload];
-    if (row != NSNotFound) {
-        NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
-        [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
-		
+    if (!thisDownload) {
+        DDLogDetail(@"Reloading DL table from DownloadStatusChanged");
+        [self reloadData];
+    } else {
+        NSUInteger row = [self.sortedDownloads indexOfObject:thisDownload];
+        if (row != NSNotFound) {
+            NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
+            [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
+        }
     }
 }
 
@@ -151,9 +152,9 @@ __DDLOGHERE__
 	[self reloadData];
 }
 
--(void) updateProgressInCell:(MTDownloadTableCellView *) cell forDL:(MTDownload *) download {
-	cell.progressIndicator.doubleValue = download.processProgress;
-	cell.progressIndicator.rightText.stringValue = download.showStatus;
+-(void) updateProgressInCell:(MTProgressindicator *) cell forDL:(MTDownload *) download {
+	cell.doubleValue = download.processProgress;
+	cell.rightText.stringValue = download.showStatus;
     NSTimeInterval myTimeLeft = download.timeLeft;
     if (myTimeLeft != 0.0) {
         NSString * timeLeft = [NSString stringFromTimeInterval:  myTimeLeft];
@@ -170,16 +171,15 @@ __DDLOGHERE__
     NSInteger programColumnIndex = [self columnWithIdentifier:@"Programs"];
     NSInteger seriesColumnIndex = [self columnWithIdentifier:@"Series"];
 	NSArray *displayedShows = self.sortedDownloads;
+    BOOL updateSeries = !self.showingProgramsColumn;
 	for (NSUInteger i=0; i< displayedShows.count; i++) {
 		MTDownload *thisDownload = [displayedShows objectAtIndex:i];
-		MTDownloadTableCellView *programCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
-		MTDownloadTableCellView *seriesCell = [self viewAtColumn:seriesColumnIndex row:i makeIfNecessary:NO];
+		MTProgressindicator *programCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
+		MTProgressindicator *seriesCell = [self viewAtColumn:seriesColumnIndex row:i makeIfNecessary:NO];
 		[self updateProgressInCell: programCell forDL: thisDownload];
-		if (!self.showingProgramsColumn) {
-			[self updateProgressInCell: seriesCell forDL: thisDownload];
-		} else {
-			seriesCell.progressIndicator.doubleValue = 0.0;
-			seriesCell.progressIndicator.rightText.stringValue = @"";
+        seriesCell.displayProgress = updateSeries;
+        if (updateSeries) {
+            [self updateProgressInCell: seriesCell forDL: thisDownload];
 		}
 	}
     if (!tiVoManager.anyTivoActive) {
@@ -236,76 +236,7 @@ __DDLOGHERE__
 {
 	NSTableColumn *programColumn = [self tableColumnWithIdentifier:@"Programs"];
 	return !programColumn.isHidden;
-	
-}
 
--(NSTableCellView *)makeViewWithIdentifier:(NSString *)identifier owner:(id)owner
-{
-    NSTableCellView * result;
-	NSTableColumn *thisColumn = [self tableColumnWithIdentifier:identifier];
-    if([identifier isEqualToString: @"Programs"] ||
-	   [identifier isEqualToString: @"Series" ]) {
-        MTDownloadTableCellView *thisCell = [[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, thisColumn.width, 20)];
-        //        result.textField.font = [NSFont userFontOfSize:14];
-        thisCell.textField.editable = NO;
-        
-        // the identifier of the NSTextField instance is set to MyView. This
-        // allows it to be re-used
-        thisCell.identifier = identifier;
-        result = thisCell;
-    } else if([identifier isEqualToString: @"iTunes"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeiTunes:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-//    } else if([identifier isEqualToString: @"Simu"]) {
-//        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSimultaneous:)];
-//        thisCell.identifier = identifier;
-//        result = thisCell;
-    } else if([identifier isEqualToString: @"Skip"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSkip:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-    } else if([identifier isEqualToString: @"Mark"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMark:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-#ifndef deleteXML
-	} else if([identifier isEqualToString: @"XML"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeXML:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-#endif
-	} else if([identifier isEqualToString: @"pyTiVo"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changepyTiVo:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-#ifndef deleteXML
-    } else if([identifier isEqualToString: @"Metadata"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeMetadata:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-#endif
-    } else if([identifier isEqualToString: @"Subtitles"]) {
-        MTDownloadCheckTableCell *thisCell = [[MTDownloadCheckTableCell alloc] initWithFrame:CGRectMake(thisColumn.width/2.0-10, 0, 20, 20) withTarget:myController withAction:@selector(changeSubtitle:)];
-        thisCell.identifier = identifier;
-        result = thisCell;
-   } else if([identifier isEqualToString: @"Format"]) {
-		MTPopUpTableCellView *thisCell = [[MTPopUpTableCellView alloc] initWithFrame:NSMakeRect(0, 0, thisColumn.width, 20) withTarget:myController withAction:@selector(selectFormat:)];
-	    thisCell.popUpButton.showHidden = NO;
-		thisCell.identifier = identifier;
-		result = thisCell;
-	} else if([identifier isEqualToString: @"icon"]) {
-		NSTableCellView *thisCell = [[NSTableCellView alloc] initWithFrame:NSMakeRect(0, -2, thisColumn.width, 22)];
-        NSImageView *tmpImageView = [[NSImageView alloc] initWithFrame:thisCell.frame];
-		thisCell.imageView = tmpImageView;
-		[thisCell addSubview:tmpImageView];
-		[thisCell.imageView setAutoresizingMask: NSViewMinXMargin | NSViewMaxXMargin];
-		thisCell.identifier = identifier;
-		result = thisCell;
-    } else {
-        result = (NSTableCellView*)[super makeViewWithIdentifier:identifier owner:owner];
-    }
-    return result;
 }
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
@@ -319,22 +250,7 @@ __DDLOGHERE__
 	
     NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
     
-    // There is no existing cell to reuse so we will create a new one
-//    if (result == nil) {
-//	This isn't getting called in 10.8, and as it always returns a MTDownload, that's a problem in anyone where it is called.
-//
-//        // create the new NSTextField with a frame of the {0,0} with the width of the table
-//        // note that the height of the frame is not really relevant, the row-height will modify the height
-//        // the new text field is then returned as an autoreleased object
-//        result = [[[MTDownloadTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableColumn.width, 20)] autorelease];
-////        result.textField.font = [NSFont userFontOfSize:14];
-//        result.editable = NO;
-//        
-//        // the identifier of the NSTextField instance is set to MyView. This
-//        // allows it to be re-used
-//        result.identifier = tableColumn.identifier;
-//    }
-    
+    // There is no existing cell to reuse so we will create
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
@@ -348,17 +264,20 @@ __DDLOGHERE__
 		 } else {
 			 cellVal = thisShow.seriesTitle ;
 		 }
-		MTDownloadTableCellView *	cell = (MTDownloadTableCellView *) result;
-		cell.progressIndicator.leftText.stringValue = cellVal;
+		MTProgressindicator *cell = (MTProgressindicator *) result;
+		cell.leftText.stringValue = cellVal;
 		cell.toolTip = cellVal;
 		if ([tableColumn.identifier isEqualToString:@"Programs"] ||
-			([tableColumn.identifier isEqualToString:@"Series"] && !self.showingProgramsColumn)) {
-			[self updateProgressInCell:cell forDL:download];
-		}
+            ([tableColumn.identifier isEqualToString:@"Series"] && !self.showingProgramsColumn)) {
+            cell.displayProgress = YES;
+            [self updateProgressInCell:cell forDL:download];
+        } else {
+            cell.displayProgress = NO;
+        }
 		if ([thisShow.protectedShow boolValue]) {
-			cell.progressIndicator.foregroundTextColor = [NSColor grayColor];
+			cell.foregroundTextColor = [NSColor grayColor];
 		} else {
-			cell.progressIndicator.foregroundTextColor = [NSColor blackColor];
+			cell.foregroundTextColor = [NSColor blackColor];
 		}
    } else if ([tableColumn.identifier isEqualToString:@"TiVo"]) {
         textVal = thisShow.tiVoName ;
@@ -392,10 +311,14 @@ __DDLOGHERE__
         [checkBox setOn: download.addToiTunesWhenEncoded];
         [checkBox setEnabled: !download.isDone && !protected &&
                               download.encodeFormat.canAddToiTunes ];
+        checkBox.target = myController;
+        checkBox.action = @selector(changeiTunes:);
          checkBox.owner = download;
 
 	} else if ([tableColumn.identifier isEqualToString:@"icon"]) {
         NSString * imageName = download.imageString;
+           DDLogVerbose(@"Icon: %@ for %@",imageName, download.show.showTitle);
+        //  result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin;
 		result.imageView.image = [NSImage imageNamed: imageName];
 		result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
 //	} else if ([tableColumn.identifier isEqualToString:@"Simu"]) {
@@ -408,12 +331,16 @@ __DDLOGHERE__
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.skipCommercials];
         checkBox.owner = download;
+        checkBox.target = myController;
+        checkBox.action = @selector(changeSkip:);
         [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSkip];
         
  	} else if ([tableColumn.identifier isEqualToString:@"Mark"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.markCommercials];
         checkBox.owner = download;
+        checkBox.target = myController;
+        checkBox.action = @selector(changeMark:);
         [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canMarkCommercials];
         
 #ifndef deleteXML
@@ -421,22 +348,30 @@ __DDLOGHERE__
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.genXMLMetaData.boolValue];
         checkBox.owner = download;
+        checkBox.target = myController;
+        checkBox.action = @selector(changeXML:);
 		checkBox.enabled = !download.isDone && !protected;
 #endif
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.genTextMetaData.boolValue];
+        checkBox.target = myController;
+        checkBox.action = @selector(changepyTiVo:);
         checkBox.owner = download;
 		checkBox.enabled = !download.isDone && !protected;
 	} else if ([tableColumn.identifier isEqualToString:@"Subtitles"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.exportSubtitles.boolValue];
+        checkBox.target = myController;
+        checkBox.action = @selector(changeSubtitle:);
         checkBox.owner = download;
 		checkBox.enabled = download.isNew && !protected;
 #ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.includeAPMMetaData.boolValue && download.encodeFormat.canAcceptMetaData];
+        checkBox.target = myController;
+        checkBox.action = @selector(changeMetadata:);
         checkBox.owner = download;
 		checkBox.enabled = download.encodeFormat.canAcceptMetaData && !download.isDone && !protected;
 #endif
@@ -523,8 +458,8 @@ __DDLOGHERE__
 		BOOL isSelectedRow = [tv isRowSelected:r];
 		BOOL isOverText = NO;
 		if ([selectedColumn.identifier isEqualToString:@"Programs"]) { //Check if over text
-			MTDownloadTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
-			NSTextField *showField = showCellView.progressIndicator.leftText;
+			MTProgressindicator *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+			NSTextField *showField = showCellView.leftText;
 			NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
 			NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
 			if (clickInText.x < stringSize.width && clickInText.x < showField.bounds.size.width) {

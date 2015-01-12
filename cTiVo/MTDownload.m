@@ -86,7 +86,7 @@ __DDLOGHERE__
 {
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
 		DDLogMajor(@"Changing DL status of %@ to %@ (%@)", object, [(MTDownload *)object showStatus], [(MTDownload *)object downloadStatus]);
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadStatusChanged object:nil];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadRowChanged object:object];
          if (!self.progressTimer && self.isInProgress) {
              [self launchPerformanceTimer];
           } else {
@@ -2236,7 +2236,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 			self.show.fileSize = downloadedFileSize;  //More accurate file size
 		}
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self.show];
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadRowChanged object:self];
+        //        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadRowChanged object:self];
  //		NSLog(@"File size after reset %lf %lf",self.show.fileSize,downloadedFileSize);
 
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTransferDidFinish object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];

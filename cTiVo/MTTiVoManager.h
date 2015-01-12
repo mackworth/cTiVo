@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "NSString+HTML.h"
-#import "MTDownloadTableCellView.h"
 #import "MTTiVoShow.h"
 #import "MTDownload.h"
 #import "MTProgramTableView.h"

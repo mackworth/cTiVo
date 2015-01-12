@@ -12,7 +12,8 @@
 @interface MTDownloadCheckTableCell : NSTableCellView
 
 @property (strong, nonatomic, readonly) MTCheckBox *checkBox;
-
+@property (assign, nonatomic) id target;
+@property (assign, nonatomic) SEL action;
 - (id)initWithFrame:(NSRect)frame withTarget:(id)target withAction:(SEL)selector;
 
 

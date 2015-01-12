@@ -143,18 +143,18 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="imageString"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="1278">
+                                                                <tableCellView id="gLi-XP-cls">
                                                                     <rect key="frame" x="46" y="1" width="25" height="17"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                     <subviews>
-                                                                        <imageView id="1279">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="25" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="center" imageScaling="proportionallyDown" image="status-unknown" id="1282"/>
+                                                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="TjH-bC-2Fo">
+                                                                            <rect key="frame" x="4" y="0.0" width="16" height="16"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="WCt-ho-8G1"/>
                                                                         </imageView>
                                                                     </subviews>
                                                                     <connections>
-                                                                        <outlet property="imageView" destination="1279" id="1283"/>
+                                                                        <outlet property="imageView" destination="TjH-bC-2Fo" id="VEf-Ic-5jG"/>
                                                                     </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -685,49 +685,12 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableHeaderView>
                                     </scrollView>
-                                    <customView hidden="YES" id="894" userLabel="Cancel Quit View">
-                                        <rect key="frame" x="-72" y="-345" width="800" height="758"/>
-                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                        <subviews>
-                                            <button verticalHuggingPriority="750" id="895">
-                                                <rect key="frame" x="314" y="356" width="170" height="32"/>
-                                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
-                                                <buttonCell key="cell" type="push" title="Cancel Quit" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="896">
-                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                    <font key="font" metaFont="system"/>
-                                                </buttonCell>
-                                                <connections>
-                                                    <action selector="dontQuit:" target="-2" id="899"/>
-                                                </connections>
-                                            </button>
-                                            <textField verticalHuggingPriority="750" id="900" userLabel="Static Text - cancel quit">
-                                                <rect key="frame" x="132" y="481" width="532" height="33"/>
-                                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
-                                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="cTiVo will quit upon completion of current processing" id="901">
-                                                    <font key="font" metaFont="systemBold" size="17"/>
-                                                    <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                </textFieldCell>
-                                            </textField>
-                                        </subviews>
-                                    </customView>
                                 </subviews>
                             </customView>
                             <customView id="1373" userLabel="Download Table Section">
                                 <rect key="frame" x="0.0" y="150" width="845" height="175"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
                                 <subviews>
-                                    <button toolTip="Remove selected items from list to be downloaded" verticalHuggingPriority="750" id="36" userLabel="Remove From Queue Button">
-                                        <rect key="frame" x="705" y="147" width="140" height="19"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        <buttonCell key="cell" type="roundRect" title="Remove From Queue" bezelStyle="roundedRect" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="47">
-                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                            <font key="font" metaFont="cellTitle"/>
-                                        </buttonCell>
-                                        <connections>
-                                            <action selector="removeFromDownloadQueue:" target="-2" id="144"/>
-                                        </connections>
-                                    </button>
                                     <scrollView focusRingType="exterior" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="35">
                                         <rect key="frame" x="0.0" y="0.0" width="845" height="145"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
@@ -741,7 +704,7 @@
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                                     <tableColumns>
-                                                        <tableColumn identifier="Order" width="32" minWidth="18" maxWidth="40" headerToolTip="Download order of shows" id="54">
+                                                        <tableColumn identifier="Order" width="18" minWidth="18" maxWidth="40" headerToolTip="Download order of shows" id="54">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="##">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -756,11 +719,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="55">
-                                                                    <rect key="frame" x="1" y="1" width="32" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="18" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="57">
-                                                                            <rect key="frame" x="1" y="1" width="31" height="17"/>
+                                                                            <rect key="frame" x="1" y="1" width="17" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="1" id="58">
                                                                                 <font key="font" metaFont="system"/>
@@ -775,7 +738,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="icon" width="39" minWidth="18" maxWidth="45" headerToolTip="Status of show on TiVo" id="1261">
+                                                        <tableColumn identifier="icon" width="18" minWidth="18" maxWidth="45" headerToolTip="Status of show on TiVo" id="1261">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Status">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -790,26 +753,22 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="1263">
-                                                                    <rect key="frame" x="36" y="1" width="39" height="17"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                    <rect key="frame" x="22" y="1" width="17" height="17"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1264">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="39" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="1265">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
+                                                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="TOe-go-xA7">
+                                                                            <rect key="frame" x="0.0" y="0.0" width="16" height="16"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="O97-cz-lyn"/>
+                                                                        </imageView>
                                                                     </subviews>
                                                                     <connections>
-                                                                        <outlet property="textField" destination="1264" id="1266"/>
+                                                                        <outlet property="imageView" destination="TOe-go-xA7" id="fMY-Dv-wq7"/>
                                                                     </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Programs" width="506" minWidth="175" maxWidth="2000" headerToolTip="Program to download" id="351">
+                                                        <tableColumn identifier="Programs" width="367" minWidth="175" maxWidth="2000" headerToolTip="Program to download" id="351">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Download Queue">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -823,14 +782,101 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="localizedCaseInsensitiveCompare:" sortKey="show.showTitle"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="353">
-                                                                    <rect key="frame" x="67" y="1" width="506" height="17"/>
+                                                                <tableCellView id="AmG-fv-mOh" customClass="MTProgressindicator">
+                                                                    <rect key="frame" x="43" y="1" width="367" height="17"/>
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                    <subviews>
+                                                                        <textField verticalHuggingPriority="750" id="z7y-2w-uIB" userLabel="leftText">
+                                                                            <rect key="frame" x="0.0" y="3" width="287" height="17"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                                                            <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="kqs-BA-Sw6">
+                                                                                <font key="font" metaFont="system"/>
+                                                                                <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                                                <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="KRR-0A-sUq" userLabel="rightText">
+                                                                            <rect key="frame" x="287" y="0.0" width="80" height="17"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                                                                            <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="icx-VM-9gi">
+                                                                                <font key="font" size="10" name="Helvetica"/>
+                                                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                    </subviews>
+                                                                    <connections>
+                                                                        <outlet property="leftText" destination="z7y-2w-uIB" id="5C6-we-1gV"/>
+                                                                        <outlet property="rightText" destination="KRR-0A-sUq" id="Fqv-cV-3UX"/>
+                                                                    </connections>
+                                                                </tableCellView>
+                                                            </prototypeCellViews>
+                                                        </tableColumn>
+                                                        <tableColumn identifier="Series" editable="NO" width="200" minWidth="64" maxWidth="400" headerToolTip="Series Name" id="751">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Series">
+                                                                <font key="font" metaFont="smallSystem"/>
+                                                                <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
+                                                            </tableHeaderCell>
+                                                            <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="763">
+                                                                <font key="font" metaFont="system"/>
+                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                            </textFieldCell>
+                                                            <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="show.seriesTitle"/>
+                                                            <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                                            <prototypeCellViews>
+                                                                <tableCellView id="762" customClass="MTProgressindicator">
+                                                                    <rect key="frame" x="413" y="1" width="200" height="17"/>
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                    <subviews>
+                                                                        <textField verticalHuggingPriority="750" id="qQB-l8-FUr" userLabel="leftText">
+                                                                            <rect key="frame" x="0.0" y="3" width="120" height="17"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                                                            <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="nX6-ru-GCz">
+                                                                                <font key="font" metaFont="system"/>
+                                                                                <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                                                <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="FEf-Ia-wX9" userLabel="rightText">
+                                                                            <rect key="frame" x="120" y="0.0" width="80" height="17"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                                                                            <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="a0F-vx-fpu">
+                                                                                <font key="font" size="10" name="Helvetica"/>
+                                                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                    </subviews>
+                                                                    <connections>
+                                                                        <outlet property="leftText" destination="qQB-l8-FUr" id="wNd-ig-lgW"/>
+                                                                        <outlet property="rightText" destination="FEf-Ia-wX9" id="zgY-SD-7At"/>
+                                                                    </connections>
+                                                                </tableCellView>
+                                                            </prototypeCellViews>
+                                                        </tableColumn>
+                                                        <tableColumn identifier="Title" editable="NO" width="120" minWidth="80" maxWidth="200" hidden="YES" headerToolTip="Episode name" id="747">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Episode">
+                                                                <font key="font" metaFont="smallSystem"/>
+                                                                <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
+                                                            </tableHeaderCell>
+                                                            <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="779">
+                                                                <font key="font" metaFont="system"/>
+                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                            </textFieldCell>
+                                                            <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="show.episodeTitle"/>
+                                                            <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                                            <prototypeCellViews>
+                                                                <tableCellView id="778">
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="354">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="506" height="17"/>
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="780">
+                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="355">
+                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="781">
                                                                                 <font key="font" metaFont="system"/>
                                                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -838,12 +884,12 @@
                                                                         </textField>
                                                                     </subviews>
                                                                     <connections>
-                                                                        <outlet property="textField" destination="354" id="356"/>
+                                                                        <outlet property="textField" destination="780" id="802"/>
                                                                     </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="TiVo" width="57" minWidth="48" maxWidth="180" headerToolTip="Tivo to download from" id="53">
+                                                        <tableColumn identifier="TiVo" width="48" minWidth="48" maxWidth="180" headerToolTip="Tivo to download from" id="53">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="TiVo">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -858,11 +904,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Which TiVo to download from" id="59">
-                                                                    <rect key="frame" x="576" y="1" width="57" height="17"/>
+                                                                    <rect key="frame" x="448" y="1" width="48" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="61">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="57" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="48" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="62">
                                                                                 <font key="font" metaFont="system"/>
@@ -939,39 +985,6 @@
                                                                     </subviews>
                                                                     <connections>
                                                                         <outlet property="textField" destination="784" id="796"/>
-                                                                    </connections>
-                                                                </tableCellView>
-                                                            </prototypeCellViews>
-                                                        </tableColumn>
-                                                        <tableColumn identifier="Title" editable="NO" width="120" minWidth="80" maxWidth="200" hidden="YES" headerToolTip="Episode name" id="747">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Episode">
-                                                                <font key="font" metaFont="smallSystem"/>
-                                                                <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
-                                                                <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
-                                                            </tableHeaderCell>
-                                                            <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="779">
-                                                                <font key="font" metaFont="system"/>
-                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                            </textFieldCell>
-                                                            <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="show.episodeTitle"/>
-                                                            <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
-                                                            <prototypeCellViews>
-                                                                <tableCellView id="778">
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="780">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="781">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="780" id="802"/>
                                                                     </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -1174,39 +1187,6 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Series" editable="NO" width="100" minWidth="64" maxWidth="250" hidden="YES" headerToolTip="Series Name" id="751">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Series">
-                                                                <font key="font" metaFont="smallSystem"/>
-                                                                <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
-                                                                <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
-                                                            </tableHeaderCell>
-                                                            <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="763">
-                                                                <font key="font" metaFont="system"/>
-                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                            </textFieldCell>
-                                                            <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="show.seriesTitle"/>
-                                                            <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
-                                                            <prototypeCellViews>
-                                                                <tableCellView id="762">
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="764">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="765">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="764" id="801"/>
-                                                                    </connections>
-                                                                </tableCellView>
-                                                            </prototypeCellViews>
-                                                        </tableColumn>
                                                         <tableColumn identifier="Station" editable="NO" width="50" minWidth="30" maxWidth="70" hidden="YES" headerToolTip="Station Call Sign" id="752">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Station">
                                                                 <font key="font" metaFont="smallSystem"/>
@@ -1306,7 +1286,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Format" width="59" minWidth="50" maxWidth="180" headerToolTip="Format of Video which to download" id="52">
+                                                        <tableColumn identifier="Format" width="50" minWidth="50" maxWidth="180" headerToolTip="Format of Video which to download" id="52">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Format">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1320,27 +1300,13 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="localizedCaseInsensitiveCompare:" sortKey="encodeFormat.name"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView toolTip="Format of video file to create" id="63">
-                                                                    <rect key="frame" x="636" y="1" width="59" height="17"/>
+                                                                <tableCellView toolTip="Format of video file to create" id="63" customClass="MTPopUpTableCellView">
+                                                                    <rect key="frame" x="711" y="1" width="50" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="65">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="59" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="66">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="65" id="74"/>
-                                                                    </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="iTunes" width="45" minWidth="43" maxWidth="45" headerToolTip="Add to iTunes after encoding" id="165">
+                                                        <tableColumn identifier="iTunes" width="43" minWidth="43" maxWidth="45" headerToolTip="Add to iTunes after encoding" id="165">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="iTunes">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1354,23 +1320,9 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="addToiTunesWhenEncoded"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView toolTip="Will be added to iTunes" id="167">
-                                                                    <rect key="frame" x="698" y="1" width="45" height="17"/>
+                                                                <tableCellView toolTip="Will be added to iTunes" id="167" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="773" y="1" width="43" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="168">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="8" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" id="169">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="168" id="170"/>
-                                                                    </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
@@ -1388,8 +1340,8 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="skipCommercials"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="947">
-                                                                    <rect key="frame" x="746" y="1" width="30" height="17"/>
+                                                                <tableCellView id="947" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="1" y="1" width="30" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="948">
@@ -1422,8 +1374,8 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="markCommercials"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="1319">
-                                                                    <rect key="frame" x="779" y="1" width="32" height="17"/>
+                                                                <tableCellView id="1319" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="1" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1321">
@@ -1443,7 +1395,7 @@
                                                             </prototypeCellViews>
                                                         </tableColumn>
                                                         <tableColumn identifier="pyTiVo" width="34" minWidth="30" maxWidth="45" hidden="YES" headerToolTip="Generate text metadata file necessary for pyTiVo usage" id="902">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="pyTiVo">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="pyTiVo">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1456,11 +1408,12 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="genTextMetaData"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="904">
+                                                                <tableCellView id="904" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="1" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="905">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="36" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="906">
                                                                                 <font key="font" metaFont="system"/>
@@ -1469,16 +1422,19 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                     </subviews>
+                                                                    <connections>
+                                                                        <outlet property="textField" destination="905" id="myspuriousid"/>
+                                                                    </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Subtitles" width="39" minWidth="30" maxWidth="50" headerToolTip="Export subtitles .SRT file" id="912">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Subtitles">
+                                                        <tableColumn identifier="Subtitles" width="30" minWidth="30" maxWidth="50" headerToolTip="Export subtitles .SRT file" id="912">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Subtitles">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                             </tableHeaderCell>
-                                                            <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="918">
+                                                            <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="center" title="Text Cell" id="918">
                                                                 <font key="font" metaFont="system"/>
                                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1486,12 +1442,12 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="exportSubtitles"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="919">
-                                                                    <rect key="frame" x="814" y="1" width="39" height="17"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <tableCellView id="919" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="889" y="1" width="30" height="17"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="920">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="42" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="30" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="921">
                                                                                 <font key="font" metaFont="system"/>
@@ -1508,7 +1464,6 @@
                                                         </tableColumn>
                                                     </tableColumns>
                                                     <connections>
-                                                        <outlet property="PerformanceLabel" destination="dzt-jz-eJI" id="apL-N1-TLE"/>
                                                         <outlet property="menu" destination="404" id="431"/>
                                                         <outlet property="myController" destination="-2" id="202"/>
                                                         <outlet property="performanceLabel" destination="dzt-jz-eJI" id="bOD-On-hon"/>
@@ -1547,6 +1502,17 @@
                                             </binding>
                                         </connections>
                                     </textField>
+                                    <button toolTip="Remove selected items from list to be downloaded" verticalHuggingPriority="750" id="36" userLabel="Remove From Queue Button">
+                                        <rect key="frame" x="614" y="149" width="146" height="19"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                        <buttonCell key="cell" type="roundRect" title="Remove From Queue" bezelStyle="roundedRect" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="47">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="cellTitle"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="removeFromDownloadQueue:" target="-2" id="144"/>
+                                        </connections>
+                                    </button>
                                     <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="dzt-jz-eJI" userLabel="Performance">
                                         <rect key="frame" x="18" y="150" width="241" height="17"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -1601,11 +1567,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="267">
-                                                                    <rect key="frame" x="1" y="1" width="372" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="371" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="268">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="372" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="371" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="269">
                                                                                 <font key="font" metaFont="system"/>
@@ -1668,23 +1634,9 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="encodeFormat.name"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="322">
-                                                                    <rect key="frame" x="528.5" y="1" width="136" height="17"/>
+                                                                <tableCellView toolTip="Format of video file to create" id="OWl-YT-bUe" customClass="MTPopUpTableCellView">
+                                                                    <rect key="frame" x="528" y="20" width="136" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="323">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="136" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="324">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="323" id="325"/>
-                                                                    </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
@@ -1702,11 +1654,12 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="preferredTivo"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="1350">
+                                                                <tableCellView id="1350" customClass="MTTiVoPopUpTableCellView">
+                                                                    <rect key="frame" x="-1" y="1" width="136" height="20"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1352">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="140" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="1353">
                                                                                 <font key="font" metaFont="system"/>
@@ -1721,7 +1674,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="iTunes" width="40" minWidth="40" maxWidth="40" headerToolTip="Add to iTunes after encoding" id="326">
+                                                        <tableColumn identifier="iTunes" width="40" minWidth="32" maxWidth="40" headerToolTip="Add to iTunes after encoding" id="326">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="iTunes">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1735,27 +1688,13 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="addToiTunes"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="328">
-                                                                    <rect key="frame" x="667.5" y="1" width="40" height="17"/>
+                                                                <tableCellView toolTip="Will be added to iTunes" id="gsv-xW-ehC" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="667" y="20" width="40" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="329">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="40" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="330">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="329" id="331"/>
-                                                                    </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Skip" width="30" minWidth="30" maxWidth="30" headerToolTip="Attempt to delete commercials.   Mutually exclusive with Skip commercials" id="853">
+                                                        <tableColumn identifier="Skip" width="32" minWidth="32" maxWidth="32" headerToolTip="Attempt to delete commercials.   Mutually exclusive with Skip commercials" id="853">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Skip">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1769,23 +1708,9 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="skipCommercials"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView toolTip="Simultaneous encoding and decoding" id="854">
-                                                                    <rect key="frame" x="710.5" y="1" width="30" height="17"/>
+                                                                <tableCellView toolTip="Will be added to iTunes" id="JZK-Uz-DYP" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="710" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="856">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="30" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="857">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="856" id="858"/>
-                                                                    </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
@@ -1803,23 +1728,9 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="markCommercials"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView toolTip="Simultaneous encoding and decoding" id="1326">
-                                                                    <rect key="frame" x="743.5" y="1" width="32" height="17"/>
+                                                                <tableCellView toolTip="Will be added to iTunes" id="CTU-yP-LYD" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="743" y="20" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1327">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="32" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="1328">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="1327" id="1329"/>
-                                                                    </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
@@ -1837,22 +1748,9 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="HDOnly"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView toolTip="Simultaneous encoding and decoding" id="1361">
+                                                                <tableCellView toolTip="Will be added to iTunes" id="HTI-1v-8Sg" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="1" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1363">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="1364">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="1363" id="1365"/>
-                                                                    </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
@@ -1870,26 +1768,13 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="SDOnly"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView toolTip="Simultaneous encoding and decoding" id="1367">
+                                                                <tableCellView toolTip="Will be added to iTunes" id="xMB-7A-GgA" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="1" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1369">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="1370">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="1369" id="1371"/>
-                                                                    </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Suggestions" width="40" minWidth="40" maxWidth="80" hidden="YES" headerToolTip="Record Tivo Suggestions" id="1313">
+                                                        <tableColumn identifier="Suggestions" width="40" minWidth="32" maxWidth="80" hidden="YES" headerToolTip="Record Tivo Suggestions" id="1313">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Suggestions">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1903,23 +1788,13 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="includeSuggestions"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="1314">
+                                                                <tableCellView toolTip="Will be added to iTunes" id="DbV-EJ-nnO" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="1" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1316">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="1317">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="pyTiVo" width="30" minWidth="30" maxWidth="45" hidden="YES" headerToolTip="Generate text metadata file necessary for pyTiVo usage" id="951">
+                                                        <tableColumn identifier="pyTiVo" width="32" minWidth="32" maxWidth="45" hidden="YES" headerToolTip="Generate text metadata file necessary for pyTiVo usage" id="951">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="pyTiVo">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1933,23 +1808,13 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="genTextMetaData"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="968">
+                                                                <tableCellView toolTip="Will be added to iTunes" id="DJc-yv-dNh" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="1" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="969">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="970">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Subtitles" width="30" minWidth="30" maxWidth="50" hidden="YES" headerToolTip="Export subtitles .SRT file" id="953">
+                                                        <tableColumn identifier="Subtitles" width="32" minWidth="32" maxWidth="50" hidden="YES" headerToolTip="Export subtitles .SRT file" id="953">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Subtitles">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1963,22 +1828,9 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="exportSubtitles"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="959">
+                                                                <tableCellView toolTip="Will be added to iTunes" id="c32-3v-Aek" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="1" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                    <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="961">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="962">
-                                                                                <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                            </textFieldCell>
-                                                                        </textField>
-                                                                    </subviews>
-                                                                    <connections>
-                                                                        <outlet property="textField" destination="961" id="972"/>
-                                                                    </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
@@ -2076,7 +1928,7 @@
                         </textFieldCell>
                     </textField>
                     <button toolTip="Where to store downloaded programs" verticalHuggingPriority="750" id="8" userLabel="Choose Download folder Round Rect Button">
-                        <rect key="frame" x="574" y="722" width="208" height="25"/>
+                        <rect key="frame" x="574" y="722" width="208" height="27"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="bevel" bezelStyle="regularSquare" alignment="center" lineBreakMode="truncatingMiddle" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="69">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2109,6 +1961,32 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="tivo" id="7N2-Bd-qq3"/>
                     </imageView>
+                    <customView hidden="YES" id="894" userLabel="Cancel Quit View">
+                        <rect key="frame" x="0.0" y="0.0" width="800" height="758"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button verticalHuggingPriority="750" id="895">
+                                <rect key="frame" x="314" y="356" width="170" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                <buttonCell key="cell" type="push" title="Cancel Quit" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="896">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="dontQuit:" target="-2" id="899"/>
+                                </connections>
+                            </button>
+                            <textField verticalHuggingPriority="750" id="900" userLabel="Static Text - cancel quit">
+                                <rect key="frame" x="132" y="481" width="532" height="33"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="cTiVo will quit upon completion of current processing" id="901">
+                                    <font key="font" metaFont="systemBold" size="17"/>
+                                    <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                    </customView>
                 </subviews>
             </view>
             <connections>
@@ -2240,7 +2118,6 @@
         </menu>
     </objects>
     <resources>
-        <image name="status-unknown" width="16" height="16"/>
         <image name="tivo" width="128" height="128"/>
     </resources>
 </document>

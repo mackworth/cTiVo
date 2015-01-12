@@ -168,7 +168,6 @@ __DDLOGHERE__
 
      DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(trackListUpdates) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
 
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -216,7 +215,6 @@ __DDLOGHERE__
 	mainWindowController = nil;
 	//	_formatEditorController = nil;
 	[self showMainWindow:nil];
-	[self updateTivoRefreshMenu];
 	gettingMediaKey = NO;
 	signal(SIGPIPE, &signalHandler);
 	signal(SIGABRT, &signalHandler );
@@ -298,10 +296,6 @@ __DDLOGHERE__
 //    }]];
 
 
-}
--(void) trackListUpdates {
-//	NSLog(@"trackListUpdates");
-	
 }
 
 /* 
