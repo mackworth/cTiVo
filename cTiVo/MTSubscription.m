@@ -220,7 +220,12 @@ __DDLOGHERE__
 #define kMTSubSD 7
 
 +(instancetype) subscriptionFromString:(NSString *) str {
-    //set the "lastrecording" time for one second before this show, to include this show.
+    //imports a subscription from an imported string
+    //syntax is the following (separated by tabs)
+    // displayTitle SubscriptionRegex Format createdTime PreferredTiVo keywords*
+    //createdTime can be blank (or not legible) ==> current time
+    //preferred Tivo can be blank ==> any Tivo
+    //keywords are case insensitive, in any order; default is off; include to turn on
     NSArray * strArray = [str componentsSeparatedByString:@"\t"];
     if (strArray.count < kMTSubMin ) {
         DDLogReport(@"Importing Subscription: Not enough fields in %@",str);
@@ -238,7 +243,7 @@ __DDLOGHERE__
         }
         newSub.encodeFormat = [tiVoManager findFormat:strArray[kMTSubFormat] ];
         newSub.createdTime = [NSDate dateWithString:strArray[kMTSubDate]];
-        if (newSub.createdTime) newSub.createdTime = [NSDate date];
+        if (!newSub.createdTime) newSub.createdTime = [NSDate date];
         newSub.preferredTiVo= strArray[kMTSubTiVo];
 
         newSub.addToiTunes = @NO;
@@ -252,22 +257,22 @@ __DDLOGHERE__
 
         for (NSUInteger i = kMTSubMin; i < strArray.count; i++ ) {
             NSString * keyWord = ((NSString *)strArray[i]).lowercaseString;
-            if (keyWord.length > 0 &&
-                [kMTSubStringsArray indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+            if (keyWord.length == 0 ) continue;
+            NSInteger whichKeyword =  [kMTSubStringsArray indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
                 NSString * s = (NSString *) obj;
                 return[keyWord isEqualToString:s.lowercaseString];
-            }] != NSNotFound) {
-                switch (i) {
-                    case kMTSubiTunes:      newSub.addToiTunes = @YES;          break;
-                    case kMTSubSkipAds:     newSub.skipCommercials = @YES;      break;
-                    case kMTSubMarkAds:     newSub.markCommercials = @YES;      break;
-                    case kMTSubSuggestions: newSub.includeSuggestions = @YES;   break;
-                    case kMTSubPyTiVo:      newSub.genTextMetaData = @YES;      break;
-                    case kMTSubCaptions:    newSub.exportSubtitles=  @YES;      break;
-                    case kMTSubHD:          newSub.HDOnly= @YES;                break;
-                    case kMTSubSD:          newSub.SDOnly= @YES;                break;
-                    default:  break;
-                }
+            }];
+            switch (whichKeyword) {
+                case kMTSubiTunes:      newSub.addToiTunes = @YES;          break;
+                case kMTSubSkipAds:     newSub.skipCommercials = @YES;      break;
+                case kMTSubMarkAds:     newSub.markCommercials = @YES;      break;
+                case kMTSubSuggestions: newSub.includeSuggestions = @YES;   break;
+                case kMTSubPyTiVo:      newSub.genTextMetaData = @YES;      break;
+                case kMTSubCaptions:    newSub.exportSubtitles=  @YES;      break;
+                case kMTSubHD:          newSub.HDOnly= @YES;                break;
+                case kMTSubSD:          newSub.SDOnly= @YES;                break;
+                default:  break;
+
             }
         }
         DDLogVerbose(@"Subscribing string %@ as: %@ ", str, newSub);
@@ -322,7 +327,9 @@ __DDLOGHERE__
     tempSub.exportSubtitles = sub[kMTSubscribedExportSubtitles];
     if (tempSub.exportSubtitles ==nil) tempSub.exportSubtitles = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportSubtitles];
     tempSub.preferredTiVo = sub[kMTSubscribedPreferredTiVo];
-    if (!tempSub.preferredTiVo) tempSub.preferredTiVo = @"";
+    if (!tempSub.preferredTiVo || ([tempSub.preferredTiVo isEqualToString:@"Any TiVo"]) ){
+        tempSub.preferredTiVo = @"";
+    }
     tempSub.HDOnly = sub[kMTSubscribedHDOnly];
     if (!tempSub.HDOnly) tempSub.HDOnly = @NO;
     tempSub.SDOnly = sub[kMTSubscribedSDOnly ];

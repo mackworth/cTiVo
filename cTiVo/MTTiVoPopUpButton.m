@@ -32,7 +32,7 @@
 }
 
 -(void) refreshMenu {
-	NSString * currSelection = (NSString *)self.selectedItem.title;
+	NSString * currSelection = (NSString *)self.selectedItem.representedObject;
 	if (!currSelection) currSelection = _currentTivo;
 	[self removeAllItems];
 	[self addItemWithTitle:@"Any TiVo"];
@@ -55,7 +55,7 @@
 		}
 	}
 	if (currSelection) {
-		if (currSelection.length == 0) {
+		if (currSelection.length == 0 || [currSelection isEqualToString:@"Any TiVo"]) {
 			//name of @"" => any tivo
 			[self selectItem:anyTivo]; 
 		} else {

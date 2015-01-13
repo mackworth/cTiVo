@@ -147,15 +147,30 @@ __DDLOGHERE__
         return nil;
     }
 }
+-(NSArray *) divideStringIntoLines:(NSString *) str {
+    NSUInteger length = [str length];
+    NSUInteger paraStart = 0, paraEnd = 0, contentsEnd = 0;
+    NSMutableArray *array = [NSMutableArray array];
+    NSRange currentRange;
+    while (paraEnd < length) {
+        [str getParagraphStart:&paraStart end:&paraEnd
+                      contentsEnd:&contentsEnd forRange:NSMakeRange(paraEnd, 0)];
+        currentRange = NSMakeRange(paraStart, contentsEnd - paraStart);
+        [array addObject:[str substringWithRange:currentRange]];
+    }
+    return [NSArray arrayWithArray:array];
+}
 
 -(NSArray *) addSubscriptionsFormattedStrings: (NSArray *) strings {
     NSMutableArray * newSubs = [NSMutableArray arrayWithCapacity:strings.count];
     DDLogDetail(@"Subscribing to strings %@", strings);
-    for (NSString * str in strings) {
-        MTSubscription * newSub = [MTSubscription subscriptionFromString:str];
-        if (newSub &&  (![self findSubscriptionNamed:newSub.displayTitle checkSuggestion:NO])) {
-            [newSubs addObject:newSub];
-            [self addObject:newSub];
+    for (NSString * multilineString in strings) {
+        for (NSString * str in [self divideStringIntoLines:multilineString]) {
+            MTSubscription * newSub = [MTSubscription subscriptionFromString:str];
+            if (newSub &&  (![self findSubscriptionNamed:newSub.displayTitle checkSuggestion:NO])) {
+                [newSubs addObject:newSub];
+                [self addObject:newSub];
+            }
         }
     }
     if (newSubs.count > 0) {

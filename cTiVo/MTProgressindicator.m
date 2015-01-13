@@ -80,10 +80,10 @@
     if (displayProgress != _displayProgress) {
         _displayProgress = displayProgress;
         if (displayProgress) {
-            _leftText.frame = CGRectMake(0, 3, self.frame.size.width -widthStatusField, self.frame.size.height);
+            _leftText.frame = CGRectMake(0, 0, self.frame.size.width -widthStatusField, self.frame.size.height);
             _rightText.hidden = NO;
         } else {
-            _leftText.frame = CGRectMake(0, 3, self.bounds.size.width, self.frame.size.height);
+            _leftText.frame = CGRectMake(0, 0, self.bounds.size.width, self.frame.size.height);
             _rightText.hidden = YES;
         }
         [self setNeedsDisplay:YES];
