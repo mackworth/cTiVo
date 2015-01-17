@@ -449,8 +449,7 @@ __DDLOGHERE__
 	}
 	// Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
-	NSPredicate *protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
-	NSArray	*selectedObjects = [[self.sortedShows objectsAtIndexes:rowIndexes ] filteredArrayUsingPredicate:protectedPredicate];
+	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ] ;
 	DDLogVerbose(@"Dragging Objects: %@", selectedObjects);
 	[pboard writeObjects:selectedObjects];
    return (selectedObjects.count > 0);
@@ -465,8 +464,8 @@ __DDLOGHERE__
 
 -(IBAction)copy: (id) sender {
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    NSPredicate *protectedPredicate = [NSPredicate predicateWithFormat:@"protectedShow == %@",[NSNumber numberWithBool:NO]];
-    NSArray	*selectedShows = [[self.sortedShows objectsAtIndexes:selectedRowIndexes ] filteredArrayUsingPredicate:protectedPredicate];
+
+    NSArray	*selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
 
     if (selectedShows.count > 0) {
         MTTiVoShow * firstShow = selectedShows[0];

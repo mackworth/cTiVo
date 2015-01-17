@@ -629,9 +629,11 @@ __DDLOGHERE__
     NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
 
     for (MTTiVoShow * show in draggedShows) {
-        MTTiVoShow * realShow= [tiVoManager findRealShow:show];
-        if (realShow) [realShows addObject:realShow];
-    }
+         MTTiVoShow * realShow= [tiVoManager findRealShow:show];
+        if (realShow && !realShow.protectedShow.boolValue) {
+            [realShows addObject:realShow];
+        }
+     }
     DDLogVerbose(@"Scheduling shows before %@", insertTarget);
     //need to move insertTarget below
 
