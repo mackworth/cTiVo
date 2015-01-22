@@ -300,6 +300,8 @@ __DDLOGHERE__
 			download.encodeFormat = [popUpButton selectFormatNamed:download.encodeFormat.name];
 			popUpButton.hidden = NO;
 			cell.textField.hidden= YES;
+           popUpButton.target = myController;
+           popUpButton.action = @selector(selectFormat:);
 	   } else {
 			//can't change now; just let them know what it is/was
 		   textVal = download.encodeFormat.name;

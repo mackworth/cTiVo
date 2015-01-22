@@ -519,7 +519,8 @@ __DDLOGHERE__
         NSString * episodePart = self.seasonEpisode.length >0 ?
                                         [NSString stringWithFormat:@"\t(%@)",self.seasonEpisode] :
                                         @""; //skip empty episode info
-        return [NSString stringWithFormat:@"%@\t%@%@" ,self.showDateString, self.showTitle, episodePart] ;
+        NSString * protected = self.protectedShow.boolValue ? @"-CP":@"";
+        return [NSString stringWithFormat:@"%@\t%@%@%@" ,self.showDateString, self.showTitle, protected, episodePart] ;
     } else {
         return nil;
     }
