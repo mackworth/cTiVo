@@ -231,6 +231,8 @@ static NSDateFormatter *dateFormatter;
 		popUp.owner = thisSubscription;
 		popUp.formatList = tiVoManager.formatList;
 		thisSubscription.encodeFormat = [popUp selectFormatNamed:thisSubscription.encodeFormat.name];
+        popUp.target = myController;
+        popUp.action = @selector(selectFormat:);
 	} else if ([tableColumn.identifier compare:@"TiVoPopUp"] == NSOrderedSame) {
 		MTTiVoPopUpButton * popUp = ((MTTiVoPopUpTableCellView *)result).popUpButton;
         popUp.target = self;
