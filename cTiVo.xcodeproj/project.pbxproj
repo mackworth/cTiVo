@@ -150,7 +150,7 @@
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
 		1E3D27DE1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNotificationCenter+Threads.h"; sourceTree = "<group>"; };
 		1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNotificationCenter+Threads.m"; sourceTree = "<group>"; };
-		1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = Crashlytics.sh; sourceTree = "<group>"; };
+		1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = Crashlytics.sh; path = cTiVo/Crashlytics.sh; sourceTree = "<group>"; };
 		1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTIsStringEmpty.h; sourceTree = "<group>"; };
 		1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTIsStringEmpty.m; sourceTree = "<group>"; };
 		1E4A38461A37C0F4001D84A7 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
@@ -162,8 +162,7 @@
 		1E59368B19648CFF0008780B /* MTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLog.m; sourceTree = "<group>"; };
 		1E5C5C1A17FDF0B80056E794 /* readme.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme.md; sourceTree = "<group>"; };
 		1E5C5C1B17FE18BB0056E794 /* wiki */ = {isa = PBXFileReference; lastKnownFileType = folder; path = wiki; sourceTree = "<group>"; };
-		1E6349E419C899CF00E650D0 /* Crashlytics.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = Crashlytics.sh; path = cTiVo/Crashlytics.sh; sourceTree = "<group>"; };
-		1E6349E519C89AB700E650D0 /* MTCrashlyticsKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTCrashlyticsKey.m; sourceTree = "<group>"; };
+		1E6349E519C89AB700E650D0 /* MTCrashlyticsKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MTCrashlyticsKey.m; path = cTiVo/MTCrashlyticsKey.m; sourceTree = "<group>"; };
 		1E684A7516E2C50B000F5C6E /* copyright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = copyright.png; sourceTree = "<group>"; };
 		1E684A7716E2C50B000F5C6E /* expired-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expired-recording.png"; sourceTree = "<group>"; };
 		1E684A7816E2C50B000F5C6E /* expires-soon-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expires-soon-recording.png"; sourceTree = "<group>"; };
@@ -420,8 +419,6 @@
 				1E59368B19648CFF0008780B /* MTLog.m */,
 				1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */,
 				1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */,
-				1E6349E519C89AB700E650D0 /* MTCrashlyticsKey.m */,
-				1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */,
 				1E9959C6173DC7D100B47539 /* DDTTYLogger.h */,
 				1E9959C7173DC7D100B47539 /* DDTTYLogger.m */,
 			);
@@ -504,7 +501,6 @@
 			isa = PBXGroup;
 			children = (
 				1E5C5C1A17FDF0B80056E794 /* readme.md */,
-				D271F3621734BCDA00641435 /* Security.framework */,
 				D2C0380F17131F9A0001BA52 /* Update */,
 				1E684A8C16E40EA8000F5C6E /* Wiki */,
 				D2D60BA716766EFD00CE32DE /* cTiVo */,
@@ -526,6 +522,8 @@
 			isa = PBXGroup;
 			children = (
 				D297AC27173047EE0036125A /* libstdc++.dylib */,
+				1E6349E519C89AB700E650D0 /* MTCrashlyticsKey.m */,
+				1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */,
 				1E07864F19C7F5EB00A68051 /* Crashlytics.framework */,
 				D2A09C7916C77E9D00F2B86F /* Quartz.framework */,
 				D2CAF33F16AB43AE004E4CFA /* IOKit.framework */,
@@ -533,10 +531,10 @@
 				1EABE6F316B0A254004DDB61 /* Growl.framework */,
 				D2995CAC168D0EE700B960B9 /* Sparkle.framework */,
 				D240EF5D16EFE05E00635E53 /* QTKit.framework */,
+				D271F3621734BCDA00641435 /* Security.framework */,
 				D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */,
 				D2D60BA116766EFD00CE32DE /* Cocoa.framework */,
 				D2D60BA316766EFD00CE32DE /* Other Frameworks */,
-				1E6349E419C899CF00E650D0 /* Crashlytics.sh */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
