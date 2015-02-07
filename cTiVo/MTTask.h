@@ -15,8 +15,8 @@
 @property (strong, nonatomic) NSTask *task;
 
 @property (strong, nonatomic) NSString	*taskName,
-                                        *baseName,
-										*outputFilePath,
+//                                        *baseName,
+//										*outputFilePath,
 										*logFilePath,
 										*errorFilePath;
 

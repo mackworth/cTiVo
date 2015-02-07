@@ -10,7 +10,7 @@
 #import "MTiTivoImport.h"
 #import "MTSubscription.h"
 #import "MTSubscriptionList.h"
-
+//#import "NSNotificationCenter+Threads.h"
 #import <Growl/Growl.h>
 
 #include <arpa/inet.h>
@@ -689,16 +689,30 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)pauseQueue:(NSNumber *)askUser
 {
 	if ([self anyTivoActive] && [askUser boolValue]) {
-		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are setting a scheduled time to start.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete stage of current shows" informativeTextWithFormat:@""];
+		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete stage of current shows" informativeTextWithFormat:@""];
 		NSInteger returnValue = [scheduleAlert runModal];
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
 		if (returnValue == NSAlertDefaultReturn) {
 			//We're rescheduling shows
             for (MTTiVo *tiVo in _tiVoList) {
-				[tiVo rescheduleAllShows];
-			}
-			NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
-			[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
+                [tiVo rescheduleAllShows];
+            }
+            NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
+            [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:4.0];
+#if 0  //maybe in a future release
+            dispatch_queue_t queue2 = dispatch_get_global_queue(0,0);
+            dispatch_group_t group = dispatch_group_create();
+
+            for (MTTiVo *tiVo in _tiVoList) {
+               dispatch_group_async(group,queue2,^{
+                   [tiVo rescheduleAllShows];
+                });
+            }
+
+            dispatch_group_notify(group,queue2,^{
+                DDLogReport(@"finished all reschedules");
+             [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:nil afterDelay:4.0 ];           });
+#endif
             self.processingPaused = @(YES);
         } else if (returnValue == NSAlertAlternateReturn) {
             //no action:  self.processingPaused = @(NO);
@@ -741,7 +755,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(unPauseQueue) object:nil];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]){
-		DDLogDetail(@"Will not be restarting queue");
+		DDLogDetail(@"No scheduled operations auto-resume");
 		return;
 	}
 	NSDate* startDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
@@ -755,7 +769,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 {
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(pauseQueue:) object:@(NO)];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations]) {
-		DDLogDetail(@"Will not be pausing queue");
+		DDLogDetail(@"No scheduled operations auto-pause ");
 		return;
 	}
 	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];

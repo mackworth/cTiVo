@@ -229,7 +229,7 @@ __DDLOGHERE__
                 DDLogVerbose(@"New progress value for %@ is %lf",_taskName,newProgressValue);
 				if ((newProgressValue != _download.processProgress) && (newProgressValue != 0)) {
 					_download.processProgress = newProgressValue;
-					[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:nil];
+					[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:self.download];
 				}
 			}
 		}
@@ -263,8 +263,8 @@ __DDLOGHERE__
     desc = [desc stringByAppendingFormat:@"\nStandard Input: %@",_task.standardInput];
     desc = [desc stringByAppendingFormat:@"\nStandard Output: %@",_task.standardOutput];
     desc = [desc stringByAppendingFormat:@"\nStandard Error: %@",_task.standardError];
-    desc = [desc stringByAppendingFormat:@"\nbasename = %@",_baseName];
-    desc = [desc stringByAppendingFormat:@"\noutputFilePath = %@",_outputFilePath];
+    //    desc = [desc stringByAppendingFormat:@"\nbasename = %@",_baseName];
+    //    desc = [desc stringByAppendingFormat:@"\noutputFilePath = %@",_outputFilePath];
     desc = [desc stringByAppendingFormat:@"\nlogFilePath = %@",_logFilePath];
     desc = [desc stringByAppendingFormat:@"\nerrorFilePath = %@",_errorFilePath];
     desc = [desc stringByAppendingFormat:@"\nFile Handles: output: %p; error: %p, logFileRead:%p, logFileWrite:%p ",_outputFileHandle, _errorFileHandle, _logFileReadHandle, _logFileWriteHandle];

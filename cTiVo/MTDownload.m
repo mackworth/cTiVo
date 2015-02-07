@@ -87,30 +87,33 @@ __DDLOGHERE__
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
 		DDLogMajor(@"Changing DL status of %@ to %@ (%@)", object, [(MTDownload *)object showStatus], [(MTDownload *)object downloadStatus]);
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadRowChanged object:object];
-         if (!self.progressTimer && self.isInProgress) {
-             [self launchPerformanceTimer];
-          } else {
-            [self cancelPerformanceTimer];        }
+        if (self.progressTimer) {
+            //if previous scheduled either cancel or cancel/restart
+            [self cancelPerformanceTimer];
+        }
+         if (self.isInProgress) {
+             self.progressTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
+         }
     }
 }
 
--(void) launchPerformanceTimer {
+-(void) launchPerformanceTimer:(NSTimer *) timer {
     //start Timer after 5 seconds
-    __weak __typeof__(self) weakSelf = self;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        __strong __typeof__(self) strongSelf = weakSelf;
-        strongSelf.startTime = [NSDate date];
-        strongSelf.startProgress = self.processProgress;
-        strongSelf.progressTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updatePerformance) userInfo:nil repeats:YES];
-    });
+    self.progressTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updatePerformance:) userInfo:nil repeats:YES];
+    self.startTime = [NSDate date];
+    self.startProgress = self.processProgress;
+    DDLogVerbose(@"creating timer");
 }
 
 -(void) cancelPerformanceTimer {
-    [self.progressTimer invalidate]; self.progressTimer = nil;
-    self.startTime = nil;
+    if (self.progressTimer){
+        [self.progressTimer invalidate]; self.progressTimer = nil;
+        self.startTime = nil;
+        DDLogVerbose(@"cancelling timer");
+    }
 }
 
--(void) updatePerformance {
+-(void) updatePerformance: (NSTimer *) timer {
     if (self.startTime == nil) {
         [self cancelPerformanceTimer];
     } else {
@@ -691,7 +694,6 @@ NSString * fourChar(long n, BOOL allowZero) {
 		 @"movieyear":		NULLT(self.show.movieYear),
 		 @"tvdbseriesid":	NULLT(TVDBseriesID)
 		 };
-	 DDLogVerbose(@"keywords: %@",keywords);
 	 NSMutableString * outStr = [NSMutableString string];
 	 
 	 NSScanner *scanner = [NSScanner scannerWithString:str];
@@ -872,7 +874,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         DDLogDetail(@"Encoding of %@ failed for %@ format, encoder %@ not found",_show.showTitle,_encodeFormat.name,_encodeFormat.encoderUsed);
         [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
         _processProgress = 1.0;
-        [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:nil];
+        [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:self];
         return nil;
     } else {
         DDLogVerbose(@"using encoder: %@", encoderLaunchPath);
@@ -977,6 +979,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         [catTask setStandardInput:inputFile];
         catTask.requiresInputPipe = NO;
     }
+    DDLogVerbose(@"Cat task: From %@ to %@ = %@",inputFile?:@"stdIn", outputFile?:@"stdOut", catTask);
     return catTask;
 }
 -(void) checkDecodeLog {
@@ -1060,6 +1063,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         }
     }
     [decryptTask setArguments:arguments];
+    DDLogVerbose(@"Decrypt Arguments: %@",arguments);
     _decryptTask = decryptTask;
     return _decryptTask;
 }
@@ -1130,7 +1134,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         } else {
             encoderArgs = [self encodingArgumentsWithInputFile:_decryptBufferFilePath outputFile:_encodeFilePath];
             encodeTask.requiresInputPipe = NO;
-            __block NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:self.encodeFormat.regExProgress options:NSRegularExpressionCaseInsensitive error:nil];
+            NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:self.encodeFormat.regExProgress ?:@"" options:NSRegularExpressionCaseInsensitive error:nil];
             encodeTask.progressCalc = ^double(NSString *data){
 				double returnValue = -1.0;
 				NSArray *values = nil;
@@ -1285,8 +1289,8 @@ NSString * fourChar(long n, BOOL allowZero) {
             return YES;
         };
 
+        NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)\\%" options:NSRegularExpressionCaseInsensitive error:nil];
         commercialTask.progressCalc = ^double(NSString *data){
-            NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)\\%" options:NSRegularExpressionCaseInsensitive error:nil];
             NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
             NSTextCheckingResult *lastItem = [values lastObject];
             NSRange valueRange = [lastItem rangeAtIndex:1];
@@ -1867,7 +1871,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (!self.isNew && !self.isDone ) {
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];
     }
-    _decryptTask = _captionTask = _commercialTask = _encodeTask  = nil;
+    self.decryptTask = self.captionTask = self.commercialTask = self.encodeTask  = nil;
     
 	NSDate *now = [NSDate date];
     while (writingData && (-1.0 * [now timeIntervalSinceNow]) < 5.0){ //Wait for no more than 5 seconds.
@@ -1901,7 +1905,11 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(void)checkStillActive
 {
-	if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
+    if (_isCanceled || !self.isInProgress) {
+        return;
+    }
+
+    if (previousProcessProgress == _processProgress) { //The process is stalled so cancel and restart
 		//Cancel and restart or delete depending on number of time we've been through this
         DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", _processProgress*100.0, self.show.showTitle);
         BOOL reschedule = YES;
@@ -1952,7 +1960,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(void)progressUpdated
 {
-    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:nil];
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:self];
 }
 
 
@@ -2056,30 +2064,29 @@ NSString * fourChar(long n, BOOL allowZero) {
               //@catch
 
             NSInteger numTries = 3;
-            while (numTries > 0 && data.length > 0) {
-                ssize_t amountSent= write ([taskChainInputHandle fileDescriptor], [data bytes], [data length]);
-                NSInteger amountLeft = [data length]- amountSent;
+            size_t bytesLeft = data.length;
+            while (numTries > 0 && bytesLeft > 0) {
+                ssize_t amountSent= write ([taskChainInputHandle fileDescriptor], [data bytes]+data.length-bytesLeft, bytesLeft);
                 if (amountSent < 0) {
-                    DDLogReport(@"write fail1; tried %lu bytes; error: %zd", (unsigned long)[data length], amountSent);
                     if (!_isCanceled){
-                        [self rescheduleOnMain];
+                        DDLogReport(@"write fail1 for %@; tried %lu bytes; error: %zd",self.show, (unsigned long)[data length], amountSent);
                     };
-                    numTries = 0; //give up
+                    break;
                 } else {
-                    if (amountLeft > 0) {
+                    bytesLeft = bytesLeft- amountSent;
+                    if (bytesLeft > 0) {
                         DDLogMajor(@"write pipe full, retrying; tried %lu bytes; wrote %zd", (unsigned long)[data length], amountSent);
                         sleep(1);  //probably too long, but this is quite rare
                         numTries--;
                     }
-                    NSRange remaining = NSMakeRange(amountSent, amountLeft);
-                    data = [data subdataWithRange:remaining];
                 }
             }
-            if (data.length > 0) {//already reported error
-                DDLogReport(@"Write Fail2: couldn't write to pipe after three tries");
+            if (bytesLeft > 0) {
+                if (numTries == 0) {
+                    DDLogReport(@"Write Fail2: couldn't write to pipe after three tries");
+                }
                 if (!_isCanceled) {
                     [self rescheduleOnMain];
-                    DDLogDetail(@"Rescheduling");
                 }
             }
 
@@ -2357,7 +2364,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             //newly possible, so take user default
             self.skipCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
         }
-        if (!self.canMarkCommercials && self.shouldMarkCommercials) {
+        if (!self.canMarkCommercials && _markCommercials) {
             //no longer possible
             self.markCommercials = NO;
         } else if (markWasDisabled && [self canMarkCommercials]) {

@@ -196,17 +196,18 @@ __DDLOGHERE__
 
 -(void)trackProgress //See if any tasks in this chain are running
 {
-    BOOL isRunning = NO;
+    if (!_isRunning) return;   //check if we've been canceled
+    BOOL taskRunning = NO;
     DDLogVerbose(@"Tracking task chain");
     for (NSArray *taskset in _taskArray) {
         for(MTTask *task in taskset) {
             if (task.taskRunning) {
-                isRunning = YES;
+                taskRunning = YES;
                 break;
             }
         }
     }
-    if (!isRunning) {
+    if (!taskRunning) {
         //We need to move on
         if (_nextTaskChain && !_beingRescheduled) {
             self.download.activeTaskChain = _nextTaskChain;
@@ -225,7 +226,7 @@ __DDLOGHERE__
     totalDataRead += readData.length;
     if (_providesProgress) {
         _download.processProgress = totalDataRead/_download.show.fileSize;
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:nil];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:_download];
     }
 //    NSLog(@"Total Data Read %ld",totalDataRead);
     NSArray *pipes = [teeBranches objectForKey:notification.object];
@@ -243,33 +244,29 @@ __DDLOGHERE__
                 //  [[pipe fileHandleForWriting] writeData:readData];
                 // @catch (NSException *exception) {
                 NSInteger numTries = 3;
-
-                while (numTries > 0 && readData.length> 0) {
-                    ssize_t amountSent= write ([[pipe fileHandleForWriting] fileDescriptor], [readData bytes], [readData length]);
+                size_t bytesLeft = readData.length;
+                while (bytesLeft > 0 && numTries > 0 ) {
+                    ssize_t amountSent= write ([[pipe fileHandleForWriting] fileDescriptor], [readData bytes]+readData.length-bytesLeft, bytesLeft);
                     if (amountSent < 0) {
-                        if (!_download.isCanceled){
-                            [_download rescheduleOnMain];
-                            DDLogDetail(@"Rescheduling");
-                        };
-                        DDLogReport(@"write fail3; tried %lu bytes; error: %zd", (unsigned long)[readData length], amountSent);
-                        numTries = 0; //give up
+                         if (!_download.isCanceled){
+                             DDLogReport(@"write fail3; tried %lu bytes; error: %zd", bytesLeft, amountSent);
+                         }
+                        break;
                     } else {
-                        NSInteger amountLeft = [readData length]- amountSent;
-
-                        if (amountLeft > 0) {
+                        bytesLeft = bytesLeft- amountSent;
+                        if (bytesLeft > 0) {
                             DDLogMajor(@"pipe full, retrying; tried %lu bytes; wrote %zd", (unsigned long)[readData length], amountSent);
                             sleep(1);  //probably too long, but this is quite rare
                             numTries--;
                         }
-                        NSRange remaining = NSMakeRange(amountSent, amountLeft);
-                        readData = [readData subdataWithRange:remaining];
                     }
                 }
-                if (readData.length >0) {
-                    DDLogReport(@"Write Fail4: couldn't write to pipe after three tries; encoder crashed?");
+                if (bytesLeft >0) {
+                    if (numTries == 0) {
+                        DDLogReport(@"Write Fail4: couldn't write to pipe after three tries; encoder crashed?");
+                    }
                     if (!_download.isCanceled) {
                         [_download rescheduleOnMain];
-                        DDLogDetail(@"Rescheduling");
                     }
 
                 }

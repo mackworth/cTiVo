@@ -11,7 +11,7 @@
 
 @implementation NSMutableArray (SubscriptionList)
 
-__DDLOGHERE__
+#define ddLogLevel [[MTSubscription class] ddLogLevel]
 
 #pragma mark - Subscription Management
 
@@ -214,7 +214,6 @@ __DDLOGHERE__
         if (newSub) {
             newSub.subscriptionRegex = tempRegex;
             [newSubs addObject:newSub];
-            [self addObject:newSub];
             //for manual titles, we allow regex matching without being the entire series
         }
     }

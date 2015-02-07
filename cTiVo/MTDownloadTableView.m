@@ -45,7 +45,7 @@ __DDLOGHERE__
 	DDLogDetail(@"Setting up notifications");
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableViewSelectionDidChange:) name:kMTNotificationDownloadQueueUpdated object:nil];
-    //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress) name:kMTNotificationProgressUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress:) name:kMTNotificationProgressUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDownloadStatusChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataTiVos) name:kMTNotificationTiVoListUpdated object:nil];
@@ -126,13 +126,13 @@ __DDLOGHERE__
 	[self selectRowIndexes:showIndexes byExtendingSelection:NO];
     if (tiVoManager.anyTivoActive) {
         if (!self.updateTimer) {
-            self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(updateProgress) userInfo:nil repeats:YES];
+            self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(updateProgress:) userInfo:nil repeats:YES];
         }
     } else {
         if (self.updateTimer) {
             [self.updateTimer invalidate];
             self.updateTimer = nil;
-            [self updateProgress];
+            [self updateProgress:nil];
         }
     }
     
@@ -153,6 +153,7 @@ __DDLOGHERE__
 }
 
 -(void) updateProgressInCell:(MTProgressindicator *) cell forDL:(MTDownload *) download {
+    if (!cell) return;
 	cell.doubleValue = download.processProgress;
 	cell.rightText.stringValue = download.showStatus;
     NSTimeInterval myTimeLeft = download.timeLeft;
@@ -166,14 +167,22 @@ __DDLOGHERE__
     [cell setNeedsDisplay:YES];
 
 }
--(void)updateProgress
+-(void)updateProgress:(id) sender
 {
+    MTDownload * download = nil;
+    if ([sender isKindOfClass: [NSNotification class]]) {
+        MTDownload * possDownload = ((NSNotification *)sender).object;
+        if ([sender isKindOfClass: [MTDownload class]]) {
+            download = possDownload;
+        }
+    }
     NSInteger programColumnIndex = [self columnWithIdentifier:@"Programs"];
     NSInteger seriesColumnIndex = [self columnWithIdentifier:@"Series"];
 	NSArray *displayedShows = self.sortedDownloads;
     BOOL updateSeries = !self.showingProgramsColumn;
 	for (NSUInteger i=0; i< displayedShows.count; i++) {
 		MTDownload *thisDownload = [displayedShows objectAtIndex:i];
+        if (download && thisDownload != download) continue; //only update current one
 		MTProgressindicator *programCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
 		MTProgressindicator *seriesCell = [self viewAtColumn:seriesColumnIndex row:i makeIfNecessary:NO];
 		[self updateProgressInCell: programCell forDL: thisDownload];

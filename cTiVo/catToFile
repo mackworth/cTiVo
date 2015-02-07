@@ -1,22 +1,38 @@
 #!/usr/bin/perl
-$stdin = 0;
+use File::Copy;
 if ($ARGV[0] eq "-") {
-	$stdin = 1;
-	open dest, ">", $ARGV[1] or exit 1;  # die "Unable to open destination 1 for pipe";
+    open dest, ">", $ARGV[1] or do {
+        print STDERR "Unable to open destination 2 ($ARGV[1]) for pipe $!\n";
+        exit 1;
+    };
 } elsif ($ARGV[1] eq "-" ) {
-	$stdin = 1;
-	open dest, ">", $ARGV[0] or exit 2;  # die "Unable to open destination 2 for pipe";
+    open dest, ">", $ARGV[0] or do {
+        print STDERR "Unable to open destination 1 ($ARGV[0]) for pipe $!\n";
+        exit 2;
+    };
 } else {
-	open source, "<", $ARGV[0] or exit 3;  # die "Unable to open source for rename";
-	open dest, ">", $ARGV[1] or exit 4;  # die "Unable to open destination for rename";
+    if (length $ARGV[0] && length $ARGV[1]) {
+        copy $ARGV[0], $ARGV[1] or do {
+            print STDERR "Unable to copy from $ARGV[0] to $ARGV[1] : $!\n";
+            exit 3;
+        };
+    } else {
+        copy *STDIN,*STDOUT or do {
+            print STDERR "Unable to copy from StdIn to StdOut : $!\n";
+            exit 4;
+        };
+    }
+    exit 0;
 }
-if($stdin == 0) {
-	rename $ARGV[0], $ARGV[1] or exit 5; # die "Unable to rename: $!";
-	#	while(<source>) {
-	#		print dest;
-	#}
-} else {
-	while(<STDIN>) {
-		print dest or exit 6;  # die "Unable to copy from stdin to dest"
-	}
+#copy \*STDIN, dest or do {
+#    print STDERR "Unable to copy from stdin to $dest: $!\n";
+#    exit 5;
+#};
+#
+#
+while(<STDIN>) {
+    print dest or do {
+        print STDERR "Unable to copy from stdin to dest: $!\n";
+        exit 5;
+    };
 }
