@@ -272,7 +272,7 @@ __DDLOGHERE__
 		}
 		
 	}
-	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: ([[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0) + 1.0 target:tiVoManager selector:@selector(writeDownloadQueueToUserDefaults) userInfo:nil repeats:YES];
+	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(writeDownloadQueueToUserDefaults) userInfo:nil repeats:YES];
 	
 	//Update atomicparsley default to metatdata default
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];

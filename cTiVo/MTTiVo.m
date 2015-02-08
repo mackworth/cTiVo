@@ -611,7 +611,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			firstUpdate = NO;
 		}
 		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowListUpdated object:self];
-		[self performSelector:@selector(updateShows:) withObject:nil afterDelay:([[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0) + 1.0];
+        NSInteger updateTime = [[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0;
+        if (updateTime > 0) {
+            [self performSelector:@selector(updateShows:) withObject:nil afterDelay:updateTime];
+        }
 		DDLogVerbose(@"Deleted shows: %@",previousShowList);
 		for (MTTiVoShow * show in [previousShowList objectEnumerator]){
 			if (show.isQueued) {
