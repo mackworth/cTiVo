@@ -36,6 +36,7 @@
 @property (nonatomic, strong) MTPreferencesWindowController *advPreferencesController;
 @property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
+@property (nonatomic, strong) NSTimer * pseudoTimer;
 
 
 -(IBAction)togglePause:(id)sender;

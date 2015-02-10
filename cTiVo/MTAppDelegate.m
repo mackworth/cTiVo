@@ -295,6 +295,14 @@ __DDLOGHERE__
 //        return ![tiVo[kMTTiVoManualTiVo] boolValue];
 //    }]];
 
+    self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: 301 target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every five minutes to clear autoreleasepools when no user interaction
+
+ }
+
+-(void) launchPseudoEvent {
+    DDLogVerbose(@"PseudoEvent");
+    NSEvent *pseudoEvent = [NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:[NSDate timeIntervalSinceReferenceDate] windowNumber:0 context:nil subtype:0 data1:0 data2:0];
+    [NSApp postEvent:pseudoEvent atStart:YES];
 
 }
 

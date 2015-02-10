@@ -18,7 +18,6 @@
 
 @interface MTTiVoShow () {
 	
-	NSXMLParser *parser;
 	NSMutableString *elementString;
 	NSMutableArray *elementArray;
 	NSArray *arrayHolder;
@@ -142,7 +141,7 @@ __DDLOGHERE__
         }
 		DDLogVerbose(@"Got Details for %@: %@", self, [[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
 
-		parser = [[NSXMLParser alloc] initWithData:xml];
+		NSXMLParser * parser = [[NSXMLParser alloc] initWithData:xml];
 		parser.delegate = self;
 		[parser parse];
 		if (!_gotDetails) {
