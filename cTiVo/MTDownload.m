@@ -2227,7 +2227,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 				DDLogMajor(@"Deleted TiVo show; marking %@",self);
 				self.downloadStatus = [NSNumber numberWithInt: kMTStatusDeleted];
                 [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
-                [self.show.tiVo updateShows:nil];
+                [self.show.tiVo scheduleNextUpdateAfterDelay:0];
 				return;
 			}
 		}

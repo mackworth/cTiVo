@@ -57,6 +57,7 @@
 +(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue;
 
 -(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;
+-(void)scheduleNextUpdateAfterDelay:(NSInteger) delay;
 -(void)updateShows:(id)sender;
 -(void)manageDownloads:(id)info;
 //-(void) reportNetworkFailure;

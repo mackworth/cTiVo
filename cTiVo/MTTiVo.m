@@ -148,15 +148,6 @@ __DDLOGHERE__
 		DDLogMajor(@"%@ reachability for tivo %@",didSchedule ? @"Scheduled" : @"Failed to schedule", _tiVo.name);
 		[self performSelectorOnMainThread:@selector(getMediaKey) withObject:nil waitUntilDone:YES];
 		[self checkEnabled];
-//		if (_mediaKey.length == 0 || [_mediaKey isEqualToString:kMTTiVoNullKey]) {
-//			DDLogDetail(@"Failed to get MAK for %@",tiVo);
-//			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"new"}];
-//		} else {
-//            if (![tiVo isKindOfClass:[MTNetService class]]) {
-//                [self updateShows:nil];
-//
-//            }
-//		}
 		[self setupNotifications];
 	}
 	return self;
@@ -174,9 +165,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     if (thisTivo.isReachable) {
 		thisTivo.networkAvailability = [NSDate date];
 		[NSObject cancelPreviousPerformRequestsWithTarget:thisTivo selector:@selector(manageDownloads:) object:thisTivo];
-//        NSLog(@"QQQcalling managedownloads from MTTiVo:tivoNetworkCallback with delay+2");
 		[thisTivo performSelector:@selector(manageDownloads:) withObject:thisTivo afterDelay:kMTTiVoAccessDelay+2];
-		[thisTivo performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTTiVoAccessDelay];
+        [thisTivo scheduleNextUpdateAfterDelay: kMTTiVoAccessDelay];
 	} 
     [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationNetworkChanged object:nil];
     DDLogCReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
@@ -304,6 +294,17 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:YES];
     }
     
+}
+
+-(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {
+    [MTTiVo cancelPreviousPerformRequestsWithTarget:self
+                                           selector:@selector(updateShows:)
+                                             object:nil ];
+    NSInteger updateTime = [[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0;
+    if (updateTime > 0) {
+        if (delay < 0) delay = updateTime;
+        [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay ];
+    }
 }
 
 -(void)updateShows:(id)sender
@@ -611,11 +612,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			firstUpdate = NO;
 		}
 		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowListUpdated object:self];
-        NSInteger updateTime = [[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0;
-        if (updateTime > 0) {
-            [self performSelector:@selector(updateShows:) withObject:nil afterDelay:updateTime];
-        }
-		DDLogVerbose(@"Deleted shows: %@",previousShowList);
+        [self scheduleNextUpdateAfterDelay:-1];
+        DDLogVerbose(@"Deleted shows: %@",previousShowList);
 		for (MTTiVoShow * show in [previousShowList objectEnumerator]){
 			if (show.isQueued) {
 				MTDownload * download = [tiVoManager findInDownloadQueue:show];
