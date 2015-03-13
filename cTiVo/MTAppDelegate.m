@@ -692,6 +692,7 @@ Routine to update and combine both the manual tivo preferences and the media key
 	[mySavePanel setTitle:@"Export User Formats"];
 	[mySavePanel setAllowedFileTypes:[NSArray arrayWithObject:@"plist"]];
     [mySavePanel setAccessoryView:formatSelectionTable];
+    [exportTableView reloadData];
 	[mySavePanel beginWithCompletionHandler:^(NSInteger result){
 		if (result == NSFileHandlingPanelOKButton) {
 			NSMutableArray *formatsToWrite = [NSMutableArray array];

@@ -160,7 +160,7 @@ __DDLOGHERE__
 #define kMTVDBNoEpisode @"Episode Not Found"
 #define kMTVDBEpisode @"Episode Found"
 #define kMTVDBCached @"Episode Found in Cache"
-#define kMTVDBNotSeries @"Not a series"
+#define kMTVDBNotSeries @"Movie"
 #define kMTVDBNewInfo @"Season/Episode Info Added"
 #define kMTVDBWrongInfo @"Season/Episode Info Mismatch"
 #define kMTVDBRightInfo @"Season/Episode Info Match"
@@ -377,9 +377,10 @@ __DDLOGHERE__
         if (artwork.length) self.tvdbArtworkLocation = artwork;
 
     } else {
-       tiVoManager.theTVDBStatistics[kMTVDBNotSeries] = @([tiVoManager.theTVDBStatistics[kMTVDBNotSeries] intValue] + 1);
+            tiVoManager.theTVDBStatistics[kMTVDBNotSeries] = @([tiVoManager.theTVDBStatistics[kMTVDBNotSeries] intValue] + 1);
+        _gotTVDBDetails = YES; //never going to find it
+        }
     }
-}
 
 -(void)retrieveTVDBArtworkIntoPath: (NSString *) path
 {
@@ -640,11 +641,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) isMovie {
-	BOOL value =  (self.movieYear.length > 0) ||
-				  ([self.episodeID hasPrefix:@"MV"]) ||
-					!((self.episodeTitle.length > 0) ||
-					   (self.episode > 0) ||
-					   (self.showLength < 70*60)) ;
+	BOOL value =  ([self.episodeID hasPrefix:@"MV"]) ;
 	return value;
 }
 

@@ -472,6 +472,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				if (self.manualTiVo) {
 					[self updatePortsInURLString:element];
 				}
+                //Australia fix? [element appendString:@"&Format=video/x-tivo-mpeg-TS"];
+                
 				[currentShow setValue:[NSURL URLWithString:element] forKey:@"downloadURL"];
 				DDLogVerbose(@"Content URL is %@",currentShow.downloadURL);
 			}
@@ -627,9 +629,17 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	}
 	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoShowsUpdated object:nil];
 	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self];
-     parser = nil;
+
 }
 
+- (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError {
+    DDLogReport(@"TiVo %@ had parsing error: %@", self, parseError.localizedDescription);
+    isConnecting = NO;
+
+    [self scheduleNextUpdateAfterDelay:-1];
+    previousShowList = nil;
+
+}
 
 #pragma mark - Download Management
 

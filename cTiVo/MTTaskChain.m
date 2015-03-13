@@ -226,8 +226,7 @@ __DDLOGHERE__
     totalDataRead += readData.length;
     if (_providesProgress) {
         _download.processProgress = totalDataRead/_download.show.fileSize;
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:_download];
-    }
+        }
 //    NSLog(@"Total Data Read %ld",totalDataRead);
     NSArray *pipes = [teeBranches objectForKey:notification.object];
     if (readData.length) {

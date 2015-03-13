@@ -229,7 +229,6 @@ __DDLOGHERE__
                 DDLogVerbose(@"New progress value for %@ is %lf",_taskName,newProgressValue);
 				if ((newProgressValue != _download.processProgress) && (newProgressValue != 0)) {
 					_download.processProgress = newProgressValue;
-					[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:self.download];
 				}
 			}
 		}

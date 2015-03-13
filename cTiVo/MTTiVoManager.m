@@ -618,7 +618,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(BOOL) anyTivoActive {
 	for (MTTiVo *tiVo in _tiVoList) {
 		if ([tiVo isProcessing]) {
-			return YES;
+           return YES;
 		}
 	}
 	return NO;
@@ -738,8 +738,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		return;
 	}
 	NSDate* startDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
-    if (!startDate) startDate = [NSDate date];
-	double targetSeconds = [self secondsUntilNextTimeOfDay:startDate];
+    if (!startDate) {
+        startDate = [NSDate date];
+        [[NSUserDefaults standardUserDefaults] setObject:startDate forKey:kMTScheduledStartTime];
+    }
+    double targetSeconds = [self secondsUntilNextTimeOfDay:startDate];
 	DDLogDetail(@"Will start queue in %f seconds (%f hours), due to beginDate of %@",targetSeconds, (targetSeconds/3600.0), startDate);
 	[self performSelector:@selector(unPauseQueue) withObject:nil afterDelay:targetSeconds];
 }
@@ -752,7 +755,11 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		return;
 	}
 	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
-	double targetSeconds = [self secondsUntilNextTimeOfDay:endDate];
+    if (!endDate) {
+        [[NSUserDefaults standardUserDefaults] setObject:endDate forKey:kMTScheduledEndTime];
+        endDate = [NSDate date];
+    }
+    double targetSeconds = [self secondsUntilNextTimeOfDay:endDate];
 	DDLogDetail(@"Will pause queue in %f seconds (%f hours), due to endDate of %@",targetSeconds, (targetSeconds/3600.0), endDate);
 	[self performSelector:@selector(pauseQueue:) withObject:@(NO) afterDelay:targetSeconds];
 }
@@ -1667,6 +1674,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
     return ipString;
 }
 
+-(void) dealloc {
+    [[NSNotificationCenter defaultCenter]removeObserver:self];
+}
 
 @end
 

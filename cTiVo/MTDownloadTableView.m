@@ -172,18 +172,18 @@ __DDLOGHERE__
     MTDownload * download = nil;
     if ([sender isKindOfClass: [NSNotification class]]) {
         MTDownload * possDownload = ((NSNotification *)sender).object;
-        if ([sender isKindOfClass: [MTDownload class]]) {
+        if ([possDownload isKindOfClass: [MTDownload class]]) {
             download = possDownload;
         }
     }
     NSInteger programColumnIndex = [self columnWithIdentifier:@"Programs"];
     NSInteger seriesColumnIndex = [self columnWithIdentifier:@"Series"];
-	NSArray *displayedShows = self.sortedDownloads;
+	NSArray *displayedShows = [self.sortedDownloads copy];
     BOOL updateSeries = !self.showingProgramsColumn;
 	for (NSUInteger i=0; i< displayedShows.count; i++) {
 		MTDownload *thisDownload = [displayedShows objectAtIndex:i];
         if (download && thisDownload != download) continue; //only update current one
-		MTProgressindicator *programCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
+        MTProgressindicator *programCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
 		MTProgressindicator *seriesCell = [self viewAtColumn:seriesColumnIndex row:i makeIfNecessary:NO];
 		[self updateProgressInCell: programCell forDL: thisDownload];
         seriesCell.displayProgress = updateSeries;
@@ -191,7 +191,7 @@ __DDLOGHERE__
             [self updateProgressInCell: seriesCell forDL: thisDownload];
 		}
 	}
-    if (!tiVoManager.anyTivoActive) {
+    if (!tiVoManager.anyTivoActive) {//somewhat expensive
         [self.performanceLabel setHidden:YES];
     } else {
         double myTimeLeft = tiVoManager.aggregateTimeLeft;

@@ -46,7 +46,7 @@
 	self.shouldSave = [NSNumber numberWithBool:NO];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateForFormatChange) name:kMTNotificationFormatChanged object:nil];
-   
+
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 	[self updateForFormatChange];
 }
@@ -343,6 +343,7 @@
 
 -(void) dealloc {
     myPopover.delegate = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 @end

@@ -26,8 +26,11 @@
 	
 	NSURLConnection *activeURLConnection;
 	BOOL volatile writingData, downloadingURL;
+
+    //these vars used for watchdog "checkStillActive"
     NSDate *previousCheck, *progressAt100Percent;
 	double previousProcessProgress;
+
     NSMutableData *urlBuffer;
     ssize_t urlReadPointer;
 	
@@ -138,6 +141,7 @@ __DDLOGHERE__
         }
         self.startTime = [NSDate date];
         self.startProgress = self.processProgress;
+        [self progressUpdated];  //should this be the only one?
     }
 }
 
@@ -2092,8 +2096,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
             totalDataRead += dataRead;
             _processProgress = totalDataRead/_show.fileSize;
-            [self progressUpdated];
-        }
+         }
     }
 	if (!activeURLConnection || _isCanceled) {
 		DDLogDetail(@"Closing taskChainHandle for show %@",self.show.showTitle);

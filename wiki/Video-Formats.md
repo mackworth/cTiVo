@@ -6,7 +6,16 @@ Note that cTiVo lets you show/hide individual video formats. We have hidden some
 1. I want the original file from the TiVo.  
     The TiVo encrypts your show with your MAK, making it unreadable. If you want to simply copy and decrypt, choose the 'Decrypted TiVo Show' format. However, Quicktime from Lion (10.7) on will play these files but iTunes won't store it. You can also use [MPlayer OSX Extended](http://www.mplayerosx.ch)  or [VLC](http:/www.videolan.org/vlc/index.html) to view it. Media managers like Boxee or Plex can also read it. Note that TiVo's MPEG2 format is much bigger than the more compressed H.264. If you later decide you prefer H.264, you can always re-encode your movie with a tool like [HandBrake](http://handbrake.fr).
 1. Why doesn't the DVD format making a burnable DVD image?  
-    The DVD format simply creates an MPEG2 file with specifications appropriate for DVD burning software. It will not make a DVD image, nor burn one for you. If you plan on making a DVD, you should then load up the resulting movie into another program like Burn.
+The DVD format simply creates an MPEG2 file with specifications appropriate for DVD burning software. It will not make a DVD image, nor burn one for you. If you plan on making a DVD, you should then load up the resulting file into another program like Burn. Note that DVDs are standard definition only, but cTiVo will downconvert high-definition shows to that format.  Instructions for use of Burn:
+        1) Download [Burn](http://burn-osx.sourceforge.net/Pages/English/home.html)
+        1) Copy to your Applications folder.
+        1) Run Burn. (First time, use right-click and Open as the program is unsigned)
+        1) In Preferences/Video, switch Region to NTSC (in US). (First time only)
+        1) In Preferences/Burner/General, turn on Verify burned data. (First time only)
+        1) Switch to Video tab and select DVD-Video from pull-down.
+        1) Drag the video created by cTiVo into the list.
+        1) Hit Burn and wait a while.
+
 1. What is iPhone super-res?  
     The iPhone can play movies up to 720x480, although its display is only 480x320. You can hook up a video cable to hook up your iphone to a TV, and that's the main reason for super-res. It also uses a much higher bitrate for people who think the iphone setting isn't of a high enough quality.
 1. Audio-only?  

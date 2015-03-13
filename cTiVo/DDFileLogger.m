@@ -1547,6 +1547,10 @@ static int exception_count = 0;
     return NO;
 }
 
+-(NSUInteger) hash {
+    return filePath.hash;
+}
+
 - (NSComparisonResult)reverseCompareByCreationDate:(DDLogFileInfo *)another
 {
     NSDate *us = [self creationDate];
