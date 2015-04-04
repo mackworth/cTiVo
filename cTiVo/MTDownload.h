@@ -76,8 +76,6 @@ numStartupRetriesRemaining;
 @property (nonatomic, readonly) double speed;  //bytes/second
 @property (nonatomic, readonly) BOOL shouldSimulEncode, shouldMarkCommercials;
 
-@property BOOL isSimultaneousEncoding;
-
 @property (readonly) BOOL isNew, isDownloading, isInProgress, isDone;
 
 

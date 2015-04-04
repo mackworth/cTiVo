@@ -277,6 +277,40 @@ static UInt8* makeStyleRecord(UInt8 * style, uint startChar, uint endChar, BOOL 
 #pragma mark - SRT handling Captions 
 
 
+MP4TrackId findFirstVideoTrack(MP4FileHandle fileHandle)
+{
+    MP4TrackId videoTrack = 0;
+    int i, trackNumber = MP4GetNumberOfTracks( fileHandle, 0, 0);
+    if (!trackNumber)
+        return 0;
+    for (i = 0; i < trackNumber; i++) {
+        videoTrack = MP4FindTrackId(fileHandle, i, 0, 0);
+        const char *trackType = MP4GetTrackType(fileHandle, videoTrack);
+        if (trackType)
+            if (!strcmp(trackType, MP4_VIDEO_TRACK_TYPE))
+                return videoTrack;
+    }
+    return 0;
+}
+
+uint16_t getFixedVideoWidth(MP4FileHandle fileHandle, MP4TrackId Id)
+{
+    uint16_t videoWidth = MP4GetTrackVideoWidth(fileHandle, Id);
+
+    if (MP4HaveTrackAtom(fileHandle, Id, "mdia.minf.stbl.stsd.*.pasp")) {
+        uint64_t hSpacing, vSpacing;
+        MP4GetTrackIntegerProperty(fileHandle, Id, "mdia.minf.stbl.stsd.*.pasp.hSpacing", &hSpacing);
+        MP4GetTrackIntegerProperty(fileHandle, Id, "mdia.minf.stbl.stsd.*.pasp.vSpacing", &vSpacing);
+        if( hSpacing > 0 && vSpacing > 0)
+            return  (uint16_t) (videoWidth / (float) vSpacing * (float) hSpacing);
+        else
+            return videoWidth;
+    }
+
+    return videoWidth;
+}
+
+
 - (void)embedSubtitlesInMP4File: (MP4FileHandle *) encodedFile forLanguage: (NSString *) language {
 	//MP4WriteSample expects two bytes of length followed by string followed by style info.
 	uint8_t data[MAXLINE*2+2];
@@ -286,7 +320,7 @@ static UInt8* makeStyleRecord(UInt8 * style, uint startChar, uint endChar, BOOL 
 	
 	double last = 0.0;
 	if (self.count > 0) {
-		
+
 		MP4TrackId textTrack = MP4AddSubtitleTrack(encodedFile,1000,0,0);  //timescale;height;width
 		const char * cLanguage = [language cStringUsingEncoding:NSUTF8StringEncoding];
 		MP4SetTrackLanguage(
@@ -296,22 +330,38 @@ static UInt8* makeStyleRecord(UInt8 * style, uint startChar, uint endChar, BOOL 
 		
 		
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "tkhd.alternate_group", 2);
-		
+        MP4SetTrackIntegerProperty(encodedFile,textTrack, "tkhd.layer", -1);
+        MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.displayFlags", 0);
+
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.horizontalJustification", 1);
-		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.verticalJustification", 0);
+		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.verticalJustification", -1);
 		
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.bgColorAlpha", 255);
 		
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontID", 1);
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontSize", 24);
-		
+
+        MP4TrackId videoTrack = findFirstVideoTrack(encodedFile);
+
+
 		const uint8_t textColor[4] = { 255,255,255,255 };
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorRed", textColor[0]);
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorGreen", textColor[1]);
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorBlue", textColor[2]);
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorAlpha", textColor[3]);
-		
-		for (MTSrt* srt in self) {
+
+        NSSize videoSize = NSMakeSize(0, 0);
+        if (videoTrack) {
+            videoSize.width = getFixedVideoWidth(encodedFile, videoTrack);
+            videoSize.height = 0.15* MP4GetTrackVideoHeight(encodedFile, videoTrack);
+        }  else {
+            videoSize.width = 640;
+            videoSize.height = 0.15* 480;
+        }
+        MP4SetTrackFloatProperty(encodedFile,textTrack, "tkhd.width", videoSize.width);
+        MP4SetTrackFloatProperty(encodedFile,textTrack, "tkhd.height", videoSize.height);
+
+        for (MTSrt* srt in self) {
 			if (last < srt.startTime) {
 				//fill in gap from previous one with an empty caption
 				//Write blank
@@ -320,7 +370,7 @@ static UInt8* makeStyleRecord(UInt8 * style, uint startChar, uint endChar, BOOL 
 									blankData,
                                     2,
 									(unsigned long long)((srt.startTime-last)*1000),
-                                    0, false )) {
+                                    0, true )) {
 					[srt writeError:@"can't write gap before" ];
 					break;
 				}
