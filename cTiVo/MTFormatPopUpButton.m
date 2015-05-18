@@ -82,7 +82,7 @@
 			thisItem.attributedTitle = [f attributedFormatStringForFont: self.font];
 			
 			thisItem.toolTip = [NSString stringWithFormat:@"%@: %@", f.name, f.formatDescription];
-			thisItem.RepresentedObject = f;
+			thisItem.representedObject = f;
 			
 			if ( [currSelection compare: f.name] == NSOrderedSame) {
 				[self selectItem:thisItem];

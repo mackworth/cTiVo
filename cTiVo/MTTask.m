@@ -132,7 +132,7 @@ __DDLOGHERE__
 		NSData *tailOfFile = [logHandle readDataOfLength:backup];
 		if (tailOfFile.length > 0) {
 			NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-			DDLogDetail(@"%@File for task %@: %@",type, _taskName,  [logString maskMediaKeys]);
+			DDLogMajor(@"%@File for task %@: %@",type, _taskName,  [logString maskMediaKeys]);
 		}
 	}
 }

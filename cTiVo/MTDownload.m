@@ -663,14 +663,18 @@ NSString * fourChar(long n, BOOL allowZero) {
 													   objectAtIndex:[components month]-1] :
 								@"";
 	 
-	 NSString *TVDBseriesID = [tiVoManager.tvdbSeriesIdMapping objectForKey:self.show.seriesTitle]; // see if we've already done this
-	 
+     NSString *TVDBseriesID = nil;
+     @synchronized (tiVoManager.tvdbSeriesIdMapping) {
+         TVDBseriesID = [tiVoManager.tvdbSeriesIdMapping objectForKey:self.show.seriesTitle]; // see if we've already done this
+     }
 	 if (!TVDBseriesID) {
-		 NSDictionary *TVDBepisodeEntry = [tiVoManager.tvdbCache objectForKey:self.show.episodeID];
+         @synchronized (tiVoManager.tvdbCache) {
+             NSDictionary *TVDBepisodeEntry = [tiVoManager.tvdbCache objectForKey:self.show.episodeID];
 		 //could provide these ,too?
 		 // NSNumber * TVDBepisodeNum = [TVDBepisodeEntry objectForKey:@"episode"];
 		 //NSNumber * TVDBseasonNum = [TVDBepisodeEntry objectForKey:@"season"];
-		TVDBseriesID = [TVDBepisodeEntry objectForKey:@"series"];
+             TVDBseriesID = [TVDBepisodeEntry objectForKey:@"series"];
+         };
 	 }
 		 
 		 
@@ -1376,7 +1380,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(void)download
 {
 	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-	DDLogDetail(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@",
+	DDLogMajor(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@",
 				self.taskFlowType,
 				self,
 				self.encodeFormat.name ,
@@ -1755,7 +1759,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(void) finishUpPostEncodeProcessing {
 	NSDate *startTime = [NSDate date];
-	DDLogReport(@"Starting finishing @ %@",startTime);
+	DDLogMajor(@"Starting finishing @ %@",startTime);
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 	NSImage * artwork = nil;
 	if (self.encodeFormat.canAcceptMetaData || _addToiTunesWhenEncoded) {
@@ -2155,9 +2159,11 @@ NSString * fourChar(long n, BOOL allowZero) {
 - (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     if (challenge.proposedCredential) {
+        DDLogMajor(@"challenge with %@", [[challenge.proposedCredential description] maskMediaKeys]);
         [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
     }else {
         if (self.show.tiVo.mediaKey && self.show.tiVo.mediaKey.length) {
+            DDLogMajor(@"sending media Key");
             [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:self.show.tiVo.mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
             
         } else {

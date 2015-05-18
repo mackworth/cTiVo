@@ -37,7 +37,7 @@
 	[self removeAllItems];
 	[self addItemWithTitle:@"Any TiVo"];
 	NSMenuItem * anyTivo = [self lastItem];
-	anyTivo.RepresentedObject = @"";
+	anyTivo.representedObject = @"";
 	NSMenuItem *separator = [NSMenuItem separatorItem];
 	[[self menu] addItem:separator];
 
@@ -47,7 +47,7 @@
 		[self addItemWithTitle:tiVoName];
 		NSMenuItem *thisItem = [self lastItem];
 		
-		thisItem.RepresentedObject = tiVoName;
+		thisItem.representedObject = tiVoName;
 		
 		if ( [currSelection isEqualToString: tiVoName]) {
 			[self selectItem:thisItem];
@@ -62,7 +62,7 @@
 			//no longer in list, but it needs to be...
 			[self addItemWithTitle:currSelection];
 			NSMenuItem *thisItem = [self lastItem];
-			thisItem.RepresentedObject = currSelection;
+			thisItem.representedObject = currSelection;
 			[self selectItem:thisItem];
 		}
 	}

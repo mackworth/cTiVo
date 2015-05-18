@@ -108,8 +108,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		listingData = [NSMutableData new];
 		_tiVoList = [NSMutableArray new];
 		queue = [NSOperationQueue new];
-		_downloadQueue = [NSMutableArray new];
-		
+        _downloadQueue = [NSMutableArray new];
+
         _lastLoadedTivoTimes = [[defaults dictionaryForKey:kMTTiVoLastLoadTimes] mutableCopy];
 		if (!_lastLoadedTivoTimes) {
 			_lastLoadedTivoTimes = [NSMutableDictionary new];
@@ -826,7 +826,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
        DDLogMajor(@"Set operations start time to %@",[defs objectForKey: kMTScheduledStartTime]);
         [self configureSchedule];
 	} else if ([keyPath isEqualToString:kMTTiVos]){
-        DDLogMajor(@"Changed TiVo list to %@",[defs objectForKey:  kMTTiVos]);
+        DDLogMajor(@"Changed TiVo list to %@",[[defs objectForKey:  kMTTiVos] maskMediaKeys]);
         [self updateTiVos];
     } else if ([keyPath isEqualToString:kMTUpdateIntervalMinutes]){
         DDLogMajor(@"Changed Update Time to %ld",(long)[defs integerForKey:kMTUpdateIntervalMinutes]);

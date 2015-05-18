@@ -29,20 +29,30 @@
 									*seriesTitle,
 									*episodeTitle,
 									*showDescription,
-									*showTime,
-									*episodeNumber,
-									*originalAirDate,
 									*showLengthString,
                                     *channelString,
                                     *stationCallsign,
 									*programId,
 									*episodeID,
 									*seriesId,
-									*movieYear,
-									 *tvRating,
                                     *sourceType,
 									*imageString,
                                     *idGuidSource;
+
+//Properties loaded in from TiVo's Detail XML
+@property (atomic, strong, readonly) NSString
+                                    *episodeNumber,
+                                    *movieYear,
+                                    *originalAirDate,
+                                    *showTime,
+                                    *episodeGenre,
+                                    *tvRating;
+@property (strong, nonatomic, readonly) NSAttributedString
+                                    *actors,
+                                    *guestStars,
+                                    *directors,
+                                    *producers;
+
 
 @property (nonatomic, strong) NSNumber  *protectedShow,  //really BOOLs
 										*inProgress,      //Is Tivo currently recording this show
@@ -57,7 +67,7 @@
 
 @property					  time_t showLength;  //length of show in seconds
 
-@property (nonatomic, strong) NSString *tvdbArtworkLocation;
+@property (atomic, strong) NSString *tvdbArtworkLocation;
 
 
 
@@ -77,8 +87,7 @@
 @property						int	season, episode; //calculated from EpisodeNumber
 @property (weak, nonatomic, readonly) NSString *seasonString;
 @property (weak, nonatomic, readonly) NSString *seasonEpisode; // S02 E04 version
-
-@property (weak, nonatomic, readonly)	NSString *episodeGenre;
+@property (readonly, nonatomic) NSString *attribDescription;
 
 @property (nonatomic, readonly) BOOL    isMovie;
 @property (nonatomic, readonly) BOOL    isSuggestion;
@@ -89,11 +98,6 @@
 										*isQueuedString,
 										*isHDString,
 										*sizeString;
-@property (weak, nonatomic, readonly) NSAttributedString *actors,
-													*guestStars,
-													*directors,
-													*producers,
-													*attribDescription;
 
 @property BOOL isQueued;
 

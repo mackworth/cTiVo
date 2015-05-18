@@ -70,9 +70,6 @@ __DDLOGHERE__
 	self.sortedShows = nil;
     [super reloadData];
     
-    if (self.sortedShows.count) {
-        myController.showForDetail = self.sortedShows[0];
-    }
 	//now restore selection
 	NSIndexSet * showIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
 		return [selectedShows indexOfObject:obj] !=NSNotFound;

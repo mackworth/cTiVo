@@ -744,12 +744,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	if (challenge.previousFailureCount == 0) {
 		DDLogDetail(@"%@ password ask",self);
         if (challenge.proposedCredential) {
+            DDLogDetail(@"Got mediaKey from keyChain");
             self.mediaKey = challenge.proposedCredential.password;
             [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:NO];
 
             [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
         } else {
-            NSURLCredentialPersistence persistance = NSURLCredentialPersistenceForSession;
+            DDLogDetail(@"sending mediaKey from userDefaults");
+           NSURLCredentialPersistence persistance = NSURLCredentialPersistenceForSession;
             if (self.storeMediaKeyInKeychain) {
                 persistance = NSURLCredentialPersistencePermanent;
             }
@@ -757,7 +759,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             [challenge.sender useCredential:myCredential forAuthenticationChallenge:challenge];
         }
 	} else {
-		DDLogDetail(@"%@ challenge failed",self);
+		DDLogReport(@"%@ challenge failed",self);
 		[challenge.sender cancelAuthenticationChallenge:challenge];
 		[showURLConnection cancel];
 		self.showURLConnection = nil;

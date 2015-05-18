@@ -262,7 +262,7 @@
 		D297AC1F1730296C0036125A /* streaming.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = streaming.h; sourceTree = "<group>"; };
 		D297AC201730296C0036125A /* track.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = track.h; sourceTree = "<group>"; };
 		D297AC211730296C0036125A /* track_prop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = track_prop.h; sourceTree = "<group>"; };
-		D297AC27173047EE0036125A /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
+        D297AC27173047EE0036125A /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
 		D2995CA4168B8BB200B960B9 /* MTCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTCheckBox.h; sourceTree = "<group>"; };
 		D2995CA5168B8BB200B960B9 /* MTCheckBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTCheckBox.m; sourceTree = "<group>"; };
 		D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cTiVo_sparkle_pub.pem; sourceTree = "<group>"; };
@@ -331,7 +331,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D271F3631734BCDA00641435 /* Security.framework in Frameworks */,
-				D297AC28173047EE0036125A /* libstdc++.dylib in Frameworks */,
+                D297AC28173047EE0036125A /* libstdc++.dylib in Frameworks */,
 				D240EF5E16EFE05E00635E53 /* QTKit.framework in Frameworks */,
 				D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */,
 				D2CAF34016AB43AE004E4CFA /* IOKit.framework in Frameworks */,
@@ -521,7 +521,7 @@
 		D2D60BA016766EFD00CE32DE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D297AC27173047EE0036125A /* libstdc++.dylib */,
+                D297AC27173047EE0036125A /* libstdc++.dylib */,
 				1E6349E519C89AB700E650D0 /* MTCrashlyticsKey.m */,
 				1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */,
 				1E07864F19C7F5EB00A68051 /* Crashlytics.framework */,
@@ -1055,7 +1055,8 @@
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/cTiVo/mp4v2\"",
+					"$(SRCROOT)/cTiVo/mp4v2",
+					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1080,11 +1081,12 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/cTiVo\"";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/cTiVo/mp4v2\"",
+					"$(SRCROOT)/cTiVo/mp4v2",
+					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";

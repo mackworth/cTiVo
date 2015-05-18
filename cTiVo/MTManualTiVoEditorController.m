@@ -54,7 +54,13 @@ __DDLOGHERE__
         int typeOfChange = 0;
         NSArray *oldValues = change[NSKeyValueChangeOldKey];
         NSArray *newValues = [[NSUserDefaults standardUserDefaults] objectForKey:kMTTiVos];
-        if (oldValues.count != newValues.count) {
+
+        if (oldValues.count == newValues.count) {
+            for (NSUInteger i = 0; i<oldValues.count; i++) {
+                if (![oldValues[i] isEqual: newValues[i] ]) break; //different so continue
+                if (i == oldValues.count-1) return; //same so just leave;
+            }
+        } else {
             typeOfChange = 1;
         }
         int newValuesEnabled = 0;
