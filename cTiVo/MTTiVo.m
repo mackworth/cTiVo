@@ -599,13 +599,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)parserDidEndDocument:(NSXMLParser *)parser
 {
 	//Check if we're done yet
-	if (itemStart+itemCount < totalItemsOnTivo) {
+	if (itemCount > 0 && itemStart+itemCount < totalItemsOnTivo) {
 		DDLogDetail(@"TiVo %@ finished batch", self);
 		if (newShows.count > _shows.count) {
 			self.shows = [NSArray arrayWithArray:newShows];
 		}
 		[self updateShowsStartingAt:itemStart + itemCount withCount:kMTNumberShowToGet];
 	} else {
+        if (itemCount == 0 && itemStart < totalItemsOnTivo) {
+            DDLogReport(@"TiVo returned ZERO items! Ignoring items from %d to %d", itemStart, totalItemsOnTivo);
+        }
 		DDLogMajor(@"TiVo %@ completed parsing", self);
 		isConnecting = NO;
 		self.shows = [NSArray arrayWithArray:newShows];
