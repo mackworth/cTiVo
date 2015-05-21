@@ -1743,16 +1743,16 @@ NSString * fourChar(long n, BOOL allowZero) {
 	return HDTypeNotAvailable;
 }
 
--(NSString *) moveFile:(NSString *) path ToiTunes: (NSString *)iTunesPath forType:(NSString *) typeString{
+-(NSString *) moveFile:(NSString *) path ToiTunes: (NSString *)iTunesBaseName forType:(NSString *) typeString andExtension: (NSString *) extension {
     if (!path) return nil;
-    if (!iTunesPath) return nil;
+    if (!iTunesBaseName) return nil;
     if (![[NSFileManager defaultManager] fileExistsAtPath:path])  return nil;
-    NSString *newPath = [iTunesPath stringByAppendingPathComponent:[path lastPathComponent]];
+    NSString *newPath = [iTunesBaseName stringByAppendingPathExtension:extension ];
     if ([[NSFileManager defaultManager] moveItemAtPath:path toPath: newPath error:nil]) {
-        DDLogDetail (@"Moved %@ file to iTunes: %@", typeString, newPath);
+        DDLogDetail (@"Moved %@ (%@) file to iTunes: %@", typeString, extension, newPath);
         return newPath;
     } else {
-        DDLogReport(@"Couldn't move %@ file from path %@ to iTunes %@",typeString, path, newPath);
+        DDLogReport(@"Couldn't move %@ (%@) file from path %@ to iTunes %@",typeString, extension, path, newPath);
         return nil;
     }
 }
@@ -1823,16 +1823,17 @@ NSString * fourChar(long n, BOOL allowZero) {
 					}
 				}
                 //move caption, commercial, and pytivo metadata files along with video
-                NSString * iTunesDirectory = [iTunesPath stringByDeletingLastPathComponent];
+                NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
                 if (self.shouldEmbedSubtitles) {
-                    captionFilePath = [self moveFile:captionFilePath ToiTunes:iTunesDirectory forType:@"caption SRT"] ?: captionFilePath;
+                     captionFilePath = [self moveFile:captionFilePath ToiTunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: captionFilePath;
                 }
                 if (self.shouldMarkCommercials) {
-                    commercialFilePath = [self moveFile:commercialFilePath ToiTunes:iTunesDirectory forType:@"commercial EDL"] ?: commercialFilePath;
+                    commercialFilePath = [self moveFile:commercialFilePath ToiTunes:iTunesBaseName forType:@"commercial" andExtension: @"edl"] ?: commercialFilePath;
                 }
                 if (self.genTextMetaData.boolValue) {
                     NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
-                    [self moveFile:textMetaPath ToiTunes:iTunesDirectory forType:@"metadata TXT"];
+                    NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
+                    [self moveFile:textMetaPath ToiTunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
                 }
                 //but remember new file for future processing
 				_encodeFilePath= iTunesPath;

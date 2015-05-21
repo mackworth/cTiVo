@@ -43,7 +43,7 @@
 @property (strong) NSArray *shows;
 @property (nonatomic, strong) NSDate *networkAvailability;
 @property (nonatomic, strong) NSString *mediaKey;
-@property (nonatomic, strong) NSOperationQueue *queue;
+@property (nonatomic, strong) NSOperationQueue *opsQueue;
 @property (nonatomic, strong) MTTiVoManager *tiVoManager;
 @property (nonatomic, strong) NSURLConnection *showURLConnection;
 @property BOOL mediaKeyIsGood,storeMediaKeyInKeychain;

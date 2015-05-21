@@ -131,7 +131,7 @@ __DDLOGHERE__
 		self.tiVo = tiVo;
         self.manualTiVo = isManual;
         self.manualTiVoID = manualTiVoID;
-		self.queue = queue;
+		self.opsQueue = queue;
         DDLogMajor(@"testing reachability for tivo %@ with address %@",self.tiVo.name, self.tiVo.addresses[0]);
         if (isManual) {
             _reachability = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [self.tiVo.iPAddress UTF8String]);
@@ -364,22 +364,25 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)updateShowsStartingAt:(int)anchor withCount:(int)count
 {
-	DDLogDetail(@"Getting %@ shows from %d to %d",self, anchor, anchor+count);
-	NSString *portString = @"";
-	if ([_tiVo isKindOfClass:[MTNetService class]]) {
-		DDLogDetail(@"On TiVo %@; port %d",self, _tiVo.userPortSSL);
-		portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];
-	}
-	
-	NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,anchor,count] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-	DDLogDetail(@"Tivo %@ URL String %@",self, tivoURLString);
-	NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
-	NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
-	self.showURLConnection = [NSURLConnection connectionWithRequest:tivoURLRequest delegate:self];
-	[urlData setData:[NSData data]];
+    NSString *portString = @"";
+    if ([_tiVo isKindOfClass:[MTNetService class]]) {
+        DDLogDetail(@"On TiVo %@; port %d",self, _tiVo.userPortSSL);
+        portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];
+    }
+
+    NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,anchor,count] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    if (previousShowList.count ==0 && anchor ==0) {
+        //first time for this tivo:
+        DDLogReport(@"Initial loading from TiVo %@ at URL %@",self, tivoURLString);
+    } else {
+        DDLogMajor(@"Loading from TiVo %@ shows from %d to %d at URL %@",self, anchor, anchor+count, tivoURLString);
+    }
+    NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
+    NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
+    self.showURLConnection = [NSURLConnection connectionWithRequest:tivoURLRequest delegate:self];
+    [urlData setData:[NSData data]];
     authenticationTries = 0;
-	[showURLConnection start];
-		
+    [showURLConnection start];
 }
 
 -(void)resetAllDetails
@@ -535,7 +538,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 					}
 				}
 				NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil];
-				[_queue addOperation:nextDetail];
+				[self.opsQueue addOperation:nextDetail];
 				//Now check and see if this was in the oldQueue (from last time we ran)
 				if(firstUpdate)[tiVoManager replaceProxyInQueue:currentShow];
 				
@@ -543,7 +546,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				DDLogDetail(@"Updated show %@", currentShow.showTitle);
 				if (!thisShow.gotDetails || !thisShow.gotTVDBDetails) {
 					NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil];
-					[_queue addOperation:nextDetail];
+					[self.opsQueue addOperation:nextDetail];
 
 				}
 				[newShows addObject:thisShow];

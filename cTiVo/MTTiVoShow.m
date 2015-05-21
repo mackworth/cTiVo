@@ -588,6 +588,9 @@ __DDLOGHERE__
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
     }
     DDLogDetail(@"Exiting detail for %@ ",self);
+    if ([NSOperationQueue currentQueue].operationCount == 1 && self.tiVo.showURLConnection) {
+        DDLogReport(@"Got all details for %@",self.tiVo);
+    }
 }
 
 #pragma  mark - parser methods

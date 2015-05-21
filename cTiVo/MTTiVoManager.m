@@ -36,7 +36,6 @@
  	NSArray *factoryFormatList;
     int numEncoders;// numCommercials, numCaptions;//Want to limit launches to two encoders.
 	
-    NSOperationQueue *queue;
     NSMetadataQuery *cTiVoQuery;
 	BOOL volatile loadingManualTiVos;
 
@@ -44,6 +43,7 @@
 
 @property (strong) MTNetService *updatingTiVo;
 //@property (nonatomic, strong) NSArray *hostAddresses;
+@property (strong)     NSOperationQueue *opsQueue;
 
 @end
 
@@ -107,7 +107,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		_tivoServices = [NSMutableArray new];
 		listingData = [NSMutableData new];
 		_tiVoList = [NSMutableArray new];
-		queue = [NSOperationQueue new];
+		self.opsQueue = [NSOperationQueue new];
         _downloadQueue = [NSMutableArray new];
 
         _lastLoadedTivoTimes = [[defaults dictionaryForKey:kMTTiVoLastLoadTimes] mutableCopy];
@@ -195,8 +195,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 //		numCommercials = 0;
 //		numCaptions = 0;
 		_signalError = 0;
-		queue.maxConcurrentOperationCount = 1;
-		
+		self.opsQueue.maxConcurrentOperationCount = 2;
+        DDLogReport (@"Concurrency: %ld", (long)self.opsQueue.maxConcurrentOperationCount);
+
 		_processingPaused = @(NO);
 		self.quitWhenCurrentDownloadsComplete = @(NO);
 		
@@ -372,7 +373,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 					}
 				}
 				if (!targetMTTiVo) { //Create a new MTTiVo
-					targetMTTiVo = [MTTiVo manualTiVoWithDescription:mTiVo withOperationQueue:queue];
+					targetMTTiVo = [MTTiVo manualTiVoWithDescription:mTiVo withOperationQueue:self.opsQueue];
 					if(targetMTTiVo){
 						shouldUpdateTiVo = YES;
 						DDLogDetail(@"Adding new manual TiVo %@",targetMTTiVo);
@@ -1642,7 +1643,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		}
 	}
     
-	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:queue];
+	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:self.opsQueue];
     
     [newTiVo scheduleNextUpdateAfterDelay:0];
   
