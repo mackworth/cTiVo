@@ -123,6 +123,23 @@ __DDLOGHERE__
 	
 }
 
+-(void) detailsComplete {
+    //called when each show completes its details
+    //DDLogReport (@"Ops Count = %lu; shows = %lu; connection: %@; queue = %@", (unsigned long)self.opsQueue.operationCount, self.shows.count, self.showURLConnection, self.opsQueue);
+    usleep(500000); //wait half second
+    if (self.opsQueue.operationCount <= 1 && !isConnecting) {
+        DDLogMajor(@"Got all details for %@",self.tiVo.name);
+        DDLogMajor(@"Statistics for TVDB since start or reset: %@",tiVoManager.theTVDBStatistics);
+//        for testing the movidedB
+//        for (MTTiVoShow * show in [self.shows copy]) {
+//            if (show.isMovie) {
+//                [show retrieveTheMovieDBArtworkIntoPath: [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:show.seriesTitle]];
+//                usleep(50000);
+//            }
+//        }
+    }
+}
+
 -(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID
 {
 	self = [self init];
@@ -334,7 +351,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     DDLogVerbose(@"Previous shows were: %@:",previousShowList);
 	[newShows removeAllObjects];
 //	[_shows removeAllObjects];
-	[NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationShowListUpdating object:self];
+	[NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationTiVoUpdating object:self];
 	if (self.currentNPLStarted) {
 		[self saveLastLoadTime:self.currentNPLStarted];
 	}
@@ -619,7 +636,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			[tiVoManager checkDownloadQueueForDeletedEntries:self];
 			firstUpdate = NO;
 		}
-		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowListUpdated object:self];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
         [self scheduleNextUpdateAfterDelay:-1];
         DDLogVerbose(@"Deleted shows: %@",previousShowList);
 		for (MTTiVoShow * show in [previousShowList objectEnumerator]){
@@ -632,8 +649,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			}
 		}
 		 previousShowList = nil;
+        //allows reporting when all other ops completed
+        NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(detailsComplete) object:nil];
+        [self.opsQueue addOperation:nextDetail];
+
 	}
-	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoShowsUpdated object:nil];
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoShowsUpdated object:nil];
 	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self];
 
 }
@@ -794,7 +815,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     DDLogReport(@"URL Connection Failed with error %@",error);
-    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowListUpdated object:self];
+    [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationTiVoUpdated object:self];
 //    [self reportNetworkFailure];
     if(self.manualTiVo) _isReachable = NO;
     self.showURLConnection = nil;

@@ -267,7 +267,7 @@ __DDLOGHERE__
 	result.toolTip = nil;
 	if ([tableColumn.identifier isEqualToString:@"Programs"] ||
 		[tableColumn.identifier isEqualToString:@"Series"]) {
-		NSString * cellVal;
+ 		NSString * cellVal;
 		if ([tableColumn.identifier isEqualToString:@"Programs"]) {
 			cellVal = thisShow.showTitle ;
 		 } else {

@@ -524,7 +524,8 @@ Routine to update and combine both the manual tivo preferences and the media key
 	} else {
 		[self.tiVoGlobalManager unPauseQueue];
 	}
-	
+    [[NSUserDefaults standardUserDefaults] setBool:[self.tiVoGlobalManager.processingPaused boolValue] forKey:kMTQueuePaused];
+
 }
 
 -(void)updateTivoRefreshMenu
@@ -993,7 +994,9 @@ Routine to update and combine both the manual tivo preferences and the media key
 	[saveQueueTimer invalidate];
 	[tiVoManager cancelAllDownloads];
 	[tiVoManager writeDownloadQueueToUserDefaults];
-    [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.tvdbCache forKey:kMTTheTVDBCache];
+    @synchronized(tiVoManager.tvdbCache) {
+        [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.tvdbCache forKey:kMTTheTVDBCache];
+    }
 	 mediaKeyQueue = nil;
     DDLogReport(@"cTiVo exiting");
 }

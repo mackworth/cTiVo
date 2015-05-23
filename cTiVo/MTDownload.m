@@ -872,8 +872,9 @@ NSString * fourChar(long n, BOOL allowZero) {
     DDLogVerbose(@"setting commercialFilePath: %@", commercialFilePath);
     
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTGetEpisodeArt]) {
-		[self.show retrieveTVDBArtworkIntoPath: [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:self.baseFileName]];
-	}
+       NSString * filename = [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:self.baseFileName];
+        [self.show retrieveArtworkIntoFile:filename];
+ 	}
 }
 
 -(NSString *) encoderPath {
@@ -1632,8 +1633,28 @@ NSString * fourChar(long n, BOOL allowZero) {
 	} else {
 		directories = @[currentDir, thumbnailDir];
 	}
+    
+    if (self.show.isMovie) {
+        for (NSString * dir in directories) {
+            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:self.show.movieYear  InPath:dir ];
+            if (artwork) return artwork;
+        }
+        for (NSString * dir in directories) {
+            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
+            if (artwork) return artwork;
+        }
 
-	if (self.show.season > 0) {
+        //then for downloaded temp art
+        if (self.show.artworkFile) {
+            NSImage * image = [[NSImage alloc] initWithContentsOfFile:self.show.artworkFile];
+            if (image) {
+                return image;
+            } else {
+                DDLogReport(@"Couldn't load downloaded artwork for %@ from %@",self.show.seriesTitle, self.show.artworkFile);
+            }
+
+        }
+    } else 	if (self.show.season > 0) {
 		//first check for user-specified, episode-specific art
 		if (self.show.seasonEpisode.length > 0) {
 			for (NSString * dir in directories) {
@@ -1642,9 +1663,14 @@ NSString * fourChar(long n, BOOL allowZero) {
 			}
 			
 			//then for downloaded temp art
-			NSString * dir = tiVoManager.tmpFilesDirectory;
-			NSImage * artwork = [self artworkWithPrefix: _baseFileName  andSuffix:[self.show seasonEpisode] InPath:dir ];
-			if (artwork) return artwork;
+            if (self.show.artworkFile) {
+                NSImage * image = [[NSImage alloc] initWithContentsOfFile:self.show.artworkFile];
+                if (image) {
+                    return image;
+                } else {
+                    DDLogReport(@"Couldn't load downloaded artwork for %@ from %@",self.show.seriesTitle, self.show.artworkFile);
+                }
+            }
 		}
 		//then for season-specific art
 		NSString * season = [NSString stringWithFormat:@"S%0.2d",self.show.season];
@@ -2160,16 +2186,16 @@ NSString * fourChar(long n, BOOL allowZero) {
 - (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     if (challenge.proposedCredential) {
-        DDLogMajor(@"challenge with %@", [[challenge.proposedCredential description] maskMediaKeys]);
+        DDLogMajor(@"Using proposed Credential for %@",self.show.tiVoName);
         [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
-    }else {
-        if (self.show.tiVo.mediaKey && self.show.tiVo.mediaKey.length) {
-            DDLogMajor(@"sending media Key");
+    } else {
+        if (self.show.tiVo.mediaKey.length) {
+            DDLogMajor(@"Sending media Key for %@",self.show.tiVoName);
             [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:self.show.tiVo.mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
             
         } else {
             [challenge.sender cancelAuthenticationChallenge:challenge];
-            DDLogMajor(@"URL Connection Authentication Failed");
+            DDLogMajor(@"No MAK, so failing URL Authentication %@",self.show.tiVoName);
             if (bufferFileWriteHandle) {
                 [bufferFileWriteHandle closeFile];
             }

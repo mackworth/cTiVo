@@ -196,7 +196,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 //		numCaptions = 0;
 		_signalError = 0;
 		self.opsQueue.maxConcurrentOperationCount = 2;
-        DDLogReport (@"Concurrency: %ld", (long)self.opsQueue.maxConcurrentOperationCount);
+        DDLogMajor (@"XXX Concurrency: %ld", (long)self.opsQueue.maxConcurrentOperationCount);
 
 		_processingPaused = @(NO);
 		self.quitWhenCurrentDownloadsComplete = @(NO);
@@ -240,7 +240,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void)metadataQueryHandler:(id)sender
 {
-	DDLogDetail(@"Got Metatdata Result with count %ld",[cTiVoQuery resultCount]);
+	DDLogDetail(@"Got Metadata Result with count %ld",[cTiVoQuery resultCount]);
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
     NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
 	for (NSUInteger i =0; i < [cTiVoQuery resultCount]; i++) {
@@ -397,7 +397,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 					}
 					if (shouldUpdateTiVo) {
 						//Turn off label in UI
-						[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:targetMTTiVo];
+						[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoUpdated object:targetMTTiVo];
 						//RE-update shows
 						[targetMTTiVo scheduleNextUpdateAfterDelay:0];
 					}
@@ -411,7 +411,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 					if (!targetTiVo.enabled  ||  ![targetTiVo.mediaKey isEqualToString:mTiVo[kMTTiVoMediaKey]]) {
 						//Turn off label in UI
 						//RE-update shows
-						[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationShowListUpdated object:targetTiVo];
+						[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoUpdated object:targetTiVo];
 						targetTiVo.enabled = YES;
 						targetTiVo.mediaKey = mTiVo[kMTTiVoMediaKey];
 						[targetTiVo scheduleNextUpdateAfterDelay:0];
@@ -582,15 +582,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(printTVDBStats)
-                                                 name:kMTNotificationShowListUpdated
-                                               object:nil];
-    
-}
 
--(void)printTVDBStats {
-    DDLogMajor(@"Statistics for TVDB since start or reset: %@",self.theTVDBStatistics);
+    
 }
 
 #pragma mark - Scheduling routine
@@ -608,7 +601,10 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		endTimeSeconds += (double)secondsInADay;
 	}
 	BOOL schedulingActive = [[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledOperations];
-	if ((startTimeSeconds > currentSeconds || currentSeconds > endTimeSeconds) && schedulingActive) { //We're NOT active
+    BOOL manuallyPaused = [[NSUserDefaults standardUserDefaults] boolForKey:kMTQueuePaused];
+	if (manuallyPaused ||
+         (schedulingActive &&
+            (startTimeSeconds > currentSeconds || currentSeconds > endTimeSeconds))) { //We're NOT active
 		[self setValue:@(YES) forKey:@"processingPaused"];
 	} else {
 		[self setValue:@(NO) forKey:@"processingPaused"];
@@ -1636,9 +1632,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
     
 	for (NSString *tiVoAddress in [self tiVoAddresses]) {
-		DDLogVerbose(@"Comparing TiVo %@ address %@ to ipaddress %@",sender.name,tiVoAddress,ipAddress);
+		DDLogVerbose(@"Comparing new TiVo %@ address %@ to existing %@",sender.name, ipAddress, tiVoAddress);
 		if ([tiVoAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
-			DDLogDetail(@"Found duplicate TiVo at %@",ipAddress);
+			DDLogDetail(@"Rejecting duplicate TiVo at %@",ipAddress);
 			return;  // This filters out tivos that have already been found from a manual entry
 		}
 	}

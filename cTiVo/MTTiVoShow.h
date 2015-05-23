@@ -14,7 +14,7 @@
 
 @class MTProgramTableView;
 
-@interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding> {
+@interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding, NSURLDownloadDelegate> {
  }
 
 
@@ -61,6 +61,7 @@
 
 @property (nonatomic, strong) NSURL *downloadURL,
 *detailURL;
+@property (atomic, strong) NSString * artworkFile;
 
 @property (nonatomic, strong) NSDate *showDate;
 @property					  int    showID;
@@ -111,7 +112,7 @@
 -(void)playVideo:(NSString *)path;
 -(void)revealInFinder:(NSArray *)paths;
 -(void)getTheTVDBDetails;
--(void)retrieveTVDBArtworkIntoPath: (NSString *) path;
+-(void)retrieveArtworkIntoFile: (NSString *) filename;
 
 
 typedef enum {

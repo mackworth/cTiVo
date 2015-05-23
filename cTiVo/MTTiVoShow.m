@@ -235,7 +235,6 @@ __DDLOGHERE__
 
 -(void)getTheTVDBDetails
 {
-    //note all the statistics references are not threadsafe, but failure should not be critical either.
 	if (_gotTVDBDetails) {
 		return;
 	}
@@ -250,7 +249,7 @@ __DDLOGHERE__
         @synchronized (tiVoManager.tvdbCache) {
              episodeEntry = [tiVoManager.tvdbCache objectForKey:self.episodeID];
         }
-        DDLogVerbose(@"%@ %@",episodeEntry? @"Already had": @"Need to get",self.showTitle);
+        DDLogDetail(@"%@ %@",episodeEntry? @"Already had": @"Need to get",self.showTitle);
         NSString *seriesIDTVDB = [self checkTVDBSeriesID];
         if (episodeEntry) { // We already have this information
             episodeNum = [episodeEntry objectForKey:@"episode"];
@@ -369,40 +368,161 @@ __DDLOGHERE__
     } else {
         [self incrementStatistic:kMTVDBNotSeries];
         _gotTVDBDetails = YES; //never going to find it
-        }
     }
-
--(void)retrieveTVDBArtworkIntoPath: (NSString *) path
-{
-	if(_gotTVDBDetails) {
-		[self getTheTVDBDetails];
-	}
-	if (_tvdbArtworkLocation.length == 0 ||
-		self.seasonEpisode.length == 0 ) {
-		return;
-	}
-	NSString * extension = [self.tvdbArtworkLocation pathExtension];
-	
-	NSString * destination = [NSString stringWithFormat:@"%@_%@.%@",path, [self seasonEpisode],extension];
-	
-	//download only if we don't have it already
-	if (![[NSFileManager defaultManager] fileExistsAtPath:destination]) {
-		NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/banners/%@",_tvdbArtworkLocation] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-		DDLogDetail(@"downloading artwork at %@",urlString);
-		NSURLRequest *theRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]
-												cachePolicy:NSURLRequestUseProtocolCachePolicy
-											timeoutInterval:60.0];
-		
-		// Create the connection with the request and start loading the data.
-		NSURLDownload  *theDownload = [[NSURLDownload alloc] initWithRequest:theRequest
-																delegate:nil];
-		if (theDownload) {
-			// Set the destination file.
-			[theDownload setDestination:destination allowOverwrite:YES];
-		}
-	}
 }
 
+#pragma mark - theMovieDB
+#define kFormatError 2
+-(int) checkMovie:(NSDictionary *) movie exact: (BOOL) perfectMatch {
+    //if perfectmatch, return YES iff same name and same year; else return YES if either are true
+    //if YES, then side effect of setting tvdbArtworkLocation
+    if(![movie isKindOfClass:[NSDictionary class]]) {
+        DDLogMajor(@"theMovieDB returned invalid JSON format: Movie is not a dictionary : %@", movie);
+        return kFormatError;
+    }
+    NSString * movieTitle = movie[@"title"];
+    if (!([movieTitle isKindOfClass:[NSString class]])) {
+        DDLogMajor(@"For %@, theMovieDB returned a movie that doesn't have a title : %@", self.seriesTitle, movie);
+        return kFormatError;
+    }
+    BOOL titlesMatch = [movieTitle isEqualToString:self.seriesTitle];
+    BOOL releaseMatch = NO;
+
+    if (perfectMatch || ! titlesMatch) {
+        NSString * releaseDate = movie[@"release_date"];
+        if (!([releaseDate isKindOfClass:[NSString class]] && releaseDate.length >= 4)) {
+            DDLogMajor(@"theMovieDB returned movie %@ without release year; %@? ", movieTitle, self.movieYear);
+            releaseMatch = YES;
+        } else {
+            NSString * releaseYear = [releaseDate substringToIndex:4];
+            releaseMatch = [releaseYear isEqualToString:self.movieYear];
+        }
+
+    }
+    if ((perfectMatch && titlesMatch && releaseMatch) ||
+        (!perfectMatch && (titlesMatch || releaseMatch))) {
+        NSString * artwork = movie[@"poster_path"];
+        if (!([artwork isKindOfClass:[NSString class]])) {
+            DDLogMajor(@"theMovieDB returned invalid JSON format: poster_path is invalid : %@", movie);
+            return kFormatError;
+        }
+
+        self.tvdbArtworkLocation = artwork;
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
+-(void) getTheMovieDBDetails {
+    if (self.gotTVDBDetails) return;
+
+
+    NSString * urlString = [[NSString stringWithFormat:@"https://api.themoviedb.org/3/search/movie?query=\"%@\"&api_key=%@",self.seriesTitle, kMTTheMoviedDBAPIKey] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSURL *url = [NSURL URLWithString:urlString];
+    DDLogDetail(@"Getting movie Data for %@ using %@",self,urlString);
+    NSData *movieInfo = [NSData dataWithContentsOfURL:url options:NSDataReadingUncached error:nil];
+    self.gotTVDBDetails = YES;
+
+    if(! NSClassFromString(@"NSJSONSerialization")) return;
+    NSError *error = nil;
+    NSDictionary *topLevel = [NSJSONSerialization
+                 JSONObjectWithData:movieInfo
+                 options:0
+                 error:&error];
+
+    if (error) {
+        DDLogMajor(@"theMovieDB returned invalid JSON format: %@ Data: %@",error.localizedDescription, movieInfo);
+        return;
+    }
+    if(![topLevel isKindOfClass:[NSDictionary class]]) {
+        DDLogMajor(@"theMovieDB returned invalid JSON format:Top Level is not a dictionary; Data: %@", movieInfo);
+        return;
+    }
+     NSArray * results = topLevel[@"results"];
+     if(![results isKindOfClass:[NSArray class]]) {
+         DDLogMajor(@"theMovieDB returned invalid JSON format: Results not an array; Data: %@", movieInfo);
+         return;
+     }
+     if (results.count == 0) {
+         DDLogMajor(@"theMovieDB couldn't find any movies named %@", self.seriesTitle);
+         return;
+     }
+    for (NSDictionary * movie in results) {
+        if ([self checkMovie:movie exact:YES] != NO) return; //look for a perfect title/release match
+    }
+    for (NSDictionary * movie in results) {
+        if ([self checkMovie:movie exact:NO] != NO) return;  // return first that matches either title or release year
+   }
+}
+
+
+-(void)retrieveArtworkIntoFile: (NSString *) filename
+{
+     if(!_gotTVDBDetails) {
+        if (self.isMovie) {
+            [self getTheMovieDBDetails];
+        } else {
+            [self getTheTVDBDetails];
+        }
+	}
+	if (_tvdbArtworkLocation.length == 0 ||
+        (!self.isMovie && self.seasonEpisode.length == 0 )) {
+		return;
+	}
+    NSString * fileNameDetail;
+    NSString *baseUrlString;
+    if (self.isMovie) {
+        fileNameDetail = [self movieYear];
+         baseUrlString = @"http://image.tmdb.org/t/p/w780%@";
+    } else {
+        fileNameDetail = [self seasonEpisode];
+        baseUrlString = @"http://thetvdb.com/banners/%@";
+    }
+    NSString * destination;
+    if (fileNameDetail.length) {
+        destination = [NSString stringWithFormat:@"%@_%@",filename, fileNameDetail];
+    } else {
+        destination = filename;
+    }
+
+    NSString *urlString = [[NSString stringWithFormat: baseUrlString, self.tvdbArtworkLocation ]
+           stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+
+    NSString * path = [destination stringByDeletingLastPathComponent];
+    NSString * base = [destination lastPathComponent];
+    NSString * extension = [self.tvdbArtworkLocation pathExtension];
+
+    base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    base = [base stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+
+    NSString * realDestination = [[path stringByAppendingPathComponent:base] stringByAppendingPathExtension:extension];
+
+    //download only if we don't have it already
+    if (![[NSFileManager defaultManager] fileExistsAtPath:realDestination]) {
+        DDLogDetail(@"downloading artwork at %@ to %@",urlString, realDestination);
+
+        dispatch_queue_t globalQueue =
+            dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_async(globalQueue, ^{
+            // get the data.
+            NSError * error = nil;
+            NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:urlString]
+                                                       options: 0
+                                                         error: &error];
+            if (!imageData || error) {
+                DDLogMajor(@"Couldn't get artwork for %@ from %@ , Error: %@", self.seriesTitle, urlString, error.localizedDescription);
+            } else {
+                if ([imageData writeToFile:realDestination atomically:YES]) {
+                    self.artworkFile = realDestination;
+                    DDLogDetail(@"Saved artwork file for %@ at %@",self.showTitle, realDestination);
+                } else {
+                    DDLogReport(@"Couldn't write to artwork file %@", realDestination);
+                }
+            }
+        });
+    }
+}
 
 
 -(NSString *)getStringForPattern:(NSString *)pattern fromString:(NSString *)string
@@ -544,7 +664,7 @@ __DDLOGHERE__
 -(void)getShowDetail
 {
     if (_gotDetails) {
-        if (!_gotTVDBDetails) {
+        if (!_gotTVDBDetails && !self.isMovie) {
             [self getTheTVDBDetails];
         }
         return;
@@ -583,14 +703,12 @@ __DDLOGHERE__
             DDLogDetail(@"GetDetails parsing Finished");
         }
         DDLogVerbose(@"Show: %@, AirDate: %@",self.showTitle, self.originalAirDateNoTime);
-        [self getTheTVDBDetails];
-        
+        if (!self.isMovie) { //no need for info, just artwork when we download.
+            [self getTheTVDBDetails];
+        }
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
-    }
-    DDLogDetail(@"Exiting detail for %@ ",self);
-    if ([NSOperationQueue currentQueue].operationCount == 1 && self.tiVo.showURLConnection) {
-        DDLogReport(@"Got all details for %@",self.tiVo);
-    }
+        DDLogDetail(@"Exiting detail for %@ ",self);
+     }
 }
 
 #pragma  mark - parser methods
@@ -623,7 +741,7 @@ __DDLOGHERE__
 }
 
 -(void) endElement:(NSString *)elementName item:(id) item {
-	DDLogDetail(@" %@: %@",elementName, item);
+    DDLogDetail(@"%@: %@",elementName, item);
 
 }
 
@@ -958,13 +1076,6 @@ __DDLOGHERE__
 	}
 }
 
--(void) setProgramId:(NSString *)programId {
-	if (programId != _programId) {
-		_programId = programId;
-        _episodeID = nil;
-    }
-}
-
 -(NSString *) episodeID {
     if (!_episodeID) {
 		_episodeID = _programId;
@@ -986,6 +1097,14 @@ __DDLOGHERE__
 -(NSString *)nameString:(NSDictionary *)nameDictionary
 {
     return [NSString stringWithFormat:@"%@ %@",nameDictionary[kMTFirstName] ? nameDictionary[kMTFirstName] : @"" ,nameDictionary[kMTLastName] ? nameDictionary[kMTLastName] : @"" ];
+}
+
+
+-(void) setProgramId:(NSString *)programId {
+    if (programId != _programId) {
+        _programId = programId;
+        _episodeID = nil;
+    }
 }
 
 -(void)setShowLengthString:(NSString *)showLengthString

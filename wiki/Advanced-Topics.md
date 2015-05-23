@@ -16,19 +16,30 @@ Sections:
 
 # Artwork
 
-For MPEG files (.MPG, .MP4, .MOV, or .M4V), cTiVo can embed a still picture inside the file to represent it in iTunes, iOS devices, or other players that understand this standard. By default, this picture is one of the first frames of the video, but you have many choices available. First, in Preferences, you can specify that all videos should have the same cTiVo icon, representing that it came from your TiVo. Secondly, in Preferences, you can enable cTiVo retrieving fan-generated, episode-specific artwork from theTVDB.com (although this is dependent on the series/episode being in the database). Third, you can create a "thumbnails" directory in your download folder containing artwork that is added to episodes as they are generated. These files can be in almost any format supported by the OS, but the filename has to be in a specific syntax.
+For MPEG files (.MPG, .MP4, .MOV, or .M4V), cTiVo can embed a still picture inside the file to represent it in iTunes, iOS devices, or other players that understand this standard. By default, this picture is one of the first frames of the video, but you have many choices available. First, in Preferences, you can specify that all videos should have the same cTiVo icon, representing that it came from your TiVo. Secondly, in Preferences, you can enable cTiVo automatically retrieving fan-generated, episode-specific artwork from theTVDB.com or theMovieDB.com (although this is dependent on the series/episode/movie being in the database). Third, you can put artwork into your download folder containing artwork that is added to episodes as they are generated. These files can be in almost any format supported by the OS, but the filename has to be in a specific syntax.
 
-The filename must start with the series title (e.g. "The Daily Show with Jon Stewart") with any slashes or colons replaced with dashes. Then you can create a series-generic file (no suffix), a season-specific file (suffix of Snn, or an episode-specific file (suffix of SnnEnn). 
+The filename must start with the series title (e.g. "The Daily Show with Jon Stewart") with any slashes or colons replaced with dashes. Then you can create a series-generic file (no suffix), a season-specific file (suffix of Snn, or an episode-specific file (suffix of SnnEnn). Movies start with their title and optionally the movie year XXXX as a suffix (e.g. "Fight Club_1999")
 
 These local files can be stored in the download directory itself or in a "thumbnails" subdirectory of the download directory. If you have enabled series-specific subdirectories within the download directory, they can also be in that directory, or in a "thumbnails" subdirectory of that subdirectory. 
+
 To give as much control to you as possible, if more than one of these artwork types are available, it will use the first one it finds in the following order:
 
-- Local episode-specific (SnnEnn)
+- Local episode-specific (SnnEnn) 
 - theTVDB artwork (if enabled and available)
 - Local season-specific (S00)
-- Local series-generic
+- Local series-generic 
 - cTiVo icon (if enabled)
 - Initial frame from video
+
+For movies, the order is:
+
+- Movie title with matching year suffix
+- Movie title without year suffix
+- theMovieDB artwork (if enabled and available)
+- cTiVo icon (if enabled)
+- Initial frame from video
+
+Especiallly if you use these facilities, consider giving back to theTVDB and theMovieDB by entering
 
 # Manual TiVos
 

@@ -39,8 +39,8 @@
 #define kMTNotificationFoundMultipleTiVos @"MTNotificationFoundMultipleTiVo"
 
 //Tivo busy indicator
-#define kMTNotificationShowListUpdating @"MTNotificationShowListUpdating"  //object: which MTTivo is updating
-#define kMTNotificationShowListUpdated @"MTNotificationShowListUpdated" //object: which MTTivo is updated
+#define kMTNotificationTiVoUpdating @"MTNotificationTiVoUpdating"  //object: which MTTivo has started updating
+#define kMTNotificationTiVoUpdated  @"MTNotificationTiVoUpdated" //object: which MTTivo is updated
 
 #define deleteXML 1   //placeholder to store deleted code in case we decide to restore XML export; need to add to downloadTable, subTable, menu and pref NIBx also
 
@@ -74,6 +74,7 @@
 #define kMTTiVoAccessDelay 7		//Seconds to wait after TiVo is found on network
 #define kMTTiVoAccessDelayServerFailure 60		//Seconds to wait after TiVo reports Download server problem
 #define kMTTheTVDBAPIKey @"DB85D57BFFC7DD85"  //API Key for theTVDB
+#define kMTTheMoviedDBAPIKey @"84463a56eaa78a5426db8c179905e901"
 
 //Subscribed Show userDefaults
 #define kMTSubscribedSeries @"MTSubscribedSeries"
@@ -213,6 +214,7 @@
 #define kMTScheduledStartTime  @"ScheduledStartTime" // NSDate when to start queue
 #define kMTScheduledEndTime    @"ScheduledEndTime"   // NSDate when to end queue
 #define kMTScheduledSleep      @"ScheduledSleep"     // Whether to start queue to sleep after scheduled downloads
+#define kMKTQueuePaused        @"QueuePaused"        //Restore state of whether queue was manually paused last time?
 
 #define kMTDebugLevel       @"DebugLevel"
 #define kMTDebugLevelDetail @"DebugLevelDetail"

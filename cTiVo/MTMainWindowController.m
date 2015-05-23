@@ -73,8 +73,7 @@ __DDLOGHERE__
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     
     [self.window.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
-    
-
+ 
 	[NSBundle loadNibNamed:@"MTMainWindowDrawer" owner:self];
 	showDetailDrawer.parentWindow = self.window;
 	
@@ -85,8 +84,8 @@ __DDLOGHERE__
     [defaultCenter addObserver:self selector:@selector(refreshFormatListPopup) name:kMTNotificationFormatListUpdated object:nil];
 	
 	//Spinner Progress Handling 
-    [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdating object:nil];
-    [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationShowListUpdated object:nil];
+    [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationTiVoUpdating object:nil];
+    [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationTiVoUpdated object:nil];
     [defaultCenter addObserver:self selector:@selector(networkChanged:) name:kMTNotificationNetworkChanged object:nil];
 	
     [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidMoveNotification object:nil];
@@ -140,11 +139,11 @@ __DDLOGHERE__
 	}
     MTTiVo * tivo = (MTTiVo *) notification.object;
 	DDLogDetail(@"LoadingIndicator: %@ for %@",notification.name, tivo.tiVo.name);
-    if ([notification.name  compare:kMTNotificationShowListUpdating] == NSOrderedSame) {
+    if ([notification.name  compare:kMTNotificationTiVoUpdating] == NSOrderedSame) {
 		if ([loadingTiVos indexOfObject:tivo] == NSNotFound) {
 			[loadingTiVos addObject:tivo];
 		}
-	} else if ([notification.name compare:kMTNotificationShowListUpdated] == NSOrderedSame) {
+	} else if ([notification.name compare:kMTNotificationTiVoUpdated] == NSOrderedSame) {
 		[loadingTiVos removeObject:tivo];
 	}
     

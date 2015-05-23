@@ -270,6 +270,13 @@ __DDLOGHERE__
     return self.sortedShows.count;
 }
 
+-(void)prepareContentInRect:(NSRect)rect {
+    NSRect visibleRect = [self visibleRect];
+    CGFloat newHeight = (rect.size.height + visibleRect.size.height)/2.0;
+    NSRect newRect = CGRectMake(rect.origin.x, rect.origin.y, rect.size.width, newHeight);
+    [super prepareContentInRect:newRect];
+}
+
 - (void)tableView:(NSTableView *)tableView didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row
 {
     MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
