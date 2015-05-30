@@ -104,7 +104,10 @@ __DDLOGHERE__
 #define kMTVDBNoSeries @"Series Not Found"
 
 -(NSString *) retrieveTVDBIdFromZap2itId: (NSString *) zapItID ofType:(NSString *) type {
-	//type is just for debugging
+    //called from background to translate TiVos (aka Zap2It) id to TVDB
+    //Tracks overall results through TVDBStatistics; No side effects otherwise;
+	//Type is just for statistics reporting
+    NSAssert (![NSThread isMainThread], @"retrieveTVDBIdFromZap2itId not running in background");
 	if (zapItID == nil) return nil;
 	DDLogVerbose(@"Trying TVDB: %@==>%@",self.seriesId, zapItID);
 	NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeriesByRemoteID.php?zap2it=%@&language=all",zapItID] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -153,7 +156,7 @@ __DDLOGHERE__
 }
 
 -(NSString *) tvdbURLForSeries {
-    NSString * tvdbID = [self checkTVDBSeriesID];
+    NSString * tvdbID = [self checkTVDBSeriesID:self.seriesTitle];
     if (tvdbID) {
         return [self urlForReporting:tvdbID];
     } else {
@@ -162,6 +165,8 @@ __DDLOGHERE__
 }
 
 -(NSString *) retrieveTVDBIdFromSeriesName: (NSString *) name  {
+    //probably called on background thread to check if series with same name is available
+    NSAssert (![NSThread isMainThread], @"retrieveTVDBIdFromSeriesName not running in background");
 	NSString * urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeries.php?seriesname=%@&language=all",name] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 	NSURL *url = [NSURL URLWithString:urlString];
 	DDLogDetail(@"Getting series for %@ using %@",self,urlString);
@@ -197,7 +202,7 @@ __DDLOGHERE__
 -(void) addValue:(NSString *) value inStatistic:(NSString *) statistic  {
     @synchronized(tiVoManager.theTVDBStatistics) {
         NSString * statisticListName = [statistic stringByAppendingString:@" List"];
-        NSMutableDictionary * statisticList = tiVoManager.theTVDBStatistics[statisticListName];
+        NSMutableDictionary * statisticList = tiVoManager.theTVDBStatistics[statisticListName]; //shorthand
         if (!statisticList) {
             statisticList = [NSMutableDictionary dictionary];
             [tiVoManager.theTVDBStatistics setObject:statisticList forKey:statisticListName];
@@ -213,11 +218,11 @@ __DDLOGHERE__
 }
 
 -(void)  updateSeason: (int) season andEpisode: (int) episode {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        self.episodeNumber = [NSString stringWithFormat:@"%d%02d",season, episode];
-        self.episode = episode;
-        self.season = season;
-    });
+    NSAssert ([NSThread isMainThread], @"updateSeason running in background");
+    self.episodeNumber = [NSString stringWithFormat:@"%d%02d",season, episode];
+    self.episode = episode;
+    self.season = season;
+    [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
 }
 
 -(void) rememberTVDBSeriesID: (NSString *) seriesID {
@@ -225,109 +230,161 @@ __DDLOGHERE__
         [tiVoManager.tvdbSeriesIdMapping setObject:seriesID forKey:self.seriesTitle];
     }
 }
--(NSString *) checkTVDBSeriesID {
+
+-(NSString *) checkTVDBSeriesID:(NSString *) title {
     NSString *seriesID = nil;
     @synchronized (tiVoManager.tvdbSeriesIdMapping) {
-       seriesID = [tiVoManager.tvdbSeriesIdMapping objectForKey:self.seriesTitle];
+       seriesID = [tiVoManager.tvdbSeriesIdMapping objectForKey:title];
     }
     return seriesID;
 }
 
--(void)getTheTVDBDetails
-{
+-(void) retrieveTVDBEpisodeInfo:(NSString *) seriesIDTVDB {
+    //Now get the details
+@autoreleasepool {
+    NSAssert (![NSThread isMainThread], @"retrieveTVDBEpisodeInfo not running in background");
+    NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetEpisodeByAirDate.php?apikey=%@&seriesid=%@&airdate=%@",kMTTheTVDBAPIKey,seriesIDTVDB,self.originalAirDateNoTime] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString * reportURL = [urlString stringByReplacingOccurrencesOfString:kMTTheTVDBAPIKey withString:@"APIKEY" ];
+    DDLogDetail (@"launching %@ for %@", reportURL, self.showTitle);
+    NSURL *url = [NSURL URLWithString:urlString];
+    NSError * error = nil;
+    NSString * episodeInfo = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&error];
+
+    if (error) {
+        DDLogMajor(@"Failed to get info from TVDB for %@: %@",self.showTitle, error.localizedDescription);
+    } else if (!episodeInfo.length) {
+        DDLogMajor(@"No error from TVDB for %@, but no content",self.showTitle);
+    } else {
+        NSString * newEpisodeNum = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo] ?: @"";
+        NSString * newSeasonNum = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo] ?: @"";
+        NSString * newArtwork = [self getStringForPattern:@"<filename>(.*)<\\/filename>" fromString:episodeInfo] ?: @"";
+        @synchronized (tiVoManager.tvdbCache) {
+            [tiVoManager.tvdbCache setObject:@{
+                                               @"season":newSeasonNum,
+                                               @"episode":newEpisodeNum,
+                                               @"artwork":newArtwork,
+                                               @"series": seriesIDTVDB,
+                                               @"date":[NSDate date]
+                                               } forKey:self.episodeID];
+        }
+        _gotTVDBDetails = YES;
+       dispatch_async(dispatch_get_main_queue(), ^{
+           [self finishTVDBProcessing];
+       });
+    }
+    //    NSTimeInterval time = 1.0/kMTMaxTVDBRate + [date timeIntervalSinceNow];
+    //    if (time > 0) [NSThread sleepForTimeInterval:time];
+    //ensures our operation stays officially running, so not hammering the TVDB API
+    DDLogDetail (@"Got episode Info for %@: %@ ops",  self.showTitle, @(tiVoManager.tvdbQueue.operationCount));
+}
+}
+
+-(void) retrieveTVDBSeriesID {
+@autoreleasepool {
+    NSAssert (![NSThread isMainThread], @"getTVDBSeriesID not running in background");
+    NSString *longSeriesID = nil;
+    NSString *shortSeriesID = nil;
+    if (self.seriesId.length < 10) {
+        shortSeriesID = self.seriesId;
+        if (self.seriesId.length > 2) {
+            longSeriesID = [NSString stringWithFormat:@"SH00%@",[self.seriesId substringFromIndex:2]];
+        }
+    } else {
+        shortSeriesID = [NSString stringWithFormat:@"SH%@",[self.seriesId substringFromIndex:2]];
+        longSeriesID = self.seriesId;
+    }
+    NSString * epSeriesID = [NSString stringWithFormat:@"EP%@",[longSeriesID substringFromIndex:2]];
+
+    NSString * mySeriesIDTVDB = [self retrieveTVDBIdFromZap2itId:epSeriesID ofType:kMTVDBSeriesFoundWithEP];
+    if (!mySeriesIDTVDB)  mySeriesIDTVDB = [self retrieveTVDBIdFromZap2itId:longSeriesID ofType:kMTVDBSeriesFoundWithSH];
+    if (!mySeriesIDTVDB)  mySeriesIDTVDB = [self retrieveTVDBIdFromZap2itId:shortSeriesID ofType:kMTVDBSeriesFoundWithShort];
+    if (!mySeriesIDTVDB)  mySeriesIDTVDB = [self retrieveTVDBIdFromSeriesName:self.seriesTitle];
+    //Don't give up yet; look for "Series: subseries" format
+    if (!mySeriesIDTVDB)  {
+        NSArray * splitName = [self.seriesTitle componentsSeparatedByString:@":"];
+        if (splitName.count > 1) {
+            mySeriesIDTVDB = [self retrieveTVDBIdFromSeriesName:splitName[0]];
+        }
+    }
+
+    if (mySeriesIDTVDB) {
+        DDLogDetail(@"Got TVDB for %@: %@ ",self, mySeriesIDTVDB);
+        [self rememberTVDBSeriesID:mySeriesIDTVDB];
+        [self retrieveTVDBEpisodeInfo:mySeriesIDTVDB];
+   } else {
+        [self rememberTVDBSeriesID:@""];
+        DDLogDetail(@"TheTVDB series not found: %@: %@ ",self.seriesTitle, self.seriesId);
+        [self addValue: epSeriesID   inStatistic: kMTVDBNoSeries];
+        self.gotTVDBDetails = YES;
+        return; //really can't get them.
+    }
+
+}
+}
+
+-(void)getTheTVDBDetails {
+    //Called from main thread
+    //Needs to get episode info from TVDB
+    //1) do possibly multiple lookups at TheTVDB in background to find TVDB's seriesID
+    //2) call retrieveTVDBEpisodeInfo in background to get Episode Info
+    //3) call finishTVDBProcessing on main thread to augment TiVo's info with theTVDB
 	if (_gotTVDBDetails) {
 		return;
 	}
-    @synchronized (tiVoManager.theTVDBStatistics) {
-        if (!tiVoManager.theTVDBStatistics) {
-            tiVoManager.theTVDBStatistics = [NSMutableDictionary dictionary];
-        }
-    }
-	if (self.seriesId.length && [self.seriesId startsWith:@"SH"]) { //if we have a series get the other informaiton
-        NSString *episodeNum = nil, *seasonNum = nil, *artwork = nil;
+	if (self.seriesId.length && [self.seriesId startsWith:@"SH"]) { //if we have a series get the other information
         NSDictionary *episodeEntry;
         @synchronized (tiVoManager.tvdbCache) {
              episodeEntry = [tiVoManager.tvdbCache objectForKey:self.episodeID];
         }
         DDLogDetail(@"%@ %@",episodeEntry? @"Already had": @"Need to get",self.showTitle);
-        NSString *seriesIDTVDB = [self checkTVDBSeriesID];
-        if (episodeEntry) { // We already have this information
-            episodeNum = [episodeEntry objectForKey:@"episode"];
-            seasonNum = [episodeEntry objectForKey:@"season"];
-            artwork = [episodeEntry objectForKey:@"artwork"];
-            if (!seriesIDTVDB) {
-                seriesIDTVDB = [episodeEntry objectForKey:@"series"];
-                [self rememberTVDBSeriesID:seriesIDTVDB];
-            }
-			_gotTVDBDetails = YES;
+        if (episodeEntry) { // We already had this information
+ 			_gotTVDBDetails = YES;
             [self incrementStatistic:kMTVDBCached];
+            [self finishTVDBProcessing];
         } else {
-            if (!seriesIDTVDB) {
-				NSString *longSeriesID = nil;
-				NSString *shortSeriesID = nil;
-				if (self.seriesId.length < 10) {
-                    shortSeriesID = self.seriesId;
-                    if (self.seriesId.length > 2) {
-                        longSeriesID = [NSString stringWithFormat:@"SH00%@",[self.seriesId substringFromIndex:2]];
-                    }
-                } else {
-                    shortSeriesID = [NSString stringWithFormat:@"SH%@",[self.seriesId substringFromIndex:2]];
-                    longSeriesID = self.seriesId;
-                }
-				NSString * epSeriesID = [NSString stringWithFormat:@"EP%@",[longSeriesID substringFromIndex:2]];
-
-				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:epSeriesID ofType:kMTVDBSeriesFoundWithEP];
-				if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:longSeriesID ofType:kMTVDBSeriesFoundWithSH];
-				if (!seriesIDTVDB)
-                    seriesIDTVDB = [self retrieveTVDBIdFromZap2itId:shortSeriesID ofType:kMTVDBSeriesFoundWithShort];
-                if (!seriesIDTVDB)  seriesIDTVDB = [self retrieveTVDBIdFromSeriesName:self.seriesTitle];
-                //Don't give up yet; look for "Series: subseries" format
-                if (!seriesIDTVDB)  {
-                    NSArray * splitName = [self.seriesTitle componentsSeparatedByString:@":"];
-                    if (splitName.count > 1) {
-                        seriesIDTVDB = [self retrieveTVDBIdFromSeriesName:splitName[0]];
-                    }
-                }
-                
-				if (seriesIDTVDB) {
-					DDLogDetail(@"Got TVDB for %@: %@ ",self, seriesIDTVDB);
-	                [self rememberTVDBSeriesID:seriesIDTVDB];
-				} else {
-                    [self rememberTVDBSeriesID:@""];
-					DDLogDetail(@"TheTVDB series not found: %@: %@ ",self.seriesTitle, self.seriesId);
-                    [self addValue: epSeriesID   inStatistic: kMTVDBNoSeries];
-                    _gotTVDBDetails = YES;
-                    return; //really can't get them.
-				}
-
+            NSString *seriesIDTVDB = [self checkTVDBSeriesID:self.seriesTitle];
+            //Need to pace calls to TVDB API
+            SEL whichTVDBMethod;
+            if (seriesIDTVDB) {
+                // already have series ID, but not this episode info
+                whichTVDBMethod = @selector(retrieveTVDBEpisodeInfo:);
+                DDLogDetail (@"queuing episodeInfo for %@ (%@): %@ ops", seriesIDTVDB, self.showTitle, @(tiVoManager.tvdbQueue.operationCount));
+            } else {
+                //first get seriesID, then Episode Info
+                whichTVDBMethod = @selector(retrieveTVDBSeriesID);
+                DDLogDetail (@"queuing series ID for %@: %@ ops", self.showTitle, @(tiVoManager.tvdbQueue.operationCount));
             }
-            if (seriesIDTVDB.length) {
-				//Now get the details
-				NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetEpisodeByAirDate.php?apikey=%@&seriesid=%@&airdate=%@",kMTTheTVDBAPIKey,seriesIDTVDB,self.originalAirDateNoTime] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-				DDLogDetail(@"Getting TVDB details @ %@",urlString);
-				NSURL *url = [NSURL URLWithString:urlString];
-				NSString *episodeInfo = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
-				if (episodeInfo) {
-					episodeNum = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo];
-					seasonNum = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo];
-					artwork = [self getStringForPattern:@"<filename>(.*)<\\/filename>" fromString:episodeInfo];
-					if (!seasonNum) seasonNum = @"";
-					if (!episodeNum) episodeNum = @"";
-					if (!artwork) artwork = @"";
-					if (!seriesIDTVDB) seriesIDTVDB = @"";
-                    @synchronized (tiVoManager.tvdbCache) {
-                            [tiVoManager.tvdbCache setObject:@{
-                             @"season":seasonNum,
-                             @"episode":episodeNum,
-                             @"artwork":artwork,
-                             @"series": seriesIDTVDB,
-                             @"date":[NSDate date]
-                         } forKey:self.episodeID];
-                    }
-					_gotTVDBDetails = YES;
-				}
-            }
-       }
+            NSInvocationOperation * op = [[NSInvocationOperation alloc] initWithTarget:self selector: whichTVDBMethod object:seriesIDTVDB ];
+            [tiVoManager.tvdbQueue addOperation:op];
+        }
+    } else {
+        //not a series; no TVDB available
+        _gotTVDBDetails = YES;
+    }
+}
+
+-(void) finishTVDBProcessing {
+
+    NSString *episodeNum = nil, *seasonNum = nil, *artwork = nil;
+    NSDictionary *episodeEntry;
+    @synchronized (tiVoManager.tvdbCache) {
+        episodeEntry = [tiVoManager.tvdbCache objectForKey:self.episodeID];
+    }
+    if (!episodeEntry) {
+        DDLogReport(@"Trying to process missing TVDB data for %@",self.showTitle);
+        return;
+    }
+
+    NSString *seriesIDTVDB = [self checkTVDBSeriesID:self.seriesTitle];
+    if (episodeEntry) { // We already have this information
+        episodeNum = [episodeEntry objectForKey:@"episode"];
+        seasonNum = [episodeEntry objectForKey:@"season"];
+        artwork = [episodeEntry objectForKey:@"artwork"];
+        if (!seriesIDTVDB) {
+            seriesIDTVDB = [episodeEntry objectForKey:@"series"];
+            [self rememberTVDBSeriesID:seriesIDTVDB];
+        }
+        _gotTVDBDetails = YES;
         if (episodeNum.length && seasonNum.length && [episodeNum intValue] > 0 && [seasonNum intValue] > 0) {
 			//special case due to parsing of tivo's season/episode combined string
             DDLogDetail(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, self);
@@ -361,7 +418,7 @@ __DDLOGHERE__
             NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self episodeIDForReporting ], self.originalAirDateNoTime, self.season, self.episode, [self urlForReporting:seriesIDTVDB] ];
             DDLogDetail(@"No episode info for %@ %@ ",self.showTitle, details);
             [self addValue:details inStatistic:kMTVDBNoEpisode];
-    }
+        }
 
         if (artwork.length) self.tvdbArtworkLocation = artwork;
 
@@ -372,10 +429,9 @@ __DDLOGHERE__
 }
 
 #pragma mark - theMovieDB
-#define kFormatError 2
--(int) checkMovie:(NSDictionary *) movie exact: (BOOL) perfectMatch {
-    //if perfectmatch, return YES iff same name and same year; else return YES if either are true
-    //if YES, then side effect of setting tvdbArtworkLocation
+#define kFormatError @"ERROR"
+-(NSString *) checkMovie:(NSDictionary *) movie exact: (BOOL) perfectMatch {
+    //if perfectmatch, return filename iff same name and same year; else return filename if either are true
     if(![movie isKindOfClass:[NSDictionary class]]) {
         DDLogMajor(@"theMovieDB returned invalid JSON format: Movie is not a dictionary : %@", movie);
         return kFormatError;
@@ -406,25 +462,23 @@ __DDLOGHERE__
             DDLogMajor(@"theMovieDB returned invalid JSON format: poster_path is invalid : %@", movie);
             return kFormatError;
         }
-
-        self.tvdbArtworkLocation = artwork;
-        return YES;
+        return artwork;
     } else {
-        return NO;
+        return nil;
     }
 }
 
 -(void) getTheMovieDBDetails {
     if (self.gotTVDBDetails) return;
 
-
+    //we only get artwork
     NSString * urlString = [[NSString stringWithFormat:@"https://api.themoviedb.org/3/search/movie?query=\"%@\"&api_key=%@",self.seriesTitle, kMTTheMoviedDBAPIKey] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString * reportURL = [urlString stringByReplacingOccurrencesOfString:kMTTheMoviedDBAPIKey withString:@"APIKEY" ];
+    DDLogDetail(@"Getting movie Data for %@ using %@",self,reportURL);
     NSURL *url = [NSURL URLWithString:urlString];
-    DDLogDetail(@"Getting movie Data for %@ using %@",self,urlString);
     NSData *movieInfo = [NSData dataWithContentsOfURL:url options:NSDataReadingUncached error:nil];
     self.gotTVDBDetails = YES;
 
-    if(! NSClassFromString(@"NSJSONSerialization")) return;
     NSError *error = nil;
     NSDictionary *topLevel = [NSJSONSerialization
                  JSONObjectWithData:movieInfo
@@ -449,22 +503,41 @@ __DDLOGHERE__
          return;
      }
     for (NSDictionary * movie in results) {
-        if ([self checkMovie:movie exact:YES] != NO) return; //look for a perfect title/release match
+        //look for a perfect title/release match
+        NSString * location = [self checkMovie:movie exact:YES];
+        if (location) {
+            if (![location isEqualToString:kFormatError]) {
+                self.tvdbArtworkLocation = location;
+            }
+            return;
+        }
     }
     for (NSDictionary * movie in results) {
-        if ([self checkMovie:movie exact:NO] != NO) return;  // return first that matches either title or release year
+       // return first that matches either title or release year
+        NSString * location = [self checkMovie:movie exact:NO];
+        if (location) {
+            if (![location isEqualToString:kFormatError]) {
+                self.tvdbArtworkLocation = location;
+            }
+            return;
+        }
    }
 }
 
 
 -(void)retrieveArtworkIntoFile: (NSString *) filename
 {
-     if(!_gotTVDBDetails) {
-        if (self.isMovie) {
-            [self getTheMovieDBDetails];
-        } else {
-            [self getTheTVDBDetails];
-        }
+     if(!self.gotTVDBDetails && self.isMovie) {
+        //we don't get movie data upfront, so go get it now, but call us back when you have it
+        __weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+            [weakSelf getTheMovieDBDetails];
+            dispatch_async(dispatch_get_main_queue(), ^(void){
+                [weakSelf retrieveArtworkIntoFile:filename];
+            });
+        });
+         return;
+
 	}
 	if (_tvdbArtworkLocation.length == 0 ||
         (!self.isMovie && self.seasonEpisode.length == 0 )) {
@@ -501,26 +574,19 @@ __DDLOGHERE__
     //download only if we don't have it already
     if (![[NSFileManager defaultManager] fileExistsAtPath:realDestination]) {
         DDLogDetail(@"downloading artwork at %@ to %@",urlString, realDestination);
-
-        dispatch_queue_t globalQueue =
-            dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        dispatch_async(globalQueue, ^{
-            // get the data.
-            NSError * error = nil;
-            NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:urlString]
-                                                       options: 0
-                                                         error: &error];
-            if (!imageData || error) {
+        NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
+        [NSURLConnection sendAsynchronousRequest:req queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+            if (!data || error) {
                 DDLogMajor(@"Couldn't get artwork for %@ from %@ , Error: %@", self.seriesTitle, urlString, error.localizedDescription);
             } else {
-                if ([imageData writeToFile:realDestination atomically:YES]) {
+                if ([data writeToFile:realDestination atomically:YES]) {
                     self.artworkFile = realDestination;
                     DDLogDetail(@"Saved artwork file for %@ at %@",self.showTitle, realDestination);
                 } else {
                     DDLogReport(@"Couldn't write to artwork file %@", realDestination);
                 }
             }
-        });
+        }];
     }
 }
 
@@ -661,54 +727,62 @@ __DDLOGHERE__
 #pragma mark - GetDetails from Tivo and parse
 
 
--(void)getShowDetail
-{
-    if (_gotDetails) {
-        if (!_gotTVDBDetails && !self.isMovie) {
-            [self getTheTVDBDetails];
+-(void)getShowDetail {
+    //run on background queue to only allow a couple at a time running, so must be threadsafe
+    //self.tivo, self.detailURL, and self.showID are read, but set long ago.
+    //  sleep(20); ///xxx
+    @synchronized(self) {
+        if (_gotDetails) {
+            return;
         }
-        return;
+        _gotDetails = YES;
     }
-    DDLogDetail(@"getting Detail for %@ at %@",self, _detailURL);
-    _gotDetails = YES;
-    @autoreleasepool {
-        //	NSString *detailURLString = [NSString stringWithFormat:@"https://%@/TiVoVideoDetails?id=%d",_tiVo.tiVo.hostName,_showID];
-        //	NSLog(@"Show Detail URL %@", detailURLString );
-        NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,_tiVo.tiVo.name,_showID];
-        NSData *xml = nil;
-        if ([[NSFileManager defaultManager] fileExistsAtPath:detailFilePath]) {
-            DDLogDetail(@"downloading details from file %@", detailFilePath);
-            xml = [NSData dataWithContentsOfFile:detailFilePath];
-            NSMutableDictionary *attr = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:detailFilePath error:nil]];
-            [attr setObject:[NSDate date] forKey:NSFileModificationDate];
-            [[NSFileManager defaultManager] setAttributes:attr ofItemAtPath:detailFilePath error:nil];
-        } else {
-            NSURLResponse *detailResponse = nil;
-            NSURLRequest *detailRequest = [NSURLRequest requestWithURL:_detailURL];;
-            xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
-            if (![_inProgress boolValue]) {
-                [xml writeToFile:detailFilePath atomically:YES];
-            }
+    NSAssert(![NSThread isMainThread],@"getShowDetail NOT on background");
+    NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.tiVo.tiVo.name,self.showID];
+    NSData *xml = nil;
+    NSFileManager * fileMgr = [NSFileManager defaultManager];
+    if ([fileMgr fileExistsAtPath:detailFilePath]) {
+        DDLogDetail(@"getting details for %@ from file %@", self, detailFilePath);
+        xml = [NSData dataWithContentsOfFile:detailFilePath];
+        //use fileModDate to know when to delete old detail files
+       NSMutableDictionary *attr = [NSMutableDictionary dictionaryWithDictionary:
+                                     [fileMgr attributesOfItemAtPath:detailFilePath error:nil]];
+        [attr setObject:[NSDate date] forKey:NSFileModificationDate];
+        [fileMgr setAttributes:attr ofItemAtPath:detailFilePath error:nil];
+    } else {
+        DDLogDetail(@"downloading %@ details from path %@", self, self.detailURL);
+        NSURLResponse *detailResponse = nil;
+        NSURLRequest *detailRequest = [NSURLRequest requestWithURL:_detailURL];;
+        xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
+        if (![_inProgress boolValue]) {
+            [xml writeToFile:detailFilePath atomically:YES];
         }
-        DDLogVerbose(@"Got Details for %@: %@", self, [[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self parseDetails:xml];
+    });
 
-        NSXMLParser * parser = [[NSXMLParser alloc] initWithData:xml];
-        parser.delegate = self;
-        self.ignoreSection = NO;
-        [parser parse];
-        if (!_gotDetails) {
-            DDLogMajor(@"GetDetails Fail for %@",_showTitle);
-            DDLogMajor(@"Returned XML is %@",	[[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
-        } else {
-            DDLogDetail(@"GetDetails parsing Finished");
-        }
-        DDLogVerbose(@"Show: %@, AirDate: %@",self.showTitle, self.originalAirDateNoTime);
-        if (!self.isMovie) { //no need for info, just artwork when we download.
+
+}
+-(void) parseDetails:(NSData *) xml  {
+    //parsing itself occurs on main thread to avoid multiaccess problems. measured < 1/1000 second
+    DDLogVerbose(@"Got Details for %@: %@", self, [[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
+
+    NSXMLParser * parser = [[NSXMLParser alloc] initWithData:xml];
+    parser.delegate = self;
+    self.ignoreSection = NO;
+    [parser parse];
+    if (!_gotDetails) {
+        DDLogMajor(@"GetDetails Fail for %@",_showTitle);
+        DDLogMajor(@"Returned XML is %@",	[[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
+    } else {
+        if (!self.isMovie) { //no need for movie info, just artwork when we download.
             [self getTheTVDBDetails];
         }
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
-        DDLogDetail(@"Exiting detail for %@ ",self);
-     }
+        DDLogDetail(@"GetDetails parsing Finished: %@", self.showTitle);
+    }
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
+
 }
 
 #pragma  mark - parser methods
@@ -737,11 +811,11 @@ __DDLOGHERE__
 
 - (void)setValue:(id)value forUndefinedKey:(NSString *)key{
     //nothing to see here; just move along
-	DDLogVerbose(@"Unrecognized key %@", key);
+    //	DDLogVerbose(@"XXX Unrecognized key %@", key);
 }
 
 -(void) endElement:(NSString *)elementName item:(id) item {
-    DDLogDetail(@"%@: %@",elementName, item);
+    // DDLogVerbose(@"XXX%@: %@",elementName, item);
 
 }
 
@@ -767,9 +841,7 @@ __DDLOGHERE__
 			item = elementString;
 		}
 		@try {
-             dispatch_sync(dispatch_get_main_queue(), ^{
-                [self setValue:item forKeyPath:elementName];
-            });
+            [self setValue:item forKeyPath:elementName];
             [self endElement: elementName item: item];
 		}
 		@catch (NSException *exception) {

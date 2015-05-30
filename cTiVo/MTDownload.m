@@ -1661,29 +1661,29 @@ NSString * fourChar(long n, BOOL allowZero) {
 				NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:self.show.seasonEpisode  InPath:dir ];
 				if (artwork) return artwork;
 			}
-			
-			//then for downloaded temp art
-            if (self.show.artworkFile) {
-                NSImage * image = [[NSImage alloc] initWithContentsOfFile:self.show.artworkFile];
-                if (image) {
-                    return image;
-                } else {
-                    DDLogReport(@"Couldn't load downloaded artwork for %@ from %@",self.show.seriesTitle, self.show.artworkFile);
-                }
-            }
-		}
-		//then for season-specific art
-		NSString * season = [NSString stringWithFormat:@"S%0.2d",self.show.season];
-		for (NSString * dir in directories) {
-			NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:season InPath:dir ];
-			if (artwork) return artwork;
-		}
+        }
+
+        //then for season-specific art
+        NSString * season = [NSString stringWithFormat:@"S%0.2d",self.show.season];
+        for (NSString * dir in directories) {
+            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:season InPath:dir ];
+            if (artwork) return artwork;
+        }
 	}
 	//finally for series-level art
 	for (NSString * dir in directories) {
 		NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
 		if (artwork) return artwork;
 	}
+    //then for downloaded temp art
+    if (self.show.artworkFile) {
+        NSImage * image = [[NSImage alloc] initWithContentsOfFile:self.show.artworkFile];
+        if (image) {
+            return image;
+        } else {
+            DDLogReport(@"Couldn't load downloaded artwork for %@ from %@",self.show.seriesTitle, self.show.artworkFile);
+        }
+    }
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesIcon]) {
 		return [NSImage imageNamed:@"cTiVo.png"];  //from iTivo; use our logo for any new video files.
 	}

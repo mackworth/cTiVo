@@ -123,23 +123,6 @@ __DDLOGHERE__
 	
 }
 
--(void) detailsComplete {
-    //called when each show completes its details
-    //DDLogReport (@"Ops Count = %lu; shows = %lu; connection: %@; queue = %@", (unsigned long)self.opsQueue.operationCount, self.shows.count, self.showURLConnection, self.opsQueue);
-    usleep(500000); //wait half second
-    if (self.opsQueue.operationCount <= 1 && !isConnecting) {
-        DDLogMajor(@"Got all details for %@",self.tiVo.name);
-        DDLogMajor(@"Statistics for TVDB since start or reset: %@",tiVoManager.theTVDBStatistics);
-//        for testing the movidedB
-//        for (MTTiVoShow * show in [self.shows copy]) {
-//            if (show.isMovie) {
-//                [show retrieveTheMovieDBArtworkIntoPath: [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:show.seriesTitle]];
-//                usleep(50000);
-//            }
-//        }
-    }
-}
-
 -(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID
 {
 	self = [self init];
@@ -667,6 +650,27 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     previousShowList = nil;
 
 }
+
+
+-(void) detailsComplete {
+    //called when each show completes its details
+    //DDLogReport (@"Ops Count = %lu; shows = %lu; connection: %@; queue = %@", (unsigned long)self.opsQueue.operationCount, self.shows.count, self.showURLConnection, self.opsQueue);
+
+    if (self.opsQueue.operationCount <= 1 && [tiVoManager tvdbQueue].operationCount <= 1 &&!isConnecting) {
+        DDLogMajor(@"Got all details for %@",self.tiVo.name);
+        @synchronized(tiVoManager.theTVDBStatistics) {
+            DDLogDetail(@"Statistics for TVDB since start or reset: %@",tiVoManager.theTVDBStatistics);
+        }
+        //        for testing the movidedB
+        //        for (MTTiVoShow * show in [self.shows copy]) {
+        //            if (show.isMovie) {
+        //                [show retrieveTheMovieDBArtworkIntoPath: [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:show.seriesTitle]];
+        //                usleep(50000);
+        //            }
+        //        }
+    }
+}
+
 
 #pragma mark - Download Management
 

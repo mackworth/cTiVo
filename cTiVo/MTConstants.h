@@ -75,7 +75,7 @@
 #define kMTTiVoAccessDelayServerFailure 60		//Seconds to wait after TiVo reports Download server problem
 #define kMTTheTVDBAPIKey @"DB85D57BFFC7DD85"  //API Key for theTVDB
 #define kMTTheMoviedDBAPIKey @"84463a56eaa78a5426db8c179905e901"
-
+#define kMTMaxTVDBRate 10
 //Subscribed Show userDefaults
 #define kMTSubscribedSeries @"MTSubscribedSeries"
 #define kMTCreatedDate	@"MTSubscribedSeriesDate"   //used to be kMTSubscribedDate"

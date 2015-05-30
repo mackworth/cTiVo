@@ -197,11 +197,15 @@
 
 }
 -(IBAction)TVDBStatistics:(id)sender {
-	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithString:[tiVoManager.theTVDBStatistics description]];
+    NSString * statsString;
+    @synchronized(tiVoManager.theTVDBStatistics) {
+        statsString = [tiVoManager.theTVDBStatistics description];
+    }
+    NSAttributedString *        attrHelpText = [[NSAttributedString alloc] initWithString:statsString];
 	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
 	NSButton *thisButton = (NSButton *)sender;
 	[myTextView setAutomaticLinkDetectionEnabled:YES];
-	[myTextView setString:[tiVoManager.theTVDBStatistics description]];
+	[myTextView setString:statsString];
 	[myTextView checkTextInDocument:nil];
 	//	[self.helpController.displayMessage insertText:helpText];
 	[popoverDetachController.displayMessage.textStorage setAttributedString:attrHelpText];

@@ -195,7 +195,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 //		numCommercials = 0;
 //		numCaptions = 0;
 		_signalError = 0;
-		self.opsQueue.maxConcurrentOperationCount = 2;
+		self.opsQueue.maxConcurrentOperationCount = 4;
         DDLogMajor (@"XXX Concurrency: %ld", (long)self.opsQueue.maxConcurrentOperationCount);
 
 		_processingPaused = @(NO);
@@ -209,8 +209,12 @@ static MTTiVoManager *sharedTiVoManager = nil;
 //        NSLog(@"Host addresses for first name %@",[[NSHost hostWithName:[[NSHost currentHost] names][0]] addresses]);
         [self setupMetadataQuery];
  		loadingManualTiVos = NO;
-        _tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
-		_tvdbCache = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTheTVDBCache]];
+        self.tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
+		self.tvdbCache = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTheTVDBCache]];
+        self.theTVDBStatistics = [NSMutableDictionary dictionary];
+        self.tvdbQueue = [[NSOperationQueue alloc] init];
+        self.tvdbQueue.maxConcurrentOperationCount = kMTMaxTVDBRate;
+        
         //Clean up old entries
         NSMutableArray *keysToDelete = [NSMutableArray array];
         for (NSString *key in _tvdbCache) {
@@ -881,8 +885,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
     [[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTTheTVDBCache];
 	self.tvdbCache =  [NSMutableDictionary dictionary];
 	self.tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
-	self.theTVDBStatistics = nil;
-	
+    @synchronized(self.theTVDBStatistics) {
+        self.theTVDBStatistics = [NSMutableDictionary dictionary];
+    }
     //Remove TiVo Detail Cache
     NSFileManager *fm = [NSFileManager defaultManager];
     NSArray *files = [fm contentsOfDirectoryAtPath:kMTTmpDetailsDir error:nil];

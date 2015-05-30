@@ -43,6 +43,7 @@
 
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
+@property (nonatomic, strong) NSOperationQueue * tvdbQueue;
 @property (nonatomic, strong) MTFormat *selectedFormat;
 @property (nonatomic) int numEncoders;
 @property (nonatomic,readonly) int totalShows; // numCommercials, numCaptions;//Want to limit launches to two encoders.
