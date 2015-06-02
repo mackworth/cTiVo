@@ -1009,7 +1009,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         return _decryptTask;
     }
     MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
-    [decryptTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"tivodecode" ofType:@""]];
+    [decryptTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"tivodecode"]];
     decryptTask.successfulExitCodes = @[@0,@6];
 
     decryptTask.completionHandler = ^BOOL(){
@@ -1189,7 +1189,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         return _captionTask;
     }
     MTTask *captionTask = [MTTask taskWithName:@"caption" download:self completionHandler:nil];
-    [captionTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"ccextractor" ofType:@""]];
+    [captionTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ccextractor" ]];
     captionTask.requiresOutputPipe = NO;
     
     if (_downloadingShowFromMPGFile) {
@@ -1270,7 +1270,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         return _commercialTask;
     }
     MTTask *commercialTask = [MTTask taskWithName:@"commercial" download:self completionHandler:nil];
-  	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]];
+  	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"comskip" ]];
     commercialTask.successfulExitCodes = @[@0, @1];
     commercialTask.requiresOutputPipe = NO;
     commercialTask.requiresInputPipe = NO;
@@ -1364,7 +1364,7 @@ NSString * fourChar(long n, BOOL allowZero) {
    } else {
         [arguments addObject:_decryptBufferFilePath];// Run this on the output of tivodecode
     }
-	DDLogVerbose(@"comskip Path: %@",[[NSBundle mainBundle] pathForResource:@"comskip" ofType:@""]);
+	DDLogVerbose(@"comskip Path: %@",[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"comskip" ]);
 	DDLogVerbose(@"comskip args: %@",arguments);
 	[commercialTask setArguments:arguments];
     _commercialTask = commercialTask;

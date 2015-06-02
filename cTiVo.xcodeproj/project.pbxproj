@@ -30,7 +30,6 @@
 		1E684A8016E2C50B000F5C6E /* suggestion-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7A16E2C50B000F5C6E /* suggestion-recording.png */; };
 		1E684A8716E3A010000F5C6E /* status-unknown.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A8616E3A010000F5C6E /* status-unknown.png */; };
 		1E684A8B16E3A338000F5C6E /* deleted.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A8A16E3A338000F5C6E /* deleted.png */; };
-		1E69B25A1AAD54060090B86F /* HandBrakeCLI in Resources */ = {isa = PBXBuildFile; fileRef = 1E69B2591AAD54060090B86F /* HandBrakeCLI */; };
 		1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
 		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
 		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
@@ -54,6 +53,11 @@
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */; };
 		1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49974174D898D0022E084 /* MTTiVoPopUpTableCellView.m */; };
+		1EDBDFA71B1CB82700E979F0 /* ccextractor in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EFD685A16D19AA100CC36E5 /* ccextractor */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1EDBDFA81B1CB82700E979F0 /* comskip in Copy Executables */ = {isa = PBXBuildFile; fileRef = D2B73F3116BC485E003CB4ED /* comskip */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1EDBDFA91B1CB82700E979F0 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E69B2591AAD54060090B86F /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1EDBDFAA1B1CB82700E979F0 /* mencoder in Copy Executables */ = {isa = PBXBuildFile; fileRef = D2D60BC216766F3200CE32DE /* mencoder */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1EDBDFAB1B1CB82700E979F0 /* tivodecode in Copy Executables */ = {isa = PBXBuildFile; fileRef = D2D60BC316766F3200CE32DE /* tivodecode */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EDE323A19C502980052E6C6 /* tivo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323819C502980052E6C6 /* tivo.png */; };
 		1EDE323B19C502980052E6C6 /* tivo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323919C502980052E6C6 /* tivo@2x.png */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
@@ -68,7 +72,6 @@
 		D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
 		D22E4B1916B76DCD00619A6E /* MTAdvPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D22E4B1716B76DCD00619A6E /* MTAdvPreferencesViewController.xib */; };
 		D235BF01168F52DE00320FA5 /* MTSubscriptionTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */; };
-		D240EF5C16EEEC3F00635E53 /* ccextractor in Resources */ = {isa = PBXBuildFile; fileRef = 1EFD685A16D19AA100CC36E5 /* ccextractor */; };
 		D240EF5E16EFE05E00635E53 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D240EF5D16EFE05E00635E53 /* QTKit.framework */; };
 		D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */ = {isa = PBXBuildFile; fileRef = D24A8D0D16A5F3DC00DFF890 /* catToFile */; };
 		D2574E8617FE30EC00BBAB5C /* MAKHelpFile.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D2574E8517FE30EC00BBAB5C /* MAKHelpFile.rtf */; };
@@ -99,7 +102,6 @@
 		D2AFDBE8169B2D3A00D7DA3B /* MTiTivoImport.m in Sources */ = {isa = PBXBuildFile; fileRef = D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */; };
 		D2B4B4F41732D69C005B97F1 /* elgatoQuit.scpt in Resources */ = {isa = PBXBuildFile; fileRef = D2B4B4F31732D69C005B97F1 /* elgatoQuit.scpt */; };
 		D2B6706D169CA91F009CB164 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */; };
-		D2B73F3216BC485E003CB4ED /* comskip in Resources */ = {isa = PBXBuildFile; fileRef = D2B73F3116BC485E003CB4ED /* comskip */; };
 		D2B73F3616BC8A90003CB4ED /* comskip.ini in Resources */ = {isa = PBXBuildFile; fileRef = D2B73F3516BC8A90003CB4ED /* comskip.ini */; };
 		D2C390761687FFA600D2062E /* MTiTunes.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C390741687FFA600D2062E /* MTiTunes.m */; };
 		D2C6BB5A1714681C00289751 /* MTTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C6BB591714681C00289751 /* MTTask.m */; };
@@ -113,8 +115,6 @@
 		D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */; };
 		D2D60BB816766EFD00CE32DE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BB616766EFD00CE32DE /* MainMenu.xib */; };
 		D2D60BC516766F3200CE32DE /* formats.plist in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC016766F3200CE32DE /* formats.plist */; };
-		D2D60BC716766F3200CE32DE /* mencoder in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC216766F3200CE32DE /* mencoder */; };
-		D2D60BC816766F3200CE32DE /* tivodecode in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC316766F3200CE32DE /* tivodecode */; };
 		D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BC916766FA600CE32DE /* MTTiVoManager.m */; };
 		D2D60BD716766FA600CE32DE /* MTDownloadTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */; };
 		D2D60BD916766FA600CE32DE /* MTProgramTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */; };
@@ -124,6 +124,21 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1EDBDFA61B1CB71200E979F0 /* Copy Executables */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				1EDBDFA71B1CB82700E979F0 /* ccextractor in Copy Executables */,
+				1EDBDFA81B1CB82700E979F0 /* comskip in Copy Executables */,
+				1EDBDFA91B1CB82700E979F0 /* HandBrakeCLI in Copy Executables */,
+				1EDBDFAA1B1CB82700E979F0 /* mencoder in Copy Executables */,
+				1EDBDFAB1B1CB82700E979F0 /* tivodecode in Copy Executables */,
+			);
+			name = "Copy Executables";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D2995CAE168D0F7D00B960B9 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -703,6 +718,7 @@
 				D2F5300316CC0C0100C44128 /* Update SVN */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
+				1EDBDFA61B1CB71200E979F0 /* Copy Executables */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
 				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				1E07864E19C7F3CE00A68051 /* Run Script */,
@@ -764,8 +780,6 @@
 				D2D60BB216766EFD00CE32DE /* Credits.rtf in Resources */,
 				D2D60BB816766EFD00CE32DE /* MainMenu.xib in Resources */,
 				D2D60BC516766F3200CE32DE /* formats.plist in Resources */,
-				D2D60BC716766F3200CE32DE /* mencoder in Resources */,
-				D2D60BC816766F3200CE32DE /* tivodecode in Resources */,
 				1E964CA31882768A00C19046 /* save-until-i-delete-recording@2x.png in Resources */,
 				D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */,
 				D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */,
@@ -782,12 +796,10 @@
 				D27579BE16B4DC2B0090D137 /* MTPreferencesWindowController.xib in Resources */,
 				D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */,
 				D22E4B1916B76DCD00619A6E /* MTAdvPreferencesViewController.xib in Resources */,
-				D2B73F3216BC485E003CB4ED /* comskip in Resources */,
 				D2B73F3616BC8A90003CB4ED /* comskip.ini in Resources */,
 				D274653516C8081C0012CFF7 /* ComSkipHelpText.rtf in Resources */,
 				1E964C9D1882768A00C19046 /* deleted@2x.png in Resources */,
 				1E2724EF16C9A8B500A21940 /* elgatoScript.pl in Resources */,
-				1E69B25A1AAD54060090B86F /* HandBrakeCLI in Resources */,
 				1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */,
 				1EDE323A19C502980052E6C6 /* tivo.png in Resources */,
 				1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */,
@@ -807,7 +819,6 @@
 				1E964CA01882768A00C19046 /* in-progress-recording@2x.png in Resources */,
 				1E684A8B16E3A338000F5C6E /* deleted.png in Resources */,
 				1E7F5ADB1701877A003AA96C /* in-progress-recording.png in Resources */,
-				D240EF5C16EEEC3F00635E53 /* ccextractor in Resources */,
 				1E0C5DD9170236B30015C55D /* recent-recording.png in Resources */,
 				1E964CA8188313ED00C19046 /* checkImage2@2x.png in Resources */,
 				1E18145E1708AC1500166E5F /* cTiVo.help in Resources */,

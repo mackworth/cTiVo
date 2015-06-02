@@ -730,7 +730,7 @@ __DDLOGHERE__
 -(void)getShowDetail {
     //run on background queue to only allow a couple at a time running, so must be threadsafe
     //self.tivo, self.detailURL, and self.showID are read, but set long ago.
-    //  sleep(20); ///xxx
+
     @synchronized(self) {
         if (_gotDetails) {
             return;
@@ -811,11 +811,11 @@ __DDLOGHERE__
 
 - (void)setValue:(id)value forUndefinedKey:(NSString *)key{
     //nothing to see here; just move along
-    //	DDLogVerbose(@"XXX Unrecognized key %@", key);
+    DDLogVerbose(@"Unrecognized key %@", key);
 }
 
 -(void) endElement:(NSString *)elementName item:(id) item {
-    // DDLogVerbose(@"XXX%@: %@",elementName, item);
+    DDLogVerbose(@"XXX%@: %@",elementName, item);
 
 }
 

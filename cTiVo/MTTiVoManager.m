@@ -196,7 +196,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
 //		numCaptions = 0;
 		_signalError = 0;
 		self.opsQueue.maxConcurrentOperationCount = 4;
-        DDLogMajor (@"XXX Concurrency: %ld", (long)self.opsQueue.maxConcurrentOperationCount);
 
 		_processingPaused = @(NO);
 		self.quitWhenCurrentDownloadsComplete = @(NO);
@@ -580,7 +579,6 @@ static MTTiVoManager *sharedTiVoManager = nil;
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
 
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTQueuePaused options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTUpdateIntervalMinutes options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
@@ -593,7 +591,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 #pragma mark - Scheduling routine
 
 -(void)determineCurrentProcessingState
-{
+{ //merge with configureSchedule?
 	int secondsInADay = 3600 * 24;
 	double currentSeconds = (int)[[NSDate date] timeIntervalSince1970] % secondsInADay;
 
@@ -609,9 +607,9 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	if (manuallyPaused ||
          (schedulingActive &&
             (startTimeSeconds > currentSeconds || currentSeconds > endTimeSeconds))) { //We're NOT active
-		[self setValue:@(YES) forKey:@"processingPaused"];
+             [self pauseQueue:@(NO)];
 	} else {
-		[self setValue:@(NO) forKey:@"processingPaused"];
+        [self unPauseQueue];
 	}
 	
 }
@@ -668,7 +666,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 
 -(void)pauseQueue:(NSNumber *)askUser
 {
-	if ([self anyTivoActive] && [askUser boolValue]) {
+    if ([self anyTivoActive] && [askUser boolValue]) {
 		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete stage of current shows" informativeTextWithFormat:@""];
 		NSInteger returnValue = [scheduleAlert runModal];
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
@@ -725,10 +723,30 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	NSDateComponents *targetComponents = [myCalendar components:(NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit) fromDate:date];
 	double currentSeconds = (double)currentComponents.hour * 3600.0 +(double) currentComponents.minute * 60.0 + (double) currentComponents.second;
 	double targetSeconds = (double)targetComponents.hour * 3600.0 + (double)targetComponents.minute * 60.0 + (double) targetComponents.second;
-	if (targetSeconds < currentSeconds) {
+	if (targetSeconds <= currentSeconds) {
 		targetSeconds += 3600 * 24;
 	}
 	return targetSeconds - currentSeconds;
+}
+
+-(NSDate *) tomorrowAtTime: (NSInteger) hour {
+    //may be called at launch, so don't assume anything is setup
+    NSUInteger units = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond  ;
+    NSDateComponents *comps = [[NSCalendar currentCalendar] components:units fromDate:[NSDate date]];
+    comps.day = comps.day + 1;    // Add one day
+    comps.hour = hour;
+    comps.minute = 0;
+    comps.second = 0;
+    NSDate *tomorrowTime = [[NSCalendar currentCalendar] dateFromComponents:comps];
+    return tomorrowTime;
+}
+
+-(NSDate *) defaultQueueStartTime {
+return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
+}
+
+-(NSDate *) defaultQueueEndTime {
+    return [self tomorrowAtTime:6];  //end at 6AM tomorrow]
 }
 
 -(void)setQueueStartTime
@@ -740,8 +758,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	NSDate* startDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
     if (!startDate) {
-        startDate = [NSDate date];
-        [[NSUserDefaults standardUserDefaults] setObject:startDate forKey:kMTScheduledStartTime];
+        [[NSUserDefaults standardUserDefaults] setObject:[self defaultQueueStartTime] forKey:kMTScheduledStartTime]; //recursive
+        return;
     }
     double targetSeconds = [self secondsUntilNextTimeOfDay:startDate];
 	DDLogDetail(@"Will start queue in %f seconds (%f hours), due to beginDate of %@",targetSeconds, (targetSeconds/3600.0), startDate);
@@ -757,8 +775,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 	}
 	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
     if (!endDate) {
-        [[NSUserDefaults standardUserDefaults] setObject:endDate forKey:kMTScheduledEndTime];
-        endDate = [NSDate date];
+         [[NSUserDefaults standardUserDefaults] setObject:[self defaultQueueEndTime] forKey:kMTScheduledEndTime];//recursive
+        return;
     }
     double targetSeconds = [self secondsUntilNextTimeOfDay:endDate];
 	DDLogDetail(@"Will pause queue in %f seconds (%f hours), due to endDate of %@",targetSeconds, (targetSeconds/3600.0), endDate);
@@ -811,21 +829,16 @@ static MTTiVoManager *sharedTiVoManager = nil;
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     NSUserDefaults * defs = [NSUserDefaults standardUserDefaults];
-    if ([keyPath compare:kMTQueuePaused] == NSOrderedSame) {
-		if ([defs boolForKey:kMTQueuePaused]) {
-			[self pauseQueue:@(YES)];
-		} else {
-			[self unPauseQueue];
-		}
-	} else if ([keyPath compare:kMTScheduledOperations] == NSOrderedSame) {
+    if ([keyPath compare:kMTScheduledOperations] == NSOrderedSame) {
         DDLogMajor(@"Turned %@ scheduled Operations",[defs boolForKey:kMTScheduledOperations]? @"on" : @"off" );
 		[self configureSchedule];
+        [self determineCurrentProcessingState];
 	} else if ([keyPath compare:kMTScheduledEndTime] == NSOrderedSame) {
         DDLogMajor(@"Set operations end time to %@",[defs objectForKey: kMTScheduledEndTime]);
-		[self configureSchedule];
+		[self setQueueEndTime];
 	} else if ([keyPath compare:kMTScheduledStartTime] == NSOrderedSame) {
        DDLogMajor(@"Set operations start time to %@",[defs objectForKey: kMTScheduledStartTime]);
-        [self configureSchedule];
+        [self setQueueStartTime];
 	} else if ([keyPath isEqualToString:kMTTiVos]){
         DDLogMajor(@"Changed TiVo list to %@",[[defs objectForKey:  kMTTiVos] maskMediaKeys]);
         [self updateTiVos];
