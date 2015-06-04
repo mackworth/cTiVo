@@ -156,7 +156,8 @@ __DDLOGHERE__
 		
 		NSArray *searchPaths = [NSArray arrayWithObjects:@"/usr/local/bin/%1$@",@"/opt/local/bin/%1$@",@"/usr/local/%1$@/bin/%1$@",@"/opt/local/%1$@/bin/%1$@",@"/usr/bin/%1$@",@"%1$@", nil];
 		NSFileManager *fm = [NSFileManager defaultManager];
-		NSString *validPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable:self.encoderUsed ];
+        NSString *validPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable:self.encoderUsed ];
+        if (!validPath) validPath = [[NSBundle mainBundle] pathForResource:self.encoderUsed ofType:@""];
 		if (!validPath) {
 			for (NSString *searchPath in searchPaths) {
 				NSString * filePath = [[NSString stringWithFormat:searchPath,self.encoderUsed] stringByResolvingSymlinksInPath];

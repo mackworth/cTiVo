@@ -779,6 +779,9 @@ __DDLOGHERE__
 	} else {
 		[menuItem setState: NSOnState];
 	}
+    if ([[column tableView] respondsToSelector:@selector(columnChanged:)]) {
+        [[column tableView] performSelector:@selector(columnChanged:) withObject:column];
+    }
 }
 
 #pragma mark - Memory Management

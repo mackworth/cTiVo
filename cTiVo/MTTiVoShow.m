@@ -815,7 +815,7 @@ __DDLOGHERE__
 }
 
 -(void) endElement:(NSString *)elementName item:(id) item {
-    DDLogVerbose(@"XXX%@: %@",elementName, item);
+    DDLogVerbose(@"%@: %@",elementName, item);
 
 }
 

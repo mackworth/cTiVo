@@ -52,7 +52,7 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDownloadRowChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisodeShow:) name:kMTNotificationDetailsLoaded	object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTiVoColumn:) name:kMTNotificationFoundMultipleTiVos object:nil];
- 	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, nil]];
+    [self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
 
@@ -176,20 +176,20 @@ __DDLOGHERE__
             download = possDownload;
         }
     }
-    NSInteger programColumnIndex = [self columnWithIdentifier:@"Programs"];
-    NSInteger seriesColumnIndex = [self columnWithIdentifier:@"Series"];
+    NSString *progressColumn = @"Series";
+    if (self.showingStageColumn) {
+        progressColumn = @"DL Stage";
+    } else if (self.showingProgramsColumn) {
+        progressColumn = @"Programs";
+    }
+    NSInteger progressIndex = [self columnWithIdentifier:progressColumn];
 	NSArray *displayedShows = [self.sortedDownloads copy];
-    BOOL updateSeries = !self.showingProgramsColumn;
 	for (NSUInteger i=0; i< displayedShows.count; i++) {
 		MTDownload *thisDownload = [displayedShows objectAtIndex:i];
         if (download && thisDownload != download) continue; //only update current one
-        MTProgressindicator *programCell = [self viewAtColumn:programColumnIndex row:i makeIfNecessary:NO];
-		MTProgressindicator *seriesCell = [self viewAtColumn:seriesColumnIndex row:i makeIfNecessary:NO];
-		[self updateProgressInCell: programCell forDL: thisDownload];
-        seriesCell.displayProgress = updateSeries;
-        if (updateSeries) {
-            [self updateProgressInCell: seriesCell forDL: thisDownload];
-		}
+		MTProgressindicator *cell = [self viewAtColumn:progressIndex row:i makeIfNecessary:NO];
+		[self updateProgressInCell: cell forDL: thisDownload];
+        cell.displayProgress = YES;
 	}
     if (!tiVoManager.anyTivoActive) {//somewhat expensive
         [self.performanceLabel setHidden:YES];
@@ -243,9 +243,27 @@ __DDLOGHERE__
 
 -(BOOL)showingProgramsColumn
 {
-	NSTableColumn *programColumn = [self tableColumnWithIdentifier:@"Programs"];
-	return !programColumn.isHidden;
+    NSTableColumn *programColumn = [self tableColumnWithIdentifier:@"Programs"];
+    return !programColumn.isHidden;
+    
+}
 
+-(BOOL)showingStageColumn
+{
+    NSTableColumn *programColumn = [self tableColumnWithIdentifier:@"DL Stage"];
+    return !programColumn.isHidden;
+    
+}
+
+-(void) columnChanged: (NSTableColumn *) column {
+    //called automagically by table when columsn are shown/hidden
+    if ([column tableView] != self) return;
+    NSString * identifier = [column identifier];
+    if ([identifier isEqualToString:@"Programs" ] ||
+        [identifier isEqualToString:@"Series" ] ||
+        [identifier isEqualToString:@"DL Stage" ] ) { //need to fixup Progress bars
+        [self reloadData];
+    }
 }
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
@@ -265,23 +283,33 @@ __DDLOGHERE__
     // nameArray value at row
 	NSString *textVal = nil;
 	result.toolTip = nil;
-	if ([tableColumn.identifier isEqualToString:@"Programs"] ||
-		[tableColumn.identifier isEqualToString:@"Series"]) {
+    BOOL programColumn = [tableColumn.identifier isEqualToString:@"Programs"];
+    BOOL seriesColumn = [tableColumn.identifier isEqualToString:@"Series"];
+    BOOL stageColumn = [tableColumn.identifier isEqualToString:@"DL Stage"];
+
+	if (programColumn || seriesColumn || stageColumn) {
+        //Progress status should show in first visible of DL Stage, then Programs, then Series
  		NSString * cellVal;
-		if ([tableColumn.identifier isEqualToString:@"Programs"]) {
+		if (programColumn) {
 			cellVal = thisShow.showTitle ;
-		 } else {
+		 } else if (seriesColumn){
 			 cellVal = thisShow.seriesTitle ;
-		 }
+         } else {
+              cellVal = @"" ;
+         }
 		MTProgressindicator *cell = (MTProgressindicator *) result;
 		cell.leftText.stringValue = cellVal;
 		cell.toolTip = cellVal;
-		if ([tableColumn.identifier isEqualToString:@"Programs"] ||
-            ([tableColumn.identifier isEqualToString:@"Series"] && !self.showingProgramsColumn)) {
+		if (stageColumn ||
+            (!self.showingStageColumn &&
+                (programColumn ||
+                 (!self.showingProgramsColumn && seriesColumn )
+            ))) {
             cell.displayProgress = YES;
             [self updateProgressInCell:cell forDL:download];
         } else {
             cell.displayProgress = NO;
+            cell.rightText.stringValue = @"";
         }
 		if ([thisShow.protectedShow boolValue]) {
 			cell.foregroundTextColor = [NSColor grayColor];
@@ -394,8 +422,10 @@ __DDLOGHERE__
 		}
 	} else if ([tableColumn.identifier isEqualToString:@"Length"]) {
 		textVal = thisShow.lengthString;
- 	} else if ([tableColumn.identifier isEqualToString:@"Episode"]) {
-		textVal = thisShow.seasonEpisode;
+    } else if ([tableColumn.identifier isEqualToString:@"Episode"]) {
+        textVal = thisShow.seasonEpisode;
+    } else if ([tableColumn.identifier isEqualToString:@"DL Stage"]) {
+        textVal = download.showStatus;
 	} else if ([tableColumn.identifier isEqualToString:@"Queued"]) {
 		textVal = thisShow.isQueuedString;
 		result.toolTip =@"Is program in queue to download?";
