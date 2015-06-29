@@ -1036,7 +1036,7 @@ __DDLOGHERE__
 	
 	if (image) {
 		NSData *PNGData  = [NSBitmapImageRep representationOfImageRepsInArray: [image representations]
-																	usingType:NSPNGFileType properties:nil];
+                                                                    usingType:NSPNGFileType properties:@{NSImageInterlaced: @NO}];
 		MP4TagArtwork artwork;
 		
 		artwork.data = (void *)[PNGData bytes];

@@ -36,7 +36,7 @@
 	
 }
 
-@property (nonatomic, readonly) NSString *downloadDir;
+@property (nonnull, nonatomic, readonly) NSString *downloadDir;
 @property (strong, nonatomic) NSString *keywordPathPart; // any extra layers of directories due to keyword template
 
 @property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
@@ -818,7 +818,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 	
 }
 
--(NSString *)downloadDir  //not valid until after configureBaseFileNameAndDirectory has been called
+-(nonnull NSString *)downloadDir  //not valid until after configureBaseFileNameAndDirectory has been called
 						  //layered on top of downloadDirectory to add subdirs and check for existence/create if necessary
 						  //maybe should change to update downloadDirectory at configureFiles time to avoid reassembling subdirs?
 {
@@ -1144,27 +1144,31 @@ NSString * fourChar(long n, BOOL allowZero) {
             encoderArgs = [self encodingArgumentsWithInputFile:_decryptBufferFilePath outputFile:_encodeFilePath];
             encodeTask.requiresInputPipe = NO;
             NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:self.encodeFormat.regExProgress ?:@"" options:NSRegularExpressionCaseInsensitive error:nil];
-            encodeTask.progressCalc = ^double(NSString *data){
-				double returnValue = -1.0;
-				NSArray *values = nil;
-				if (data) {
-					values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
-				}
-				if (values && values.count) {
-					NSTextCheckingResult *lastItem = [values lastObject];
-					NSRange r = [lastItem range];
-					if (r.location != NSNotFound) {
-						NSRange valueRange = [lastItem rangeAtIndex:1];
-						returnValue =  [[data substringWithRange:valueRange] doubleValue]/100.0;
-						DDLogVerbose(@"Encoder progress found data %lf",returnValue);
-					}
+            if (!percents) { 
+                DDLogReport(@"Missing Regular Expression for Format %@!!", self.encodeFormat.name);
+            } else {
+                encodeTask.progressCalc = ^double(NSString *data){
+                    double returnValue = -1.0;
+                    NSArray *values = nil;
+                    if (data) {
+                        values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
+                    }
+                    if (values && values.count) {
+                        NSTextCheckingResult *lastItem = [values lastObject];
+                        NSRange r = [lastItem range];
+                        if (r.location != NSNotFound) {
+                            NSRange valueRange = [lastItem rangeAtIndex:1];
+                            returnValue =  [[data substringWithRange:valueRange] doubleValue]/100.0;
+                            DDLogVerbose(@"Encoder progress found data %lf",returnValue);
+                        }
 
-				}
-				if (returnValue == -1.0) {
-					DDLogMajor(@"Encode progress with Rx failed for task encoder for show %@\nEncoder report: %@",self.show.showTitle, data);
+                    }
+                    if (returnValue == -1.0) {
+                        DDLogMajor(@"Encode progress with Rx failed for task encoder for show %@\nEncoder report: %@",self.show.showTitle, data);
 
-				}
-				return returnValue;
+                    }
+                    return returnValue;
+                };
             };
             encodeTask.startupHandler = ^BOOL(){
                 _processProgress = 0.0;
