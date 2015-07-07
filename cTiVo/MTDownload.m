@@ -36,7 +36,7 @@
 	
 }
 
-@property (nonnull, nonatomic, readonly) NSString *downloadDir;
+@property (nonatomic, readonly) NSString *downloadDir;
 @property (strong, nonatomic) NSString *keywordPathPart; // any extra layers of directories due to keyword template
 
 @property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
@@ -818,7 +818,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 	
 }
 
--(nonnull NSString *)downloadDir  //not valid until after configureBaseFileNameAndDirectory has been called
+-(NSString *)downloadDir  //not valid until after configureBaseFileNameAndDirectory has been called
 						  //layered on top of downloadDirectory to add subdirs and check for existence/create if necessary
 						  //maybe should change to update downloadDirectory at configureFiles time to avoid reassembling subdirs?
 {
@@ -1622,6 +1622,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 - (NSImage *) findArtWork {
 	NSString *currentDir   = self.downloadDir;
+    if(!currentDir) return nil;
 	NSString *thumbnailDir = [currentDir stringByAppendingPathComponent:@"thumbnails"];
 	NSArray * directories;
 	NSString * legalSeriesName = [self.show.seriesTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
