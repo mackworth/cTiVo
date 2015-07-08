@@ -3,59 +3,107 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 2.3.1 (User control of output filenames, Full screen, Keychain)</description>
+        <description>Version 2.4.0; Major release</description>
         <language>en</language>
         <item>
-            <title>Version 2.3.1 (User control of output filenames, Full screen, Keychain)</title>
+            <title>Version 2.4.0; Major release</title>
 			<description><![CDATA[
-                <b>Version 2.3.1 (User control of output filenames, Full screen, Keychain)</b><br /><br />
+                <h2>2.4.0 features</h2>
+
+                <h3>UI Improvements:</h3>
                 <ul>
-                <li>Ability to specify output filename and structure - similar to kmttg</li>
-                <li>New retina-compatible graphics - thanks Patrick</li>
-                <li>Bugs fixed on manual TiVos and MAK on initial setup</li>
-                <li>Support for OS X Keychain</li>
-                <li>Quicktime formats now use constant quality instead of constant bit rate</li>
-                <li>Full screen command and support</li>
+                <li> Performance monitoring.
+                <ul>
+                <li>While cTiVo is processing, it will display the current throughput and estimate the time left to finish all files. </li>
+                <li>In addition, if you hover over a show in process, it will show you the throughput/estimated time for that particular show.</li>
                 </ul>
-                <b>Version 2.2 (Addresses users having trouble with MAK key entry)</b><br /><br />
-				<ul>
-				<li>Improved handling of initial MAK entry</li>
-                <li>Users can now enable and disable any TiVo with the TiVo preferences UI</li>
+                </li>
+                <li>  Simplified top bar of window
+                <ul>
+                <li>Put download controls (Directory and Format) on right</li>
+                <li>Put display controls (TiVos and Find) on left</li>
+                <li>Added TiVo logo</li>
                 </ul>
-                <br />
-				<b>Version 2.1 (More Major new features and UI improvements)</b><br /><br />
-				<ul>
-				<li>cTiVo now automatically configures an optimum workflow based on user selections so that the simultaneous encoding selection by the user is no longer necessary</li>
-				<li>Commercials can now be marked as chapters on mp4 files regardless of the capability of the encoder.</li>
-				<li>Subtitles are now embedded in the video file for mp4 including advanced formatting and glyphs</li>
-				<li>Improved elGato support</li>
-				<li>Improved UI for specification of tmp directory in Advanced Preferences</li>
-				<li>Greatly improved logging for debugging support</li>
-				<li>Update to HandbrakeCLI 0.99</li>
-				<li>Greatly improved subscription handling including in multiple TiVo settings.  Users have the ability to specify TiVo or quality preference.  Users can also specify All to subscribe to all shows being recorded.</li>
-				<li>Improved support for artwork</li>
-				<li>Improved handing of Manual TiVo network access</li>
-				<li>cTiVo now accesses TheTVDB.com to try to find missing episode/season information and missing artwork.</li>
-				<li>Improved speed through added buffering of TiVo information</li>
-				<li>Main window now allows the user to adjust window sizes</li>
-				<li>Added robustness against certain TiVo network issues</li>
-				<li>Many other bug fixes and UI enhancements</li>
-				<li>cTiVo is now code-signed for additional security.</li>
-				</ul>
-                <br />
-                
-				
-				See <a href="https://github.com/dscottbuch/cTiVo/wiki"> cTiVo Home </a> for more informaton.
+                </li>
+                <li>New Drag/Drop option
+                <ul>
+                <li>Text list of show names (tab separated) from both NowPlaying list or Download</li>
+                <li>Text version of subscriptions from Subscription Table </li>
+                <li>Accepts text subscriptions back again, e.g. after editing subscription as text</li>
+                </ul>
+                </li>
+                <li>Added cut/copy/paste equivalents of drag/drop
+                <ul>
+                <li>From NowPlaying or Downloads to Downloads </li>
+                <li>From NowPlaying, Downloads, or Text to Subscriptions</li>
+                </ul>
+                </li>
+                <li>New Status column for Download table DL Stage to allow sorting by stage of downloads</li>
+
+                <li>Remember prior manual queue start/stop between runs</li>
+                </ul>
+
+                <h3>Artwork Improvements:</h3>
+                <ul>
+                <li>Added access to TheMovieDB posters for movies</li>
+                <li>Option to choose to “trust” TVDB’s episode numbers over TiVo's</li>
+                <li>Better background transfer management and Rate limiting for TVDB</li>
+                <li>Move downloaded art below user thumbnails in priority</li>
+                </ul>
+                <h3>Logging Improvements:</h3>
+                <ul>
+                <li>Added "Help&gt;Show Logs in Finder"  menu command</li>
+                <li>Log files now dated, named ".log" to open in Console</li>
+                <li>Better logging for authentication challenges and saving log files after failure</li>
+                <li>Masking MAK in logging</li>
+                <li>Changed levels of several msgs to be more helpful</li>
+                <li>Removed highly repetitive warnings</li>
+                </ul>
+
+                <h3> Other Improvements: </h3>
+                <ul>
+                <li>Significantly smaller memory usage, especially when running unattended.</li>
+                <li>   Added crash tracking with Crashlytics  (opt-out in Advanced Preferences)</li>
+                <li>   For hackers, added MaxNumberEncoders and MaxProgressDelay (in seconds) as user Prefs (no GUI)</li>
+                <li>   Supplying 0 (zero) in Adv Preferences&gt;TiVo Refresh time means "manual refresh only".</li>
+                <li>   Update to latest versions of Handbrake, Sparkle, and ccExtractor</li>
+                </ul>
+
+                <h3> Bug Fixes:</h3>
+                <ul>
+                <li>   Prevent possible crash during enabling scheduled times.</li>
+                <li>   Protect against TiVo returning less shows than it says it has</li>
+                <li>   Updated DVD Format to be compatible with current encoder</li>
+                <li>   Fix for length field not appearing in Downloads</li>
+                <li>   Long-standing bug that if encoder crashed, it took down cTiVo as well; rewrote to lower-level file routines, so now the download should simply fail instead.</li>
+                <li>   Caption/pyTiVo files are moved to iTunes folder IF Delete after iTunes is enabled</li>
+                <li>   Manual TiVos will now coming online after recovery from network failure.</li>
+                <li>   No longer tries to download deleted TiVo shows</li>
+                <li>   Will now find series with embedded season names in theTVDB (e.g. Spartacus: War of the Damned)</li>
+                <li>   Supports vibrancy in Yosemite</li>
+                <li>   Fixed rare startup crash in Lumberjack logging module</li>
+                <li>   Sorting Channel column numerically instead of alphabetically</li>
+                <li>   Filter out TiVo Desktop</li>
+                <li>   Removed delay after two encodes finish</li>
+                <li>   Pickup foreign language titles from theTVDB</li>
+                <li>   Adding error checking to catToFile "encoder"</li>
+                <li>   Corrected PS3 encoder description to "resolution unchanged"</li>
+                <li>   Checks for progress regex if needed</li>
+                <li>   Major internally restructuring to avoid sporadic crashes during downloads</li>
+                <li>   Doesn't allow selecting cTiVo's Download folder as its Temporary folder</li>
+                </ul>
+
+                See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
                 
             ]]>
 			</description>
-            <pubDate>Mon., Apr 8, 2013 10:10:00 -0800</pubDate>
+            <pubDate>Wed., July 9, 2015 7:00:00 -0800</pubDate>
             <!-- <sparkle:releaseNotesLink>http://andymatuschak.org/files/notes.html</sparkle:releaseNotesLink> -->
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/v2.3.1.468/cTiVo_2.3.1_468.zip"
-            sparkle:version="468" sparkle:shortVersionString="2.3.1"
-            length="16799062"
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.4.0/cTiVo.zip"
+            sparkle:version="547" sparkle:shortVersionString="2.4.0"
+            length="19088130"
             type="application/octet-stream"
-            sparkle:dsaSignature="MC4CFQCIOuldRDTy03sSvMV1GRaGWNnCsgIVAJkTmPzyc80rFAC9wpG/i+6MuMNR" />
+            sparkle:dsaSignature="MCwCFG6Yq3lWIKToLogRLGjwqWa13apKAhR4oHeNP28WCpzNUXvqoNu7seOp5w==" />
         </item>
     </channel>
 </rss>
