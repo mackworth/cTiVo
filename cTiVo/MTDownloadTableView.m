@@ -449,6 +449,11 @@ __DDLOGHERE__
 		textVal = thisShow.episodeGenre;
 	} else if ([tableColumn.identifier isEqualToString:@"FirstAirDate"]) {
 		textVal = thisShow.originalAirDateNoTime;
+    } else if ([tableColumn.identifier compare:@"AgeRating"] == NSOrderedSame) {
+        textVal = thisShow.ageRatingString;
+        result.toolTip = textVal;
+    } else if ([tableColumn.identifier compare:@"StarRating"] == NSOrderedSame) {
+        textVal = thisShow.starRatingString;
 	} else {
 		DDLogReport(@"Unknown Column: %@ ",tableColumn.identifier);
 	}

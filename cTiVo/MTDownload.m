@@ -1284,7 +1284,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     commercialTask.cleanupHandler = ^(){
         if (_commercialTask.taskFailed) {
-			[tiVoManager  notifyWithTitle:@"Detecting Commercials Failed" subTitle:[NSString stringWithFormat:@"Skipping commercials for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlCommercialDetFailed];
+			[tiVoManager  notifyWithTitle:@"Detecting Commercials Failed" subTitle:[NSString stringWithFormat:@"Not processing commercials for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlCommercialDetFailed];
 
             if ([[NSFileManager defaultManager] fileExistsAtPath:commercialFilePath]) {
                 [[NSFileManager defaultManager] removeItemAtPath:commercialFilePath error:nil];
@@ -1698,9 +1698,9 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 
 -(void) writeTextMetaData:(NSString*) value forKey: (NSString *) key toFile: (NSFileHandle *) handle {
-	if ( key && value) {
+	if ( key.length > 0 && value.length > 0) {
 		
-		[handle writeData:[[NSString stringWithFormat:@"%@: %@\n",key, value] dataUsingEncoding:NSUTF8StringEncoding]];
+		[handle writeData:[[NSString stringWithFormat:@"%@ : %@\n",key, value] dataUsingEncoding:NSUTF8StringEncoding]];
 	}
 }
 
@@ -1729,10 +1729,11 @@ NSString * fourChar(long n, BOOL allowZero) {
 		} else {
 			NSFileHandle *textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
 			[textMetaHandle seekToEndOfFile];
-			[self writeTextMetaData:self.show.seriesId		  forKey:@"seriesID"			toFile:textMetaHandle];
+			[self writeTextMetaData:self.show.seriesId		  forKey:@"seriesId"			toFile:textMetaHandle];
 			[self writeTextMetaData:self.show.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
 			[self writeTextMetaData:self.show.stationCallsign forKey:@"callsign"		    toFile:textMetaHandle];
-            [self writeTextMetaData:self.show.episodeNumber   forKey:@"episodeNumber"       toFile:textMetaHandle];
+            [self writeTextMetaData:self.show.programId       forKey:@"programId"       toFile:textMetaHandle];
+            [textMetaHandle closeFile];
 		}
 	}
 }
@@ -1749,30 +1750,6 @@ NSString * fourChar(long n, BOOL allowZero) {
 	[tiVoManager updateShowOnDisk:_show.showKey withPath: videoFilePath];
 }
 
--(HDTypes) hdTypeForMP4File:(MP4FileHandle *) fileHandle {
-	uint32_t tracksCount = MP4GetNumberOfTracks(fileHandle, 0, 0);
-	
-	for (uint16_t i=0; i< tracksCount; i++) {
-		MP4TrackId trackId = MP4FindTrackId(fileHandle, i, 0, 0);
-		const char* type = MP4GetTrackType(fileHandle, trackId);
-		
-		if (MP4_IS_VIDEO_TRACK_TYPE(type)) {
-			uint16 height = MP4GetTrackVideoHeight(fileHandle, trackId);
-			if (height == 0) {
-				return HDTypeNotAvailable;
-			} else  if (height <=  480) {
-				return HDTypeStandard;
-			} else if (height <= 720 ) {
-				return HDType720p;
-			} else if (height <= 10000) {
-				return HDType1080p;
-			} else {
-				return HDTypeNotAvailable;
-			}
-		}
-	}
-	return HDTypeNotAvailable;
-}
 
 -(NSString *) moveFile:(NSString *) path ToiTunes: (NSString *)iTunesBaseName forType:(NSString *) typeString andExtension: (NSString *) extension {
     if (!path) return nil;
@@ -1814,10 +1791,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 			}
 		}
 		if (self.encodeFormat.canAcceptMetaData) {
-			HDTypes hdType = [self hdTypeForMP4File:encodedFile ];
-			const MP4Tags* tags = [self.show metaDataTagsWithImage: artwork andResolution:hdType];
-			MP4TagsStore(tags, encodedFile );
-			MP4TagsFree(tags);
+            [self.show addExtendedMetaDataToFile:encodedFile withImage:artwork];
+
 }
 		
 		MP4Close(encodedFile, 0);

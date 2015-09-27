@@ -28,16 +28,32 @@
 @property (nonatomic, strong) NSString 
 									*seriesTitle,
 									*episodeTitle,
-									*showDescription,
+                                    *showDescription,
 									*showLengthString,
                                     *channelString,
                                     *stationCallsign,
 									*programId,
-									*episodeID,
 									*seriesId,
                                     *sourceType,
 									*imageString,
                                     *idGuidSource;
+
+
+@property (nonatomic, strong) NSNumber
+                                    *protectedShow,  //really BOOLs
+                                    *inProgress,      //Is Tivo currently recording this show
+                                    *isHD;
+@property (nonatomic, strong) NSDate *showDate;
+
+@property					  double fileSize;  //Size on TiVo;
+
+@property (nonatomic, strong)  NSURL *downloadURL,
+                                    *detailURL;
+
+//computed from TiVo's XML
+@property					  int    showID;  //pulled out of URL; unique for this TiVo
+@property (nonatomic, assign) NSInteger tvRating,
+                                        mpaaRating;
 
 //Properties loaded in from TiVo's Detail XML
 @property (atomic, strong, readonly) NSString
@@ -45,43 +61,33 @@
                                     *movieYear,
                                     *originalAirDate,
                                     *showTime,
-                                    *episodeGenre,
-                                    *tvRating;
+                                    *startTime,
+                                    *stopTime,
+                                    *showingBits,
+                                    *colorCode,
+                                    *starRating,
+                                    *episodeGenre;
+
 @property (strong, nonatomic, readonly) NSAttributedString
+                                    *writers,
                                     *actors,
                                     *guestStars,
                                     *directors,
                                     *producers;
 
+@property (strong, nonatomic) NSString *episodeID;
 
-@property (nonatomic, strong) NSNumber  *protectedShow,  //really BOOLs
-										*inProgress,      //Is Tivo currently recording this show
-										*isHD;
-@property					  double fileSize;  //Size on TiVo;
-
-@property (nonatomic, strong) NSURL *downloadURL,
-*detailURL;
 @property (atomic, strong) NSString * artworkFile;
-
-@property (nonatomic, strong) NSDate *showDate;
-@property					  int    showID;
 
 @property					  time_t showLength;  //length of show in seconds
 
 @property (atomic, strong) NSString *tvdbArtworkLocation;
 
 
-
-
-#pragma mark - Properties loaded in from Details Page
-@property int episodeYear;
-
-
 //--------------------------------------------------------------
 #pragma mark - Calculated properties for display 
 @property (strong)	NSString *showTitle;  //calculated from series: episode
-@property (nonatomic, readonly) NSString *yearString,
-										*originalAirDateNoTime,
+@property (nonatomic, readonly) NSString *originalAirDateNoTime,
 										 *showDateString,
 										*showKey,
 										 *showMediumDateString;
@@ -89,6 +95,12 @@
 @property (weak, nonatomic, readonly) NSString *seasonString;
 @property (weak, nonatomic, readonly) NSString *seasonEpisode; // S02 E04 version
 @property (readonly, nonatomic) NSString *attribDescription;
+@property (readonly, nonatomic) NSString *starRatingString;
+
+@property (nonatomic, readonly) NSString *ageRatingString; //computed from tvRating and MPRating
+@property (nonatomic, readonly) NSNumber *ageRatingValue; //computed from tvRating and MPRating
+
+
 
 @property (nonatomic, readonly) BOOL    isMovie;
 @property (nonatomic, readonly) BOOL    isSuggestion;
@@ -113,7 +125,8 @@
 -(void)revealInFinder:(NSArray *)paths;
 -(void)getTheTVDBDetails;
 -(void)retrieveArtworkIntoFile: (NSString *) filename;
-
+-(void) addExtendedMetaDataToFile:(MP4FileHandle *)fileHandle withImage:(NSImage *) artwork ;
+-(void)createTestMP4;
 
 typedef enum {
 	HDTypeNotAvailable = -1,

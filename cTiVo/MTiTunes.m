@@ -128,8 +128,9 @@ __DDLOGHERE__
 
 		if (show.isMovie) {
 			newTrack.name = show.showTitle;
+            newTrack.artist = show.directors.string;
 		} else {
-			if (show.season > 0) {
+			if (![show.programId hasPrefix:@"SH"] && show.season > 0) {
 				newTrack.album = [NSString stringWithFormat: @"%@, Season %d",show.seriesTitle, show.season];
 				newTrack.seasonNumber = show.season;
 			} else {
@@ -149,7 +150,9 @@ __DDLOGHERE__
 			} else {
 				newTrack.name = show.episodeTitle;
 			}
-			if (show.episode > 0) {
+            NSInteger episodeNum = show.episode;
+            if (episodeNum == 0) episodeNum = show.episodeNumber.integerValue;
+			if (![show.programId hasPrefix:@"SH"] && episodeNum > 0) {
 				newTrack.episodeNumber = show.episode;
 				newTrack.trackNumber = show.episode;
 			}
@@ -161,9 +164,17 @@ __DDLOGHERE__
 		newTrack.longDescription = descrip;
 		newTrack.objectDescription = descrip;
 		newTrack.show = show.seriesTitle;
-		newTrack.year = show.episodeYear;
+        NSString * releaseDate = show.isMovie ? show.movieYear : show.originalAirDate;
+        if (releaseDate.length == 0) {
+            releaseDate = show.isMovie ? show.originalAirDate : show.movieYear ;
+        }
+        if (releaseDate.length > 4) {
+            releaseDate = [releaseDate substringToIndex:4];
+        }
+        NSInteger episodeYear = [releaseDate intValue];
+		if (episodeYear) newTrack.year = episodeYear;
 		//Can't set release date for some reason
-		//No tv  channel concept
+		//No tv  channel or network concept
 		newTrack.genre = show.episodeGenre;
 		if (image) {
 			//don't ask me why this works...

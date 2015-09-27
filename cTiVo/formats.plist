@@ -877,7 +877,7 @@ audio: mp2 at 192kbs</string>
 			<key>regExProgress</key>
 			<string> ([\d\.]*?) \%</string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>

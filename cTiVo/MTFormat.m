@@ -316,6 +316,14 @@ __DDLOGHERE__
 	[[NSAttributedString alloc] initWithString:_formatDescription];
 }
 
+-(void) setAttributedFormatDescription:(NSAttributedString *)attributedFormatDescription {
+    //necessary due to cocoa bindings for description of format
+    NSString * newString = [attributedFormatDescription string];
+    if (newString.length > 0) {
+        self.formatDescription = newString;
+    }
+}
+
 -(NSDictionary *)toDictionary
 {
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];

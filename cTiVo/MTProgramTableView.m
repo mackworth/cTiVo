@@ -359,6 +359,11 @@ __DDLOGHERE__
     } else if ([tableColumn.identifier compare:@"Genre"] == NSOrderedSame) {
         textVal = thisShow.episodeGenre;
         result.toolTip = textVal;
+    } else if ([tableColumn.identifier compare:@"AgeRating"] == NSOrderedSame) {
+        textVal = thisShow.ageRatingString;
+        result.toolTip = textVal;
+    } else if ([tableColumn.identifier compare:@"StarRating"] == NSOrderedSame) {
+        textVal = thisShow.starRatingString;
     } else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
         textVal = thisShow.originalAirDateNoTime ?: @"";
     } else if ([tableColumn.identifier isEqualToString:@"icon"]) {

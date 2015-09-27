@@ -31,10 +31,13 @@
                                 *originalAirDate,
                                 *showTime,
                                 *episodeGenre,
-                                *tvRating;
+                                *colorCode,
+                                *starRating,
+                                *showingBits;
 @property (strong, nonatomic, readwrite) NSAttributedString
                                 *actors,
                                 *guestStars,
+                                *writers,
                                 *directors,
                                 *producers;
 
@@ -48,7 +51,7 @@
 			episodeTitle	 = _episodeTitle,
 			episodeID    	 = _episodeID,
 			imageString		 = _imageString,
-			tempTiVoName     = _tempTiVoName;
+			tempTiVoName     = _tempTiVoName ;
 
 __DDLOGHERE__
 
@@ -68,15 +71,19 @@ __DDLOGHERE__
 		_episodeTitle = @"";
 		_seriesTitle = @"";
 //		_originalAirDate = @"";
-		_episodeYear = 0;
         _tvdbArtworkLocation = nil;
 		
 		self.protectedShow = @(NO); //This is the default
 		parseTermMapping = @{
-					   @"description" : @"",  //mark to not load these values
-					   @"time": @"showTime",  //maybe this one also
+					   @"description" : @"",  //mark to not load these values as they come from main XML, not detail
+					   @"time"        : @"showTime",  //maybe this one also
 					   @"seriesTitle" : @"",
-					   @"episodeTitle" : @""
+					   @"episodeTitle": @"",
+                       @"tvRating"    : @"",
+                       @"mpaaRating"  : @"",
+                       @"showingBits" : @"",  //and these two come from attributes, not surrounded text
+                       @"colorCode"   : @"",
+                       @"starRating"  : @""
 		};
         [self addObserver:self forKeyPath:@"showTime" options:NSKeyValueObservingOptionNew context:showTimeContext];
         [self addObserver:self forKeyPath:@"episodeNumber" options:NSKeyValueObservingOptionNew context:episodeNumberContext];
@@ -251,9 +258,9 @@ __DDLOGHERE__
     NSString * episodeInfo = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&error];
 
     if (error) {
-        DDLogMajor(@"Failed to get info from TVDB for %@: %@",self.showTitle, error.localizedDescription);
+        DDLogMajor(@"Failed to get info from TVDB for %@ at %@: %@",self.showTitle, reportURL, error.localizedDescription);
     } else if (!episodeInfo.length) {
-        DDLogMajor(@"No error from TVDB for %@, but no content",self.showTitle);
+        DDLogMajor(@"No error from TVDB for %@ at %@, but no content",self.showTitle, reportURL);
     } else {
         NSString * newEpisodeNum = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo] ?: @"";
         NSString * newSeasonNum = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo] ?: @"";
@@ -800,6 +807,19 @@ __DDLOGHERE__
    elementString = [NSMutableString new];
    if (![elementName isEqualToString:@"element"]) {
        elementArray = [NSMutableArray new];
+
+       if (attributeDict.count > 0) {
+           NSString * value = [attributeDict objectForKey:@"value"];
+           if (value.length == 0) return;
+           if ([elementName isEqualToString:@"showingBits"]) {  //ignore spurious zero entries
+               if (self.showingBits.integerValue > 0 && [value isEqualToString:@"0"])  return;
+               self.showingBits = value;
+           } else if ([elementName isEqualToString:@"colorCode"]) {
+               self.colorCode = value;
+           } else if ([elementName isEqualToString:@"starRating"]) {
+               self.starRating = value;
+           }
+       }
    }
 }
 
@@ -919,11 +939,6 @@ __DDLOGHERE__
 	return attstring;
 }
 
--(NSString *)yearString
-{
-    return [NSString stringWithFormat:@"%d",_episodeYear];
-}
-
 -(NSString *)seasonString
 {
 	NSString *returnString = @"";
@@ -949,51 +964,55 @@ __DDLOGHERE__
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage* ) image andResolution:(HDTypes) hdType {
 	//maintain source code parallel with MTiTunes.m>importIntoiTunes
 	const MP4Tags *tags = MP4TagsAlloc();
-	uint8_t mediaType = 10;
+    uint8_t mediaType = 10;  //MP4 can't be audio only?
 	if (self.isMovie) {
 		mediaType = 9;
 		MP4TagsSetMediaType(tags, &mediaType);
 		MP4TagsSetName(tags,[self.showTitle cStringUsingEncoding:NSUTF8StringEncoding]) ;
+        MP4TagsSetArtist(tags,[self.directors.string cStringUsingEncoding:NSUTF8StringEncoding]);
 	} else {
 		mediaType = 10;
 		MP4TagsSetMediaType(tags, &mediaType);
-		if (self.season > 0 ) {
-			uint32_t showSeason =  self.season;
-			MP4TagsSetTVSeason(tags, &showSeason);
-			MP4TagsSetAlbum(tags,[[NSString stringWithFormat: @"%@, Season %d",self.seriesTitle, self.season] cStringUsingEncoding:NSUTF8StringEncoding]) ;
-		} else {
-			MP4TagsSetAlbum(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]) ;
-			
-		}
-		if (self.seriesTitle.length>0) {
-			MP4TagsSetTVShow(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-			MP4TagsSetArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-			MP4TagsSetAlbumArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-		}
-		if (self.episodeTitle.length==0) {
-			NSString * dateString = self.originalAirDateNoTime;
-			if (dateString.length == 0) {
-				NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
-				[dateFormat setDateStyle:NSDateFormatterShortStyle];
-				[dateFormat setTimeStyle:NSDateFormatterNoStyle];
-				dateString =  [dateFormat stringFromDate: self.showDate ];
-			}
-			MP4TagsSetName(tags,[[NSString stringWithFormat:@"%@ - %@",self.showTitle, dateString] cStringUsingEncoding:NSUTF8StringEncoding]);
-		} else {
-			MP4TagsSetName(tags,[self.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-		}
-		uint32_t episodeNum = (uint32_t) self.episode;
-		if (episodeNum == 0) {
-			episodeNum = (uint32_t) [self.episodeNumber integerValue];
-		}
-		if (episodeNum> 0) {
-			MP4TagsSetTVEpisode(tags, &episodeNum);
-			MP4TagTrack track;
-			track.index = (uint16)episodeNum;
-			track.total = 0;
-			MP4TagsSetTrack(tags, &track);
-			
-		}
+        if (self.seriesTitle.length>0) {
+            MP4TagsSetTVShow(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+            MP4TagsSetArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+            MP4TagsSetAlbumArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+        }
+        if (![self.programId hasPrefix: @"SH"]) {
+            //else it's 'non-episodic" show, so no seasons or episodes.
+            if (self.season > 0 ) {
+                uint32_t showSeason =  self.season;
+                MP4TagsSetTVSeason(tags, &showSeason);
+                MP4TagsSetAlbum(tags,[[NSString stringWithFormat: @"%@, Season %d",self.seriesTitle, self.season] cStringUsingEncoding:NSUTF8StringEncoding]) ;
+            } else {
+                MP4TagsSetAlbum(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+            }
+
+            if (self.episodeTitle.length==0) {
+                NSString * dateString = self.originalAirDateNoTime;
+                if (dateString.length == 0) {
+                    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+                    [dateFormat setDateStyle:NSDateFormatterShortStyle];
+                    [dateFormat setTimeStyle:NSDateFormatterNoStyle];
+                    dateString =  [dateFormat stringFromDate: self.showDate ];
+                }
+                MP4TagsSetName(tags,[[NSString stringWithFormat:@"%@ - %@",self.showTitle, dateString] cStringUsingEncoding:NSUTF8StringEncoding]);
+            } else {
+                MP4TagsSetName(tags,[self.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+            }
+            uint32_t episodeNum = (uint32_t) self.episode;
+            if (episodeNum == 0) {
+                episodeNum = (uint32_t) [self.episodeNumber integerValue];
+            }
+            if ( episodeNum> 0) {
+                MP4TagsSetTVEpisode(tags, &episodeNum);
+                MP4TagTrack track;
+                track.index = (uint16)episodeNum;
+                track.total = 0;
+                MP4TagsSetTrack(tags, &track);
+                
+            }
+        }
 	}
 	if (self.episodeID.length >0) {
 		MP4TagsSetTVEpisodeID(tags, [self.episodeID cStringUsingEncoding:NSUTF8StringEncoding]);
@@ -1020,20 +1039,22 @@ __DDLOGHERE__
 		MP4TagsSetTVShow(tags, [self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
 	}
 	//no year equivalent?
-	NSString * releaseDate = self.originalAirDate;
+    NSString * releaseDate = self.isMovie ? self.movieYear : self.originalAirDate;
 	if (releaseDate.length == 0) {
-		releaseDate = self.movieYear;
+        releaseDate = self.isMovie ? self.originalAirDate : self.movieYear ;
 	}
 	if (releaseDate.length>0) {
 		MP4TagsSetReleaseDate(tags,[releaseDate cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
+    } else {
+        DDLogMajor(@"No release date? for %@", self);
+    }
 	if (self.stationCallsign) {
 		MP4TagsSetTVNetwork(tags, [self.stationCallsign cStringUsingEncoding:NSUTF8StringEncoding]);
 	}
 	if (self.episodeGenre.length>0) {
 		MP4TagsSetGenre(tags,[self.episodeGenre cStringUsingEncoding:NSUTF8StringEncoding]);
 	}
-	
+
 	if (image) {
 		NSData *PNGData  = [NSBitmapImageRep representationOfImageRepsInArray: [image representations]
                                                                     usingType:NSPNGFileType properties:@{NSImageInterlaced: @NO}];
@@ -1051,6 +1072,286 @@ __DDLOGHERE__
 		MP4TagsSetHDVideo(tags, &myHDType);
 	}
 	return tags;
+}
+
+- (NSArray *) dictArrayFromString:(NSAttributedString *) string {
+    NSArray * data = [string.string componentsSeparatedByString: @"\n" ];
+    NSMutableArray *dictElements = [NSMutableArray array];
+    for (NSString *name in data) {
+        if (name.length == 0) continue;
+        //tivo likes it LastName|First Names
+        NSArray * names = [name componentsSeparatedByString:@" "];
+        NSString * lastName = [names lastObject]; //e.g. Maggie Smith  12char total  5last 6first
+        NSInteger length = name.length-lastName.length -1;
+        NSString * firstNames = (length > 0) ? [name substringToIndex:length] : @"";
+        NSString * tivoName = [NSString stringWithFormat:@"%@|%@", lastName, firstNames];
+
+        [dictElements addObject:[NSDictionary dictionaryWithObject:tivoName forKey:@"name"]];
+    }
+    return dictElements;
+}
+
+-(NSString *) iTunesCode {
+    NSUInteger index;
+    NSArray *codeArray;
+    if (self.isMovie) {
+       codeArray =@[
+             @"" ,  //mpaa|NR|000?
+             @"mpaa|G|100",
+             @"mpaa|PG|200",
+             @"mpaa|PG-13|300",
+             @"mpaa|R|400",
+             @"mpaa|NC-17|500",
+             @"mpaa|Unrated|???"];
+        index = self.mpaaRating > 0 ? self.mpaaRating: 0 ;
+    } else {
+        codeArray = @[
+             @"",
+             @"us-tv|TV-Y|100",
+             @"us-tv|TV-Y7|200",
+             @"us-tv|TV-G|300",
+             @"us-tv|TV-PG|400",
+             @"us-tv|TV-14|500",
+             @"us-tv|TV-MA|600"];
+        index = self.tvRating > 0 ? self.tvRating: 0;
+    }
+    if (index < codeArray.count) {
+        return codeArray[index];
+    } else {
+        return codeArray[0];
+    }
+}
+
+-(NSString *) starRatingString {
+    if  (self.starRating.intValue == 0) return @"";
+    int numHalfStars = self.starRating.intValue + 1;
+    NSString * stars = [@"★★★★★" substringToIndex: numHalfStars/2];
+    if (numHalfStars & 1) {
+        stars = [stars stringByAppendingString:@"½"];
+    }
+    return stars;
+}
+
+-(HDTypes) hdTypeForMP4File:(MP4FileHandle *) fileHandle {
+    uint32_t tracksCount = MP4GetNumberOfTracks(fileHandle, 0, 0);
+
+    for (uint16_t i=0; i< tracksCount; i++) {
+        MP4TrackId trackId = MP4FindTrackId(fileHandle, i, 0, 0);
+        const char* type = MP4GetTrackType(fileHandle, trackId);
+
+        if (MP4_IS_VIDEO_TRACK_TYPE(type)) {
+            uint16 height = MP4GetTrackVideoHeight(fileHandle, trackId);
+            if (height == 0) {
+                return HDTypeNotAvailable;
+            } else  if (height <=  480) {
+                return HDTypeStandard;
+            } else if (height <= 720 ) {
+                return HDType720p;
+            } else if (height <= 10000) {
+                return HDType1080p;
+            } else {
+                return HDTypeNotAvailable;
+            }
+        }
+    }
+    return HDTypeNotAvailable;
+}
+
+-(void) writeTextMetaData:(NSString*) value forKey: (NSString *) key toFile: (NSFileHandle *) handle {
+    if ( key.length > 0 && value.length > 0) {
+
+        [handle writeData:[[NSString stringWithFormat:@"%@ : %@\n",key, value] dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+}
+
+-(void) createTestMP4 {
+    //test routine to create dummy MP4 with all metadata stored
+    //sample call code: add to MainWindowController programMenuHandler
+    // and add to right-click menu in mainWindowController
+    //    } else if ([menu.title caseInsensitiveCompare:@"Test Metadata"] == NSOrderedSame) {
+    //		for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {
+    //            [show createTestMP4];
+    //        }
+
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString * baseTitle  = [self.showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
+    baseTitle = [baseTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+    NSString * filePath = [NSString stringWithFormat:@"%@/ZTEST%@.mp4", [tiVoManager downloadDirectory], baseTitle];
+    NSString * testPath =[NSString stringWithFormat:@"%@/test.mp4", [tiVoManager downloadDirectory]];
+    NSString * textMetaPath = [filePath stringByAppendingPathExtension:@"txt"];
+    NSString * textFromMP4Path =[[filePath stringByAppendingString:@"2" ] stringByAppendingPathExtension:@"txt"];
+    NSString * diffPath =[[filePath stringByAppendingString:@".diff" ] stringByAppendingPathExtension:@"txt"];
+    NSError * error = nil;
+    if (![fm copyItemAtPath:testPath toPath:filePath error:&error]) {
+        DDLogMajor(@"couldn't copy file %@ to %@; Error %@", testPath, filePath, error.localizedDescription);
+        return;
+    };
+
+
+    MP4FileHandle *encodedFile = MP4Modify([filePath cStringUsingEncoding:NSUTF8StringEncoding],0);
+    
+    [self addExtendedMetaDataToFile:encodedFile withImage:nil];
+    MP4Close(encodedFile,MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
+
+    NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.tiVo.tiVo.name,self.showID];
+
+    NSData * xml = [NSData dataWithContentsOfFile:detailFilePath];
+    NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:xml options:0 error:nil];
+    NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
+    NSData * returnxml = [xmldoc objectByApplyingXSLTAtURL:[NSURL fileURLWithPath:xltTemplate] arguments:nil error:nil	];
+    NSString *returnString = [[NSString alloc] initWithData:returnxml encoding:NSUTF8StringEncoding];
+    if (![returnString writeToFile:textMetaPath atomically:NO encoding:NSUTF8StringEncoding error:nil]) {
+        DDLogReport(@"Couldn't write pyTiVo Data to file %@", textMetaPath);
+    } else {
+        NSFileHandle *textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
+        [textMetaHandle seekToEndOfFile];
+        [self writeTextMetaData:self.seriesId		  forKey:@"seriesId"			toFile:textMetaHandle];
+        [self writeTextMetaData:self.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
+        [self writeTextMetaData:self.stationCallsign forKey:@"callsign"		    toFile:textMetaHandle];
+         [self writeTextMetaData:self.programId       forKey:@"programId"       toFile:textMetaHandle];
+        [textMetaHandle closeFile];
+    }
+
+    NSTask * pythonTask = [[NSTask alloc] init];
+    [pythonTask setLaunchPath:[@"~/Documents/develop/pytivo/metadata.py" stringByExpandingTildeInPath]];
+    [pythonTask setArguments:@[ [filePath stringByExpandingTildeInPath]]];
+    [fm createFileAtPath:textFromMP4Path contents:nil attributes:nil];
+    NSFileHandle * textHandle = [NSFileHandle fileHandleForWritingAtPath:textFromMP4Path];
+    [pythonTask setStandardOutput:textHandle];
+    [pythonTask launch];
+    [pythonTask  waitUntilExit];
+    [textHandle closeFile];
+
+    if ([pythonTask terminationStatus] == 0) {
+          NSString * bashCmd = [NSString stringWithFormat:@"diff -u <(sort \"%@\") <(sort \"%@\") >\"%@\"",textMetaPath, textFromMP4Path, diffPath ];
+          NSTask * proc = [[NSTask alloc] init];
+          [proc setLaunchPath:@"/bin/bash"];
+          [proc setArguments:@[ @"-c", bashCmd]];
+          [proc launch];
+          [proc  waitUntilExit];
+
+        if ([proc terminationStatus] != 0) {
+                   DDLogMajor(@"Diff metadata failed for %@", self);
+        }
+    } else {
+        DDLogMajor(@"Python metadata failed for %@", self);
+    }
+
+
+}
+-(void) addExtendedMetaDataToFile:(MP4FileHandle *)fileHandle withImage:(NSImage *) artwork {
+
+    HDTypes hdType = [self hdTypeForMP4File:fileHandle ];
+    const MP4Tags* tags = [self metaDataTagsWithImage: artwork andResolution:hdType];
+    MP4TagsStore(tags, fileHandle );
+    MP4TagsFree(tags);
+
+
+
+    //   for (NSString * key in [@'vActor', 'directors': 'vDirector',  'producers': 'vProducer', 'screenwriters': 'vWriter']);
+
+    NSMutableDictionary * iTunMovi = [NSMutableDictionary dictionary];
+    if (self.directors.string.length) {
+        [iTunMovi setObject:[self dictArrayFromString:self.directors] forKey:@"directors"];
+    }
+    if (self.actors.string.length > 0 ||
+        self.guestStars.string.length > 0){
+        NSArray * castArray = [[self dictArrayFromString: self.actors    ]  arrayByAddingObjectsFromArray:
+                           [self dictArrayFromString: self.guestStars]];
+        [iTunMovi setObject:castArray forKey:@"cast"];
+    }
+    if (self.producers.string.length) {
+        [iTunMovi setObject:[self dictArrayFromString:self.producers] forKey:@"producers"];
+    }
+    if (self.writers.string.length) {
+        [iTunMovi setObject:[self dictArrayFromString:self.writers] forKey:@"screenwriters"];
+    }
+
+    if (iTunMovi.count) {
+        NSData *serializedPlist = [NSPropertyListSerialization
+                                   dataFromPropertyList:iTunMovi
+                                   format:NSPropertyListXMLFormat_v1_0
+                                   errorDescription:nil];
+        MP4ItmfItem* newItem = MP4ItmfItemAlloc( "----", 1 );
+        newItem->mean = strdup( "com.apple.iTunes" );
+        newItem->name = strdup( "iTunMOVI" );
+
+        MP4ItmfData* data = &newItem->dataList.elements[0];
+        data->typeCode = MP4_ITMF_BT_UTF8;
+        data->valueSize = (unsigned int) [serializedPlist length];
+        data->value = (uint8_t*)malloc( data->valueSize );
+        memcpy( data->value, [serializedPlist bytes], data->valueSize );
+
+        MP4ItmfAddItem(fileHandle, newItem);
+        MP4ItmfItemFree(newItem);
+    }
+
+#define pytivoEmbed 1
+#if pytivoEmbed
+    NSMutableDictionary * tiVoInfo = [NSMutableDictionary dictionary];
+    if (self.channelString.length >0) {
+        [tiVoInfo setObject:self.channelString forKey:@"displayMajorNumber"];
+    }
+    if (self.showTime.length >0){
+        [tiVoInfo setObject:self.showTime forKey:@"time"];
+    }
+    if (self.colorCode.length >0){
+        [tiVoInfo setObject:self.colorCode forKey:@"colorCode"];
+    }
+    if (self.showingBits.length >0){
+        [tiVoInfo setObject:self.showingBits forKey:@"showingBits"];
+    }
+    if (self.starRating.length >0){
+        [tiVoInfo setObject:self.starRating forKey:@"starRating"];
+    }
+    if (self.startTime.length >0){
+        [tiVoInfo setObject:self.startTime forKey:@"startTime"];
+    }
+    if (self.stopTime.length >0){
+        [tiVoInfo setObject:self.stopTime forKey:@"stopTime"];
+    }
+    if (self.programId.length >0){
+        [tiVoInfo setObject:self.programId forKey:@"programId"];
+    }
+    if (self.seriesId.length >0){
+        [tiVoInfo setObject:self.seriesId forKey:@"seriesId"];
+    }
+    if (tiVoInfo.count) {
+        NSData *serializedPlist = [NSPropertyListSerialization
+                                   dataFromPropertyList:tiVoInfo
+                                   format:NSPropertyListXMLFormat_v1_0
+                                   errorDescription:nil];
+        MP4ItmfItem* newItem = MP4ItmfItemAlloc( "----", 1 );
+        newItem->mean = strdup( "com.pyTivo.pyTivo" );
+        newItem->name = strdup( "tiVoINFO" );
+
+        MP4ItmfData* data = &newItem->dataList.elements[0];
+        data->typeCode = MP4_ITMF_BT_UTF8;
+        data->valueSize = (unsigned int) [serializedPlist length];
+        data->value = (uint8_t*)malloc( data->valueSize );
+        memcpy( data->value, [serializedPlist bytes], data->valueSize );
+
+        MP4ItmfAddItem(fileHandle, newItem);
+        MP4ItmfItemFree(newItem);
+    }
+#endif
+    //Now for ratings
+
+    NSString * itunesRating = [self iTunesCode];
+    if (itunesRating.length >0) {
+        MP4ItmfItem *newItem = MP4ItmfItemAlloc("----", 1);
+        newItem->mean = strdup("com.apple.iTunes");
+        newItem->name = strdup("iTunEXTC");
+
+        MP4ItmfData *data = &newItem->dataList.elements[0];
+        data->typeCode = MP4_ITMF_BT_UTF8;
+        data->valueSize = (unsigned int) strlen([itunesRating UTF8String]);
+        data->value = (uint8_t*)malloc( data->valueSize );
+        memcpy( data->value, [itunesRating UTF8String], data->valueSize );
+
+        MP4ItmfAddItem(fileHandle, newItem);
+    }
 }
 
 -(NSString *)showDateString
@@ -1219,9 +1520,7 @@ static void * originalAirDateContext = &originalAirDateContext;
             _originalAirDateNoTime = self.movieYear;
         }
     } else if (context == originalAirDateContext) {
-        if (_originalAirDate.length > 4) {
-            _episodeYear = [[_originalAirDate substringToIndex:4] intValue];
-        }
+
         if (_originalAirDate.length >= 10) {
             _originalAirDateNoTime = [_originalAirDate substringToIndex:10];
         } else if (_originalAirDate.length > 0) {
@@ -1350,14 +1649,69 @@ static void * originalAirDateContext = &originalAirDateContext;
 	self.directors = [self parseNames: vDirector ];
 }
 
--(void)setVExecProducer:(NSArray *)vExecProducer
+-(void)setVWriter:(NSArray*) vWriter
 {
-	if ( ![vExecProducer isKindOfClass:[NSArray class]]) {
-		return;
-	}
-    self.producers  = [self parseNames:vExecProducer];
+    if ( ![vWriter isKindOfClass:[NSArray class]]) {
+        return;
+    }
+    self.writers = [self parseNames: vWriter ];
 }
 
+-(NSAttributedString *) appendNames: (NSArray *) names to: (NSAttributedString *) stringA {
+    NSAttributedString * temp = [self parseNames:names];
+
+    if (stringA.string.length == 0) {
+        return temp;
+    } else {
+        return [[NSAttributedString alloc] initWithString:[NSString stringWithFormat: @"%@\n%@",stringA.string, temp.string]
+                                               attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:11]} ]
+                ;
+    }
+
+}
+
+-(void)setVExecProducer:(NSArray *)vExecProducer   //we just merge producers and exec producers together
+{
+    if ( ![vExecProducer isKindOfClass:[NSArray class]]) {
+        return;
+    }
+    self.producers = [self appendNames:vExecProducer to:self.producers];
+}
+
+-(void)setVProducer:(NSArray *)vProducer
+{
+    if ( ![vProducer isKindOfClass:[NSArray class]]) {
+        return;
+    }
+    self.producers = [self appendNames:vProducer to:self.producers];
+
+}
+
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-property-ivar"
+-(NSString *) ageRatingString {
+    NSUInteger index;
+    NSArray * ratingArray;
+    if  (self.mpaaRating > self.tvRating) {
+       index  = self.mpaaRating > 0 ? self.mpaaRating : 0;
+        ratingArray = @[ @"", @"G", @"PG", @"PG-13",  @"R", @"NC-17"];
+     } else {
+        index = self.tvRating > 0 ? self.tvRating : 0;
+        ratingArray = @[ @"", @"TV-Y", @"TV-Y7", @"TV-G",  @"TV-PG", @"TV-14", @"TV-MA"];
+    }
+    if ( index < ratingArray.count ) {
+        return ratingArray[index];
+    } else {
+        return @"";
+    }
+}
+
+-(NSNumber *) ageRatingValue {
+    return @(MAX(self.mpaaRating , self.tvRating));
+}
+
+#pragma clang diagnostic pop
 
 -(void)setVProgramGenre:(NSArray *)vProgramGenre
 {

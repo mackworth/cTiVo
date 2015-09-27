@@ -111,7 +111,8 @@ __DDLOGHERE__
             @"HighDefinition" : @{kMTValue : @"isHD", kMTType : [NSNumber numberWithInt:kMTBoolType]},
             @"ProgramId" : @{kMTValue : @"programId", kMTType : [NSNumber numberWithInt:kMTStringType]},
             @"SeriesId" : @{kMTValue : @"seriesId", kMTType : [NSNumber numberWithInt:kMTStringType]},
-            @"TvRating" : @{kMTValue : @"tvRating", kMTType : [NSNumber numberWithInt:kMTStringType]},
+            @"TvRating" : @{kMTValue : @"tvRating", kMTType : [NSNumber numberWithInt:kMTNumberType]},
+            @"MpaaRating" : @{kMTValue : @"mpaaRating", kMTType : [NSNumber numberWithInt:kMTNumberType]},
             @"SourceType" : @{kMTValue : @"sourceType", kMTType : [NSNumber numberWithInt:kMTStringType]},
             @"IdGuideSource" : @{kMTValue : @"idGuidSource", kMTType : [NSNumber numberWithInt:kMTStringType]}};
 		elementToPropertyMap = [[NSDictionary alloc] initWithDictionary:elementToPropertyMap];
@@ -481,7 +482,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				DDLogVerbose(@"Content URL is %@",currentShow.downloadURL);
 			}
         } else if (gettingIcon) {
-            //Get URL for Content here
+            //Get name of Icon here
 			if ([elementName caseInsensitiveCompare:@"Url"] == NSOrderedSame) {
 				NSString *introURL = @"urn:tivo:image:";
 				if ([element hasPrefix: introURL]){
@@ -498,7 +499,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                 case kMTStringType:
                     //Process String Type here
 					valueToSet = element;
-					break;
+                    break;
                     
                 case kMTBoolType:
                     //Process Boolean Type here
@@ -586,16 +587,20 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	NSRegularExpression *portRx = [NSRegularExpression regularExpressionWithPattern:@"\\:(\\d+)\\/" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSTextCheckingResult *portMatch = [portRx firstMatchInString:elementToUpdate options:0 range:NSMakeRange(0, elementToUpdate.length)];
 	if (portMatch.numberOfRanges == 2) {
-		NSString *portString = [elementToUpdate substringWithRange:[portMatch rangeAtIndex:1]];
-		NSString *portReplaceString = portString;
+        NSRange portRange = [portMatch rangeAtIndex:1];
+		NSString *portString = [elementToUpdate substringWithRange:portRange];
+        short port = -1;
+
 		if ([portString compare:@"443"] == NSOrderedSame) {
-			portReplaceString = [NSString stringWithFormat:@"%d",self.tiVo.userPortSSL];
+            port = self.tiVo.userPortSSL;
+        } else if ([portString compare:@"80"] == NSOrderedSame) {
+            port = self.tiVo.userPort;
 		}
-		if ([portString compare:@"80"] == NSOrderedSame) {
-			portReplaceString = [NSString stringWithFormat:@"%d",self.tiVo.userPort];
-		}
-		DDLogVerbose(@"Replacing port %@ with %@",portString,portReplaceString);
-		[elementToUpdate replaceOccurrencesOfString:portString withString:portReplaceString options:0 range:NSMakeRange(0, elementToUpdate.length)];
+        if ( port > 0 ) {
+            NSString * portReplaceString = [NSString stringWithFormat:@"%d", port];
+            DDLogVerbose(@"Replacing port %@ with %@",portString, portReplaceString);
+            [elementToUpdate replaceCharactersInRange:portRange withString:portReplaceString] ;
+        }
 	}
 }
 

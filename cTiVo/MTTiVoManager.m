@@ -56,47 +56,23 @@ __DDLOGHERE__
 
 #pragma mark - Singleton Support Routines
 
-static MTTiVoManager *sharedTiVoManager = nil;
-
 + (MTTiVoManager *)sharedTiVoManager {
-    if (sharedTiVoManager == nil) {
-        sharedTiVoManager = [[super allocWithZone:NULL] init];
-        [sharedTiVoManager setupNotifications];
+     static dispatch_once_t pred;
+    static MTTiVoManager *myManager = nil;
+    BOOL __block firstTime = NO;
+    dispatch_once(&pred, ^{
+        myManager = [[self alloc] init];
+        //have to wait until tivomanager is assigned and out of protected block
+        //before calling subsidiary data models as they will call back in
+        firstTime = YES;
+
+    });
+    if (firstTime) {
+        [myManager restoreOldQueue]; //no reason to fire all notifications on initial queue
+        [myManager setupNotifications];
     }
-    
-    return sharedTiVoManager;
+    return myManager;
 }
-
-// We don't want to allocate a new instance, so return the current one.
-+ (id)allocWithZone:(NSZone*)zone {
-    return [self sharedTiVoManager];
-}
-
-// Equally, we don't want to generate multiple copies of the singleton.
-- (id)copyWithZone:(NSZone *)zone {
-    return self;
-}
-
-// Once again - do nothing, as we don't have a retain counter for this object.
-//- (id)retain {
-//    return self;
-//}
-
-//// Replace the retain counter so we can never release this object.
-//- (NSUInteger)retainCount {
-//    return NSUIntegerMax;
-//}
-//
-//// This function is empty, as we don't want to let the user release this object.
-//- (oneway void)release {
-//    
-//}
-//
-////Do nothing, other than return the shared instance - as this is expected from autorelease.
-//- (id)autorelease {
-//    return self;
-//}
-//
 
 -(id)init
 {
@@ -202,6 +178,7 @@ static MTTiVoManager *sharedTiVoManager = nil;
 		
 		[self loadGrowl];
 //		NSLog(@"Getting Host Addresses");
+//      Note that NSHost is unsafe in general
 //		hostAddresses = [[[NSHost currentHost] addresses] retain];
 //        NSLog(@"Host Addresses = %@",self.hostAddresses);
 //        NSLog(@"Host Names = %@",[[NSHost currentHost] names]);
@@ -563,10 +540,8 @@ static MTTiVoManager *sharedTiVoManager = nil;
 }
 
 -(void) setupNotifications {
-    //have to wait until tivomanager is setup before calling subsidiary data models
-	[self restoreOldQueue];
-	
-	DDLogVerbose(@"setting tivoManager notifications");
+
+    DDLogVerbose(@"setting tivoManager notifications");
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
     
     [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadDidFinish object:nil];

@@ -2,7 +2,7 @@
 xmlns="http://www.w3.org/1999/XSL/Transform">
 <output method="text"/>
 
-<template match="originalAirDate|episodeTitle|title|time|movieYear|seriesTitle|isEpisode|seriesId|episodeNumber|displayMajorNumber|callsign|displayMinorNumber|startTime|stopTime|partCount|partIndex">
+<template match="originalAirDate|episodeTitle|title|time|movieYear|seriesTitle|isEpisode|seriesId|episodeNumber|displayMajorNumber|callsign|displayMinorNumber|startTime|stopTime|partCount|partIndex|tvRating|mpaaRating">
   <value-of select="name()"/>
   <text> : </text>
   <value-of select="."/>
@@ -35,24 +35,15 @@ xmlns="http://www.w3.org/1999/XSL/Transform">
 </text>
 
 </template>
-<template match="tvRating|starRating|colorCode">
-  <value-of select="name()"/>
-  <text> : 0</text>
-  <value-of select="@value"/>
-  <text>
-</text>
-
-</template>
-
-<template match="mpaaRating">
+<template match="starRating|colorCode">
   <value-of select="name()"/>
   <text> : </text>
-  <value-of select="substring(. , 1, 1)"/>
   <value-of select="@value"/>
   <text>
 </text>
 
 </template>
+
 
 <template match="vActor|vGuestStar|vDirector|vExecProducer|vProducer|vWriter|vHost|vChoreographer|vProgramGenre|vSeriesGenre">
   <for-each select="element">
@@ -72,6 +63,9 @@ xmlns="http://www.w3.org/1999/XSL/Transform">
 </template>
 
 <template match="vActualShowing">
+</template>
+
+<template match="vBookmark">
 </template>
 
 <template match="*">
