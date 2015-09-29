@@ -12,6 +12,7 @@
 #import "MTSubscriptionList.h"
 //#import "NSNotificationCenter+Threads.h"
 #import <Growl/Growl.h>
+#import "NSString+Helpers.h"
 
 #include <arpa/inet.h>
 #include <sys/xattr.h>
@@ -1404,8 +1405,12 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 }
 
 -(void) setDownloadDirectory: (NSString *) newDir {
-	if (newDir != _downloadDirectory) {
-		
+ 	if (newDir != _downloadDirectory) {
+        if ([newDir isEquivalentToPath:self.defaultDownloadDirectory] ||
+            [newDir isEquivalentToPath:self.downloadDirectory]) {
+            DDLogReport(@"Can't set download directory to temp directory%@; trying default", newDir);
+            newDir = nil;
+        }
 		if (newDir.length > 0) {
 			if (![self checkDirectory:newDir]) {
 				DDLogReport(@"Can't open user's download directory %@; trying default", newDir);
@@ -1422,7 +1427,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 			}
 		}
 		if (newDir) {
-			[[NSUserDefaults standardUserDefaults] setValue:newDir forKey:kMTDownloadDirectory];
+ 			[[NSUserDefaults standardUserDefaults] setValue:newDir forKey:kMTDownloadDirectory];
 			_downloadDirectory = newDir;
 		}
 	}

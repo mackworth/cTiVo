@@ -16,6 +16,7 @@
 #import "NSNotificationCenter+Threads.h"
 #import "Fabric/Fabric.h"
 #import "Crashlytics/Crashlytics.h"
+#import "NSString+Helpers.h"
 
 #import <IOKit/pwr_mgt/IOPMLib.h>
 #include <ctype.h>
@@ -364,6 +365,43 @@ Routine to update and combine both the manual tivo preferences and the media key
     }
 }
 
+BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for directory change.
+                          //from [NSUserDefaultsController _setSingleValue:forKey:]
+
+-(void) promptForNewTmpDirectory:(NSString *) oldTmpDir withMessage: (NSString *) message{
+    if (panelIsActive) return;
+    panelIsActive = YES;
+    NSString *fullMessage = [NSString stringWithFormat:message,oldTmpDir];
+    DDLogReport(@"Error \"%@\" while checking tmp directory.",fullMessage);
+    if ( [oldTmpDir isEquivalentToPath:  kMTTmpDir]) {
+        fullMessage = [fullMessage stringByAppendingString:@"\nPlease fix directory problem, or choose a new location." ] ;
+    } else {
+        fullMessage = [fullMessage stringByAppendingString:@"\nPlease choose a new location, or press 'Cancel' to use default temp directory." ] ;
+    }
+    NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
+    myOpenPanel.canChooseFiles = NO;
+    myOpenPanel.canChooseDirectories = YES;
+    myOpenPanel.canCreateDirectories = YES;
+    myOpenPanel.directoryURL = [NSURL fileURLWithPath:oldTmpDir];
+    myOpenPanel.message = fullMessage;
+    myOpenPanel.prompt = @"Choose";
+    [myOpenPanel setTitle:@"Select Directory for Temp cTiVo Files"];
+
+    NSWindow * window = [NSApp keyWindow] ?: mainWindowController.window;
+    [myOpenPanel beginSheetModalForWindow:window completionHandler:^(NSInteger ret){
+        NSString *directoryName;
+        if (ret == NSFileHandlingPanelOKButton) {
+            directoryName = myOpenPanel.URL.path;
+        } else {
+            directoryName = kMTTmpDir;
+        }
+        [myOpenPanel close];
+        panelIsActive = NO;
+        [[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
+    }];
+
+}
+
 -(void)validateTmpDirectory
 {
     //Validate users choice for tmpFilesDirectory
@@ -373,93 +411,51 @@ Routine to update and combine both the manual tivo preferences and the media key
     if (![fm fileExistsAtPath:tmpdir isDirectory:&isDir]) {
         NSError *error = nil;
         newDir = [fm createDirectoryAtPath:tmpdir withIntermediateDirectories:YES attributes:nil error:&error];
-        if (error) DDLogMajor(@"Error %@ creating new tmp directory",error);
+        if (error) DDLogReport(@"Error %@ creating new tmp directory",error);
 
         if (newDir) {
             isDir = YES;
         }
     }
+    
     if (!newDir || !isDir) { //Something wrong with this choice
         if (newDir && !isDir) {
-            NSString *message = [NSString stringWithFormat:@"%@ is a file, not a directory.  \nPlease choose a new location and press 'Choose' \nor press 'Cancel' to delete the existing file.",tmpdir];
-			NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
-			myOpenPanel.canChooseFiles = NO;
-			myOpenPanel.canChooseDirectories = YES;
-			myOpenPanel.canCreateDirectories = YES;
-			myOpenPanel.directoryURL = [NSURL fileURLWithPath:tmpdir];
-			myOpenPanel.message = message;
-			myOpenPanel.prompt = @"Choose";
-			[myOpenPanel setTitle:@"Select Temp Directory for Files"];
-			[myOpenPanel beginSheetModalForWindow:mainWindowController.window completionHandler:^(NSInteger ret){
-				if (ret == NSFileHandlingPanelOKButton) {
-					NSString *directoryName = myOpenPanel.URL.path;
-					[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
-				} else {
-					NSError *error = nil;
-					[fm removeItemAtPath:tmpdir error:&error];
-					if (error) DDLogMajor(@"Can't remove %@, Error was %@",tmpdir, error);
-				}
-				[myOpenPanel close];
-				[self validateTmpDirectory];
-			}];
+            [self promptForNewTmpDirectory:tmpdir withMessage:@"%@ is a file, not a directory"];
         } else {
-            NSString *message = [NSString stringWithFormat:@"Unable to create directory %@. \n Please choose a new location or fix permissions.",tmpdir];
-			NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
-			myOpenPanel.canChooseFiles = NO;
-			myOpenPanel.canChooseDirectories = YES;
-			myOpenPanel.canCreateDirectories = YES;
-			myOpenPanel.directoryURL = [NSURL fileURLWithPath:tmpdir];
-			myOpenPanel.message = message;
-			myOpenPanel.prompt = @"Choose";
-			[myOpenPanel setTitle:@"Select Temp Directory for Files"];
-			[myOpenPanel beginSheetModalForWindow:mainWindowController.window completionHandler:^(NSInteger ret){
-				if (ret == NSFileHandlingPanelOKButton) {
-					NSString *directoryName = myOpenPanel.URL.path;
-					[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
-				}
-				[myOpenPanel close];
-				[self validateTmpDirectory];
-			}];
+            [self promptForNewTmpDirectory:tmpdir withMessage:@"Unable to create directory %@; maybe need to fix permissions?"];
         }
+        return;
+
+    } else if ( [[tiVoManager downloadDirectory] isEquivalentToPath:  kMTTmpDir]) {
+        //well, that's not good
+        tiVoManager.downloadDirectory = [tiVoManager defaultDownloadDirectory];
+        return;
+    } else if ([tmpdir isEquivalentToPath: [tiVoManager defaultDownloadDirectory]  ] ) {
+        //Oops; user confused temp dir with download dir
+        [self promptForNewTmpDirectory:tmpdir withMessage:@"Your temp directory %@ needs to be separate from your download directory."];
+         return;
     }
     //Now check for write permission
     NSString *testPath = [NSString stringWithFormat:@"%@/.junk",tmpdir];
     BOOL canWrite = [fm createFileAtPath:testPath contents:[NSData data] attributes:nil];
     if (!canWrite) {
-        NSString *message = [NSString stringWithFormat:@"You don't have write permission on %@.  \nPlease fix the permissions or choose a new location.",tmpdir];
-		NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
-		myOpenPanel.canChooseFiles = NO;
-		myOpenPanel.canChooseDirectories = YES;
-		myOpenPanel.canCreateDirectories = YES;
-		myOpenPanel.directoryURL = [NSURL fileURLWithPath:tmpdir];
-		myOpenPanel.message = message;
-		myOpenPanel.prompt = @"Choose";
-		[myOpenPanel setTitle:@"Select Temp Directory for Files"];
-		[myOpenPanel beginSheetModalForWindow:mainWindowController.window completionHandler:^(NSInteger ret){
-			if (ret == NSFileHandlingPanelOKButton) {
-				NSString *directoryName = myOpenPanel.URL.path;
-				[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
-			}
-			[myOpenPanel close];
-			[self validateTmpDirectory];
-		}];
+         [self promptForNewTmpDirectory:tmpdir withMessage:@"You don't have write permission on %@."];
 
     } else {
         //Clean up
         [fm removeItemAtPath:testPath error:nil];
     }
-    return;
-  
 }
 
 -(void)clearTmpDirectory
 {
-	//Make sure the tmp directory exits
+	//Make sure the tmp directory exists
 	if (![[NSFileManager defaultManager] fileExistsAtPath:tiVoManager.tmpFilesDirectory]) {
 		[[NSFileManager defaultManager] createDirectoryAtPath:tiVoManager.tmpFilesDirectory withIntermediateDirectories:YES attributes:nil error:nil];
-	} else {
+    } else 	if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+        if ([tiVoManager.tmpFilesDirectory isEquivalentToPath:kMTTmpDir]){
+        //only erase all files if we're in our original temp dir. Too risky elsewise;
 		//Clear it if not saving intermediate files
-		if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
 			NSFileManager *fm = [NSFileManager defaultManager];
 			NSError *err = nil;
 			NSArray *filesToRemove = [fm contentsOfDirectoryAtPath:tiVoManager.tmpFilesDirectory error:&err];
@@ -482,7 +478,7 @@ Routine to update and combine both the manual tivo preferences and the media key
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
+    if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
 		DDLogDetail(@"Selecting Format");
 		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
         BOOL canSkip = [tiVoManager.selectedFormat.comSkip boolValue];

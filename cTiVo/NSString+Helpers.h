@@ -18,4 +18,6 @@
 
 + (NSString *)stringFromBytesPerSecond: (double) speed;
 
+- (BOOL) isEquivalentToPath: (NSString *) path;
+
 @end

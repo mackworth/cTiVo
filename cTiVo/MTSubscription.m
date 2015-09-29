@@ -139,7 +139,6 @@ __DDLOGHERE__
 	
 	//Check if we've already recorded it
 	for (NSDictionary * prevShow in self.prevRecorded ) {
-		DDLogVerbose(@"check Recorded: %@ v. %@",prevShow[@"episodeID"], tivoShow.episodeID);  //QQQ debug only; pullout
 		if ([prevShow[@"episodeID"] isEqualToString: tivoShow.episodeID]) {
 			DDLogVerbose(@"Already recorded: %@ ",prevShow);
 			return NO;
@@ -386,7 +385,6 @@ __DDLOGHERE__
 #pragma mark - Pasteboard routines
 
 - (id)pasteboardPropertyListForType:(NSString *)type {
-    //	NSLog(@"QQQ:pboard Type: %@",type);
     if ( [type isEqualToString:NSPasteboardTypeString]) {
         return [self subscribeString] ;
     } else {

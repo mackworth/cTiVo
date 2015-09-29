@@ -343,7 +343,6 @@ static NSDateFormatter *dateFormatter;
 	// 	NSArray	*selectedObjects = [self.sortedSubscriptions objectsAtIndexes:rowIndexes ];
 	//	[pboard declareTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType,nil] owner:self];
 	//[pboard writeObjects:selectedObjects];
-	//	NSLog (@"QQQQproperty list: %@",[pboard propertyListForType:kMTTivoShowPasteBoardType]);
 	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
 		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
 		NSPoint p = [tv convertPoint:windowPoint fromView:nil];

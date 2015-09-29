@@ -38,7 +38,8 @@
 	myOpenPanel.prompt = @"Choose";
 	myOpenPanel.directoryURL = [NSURL fileURLWithPath:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTmpFilesDirectory]];
 	[myOpenPanel setTitle:@"Select Temp Directory for Files"];
-	[myOpenPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSInteger ret){
+ 	[myOpenPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSInteger ret){
+        [myOpenPanel orderOut:nil];
 		if (ret == NSFileHandlingPanelOKButton) {
 			NSString *directoryName = [myOpenPanel.URL.path stringByStandardizingPath];
             if (![directoryName  isEqualToString:[[tiVoManager downloadDirectory] stringByStandardizingPath] ] ||
@@ -46,7 +47,6 @@
                 [[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
             }
 		}
-		[myOpenPanel close];
 	}];
 	
 }

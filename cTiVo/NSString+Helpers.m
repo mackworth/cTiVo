@@ -61,4 +61,29 @@
 }
 
 
+- (BOOL) isEquivalentToPath: (NSString *) path {
+    if (!path.length) return NO;
+
+    if ([self isEqualToString:path] ) {
+        return YES;
+    }
+    NSURL * urlA = [NSURL fileURLWithPath:self];
+    NSURL * urlB = [NSURL fileURLWithPath:path];
+
+    // Standarized path. Valid for ~ . and ..
+    // Does not resolv real paths, though.
+    NSString * myPathA = [[urlA path] stringByStandardizingPath];
+    NSString * myPathB = [[urlB path] stringByStandardizingPath];
+    if ([myPathA isEqualToString:myPathB]) return YES;
+
+    // If everything else fails, test if both files point to the same resource (symbolic links, shared files...)
+    myPathA = [myPathA stringByResolvingSymlinksInPath];
+    myPathB = [myPathB stringByResolvingSymlinksInPath];
+    if ([myPathA isEqualToString:myPathB]) return YES; // both files must exist
+
+    return NO;
+}
+
+
+
 @end

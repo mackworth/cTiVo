@@ -700,7 +700,7 @@ May not work in quicktime</string>
 			<key>inputFileFlag</key>
 			<string></string>
 			<key>regExProgress</key>
-			<string></string>
+            <string>\( ?([\d\.]*?)\%\)</string>
 			<key>isHidden</key>
 			<false/>
 		</dict>
@@ -736,7 +736,7 @@ May not work in Quicktime</string>
 			<key>outputFileFlag</key>
 			<string>-o</string>
 			<key>regExProgress</key>
-			<string></string>
+			<string>\( ?([\d\.]*?)\%\)</string>
 			<key>isHidden</key>
 			<false/>
 		</dict>
