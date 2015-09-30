@@ -76,12 +76,13 @@ __DDLOGHERE__
 //                }
                 break;
             case 1:
-                if (newValuesEnabled == 0) {
+                if (newValuesEnabled == 0 && newValues.count > 0) {
                     NSMutableArray *changedNewValues = [NSMutableArray arrayWithArray:newValues];
                     NSMutableDictionary *firstValue = [NSMutableDictionary dictionaryWithDictionary:changedNewValues[0]];
                     firstValue[kMTTiVoEnabled] = @YES;
                     [changedNewValues replaceObjectAtIndex:0 withObject:firstValue];
                     [[NSUserDefaults standardUserDefaults] setObject:changedNewValues forKey:kMTTiVos];
+                    return;  //previous line will recurse, no need to load agin.
                 }
                 break;
                 

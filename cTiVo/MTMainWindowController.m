@@ -201,7 +201,8 @@ __DDLOGHERE__
 		}
 		
 	}
-    if (tiVoManager.tiVoList.count == 0) {
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(popupHelpIfNotTiVosAfterInterval) object:nil];
+   if (tiVoManager.tiVoList.count == 0) {
 		[tiVoListPopUp setHidden:YES];
 		tiVoListPopUpLabel.stringValue = @"Searching for TiVos...";
 		tiVoListPopUpLabel.hidden = NO;
@@ -209,7 +210,6 @@ __DDLOGHERE__
         [self performSelector:@selector(popupHelpIfNotTiVosAfterInterval) withObject:Nil afterDelay:kMTTimeToHelpIfNoTiVoFound];
 	} else if (tiVoManager.tiVoList.count == 1) {
         [searchingTiVosIndicator stopAnimation:nil];
-        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(popupHelpIfNotTiVosAfterInterval) object:nil];
 		MTTiVo *ts = tiVoManager.tiVoList[0];
         [tiVoListPopUp selectItem:[tiVoListPopUp lastItem]];
 		[tiVoListPopUpLabel setHidden:NO];
@@ -224,7 +224,6 @@ __DDLOGHERE__
         }
     } else if (tiVoManager.tiVoList.count > 1){
         [searchingTiVosIndicator stopAnimation:nil];
-        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(popupHelpIfNotTiVosAfterInterval) object:nil];
         [tiVoListPopUp.menu addItem:[NSMenuItem separatorItem]];
         [tiVoListPopUp addItemWithTitle:[NSString stringWithFormat:@"%@ (%d shows)",kMTAllTiVos,tiVoManager.totalShows]];
         if ([kMTAllTiVos compare:_selectedTiVo] == NSOrderedSame) {

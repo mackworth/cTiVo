@@ -1406,8 +1406,8 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(void) setDownloadDirectory: (NSString *) newDir {
  	if (newDir != _downloadDirectory) {
-        if ([newDir isEquivalentToPath:self.defaultDownloadDirectory] ||
-            [newDir isEquivalentToPath:self.downloadDirectory]) {
+        if ([newDir isEquivalentToPath:kMTTmpDir] ||
+            [newDir isEquivalentToPath:[[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory]]) {
             DDLogReport(@"Can't set download directory to temp directory%@; trying default", newDir);
             newDir = nil;
         }
