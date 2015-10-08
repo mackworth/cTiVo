@@ -17,6 +17,7 @@
 
 -(void) initialLastLoadedTimes { //called when TivoList changes
     for (MTTiVo * tivo in tiVoManager.tiVoList) {  //ensure all are in the dictionary
+        if (!tivo.tiVo.name) continue;   //should never happen, yet it did once...
         if (!tiVoManager.lastLoadedTivoTimes[tivo.tiVo.name]) {
             tiVoManager.lastLoadedTivoTimes[tivo.tiVo.name] = [NSDate distantPast];  //first time, so mark as not processed yet
         }

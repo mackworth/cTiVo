@@ -172,7 +172,6 @@
 		1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTIsStringEmpty.m; sourceTree = "<group>"; };
 		1E4A38461A37C0F4001D84A7 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
 		1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionList.m; sourceTree = "<group>"; };
-		1E533E0F1A51F662006E6757 /* cTiVoLogging-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTiVoLogging-Info.plist"; path = "/Users/hugh/Documents/Develop/cTiVoGithub/cTiVoLogging-Info.plist"; sourceTree = "<absolute>"; };
 		1E5936821964867E0008780B /* MTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLog.h; sourceTree = "<group>"; };
 		1E59368319648C180008780B /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
 		1E59368819648C860008780B /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
@@ -602,7 +601,6 @@
 			isa = PBXGroup;
 			children = (
 				D2D60BA916766EFD00CE32DE /* cTiVo-Info.plist */,
-				1E533E0F1A51F662006E6757 /* cTiVoLogging-Info.plist */,
 				D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */,
 				D2D60BAD16766EFD00CE32DE /* main.m */,
 				D2D60BAF16766EFD00CE32DE /* cTiVo-Prefix.pch */,
@@ -978,7 +976,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = NO;
 				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_IDENTITY = "Mac Developer:";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_TESTABILITY = YES;
@@ -1053,8 +1051,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Mac Developer:";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1085,7 +1082,6 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "Developer ID Application";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

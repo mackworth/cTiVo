@@ -484,6 +484,7 @@ __DDLOGHERE__
     DDLogDetail(@"Getting movie Data for %@ using %@",self,reportURL);
     NSURL *url = [NSURL URLWithString:urlString];
     NSData *movieInfo = [NSData dataWithContentsOfURL:url options:NSDataReadingUncached error:nil];
+    if (!movieInfo) return;
     self.gotTVDBDetails = YES;
 
     NSError *error = nil;

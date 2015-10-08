@@ -1009,7 +1009,12 @@ NSString * fourChar(long n, BOOL allowZero) {
         return _decryptTask;
     }
     MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
-    [decryptTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"tivodecode"]];
+    NSString * decryptPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"tivodecode"];
+    if (!decryptPath) { //should never happen, but did once.
+        DDLogReport(@"Fatal Error: tivodecode not found??");
+        return nil;
+    }
+    [decryptTask setLaunchPath:decryptPath] ;
     decryptTask.successfulExitCodes = @[@0,@6];
 
     decryptTask.completionHandler = ^BOOL(){
