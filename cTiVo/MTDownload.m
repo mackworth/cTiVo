@@ -1797,8 +1797,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		}
 		if (self.encodeFormat.canAcceptMetaData) {
             [self.show addExtendedMetaDataToFile:encodedFile withImage:artwork];
-
-}
+        }
 		
 		MP4Close(encodedFile, 0);
     }
@@ -2181,6 +2180,10 @@ NSString * fourChar(long n, BOOL allowZero) {
         } else {
             [challenge.sender cancelAuthenticationChallenge:challenge];
             DDLogMajor(@"No MAK, so failing URL Authentication %@",self.show.tiVoName);
+            if (activeURLConnection) {
+                [activeURLConnection cancel];
+                activeURLConnection = nil;
+            }
             if (bufferFileWriteHandle) {
                 [bufferFileWriteHandle closeFile];
             }
@@ -2204,7 +2207,11 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     DDLogMajor(@"URL Connection Failed with error %@",[error maskMediaKeys]);
-	if (bufferFileWriteHandle) {
+   if (activeURLConnection) {
+        [activeURLConnection cancel];
+        activeURLConnection = nil;
+    }
+    if (bufferFileWriteHandle) {
 		[bufferFileWriteHandle closeFile];
 	}
 	[self rescheduleOnMain];

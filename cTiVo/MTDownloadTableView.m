@@ -492,30 +492,31 @@ __DDLOGHERE__
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
 	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
+        //if user wants drag-to-select, then check if we're selecting new rows or not
+        //drag/drop if current row is  already selected OR we're over name of show
+        //this is parallel to Finder behavior.
 		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
 		NSPoint p = [tv convertPoint:windowPoint fromView:nil];
 		NSInteger r = [tv rowAtPoint:p];
 		NSInteger c = [tv columnAtPoint:p];
-		if (c < 0) 	c = 0;
-		if (c > tv.numberOfColumns) c = tv.numberOfColumns;
-		if (r < 0) r = 0;
-		if (r > tv.numberOfRows) r = tv.numberOfRows;
-		NSTableColumn *selectedColumn = tv.tableColumns[c];
-		BOOL isSelectedRow = [tv isRowSelected:r];
-		BOOL isOverText = NO;
-		if ([selectedColumn.identifier isEqualToString:@"Programs"]) { //Check if over text
-			MTProgressindicator *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
-			NSTextField *showField = showCellView.leftText;
-			NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
-			NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
-			if (clickInText.x < stringSize.width && clickInText.x < showField.bounds.size.width) {
-				isOverText = YES;
-			}
-		}
-		if (!isSelectedRow && !isOverText) {
-			return NO;
-		}
-	
+		if (c >= 0 && r >=0 ) {
+            NSTableColumn *selectedColumn = tv.tableColumns[c];
+            BOOL isSelectedRow = [tv isRowSelected:r];
+            BOOL isOverText = NO;
+            if ([selectedColumn.identifier isEqualToString:@"Programs"]) { //Check if over text
+                MTProgressindicator *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+                NSTextField *showField = showCellView.leftText;
+                NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+                NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
+                if (clickInText.x < stringSize.width && clickInText.x < showField.bounds.size.width) {
+                    isOverText = YES;
+                }
+            }
+            if (!isSelectedRow && !isOverText) {
+                return NO;
+            }
+        }
+
 	}
     // Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];

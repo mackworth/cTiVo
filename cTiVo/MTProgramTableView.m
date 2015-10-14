@@ -409,52 +409,49 @@ __DDLOGHERE__
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
 	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
+        //if user wants drag-to-select, then check if we're selecting new rows or not
+        //drag/drop if current row is  already selected OR we're over name of show
+        //this is parallel to Finder behavior.
 		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
 		NSPoint p = [tv convertPoint:windowPoint fromView:nil];
 		NSInteger r = [tv rowAtPoint:p];
-		if (r < 0) {
-			r = 0;
-		}
 		NSInteger c = [tv columnAtPoint:p];
-		if (c < 0) {
-			c = 0;
-		}
-//		NSTableColumn *selectedColumn = tv.tableColumns[c];
-//        NSTableCellView *selectedCell = selectedColumn.dataCell;
-		BOOL isSelectedRow = [tv isRowSelected:r];
-		BOOL isOverText = NO;
-        NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
-        NSTextAlignment alignment = showCellView.textField.alignment;
-        NSTextField *showField = showCellView.textField;
-		if (showField) {
-			NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
-			NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
-			NSSize cellSize = showCellView.frame.size;
-			switch (alignment) {
-				case NSLeftTextAlignment:
-				case NSNaturalTextAlignment:
-					if (clickInText.x < stringSize.width) {
-						isOverText = YES;
-					}
-					break;
-				case NSRightTextAlignment:
-					if (clickInText.x > cellSize.width - stringSize.width) {
-						isOverText = YES;
-					}
-					break;
-				case NSCenterTextAlignment:
-					if (clickInText.x < (cellSize.width + stringSize.width)/2.0 && clickInText.x > (cellSize.width - stringSize.width)/2.0) {
-						isOverText = YES;
-					}
-					break;
-					
-				default:
-					break;
-			}
-		}
-		if (!isSelectedRow && !isOverText) {
-			return NO;
-		}
+		if (c >= 0 && r >=0 ) {
+            BOOL isSelectedRow = [tv isRowSelected:r];
+            BOOL isOverText = NO;
+            NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+            NSTextAlignment alignment = showCellView.textField.alignment;
+            NSTextField *showField = showCellView.textField;
+            if (showField) {
+                NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+                NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
+                NSSize cellSize = showCellView.frame.size;
+                switch (alignment) {
+                    case NSLeftTextAlignment:
+                    case NSNaturalTextAlignment:
+                        if (clickInText.x < stringSize.width) {
+                            isOverText = YES;
+                        }
+                        break;
+                    case NSRightTextAlignment:
+                        if (clickInText.x > cellSize.width - stringSize.width) {
+                            isOverText = YES;
+                        }
+                        break;
+                    case NSCenterTextAlignment:
+                        if (clickInText.x < (cellSize.width + stringSize.width)/2.0 && clickInText.x > (cellSize.width - stringSize.width)/2.0) {
+                            isOverText = YES;
+                        }
+                        break;
+                        
+                    default:
+                        break;
+                }
+            }
+            if (!isSelectedRow && !isOverText) {
+                return NO;
+            }
+        }
 	}
 	// Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];

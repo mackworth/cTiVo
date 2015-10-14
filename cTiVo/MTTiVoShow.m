@@ -1288,8 +1288,6 @@ __DDLOGHERE__
         MP4ItmfItemFree(newItem);
     }
 
-#define pytivoEmbed 1
-#if pytivoEmbed
     NSMutableDictionary * tiVoInfo = [NSMutableDictionary dictionary];
     if (self.channelString.length >0) {
         [tiVoInfo setObject:self.channelString forKey:@"displayMajorNumber"];
@@ -1336,7 +1334,7 @@ __DDLOGHERE__
         MP4ItmfAddItem(fileHandle, newItem);
         MP4ItmfItemFree(newItem);
     }
-#endif
+
     //Now for ratings
 
     NSString * itunesRating = [self iTunesCode];

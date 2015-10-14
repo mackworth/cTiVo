@@ -211,7 +211,7 @@ static NSDateFormatter *dateFormatter;
     // result is now guaranteed to be valid, either as a re-used cell
     // or as a new cell, so set the stringValue of the cell to the
     // nameArray value at row
-	
+	result.toolTip = nil;
 	if ([tableColumn.identifier compare:@"series"] == NSOrderedSame) {
 		result.textField.stringValue = thisSubscription.displayTitle ;
         result.toolTip = result.textField.stringValue;
@@ -339,33 +339,31 @@ static NSDateFormatter *dateFormatter;
 //}
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
-    // Drag and drop support:  nothing to do here, as we're only a "source" to drag to trash
-	// 	NSArray	*selectedObjects = [self.sortedSubscriptions objectsAtIndexes:rowIndexes ];
-	//	[pboard declareTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType,nil] owner:self];
-	//[pboard writeObjects:selectedObjects];
 	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
+        //if user wants drag-to-select, then check if we're selecting new rows or not
+        //drag/drop if current row is  already selected OR we're over name of show
+        //this is parallel to Finder behavior.
 		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
 		NSPoint p = [tv convertPoint:windowPoint fromView:nil];
 		NSInteger r = [tv rowAtPoint:p];
 		NSInteger c = [tv columnAtPoint:p];
-		if (c < 0) {
-			c = 0;
-		}
-		NSTableColumn *selectedColumn = tv.tableColumns[c];
-		BOOL isSelectedRow = [tv isRowSelected:r];
-		BOOL isOverText = NO;
-		if ([selectedColumn.identifier caseInsensitiveCompare:@"series"] == NSOrderedSame) { //Check if over text
-			NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
-			NSTextField *showField = showCellView.textField;
-			NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
-			NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
-			if (clickInText.x < stringSize.width) {
-				isOverText = YES;
-			}
-		}
-		if (!isSelectedRow && !isOverText) {
-			return NO;
-		}
+		if (c >= 0 && r >=0 ) {
+            NSTableColumn *selectedColumn = tv.tableColumns[c];
+            BOOL isSelectedRow = [tv isRowSelected:r];
+            BOOL isOverText = NO;
+            if ([selectedColumn.identifier caseInsensitiveCompare:@"series"] == NSOrderedSame) { //Check if over text
+                NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+                NSTextField *showField = showCellView.textField;
+                NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+                NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
+                if (clickInText.x < stringSize.width) {
+                    isOverText = YES;
+                }
+            }
+            if (!isSelectedRow && !isOverText) {
+                return NO;
+            }
+        }
 	}
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
     [pboard writeObjects:[self.sortedSubscriptions objectsAtIndexes:rowIndexes]];
