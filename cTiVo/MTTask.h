@@ -37,7 +37,7 @@
 
 @property (nonatomic, copy) double (^progressCalc)(NSString *data);
 
-@property (nonatomic, copy) void (^cleanupHandler)();
+@property (nonatomic, copy) void (^cleanupHandler)(void);
 
 @property BOOL requiresInputPipe, requiresOutputPipe, shouldReschedule;
 @property (nonatomic, readonly) BOOL taskFailed;
