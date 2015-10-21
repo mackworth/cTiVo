@@ -30,6 +30,7 @@
     int lastChangeDate;
     int itemStart;
     int itemCount;
+    int numAddedThisBatch; //should be itemCount minus duplicates
     int authenticationTries;
     BOOL parsingShow, gettingContent, gettingDetails, gettingIcon;
     NSMutableString *element;

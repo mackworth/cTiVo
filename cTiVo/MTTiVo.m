@@ -401,6 +401,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     parsingShow = NO;
     gettingContent = NO;
     gettingDetails = NO;
+    numAddedThisBatch = 0;
 }
 
 -(void) startElement:(NSString *) elementName {
@@ -415,6 +416,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     if ([elementName compare:@"Item"] == NSOrderedSame) {
         parsingShow = YES;
         currentShow = [[MTTiVoShow alloc] init];
+        currentShow.tiVo = self;
         gettingContent = NO;
         gettingDetails = NO;
         gettingIcon = NO;
@@ -526,9 +528,17 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			DDLogVerbose(@"set %@ (type %d) to %@ for %@",keyToSet, type, valueToSet, elementName);
 
         } else if ([elementName compare:@"Item"] == NSOrderedSame) {
+            parsingShow = NO;
+            for (MTTiVoShow * oldShow in newShows) {
+                if ([oldShow isEqualTo:currentShow]) {
+                    DDLogReport(@"Duplicate show found: %@",currentShow);
+//                    currentShow = nil;
+//                    return;
+                    }
+            }
+            numAddedThisBatch++;
             MTTiVoShow *thisShow = [previousShowList valueForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
 			if (!thisShow) {
-				currentShow.tiVo = self;
 				DDLogDetail(@"Added new show %@",currentShow.showTitle);
 				[newShows addObject:currentShow];
 				if (currentShow.inProgress.boolValue) {
@@ -554,7 +564,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				[previousShowList removeObjectForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
 			}
 			currentShow = nil;
-            parsingShow = NO;
         }
     } else {
         if ([elementName compare:@"TotalItems"] == NSOrderedSame) {
@@ -607,15 +616,20 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)parserDidEndDocument:(NSXMLParser *)parser
 {
 	//Check if we're done yet
-	if (itemCount > 0 && itemStart+itemCount < totalItemsOnTivo) {
+	if (itemCount > 0 && itemStart+itemCount < totalItemsOnTivo && numAddedThisBatch > 0) {
 		DDLogDetail(@"TiVo %@ finished batch", self);
 		if (newShows.count > _shows.count) {
 			self.shows = [NSArray arrayWithArray:newShows];
 		}
 		[self updateShowsStartingAt:itemStart + itemCount withCount:kMTNumberShowToGet];
 	} else {
-        if (itemCount == 0 && itemStart < totalItemsOnTivo) {
-            DDLogReport(@"TiVo returned ZERO items! Ignoring items from %d to %d", itemStart, totalItemsOnTivo);
+        if ((numAddedThisBatch == 0 || itemCount == 0) && itemStart < totalItemsOnTivo) {
+            if (numAddedThisBatch == 0 && itemCount >0) {
+                //Streaming Movies reported as shows bug
+                DDLogMajor(@"TiVo returned only duplicated items. Ignoring items from %d to %d", itemStart, totalItemsOnTivo);
+            } else {
+                DDLogReport(@"TiVo returned ZERO items! Ignoring items from %d to %d", itemStart, totalItemsOnTivo);
+            }
         }
 		DDLogMajor(@"TiVo %@ completed parsing", self);
 		isConnecting = NO;

@@ -1011,7 +1011,6 @@ NSString * fourChar(long n, BOOL allowZero) {
     MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
     NSString * decryptPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"tivodecode"];
     if (!decryptPath) { //should never happen, but did once.
-        DDLogReport(@"Fatal Error: tivodecode not found??");
         return nil;
     }
     [decryptTask setLaunchPath:decryptPath] ;
@@ -1463,8 +1462,18 @@ NSString * fourChar(long n, BOOL allowZero) {
 	
     NSMutableArray *taskArray = [NSMutableArray array];
 	
-	if (!_downloadingShowFromMPGFile)[taskArray addObject:@[self.decryptTask]];
-    
+	if (!_downloadingShowFromMPGFile) {
+        MTTask * decryptTask = self.decryptTask;
+        if (decryptTask) {
+            [taskArray addObject:@[decryptTask]];
+        } else {
+            [tiVoManager  notifyWithTitle:@"Can't Find tivodecode" subTitle:[NSString stringWithFormat:@"Please go to cTiVo site for help! %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
+            DDLogReport(@"Fatal Error: tivodecode not found???");
+            [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
+            return;
+        }
+    }
+
     switch (self.taskFlowType) {
         case kMTTaskFlowNonSimu:  //Just encode with non-simul encoder
         case kMTTaskFlowSimu:  //Just encode with simul encoder
@@ -1717,7 +1726,6 @@ NSString * fourChar(long n, BOOL allowZero) {
 		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
 		DDLogMajor(@"Writing XML to    %@",tivoMetaPath);
 		if (![[NSFileManager defaultManager] copyItemAtPath: detailFilePath toPath:tivoMetaPath error:nil]) {
-		
 				DDLogReport(@"Couldn't write XML to file %@", tivoMetaPath);
 		}
 	}
@@ -1727,19 +1735,23 @@ NSString * fourChar(long n, BOOL allowZero) {
 		NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:xml options:0 error:nil];
 		NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
 		id returnxml = [xmldoc objectByApplyingXSLTAtURL:[NSURL fileURLWithPath:xltTemplate] arguments:nil error:nil	];
-		NSString *returnString = [[NSString alloc] initWithData:returnxml encoding:NSUTF8StringEncoding];
-		NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
-		if (![returnString writeToFile:textMetaPath atomically:NO encoding:NSUTF8StringEncoding error:nil]) {
-			DDLogReport(@"Couldn't write pyTiVo Data to file %@", textMetaPath);
-		} else {
-			NSFileHandle *textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
-			[textMetaHandle seekToEndOfFile];
-			[self writeTextMetaData:self.show.seriesId		  forKey:@"seriesId"			toFile:textMetaHandle];
-			[self writeTextMetaData:self.show.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
-			[self writeTextMetaData:self.show.stationCallsign forKey:@"callsign"		    toFile:textMetaHandle];
-            [self writeTextMetaData:self.show.programId       forKey:@"programId"       toFile:textMetaHandle];
-            [textMetaHandle closeFile];
-		}
+		if (!returnxml || [returnxml isKindOfClass:[NSData class]] ) {
+ 			DDLogReport(@"Couldn't convert XML to text using %@ got %@; XML: \n %@ \n ", xltTemplate, returnxml, xml);
+        } else {
+           NSString *returnString = [[NSString alloc] initWithData:returnxml encoding:NSUTF8StringEncoding];
+            NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
+            if (![returnString writeToFile:textMetaPath atomically:NO encoding:NSUTF8StringEncoding error:nil]) {
+                DDLogReport(@"Couldn't write pyTiVo Data to file %@", textMetaPath);
+            } else {
+                NSFileHandle *textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
+                [textMetaHandle seekToEndOfFile];
+                [self writeTextMetaData:self.show.seriesId		  forKey:@"seriesId"			toFile:textMetaHandle];
+                [self writeTextMetaData:self.show.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
+                [self writeTextMetaData:self.show.stationCallsign forKey:@"callsign"		    toFile:textMetaHandle];
+                [self writeTextMetaData:self.show.programId       forKey:@"programId"       toFile:textMetaHandle];
+                [textMetaHandle closeFile];
+            }
+        }
 	}
 }
 
@@ -2186,6 +2198,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             }
             if (bufferFileWriteHandle) {
                 [bufferFileWriteHandle closeFile];
+                bufferFileWriteHandle = nil;
             }
             [self rescheduleOnMain];
         }
@@ -2213,6 +2226,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
     if (bufferFileWriteHandle) {
 		[bufferFileWriteHandle closeFile];
+        bufferFileWriteHandle = nil;
 	}
 	[self rescheduleOnMain];
 }
@@ -2222,6 +2236,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 {
 	if (bufferFileWriteHandle) {
 		[bufferFileWriteHandle closeFile];
+        bufferFileWriteHandle   = nil;
 	}
 	double downloadedFileSize = totalDataDownloaded;
 	DDLogDetail(@"finished loading file");

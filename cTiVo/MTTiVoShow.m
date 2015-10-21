@@ -629,10 +629,11 @@ __DDLOGHERE__
 }
 
 -(BOOL) isEqual:(id)object {
-	MTTiVoShow * show = (MTTiVoShow *) object;
-	return [self.showTitle isEqualToString: show.showTitle] &&
-			self. showID == show.showID &&
-		   [self.tiVoName isEqualToString: show.tiVoName];
+	if (![object isKindOfClass:[self class]]) return NO;
+    MTTiVoShow * show = (MTTiVoShow *) object;
+	return (self.showID == show.showID) &&
+            [self.showTitle isEqualToString: show.showTitle] &&
+            [self.tiVoName isEqualToString: show.tiVoName];
 }
 
 -(NSUInteger) hash {
