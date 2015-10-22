@@ -621,13 +621,16 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 
 -(IBAction)showPreferences:(id)sender
 {
-	[NSApp beginSheet:self.preferencesController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+	[NSApp beginSheet:self.preferencesController.window modalForWindow:mainWindowController.window ?: [NSApp keyWindow]
+        modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 	
 }
 
 -(IBAction)showAdvPreferences:(id)sender
 {
-	[NSApp beginSheet:self.advPreferencesController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+	[NSApp beginSheet:self.advPreferencesController.window
+            modalForWindow:mainWindowController.window ?: [NSApp keyWindow]
+            modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 }
 
 -(MTPreferencesWindowController *)preferencesController

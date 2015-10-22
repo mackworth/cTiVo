@@ -14,7 +14,6 @@
 		1E2724EF16C9A8B500A21940 /* elgatoScript.pl in Resources */ = {isa = PBXBuildFile; fileRef = 1E2724EE16C9A8B500A21940 /* elgatoScript.pl */; };
 		1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */; };
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
-		1E37CBEC19D7EBA200661D7D /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
 		1E3D27E01A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */; };
 		1E3D27E51A4F5992006B9CC4 /* Crashlytics.sh in Resources */ = {isa = PBXBuildFile; fileRef = 1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */; };
@@ -37,6 +36,7 @@
 		1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
 		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
 		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
+		1E7809131BD89DD6006E2AFA /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1E7F5ADB1701877A003AA96C /* in-progress-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7F5ADA1701877A003AA96C /* in-progress-recording.png */; };
 		1E964C9C1882768A00C19046 /* copyright@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C931882768900C19046 /* copyright@2x.png */; };
 		1E964C9D1882768A00C19046 /* deleted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C941882768A00C19046 /* deleted@2x.png */; };
@@ -95,7 +95,6 @@
 		D297AC221730296C0036125A /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC1A1730296C0036125A /* libmp4v2.a */; };
 		D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = D2995CA5168B8BB200B960B9 /* MTCheckBox.m */; };
 		D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */; };
-		D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A09C7916C77E9D00F2B86F /* Quartz.framework */; };
 		D2A648F216991CD300C7DA01 /* MTTiVo.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A648F116991CD300C7DA01 /* MTTiVo.m */; };
 		D2A648FB16994D2A00C7DA01 /* MTSubscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E791BD31697C59300E47E84 /* MTSubscription.m */; };
@@ -148,7 +147,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				D2995CAF168D0F9200B960B9 /* Sparkle.framework in CopyFiles */,
+				1E7809131BD89DD6006E2AFA /* Sparkle.framework in CopyFiles */,
 				1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -359,7 +358,6 @@
 				D2B6706D169CA91F009CB164 /* SystemConfiguration.framework in Frameworks */,
 				D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */,
 				D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */,
-				1E37CBEC19D7EBA200661D7D /* Sparkle.framework in Frameworks */,
 				D297AC221730296C0036125A /* libmp4v2.a in Frameworks */,
 				1E61CDB31BB898E2006D6DBE /* Crashlytics.framework in Frameworks */,
 				1E61CDB71BB89DA5006D6DBE /* Fabric.framework in Frameworks */,

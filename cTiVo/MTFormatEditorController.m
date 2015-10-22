@@ -73,7 +73,10 @@
 	[[NSApp keyWindow] makeFirstResponder:[NSApp keyWindow]]; //save any text edits in process
 	if ([self.shouldSave boolValue]) {
 		saveOrCancelAlert = [NSAlert alertWithMessageText:@"You have edited the formats.  Leaving the window will discard your changes.  Do you want to save your changes?" defaultButton:@"Save" alternateButton:@"Leave Window" otherButton:@"Continue Editing" informativeTextWithFormat:@""];
-		[saveOrCancelAlert beginSheetModalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+ 		[saveOrCancelAlert beginSheetModalForWindow:self.view.window ?: [NSApp keyWindow]
+                                      modalDelegate:self
+                                     didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
+                                        contextInfo:nil];
 		self.alertResponseInfo = (NSDictionary *)sender;
 		return NO;
 	} else {
@@ -247,7 +250,10 @@
 -(IBAction)deleteFormat:(id)sender
 {
 	deleteAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to delete the format %@ entirely?",_currentFormat.name] defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
-	[deleteAlert beginSheetModalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+ 	[deleteAlert beginSheetModalForWindow:self.view.window ?: [NSApp keyWindow]
+                            modalDelegate:self
+                           didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
+                              contextInfo:nil];
 	
 }
 
