@@ -179,6 +179,9 @@ __DDLOGHERE__
 			index++;
 		}
 	}
+    if (index ==0) { //later than previous latest, so update table
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:self];
+    }
 	DDLogVerbose(@"remembering Recording %ld: %@", index, thisRecording);
 	[self.prevRecorded insertObject:thisRecording atIndex:index];
 	return newDownload;
