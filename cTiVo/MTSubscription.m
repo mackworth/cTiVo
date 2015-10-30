@@ -138,8 +138,9 @@ __DDLOGHERE__
 	}
 	
 	//Check if we've already recorded it
+    NSString * thisShowID = [self subscriptionID:tivoShow];
 	for (NSDictionary * prevShow in self.prevRecorded ) {
-		if ([prevShow[@"episodeID"] isEqualToString: tivoShow.episodeID]) {
+        if ([prevShow[@"episodeID"] isEqualToString: thisShowID]) {
 			DDLogVerbose(@"Already recorded: %@ ",prevShow);
 			return NO;
 		}
@@ -148,6 +149,13 @@ __DDLOGHERE__
 	
 }
 
+-(NSString *) subscriptionID: (MTTiVoShow *) thisShow {
+    if ([thisShow.episodeID hasPrefix:@"SH"]) {
+        return [thisShow.episodeID stringByAppendingFormat:@"-%@", thisShow.showDateRFCString];
+    } else {
+        return thisShow.episodeID;
+    }
+}
 
 -(MTDownload *) downloadForSubscribedShow: (MTTiVoShow *) thisShow {
 	DDLogDetail(@"Subscribed; adding %@", thisShow);
@@ -168,7 +176,7 @@ __DDLOGHERE__
 #endif
 	NSDictionary *thisRecording = @{
 		 @"showTitle": thisShow.showTitle ,
-		 @"episodeID": thisShow.episodeID,
+		 @"episodeID": [self subscriptionID: thisShow],
 		 @"startTime": thisShow.showDate,
 		 @"tiVoName":  thisShow.tiVoName
 	};
@@ -181,6 +189,9 @@ __DDLOGHERE__
 	}
 	DDLogVerbose(@"remembering Recording %ld: %@", index, thisRecording);
 	[self.prevRecorded insertObject:thisRecording atIndex:index];
+    if (index ==0) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:self];
+    }
 	return newDownload;
 }
 

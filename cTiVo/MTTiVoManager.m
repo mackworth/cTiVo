@@ -1638,7 +1638,8 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	}
     
 	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:self.opsQueue];
-    
+    newTiVo.supportsTransportStream = [TSN characterAtIndex:0] > '6' || [TSN hasPrefix:@"663"];
+
     [newTiVo scheduleNextUpdateAfterDelay:0];
   
 	self.tiVoList = [_tiVoList arrayByAddingObject: newTiVo];

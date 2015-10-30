@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */; };
+		1E08780C1BE300250086A546 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E08780B1BE300250086A546 /* Sparkle.framework */; };
+		1E08780E1BE3007B0086A546 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1E08780B1BE300250086A546 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1E0C5DD9170236B30015C55D /* recent-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E0C5DD8170236B30015C55D /* recent-recording.png */; };
 		1E18145E1708AC1500166E5F /* cTiVo.help in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145D1708AC1500166E5F /* cTiVo.help */; };
 		1E1814601708AF7000166E5F /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145F1708AF7000166E5F /* cTiVo.icns */; };
@@ -21,8 +23,8 @@
 		1E4A38481A37C0F4001D84A7 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */; };
 		1E59368919648C860008780B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
 		1E59368C19648CFF0008780B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
-		1E61CDB31BB898E2006D6DBE /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */; settings = {ASSET_TAGS = (); }; };
-		1E61CDB71BB89DA5006D6DBE /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB61BB89DA5006D6DBE /* Fabric.framework */; settings = {ASSET_TAGS = (); }; };
+		1E61CDB31BB898E2006D6DBE /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */; };
+		1E61CDB71BB89DA5006D6DBE /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB61BB89DA5006D6DBE /* Fabric.framework */; };
 		1E61CDB91BB89E6A006D6DBE /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB81BB89E6A006D6DBE /* libc++.tbd */; };
 		1E61CDBB1BB89E7C006D6DBE /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDBA1BB89E7C006D6DBE /* libstdc++.tbd */; };
 		1E61CDBD1BB89E91006D6DBE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDBC1BB89E91006D6DBE /* libz.tbd */; };
@@ -36,7 +38,6 @@
 		1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
 		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
 		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
-		1E7809131BD89DD6006E2AFA /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1E7F5ADB1701877A003AA96C /* in-progress-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7F5ADA1701877A003AA96C /* in-progress-recording.png */; };
 		1E964C9C1882768A00C19046 /* copyright@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C931882768900C19046 /* copyright@2x.png */; };
 		1E964C9D1882768A00C19046 /* deleted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C941882768A00C19046 /* deleted@2x.png */; };
@@ -147,8 +148,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1E7809131BD89DD6006E2AFA /* Sparkle.framework in CopyFiles */,
 				1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */,
+				1E08780E1BE3007B0086A546 /* Sparkle.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -156,6 +157,7 @@
 
 /* Begin PBXFileReference section */
 		1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowDrawer.xib; sourceTree = "<group>"; };
+		1E08780B1BE300250086A546 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = cTiVo/Sparkle.framework; sourceTree = "<group>"; };
 		1E0C5DD8170236B30015C55D /* recent-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "recent-recording.png"; sourceTree = "<group>"; };
 		1E18145D1708AC1500166E5F /* cTiVo.help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cTiVo.help; sourceTree = "<group>"; };
 		1E18145F1708AF7000166E5F /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cTiVo.icns; sourceTree = "<group>"; };
@@ -284,7 +286,6 @@
 		D2995CA4168B8BB200B960B9 /* MTCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTCheckBox.h; sourceTree = "<group>"; };
 		D2995CA5168B8BB200B960B9 /* MTCheckBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTCheckBox.m; sourceTree = "<group>"; };
 		D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cTiVo_sparkle_pub.pem; sourceTree = "<group>"; };
-		D2995CAC168D0EE700B960B9 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = cTiVo/Sparkle.framework; sourceTree = "<group>"; };
 		D2A09C7916C77E9D00F2B86F /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		D2A648F016991CD300C7DA01 /* MTTiVo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVo.h; sourceTree = "<group>"; };
 		D2A648F116991CD300C7DA01 /* MTTiVo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVo.m; sourceTree = "<group>"; };
@@ -354,6 +355,7 @@
 				D271F3631734BCDA00641435 /* Security.framework in Frameworks */,
 				D240EF5E16EFE05E00635E53 /* QTKit.framework in Frameworks */,
 				D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */,
+				1E08780C1BE300250086A546 /* Sparkle.framework in Frameworks */,
 				D2CAF34016AB43AE004E4CFA /* IOKit.framework in Frameworks */,
 				D2B6706D169CA91F009CB164 /* SystemConfiguration.framework in Frameworks */,
 				D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */,
@@ -544,6 +546,7 @@
 				1E61CDBC1BB89E91006D6DBE /* libz.tbd */,
 				1E61CDBA1BB89E7C006D6DBE /* libstdc++.tbd */,
 				1E61CDB81BB89E6A006D6DBE /* libc++.tbd */,
+				1E08780B1BE300250086A546 /* Sparkle.framework */,
 				1E61CDB61BB89DA5006D6DBE /* Fabric.framework */,
 				1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */,
 				1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */,
@@ -551,7 +554,6 @@
 				D2CAF33F16AB43AE004E4CFA /* IOKit.framework */,
 				D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */,
 				1EABE6F316B0A254004DDB61 /* Growl.framework */,
-				D2995CAC168D0EE700B960B9 /* Sparkle.framework */,
 				D240EF5D16EFE05E00635E53 /* QTKit.framework */,
 				D271F3621734BCDA00641435 /* Security.framework */,
 				D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */,
@@ -1056,11 +1058,13 @@
 					"$(SRCROOT)/cTiVo",
 					"$(SRCROOT)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/cTiVo",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/cTiVo/mp4v2",
@@ -1086,11 +1090,13 @@
 					"$(SRCROOT)/cTiVo",
 					"$(SRCROOT)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/cTiVo",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/cTiVo/mp4v2",

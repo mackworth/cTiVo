@@ -25,4 +25,6 @@
 -(IBAction)selectTmpDir:(id)sender;
 -(IBAction)TVDBStatistics:(id)sender;
 
+-(void) updatePlexPattern;
+
 @end

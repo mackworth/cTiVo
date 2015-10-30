@@ -18,7 +18,6 @@
 #import "MTHelpViewController.h"
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSPopoverDelegate> {
-	MTMainWindowController *mainWindowController;
 	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *markCommercialsItem, *skipCommercialsItem, *pauseMenuItem, *apmMenuItem;
 	IBOutlet NSMenuItem *playVideoMenuItem, *showInFinderMenuItem;
 	IBOutlet NSMenu *optionsMenu;
@@ -34,6 +33,7 @@
 
 @property (nonatomic, strong) MTPreferencesWindowController *preferencesController;
 @property (nonatomic, strong) MTPreferencesWindowController *advPreferencesController;
+@property (nonatomic, strong) MTMainWindowController  *mainWindowController;
 @property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
 @property (nonatomic, strong) NSTimer * pseudoTimer;

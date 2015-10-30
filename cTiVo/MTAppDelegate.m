@@ -209,7 +209,7 @@ __DDLOGHERE__
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTRunComSkip options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTmpFilesDirectory options:NSKeyValueObservingOptionNew context:nil];
-	mainWindowController = nil;
+	_mainWindowController = nil;
 	//	_formatEditorController = nil;
 	[self showMainWindow:nil];
 	gettingMediaKey = NO;
@@ -278,19 +278,9 @@ __DDLOGHERE__
 		[defaults removeObjectForKey:@"ExportAtomicParsleyMetaData"];
 		[defaults setObject:md forKey:@"ExportMetaData"];
 	}
-//    manualTiVoArrayController = [NSArrayController new];
-//    [manualTiVoArrayController bind:@"content" toObject:[NSUserDefaults standardUserDefaults] withKeyPath:@"TiVos" options:nil];
-//    
-//    [manualTiVoArrayController setFilterPredicate:[NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary *bindings){
-//        NSDictionary *tiVo = (NSDictionary *)item;
-//        return [tiVo[kMTTiVoManualTiVo] boolValue];
-//    }]];
-//    networkTiVoArrayController = [NSArrayController new];
-//    [networkTiVoArrayController bind:@"content" toObject:[NSUserDefaults standardUserDefaults] withKeyPath:@"TiVos" options:nil];
-//    [networkTiVoArrayController setFilterPredicate:[NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary *bindings){
-//        NSDictionary *tiVo = (NSDictionary *)item;
-//        return ![tiVo[kMTTiVoManualTiVo] boolValue];
-//    }]];
+
+    [self.advPreferencesController.advPreferencesViewController updatePlexPattern];  //only needed once
+    
 
     self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: 61 target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
 
@@ -387,7 +377,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     myOpenPanel.prompt = @"Choose";
     [myOpenPanel setTitle:@"Select Directory for Temp cTiVo Files"];
 
-    NSWindow * window = [NSApp keyWindow] ?: mainWindowController.window;
+    NSWindow * window = [NSApp keyWindow] ?: _mainWindowController.window;
     [myOpenPanel beginSheetModalForWindow:window completionHandler:^(NSInteger ret){
         NSString *directoryName;
         if (ret == NSFileHandlingPanelOKButton) {
@@ -574,11 +564,11 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 	
 }
 -(IBAction)findShows:(id)sender {
-	[[mainWindowController tiVoShowTable] findShows:sender];
+	[[_mainWindowController tiVoShowTable] findShows:sender];
 }
 
 - (IBAction)clearHistory:(id)sender {
-	[[mainWindowController downloadQueueTable] clearHistory:sender];
+	[[_mainWindowController downloadQueueTable] clearHistory:sender];
 }
 
 
@@ -614,14 +604,14 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 -(IBAction)editManualTiVos:(id)sender
 {
 	//	[self.manualTiVoEditorController showWindow:nil];
-	//	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+	//	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:_mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 	self.preferencesController.startingTabIdentifier = @"TiVos";
 	[self showPreferences:nil];
 }
 
 -(IBAction)showPreferences:(id)sender
 {
-	[NSApp beginSheet:self.preferencesController.window modalForWindow:mainWindowController.window ?: [NSApp keyWindow]
+	[NSApp beginSheet:self.preferencesController.window modalForWindow:_mainWindowController.window ?: [NSApp keyWindow]
         modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 	
 }
@@ -629,7 +619,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 -(IBAction)showAdvPreferences:(id)sender
 {
 	[NSApp beginSheet:self.advPreferencesController.window
-            modalForWindow:mainWindowController.window ?: [NSApp keyWindow]
+            modalForWindow:_mainWindowController.window ?: [NSApp keyWindow]
             modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 }
 
@@ -648,7 +638,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 		[_advPreferencesController window];
 		MTTabViewItem *advTabViewItem = [[MTTabViewItem alloc] initWithIdentifier:@"AdvPrefs"];
 		advTabViewItem.label = @"Advanced Preferences";
-		NSViewController *thisController = [[MTAdvPreferencesViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil];
+		MTAdvPreferencesViewController *thisController = [[MTAdvPreferencesViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil];
         [thisController loadView];
 		advTabViewItem.windowController = (id)thisController;
 		[_advPreferencesController.myTabView insertTabViewItem:advTabViewItem atIndex:0];
@@ -660,6 +650,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 		_advPreferencesController.ignoreTabItemSelection = YES;
 		[_advPreferencesController.myTabView selectTabViewItem:advTabViewItem];
 		_advPreferencesController.ignoreTabItemSelection = NO;;
+        _advPreferencesController.advPreferencesViewController = thisController;
 	}
 	return _advPreferencesController;
 }
@@ -916,16 +907,16 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 
 -(IBAction)showMainWindow:(id)sender
 {
-	if (!mainWindowController) {
-		mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
-		showInFinderMenuItem.target = mainWindowController;
+	if (!_mainWindowController) {
+		_mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
+		showInFinderMenuItem.target = _mainWindowController;
 		showInFinderMenuItem.action = @selector(revealInFinder:);
-		playVideoMenuItem.target = mainWindowController;
+		playVideoMenuItem.target = _mainWindowController;
 		playVideoMenuItem.action = @selector(playVideo:);
-		mainWindowController.showInFinderMenuItem = showInFinderMenuItem;
-		mainWindowController.playVideoMenuItem = playVideoMenuItem;
+		_mainWindowController.showInFinderMenuItem = showInFinderMenuItem;
+		_mainWindowController.playVideoMenuItem = playVideoMenuItem;
 	}
-	[mainWindowController showWindow:nil];
+	[_mainWindowController showWindow:nil];
 	
 }
 
@@ -934,7 +925,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 	if ( ![tiVoManager anyTivoActive] ){
 		DDLogDetail(@"Checking finished");
 		[checkingDone invalidate]; checkingDone = nil;
-		[NSApp endSheet: [mainWindowController window]];
+		[NSApp endSheet: [_mainWindowController window]];
 		[self cleanup];
 		[NSApp replyToApplicationShouldTerminate:YES];
 	}
@@ -954,7 +945,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 			DDLogMajor(@"User did ask to continue");
 			tiVoManager.processingPaused = @(YES);
 			tiVoManager.quitWhenCurrentDownloadsComplete = @(YES);
-			[mainWindowController.cancelQuitView setHidden:NO];
+			[_mainWindowController.cancelQuitView setHidden:NO];
 			[NSApp replyToApplicationShouldTerminate:NO];
 			
 			//			NSRunLoop* myRunLoop = [NSRunLoop currentRunLoop];
@@ -970,7 +961,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 			//
 			//			NSString *message = [NSString stringWithFormat:@"Please wait for processing to complete..."];
 			//			NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Cancel Quit" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-			//			[quitAlert beginSheetModalForWindow:mainWindowController.window modalDelegate:self didEndSelector:@selector(doQuit) contextInfo:nil ];
+			//			[quitAlert beginSheetModalForWindow:_mainWindowController.window modalDelegate:self didEndSelector:@selector(doQuit) contextInfo:nil ];
 			break;
 		case NSAlertOtherReturn:
 			DDLogMajor(@"User did ask to quit");

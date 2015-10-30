@@ -8,6 +8,7 @@
 
 #import "MTAdvPreferencesViewController.h"
 #import "MTTiVoManager.h"
+#import "MTAppDelegate.h"
 
 #define tiVoManager [MTTiVoManager sharedTiVoManager]
 
@@ -80,6 +81,30 @@
 		}
 	}
 }
+#define kMTPlexSimple @"[MainTitle] - [SeriesEpNumber | OriginalAirDate] [\"- \" EpisodeTitle]"
+#define kMTPlexFolder @"[MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | Year [\" - \" EpisodeTitle]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
+
+-(void) updatePlexPattern {
+
+    //update plex strings from previous standard format
+    //only needs to be done once,
+    //if someone really wants old format, just add a space
+    NSString * oldPlexSimple = @"[MainTitle] - [SeriesEpNumber] - [EpisodeTitle]";
+
+    NSString * oldPlexFolder = 	@"[MainTitle / \"Season \" Season / MainTitle \" - \" SeriesEpNumber \" - \" EpisodeTitle][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]";
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString * currentPattern = [defaults objectForKey:kMTFileNameFormat];
+    NSString * newPattern = nil;
+    if ([currentPattern isEqualToString:oldPlexSimple]) {
+        newPattern = kMTPlexSimple;
+    } else if ([currentPattern isEqualToString:oldPlexFolder]) {
+        newPattern = kMTPlexFolder;
+    }
+    if (newPattern) [defaults setObject:newPattern forKey:kMTFileNameFormat];
+}
+
+#define kMTTestCommand @"Test on Selected Shows"
+
 -(void) addKeywordMenuTo:(NSPopUpButton*) cell{
 	NSArray * keyWords = @[
 						   @"Title",  //these values must be same as those in keyword processing
@@ -103,33 +128,88 @@
 						   @"MovieYear",
 						   @"TiVoName",
 						   @"TVDBseriesID",
-						   @"• Plex Default",  //• means replace whole field;
+						   @"• Plex Simple",  //• means replace whole field;
 						   @"• Plex Folders",
 						   @"• Complex Example",//these must match below
 						   @"• cTiVo Default"
-						   ];
+   						   ];
 	[cell addItemsWithTitles: keyWords];
+
+    //And add test command
+    [[cell menu] addItem:[NSMenuItem separatorItem]];
+    [cell addItemWithTitle: kMTTestCommand];
+
 	for (NSMenuItem * item in cell.itemArray) {
 		item.representedObject = item.title;
 	}
 	//and fixup the ones that are special
-	NSMenuItem * plex = [cell itemWithTitle:@"• Plex Default"];
-	plex.representedObject = @"[MainTitle] - [SeriesEpNumber] - [EpisodeTitle]";
+	NSMenuItem * plex = [cell itemWithTitle:@"• Plex Simple"];
+	plex.representedObject = kMTPlexSimple;
 	
 	NSMenuItem * plex2 = [cell itemWithTitle:@"• Plex Folders"];
-	plex2.representedObject = 	@"[MainTitle / \"Season \" Season / MainTitle \" - \" SeriesEpNumber \" - \" EpisodeTitle][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]";
+    plex2.representedObject = 	kMTPlexFolder;
 	
 	NSMenuItem * complex = [cell itemWithTitle:@"• Complex Example"];
 	complex.representedObject =
-	@"[MainTitle / SeriesEpNumber \" - \" EpisodeTitle][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]";
+	@"[MainTitle / SeriesEpNumber [\" - \" EpisodeTitle]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]";
 
 	NSMenuItem * example = [cell itemWithTitle:@"• cTiVo Default"];
 	example.representedObject = @"";
 }
 
 
--(void) resetAllPopups: (int) newVal {
+-(void)testFileName: (NSString *) testString {
+    MTDownload * testDownload = [[MTDownload alloc] init];
+    for (MTTiVoShow * show in tiVoManager.tiVoShows) {
+            testDownload.show = show;
+            NSLog(@"%@",[testDownload swapKeywordsInString:testString]);
+
+    }
 }
+
+-(IBAction)testFileNames: (id) sender {
+//    NSArray * testStrings  = @[
+//                               @" [\"TV Shows\" / dateShowTitle / \"Season \" plexSeason / dateShowTitle \" - \" plexID [\" - \" episodeTitle]][\"Movies\" / mainTitle \" (\" movieYear \")\"]"
+                               //                              @"title: [title]\nmaintitle: [maintitle]\nepisodetitle: [episodetitle]\ndateshowtitle: [dateshowtitle]\nchannelnum: [channelnum]\nchannel: [channel]\nstarttime: [starttime]\nmin: [min]\nhour: [hour]\nwday: [wday]\nmday: [mday]\nmonth: [month]\nmonthnum: [monthnum]\nyear: [year]\noriginalairdate: [originalairdate]\nepisode: [episode]\nseason: [season]\nepisodenumber: [episodenumber]\nseriesepnumber: [seriesepnumber]\ntivoname: [tivoname]\nmovieyear: [movieyear]\ntvdbseriesid: [tvdbseriesid]",
+                               //                               @" [mainTitle [\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday]",
+                               //                               //							   @" [mainTitle] [\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday",
+                               //                               @" [mainTitle] [\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday",
+                               //                               //							   @" [mainTitle] [\"_Ep# EpisodeNumber]_[wday]_[month]_[mday]",
+                               //                               //							   @" [mainTitle] [\"_Ep#\" EpisodeNumber \"\"]_[wday]_[]_[mday]",
+                               //                               //							   @" [mainTitle][\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday]",
+                               //                               @"[mainTitle][\" (\" movieYear \")][\" (\" SeriesEpNumber \")\"][\" - \" episodeTitle]",
+                               //                               @"[mainTitle / seriesEpNumber \" - \" episodeTitle][\"MOVIES\"  / mainTitle \" (\" movieYear \")"
+//                               ];
+//    for (NSString * str in testStrings) {
+//    NSString * str = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormat];
+//  NSLog(@"FOR TEST STRING %@",str);
+//    [self testFileName:str];
+//
+    NSString * pattern = self.fileNameField.stringValue;
+    NSMutableString * fileNames = [NSMutableString stringWithFormat: @"FOR TEST PATTERN: %@\n",pattern];
+
+    MTDownload * testDownload = [[MTDownload alloc] init];
+    MTProgramTableView * programs = ((MTAppDelegate *) [NSApp delegate]).mainWindowController. tiVoShowTable;
+    NSArray	*shows = programs.sortedShows;
+    NSIndexSet *selectedRowIndexes = [programs selectedRowIndexes];
+    if (selectedRowIndexes.count > 0) {
+        shows = [shows objectsAtIndexes:selectedRowIndexes ];
+      }
+    for (MTTiVoShow * show in  shows) {
+        testDownload.show = show;
+        [fileNames appendFormat:@"%@\n", [testDownload swapKeywordsInString:pattern]];
+
+    }
+    NSAttributedString * results = [[NSAttributedString alloc] initWithString:fileNames];
+    //	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
+    NSPopUpButton *thisButton = (NSPopUpButton *)sender;
+    [myTextView setString:fileNames];
+
+    [popoverDetachController.displayMessage.textStorage setAttributedString:results];
+    [myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+     //    }
+}
+
 
 -(void) awakeFromNib {
 	
@@ -226,7 +306,10 @@
 	if ([cell.selectedItem.title hasPrefix:@"•"]) {
 		//whole template, so replace whole string
 		[editor setSelectedRange:NSMakeRange(0,current.length)];
-	} else {
+    } else	if ([cell.selectedItem.title isEqualToString:kMTTestCommand]) {
+        [self testFileNames:sender];
+        keyword = @"";
+    } else {
 		//normally we add brackets around individual keywords, but not if we're inside one already
 		NSUInteger cursorLoc = editor.selectedRange.location;
 		NSRange beforeCursor = NSMakeRange(0,cursorLoc);

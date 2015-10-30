@@ -85,6 +85,7 @@ numStartupRetriesRemaining;
 -(void)download;
 -(void) finishUpPostEncodeProcessing;
 
+-(NSString *)swapKeywordsInString: (NSString *) testString;
 
 #pragma mark - Methods for manipulating video
 -(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted;

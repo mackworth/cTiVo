@@ -10,7 +10,6 @@
 #import "NSString+HTML.h"
 #import "MTTiVoShow.h"
 #import "MTDownload.h"
-#import "MTProgramTableView.h"
 #import "MTTiVo.h"
 #import "MTSubscription.h"
 #import <SystemConfiguration/SystemConfiguration.h>

@@ -52,6 +52,7 @@
 @property (nonatomic, strong) NSDate *lastDownloadEnded;
 @property (nonatomic, strong) 	NSDate *currentNPLStarted;
 @property int manualTiVoID;
+@property (nonatomic) BOOL supportsTransportStream;
 
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
 +(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;

@@ -75,7 +75,7 @@
                                     *directors,
                                     *producers;
 
-@property (strong, nonatomic) NSString *episodeID;
+@property (strong, nonatomic) NSString *episodeID;  //normalized version of programID (convert 12 digit to 14 
 
 @property (atomic, strong) NSString * artworkFile;
 
@@ -90,6 +90,7 @@
 @property (nonatomic, readonly) NSString *originalAirDateNoTime,
 										 *showDateString,
 										*showKey,
+                                        *showDateRFCString,
 										 *showMediumDateString;
 @property						int	season, episode; //calculated from EpisodeNumber
 @property (weak, nonatomic, readonly) NSString *seasonString;

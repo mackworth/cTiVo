@@ -10,7 +10,7 @@
 #import "MTManualTiVoEditorController.h"
 #import "MTFormatEditorController.h"
 #import "MTTabViewItem.h"
-
+#import "MTAdvPreferencesViewController.h"
 
 
 @interface MTPreferencesWindowController : NSWindowController <NSTabViewDelegate> {
@@ -21,7 +21,7 @@
 @property (nonatomic, strong) NSString *startingTabIdentifier;
 @property (nonatomic, strong) IBOutlet NSTabView *myTabView;
 @property BOOL ignoreTabItemSelection;
-
+@property (nonatomic, strong) IBOutlet MTAdvPreferencesViewController * advPreferencesViewController;
 -(NSRect)getNewWindowRect:(MTTabViewItem *)tabViewItem;
 
 

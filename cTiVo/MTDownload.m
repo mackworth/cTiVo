@@ -568,36 +568,19 @@ __DDLOGHERE__
  [mainTitle]["_Ep#" EpisodeNumber]_[wday]_[month]_[mday]
  The advanced keyword is highlighted in bold and signifies only include “_Ep#xxx” if EpisodeNumber exists for the show in question. “_Ep#” is literal string to which the evaluated contents of EpisodeNumber keyword are appended. If EpisodeNumber does not exist then the whole advanced keyword evaluates to empty string.
  
+ Added to KMTTG: 
+startTime
+ seriesEpNumber
+ TivoName
+ TVDBSeriesID
+ plexID
+	OR (|) option, uses second keyword if first is empty
+	Embedded optional values [ this option [with this embedded option] ]
+
+
  */
-//Test routines. A good place is in MTTiVoShow when Remaining Operations= 1, so we've downloaded all TVDB info
-//calling line:
-//[self testFileNames];
-//-(void)testFileName: (NSString *) testString {
-//	MTDownload * testDownload = [[MTDownload alloc] init];
-//	for (MTTiVoShow * show in self.tiVo.shows) {
-//		testDownload.show = show;
-//		DDLogMajor(@"ANSWER:%@",[testDownload swapKeywordsInString:testString]);
-//		
-//	}
-//}
-//
-//-(void)testFileNames {
-//	NSArray * testStrings  = @[
-//							   @" [mainTitle [\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday]",
-//							   //							   @" [mainTitle] [\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday",
-//							   @" [mainTitle] [\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday",
-//							   //							   @" [mainTitle] [\"_Ep# EpisodeNumber]_[wday]_[month]_[mday]",
-//							   //							   @" [mainTitle] [\"_Ep#\" EpisodeNumber \"\"]_[wday]_[]_[mday]",
-//							   //							   @" [mainTitle][\"_Ep#\" EpisodeNumber]_[wday]_[month]_[mday]",
-//							   @"[mainTitle][\" (\" movieYear \")][\" (\" SeriesEpNumber \")\"][\" - \" episodeTitle]",
-//							   @"[mainTitle / seriesEpNumber \" - \" episodeTitle][\"MOVIES\"  / mainTitle \" (\" movieYear \")"
-//							   ];
-//	for (NSString * str in testStrings) {
-//		DDLogMajor(@"FOR TEST STRING %@",str);
-//		[self testFileName:str];
-//	}
-//}
-//
+
+//test routines moved to Advanced Preferences
 
 - (NSString *) replacementForKeyword:(NSString *) key usingDictionary: (NSDictionary*) keys {
 	NSMutableString * outStr = [NSMutableString string];
@@ -605,30 +588,72 @@ __DDLOGHERE__
 	NSScanner *scanner = [NSScanner scannerWithString:key];
 	[scanner setCharactersToBeSkipped:nil];
     NSCharacterSet * whitespaceSet = [NSCharacterSet whitespaceCharacterSet];
+    NSCharacterSet * brackets = [NSCharacterSet characterSetWithCharactersInString:@"[]"];
+    BOOL skipOne = NO;  //have we found a good alternative, so skip the rest?
+    NSString * foundKey;
 
 	while (![scanner isAtEnd]) {
 		[scanner scanCharactersFromSet:whitespaceSet intoString:nil];
 		//get any literal characters
-		while ([scanner scanString:@"\"" intoString:nil]) {
+		if ([scanner scanString:@"\"" intoString:nil]) {
 			NSString * tempString;
 			if ([scanner scanUpToString: @"\"" intoString:&tempString]) {
-				[outStr appendString:tempString];
+                if (skipOne) {
+                    skipOne = NO;
+                } else {
+                    [outStr appendString:tempString];
+                }
 			} //else no chars scanned before quote (or end of line), so ignore this quote
 			[scanner scanString:@"\"" intoString:nil];
 			[scanner scanCharactersFromSet:whitespaceSet intoString:nil];
-		}
-		//not space or quote, so get keyword and replace with value from Dictionary
-		NSString * foundKey;
-		if ([scanner scanUpToString:@" " intoString:&foundKey]) {
-			foundKey = foundKey.lowercaseString;
-			if ([keys[foundKey] length] == 0) {
-				DDLogMajor(@"No key: %@",foundKey);
-				//found invalid or empty key so entire conditional fails and should be empty; ignore everything else
-				return @"";
-			} else {
-				DDLogVerbose(@"Swapping key %@ with %@",foundKey, keys[foundKey]);
-				[outStr appendString:keys[foundKey]];
-			}
+		} else if ([scanner scanString:@"[" intoString:nil]) {
+            //get any recursive fields
+            NSString * tempString;
+            int numBrackets = 1;
+            NSMutableString *bracketedString = [NSMutableString string];
+            tempString = @"";
+            while (numBrackets > 0) {
+                [bracketedString appendString:tempString];  //get recursive [ if any
+                if ([scanner scanUpToCharactersFromSet:brackets intoString:&tempString]) {
+                    [bracketedString appendString:tempString];
+                }
+                if ([scanner scanString:@"[" intoString:&tempString]) {
+                    numBrackets++;
+                } else if ([scanner scanString:@"]" intoString:&tempString]) {
+                    numBrackets--;
+                }
+            }
+            [scanner scanCharactersFromSet:whitespaceSet intoString:nil];
+            if (skipOne) {
+                skipOne = NO;
+            } else {
+                [outStr appendString: [self replacementForKeyword:bracketedString usingDictionary:keys]];
+            }
+       } else if ([scanner scanString:@"|" intoString:nil]) {
+            //got an alternative, but previous one must have been good (or we'd have eaten this)
+            skipOne = YES;
+        } else  {
+            //not space, quote, alternative or recursive, so get keyword and replace with value from Dictionary
+            if ([scanner scanUpToString:@" " intoString:&foundKey]) {
+                if (skipOne) {
+                    skipOne = NO;
+                } else {
+                    foundKey = foundKey.lowercaseString;
+                    if ([keys[foundKey] length] == 0) {
+                        DDLogDetail(@"No filename key: %@",foundKey);
+                        //found invalid or empty key so entire conditional fails and should be empty; ignore everything else, unless there's an OR (vertical bar)
+                        [scanner scanCharactersFromSet:whitespaceSet intoString:nil];
+                        if ([scanner scanString:@"|" intoString:nil]) {
+                            //ah, we've got an alternative, so let's keep going
+                        } else {
+                            return @"";
+                        }
+                    } else {
+                        DDLogVerbose(@"Swapping key %@ with %@",foundKey, keys[foundKey]);
+                        [outStr appendString:keys[foundKey]];
+                    }
+                }
+            }
 		} //else no chars scanned before ] (or end of line) so ignore this
 	}
 	return [NSString stringWithString:outStr];
@@ -652,11 +677,11 @@ NSString * fourChar(long n, BOOL allowZero) {
 											fromDate:self.show.showDate];
 	 
 	 NSString * originalAirDate =self.show.originalAirDateNoTime;
-	 if (!originalAirDate) {
+	 if (!originalAirDate && [components year] > 0) {
 		 originalAirDate = [NSString stringWithFormat:@"%@-%@-%@",
 											fourChar([components year], NO),
-											twoChar([components month], NO),
-											twoChar([components day], NO)];
+											twoChar([components month], YES),
+											twoChar([components day], YES)];
 	 }
 	 NSString * monthName = [components month]> 0 ?
 								[[[[NSDateFormatter alloc] init] shortMonthSymbols]
@@ -692,21 +717,25 @@ NSString * fourChar(long n, BOOL allowZero) {
 		 @"mday":			twoChar([components day], NO),
 		 @"month":			monthName,
 		 @"monthnum":		twoChar([components month], NO),
-		 @"year": 			fourChar([components year], NO),
-		 @"originalairdate": originalAirDate,
+		 @"year": 			self.show.isMovie ? @"" : fourChar([components year], NO),
+ 		 @"originalairdate": originalAirDate,
 		 @"episode":		twoChar(self.show.episode, NO),
 		 @"season":			twoChar(self.show.season, NO),
 		 @"episodenumber":	NULLT(self.show.episodeNumber),
 		 @"seriesepnumber": NULLT(self.show.seasonEpisode),
 		 @"tivoname":		NULLT(self.show.tiVoName),
 		 @"movieyear":		NULLT(self.show.movieYear),
-		 @"tvdbseriesid":	NULLT(TVDBseriesID)
+		 @"tvdbseriesid":	NULLT(TVDBseriesID),
+//         @"plexid":        [self ifString: self.show.seasonEpisode
+//                                elseString: originalAirDate],
+//         @"plexseason":    [self ifString: twoChar(self.show.season, NO)
+//                                 elseString: fourChar([components year], NO) ]
 		 };
 	 NSMutableString * outStr = [NSMutableString string];
 	 
 	 NSScanner *scanner = [NSScanner scannerWithString:str];
 	 [scanner setCharactersToBeSkipped:nil];
-	 
+     NSCharacterSet * brackets = [NSCharacterSet characterSetWithCharactersInString:@"[]"];
 	 while (![scanner isAtEnd]) {
 		 NSString * tempString;
 		 //get any literal characters
@@ -715,9 +744,22 @@ NSString * fourChar(long n, BOOL allowZero) {
 		 }
 		 //get keyword and replace with values
 		 if ([scanner scanString:@"[" intoString:nil]) {
-			 [scanner scanUpToString: @"]" intoString:&tempString];
-			 [outStr appendString: [self replacementForKeyword:tempString usingDictionary:keywords]];
-			 [scanner scanString:@"]" intoString:nil];
+
+             int numBrackets = 1;
+             NSMutableString *bracketedString = [NSMutableString string];
+             tempString = @"";
+             while (numBrackets > 0) {
+                 [bracketedString appendString:tempString];  //get recursive [ if any
+                 if ([scanner scanUpToCharactersFromSet:brackets intoString:&tempString]) {
+                     [bracketedString appendString:tempString];
+                 }
+                if ([scanner scanString:@"[" intoString:&tempString]) {
+                     numBrackets++;
+                } else if ([scanner scanString:@"]" intoString:&tempString]) {
+                     numBrackets--;
+                 }
+            }
+			 [outStr appendString: [self replacementForKeyword:bracketedString usingDictionary:keywords]];
 		 }
 	 }
      NSString * finalStr = [outStr stringByReplacingOccurrencesOfString:@"/" withString:@"-"]; //remove accidental directory markers
