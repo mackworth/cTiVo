@@ -3,13 +3,46 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 2.4.0; Major release</description>
+        <description>Version 2.4.2; Metadata improvements</description>
         <language>en</language>
         <item>
-            <title>Version 2.4.0; Major release</title>
-			<description><![CDATA[
-                <h2>2.4.0 features</h2>
+            <title>Version 2.4.2; Metadata improvements</title>
+            <description><![CDATA[
+                <h2>Version 2.4.2</h2>
 
+                <h3>Metadata Improvements:</h3>
+
+                <ul>
+                <li>New Metadata Integration with pyTivo <br>
+                With the latest version of pyTiVo, the .TXT metadata files are no longer necessary.<br>
+                Instead, cTiVo will embed the TiVo-specific data inside the MPEG files.<br>
+                So now you can simply turn off cTiVo's <code>PyTiVo</code> feature and not worry about having to track the .TXT files anymore.<br>
+                The pyTiVo version required has <code>metadata.py</code> dated 10/12/15 or later and <a href="https://github.com/wmcbrine/pytivo/archive/master.zip">can be downloaded here </a>.<br>
+                Note: this is only true for newly created .MP4, M4V, and .MOV files. <br></li>
+
+                <li>New metadata: starRating, ageRating, showingBits, writers</li>
+                <li>Improved pytivo compatibility with text metadata as well</li>
+                <li>MP4 metadata generally cleaned up</li>
+                <li>Pass director's name for movies to iTunes</li>
+                <li>New table columns for ageRating and starRating of shows</li>
+                </ul>
+
+                <h3>Bug Fixes:</h3>
+
+                <ul>
+                <li>Allow editing of Format names</li>
+                <li>Allow remote IP address to have 80 or 443</li>
+                <li>Protection against confusing download directory and tmp directory</li>
+                <li>No more mass deleting tmp files on startup from a user-specified tmp directory.</li>
+                <li>Repaired MPEG2-HD and MPEG2-1mbps Formats</li>
+                <li>Prevent crash if deleting last TiVo in Manual TiVo Editor</li>
+                <li>Avoid duplicate listings from "Streaming Movies" bug in TiVo</li>
+                <li>Realtime updating of "Last Recorded" column in Subscriptions</li>
+                </ul>
+
+                <h3>Upgrade to Crashlytics 3.3.4 and Sparkle 1.11</h3>
+
+                <h2>Prior Version: 2.4.0</h2>
                 <h3>UI Improvements:</h3>
                 <ul>
                 <li> Performance monitoring.
@@ -94,17 +127,15 @@
                 </ul>
 
                 See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
-                
             ]]>
-			</description>
-            <pubDate>Wed., July 9, 2015 7:00:00 -0800</pubDate>
+            </description>
+            <pubDate>Fri., October30, 2015 14:00:00 -0800</pubDate>
             <!-- <sparkle:releaseNotesLink>http://andymatuschak.org/files/notes.html</sparkle:releaseNotesLink> -->
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.4.0/cTiVo.zip"
-            sparkle:version="547" sparkle:shortVersionString="2.4.0"
-            length="19088130"
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.4.2/cTiVo.zip"
+            sparkle:version="560" sparkle:shortVersionString="2.4.2"
+            length="19148048"
             type="application/octet-stream"
-            sparkle:dsaSignature="MCwCFG6Yq3lWIKToLogRLGjwqWa13apKAhR4oHeNP28WCpzNUXvqoNu7seOp5w==" />
+            sparkle:dsaSignature="MC0CFBCVx2xov06eCobATkmusU+VzaiuAhUAm+q3qNnGG3M9JbKm9HGur1Q9SLo=" />
         </item>
     </channel>
 </rss>
-
