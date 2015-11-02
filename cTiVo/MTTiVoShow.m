@@ -877,6 +877,13 @@ __DDLOGHERE__
 {
 	_gotDetails = NO;
 	DDLogMajor(@"Show: %@ Parser Error %@",self.showTitle, parseError);
+    NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.tiVo.tiVo.name,self.showID];
+    NSFileManager * fileMgr = [NSFileManager defaultManager];
+    if ([fileMgr fileExistsAtPath:detailFilePath]) {
+        DDLogDetail(@"deleting file %@ for show %@", detailFilePath, self);
+        [fileMgr removeItemAtPath:detailFilePath error:nil];
+    }
+
 }
 
 #pragma mark - Custom Getters

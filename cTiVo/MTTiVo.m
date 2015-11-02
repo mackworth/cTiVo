@@ -531,10 +531,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             parsingShow = NO;
             for (MTTiVoShow * oldShow in newShows) {
                 if ([oldShow isEqualTo:currentShow]) {
-                    DDLogReport(@"Duplicate show found: %@",currentShow);
-//                    currentShow = nil;
-//                    return;
-                    }
+                    DDLogMajor(@"Duplicate show found, skipping: %@",currentShow);
+                    currentShow = nil;
+                    return;
+                }
             }
             numAddedThisBatch++;
             MTTiVoShow *thisShow = [previousShowList valueForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
