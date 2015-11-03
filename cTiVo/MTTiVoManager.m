@@ -1646,7 +1646,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
 	}
-	DDLogMajor(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
+	DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
 
 }
