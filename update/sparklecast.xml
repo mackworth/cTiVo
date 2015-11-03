@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>cTiVo Updates</title>
+        <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
+        <description>Version 2.4.3; Metadata improvements</description>
+        <language>en</language>
+        <item>
+            <title>Version 2.4.3; Metadata improvements</title>
+            <description><![CDATA[
+                <h2>Version 2.4.3</h2>
+
+                <h3>Metadata Improvements:</h3>
+
+                <ul>
+                <li>New Metadata Integration with pyTivo <br>
+                With the latest version of pyTiVo, the .TXT metadata files are no longer necessary.<br>
+                Instead, cTiVo will embed the TiVo-specific data inside the MPEG files.<br>
+                So now you can simply turn off cTiVo's <code>PyTiVo</code> feature and not worry about having to track the .TXT files anymore.<br>
+                The pyTiVo version required has <code>metadata.py</code> dated 10/12/15 or later and <a href="https://github.com/wmcbrine/pytivo/archive/master.zip">can be downloaded here </a>.<br>
+                Note: this is only true for newly created .MP4, M4V, and .MOV files. <br></li>
+
+                <li>New metadata: starRating, ageRating, showingBits, writers</li>
+                <li>Improved pytivo compatibility with text metadata as well</li>
+                <li>MP4 metadata generally cleaned up</li>
+                <li>Pass director's name for movies to iTunes</li>
+                <li>New table columns for ageRating and starRating of shows</li>
+                </ul>
+
+                <h3>Bug Fixes:</h3>
+
+                <ul>
+                <li>Allow editing of Format names</li>
+                <li>Allow remote IP address to have 80 or 443</li>
+                <li>Protection against confusing download directory and tmp directory</li>
+                <li>No more mass deleting tmp files on startup from a user-specified tmp directory.</li>
+                <li>Repaired MPEG2-HD and MPEG2-1mbps Formats</li>
+                <li>Prevent crash if deleting last TiVo in Manual TiVo Editor</li>
+                <li>Avoid duplicate listings from "Streaming Movies" bug in TiVo</li>
+                <li>Realtime updating of "Last Recorded" column in Subscriptions</li>
+                </ul>
+
+                <h3>Upgrade to Crashlytics 3.3.4 and Sparkle 1.11</h3>
+                <ul>
+                <li>Note the version 2.4.2 broke Sparkle upgrades
+                </ul>
+
+                <h2>Prior Version: 2.4.0</h2>
+                <h3>UI Improvements:</h3>
+                <ul>
+                <li> Performance monitoring.
+                <ul>
+                <li>While cTiVo is processing, it will display the current throughput and estimate the time left to finish all files. </li>
+                <li>In addition, if you hover over a show in process, it will show you the throughput/estimated time for that particular show.</li>
+                </ul>
+                </li>
+                <li>  Simplified top bar of window
+                <ul>
+                <li>Put download controls (Directory and Format) on right</li>
+                <li>Put display controls (TiVos and Find) on left</li>
+                <li>Added TiVo logo</li>
+                </ul>
+                </li>
+                <li>New Drag/Drop option
+                <ul>
+                <li>Text list of show names (tab separated) from both NowPlaying list or Download</li>
+                <li>Text version of subscriptions from Subscription Table </li>
+                <li>Accepts text subscriptions back again, e.g. after editing subscription as text</li>
+                </ul>
+                </li>
+                <li>Added cut/copy/paste equivalents of drag/drop
+                <ul>
+                <li>From NowPlaying or Downloads to Downloads </li>
+                <li>From NowPlaying, Downloads, or Text to Subscriptions</li>
+                </ul>
+                </li>
+                <li>New Status column for Download table DL Stage to allow sorting by stage of downloads</li>
+
+                <li>Remember prior manual queue start/stop between runs</li>
+                </ul>
+
+                <h3>Artwork Improvements:</h3>
+                <ul>
+                <li>Added access to TheMovieDB posters for movies</li>
+                <li>Option to choose to “trust” TVDB’s episode numbers over TiVo's</li>
+                <li>Better background transfer management and Rate limiting for TVDB</li>
+                <li>Move downloaded art below user thumbnails in priority</li>
+                </ul>
+                <h3>Logging Improvements:</h3>
+                <ul>
+                <li>Added "Help&gt;Show Logs in Finder"  menu command</li>
+                <li>Log files now dated, named ".log" to open in Console</li>
+                <li>Better logging for authentication challenges and saving log files after failure</li>
+                <li>Masking MAK in logging</li>
+                <li>Changed levels of several msgs to be more helpful</li>
+                <li>Removed highly repetitive warnings</li>
+                </ul>
+
+                <h3> Other Improvements: </h3>
+                <ul>
+                <li>Significantly smaller memory usage, especially when running unattended.</li>
+                <li>   Added crash tracking with Crashlytics  (opt-out in Advanced Preferences)</li>
+                <li>   For hackers, added MaxNumberEncoders and MaxProgressDelay (in seconds) as user Prefs (no GUI)</li>
+                <li>   Supplying 0 (zero) in Adv Preferences&gt;TiVo Refresh time means "manual refresh only".</li>
+                <li>   Update to latest versions of Handbrake, Sparkle, and ccExtractor</li>
+                </ul>
+
+                <h3> Bug Fixes:</h3>
+                <ul>
+                <li>   Prevent possible crash during enabling scheduled times.</li>
+                <li>   Protect against TiVo returning less shows than it says it has</li>
+                <li>   Updated DVD Format to be compatible with current encoder</li>
+                <li>   Fix for length field not appearing in Downloads</li>
+                <li>   Long-standing bug that if encoder crashed, it took down cTiVo as well; rewrote to lower-level file routines, so now the download should simply fail instead.</li>
+                <li>   Caption/pyTiVo files are moved to iTunes folder IF Delete after iTunes is enabled</li>
+                <li>   Manual TiVos will now coming online after recovery from network failure.</li>
+                <li>   No longer tries to download deleted TiVo shows</li>
+                <li>   Will now find series with embedded season names in theTVDB (e.g. Spartacus: War of the Damned)</li>
+                <li>   Supports vibrancy in Yosemite</li>
+                <li>   Fixed rare startup crash in Lumberjack logging module</li>
+                <li>   Sorting Channel column numerically instead of alphabetically</li>
+                <li>   Filter out TiVo Desktop</li>
+                <li>   Removed delay after two encodes finish</li>
+                <li>   Pickup foreign language titles from theTVDB</li>
+                <li>   Adding error checking to catToFile "encoder"</li>
+                <li>   Corrected PS3 encoder description to "resolution unchanged"</li>
+                <li>   Checks for progress regex if needed</li>
+                <li>   Major internally restructuring to avoid sporadic crashes during downloads</li>
+                <li>   Doesn't allow selecting cTiVo's Download folder as its Temporary folder</li>
+                </ul>
+
+                See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
+            ]]>
+            </description>
+            <pubDate>Tues., November 3, 2015 14:00:00 -0800</pubDate>
+            <!-- <sparkle:releaseNotesLink>http://andymatuschak.org/files/notes.html</sparkle:releaseNotesLink> -->
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.4.3/cTiVo.zip"
+            sparkle:version="564" sparkle:shortVersionString="2.4.3"
+            length="19160417"
+            type="application/octet-stream"
+            sparkle:dsaSignature="MC0CFAJYZZ8gXzcT03RzhQo8MxJU0xkrAhUAiYvS4lktlbjXGO5YLwumO8H9Avo=" />
+        </item>
+    </channel>
+</rss>
