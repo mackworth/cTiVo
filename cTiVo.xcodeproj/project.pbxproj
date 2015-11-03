@@ -64,6 +64,7 @@
 		1EDBDFAB1B1CB82700E979F0 /* tivodecode in Copy Executables */ = {isa = PBXBuildFile; fileRef = D2D60BC316766F3200CE32DE /* tivodecode */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EDE323A19C502980052E6C6 /* tivo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323819C502980052E6C6 /* tivo.png */; };
 		1EDE323B19C502980052E6C6 /* tivo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323919C502980052E6C6 /* tivo@2x.png */; };
+		1EFE66FD1BE965C10083386C /* sparklecast.xml in Resources */ = {isa = PBXBuildFile; fileRef = 1EFE66FC1BE965C10083386C /* sparklecast.xml */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
@@ -226,6 +227,7 @@
 		1EDE323819C502980052E6C6 /* tivo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tivo.png; sourceTree = "<group>"; };
 		1EDE323919C502980052E6C6 /* tivo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tivo@2x.png"; sourceTree = "<group>"; };
 		1EFD685A16D19AA100CC36E5 /* ccextractor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ccextractor; sourceTree = "<group>"; };
+		1EFE66FC1BE965C10083386C /* sparklecast.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = sparklecast.xml; path = "../../cTiVo secrets/sparklecast.xml"; sourceTree = "<group>"; };
 		D2001C211704F93F00B75D9C /* MTSrt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTSrt.h; sourceTree = "<group>"; };
 		D2001C221704F93F00B75D9C /* MTSrt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSrt.m; sourceTree = "<group>"; };
 		D2001C231704F93F00B75D9C /* MTEdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTEdl.h; sourceTree = "<group>"; };
@@ -512,6 +514,7 @@
 		D2C0380F17131F9A0001BA52 /* Update */ = {
 			isa = PBXGroup;
 			children = (
+				1EFE66FC1BE965C10083386C /* sparklecast.xml */,
 			);
 			name = Update;
 			path = update;
@@ -795,6 +798,7 @@
 				D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */,
 				1E3D27E51A4F5992006B9CC4 /* Crashlytics.sh in Resources */,
 				1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */,
+				1EFE66FD1BE965C10083386C /* sparklecast.xml in Resources */,
 				1E964C9E1882768A00C19046 /* expired-recording@2x.png in Resources */,
 				D2574E8617FE30EC00BBAB5C /* MAKHelpFile.rtf in Resources */,
 				D2D2C6F016B3816B001AFE75 /* MTManualTiVoEditorController.xib in Resources */,
