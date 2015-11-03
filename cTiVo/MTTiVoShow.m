@@ -851,7 +851,7 @@ __DDLOGHERE__
         _gotDetails = YES;
     }
     NSAssert(![NSThread isMainThread],@"getShowDetail NOT on background");
-    NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.tiVo.tiVo.name,self.showID];
+    NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.tiVo.tiVo.name,self.showID]; //keep in sync with parseDetails
     NSData *xml = nil;
     NSFileManager * fileMgr = [NSFileManager defaultManager];
     if ([fileMgr fileExistsAtPath:detailFilePath]) {
@@ -871,13 +871,14 @@ __DDLOGHERE__
             [xml writeToFile:detailFilePath atomically:YES];
         }
     }
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self parseDetails:xml];
+        [self parseDetails:xml firstTime:YES];
     });
 
 
 }
--(void) parseDetails:(NSData *) xml  {
+-(void) parseDetails:(NSData *) xml  firstTime:(BOOL) firstTime {
     //parsing itself occurs on main thread to avoid multiaccess problems. measured < 1/1000 second
     DDLogVerbose(@"Got Details for %@: %@", self, [[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
 
@@ -886,8 +887,29 @@ __DDLOGHERE__
     self.ignoreSection = NO;
     [parser parse];
     if (!_gotDetails) {
-        DDLogMajor(@"GetDetails Fail for %@",_showTitle);
-        DDLogMajor(@"Returned XML is %@",	[[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	]);
+        //Tivo sometimes puts "&&amp" for "&amp"; if so, fix it and try again
+
+        NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.tiVo.tiVo.name,self.showID]; //keep in sync with getShowDetail
+        NSString *xmlString =  [[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	];
+        if (firstTime && [xmlString containsString:@"&&amp"]) {
+            _gotDetails = YES;
+            DDLogMajor(@"Fixing TiVo &&amp bug for %@",_showTitle);
+            xmlString = [xmlString stringByReplacingOccurrencesOfString:@"&&amp" withString:@"&amp"];
+            NSData * revisedXML = [xmlString dataUsingEncoding:NSUTF8StringEncoding];
+            [revisedXML writeToFile:detailFilePath atomically:YES];
+            [self parseDetails:revisedXML firstTime:NO];
+
+        } else {
+            DDLogMajor(@"GetDetails %@fails for %@", firstTime? @"":@"really ",_showTitle);
+            DDLogMajor(@"Returned XML is %@",xmlString);
+            NSFileManager * fileMgr = [NSFileManager defaultManager];
+            if ([fileMgr fileExistsAtPath:detailFilePath]) {
+                //cached version is not usable
+                DDLogDetail(@"deleting file %@ for show %@", detailFilePath, self);
+                [fileMgr removeItemAtPath:detailFilePath error:nil];
+            }
+        }
+
     } else {
         if (!self.isMovie) { //no need for movie info, just artwork when we download.
             [self getTheTVDBDetails];
@@ -980,7 +1002,8 @@ __DDLOGHERE__
 -(void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError
 {
 	_gotDetails = NO;
-	DDLogMajor(@"Show: %@ Parser Error %@",self.showTitle, parseError);
+    DDLogMajor(@"Show: %@ Parser Error %@",self.showTitle, parseError);
+
 }
 
 #pragma mark - Custom Getters
