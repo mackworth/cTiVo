@@ -787,7 +787,7 @@ __DDLOGHERE__
 
         NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.tiVo.tiVo.name,self.showID]; //keep in sync with getShowDetail
         NSString *xmlString =  [[NSString alloc] initWithData:xml encoding:NSUTF8StringEncoding	];
-        if (firstTime && [xmlString containsString:@"&&amp"]) {
+        if (firstTime && [xmlString contains:@"&&amp"]) {
             _gotDetails = YES;
             DDLogMajor(@"Fixing TiVo &&amp bug for %@",_showTitle);
             xmlString = [xmlString stringByReplacingOccurrencesOfString:@"&&amp" withString:@"&amp"];
