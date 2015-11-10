@@ -82,8 +82,7 @@
 	}
 }
 #define kMTPlexSimple @"[MainTitle] - [SeriesEpNumber | OriginalAirDate] [\"- \" EpisodeTitle]"
-#define kMTPlexFolder @"[MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | Year [\" - \" EpisodeTitle]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
-
+#define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | OriginalAirDate [\" - \" EpisodeTitle]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
 -(void) updatePlexPattern {
 
     //update plex strings from previous standard format
