@@ -82,7 +82,7 @@
 	}
 }
 #define kMTPlexSimple @"[MainTitle] - [SeriesEpNumber | OriginalAirDate] [\"- \" EpisodeTitle]"
-#define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | Year [\" - \" EpisodeTitle]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
+#define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | OriginalAirDate [\" - \" EpisodeTitle]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
 
 -(void) updatePlexPattern {
 
@@ -196,9 +196,7 @@
         shows = [shows objectsAtIndexes:selectedRowIndexes ];
       }
     for (MTTiVoShow * show in  shows) {
-        testDownload.show = show;
-        [fileNames appendFormat:@"%@\n", [testDownload swapKeywordsInString:pattern]];
-
+        [fileNames appendFormat:@"%@ - %@\n", [testDownload swapKeywordsInString:pattern], show.lengthString];
     }
     NSAttributedString * results = [[NSAttributedString alloc] initWithString:fileNames];
     //	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];

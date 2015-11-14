@@ -225,7 +225,9 @@ __DDLOGHERE__
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
     NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
 	for (NSUInteger i =0; i < [cTiVoQuery resultCount]; i++) {
-		NSString *filePath = [[cTiVoQuery resultAtIndex:i] valueForAttribute:NSMetadataItemPathKey];
+        NSMetadataItem * item = [cTiVoQuery resultAtIndex:i];
+        if (![item isKindOfClass:[NSMetadataItem class]]) continue;
+        NSString *filePath = [item valueForAttribute:NSMetadataItemPathKey];
 		ssize_t len = getxattr([filePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], (void *)[buffer bytes], 256, 0, 0);
 		if (len > 0) {
 			NSData *idData = [NSData dataWithBytes:[buffer bytes] length:(NSUInteger)len];

@@ -701,7 +701,7 @@ NSString * fourChar(long n, BOOL allowZero) {
              TVDBseriesID = [TVDBepisodeEntry objectForKey:@"series"];
          };
 	 }
-		 
+     NSString * guests = [[self.show.guestStars.string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@", "];
 		 
 	 NSDictionary * keywords = @{  //lowercase so we can just lowercase keyword when found
 		 @"/":				@"|||",						//allows [/] for subdirs
@@ -722,7 +722,9 @@ NSString * fourChar(long n, BOOL allowZero) {
 		 @"episode":		twoChar(self.show.episode, NO),
 		 @"season":			twoChar(self.show.season, NO),
 		 @"episodenumber":	NULLT(self.show.episodeNumber),
+         @"StartTime":     NULLT(self.show.startTime),
 		 @"seriesepnumber": NULLT(self.show.seasonEpisode),
+         @"guests":        NULLT(guests),
 		 @"tivoname":		NULLT(self.show.tiVoName),
 		 @"movieyear":		NULLT(self.show.movieYear),
 		 @"tvdbseriesid":	NULLT(TVDBseriesID),
@@ -1777,7 +1779,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:xml options:0 error:nil];
 		NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
 		id returnxml = [xmldoc objectByApplyingXSLTAtURL:[NSURL fileURLWithPath:xltTemplate] arguments:nil error:nil	];
-		if (!returnxml || [returnxml isKindOfClass:[NSData class]] ) {
+		if (!returnxml || ![returnxml isKindOfClass:[NSData class]] ) {
  			DDLogReport(@"Couldn't convert XML to text using %@ got %@; XML: \n %@ \n ", xltTemplate, returnxml, xml);
         } else {
            NSString *returnString = [[NSString alloc] initWithData:returnxml encoding:NSUTF8StringEncoding];
