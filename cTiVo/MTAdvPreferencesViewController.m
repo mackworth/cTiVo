@@ -9,6 +9,7 @@
 #import "MTAdvPreferencesViewController.h"
 #import "MTTiVoManager.h"
 #import "MTAppDelegate.h"
+#import "NSString+Helpers.h"
 
 #define tiVoManager [MTTiVoManager sharedTiVoManager]
 
@@ -123,6 +124,7 @@
 						   @"Season",
 						   @"Episode",
 						   @"EpisodeNumber",
+                           @"ExtraEpisode",
 						   @"SeriesEpNumber",
 						   @"StartTime",
 						   @"MovieYear",
@@ -196,7 +198,11 @@
         shows = [shows objectsAtIndexes:selectedRowIndexes ];
       }
     for (MTTiVoShow * show in  shows) {
-        [fileNames appendFormat:@"%@ - %@\n", [testDownload swapKeywordsInString:pattern], show.lengthString];
+        testDownload.show = show;
+        NSString * filename =[testDownload swapKeywordsInString:pattern];
+        if (![pattern contains:@"ExtraEpisode"] || [filename contains:@"-E"]) {    //Temporary for 2.5alpha2 only; REMOVE if for next release
+            [fileNames appendFormat:@"%@ - %@\n",show.showTitle, [testDownload swapKeywordsInString:pattern]];
+        }
     }
     NSAttributedString * results = [[NSAttributedString alloc] initWithString:fileNames];
     //	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];

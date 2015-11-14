@@ -671,11 +671,15 @@ NSString * fourChar(long n, BOOL allowZero) {
 #define NULLT(x) (x ?: @"")
 
  -(NSString *) swapKeywordsInString: (NSString *) str {
-	NSDateComponents *components = [[NSCalendar currentCalendar]
+     NSDateComponents *components;
+     if (self.show.showDate) {
+         components = [[NSCalendar currentCalendar]
 									components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear |NSCalendarUnitWeekday  |
 									NSCalendarUnitMinute | NSCalendarUnitHour
 											fromDate:self.show.showDate];
-	 
+     } else {
+         components = [[NSDateComponents alloc] init];
+     }
 	 NSString * originalAirDate =self.show.originalAirDateNoTime;
 	 if (!originalAirDate && [components year] > 0) {
 		 originalAirDate = [NSString stringWithFormat:@"%@-%@-%@",
@@ -683,7 +687,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 											twoChar([components month], YES),
 											twoChar([components day], YES)];
 	 }
-	 NSString * monthName = [components month]> 0 ?
+	 NSString * monthName = ([components month]> 0 && [components month] != NSUndefinedDateComponent) ?
 								[[[[NSDateFormatter alloc] init] shortMonthSymbols]
 													   objectAtIndex:[components month]-1] :
 								@"";
@@ -702,7 +706,12 @@ NSString * fourChar(long n, BOOL allowZero) {
          };
 	 }
      NSString * guests = [[self.show.guestStars.string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@", "];
-		 
+     NSString * extraEpisode = @"";
+     if (self.show.episode && self.show.season &&   //if we have an SxxExx AND either a 2 hr show OR a semicolon in episode title, then it might be a double episode
+         ((self.show.showLength > 115*60 && self.show.showLength < 125*60) ||
+          ([self.show.episodeTitle contains:@";"]))) {
+         extraEpisode = [NSString stringWithFormat:@"E%02d",self.show.episode+1];
+     }
 	 NSDictionary * keywords = @{  //lowercase so we can just lowercase keyword when found
 		 @"/":				@"|||",						//allows [/] for subdirs
 		 @"title":			NULLT(self.show.showTitle) ,
@@ -720,7 +729,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 		 @"year": 			self.show.isMovie ? @"" : fourChar([components year], NO),
  		 @"originalairdate": originalAirDate,
 		 @"episode":		twoChar(self.show.episode, NO),
-		 @"season":			twoChar(self.show.season, NO),
+         @"extraepisode":  NULLT(extraEpisode),
+         @"season":			twoChar(self.show.season, NO),
 		 @"episodenumber":	NULLT(self.show.episodeNumber),
          @"StartTime":     NULLT(self.show.startTime),
 		 @"seriesepnumber": NULLT(self.show.seasonEpisode),
