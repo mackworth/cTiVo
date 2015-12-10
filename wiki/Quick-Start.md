@@ -20,8 +20,8 @@ cTiVo is intended to be very easy to get going, but it has a lot of configuratio
 ## Further reading
 
 If you would like more information, check out the other documents:
-- [Installation](installation.md)
-- [Configuration](http://configuration.md)
+- [Installation](Installation.md)
+- [Configuration](Configuration.md)
 - [Subscriptions](Subscriptions.md)
 - [Video Formats](Video-Formats.md)
 - [Advanced Topics](Advanced-Topics.md)
