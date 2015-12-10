@@ -37,7 +37,6 @@
 									   *exportSubtitles;
 
 @property (readonly) BOOL canSimulEncode;
-@property (readonly) BOOL shouldSimulEncode;
 @property (readonly) BOOL canAddToiTunes;
 @property (readonly) BOOL shouldAddToiTunes;
 @property (readonly) BOOL canSkipCommercials;

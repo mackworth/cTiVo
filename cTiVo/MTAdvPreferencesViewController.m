@@ -83,7 +83,7 @@
 	}
 }
 #define kMTPlexSimple @"[MainTitle] - [SeriesEpNumber | OriginalAirDate] [\"- \" EpisodeTitle]"
-#define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | OriginalAirDate [\" - \" EpisodeTitle]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
+#define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | OriginalAirDate [\"-\" ExtraEpisode][\" - \" EpisodeTitle | Guests]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
 
 -(void) updatePlexPattern {
 
@@ -123,6 +123,7 @@
 						   @"OriginalAirDate",
 						   @"Season",
 						   @"Episode",
+                           @"Guests",
 						   @"EpisodeNumber",
                            @"ExtraEpisode",
 						   @"SeriesEpNumber",

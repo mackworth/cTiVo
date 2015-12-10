@@ -122,10 +122,10 @@
             BOOL iTunes = [sUD boolForKey:kITiTunes];
             [sUD setBool:   iTunes forKey:kMTiTunesSubmit ];
             
-            //Simultaneous encode
-            BOOL simulEncode = ![sUD boolForKey:kITDownloadFirst];
-            [sUD setBool: simulEncode forKey:kMTSimultaneousEncode ];
-            
+//            //Simultaneous encode
+//            BOOL simulEncode = ![sUD boolForKey:kITDownloadFirst];
+//            [sUD setBool: simulEncode forKey:kMTSimultaneousEncode ];
+//            
             //download directory
             NSString * downloadDir = [sUD objectForKey:kITDL];
 			[sUD setValue: downloadDir  forKey:kMTDownloadDirectory];  //will validate when loaded again

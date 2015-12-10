@@ -139,7 +139,7 @@ __DDLOGHERE__
 //            //What? No previous format,must be our first run. Let's see if there's any iTivo prefs.
 //            [MTiTiVoImport checkForiTiVoPrefs];
 //        }
-		if (([defaults boolForKey:kMTRunComSkip] && [defaults boolForKey:kMTSimultaneousEncode])) [defaults setBool:NO forKey:kMTRunComSkip];  //patch for iTivo imports
+//		if (([defaults boolForKey:kMTRunComSkip] && [defaults boolForKey:kMTSimultaneousEncode])) [defaults setBool:NO forKey:kMTRunComSkip];  //patch for iTivo imports
 
 		if ([defaults objectForKey:kMTSelectedFormat]) {
 			NSString *formatName = [defaults objectForKey:kMTSelectedFormat];

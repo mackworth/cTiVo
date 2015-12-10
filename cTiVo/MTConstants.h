@@ -184,7 +184,7 @@
 #define kMTiTunesSync @"iTunesSync"                 // Whether to sync iDevices after iTunes submital
 #define kMTiTunesDelete @"iTunesDelete"				//Whether to delete original file after submitting to iTunes
 #define kMTiTunesContentIDExperiment @"iTunesContentID"  //Whether to add episodeID as contentID for iTunes; doesn't seem to work
-#define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
+//#define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
 #define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
 //Future? #define kMTAllowDups @"AllowDups"			//Whether to allow duplicate entries in downloads/subscriptions (e.g. for different formats)
 #define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)
@@ -192,6 +192,8 @@
 #define kMTShowSuggestions @"ShowSuggestions"		// Whether to display Tivo Suggestions (and to subscribe thereto)
 #define kMTSaveTmpFiles @"SaveTmpFiles"				// Turn off AutoDelete of intermediate files (to make debugging encoders easier)
 #define kMTUseMemoryBufferForDownload @"UseMemoryBufferForDownload" //Default is YES.  Turn off to make sure downloaded file is complete. Principally for debugging use and checkpointing.
+#define kMTSaveMPGFile @"SaveMPGFile"               //Don't delete decrypted MPG file after processing (also puts in download v tmp folder and disables simultaneous encoding)
+
 #define kMTFileNameFormat @"FileNameFormat"			//keyword pattern for filenames
 #define kMTTmpFilesDirectory @"TmpFilesDirectory"   //Where are temporary files saved
 
