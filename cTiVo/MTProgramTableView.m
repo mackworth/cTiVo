@@ -340,7 +340,10 @@ __DDLOGHERE__
         result.toolTip = textVal;
     } else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
         textVal = thisShow.isQueuedString;
-    } else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
+    } else if ([tableColumn.identifier compare:@"OnDisk"] == NSOrderedSame) {
+        textVal = thisShow.isOnDiskString;
+        result.toolTip =@"Is program already downloaded and still on disk?";
+   } else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
         textVal = thisShow.isHDString;
         result.textField.alignment = NSCenterTextAlignment;
     } else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
@@ -377,7 +380,7 @@ __DDLOGHERE__
     result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
     if ([thisShow.protectedShow boolValue]) {
         result.textField.textColor = [NSColor grayColor];
-    } else if ([tiVoManager.showsOnDisk objectForKey:thisShow.showKey]){
+    } else if ([thisShow isOnDisk]){
         //        result.textField.textColor = [NSColor blueColor];
         result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];
         result.textField.textColor = [NSColor blackColor];

@@ -105,15 +105,18 @@
 
 @property (nonatomic, readonly) BOOL    isMovie;
 @property (nonatomic, readonly) BOOL    isSuggestion;
+
 @property (nonatomic, readonly) NSNumber *channelNumber;  //numeric version of channel. Used only for sorting; NA => big number
 @property (weak, nonatomic, readonly) NSString *idString,
 										*combinedChannelString,
 										*lengthString,
 										*isQueuedString,
 										*isHDString,
+                                        *isOnDiskString,
 										*sizeString;
 
 @property BOOL isQueued;
+@property (nonatomic, readonly) BOOL isOnDisk;
 
 @property (nonatomic, assign) BOOL	gotDetails, gotTVDBDetails;
 

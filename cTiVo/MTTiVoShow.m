@@ -1517,6 +1517,13 @@ __DDLOGHERE__
                     [components day]];
 
 }
+-(BOOL) isOnDisk {
+    return [tiVoManager.showsOnDisk objectForKey:self.showKey] != nil;
+}
+
+-(NSString *) isOnDiskString {
+    return [self checkString: self.isOnDisk];
+}
 
 -(NSString *)checkString:(BOOL) test {
   return test ? @"✔" : @"";

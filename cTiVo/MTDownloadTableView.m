@@ -429,6 +429,9 @@ __DDLOGHERE__
 	} else if ([tableColumn.identifier isEqualToString:@"Queued"]) {
 		textVal = thisShow.isQueuedString;
 		result.toolTip =@"Is program in queue to download?";
+    } else if ([tableColumn.identifier isEqualToString:@"OnDisk"]) {
+        textVal = thisShow.isOnDiskString;
+        result.toolTip =@"Is program already downloaded and still on disk?";
 	} else if ([tableColumn.identifier isEqualToString:@"HD"]) {
 		textVal = thisShow.isHDString;
 		result.textField.alignment = NSCenterTextAlignment;
