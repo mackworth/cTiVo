@@ -46,6 +46,7 @@
 @property (nonatomic, assign) double startProgress;
 @property (nonatomic, strong) NSTimer * progressTimer;
 @property (nonatomic, assign) int numZeroSpeeds;
+@property (nonatomic, readonly) BOOL shouldSaveMPG;
 
 @end
 
@@ -98,6 +99,12 @@ __DDLOGHERE__
              self.progressTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
          }
     }
+}
+
+- (void) formatMayHaveChanged{
+    //if format list is updated, we need to ensure our format still exists
+    //known bug: if name of current format changed, we will not find correct one
+    self.encodeFormat = [tiVoManager findFormat:self.encodeFormat.name];
 }
 
 -(void) launchPerformanceTimer:(NSTimer *) timer {
@@ -294,8 +301,7 @@ __DDLOGHERE__
 	//used for persistent queue, as we like having english-readable pref lists
 	//keep parallel with encodeWithCoder
 	//need to watch out for a nil object ending the dictionary too soon.
-	DDLogDetail(@"queueRecord for %@",self);
-	
+
 	NSMutableDictionary *result = [NSMutableDictionary dictionaryWithObjectsAndKeys:
 								   [NSNumber numberWithInteger: _show.showID], kMTQueueID,
 								   [NSNumber numberWithBool:_addToiTunesWhenEncoded], kMTSubscribediTunes,
@@ -444,12 +450,6 @@ __DDLOGHERE__
 	return 0;
 }
 
-- (void) formatMayHaveChanged{
-	//if format list is updated, we need to ensure our format still exists
-	//known bug: if name of current format changed, we will not find correct one
-	self.encodeFormat = [tiVoManager findFormat:self.encodeFormat.name];
-}
-
 #pragma mark - Set up for queuing / reset
 -(void)prepareForDownload: (BOOL) notifyTiVo {
 	//set up initial parameters for download before submittal; can also be used to resubmit while still in DL queue
@@ -457,6 +457,7 @@ __DDLOGHERE__
 	if (self.isInProgress) {
 		[self cancel];
 	}
+    self.baseFileName = nil;
 	_processProgress = 0.0;
 	self.numRetriesRemaining = (int) [[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries];
 	self.numStartupRetriesRemaining = kMTMaxDownloadStartupRetries;
@@ -503,27 +504,33 @@ __DDLOGHERE__
 		}
 		
 	}
+/*shouldSaveMPG:
     BOOL succeeded = _downloadStatus.intValue == kMTStatusDone;
 
-    if (succeeded &&[[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveMPGFile] && !_downloadingShowFromMPGFile) {
-        NSString * mpgPath = [NSString stringWithFormat:@"%@/%@.tivo.mpg",self.downloadDir,self.baseFileName];
+    if (succeeded && self.shouldSaveMPG && !_downloadingShowFromMPGFile) {
+        NSString * newMPGPath = [NSString stringWithFormat:@"%@/%@.tivo.mpg",self.downloadDir,self.baseFileName];
         NSError * error = nil;
         if ([fm fileExistsAtPath:_decryptBufferFilePath]) {
             BOOL tryToMove = YES;
-            if ([fm fileExistsAtPath:mpgPath]) {
-                if (![fm removeItemAtPath:mpgPath error:&error]){
-                    DDLogMajor(@"Could not remove prior version of TiVo MPG file for %@ at %@ because %@",  self, mpgPath, error.localizedDescription?:@"No reason found");
+            if ([fm fileExistsAtPath:newMPGPath]) {
+                if (![fm removeItemAtPath:newMPGPath error:&error]){
+                    DDLogMajor(@"Could not remove prior version of TiVo MPG file for %@ at %@ because %@",  self, newMPGPath, error.localizedDescription?:@"No reason found");
                     tryToMove = NO;
                 }
-
             }
-            if (tryToMove && ![fm moveItemAtPath:_decryptBufferFilePath toPath:mpgPath error:&error]) {
-                DDLogMajor(@"Could not save %@ TiVo MPG file: %@ because %@",  self, mpgPath, error.localizedDescription?:@"No reason found");
+            if (tryToMove && [self isCompleteCTiVoFile:_decryptBufferFilePath forFileType:@"MPEG" ]) {
+                if ([fm moveItemAtPath:_decryptBufferFilePath toPath:newMPGPath error:&error]) {
+                    [self markCompleteCTiVoFile:newMPGPath];
+                    [self addXAttrs:newMPGPath];
+                } else {
+                    DDLogMajor(@"Could not save %@ TiVo MPG file: %@ because %@",  self, newMPGPath, error.localizedDescription?:@"No reason found");
+                }
             }
         } else {
-            DDLogMajor(@"TiVo MPG file for %@ not found at %@", self,mpgPath);
+            DDLogMajor(@"TiVo MPG file for %@ not found at %@", self,newMPGPath);
         }
     }
+ */
 	//Clean up files in TmpFilesDirectory
 	if (deleteFiles && self.baseFileName) {
 		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:tiVoManager.tmpFilesDirectory error:nil];
@@ -805,6 +812,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 //#define Null(x) x ?  x : nullString
 //
+#pragma mark - Configure files
 -(void)configureBaseFileNameAndDirectory {
 	if (!self.baseFileName) {
 		// generate only once
@@ -862,32 +870,34 @@ NSString * fourChar(long n, BOOL allowZero) {
 	NSString * possibleMpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,baseName];
     BOOL tivoFileExists = NO;
 
-    BOOL mpgFileExists = [self isCompleteCTiVoFile: possibleMpgFilePath forFileType:@"MPEG"];
-    if (!mpgFileExists) {
-        possibleMpgFilePath = [NSString stringWithFormat:@"%@/%@.tivo.mpg",downloadDir,baseName];
-        if ([self isCompleteCTiVoFile: possibleMpgFilePath forFileType:@"MPEG"]) {
-            mpgFileExists = YES;
-         }
-    }
+    if (!self.downloadingShowFromMPGFile && ! self.downloadingShowFromTiVoFile) { //due to recursion
+        BOOL mpgFileExists = [self isCompleteCTiVoFile: possibleMpgFilePath forFileType:@"MPEG"];
+        if (!mpgFileExists) {
+            possibleMpgFilePath = [NSString stringWithFormat:@"%@/%@.tivo.mpg",downloadDir,baseName];
+            if ([self isCompleteCTiVoFile: possibleMpgFilePath forFileType:@"MPEG"]) {
+                mpgFileExists = YES;
+             }
+        }
 
-    if (mpgFileExists) {
-        _mpgFilePath = possibleMpgFilePath;
-        _downloadingShowFromTiVoFile = NO;
-        _downloadingShowFromMPGFile = YES;
-        //we're using an existing file so start the next download
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTransferDidFinish object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
-        DDLogDetail(@"For %@, Using MPEG file %@",self, possibleMpgFilePath);
-    } else {
-        NSString *possibleTivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,baseName];
-        tivoFileExists = [self isCompleteCTiVoFile:possibleTivoFilePath forFileType:@"TiVo"];
-        if (tivoFileExists) {
-            _downloadingShowFromTiVoFile = YES;
-            _tivoFilePath = possibleTivoFilePath;
-            DDLogDetail(@"For %@, Using .TiVo file %@",self, possibleTivoFilePath);
+        if (mpgFileExists) {
+            _mpgFilePath = possibleMpgFilePath;
+            _downloadingShowFromTiVoFile = NO;
+            _downloadingShowFromMPGFile = NO; //shouldsaveMPG
+            //we're using an existing file so start the next download
+            [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTransferDidFinish object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
+            DDLogDetail(@"For %@, Using MPEG file %@",self, possibleMpgFilePath);
+        } else {
+            NSString *possibleTivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,baseName];
+            tivoFileExists = [self isCompleteCTiVoFile:possibleTivoFilePath forFileType:@"TiVo"];
+            if (tivoFileExists) {
+                _downloadingShowFromTiVoFile = NO; //shouldsaveMPG
+                _tivoFilePath = possibleTivoFilePath;
+                DDLogDetail(@"For %@, Using .TiVo file %@",self, possibleTivoFilePath);
+            }
         }
     }
 
-	if (([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:trialLockFilePath]) ) { //If .tivo file exits assume we will use this and not download.
+	if (([fm fileExistsAtPath:trialEncodeFilePath] || [fm fileExistsAtPath:trialLockFilePath]) ) { //If .tivo file exists, assume we will use this and not download.
 		NSString * nextBase;
 		NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
 		NSTextCheckingResult *result = [ending firstMatchInString:baseName options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, (baseName).length)];
@@ -950,9 +960,9 @@ NSString * fourChar(long n, BOOL allowZero) {
             bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:_bufferFilePath];
         }
     }
-        _decryptBufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,self.baseFileName];
-    DDLogVerbose(@"setting decrypt path: %@", _decryptBufferFilePath);
     if (!_downloadingShowFromMPGFile) {
+        _decryptBufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,self.baseFileName];
+        DDLogVerbose(@"setting decrypt path: %@", _decryptBufferFilePath);
         [[NSFileManager defaultManager] createFileAtPath:_decryptBufferFilePath contents:[NSData data] attributes:nil];
     }
 	_encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.downloadDir,self.baseFileName,_encodeFormat.filenameExtension];
@@ -1109,7 +1119,16 @@ NSString * fourChar(long n, BOOL allowZero) {
         return _decryptTask;
     }
     MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
-    NSString * decryptPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"tivodecode"];
+    NSString * decoder = [[NSUserDefaults standardUserDefaults] objectForKey:kMTDecodeBinary];
+    NSString * decryptPath = nil;
+    NSString * libreJar = nil;
+    if ([decoder isEqualToString:@"tivoLibre"]) {
+        // NSFileManager * fm = [NSFileManager defaultManager];
+        decryptPath = @"/usr/bin/java";
+        libreJar = [[NSBundle mainBundle] pathForAuxiliaryExecutable: @"tivo-libre.jar"];
+    } else {
+        decryptPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable: decoder];
+    }
     if (!decryptPath) { //should never happen, but did once.
         return nil;
     }
@@ -1120,11 +1139,11 @@ NSString * fourChar(long n, BOOL allowZero) {
         if (!self.shouldSimulEncode) {
             [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
             [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationDecryptDidFinish object:nil];
-            if (_decryptBufferFilePath) {
-                [self markCompleteCTiVoFile: _decryptBufferFilePath ];
-            }
         }
-        
+        if (_decryptBufferFilePath && self.shouldSaveMPG) {
+            [self markCompleteCTiVoFile: _decryptBufferFilePath ];
+        }
+
         [self checkDecodeLog];
 		return YES;
     };
@@ -1151,24 +1170,44 @@ NSString * fourChar(long n, BOOL allowZero) {
 //            }
 //        }
 //    };
-
-	NSArray *arguments = [NSArray arrayWithObjects:
-						  [NSString stringWithFormat:@"-m%@",self.show.tiVo.mediaKey],
+    NSString * mediaKey = [NSString stringWithFormat:
+                          @"-m%@%@",
+                           libreJar ? @" " : @"",
+                           self.show.tiVo.mediaKey];
+	NSArray *arguments = @[
+						  mediaKey,
 						  [NSString stringWithFormat:@"-o%@",_decryptBufferFilePath],
 						  @"-v",
-                          [NSString stringWithFormat:@"-"],
-						  nil];
+                          @"-"
+                          ];
+    if (libreJar) {
+        arguments = @[
+                      @"-jar",
+                      libreJar,
+                      mediaKey,
+                      @"-d",
+                      [NSString stringWithFormat:@"-o %@",_decryptBufferFilePath],
+                      ];
+    }
     decryptTask.requiresOutputPipe = NO;
     if (_exportSubtitles.boolValue || self.shouldSimulEncode) {  //use stdout to pipe to captions  or simultaneous encoding
-        arguments = [NSMutableArray arrayWithObjects:
-                     [NSString stringWithFormat:@"-m%@",_show.tiVo.mediaKey],
+        arguments =@[
+                     mediaKey,
                      @"-v",
                      @"--",
-                     @"-",
-                     nil];
+                     @"-"
+                     ];
+        if (libreJar) {
+            arguments = @[
+                          @"-jar",
+                          libreJar,
+                          mediaKey,
+                          @"-d"
+                          ];
+        }
         decryptTask.requiresOutputPipe = YES;
         //Not using the filebuffer so remove so it can act as a flag upon completion.
-        if (!_skipCommercials && !_exportSubtitles.boolValue && !_markCommercials) {
+        if (!self.shouldSaveMPG && !_skipCommercials && !_exportSubtitles.boolValue && !_markCommercials) {
             if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
                 [[NSFileManager defaultManager] removeItemAtPath:_decryptBufferFilePath error:nil];
             };
@@ -1176,7 +1215,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         }
     }
     [decryptTask setArguments:arguments];
-    DDLogVerbose(@"Decrypt Arguments: %@",arguments);
+    DDLogDetail(@"Decrypt Arguments: %@",[arguments componentsJoinedByString:@" "]);
     _decryptTask = decryptTask;
     return _decryptTask;
 }
@@ -1299,7 +1338,8 @@ NSString * fourChar(long n, BOOL allowZero) {
     MTTask *captionTask = [MTTask taskWithName:@"caption" download:self completionHandler:nil];
     [captionTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ccextractor" ]];
     captionTask.requiresOutputPipe = NO;
-    
+    captionTask.shouldReschedule  = NO;  //If captioning fails continue, just without captioning
+
     if (_downloadingShowFromMPGFile) {
         captionTask.progressCalc = ^double(NSString *data){
             NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\d+:\\d\\d" options:NSRegularExpressionCaseInsensitive error:nil];
@@ -1321,7 +1361,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 
             }
 			if (returnValue == -1.0){
-                DDLogMajor(@"Track progress with Rx failed for task caption for show %@",self.show.showTitle);
+                DDLogMajor(@"Track progress with Rx failed for task caption for show %@: %@",self.show.showTitle, data);
             }
 			return returnValue;
         };
@@ -1343,10 +1383,15 @@ NSString * fourChar(long n, BOOL allowZero) {
     };
     
     captionTask.cleanupHandler = ^(){
-        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] && self.isCanceled) {
+        if (_captionTask.taskFailed) {
+            [tiVoManager  notifyWithTitle:@"Detecting Captions Failed" subTitle:[NSString stringWithFormat:@"Not including captions for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlCommercialDetFailed];
+        }
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] &&
+            (_captionTask.taskFailed || self.isCanceled)) {
             if ([[NSFileManager defaultManager] fileExistsAtPath:captionFilePath]) {
                 [[NSFileManager defaultManager] removeItemAtPath:captionFilePath error:nil];
             }
+            captionFilePath = nil;
         }
     };
     
@@ -1423,7 +1468,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 				 }
 				[self progressUpdated];
 				[self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
-				if (self.exportSubtitles.boolValue && self.skipCommercials) {
+				if (self.exportSubtitles.boolValue && self.skipCommercials && captionFilePath) {
 					NSArray *srtEntries = [NSArray getFromSRTFile:captionFilePath];
 					NSArray *edlEntries = [NSArray getFromEDLFile:commercialFilePath];
 					if (srtEntries && edlEntries) {
@@ -1468,8 +1513,10 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     if ((self.taskFlowType == kMTTaskFlowSimuMarkcom || self.taskFlowType == kMTTaskFlowSimuMarkcomSubtitles) && [self canPostDetectCommercials]) {
         [arguments addObject:_encodeFilePath]; //Run on the final file for these conditions
-        commercialFilePath = [NSString stringWithFormat:@"%@/%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version
-   } else {
+        commercialFilePath = [NSString stringWithFormat:@"%@/%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version  (probably wrong, but not currently used)
+    } else if (self.downloadingShowFromMPGFile) {
+        [arguments addObject:_mpgFilePath];
+    } else {
         [arguments addObject:_decryptBufferFilePath];// Run this on the output of tivodecode
     }
 	DDLogVerbose(@"comskip Path: %@",[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"comskip" ]);
@@ -1486,9 +1533,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 -(NSArray *) addSaveMPG: (NSArray *) taskArray {
-    BOOL saveMPG = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveMPGFile] &&
-    !_downloadingShowFromMPGFile;            //if so, need to write file in all cases
-    if (saveMPG) {
+    if (self.shouldSaveMPG) {
         taskArray = [taskArray arrayByAddingObject:[self catTask:_decryptBufferFilePath]];
     }
     return taskArray;
@@ -1531,7 +1576,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                [defaults boolForKey:kMTGetEpisodeArt] ?
                     @" " :
                     @" No TVDB art;",
-               [defaults boolForKey:kMTSaveMPGFile] ?
+               self.shouldSaveMPG ?
                     @"Saving MPG file" :
                     @";"
                );
@@ -1695,9 +1740,23 @@ NSString * fourChar(long n, BOOL allowZero) {
     totalDataDownloaded = 0;
 
     if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {
+        NSURL * downloadURL = self.show.downloadURL;
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:KMTDownloadTSFormat]) {
+            NSString * downloadString = [downloadURL absoluteString];
+            if (![downloadString hasSuffix:@"&Format=video/x-tivo-mpeg-TS"]) {
+                if (![downloadString hasSuffix:@"&Format=video/x-tivo-mpeg"]) {
+                    downloadString = [downloadString stringByAppendingString: @"-TS"];
+                } else {
+                    downloadString = [downloadString stringByAppendingString: @"&Format=video/x-tivo-mpeg-TS"]; //normal case
+                }
+            }
+            downloadURL = [NSURL URLWithString:downloadString];
+        }
+
         NSURLRequest *thisRequest = [NSURLRequest requestWithURL:self.show.downloadURL];
         activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
         downloadingURL = YES;
+        DDLogMajor(@"Starting URL %@ for show %@", downloadURL,_show.showTitle);
     }
     _processProgress = 0.0;
 	previousProcessProgress = 0.0;
@@ -1710,7 +1769,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 	}
 	if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile)
 	{
-		DDLogMajor(@"Will start download of %@ in %lf seconds",self.show.showTitle,downloadDelay);
+		DDLogMajor(@"Will start download of %@ in %0.1lf seconds",self.show.showTitle,downloadDelay);
 		[activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	}
@@ -1912,7 +1971,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 				}
 			}
 		}
-		if (self.shouldEmbedSubtitles) {
+		if (self.shouldEmbedSubtitles && captionFilePath) {
 			NSArray * srtEntries = [NSArray getFromSRTFile:captionFilePath];
 			if (srtEntries.count > 0) {
 				[srtEntries embedSubtitlesInMP4File:encodedFile forLanguage:[MTSrt languageFromFileName:captionFilePath]];
@@ -1957,11 +2016,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 				}
                 //move caption, commercial, and pytivo metadata files along with video
                 NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
-                if (self.shouldEmbedSubtitles) {
+                if (self.shouldEmbedSubtitles && captionFilePath) {
                      captionFilePath = [self moveFile:captionFilePath ToiTunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: captionFilePath;
-                }
-                if (self.shouldMarkCommercials) {
-                    commercialFilePath = [self moveFile:commercialFilePath ToiTunes:iTunesBaseName forType:@"commercial" andExtension: @"edl"] ?: commercialFilePath;
                 }
                 if (self.genTextMetaData.boolValue) {
                     NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
@@ -2412,6 +2468,12 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 
 #pragma mark Convenience methods
+
+-(BOOL) shouldSaveMPG {
+    return NO;
+    //Not yet; while we work on tivodecode
+    //[[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveMPGFile] && !_downloadingShowFromMPGFile;
+}
 
 -(BOOL) canSimulEncode {
     return self.encodeFormat.canSimulEncode;

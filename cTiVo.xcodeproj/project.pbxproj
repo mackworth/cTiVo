@@ -55,6 +55,9 @@
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
+		1EB49B9D1C505D3000887240 /* tivodecode-ng in Resources */ = {isa = PBXBuildFile; fileRef = 1EB49B9C1C505D3000887240 /* tivodecode-ng */; };
+		1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9C1C505D3000887240 /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1EB49BA01C50A4B100887240 /* tivo-libre.jar in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */; };
 		1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49974174D898D0022E084 /* MTTiVoPopUpTableCellView.m */; };
 		1EDBDFA71B1CB82700E979F0 /* ccextractor in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EFD685A16D19AA100CC36E5 /* ccextractor */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -134,6 +137,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
+				1EB49BA01C50A4B100887240 /* tivo-libre.jar in Copy Executables */,
+				1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */,
 				1EDBDFA71B1CB82700E979F0 /* ccextractor in Copy Executables */,
 				1EDBDFA81B1CB82700E979F0 /* comskip in Copy Executables */,
 				1EDBDFA91B1CB82700E979F0 /* HandBrakeCLI in Copy Executables */,
@@ -220,6 +225,8 @@
 		1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Growl Registration Ticket.growlRegDict"; sourceTree = "<group>"; };
 		1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLogFormatter.h; sourceTree = "<group>"; };
 		1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLogFormatter.m; sourceTree = "<group>"; };
+		1EB49B9C1C505D3000887240 /* tivodecode-ng */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "tivodecode-ng"; sourceTree = "<group>"; };
+		1EB49B9F1C50A49000887240 /* tivo-libre.jar */ = {isa = PBXFileReference; lastKnownFileType = archive.jar; path = "tivo-libre.jar"; sourceTree = "<group>"; };
 		1ED49971174D898D0022E084 /* MTTiVoPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoPopUpButton.h; sourceTree = "<group>"; };
 		1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoPopUpButton.m; sourceTree = "<group>"; };
 		1ED49973174D898D0022E084 /* MTTiVoPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoPopUpTableCellView.h; sourceTree = "<group>"; };
@@ -633,6 +640,8 @@
 				D2D60BC216766F3200CE32DE /* mencoder */,
 				1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */,
 				D2D60BC316766F3200CE32DE /* tivodecode */,
+				1EB49B9C1C505D3000887240 /* tivodecode-ng */,
+				1EB49B9F1C50A49000887240 /* tivo-libre.jar */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -832,6 +841,7 @@
 				1E964CA8188313ED00C19046 /* checkImage2@2x.png in Resources */,
 				1E18145E1708AC1500166E5F /* cTiVo.help in Resources */,
 				1E1814601708AF7000166E5F /* cTiVo.icns in Resources */,
+				1EB49B9D1C505D3000887240 /* tivodecode-ng in Resources */,
 				1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */,
 				D2B4B4F41732D69C005B97F1 /* elgatoQuit.scpt in Resources */,
 				1E9A10EF1757200000863C44 /* cTiVo.png in Resources */,

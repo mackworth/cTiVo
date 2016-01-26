@@ -82,6 +82,15 @@
 		}
 	}
 }
+
+-(void) addDecodeMenuTo:(NSPopUpButton*) cell withCurrentChoice: (NSString *) level{
+    NSArray * decodeNames = @[@"tivodecode",@"tivodecode-ng"]; // ,@"tivoLibre"];
+
+    [cell addItemsWithTitles: decodeNames];
+    [cell selectItemWithTitle:level];
+
+}
+
 #define kMTPlexSimple @"[MainTitle] - [SeriesEpNumber | OriginalAirDate] [\"- \" EpisodeTitle]"
 #define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | OriginalAirDate [\"-\" ExtraEpisode][\" - \" EpisodeTitle | Guests]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
 
@@ -220,7 +229,7 @@
 	
 	[self addDebugMenuTo:self.masterDebugLevel withCurrentLevel:[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel]];
 	[self addKeywordMenuTo:self.keywordPopup];
-	
+    [self addDecodeMenuTo:self.decodePopup withCurrentChoice:[[NSUserDefaults standardUserDefaults] stringForKey:kMTDecodeBinary]];
 	self.debugClasses = [DDLog registeredClasses] ;
 	self.popups= [NSMutableArray arrayWithCapacity:self.debugClasses.count ];
 	self.classNames = [NSMutableArray arrayWithCapacity:self.debugClasses.count];
@@ -357,6 +366,13 @@
 	
 	[DDLog setLogLevel:newVal forClassWithName :className];
 	[DDLog writeAllClassesLogLevelToUserDefaults];
+}
+
+-(IBAction)newDecodeValue:(id)sender {
+    NSPopUpButton * cell =  (NSPopUpButton *) sender;
+    NSString * decoder = cell.selectedItem.title;
+    [[NSUserDefaults standardUserDefaults] setObject:decoder forKey:kMTDecodeBinary];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(IBAction)emptyCaches:(id)sender

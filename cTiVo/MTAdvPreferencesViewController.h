@@ -18,10 +18,12 @@
 @property (weak) IBOutlet NSPopUpButton *keywordPopup;
 @property (weak) IBOutlet NSView *debugLevelView;
 @property (weak) IBOutlet NSPopUpButton *masterDebugLevel;
+@property (weak) IBOutlet NSPopUpButton *decodePopup;
 @property (weak) IBOutlet NSTextField *fileNameField;
 
 -(IBAction) keywordSelected:(id) sender;
 -(IBAction) newMasterValue:(id) sender;
+-(IBAction)newDecodeValue:(id)sender;
 -(IBAction)selectTmpDir:(id)sender;
 -(IBAction)TVDBStatistics:(id)sender;
 

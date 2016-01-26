@@ -476,8 +476,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				if (self.manualTiVo) {
 					[self updatePortsInURLString:element];
 				}
-                //Australia fix? [element appendString:@"&Format=video/x-tivo-mpeg-TS"];
-                
 				[currentShow setValue:[NSURL URLWithString:element] forKey:@"downloadURL"];
 				DDLogVerbose(@"Content URL is %@",currentShow.downloadURL);
 			}

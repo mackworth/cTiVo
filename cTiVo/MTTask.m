@@ -213,7 +213,7 @@ __DDLOGHERE__
         [self completeProcess];
 	} else {
 		double newProgressValue = -1;
-		NSUInteger sizeOfFileSample = 100;
+		NSUInteger sizeOfFileSample = 180;
 		unsigned long long logFileSize = [self.logFileReadHandle seekToEndOfFile];
 		if (logFileSize > sizeOfFileSample) {
 			[self.logFileReadHandle seekToFileOffset:(logFileSize-sizeOfFileSample)];

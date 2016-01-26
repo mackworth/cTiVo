@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="14A361c" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment version="1070" defaultVersion="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6245"/>
+        <deployment version="1070" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTAdvPreferencesViewController">
             <connections>
                 <outlet property="debugLevelView" destination="28" id="29"/>
+                <outlet property="decodePopup" destination="7qa-Kj-zsO" id="XLX-4F-htv"/>
                 <outlet property="fileNameField" destination="46" id="jAh-vB-kwp"/>
                 <outlet property="keywordPopup" destination="In7-Wa-ifU" id="Vva-Mt-XFC"/>
                 <outlet property="masterDebugLevel" destination="32" id="40"/>
@@ -19,11 +20,11 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView id="1">
-            <rect key="frame" x="0.0" y="2" width="567" height="592"/>
+            <rect key="frame" x="0.0" y="0.0" width="567" height="622"/>
             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField verticalHuggingPriority="750" id="38">
-                    <rect key="frame" x="10" y="557" width="86" height="17"/>
+                    <rect key="frame" x="10" y="587" width="86" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Debug Level:" id="39">
                         <font key="font" metaFont="system"/>
@@ -32,7 +33,7 @@
                     </textFieldCell>
                 </textField>
                 <popUpButton toolTip="Set all modules debugging levels simultaneously" verticalHuggingPriority="750" id="32" userLabel="Debug Popup Button">
-                    <rect key="frame" x="101" y="552" width="100" height="26"/>
+                    <rect key="frame" x="101" y="582" width="100" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="33">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -43,8 +44,20 @@
                         <action selector="newMasterValue:" target="-2" id="41"/>
                     </connections>
                 </popUpButton>
+                <popUpButton toolTip="Choose which binary with which to decode TiVo files " verticalHuggingPriority="750" id="Td8-gx-ZnF" userLabel="Decode Popup Button">
+                    <rect key="frame" x="458" y="494" width="100" height="26"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="H96-XV-9f7">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="OtherViews" id="ne6-TL-xcA"/>
+                    </popUpButtonCell>
+                    <connections>
+                        <action selector="newDecodeValue:" target="-2" id="LOy-2A-dYt"/>
+                    </connections>
+                </popUpButton>
                 <button toolTip="If checked, no temporary files will be deleted during processing. Will leave enormous video files, so only use for debugging." id="42" userLabel="Tmp Files Button">
-                    <rect key="frame" x="10" y="528" width="266" height="18"/>
+                    <rect key="frame" x="10" y="558" width="266" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Don't delete tmp Files (for debug only)" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="43">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -55,7 +68,7 @@
                     </connections>
                 </button>
                 <button toolTip="If checked, video will be written to disk between steps. Otherwise, uses main memory to speed processing." id="61" userLabel="Memory Buffer Button">
-                    <rect key="frame" x="10" y="498" width="274" height="18"/>
+                    <rect key="frame" x="10" y="528" width="274" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Don't use memory buffer for downloads" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="62">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -70,7 +83,7 @@
                     </connections>
                 </button>
                 <button toolTip="If checked, opts out of crash/usage reporting. This will make it more difficult for us to fix problems!" id="IYb-h6-LkF" userLabel="Crashlytics Opt Out Button">
-                    <rect key="frame" x="10" y="468" width="274" height="18"/>
+                    <rect key="frame" x="10" y="498" width="274" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Opt-out of Crashlytics reporting" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="HWk-ay-wz3">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -81,7 +94,7 @@
                     </connections>
                 </button>
                 <textField toolTip="Where cTiVo stores temporary files (default is /tmp/ctivo/)" verticalHuggingPriority="750" id="67">
-                    <rect key="frame" x="10" y="438" width="171" height="17"/>
+                    <rect key="frame" x="10" y="441" width="171" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Temporary Files Directory:" id="70">
                         <font key="font" metaFont="system"/>
@@ -90,7 +103,7 @@
                     </textFieldCell>
                 </textField>
                 <textField toolTip="Where cTiVo stores temporary files (default is /tmp/ctivo/)" verticalHuggingPriority="750" id="66" userLabel="Text Field - Temporary Files">
-                    <rect key="frame" x="182" y="433" width="287" height="22"/>
+                    <rect key="frame" x="182" y="436" width="287" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" continuous="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="" drawsBackground="YES" id="71">
                         <font key="font" metaFont="system"/>
@@ -102,7 +115,7 @@
                     </connections>
                 </textField>
                 <textField toolTip="Not used yet." verticalHuggingPriority="750" id="48">
-                    <rect key="frame" x="10" y="408" width="135" height="17"/>
+                    <rect key="frame" x="10" y="411" width="135" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Filename Template:" id="49">
                         <font key="font" metaFont="system"/>
@@ -111,7 +124,7 @@
                     </textFieldCell>
                 </textField>
                 <textField toolTip="Keyword-based template for video-file names" verticalHuggingPriority="750" id="46" userLabel="Text Field FileName">
-                    <rect key="frame" x="141" y="403" width="311" height="22"/>
+                    <rect key="frame" x="141" y="406" width="311" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" lineBreakMode="truncatingMiddle" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="" drawsBackground="YES" usesSingleLineMode="YES" id="47">
                         <font key="font" metaFont="system"/>
@@ -123,7 +136,7 @@
                     </connections>
                 </textField>
                 <button toolTip="Displays statistics from theTVDB.com lookup process. Need to Empty Caches first to get most complete information." verticalHuggingPriority="750" id="98" userLabel="TVDB Stats Button">
-                    <rect key="frame" x="6" y="367" width="166" height="32"/>
+                    <rect key="frame" x="6" y="370" width="166" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="View TVDB statistics" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="99">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -134,7 +147,7 @@
                     </connections>
                 </button>
                 <button id="11">
-                    <rect key="frame" x="364" y="556" width="194" height="18"/>
+                    <rect key="frame" x="364" y="586" width="194" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <string key="toolTip">If checked, the user will need to use shift-click to select multiple items in the Now Playing list, but dragging one item will be easier.</string>
                     <buttonCell key="cell" type="check" title="Disable Drag to Select in UI" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="12">
@@ -146,7 +159,7 @@
                     </connections>
                 </button>
                 <textField toolTip="Specifies the number of times cTiVo will try to download before giving up." verticalHuggingPriority="750" id="53">
-                    <rect key="frame" x="379" y="529" width="119" height="17"/>
+                    <rect key="frame" x="379" y="559" width="119" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Download Retries:" id="54">
                         <font key="font" metaFont="system"/>
@@ -155,7 +168,7 @@
                     </textFieldCell>
                 </textField>
                 <textField toolTip="Specifies the number of times cTiVo will try to download before giving up." verticalHuggingPriority="750" id="52" userLabel="Text Field Retries">
-                    <rect key="frame" x="503" y="527" width="53" height="22"/>
+                    <rect key="frame" x="503" y="557" width="53" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" continuous="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="55">
                         <font key="font" metaFont="system"/>
@@ -171,7 +184,7 @@
                     </connections>
                 </textField>
                 <textField toolTip="Number of minutes between refreshing Now Playing List from TiVo" verticalHuggingPriority="750" id="77">
-                    <rect key="frame" x="379" y="503" width="120" height="17"/>
+                    <rect key="frame" x="379" y="533" width="120" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="TiVo Refresh Rate:" id="78">
                         <font key="font" metaFont="system"/>
@@ -180,7 +193,7 @@
                     </textFieldCell>
                 </textField>
                 <textField toolTip="Number of minutes between refreshing Now Playing List from TiVo" verticalHuggingPriority="750" id="76" userLabel="Text Field TiVo Refresh">
-                    <rect key="frame" x="503" y="501" width="53" height="22"/>
+                    <rect key="frame" x="503" y="531" width="53" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" continuous="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="79">
                         <font key="font" metaFont="system"/>
@@ -196,7 +209,7 @@
                     </connections>
                 </textField>
                 <popUpButton id="In7-Wa-ifU">
-                    <rect key="frame" x="458" y="401" width="100" height="26"/>
+                    <rect key="frame" x="458" y="404" width="100" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="bevel" title="Keywords" bezelStyle="regularSquare" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" pullsDown="YES" id="lei-jo-eUa">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -212,7 +225,7 @@
                     </connections>
                 </popUpButton>
                 <button toolTip="Erases and re-retrieves information from TiVo and TVDB. Useful to get latest stats on TVDB, or if their data may have changed." verticalHuggingPriority="750" id="86" userLabel="Empty Caches Push Button">
-                    <rect key="frame" x="434" y="367" width="128" height="32"/>
+                    <rect key="frame" x="434" y="370" width="128" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="Empty Caches" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="87">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -227,7 +240,7 @@
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                 </customView>
                 <button toolTip="Opens dialog to select Temporary Files Directory" verticalHuggingPriority="750" id="68" userLabel="Browse tmp Dir Square Textured Button">
-                    <rect key="frame" x="477" y="431" width="79" height="25"/>
+                    <rect key="frame" x="477" y="434" width="79" height="25"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="squareTextured" title="Browse" bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="69">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -237,6 +250,38 @@
                         <action selector="selectTmpDir:" target="-2" id="72"/>
                     </connections>
                 </button>
+                <popUpButton toolTip="Choose program with which to decode TiVo files " verticalHuggingPriority="750" id="7qa-Kj-zsO" userLabel="Decode Popup Button">
+                    <rect key="frame" x="433" y="494" width="125" height="26"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="Lvf-G0-aBf">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="OtherViews" id="Lpp-XX-k5d"/>
+                    </popUpButtonCell>
+                    <connections>
+                        <action selector="newDecodeValue:" target="-2" id="X6J-OZ-Gxp"/>
+                    </connections>
+                </popUpButton>
+                <button toolTip="Experimental switch to test using TIVos' TS format instead of normal PS format." id="BV3-jG-Qvw" userLabel="Crashlytics Opt Out Button">
+                    <rect key="frame" x="10" y="468" width="252" height="18"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="check" title="Use TiVo's Transport Stream Format" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ZZ6-6v-Mtn">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="15" name="value" keyPath="values.DownloadTSFormat" id="11w-Th-0fK"/>
+                    </connections>
+                </button>
+                <textField toolTip="Specifies the number of times cTiVo will try to download before giving up." verticalHuggingPriority="750" id="PnJ-Bi-BN9">
+                    <rect key="frame" x="339" y="501" width="90" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Decode With:" id="7Pz-0g-B9t">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
             </subviews>
             <point key="canvasLocation" x="425.5" y="360"/>
         </customView>
