@@ -262,7 +262,7 @@
                         <action selector="newDecodeValue:" target="-2" id="X6J-OZ-Gxp"/>
                     </connections>
                 </popUpButton>
-                <button toolTip="Experimental switch to test using TIVos' TS format instead of normal PS format." id="BV3-jG-Qvw" userLabel="Crashlytics Opt Out Button">
+                <button toolTip="Experimental switch to test using TIVos' TS format instead of normal PS format." id="BV3-jG-Qvw" userLabel="Transport Stream">
                     <rect key="frame" x="10" y="468" width="252" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Use TiVo's Transport Stream Format" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ZZ6-6v-Mtn">

@@ -1738,42 +1738,41 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     totalDataRead = 0;
     totalDataDownloaded = 0;
+    _processProgress = 0.0;
+    previousProcessProgress = 0.0;
 
     if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {
         NSURL * downloadURL = self.show.downloadURL;
         if ([[NSUserDefaults standardUserDefaults] boolForKey:KMTDownloadTSFormat]) {
             NSString * downloadString = [downloadURL absoluteString];
-            if (![downloadString hasSuffix:@"&Format=video/x-tivo-mpeg-TS"]) {
-                if (![downloadString hasSuffix:@"&Format=video/x-tivo-mpeg"]) {
-                    downloadString = [downloadString stringByAppendingString: @"-TS"];
+            if (![downloadString hasSuffix:@"&Format=video/x-tivo-mpeg-ts"]) {
+                if ([downloadString hasSuffix:@"&Format=video/x-tivo-mpeg"]) {
+                    downloadString = [downloadString stringByAppendingString: @"-ts"];
                 } else {
-                    downloadString = [downloadString stringByAppendingString: @"&Format=video/x-tivo-mpeg-TS"]; //normal case
+                    downloadString = [downloadString stringByAppendingString: @"&Format=video/x-tivo-mpeg-ts"]; //normal case
                 }
             }
             downloadURL = [NSURL URLWithString:downloadString];
         }
 
-        NSURLRequest *thisRequest = [NSURLRequest requestWithURL:self.show.downloadURL];
+        NSURLRequest *thisRequest = [NSURLRequest requestWithURL:downloadURL];
         activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
         downloadingURL = YES;
         DDLogMajor(@"Starting URL %@ for show %@", downloadURL,_show.showTitle);
-    }
-    _processProgress = 0.0;
-	previousProcessProgress = 0.0;
-    
-	[self.activeTaskChain run];
-	DDLogMajor(@"Starting URL %@ for show %@", _show.downloadURL,_show.showTitle);
-	double downloadDelay = kMTTiVoAccessDelayServerFailure - [[NSDate date] timeIntervalSinceDate:self.show.tiVo.lastDownloadEnded];
-	if (downloadDelay < 0) {
-		downloadDelay = 0;
-	}
-	if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile)
-	{
+
+        [self.activeTaskChain run];
+        double downloadDelay = kMTTiVoAccessDelayServerFailure - [[NSDate date] timeIntervalSinceDate:self.show.tiVo.lastDownloadEnded];
+        if (downloadDelay < 0) {
+            downloadDelay = 0;
+        }
 		DDLogMajor(@"Will start download of %@ in %0.1lf seconds",self.show.showTitle,downloadDelay);
 		[activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
-	}
-	[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay] + downloadDelay];
+        [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay] + downloadDelay];
+    } else {
+        [self.activeTaskChain run];
+        [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
+    }
 }
 
 - (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {

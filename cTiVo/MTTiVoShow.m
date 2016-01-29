@@ -584,7 +584,7 @@ __DDLOGHERE__
                  options:0
                  error:&error];
 
-    if (error) {
+    if (!topLevel || error) {
         DDLogMajor(@"theMovieDB returned invalid JSON format: %@ Data: %@",error.localizedDescription, movieInfo);
         return;
     }
@@ -624,13 +624,15 @@ __DDLOGHERE__
             }
         }
    }
-    if (newArtwork.length > 0) {
+    if (newArtwork.length > 0 ) {
         self.tvdbArtworkLocation = newArtwork;
-        @synchronized (tiVoManager.tvdbCache) {
-            [tiVoManager.tvdbCache setObject:@{
-                                               @"artwork":newArtwork,
-                                               @"date":[NSDate date]
-                                               } forKey:self.seriesId];
+        if ( self.seriesId.length > 0) {  //protective only
+            @synchronized (tiVoManager.tvdbCache) {
+                [tiVoManager.tvdbCache setObject:@{
+                                                   @"artwork":newArtwork,
+                                                   @"date":[NSDate date]
+                                                   } forKey:self.seriesId];
+            }
         }
     } else {
 
