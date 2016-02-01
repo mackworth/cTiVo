@@ -84,7 +84,9 @@
 }
 
 -(void) addDecodeMenuTo:(NSPopUpButton*) cell withCurrentChoice: (NSString *) level{
-    NSArray * decodeNames = @[@"tivodecode",@"tivodecode-ng"]; // ,@"tivoLibre"];
+    NSArray * decodeNames = @[@"tivodecode",
+                               @"tivodecode-ng",
+                               @"tivoLibre"];
 
     [cell addItemsWithTitles: decodeNames];
     [cell selectItemWithTitle:level];
