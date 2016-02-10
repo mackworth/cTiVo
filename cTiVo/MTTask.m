@@ -76,7 +76,7 @@ __DDLOGHERE__
 		[[NSFileManager defaultManager] createFileAtPath:_errorFilePath contents:[NSData data] attributes:nil];
         self.errorFileHandle = [NSFileHandle fileHandleForWritingAtPath:_errorFilePath];
         [self setStandardOutput:self.logFileWriteHandle];
-        [self setStandardInput:self.logFileWriteHandle];
+        [self setStandardInput:self.logFileReadHandle];
         [self setStandardError:self.errorFileHandle];
     }
 }

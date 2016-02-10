@@ -1079,7 +1079,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     NSString * decoder = [[NSUserDefaults standardUserDefaults] objectForKey:kMTDecodeBinary];
     NSString * decryptPath = nil;
     NSString * libreJar = nil;
-    if ([decoder isEqualToString:@"tivoLibre"]) {
+    if ([decoder isEqualToString:@"TivoLibre"]) {
         // NSFileManager * fm = [NSFileManager defaultManager];
         decryptPath = @"/usr/bin/java";
         libreJar = [[NSBundle mainBundle] pathForAuxiliaryExecutable: @"tivo-libre.jar"];
@@ -1087,6 +1087,8 @@ NSString * fourChar(long n, BOOL allowZero) {
         decryptPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable: decoder];
     }
     if (!decryptPath) { //should never happen, but did once.
+        [tiVoManager  notifyWithTitle:[NSString stringWithFormat:@"Can't Find %@", decoder] subTitle:[NSString stringWithFormat:@"Please go to cTiVo site for help! %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
+        DDLogReport(@"Fatal Error: decoder %@ not found???", decoder);
         return nil;
     }
     [decryptTask setLaunchPath:decryptPath] ;
@@ -1574,9 +1576,8 @@ NSString * fourChar(long n, BOOL allowZero) {
         if (decryptTask) {
             [taskArray addObject:@[decryptTask]];
         } else {
-            [tiVoManager  notifyWithTitle:@"Can't Find tivodecode" subTitle:[NSString stringWithFormat:@"Please go to cTiVo site for help! %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
-            DDLogReport(@"Fatal Error: tivodecode not found???");
             [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
+            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
             return;
         }
     }

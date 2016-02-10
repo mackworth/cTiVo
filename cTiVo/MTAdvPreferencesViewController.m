@@ -99,6 +99,8 @@
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
     if ([[menuItem title ] isEqualToString: @"tivodecode"]) {
         return (![[NSUserDefaults standardUserDefaults] boolForKey:KMTDownloadTSFormat]);
+    } else if ([[menuItem title ] isEqualToString: @"TivoLibre"]) {
+        return ([self javaInstalled]);
     }
     return YES;
 }
@@ -385,6 +387,25 @@
 //    NSString * decoder = cell.selectedItem.title;
 //    [[NSUserDefaults standardUserDefaults] setObject:decoder forKey:kMTDecodeBinary];
 ////    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+-(BOOL) javaInstalled {
+    NSPipe *pipe = [NSPipe pipe];
+    NSFileHandle *file = pipe.fileHandleForReading;
+
+    NSTask *task = [[NSTask alloc] init];
+    task.launchPath = @"/usr/libexec/java_home";
+    task.standardOutput = pipe;
+    task.standardError = pipe;
+
+    [task launch];
+
+    NSData *data = [file readDataToEndOfFile];
+    [file closeFile];
+
+    NSString *grepOutput = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
+    NSLog (@"grep returned:\n%@", grepOutput);
+    return ![grepOutput startsWith:@"Unable"];
 }
 
 -(IBAction)emptyCaches:(id)sender
