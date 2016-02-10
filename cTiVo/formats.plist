@@ -1016,38 +1016,43 @@ audio: mp2 at 192kbs</string>
 			<false/>
 		</dict>
 		<dict>
-			<key>formatDescription</key>
-			<string>Use TiVo&apos;s MP4 format</string>
-			<key>comSkip</key>
-			<false/>
-			<key>edlFlag</key>
+			<key>captionOptions</key>
 			<string></string>
+			<key>comSkip</key>
+			<true/>
 			<key>comSkipOptions</key>
 			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string>-oac copy</string>
+			<key>encoderOtherOptions</key>
+			<string>-hr-edl-seek</string>
+			<key>encoderUsed</key>
+			<string>mencoder</string>
+			<key>encoderVideoOptions</key>
+			<string>-of lavf  -ovc copy</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
-			<key>encoderUsed</key>
-			<string>catToFile</string>
-			<key>name</key>
-			<string>TiVo MP4 download</string>
-			<key>encoderVideoOptions</key>
-			<string></string>
-			<key>encoderAudioOptions</key>
-			<string></string>
-			<key>encoderOtherOptions</key>
-			<string></string>
+			<key>formatDescription</key>
+			<string>For use w/ TiVos that already produce H.264 video (e.g. new Comcast)
+                Converts to MP4 container</string>
 			<key>iTunes</key>
 			<true/>
-			<key>mustDownloadFirst</key>
-			<false/>
-			<key>outputFileFlag</key>
-			<string></string>
 			<key>inputFileFlag</key>
 			<string></string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<false/>
+			<key>name</key>
+			<string>Download TiVo MP4</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
 			<key>regExProgress</key>
 			<string></string>
-			<key>isHidden</key>
-			<true/>
 		</dict>
 		<dict>
 			<key>edlFlag</key>
@@ -1407,6 +1412,153 @@ audio: mp3 at 192kbps</string>
 			<false/>
 			<key>name</key>
 			<string>Audio only (ffmpeg MP3)</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt;-acodec pcm_s16le</string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>ffmpeg</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt;-vcodec prores -profile:v 1</string>
+			<key>filenameExtension</key>
+			<string>.mov</string>
+			<key>formatDescription</key>
+			<string>ProRes LT Draft format</string>
+			<key>isHidden</key>
+			<true/>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>mustDownloadFirst</key>
+			<false/>
+			<key>name</key>
+			<string>ProRes LT </string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string>-oac copy</string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>mencoder</string>
+			<key>encoderVideoOptions</key>
+			<string>-of lavf  -ovc copy</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>For use w/ TiVos that already produce H.264 video (e.g. new Comcast)
+Converts to MP4 container</string>
+			<key>isHidden</key>
+			<false/>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>mustDownloadFirst</key>
+			<false/>
+			<key>name</key>
+			<string>MP4 Mencoder</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>avconv</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt;-codec copy -f mp4 -flags +global_header</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>For use w/ TiVos that already produce H.264 video (e.g. new Comcast)
+                Converts to MP4 container</string>
+			<key>isHidden</key>
+			<false/>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>mustDownloadFirst</key>
+			<false/>
+			<key>name</key>
+			<string>MP4 Avconv</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt; -acodec copy</string>
+			<key>encoderOtherOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt; -metadata:s:v:0 language=eng </string>
+			<key>encoderUsed</key>
+			<string>ffmpeg</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt; -vcodec copy</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>For use w/ TiVos that already produce H.264 video (e.g. new Comcast). REQUIRES ffmpeg
+                Converts to MP4 container</string>
+			<key>isHidden</key>
+			<false/>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>mustDownloadFirst</key>
+			<false/>
+			<key>name</key>
+			<string>MP4 FFMpeg</string>
 			<key>outputFileFlag</key>
 			<string></string>
 			<key>regExProgress</key>

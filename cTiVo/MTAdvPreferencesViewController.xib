@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTAdvPreferencesViewController">
@@ -252,14 +252,14 @@
                 </button>
                 <popUpButton toolTip="Choose program with which to decode TiVo files " verticalHuggingPriority="750" id="7qa-Kj-zsO" userLabel="Decode Popup Button">
                     <rect key="frame" x="433" y="494" width="125" height="26"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="Lvf-G0-aBf">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="menu"/>
                         <menu key="menu" title="OtherViews" id="Lpp-XX-k5d"/>
                     </popUpButtonCell>
                     <connections>
-                        <action selector="newDecodeValue:" target="-2" id="X6J-OZ-Gxp"/>
+                        <action selector="newDecodeValue:" target="-2" id="YEC-9H-WIC"/>
                     </connections>
                 </popUpButton>
                 <button toolTip="Experimental switch to test using TIVos' TS format instead of normal PS format." id="BV3-jG-Qvw" userLabel="Transport Stream">

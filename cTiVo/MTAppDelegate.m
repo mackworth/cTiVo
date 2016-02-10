@@ -188,7 +188,7 @@ __DDLOGHERE__
 										  @NO, kMTTrustTVDB,
                                           @2, kMTMaxNumEncoders,
                                           @120, kMTMaxProgressDelay,
-                                          @"tivodecode", kMTDecodeBinary,
+                                          @"tivodecode-ng", kMTDecodeBinary,
                                           @NO, KMTDownloadTSFormat,
                                           nil];
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSaveMPGFile];

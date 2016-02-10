@@ -15,6 +15,8 @@
 		1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */; };
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
+		1E38BAB41C6AB44000A2A130 /* avconv in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E38BAB11C6AB41B00A2A130 /* avconv */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E38BAB61C6AB8C600A2A130 /* ffmpeg in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E38BAB51C6AB8C100A2A130 /* ffmpeg */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E3D27E01A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */; };
 		1E3D27E51A4F5992006B9CC4 /* Crashlytics.sh in Resources */ = {isa = PBXBuildFile; fileRef = 1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */; };
 		1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */; };
@@ -55,7 +57,6 @@
 		1EABE6F616B0C593004DDB61 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1EABE6F316B0A254004DDB61 /* Growl.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EABE6FE16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */; };
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
-		1EB49B9D1C505D3000887240 /* tivodecode-ng in Resources */ = {isa = PBXBuildFile; fileRef = 1EB49B9C1C505D3000887240 /* tivodecode-ng */; };
 		1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9C1C505D3000887240 /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EB49BA01C50A4B100887240 /* tivo-libre.jar in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */; };
@@ -137,6 +138,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
+				1E38BAB61C6AB8C600A2A130 /* ffmpeg in Copy Executables */,
+				1E38BAB41C6AB44000A2A130 /* avconv in Copy Executables */,
 				1EB49BA01C50A4B100887240 /* tivo-libre.jar in Copy Executables */,
 				1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */,
 				1EDBDFA71B1CB82700E979F0 /* ccextractor in Copy Executables */,
@@ -171,6 +174,8 @@
 		1E2725C316CB63D500A21940 /* elgatoProgress.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; lineEnding = 1; path = elgatoProgress.scpt; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.simpleColoring; };
 		1E389BB616C46BA600B80EC9 /* MTAdvPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTAdvPreferencesViewController.h; sourceTree = "<group>"; };
 		1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTAdvPreferencesViewController.m; sourceTree = "<group>"; };
+		1E38BAB11C6AB41B00A2A130 /* avconv */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = avconv; sourceTree = "<group>"; };
+		1E38BAB51C6AB8C100A2A130 /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ffmpeg; sourceTree = "<group>"; };
 		1E3D27DE1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNotificationCenter+Threads.h"; sourceTree = "<group>"; };
 		1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNotificationCenter+Threads.m"; sourceTree = "<group>"; };
 		1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = Crashlytics.sh; path = cTiVo/Crashlytics.sh; sourceTree = "<group>"; };
@@ -622,6 +627,8 @@
 			children = (
 				D209B6A91813305E004E733B /* FindTiVoHelpFile.rtf */,
 				D2574E8517FE30EC00BBAB5C /* MAKHelpFile.rtf */,
+				1E38BAB11C6AB41B00A2A130 /* avconv */,
+				1E38BAB51C6AB8C100A2A130 /* ffmpeg */,
 				D24A8D0D16A5F3DC00DFF890 /* catToFile */,
 				1EFD685A16D19AA100CC36E5 /* ccextractor */,
 				D2B73F3116BC485E003CB4ED /* comskip */,
@@ -841,7 +848,6 @@
 				1E964CA8188313ED00C19046 /* checkImage2@2x.png in Resources */,
 				1E18145E1708AC1500166E5F /* cTiVo.help in Resources */,
 				1E1814601708AF7000166E5F /* cTiVo.icns in Resources */,
-				1EB49B9D1C505D3000887240 /* tivodecode-ng in Resources */,
 				1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */,
 				D2B4B4F41732D69C005B97F1 /* elgatoQuit.scpt in Resources */,
 				1E9A10EF1757200000863C44 /* cTiVo.png in Resources */,

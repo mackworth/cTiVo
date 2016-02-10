@@ -118,6 +118,7 @@ __DDLOGHERE__
     if (self.progressTimer){
         [self.progressTimer invalidate]; self.progressTimer = nil;
         self.startTime = nil;
+        _speed = 0.0;
         DDLogVerbose(@"cancelling timer");
     }
 }
@@ -841,14 +842,14 @@ NSString * fourChar(long n, BOOL allowZero) {
 	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tiVoManager.tmpFilesDirectory,baseName];
 	_tivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,baseName];
 	_mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,baseName];
-    BOOL tivoFileExists = [self isCompleteCTiVoFile:_tivoFilePath forFileType:@"TiVo"];
+    BOOL tivoFileExists = NO; // [self isCompleteCTiVoFile:_tivoFilePath forFileType:@"TiVo"];  Note: if tivFileExists, then stomps on file w/ current basename!
     
-    _downloadingShowFromTiVoFile = tivoFileExists;
+    _downloadingShowFromTiVoFile = NO;
 
-    BOOL mpgFileExists = [self isCompleteCTiVoFile: _mpgFilePath forFileType:@"MPEG"];
+    BOOL mpgFileExists = NO; //[self isCompleteCTiVoFile: _mpgFilePath forFileType:@"MPEG"];
         if (mpgFileExists) {
             _downloadingShowFromTiVoFile = NO;
-         _downloadingShowFromMPGFile = YES;
+         _downloadingShowFromMPGFile = NO;
     }
 	if (tivoFileExists || mpgFileExists) {  //we're using an exisiting file so start the next download
             [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTransferDidFinish object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
@@ -859,11 +860,11 @@ NSString * fourChar(long n, BOOL allowZero) {
 		NSTextCheckingResult *result = [ending firstMatchInString:baseName options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, (baseName).length)];
 		if (result) {
 			int n = [[baseName substringWithRange:[result rangeAtIndex:2]] intValue];
-			DDLogVerbose(@"found output file named %@, incrementing version number %d", baseName, n);
+			DDLogVerbose(@"found output file named %@, incrementing to version number %d", baseName, n+1);
 			nextBase = [[baseName substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
 		} else {
 			nextBase = [baseName stringByAppendingString:@"-1"];
-			DDLogVerbose(@"found output file named %@, adding version number", nextBase);
+			DDLogVerbose(@"found output file named %@, adding version number", baseName);
 		}
 		return [self createUniqueBaseFileName:nextBase inDownloadDir:downloadDir];
 		
@@ -1112,13 +1113,19 @@ NSString * fourChar(long n, BOOL allowZero) {
         [decryptTask setStandardError:decryptTask.logFileWriteHandle];
         decryptTask.progressCalc = ^(NSString *data){
             NSArray *lines = [data componentsSeparatedByString:@"\n"];
-            data = [lines objectAtIndex:lines.count-2];
-            lines = [data componentsSeparatedByString:@":"];
-            double position = [[lines objectAtIndex:0] doubleValue];
-            return (position/_show.fileSize);
+            double position = 0.0;
+            for (NSInteger lineNum =  lines.count-2; lineNum >= 0; lineNum--) {
+                NSString * line = [lines objectAtIndex:lineNum];
+                NSArray * words = [line componentsSeparatedByString:@":"]; //always 1
+                position= [[words objectAtIndex:0] doubleValue];
+                if (position  > 0) {
+                    return (position/_show.fileSize);
+                }
+            };
+            return 0.0;
         };
     }
-    
+
 //    decryptTask.cleanupHandler = ^(){
 //        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
 //            if ([[NSFileManager defaultManager] fileExistsAtPath:_bufferFilePath]) {
@@ -1535,7 +1542,6 @@ NSString * fourChar(long n, BOOL allowZero) {
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
 		return;
 	}
-	DDLogVerbose(@"encoder is %@",[self encoderPath]);
 	
     [self setValue:[NSNumber numberWithInt:kMTStatusDownloading] forKeyPath:@"downloadStatus"];
     
@@ -1683,9 +1689,9 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     totalDataRead = 0;
     totalDataDownloaded = 0;
-
+    NSURL * downloadURL = nil;
     if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile) {
-        NSURL * downloadURL = self.show.downloadURL;
+        downloadURL = self.show.downloadURL;
         if ([[NSUserDefaults standardUserDefaults] boolForKey:KMTDownloadTSFormat]) {
             NSString * downloadString = [downloadURL absoluteString];
             if (![downloadString hasSuffix:@"&Format=video/x-tivo-mpeg-ts"]) {
@@ -1700,7 +1706,6 @@ NSString * fourChar(long n, BOOL allowZero) {
 
         NSURLRequest *thisRequest = [NSURLRequest requestWithURL:downloadURL];
         activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
-        DDLogMajor(@"Starting URL %@ for show %@", downloadURL,_show.showTitle);
         downloadingURL = YES;
     }
     _processProgress = 0.0;
@@ -1713,7 +1718,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         }
 	if (!_downloadingShowFromTiVoFile && !_downloadingShowFromMPGFile)
 	{
-		DDLogMajor(@"Will start download of %@ in %0.1lf seconds",self.show.showTitle,downloadDelay);
+        DDLogReport(@"Starting URL %@ for show %@ in %0.1lf seconds", downloadURL,_show.showTitle, downloadDelay);
 		[activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	}
@@ -2170,6 +2175,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 
 	//	writingData = YES;
+    DDLogVerbose(@"Writing data %@ : %@Connection %@", [NSThread isMainThread] ? @"Main" : @"Background", activeURLConnection == nil ? @"No ":@"", _isCanceled ? @"- Cancelled" : @"");
     const long chunkSize = 50000;
     long dataRead = chunkSize; //to start loop
     while (dataRead == chunkSize && !_isCanceled) {
@@ -2350,7 +2356,6 @@ NSString * fourChar(long n, BOOL allowZero) {
         bufferFileWriteHandle   = nil;
 	}
 	double downloadedFileSize = totalDataDownloaded;
-	DDLogDetail(@"finished loading file");
     //Check to make sure a reasonable file size in case there was a problem.
     if (downloadedFileSize > kMTMinTiVoFileSize) {
         DDLogDetail(@"finished loading TiVo file");
@@ -2366,9 +2371,10 @@ NSString * fourChar(long n, BOOL allowZero) {
 		[self performSelectorInBackground:@selector(writeData) withObject:nil];
 	}
 	downloadingURL = NO;
-	activeURLConnection = nil; //NOTE this MUST occur after the last call to writeData so that writeData doesn't exits before comletion of the downloaded buffer.
+	activeURLConnection = nil; //NOTE this MUST occur after the last call to writeData so that writeData doesn't exit before completion of the downloaded buffer.
 	self.show.tiVo.lastDownloadEnded = [NSDate date];
 	if (downloadedFileSize < kMTMinTiVoFileSize) { //Not a good download - reschedule
+        DDLogMajor(@"For show %@, only received %0.0f bytes",self.show, downloadedFileSize);
         NSString *dataReceived = nil;
         if (urlBuffer) {
             dataReceived = [[NSString alloc] initWithData:urlBuffer encoding:NSUTF8StringEncoding];
@@ -2383,16 +2389,26 @@ NSString * fourChar(long n, BOOL allowZero) {
                 [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
                 [self.show.tiVo scheduleNextUpdateAfterDelay:0];
 				return;
-			}
+            } else {
+                NSRange serverBusy = [dataReceived rangeOfString:@"Server Busy" options:NSCaseInsensitiveSearch];
+                if (serverBusy.location != NSNotFound) { //TiVo is overloaded
+                    [tiVoManager  notifyWithTitle: @"TiVo Warning: Server Busy."
+                                         subTitle: [NSString stringWithFormat: @"If this recurs, your TiVo (%@) may need to be restarted.", self.show.tiVoName ] forNotification:kMTGrowlPossibleProblem];
+                    DDLogMajor(@"Warning Server Busy %@", self);
+                    [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+                    return;
+                }
+            }
 		}
 		DDLogMajor(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
-		[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:kMTTiVoAccessDelay];
+		[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
 	} else {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
-		if (downloadedFileSize < self.show.fileSize * 0.85f) {  //hmm, doesn't look like it's big enough
+		if ((downloadedFileSize < self.show.fileSize * 0.9f && ![[NSUserDefaults standardUserDefaults] boolForKey:KMTDownloadTSFormat]) ||
+            downloadedFileSize < self.show.fileSize * 0.8f ) {  //hmm, doesn't look like it's big enough  (90% for PS; 80% for TS
 			[tiVoManager  notifyWithTitle: @"Warning: Show may be damaged/incomplete."
 								 subTitle:self.show.showTitle forNotification:kMTGrowlPossibleProblem];
-			DDLogMajor(@"Show %@ supposed to be %f bytes, actually %f bytes", self.show,self.show.fileSize, downloadedFileSize);
+			DDLogMajor(@"Show %@ supposed to be %0.0f bytes, actually %0.0f bytes", self.show,self.show.fileSize, downloadedFileSize);
 		} else {
 			self.show.fileSize = downloadedFileSize;  //More accurate file size
 		}

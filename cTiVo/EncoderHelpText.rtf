@@ -1,9 +1,9 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf370
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf340
 {\fonttbl\f0\fnil\fcharset0 LucidaGrande;}
 {\colortbl;\red255\green255\blue255;}
 \margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \deftab720
-\pard\pardeftab720
+\pard\pardeftab720\partightenfactor0
 
 \f0\fs22 \cf0 Enter either the name or the full path to the encoder to be used. The paths searched for the encoder are (in order)\
 \
@@ -17,7 +17,7 @@
 \
 If the encoder accepts - (dash) for standard input, you should check 'Can run download and encode at the same time' to allow simultaneous encoding. The encoder must be marked as executable.\
 \
-\pard\pardeftab720
+\pard\pardeftab720\partightenfactor0
 
 \b \cf0 mencoder
 \b0  & 
@@ -25,7 +25,7 @@ If the encoder accepts - (dash) for standard input, you should check 'Can run do
 \b0  are included in the cTiVo bundle.\
 \
 If the encoder cannot support simultaneous encoding (e.g. HandBrakeCLI), the encoder should provide in its standard output the percentage complete as a number from 0-100.\'a0 You will need to provide a regex expression for extracting this number from the last few lines of the standard output.\'a0 This will only be used when doing sequential downloading, decrypting and encoding.\'a0 When doing simultaneous encoding, the data flow through the pipes is used to measure progress.\
-\pard\pardeftab720
+\pard\pardeftab720\partightenfactor0
 
 \fs20 \cf0 \
 The arguments passed from the options are:\
@@ -55,9 +55,9 @@ if your encoder (such as ffmpeg) requires some or all of one of the options to o
 \b0 , and an output flag of 
 \b -o
 \b0  and all the rest are empty, then the command line would look like:
-\b    encoder -a -b -e -f -o outFile.mpg inputFile.mpg -g -h.
+\b    encoder -a -b -e -f -o outFile.mpg inputFile.mpg \'97c -d g -h.
 \b0  If no output flag, the command line would be: 
-\b encoder -a -b -e -f inputFile.mpg -g -h outFile.mpg
+\b encoder -a -b -e -f inputFile.mpg -c -d -g -h outFile.mpg
 \b0 \
 \
 Your encoder can be a script file (with standard first line of #! to specify script type, such as #!/usr/bin/osascript for Applescript), provided it accepts the above arguments and is marked as executable.\'a0\

@@ -165,7 +165,7 @@ __DDLOGHERE__
 
 -(void)failedTaskCompletion
 {
-	DDLogMajor(@"Task %@ failed",self.taskName);
+	DDLogReport(@"Task %@ failed",self.taskName);
 	[self saveLogFile];
 	[self cleanUp];
 	if (!_download.isCanceled && _shouldReschedule){  // _shouldReschedule is for failure of non-critical tasks

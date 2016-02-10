@@ -86,11 +86,21 @@
 -(void) addDecodeMenuTo:(NSPopUpButton*) cell withCurrentChoice: (NSString *) level{
     NSArray * decodeNames = @[@"tivodecode",
                                @"tivodecode-ng",
-                               @"tivoLibre"];
-
+                               @"TivoLibre"];
+    NSArray * toolTips = @[@"Traditional decoder (No Transport Stream)", @"Updated decoder", @"Latest decoder (Requires Java)"];
     [cell addItemsWithTitles: decodeNames];
-    [cell selectItemWithTitle:level];
+    for (NSUInteger i = 0; i < decodeNames.count; i++) {
+        NSMenuItem *item =  [cell itemAtIndex:i];
+        item.toolTip = toolTips[i];
+    }
+    [cell bind:@"selectedValue" toObject:[NSUserDefaults standardUserDefaults] withKeyPath:@"DecodeBinary" options:nil];
+}
 
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
+    if ([[menuItem title ] isEqualToString: @"tivodecode"]) {
+        return (![[NSUserDefaults standardUserDefaults] boolForKey:KMTDownloadTSFormat]);
+    }
+    return YES;
 }
 
 #define kMTPlexSimple @"[MainTitle] - [SeriesEpNumber | OriginalAirDate] [\"- \" EpisodeTitle]"
@@ -371,10 +381,10 @@
 }
 
 -(IBAction)newDecodeValue:(id)sender {
-    NSPopUpButton * cell =  (NSPopUpButton *) sender;
-    NSString * decoder = cell.selectedItem.title;
-    [[NSUserDefaults standardUserDefaults] setObject:decoder forKey:kMTDecodeBinary];
-    [[NSUserDefaults standardUserDefaults] synchronize];
+//    NSPopUpButton * cell =  (NSPopUpButton *) sender;
+//    NSString * decoder = cell.selectedItem.title;
+//    [[NSUserDefaults standardUserDefaults] setObject:decoder forKey:kMTDecodeBinary];
+////    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(IBAction)emptyCaches:(id)sender

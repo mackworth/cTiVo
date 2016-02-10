@@ -561,9 +561,10 @@ __DDLOGHERE__
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDecodeBinary options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:KMTDownloadTSFormat options:NSKeyValueObservingOptionNew context:nil];
 
-    
 }
 
 #pragma mark - Scheduling routine
@@ -824,10 +825,22 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         DDLogMajor(@"Changed Update Time to %ld",(long)[defs integerForKey:kMTUpdateIntervalMinutes]);
         for (MTTiVo *tiVo in _tiVoList) {
             [tiVo scheduleNextUpdateAfterDelay:-1];
+        }
+    } else if ([keyPath isEqualToString:KMTDownloadTSFormat] ||
+                [keyPath isEqualToString:kMTDecodeBinary])  {
+        BOOL isTSFormat = [defs boolForKey:KMTDownloadTSFormat];
+        NSString * decodeBinary = [defs objectForKey:kMTDecodeBinary];
+        DDLogMajor(@"Changed: TS format %@; decoder: %@", isTSFormat ? @"On" : @"Off", decodeBinary);
+        if (isTSFormat && [decodeBinary isEqualToString:@"tivodecode"]) {
+                //can't be used with Transport streams so change the "other" key
+            if ([keyPath isEqualToString:KMTDownloadTSFormat]){
+                [defs setObject:@"tivodecode-ng" forKey:kMTDecodeBinary ];
+            } else {
+                [defs setBool:NO forKey:KMTDownloadTSFormat];
+            }
 
         }
     }
-
 
 }
 
@@ -1347,7 +1360,13 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(void)encodeFinished:(NSNotification *)notification
 {
-	numEncoders--;
+    if (numEncoders == 0) {
+        [tiVoManager  notifyWithTitle: @"Internal Logic Error! "
+                             subTitle:@"numEncoders < 0" forNotification:kMTGrowlEndDownload];
+
+    } else {
+        numEncoders--;
+    }
     DDLogMajor(@"Num encoders after decrement from notification %@ is %d ",notification.name,numEncoders);
 	if ([_quitWhenCurrentDownloadsComplete boolValue] && ![self tiVosProcessing]) {
 		//Quit here
