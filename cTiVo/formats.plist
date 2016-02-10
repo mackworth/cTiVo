@@ -1016,45 +1016,6 @@ audio: mp2 at 192kbs</string>
 			<false/>
 		</dict>
 		<dict>
-			<key>captionOptions</key>
-			<string></string>
-			<key>comSkip</key>
-			<true/>
-			<key>comSkipOptions</key>
-			<string></string>
-			<key>edlFlag</key>
-			<string>-edl</string>
-			<key>encoderAudioOptions</key>
-			<string>-oac copy</string>
-			<key>encoderOtherOptions</key>
-			<string>-hr-edl-seek</string>
-			<key>encoderUsed</key>
-			<string>mencoder</string>
-			<key>encoderVideoOptions</key>
-			<string>-of lavf  -ovc copy</string>
-			<key>filenameExtension</key>
-			<string>.mp4</string>
-			<key>formatDescription</key>
-			<string>For use w/ TiVos that already produce H.264 video (e.g. new Comcast)
-                Converts to MP4 container</string>
-			<key>iTunes</key>
-			<true/>
-			<key>inputFileFlag</key>
-			<string></string>
-			<key>isFactoryFormat</key>
-			<false/>
-			<key>isHidden</key>
-			<false/>
-			<key>mustDownloadFirst</key>
-			<false/>
-			<key>name</key>
-			<string>Download TiVo MP4</string>
-			<key>outputFileFlag</key>
-			<string>-o</string>
-			<key>regExProgress</key>
-			<string></string>
-		</dict>
-		<dict>
 			<key>edlFlag</key>
 			<string>-edl</string>
 			<key>comSkipOptions</key>
@@ -1506,7 +1467,7 @@ Converts to MP4 container</string>
 			<key>encoderUsed</key>
 			<string>avconv</string>
 			<key>encoderVideoOptions</key>
-			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt;-codec copy -f mp4 -flags +global_header</string>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt;-codec copy -f mp4  </string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>formatDescription</key>
