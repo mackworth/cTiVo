@@ -63,7 +63,7 @@ __DDLOGHERE__
 						newFormat.comSkip = @NO;
 						newFormat.edlFlag = @"-edl";
 						newFormat.comSkipOptions = @"";
-						newFormat.mustDownloadFirst = @YES;
+						newFormat.mustDownloadFirst = @NO;
 						newFormat.outputFileFlag= @"";
 						newFormat.inputFileFlag = @"-i";
 						newFormat.regExProgress =  @"" ;
@@ -98,18 +98,24 @@ __DDLOGHERE__
 					default:
 						break;
 				}
-				parameters = [parameters stringByReplacingOccurrencesOfString:@"CPU_CORES" withString:@"auto"];
+				parameters = [parameters stringByReplacingOccurrencesOfString:@"CPU_CORES" withString:@"0"];
 				if ([parameters rangeOfString:@"PWD"].location != NSNotFound) {
-					[newFormat.description stringByAppendingFormat:@"\nError: PWD keyword not supported: %@", parameters];
+					newFormat.formatDescription = [newFormat.formatDescription stringByAppendingFormat:@"\nWarning: PWD keyword not supported: %@", parameters];
 				}
 				if ([parameters rangeOfString:@"SRTFILE"].location != NSNotFound) {
-					[newFormat.description stringByAppendingFormat:@"\nError: SRTFILE keyword not supported:%@", parameters];
+					newFormat.formatDescription = [newFormat.formatDescription stringByAppendingFormat:@"\nWarning: SRTFILE keyword not supported:%@", parameters];
 				}
+                if ([parameters rangeOfString:@"HEIGHT"].location != NSNotFound) {
+                    newFormat.formatDescription = [newFormat.formatDescription stringByAppendingFormat:@"\nWarning: HEIGHT keyword not supported: %@", parameters];
+                }
+                if ([parameters rangeOfString:@"WIDTH"].location != NSNotFound) {
+                    newFormat.formatDescription = [newFormat.formatDescription stringByAppendingFormat:@"\nWarning: WIDTH keyword not supported: %@", parameters];
+                }
 				if (newFormat.outputFileFlag.length > 0) {
 					parameters = [parameters stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@" %@ ",newFormat.outputFileFlag] withString:@""];
 				} else if (![parameters hasSuffix:@"OUTPUT"]) {
 					//output must be at end
-					[newFormat.description stringByAppendingFormat:@"\nError: with no output flag, OUTPUT must be at end:%@", parameters];
+					newFormat.formatDescription = [newFormat.formatDescription stringByAppendingFormat:@"\nWarning: with no output flag, OUTPUT must be at end:%@", parameters];
 				}
 				parameters = [parameters stringByReplacingOccurrencesOfString:@"OUTPUT" withString:@""];
 				parameters = [parameters stringByReplacingOccurrencesOfString:@"INPUT" withString:kMTInputLocationToken];

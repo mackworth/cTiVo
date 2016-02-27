@@ -1499,7 +1499,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(void)download
 {
 	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-	DDLogMajor(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@",
+	DDLogMajor(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@%@; %@",
 				self.taskFlowType,
 				self,
 				self.encodeFormat.name ,
@@ -1532,7 +1532,9 @@ NSString * fourChar(long n, BOOL allowZero) {
 					@" No Memory Buffer;",
                [defaults boolForKey:kMTGetEpisodeArt] ?
                     @" " :
-					@" No TVDB art;"				
+					@" No TVDB art; ",
+               [defaults objectForKey:kMTDecodeBinary],
+               [defaults boolForKey:KMTDownloadTSFormat] ? @"Transport Stream" : @"Program Stream"
 				);
 	_isCanceled = NO;
 	_isRescheduled = NO;
