@@ -177,8 +177,12 @@ __DDLOGHERE__
 
 -(NSString *)reasonForTermination
 {
-    if (launched) {
-        return (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit";
+    if (launched ) {
+        if (! _task.isRunning) {
+            return (_task.terminationReason == NSTaskTerminationReasonUncaughtSignal) ? @"uncaught signal" : @"exit";
+        } else {
+            return @"still running";
+        }
     } else {
         return @"not launched";
     }
@@ -186,7 +190,7 @@ __DDLOGHERE__
 
 -(BOOL)taskFailed
 {
-    if (!launched) {
+    if (!launched || _task.isRunning) {
         return NO;
     } else {
         return _task.terminationReason == NSTaskTerminationReasonUncaughtSignal || ![self succcessfulExit] ;
@@ -196,6 +200,7 @@ __DDLOGHERE__
 -(BOOL)succcessfulExit
 {
 	BOOL ret = NO;
+    if (!launched || _task.isRunning) return NO;
 	for (NSNumber *exitCode in _successfulExitCodes) {
 		if ([exitCode intValue] == _task.terminationStatus) {
 			ret = YES;
