@@ -189,11 +189,13 @@ __DDLOGHERE__
                                           @2, kMTMaxNumEncoders,
                                           @120, kMTMaxProgressDelay,
                                           @"tivodecode-ng", kMTDecodeBinary,
-                                          @NO, KMTDownloadTSFormat,
+                                          @NO, kMTDownloadTSFormat,
+                                          @[], kMTChannelInfo,
                                           nil];
+    
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSaveMPGFile];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
-	
+    
 	if (![[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedFormat]) {
 		//What? No previous format,must be our first run. Let's see if there's any iTivo prefs.
 		[MTiTiVoImport checkForiTiVoPrefs];
@@ -905,6 +907,11 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     NSURL *appSupportURL = [[fileManager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject];
 	DDLogVerbose(@"App Support Dir: %@",appSupportURL);
     return [appSupportURL URLByAppendingPathComponent:@"com.cTiVo.cTivo"];
+}
+
+-(NSArray *) currentShows {
+    MTProgramTableView * programs = self.mainWindowController. tiVoShowTable;
+    return programs.sortedShows;
 }
 
 -(IBAction)showMainWindow:(id)sender

@@ -8,6 +8,7 @@
 
 #import "MTTiVoManager.h"
 #import "MTiTivoImport.h"
+#import "MTAppDelegate.h"
 #import "MTSubscription.h"
 #import "MTSubscriptionList.h"
 //#import "NSNotificationCenter+Threads.h"
@@ -563,7 +564,7 @@ __DDLOGHERE__
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDecodeBinary options:NSKeyValueObservingOptionNew context:nil];
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:KMTDownloadTSFormat options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDownloadTSFormat options:NSKeyValueObservingOptionNew context:nil];
 
 }
 
@@ -826,17 +827,17 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         for (MTTiVo *tiVo in _tiVoList) {
             [tiVo scheduleNextUpdateAfterDelay:-1];
         }
-    } else if ([keyPath isEqualToString:KMTDownloadTSFormat] ||
+    } else if ([keyPath isEqualToString:kMTDownloadTSFormat] ||
                 [keyPath isEqualToString:kMTDecodeBinary])  {
-        BOOL isTSFormat = [defs boolForKey:KMTDownloadTSFormat];
+        BOOL isTSFormat = [defs boolForKey:kMTDownloadTSFormat];
         NSString * decodeBinary = [defs objectForKey:kMTDecodeBinary];
         DDLogMajor(@"Changed: TS format %@; decoder: %@", isTSFormat ? @"On" : @"Off", decodeBinary);
         if (isTSFormat && [decodeBinary isEqualToString:@"tivodecode"]) {
                 //can't be used with Transport streams so change the "other" key
-            if ([keyPath isEqualToString:KMTDownloadTSFormat]){
+            if ([keyPath isEqualToString:kMTDownloadTSFormat]){
                 [defs setObject:@"tivodecode-ng" forKey:kMTDecodeBinary ];
             } else {
-                [defs setBool:NO forKey:KMTDownloadTSFormat];
+                [defs setBool:NO forKey:kMTDownloadTSFormat];
             }
 
         }
@@ -1002,9 +1003,169 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 		[_formatList addObject:newFormat];
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
-	[[NSUserDefaults standardUserDefaults] setObject:tiVoManager.userFormatDictionaries forKey:kMTFormats];
+	[[NSUserDefaults standardUserDefaults] setValue:tiVoManager.userFormatDictionaries forKey:kMTFormats];
 }
 
+#pragma mark - Channel management
+
+-(void) updateChannel: (NSDictionary *) newChannel {
+    if (!newChannel) return;
+    NSMutableArray *channels = nil;
+    NSArray * defaultsChannels =[[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo];
+    if (defaultsChannels) {
+        channels = [NSMutableArray arrayWithArray:defaultsChannels];
+    } else {
+        channels = [NSMutableArray array];
+    }
+    NSIndexSet * removeIndexes = [channels indexesOfObjectsPassingTest:^BOOL(NSDictionary *  _Nonnull channel, NSUInteger idx, BOOL * _Nonnull stop) {
+        return [channel[kMTChannelInfoName] caseInsensitiveCompare:newChannel[kMTChannelInfoName]] == NSOrderedSame;
+    }];
+    if (removeIndexes.count >0) {
+        [channels removeObjectsAtIndexes:removeIndexes];
+    }
+    [channels addObject:newChannel];
+    [[NSUserDefaults standardUserDefaults] setValue:channels forKeyPath:kMTChannelInfo];
+}
+
+-(void) createChannel: (NSDictionary *) newChannel  {
+    if (!newChannel) return;
+    NSString * channelBase = newChannel[kMTChannelInfoName];
+    if ([self channelNamed:channelBase]) {
+        int i = 0;
+        NSString * newName = nil;
+
+        do {
+            i++;
+            newName = [NSString stringWithFormat:@"%@%d",channelBase, i];
+        } while ( [self channelNamed:newName]);
+        NSMutableDictionary * channel = [newChannel mutableCopy];
+        [channel setObject:newName forKey:kMTChannelInfoName];
+        [self updateChannel:channel];
+    } else {
+        [self updateChannel:newChannel];
+    }
+}
+
+-(void) setFailedPS:(BOOL) psFailed forChannelNamed: (NSString *) channelName {
+    NSDictionary * newChannel = [self channelNamed:channelName];
+    if (newChannel) {
+        NSMutableDictionary * mutChannel = [newChannel mutableCopy];
+        [mutChannel setValue:@(psFailed) forKey:kMTChannelInfoPSFailed];
+        newChannel = [NSDictionary dictionaryWithDictionary: mutChannel ];
+    } else {
+        newChannel = @{kMTChannelInfoName: channelName,
+                      kMTChannelInfoCommercials: @(NSOnState),
+                      kMTChannelInfoPSFailed: @(psFailed),
+                       kMTChannelInfoUseTS: @(psFailed ? NSOnState : NSMixedState)};
+    }
+    [self updateChannel:newChannel];
+}
+
+-(NSDictionary *)channelNamed:(NSString *) channelName {
+    NSArray <NSDictionary *> * channels = [[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo];
+    NSUInteger index = [channels  indexOfObjectPassingTest:^BOOL(NSDictionary *  _Nonnull channel, NSUInteger idx, BOOL * _Nonnull stop) {
+        return [channel[kMTChannelInfoName ] caseInsensitiveCompare:channelName] == NSOrderedSame;
+    }];
+    if (index == NSNotFound) {
+        return nil;
+    } else {
+        return channels[index];
+    }
+}
+
+-(void) removeAllChannelsStartingWith: (NSString*) prefix {
+    NSArray * channels = [[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo];
+    NSIndexSet * realChannels = [channels indexesOfObjectsPassingTest:^BOOL(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        return ! [obj[kMTChannelInfoName] hasPrefix:@"???"];
+    }];
+    if (realChannels.count < channels.count) {
+        [[NSUserDefaults standardUserDefaults] setValue: [channels objectsAtIndexes:realChannels]  forKey:kMTChannelInfo];
+    }
+}
+
+-(void) sortChannelsAndMakeUnique {
+    NSArray * channels = [[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo];
+
+    NSMutableDictionary *uniqueObjects = [NSMutableDictionary dictionaryWithCapacity:channels.count];
+    for (NSDictionary *object in channels) {
+        [uniqueObjects setObject:object forKey:object[kMTChannelInfoName]];
+    }
+    NSArray * newChannels = [[uniqueObjects allValues] sortedArrayUsingComparator:^NSComparisonResult(NSDictionary *  _Nonnull obj1, NSDictionary *   _Nonnull obj2) {
+        return [obj1[kMTChannelInfoName] caseInsensitiveCompare:obj2[kMTChannelInfoName] ];
+    }];
+    [[NSUserDefaults standardUserDefaults] setValue:newChannels  forKey:kMTChannelInfo];
+}
+
+-(NSCellStateValue) useTSForChannel:(NSString *)channelName {
+    NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
+    if (channelInfo) {
+        return ((NSNumber*) channelInfo[kMTChannelInfoUseTS ]).intValue;
+    } else {
+        return NSMixedState;
+    }
+}
+
+-(NSCellStateValue) failedPSForChannel:(NSString *) channelName {
+    NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
+    if (channelInfo) {
+        return ((NSNumber*) channelInfo[kMTChannelInfoPSFailed ]).intValue;
+    } else {
+        return NSOffState;
+    }
+}
+
+-(NSCellStateValue) commercialsForChannel:(NSString *) channelName {
+    NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
+    if (channelInfo) {
+        return ((NSNumber*) channelInfo[kMTChannelInfoCommercials ]).intValue;
+    } else {
+        return NSOnState;
+    }
+
+}
+
+-(void) testAllChannelsForPS {
+    NSMutableSet * channelsTested = [NSMutableSet new];
+    NSMutableArray * testsToRun = [NSMutableArray new];
+    NSArray * programs = ((MTAppDelegate *) [NSApp delegate]).currentShows;
+    MTFormat * testFormat = [self findFormat:@"Test PS" ];
+    for (MTTiVoShow * show in programs) {
+        if (!(show.protectedShow.boolValue) && ! show.isQueued ) {
+            NSString * channel = show.stationCallsign;
+            if ( ! [channelsTested containsObject:channel]) {
+                if  ( ! [self channelNamed:channel] ) {
+                    MTDownload * newDownload = [[MTDownload  alloc] init];
+                    newDownload.show= show;
+                    newDownload.encodeFormat = testFormat;
+                    newDownload.downloadDirectory = [tiVoManager downloadDirectory];
+                    newDownload.addToiTunesWhenEncoded = NO;
+                    newDownload.exportSubtitles = NO;
+                    newDownload.skipCommercials = NO;
+                    newDownload.markCommercials = NO;
+                    newDownload.genTextMetaData = NO;
+                    newDownload.numRetriesRemaining = 0;
+                    [testsToRun addObject:newDownload];
+                }
+                [channelsTested addObject:channel];
+            }
+        }
+    }
+    if (testsToRun.count > 0) {
+        [self addToDownloadQueue:testsToRun beforeDownload:nil];
+    }
+}
+
+-(void) removeAllPSTests {
+    MTFormat * testFormat = [self findFormat:@"Test PS" ];
+    NSMutableArray * testDownloads = [NSMutableArray new];
+    for (MTDownload * download in self.downloadQueue) {
+        if (!download.isInProgress && download.encodeFormat == testFormat) {
+            [testDownloads addObject:download];
+        }
+    }
+    [self deleteFromDownloadQueue:testDownloads ];
+
+}
 
 #pragma mark - Media Key Support
 
@@ -1703,8 +1864,8 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     NSString * outString =[self description];
     for (MTTiVo * tiVo in tiVoManager.tiVoList) {
         NSString * mediaKey = tiVo.mediaKey;
-        NSString * maskedKey = [NSString stringWithFormat:@"<<%@MediaKey>>",tiVo.tiVo.name];
-        outString = [outString stringByReplacingOccurrencesOfString:mediaKey                                        withString:maskedKey];
+        NSString * maskedKey = [NSString stringWithFormat:@"<<%@ MediaKey>>",tiVo.tiVo.name];
+        outString = [outString stringByReplacingOccurrencesOfString:mediaKey withString:maskedKey];
     }
     return outString;
 }

@@ -105,13 +105,24 @@
 -(int) nextManualTiVoID;
 -(void)updateTiVoDefaults:(MTTiVo *)tiVo;
 
+//----------------Channel Management Methods --------
+-(void) updateChannel: (NSDictionary *) newChannel;
+-(void) createChannel: (NSDictionary *) newChannel;
+-(NSDictionary *)channelNamed:(NSString *) channel;
+-(void) sortChannelsAndMakeUnique;
+-(void) removeAllChannelsStartingWith: (NSString*) prefix;
+-(NSCellStateValue) useTSForChannel:(NSString *) channelName;
+-(void) setFailedPS:(BOOL) psFailed forChannelNamed: (NSString *) channelName;
+-(NSCellStateValue) failedPSForChannel:(NSString *) channelName;
+-(NSCellStateValue) commercialsForChannel:(NSString *) channelName;
+-(void) testAllChannelsForPS;
+-(void) removeAllPSTests;
 
 //---------------Other methods ----------
 - (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky: (BOOL) sticky forNotification: (NSString *) notification; //Gowl notification with Sticky
 - (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification;   //Growl notification
 -(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path;
 -(NSString *)getAMediaKey;
-
 
 @end
 

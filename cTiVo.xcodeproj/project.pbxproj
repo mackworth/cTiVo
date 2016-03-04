@@ -59,6 +59,8 @@
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9C1C505D3000887240 /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EB49BA01C50A4B100887240 /* tivo-libre.jar in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1ECD9D411C8265D600FBC78D /* MTChannelEditorController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD9D3F1C8265D600FBC78D /* MTChannelEditorController.m */; };
+		1ECD9D421C8265D600FBC78D /* MTChannelEditorController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1ECD9D401C8265D600FBC78D /* MTChannelEditorController.xib */; };
 		1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */; };
 		1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49974174D898D0022E084 /* MTTiVoPopUpTableCellView.m */; };
 		1EDBDFA71B1CB82700E979F0 /* ccextractor in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EFD685A16D19AA100CC36E5 /* ccextractor */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -232,6 +234,9 @@
 		1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLogFormatter.m; sourceTree = "<group>"; };
 		1EB49B9C1C505D3000887240 /* tivodecode-ng */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "tivodecode-ng"; sourceTree = "<group>"; };
 		1EB49B9F1C50A49000887240 /* tivo-libre.jar */ = {isa = PBXFileReference; lastKnownFileType = archive.jar; path = "tivo-libre.jar"; sourceTree = "<group>"; };
+		1ECD9D3E1C8265D600FBC78D /* MTChannelEditorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTChannelEditorController.h; sourceTree = "<group>"; };
+		1ECD9D3F1C8265D600FBC78D /* MTChannelEditorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTChannelEditorController.m; sourceTree = "<group>"; };
+		1ECD9D401C8265D600FBC78D /* MTChannelEditorController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTChannelEditorController.xib; sourceTree = "<group>"; };
 		1ED49971174D898D0022E084 /* MTTiVoPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoPopUpButton.h; sourceTree = "<group>"; };
 		1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoPopUpButton.m; sourceTree = "<group>"; };
 		1ED49973174D898D0022E084 /* MTTiVoPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoPopUpTableCellView.h; sourceTree = "<group>"; };
@@ -304,8 +309,8 @@
 		D2A648F016991CD300C7DA01 /* MTTiVo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVo.h; sourceTree = "<group>"; };
 		D2A648F116991CD300C7DA01 /* MTTiVo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVo.m; sourceTree = "<group>"; };
 		D2A7269416A2005400C58C5F /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
-		D2A7269616A23E3D00C58C5F /* MTFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTFormat.h; sourceTree = "<group>"; };
-		D2A7269716A23E3D00C58C5F /* MTFormat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTFormat.m; sourceTree = "<group>"; };
+		D2A7269616A23E3D00C58C5F /* MTFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = MTFormat.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D2A7269716A23E3D00C58C5F /* MTFormat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTFormat.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D2A7269916A25DEB00C58C5F /* MTFormatEditorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTFormatEditorController.h; sourceTree = "<group>"; };
 		D2A7269A16A25DEB00C58C5F /* MTFormatEditorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTFormatEditorController.m; sourceTree = "<group>"; };
 		D2A7269B16A25DEB00C58C5F /* MTFormatEditorController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTFormatEditorController.xib; sourceTree = "<group>"; };
@@ -460,6 +465,16 @@
 			name = DDLogger;
 			sourceTree = "<group>";
 		};
+		1ECD9D3D1C82657600FBC78D /* UI Classes - Channel Edit */ = {
+			isa = PBXGroup;
+			children = (
+				1ECD9D3E1C8265D600FBC78D /* MTChannelEditorController.h */,
+				1ECD9D3F1C8265D600FBC78D /* MTChannelEditorController.m */,
+				1ECD9D401C8265D600FBC78D /* MTChannelEditorController.xib */,
+			);
+			name = "UI Classes - Channel Edit";
+			sourceTree = "<group>";
+		};
 		1EE4418016A4E64800796897 /* UI Classes- Format Edit */ = {
 			isa = PBXGroup;
 			children = (
@@ -476,9 +491,9 @@
 		D272E49116B33D1600392165 /* UI Classes - Manual TiVo Editor */ = {
 			isa = PBXGroup;
 			children = (
-				D2D2C6ED16B3816B001AFE75 /* MTManualTiVoEditorController.xib */,
-				D2D2C6EE16B3816B001AFE75 /* MTManualTiVoEditorController.m */,
 				D2D2C6EF16B3816B001AFE75 /* MTManualTiVoEditorController.h */,
+				D2D2C6EE16B3816B001AFE75 /* MTManualTiVoEditorController.m */,
+				D2D2C6ED16B3816B001AFE75 /* MTManualTiVoEditorController.xib */,
 			);
 			name = "UI Classes - Manual TiVo Editor";
 			sourceTree = "<group>";
@@ -494,9 +509,9 @@
 				D208560416B61B9B002F5F8C /* MTPreferencesViewController.h */,
 				D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */,
 				D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */,
-				D22E4B1716B76DCD00619A6E /* MTAdvPreferencesViewController.xib */,
 				1E389BB616C46BA600B80EC9 /* MTAdvPreferencesViewController.h */,
 				1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */,
+				D22E4B1716B76DCD00619A6E /* MTAdvPreferencesViewController.xib */,
 			);
 			name = "UI Classes - Preferences ";
 			sourceTree = "<group>";
@@ -598,6 +613,7 @@
 				D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */,
 				D278CCDA16B49A8500711FFD /* UI Classes - Preferences  */,
 				1EE4418016A4E64800796897 /* UI Classes- Format Edit */,
+				1ECD9D3D1C82657600FBC78D /* UI Classes - Channel Edit */,
 				D272E49116B33D1600392165 /* UI Classes - Manual TiVo Editor */,
 				1E791BD01697ACAA00E47E84 /* Custom NSViews */,
 				D2DFA68B1683B9EC00CD6CE0 /* iTunesInterface */,
@@ -820,6 +836,7 @@
 				D2D2C6F016B3816B001AFE75 /* MTManualTiVoEditorController.xib in Resources */,
 				D27579BE16B4DC2B0090D137 /* MTPreferencesWindowController.xib in Resources */,
 				D208560816B61B9B002F5F8C /* MTPreferencesViewController.xib in Resources */,
+				1ECD9D421C8265D600FBC78D /* MTChannelEditorController.xib in Resources */,
 				D22E4B1916B76DCD00619A6E /* MTAdvPreferencesViewController.xib in Resources */,
 				D2B73F3616BC8A90003CB4ED /* comskip.ini in Resources */,
 				D274653516C8081C0012CFF7 /* ComSkipHelpText.rtf in Resources */,
@@ -939,6 +956,7 @@
 				1E3D27E01A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m in Sources */,
 				1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */,
 				D2001C261704F93F00B75D9C /* MTSrt.m in Sources */,
+				1ECD9D411C8265D600FBC78D /* MTChannelEditorController.m in Sources */,
 				D2001C281704F93F00B75D9C /* MTEdl.m in Sources */,
 				D291436E1713467A00CE3202 /* NSString+HTML.m in Sources */,
 				D291436F1713467F00CE3202 /* GTMNSString+HTML.m in Sources */,

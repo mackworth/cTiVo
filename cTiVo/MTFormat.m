@@ -408,6 +408,10 @@ __DDLOGHERE__
     return [_comSkip boolValue];
 }
 
+-(BOOL)isTestPS {
+    return [self.name isEqualToString:@"Test PS"];
+}
+
 -(void) setEncoderUsed:(NSString *)encoderUsed {
 	if (encoderUsed == _encoderUsed) return;
 	_encoderUsed = encoderUsed;

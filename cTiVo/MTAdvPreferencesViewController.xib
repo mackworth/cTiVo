@@ -94,7 +94,7 @@
                     </connections>
                 </button>
                 <textField toolTip="Where cTiVo stores temporary files (default is /tmp/ctivo/)" verticalHuggingPriority="750" id="67">
-                    <rect key="frame" x="10" y="441" width="171" height="17"/>
+                    <rect key="frame" x="10" y="460" width="171" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Temporary Files Directory:" id="70">
                         <font key="font" metaFont="system"/>
@@ -103,7 +103,7 @@
                     </textFieldCell>
                 </textField>
                 <textField toolTip="Where cTiVo stores temporary files (default is /tmp/ctivo/)" verticalHuggingPriority="750" id="66" userLabel="Text Field - Temporary Files">
-                    <rect key="frame" x="182" y="436" width="287" height="22"/>
+                    <rect key="frame" x="182" y="455" width="287" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" continuous="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="" drawsBackground="YES" id="71">
                         <font key="font" metaFont="system"/>
@@ -115,7 +115,7 @@
                     </connections>
                 </textField>
                 <textField toolTip="Not used yet." verticalHuggingPriority="750" id="48">
-                    <rect key="frame" x="10" y="411" width="135" height="17"/>
+                    <rect key="frame" x="10" y="430" width="135" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Filename Template:" id="49">
                         <font key="font" metaFont="system"/>
@@ -124,7 +124,7 @@
                     </textFieldCell>
                 </textField>
                 <textField toolTip="Keyword-based template for video-file names" verticalHuggingPriority="750" id="46" userLabel="Text Field FileName">
-                    <rect key="frame" x="141" y="406" width="311" height="22"/>
+                    <rect key="frame" x="141" y="425" width="311" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" lineBreakMode="truncatingMiddle" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="" drawsBackground="YES" usesSingleLineMode="YES" id="47">
                         <font key="font" metaFont="system"/>
@@ -136,7 +136,7 @@
                     </connections>
                 </textField>
                 <button toolTip="Displays statistics from theTVDB.com lookup process. Need to Empty Caches first to get most complete information." verticalHuggingPriority="750" id="98" userLabel="TVDB Stats Button">
-                    <rect key="frame" x="6" y="370" width="166" height="32"/>
+                    <rect key="frame" x="6" y="389" width="166" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="View TVDB statistics" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="99">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -209,7 +209,7 @@
                     </connections>
                 </textField>
                 <popUpButton id="In7-Wa-ifU">
-                    <rect key="frame" x="458" y="404" width="100" height="26"/>
+                    <rect key="frame" x="458" y="423" width="100" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="bevel" title="Keywords" bezelStyle="regularSquare" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" pullsDown="YES" id="lei-jo-eUa">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -225,7 +225,7 @@
                     </connections>
                 </popUpButton>
                 <button toolTip="Erases and re-retrieves information from TiVo and TVDB. Useful to get latest stats on TVDB, or if their data may have changed." verticalHuggingPriority="750" id="86" userLabel="Empty Caches Push Button">
-                    <rect key="frame" x="434" y="370" width="128" height="32"/>
+                    <rect key="frame" x="434" y="389" width="128" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="Empty Caches" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="87">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -236,11 +236,11 @@
                     </connections>
                 </button>
                 <customView id="28" userLabel="Custom View Debug levels">
-                    <rect key="frame" x="0.0" y="0.0" width="567" height="359"/>
+                    <rect key="frame" x="0.0" y="19" width="567" height="359"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                 </customView>
                 <button toolTip="Opens dialog to select Temporary Files Directory" verticalHuggingPriority="750" id="68" userLabel="Browse tmp Dir Square Textured Button">
-                    <rect key="frame" x="477" y="434" width="79" height="25"/>
+                    <rect key="frame" x="477" y="453" width="79" height="25"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="squareTextured" title="Browse" bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="69">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -262,17 +262,6 @@
                         <action selector="newDecodeValue:" target="-2" id="YEC-9H-WIC"/>
                     </connections>
                 </popUpButton>
-                <button toolTip="Experimental switch to test using TIVos' TS format instead of normal PS format." id="BV3-jG-Qvw" userLabel="Transport Stream">
-                    <rect key="frame" x="10" y="468" width="252" height="18"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Use TiVo's Transport Stream Format" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ZZ6-6v-Mtn">
-                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <binding destination="15" name="value" keyPath="values.DownloadTSFormat" id="11w-Th-0fK"/>
-                    </connections>
-                </button>
                 <textField toolTip="Specifies the number of times cTiVo will try to download before giving up." verticalHuggingPriority="750" id="PnJ-Bi-BN9">
                     <rect key="frame" x="339" y="501" width="90" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>

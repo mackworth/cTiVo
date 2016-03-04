@@ -1430,22 +1430,21 @@ audio: mp3 at 192kbps</string>
 			<key>encoderUsed</key>
 			<string>mencoder</string>
 			<key>encoderVideoOptions</key>
-			<string>-of lavf  -ovc copy</string>
+			<string>-of lavf </string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>formatDescription</key>
-			<string>For use w/ TiVos that already produce H.264 video (e.g. new Comcast)
-Converts to MP4 container</string>
+			<string>Only to test if a channel works with Program Stream vs TransportStream</string>
 			<key>isHidden</key>
-			<false/>
-			<key>iTunes</key>
 			<true/>
+			<key>iTunes</key>
+			<false/>
 			<key>inputFileFlag</key>
 			<string></string>
 			<key>mustDownloadFirst</key>
 			<false/>
 			<key>name</key>
-			<string>MP4 Mencoder</string>
+			<string>Test PS</string>
 			<key>outputFileFlag</key>
 			<string>-o</string>
 			<key>regExProgress</key>

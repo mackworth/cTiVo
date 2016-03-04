@@ -9,13 +9,15 @@
 #import <Cocoa/Cocoa.h>
 #import "MTManualTiVoEditorController.h"
 #import "MTFormatEditorController.h"
+#import "MTChannelEditorController.h"
 #import "MTTabViewItem.h"
 #import "MTAdvPreferencesViewController.h"
 
 
 @interface MTPreferencesWindowController : NSWindowController <NSTabViewDelegate> {
 	IBOutlet MTManualTiVoEditorController *manualTiVoEditorController;
-	IBOutlet MTFormatEditorController *formatEditorController;
+    IBOutlet MTFormatEditorController *formatEditorController;
+    IBOutlet MTChannelEditorController *channelEditorController;
 }
 
 @property (nonatomic, strong) NSString *startingTabIdentifier;

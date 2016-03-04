@@ -436,23 +436,25 @@ __DDLOGHERE__
 		[self removeFromDownloadQueue:menu];
 	} else if ([menu.title caseInsensitiveCompare:@"Reschedule"] == NSOrderedSame) {
 		NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
-		NSArray *itemsToRemove = [downloadQueueTable.sortedDownloads objectsAtIndexes:selectedRows];
+		NSArray *itemsToReschedule = [downloadQueueTable.sortedDownloads objectsAtIndexes:selectedRows];
 		if ([tiVoManager.processingPaused boolValue]) {
-			for (MTDownload *download in itemsToRemove) {
+			for (MTDownload *download in itemsToReschedule) {
+                if (!download.show.protectedShow.boolValue && download.downloadStatus.intValue != kMTStatusDeleted) {
 					[download prepareForDownload:YES];
+                }
 			}
 		} else {
-			//Can't reschedule items that haven't loaded yet.
-			NSMutableArray * realItemsToRemove = [NSMutableArray arrayWithArray:itemsToRemove];
-			for (MTDownload *download in itemsToRemove) {
-				if (download.show.protectedShow.boolValue) {
+			//Can't reschedule items that haven't loaded yet or have been deleted.
+			NSMutableArray * realItemsToReschedule = [NSMutableArray arrayWithArray:itemsToReschedule];
+			for (MTDownload *download in itemsToReschedule) {
+				if (download.show.protectedShow.boolValue || download.downloadStatus.intValue == kMTStatusDeleted) {
 					//A proxy DL waiting for "real" show
 					[download prepareForDownload:YES];
-					[realItemsToRemove removeObject:download];
+					[realItemsToReschedule removeObject:download];
 				}
 			}
-			[tiVoManager deleteFromDownloadQueue:realItemsToRemove];
-			[tiVoManager addToDownloadQueue:realItemsToRemove beforeDownload:nil];
+			[tiVoManager deleteFromDownloadQueue:realItemsToReschedule];
+			[tiVoManager addToDownloadQueue:realItemsToReschedule beforeDownload:nil];
 		}
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		NSArray * selectedDownloads = [downloadQueueTable.sortedDownloads objectsAtIndexes:downloadQueueTable.selectedRowIndexes];

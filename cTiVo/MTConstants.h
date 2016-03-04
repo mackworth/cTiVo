@@ -222,7 +222,13 @@
 #define kMTDebugLevelDetail @"DebugLevelDetail"
 #define kMTCrashlyticsOptOut @"CrashlyticsOptOut"
 #define kMTDecodeBinary  @"DecodeBinary"
-#define KMTDownloadTSFormat @"DownloadTSFormat"
+#define kMTDownloadTSFormat @"DownloadTSFormat"
+
+#define kMTChannelInfo @"ChannelInfo"
+#define kMTChannelInfoName @"name"
+#define kMTChannelInfoCommercials @"commercials"
+#define kMTChannelInfoPSFailed @"PSFailed"
+#define kMTChannelInfoUseTS @"useTS"
 
 //Obsolete keys, but kept for upgrade path
 #define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address. -replaced by MTTiVos

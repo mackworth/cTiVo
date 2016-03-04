@@ -37,6 +37,7 @@
 @property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
 @property (nonatomic, strong) NSTimer * pseudoTimer;
+@property (nonatomic, readonly) NSArray *currentShows;
 
 
 -(IBAction)togglePause:(id)sender;

@@ -98,7 +98,7 @@
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
     if ([[menuItem title ] isEqualToString: @"tivodecode"]) {
-        return (![[NSUserDefaults standardUserDefaults] boolForKey:KMTDownloadTSFormat]);
+        return (![[NSUserDefaults standardUserDefaults] boolForKey:kMTDownloadTSFormat]);
     } else if ([[menuItem title ] isEqualToString: @"TivoLibre"]) {
         return ([self javaInstalled]);
     }
@@ -223,10 +223,8 @@
       }
     for (MTTiVoShow * show in  shows) {
         testDownload.show = show;
-        NSString * filename =[testDownload swapKeywordsInString:pattern];
-        if (![pattern contains:@"ExtraEpisode"] || [filename contains:@"-E"]) {    //Temporary for 2.5alpha2 only; REMOVE if for next release
-            [fileNames appendFormat:@"%@ - %@\n",show.showTitle, [testDownload swapKeywordsInString:pattern]];
-        }
+        [fileNames appendFormat:@"%@ - %@\n",show.showTitle, [testDownload swapKeywordsInString:pattern]];
+
     }
     NSAttributedString * results = [[NSAttributedString alloc] initWithString:fileNames];
     //	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
