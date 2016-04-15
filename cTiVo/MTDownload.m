@@ -886,7 +886,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(NSString *) encoderPath {
 	NSString *encoderLaunchPath = [_encodeFormat pathForExecutable];
     if (!encoderLaunchPath) {
-        DDLogDetail(@"Encoding of %@ failed for %@ format, encoder %@ not found",_show.showTitle,_encodeFormat.name,_encodeFormat.encoderUsed);
+        DDLogReport(@"Encoding of %@ failed for %@ format, encoder %@ not found",_show.showTitle,_encodeFormat.name,_encodeFormat.encoderUsed);
         [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
         _processProgress = 1.0;
         [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:self];
@@ -1139,7 +1139,9 @@ NSString * fourChar(long n, BOOL allowZero) {
         return _encodeTask;
     }
     MTTask *encodeTask = [MTTask taskWithName:@"encode" download:self];
-    [encodeTask setLaunchPath:[self encoderPath]];
+    NSString * encoderPath = [self encoderPath];
+    if (!encoderPath) return nil;
+    [encodeTask setLaunchPath:encoderPath];
     encodeTask.requiresOutputPipe = NO;
     NSArray * encoderArgs = nil;
 
@@ -1246,6 +1248,22 @@ NSString * fourChar(long n, BOOL allowZero) {
     return _encodeTask;
 }
 
+-(void) fixupSRTsDueToCommercialSkipping {
+    NSArray *srtEntries = [NSArray getFromSRTFile:captionFilePath];
+    NSArray *edlEntries = [NSArray getFromEDLFile:commercialFilePath];
+    if (srtEntries && edlEntries) {
+        NSArray *correctedSrts = [srtEntries processWithEDLs:edlEntries];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+            NSString *oldCaptionPath = [[captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
+            [[NSFileManager defaultManager] moveItemAtPath:captionFilePath toPath:oldCaptionPath error:nil];
+        }
+        if (correctedSrts) {
+            [correctedSrts writeToSRTFilePath:captionFilePath];
+            [self markCompleteCTiVoFile:captionFilePath];
+        }
+    }
+}
+
 -(MTTask *)captionTask  //Captioning is done in parallel with download so no progress indicators are needed.
 {
     NSAssert(_exportSubtitles.boolValue,@"captionTask not requested");
@@ -1295,6 +1313,9 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     captionTask.completionHandler = ^BOOL(){
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
+        if ( self.skipCommercials && self.commercialTask.successfulExit) {
+            [self fixupSRTsDueToCommercialSkipping];
+        }
         [self markCompleteCTiVoFile:captionFilePath];
 		return YES;
     };
@@ -1386,30 +1407,16 @@ NSString * fourChar(long n, BOOL allowZero) {
 				 }
 				[self progressUpdated];
 				[self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
-				if (self.exportSubtitles.boolValue && self.skipCommercials && captionFilePath) {
-					NSArray *srtEntries = [NSArray getFromSRTFile:captionFilePath];
-					NSArray *edlEntries = [NSArray getFromEDLFile:commercialFilePath];
-					if (srtEntries && edlEntries) {
-						NSArray *correctedSrts = [srtEntries processWithEDLs:edlEntries];
-						if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-							NSString *oldCaptionPath = [[captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
-							[[NSFileManager defaultManager] moveItemAtPath:captionFilePath toPath:oldCaptionPath error:nil];
-						}
-						if (correctedSrts) [correctedSrts writeToSRTFilePath:captionFilePath];
-					}
+				if (self.exportSubtitles.boolValue && self.skipCommercials && captionFilePath && self.captionTask.successfulExit) {
+                    [self fixupSRTsDueToCommercialSkipping];
 				}
              } else {
                  self.processProgress = 1.0;
                  [self progressUpdated];
                  [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
                  [self writeMetaDataFiles];
-#ifndef deleteXML
-				 //                 if ( ! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAcceptMetaData) ) {
-#endif
-                     [self finishUpPostEncodeProcessing];
-//                 }
+                 [self finishUpPostEncodeProcessing];
              }
-            [self markCompleteCTiVoFile:captionFilePath];
             [self markCompleteCTiVoFile:commercialFilePath];
             return YES;
         };
@@ -1554,11 +1561,16 @@ NSString * fourChar(long n, BOOL allowZero) {
             return;
         }
     }
-
+    MTTask * encodeTask = self.encodeTask;
+    if (!encodeTask) {
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
+        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+        return;
+    }
     switch (self.taskFlowType) {
         case kMTTaskFlowNonSimu:  //Just encode with non-simul encoder
         case kMTTaskFlowSimu:  //Just encode with simul encoder
-           [taskArray addObject:@[self.encodeTask]];
+           [taskArray addObject:@[encodeTask]];
             break;
             
         case kMTTaskFlowNonSimuSubtitles:  //Encode with non-simul encoder and subtitles
@@ -1567,29 +1579,29 @@ NSString * fourChar(long n, BOOL allowZero) {
             } else {
                 [taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];
             }
-			[taskArray addObject:@[self.encodeTask]];
+			[taskArray addObject:@[encodeTask]];
             break;
             
         case kMTTaskFlowSimuSubtitles:  //Encode with simul encoder and subtitles
             if(_downloadingShowFromMPGFile)self.activeTaskChain.providesProgress = YES;
-			[taskArray addObject:@[self.encodeTask,self.captionTask]];
+			[taskArray addObject:@[encodeTask,self.captionTask]];
             break;
             
         case kMTTaskFlowNonSimuSkipcom:  //Encode with non-simul encoder skipping commercials
         case kMTTaskFlowSimuSkipcom:  //Encode with simul encoder skipping commercials
 			[taskArray addObject:@[self.commercialTask]];
-            [taskArray addObject:@[self.encodeTask]];
+            [taskArray addObject:@[encodeTask]];
             break;
             
         case kMTTaskFlowNonSimuSkipcomSubtitles:  //Encode with non-simul encoder skipping commercials and subtitles
         case kMTTaskFlowSimuSkipcomSubtitles:  //Encode with simul encoder skipping commercials and subtitles
 			[taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];
 			[taskArray addObject:@[self.commercialTask]];
-			[taskArray addObject:@[self.encodeTask]];
+			[taskArray addObject:@[encodeTask]];
             break;
             
         case kMTTaskFlowNonSimuMarkcom:  //Encode with non-simul encoder marking commercials
-            [taskArray addObject:@[self.encodeTask, self.commercialTask]];
+            [taskArray addObject:@[encodeTask, self.commercialTask]];
             break;
             
         case kMTTaskFlowNonSimuMarkcomSubtitles:  //Encode with non-simul encoder marking commercials and subtitles
@@ -1599,17 +1611,17 @@ NSString * fourChar(long n, BOOL allowZero) {
             } else {
                 [taskArray addObject:@[self.captionTask,[self catTask:_decryptBufferFilePath]]];
             }
-            [taskArray addObject:@[self.encodeTask, self.commercialTask]];
+            [taskArray addObject:@[encodeTask, self.commercialTask]];
             break;
             
         case kMTTaskFlowSimuMarkcom:  //Encode with simul encoder marking commercials
             if(_downloadingShowFromMPGFile) {
-                [taskArray addObject:@[self.encodeTask]];
+                [taskArray addObject:@[encodeTask]];
             } else {
                 if ([self canPostDetectCommercials]) {
-                    [taskArray addObject:@[self.encodeTask]];
+                    [taskArray addObject:@[encodeTask]];
                 } else {
-                    [taskArray addObject:@[self.encodeTask,[self catTask:_decryptBufferFilePath] ]];
+                    [taskArray addObject:@[encodeTask,[self catTask:_decryptBufferFilePath] ]];
                 }
             }
             [taskArray addObject:@[self.commercialTask]];
@@ -1617,12 +1629,12 @@ NSString * fourChar(long n, BOOL allowZero) {
             
         case kMTTaskFlowSimuMarkcomSubtitles:  //Encode with simul encoder marking commercials and subtitles
             if(_downloadingShowFromMPGFile) {
-                [taskArray addObject:@[self.captionTask,self.encodeTask]];
+                [taskArray addObject:@[self.captionTask,encodeTask]];
             } else {
                 if ([self canPostDetectCommercials]) {
-                    [taskArray addObject:@[self.encodeTask, self.captionTask]];
+                    [taskArray addObject:@[encodeTask, self.captionTask]];
                 } else {
-                    [taskArray addObject:@[self.encodeTask, self.captionTask,[self catTask:_decryptBufferFilePath]]];
+                    [taskArray addObject:@[encodeTask, self.captionTask,[self catTask:_decryptBufferFilePath]]];
                 }
             }
             [taskArray addObject:@[self.commercialTask]];
@@ -1861,7 +1873,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 
--(NSString *) moveFile:(NSString *) path ToiTunes: (NSString *)iTunesBaseName forType:(NSString *) typeString andExtension: (NSString *) extension {
+-(NSString *) moveFile:(NSString *) path toITunes: (NSString *)iTunesBaseName forType:(NSString *) typeString andExtension: (NSString *) extension {
     if (!path) return nil;
     if (!iTunesBaseName) return nil;
     if (![[NSFileManager defaultManager] fileExistsAtPath:path])  return nil;
@@ -1876,9 +1888,22 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 -(void) finishUpPostEncodeProcessing {
-	NSDate *startTime = [NSDate date];
-	DDLogMajor(@"Starting finishing @ %@",startTime);
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
+    if (_decryptTask.isRunning ||
+        _encodeTask.isRunning ||
+        _commercialTask.isRunning ||
+        _captionTask.isRunning)  {
+        //if any of the tasks exist and are still running, then let them finish; checkStillActive will eventually fail them if no progress
+        DDLogDetail(@"Finishing up, but processes still running");
+        [self performSelector:@selector(finishUpPostEncodeProcessing) withObject:nil afterDelay:0.5];
+    }
+    if (!(self.decryptTask.successfulExit && self.encodeTask.successfulExit)) {
+        DDLogMajor(@"Strange: thought we were finished, but later %@ failure", self.decryptTask.successfulExit ? @"encode" : @"decrypt");
+        [self cancel]; //just in case
+        return;
+    }
+    NSDate *startTime = [NSDate date];
+    DDLogMajor(@"Starting finishing @ %@",startTime);
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 	NSImage * artwork = nil;
 	if (self.encodeFormat.canAcceptMetaData || _addToiTunesWhenEncoded) {
 		//see if we can find artwork for this series
@@ -1916,18 +1941,6 @@ NSString * fourChar(long n, BOOL allowZero) {
 		
 		if (iTunesPath && ![iTunesPath isEqualToString: self.encodeFilePath]) {
 			//apparently iTunes created new file
-//			MP4FileHandle *iTunesFileHandle = MP4Modify([iTunesPath cStringUsingEncoding:NSUTF8StringEncoding],0);
-//			const MP4Tags* tags2 = MP4TagsAlloc();
-//			MP4TagsFetch( tags2, iTunesFileHandle );
-//			uint32 iTunesContentID = *tags2->contentID;
-//			if (iTunesContentID != realContentID) {
-//				DDLogMajor(@"replacing iTunes ContentID: %u with %u",iTunesContentID, realContentID);
-//				MP4TagsSetContentID(tags2, &realContentID);
-//				MP4TagsStore(tags2, iTunesFileHandle);
-//			}
-//			MP4TagsFree(tags2);
-//			MP4Close(iTunesFileHandle, 0);
-
 			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
                 //delete old file
 				if (![[NSUserDefaults standardUserDefaults ] boolForKey:kMTSaveTmpFiles]) {
@@ -1940,12 +1953,12 @@ NSString * fourChar(long n, BOOL allowZero) {
                 //move caption, commercial, and pytivo metadata files along with video
                 NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
                 if (self.shouldEmbedSubtitles && captionFilePath) {
-                     captionFilePath = [self moveFile:captionFilePath ToiTunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: captionFilePath;
+                     captionFilePath = [self moveFile:captionFilePath toITunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: captionFilePath;
                 }
                 if (self.genTextMetaData.boolValue) {
                     NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
                     NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
-                    [self moveFile:textMetaPath ToiTunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
+                    [self moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
                 }
                 //but remember new file for future processing
 				_encodeFilePath= iTunesPath;

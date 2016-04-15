@@ -75,7 +75,11 @@ __DDLOGHERE__
         self.errorFilePath = [NSString stringWithFormat:@"%@/%@%@.err",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
 		[[NSFileManager defaultManager] createFileAtPath:_errorFilePath contents:[NSData data] attributes:nil];
         self.errorFileHandle = [NSFileHandle fileHandleForWritingAtPath:_errorFilePath];
-        [self setStandardOutput:self.logFileWriteHandle];
+        if (self.logFileWriteHandle) {
+            [self setStandardOutput:self.logFileWriteHandle];
+        } else {
+            DDLogReport(@"Could not open logfile at %@",_logFilePath);
+        }
         [self setStandardInput:self.logFileReadHandle];
         [self setStandardError:self.errorFileHandle];
     }
@@ -147,6 +151,7 @@ __DDLOGHERE__
 
 -(void)completeProcess
 {
+    _taskRunning = NO;
     DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus,[self reasonForTermination]);
     if (self.taskFailed) {
 		[self failedTaskCompletion];
@@ -154,13 +159,11 @@ __DDLOGHERE__
         if (_completionHandler) {
 			if(!_completionHandler()) { //The task actually failed
 				[self failedTaskCompletion];
-                _taskRunning = NO;
 				return;
 			}
         }
         [self cleanUp];
     }
-    _taskRunning = NO;
 }
 
 -(void)failedTaskCompletion
@@ -193,11 +196,11 @@ __DDLOGHERE__
     if (!launched || _task.isRunning) {
         return NO;
     } else {
-        return _task.terminationReason == NSTaskTerminationReasonUncaughtSignal || ![self succcessfulExit] ;
+        return _task.terminationReason == NSTaskTerminationReasonUncaughtSignal || ![self successfulExit] ;
     }
 }
 
--(BOOL)succcessfulExit
+-(BOOL)successfulExit
 {
 	BOOL ret = NO;
     if (!launched || _task.isRunning) return NO;
@@ -284,7 +287,11 @@ __DDLOGHERE__
 
 -(void)setLaunchPath:(NSString *)path
 {
-    [_task setLaunchPath:path];
+    if (path.length > 0) {
+        [_task setLaunchPath:path];
+    } else {
+        DDLogReport(@"Error: executable path for %@ not found", self.taskName);
+    }
 }
 
 -(void)setCurrentDirectoryPath:(NSString *)path
@@ -319,6 +326,10 @@ __DDLOGHERE__
 
 -(void)launch
 {
+    if (!_task.launchPath) {
+        DDLogReport(@"Error: no executable for %@; cannot launch", self.taskName);
+       return;
+    }
     BOOL shouldLaunch = YES;
     if (_startupHandler) {
         shouldLaunch = _startupHandler();

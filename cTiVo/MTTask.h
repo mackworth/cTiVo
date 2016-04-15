@@ -42,6 +42,7 @@
 @property BOOL requiresInputPipe, requiresOutputPipe, shouldReschedule;
 @property (nonatomic, readonly) BOOL taskFailed;
 @property (nonatomic) BOOL taskRunning;
+@property (nonatomic, readonly) BOOL successfulExit;
 
 @property int pid;
 

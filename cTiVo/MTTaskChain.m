@@ -219,9 +219,20 @@ __DDLOGHERE__
     }
 }
 
--(void)tee:(NSNotification *)notification
-{
-//    NSLog(@"Got read for tee ");
+-(void)tee:(NSNotification *)notification {
+//    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+//        //Background Thread
+//        [self teeInBackground:notification];
+//        //		dispatch_async(dispatch_get_main_queue(), ^(void){
+//        //			//Run UI Updates
+//        //		});
+//    });
+//}
+//
+//-(void)teeInBackground:(NSNotification *)notification {
+////    NSLog(@"Got read for tee ");
+
+    DDLogVerbose(@"tee: %@", [NSThread isMainThread] ? @"Main" : @"Background");
 	NSData *readData = notification.userInfo[NSFileHandleNotificationDataItem];
     totalDataRead += readData.length;
     if (_providesProgress) {
@@ -272,21 +283,24 @@ __DDLOGHERE__
 			}
         }
 		if (!_download.isCanceled) {
-			@try {
-				[(NSFileHandle *)(notification.object) readInBackgroundAndNotify];
-			}
-			@catch (NSException *exception) {
-				DDLogDetail(@"download read data in background fail: %@", exception.reason);
-				if (!_download.isCanceled) {
-					[_download rescheduleOnMain];
-				}
-				return;
-				
-			}
-			@finally {
-			}
+            dispatch_async(dispatch_get_main_queue(), ^{
+                @try {
+                    [(NSFileHandle *)(notification.object) readInBackgroundAndNotify];
+                }
+                @catch (NSException *exception) {
+                    DDLogDetail(@"download read data in background fail: %@", exception.reason);
+                    if (!_download.isCanceled) {
+                        [_download rescheduleOnMain];
+                    }
+                    return;
+                    
+                }
+                @finally {
+                }
+            });
+
 		}
-		
+
 	} else {
         DDLogMajor(@"Really Quitting because data length is %ld and is %@cancelled",readData.length, _download.isCanceled ? @"" : @"not ");
         for (NSPipe *pipe in pipes) {
@@ -311,6 +325,7 @@ __DDLOGHERE__
 
 -(void)dealloc
 {
+    DDLogVerbose(@"Deallocing taskChain");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

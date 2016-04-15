@@ -613,18 +613,22 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 	[self showPreferences:nil];
 }
 
--(IBAction)showPreferences:(id)sender
-{
-	[NSApp beginSheet:self.preferencesController.window modalForWindow:_mainWindowController.window ?: [NSApp keyWindow]
-        modalDelegate:nil didEndSelector:NULL contextInfo:nil];
-	
+-(void)showWindowController: (MTPreferencesWindowController *) controller {
+    //prefer to show window as attached sheet, but sometimes in the field, we don't have a window?, so just show it regular.
+    NSWindow * mainWindow =  _mainWindowController.window ?: [NSApp keyWindow];
+    if (mainWindow) {
+        [NSApp beginSheet:controller.window modalForWindow:_mainWindowController.window ?: [NSApp keyWindow] modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+    } else {
+        [controller showWindow:nil];
+    }
 }
 
--(IBAction)showAdvPreferences:(id)sender
-{
-	[NSApp beginSheet:self.advPreferencesController.window
-            modalForWindow:_mainWindowController.window ?: [NSApp keyWindow]
-            modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+-(IBAction)showPreferences:(id)sender {
+    [self showWindowController: self.preferencesController];
+}
+
+-(IBAction)showAdvPreferences:(id)sender {
+    [self showWindowController: self.preferencesController];
 }
 
 -(MTPreferencesWindowController *)preferencesController
@@ -831,7 +835,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
         [keychainButton setState:NSOffState];
         [accView addSubview:keychainButton];
         
-        [input setStringValue:tiVo.mediaKey];
+        if (tiVo.mediaKey) [input setStringValue:tiVo.mediaKey];
         [keyAlert setAccessoryView:accView];
         NSInteger button = [keyAlert runModal];
         if (button == NSAlertDefaultReturn) {
@@ -872,7 +876,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     [helpButton setAction:@selector(help:)];
     [accView addSubview:helpButton];
     
-    [input setStringValue:tiVo.mediaKey];
+    if (tiVo.mediaKey) [input setStringValue:tiVo.mediaKey];
     [keyAlert setAccessoryView:accView];
     return keyAlert;
 
