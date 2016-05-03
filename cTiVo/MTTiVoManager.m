@@ -286,19 +286,20 @@ __DDLOGHERE__
 
 -(NSInteger) findProxyShowInDLQueue:(MTTiVoShow *) showTarget {
 	NSString * targetTivoName = showTarget.tiVo.tiVo.name;
-	return [self.downloadQueue indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-		MTTiVoShow * possShow = ((MTDownload *) obj).show;
+	return [self.downloadQueue indexOfObjectPassingTest:^BOOL(MTDownload * download, NSUInteger idx, BOOL *stop) {
+		MTTiVoShow * possShow = download.show;
 		return [targetTivoName isEqualToString:[possShow tempTiVoName]] &&
-		showTarget.showID == possShow.showID;
+		showTarget.showID == possShow.showID &&
+        possShow.protectedShow.boolValue;
 		
 	}];
 }
 
 -(void) replaceProxyInQueue: (MTTiVoShow *) newShow {
-	NSInteger DLIndex =[tiVoManager findProxyShowInDLQueue:newShow];
-	if (DLIndex != NSNotFound) {
-		MTDownload * proxyDL = [tiVoManager downloadQueue][DLIndex];
-		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, DLIndex, proxyDL.show.tiVoName);
+    NSInteger dlIndex;
+    while ((dlIndex =[tiVoManager findProxyShowInDLQueue:newShow]) != NSNotFound) {
+		MTDownload * proxyDL = [tiVoManager downloadQueue][dlIndex];
+		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, dlIndex, proxyDL.show.tiVoName);
 		proxyDL.show = newShow;
 		//this is a back door entry into queue, so need to check for uniqueness again in current environment
 //		[self checkShowTitleUniqueness:newShow];
@@ -1291,18 +1292,19 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 		MTTiVoShow * newShow = newDownload.show;
 		if (![newShow.protectedShow boolValue]) {
             BOOL showFound = NO;
-            //if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups]) {
-			for (MTDownload *oldDownload in _downloadQueue) {
-				if (oldDownload.show.showID == newShow.showID	) {
-					if (oldDownload.show==newShow) {
-						DDLogDetail(@" %@ already in queue",oldDownload);
-					} else {
-						DDLogReport(@"show %@ already in queue as %@ with same ID %d!",oldDownload, newShow, newShow.showID);
-					}
-					showFound = YES;
-					break;
-				}
-			}
+            if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups]) {
+                for (MTDownload *oldDownload in _downloadQueue) {
+                    if (oldDownload.show.showID == newShow.showID	) {
+                        if (oldDownload.show==newShow) {
+                            DDLogDetail(@" %@ already in queue",oldDownload);
+                        } else {
+                            DDLogReport(@"show %@ already in queue as %@ with same ID %d!",oldDownload, newShow, newShow.showID);
+                        }
+                        showFound = YES;
+                        break;
+                    }
+                }
+            }
             if (!showFound) {
                 //Make sure the title isn't the same and if it is add a -1 modifier
                 submittedAny = YES;

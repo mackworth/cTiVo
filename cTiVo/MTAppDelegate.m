@@ -613,6 +613,14 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 	[self showPreferences:nil];
 }
 
+-(IBAction)editChannels:(id)sender
+{
+    //	[self.manualTiVoEditorController showWindow:nil];
+    //	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:_mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+    self.preferencesController.startingTabIdentifier = @"Channels";
+    [self showPreferences:nil];
+}
+
 -(void)showWindowController: (MTPreferencesWindowController *) controller {
     //prefer to show window as attached sheet, but sometimes in the field, we don't have a window?, so just show it regular.
     NSWindow * mainWindow =  _mainWindowController.window ?: [NSApp keyWindow];
@@ -628,7 +636,8 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 }
 
 -(IBAction)showAdvPreferences:(id)sender {
-    [self showWindowController: self.preferencesController];
+    self.advPreferencesController.startingTabIdentifier = @"AdvPrefs";
+    [self showWindowController: self.advPreferencesController];
 }
 
 -(MTPreferencesWindowController *)preferencesController

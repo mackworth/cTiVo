@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="14A361c" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment version="1070" defaultVersion="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6245"/>
+        <deployment version="1070" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="10116"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTFormatEditorController">
@@ -120,11 +120,6 @@
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2662" id="2663">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
                     </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" id="2475">
@@ -146,11 +141,6 @@
                     </textFieldCell>
                     <connections>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2664">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2664" id="2665">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
@@ -196,11 +186,6 @@
                             </dictionary>
                         </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2648">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2648" id="2649">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
@@ -331,11 +316,6 @@
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2655" id="2656">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
                     </connections>
                 </textField>
                 <textField toolTip="Encoder command-line switch to specify output filename. Example:  -i" verticalHuggingPriority="750" id="2472">
@@ -357,11 +337,6 @@
                     </textFieldCell>
                     <connections>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2645">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2645" id="2646">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
@@ -391,7 +366,7 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
-                        <binding destination="-2" name="enabled2" keyPath="currentFormat.comSkip" previousBinding="2684" id="2687">
+                        <binding destination="-2" name="enabled" keyPath="currentFormat.comSkip" previousBinding="ubA-DF-d8z" id="0w2-Jh-6QT">
                             <dictionary key="options">
                                 <integer key="NSMultipleValuesPlaceholder" value="-1"/>
                                 <integer key="NSNoSelectionPlaceholder" value="-1"/>
@@ -404,16 +379,7 @@
                                 <bool key="NSContinuouslyUpdatesValue" value="YES"/>
                             </dictionary>
                         </binding>
-                        <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2683">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2683" id="2684">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
+                        <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="ubA-DF-d8z"/>
                     </connections>
                 </textField>
                 <textField toolTip="Encoder command-line switch to specify output filename. Example:   -o" verticalHuggingPriority="750" id="2679">
@@ -435,17 +401,8 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
-                        <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2621">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2621" id="2622">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled2" keyPath="currentFormat.mustDownloadFirst" previousBinding="2622" id="2623">
+                        <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="aYT-QF-feV"/>
+                        <binding destination="-2" name="enabled" keyPath="currentFormat.mustDownloadFirst" previousBinding="aYT-QF-feV" id="WKg-bZ-dqt">
                             <dictionary key="options">
                                 <integer key="NSMultipleValuesPlaceholder" value="-1"/>
                                 <integer key="NSNoSelectionPlaceholder" value="-1"/>
@@ -470,9 +427,9 @@
                     </textFieldCell>
                 </textField>
                 <textField toolTip="Format provided by cTiVo program." verticalHuggingPriority="750" id="2459">
-                    <rect key="frame" x="17" y="642" width="178" height="17"/>
+                    <rect key="frame" x="17" y="642" width="248" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="This is a Built-In Format" id="2601">
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="This is a Built-In Format (not editable)" id="2601">
                         <font key="font" metaFont="systemBold"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -546,15 +503,10 @@
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2650" id="2651">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
                     </connections>
                 </textField>
-                <textField toolTip="Audio-related command-line options " verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" id="2467">
-                    <rect key="frame" x="20" y="267" width="500" height="22"/>
+               <textField toolTip="Audio-related command-line options " verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" id="2467">
+                    <rect key="frame" x="20" y="265" width="500" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="2593">
                         <font key="font" metaFont="system"/>
@@ -568,11 +520,6 @@
                             </dictionary>
                         </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2638">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2638" id="2639">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
@@ -598,11 +545,6 @@
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
                         </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2629" id="2630">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
                     </connections>
                 </textField>
                 <textField toolTip="Options to be added to comskip command line" verticalHuggingPriority="750" id="2688">
@@ -623,7 +565,7 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
-                        <binding destination="-2" name="enabled2" keyPath="currentFormat.comSkip" previousBinding="2693" id="2697">
+                        <binding destination="-2" name="enabled" keyPath="currentFormat.comSkip" previousBinding="UW3-ZY-6B3" id="iNb-MH-6Rn">
                             <dictionary key="options">
                                 <integer key="NSMultipleValuesPlaceholder" value="-1"/>
                                 <integer key="NSNoSelectionPlaceholder" value="-1"/>
@@ -636,16 +578,7 @@
                                 <bool key="NSContinuouslyUpdatesValue" value="YES"/>
                             </dictionary>
                         </binding>
-                        <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2692">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2692" id="2693">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
+                        <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="UW3-ZY-6B3"/>
                     </connections>
                 </textField>
                 <textField toolTip="Options to be added to ccExtractor (e.g. -sc to convert UPPERCASE to Sentence case) " verticalHuggingPriority="750" id="2709">
@@ -672,11 +605,6 @@
                             </dictionary>
                         </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="2714">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.isFactoryFormat" previousBinding="2714" id="2715">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
                             </dictionary>
@@ -749,7 +677,7 @@
                         <action selector="cancelFormatEdit:" target="-2" id="2675"/>
                     </connections>
                 </button>
-            </subviews>
+             </subviews>
         </view>
         <userDefaultsController representsSharedInstance="YES" id="562"/>
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="1969" userLabel="Popover Detach Windo">

@@ -186,7 +186,7 @@
 #define kMTiTunesContentIDExperiment @"iTunesContentID"  //Whether to add episodeID as contentID for iTunes; doesn't seem to work
 //#define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
 #define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
-//Future? #define kMTAllowDups @"AllowDups"			//Whether to allow duplicate entries in downloads/subscriptions (e.g. for different formats)
+#define kMTAllowDups @"AllowDups"			//Whether to allow duplicate entries in downloads/subscriptions (e.g. for different formats)
 #define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
 #define kMTShowSuggestions @"ShowSuggestions"		// Whether to display Tivo Suggestions (and to subscribe thereto)

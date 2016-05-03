@@ -220,17 +220,13 @@ __DDLOGHERE__
 }
 
 -(void)tee:(NSNotification *)notification {
-//    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-//        //Background Thread
-//        [self teeInBackground:notification];
-//        //		dispatch_async(dispatch_get_main_queue(), ^(void){
-//        //			//Run UI Updates
-//        //		});
-//    });
-//}
-//
-//-(void)teeInBackground:(NSNotification *)notification {
-////    NSLog(@"Got read for tee ");
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+        //run on Background Thread
+        [self teeInBackground:notification];
+     });
+}
+
+-(void)teeInBackground:(NSNotification *)notification {
 
     DDLogVerbose(@"tee: %@", [NSThread isMainThread] ? @"Main" : @"Background");
 	NSData *readData = notification.userInfo[NSFileHandleNotificationDataItem];
