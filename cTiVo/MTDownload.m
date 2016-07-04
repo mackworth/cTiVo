@@ -172,13 +172,9 @@ __DDLOGHERE__
     if (_downloadStatus.intValue == kMTStatusDownloading) {
         DDLogMajor(@"%@ downloaded %ld of %f bytes; %ld%%",self,totalDataDownloaded, _show.fileSize, lround(_processProgress*100));
     }
-    if (self.encodeFormat.isTestPS) {
-        //if test, then we knew it would fail whether it's audio-only OR no video encoder, so everything's good; just report it.
-        NSNumber * status = @([self checkEncodeLogForAudio] ? kMTStatusFailed : kMTStatusDone);
-        [self cancel];
-        [self setValue:status forKeyPath:@"downloadStatus"];
-    } else {
-        [self cancel];
+    [self cancel];
+    if (!self.encodeFormat.isTestPS) {
+        //if it was a test, then we knew it would fail whether it's audio-only OR no video encoder, so everything's good; cancel will report it.
         DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(_numRetriesRemaining > 0) ? @"restarting":@"canceled",  _show.showTitle, _processProgress, previousCheck );
         if (_downloadStatus.intValue == kMTStatusDone) {
             self.baseFileName = nil;
@@ -2264,7 +2260,10 @@ NSString * fourChar(long n, BOOL allowZero) {
 
                 NSString * channel = self.show.stationCallsign;
                 DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self.show, channel);
-                 if ( [tiVoManager failedPSForChannel:channel] != NSOnState ) {
+                if (testingPS) {
+                    [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+                }
+                if ( [tiVoManager failedPSForChannel:channel] != NSOnState ) {
                     [tiVoManager setFailedPS:YES forChannelNamed:channel];
                     if ([tiVoManager useTSForChannel:channel] == NSOffState) {
                         if (!testingPS) {
@@ -2277,6 +2276,9 @@ NSString * fourChar(long n, BOOL allowZero) {
             }
         }
         DDLogDetail(@"Not an audio-only stream in %@ on %@",self.show, self.show.stationCallsign);
+        if (testingPS) {
+            [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
+        }
 
         [tiVoManager setFailedPS:NO forChannelNamed: self.show.stationCallsign];
     }
@@ -2286,6 +2288,13 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
     totalDataDownloaded += data.length;
+    if (totalDataDownloaded > 5000000 && self.encodeFormat.isTestPS) {
+        //we've gotten 5MB on our testTS run, so looks good.  Mark it and finish up...
+        [tiVoManager setFailedPS:NO forChannelNamed: self.show.stationCallsign];
+        [self cancel];
+        [self connectionDidFinishLoading:connection];
+        return;
+    }
 	if (urlBuffer) {
         // cTiVo's URL connection supports sending its data to either an NSData buffer (urlBuffer) or a file on disk (_bufferFilePath).  This allows cTiVo to 
         // initially try to keep the dataflow off the disk, except for final products, where possible.  But, the ability to do this depends on the processor 
@@ -2378,6 +2387,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		[bufferFileWriteHandle closeFile];
         bufferFileWriteHandle   = nil;
 	}
+    if (self.isCanceled) return;
 	double downloadedFileSize = totalDataDownloaded;
     //Check to make sure a reasonable file size in case there was a problem.
     if (downloadedFileSize > kMTMinTiVoFileSize) {
@@ -2430,7 +2440,12 @@ NSString * fourChar(long n, BOOL allowZero) {
 		if ((downloadedFileSize < self.show.fileSize * 0.9f && !self.useTransportStream) ||
             downloadedFileSize < self.show.fileSize * 0.8f ) {  //hmm, doesn't look like it's big enough  (90% for PS; 80% for TS
             BOOL foundAudio = [self checkEncodeLogForAudio]; //see if it's a audio-only file (i.e. trashed)
-            if (foundAudio) {
+            if ( self.encodeFormat.isTestPS) {
+                // if a test, then we only try once.
+                [self cancel];
+                _processProgress = 1.0;
+                [self progressUpdated];
+            } else if (foundAudio) {
                 //On a regular file, throw away audio-only file and try again
                 [[NSFileManager defaultManager] removeItemAtPath:_encodeFilePath error:nil];
                 [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];

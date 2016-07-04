@@ -1430,7 +1430,7 @@ audio: mp3 at 192kbps</string>
 			<key>encoderUsed</key>
 			<string>mencoder</string>
 			<key>encoderVideoOptions</key>
-			<string>-of lavf </string>
+			<string>-of lavf -lavfopts format=mp4 -ovc x264 </string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>formatDescription</key>
