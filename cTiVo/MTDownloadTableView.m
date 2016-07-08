@@ -156,9 +156,8 @@ __DDLOGHERE__
     if (!cell) return;
 	cell.doubleValue = download.processProgress;
 	cell.rightText.stringValue = download.showStatus;
-    NSTimeInterval myTimeLeft = download.timeLeft;
-    if (myTimeLeft != 0.0) {
-        NSString * timeLeft = [NSString stringFromTimeInterval:  myTimeLeft];
+    NSString * timeLeft = download.timeLeft;
+    if (timeLeft != nil) {
         NSString * mySpeed = [NSString stringFromBytesPerSecond: download.speed];
         cell.toolTip = [NSString stringWithFormat:@"%@; %0.0f%%; Est time left: %@",mySpeed, download.processProgress* 100, timeLeft];
     } else {
@@ -812,18 +811,18 @@ __DDLOGHERE__
 	NSUInteger realRow = (row < 0) ? 0: row ;
 	//although displayed in sorted order, need to work in actual download order
 	if ([info draggingSource] == myController.tiVoShowTable) {
-        return [self insertShowsFromPasteboard:[info draggingPasteboard] atRow:realRow ];
-
+        if ( [self insertShowsFromPasteboard:[info draggingPasteboard] atRow:realRow ]) {
+            [self reloadData];
+            return YES;
+        }
 	} else if( [info draggingSource] == aTableView ) {
-        return [self insertDownloadsFromPasteboard:[info draggingPasteboard] atRow:realRow];
+        if ([self insertDownloadsFromPasteboard:[info draggingPasteboard] atRow:realRow]) {
+            [self reloadData];
+            return YES;
+        }
 
-	} else {
-		return NO;
 	}
-	
-
-	[self reloadData];
-	return YES;
+    return NO;
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{

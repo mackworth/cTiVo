@@ -159,13 +159,12 @@ __DDLOGHERE__
 
 -(MTDownload *) downloadForSubscribedShow: (MTTiVoShow *) thisShow {
 	DDLogDetail(@"Subscribed; adding %@", thisShow);
-	MTDownload * newDownload = [[MTDownload  alloc] init];
-	newDownload.show= thisShow;
-	newDownload.encodeFormat = self.encodeFormat;
+    MTDownload * newDownload = [MTDownload downloadForShow:thisShow withFormat:self.encodeFormat intoDirectory:[tiVoManager downloadDirectory]];
+
+    //should we have a directory per subscription? UI?
 	newDownload.addToiTunesWhenEncoded = ([self canAddToiTunes] && [self shouldAddToiTunes]);
 	//			newDownload.simultaneousEncode = ([subscription canSimulEncode] && [subscription shouldSimulEncode]);
-	newDownload.downloadDirectory = [tiVoManager downloadDirectory];  //should we have one per subscription? UI?
-	
+
 	newDownload.exportSubtitles = self.exportSubtitles;
 	newDownload.skipCommercials = self.shouldSkipCommercials && self.canSkipCommercials;
 	newDownload.markCommercials = self.shouldMarkCommercials && self.canMarkCommercials ;

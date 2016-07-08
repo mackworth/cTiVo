@@ -183,16 +183,6 @@
 	example.representedObject = @"";
 }
 
-
--(void)testFileName: (NSString *) testString {
-    MTDownload * testDownload = [[MTDownload alloc] init];
-    for (MTTiVoShow * show in tiVoManager.tiVoShows) {
-            testDownload.show = show;
-            NSLog(@"%@",[testDownload swapKeywordsInString:testString]);
-
-    }
-}
-
 -(IBAction)testFileNames: (id) sender {
 //    NSArray * testStrings  = @[
 //                               @" [\"TV Shows\" / dateShowTitle / \"Season \" plexSeason / dateShowTitle \" - \" plexID [\" - \" episodeTitle]][\"Movies\" / mainTitle \" (\" movieYear \")\"]"
@@ -214,18 +204,17 @@
     NSString * pattern = self.fileNameField.stringValue;
     NSMutableString * fileNames = [NSMutableString stringWithFormat: @"FOR TEST PATTERN: %@\n",pattern];
 
-    MTDownload * testDownload = [[MTDownload alloc] init];
     MTProgramTableView * programs = ((MTAppDelegate *) [NSApp delegate]).mainWindowController. tiVoShowTable;
     NSArray	*shows = programs.sortedShows;
     NSIndexSet *selectedRowIndexes = [programs selectedRowIndexes];
     if (selectedRowIndexes.count > 0) {
         shows = [shows objectsAtIndexes:selectedRowIndexes ];
       }
-    for (MTTiVoShow * show in  shows) {
-        testDownload.show = show;
+    for (MTTiVoShow * show in shows) {
+        MTDownload * testDownload = [MTDownload downloadForShow:show withFormat:[tiVoManager selectedFormat] intoDirectory:[tiVoManager downloadDirectory ]];
         [fileNames appendFormat:@"%@ - %@\n",show.showTitle, [testDownload swapKeywordsInString:pattern]];
-
     }
+
     NSAttributedString * results = [[NSAttributedString alloc] initWithString:fileNames];
     //	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
     NSPopUpButton *thisButton = (NSPopUpButton *)sender;
@@ -233,7 +222,6 @@
 
     [popoverDetachController.displayMessage.textStorage setAttributedString:results];
     [myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
-     //    }
 }
 
 

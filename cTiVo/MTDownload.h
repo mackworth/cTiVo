@@ -16,82 +16,70 @@
 #import "MTTask.h"
 #import "MTTaskChain.h"
 
-@interface MTDownload : NSObject  <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding> {
-    
-    ssize_t volatile totalDataRead, totalDataDownloaded;
-}
+@interface MTDownload : NSObject  <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding>
 
-@property (strong, nonatomic) MTTaskChain *activeTaskChain;
 
-@property (nonatomic, strong) MTTiVoShow * show;
+#pragma mark - Properties for download/conversion configuration
+@property (nonatomic, readonly) MTTiVoShow *show;
+@property (nonatomic, readonly) NSString *downloadDirectory;
+@property (nonatomic, readonly) NSString *baseFileName;
+@property (nonatomic, readonly) NSString *encodeFilePath;
+@property (nonatomic, strong)   MTFormat *encodeFormat;  //changeable until download starts
 
-//-------------------------------------------------------------
-#pragma mark - Properties/Methods for persistent queue
-@property (weak, readonly) NSDictionary * queueRecord;  //used to write
-
--(BOOL) isSameAs:(NSDictionary *) queueEntry;
--(void) restoreDownloadData:(NSDictionary *) queueEntry;
-
-#pragma mark - Properties for download/conversion work
-@property (nonatomic, readonly) NSNumber *downloadIndex;
-
-@property (nonatomic, strong) NSString *downloadDirectory;
-@property (nonatomic, strong) MTFormat *encodeFormat;
-
-@property BOOL volatile isCanceled, isRescheduled, downloadingShowFromTiVoFile, downloadingShowFromMPGFile;
-
-@property (nonatomic, strong) NSNumber *genTextMetaData,
+@property (nonatomic, strong)  NSNumber *genTextMetaData,
 #ifndef deleteXML
-*genXMLMetaData,
-*includeAPMMetaData,
+                                        *genXMLMetaData,
+                                        *includeAPMMetaData,
 #endif
-*exportSubtitles;
-@property BOOL  addToiTunesWhenEncoded,
-//simultaneousEncode,
-skipCommercials,
-markCommercials;
-
-@property NSInteger  	numRetriesRemaining,
-numStartupRetriesRemaining;
--(void) prepareForDownload: (BOOL) notifyTiVo;
-
-@property (nonatomic, readonly) NSString *encodeFilePath,
-*bufferFilePath,   //
-*tivoFilePath,  //For checkpointing
-*mpgFilePath,   //For checkpointing
-*decryptBufferFilePath,
-*downloadFilePath;
-
-@property(nonatomic, strong) NSString * baseFileName;
-
-
-
-//--------------------------------------------------------------
-#pragma mark - Properties for download/conversion progress
-@property (strong) NSNumber *downloadStatus;
-@property (weak, nonatomic, readonly)	NSString *showStatus;
-@property (weak, nonatomic, readonly) NSString *imageString;
-@property double processProgress; //Should be between 0 and 1
-@property (nonatomic, readonly) NSTimeInterval timeLeft;
-@property (nonatomic, readonly) double speed;  //bytes/second
-@property (nonatomic, readonly) BOOL shouldSimulEncode, shouldMarkCommercials;
-
-@property (readonly) BOOL isNew, isDownloading, isInProgress, isDone;
+                                        *exportSubtitles;
+@property (nonatomic, assign) BOOL      addToiTunesWhenEncoded,
+                                        skipCommercials,
+                                        markCommercials;
 
 
 #pragma mark - Methods for download/conversion work
--(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
--(void)cancel;
--(void)download;
--(void) finishUpPostEncodeProcessing;
++(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format intoDirectory: (NSString *) downloadDirectory;
++(MTDownload *) downloadTestPSForShow:(MTTiVoShow *) show;
+-(void) prepareForDownload: (BOOL) notifyTiVo;  //reset for a new download
+-(void) rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
+-(void) cancel;
+-(void) download;  //actually launch the download process
+-(void) rescheduleOnMain; //convenience version for use in background threads
 
--(NSString *)swapKeywordsInString: (NSString *) testString;
 
-#pragma mark - Methods for manipulating video
+#pragma mark - Properties for download/conversion progress
+@property (atomic, strong) NSNumber *downloadStatus;
+@property (readonly) BOOL isNew, isDownloading, isInProgress, isDone;
+//convenience versions of downloadStatus
+@property (atomic, assign) BOOL isCanceled;
+@property (atomic, assign) double processProgress; //Should be between 0 and 1
+@property (atomic, strong) MTTaskChain *activeTaskChain; //advanced to nextTaskChain when appropriate
+
+
+#pragma mark - Properties/Methods for persistent queue (in NSUserDefaults)
+@property (weak, readonly) NSDictionary * queueRecord;
+-(BOOL) isSameAs:(NSDictionary *) queueEntry;
+-(void) restoreDownloadData:(NSDictionary *) queueEntry;
+-(void) convertProxyToRealForShow:(MTTiVoShow *) show;
+
+
+#pragma mark - Properties for display in NSTableView
+@property (nonatomic, readonly) NSNumber *downloadIndex;
+@property (nonatomic, readonly) NSString *showStatus;
+@property (nonatomic, readonly) NSString *imageString;
+@property (nonatomic, readonly) NSString *timeLeft;
+@property (atomic, readonly) double speed;  //bytes/second
+
+
+#pragma mark - Methods for manipulating video files
 -(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted;
 -(BOOL) canPlayVideo;
 -(BOOL) playVideo;
 -(BOOL) revealInFinder;
--(void)rescheduleOnMain;
+
+
+#pragma mark - Test Methods
+-(NSString *)swapKeywordsInString: (NSString *) testString;
+
 
 @end

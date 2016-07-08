@@ -374,7 +374,7 @@ static NSDateFormatter *dateFormatter;
 	
     switch(context) {
         case NSDraggingContextOutsideApplication:
-			return NSDragOperationDelete || NSDragOperationCopy;
+			return NSDragOperationDelete | NSDragOperationCopy;
             break;
 			
         case NSDraggingContextWithinApplication:

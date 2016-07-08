@@ -106,8 +106,8 @@
 #define kMTQueueStatus  @"QueueStatus"
 #define kMTQueueShowStatus @"QueueShowStatus"
 #define kMTQueueDirectory @"QueueDirectory"
-#define kMTQueueDownloadFile @"QueueDownloadFile"
-#define kMTQueueBufferFile @"QueueBufferFile"
+//#define kMTQueueDownloadFile @"QueueDownloadFile"
+//#define kMTQueueBufferFile @"QueueBufferFile"
 #define kMTQueueFinalFile @"QueueFileName"
 #define kMTQueueGenTextMetaData     @"QueueGenTextMetadata"
 #ifndef deleteXML

@@ -23,19 +23,7 @@
 @interface MTTiVoManager () {
 	
     NSNetServiceBrowser *tivoBrowser;
-    NSMutableData *listingData;
-	//	NSMutableDictionary *tiVoShowsDictionary;
-	NSMutableArray *updatingTiVoShows;
-	
-	NSURLConnection *programListURLConnection, *downloadURLConnection;
-	NSTask *decryptingTask, *encodingTask;
-    NSMutableDictionary *programDownloading, *programDecrypting, *programEncoding;
-	NSFileHandle *downloadFile, *stdOutFileHandle;
-	double dataDownloaded, referenceFileSize;
-	MTNetService *tivoConnectingTo;
-	NSOpenPanel *myOpenPanel;
-    double percentComplete;
- 	NSArray *factoryFormatList;
+
     int numEncoders;// numCommercials, numCaptions;//Want to limit launches to two encoders.
 	
     NSMetadataQuery *cTiVoQuery;
@@ -43,9 +31,7 @@
 
 }
 
-@property (strong) MTNetService *updatingTiVo;
-//@property (nonatomic, strong) NSArray *hostAddresses;
-@property (strong)     NSOperationQueue *opsQueue;
+@property (atomic, strong)     NSOperationQueue *opsQueue;
 
 @end
 
@@ -83,7 +69,6 @@ __DDLOGHERE__
 		DDLogDetail(@"setting up TivoManager");
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		_tivoServices = [NSMutableArray new];
-		listingData = [NSMutableData new];
 		_tiVoList = [NSMutableArray new];
 		self.opsQueue = [NSOperationQueue new];
         _downloadQueue = [NSMutableArray new];
@@ -102,9 +87,8 @@ __DDLOGHERE__
 			thisFormat.isFactoryFormat = [NSNumber numberWithBool:YES];
 			[tmpArray addObject:thisFormat];
 		}
-		factoryFormatList = [tmpArray copy];
 		_formatList = tmpArray;
-        DDLogVerbose(@"factory Formats: %@", factoryFormatList);
+        DDLogVerbose(@"factory Formats: %@", tmpArray);
 		
         //Set user desired hiding of the user pref, if any
         
@@ -155,23 +139,8 @@ __DDLOGHERE__
 				
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
 		DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
-		
 
- 		programEncoding = nil;
-		programDecrypting = nil;
-		programDownloading = nil;
-		downloadURLConnection = nil;
-		programListURLConnection = nil;
-//        _hostAddresses = nil;
-		downloadFile = nil;
-		decryptingTask = nil;
-		encodingTask = nil;
-		stdOutFileHandle = nil;
-		tivoConnectingTo = nil;
-		
 		numEncoders = 0;
-//		numCommercials = 0;
-//		numCaptions = 0;
 		_signalError = 0;
 		self.opsQueue.maxConcurrentOperationCount = 4;
 
@@ -300,10 +269,9 @@ __DDLOGHERE__
     while ((dlIndex =[tiVoManager findProxyShowInDLQueue:newShow]) != NSNotFound) {
 		MTDownload * proxyDL = [tiVoManager downloadQueue][dlIndex];
 		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, dlIndex, proxyDL.show.tiVoName);
-		proxyDL.show = newShow;
+        [proxyDL convertProxyToRealForShow: newShow];
 		//this is a back door entry into queue, so need to check for uniqueness again in current environment
 //		[self checkShowTitleUniqueness:newShow];
-		proxyDL.show.isQueued = YES;
 		if (proxyDL.downloadStatus.integerValue == kMTStatusDeleted) {
 			DDLogDetail(@"Tivo restored previously deleted show %@",newShow);
 			[proxyDL prepareForDownload:YES];
@@ -324,12 +292,10 @@ __DDLOGHERE__
 			download.show.protectedShow = @NO; //let them delete from queue
 		}
 	}
-
 }
 
 
 #pragma mark - TiVo Search Methods
-
 
 -(void) loadManualTiVos
 {
@@ -986,6 +952,16 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	}
 	return _formatList[0];
 }
+
+-(MTFormat *) testPSFormat {
+    for (MTFormat *fd in _formatList) {
+        if (fd.isTestPS) {
+            return fd;
+        }
+    }
+    return nil;
+}
+
 -(void)addEncFormatToList: (NSString *) filename {
 	MTFormat * newFormat = [MTFormat formatWithEncFile:filename];
 	[newFormat checkAndUpdateFormatName:tiVoManager.formatList];
@@ -1129,22 +1105,12 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     NSMutableSet * channelsTested = [NSMutableSet new];
     NSMutableArray * testsToRun = [NSMutableArray new];
     NSArray * programs = ((MTAppDelegate *) [NSApp delegate]).currentShows;
-    MTFormat * testFormat = [self findFormat:@"Test PS" ];
     for (MTTiVoShow * show in programs) {
         if (!(show.protectedShow.boolValue) && ! show.isQueued ) {
             NSString * channel = show.stationCallsign;
             if ( ! [channelsTested containsObject:channel]) {
                 if  ( ! [self channelNamed:channel] ) {
-                    MTDownload * newDownload = [[MTDownload  alloc] init];
-                    newDownload.show= show;
-                    newDownload.encodeFormat = testFormat;
-                    newDownload.downloadDirectory = [tiVoManager downloadDirectory];
-                    newDownload.addToiTunesWhenEncoded = NO;
-                    newDownload.exportSubtitles = NO;
-                    newDownload.skipCommercials = NO;
-                    newDownload.markCommercials = NO;
-                    newDownload.genTextMetaData = NO;
-                    newDownload.numRetriesRemaining = 0;
+                    MTDownload * newDownload = [MTDownload downloadTestPSForShow:show];
                     [testsToRun addObject:newDownload];
                 }
                 [channelsTested addObject:channel];
@@ -1157,7 +1123,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 }
 
 -(void) removeAllPSTests {
-    MTFormat * testFormat = [self findFormat:@"Test PS" ];
+    MTFormat * testFormat = [self testPSFormat];
     NSMutableArray * testDownloads = [NSMutableArray new];
     for (MTDownload * download in self.downloadQueue) {
         if (!download.isInProgress && download.encodeFormat == testFormat) {
@@ -1340,9 +1306,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	for (MTTiVoShow * thisShow in shows) {
 		NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 		DDLogDetail(@"Adding show: %@", thisShow);
-		MTDownload * newDownload = [[MTDownload alloc] init];
-		newDownload.show = thisShow;
-		newDownload.encodeFormat = [self selectedFormat];
+        MTDownload * newDownload = [MTDownload downloadForShow:thisShow withFormat: self.selectedFormat intoDirectory:self.downloadDirectory];
 		newDownload.exportSubtitles = [defaults objectForKey:kMTExportSubtitles];
 		newDownload.addToiTunesWhenEncoded = newDownload.encodeFormat.canAddToiTunes &&
 											[defaults boolForKey:kMTiTunesSubmit];
