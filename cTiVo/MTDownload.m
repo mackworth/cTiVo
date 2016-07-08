@@ -2186,7 +2186,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     // processor being able to keep up with the data flow from the TiVo which is often not the case due to either a slow processor, fast network
     // connection, of different tasks competing for processor resources.  When the processor falls too far behind and the memory buffer will
     // become too large cTiVo will fall back to using files on the disk as a data buffer.
-
+    @autoreleasepool {  //because run as separate thread
 
 	//	self.writingData = YES;
     DDLogVerbose(@"Writing data %@ : %@Connection %@", [NSThread isMainThread] ? @"Main" : @"Background", self.activeURLConnection == nil ? @"No ":@"", self.isCanceled ? @"- Cancelled" : @"");
@@ -2267,6 +2267,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 		self.bufferFileReadHandle = nil;
         self.urlBuffer = nil;
  	}
+    }
+
 }
 
 #pragma mark - NSURL Delegate Methods
@@ -2428,14 +2430,13 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
     //Make sure to flush the last of the buffer file into the pipe and close it.
     @synchronized(self) {
+        self.activeURLConnection = nil;
         if (!self.writingData) {
             DDLogVerbose (@"writing last data for %@",self);
-            self.activeURLConnection = nil;
             self.writingData = YES;
             [self performSelectorInBackground:@selector(writeData) withObject:nil];
         }
-        self.activeURLConnection = nil; //NOTE this MUST occur after the last call to writeData so that writeData doesn't exit before completion of the downloaded buffer.
-	}
+    }
 	self.show.tiVo.lastDownloadEnded = [NSDate date];
 	if (downloadedFileSize < kMTMinTiVoFileSize) { //Not a good download - reschedule
         DDLogMajor(@"For show %@, only received %0.0f bytes",self.show, downloadedFileSize);
