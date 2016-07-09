@@ -51,9 +51,10 @@ __DDLOGHERE__
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath compare:kMTTiVos] == NSOrderedSame) {
-        int typeOfChange = 0;
+        int typeOfChange = 0;  //0 = change to one of the Tivos; 1= change to number of Tivos
         NSArray *oldValues = change[NSKeyValueChangeOldKey];
         NSArray *newValues = [[NSUserDefaults standardUserDefaults] objectForKey:kMTTiVos];
+        if ([oldValues isEqual:[NSNull null]]) oldValues = nil;
 
         if (oldValues.count == newValues.count) {
             for (NSUInteger i = 0; i<oldValues.count; i++) {

@@ -11,6 +11,7 @@
 #import "MTTaskChain.h"
 #import "MTTiVoManager.h"
 #import "NSNotificationCenter+Threads.h"
+#import "Crashlytics/Crashlytics.h"
 
 @interface MTTask ()
 {
@@ -69,16 +70,24 @@ __DDLOGHERE__
 	_taskName = taskName;
     if (self.download) {
         self.logFilePath = [NSString stringWithFormat:@"%@/%@%@.txt",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
-		[[NSFileManager defaultManager] createFileAtPath:_logFilePath contents:[NSData data] attributes:nil];
+        if (![[NSFileManager defaultManager] createFileAtPath:_logFilePath contents:[NSData data] attributes:nil]) {
+            DDLogReport(@"Could not create logfile at %@",_logFilePath);
+            [CrashlyticsKit setObjectValue:_logFilePath forKey:@"CreateLogFile"];
+        }
         self.logFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_logFilePath];
         self.logFileReadHandle	= [NSFileHandle fileHandleForReadingAtPath:_logFilePath];
         self.errorFilePath = [NSString stringWithFormat:@"%@/%@%@.err",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
-		[[NSFileManager defaultManager] createFileAtPath:_errorFilePath contents:[NSData data] attributes:nil];
+        if (![[NSFileManager defaultManager] createFileAtPath:_errorFilePath contents:[NSData data] attributes:nil]) {
+            DDLogReport(@"Could not create errfile at %@",_logFilePath);
+            [CrashlyticsKit setObjectValue:_logFilePath forKey:@"CreateErrFile"];
+        }
+
         self.errorFileHandle = [NSFileHandle fileHandleForWritingAtPath:_errorFilePath];
         if (self.logFileWriteHandle) {
             [self setStandardOutput:self.logFileWriteHandle];
         } else {
             DDLogReport(@"Could not open logfile at %@",_logFilePath);
+            [CrashlyticsKit setObjectValue:_logFilePath forKey:@"BadLogFile"];
         }
         [self setStandardInput:self.logFileReadHandle];
         [self setStandardError:self.errorFileHandle];

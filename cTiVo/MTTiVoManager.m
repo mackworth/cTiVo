@@ -1830,8 +1830,10 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     NSString * outString =[self description];
     for (MTTiVo * tiVo in tiVoManager.tiVoList) {
         NSString * mediaKey = tiVo.mediaKey;
-        NSString * maskedKey = [NSString stringWithFormat:@"<<%@ MediaKey>>",tiVo.tiVo.name];
-        outString = [outString stringByReplacingOccurrencesOfString:mediaKey withString:maskedKey];
+        if (mediaKey.length > 0) {
+            NSString * maskedKey = [NSString stringWithFormat:@"<<%@ MediaKey>>",tiVo.tiVo.name];
+            outString = [outString stringByReplacingOccurrencesOfString:mediaKey withString:maskedKey];
+        }
     }
     return outString;
 }

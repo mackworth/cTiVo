@@ -1737,6 +1737,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 - (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
 	prefix = [prefix lowercaseString];
 	suffix = [suffix lowercaseString];
+    if (directory.length == 0) return nil;
 	NSString * realDirectory = [directory stringByStandardizingPath];
 	DDLogVerbose(@"Checking for %@_%@ artwork in %@", prefix, suffix ?:@"", realDirectory);
 	NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:realDirectory error:nil];
