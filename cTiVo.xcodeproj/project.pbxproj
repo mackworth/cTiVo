@@ -94,7 +94,6 @@
 		1E61CDB31BB898E2006D6DBE /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */; };
 		1E61CDB71BB89DA5006D6DBE /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB61BB89DA5006D6DBE /* Fabric.framework */; };
 		1E61CDB91BB89E6A006D6DBE /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB81BB89E6A006D6DBE /* libc++.tbd */; };
-		1EF8CFD61D2D97790006D9BE /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDBA1BB89E7C006D6DBE /* libstdc++.tbd */; };
 		1E61CDBD1BB89E91006D6DBE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDBC1BB89E91006D6DBE /* libz.tbd */; };
 		1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7516E2C50B000F5C6E /* copyright.png */; };
 		1E684A7D16E2C50B000F5C6E /* expired-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7716E2C50B000F5C6E /* expired-recording.png */; };
@@ -136,6 +135,7 @@
 		1EDBDFAB1B1CB82700E979F0 /* tivodecode in Copy Executables */ = {isa = PBXBuildFile; fileRef = D2D60BC316766F3200CE32DE /* tivodecode */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EDE323A19C502980052E6C6 /* tivo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323819C502980052E6C6 /* tivo.png */; };
 		1EDE323B19C502980052E6C6 /* tivo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323919C502980052E6C6 /* tivo@2x.png */; };
+		1EF8CFD61D2D97790006D9BE /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDBA1BB89E7C006D6DBE /* libstdc++.tbd */; };
 		1EFE66FF1BE967460083386C /* sparklecast.xml in Resources */ = {isa = PBXBuildFile; fileRef = 1EFE66FE1BE967460083386C /* sparklecast.xml */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
@@ -576,7 +576,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1E61CDBD1BB89E91006D6DBE /* libz.tbd in Frameworks */,
-                1EF8CFD61D2D97790006D9BE /* libstdc++.tbd in Frameworks */,
+				1EF8CFD61D2D97790006D9BE /* libstdc++.tbd in Frameworks */,
 				1E61CDB91BB89E6A006D6DBE /* libc++.tbd in Frameworks */,
 				D271F3631734BCDA00641435 /* Security.framework in Frameworks */,
 				D240EF5E16EFE05E00635E53 /* QTKit.framework in Frameworks */,
@@ -1404,7 +1404,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1436,7 +1436,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
