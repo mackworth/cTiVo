@@ -507,7 +507,9 @@ __DDLOGHERE__
             BOOL isOverText = NO;
             if ([selectedColumn.identifier isEqualToString:@"Programs"]) { //Check if over text
                 MTProgressindicator *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+                if (![showCellView isKindOfClass:[MTProgressindicator class]]) return NO;
                 NSTextField *showField = showCellView.leftText;
+                if (!showField) return NO;
                 NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
                 NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
                 if (clickInText.x < stringSize.width && clickInText.x < showField.bounds.size.width) {

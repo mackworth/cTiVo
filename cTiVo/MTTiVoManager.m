@@ -1108,12 +1108,14 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     for (MTTiVoShow * show in programs) {
         if (!(show.protectedShow.boolValue) && ! show.isQueued ) {
             NSString * channel = show.stationCallsign;
-            if ( ! [channelsTested containsObject:channel]) {
-                if  ( ! [self channelNamed:channel] ) {
-                    MTDownload * newDownload = [MTDownload downloadTestPSForShow:show];
-                    [testsToRun addObject:newDownload];
+            if (channel) {
+                if ( ! [channelsTested containsObject:channel]) {
+                    if  ( ! [self channelNamed:channel] ) {
+                        MTDownload * newDownload = [MTDownload downloadTestPSForShow:show];
+                        [testsToRun addObject:newDownload];
+                    }
+                    [channelsTested addObject:channel];
                 }
-                [channelsTested addObject:channel];
             }
         }
     }
