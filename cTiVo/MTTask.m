@@ -108,6 +108,9 @@ __DDLOGHERE__
 
 -(void)cleanUp
 {
+    if (_cleanupHandler) {
+        _cleanupHandler();
+    }
 	if (_logFileWriteHandle) {
 		[_logFileWriteHandle closeFile];
 		self.logFileWriteHandle = nil;
@@ -130,11 +133,8 @@ __DDLOGHERE__
 			[[NSFileManager defaultManager] removeItemAtPath:_errorFilePath error:nil];
 		}
 	}
-    if (_cleanupHandler) {
-        _cleanupHandler();
-    }
-
 }
+
 -(void) saveLogFileType:(NSString *) type fromPath: (NSString *) path {
 	NSFileHandle *logHandle = [NSFileHandle fileHandleForReadingAtPath:path];
 	unsigned long long logFileSize = [logHandle seekToEndOfFile];

@@ -40,6 +40,8 @@
 #pragma mark - Methods for download/conversion work
 +(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format intoDirectory: (NSString *) downloadDirectory;
 +(MTDownload *) downloadTestPSForShow:(MTTiVoShow *) show;
++(MTDownload *) downloadFromQueue:(NSDictionary *) queueEntry;
+
 -(void) prepareForDownload: (BOOL) notifyTiVo;  //reset for a new download
 -(void) rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
 -(void) cancel;
@@ -59,7 +61,6 @@
 #pragma mark - Properties/Methods for persistent queue (in NSUserDefaults)
 @property (weak, readonly) NSDictionary * queueRecord;
 -(BOOL) isSameAs:(NSDictionary *) queueEntry;
--(void) restoreDownloadData:(NSDictionary *) queueEntry;
 -(void) convertProxyToRealForShow:(MTTiVoShow *) show;
 
 

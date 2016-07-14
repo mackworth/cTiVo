@@ -237,20 +237,17 @@ __DDLOGHERE__
 }
 
 -(void) restoreOldQueue {
-	
 	NSArray *oldQueue = [[NSUserDefaults standardUserDefaults] objectForKey:kMTQueue];
 	DDLogMajor(@"Restoring old Queue(%ld elements)",oldQueue.count);
 	
 	NSMutableArray * newShows = [NSMutableArray arrayWithCapacity:oldQueue.count];
 	for (NSDictionary * queueEntry in oldQueue) {
 		DDLogDetail(@"Restoring show %@",queueEntry[kMTQueueTitle]);
-		MTDownload * newShow = [[MTDownload alloc] init];
-		[newShow restoreDownloadData:queueEntry];
-		[newShows addObject:newShow];
+		MTDownload * newDownload= [MTDownload downloadFromQueue:queueEntry];
+		[newShows addObject:newDownload];
 	}
 	DDLogVerbose(@"Restored downloadQueue: %@",newShows);
 	self.downloadQueue = newShows;
-
 }
 
 -(NSInteger) findProxyShowInDLQueue:(MTTiVoShow *) showTarget {
@@ -260,7 +257,6 @@ __DDLOGHERE__
 		return [targetTivoName isEqualToString:[possShow tempTiVoName]] &&
 		showTarget.showID == possShow.showID &&
         possShow.protectedShow.boolValue;
-		
 	}];
 }
 

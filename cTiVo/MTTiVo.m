@@ -732,8 +732,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
     BOOL isDownloading = NO;
     for (MTDownload *s in self.downloadQueue) {
-        if ([s.downloadStatus intValue] == kMTStatusDownloading) {
+        if (s.isDownloading) {
             isDownloading = YES;
+            break;
         }
     }
     if (!isDownloading) {
