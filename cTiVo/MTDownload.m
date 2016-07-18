@@ -2172,7 +2172,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         URL = [self URLExists:self.decryptedFilePath];
     }
     if (!URL && encrypted) {
-        if ([self.bufferFilePath containsString:@".tivo"]){ //not just a buffer
+        if ([self.bufferFilePath contains:@".tivo"]){ //not just a buffer
             URL= [self URLExists: self.bufferFilePath];
         }
     }

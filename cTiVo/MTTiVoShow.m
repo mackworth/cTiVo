@@ -414,7 +414,7 @@ __DDLOGHERE__
 	if (_gotTVDBDetails) {
 		return;
 	}
-	if (self.seriesId.length && [self.seriesId startsWith:@"SH"]) { //if we have a series get the other information
+	if (self.seriesId.length && [self.seriesId hasPrefix:@"SH"]) { //if we have a series get the other information
         NSDictionary *episodeEntry;
         @synchronized (tiVoManager.tvdbCache) {
             if ([self.episodeID hasPrefix:@"SH"]) {

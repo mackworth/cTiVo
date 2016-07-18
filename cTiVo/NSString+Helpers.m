@@ -20,16 +20,6 @@
     return retValue;    
 }
 
--(BOOL)startsWith:(NSString *)string
-{
-    BOOL retValue = NO;
-    NSRange r = [self rangeOfString:string];
-    if (r.location == 0) {
-        retValue = YES;
-    }
-    return retValue;
-}
-
 + (NSString *)stringFromTimeInterval:(NSTimeInterval)interval {
     NSInteger ti = (NSInteger)interval;
     NSInteger seconds = ti % 60;

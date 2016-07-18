@@ -12,8 +12,6 @@
 
 -(BOOL)contains:(NSString *)string;
 
--(BOOL)startsWith:(NSString *)string;
-
 + (NSString *)stringFromTimeInterval:(NSTimeInterval)interval;
 
 + (NSString *)stringFromBytesPerSecond: (double) speed;
