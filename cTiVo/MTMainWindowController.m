@@ -550,7 +550,8 @@ __DDLOGHERE__
 		itemsToRemove = [downloadQueueTable.sortedDownloads objectsAtIndexes:selectedRows];
 	}
  	for (MTDownload * download in itemsToRemove) {
-        if (download.isInProgress) {
+        if (download.isInProgress && download.downloadStatus.intValue != kMTStatusWaiting) {
+            //if just waiting on TiVo, go ahead w/o confirmation
             if( ![self confirmCancel:download.show.showTitle]) {
                 //if any cancelled, cancel the whole group
                 return;

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="10116" systemVersion="15F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="10116"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTChannelEditorController">
@@ -49,7 +49,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" autosaveColumns="NO" headerView="435" id="437">
-                                <rect key="frame" x="0.0" y="0.0" width="403" height="380"/>
+                                <rect key="frame" x="0.0" y="0.0" width="426" height="380"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <size key="intercellSpacing" width="3" height="2"/>
                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -77,8 +77,8 @@
                                             </binding>
                                         </connections>
                                     </tableColumn>
-                                    <tableColumn width="81" minWidth="10" maxWidth="3.4028234663852886e+38" headerToolTip="Does channel have commercials? &quot;No&quot; overrides commercial marking/skipping." id="441">
-                                        <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Commercials">
+                                    <tableColumn width="110" minWidth="20" maxWidth="200" headerToolTip="Might this channel have commercials? &quot;No&quot; overrides commercial marking/skipping." id="441">
+                                        <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Has Commercials?">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -98,7 +98,7 @@
                                             </binding>
                                         </connections>
                                     </tableColumn>
-                                    <tableColumn width="104" minWidth="10" maxWidth="3.4028234663852886e+38" id="440">
+                                    <tableColumn width="104" minWidth="20" maxWidth="200" id="440">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Use TS">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -108,8 +108,8 @@
                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
-                                        <string key="headerToolTip">Should cTiVo use TS with this channel? 
-No = force Progress Stream;
+                                        <string key="headerToolTip">Should cTiVo use Transport Stream with this channel? 
+No = force older Progress Stream;
 Maybe (-) = use PS until TS Detected
 Yes = force Transport Stream</string>
                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
@@ -128,8 +128,8 @@ Yes = force Transport Stream</string>
                                             </binding>
                                         </connections>
                                     </tableColumn>
-                                    <tableColumn editable="NO" width="104" minWidth="10" maxWidth="3.4028234663852886e+38" id="5IF-Fa-cF2">
-                                        <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="PS Failed?">
+                                    <tableColumn editable="NO" width="104" minWidth="20" maxWidth="200" headerToolTip="Does it look like this channel migrated to H.264? (If so, needs Transport Stream)." id="5IF-Fa-cF2">
+                                        <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="H.264?">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -138,10 +138,6 @@ Yes = force Transport Stream</string>
                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
-                                        <string key="headerToolTip">Should cTiVo use TS with this channel? 
-No = force Progress Stream;
-Maybe (-) = use PS until TS Detected
-Yes = force Transport Stream</string>
                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         <connections>
                                             <binding destination="VwR-AV-Z73" name="value" keyPath="arrangedObjects.PSFailed" id="9iz-DE-5pE">
@@ -158,7 +154,7 @@ Yes = force Transport Stream</string>
                         </subviews>
                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </clipView>
-                    <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="436">
+                    <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="436">
                         <rect key="frame" x="1" y="381" width="403" height="16"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
@@ -167,7 +163,7 @@ Yes = force Transport Stream</string>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <tableHeaderView key="headerView" id="435">
-                        <rect key="frame" x="0.0" y="0.0" width="403" height="17"/>
+                        <rect key="frame" x="0.0" y="0.0" width="426" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </tableHeaderView>
                 </scrollView>

@@ -21,7 +21,7 @@
 @property (nonatomic, strong) NSString *downloadDirectory;
 
 @property (nonatomic, strong) NSFileHandle  *bufferFileWriteHandle;
-//we read from EITHER bufferFileReadHandle or urlBuffer (if memory-based); or none (if encoder keeping up with Tivo)
+//we read from EITHER bufferFileReadHandle or urlBuffer (if memory-based and encoder keeping up with Tivo)
 @property (atomic, strong) NSFileHandle * bufferFileReadHandle;
 @property (atomic, strong) NSMutableData *urlBuffer;
 @property (atomic, assign) ssize_t urlReadPointer;
@@ -32,7 +32,7 @@
 @property (atomic, assign) NSInteger  	numRetriesRemaining,
                                         numStartupRetriesRemaining;
 
-@property (atomic, assign) BOOL  writingData;  //says background thread is still active, so don't launch another
+@property (atomic, assign) BOOL  writingData;  //says background thread writedata is still active, so don't launch another
 
 //these vars used for watchdog "checkStillActive"
 @property (atomic, strong) NSDate *previousCheck, *progressAt100Percent;
@@ -57,8 +57,8 @@
 @property (atomic, assign) BOOL volatile isRescheduled, downloadingShowFromTiVoFile, downloadingShowFromMPGFile;
 
 @property (nonatomic, strong) NSString *baseFileName,
-*tivoFilePath,  //For reading .tivo file from prev run (not implemented)
-*mpgFilePath,   //For reading decoded .mpg from prev run (not implemented)
+*tivoFilePath,  //For reading .tivo file from a prev run (not implemented; reuse bufferFilePath?)
+*mpgFilePath,   //For reading decoded .mpg from a prev run (not implemented; reuse decryptedFilePath?)
 *bufferFilePath,  //downloaded show prior to decryption; .tivo if complete, .bin if not (due to memory buffer usage)
 *decryptedFilePath, //show after decryption; .mpg
 *encodeFilePath, //show after encoding (e.g. MP4)
@@ -2537,14 +2537,14 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 
-#pragma mark Convenience methods
+#pragma mark - Convenience methods
 
 -(BOOL) canSimulEncode {
     return self.encodeFormat.canSimulEncode;
 }
 
 -(BOOL) shouldSimulEncode {
-    return (self.encodeFormat.canSimulEncode && !self.skipCommercials);// && !self.downloadingShowFromMPGFile);
+    return (self.encodeFormat.canSimulEncode && !self.shouldSkipCommercials);// && !self.downloadingShowFromMPGFile);
 }
 
 -(BOOL) canSkipCommercials {
