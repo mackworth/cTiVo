@@ -14,8 +14,10 @@
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
 #import "NSNotificationCenter+Threads.h"
+#ifndef DEBUG
 #import "Fabric/Fabric.h"
 #import "Crashlytics/Crashlytics.h"
+#endif
 #import "NSString+Helpers.h"
 
 #import <IOKit/pwr_mgt/IOPMLib.h>
@@ -121,9 +123,11 @@ __DDLOGHERE__
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
+#ifndef DEBUG
     if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTCrashlyticsOptOut]) {
           [Fabric with:@[[Crashlytics class]]];
     }
+#endif
     CGEventRef event = CGEventCreate(NULL);
     CGEventFlags modifiers = CGEventGetFlags(event);
     CFRelease(event);

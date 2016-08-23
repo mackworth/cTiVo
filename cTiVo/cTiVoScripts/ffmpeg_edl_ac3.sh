@@ -1,0 +1,220 @@
+#!/bin/bash
+
+# I'm not sure why but Contents/MacOS doesn't appear to be in the path?
+# apparently NSTask is smart enough to resolve the launchPath
+# within the bundle...
+# as a workaround, use dirname $0
+ffmpeg_path=$(dirname "$0")/ffmpeg
+
+# cTiVo can kill this script if it outputs the same % in a
+# MaxProgressDelay (default 2 min) window.
+# set to some low number between 0 and 1%, with the goal 
+# being to minimize the chances of outputting the same % 
+# as whatever was running 2 minutes ago.  This script will 
+# output $first_pct initially until the actual ffmpeg process 
+# catches up.  It should be set such that ffmpeg takes < 2
+# minutes to progress from 0% to $first_pct for all video sizes.
+# see issue #183 for details
+# note, this value is multiplied by 2 for the merge progress
+first_pct="0.10"
+
+# kill ffmpeg if our script is killed
+trap terminate SIGTERM
+
+usage() {
+  cat << EOF 1>&2
+Usage: $0 -edl <edl file> <ffmpeg options>
+       $0 -h
+EOF
+exit 1
+}
+
+timestamp_to_seconds() {
+  hours=$(echo $1 | cut -d: -f1)
+  minutes=$(echo $1 | cut -d: -f2)
+  seconds=$(echo $1 | cut -d: -f3)
+  seconds_fraction=$(echo "$seconds" | cut -d, -f2 | awk '{printf("%03d",$1)}')
+  seconds=$(echo "$seconds" | cut -d, -f1)
+  echo $(echo "3600*$hours + 60*$minutes + $seconds + $seconds_fraction/1000" | bc -l)
+}
+
+# monitor the ffmpeg proc as it runs in the background, grepping the time out
+# of the end of the ffmpeg log for the progress indicator
+monitor() {
+  while kill -0 $pid &> /dev/null; do
+    this_progress=$(tail -c 1000 "$ffmpeg_logfile"  | egrep -o 'time=\S+' | cut -d= -f2 | tail -n1)
+    if [ ! -z "$this_progress" ]; then
+      this_progress=$(timestamp_to_seconds "$this_progress")
+      if [ "$this_progress" != "0" ]; then
+        pct=$(echo "$progress $this_progress $duration" | awk '{printf("%.2f", 100 * ($1 + $2) / $3)}')
+        if (($(echo "$pct < $first_pct" | bc -l))); then pct="$first_pct"; fi
+        if (($(echo "$pct >= 100" | bc -l))); then pct="99.99"; fi
+      fi
+    fi
+    if [ "$last_pct" != "$pct" ]; then
+      echo "$pct %"
+    fi
+    last_pct="$pct"
+    sleep 1
+  done 
+}
+
+# kill any encode that's going on in the background before 
+# exiting ourselves
+terminate() {
+  kill -TERM "$pid" 2> /dev/null
+  rm -rf "$tmpdir"
+  exit 15
+}
+
+while (( $# > 0 )); do
+  if [ "$1" == "-h" ]; then usage; fi
+  if [ "$1" == "-i" ]; then
+    input="$2"
+    shift 2
+    continue
+  fi
+  if [ "$1" == "-edl" ]; then
+    edl_file="$2"
+    shift 2
+    continue
+  fi
+# last positional argument should be the output file
+  if (( $# == 1 )); then
+    output="$1"
+    shift 1
+    continue
+  fi
+  if [ -z "$input" ]; then
+    ffmpeg_opts_pre_input="$ffmpeg_opts_pre_input $1"
+  else
+    ffmpeg_opts_post_input="$ffmpeg_opts_post_input $1"
+  fi
+  shift
+done
+
+if [ -z "$output" ]; then
+  echo "missing output"
+  usage
+fi
+if [ -z "$input" ]; then
+  echo "missing -i"
+  usage
+fi
+
+if [ ! -f "$input" ]; then
+  echo "no such file: $input"
+  usage
+fi
+
+awkcmd='
+BEGIN {OFS=":"}
+{
+  if (NR == 1 && $1 > 0) {
+    print "",$1
+  } else {
+    if (NR > 1) {
+      print ss,$1
+    }
+  }
+  ss = $2
+}
+END {print ss,""}
+'
+
+tmpdir="/tmp/ffmpeg_edl_ac3_$$"
+rm -rf "$tmpdir"
+mkdir -p "$tmpdir/comskip"
+mkdir -p "$tmpdir/logs"
+
+if [ -z "$edl_file" ]; then
+  edl_file="$tmpdir/dummy.edl"
+  touch "$edl_file"
+fi
+
+ext="${output##*.}"
+
+# figure out the duration after cutting, for the progress indicator
+file_info=$($ffmpeg_path -i "$input" 2>&1 >/dev/null)
+original_duration=$(echo "$file_info" | grep Duration: | awk '{print $2}')
+original_duration=$(timestamp_to_seconds $original_duration)
+cut_duration=$(awk "BEGIN {total=0} {total += ($original_duration < \$2 ? $original_duration : \$2)-\$1} END {print total}" "$edl_file")
+duration=$(echo "$original_duration-$cut_duration" | bc -l)
+
+# check if the audio stream is ac3 and 5.1
+# if it is, create two audio streams in the output file: 2-channel aac and ac3 5.1
+# otherwise, just convert to aac
+audio_stream=$(echo "$file_info" | grep -m1 Audio: | perl -pe 's/\s*Stream #(\d:\d).*/$1/')
+video_stream=$(echo "$file_info" | grep -m1 Video: | perl -pe 's/\s*Stream #(\d:\d).*/$1/')
+map_opts="-map $video_stream -map $audio_stream"
+ac3_opts=
+if echo "$file_info" | grep -m1 Audio: | grep ac3 | grep --quiet '5\.1'; then
+  map_opts="$map_opts -map $audio_stream"
+  ac3_opts="-c:a:1 ac3"
+fi
+
+ffmpeg_concat_filename="$tmpdir/ffmpeg_concat.txt"
+i=1
+progress=0
+pct=$first_pct
+for startstop in $(/usr/bin/awk "$awkcmd" "$edl_file"); do
+  ss=$(echo $startstop | cut -d: -f1)
+  to=$(echo $startstop | cut -d: -f2)
+
+  # "input seeking" (-ss before the input file) in ffmpeg is very fast but
+  # the timestamps are reset so -to is now really a duration rather than a timestamp to stop at
+  if [ ! -z "$to" ]; then
+    if [ ! -z "$ss" ]; then to=$(echo "$to - $ss" | bc -l | awk '{printf("%.3f",$1)}'); fi
+    this_duration="$to"
+    to="-to $to"
+  else
+    if [ -z "$ss" ]; then ss="0"; fi
+    this_duration=$(echo "$original_duration - $ss" | bc -l)
+  fi
+  if [ ! -z "$ss" ]; then
+    # skip if the beginning of the cut is longer than the duration of the video
+    if (($(echo "$ss > $original_duration" | bc -l))); then continue; fi
+    ss="-ss $ss";
+  fi
+
+  segment_filename="$tmpdir/segment${i}.$ext"
+  ffmpeg_logfile="$tmpdir/logs/ffmpeg_segment$i.log"
+  set -x
+  $ffmpeg_path $ss $ffmpeg_opts_pre_input -i "$input" $map_opts $ffmpeg_opts_post_input -strict -2 -c:a:0 aac $ac3_opts $to "$segment_filename" >& "$ffmpeg_logfile" &
+  pid=$!
+  set +x
+
+  # monitor ffmpeg and update progress
+  monitor
+
+  if [ -f "$segment_filename" ]; then
+    echo "file $segment_filename" >> "$ffmpeg_concat_filename"
+  else
+    echo "error: problem generating $segment_filename, see $ffmpeg_logfile for details"
+    exit 1
+  fi
+  let i++
+  progress=$(echo "$this_duration + $progress" | bc -l)
+done
+
+# merge the segments together
+# though this usually happens in under 2 minutes, it could 
+# take longer for larger videos, so restart progress at 0 
+# and track progress for the merge
+rm -f "$output"
+ffmpeg_logfile="$tmpdir/logs/ffmpeg_concat.log"
+set -x
+$ffmpeg_path -f concat -safe 0 -i "$ffmpeg_concat_filename" $map_opts -c copy $ac3_opts "$output" >& "$ffmpeg_logfile" &
+pid=$!
+set +x
+last_pct=
+# mix it up a bit, again to reduce our chances of getting killed...
+first_pct=$(echo "2*$first_pct" | bc -l)
+pct=$first_pct
+progress=0
+monitor
+
+echo "100.00 %"
+
+# clean up
+rm -rf "$tmpdir"
