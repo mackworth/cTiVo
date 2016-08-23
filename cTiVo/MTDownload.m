@@ -43,7 +43,6 @@
 
 @property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
 
-@property (nonatomic, readonly) int taskFlowType;
 @property (nonatomic, strong) NSDate *startTime;
 @property (nonatomic, assign) double startProgress;
 @property (nonatomic, strong) NSTimer * progressTimer;
@@ -1494,14 +1493,36 @@ NSString * fourChar(long n, BOOL allowZero) {
   
 }
 
--(int)taskFlowType
+//Task Flow Types
+// bit 0 = Subtitle
+// bit 1 = Simultaneous download/encoding
+// bit 2 = Skip Com
+// bit 3 = Mark Com
+//no 12-15 because skipCom <==> ! markCom
+
+typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
+    kMTTaskFlowNonSimu = 0,
+    kMTTaskFlowNonSimuSubtitles = 1,
+    kMTTaskFlowSimu = 2,
+    kMTTaskFlowSimuSubtitles = 3,
+    kMTTaskFlowNonSimuSkipcom = 4,
+    kMTTaskFlowNonSimuSkipcomSubtitles = 5,
+    kMTTaskFlowSimuSkipcom = 6,
+    kMTTaskFlowSimuSkipcomSubtitles = 7,
+    kMTTaskFlowNonSimuMarkcom = 8,
+    kMTTaskFlowNonSimuMarkcomSubtitles = 9,
+    kMTTaskFlowSimuMarkcom = 10,
+    kMTTaskFlowSimuMarkcomSubtitles = 11
+};
+
+-(MTTaskFlowType)taskFlowType
 {
-  return 1 * (int) self.exportSubtitles.boolValue +
+  return (MTTaskFlowType)
+          1 * (int) self.exportSubtitles.boolValue +
           2 * (int) self.encodeFormat.canSimulEncode +
           4 * (int) self.skipCommercials +
           8 * (int) self.markCommercials;
 }
-
 
 -(void)download
 {
@@ -1525,7 +1546,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         self.markCommercials = NO;
     }
 	DDLogMajor(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@%@; %@",
-				self.taskFlowType,
+				(int)self.taskFlowType,
 				self,
 				self.encodeFormat.name ,
 				self.encodeFormat.canSimulEncode ?

@@ -150,21 +150,6 @@
 #define kMTXATTRFileComplete @"com.ctivo.filecomplete"
 #define kMTSpotlightKeyword @"cTiVoDownload"
 
-//Task Flow Types
-
-#define kMTTaskFlowNonSimu 0
-#define kMTTaskFlowNonSimuSubtitles 1
-#define kMTTaskFlowSimu 2
-#define kMTTaskFlowSimuSubtitles 3
-#define kMTTaskFlowNonSimuSkipcom 4
-#define kMTTaskFlowNonSimuSkipcomSubtitles 5
-#define kMTTaskFlowSimuSkipcom 6
-#define kMTTaskFlowSimuSkipcomSubtitles 7
-#define kMTTaskFlowNonSimuMarkcom 8
-#define kMTTaskFlowNonSimuMarkcomSubtitles 9
-#define kMTTaskFlowSimuMarkcom 10
-#define kMTTaskFlowSimuMarkcomSubtitles 11
-
 //USER DEFAULTS
 
 #define kMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information

@@ -101,7 +101,8 @@ __DDLOGHERE__
 	if (_terminationHandler) {
 		_terminationHandler();
 	}
-	[_task terminate];
+	[self terminate];
+
 	//following line has important side effect that it lets the task do whatever it needs to do to terminate before killing it dead in dealloc
 	[self performSelector:@selector(saveLogFile) withObject:self afterDelay:2.0];
 }
@@ -358,6 +359,7 @@ __DDLOGHERE__
 
 -(void)terminate
 {
+    _taskRunning = NO;
     if ([_task isRunning]) {
         [_task terminate];
 
@@ -383,6 +385,7 @@ __DDLOGHERE__
     if ([_task isRunning]) {
         [_task waitUntilExit];
     }
+    [self completeProcess];
 }
 
 -(BOOL)isRunning
