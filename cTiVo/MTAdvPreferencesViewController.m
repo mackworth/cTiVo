@@ -390,7 +390,6 @@
     [file closeFile];
 
     NSString *grepOutput = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
-    NSLog (@"grep returned:\n%@", grepOutput);
     return ![grepOutput hasPrefix:@"Unable"];
 }
 

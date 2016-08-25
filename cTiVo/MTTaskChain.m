@@ -10,7 +10,13 @@
 #import "MTDownload.h"
 #import "NSNotificationCenter+Threads.h"
 
+
 @implementation MTTaskChain
+
+NSMutableDictionary *teeBranches;
+NSMutableArray *branchFileHandles;
+BOOL isConfigured;
+ssize_t totalDataRead;
 
 __DDLOGHERE__
 
@@ -34,8 +40,7 @@ __DDLOGHERE__
     if (isConfigured) {
         return YES;
     }
-//    DDLogVerbose(@"Input Task Chain: %@",self);
-	//Called configure starts over
+
 	teeBranches = [NSMutableDictionary new];
 	branchFileHandles = [NSMutableArray new];
 	
@@ -58,9 +63,8 @@ __DDLOGHERE__
 	
 	//No problems found so configure
 	
-	NSArray *currentTasks = nil;
+	NSArray <MTTask *> *currentTasks = nil;
 	NSFileHandle *sourceToTee = nil;
-	NSFileHandle *fileHandleToTee = nil;
 	if (_dataSource) {
 		if ([_dataSource isKindOfClass:[NSPipe class]]) { //Data source from pipe
 			sourceToTee = [(NSPipe *)_dataSource fileHandleForReading];
@@ -75,7 +79,7 @@ __DDLOGHERE__
 	MTTask *currentTask = nil;
 	NSMutableArray *inputPipes = [NSMutableArray array];
 	for (NSUInteger i=0; i < _taskArray.count; i++) {
-        fileHandleToTee = nil;
+        NSFileHandle * fileHandleToTee = nil;
 		currentTasks = _taskArray[i];
 		if (currentTasks.count ==1 ) {
             currentTask = currentTasks[0];
@@ -106,28 +110,29 @@ __DDLOGHERE__
 				currentTask.task.standardOutput = outputPipe;
 				sourceToTee = [outputPipe fileHandleForReading];
 			} else {
-				NSMutableArray *nextChain = [NSMutableArray array];
-                NSMutableArray *newTaskArray = [NSMutableArray arrayWithArray:_taskArray];
+				NSMutableArray *nextChainTasks = [NSMutableArray array];
 				for (NSUInteger k = i+1; k<_taskArray.count; k++) {
-					[nextChain addObject:_taskArray[k]];
+					[nextChainTasks addObject:_taskArray[k]];
 				}
-				if (nextChain.count) {
+				if (nextChainTasks.count) {
 					self.nextTaskChain = [MTTaskChain new];
-                    self.nextTaskChain.taskArray = nextChain;
-                    [newTaskArray removeObjectsInArray:nextChain];
+                    self.nextTaskChain.download = self.download;
+                    self.nextTaskChain.taskArray = nextChainTasks;
+                    NSMutableArray *newTaskArray = [NSMutableArray arrayWithArray:_taskArray];
+                    [newTaskArray removeObjectsInArray:nextChainTasks];
                     _taskArray = [NSArray arrayWithArray:newTaskArray];
 				}
 				break;
 			}
 		}
 	}
-	for (NSArray *tasks in _taskArray) {
+	for (NSArray <MTTask *> *tasks in _taskArray) {
 		for (MTTask *task in tasks) {
 			task.myTaskChain = self;
 		}
 	}
 	if (_dataSink) {
-		((MTTask *)currentTasks[0]).task.standardOutput = _dataSink;
+		currentTasks[0].task.standardOutput = _dataSink;
 	}
     //Show configuration
     DDLogVerbose(@"\n\nConfigured Task Chain: %@",self);
@@ -198,17 +203,18 @@ __DDLOGHERE__
 {
     if (!_isRunning) return;   //check if we've been canceled
     BOOL taskRunning = NO;
-    DDLogVerbose(@"Tracking task chain");
     for (NSArray *taskset in _taskArray) {
         for(MTTask *task in taskset) {
             if (task.taskRunning) {
                 taskRunning = YES;
+                DDLogVerbose(@"Tracking task chain: %@ for %@",task.taskName, self.download.show.showTitle);
                 break;
             }
         }
     }
     if (!taskRunning) {
         //We need to move on
+        DDLogVerbose(@"Finished task chain: moving on to %@", _nextTaskChain ?: @"finish up");
         if (_nextTaskChain && !_beingRescheduled) {
             self.download.activeTaskChain = _nextTaskChain;
             [_nextTaskChain run];
