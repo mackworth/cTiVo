@@ -1487,6 +1487,46 @@ audio: mp3 at 192kbps</string>
 			<key>regExProgress</key>
 			<string></string>
 		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<true/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>ffmpeg_edl_ac3.sh</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt; -vf scale=-1:720,yadif -c:v libx264 -preset medium -crf 20 -profile:v high -level 4.2</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>Wrapper script:
+  - Converts an edl into multiple ffmpeg encodings which are then merged into the output file.
+  - Attempts to detect if one of the input video audio streams has 5.1 and includes a 5.1 ac3 audio stream in the output if found.  Since this may or may not play nice with additional audio encoder options, use additional audio encoder options at your own risk!
+
+Use as a workaround if you are having issues with mencoder -edl or just want to be able to automatically detect 5.1 and/or cut commercials with ffmpeg.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>FFMpeg wrapper for comskip and 5.1</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>(\d+\.\d+) \%</string>
+		</dict>
 	</array>
 </dict>
 </plist>
