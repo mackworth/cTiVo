@@ -27,35 +27,25 @@ timestamp_to_seconds() {
 # of the end of the ffmpeg log for the progress indicator
 monitor() {
 # Globals:
-#  $duration: length of video in seconds (after cutting)
-#  $progress: starting point in seconds for current section (if first_pass)
 #  $pid: process for ffmpeg
-#  $first_pass: empty if doing ffmpeg encoding; set if doing ffmpeg concat
-#  $last_pct: previous % status (empty if none)
 #  $ffmpeg_logfile: path to log file
+#  $this_duration: expected length of current segment of video in seconds
+#  $min_percent -> $max_percent: the range into which we map ffmpeg progress for reporting (0-100)
 
 # cTiVo will kill this script if it continuously outputs the same progress % for a
 # MaxProgressDelay (default 2 min) window.
-
   while kill -0 $pid &> /dev/null; do
     this_progress=$(tail -c 1000 "$ffmpeg_logfile"  | egrep -o 'time=\S+' | cut -d= -f2 | tail -n1)
     if [ ! -z "$this_progress" ]; then
       this_progress=$(timestamp_to_seconds "$this_progress")
-      if [ "$this_progress" != "0" ]; then
-        if [ "$first_pass" == "true" ]; then
-          pct=$(echo "$progress $this_progress $duration" | awk '{printf("%.2f", 90 * ($1 + $2) / $3)}')
-          if (($(echo "$pct >= 90" | bc -l))); then pct="89.99"; fi
-        else
-          pct=$(echo "$this_progress $duration" | awk '{printf("%.2f", 90 + (10 * $1 / $2))}')
-          if (($(echo "$pct < 90" | bc -l))); then pct="90.00"; fi
-          if (($(echo "$pct >= 100" | bc -l))); then pct="99.99"; fi
-        fi
+      pct=$(echo "$min_percent $max_percent $this_progress $this_duration " | awk '{printf("%.2f", $1 + ($2 - $1) * $3 / $4)}')
+      if (($(echo "$pct <  $min_percent" | bc -l))); then pct=$min_percent; fi
+      if (($(echo "$pct >= $max_percent" | bc -l))); then pct=$max_percent; fi
+      if [ "$last_pct" != "$pct" ]; then
+        echo "$pct %"
       fi
+      last_pct="$pct"
     fi
-    if [ "$last_pct" != "$pct" ]; then
-      echo "$pct %"
-    fi
-    last_pct="$pct"
     sleep 1
   done 
 }
@@ -157,7 +147,6 @@ fi
 ffmpeg_concat_filename="$tmpdir/ffmpeg_concat.txt"
 i=1
 progress=0
-first_pass="true"
 for startstop in $(/usr/bin/awk "$awkcmd" "$edl_file"); do
   ss=$(echo $startstop | cut -d: -f1)
   to=$(echo $startstop | cut -d: -f2)
@@ -186,6 +175,8 @@ for startstop in $(/usr/bin/awk "$awkcmd" "$edl_file"); do
   set +x
 
   # monitor ffmpeg and update progress
+  min_percent=$(echo "90 * ($progress / $duration)" | bc -l)
+  max_percent=$(echo "90 * (($progress + $this_duration) / $duration)" | bc -l)
   monitor
 
   if [ -f "$tmpdir/$segment_filename" ]; then
@@ -209,7 +200,9 @@ $ffmpeg_path -f concat -safe 0 -i "$ffmpeg_concat_filename" $map_opts -c copy $a
 pid=$!
 set +x
 
-first_pass="false"
+this_duration=$duration
+min_percent=90
+max_percent=100
 monitor
 
 echo "100.00 %"

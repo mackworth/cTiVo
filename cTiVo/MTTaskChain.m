@@ -11,11 +11,11 @@
 #import "NSNotificationCenter+Threads.h"
 
 
+
 @implementation MTTaskChain
 
 NSMutableDictionary *teeBranches;
 NSMutableArray *branchFileHandles;
-BOOL isConfigured;
 ssize_t totalDataRead;
 
 __DDLOGHERE__
@@ -26,7 +26,6 @@ __DDLOGHERE__
     if (self) {
         _dataSink = nil;
         _dataSource = nil;
-		isConfigured = NO;
         _isRunning = NO;
         _providesProgress = NO;
 		_beingRescheduled = NO;
@@ -37,9 +36,6 @@ __DDLOGHERE__
 
 -(BOOL)configure
 {
-    if (isConfigured) {
-        return YES;
-    }
 
 	teeBranches = [NSMutableDictionary new];
 	branchFileHandles = [NSMutableArray new];
@@ -136,7 +132,6 @@ __DDLOGHERE__
 	}
     //Show configuration
     DDLogVerbose(@"\n\nConfigured Task Chain: %@",self);
-	isConfigured = YES;
 	return YES;
 }
 
@@ -169,9 +164,7 @@ __DDLOGHERE__
 
 -(BOOL)run
 {
-	if (!isConfigured) { //Try 
-		[self configure];
-	}
+    BOOL isConfigured = [self configure];
 	if (isConfigured) {
         totalDataRead  = 0;
 		for (int i=(int)_taskArray.count-1; i >=0 ; i--) {
@@ -186,10 +179,10 @@ __DDLOGHERE__
             [fileHandle readInBackgroundAndNotify];
 		}
 
-	}
-    _isRunning = YES;
-    [self performSelector:@selector(trackProgress) withObject:nil afterDelay:0.5];
-	return isConfigured;
+        _isRunning = YES;
+        [self performSelector:@selector(trackProgress) withObject:nil afterDelay:0.5];
+    }
+    return isConfigured;
 }
 
 -(void)startReading:(NSNotification *)notification
