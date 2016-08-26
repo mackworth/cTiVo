@@ -1,22 +1,7 @@
 #!/bin/bash
 
-# I'm not sure why but Contents/MacOS doesn't appear to be in the path?
-# apparently NSTask is smart enough to resolve the launchPath
-# within the bundle...
-# as a workaround, use dirname $0
+# use dirname $0 to get path to ourselves
 ffmpeg_path=$(dirname "$0")/ffmpeg
-
-# cTiVo can kill this script if it outputs the same % in a
-# MaxProgressDelay (default 2 min) window.
-# set to some low number between 0 and 1%, with the goal 
-# being to minimize the chances of outputting the same % 
-# as whatever was running 2 minutes ago.  This script will 
-# output $first_pct initially until the actual ffmpeg process 
-# catches up.  It should be set such that ffmpeg takes < 2
-# minutes to progress from 0% to $first_pct for all video sizes.
-# see issue #183 for details
-# note, this value is multiplied by 2 for the merge progress
-first_pct="0.10"
 
 # kill ffmpeg if our script is killed
 trap terminate SIGTERM
@@ -41,20 +26,26 @@ timestamp_to_seconds() {
 # monitor the ffmpeg proc as it runs in the background, grepping the time out
 # of the end of the ffmpeg log for the progress indicator
 monitor() {
+# Globals:
+#  $pid: process for ffmpeg
+#  $ffmpeg_logfile: path to log file
+#  $this_duration: expected length of current segment of video in seconds
+#  $min_percent -> $max_percent: the range into which we map ffmpeg progress for reporting (0-100)
+
+# cTiVo will kill this script if it continuously outputs the same progress % for a
+# MaxProgressDelay (default 2 min) window.
   while kill -0 $pid &> /dev/null; do
     this_progress=$(tail -c 1000 "$ffmpeg_logfile"  | egrep -o 'time=\S+' | cut -d= -f2 | tail -n1)
     if [ ! -z "$this_progress" ]; then
       this_progress=$(timestamp_to_seconds "$this_progress")
-      if [ "$this_progress" != "0" ]; then
-        pct=$(echo "$progress $this_progress $duration" | awk '{printf("%.2f", 100 * ($1 + $2) / $3)}')
-        if (($(echo "$pct < $first_pct" | bc -l))); then pct="$first_pct"; fi
-        if (($(echo "$pct >= 100" | bc -l))); then pct="99.99"; fi
+      pct=$(echo "$min_percent $max_percent $this_progress $this_duration " | awk '{printf("%.2f", $1 + ($2 - $1) * $3 / $4)}')
+      if (($(echo "$pct <  $min_percent" | bc -l))); then pct=$min_percent; fi
+      if (($(echo "$pct >= $max_percent" | bc -l))); then pct=$max_percent; fi
+      if [ "$last_pct" != "$pct" ]; then
+        echo "$pct %"
       fi
+      last_pct="$pct"
     fi
-    if [ "$last_pct" != "$pct" ]; then
-      echo "$pct %"
-    fi
-    last_pct="$pct"
     sleep 1
   done 
 }
@@ -63,7 +54,7 @@ monitor() {
 # exiting ourselves
 terminate() {
   kill -TERM "$pid" 2> /dev/null
-  rm -rf "$tmpdir"
+  echo "Terminating"
   exit 15
 }
 
@@ -122,7 +113,7 @@ BEGIN {OFS=":"}
 END {print ss,""}
 '
 
-tmpdir="/tmp/ffmpeg_edl_ac3_$$"
+tmpdir="${input%.*}_ffmpeg"
 rm -rf "$tmpdir"
 mkdir -p "$tmpdir/comskip"
 mkdir -p "$tmpdir/logs"
@@ -156,7 +147,6 @@ fi
 ffmpeg_concat_filename="$tmpdir/ffmpeg_concat.txt"
 i=1
 progress=0
-pct=$first_pct
 for startstop in $(/usr/bin/awk "$awkcmd" "$edl_file"); do
   ss=$(echo $startstop | cut -d: -f1)
   to=$(echo $startstop | cut -d: -f2)
@@ -177,17 +167,19 @@ for startstop in $(/usr/bin/awk "$awkcmd" "$edl_file"); do
     ss="-ss $ss";
   fi
 
-  segment_filename="$tmpdir/segment${i}.$ext"
+  segment_filename="segment${i}.$ext"
   ffmpeg_logfile="$tmpdir/logs/ffmpeg_segment$i.log"
   set -x
-  $ffmpeg_path $ss $ffmpeg_opts_pre_input -i "$input" $map_opts $ffmpeg_opts_post_input -strict -2 -c:a:0 aac $ac3_opts $to "$segment_filename" >& "$ffmpeg_logfile" &
+  $ffmpeg_path $ss $ffmpeg_opts_pre_input -i "$input" $map_opts $ffmpeg_opts_post_input -strict -2 -c:a:0 aac $ac3_opts $to "$tmpdir/$segment_filename" >& "$ffmpeg_logfile" &
   pid=$!
   set +x
 
   # monitor ffmpeg and update progress
+  min_percent=$(echo "90 * ($progress / $duration)" | bc -l)
+  max_percent=$(echo "90 * (($progress + $this_duration) / $duration)" | bc -l)
   monitor
 
-  if [ -f "$segment_filename" ]; then
+  if [ -f "$tmpdir/$segment_filename" ]; then
     echo "file $segment_filename" >> "$ffmpeg_concat_filename"
   else
     echo "error: problem generating $segment_filename, see $ffmpeg_logfile for details"
@@ -207,14 +199,10 @@ set -x
 $ffmpeg_path -f concat -safe 0 -i "$ffmpeg_concat_filename" $map_opts -c copy $ac3_opts "$output" >& "$ffmpeg_logfile" &
 pid=$!
 set +x
-last_pct=
-# mix it up a bit, again to reduce our chances of getting killed...
-first_pct=$(echo "2*$first_pct" | bc -l)
-pct=$first_pct
-progress=0
+
+this_duration=$duration
+min_percent=90
+max_percent=100
 monitor
 
 echo "100.00 %"
-
-# clean up
-rm -rf "$tmpdir"

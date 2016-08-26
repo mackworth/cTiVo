@@ -1271,7 +1271,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
                     }
                     if (returnValue == -1.0) {
-                        DDLogMajor(@"Encode progress with Rx failed for task encoder for show %@\nEncoder report: %@",self.show.showTitle, data);
+                        DDLogMajor(@"Encode progress with RX %@ failed for task encoder for show %@\nEncoder report: %@",percents, self.show.showTitle, data);
 
                     }
                     return returnValue;
@@ -1985,6 +1985,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         if (!(_decryptTask.successfulExit && _encodeTask.successfulExit)) {
             DDLogReport(@"Strange: thought we were finished, but later %@ failure", _decryptTask.successfulExit ? @"encode" : @"decrypt");
             [self cancel]; //just in case
+            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
             return;
         }
         NSImage * artwork = nil;

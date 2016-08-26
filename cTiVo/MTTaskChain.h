@@ -11,20 +11,37 @@
 
 @class MTDownload;
 
-@interface MTTaskChain : NSObject {
-    
-    NSMutableDictionary *teeBranches;
-	NSMutableArray *branchFileHandles;
-	BOOL isConfigured;
-    ssize_t totalDataRead;
-}
+//A TaskChain describes a set of file processing steps to be executed concurrently
+//It has an array of array of MTTasks to be chained in order. We call each subarray of tasks a group.
+//Each group receives the same input, and the output of the first task in the group is fed to the next group
 
-@property (strong, nonatomic) NSArray *taskArray;   //An array of arrays of tasks to be chained in order.  Single branching is allow so that one tasks output can be piped to two tasks.
-                                                    //If the chain continues after a branch it is assumed that the first task in the multiple branch is the source for the next array of tasks.
+//                         Group 1         Group2
+//                         +-----+         +-----+
+// dataSource  +------->+> |TaskA+----->+> |TaskD|-----> dataSink
+//                      |  +-----+      |  +-----+
+//                      |               |
+//                      |  +-----+      |  +-----+
+//                      +> |TaskB|      +> |TaskE|
+//                      |  +-----+      |  +-----+
+//                      |               |
+//                      |  +-----+      |  +-----+
+//                      +> |TaskC|      +> |TaskF|
+//                         +-----+         +-----+
+//
+//During configuration, IF a task in a group can't stream output (e.g. not MTTask.requiresOutputPipe),
+//in other words, that the group has to complete before the next group can run
+//then the group is automatically split off into a new TaskChain and linked to nextTaskChain
+//Thus when all tasks in the current chain are completed, the nextTaskChain is starte,
+
+@interface MTTaskChain : NSObject
+
+@property (strong, nonatomic) NSArray
+                                <NSArray
+                                    <MTTask *> *> *taskArray;
 
 @property (strong, nonatomic) MTTaskChain *nextTaskChain;
 
-@property (strong, nonatomic) id dataSource, dataSink;  //These should be either NSFileHandle or NSPipe
+@property (strong, nonatomic) id dataSource, dataSink;  //These should be an NSFileHandle, NSPipe, or for dataSource an NSString (pathname)
 
 @property (weak, nonatomic) MTDownload *download;
 

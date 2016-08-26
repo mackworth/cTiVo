@@ -39,6 +39,7 @@ __DDLOGHERE__
 //    mTTask.task  = [NSTask new];
     mTTask.download = download;
     mTTask.taskName = name;
+    mTTask.task.currentDirectoryPath = [tiVoManager tmpFilesDirectory];
     return mTTask;
 }
 
