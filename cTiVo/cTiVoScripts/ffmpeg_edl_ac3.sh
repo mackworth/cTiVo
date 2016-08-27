@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# arbitrarily choose a completion point of the segments
+# rather than printing 0 - 100 % twice, which runs the risk (albeit small) of getting
+# killed by cTiVo if the progress monitor sees the same % twice in a row
+merge_start_percent=95
+
+# Due to the transition to Transport Stream, there’s a good chance you’ll get a file
+# with no video stream.  It needs to report this to ctivo which will switch to TS and
+# start all over again
+no_video_stream_message="no video streams"
+
 usage() {
   cat << EOF 1>&2
 Usage: $0 -edl <edl file> <ffmpeg options>
@@ -136,7 +146,7 @@ fi
 ext="${output##*.}"
 
 # work dir prep
-tmpdir="${input%.*}_ffmpeg"
+tmpdir=$(dirname "$input")/"${output%.*}_ffmpeg"
 rm -rf "$tmpdir"
 mkdir -p "$tmpdir/comskip"
 mkdir -p "$tmpdir/logs"
@@ -153,6 +163,10 @@ duration=$(echo "$original_duration-$cut_duration" | bc -l)
 # otherwise, just convert to aac
 audio_stream=$(echo "$file_info" | perl -ne 'print $1 if /^\s*Stream #(\d:\d).*Audio:.*/' | head -n1)
 video_stream=$(echo "$file_info" | perl -ne 'print $1 if /^\s*Stream #(\d:\d).*Video:.*/' | head -n1)
+if [[ -z "$video_stream" ]]; then
+  echo "$no_video_stream_message"
+  exit 1
+fi
 map_opts="-map $video_stream -map $audio_stream"
 ac3_opts=
 if echo "$file_info" | grep -m1 Audio: | grep ac3 | grep --quiet '5\.1'; then
@@ -166,12 +180,7 @@ if [ -z "$edl_file" ]; then
 
 else
   # encode segments separately and merge together
-
-  # arbitrarily choose 90% as the completion point of the segments
-  # rather than printing 0 - 100 % twice, which runs the risk (albeit small) of getting
-  # killed by cTiVo if the progress monitor sees the same % twice in a row
-  merge_start_percent=90
-
+  merge_filename="$tmpdir/ffmpeg_merge.txt"
   progress=0
   for startstop in $(/usr/bin/awk '
 BEGIN {OFS=":"}
@@ -210,11 +219,14 @@ END {print ss,""}
       to="-to $this_duration"
     fi
 
+    segment_filename="$tmpdir/segment_${segment_name}.$ext"
+    echo file \'$(realpath "$segment_filename")\' >> "$merge_filename"
+
     # TODO: remove -strict -2 once the bundled ffmpeg binary is updated to 3.1.1 or later
     launch_and_monitor_ffmpeg $(echo "$merge_start_percent * ($progress / $duration)" | bc -l) \
                               $(echo "$merge_start_percent * (($progress + $this_duration) / $duration)" | bc -l) \
                               $this_duration \
-                              "$tmpdir/segment_$segment_name.$ext" \
+                              "$segment_filename" \
                               "$tmpdir/logs/ffmpeg_segment$i.log" \
                               $ss $ffmpeg_opts_pre_input -i "$input" $map_opts $ffmpeg_opts_post_input -strict -2 -c:a:0 aac $ac3_opts $to
 
@@ -224,13 +236,10 @@ END {print ss,""}
   # merge the segments together
   # though this usually happens in under 2 minutes, it could 
   # take longer for larger videos, so track progress for the merge
-  for f in "$tmpdir"/segment*.$ext; do
-    echo file \'$(realpath "$f")\' >> "$tmpdir"/segments.txt
-  done
   launch_and_monitor_ffmpeg $merge_start_percent \
                             100 \
                             $duration \
                             "$output" \
                             "$tmpdir/logs/ffmpeg_concat.log" \
-                            -f concat -safe 0 -i "$tmpdir"/segments.txt $map_opts -c copy $ac3_opts
+                            -f concat -safe 0 -i "$merge_filename" $map_opts -c copy $ac3_opts
 fi
