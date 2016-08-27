@@ -31,6 +31,10 @@
 
 @property (weak, nonatomic) MTDownload *download;
 
+//Startup is called just before launch, and can abort by returning false
+//Completion is called on successful completion, and can convert to failure by returning false
+//Termination handler is called upon cancellation only
+//Cleanup is called on any termination, including dealloc
 @property (nonatomic, copy) void (^terminationHandler)(void);
 
 @property (nonatomic, copy) BOOL (^startupHandler)(void), (^completionHandler)(void);

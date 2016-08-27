@@ -120,6 +120,7 @@ __DDLOGHERE__
 {
     if (_cleanupHandler) {
         _cleanupHandler();
+        _cleanupHandler = nil; //only call once
     }
 	if (_logFileWriteHandle) {
 		[_logFileWriteHandle closeFile];

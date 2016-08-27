@@ -195,23 +195,28 @@ __DDLOGHERE__
         if (recentSpeed < 0.0) recentSpeed = 0.0;
         if (recentSpeed == 0.0) {
             self.numZeroSpeeds ++;
+            if (self.numZeroSpeeds > 3) {
+                //not getting much data; hide meter
+                if (self.numZeroSpeeds == 4) {
+                    self.speed = 0.0;
+                    DDLogVerbose(@"Four measurements of zero; hide speed");
+                    [self progressUpdated];
+                }
+            }
         } else {
             self.numZeroSpeeds = 0;
+            if (self.speed <= 0.0) {
+                self.speed = recentSpeed;
+           } else {
+                const double kSMOOTHING_FACTOR = 0.03;
+                double newSpeed = kSMOOTHING_FACTOR * recentSpeed + (1-kSMOOTHING_FACTOR) * self.speed;
+                DDLogVerbose(@"Speed was %0.1f; is %0.1f; ==> %0.1f",self.speed/1000, recentSpeed/1000, newSpeed/1000);
+                self.speed = newSpeed; //exponential decay on older average
+            }
+            [self progressUpdated];
+            self.startTime = [NSDate date];
+            self.startProgress = self.processProgress;
         }
-        if (self.numZeroSpeeds > 3) {
-            //not getting much data; hide meter
-            self.speed = 0.0;
-        } else if (self.speed <= 0.0) {
-            self.speed = recentSpeed;
-        } else {
-            const double kSMOOTHING_FACTOR = 0.03;
-            double newSpeed = kSMOOTHING_FACTOR * recentSpeed + (1-kSMOOTHING_FACTOR) * self.speed;
-            DDLogVerbose(@"Speed was %0.1f; is %0.1f; ==> %0.1f",self.speed/1000, recentSpeed/1000, newSpeed/1000);
-            self.speed = newSpeed; //exponential decay on older average
-        }
-        self.startTime = [NSDate date];
-        self.startProgress = self.processProgress;
-        [self progressUpdated];  //should this be the only one?
     }
 }
 
@@ -1210,8 +1215,8 @@ NSString * fourChar(long n, BOOL allowZero) {
     };
 
     encodeTask.cleanupHandler = ^(){
-        if (self.activeURLConnection) {  //else we've already checked
-            [self checkEncodeLogForAudio];
+        if (self.activeURLConnection || ! self.shouldSimulEncode) {  //else we've already checked
+            [self checkLogForAudio: self.encodeTask.errorFilePath];
         }
        if (self.isCanceled) {
            [self deleteVideoFile];
@@ -1414,14 +1419,18 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     commercialTask.cleanupHandler = ^(){
         if (_commercialTask.taskFailed) {
-			[tiVoManager  notifyWithTitle:@"Detecting Commercials Failed" subTitle:[NSString stringWithFormat:@"Not processing commercials for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlCommercialDetFailed];
+            if ([self checkLogForAudio: self.commercialTask.logFilePath]) {
+                [self rescheduleOnMain];
+            } else {
+                [tiVoManager  notifyWithTitle:@"Detecting Commercials Failed" subTitle:[NSString stringWithFormat:@"Not processing commercials for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlCommercialDetFailed];
 
-            if ([[NSFileManager defaultManager] fileExistsAtPath:self.commercialFilePath]) {
-                [[NSFileManager defaultManager] removeItemAtPath:self.commercialFilePath error:nil];
+                if ([[NSFileManager defaultManager] fileExistsAtPath:self.commercialFilePath]) {
+                    [[NSFileManager defaultManager] removeItemAtPath:self.commercialFilePath error:nil];
+                }
+                NSData *zeroData = [NSData data];
+                [zeroData writeToFile:self.commercialFilePath atomically:YES];
+                _commercialTask.completionHandler();
             }
-            NSData *zeroData = [NSData data];
-            [zeroData writeToFile:self.commercialFilePath atomically:YES];
-			_commercialTask.completionHandler();
         }
     };
 
@@ -2124,7 +2133,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
     if (self.previousProcessProgress == self.processProgress) { //The process is stalled so cancel and restart
 		//Cancel and restart or delete depending on number of time we've been through this
-        DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", self.processProgress*100.0, self.show.showTitle);
         BOOL reschedule = YES;
         if (self.processProgress == 1.0) {
             reschedule = NO;
@@ -2137,6 +2145,8 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             } else {
 				DDLogVerbose(@"In extended wait for Handbrake");
 			}
+        } else {
+                DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", self.processProgress*100.0, self.show.showTitle);
         }
 		if (reschedule) {
 			[self rescheduleShowWithDecrementRetries:@(YES)];
@@ -2244,7 +2254,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     @autoreleasepool {  //because run as separate thread
 
 	//	self.writingData = YES;
-    DDLogVerbose(@"Writing data %@ : %@Connection %@", [NSThread isMainThread] ? @"Main" : @"Background", self.activeURLConnection == nil ? @"No ":@"", self.isCanceled ? @"- Cancelled" : @"");
+    //DDLogVerbose(@"Writing data %@ : %@Connection %@", [NSThread isMainThread] ? @"Main" : @"Background", self.activeURLConnection == nil ? @"No ":@"", self.isCanceled ? @"- Cancelled" : @"");
     const long chunkSize = 50000;
     long dataRead = chunkSize; //to start loop
     while (dataRead == chunkSize && !self.isCanceled) {
@@ -2328,19 +2338,20 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 #pragma mark - NSURL Delegate Methods
 
--(BOOL) checkEncodeLogForAudio {
+-(BOOL) checkLogForAudio: (NSString *) filePath {
     //if we find audio required, then mark channel as TS.
     //If not, then IF it was a successfulencode, then mark as not needing TS
     if ( ! self.useTransportStream) {
         //If we did Program Stream and encoder says "I only see Audio", then probably TS required
         NSArray * audioOnlyStrings = @[
-                                       @"Video stream is mandatory!",    // mencoder:
-                                       @"No title found",                  //handbrake
-                                       @"no video streams", //ffmpeg
-                                       @"Stream #0:0: Audio"                //ffmpeg
+                                       @"Video stream is mandatory!",       //mencoder:
+                                       @"No title found",                   //handbrake
+                                       @"no video streams",                 //ffmpeg
+                                       @"Stream #0:0: Audio",               //ffmpeg
+                                       @"Could not open video codec"        //comskip
                                        ];
-        NSString *log = [NSString stringWithContentsOfFile:_encodeTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
-        if (!log) return NO;
+        NSString *log = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+        if ( ! log.length) return NO;
         for (NSString * errMsg in audioOnlyStrings) {
             if ([log rangeOfString:errMsg].location != NSNotFound) {
                 DDLogVerbose(@"found audio %@ in log file: %@",errMsg, [log maskMediaKeys]);
@@ -2512,7 +2523,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         DDLogDetail(@"finished loading TiVo file");
 		if ((downloadedFileSize < self.show.fileSize * 0.9f && !self.useTransportStream) ||
             downloadedFileSize < self.show.fileSize * 0.8f ) {  //hmm, doesn't look like it's big enough  (90% for PS; 80% for TS
-            BOOL foundAudio = [self checkEncodeLogForAudio]; //see if it's a audio-only file (i.e. trashed)
+            BOOL foundAudio = self.shouldSimulEncode ? [self checkLogForAudio: self.encodeTask.errorFilePath] : NO; //see if it's a audio-only file (i.e. trashed)
             if ( self.encodeFormat.isTestPS) {
                 // if a test, then we only try once.
                 if (!self.isDone) {
@@ -2531,11 +2542,13 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                [self deleteVideoFile];
                [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
             } else {
-                [tiVoManager  notifyWithTitle: @"Warning: Show may be damaged/incomplete."
-                                 subTitle:self.show.showTitle forNotification:kMTGrowlPossibleProblem];
                 DDLogMajor(@"Show %@ supposed to be %0.0f bytes, actually %0.0f bytes (%0.1f%%)", self.show,self.show.fileSize, downloadedFileSize, downloadedFileSize / self.show.fileSize);
-                if (self.shouldSimulEncode ) {
-                    [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                if (self.shouldSimulEncode || self.useTransportStream) {
+                    [tiVoManager  notifyWithTitle: @"Warning: Show may be damaged/incomplete."
+                                 subTitle:self.show.showTitle forNotification:kMTGrowlPossibleProblem];
+                    if (self.shouldSimulEncode) {
+                        [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                    }
                 }
             }
 		} else {

@@ -227,7 +227,6 @@ __DDLOGHERE__
 
 -(void)teeInBackground:(NSNotification *)notification {
 
-    DDLogVerbose(@"tee: %@", [NSThread isMainThread] ? @"Main" : @"Background");
 	NSData *readData = notification.userInfo[NSFileHandleNotificationDataItem];
     totalDataRead += readData.length;
     if (_providesProgress) {
@@ -236,9 +235,9 @@ __DDLOGHERE__
 //    NSLog(@"Total Data Read %ld",totalDataRead);
     NSArray *pipes = [teeBranches objectForKey:notification.object];
     if (readData.length) {
-        DDLogVerbose(@"Got %ld bytes", readData.length);
+        DDLogVerbose(@"Tee got %ld bytes", readData.length);
     } else {
-        DDLogMajor(@"Got 0 bytes, and is %@cancelled",_download.isCanceled ? @"" : @"not ");
+        DDLogMajor(@"Tee got 0 bytes, and is %@cancelled",_download.isCanceled ? @"" : @"not ");
     }
 	if (readData.length && !_download.isCanceled) {
         for (NSPipe *pipe in pipes ) {
