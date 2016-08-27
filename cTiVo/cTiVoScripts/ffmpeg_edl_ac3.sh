@@ -146,7 +146,8 @@ fi
 ext="${output##*.}"
 
 # work dir prep
-tmpdir=$(dirname "$input")/"${output%.*}_ffmpeg"
+outfilename="${output##*/}"  #just the filename, not path
+tmpdir=$(dirname "$input")/"${outfilename%.*}_ffmpeg"
 rm -rf "$tmpdir"
 mkdir -p "$tmpdir/comskip"
 mkdir -p "$tmpdir/logs"
