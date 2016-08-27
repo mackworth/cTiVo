@@ -522,15 +522,10 @@ __DDLOGHERE__
 	[downloadQueueTable deselectAll:nil];
 }
 
--(IBAction)dontQuit:(id)sender
-{
+-(IBAction)dontQuit:(id)sender {
 	DDLogDetail(@"User canceled Quit after processing");
-	tiVoManager.quitWhenCurrentDownloadsComplete = @(NO);
-	tiVoManager.processingPaused = @(NO);
-	[self.cancelQuitView setHidden:YES];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationUserCanceledQuit object:nil ];
 }
-
-
 
 -(BOOL) confirmCancel:(NSString *) title {
     NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",title] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@""];

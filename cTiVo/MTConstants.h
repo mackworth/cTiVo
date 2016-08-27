@@ -42,6 +42,8 @@
 #define kMTNotificationTiVoUpdating @"MTNotificationTiVoUpdating"  //object: which MTTivo has started updating
 #define kMTNotificationTiVoUpdated  @"MTNotificationTiVoUpdated" //object: which MTTivo is updated
 
+#define kMTNotificationUserCanceledQuit @"kMTNotificationUserCanceledQuit" 
+
 #define deleteXML 1   //placeholder to store deleted code in case we decide to restore XML export; need to add to downloadTable, subTable, menu and pref NIBx also
 
 //Download Status

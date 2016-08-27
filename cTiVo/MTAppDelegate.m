@@ -7,6 +7,14 @@
 //
 
 #import "MTAppDelegate.h"
+#import "MTProgramTableView.h"
+#import "MTDownloadTableView.h"
+#import "MTMainWindowController.h"
+#import "MTSubscriptionTableView.h"
+#import "MTPreferencesWindowController.h"
+#import "MTAdvPreferencesViewController.h"
+#import "MTiTivoImport.h"
+#import "MTHelpViewController.h"
 #import "MTTiVo.h"
 #import "MTSubscriptionList.h"
 
@@ -33,6 +41,7 @@
 #include <IOKit/IOMessage.h>
 
 io_connect_t  root_port; // a reference to the Root Power Domain IOService
+
 
 void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType, void * messageArgument )
 {
@@ -110,6 +119,38 @@ void signalHandler(int signal)
     //NSLog(@"Got signal %d",signal); not safe
 }
 
+@interface MTAppDelegate  () {
+	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *markCommercialsItem, *skipCommercialsItem, *pauseMenuItem, *apmMenuItem;
+	IBOutlet NSMenuItem *playVideoMenuItem, *showInFinderMenuItem;
+	IBOutlet NSMenu *optionsMenu;
+    IBOutlet NSView *formatSelectionTable;
+    IBOutlet NSTableView *exportTableView;
+
+	NSMutableArray *mediaKeyQueue;
+	BOOL gettingMediaKey;
+	NSTimer * checkingDone;
+	NSTimer * saveQueueTimer;
+    BOOL quitWhenCurrentDownloadsComplete;
+}
+
+@property (nonatomic, strong) MTPreferencesWindowController *preferencesController;
+@property (nonatomic, strong) MTPreferencesWindowController *advPreferencesController;
+@property (nonatomic, strong) MTMainWindowController  *mainWindowController;
+@property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
+@property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
+@property (nonatomic, strong) NSTimer * pseudoTimer;
+
+-(IBAction)togglePause:(id)sender;
+-(IBAction)editFormats:(id)sender;
+-(IBAction)editManualTiVos:(id)sender;
+-(IBAction)createManualSubscription:(id)sender;
+-(IBAction)findShows:(id)sender;
+-(IBAction)clearHistory:(id)sender;
+-(IBAction)showLogs:(id)sender;
+
+
+@end
+
 @implementation MTAppDelegate
 
 
@@ -168,6 +209,7 @@ __DDLOGHERE__
     [DDLog addLogger:fileLogger];
 
      DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelUserQuit) name:kMTNotificationUserCanceledQuit object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
 
@@ -205,6 +247,7 @@ __DDLOGHERE__
 		[MTiTiVoImport checkForiTiVoPrefs];
 	}
 	
+    quitWhenCurrentDownloadsComplete = NO;
 	mediaKeyQueue = [NSMutableArray new];
 //	[self updateManualTiVosWithID];
     [self updateTiVos];
@@ -231,7 +274,7 @@ __DDLOGHERE__
 	//Turn off check mark on Pause/Resume queue menu item
 	[pauseMenuItem setOnStateImage:nil];
 	[self.tiVoGlobalManager determineCurrentProcessingState];
-    
+
 	//Set up callback for sleep notification (this is 10.5 method and is still valid.  There is newer UI in 10.6 on.
 	
 	// notification port allocated by IORegisterForSystemPower
@@ -686,6 +729,18 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     }
 }
 
+
+-(NSArray <MTTiVoShow *> *) currentSelectedShows {
+    MTProgramTableView * programs = ((MTAppDelegate *) [NSApp delegate]).mainWindowController. tiVoShowTable;
+    NSArray * shows = programs.sortedShows;
+    NSIndexSet *selectedRowIndexes = [programs selectedRowIndexes];
+    if (selectedRowIndexes.count > 0) {
+        shows = [shows objectsAtIndexes:selectedRowIndexes ];
+    }
+    return shows;
+}
+
+
 #pragma mark - Export Formats Methods
 
 -(NSNumber *)numberOfUserFormats
@@ -926,11 +981,6 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     return [appSupportURL URLByAppendingPathComponent:@"com.cTiVo.cTivo"];
 }
 
--(NSArray *) currentShows {
-    MTProgramTableView * programs = self.mainWindowController. tiVoShowTable;
-    return programs.sortedShows;
-}
-
 -(IBAction)showMainWindow:(id)sender
 {
 	if (!_mainWindowController) {
@@ -945,22 +995,12 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 	[_mainWindowController showWindow:nil];
 	
 }
+-(void) cancelUserQuit {
+	quitWhenCurrentDownloadsComplete = NO;
+	tiVoManager.processingPaused = @(NO);
+	[self.mainWindowController.cancelQuitView setHidden:YES];
 
--(void) checkDone:(id) sender {
-	DDLogVerbose(@"Checking done");
-	if ( ![tiVoManager anyTivoActive] ){
-		DDLogDetail(@"Checking finished");
-		[checkingDone invalidate]; checkingDone = nil;
-		[NSApp endSheet: [_mainWindowController window]];
-		[self cleanup];
-		[NSApp replyToApplicationShouldTerminate:YES];
-	}
 }
-
-//-(void) doQuit {
-//	[checkingDone invalidate]; checkingDone = nil;
-//	[NSApp replyToApplicationShouldTerminate:NO];
-//}
 
 -(void) confirmUserQuit {
 	NSString *message = [NSString stringWithFormat:@"Shows are in process, and would need to be restarted next time. Do you wish them to finish now, or quit immediately?"];
@@ -968,27 +1008,12 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 	NSInteger returnValue = [quitAlert runModal];
 	switch (returnValue) {
 		case NSAlertDefaultReturn:
-			DDLogMajor(@"User did ask to continue");
+			DDLogMajor(@"User did ask to continue until finished");
 			tiVoManager.processingPaused = @(YES);
-			tiVoManager.quitWhenCurrentDownloadsComplete = @(YES);
+			quitWhenCurrentDownloadsComplete = YES;
 			[_mainWindowController.cancelQuitView setHidden:NO];
 			[NSApp replyToApplicationShouldTerminate:NO];
-			
-			//			NSRunLoop* myRunLoop = [NSRunLoop currentRunLoop];
-			//			// Create and schedule the  timer.
-			//			NSDate* futureDate = [NSDate dateWithTimeIntervalSinceNow:5.0];
-			//			checkingDone = [[[NSTimer alloc] initWithFireDate:futureDate
-			//														interval:5.0
-			//														  target:self
-			//														selector:@selector(checkDone:)
-			//														userInfo:nil
-			//														 repeats:YES] autorelease];
-			//			[myRunLoop addTimer:checkingDone forMode:NSRunLoopCommonModes];
-			//
-			//			NSString *message = [NSString stringWithFormat:@"Please wait for processing to complete..."];
-			//			NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Cancel Quit" alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-			//			[quitAlert beginSheetModalForWindow:_mainWindowController.window modalDelegate:self didEndSelector:@selector(doQuit) contextInfo:nil ];
-			break;
+            break;
 		case NSAlertOtherReturn:
 			DDLogMajor(@"User did ask to quit");
 			[self cleanup];
@@ -996,10 +1021,23 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 			break;
 		case NSAlertAlternateReturn:
 		default:
+            DDLogMajor(@"User canceled quit");
 			[NSApp replyToApplicationShouldTerminate:NO];
 			break;
 	}
 }
+
+-(BOOL)checkForExit {
+//return YES if we're trying to exit
+	if (quitWhenCurrentDownloadsComplete) {
+		if ( ![tiVoManager anyTivoActive]) {
+            [[NSApplication sharedApplication] terminate:nil];
+        }
+	     return YES;
+		}
+	return NO;
+}
+
 
 -(void) cleanup {
 	

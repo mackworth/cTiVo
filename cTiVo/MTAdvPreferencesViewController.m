@@ -202,17 +202,12 @@
 //    [self testFileName:str];
 //
     NSString * pattern = self.fileNameField.stringValue;
-    NSMutableString * fileNames = [NSMutableString stringWithFormat: @"FOR TEST PATTERN: %@\n",pattern];
+    NSMutableString * fileNames = [NSMutableString stringWithFormat: @"FOR TEST PATTERN >>> %@\n",pattern];
 
-    MTProgramTableView * programs = ((MTAppDelegate *) [NSApp delegate]).mainWindowController. tiVoShowTable;
-    NSArray	*shows = programs.sortedShows;
-    NSIndexSet *selectedRowIndexes = [programs selectedRowIndexes];
-    if (selectedRowIndexes.count > 0) {
-        shows = [shows objectsAtIndexes:selectedRowIndexes ];
-      }
+    NSArray	*shows = [((MTAppDelegate *) [NSApp delegate]) currentSelectedShows] ;
     for (MTTiVoShow * show in shows) {
         MTDownload * testDownload = [MTDownload downloadForShow:show withFormat:[tiVoManager selectedFormat] intoDirectory:[tiVoManager downloadDirectory ]];
-        [fileNames appendFormat:@"%@ - %@\n",show.showTitle, [testDownload swapKeywordsInString:pattern]];
+        [fileNames appendFormat:@"%@ >>>> %@\n",show.showTitle, [testDownload swapKeywordsInString:pattern]];
     }
 
     NSAttributedString * results = [[NSAttributedString alloc] initWithString:fileNames];

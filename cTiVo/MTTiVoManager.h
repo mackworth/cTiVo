@@ -46,7 +46,7 @@
 @property (nonatomic, strong) MTFormat *selectedFormat;
 @property (atomic) int numEncoders;
 @property (nonatomic,readonly) int totalShows; // numCommercials, numCaptions;//Want to limit launches to two encoders.
-@property (nonatomic, strong) NSNumber *processingPaused, *quitWhenCurrentDownloadsComplete;
+@property (nonatomic, strong) NSNumber *processingPaused;
 @property (nonatomic, strong) NSDictionary *showsOnDisk;
 @property (nonatomic, readonly) BOOL anyShowsCompleted;
 @property (nonatomic, strong) NSArray *currentMediaKeys;
@@ -124,6 +124,7 @@
 - (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification;   //Growl notification
 -(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path;
 -(NSString *)getAMediaKey;
+-(BOOL) checkForExit;
 
 @end
 

@@ -145,7 +145,6 @@ __DDLOGHERE__
 		self.opsQueue.maxConcurrentOperationCount = 4;
 
 		_processingPaused = @(NO);
-		self.quitWhenCurrentDownloadsComplete = @(NO);
 		
 		[self loadGrowl];
 //		NSLog(@"Getting Host Addresses");
@@ -288,6 +287,20 @@ __DDLOGHERE__
 			download.show.protectedShow = @NO; //let them delete from queue
 		}
 	}
+}
+
+
+-(void)writeDownloadQueueToUserDefaults {
+	NSMutableArray * downloadArray = [NSMutableArray arrayWithCapacity:_downloadQueue.count];
+	for (MTDownload * download in _downloadQueue) {
+		[downloadArray addObject:[download queueRecord]];
+	}
+    DDLogVerbose(@"writing DL queue: %@", downloadArray);
+	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];
+		
+	[self.subscribedShows saveSubscriptions];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+
 }
 
 
@@ -610,7 +623,7 @@ __DDLOGHERE__
 -(void)pauseQueue:(NSNumber *)askUser
 {
     if ([self anyTivoActive] && [askUser boolValue]) {
-		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete stage of current shows" informativeTextWithFormat:@""];
+		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current show(s)" informativeTextWithFormat:@""];
 		NSInteger returnValue = [scheduleAlert runModal];
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
 		if (returnValue == NSAlertDefaultReturn) {
@@ -642,6 +655,10 @@ __DDLOGHERE__
         }
     } else {
         self.processingPaused = @(YES);
+        for (MTTiVo *tiVo in _tiVoList) {
+            [tiVo rescheduleAllShows];
+        }
+
     }
 	[self configureSchedule];
 }
@@ -1100,7 +1117,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 -(void) testAllChannelsForPS {
     NSMutableSet * channelsTested = [NSMutableSet new];
     NSMutableArray * testsToRun = [NSMutableArray new];
-    NSArray * programs = ((MTAppDelegate *) [NSApp delegate]).currentShows;
+    NSArray * programs = [((MTAppDelegate *) [NSApp delegate]) currentSelectedShows];
     for (MTTiVoShow * show in programs) {
         if (!(show.protectedShow.boolValue) && ! show.isQueued ) {
             NSString * channel = show.stationCallsign;
@@ -1371,32 +1388,10 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	return n;
 }
 
-//-(BOOL)playVideoForDownloads:(NSArray *) downloads {
-//	for (MTDownload *download in downloads) {
-//		if (download.isDone) {
-//			if ([download playVideo])  {
-//				return YES;		}
-//		}
-//	}
-//	return NO;
-//}
-//
-//-(BOOL)revealInFinderForDownloads:(NSArray *) downloads {
-//	NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:downloads.count];
-//	for (MTDownload *show in downloads) {
-//		NSURL * showURL = [show videoFileURLWithEncrypted:YES];
-//		if (showURL) {
-//			[showURLs addObject:showURL];
-//		}
-//	}
-//	if (showURLs.count > 0) {
-//		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
-//		return YES;
-//	} else{
-//		return NO;
-//	}
-//	
-//}
+-(BOOL) checkForExit {
+    return [(MTAppDelegate *) [NSApp delegate] checkForExit];
+}
+
 #pragma mark - Growl/Apple Notifications
 
 -(void) loadGrowl {
@@ -1493,52 +1488,9 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         numEncoders--;
     }
     DDLogMajor(@"Num encoders after decrement from notification %@ is %d ",notification.name,numEncoders);
-	if ([_quitWhenCurrentDownloadsComplete boolValue] && ![self tiVosProcessing]) {
-		//Quit here
-		[NSApp terminate:nil];
-	}
-//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
+
     NSNotification *restartNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
     [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:restartNotification afterDelay:2];
-}
-
--(BOOL)tiVosProcessing
-{
-	BOOL returnValue = NO;
-	for (MTTiVo *tiVo in _tiVoList) {
-		if (tiVo.isProcessing) {
-			returnValue = YES;
-			break;
-		}
-	}
-	return returnValue;
-}
-
-//-(void)commercialFinished
-//{
-//	numCommercials--;
-//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-//    DDLogMajor(@"num commercials after decrement is %d",numCommercials);
-//}
-//
-//-(void)captionFinished
-//{
-//	numCaptions--;
-//    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil];
-//    DDLogMajor(@"num captions after decrement is %d",numCaptions);
-//}
-
--(void)writeDownloadQueueToUserDefaults {
-	NSMutableArray * downloadArray = [NSMutableArray arrayWithCapacity:_downloadQueue.count];
-	for (MTDownload * download in _downloadQueue) {
-		[downloadArray addObject:[download queueRecord]];
-	}
-    DDLogVerbose(@"writing DL queue: %@", downloadArray);
-	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];
-		
-	[self.subscribedShows saveSubscriptions];
-	[[NSUserDefaults standardUserDefaults] synchronize];
-
 }
 
 #pragma mark - Handle directory

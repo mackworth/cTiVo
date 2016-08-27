@@ -345,7 +345,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(NSInteger)isProcessing
 {
     for (MTDownload *download in self.downloadQueue) {
-        if (download.isInProgress) {
+        if (download.isInProgress && (download.downloadStatus.intValue != kMTStatusWaiting)) {
 			return YES;
         }
     }
@@ -355,7 +355,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)rescheduleAllShows
 {
     for (MTDownload *download in self.downloadQueue) {
-        if (download.isInProgress) {
+        if (download.isInProgress ) {
             [download prepareForDownload:NO];
         }
     }
@@ -702,9 +702,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //        DDLogMajor(@"%@ Delaying download until %@",self,tiVoManager.queueStartTime);
 //		return;
 //    }
-	if ([tiVoManager.processingPaused boolValue] || [tiVoManager.quitWhenCurrentDownloadsComplete boolValue]) {
-		return;
-	}
+	if ([tiVoManager checkForExit]) return;
+	if (tiVoManager.processingPaused.boolValue) return;
+
 	if ([info isKindOfClass:[NSNotification class]]) {
 		NSNotification *notification = (NSNotification *)info;
 		if (!notification.object || notification.object == self) {
