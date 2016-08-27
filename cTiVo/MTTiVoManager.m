@@ -1221,8 +1221,8 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 -(void) sortDownloadQueue {
 
 	[self.downloadQueue sortUsingComparator:^NSComparisonResult(MTDownload * download1, MTDownload* download2) {
-		int status1 = download1.downloadStatus.intValue; if (status1 > kMTStatusDone) status1= kMTStatusDone; //sort failed/done together
-		int status2 = download2.downloadStatus.intValue;if (status2 > kMTStatusDone) status2= kMTStatusDone;
+		NSInteger status1 = download1.downloadStatusSorter;
+        NSInteger status2 = download2.downloadStatusSorter;
 		return status1 > status2 ? NSOrderedAscending : status1 < status2 ? NSOrderedDescending : NSOrderedSame;
 		
 	}];

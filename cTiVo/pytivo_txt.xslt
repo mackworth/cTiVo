@@ -15,8 +15,8 @@ xmlns="http://www.w3.org/1999/XSL/Transform">
   <value-of select="name()"/>
   <text> : </text>
   <choose>
-    <when test="contains(.,' Copyright Tribune Media Services, Inc.')">
-      <value-of select="substring-before(.,' Copyright Tribune Media Services, Inc.')" />
+    <when test="contains(.,' Copyright Rovi, Inc.')">
+      <value-of select="substring-before(.,' Copyright Rovi, Inc.')" />
     </when>
     <otherwise>
       <value-of select="." />

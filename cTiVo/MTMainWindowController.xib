@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11191" systemVersion="15G31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="10116"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11191"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTMainWindowController">
@@ -86,11 +86,11 @@
                                         <rect key="frame" x="0.0" y="0.0" width="845" height="323"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES"/>
                                         <clipView key="contentView" id="7XD-lV-R8z">
-                                            <rect key="frame" x="1" y="0.0" width="843" height="302"/>
+                                            <rect key="frame" x="1" y="0.0" width="843" height="322"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveName="ProgramTable" rowSizeStyle="automatic" headerView="40" viewBased="YES" id="38" customClass="MTProgramTableView">
-                                                    <rect key="frame" x="0.0" y="0.0" width="908" height="0.0"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="908" height="305"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -111,7 +111,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="306">
-                                                                    <rect key="frame" x="1" y="1" width="42" height="17"/>
+                                                                    <rect key="frame" x="0.0" y="1" width="42" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="308">
@@ -704,7 +704,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="EpisodeID" editable="NO" width="64" minWidth="50" maxWidth="160" hidden="YES" headerToolTip="Episode ID valid across TiVos; used for subscriptions" id="1336">
+                                                        <tableColumn identifier="EpisodeID" editable="NO" width="64" minWidth="50" maxWidth="250" hidden="YES" headerToolTip="Episode ID valid across TiVos; used for subscriptions" id="1336">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Episode ID">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -782,10 +782,9 @@
                                                     </connections>
                                                 </tableView>
                                             </subviews>
-                                            <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </clipView>
                                         <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="39">
-                                            <rect key="frame" x="1" y="238" width="843" height="16"/>
+                                            <rect key="frame" x="1" y="306" width="843" height="16"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                         <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="41">
@@ -811,7 +810,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveName="DownloadTable" rowSizeStyle="automatic" headerView="49" viewBased="YES" id="51" customClass="MTDownloadTableView">
-                                                    <rect key="frame" x="0.0" y="0.0" width="917" height="0.0"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="917" height="127"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -866,7 +865,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="1263">
-                                                                    <rect key="frame" x="22" y="1" width="17" height="17"/>
+                                                                    <rect key="frame" x="22" y="1" width="18" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                     <subviews>
                                                                         <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="TOe-go-xA7">
@@ -980,7 +979,7 @@
                                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
-                                                            <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="downloadStatus"/>
+                                                            <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="downloadStatusSorter"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="NcC-st-sjz" customClass="MTProgressindicator">
@@ -1062,7 +1061,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Which TiVo to download from" id="59">
-                                                                    <rect key="frame" x="448" y="1" width="48" height="17"/>
+                                                                    <rect key="frame" x="667" y="1" width="48" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="61">
@@ -1523,7 +1522,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="EpisodeID" editable="NO" width="64" minWidth="50" maxWidth="160" hidden="YES" headerToolTip="Episode ID valid across TiVos; used for subscriptions" id="1330">
+                                                        <tableColumn identifier="EpisodeID" editable="NO" width="64" minWidth="50" maxWidth="250" hidden="YES" headerToolTip="Episode ID valid across TiVos; used for subscriptions" id="1330">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Episode ID">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1742,7 +1741,6 @@
                                                     </connections>
                                                 </tableView>
                                             </subviews>
-                                            <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </clipView>
                                         <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="50">
                                             <rect key="frame" x="1" y="128" width="843" height="16"/>
@@ -1753,7 +1751,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                         <tableHeaderView key="headerView" id="49">
-                                            <rect key="frame" x="0.0" y="0.0" width="855" height="17"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="917" height="17"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableHeaderView>
                                     </scrollView>
@@ -1818,7 +1816,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveName="SubscriptionTable" rowSizeStyle="automatic" headerView="251" viewBased="YES" id="249" customClass="MTSubscriptionTableView">
-                                                    <rect key="frame" x="0.0" y="0.0" width="779.5" height="0.0"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="843" height="102"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1839,11 +1837,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="267">
-                                                                    <rect key="frame" x="1" y="1" width="372" height="17"/>
+                                                                    <rect key="frame" x="0.0" y="1" width="371.5" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="268">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="372" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="371.5" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="269">
                                                                                 <font key="font" metaFont="system"/>
@@ -1873,7 +1871,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="263">
-                                                                    <rect key="frame" x="375" y="1" width="150" height="17"/>
+                                                                    <rect key="frame" x="375.5" y="1" width="150" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="264">
@@ -1907,7 +1905,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Format of video file to create" id="OWl-YT-bUe" customClass="MTPopUpTableCellView">
-                                                                    <rect key="frame" x="528" y="1" width="136" height="17"/>
+                                                                    <rect key="frame" x="528.5" y="1" width="136" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -1961,7 +1959,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Will be added to iTunes" id="gsv-xW-ehC" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="667" y="1" width="40" height="17"/>
+                                                                    <rect key="frame" x="667.5" y="1" width="40" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -1981,7 +1979,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Will be added to iTunes" id="JZK-Uz-DYP" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="710" y="1" width="32" height="17"/>
+                                                                    <rect key="frame" x="710.5" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -2001,7 +1999,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Will be added to iTunes" id="CTU-yP-LYD" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="745" y="1" width="32" height="17"/>
+                                                                    <rect key="frame" x="745.5" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -2114,7 +2112,6 @@
                                                     </connections>
                                                 </tableView>
                                             </subviews>
-                                            <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </clipView>
                                         <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="250">
                                             <rect key="frame" x="1" y="85" width="843" height="16"/>

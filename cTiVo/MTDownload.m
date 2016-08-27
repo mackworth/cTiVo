@@ -2636,7 +2636,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(NSString *) showStatus {
 	switch (self.downloadStatus.intValue) {
 		case  kMTStatusNew :				return @"";
-        case  kMTStatusWaiting :          return @"Waiting";
+        case  kMTStatusWaiting :            return @"Waiting";
         case  kMTStatusDownloading :		return @"Downloading";
 		case  kMTStatusDownloaded :			return @"Downloaded";
 		case  kMTStatusDecrypting :			return @"Decrypting";
@@ -2655,6 +2655,27 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		default: return @"";
 	}
 }
+
+-(NSInteger) downloadStatusSorter {
+//used to put column in right order  (hack due to adding kMTStatusWaiting as -1 to avoid fixing up queues)
+//#define kMTStatusWaiting -1   //should reorder someday, but persistent queue stores these values in prefs
+//#define kMTStatusNew 0
+//#define kMTStatusDownloading 1
+//also sorts Done/Failed together
+
+    NSInteger status = self.downloadStatus.integerValue;
+    if (status >= kMTStatusDone) {
+        status = kMTStatusDone;
+    }
+     if (status >= kMTStatusDownloading) {
+        return status+1;
+    } else if (status == kMTStatusWaiting) {
+        return 1;
+    } else {  //new
+        return status;
+    }
+}
+
 -(NSString *) imageString {
 	if (self.downloadStatus.intValue == kMTStatusDeleted) {
 		return @"deleted";

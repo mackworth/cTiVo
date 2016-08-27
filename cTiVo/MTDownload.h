@@ -51,6 +51,8 @@
 
 #pragma mark - Properties for download/conversion progress
 @property (atomic, strong) NSNumber *downloadStatus;
+@property (readonly) NSInteger downloadStatusSorter;
+
 @property (readonly) BOOL isNew, isDownloading, isInProgress, isDone;
 //convenience versions of downloadStatus
 @property (atomic, assign) BOOL isCanceled;

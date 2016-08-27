@@ -361,23 +361,8 @@ __DDLOGHERE__
 -(void) retrieveTVDBSeriesID {
 @autoreleasepool {
     NSAssert (![NSThread isMainThread], @"getTVDBSeriesID not running in background");
-    NSString *longSeriesID = nil;
-    NSString *shortSeriesID = nil;
-    if (self.seriesId.length < 10) {
-        shortSeriesID = self.seriesId;
-        if (self.seriesId.length > 2) {
-            longSeriesID = [NSString stringWithFormat:@"SH00%@",[self.seriesId substringFromIndex:2]];
-        }
-    } else {
-        shortSeriesID = [NSString stringWithFormat:@"SH%@",[self.seriesId substringFromIndex:2]];
-        longSeriesID = self.seriesId;
-    }
-    NSString * epSeriesID = [NSString stringWithFormat:@"EP%@",[longSeriesID substringFromIndex:2]];
 
-    NSString * mySeriesIDTVDB = [self retrieveTVDBIdFromZap2itId:epSeriesID ofType:kMTVDBSeriesFoundWithEP];
-    if (!mySeriesIDTVDB)  mySeriesIDTVDB = [self retrieveTVDBIdFromZap2itId:longSeriesID ofType:kMTVDBSeriesFoundWithSH];
-    if (!mySeriesIDTVDB)  mySeriesIDTVDB = [self retrieveTVDBIdFromZap2itId:shortSeriesID ofType:kMTVDBSeriesFoundWithShort];
-    if (!mySeriesIDTVDB)  mySeriesIDTVDB = [self retrieveTVDBIdFromSeriesName:self.seriesTitle];
+    NSString * mySeriesIDTVDB = [self retrieveTVDBIdFromSeriesName:self.seriesTitle];
     //Don't give up yet; look for "Series: subseries" format
     if (!mySeriesIDTVDB)  {
         NSArray * splitName = [self.seriesTitle componentsSeparatedByString:@":"];
@@ -397,7 +382,7 @@ __DDLOGHERE__
    } else {
         [self rememberTVDBSeriesID:@""];
         DDLogDetail(@"TheTVDB series not found: %@: %@ ",self.seriesTitle, self.seriesId);
-        [self addValue: epSeriesID   inStatistic: kMTVDBNoSeries forShow:self.seriesTitle];
+        [self addValue: self.seriesId   inStatistic: kMTVDBNoSeries forShow:self.seriesTitle];
         self.gotTVDBDetails = YES;
         return; //really can't get them.
     }
@@ -1755,15 +1740,21 @@ static void * originalAirDateContext = &originalAirDateContext;
 
 -(void)setShowDescription:(NSString *)showDescription
 {
-    NSString * tribuneCopyright = @" Copyright Tribune Media Services, Inc.";
 	if (_showDescription == showDescription) {
 		return;
 	}
-    if ([showDescription hasSuffix: tribuneCopyright]){
-        _showDescription = [showDescription substringToIndex:showDescription.length -tribuneCopyright.length];
+    NSString * roviCopyright = @" Copyright Rovi, Inc.";
+     if ([showDescription hasSuffix: roviCopyright]){
+        NSInteger lengthTokeep = showDescription.length -roviCopyright.length;
+        if (lengthTokeep > 0 && [showDescription characterAtIndex:lengthTokeep-1 ] == '*' ) lengthTokeep--;
+        _showDescription = [showDescription substringToIndex:lengthTokeep];
     } else {
-        _showDescription = showDescription;
-
+        NSString * tribuneCopyright = @" Copyright Tribune Media Services, Inc.";
+        if ([showDescription hasSuffix: tribuneCopyright]){
+            _showDescription = [showDescription substringToIndex:showDescription.length -tribuneCopyright.length];
+        } else {
+            _showDescription = showDescription;
+        }
     }
 }
 
