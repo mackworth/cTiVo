@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# use dirname $0 to get path to ourselves
-ffmpeg_path=$(dirname "$0")/ffmpeg
-
-# kill ffmpeg if our script is killed
-trap terminate SIGTERM
-
 usage() {
   cat << EOF 1>&2
 Usage: $0 -edl <edl file> <ffmpeg options>
@@ -14,6 +8,27 @@ EOF
 exit 1
 }
 
+# use dirname $0 to get path to ourselves
+ffmpeg_path=$(dirname "$0")/ffmpeg
+
+# kill any encode that's going on in the background before 
+# exiting ourselves
+trap terminate SIGTERM
+terminate() {
+  if [ -n $pid ]; then
+    kill -TERM "$pid" 2> /dev/null
+  fi
+  echo "Terminating"
+  exit 15
+}
+
+# http://stackoverflow.com/questions/3572030/bash-script-absolute-path-with-osx
+realpath() {
+  [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
+# convert timestamp (i.e. 00:10:30,123) to seconds (i.e. 40.123)
+# for the purpose of calculating a % progress indicator
 timestamp_to_seconds() {
   local timestamp="$1"
   hours=$(echo $timestamp | cut -d: -f1)
@@ -30,7 +45,8 @@ timestamp_to_seconds() {
 #  min_percent:
 #  max_percent: the range into which we map ffmpeg progress for reporting (0-100)
 #  duration: expected length of current segment of video in seconds
-#  logfile: path to log file
+#  output: ffmpeg output file
+#  logfile: ffmpeg log file
 #
 # cTiVo will kill this script if it continuously outputs the same progress % for a
 # MaxProgressDelay (default 2 min) window.
@@ -41,12 +57,17 @@ launch_and_monitor_ffmpeg() {
   local output="$1"; shift
   local logfile="$1"; shift
   local progress percent last_percent
+
+  # make sure ffmpeg doesn't prompt us to remove the output file
+  # if for some reason it pre-exists
+  rm -rf "$output"
+
   set -x
   "$ffmpeg_path" "$@" "$output" >& "$logfile" &
   pid=$!
   set +x
   last_percent="$min_percent"
-  echo "$last_percent %"
+  echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
   while kill -0 $pid &> /dev/null; do
     progress=$(tail -c 1000 "$logfile"  | egrep -o 'time=\S+' | cut -d= -f2 | tail -n1)
     if [ -n "$progress" ]; then
@@ -60,7 +81,7 @@ launch_and_monitor_ffmpeg() {
     sleep 1
   done 
   last_percent="$max_percent"
-  echo "$last_percent %"
+  echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
   pid=
 
   if [ ! -f "$output" ]; then
@@ -69,16 +90,8 @@ launch_and_monitor_ffmpeg() {
   fi
 }
 
-# kill any encode that's going on in the background before 
-# exiting ourselves
-terminate() {
-  if [ -n $pid ]; then
-    kill -TERM "$pid" 2> /dev/null
-  fi
-  echo "Terminating"
-  exit 15
-}
-
+# attempt to keep the wrapper script interface transparent, 
+# just adding an -edl option
 while (( $# > 0 )); do
   if [ "$1" == "-h" ]; then
     usage
@@ -91,7 +104,7 @@ while (( $# > 0 )); do
     shift 2
     continue
   fi
-# last positional argument should be the output file
+  # last positional argument should be the output file
   if (( $# == 1 )); then
     output="$1"
     shift 1
@@ -105,6 +118,11 @@ while (( $# > 0 )); do
   shift
 done
 
+# sanity check the arguments
+if [ ! -x "$ffmpeg_path" ]; then
+  echo "internal error: unable to find executable ffmpeg at $ffmpeg_path"
+  exit 1
+fi
 if [ -z "$output" ]; then
   echo "missing output file"
   usage
@@ -117,6 +135,7 @@ elif [ ! -f "$input" ]; then
 fi
 ext="${output##*.}"
 
+# work dir prep
 tmpdir="${input%.*}_ffmpeg"
 rm -rf "$tmpdir"
 mkdir -p "$tmpdir/comskip"
@@ -132,8 +151,8 @@ duration=$(echo "$original_duration-$cut_duration" | bc -l)
 # check if the audio stream is ac3 and 5.1
 # if it is, create two audio streams in the output file: 2-channel aac and ac3 5.1
 # otherwise, just convert to aac
-audio_stream=$(echo "$file_info" | grep -m1 Audio: | perl -pe 's/\s*Stream #(\d:\d).*/$1/')
-video_stream=$(echo "$file_info" | grep -m1 Video: | perl -pe 's/\s*Stream #(\d:\d).*/$1/')
+audio_stream=$(echo "$file_info" | perl -ne 'print $1 if /^\s*Stream #(\d:\d).*Audio:.*/' | head -n1)
+video_stream=$(echo "$file_info" | perl -ne 'print $1 if /^\s*Stream #(\d:\d).*Video:.*/' | head -n1)
 map_opts="-map $video_stream -map $audio_stream"
 ac3_opts=
 if echo "$file_info" | grep -m1 Audio: | grep ac3 | grep --quiet '5\.1'; then
@@ -143,29 +162,34 @@ fi
 
 if [ -z "$edl_file" ]; then
   # no edl file, don't need to encode segments and merge, simply encode with the modified audio streams
-  args=($ffmpeg_opts_pre_input -i "$input" $map_opts $ffmpeg_opts_post_input -strict -2 -c:a:0 aac $ac3_opts)
-  launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/ffmpeg.txt"
+  launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/ffmpeg.txt" $ffmpeg_opts_pre_input -i "$input" $map_opts $ffmpeg_opts_post_input -strict -2 -c:a:0 aac $ac3_opts
 
 else
   # encode segments separately and merge together
-  i=1
+
+  # arbitrarily choose 90% as the completion point of the segments
+  # rather than printing 0 - 100 % twice, which runs the risk (albeit small) of getting
+  # killed by cTiVo if the progress monitor sees the same % twice in a row
+  merge_start_percent=90
+
   progress=0
   for startstop in $(/usr/bin/awk '
-  BEGIN {OFS=":"}
-  {
-    if (NR == 1 && $1 > 0) {
-      print "",$1
-    } else {
-      if (NR > 1) {
-        print ss,$1
-      }
+BEGIN {OFS=":"}
+{
+  if (NR == 1 && $1 > 0) {
+    print "",$1
+  } else {
+    if (NR > 1) {
+      print ss,$1
     }
-    ss = $2
   }
-  END {print ss,""}
-  ' "$edl_file"); do
+  ss = $2
+}
+END {print ss,""}
+' "$edl_file"); do
     ss=$(echo $startstop | cut -d: -f1)
     to=$(echo $startstop | cut -d: -f2)
+    segment_name=${ss}_${to}
 
     # "input seeking" (-ss before the input file) in ffmpeg is very fast but
     # the timestamps are reset so -to is now really a duration rather than a timestamp to stop at
@@ -176,6 +200,8 @@ else
         continue
       fi
       this_duration=$(echo "$original_duration - $ss" | bc -l)
+    else
+      this_duration="$to"
     fi
     if [[ -n "$ss" ]]; then
       ss="-ss $ss"
@@ -184,20 +210,27 @@ else
       to="-to $this_duration"
     fi
 
-    launch_and_monitor_ffmpeg $(echo "90 * ($progress / $duration)" | bc -l) \
-                              $(echo "90 * (($progress + $this_duration) / $duration)" | bc -l) \
+    # TODO: remove -strict -2 once the bundled ffmpeg binary is updated to 3.1.1 or later
+    launch_and_monitor_ffmpeg $(echo "$merge_start_percent * ($progress / $duration)" | bc -l) \
+                              $(echo "$merge_start_percent * (($progress + $this_duration) / $duration)" | bc -l) \
                               $this_duration \
-                              "$tmpdir/segment${i}.$ext" \
+                              "$tmpdir/segment_$segment_name.$ext" \
                               "$tmpdir/logs/ffmpeg_segment$i.log" \
-                              $ss $ffmpeg_opts_pre_input -i "$input" $map_opts $ffmpeg_opts_post_input -strict -2 -c:a:0 aac $ac3_opts $to "$segment_filename"
+                              $ss $ffmpeg_opts_pre_input -i "$input" $map_opts $ffmpeg_opts_post_input -strict -2 -c:a:0 aac $ac3_opts $to
 
     progress=$(echo "$this_duration + $progress" | bc -l)
-    let i++
   done
 
   # merge the segments together
   # though this usually happens in under 2 minutes, it could 
   # take longer for larger videos, so track progress for the merge
-  rm -f "$output"
-  launch_and_monitor_ffmpeg 90 100 $duration "$tmpdir/logs/ffmpeg_concat.log" -f concat -safe 0 -i <"$(ls $tmpdir/segment*.$ext)" $map_opts -c copy $ac3_opts "$output"
-endif
+  for f in "$tmpdir"/segment*.$ext; do
+    echo file \'$(realpath "$f")\' >> "$tmpdir"/segments.txt
+  done
+  launch_and_monitor_ffmpeg $merge_start_percent \
+                            100 \
+                            $duration \
+                            "$output" \
+                            "$tmpdir/logs/ffmpeg_concat.log" \
+                            -f concat -safe 0 -i "$tmpdir"/segments.txt $map_opts -c copy $ac3_opts
+fi
