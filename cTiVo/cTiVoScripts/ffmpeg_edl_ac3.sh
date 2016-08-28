@@ -140,7 +140,7 @@ elif [ -z "$input" ]; then
   echo "missing -i"
   usage
 elif [ ! -f "$input" ]; then
-  echo "no such file: $input"
+  echo "no such file: $input" 
   usage
 fi
 ext="${output##*.}"
@@ -165,7 +165,7 @@ duration=$(echo "$original_duration-$cut_duration" | bc -l)
 audio_stream=$(echo "$file_info" | perl -ne 'print $1 if /^\s*Stream #(\d:\d).*Audio:.*/' | head -n1)
 video_stream=$(echo "$file_info" | perl -ne 'print $1 if /^\s*Stream #(\d:\d).*Video:.*/' | head -n1)
 if [[ -z "$video_stream" ]]; then
-  echo "$no_video_stream_message"
+  echo "$no_video_stream_message" >&2
   exit 1
 fi
 map_opts="-map $video_stream -map $audio_stream"
