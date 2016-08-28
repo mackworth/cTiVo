@@ -198,12 +198,13 @@ __DDLOGHERE__
     BOOL taskRunning = NO;
     for (NSArray *taskset in _taskArray) {
         for(MTTask *task in taskset) {
-            if (task.taskRunning) {
+            if (task.isRunning) {
                 taskRunning = YES;
                 DDLogVerbose(@"Tracking task chain: %@ for %@",task.taskName, self.download.show.showTitle);
                 break;
             }
         }
+        if (taskRunning) break;
     }
     if (!taskRunning) {
         //We need to move on

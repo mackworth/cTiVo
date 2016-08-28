@@ -59,7 +59,6 @@ __DDLOGHERE__
         _shouldReschedule = YES;
 		_successfulExitCodes = @[@0];
         launched = NO;
-        _taskRunning = NO;
     }
     return self;
 }
@@ -171,7 +170,6 @@ __DDLOGHERE__
 
 -(void)completeProcess
 {
-    _taskRunning = NO;
     DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus,[self reasonForTermination]);
     if (self.taskFailed) {
 		[self failedTaskCompletion];
@@ -239,7 +237,7 @@ __DDLOGHERE__
 	DDLogVerbose(@"Tracking %@ for show %@",_taskName,_download.show.showTitle);
 	if (![self.task isRunning]) {
         [self completeProcess];
-	} else {
+	} else if (_trackingRegEx || _progressCalc){
 		double newProgressValue = -1;
 		NSUInteger sizeOfFileSample = 180;
 		unsigned long long logFileSize = [self.logFileReadHandle seekToEndOfFile];
@@ -357,7 +355,6 @@ __DDLOGHERE__
     if (shouldLaunch) {
         [_task launch];
         launched = YES;
-        _taskRunning = YES;
         _pid = [_task processIdentifier];
         [self trackProcess];
     } else {
@@ -369,7 +366,6 @@ __DDLOGHERE__
 
 -(void)terminate
 {
-    _taskRunning = NO;
     if ([_task isRunning]) {
         [_task terminate];
 
@@ -400,7 +396,7 @@ __DDLOGHERE__
 
 -(BOOL)isRunning
 {
-    return _taskRunning;
+    return [_task isRunning];
 }
 
 -(void)dealloc

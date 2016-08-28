@@ -73,7 +73,7 @@ launch_and_monitor_ffmpeg() {
   rm -rf "$output"
 
   set -x
-  "$ffmpeg_path" "$@" "$output" >& "$logfile" &
+  "$ffmpeg_path" "$@" "$output" &> "$logfile" &
   pid=$!
   set +x
   last_percent="$min_percent"
