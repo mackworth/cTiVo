@@ -9,7 +9,7 @@
 #import "MTTaskChain.h"
 #import "MTDownload.h"
 #import "NSNotificationCenter+Threads.h"
-
+#import "MTTiVoManager.h" //Just for maskMediaKeys
 
 
 @implementation MTTaskChain
@@ -79,7 +79,7 @@ __DDLOGHERE__
 		currentTasks = _taskArray[i];
 		if (currentTasks.count ==1 ) {
             currentTask = currentTasks[0];
-			// No need to tee if only 1 task in level
+			// No need to tee if only 1 task in group
 			if (sourceToTee && currentTask.requiresInputPipe) {
 				currentTask.task.standardInput = sourceToTee;
 			}
@@ -131,7 +131,7 @@ __DDLOGHERE__
 		currentTasks[0].task.standardOutput = _dataSink;
 	}
     //Show configuration
-    DDLogVerbose(@"\n\nConfigured Task Chain: %@",self);
+    DDLogDetail(@"\n\n***Configured Task Chain***: %@",[self maskMediaKeys]);
 	return YES;
 }
 
@@ -140,12 +140,15 @@ __DDLOGHERE__
 	NSString *desc = @"";
 	desc = [desc stringByAppendingFormat:@"dataSource: %@",_dataSource];
 	desc = [desc stringByAppendingFormat:@"\ndataSink: %@",_dataSink];
-	desc = [desc stringByAppendingFormat:@"\nNumber of Task Levels: %ld",_taskArray.count];
+	desc = [desc stringByAppendingFormat:@"\nNumber of Task Groups: %ld",_taskArray.count];
 	for (NSArray *tasks in _taskArray) {
-        desc = [desc stringByAppendingFormat:@"\n---------------------------------------\nThis level has %ld tasks",tasks.count];
+        desc = [desc stringByAppendingFormat:@"\n---------------------------------------\nThis group has %ld tasks",tasks.count];
         for (MTTask *task in tasks) {
             desc = [desc stringByAppendingFormat:@"\n%@",task];
         }
+    }
+    if (self.nextTaskChain) {
+        desc = [desc stringByAppendingFormat:@"\n=======================================\nNext Chain: %@",self.nextTaskChain];
     }
 	return desc;
 }

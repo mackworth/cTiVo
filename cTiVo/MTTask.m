@@ -11,6 +11,9 @@
 #import "MTTaskChain.h"
 #import "MTTiVoManager.h"
 #import "NSNotificationCenter+Threads.h"
+#import "NSArray+Map.h"
+#import "NSString+Helpers.h"
+
 #ifndef DEBUG
 #import "Crashlytics/Crashlytics.h"
 #endif
@@ -39,6 +42,9 @@ __DDLOGHERE__
 //    mTTask.task  = [NSTask new];
     mTTask.download = download;
     mTTask.taskName = name;
+    if ([mTTask.task respondsToSelector:@selector(setQualityOfService:)]) {  //os10.0 and later
+        mTTask.task.qualityOfService = NSQualityOfServiceUtility;
+    }
     mTTask.task.currentDirectoryPath = [tiVoManager tmpFilesDirectory];
     return mTTask;
 }
@@ -237,28 +243,30 @@ __DDLOGHERE__
 	DDLogVerbose(@"Tracking %@ for show %@",_taskName,_download.show.showTitle);
 	if (![self.task isRunning]) {
         [self completeProcess];
-	} else if (_trackingRegEx || _progressCalc){
-		double newProgressValue = -1;
-		NSUInteger sizeOfFileSample = 180;
-		unsigned long long logFileSize = [self.logFileReadHandle seekToEndOfFile];
-		if (logFileSize > sizeOfFileSample) {
-			[self.logFileReadHandle seekToFileOffset:(logFileSize-sizeOfFileSample)];
-			NSData *tailOfFile = [self.logFileReadHandle readDataOfLength:sizeOfFileSample];
-			NSString *data = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-            if (_trackingRegEx) {
-                newProgressValue = [self progressValueWithRx:data];
+    } else {
+        if (_trackingRegEx || _progressCalc) {
+            double newProgressValue = -1;
+            NSUInteger sizeOfFileSample = 180;
+            unsigned long long logFileSize = [self.logFileReadHandle seekToEndOfFile];
+            if (logFileSize > sizeOfFileSample) {
+                [self.logFileReadHandle seekToFileOffset:(logFileSize-sizeOfFileSample)];
+                NSData *tailOfFile = [self.logFileReadHandle readDataOfLength:sizeOfFileSample];
+                NSString *data = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
+                if (_trackingRegEx) {
+                    newProgressValue = [self progressValueWithRx:data];
+                }
+                if (_progressCalc) {
+                    newProgressValue = _progressCalc(data);
+                }
+                if (newProgressValue != -1) {
+                    DDLogVerbose(@"New progress value for %@ is %lf",_taskName,newProgressValue);
+                    if ((newProgressValue != _download.processProgress) && (newProgressValue != 0)) {
+                        _download.processProgress = newProgressValue;
+                    }
+                }
             }
-            if (_progressCalc) {
-                newProgressValue = _progressCalc(data);
-            }
-            if (newProgressValue != -1) {
-                DDLogVerbose(@"New progress value for %@ is %lf",_taskName,newProgressValue);
-				if ((newProgressValue != _download.processProgress) && (newProgressValue != 0)) {
-					_download.processProgress = newProgressValue;
-				}
-			}
-		}
-		[self performSelector:@selector(trackProcess) withObject:nil afterDelay:0.5];
+        }
+    [self performSelector:@selector(trackProcess) withObject:nil afterDelay:0.5];
 	}
 }
 
@@ -283,7 +291,26 @@ __DDLOGHERE__
 -(NSString *)description
 {
     NSString *desc = [NSString stringWithFormat:@"Task Name: %@",_taskName];
-    desc = [desc stringByAppendingFormat:@"\n%@ input pipe",_requiresInputPipe ? @"Requires" : @"Does not require"];
+    desc = [desc stringByAppendingFormat:@"\nLaunchPath: %@", _task.launchPath];
+
+    //try to provide argument list in cut/paste form for bash
+    NSCharacterSet *specialCharSet = [NSCharacterSet characterSetWithCharactersInString:@" $\"\\"];
+    // space, dollar sign, quote, backslash
+
+    NSArray * arguments = [_task.arguments mapObjectsUsingBlock:^id(NSString * argument, NSUInteger idx) {
+        if (argument.length ==0) {
+            return @"\"\"";
+        }
+        if ([argument rangeOfCharacterFromSet:specialCharSet].length) {
+            return [NSString stringWithFormat:@"'%@'",argument]; //surround with 's; if ' also, then fails!
+        }
+        if ([argument contains:@"'"]) {
+            return [NSString stringWithFormat:@"\"%@\"", argument]; //if single quote, surround with double.
+
+        }
+        return argument;
+    }];
+    desc = [desc stringByAppendingFormat:@"\nArguments: %@",[arguments componentsJoinedByString:@" "]];
     desc = [desc stringByAppendingFormat:@"\n%@ output pipe",_requiresOutputPipe ? @"Requires" : @"Does not require"];
     desc = [desc stringByAppendingFormat:@"\nStandard Input: %@",_task.standardInput];
     desc = [desc stringByAppendingFormat:@"\nStandard Output: %@",_task.standardOutput];

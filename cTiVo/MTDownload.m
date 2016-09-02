@@ -237,7 +237,6 @@ __DDLOGHERE__
     if (self.isDownloading) {
         DDLogMajor(@"%@ downloaded %ldK of %0.0f KB; %0.1f%%",self,self.totalDataDownloaded/1000, self.show.fileSize/1000, self.processProgress*100);
     }
-    [self cancel];
     if (self.encodeFormat.isTestPS) {
         //if it was a test, then we knew it would fail whether it's audio-only OR no video encoder, so everything's good
         if (!self.isDone) {
@@ -248,6 +247,7 @@ __DDLOGHERE__
             [self progressUpdated];
         }
     } else {
+        [self cancel];
         DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self.show.showTitle, self.processProgress, self.previousCheck );
         if (self.downloadStatus.intValue == kMTStatusDone) {
             self.baseFileName = nil;
@@ -328,7 +328,6 @@ __DDLOGHERE__
 #endif
 	if (self.exportSubtitles) [result setValue:self.exportSubtitles forKey: kMTQueueExportSubtitles];
 	
-	DDLogVerbose(@"queueRecord for %@ is %@",self,result);
 	return [NSDictionary dictionaryWithDictionary: result];
 }
 
@@ -373,7 +372,6 @@ __DDLOGHERE__
 	download.includeAPMMetaData = queueEntry[kMTQueueIncludeAPMMetaData]; if (!download.includeAPMMetaData) download.includeAPMMetaData= @(NO);
 #endif
 	download.exportSubtitles = queueEntry[kMTQueueExportSubtitles]; if (!download.exportSubtitles) download.exportSubtitles= @(NO);
-	DDLogDetail(@"restored %@ with %@; inProgress",download, queueEntry);
     return download;
 }
 
@@ -964,7 +962,6 @@ NSString * fourChar(long n, BOOL allowZero) {
 		}
 		[arguments addObject:[argString substringWithRange:[tr rangeAtIndex:j]]];
 	}
-	DDLogVerbose(@"arguments: %@", [arguments maskMediaKeys]);
 	return arguments;
 	
 }
@@ -1536,18 +1533,21 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(void)download
 {
 	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-    NSCellStateValue channelUsesTS = [tiVoManager useTSForChannel:self.show.stationCallsign];
 
-    NSCellStateValue psFailed = [tiVoManager failedPSForChannel :self.show.stationCallsign];
+    NSString * channelName = self.show.stationCallsign;
+
     if (self.encodeFormat.isTestPS) {
         self.useTransportStream = NO;  //if testing whether PS is bad, naturally don't use TS
     } else { 
+        NSCellStateValue channelUsesTS =     [ tiVoManager useTSForChannel:channelName];
+        NSCellStateValue channelPSFailed =    [tiVoManager failedPSForChannel:channelName];
         self.useTransportStream =
             [defaults boolForKey:kMTDownloadTSFormat] ||  //always use TS OR
             channelUsesTS == NSOnState ||                   //user specified TS for this channel OR
-            (channelUsesTS == NSMixedState && psFailed == NSOnState ); //user didn't care, but we've seen need
+            (channelUsesTS == NSMixedState && channelPSFailed == NSOnState ); //user didn't care, but we've seen need
     }
-    if (([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOffState) &&
+    BOOL channelCommercials = [tiVoManager commercialsForChannel:channelName] != NSOffState;
+    if ((channelCommercials) &&
         (self.skipCommercials || self.markCommercials)) {
         //this channel doesn't use commercials
         DDLogDetail(@"Channel %@ doesn't use commercials; overriding  for %@",self.show.stationCallsign, self.show);
@@ -2356,13 +2356,13 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             if ([log rangeOfString:errMsg].location != NSNotFound) {
                 DDLogVerbose(@"found audio %@ in log file: %@",errMsg, [log maskMediaKeys]);
 
-                NSString * channel = self.show.stationCallsign;
-                DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self.show, channel);
-                if ( [tiVoManager failedPSForChannel:channel] != NSOnState ) {
-                    [tiVoManager setFailedPS:YES forChannelNamed:channel];
-                    if ([tiVoManager useTSForChannel:channel] == NSOffState && !self.encodeFormat.isTestPS) {
+                NSString * channelName = self.show.stationCallsign;
+                DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self.show, channelName);
+                if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
+                    [tiVoManager setFailedPS:YES forChannelNamed:channelName];
+                    if ([tiVoManager useTSForChannel:channelName] == NSOffState && !self.encodeFormat.isTestPS) {
                         //only notify if we're not (testing, OR previously seen, OR forcing PS)
-                        [tiVoManager  notifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channel] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
+                        [tiVoManager  notifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
                     }
                 }
                 return YES;
@@ -2527,6 +2527,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             if ( self.encodeFormat.isTestPS) {
                 // if a test, then we only try once.
                 if (!self.isDone) {
+                    [self cancel];
                     if (foundAudio) {
                         self.processProgress = 0.0;
                        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
@@ -2536,7 +2537,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                     }
                     [self progressUpdated];
                 }
-                [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+                [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
            } else if (foundAudio) {
                 //On a regular file, throw away audio-only file and try again
                [self deleteVideoFile];
@@ -2597,9 +2598,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(BOOL) shouldMarkCommercials
 {
-    return (self.encodeFormat.canMarkCommercials &&
+    return  self.encodeFormat.canMarkCommercials &&
             self.markCommercials &&
-            ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState));
+            ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState);
 }
 
 -(BOOL) shouldEmbedSubtitles

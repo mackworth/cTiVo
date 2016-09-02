@@ -120,11 +120,6 @@ __DDLOGHERE__
 		//Make sure there's a selected format, espeically on first launch
 		
 		_selectedFormat = nil;
-//        if (![defaults objectForKey:kMTSelectedFormat]) {
-//            //What? No previous format,must be our first run. Let's see if there's any iTivo prefs.
-//            [MTiTiVoImport checkForiTiVoPrefs];
-//        }
-//		if (([defaults boolForKey:kMTRunComSkip] && [defaults boolForKey:kMTSimultaneousEncode])) [defaults setBool:NO forKey:kMTRunComSkip];  //patch for iTivo imports
 
 		if ([defaults objectForKey:kMTSelectedFormat]) {
 			NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
@@ -136,7 +131,7 @@ __DDLOGHERE__
 		if (!_selectedFormat) {
 			self.selectedFormat = [_formatList objectAtIndex:0];
 		}
-				
+
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
 		DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
 
@@ -1111,19 +1106,24 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     } else {
         return NSOnState;
     }
-
 }
 
 -(void) testAllChannelsForPS {
     NSMutableSet * channelsTested = [NSMutableSet new];
     NSMutableArray * testsToRun = [NSMutableArray new];
     NSArray * programs = [((MTAppDelegate *) [NSApp delegate]) currentSelectedShows];
+    for (MTDownload * existingDL in [self downloadQueue]) {
+        //Avoids accidentally testing all shows twice
+        if (existingDL.encodeFormat.isTestPS && existingDL.isNew) {
+            [channelsTested addObject:existingDL.show.stationCallsign];
+        }
+    }
     for (MTTiVoShow * show in programs) {
         if (!(show.protectedShow.boolValue) && ! show.isQueued ) {
             NSString * channel = show.stationCallsign;
             if (channel) {
                 if ( ! [channelsTested containsObject:channel]) {
-                    if  ( ! [self channelNamed:channel] ) {
+                    if  ( [self useTSForChannel:channel ] != NSOnState ) {
                         MTDownload * newDownload = [MTDownload downloadTestPSForShow:show];
                         [testsToRun addObject:newDownload];
                     }
@@ -1151,24 +1151,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 #pragma mark - Media Key Support
 
-//-(NSDictionary *)currentMediaKeys
-//{
-//	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
-//	for (MTTiVo *thisTiVo in [self allTiVos]) {
-//		[tmpDict setObject:thisTiVo.mediaKey forKey:thisTiVo.tiVo.name];
-//	}
-//	return [NSDictionary dictionaryWithDictionary:tmpDict];
-//}
 
-//-(void)updateMediaKeysDefaults
-//{
-//	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
-//	for (MTTiVo *tiVo in [self allTiVos]) {
-//		[tmpDict setValue:tiVo.mediaKey forKey:tiVo.tiVo.name];
-//	}
-//	[[NSUserDefaults standardUserDefaults] setValue:tmpDict forKey:kMTMediaKeys];
-//}
-//
 -(NSString *)getAMediaKey
 {
 	NSString *key = nil;
@@ -1183,30 +1166,6 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 }
 
 #pragma mark - Download Management
-
-
-
-//-(void)checkShowTitleUniqueness:(MTTiVoShow *)program
-//{
-//    //Make sure the title isn't the same and if it is add a -1 modifier
-//    for (MTDownload *download in _downloadQueue) {
-//		if (download.show == program) continue;  //no need to check oneself
-//        if ([download.show.showTitle compare:program.showTitle] == NSOrderedSame) {
-//			NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
-//            NSTextCheckingResult *result = [ending firstMatchInString:program.showTitle options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, program.showTitle.length)];
-//            if (result) {
-//                int n = [[program.showTitle substringWithRange:[result rangeAtIndex:2]] intValue];
-//				DDLogVerbose(@"found show title %@, incrementing version number %d", program.showTitle, n);
-//				program.showTitle = [[program.showTitle substringWithRange:[result rangeAtIndex:1]] stringByAppendingFormat:@"-%d",n+1];
-//           } else {
-//                program.showTitle = [program.showTitle stringByAppendingString:@"-1"];
-//			   DDLogDetail(@"found show title %@, adding version number", program.showTitle);
-//            }
-//            [self checkShowTitleUniqueness:program];
-//        }
-//    }
-//
-//}
 
 -(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) shows
 								 toIndex:(NSUInteger)insertIndex
@@ -1600,60 +1559,6 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 #pragma mark - NetService delegate methods
 
 
-//#include <ifaddrs.h>
-//- (BOOL)isIPSelf:(NSData *)dataIn {
-//	struct sockaddr *realSocketAddress = (struct sockaddr *)[dataIn bytes];
-//	struct ifaddrs *ifap, *ifp;
-//
-//	if(getifaddrs(&ifap) < 0) {
-//		DDLogMajor (@"getifaddr error: %d",getifaddrs(&ifap));
-//		return NO;
-//	}
-//	
-//	for(ifp = ifap; ifp; ifp = ifp->ifa_next) {
-//		sa_family_t targetFamily = ifp->ifa_addr->sa_family;
-//		if (realSocketAddress->sa_family == targetFamily) {
-//			switch (targetFamily) {
-//				case AF_INET: {
-//					struct sockaddr_in  *socketAddress = (struct sockaddr_in *)realSocketAddress;
-//					struct in_addr targetAddress = socketAddress->sin_addr;
-//					struct in_addr myAddress = ((struct sockaddr_in*)ifp->ifa_addr)->sin_addr;
-//					DDLogVerbose(@"Checking iPv4: %s-%s (%u) vs  %u",inet_ntoa(myAddress), ifp->ifa_name, myAddress.s_addr, targetAddress.s_addr);
-//					if (myAddress.s_addr ==targetAddress.s_addr) {
-//						freeifaddrs(ifap);
-//						return YES;
-//					}
-//					break;
-//				}
-//				case AF_INET6: {
-//					struct sockaddr_in6  *socketAddress6= (struct sockaddr_in6 *)realSocketAddress;
-//					struct in6_addr targetAddress = socketAddress6->sin6_addr;
-//					struct in6_addr myAddress = ((struct sockaddr_in6*)ifp->ifa_addr)->sin6_addr;
-//					char myDest[INET6_ADDRSTRLEN];
-//					inet_ntop(AF_INET6, &targetAddress, myDest, sizeof myDest);
-//					
-//					char targetDest[INET6_ADDRSTRLEN];
-//					inet_ntop(AF_INET6, &targetAddress, targetDest, sizeof targetDest);
-//					
-//					DDLogVerbose(@"Checking: %s-%s",myDest, targetDest);
-//
-//					if (memcmp(&myAddress, &targetAddress, sizeof(myAddress))==0) {
-//						freeifaddrs(ifap);
-//						return YES;
-//					}
-//						break;
-//				}
-//				default: {
-//					DDLogVerbose(@"Unrecognized IP family: %d",targetFamily);
-//				}
-//			}
-//		}
-//	}
-//	// Free memory
-//	freeifaddrs(ifap);
-//	
-//	return NO;
-//}
 
 - (NSString *)dataToString:(NSData *) data {
     // Helper for getting information from the TXT data
@@ -1677,19 +1582,6 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 //    if (_tiVoList.count == 1) {  //Test code for single tivo testing
 //        return;
 //    }
-//		DDLogDetail(@"Checking hostAddresses for %@",ipAddress);
-//	for (NSString *hostAddress in self.hostAddresses) { //older, slower routine
-//		if ([hostAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
-//			return;  
-//		}
-//	}
-//	for (NSData * addr in addresses) {
-//		// This filters out PyTivo instances on the current host
-//		if ([self isIPSelf:addr]) {
-//			DDLogDetail(@"Found self at %@",ipAddress);
-//			//return;
-//		}
-//	}
 	NSDictionary * TXTRecord = [NSNetService dictionaryFromTXTRecordData:sender.TXTRecordData ];
 	for (NSString * key in [TXTRecord allKeys]) {
 		DDLogDetail(@"TXTKey: %@ = %@", key, [self dataToString:TXTRecord[key]]);

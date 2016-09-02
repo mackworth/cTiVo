@@ -19,7 +19,6 @@ __DDLOGHERE__
 		if (!_iTunes) DDLogMajor(@"couldn't find iTunes");
 	}
 	return _iTunes;
-
 }
 
 -(iTunesSource *) iTunesLibrary   {
@@ -28,26 +27,27 @@ __DDLOGHERE__
 		NSArray *librarySources = [[self.iTunes sources] filteredArrayUsingPredicate:libraryKindPred];
 		if ([librarySources count] > 0){
 			_iTunesLibrary = [librarySources objectAtIndex:0];
-	
 		} else {
-			DDLogMajor(@"couldn't find iTunes Library ");
+			DDLogMajor(@"couldn't find iTunes Library. iTunes not responding?");
 		}
 	}
 	return _iTunesLibrary;
-
 }
 
 -(iTunesLibraryPlaylist *) libraryPlayList {
 	if (!_libraryPlayList|| ![_libraryPlayList exists]) {
-		SBElementArray * allLists = [[self iTunesLibrary] libraryPlaylists];
+        iTunesSource * iLibrary = [self iTunesLibrary];
+        if (!iLibrary) return nil;
+		SBElementArray * allLists = [iLibrary libraryPlaylists];
 		if (allLists.count > 0) {
 				
 			iTunesPlaylist * list = [allLists objectAtIndex:0];
-			if ([list exists])
+            if ([list exists]) {
 				_libraryPlayList = (iTunesLibraryPlaylist *)list;
-		} else {
+            }
+		}
+        if (!_libraryPlayList) {
 			DDLogMajor(@"couldn't find iTunes playList");
-
 		}
 	}
 	return _libraryPlayList;
@@ -55,15 +55,16 @@ __DDLOGHERE__
 
 -(iTunesPlaylist *) tivoPlayList {
 	if (!_tivoPlayList || ![_tivoPlayList exists]) {
-		SBElementArray * allLists = [[self iTunesLibrary] playlists];
-		NSPredicate * libraryKindPred = [NSPredicate predicateWithFormat:@"name LIKE[CD] %@ ",@"Tivo Shows"];
+        iTunesSource * iLibrary = [self iTunesLibrary];
+        if (!iLibrary) return nil;
+		SBElementArray * allLists = [iLibrary playlists];
+        NSPredicate * libraryKindPred = [NSPredicate predicateWithFormat:@"name LIKE[CD] %@ ",@"Tivo Shows"];
 		NSArray *TivoLists = [allLists filteredArrayUsingPredicate:libraryKindPred];
 		if ([TivoLists count] > 0){
 			_tivoPlayList = [TivoLists objectAtIndex:0];
-			
-		}
+        }
 		if (!_tivoPlayList || ![_tivoPlayList exists]) {
-			//No playlist found; create one
+			//No tivo playlist found; create one
 			NSDictionary *props = @{
 				@"name":@"Tivo Shows",
 				//@"specialKind":[NSNumber numberWithInt:iTunesESpKMovies],
@@ -110,8 +111,12 @@ __DDLOGHERE__
 	//maintain source code parallel with MTTivoShow.m>metadataTagsWithImage
 	MTTiVoShow * show = download.show;
 	NSURL * showFileURL = [NSURL fileURLWithPath:download.encodeFilePath];
-
-	iTunesFileTrack * newTrack = (iTunesFileTrack *)[self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
+    iTunesPlaylist * myPlayList = self.tivoPlayList;
+    if (!myPlayList) {
+        DDLogReport(@"Couldn't create TiVo playlist, because library not found. Is iTunes frozen?" );
+        return nil;
+    }
+    iTunesFileTrack * newTrack = (iTunesFileTrack *)[self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
 	NSError * error = newTrack.lastError;
 	if ([newTrack exists]) {
 		DDLogReport(@"Added iTunes track:  %@", show.showTitle);

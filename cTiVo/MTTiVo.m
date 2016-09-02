@@ -195,26 +195,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 {
     if (self.manualTiVo) {
         return [NSString stringWithFormat:@"%@ (%@:%hd/%hd)",
-//        return [NSString stringWithFormat:@"Name: %@ \n IPAddress: %@ \n UserPort: %d \n UserPortSSL %d \n MediaKey: %@ \n Enabled: %@ \n Manual:%@",
             self.tiVo.name,
             self.tiVo.iPAddress,
             self.tiVo.userPort,
             self.tiVo.userPortSSL
-//            self.mediaKey,
-//            self.enabled ? @"Yes" : @"No",
-//            self.manualTiVo ? @"-Manual" : @""
             ];
     } else {
 		return self.tiVo.name;
-		//		[NSString stringWithFormat:@"Name: %@, Manual:%@",
-
-//        return [NSString stringWithFormat:@"Name: %@\n MediaKey: %@\nEnabled: %@\nManual:%@",
-//                self.tiVo.name,
-//                self.mediaKey,
-//                self.enabled ? @"Yes" : @"No",
-//                self.manualTiVo ? @"Yes" : @"No"
-//                ];
-//
     }
 }
 
@@ -240,19 +227,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
     return retValue;
 }
-
-//-(void) reportNetworkFailure {
-//    [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationNetworkNotAvailable object:self];
-////    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:kMTRetryNetworkInterval];
-//}
-
-//-(BOOL) isReachable {
-//    uint32_t    networkReachabilityFlags;
-//    SCNetworkReachabilityGetFlags(self.reachability , &networkReachabilityFlags);
-//    BOOL result = (networkReachabilityFlags >>17) && 1 ;  //if the 17th bit is set we are reachable.
-//    return result;
-//}
-//
 
 -(void)checkEnabled
 {
@@ -359,7 +333,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             [download prepareForDownload:NO];
         }
     }
-
 }
 
 -(void)updateShowsStartingAt:(int)anchor withCount:(int)count
@@ -782,11 +755,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[urlData appendData:data];
 }
 
-//- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
-////    return [protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust];
-//	return YES;  //Ignore self-signed certificate
-//}
-
 - (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
 	NSString *password = self.mediaKey;
@@ -817,22 +785,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	}
 }
 
-
-//- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-//	NSString *password = self.mediaKey;
-//	if (challenge.previousFailureCount == 0) {
-//		DDLogDetail(@"%@ password ask",self);
-//		NSURLCredential *myCredential = [NSURLCredential credentialWithUser:@"tivo" password:password persistence:NSURLCredentialPersistenceForSession];
-//		[challenge.sender useCredential:myCredential forAuthenticationChallenge:challenge];
-//	} else {
-//		DDLogDetail(@"%@ challenge failed",self);
-//		[challenge.sender cancelAuthenticationChallenge:challenge];
-//		[showURLConnection cancel];
-//		self.showURLConnection = nil;
-//		isConnecting = NO;
-//		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"incorrect"}];
-//	}
-//}
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
