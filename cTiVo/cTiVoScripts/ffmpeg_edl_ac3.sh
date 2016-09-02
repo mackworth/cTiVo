@@ -88,8 +88,8 @@ launch_and_monitor_ffmpeg() {
       fi
       last_percent="$percent"
     fi
-    sleep 1
-  done 
+    read -t 1.0 -N 0   #hack: "read zero char from keyboard, fail after 1 second", better than "sleep 1" as no process created
+  done
   last_percent="$max_percent"
   echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
   pid=

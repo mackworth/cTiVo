@@ -672,7 +672,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     //prefer to show window as attached sheet, but sometimes in the field, we don't have a window?, so just show it regular.
     NSWindow * mainWindow =  _mainWindowController.window ?: [NSApp keyWindow];
     if (mainWindow) {
-        [NSApp beginSheet:controller.window modalForWindow:_mainWindowController.window ?: [NSApp keyWindow] modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+        [NSApp beginSheet:controller.window modalForWindow:mainWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
     } else {
         [controller showWindow:nil];
     }

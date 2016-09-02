@@ -173,7 +173,9 @@ __DDLOGHERE__
 	newDownload.genXMLMetaData = self.genXMLMetaData;
 	newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAcceptMetaData && self.includeAPMMetaData.boolValue)];
 #endif
-	NSDictionary *thisRecording = @{
+    DDLogDetail(@"Adding %@: ID: %@, Sub: %@, date: %@, Tivo: %@", thisShow, thisShow.episodeID, [self subscriptionID:thisShow], thisShow.showDate, thisShow.tiVoName );
+
+    NSDictionary *thisRecording = @{
 		 @"showTitle": thisShow.showTitle ,
 		 @"episodeID": [self subscriptionID: thisShow],
 		 @"startTime": thisShow.showDate,
