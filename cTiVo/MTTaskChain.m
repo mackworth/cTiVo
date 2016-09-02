@@ -138,7 +138,7 @@ __DDLOGHERE__
 -(NSString *)description
 {
 	NSString *desc = @"";
-	desc = [desc stringByAppendingFormat:@"dataSource: %@",_dataSource];
+	desc = [desc stringByAppendingFormat:@"\ndataSource: %@",_dataSource];
 	desc = [desc stringByAppendingFormat:@"\ndataSink: %@",_dataSink];
 	desc = [desc stringByAppendingFormat:@"\nNumber of Task Groups: %ld",_taskArray.count];
 	for (NSArray *tasks in _taskArray) {

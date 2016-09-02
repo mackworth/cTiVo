@@ -65,6 +65,7 @@ __DDLOGHERE__
         _shouldReschedule = YES;
 		_successfulExitCodes = @[@0];
         launched = NO;
+        _taskRunning = NO;  //need to be sure we've processed before reporting to taskChain
     }
     return self;
 }
@@ -149,6 +150,7 @@ __DDLOGHERE__
 			[[NSFileManager defaultManager] removeItemAtPath:_errorFilePath error:nil];
 		}
 	}
+    self.taskRunning = NO;
 }
 
 -(void) saveLogFileType:(NSString *) type fromPath: (NSString *) path {
@@ -266,7 +268,7 @@ __DDLOGHERE__
                 }
             }
         }
-    [self performSelector:@selector(trackProcess) withObject:nil afterDelay:0.5];
+        [self performSelector:@selector(trackProcess) withObject:nil afterDelay:0.5];
 	}
 }
 
@@ -382,6 +384,7 @@ __DDLOGHERE__
     if (shouldLaunch) {
         [_task launch];
         launched = YES;
+        self.taskRunning = YES;
         _pid = [_task processIdentifier];
         [self trackProcess];
     } else {
@@ -423,7 +426,7 @@ __DDLOGHERE__
 
 -(BOOL)isRunning
 {
-    return [_task isRunning];
+    return self.taskRunning;
 }
 
 -(void)dealloc

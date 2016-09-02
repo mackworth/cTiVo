@@ -156,9 +156,11 @@ __DDLOGHERE__
         if (self.progressTimer) {
             //if previous scheduled either cancel or cancel/restart
             [self cancelPerformanceTimer];
+            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         }
          if (self.isInProgress) {
              self.progressTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
+             [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
          }
     }
 }
@@ -2543,13 +2545,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                [self deleteVideoFile];
                [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
             } else {
-                DDLogMajor(@"Show %@ supposed to be %0.0f bytes, actually %0.0f bytes (%0.1f%%)", self.show,self.show.fileSize, downloadedFileSize, downloadedFileSize / self.show.fileSize);
-                if (self.shouldSimulEncode || self.useTransportStream) {
-                    [tiVoManager  notifyWithTitle: @"Warning: Show may be damaged/incomplete."
-                                 subTitle:self.show.showTitle forNotification:kMTGrowlPossibleProblem];
-                    if (self.shouldSimulEncode) {
-                        [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-                    }
+                DDLogMajor(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self.show,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
+                [tiVoManager  notifyWithTitle: @"Warning: Show may be damaged/incomplete."
+                             subTitle:self.show.showTitle forNotification:kMTGrowlPossibleProblem];
+                if (self.shouldSimulEncode) {
+                    [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
                 }
             }
 		} else {
