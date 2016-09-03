@@ -151,7 +151,6 @@ output_base=$(basename "$output")
 input_dir=$(dirname "$input")
 tmpdir="${input_dir}/${output_base%.*}_ffmpeg"
 rm -rf "$tmpdir"
-mkdir -p "$tmpdir/comskip"
 mkdir -p "$tmpdir/logs"
 
 # figure out the duration after cutting, for the progress indicator
