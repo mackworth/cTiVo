@@ -184,7 +184,7 @@ fi
 if [ -z "$edl_file" ]; then
   # no edl file, don't need to encode segments and merge, simply encode with the modified audio streams
   # TODO: remove -strict -2 once the bundled ffmpeg binary is updated to 3.1.1 or later
-  launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/ffmpeg.txt" "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -strict -2 -c:a:0 aac "${ac3_opts[@]}"
+  launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/logs/ffmpeg.log" "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -strict -2 -c:a:0 aac "${ac3_opts[@]}"
 
 else
   # encode segments separately and merge together
