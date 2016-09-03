@@ -20,7 +20,6 @@ exit 1
 
 # use dirname $0 to get path to ourselves
 ffmpeg_path=$(dirname "$0")/ffmpeg
-ffmpeg_path=/usr/local/bin/ffmpeg
 
 # kill any encode that's going on in the background before 
 # exiting ourselves
