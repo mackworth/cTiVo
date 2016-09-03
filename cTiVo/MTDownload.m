@@ -43,9 +43,9 @@
 
 @property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
 
-@property (nonatomic, strong) NSDate *startTime;
-@property (nonatomic, assign) double startProgress;
-@property (nonatomic, strong) NSTimer * progressTimer;
+@property (nonatomic, strong) NSDate *startTimeForPerformance;
+@property (nonatomic, assign) double startProgressForPerformance;
+@property (nonatomic, strong) NSTimer * performanceTimer;
 @property (nonatomic, assign) int numZeroSpeeds;
 @property (nonatomic, assign) BOOL useTransportStream;
 
@@ -153,13 +153,13 @@ __DDLOGHERE__
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
 		DDLogMajor(@"Changing DL status of %@ to %@ (%@)", object, [(MTDownload *)object showStatus], [(MTDownload *)object downloadStatus]);
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadRowChanged object:object];
-        if (self.progressTimer) {
+        if (self.performanceTimer) {
             //if previous scheduled either cancel or cancel/restart
             [self cancelPerformanceTimer];
             [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         }
          if (self.isInProgress) {
-             self.progressTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
+             self.performanceTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
              [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
          }
     }
@@ -171,29 +171,31 @@ __DDLOGHERE__
     self.encodeFormat = [tiVoManager findFormat:self.encodeFormat.name];
 }
 
+#pragma mark -
+#pragma mark Performance timer for UI
 -(void) launchPerformanceTimer:(NSTimer *) timer {
     //start Timer after 5 seconds
-    self.progressTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updatePerformance:) userInfo:nil repeats:YES];
-    self.startTime = [NSDate date];
-    self.startProgress = self.processProgress;
+    self.performanceTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updatePerformance:) userInfo:nil repeats:YES];
+    self.startTimeForPerformance = [NSDate date];
+    self.startProgressForPerformance = self.processProgress;
     DDLogVerbose(@"creating performance timer");
 }
 
 -(void) cancelPerformanceTimer {
-    if (self.progressTimer){
-        [self.progressTimer invalidate]; self.progressTimer = nil;
-        self.startTime = nil;
+    if (self.performanceTimer){
+        [self.performanceTimer invalidate]; self.performanceTimer = nil;
+        self.startTimeForPerformance = nil;
         self.speed = 0.0;
         DDLogVerbose(@"cancelling performance timer");
     }
 }
 
 -(void) updatePerformance: (NSTimer *) timer {
-    if (self.startTime == nil) {
+    if (self.startTimeForPerformance == nil) {
         [self cancelPerformanceTimer];
     } else {
-        NSTimeInterval timeSoFar = -[self.startTime timeIntervalSinceNow];
-        double recentSpeed =  self.show.fileSize * (self.processProgress-self.startProgress)/timeSoFar;
+        NSTimeInterval timeSoFar = -[self.startTimeForPerformance timeIntervalSinceNow];
+        double recentSpeed =  self.show.fileSize * (self.processProgress-self.startProgressForPerformance)/timeSoFar;
         if (recentSpeed < 0.0) recentSpeed = 0.0;
         if (recentSpeed == 0.0) {
             self.numZeroSpeeds ++;
@@ -216,8 +218,8 @@ __DDLOGHERE__
                 self.speed = newSpeed; //exponential decay on older average
             }
             [self progressUpdated];
-            self.startTime = [NSDate date];
-            self.startProgress = self.processProgress;
+            self.startTimeForPerformance = [NSDate date];
+            self.startProgressForPerformance = self.processProgress;
         }
     }
 }
@@ -228,60 +230,6 @@ __DDLOGHERE__
     NSTimeInterval actualTimeLeft = self.show.fileSize *(1-self.processProgress) /self.speed;
     if (actualTimeLeft == 0.0) return nil;
     return [NSString stringFromTimeInterval:  actualTimeLeft];
-}
-
--(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries
-{
-	if (self.isRescheduled) {
-		return;
-	}
-	self.isRescheduled = YES;
-    if (self.isDownloading) {
-        DDLogMajor(@"%@ downloaded %ldK of %0.0f KB; %0.1f%%",self,self.totalDataDownloaded/1000, self.show.fileSize/1000, self.processProgress*100);
-    }
-    if (self.encodeFormat.isTestPS) {
-        //if it was a test, then we knew it would fail whether it's audio-only OR no video encoder, so everything's good
-        if (!self.isDone) {
-            //test failed without triggering a audiocheck!
-            DDLogReport(@"Failure during PS Test for %@", self.show.showTitle );
-            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
-            self.processProgress = 1.0;
-            [self progressUpdated];
-        }
-    } else {
-        [self cancel];
-        DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self.show.showTitle, self.processProgress, self.previousCheck );
-        if (self.downloadStatus.intValue == kMTStatusDone) {
-            self.baseFileName = nil;
-        }
-        if (self.downloadStatus.intValue == kMTStatusDeleted) {
-            self.numRetriesRemaining = 0;
-            self.processProgress = 1.0;
-            [self progressUpdated];
-            [tiVoManager  notifyWithTitle: @"TiVo deleted program; download cancelled."
-                                 subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
-        } else if (([decrementRetries boolValue] && self.numRetriesRemaining <= 0) ||
-            (![decrementRetries boolValue] && self.numStartupRetriesRemaining <=0)) {
-            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
-            self.processProgress = 1.0;
-            [self progressUpdated];
-            [tiVoManager  notifyWithTitle: @"TiVo show failed; cancelled."
-                                 subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
-            
-        } else {
-            if ([decrementRetries boolValue]) {
-                self.numRetriesRemaining--;
-                [tiVoManager  notifyWithTitle:@"TiVo show failed; retrying..." subTitle:self.show.showTitle forNotification:kMTGrowlCantDownload];
-                DDLogDetail(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
-            } else {
-                self.numStartupRetriesRemaining--;
-                DDLogDetail(@"Decrementing startup retries to %@",@(self.numStartupRetriesRemaining));
-            }
-            [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
-        }
-    }
-    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
-
 }
 
 #pragma mark - Queue encoding/decoding methods for persistent queue, copy/paste, and drag/drop
@@ -535,6 +483,7 @@ __DDLOGHERE__
 	}
 	return tryDirectory;
 }
+
 #pragma mark - Keyword Processing:
 /*
  From KMTTG:
@@ -1428,12 +1377,13 @@ NSString * fourChar(long n, BOOL allowZero) {
                 }
                 NSData *zeroData = [NSData data];
                 [zeroData writeToFile:self.commercialFilePath atomically:YES];
-                _commercialTask.completionHandler();
+                if (_commercialTask.completionHandler) _commercialTask.completionHandler();
             }
         }
     };
 
-    if (self.taskFlowType != kMTTaskFlowNonSimuMarkcom && self.taskFlowType != kMTTaskFlowNonSimuMarkcomSubtitles) {  // For these cases the encoding tasks is the driver
+    if (self.taskFlowType != kMTTaskFlowNonSimuMarkcom && self.taskFlowType != kMTTaskFlowNonSimuMarkcomSubtitles) {
+        // For these cases the encoding tasks is the driver
         commercialTask.startupHandler = ^BOOL(){
             self.processProgress = 0.0;
             [self setValue:[NSNumber numberWithInt:kMTStatusCommercialing] forKeyPath:@"downloadStatus"];
@@ -1603,15 +1553,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
 		return;
 	}
-	
-    //Tivodecode is always run.  The output of the tivodecode task will always to to a file to act as a buffer for differeing download and encoding speeds.
-    //The file will be a mpg file in the tmp directory (the buffer file path)
-    
+
     [self configureFiles];
-    
-    //decrypt task is a special task as it is always run and always to a file due to buffering requirement for the URL connection to the Tivo.
-    //It shoul not be part of the processing chain.
-    
+
     self.activeTaskChain = [MTTaskChain new];
     self.activeTaskChain.download = self;
     if (!self.downloadingShowFromMPGFile && !self.downloadingShowFromTiVoFile) {
@@ -1666,7 +1610,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             
         case kMTTaskFlowNonSimuSkipcom:  //Encode with non-simul encoder skipping commercials
         case kMTTaskFlowSimuSkipcom:  //Encode with simul encoder skipping commercials
-			[taskArray addObject:@[self.commercialTask]];
+            [taskArray addObject:@[self.commercialTask]]; //must be complete before encode to skip
             [taskArray addObject:@[encodeTask]];
             break;
             
@@ -1790,6 +1734,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay] + downloadDelay];
 }
 
+
+#pragma mark -
+#pragma mark Post processing methods
 - (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
 	prefix = [prefix lowercaseString];
 	suffix = [suffix lowercaseString];
@@ -2072,6 +2019,62 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 }
 
 
+#pragma mark - Download/Conversion  Progress Tracking
+
+-(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries
+{
+    if (self.isRescheduled) {
+        return;
+    }
+    self.isRescheduled = YES;
+    if (self.isDownloading) {
+        DDLogMajor(@"%@ downloaded %ldK of %0.0f KB; %0.1f%%",self,self.totalDataDownloaded/1000, self.show.fileSize/1000, self.processProgress*100);
+    }
+    if (self.encodeFormat.isTestPS) {
+        //if it was a test, then we knew it would fail whether it's audio-only OR no video encoder, so everything's good
+        if (!self.isDone) {
+            //test failed without triggering a audiocheck!
+            DDLogReport(@"Failure during PS Test for %@", self.show.showTitle );
+            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+            self.processProgress = 1.0;
+            [self progressUpdated];
+        }
+    } else {
+        [self cancel];
+        DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self.show.showTitle, self.processProgress, self.previousCheck );
+        if (self.downloadStatus.intValue == kMTStatusDone) {
+            self.baseFileName = nil;
+        }
+        if (self.downloadStatus.intValue == kMTStatusDeleted) {
+            self.numRetriesRemaining = 0;
+            self.processProgress = 1.0;
+            [self progressUpdated];
+            [tiVoManager  notifyWithTitle: @"TiVo deleted program; download cancelled."
+                                 subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
+        } else if (([decrementRetries boolValue] && self.numRetriesRemaining <= 0) ||
+                   (![decrementRetries boolValue] && self.numStartupRetriesRemaining <=0)) {
+            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+            self.processProgress = 1.0;
+            [self progressUpdated];
+            [tiVoManager  notifyWithTitle: @"TiVo show failed; cancelled."
+                                 subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
+
+        } else {
+            if ([decrementRetries boolValue]) {
+                self.numRetriesRemaining--;
+                [tiVoManager  notifyWithTitle:@"TiVo show failed; retrying..." subTitle:self.show.showTitle forNotification:kMTGrowlCantDownload];
+                DDLogDetail(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
+            } else {
+                self.numStartupRetriesRemaining--;
+                DDLogDetail(@"Decrementing startup retries to %@",@(self.numStartupRetriesRemaining));
+            }
+            [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+        }
+    }
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
+    
+}
+
 -(void)cancel
 {
     if (self.isCanceled || !self.isInProgress) {
@@ -2088,8 +2091,8 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	}
     if(self.activeTaskChain.isRunning) {
         [self.activeTaskChain cancel];
-        self.activeTaskChain = nil;
     }
+    self.activeTaskChain = nil;
 //    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:bufferFileReadHandle];
     if (!self.isNew && !self.isDone ) { //tests are already marked for success/failure
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];
@@ -2124,8 +2127,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     }
     
 }
-
-#pragma mark - Download/Conversion  Progress Tracking
 
 -(void)checkStillActive
 {
@@ -2321,7 +2322,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
             @synchronized (self) {
                 self.totalDataRead += dataRead;
-                self.processProgress = self.totalDataRead/self.show.fileSize;
+                if (! _encodeTask.progressCalc) {
+                    self.processProgress = self.totalDataRead/self.show.fileSize;
+                }
             }
          }
     }
@@ -2721,9 +2724,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(void)dealloc
 {
     self.encodeFormat = nil;
-    if (_progressTimer) {
-        [_progressTimer invalidate];
-        _progressTimer = nil;
+    if (_performanceTimer) {
+        [_performanceTimer invalidate];
+        _performanceTimer = nil;
     }
 	[self removeObserver:self forKeyPath:@"downloadStatus"];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];

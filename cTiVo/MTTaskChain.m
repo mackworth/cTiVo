@@ -106,6 +106,7 @@ __DDLOGHERE__
 				currentTask.task.standardOutput = outputPipe;
 				sourceToTee = [outputPipe fileHandleForReading];
 			} else {
+                //as next group of tasks requires a finished file, not a pipe, we have to separate into a new taskChain
 				NSMutableArray *nextChainTasks = [NSMutableArray array];
 				for (NSUInteger k = i+1; k<_taskArray.count; k++) {
 					[nextChainTasks addObject:_taskArray[k]];
@@ -212,6 +213,7 @@ __DDLOGHERE__
     if (!taskRunning) {
         //We need to move on
         DDLogVerbose(@"Finished task chain: moving on to %@", _nextTaskChain ?: @"finish up");
+        self.isRunning = NO;
         if (_nextTaskChain && !_beingRescheduled) {
             self.download.activeTaskChain = _nextTaskChain;
             [_nextTaskChain run];
@@ -220,6 +222,17 @@ __DDLOGHERE__
         [self performSelector:@selector(trackProgress) withObject:nil afterDelay:0.5];
 
     }
+}
+
+-(MTTask *) taskforPipe: (NSPipe *) pipe {
+    for (NSArray <MTTask *> * taskGroup in self.taskArray) {
+        for (MTTask *task in taskGroup) {
+            if (task.task.standardInput == pipe) {
+                return task;
+            }
+        }
+    }
+    return nil;
 }
 
 -(void)tee:(NSNotification *)notification {
@@ -253,28 +266,38 @@ __DDLOGHERE__
                 // @catch (NSException *exception) {
                 NSInteger numTries = 3;
                 size_t bytesLeft = readData.length;
+                MTTask * currentTask = nil;
                 while (bytesLeft > 0 && numTries > 0 ) {
                     ssize_t amountSent= write ([[pipe fileHandleForWriting] fileDescriptor], [readData bytes]+readData.length-bytesLeft, bytesLeft);
                     if (amountSent < 0) {
-                         if (!_download.isCanceled){
-                             DDLogReport(@"write fail3; tried %lu bytes; error: %zd", bytesLeft, amountSent);
-                         }
+                        currentTask = [self taskforPipe:pipe];
                         break;
                     } else {
                         bytesLeft = bytesLeft- amountSent;
                         if (bytesLeft > 0) {
                             DDLogMajor(@"pipe full, retrying; tried %lu bytes; wrote %zd", (unsigned long)[readData length], amountSent);
-                            sleep(1);  //probably too long, but this is quite rare
+                            sleep(1);  //probably too long, but this should be quite rare
                             numTries--;
                         }
                     }
                 }
-                if (bytesLeft >0) {
+                if (bytesLeft >0 && !_download.isCanceled){
+                    //Couldn't write all data
+                    NSString * taskName = currentTask.taskName ?: @"unknown task";
                     if (numTries == 0) {
-                        DDLogReport(@"Write Fail4: couldn't write to pipe after three tries; encoder crashed?");
+                        DDLogReport(@"Write Fail: couldn't write to pipe after three tries; %@ may have crashed.", taskName);
+                    } else {
+                        DDLogReport(@"Write Fail; tried %lu bytes; error: %zd; %@ may have crashed.", bytesLeft, errno, taskName);
+
                     }
-                    if (!_download.isCanceled) {
+                    if (!currentTask || currentTask.shouldReschedule) {
                         [_download rescheduleOnMain];
+                    } else if (! currentTask.shouldReschedule) {
+                        //this task not critical, proceeding without it.
+                        NSMutableArray * newPipes = [pipes mutableCopy];
+                        [newPipes removeObject:pipe];
+                        [teeBranches setObject:[NSArray arrayWithArray:newPipes] forKey:notification.object];
+                        [currentTask cancel];
                     }
 
                 }

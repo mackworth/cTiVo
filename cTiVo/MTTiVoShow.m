@@ -147,7 +147,7 @@ __DDLOGHERE__
 	}
 }
 
--(NSString *) episodeIDForReporting {
+-(NSString *) seriesIDForReporting {
 	NSString *epID = nil;
 	if (self.seriesId.length > 1) {
 		epID = [self.seriesId  substringFromIndex:2];
@@ -190,7 +190,7 @@ __DDLOGHERE__
 			NSString * tvdbID= [self getStringForPattern:@"<seriesid>(\\d*)" fromString:series];
 			NSString * zap2ID= [self getStringForPattern:@"<zap2it_id>(.*)</zap2it_id>" fromString:series];
 			if (tvdbID) {
-				NSString * details = [NSString stringWithFormat:@"tvdb has %@ for our %@; %@ ", zap2ID, [self episodeIDForReporting],[self urlForReporting:tvdbID]  ];
+				NSString * details = [NSString stringWithFormat:@"tvdb has %@ for our %@; %@ ", zap2ID, [self seriesIDForReporting],[self urlForReporting:tvdbID]  ];
 				DDLogVerbose(@"Had to search by name %@, %@",self.showTitle, details);
                 [self addValue:details inStatistic:kMTVDBSeriesFoundName forShow:self.seriesTitle];
 				return tvdbID;
@@ -269,7 +269,7 @@ __DDLOGHERE__
     } else if ([self getStringForPattern:@"<Error>(.*)<\\/Error>" fromString:episodeInfo].length > 0) {
         //So, an episode not found case, let's report but try series lookup for artwork
 
-        NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self episodeIDForReporting ], self.originalAirDateNoTime, self.season, self.episode, [self urlForReporting:seriesIDTVDB] ];
+        NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self seriesIDForReporting ], self.originalAirDateNoTime, self.season, self.episode, [self urlForReporting:seriesIDTVDB] ];
         DDLogDetail(@"No episode info for %@ %@ ",self.showTitle, details);
         [self addValue:details inStatistic:kMTVDBNoEpisode forShow:self.showTitle];
 
@@ -469,7 +469,7 @@ __DDLOGHERE__
             if (artwork.length) self.tvdbArtworkLocation = artwork;
         } else {
             DDLogDetail(@"QQQ %@", episodeEntry);
-            NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self episodeIDForReporting ], self.originalAirDateNoTime, self.season, self.episode, [self urlForReporting:seriesIDTVDB] ];
+            NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self seriesIDForReporting ], self.originalAirDateNoTime, self.season, self.episode, [self urlForReporting:seriesIDTVDB] ];
             DDLogDetail(@"No series info for %@ %@ ",self.showTitle, details);
             [self addValue:details inStatistic:kMTVDBNoSeriesInfo forShow:self.showTitle];
         }
@@ -487,7 +487,7 @@ __DDLOGHERE__
 			if (self.episode >0 && self.season > 0) {
 				//both sources have sea/epi; so compare for report
 				if ([episodeNum intValue] != self.episode || [seasonNum intValue] != self.season) {
-					NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d; %@ aired %@; %@ ",seasonNum, episodeNum, self.season, self.episode, [self episodeIDForReporting], self.originalAirDateNoTime,  [self urlForReporting:seriesIDTVDB]];
+					NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d; %@ aired %@; %@ ",seasonNum, episodeNum, self.season, self.episode, [self seriesIDForReporting], self.originalAirDateNoTime,  [self urlForReporting:seriesIDTVDB]];
 					DDLogDetail(@"TheTVDB has different Sea/Eps info for %@: %@ %@", self.showTitle, details, [[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB] ? @"updating": @"leaving" );
                     [self addValue: details   inStatistic: kMTVDBWrongInfo forShow:self.showTitle];
 

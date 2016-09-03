@@ -150,10 +150,14 @@ __DDLOGHERE__
 }
 
 -(NSString *) subscriptionID: (MTTiVoShow *) thisShow {
-    if ([thisShow.episodeID hasPrefix:@"SH"]) {
-        return [thisShow.episodeID stringByAppendingFormat:@"-%@", thisShow.showDateRFCString];
+    NSString * epID = thisShow.episodeID;
+    if (!epID) {
+        return thisShow.showTitle ?: @"NeverHappens";
+    }
+    if ([epID hasPrefix:@"SH"]) {
+        return [epID stringByAppendingFormat:@"-%@", thisShow.showDateRFCString];
     } else {
-        return thisShow.episodeID;
+        return epID;
     }
 }
 

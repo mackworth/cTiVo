@@ -25,7 +25,7 @@
 											*logFileWriteHandle,
 											*logFileReadHandle;
 
-@property (strong, nonatomic) NSRegularExpression *trackingRegEx;
+@property (strong, nonatomic) NSRegularExpression *trackingRegEx; //not currently used
 
 @property (weak, nonatomic) MTTaskChain *myTaskChain;
 
@@ -54,8 +54,6 @@
 
 +(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download;
 +(MTTask *)taskWithName:(NSString *)name download:(MTDownload *)download completionHandler:(BOOL(^)(void))completionHandler;
-
--(void) trackProcess;
 
 -(void)setLaunchPath:(NSString *)path;
 -(void)setCurrentDirectoryPath:(NSString *)path;
