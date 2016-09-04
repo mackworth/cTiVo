@@ -14,8 +14,8 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <userDefaultsController representsSharedInstance="YES" id="48"/>
-        <view id="416">
-            <rect key="frame" x="0.0" y="0.0" width="442" height="507"/>
+        <view misplaced="YES" id="416">
+            <rect key="frame" x="0.0" y="0.0" width="472" height="505"/>
             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <button verticalHuggingPriority="750" id="420">
@@ -41,15 +41,15 @@
                         <binding destination="VwR-AV-Z73" name="enabled" keyPath="canRemove" id="2cq-Sm-Saj"/>
                     </connections>
                 </button>
-                <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="417">
-                    <rect key="frame" x="17" y="54" width="405" height="398"/>
+                <scrollView misplaced="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="417">
+                    <rect key="frame" x="17" y="52" width="435" height="398"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <clipView key="contentView" id="CYN-kZ-RDO">
-                        <rect key="frame" x="1" y="0.0" width="403" height="397"/>
+                        <rect key="frame" x="1" y="0.0" width="433" height="397"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" autosaveColumns="NO" headerView="435" id="437">
-                                <rect key="frame" x="0.0" y="0.0" width="426" height="380"/>
+                                <rect key="frame" x="0.0" y="0.0" width="433" height="380"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <size key="intercellSpacing" width="3" height="2"/>
                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -129,7 +129,7 @@ Yes = force Transport Stream</string>
                                             </binding>
                                         </connections>
                                     </tableColumn>
-                                    <tableColumn editable="NO" width="104" minWidth="20" maxWidth="200" headerToolTip="Does it look like this channel migrated to H.264? (If so, needs Transport Stream)." id="5IF-Fa-cF2">
+                                    <tableColumn editable="NO" width="111" minWidth="20" maxWidth="200" headerToolTip="Does it look like this channel migrated to H.264? (If so, needs Transport Stream)." id="5IF-Fa-cF2">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="H.264?">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -154,8 +154,8 @@ Yes = force Transport Stream</string>
                             </tableView>
                         </subviews>
                     </clipView>
-                    <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="436">
-                        <rect key="frame" x="1" y="381" width="403" height="16"/>
+                    <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="436">
+                        <rect key="frame" x="1" y="381" width="423" height="16"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="434">
@@ -163,12 +163,12 @@ Yes = force Transport Stream</string>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <tableHeaderView key="headerView" id="435">
-                        <rect key="frame" x="0.0" y="0.0" width="426" height="17"/>
+                        <rect key="frame" x="0.0" y="0.0" width="433" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </tableHeaderView>
                 </scrollView>
                 <button toolTip="Forces TS for all channels. Overrides TS values below." id="qVI-hc-NaG" userLabel="Transport Stream">
-                    <rect key="frame" x="15" y="471" width="409" height="18"/>
+                    <rect key="frame" x="15" y="469" width="439" height="18"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Always Use TiVo's Transport Stream Format" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="iDB-7u-Dde">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -178,10 +178,10 @@ Yes = force Transport Stream</string>
                         <binding destination="48" name="value" keyPath="values.DownloadTSFormat" id="zBD-YX-VAK"/>
                     </connections>
                 </button>
-                <button toolTip="Runs a test download for all untested channels in Program Table " verticalHuggingPriority="750" id="STy-iF-kCG">
-                    <rect key="frame" x="122" y="13" width="145" height="32"/>
+                <button toolTip="Runs a test download for all untested channels in Program Table " verticalHuggingPriority="750" misplaced="YES" id="STy-iF-kCG">
+                    <rect key="frame" x="122" y="13" width="183" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
-                    <buttonCell key="cell" type="push" title="Test All Channels" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="0yq-Jk-uoh">
+                    <buttonCell key="cell" type="push" title="Test Selected Channels" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="0yq-Jk-uoh">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -189,8 +189,8 @@ Yes = force Transport Stream</string>
                         <action selector="testAllChannels:" target="-2" id="Gtm-nv-FXJ"/>
                     </connections>
                 </button>
-                <button toolTip="Cleans out all tests from Download Queue." verticalHuggingPriority="750" id="RRj-Mp-O38">
-                    <rect key="frame" x="275" y="13" width="143" height="32"/>
+                <button toolTip="Cleans out all tests from Download Queue." verticalHuggingPriority="750" misplaced="YES" id="RRj-Mp-O38">
+                    <rect key="frame" x="315" y="13" width="143" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                     <buttonCell key="cell" type="push" title="Remove All Tests" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lND-yN-oEU">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -201,7 +201,7 @@ Yes = force Transport Stream</string>
                     </connections>
                 </button>
             </subviews>
-            <point key="canvasLocation" x="331" y="230.5"/>
+            <point key="canvasLocation" x="346" y="229.5"/>
         </view>
         <arrayController automaticallyRearrangesObjects="YES" id="VwR-AV-Z73">
             <connections>

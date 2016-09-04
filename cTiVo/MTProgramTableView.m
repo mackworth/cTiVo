@@ -369,6 +369,10 @@ __DDLOGHERE__
         textVal = thisShow.starRatingString;
     } else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
         textVal = thisShow.originalAirDateNoTime ?: @"";
+    } else if ([tableColumn.identifier compare:@"H.264"] == NSOrderedSame) {
+        textVal = thisShow.h264String;
+        result.textField.alignment = NSCenterTextAlignment;
+        result.toolTip =@"Does this channel use H.264 compression?";
     } else if ([tableColumn.identifier isEqualToString:@"icon"]) {
         NSString * imageName = thisShow.imageString;
         result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;

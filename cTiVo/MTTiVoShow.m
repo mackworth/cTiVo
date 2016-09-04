@@ -1512,10 +1512,25 @@ __DDLOGHERE__
     return [self checkString: self.isOnDisk];
 }
 
+-(NSString *) h264String {
+    NSCellStateValue state = [tiVoManager failedPSForChannel:self.stationCallsign];
+    switch (state) {
+        case NSOffState: {
+            return @"-";
+        }
+        case NSOnState: {
+            return @"√";
+        }
+        default: {
+            return @"";
+        }
+    }
+}
+
 -(NSString *)checkString:(BOOL) test {
   return test ? @"✔" : @"";
 }
-											  
+
 -(NSString*) lengthString {
 	NSInteger length = (_showLength+30)/60; //round up to nearest minute;
 	return [NSString stringWithFormat:@"%ld:%0.2ld",length/60,length % 60];

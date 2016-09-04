@@ -888,7 +888,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         DDLogReport(@"Encoding of %@ failed for %@ format, encoder %@ not found",self.show.showTitle,self.encodeFormat.name,self.encodeFormat.encoderUsed);
         [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
         self.processProgress = 1.0;
-        [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:self];
+        [self progressUpdated];
         return nil;
     } else {
         DDLogVerbose(@"using encoder: %@", encoderLaunchPath);
@@ -1164,7 +1164,12 @@ NSString * fourChar(long n, BOOL allowZero) {
 
     encodeTask.cleanupHandler = ^(){
         if (self.activeURLConnection || ! self.shouldSimulEncode) {  //else we've already checked
-            [self checkLogForAudio: self.encodeTask.errorFilePath];
+            if ([self checkLogForAudio: self.encodeTask.errorFilePath] ) {
+                [self cancel];
+                [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+            }
+            self.processProgress = 1.0;
+            [self progressUpdated];
         }
        if (self.isCanceled) {
            [self deleteVideoFile];
@@ -1484,7 +1489,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void)download
 {
-	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 
     NSString * channelName = self.show.stationCallsign;
 
@@ -2035,10 +2040,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         if (!self.isDone) {
             //test failed without triggering a audiocheck!
             DDLogReport(@"Failure during PS Test for %@", self.show.showTitle );
+            [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];
             [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
-            self.processProgress = 1.0;
-            [self progressUpdated];
         }
+        self.processProgress = 1.0;
+        [self progressUpdated];
     } else {
         [self cancel];
         DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self.show.showTitle, self.processProgress, self.previousCheck );
@@ -2121,11 +2127,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
 //    }
 //    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
-    if (self.processProgress != 0.0 ) {
+    if (self.processProgress != 0.0) {
 		self.processProgress = 0.0;
         [self progressUpdated];
     }
-    
+
 }
 
 -(void)checkStillActive
@@ -2324,6 +2330,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 self.totalDataRead += dataRead;
                 if (! _encodeTask.progressCalc) {
                     self.processProgress = self.totalDataRead/self.show.fileSize;
+                    [self progressUpdated];
                 }
             }
          }
@@ -2534,12 +2541,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 if (!self.isDone) {
                     [self cancel];
                     if (foundAudio) {
-                        self.processProgress = 0.0;
                        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
                     } else {
-                        self.processProgress = 1.0;
                         [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
                     }
+                    self.processProgress = 1.0;
                     [self progressUpdated];
                 }
                 [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];

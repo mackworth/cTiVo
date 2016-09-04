@@ -113,6 +113,7 @@
 										*isQueuedString,
 										*isHDString,
                                         *isOnDiskString,
+                                        *h264String,
 										*sizeString;
 
 @property BOOL isQueued;

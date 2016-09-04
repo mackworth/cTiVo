@@ -28,7 +28,7 @@
 
 #define kMTNotificationTiVoListUpdated @"MTNotificationTiVoListUpdated"  //optional object: which Tivo changed/added; not used
 #define kMTNotificationFormatListUpdated @"MTNotificationFormatListUpdated"
-#define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"  //NOT USED (polling instead every second) optional object: which MTDownload, 
+#define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"  // optional object: which MTDownload, 
 #define kMTNotificationNetworkChanged @"MTNotificationNetworkChanged"
 #define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"  //object: which MTTiVoShow was loaded
 #define kMTNotificationDownloadRowChanged @"NotificationDownloadRowChanged"  //object: which MTDownload was changed

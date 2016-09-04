@@ -435,6 +435,10 @@ __DDLOGHERE__
 		textVal = thisShow.isHDString;
 		result.textField.alignment = NSCenterTextAlignment;
 		result.toolTip =@"Is program recorded in HD?";
+    } else if ([tableColumn.identifier compare:@"H.264"] == NSOrderedSame) {
+        textVal = thisShow.h264String;
+        result.textField.alignment = NSCenterTextAlignment;
+        result.toolTip =@"Does this channel use H.264 compression?";
 	} else if ([tableColumn.identifier isEqualToString:@"Channel"]) {
 		textVal = thisShow.channelString;
 	} else if ([tableColumn.identifier isEqualToString:@"Size"]) {

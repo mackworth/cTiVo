@@ -1095,7 +1095,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     if (channelInfo) {
         return ((NSNumber*) channelInfo[kMTChannelInfoPSFailed ]).intValue;
     } else {
-        return NSOffState;
+        return NSMixedState;
     }
 }
 
@@ -1111,7 +1111,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 -(void) testAllChannelsForPS {
     NSMutableSet * channelsTested = [NSMutableSet new];
     NSMutableArray * testsToRun = [NSMutableArray new];
-    NSArray * programs = [((MTAppDelegate *) [NSApp delegate]) currentSelectedShows];
+    NSArray * programs = ((MTAppDelegate *) [NSApp delegate]).currentSelectedShows;
     for (MTDownload * existingDL in [self downloadQueue]) {
         //Avoids accidentally testing all shows twice
         if (existingDL.encodeFormat.isTestPS && existingDL.isNew) {
