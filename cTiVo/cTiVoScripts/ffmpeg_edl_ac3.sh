@@ -88,8 +88,9 @@ launch_and_monitor_ffmpeg() {
       fi
       last_percent="$percent"
     fi
-    read -t 1.0 -N 0   #hack: "read zero char from keyboard, fail after 1 second", better than "sleep 1" as no process created
-  done
+    #hack: "read zero char from keyboard, fail after 1 second", better than "sleep 1" as no process created
+    read -t 1.0 -N 0
+  done 
   last_percent="$max_percent"
   echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
   pid=
@@ -102,6 +103,7 @@ launch_and_monitor_ffmpeg() {
 
 # attempt to keep the wrapper script interface transparent, 
 # just adding an -edl option
+declare -a ffmpeg_opts_pre_input ffmpeg_opts_post_input
 while (( $# > 0 )); do
   if [ "$1" == "-h" ]; then
     usage
@@ -121,9 +123,9 @@ while (( $# > 0 )); do
     continue
   fi
   if [ -z "$input" ]; then
-    ffmpeg_opts_pre_input="$ffmpeg_opts_pre_input $1"
+    ffmpeg_opts_pre_input+=("$1")
   else
-    ffmpeg_opts_post_input="$ffmpeg_opts_post_input $1"
+    ffmpeg_opts_post_input+=("$1")
   fi
   shift
 done
@@ -146,10 +148,10 @@ fi
 ext="${output##*.}"
 
 # work dir prep
-outfilename="${output##*/}"  #just the filename, not path
-tmpdir=$(dirname "$input")/"${outfilename%.*}_ffmpeg"
+output_base=$(basename "$output")
+input_dir=$(dirname "$input")
+tmpdir="${input_dir}/${output_base%.*}_ffmpeg"
 rm -rf "$tmpdir"
-mkdir -p "$tmpdir/comskip"
 mkdir -p "$tmpdir/logs"
 
 # figure out the duration after cutting, for the progress indicator
@@ -162,22 +164,28 @@ duration=$(echo "$original_duration-$cut_duration" | bc -l)
 # check if the audio stream is ac3 and 5.1
 # if it is, create two audio streams in the output file: 2-channel aac and ac3 5.1
 # otherwise, just convert to aac
-audio_stream=$(echo "$file_info" | perl -ne 'print $1 if /^\s*Stream #(\d:\d).*Audio:.*/' | head -n1)
-video_stream=$(echo "$file_info" | perl -ne 'print $1 if /^\s*Stream #(\d:\d).*Video:.*/' | head -n1)
-if [[ -z "$video_stream" ]]; then
+audio_line=$(echo "$file_info" | /usr/bin/perl -ne 'if (/^\s*Stream #(\d:\d).*Audio:.*/) {print "$1,$_"; exit}')
+audio_stream=$(echo "$audio_line" | cut -d, -f1)
+video_stream=$(echo "$file_info" | /usr/bin/perl -ne 'if (/^\s*Stream #(\d:\d).*Video:.*/) {print "$1"; exit}')
+declare -a map_opts ac3_opts
+if [[ -n "$video_stream" ]]; then
+  map_opts+=(-map "$video_stream")
+else
   echo "$no_video_stream_message" >&2
   exit 1
 fi
-map_opts="-map $video_stream -map $audio_stream"
-ac3_opts=
-if echo "$file_info" | grep -m1 Audio: | grep ac3 | grep --quiet '5\.1'; then
-  map_opts="$map_opts -map $audio_stream"
-  ac3_opts="-c:a:1 ac3"
+if [[ -n "$audio_stream" ]]; then
+  map_opts+=(-map "$audio_stream")
+fi
+if echo "$audio_line" | cut -d, -f2- | grep ac3 | grep --quiet '5\.1'; then
+  map_opts+=(-map "$audio_stream")
+  ac3_opts+=("-c:a:1" "ac3")
 fi
 
 if [ -z "$edl_file" ]; then
   # no edl file, don't need to encode segments and merge, simply encode with the modified audio streams
-  launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/ffmpeg.txt" $ffmpeg_opts_pre_input -i "$input" $map_opts $ffmpeg_opts_post_input -strict -2 -c:a:0 aac $ac3_opts
+  # TODO: remove -strict -2 once the bundled ffmpeg binary is updated to 3.1.1 or later
+  launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/logs/ffmpeg.log" "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -strict -2 -c:a:0 aac "${ac3_opts[@]}"
 
 else
   # encode segments separately and merge together
@@ -229,7 +237,7 @@ END {print ss,""}
                               $this_duration \
                               "$segment_filename" \
                               "$tmpdir/logs/ffmpeg_segment$i.log" \
-                              $ss $ffmpeg_opts_pre_input -i "$input" $map_opts $ffmpeg_opts_post_input -strict -2 -c:a:0 aac $ac3_opts $to
+                              $ss "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -strict -2 -c:a:0 aac "${ac3_opts[@]}" $to
 
     progress=$(echo "$this_duration + $progress" | bc -l)
   done
@@ -242,5 +250,5 @@ END {print ss,""}
                             $duration \
                             "$output" \
                             "$tmpdir/logs/ffmpeg_concat.log" \
-                            -f concat -safe 0 -i "$merge_filename" $map_opts -c copy $ac3_opts
+                            -f concat -safe 0 -i "$merge_filename" "${map_opts[@]}" -c copy "${ac3_opts[@]}"
 fi
