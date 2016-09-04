@@ -88,7 +88,8 @@ launch_and_monitor_ffmpeg() {
       fi
       last_percent="$percent"
     fi
-    sleep 1
+    #hack: "read zero char from keyboard, fail after 1 second", better than "sleep 1" as no process created
+    read -t 1.0 -N 0
   done 
   last_percent="$max_percent"
   echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
@@ -170,7 +171,7 @@ declare -a map_opts ac3_opts
 if [[ -n "$video_stream" ]]; then
   map_opts+=(-map "$video_stream")
 else
-  echo "$no_video_stream_message"
+  echo "$no_video_stream_message" >&2
   exit 1
 fi
 if [[ -n "$audio_stream" ]]; then
