@@ -11,12 +11,14 @@
 #import "NSNotificationCenter+Threads.h"
 #import "MTTiVoManager.h" //Just for maskMediaKeys
 
+@interface MTTaskChain ()
+
+@property (atomic, strong) NSMapTable *teeBranches;
+@property (atomic, assign) ssize_t totalDataRead;
+
+@end
 
 @implementation MTTaskChain
-
-NSMutableDictionary *teeBranches;
-NSMutableArray *branchFileHandles;
-ssize_t totalDataRead;
 
 __DDLOGHERE__
 
@@ -36,10 +38,6 @@ __DDLOGHERE__
 
 -(BOOL)configure
 {
-
-	teeBranches = [NSMutableDictionary new];
-	branchFileHandles = [NSMutableArray new];
-	
 	// Check for misconfigured chains
 	
    if (_taskArray.count == 0) {
@@ -58,8 +56,6 @@ __DDLOGHERE__
 	}
 	
 	//No problems found so configure
-	
-	NSArray <MTTask *> *currentTasks = nil;
 	NSFileHandle *sourceToTee = nil;
 	if (_dataSource) {
 		if ([_dataSource isKindOfClass:[NSPipe class]]) { //Data source from pipe
@@ -72,35 +68,32 @@ __DDLOGHERE__
 			sourceToTee = [NSFileHandle fileHandleForReadingAtPath:_dataSource];
 		}
 	}
-	MTTask *currentTask = nil;
-	NSMutableArray *inputPipes = [NSMutableArray array];
-	for (NSUInteger i=0; i < _taskArray.count; i++) {
-        NSFileHandle * fileHandleToTee = nil;
-		currentTasks = _taskArray[i];
-		if (currentTasks.count ==1 ) {
-            currentTask = currentTasks[0];
+
+    self.teeBranches = [NSMapTable mapTableWithKeyOptions:NSMapTableWeakMemory
+                                             valueOptions:NSMapTableStrongMemory];
+    for (NSArray <MTTask *> *currentTaskGroup in self.taskArray) {
+        NSMutableArray *inputPipes = [NSMutableArray array];
+		if (currentTaskGroup.count ==1 ) {
+            MTTask *currentTask = currentTaskGroup[0];
 			// No need to tee if only 1 task in group
 			if (sourceToTee && currentTask.requiresInputPipe) {
 				currentTask.task.standardInput = sourceToTee;
 			}
 		} else {
-			fileHandleToTee = sourceToTee;
-			for (NSUInteger j=0; j< currentTasks.count; j++) {
-				MTTask *nextTask = currentTasks[j];
-                if (nextTask.requiresInputPipe) {
+			for (MTTask *task in currentTaskGroup) {
+                if (task.requiresInputPipe) {
                     NSPipe *pipe = [NSPipe new];
-                    nextTask.task.standardInput = pipe;
+                    task.task.standardInput = pipe;
                     [inputPipes addObject:pipe];
                 }
 			}
+            if (sourceToTee) {
+                [self.teeBranches setObject:[NSArray arrayWithArray:inputPipes] forKey:sourceToTee];
+            }
 		}
-		if (fileHandleToTee) {
-			[teeBranches setObject:[NSArray arrayWithArray:inputPipes] forKey:(id)fileHandleToTee];
-			[branchFileHandles addObject:fileHandleToTee];
-		}
-		if (i < _taskArray.count - 1) {		//Set up the next source except for the last set or if stdout is already set
-											//If stdout is set the the next task will be sequential, not piped.
-			currentTask = currentTasks[0];  //Next potential source
+		if (currentTaskGroup != self.taskArray.lastObject ) {
+            //Set up the next source (except for the last set)
+            MTTask *currentTask = currentTaskGroup[0];  //Source for next group is first task of this group
 			if (currentTask.requiresOutputPipe) {
 				NSPipe *outputPipe = [NSPipe pipe];
 				currentTask.task.standardOutput = outputPipe;
@@ -108,29 +101,34 @@ __DDLOGHERE__
 			} else {
                 //as next group of tasks requires a finished file, not a pipe, we have to separate into a new taskChain
 				NSMutableArray *nextChainTasks = [NSMutableArray array];
+                NSUInteger i = [self.taskArray indexOfObject:currentTaskGroup];
 				for (NSUInteger k = i+1; k<_taskArray.count; k++) {
 					[nextChainTasks addObject:_taskArray[k]];
 				}
 				if (nextChainTasks.count) {
 					self.nextTaskChain = [MTTaskChain new];
                     self.nextTaskChain.download = self.download;
-                    self.nextTaskChain.taskArray = nextChainTasks;
-                    NSMutableArray *newTaskArray = [NSMutableArray arrayWithArray:_taskArray];
+                    self.nextTaskChain.taskArray = [NSArray arrayWithArray: nextChainTasks] ;
+                    self.nextTaskChain.dataSink = self.dataSink;
+                    self.dataSink = nil;
+                    NSMutableArray *newTaskArray = [NSMutableArray arrayWithArray:self.taskArray];
                     [newTaskArray removeObjectsInArray:nextChainTasks];
-                    _taskArray = [NSArray arrayWithArray:newTaskArray];
+                    self.taskArray = [NSArray arrayWithArray:newTaskArray];
 				}
 				break;
 			}
 		}
 	}
-	for (NSArray <MTTask *> *tasks in _taskArray) {
+	for (NSArray <MTTask *> *tasks in self.taskArray) {
 		for (MTTask *task in tasks) {
 			task.myTaskChain = self;
 		}
 	}
-	if (_dataSink) {
-		currentTasks[0].task.standardOutput = _dataSink;
+	if (self.dataSink) {
+        NSArray <MTTask *> *lastTaskGroup = [self.taskArray lastObject];
+        [lastTaskGroup firstObject].task.standardOutput = self.dataSink;
 	}
+    DDLogVerbose(@" teeBranches = %@", self.teeBranches);
     //Show configuration
     DDLogDetail(@"\n\n***Configured Task Chain***: %@",[self maskMediaKeys]);
 	return YES;
@@ -170,14 +168,14 @@ __DDLOGHERE__
 {
     BOOL isConfigured = [self configure];
 	if (isConfigured) {
-        totalDataRead  = 0;
+        self.totalDataRead  = 0;
 		for (int i=(int)_taskArray.count-1; i >=0 ; i--) {
 			for (MTTask *task in _taskArray[i]) {
                 DDLogMajor(@"Starting task %@ for show %@",task.taskName,task.download.show.showTitle);
 				[task launch];				
 			}
 		}
-		for (NSFileHandle *fileHandle in branchFileHandles) {
+		for (NSFileHandle *fileHandle in self.teeBranches) {
             DDLogDetail(@"Setting up reading of filehandle %p",fileHandle);
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tee:) name:NSFileHandleReadCompletionNotification object:fileHandle];
             [fileHandle readInBackgroundAndNotify];
@@ -245,12 +243,13 @@ __DDLOGHERE__
 -(void)teeInBackground:(NSNotification *)notification {
 
 	NSData *readData = notification.userInfo[NSFileHandleNotificationDataItem];
-    totalDataRead += readData.length;
+    self.totalDataRead += readData.length;
     if (_providesProgress) {
-        _download.processProgress = totalDataRead/_download.show.fileSize;
+        _download.processProgress = self.totalDataRead/_download.show.fileSize;
         }
 //    NSLog(@"Total Data Read %ld",totalDataRead);
-    NSArray *pipes = [teeBranches objectForKey:notification.object];
+    NSFileHandle * incomingHandle = (NSFileHandle *) notification.object;
+    NSArray *pipes = [self.teeBranches objectForKey:incomingHandle];
     if (readData.length) {
         DDLogVerbose(@"Tee got %ld bytes", readData.length);
     } else {
@@ -288,15 +287,20 @@ __DDLOGHERE__
                         DDLogReport(@"Write Fail: couldn't write to pipe after three tries; %@ may have crashed.", taskName);
                     } else {
                         DDLogReport(@"Write Fail; tried %lu bytes; error: %zd; %@ may have crashed.", bytesLeft, errno, taskName);
-
                     }
                     if (!currentTask || currentTask.shouldReschedule) {
                         [_download rescheduleOnMain];
                     } else if (! currentTask.shouldReschedule) {
                         //this task not critical, proceeding without it.
-                        NSMutableArray * newPipes = [pipes mutableCopy];
-                        [newPipes removeObject:pipe];
-                        [teeBranches setObject:[NSArray arrayWithArray:newPipes] forKey:notification.object];
+                        if (pipes.count <= 1) {
+                            [self.teeBranches removeObjectForKey:incomingHandle];
+                            incomingHandle = nil;  //no more reads here
+                                                   //Do we need to reset pipes across this one?
+                        } else {
+                            NSMutableArray * newPipes = [pipes mutableCopy];
+                            [newPipes removeObject:pipe];
+                            [self.teeBranches setObject:[NSArray arrayWithArray:newPipes] forKey:incomingHandle];
+                        }
                         [currentTask cancel];
                     }
 
@@ -306,7 +310,7 @@ __DDLOGHERE__
 		if (!_download.isCanceled) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 @try {
-                    [(NSFileHandle *)(notification.object) readInBackgroundAndNotify];
+                    [incomingHandle readInBackgroundAndNotify];
                 }
                 @catch (NSException *exception) {
                     DDLogDetail(@"download read data in background fail: %@", exception.reason);

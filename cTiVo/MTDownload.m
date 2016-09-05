@@ -2264,7 +2264,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 	//	self.writingData = YES;
     //DDLogVerbose(@"Writing data %@ : %@Connection %@", [NSThread isMainThread] ? @"Main" : @"Background", self.activeURLConnection == nil ? @"No ":@"", self.isCanceled ? @"- Cancelled" : @"");
-    const long chunkSize = 50000;
+    const long chunkSize = 32768;
     long dataRead = chunkSize; //to start loop
     while (dataRead == chunkSize && !self.isCanceled) {
         @autoreleasepool {
@@ -2343,7 +2343,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         [self.bufferFileReadHandle closeFile];
 		self.bufferFileReadHandle = nil;
         self.urlBuffer = nil;
- 	}
+    }
     }
 
 }
