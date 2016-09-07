@@ -246,10 +246,15 @@ __DDLOGHERE__
     } else {
         if (_trackingRegEx || _progressCalc) {
             double newProgressValue = -1;
-            NSUInteger sizeOfFileSample = 180;
             unsigned long long logFileSize = [self.logFileReadHandle seekToEndOfFile];
-            if (logFileSize > sizeOfFileSample) {
-                [self.logFileReadHandle seekToFileOffset:(logFileSize-sizeOfFileSample)];
+            if (logFileSize > 20) {
+                NSUInteger sizeOfFileSample = 256;
+                unsigned long long startPoint = logFileSize-sizeOfFileSample;
+                if (logFileSize < sizeOfFileSample) {
+                    startPoint = 0;
+                    sizeOfFileSample = logFileSize;
+                }
+                [self.logFileReadHandle seekToFileOffset:(startPoint)];
                 NSData *tailOfFile = [self.logFileReadHandle readDataOfLength:sizeOfFileSample];
                 NSString *data = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
                 if (_trackingRegEx) {

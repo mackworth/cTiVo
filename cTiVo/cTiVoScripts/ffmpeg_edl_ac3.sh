@@ -12,7 +12,7 @@ no_video_stream_message="no video streams"
 
 # cTiVo needs us to print a progress indicator, so every $sleep_duration seconds, 
 # check the tail of the ffmpeg log to see where we're at
-sleep_duration=10
+sleep_duration=3
 
 usage() {
   cat << EOF 1>&2

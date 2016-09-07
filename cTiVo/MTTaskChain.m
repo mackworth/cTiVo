@@ -212,11 +212,11 @@ __DDLOGHERE__
         //We need to move on
         DDLogVerbose(@"Finished task chain: moving on to %@", _nextTaskChain ?: @"finish up");
         self.isRunning = NO;
-        if (_nextTaskChain && !_beingRescheduled) {
+        if (_nextTaskChain && !_beingRescheduled && !self.download.isCanceled) {
             self.download.activeTaskChain = _nextTaskChain;
             [_nextTaskChain run];
         }
-    } else {
+    } else if (self.isRunning) {
         [self performSelector:@selector(trackProgress) withObject:nil afterDelay:0.5];
 
     }
@@ -351,6 +351,7 @@ __DDLOGHERE__
 -(void)dealloc
 {
     DDLogVerbose(@"Deallocing taskChain");
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

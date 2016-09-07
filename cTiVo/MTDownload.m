@@ -1177,7 +1177,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
     encodeTask.cleanupHandler = ^(){
         if (self.activeURLConnection || ! self.shouldSimulEncode) {  //else we've already checked
-            if ([self checkLogForAudio: self.encodeTask.errorFilePath] ) {
+            if ([self checkLogForAudio: _encodeTask.errorFilePath] ) {
                 [self cancel];
                 [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
             }
