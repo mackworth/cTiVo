@@ -3,12 +3,16 @@
 # arbitrarily choose a completion point of the segments
 # rather than printing 0 - 100 % twice, which runs the risk (albeit small) of getting
 # killed by cTiVo if the progress monitor sees the same % twice in a row
-merge_start_percent=95
+merge_start_percent=98
 
 # Due to the transition to Transport Stream, there’s a good chance you’ll get a file
 # with no video stream.  It needs to report this to ctivo which will switch to TS and
 # start all over again
 no_video_stream_message="no video streams"
+
+# cTiVo needs us to print a progress indicator, so every $sleep_duration seconds, 
+# check the tail of the ffmpeg log to see where we're at
+sleep_duration=10
 
 usage() {
   cat << EOF 1>&2
@@ -82,21 +86,32 @@ launch_and_monitor_ffmpeg() {
     progress=$(tail -c 1000 "$logfile"  | egrep -o 'time=\S+' | cut -d= -f2 | tail -n1)
     if [ -n "$progress" ]; then
       progress=$(timestamp_to_seconds "$progress")
-      percent=$(echo "$min_percent $max_percent $progress $duration " | awk '{printf("%.2f", $1 + ($2 - $1) * $3 / $4)}')
+      percent=$(echo "$min_percent $max_percent $progress $duration " | awk '
+{
+min=$1
+max=$2
+progress=$3
+duration=$4
+if (progress > duration) {
+  printf("%.2f",max)
+} else {
+  printf("%.2f", min + (max - min) * progress / duration)
+}
+}')
       if [ "$last_percent" != "$percent" ]; then
         echo "$percent %"
       fi
       last_percent="$percent"
     fi
-    #hack: "read zero char from keyboard, fail after 1 second", better than "sleep 1" as no process created
-    read -t 1.0 -N 0
+    sleep $sleep_duration
   done 
   last_percent="$max_percent"
   echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
   pid=
 
   if [ ! -f "$output" ]; then
-    echo "error: problem generating $output, see $logfile for details"
+    echo "error: problem generating $output, dumping contents of ffmpeg logfile ($logfile)"
+    cat "$logfile"
     exit 1
   fi
 }
@@ -152,7 +167,7 @@ output_base=$(basename "$output")
 input_dir=$(dirname "$input")
 tmpdir="${input_dir}/${output_base%.*}_ffmpeg"
 rm -rf "$tmpdir"
-mkdir -p "$tmpdir/logs"
+mkdir -p "$tmpdir/logs" "$tmpdir/segments"
 
 # figure out the duration after cutting, for the progress indicator
 file_info=$("$ffmpeg_path" -i "$input" 2>&1 >/dev/null)
@@ -189,7 +204,7 @@ if [ -z "$edl_file" ]; then
 
 else
   # encode segments separately and merge together
-  merge_filename="$tmpdir/ffmpeg_merge.txt"
+  merge_filename="$tmpdir/segment_list.txt"
   progress=0
   for startstop in $(/usr/bin/awk '
 BEGIN {OFS=":"}
@@ -207,12 +222,12 @@ END {print ss,""}
 ' "$edl_file"); do
     ss=$(echo $startstop | cut -d: -f1)
     to=$(echo $startstop | cut -d: -f2)
-    segment_name=${ss}_${to}
+    segment_name=$(echo "$ss,$to" | /usr/bin/awk -F, '{printf("%06d_%06d", $1, $2)}')
 
     # "input seeking" (-ss before the input file) in ffmpeg is very fast but
     # the timestamps are reset so -to is now really a duration rather than a timestamp to stop at
     if [[ -n "$to" && -n "$ss" ]]; then
-      this_duration=$(echo "$to - $ss" | bc -l | /usr/bin/awk '{printf("%.3f",$1)}')
+      this_duration=$(echo "$to - $ss" | bc -l)
     elif [[ -n "$ss" ]]; then
       if (($(echo "$ss > $original_duration" | bc -l))); then
         continue
@@ -228,15 +243,18 @@ END {print ss,""}
       to="-to $this_duration"
     fi
 
-    segment_filename="$tmpdir/segment_${segment_name}.$ext"
-    echo file \'$(realpath "$segment_filename")\' >> "$merge_filename"
+    segment_log="$tmpdir/logs/ffmpeg_segment_${segment_name}.log"
+    segment_filename="$tmpdir/segments/segment_${segment_name}.$ext"
+    segment_absolute_path=$(realpath "$segment_filename")
+    segment_absolute_path_escaped=$(echo "$segment_absolute_path" | sed "s/'/'\\\''/g")
+    echo file \'$segment_absolute_path_escaped\' >> "$merge_filename"
 
     # TODO: remove -strict -2 once the bundled ffmpeg binary is updated to 3.1.1 or later
     launch_and_monitor_ffmpeg $(echo "$merge_start_percent * ($progress / $duration)" | bc -l) \
                               $(echo "$merge_start_percent * (($progress + $this_duration) / $duration)" | bc -l) \
                               $this_duration \
                               "$segment_filename" \
-                              "$tmpdir/logs/ffmpeg_segment$i.log" \
+                              "$segment_log" \
                               $ss "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -strict -2 -c:a:0 aac "${ac3_opts[@]}" $to
 
     progress=$(echo "$this_duration + $progress" | bc -l)
@@ -250,5 +268,5 @@ END {print ss,""}
                             $duration \
                             "$output" \
                             "$tmpdir/logs/ffmpeg_concat.log" \
-                            -f concat -safe 0 -i "$merge_filename" "${map_opts[@]}" -c copy "${ac3_opts[@]}"
+                            -f concat -safe 0 -i "$merge_filename" -map 0 -c copy
 fi
