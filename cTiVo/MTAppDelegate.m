@@ -233,7 +233,7 @@ __DDLOGHERE__
 										  @NO, kMTiTunesContentIDExperiment,
 										  @NO, kMTTrustTVDB,
                                           @2, kMTMaxNumEncoders,
-                                          @120, kMTMaxProgressDelay,
+                                          @240, kMTMaxProgressDelay,
                                           @"tivodecode-ng", kMTDecodeBinary,
                                           @NO, kMTDownloadTSFormat,
                                           @[], kMTChannelInfo,

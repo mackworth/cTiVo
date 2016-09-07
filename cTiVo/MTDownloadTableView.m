@@ -182,14 +182,13 @@ __DDLOGHERE__
         progressColumn = @"Programs";
     }
     NSInteger progressIndex = [self columnWithIdentifier:progressColumn];
-	NSArray *displayedShows = [self.sortedDownloads copy];
-	for (NSUInteger i=0; i< displayedShows.count; i++) {
-		MTDownload *thisDownload = [displayedShows objectAtIndex:i];
-        if (download && thisDownload != download) continue; //only update current one
-		MTProgressindicator *cell = [self viewAtColumn:progressIndex row:i makeIfNecessary:NO];
-		[self updateProgressInCell: cell forDL: thisDownload];
+    NSUInteger i = [self.sortedDownloads indexOfObject:download];
+    if (i != NSNotFound) {
+        MTProgressindicator *cell = [self viewAtColumn:progressIndex row:i makeIfNecessary:NO];
+        [self updateProgressInCell: cell forDL: download];
         cell.displayProgress = YES;
-	}
+
+    }
     if (!tiVoManager.anyTivoActive) {//somewhat expensive
         [self.performanceLabel setHidden:YES];
     } else {

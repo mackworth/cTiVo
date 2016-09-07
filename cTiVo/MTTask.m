@@ -170,10 +170,8 @@ __DDLOGHERE__
 
 -(void) saveLogFile
 {
-	if (ddLogLevel >= LOG_LEVEL_REPORT) {
-		[self saveLogFileType:@"log" fromPath:_logFilePath];
-		[self saveLogFileType:@"err" fromPath:_errorFilePath];
-	}
+    [self saveLogFileType:@"log" fromPath:_logFilePath];
+    [self saveLogFileType:@"err" fromPath:_errorFilePath];
 }
 
 -(void)completeProcess
@@ -261,7 +259,7 @@ __DDLOGHERE__
                     newProgressValue = _progressCalc(data);
                 }
                 if (newProgressValue != -1) {
-                    DDLogVerbose(@"New progress value for %@ is %lf",_taskName,newProgressValue);
+                    DDLogVerbose(@"New progress value for %@ is %0.1lf%%",_taskName,newProgressValue*100);
                     if ((newProgressValue != _download.processProgress) && (newProgressValue != 0)) {
                         _download.processProgress = newProgressValue;
                     }
@@ -293,7 +291,6 @@ __DDLOGHERE__
 -(NSString *)description
 {
     NSString *desc = [NSString stringWithFormat:@"Task Name: %@",_taskName];
-    desc = [desc stringByAppendingFormat:@"\nLaunchPath: %@", _task.launchPath];
 
     //try to provide argument list in cut/paste form for bash
     NSCharacterSet *specialCharSet = [NSCharacterSet characterSetWithCharactersInString:@" $\"\\"];
@@ -312,7 +309,7 @@ __DDLOGHERE__
         }
         return argument;
     }];
-    desc = [desc stringByAppendingFormat:@"\nArguments: %@",[arguments componentsJoinedByString:@" "]];
+    desc = [desc stringByAppendingFormat:@"\nLaunchPath: %@ %@", _task.launchPath, [arguments componentsJoinedByString:@" "]];
     desc = [desc stringByAppendingFormat:@"\n%@ output pipe",_requiresOutputPipe ? @"Requires" : @"Does not require"];
     desc = [desc stringByAppendingFormat:@"\nStandard Input: %@",_task.standardInput];
     desc = [desc stringByAppendingFormat:@"\nStandard Output: %@",_task.standardOutput];

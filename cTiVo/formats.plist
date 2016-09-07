@@ -372,78 +372,6 @@ NOTE: *MUST* install a codec (http://perian.org/)</string>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>for fastest encode (worst quality)
-video: 640x480 mpeg-1 at 3000mbps
-audio: mp2 at 128kbs</string>
-			<key>comSkip</key>
-			<true/>
-			<key>edlFlag</key>
-			<string>-edl</string>
-			<key>comSkipOptions</key>
-			<string></string>
-			<key>filenameExtension</key>
-			<string>.mpg</string>
-			<key>encoderUsed</key>
-			<string>mencoder</string>
-			<key>name</key>
-			<string>QuickTime superfast (mpeg-1)</string>
-			<key>encoderVideoOptions</key>
-			<string>-vf scale=640:480,harddup -ovc lavc -lavcopts vcodec=mpeg1video:vbitrate=3000</string>
-			<key>encoderAudioOptions</key>
-			<string>-oac lavc -lavcopts acodec=mp2:abitrate=128</string>
-			<key>encoderOtherOptions</key>
-			<string>-of lavf -lavfopts format=mpeg -hr-edl-seek</string>
-			<key>iTunes</key>
-			<false/>
-			<key>mustDownloadFirst</key>
-			<false/>
-			<key>outputFileFlag</key>
-			<string>-o</string>
-			<key>inputFileFlag</key>
-			<string></string>
-			<key>regExProgress</key>
-			<string></string>
-			<key>isHidden</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>formatDescription</key>
-			<string>for Microsoft Zune (untested)
-video: 320x240 h.264 at 384kbps
-audio: mp3 at 192kbs</string>
-			<key>comSkip</key>
-			<true/>
-			<key>edlFlag</key>
-			<string>-edl</string>
-			<key>comSkipOptions</key>
-			<string></string>
-			<key>filenameExtension</key>
-			<string>.mp4</string>
-			<key>encoderUsed</key>
-			<string>mencoder</string>
-			<key>name</key>
-			<string>Zune</string>
-			<key>encoderVideoOptions</key>
-			<string>-of lavf -lavfopts format=mp4 -ovc x264 -x264encopts nocabac:level_idc=21:bitrate=384:threads=auto:bframes=0:global_header -vf dsize=320:240:0,scale=-8:-8,harddup</string>
-			<key>encoderAudioOptions</key>
-			<string>-oac mp3lame -lameopts br=192</string>
-			<key>encoderOtherOptions</key>
-			<string>-hr-edl-seek</string>
-			<key>iTunes</key>
-			<false/>
-			<key>mustDownloadFirst</key>
-			<false/>
-			<key>outputFileFlag</key>
-			<string>-o</string>
-			<key>inputFileFlag</key>
-			<string></string>
-			<key>regExProgress</key>
-			<string></string>
-			<key>isHidden</key>
-			<true/>
-		</dict>
-		<dict>
-			<key>formatDescription</key>
 			<string>for playback on AppleTV
 video: 960x540 h.264 at 2Mbps
 audio: 2-channel aac at 128kbs</string>
@@ -668,45 +596,6 @@ audio: aac at 128kbs
 		<dict>
 			<key>formatDescription</key>
 			<string>MPEG-2 Program Stream
-intended for HD sources
-video: original resolution mpeg-2 at 5Mbps
-audio: mp2 at 128kbs
-
-May not work in quicktime</string>
-			<key>comSkip</key>
-			<true/>
-			<key>edlFlag</key>
-			<string>-edl</string>
-			<key>comSkipOptions</key>
-			<string></string>
-			<key>filenameExtension</key>
-			<string>.mpg</string>
-			<key>encoderUsed</key>
-			<string>mencoder</string>
-			<key>name</key>
-			<string>MPEG-2  HD</string>
-			<key>encoderVideoOptions</key>
-			<string>-ovc lavc -vf harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=18350:vrc_maxrate=9800:vbitrate=5000:keyint=15:trell:mbd=2:precmp=2:subcmp=2:cmp=2:dia=-10:predia=-10:cbp:mv0:vqmin=1:lmin=1:dc=10:vstrict=0:autoaspect</string>
-			<key>encoderAudioOptions</key>
-			<string>-srate 48000 -af lavcresample=48000 -oac lavc -lavcopts acodec=mp2:abitrate=192</string>
-			<key>encoderOtherOptions</key>
-			<string>-hr-edl-seek -of lavf -lavfopts format=dvd</string>
-			<key>iTunes</key>
-			<false/>
-			<key>mustDownloadFirst</key>
-			<true/>
-			<key>outputFileFlag</key>
-			<string>-o</string>
-			<key>inputFileFlag</key>
-			<string></string>
-			<key>regExProgress</key>
-			<string>\( ?([\d\.]*?)\%\)</string>
-			<key>isHidden</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>formatDescription</key>
-			<string>MPEG-2 Program Stream
 video: original resolution, mpeg-2 at 1Mbps
 audio: mp2 at 128kbs
 
@@ -724,7 +613,7 @@ May not work in Quicktime</string>
 			<key>name</key>
 			<string>MPEG-2   ( 1Mbps )</string>
 			<key>encoderVideoOptions</key>
-			<string>-ovc lavc -vf pp=lb,scale=-1:-1,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=2400:vbitrate=1000:keyint=15:trell:mbd=2:precmp=2:subcmp=2:cmp=2:dia=-10:predia=-10:cbp:mv0:vqmin=1:lmin=1:dc=10:vstrict=0:autoaspect</string>
+			<string>-ovc lavc -vf pp=lb,scale=-1:-1,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=2400:vbitrate=1000:keyint=15:trell:mbd=2:precmp=2:subcmp=2:cmp=2:dia=-10:predia=-10:o=mpv_flags=+cbp_rd:mv0:vqmin=1:lmin=1:dc=10:vstrict=0:autoaspect</string>
 			<key>encoderAudioOptions</key>
 			<string>-srate 48000 -af lavcresample=48000 -oac lavc -lavcopts acodec=mp2:abitrate=128</string>
 			<key>encoderOtherOptions</key>
@@ -949,7 +838,7 @@ audio: mp2 at 192kbs</string>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
-			<string>Test Format for ffmpeg (ffmpeg must be on users system to see this)</string>
+			<string>Create AVI format file</string>
 			<key>comSkip</key>
 			<false/>
 			<key>edlFlag</key>

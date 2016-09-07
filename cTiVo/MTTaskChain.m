@@ -251,9 +251,9 @@ __DDLOGHERE__
     NSFileHandle * incomingHandle = (NSFileHandle *) notification.object;
     NSArray *pipes = [self.teeBranches objectForKey:incomingHandle];
     if (readData.length) {
-        DDLogVerbose(@"Tee got %ld bytes", readData.length);
+        DDLogVerbose(@"Tee got %ld bytes; total: %ld", readData.length, self.totalDataRead);
     } else {
-        DDLogMajor(@"Tee got 0 bytes, and is %@cancelled",_download.isCanceled ? @"" : @"not ");
+        DDLogDetail(@"Tee got 0 bytes after %ld, and is %@cancelled", self.totalDataRead,_download.isCanceled ? @"" : @"not ");
     }
 	if (readData.length && !_download.isCanceled) {
         for (NSPipe *pipe in pipes ) {

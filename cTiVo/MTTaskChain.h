@@ -37,7 +37,7 @@ Thus when all tasks in the current chain are completed, the nextTaskChain is sta
 
 Flow of data:
  MTDownload initiates the URL download from the Tivo in MTDownload>download.
- When a packet arrives, the system calls MTDownload connection:didReceiveData which either stores it in memory in urlBuffer or writes it to bufferFileHandle.
+ When a packet arrives, the system calls MTDownload connection:didReceiveData, which either stores it in memory in urlBuffer or writes it to bufferFileHandle.
  Then download>WriteData in the background reads that data and writes it to the taskchain's inputhandle.
  If the first group of the taskchain only has one member, then we don't need to tee, we just connect the inputhandle directly as a pipe into the task.
  OR if there's more than one, then MTTaskChain runs tee on a ReadAndNotifyInBackground

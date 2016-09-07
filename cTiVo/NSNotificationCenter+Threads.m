@@ -16,11 +16,19 @@
 
 +(void)postNotificationOnMainThread:(NSNotification *)notification afterDelay:(NSTimeInterval) delay {
     if (delay == 0.0) {
-        [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
+        if ([NSThread isMainThread]) {
+            [[NSNotificationCenter defaultCenter] postNotification:notification];
+        } else {
+            [[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
+        }
     } else {
-        dispatch_async(dispatch_get_main_queue(), ^{
+        if ([NSThread isMainThread]) {
             [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:delay];
-        });
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:notification afterDelay:delay];
+            });
+        }
     }
 }
 
