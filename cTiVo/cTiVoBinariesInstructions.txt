@@ -1,0 +1,11 @@
+To build the binaries need for inclusion:
+
+1) git clone git://github.com/erikkaashoek/Comskip <git://github.com/erikkaashoek/Comskip> (or pull update) and then follow the build instructions
+2) git clone git://github.com/essandess/matryoshka-name-tool <git://github.com/essandess/matryoshka-name-tool> (not needed if you already have it)
+3) port install (or upgrade) ffmpeg
+4) port install (or upgrade) mplayer @1.2_2+a52+mencoder_extras(for mencoder)
+5) port install  (or upgrade) argtable
+6) create a target directory with bin and lib subdirectories (or use exiting structure in cTiVo xcode project)
+7) copy comskip, mencoder and ffmpeg to the bin directory
+8) cd to the bin directory used above
+9) run  -  python $PATH_TO/matryoshka_name_tool.py -d ../lib/ comskip ffmpeg mencoder
