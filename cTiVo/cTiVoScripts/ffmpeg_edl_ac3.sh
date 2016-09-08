@@ -110,7 +110,7 @@ if (progress > duration) {
   pid=
 
   if [ ! -f "$output" ]; then
-    echo "error: problem generating $output, dumping contents of ffmpeg logfile ($logfile)"
+    echo "error: problem generating $output, dumping contents of ffmpeg logfile ($logfile)" >&2
     cat "$logfile"
     exit 1
   fi
@@ -186,6 +186,7 @@ declare -a map_opts ac3_opts
 if [[ -n "$video_stream" ]]; then
   map_opts+=(-map "$video_stream")
 else
+  echo $file_info >&2
   echo "$no_video_stream_message" >&2
   exit 1
 fi
@@ -199,8 +200,7 @@ fi
 
 if [ -z "$edl_file" ]; then
   # no edl file, don't need to encode segments and merge, simply encode with the modified audio streams
-  # TODO: remove -strict -2 once the bundled ffmpeg binary is updated to 3.1.1 or later
-  launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/logs/ffmpeg.log" "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -strict -2 -c:a:0 aac "${ac3_opts[@]}"
+  launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/logs/ffmpeg.log" "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -c:a:0 aac "${ac3_opts[@]}"
 
 else
   # encode segments separately and merge together
@@ -249,13 +249,12 @@ END {print ss,""}
     segment_absolute_path_escaped=$(echo "$segment_absolute_path" | sed "s/'/'\\\''/g")
     echo file \'$segment_absolute_path_escaped\' >> "$merge_filename"
 
-    # TODO: remove -strict -2 once the bundled ffmpeg binary is updated to 3.1.1 or later
     launch_and_monitor_ffmpeg $(echo "$merge_start_percent * ($progress / $duration)" | bc -l) \
                               $(echo "$merge_start_percent * (($progress + $this_duration) / $duration)" | bc -l) \
                               $this_duration \
                               "$segment_filename" \
                               "$segment_log" \
-                              $ss "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -strict -2 -c:a:0 aac "${ac3_opts[@]}" $to
+                              $ss "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -c:a:0 aac "${ac3_opts[@]}" $to
 
     progress=$(echo "$this_duration + $progress" | bc -l)
   done

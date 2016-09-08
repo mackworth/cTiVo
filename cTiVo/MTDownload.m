@@ -14,6 +14,10 @@
 #include <sys/xattr.h>
 #include "mp4v2.h"
 #include "NSNotificationCenter+Threads.h"
+#ifndef DEBUG
+#import "Crashlytics/Crashlytics.h"
+#endif
+
 
 @interface MTDownload ()
 
@@ -2017,6 +2021,12 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         [self addXAttrs:self.encodeFilePath];
     //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
         DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], self.show.showTitle);
+#ifndef DEBUG
+        [Answers logCustomEventWithName:@"Success"
+                       customAttributes:@{@"Format" : self.encodeFormat.name,
+                                          @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]
+                                          }];
+#endif
         [tiVoManager  notifyWithTitle:@"TiVo show transferred." subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
     }
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
@@ -2064,6 +2074,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                    (![decrementRetries boolValue] && self.numStartupRetriesRemaining <=0)) {
             [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
             self.processProgress = 1.0;
+#ifndef DEBUG
+           [Answers logCustomEventWithName:@"Failure"
+                           customAttributes:@{ @"Format" : self.encodeFormat.name,
+                                               @"Type" : @([self taskFlowType])}];
+#endif
             [tiVoManager  notifyWithTitle: @"TiVo show failed; cancelled."
                                  subTitle:self.show.showTitle forNotification:kMTGrowlEndDownload];
 
@@ -2071,9 +2086,14 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             if ([decrementRetries boolValue]) {
                 self.numRetriesRemaining--;
                 [tiVoManager  notifyWithTitle:@"TiVo show failed; retrying..." subTitle:self.show.showTitle forNotification:kMTGrowlCantDownload];
-                DDLogDetail(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
+#ifndef DEBUG
+                [Answers logCustomEventWithName:@"Retry"
+                               customAttributes:@{ @"Format" : self.encodeFormat.name,
+                                                   @"Type" : @([self taskFlowType])}];
+#endif
+                DDLogMajor(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
             } else {
-                self.numStartupRetriesRemaining--;
+               self.numStartupRetriesRemaining--;
                 DDLogDetail(@"Decrementing startup retries to %@",@(self.numStartupRetriesRemaining));
             }
             [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
