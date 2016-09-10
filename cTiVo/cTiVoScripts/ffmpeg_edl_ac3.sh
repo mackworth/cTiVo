@@ -112,8 +112,8 @@ printf("%.2f",pct)
   status=$?
   pid=
 
-  [[ ! -s "$output" ]] && err_msg="problem generating $output"
-  [[ "$status" != "0" ]] && err_msg="$ffmpeg_path exited with a status of $status"
+  [[ -s "$output" ]] || err_msg="problem generating $output"
+  [[ "$status" = "0" ]] || err_msg="$ffmpeg_path exited with a status of $status"
   if [[ -n "$err_msg" ]]; then
     echo "error: $err_msg, dumping contents of ffmpeg logfile ($logfile)" >&2
     cat "$logfile"
