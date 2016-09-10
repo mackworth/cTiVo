@@ -106,8 +106,6 @@ printf("%.2f",pct)
     fi
     sleep $sleep_duration
   done 
-  last_percent="$max_percent"
-  echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
   wait $pid
   status=$?
   pid=
@@ -119,6 +117,9 @@ printf("%.2f",pct)
     cat "$logfile"
     exit 1
   fi
+
+  last_percent="$max_percent"
+  echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
 }
 
 # attempt to keep the wrapper script interface transparent, 
