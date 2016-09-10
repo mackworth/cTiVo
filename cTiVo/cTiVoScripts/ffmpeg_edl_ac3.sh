@@ -22,8 +22,12 @@ EOF
 exit 1
 }
 
-# use dirname $0 to get path to ourselves
+# use dirname $0 to get path to ourselves unless $FFMPEG_PATH 
+# is set, in which case use that
 ffmpeg_path=$(dirname "$0")/ffmpeg
+if [ -n "$FFMPEG_PATH" ]; then
+  ffmpeg_path="$FFMPEG_PATH"
+fi
 
 # kill any encode that's going on in the background before 
 # exiting ourselves
@@ -70,7 +74,7 @@ launch_and_monitor_ffmpeg() {
   local duration="$1"; shift
   local output="$1"; shift
   local logfile="$1"; shift
-  local progress percent last_percent
+  local progress percent last_percent status err_msg
 
   # make sure ffmpeg doesn't prompt us to remove the output file
   # if for some reason it pre-exists
@@ -88,15 +92,12 @@ launch_and_monitor_ffmpeg() {
       progress=$(timestamp_to_seconds "$progress")
       percent=$(echo "$min_percent $max_percent $progress $duration " | awk '
 {
-min=$1
-max=$2
-progress=$3
-duration=$4
-if (progress > duration) {
-  printf("%.2f",max)
-} else {
-  printf("%.2f", min + (max - min) * progress / duration)
+min=$1; max=$2; progress=$3; duration=$4
+pct=max
+if (progress < duration) {
+  pct = min + (max - min) * progress / duration
 }
+printf("%.2f",pct)
 }')
       if [ "$last_percent" != "$percent" ]; then
         echo "$percent %"
@@ -105,15 +106,20 @@ if (progress > duration) {
     fi
     sleep $sleep_duration
   done 
-  last_percent="$max_percent"
-  echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
+  wait $pid
+  status=$?
   pid=
 
-  if [ ! -f "$output" ]; then
-    echo "error: problem generating $output, dumping contents of ffmpeg logfile ($logfile)" >&2
+  [[ -s "$output" ]] || err_msg="problem generating $output"
+  [[ "$status" = "0" ]] || err_msg="$ffmpeg_path exited with a status of $status"
+  if [[ -n "$err_msg" ]]; then
+    echo "error: $err_msg, dumping contents of ffmpeg logfile ($logfile)" >&2
     cat "$logfile"
     exit 1
   fi
+
+  last_percent="$max_percent"
+  echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
 }
 
 # attempt to keep the wrapper script interface transparent, 
@@ -167,45 +173,58 @@ output_base=$(basename "$output")
 input_dir=$(dirname "$input")
 tmpdir="${input_dir}/${output_base%.*}_ffmpeg"
 rm -rf "$tmpdir"
-mkdir -p "$tmpdir/logs" "$tmpdir/segments"
+mkdir -p "$tmpdir/logs"
+
+# first use ffmpeg to get info about duration, stream IDs
+file_info=$("$ffmpeg_path" -i "$input" 2>&1 >/dev/null)
+
+original_duration=$(echo "$file_info" | grep Duration: | awk '{print $2}')
+if [ -z "$original_duration" ]; then
+  echo "Unable to determine duration from input file $input:"
+  echo "$file_info"
+  exit 1
+fi
 
 # figure out the duration after cutting, for the progress indicator
-file_info=$("$ffmpeg_path" -i "$input" 2>&1 >/dev/null)
-original_duration=$(echo "$file_info" | grep Duration: | awk '{print $2}')
 original_duration=$(timestamp_to_seconds $original_duration)
 cut_duration=$(awk "BEGIN {total=0} {total += ($original_duration < \$2 ? $original_duration : \$2)-\$1} END {print total}" "$edl_file")
 duration=$(echo "$original_duration-$cut_duration" | bc -l)
 
-# check if the audio stream is ac3 and 5.1
-# if it is, create two audio streams in the output file: 2-channel aac and ac3 5.1
-# otherwise, just convert to aac
+# look for first video and audio stream in input file
 audio_line=$(echo "$file_info" | /usr/bin/perl -ne 'if (/^\s*Stream #(\d:\d).*Audio:.*/) {print "$1,$_"; exit}')
 audio_stream=$(echo "$audio_line" | cut -d, -f1)
 video_stream=$(echo "$file_info" | /usr/bin/perl -ne 'if (/^\s*Stream #(\d:\d).*Video:.*/) {print "$1"; exit}')
-declare -a map_opts ac3_opts
+declare -a map_opts audio_opts encode_opts
 if [[ -n "$video_stream" ]]; then
   map_opts+=(-map "$video_stream")
 else
-  echo $file_info >&2
+  echo "$file_info" >&2
   echo "$no_video_stream_message" >&2
   exit 1
 fi
 if [[ -n "$audio_stream" ]]; then
   map_opts+=(-map "$audio_stream")
+  audio_opts+=(-c:a:0 aac)
 fi
 if echo "$audio_line" | cut -d, -f2- | grep ac3 | grep --quiet '5\.1'; then
+  # if audio is ac3 5.1 (Dolby Digital), create an additional ac3 stream for surround sound
   map_opts+=(-map "$audio_stream")
-  ac3_opts+=("-c:a:1" "ac3")
+  audio_opts+=(-c:a:1 ac3)
 fi
 
+# attempt to munge users's ffmpeg args with our auto-generated -map and audio encoder opts.
+encode_opts=("${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" "${audio_opts[@]}")
+
 if [ -z "$edl_file" ]; then
-  # no edl file, don't need to encode segments and merge, simply encode with the modified audio streams
-  launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/logs/ffmpeg.log" "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -c:a:0 aac "${ac3_opts[@]}"
+  # no edl file, don't need to encode segments and merge, simply encode
+  launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/logs/ffmpeg.log" "${encode_opts[@]}"
 
 else
   # encode segments separately and merge together
   merge_filename="$tmpdir/segment_list.txt"
+  mkdir -p "$tmpdir/segments"
   progress=0
+
   for startstop in $(/usr/bin/awk '
 BEGIN {OFS=":"}
 {
@@ -254,7 +273,7 @@ END {print ss,""}
                               $this_duration \
                               "$segment_filename" \
                               "$segment_log" \
-                              $ss "${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" -c:a:0 aac "${ac3_opts[@]}" $to
+                              $ss "${encode_opts[@]}" $to
 
     progress=$(echo "$this_duration + $progress" | bc -l)
   done
