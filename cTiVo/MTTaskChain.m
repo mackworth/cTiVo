@@ -286,7 +286,7 @@ __DDLOGHERE__
                     if (numTries == 0) {
                         DDLogReport(@"Write Fail: couldn't write to pipe after three tries; %@ may have crashed.", taskName);
                     } else {
-                        DDLogReport(@"Write Fail; tried %lu bytes; error: %zd; %@ may have crashed.", bytesLeft, errno, taskName);
+                        DDLogReport(@"Write Fail; tried %lu bytes; error: %d; %@ may have crashed.", bytesLeft, errno, taskName);
                     }
                     if (!currentTask || currentTask.shouldReschedule) {
                         [_download rescheduleOnMain];
@@ -327,7 +327,7 @@ __DDLOGHERE__
 		}
 
 	} else {
-        DDLogMajor(@"Really Quitting because data length is %ld and is %@cancelled",readData.length, _download.isCanceled ? @"" : @"not ");
+        DDLogMajor(@"Finishing Tee because we are %@.",_download.isCanceled ? @"cancelled" : @"finished");
         for (NSPipe *pipe in pipes) {
 			@try{
 				[[pipe fileHandleForWriting] closeFile];

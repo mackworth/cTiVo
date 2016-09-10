@@ -1013,7 +1013,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     if ([outputFile isKindOfClass:[NSString class]]) {
         catTask.completionHandler = ^BOOL(){
             if (! [[NSFileManager defaultManager] fileExistsAtPath:outputFile] ) {
-                DDLogReport(@"Warning: %@: File %@ not found after completion",self, outputFile );
+                DDLogReport(@"Warning: %@: File %@ not found after cat completion",self, outputFile );
             }
             return YES;
         };
@@ -1098,13 +1098,9 @@ NSString * fourChar(long n, BOOL allowZero) {
 //            }
 //        }
 //    };
-    NSString * mediaKey = [NSString stringWithFormat:
-                          @"-m%@%@",
-                           libreJar ? @" " : @"",
-                           self.show.tiVo.mediaKey];
 	NSArray *arguments = @[
-						  mediaKey,
-						  [NSString stringWithFormat:@"-o%@",self.decryptedFilePath],
+						  @"-m",self.show.tiVo.mediaKey,
+						  @"-o",self.decryptedFilePath,
 						  @"-v",
                           @"-"
                           ];
@@ -1112,15 +1108,15 @@ NSString * fourChar(long n, BOOL allowZero) {
         arguments = @[
                       @"-jar",
                       libreJar,
-                      mediaKey,
+                      @"-m",self.show.tiVo.mediaKey,
                       @"-d",
-                      [NSString stringWithFormat:@"-o %@",self.decryptedFilePath],
+                      @"-o", self.decryptedFilePath
                       ];
     }
     decryptTask.requiresOutputPipe = NO;
     if (self.exportSubtitles.boolValue || self.shouldSimulEncode) {  //use stdout to pipe to captions  or simultaneous encoding
         arguments =@[
-                     mediaKey,
+                     @"-m", self.show.tiVo.mediaKey,
                      @"-v",
                      @"--",
                      @"-"
@@ -1129,7 +1125,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             arguments = @[
                           @"-jar",
                           libreJar,
-                          mediaKey,
+                          @"-m", self.show.tiVo.mediaKey,
                           @"-d"
                           ];
         }
@@ -1162,19 +1158,20 @@ NSString * fourChar(long n, BOOL allowZero) {
     NSArray * encoderArgs = nil;
 
     encodeTask.completionHandler = ^BOOL(){
-        [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
-        //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeDidFinish object:nil];
-        self.processProgress = 1.0;
         if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
-            DDLogReport(@" %@ File %@ not found after encoding complete",self, self.encodeFilePath );
-            [self rescheduleShowWithDecrementRetries:@(YES)];
+            DDLogReport(@" %@ encoding complete, but the video file not found: %@ ",self, self.encodeFilePath );
             return NO;
-
-        } else if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
+        }
+        unsigned long long fileSize = [[[NSFileManager defaultManager] attributesOfItemAtPath:self.encodeFilePath error:nil] fileSize];
+        if (fileSize == 0) {
+            DDLogReport(@" %@ encoding complete, but empty file found: %@",self, self.encodeFilePath );
+            return NO;
+        }
+        [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
+        self.processProgress = 1.0;
+       if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
             [self writeMetaDataFiles];
-            //            if ( ! (self.includeAPMMetaData.boolValue && self.encodeFormat.canAcceptMetaData) ) {
             [self finishUpPostEncodeProcessing];
-            //            }
         }
         return YES;
     };
@@ -2061,7 +2058,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         self.processProgress = 1.0;
     } else {
         [self cancel];
-        DDLogMajor(@"Stalled at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self.show.showTitle, self.processProgress, self.previousCheck );
+        DDLogMajor(@"Stopping at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self.show.showTitle, self.processProgress, self.previousCheck );
         if (self.downloadStatus.intValue == kMTStatusDone) {
             self.baseFileName = nil;
         }

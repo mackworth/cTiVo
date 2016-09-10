@@ -613,7 +613,7 @@ May not work in Quicktime</string>
 			<key>name</key>
 			<string>MPEG-2   ( 1Mbps )</string>
 			<key>encoderVideoOptions</key>
-			<string>-ovc lavc -vf pp=lb,scale=-1:-1,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=2400:vbitrate=1000:keyint=15:trell:mbd=2:precmp=2:subcmp=2:cmp=2:dia=-10:predia=-10:o=mpv_flags=+cbp_rd:mv0:vqmin=1:lmin=1:dc=10:vstrict=0:autoaspect</string>
+			<string>-ovc lavc -vf pp=lb,scale=-1:-1,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=2400:vbitrate=1000:keyint=15:trell:mbd=2:precmp=2:subcmp=2:cmp=2:dia=-10:predia=-10:o=mpv_flags=+cbp_rd:o=mpv_flags=+mv0:vqmin=1:lmin=1:dc=10:vstrict=0:autoaspect</string>
 			<key>encoderAudioOptions</key>
 			<string>-srate 48000 -af lavcresample=48000 -oac lavc -lavcopts acodec=mp2:abitrate=128</string>
 			<key>encoderOtherOptions</key>

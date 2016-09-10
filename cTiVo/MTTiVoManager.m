@@ -1070,9 +1070,12 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(void) sortChannelsAndMakeUnique {
     NSArray * channels = [[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo];
-
     NSMutableDictionary *uniqueObjects = [NSMutableDictionary dictionaryWithCapacity:channels.count];
     for (NSDictionary *object in channels) {
+        if ([object class] != [NSDictionary class] || !object[kMTChannelInfoName]) {
+            DDLogReport(@"Removing invalid entry in channels: %@", object);
+            continue;
+        }
         [uniqueObjects setObject:object forKey:object[kMTChannelInfoName]];
     }
     NSArray * newChannels = [[uniqueObjects allValues] sortedArrayUsingComparator:^NSComparisonResult(NSDictionary *  _Nonnull obj1, NSDictionary *   _Nonnull obj2) {
@@ -1381,7 +1384,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 }
 
 - (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notification {
-	DDLogReport(@"Notify: %@/%@: %@", title, subTitle, notification);
+	DDLogReport(@"Notify: %@/n%@: %@", title, subTitle, notification);
 	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
 	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
 		[GAB notifyWithTitle: title
