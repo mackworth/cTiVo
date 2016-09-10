@@ -204,7 +204,7 @@ else
 fi
 if [[ -n "$audio_stream" ]]; then
   map_opts+=(-map "$audio_stream")
-  audio_opts+=(-c:a:0 aac)
+  audio_opts+=(-c:a:0 aac -ac:a:0 2)
 fi
 if echo "$audio_line" | cut -d, -f2- | grep ac3 | grep --quiet '5\.1'; then
   # if audio is ac3 5.1 (Dolby Digital), create an additional ac3 stream for surround sound
