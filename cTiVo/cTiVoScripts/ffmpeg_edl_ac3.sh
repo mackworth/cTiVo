@@ -24,9 +24,8 @@ exit 1
 
 # use dirname $0 to get path to ourselves unless $FFMPEG_PATH 
 # is set, in which case use that
-if [ -z "$FFMPEG_PATH" ]; then
-  ffmpeg_path=$(dirname "$0")/ffmpeg
-else
+ffmpeg_path=$(dirname "$0")/ffmpeg
+if [ -n "$FFMPEG_PATH" ]; then
   ffmpeg_path="$FFMPEG_PATH"
 fi
 
