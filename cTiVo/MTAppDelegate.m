@@ -236,6 +236,7 @@ __DDLOGHERE__
                                           @240, kMTMaxProgressDelay,
                                           @"tivodecode-ng", kMTDecodeBinary,
                                           @NO, kMTDownloadTSFormat,
+                                          @NO, kMTExportTextMetaData,
                                           @[], kMTChannelInfo,
                                           nil];
     
