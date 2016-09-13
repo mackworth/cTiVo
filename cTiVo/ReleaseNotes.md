@@ -1,9 +1,8 @@
 # Release 2.5; Beta 1 
-
 ### TL; DR:
 Cable companies are migrating to H.264 video streams, requiring many changes to cTiVo. Most of these changes should now be transparent in operation, but many of the old Formats won't work with these new streams, and we'll be revamping them. There's a new Preferences screen Channels which will show if channels have converted to H.264.
 
-##Notice: Formats expected to change
+## Notice: Formats expected to change
 The `mencoder` program we have used for many of the original Formats (e.g. iPhone, AppleTV, iPod, H.264, DVD, QuickTime, PSP, YouTube) seems to be increasingly broken, with no active work going on to repair it. We're planning to change to `ffmpeg` as the primary converter, which means a lot of the existing Formats will change in an upcoming release. Existing subscriptions and queue items will still connect to the (renamed) older Formats, but there'll be new ones recommended for everyday use.  FYI, Some of the problems with mencoder are: Frequent incompatibility with the new H.264 formats; audio being dropped; doubling of video length, problems with commercial skipping, and other miscellaneous ones.
 
 I really need help testing all the different combinations and Formats. Any volunteers out there who can help test and, in particular, find the best way to re-encode the interlaced MP4 content to make them compatible with iTunes and iDevices would be great!
@@ -41,6 +40,7 @@ I'm also pleased to report that we've also added a `FFMpeg Comskip/5.1` format w
 * MEncoder 1.3.0-4.2.1 (C) 2000-201
 * HandBrake 0.10.1 (2015030800)
 * ffmpeg 3.1.3
+
 2) Added `ffmpeg` binary
 3) Filename template keywords Guests, StartTime, and ExtraEpisode
 4) Better Plex folder naming
@@ -55,27 +55,26 @@ I'm also pleased to report that we've also added a `FFMpeg Comskip/5.1` format w
 13) Many fixes for multitasking, iTunes, comskip, and Subscriptions.
 
 # Detailed changes versus Alpha 10:
-o New ffmpeg Format, which allows comskip and 5.1AC3 to be used with ffmpeg (contributed by Ryan Child)
-o New ffmpeg bash script can be used as a base for many interesting uses of ffmpeg
-o No need to confirm delete download if in Waiting mode
-o Initial changes for Rovi transition	
-o avoid Rovi copyright msessages (and the *’s as well)
-o Avoid using Rovi numbers with theTVDB
-o Lower CPU priority of background tasks to avoid swamping user interface
-o New column H.264 indicates whether a channel has mgirated
-o Removed QuickTime MP1, MP2-HD, and Zune Formats (let me know if you want one of these)
-o During Detail debug mode in TaskChain, prints out full config and command line invocation of helper apps
-o Updated all binaries to latest version
-o Allow encoding despite caption/commercial failure
-o Warns of empty file after encoding
+* New ffmpeg Format, which allows comskip and 5.1AC3 to be used with ffmpeg (contributed by Ryan Child)
+* New ffmpeg bash script can be used as a base for many interesting uses of ffmpeg
+* No need to confirm delete download if in Waiting mode
+* Initial changes for Rovi transition	
+* avoid Rovi copyright msessages (and the *’s as well)
+* Avoid using Rovi numbers with theTVDB
+* Lower CPU priority of background tasks to avoid swamping user interface
+* New column H.264 indicates whether a channel has mgirated
+* Removed QuickTime MP1, MP2-HD, and Zune Formats (let me know if you want one of these)
+* During Detail debug mode in TaskChain, prints out full config and command line invocation of helper apps
+* Updated all binaries to latest version
+* Allow encoding despite caption/commercial failure
+* Warns of empty file after encoding
 
 Fixes:
-o Much testing and fixes around certain Format configuration flows
-o Subscription information now being properly recorded for new users.
-o Pause Queue and Quit will now properly complete the current show (if requested)
-o Don’t crash if iTunes is Frozen
-o Fixes Play-Video crash in pre-Maverick systems
-
+* Much testing and fixes around certain Format configuration flows
+* Subscription information now being properly recorded for new users.
+* Pause Queue and Quit will now properly complete the current show (if requested)
+* Don’t crash if iTunes is Frozen
+* Fixes Play-Video crash in pre-Maverick systems
 
 <!---
 ====================
