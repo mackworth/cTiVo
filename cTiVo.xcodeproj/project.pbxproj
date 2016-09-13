@@ -443,6 +443,7 @@
 		1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLogFormatter.m; sourceTree = "<group>"; };
 		1EB49B9C1C505D3000887240 /* tivodecode-ng */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "tivodecode-ng"; sourceTree = "<group>"; };
 		1EB49B9F1C50A49000887240 /* tivo-libre.jar */ = {isa = PBXFileReference; lastKnownFileType = archive.jar; path = "tivo-libre.jar"; sourceTree = "<group>"; };
+		1EB757711D8712AB0045D040 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = ReleaseNotes.md; path = ../cTiVo/ReleaseNotes.md; sourceTree = "<group>"; };
 		1ECD9D3E1C8265D600FBC78D /* MTChannelEditorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTChannelEditorController.h; sourceTree = "<group>"; };
 		1ECD9D3F1C8265D600FBC78D /* MTChannelEditorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTChannelEditorController.m; sourceTree = "<group>"; };
 		1ECD9D401C8265D600FBC78D /* MTChannelEditorController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTChannelEditorController.xib; sourceTree = "<group>"; };
@@ -852,6 +853,7 @@
 		D2C0380F17131F9A0001BA52 /* Update */ = {
 			isa = PBXGroup;
 			children = (
+				1EB757711D8712AB0045D040 /* ReleaseNotes.md */,
 				1EFE66FE1BE967460083386C /* sparklecast.xml */,
 			);
 			name = Update;
