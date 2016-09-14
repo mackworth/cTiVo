@@ -730,9 +730,15 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     }
 }
 
+-(BOOL) allShowsSelected {
+    MTProgramTableView * programs = self.mainWindowController. tiVoShowTable;
+    NSInteger numShows = programs.sortedShows.count;
+    NSInteger numSelected = [programs selectedRowIndexes].count;
+    return (numSelected == 0 || numSelected == numShows);
+}
 
 -(NSArray <MTTiVoShow *> *) currentSelectedShows {
-    MTProgramTableView * programs = ((MTAppDelegate *) [NSApp delegate]).mainWindowController. tiVoShowTable;
+    MTProgramTableView * programs = self.mainWindowController. tiVoShowTable;
     NSArray * shows = programs.sortedShows;
     NSIndexSet *selectedRowIndexes = [programs selectedRowIndexes];
     if (selectedRowIndexes.count > 0) {

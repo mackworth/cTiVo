@@ -995,13 +995,9 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(void) updateChannel: (NSDictionary *) newChannel {
     if (!newChannel) return;
-    NSMutableArray *channels = nil;
-    NSArray * defaultsChannels =[[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo];
-    if (defaultsChannels) {
-        channels = [NSMutableArray arrayWithArray:defaultsChannels];
-    } else {
-        channels = [NSMutableArray array];
-    }
+    NSMutableArray *channels = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo] mutableCopy];
+    if (!channels) channels = [NSMutableArray array];
+
     NSIndexSet * removeIndexes = [channels indexesOfObjectsPassingTest:^BOOL(NSDictionary *  _Nonnull channel, NSUInteger idx, BOOL * _Nonnull stop) {
         return [channel[kMTChannelInfoName] caseInsensitiveCompare:newChannel[kMTChannelInfoName]] == NSOrderedSame;
     }];
@@ -1061,7 +1057,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 -(void) removeAllChannelsStartingWith: (NSString*) prefix {
     NSArray * channels = [[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo];
     NSIndexSet * realChannels = [channels indexesOfObjectsPassingTest:^BOOL(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        return ! [obj[kMTChannelInfoName] hasPrefix:@"???"];
+        return ! [obj[kMTChannelInfoName] hasPrefix:prefix];
     }];
     if (realChannels.count < channels.count) {
         [[NSUserDefaults standardUserDefaults] setValue: [channels objectsAtIndexes:realChannels]  forKey:kMTChannelInfo];
@@ -1072,7 +1068,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     NSArray * channels = [[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo];
     NSMutableDictionary *uniqueObjects = [NSMutableDictionary dictionaryWithCapacity:channels.count];
     for (NSDictionary *object in channels) {
-        if ([object class] != [NSDictionary class] || !object[kMTChannelInfoName]) {
+        if (![object isKindOfClass:[NSDictionary class]] || !object[kMTChannelInfoName]) {
             DDLogReport(@"Removing invalid entry in channels: %@", object);
             continue;
         }
@@ -1109,6 +1105,10 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     } else {
         return NSOnState;
     }
+}
+
+-(BOOL) allShowsSelected {
+    return ((MTAppDelegate *) [NSApp delegate]).allShowsSelected;
 }
 
 -(void) testAllChannelsForPS {

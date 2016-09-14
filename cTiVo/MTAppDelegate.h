@@ -15,5 +15,6 @@
 -(BOOL)checkForExit;
 
 -(NSArray <MTTiVoShow*> *)currentSelectedShows; //used for test purposes
+-(BOOL) allShowsSelected;
 
 @end
