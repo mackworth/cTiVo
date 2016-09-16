@@ -175,11 +175,46 @@ __DDLOGHERE__
 				[task launch];				
 			}
 		}
-		for (NSFileHandle *fileHandle in self.teeBranches) {
+        for (NSFileHandle *fileHandle in self.teeBranches) {
             DDLogDetail(@"Setting up reading of filehandle %p",fileHandle);
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tee:) name:NSFileHandleReadCompletionNotification object:fileHandle];
-            [fileHandle readInBackgroundAndNotify];
-		}
+            NSInteger priority = QOS_CLASS_USER_INITIATED;
+            if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9) {
+                priority = DISPATCH_QUEUE_PRIORITY_DEFAULT;
+            }
+
+            dispatch_io_t channel = dispatch_io_create(DISPATCH_IO_STREAM, [fileHandle fileDescriptor], dispatch_get_global_queue(priority, 0), ^(int error) {
+                if(error)
+                    DDLogMajor(@"got an error from fildHandle %@ %d (%s)\n", fileHandle, error, strerror(error));
+            });
+            dispatch_io_set_low_water(channel, 524288);  //512K
+
+            dispatch_io_read( channel,
+                             0,
+                             SIZE_MAX, dispatch_get_global_queue(QOS_CLASS_UTILITY, 0),
+                             ^(bool done,
+                               dispatch_data_t  _Nullable data,
+                               int error) {
+                                 if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_8) {
+                                     const void *buffer = NULL;
+                                     size_t size = 0;
+                                     dispatch_data_t new_data_file = dispatch_data_create_map(data, &buffer, &size);
+                                     if(new_data_file){
+                                         /* to avoid warning really - since dispatch_data_create_map demands we care about the return arg */
+                                     }
+
+                                    NSData *nsData = [[NSData alloc] initWithBytes:buffer length:size];
+                                 
+                                    [self teeInBackground:nsData isDone: done forHandle:fileHandle];
+
+                                    // clean up
+                                    free((void *)buffer); // warning: passing const void * to parameter of type void *
+
+                                } else {
+                                 [self teeInBackground:(__bridge NSData *)(data) isDone: done forHandle:fileHandle];
+                                }
+
+                             });
+        }
 
         _isRunning = YES;
         [self performSelector:@selector(trackProgress) withObject:nil afterDelay:0.5];
@@ -233,25 +268,14 @@ __DDLOGHERE__
     return nil;
 }
 
--(void)tee:(NSNotification *)notification {
-    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-        //run on Background Thread
-        [self teeInBackground:notification];
-     });
-}
-
--(void)teeInBackground:(NSNotification *)notification {
-
-	NSData *readData = notification.userInfo[NSFileHandleNotificationDataItem];
+-(void)teeInBackground: (NSData *) readData isDone:(BOOL) done forHandle: (NSFileHandle *) incomingHandle {
     self.totalDataRead += readData.length;
-    if (_providesProgress) {
+    if (self.providesProgress) {
         _download.processProgress = self.totalDataRead/_download.show.fileSize;
-        }
-//    NSLog(@"Total Data Read %ld",totalDataRead);
-    NSFileHandle * incomingHandle = (NSFileHandle *) notification.object;
+    }
     NSArray *pipes = [self.teeBranches objectForKey:incomingHandle];
     if (readData.length) {
-        DDLogVerbose(@"Tee got %ld bytes; total: %ld", readData.length, self.totalDataRead);
+        DDLogVerbose(@"Tee got %ld bytes on %@ thread; total: %ld", readData.length, [NSThread isMainThread ] ? @"main" : @"background",self.totalDataRead);
     } else {
         DDLogDetail(@"Tee got 0 bytes after %ld, and is %@cancelled", self.totalDataRead,_download.isCanceled ? @"" : @"not ");
     }
@@ -307,25 +331,6 @@ __DDLOGHERE__
                 }
 			}
         }
-		if (!_download.isCanceled) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                @try {
-                    [incomingHandle readInBackgroundAndNotify];
-                }
-                @catch (NSException *exception) {
-                    DDLogDetail(@"download read data in background fail: %@", exception.reason);
-                    if (!_download.isCanceled) {
-                        [_download rescheduleOnMain];
-                    }
-                    return;
-                    
-                }
-                @finally {
-                }
-            });
-
-		}
-
 	} else {
         DDLogMajor(@"Finishing Tee because we are %@.",_download.isCanceled ? @"cancelled" : @"finished");
         for (NSPipe *pipe in pipes) {

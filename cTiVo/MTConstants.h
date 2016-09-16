@@ -134,8 +134,8 @@
 #define kMTAllTiVos @"All TiVos"
 #define kMTDefaultDownloadDir  @"Movies/TiVoShows/"
 #define kMTMaxBuffSize 50000000
-#define kMTMaxReadPoints 500000
-#define kMTMaxPointsBeforeWrite 500000
+#define kMTMaxReadPoints 1048576
+#define kMTMaxPointsBeforeWrite 1048576
 #define kMTTimeToHelpIfNoTiVoFound 15
 
 #define kMTTivoShowPasteBoardType @"com.cTiVo.TivoShow"

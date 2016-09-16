@@ -2300,7 +2300,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                     [self rescheduleOnMain];
                     DDLogDetail(@"Rescheduling");
                 };
-				DDLogDetail(@"buffer read fail:%@; %@", exception.reason, self.show.showTitle);
+				DDLogMajor(@"buffer read fail:%@; %@", exception.reason, self.show.showTitle);
 			}
 			@finally {
 			}
@@ -2405,7 +2405,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         [self connectionDidFinishLoading:connection];
         return;
     }
-	if (self.urlBuffer) {
+    if (self.urlBuffer) {
         // cTiVo's URL connection supports sending its data to either an NSData buffer (self.urlBuffer) or a file on disk (self.bufferFilePath).  This allows cTiVo to 
         // initially try to keep the dataflow off the disk, except for final products, where possible.  But, the ability to do this depends on the processor 
         // being able to keep up with the data flow from the TiVo which is often not the case due to either a slow processor, fast network connection, of
