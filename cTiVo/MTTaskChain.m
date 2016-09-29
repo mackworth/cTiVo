@@ -69,8 +69,11 @@ __DDLOGHERE__
 		}
 	}
 
-    self.teeBranches = [NSMapTable mapTableWithKeyOptions:NSMapTableWeakMemory
-                                             valueOptions:NSMapTableStrongMemory];
+    if ( NSAppKitVersionNumber >= NSAppKitVersionNumber10_8 ) {
+        self.teeBranches = [NSMapTable strongToStrongObjectsMapTable];
+    } else {
+        self.teeBranches = [NSMapTable mapTableWithStrongToStrongObjects];
+    }
     for (NSArray <MTTask *> *currentTaskGroup in self.taskArray) {
         NSMutableArray *inputPipes = [NSMutableArray array];
 		if (currentTaskGroup.count ==1 ) {

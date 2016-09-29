@@ -704,6 +704,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		 @"tivoname":		NULLT(self.show.tiVoName),
 		 @"movieyear":		NULLT(self.show.movieYear),
 		 @"tvdbseriesid":	NULLT(TVDBseriesID),
+         @"format":         NULLT(self.encodeFormat.name)
 //         @"plexid":        [self ifString: self.show.seasonEpisode
 //                                elseString: originalAirDate],
 //         @"plexseason":    [self ifString: twoChar(self.show.season, NO)

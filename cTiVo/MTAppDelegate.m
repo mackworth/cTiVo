@@ -344,7 +344,9 @@ __DDLOGHERE__
     [NSApp postEvent:pseudoEvent atStart:YES];
 
 }
-
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
+    [self showMainWindow:notification];
+}
 /* 
 Routine to update and combine both the manual tivo preferences and the media keys, all of which are TiVo related into 1 preference
  array for TiVos to eliminate duplication and simplify maintanence.  This only needs to be done once.
@@ -671,6 +673,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 
 -(void)showWindowController: (MTPreferencesWindowController *) controller {
     //prefer to show window as attached sheet, but sometimes in the field, we don't have a window?, so just show it regular.
+    if (!controller.window) return;
     NSWindow * mainWindow =  _mainWindowController.window ?: [NSApp keyWindow];
     if (mainWindow) {
         [NSApp beginSheet:controller.window modalForWindow:mainWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
