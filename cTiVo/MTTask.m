@@ -152,7 +152,10 @@ __DDLOGHERE__
 			NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
 			DDLogMajor(@"%@File for task %@: %@",type, _taskName,  [logString maskMediaKeys]);
 		}
-	}
+    } else {
+        DDLogVerbose(@"%@File for task %@ was empty", type, _taskName);
+
+    }
 }
 
 -(void) saveLogFile
@@ -316,6 +319,9 @@ __DDLOGHERE__
     desc = [desc stringByAppendingFormat:@"\n%@ completionHandler",_completionHandler ? @"Has" : @"Does not have"];
     desc = [desc stringByAppendingFormat:@"\n%@ progressCalc",_progressCalc ? @"Has" : @"Does not have"];
     desc = [desc stringByAppendingFormat:@"\n%@ startupHandler",_startupHandler ? @"Has" : @"Does not have"];
+    desc = [desc stringByAppendingFormat:@"\nDirectoryPath: %@",_task.currentDirectoryPath ];
+    desc = [desc stringByAppendingFormat:@"\nEnvironment: %@",_task.environment ];
+
 //    desc = [desc stringByAppendingFormat:@"\n%@ a following task chain",_nextTaskChain ? @"Has" : @"Does not have"];
     return desc;
 }
@@ -372,6 +378,7 @@ __DDLOGHERE__
         shouldLaunch = _startupHandler();
     }
     if (shouldLaunch) {
+        DDLogVerbose(@"Launching: %@",self);
         [_task launch];
         launched = YES;
         self.taskRunning = YES;

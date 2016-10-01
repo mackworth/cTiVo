@@ -72,8 +72,12 @@ __DDLOGHERE__
     if ( NSAppKitVersionNumber >= NSAppKitVersionNumber10_8 ) {
         self.teeBranches = [NSMapTable strongToStrongObjectsMapTable];
     } else {
-        self.teeBranches = [NSMapTable mapTableWithStrongToStrongObjects];
+        //this is a kludge; putting it back the way it was before cleaning it up with MapTable
+        //but that doesn't work in macOS7, so this...
+        //works because NSMutableDictionary also responds to setObject:forKey:, removeObjectForKey:, objectForKey: and fast enumeration
+        self.teeBranches = (NSMapTable *)[NSMutableDictionary new];
     }
+    DDLogVerbose(@"tasks BEFORE config: %@", [self maskMediaKeys]);
     for (NSArray <MTTask *> *currentTaskGroup in self.taskArray) {
         NSMutableArray *inputPipes = [NSMutableArray array];
 		if (currentTaskGroup.count ==1 ) {
@@ -108,17 +112,16 @@ __DDLOGHERE__
 				for (NSUInteger k = i+1; k<_taskArray.count; k++) {
 					[nextChainTasks addObject:_taskArray[k]];
 				}
-				if (nextChainTasks.count) {
-					self.nextTaskChain = [MTTaskChain new];
-                    self.nextTaskChain.download = self.download;
-                    self.nextTaskChain.taskArray = [NSArray arrayWithArray: nextChainTasks] ;
-                    self.nextTaskChain.dataSink = self.dataSink;
-                    self.dataSink = nil;
-                    NSMutableArray *newTaskArray = [NSMutableArray arrayWithArray:self.taskArray];
-                    [newTaskArray removeObjectsInArray:nextChainTasks];
-                    self.taskArray = [NSArray arrayWithArray:newTaskArray];
-				}
-				break;
+                self.nextTaskChain = [MTTaskChain new];
+                self.nextTaskChain.download = self.download;
+                self.nextTaskChain.taskArray = [NSArray arrayWithArray: nextChainTasks] ;
+                self.nextTaskChain.dataSink = self.dataSink;
+                self.dataSink = nil;
+                NSMutableArray *newTaskArray = [NSMutableArray arrayWithArray:self.taskArray];
+                [newTaskArray removeObjectsInArray:nextChainTasks];
+                self.taskArray = [NSArray arrayWithArray:newTaskArray];
+                //rest of array will be configured next time (and we've modified self.taskArray!), so...
+                break;
 			}
 		}
 	}
@@ -198,6 +201,7 @@ __DDLOGHERE__
                                dispatch_data_t  _Nullable data,
                                int error) {
                                  if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_8) {
+                                     DDLogReport(@"got some data");
                                      const void *buffer = NULL;
                                      size_t size = 0;
                                      dispatch_data_t new_data_file = dispatch_data_create_map(data, &buffer, &size);
