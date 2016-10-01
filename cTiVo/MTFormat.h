@@ -40,10 +40,11 @@
 
 @property (nonatomic, readonly) NSAttributedString *attributedFormatDescription;
 
-@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip, canAcceptMetaData, canMarkCommercials, isTestPS;
+@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip, canAcceptMetaData, canMarkCommercials, isTestPS, testsForAudioOnly;
 @property (nonatomic, strong) NSString * pathForExecutable;
 
 @property (nonatomic, strong) NSString * formerName;//only used to update existing format objects when name is edited.
+
 
 +(MTFormat *)formatWithDictionary:(NSDictionary *)format;
 +(MTFormat *) formatWithEncFile: (NSString *) filename;

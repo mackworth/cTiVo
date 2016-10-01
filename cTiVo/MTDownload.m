@@ -2379,21 +2379,23 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         for (NSString * errMsg in audioOnlyStrings) {
             if ([log rangeOfString:errMsg].location != NSNotFound) {
                 DDLogVerbose(@"found audio %@ in log file: %@",errMsg, [log maskMediaKeys]);
-
-                NSString * channelName = self.show.stationCallsign;
-                DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self.show, channelName);
-                if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
-                    [tiVoManager setFailedPS:YES forChannelNamed:channelName];
-                    if ([tiVoManager useTSForChannel:channelName] == NSOffState && !self.encodeFormat.isTestPS) {
-                        //only notify if we're not (testing, OR previously seen, OR forcing PS)
-                        [tiVoManager  notifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
-                    }
-                }
                 return YES;
             }
         }
     }
     return NO;
+}
+
+-(void) markMyChannelAsTSOnly {
+    NSString * channelName = self.show.stationCallsign;
+    DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self.show, channelName);
+    if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
+        [tiVoManager setFailedPS:YES forChannelNamed:channelName];
+        if ([tiVoManager useTSForChannel:channelName] == NSOffState && !self.encodeFormat.isTestPS) {
+            //only notify if we're not (testing, OR previously seen, OR forcing PS)
+            [tiVoManager  notifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName] isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
+        }
+    }
 }
 
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
@@ -2544,15 +2546,30 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
 	} else {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
-        DDLogDetail(@"finished loading TiVo file: %0.1f of %0.1f KB expected; %0.1f%% ", downloadedFileSize/1000, self.show.fileSize, downloadedFileSize / self.show.fileSize*100);
-		if ((downloadedFileSize < self.show.fileSize * 0.9f && !self.useTransportStream) ||
-            downloadedFileSize < self.show.fileSize * 0.8f ) {  //hmm, doesn't look like it's big enough  (90% for PS; 80% for TS
-            BOOL foundAudio = self.shouldSimulEncode ? [self checkLogForAudio: self.encodeTask.errorFilePath] : NO; //see if it's a audio-only file (i.e. trashed)
+        double filePercent = downloadedFileSize / self.show.fileSize*100;
+        DDLogDetail(@"finished loading TiVo file: %0.1f of %0.1f KB expected; %0.1f%% ", downloadedFileSize/1000, self.show.fileSize, filePercent);
+		if (filePercent < 80.0 ||
+             (!self.useTransportStream && filePercent < 90.0 )) {
+                 //hmm, doesn't look like it's big enough  (90% for PS; 80% for TS
+            BOOL foundAudioOnly = NO;
+            if (!self.useTransportStream ) {
+                if (self.shouldSimulEncode) {
+                    //else encoder will fail later
+                    if ([self checkLogForAudio: self.encodeTask.errorFilePath]) {
+                        foundAudioOnly = YES;
+                    }
+                }
+                if (!self.encodeFormat.testsForAudioOnly && filePercent > 2.0 && filePercent < 25.0) {
+                    //decrypted file, so encoder won't check, so rely on size alone
+                    foundAudioOnly = YES;
+                }
+            }
+
             if ( self.encodeFormat.isTestPS) {
                 // if a test, then we only try once.
                 if (!self.isDone) {
                     [self cancel];
-                    if (foundAudio) {
+                    if (foundAudioOnly) {
                        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
                     } else {
                         [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
@@ -2560,11 +2577,13 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                     self.processProgress = 1.0;
                 }
                 [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
-           } else if (foundAudio) {
+           } else if (foundAudioOnly) {
+               [self markMyChannelAsTSOnly];
                 //On a regular file, throw away audio-only file and try again
                [self deleteVideoFile];
                [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
             } else {
+                //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
                 DDLogMajor(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self.show,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
                 [tiVoManager  notifyWithTitle: @"Warning: Show may be damaged/incomplete."
                              subTitle:self.show.showTitle forNotification:kMTGrowlPossibleProblem];

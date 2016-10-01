@@ -7,6 +7,7 @@
 //
 
 #import "MTFormat.h"
+#import "NSString+Helpers.h"
 
 @implementation MTFormat
 
@@ -410,6 +411,10 @@ __DDLOGHERE__
 
 -(BOOL)isTestPS {
     return [self.name isEqualToString:@"Test PS"];
+}
+
+-(BOOL) testsForAudioOnly {
+    return !([self.encoderUsed isEqualToString: @"catToFile"] || [self.encoderVideoOptions contains:@"copy"]);
 }
 
 -(void) setEncoderUsed:(NSString *)encoderUsed {
