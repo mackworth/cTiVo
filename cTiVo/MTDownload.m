@@ -2398,6 +2398,16 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     }
 }
 
+-(void) connection:(NSURLConnection *) connection didReceiveResponse:(nonnull NSURLResponse *)response {
+    DDLogVerbose(@"MainURL: %@", [self.activeURLConnection.currentRequest URL]);
+    DDLogVerbose(@"Headers for Request: %@", [self.activeURLConnection.currentRequest allHTTPHeaderFields]);
+    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
+    if ([response respondsToSelector:@selector(allHeaderFields)]) {
+        DDLogVerbose(@"Response: %@ - %@",@([httpResponse statusCode]), [NSHTTPURLResponse localizedStringForStatusCode:[httpResponse statusCode]]);
+        DDLogVerbose(@"Response Headers: %@", [httpResponse allHeaderFields]);
+    }
+}
+
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
     self.totalDataDownloaded += data.length;
@@ -2484,6 +2494,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     DDLogMajor(@"URL Connection Failed with error %@",[error maskMediaKeys]);
+    NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
+    if (error.code == 1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
+        [tiVoManager  notifyWithTitle: @"Warning: Could not reach TiVo!"
+                             subTitle:@"Is an antivirus program blocking the connection?" forNotification:kMTGrowlPossibleProblem];
+    }
    if (self.activeURLConnection) {
         [self.activeURLConnection cancel];
         self.activeURLConnection = nil;
