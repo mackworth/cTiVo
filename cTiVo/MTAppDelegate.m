@@ -42,6 +42,7 @@
 
 io_connect_t  root_port; // a reference to the Root Power Domain IOService
 
+#define cTiVoLogDirectory @"~/Library/Logs/cTiVo"
 
 void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType, void * messageArgument )
 {
@@ -163,7 +164,7 @@ __DDLOGHERE__
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
+   [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
 #ifndef DEBUG
     if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTCrashlyticsOptOut]) {
           [Fabric with:@[[Crashlytics class]]];
@@ -199,12 +200,13 @@ __DDLOGHERE__
 	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(0,128,0)  backgroundColor:nil forFlag:LOG_FLAG_DETAIL];
 	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(160,160,160)  backgroundColor:nil forFlag:LOG_FLAG_VERBOSE];
 	// Initialize File Logger
-    DDFileLogger *fileLogger = [[DDFileLogger alloc] init];
+    DDLogFileManagerDefault *ddlogFileManager = [[DDLogFileManagerDefault alloc] initWithLogsDirectory:[cTiVoLogDirectory stringByExpandingTildeInPath]];
+    DDFileLogger *fileLogger = [[DDFileLogger alloc] initWithLogFileManager:ddlogFileManager];
     // Configure File Logger
      [fileLogger setMaximumFileSize:(20 * 1024 * 1024)];
     [fileLogger.logFileManager setLogFilesDiskQuota:0]; //only delete max files
     [fileLogger setRollingFrequency:(3600.0 * 24.0)];
-    [[fileLogger logFileManager] setMaximumNumberOfLogFiles:3];
+    [[fileLogger logFileManager] setMaximumNumberOfLogFiles:4];
 	[fileLogger setLogFormatter:logFormat];
     [DDLog addLogger:fileLogger];
 
@@ -725,7 +727,7 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 
 -(IBAction)showLogs:(id)sender {
     NSURL * showURL =[NSURL fileURLWithPath:[
-                                             @"~/Library/Logs/cTiVo"
+                                             cTiVoLogDirectory
                                              stringByExpandingTildeInPath] isDirectory:YES];
     if (showURL) {
         DDLogMajor(@"Showing logs at %@ ", showURL);

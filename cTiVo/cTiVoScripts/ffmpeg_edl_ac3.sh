@@ -88,16 +88,23 @@ launch_and_monitor_ffmpeg() {
 
   # make sure ffmpeg doesn't prompt us to remove the output file
   # if for some reason it pre-exists
+#  echo "Min: $min_percent"
+#  echo "Max: $max_percent"
+#  echo "Dur: $duration"
+#  echo "Out: $output"
+#  echo "Log: $logfile"
+#  echo "Rst: $@"
   rm -rf "$output"
 
   set -x
+# echo "launching ffmpeg $@ $output"  &> "$logfile"
   "$ffmpeg_path" "$@" "$output" &> "$logfile" &
   pid=$!
   set +x
   last_percent="$min_percent"
   echo "$last_percent" | awk '{printf("%.2f %%\n",$1)}'
   while kill -0 $pid &> /dev/null; do
-    progress=$(tail -c 1000 "$logfile"  | egrep -o 'time=\S+' | cut -d= -f2 | tail -n1)
+    progress=$(tail -c 1000 "$logfile"  | egrep -o 'time=[0-9:\.]+' | cut -d= -f2 | tail -n1)
     if [ -n "$progress" ]; then
       progress=$(timestamp_to_seconds "$progress")
       percent=$(echo "$min_percent $max_percent $progress $duration " | awk '
@@ -225,8 +232,8 @@ fi
 # attempt to munge users's ffmpeg args with our auto-generated -map and audio encoder opts.
 encode_opts=("${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" "${audio_opts[@]}")
 
-if [ -z "$edl_file" ]; then
-  # no edl file, don't need to encode segments and merge, simply encode
+if [ ! -s "$edl_file" ]; then
+  # no edl file or empty, don't need to encode segments and merge, simply encode
   launch_and_monitor_ffmpeg 0 100 $duration "$output" "$tmpdir/logs/ffmpeg.log" "${encode_opts[@]}"
 
 else
@@ -251,7 +258,7 @@ END {print ss,""}
 ' "$edl_file"); do
     ss=$(echo $startstop | cut -d: -f1)
     to=$(echo $startstop | cut -d: -f2)
-    segment_name=$(echo "$ss,$to" | /usr/bin/awk -F, '{printf("%06d_%06d", $1, $2)}')
+   segment_name=$(echo "$ss,$to" | /usr/bin/awk -F, '{printf("%06d_%06d", $1, $2)}')
 
     # "input seeking" (-ss before the input file) in ffmpeg is very fast but
     # the timestamps are reset so -to is now really a duration rather than a timestamp to stop at
@@ -262,8 +269,10 @@ END {print ss,""}
         continue
       fi
       this_duration=$(echo "$original_duration - $ss" | bc -l)
-    else
+    elif [[ -n "$to" ]]; then
       this_duration="$to"
+    else
+      this_duration="$duration"
     fi
     if [[ -n "$ss" ]]; then
       ss="-ss $ss"
@@ -271,6 +280,11 @@ END {print ss,""}
     if [[ -n "$to" ]]; then
       to="-to $this_duration"
     fi
+
+#    echo "StartStop: >>$startstop<<"
+#    echo "To/SS: >>$ss/$to<<"
+#    echo "duration: >>$duration<<"
+#    echo "Merge%: >>$merge_start_percent<<"
 
     segment_log="$tmpdir/logs/ffmpeg_segment_${segment_name}.log"
     segment_filename="$tmpdir/segments/segment_${segment_name}.$ext"

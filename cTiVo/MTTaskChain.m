@@ -13,7 +13,12 @@
 
 @interface MTTaskChain ()
 
-@property (atomic, strong) NSMapTable *teeBranches;
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
+    @property (atomic, strong) NSMutableDictionary *teeBranches;
+#else
+    @property (atomic, strong) NSMapTable *teeBranches;
+#endif
+
 @property (atomic, assign) ssize_t totalDataRead;
 
 @end
@@ -69,14 +74,13 @@ __DDLOGHERE__
 		}
 	}
 
-    if ( NSAppKitVersionNumber >= NSAppKitVersionNumber10_8 ) {
-        self.teeBranches = [NSMapTable strongToStrongObjectsMapTable];
-    } else {
-        //this is a kludge; putting it back the way it was before cleaning it up with MapTable
-        //but that doesn't work in macOS7, so this...
-        //works because NSMutableDictionary also responds to setObject:forKey:, removeObjectForKey:, objectForKey: and fast enumeration
-        self.teeBranches = (NSMapTable *)[NSMutableDictionary new];
-    }
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
+    //this is a kludge; putting it back the way it was before cleaning it up with MapTable
+    self.teeBranches = [NSMutableDictionary new];
+#else
+    self.teeBranches = [NSMapTable strongToStrongObjectsMapTable];
+#endif
+
     DDLogVerbose(@"tasks BEFORE config: %@", [self maskMediaKeys]);
     for (NSArray <MTTask *> *currentTaskGroup in self.taskArray) {
         NSMutableArray *inputPipes = [NSMutableArray array];
@@ -95,7 +99,7 @@ __DDLOGHERE__
                 }
 			}
             if (sourceToTee) {
-                [self.teeBranches setObject:[NSArray arrayWithArray:inputPipes] forKey:sourceToTee];
+                [self.teeBranches setObject:[NSArray arrayWithArray:inputPipes] forKey:sourceToTee];  //have to ignore warning for 10.7
             }
 		}
 		if (currentTaskGroup != self.taskArray.lastObject ) {
@@ -181,45 +185,48 @@ __DDLOGHERE__
 				[task launch];				
 			}
 		}
+
+        long priority;
+        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9) {
+            priority = DISPATCH_QUEUE_PRIORITY_LOW;
+        } else {
+            priority = QOS_CLASS_USER_INITIATED;
+        }
+        dispatch_queue_t queue = dispatch_get_global_queue (priority, 0);
+
         for (NSFileHandle *fileHandle in self.teeBranches) {
             DDLogDetail(@"Setting up reading of filehandle %p",fileHandle);
-            NSInteger priority = QOS_CLASS_USER_INITIATED;
-            if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9) {
-                priority = DISPATCH_QUEUE_PRIORITY_DEFAULT;
-            }
-
-            dispatch_io_t channel = dispatch_io_create(DISPATCH_IO_STREAM, [fileHandle fileDescriptor], dispatch_get_global_queue(priority, 0), ^(int error) {
+            dispatch_io_t channel = dispatch_io_create(DISPATCH_IO_STREAM, [fileHandle fileDescriptor], queue, ^(int error) {
                 if(error)
                     DDLogMajor(@"got an error from fildHandle %@ %d (%s)\n", fileHandle, error, strerror(error));
             });
+            //    DDLogReport(@"just about to read channel %@", channel);
             dispatch_io_set_low_water(channel, 524288);  //512K
-
-            dispatch_io_read( channel,
-                             0,
-                             SIZE_MAX, dispatch_get_global_queue(QOS_CLASS_UTILITY, 0),
+            __weak typeof(self) weakSelf = self;
+            dispatch_io_read( channel, 0, SIZE_MAX, queue,
                              ^(bool done,
                                dispatch_data_t  _Nullable data,
                                int error) {
-                                 if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_8) {
-                                     DDLogReport(@"got some data");
+                                 typeof(self) strongSelf = weakSelf;
+                                 if (strongSelf) {
+                                     if (strongSelf.beingRescheduled || strongSelf.download.isCanceled) return;
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
                                      const void *buffer = NULL;
                                      size_t size = 0;
                                      dispatch_data_t new_data_file = dispatch_data_create_map(data, &buffer, &size);
-                                     if(new_data_file){
-                                         /* to avoid warning really - since dispatch_data_create_map demands we care about the return arg */
-                                     }
-
                                     NSData *nsData = [[NSData alloc] initWithBytes:buffer length:size];
                                  
-                                    [self teeInBackground:nsData isDone: done forHandle:fileHandle];
-
+                                     [strongSelf teeInBackground:nsData isDone: done forHandle:fileHandle];
                                     // clean up
                                     free((void *)buffer); // warning: passing const void * to parameter of type void *
 
-                                } else {
-                                 [self teeInBackground:(__bridge NSData *)(data) isDone: done forHandle:fileHandle];
-                                }
-
+                                     if(new_data_file){
+                                         /* to hang onto it until now; - since dispatch_data_create_map demands we care about the return arg */
+                                     }
+#else
+                                     [strongSelf teeInBackground:(NSData *)(data) isDone: done forHandle:fileHandle];
+#endif
+                                 }
                              });
         }
 

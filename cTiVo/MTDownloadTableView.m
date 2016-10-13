@@ -736,7 +736,7 @@ __DDLOGHERE__
     NSDictionary *options = [NSDictionary dictionary];
     NSArray	*draggedDLs = [pboard readObjectsForClasses:classes options:options];
     DDLogDetail(@"Accepting drop: %@", draggedDLs);
-
+    if (draggedDLs.count == 0) return NO;
     //dragged downloads are proxies, so we need to find the real download objects
     NSMutableArray * realDLs = [NSMutableArray arrayWithCapacity:draggedDLs.count ];
     NSMutableArray * completedDownloadsBeingMoved =[NSMutableArray array];

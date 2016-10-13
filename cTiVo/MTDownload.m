@@ -173,6 +173,12 @@ __DDLOGHERE__
              self.performanceTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
              [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
          }
+        if (self.downloadStatus.intValue == kMTStatusEncoding) {
+            //if done downloading, then maybe taskchain needs to update progress
+            if (!(self.encodeTask.progressCalc || self.encodeTask.trackingRegEx)) {
+                self.activeTaskChain.providesProgress = YES;
+            }
+        }
     } else if ([keyPath isEqualToString:@"processProgress"]) {
         DDLogVerbose(@"%@ at %0.1f%%", self.show, self.processProgress*100);
         double progressChange = self.processProgress - self.displayedProcessProgress;
@@ -1266,13 +1272,13 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(void) fixupSRTsDueToCommercialSkipping {
     NSArray *srtEntries = [NSArray getFromSRTFile:self.captionFilePath];
     NSArray *edlEntries = [NSArray getFromEDLFile:self.commercialFilePath];
-    if (srtEntries && edlEntries) {
+    if (srtEntries.count && edlEntries.count) {
         NSArray *correctedSrts = [srtEntries processWithEDLs:edlEntries];
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
             NSString *oldCaptionPath = [[self.captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
             [[NSFileManager defaultManager] moveItemAtPath:self.captionFilePath toPath:oldCaptionPath error:nil];
         }
-        if (correctedSrts) {
+        if (correctedSrts.count) {
             [correctedSrts writeToSRTFilePath:self.captionFilePath];
             [self markCompleteCTiVoFile:self.captionFilePath];
         }
@@ -1339,7 +1345,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             [tiVoManager  notifyWithTitle:@"Detecting Captions Failed" subTitle:[NSString stringWithFormat:@"Not including captions for %@",self.show.showTitle] isSticky:YES forNotification:kMTGrowlCommercialDetFailed];
         }
         if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] &&
-            (_captionTask.taskFailed || self.isCanceled)) {
+            (self.isCanceled)) {
             if ([[NSFileManager defaultManager] fileExistsAtPath:self.captionFilePath]) {
                 [[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
             }
@@ -1351,7 +1357,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     if (self.encodeFormat.captionOptions.length) [captionArgs addObjectsFromArray:[self getArguments:self.encodeFormat.captionOptions]];
     
-    [captionArgs addObject:@"-bi"];
+    // [captionArgs addObject:@"-bi"]; messes with most recent version of ccextractor
     [captionArgs addObject:@"-utf8"];
     [captionArgs addObject:@"-s"];
     //[captionArgs addObject:@"-debug"];
@@ -1618,7 +1624,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             break;
             
         case kMTTaskFlowSimuSubtitles:  //Encode with simul encoder and subtitles
-            if(self.downloadingShowFromMPGFile)self.activeTaskChain.providesProgress = YES;
 			[taskArray addObject:@[encodeTask,self.captionTask]];
             break;
             
@@ -1707,6 +1712,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 //	}
 #endif
 	self.activeTaskChain.taskArray = [NSArray arrayWithArray:taskArray];
+    if(self.downloadingShowFromMPGFile)self.activeTaskChain.providesProgress = YES;
     
     self.totalDataRead = 0;
     self.totalDataDownloaded = 0;
@@ -2399,6 +2405,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 }
 
 -(void) connection:(NSURLConnection *) connection didReceiveResponse:(nonnull NSURLResponse *)response {
+    if (![self.activeURLConnection respondsToSelector:@selector(currentRequest)] ) return;
     DDLogVerbose(@"MainURL: %@", [self.activeURLConnection.currentRequest URL]);
     DDLogVerbose(@"Headers for Request: %@", [self.activeURLConnection.currentRequest allHTTPHeaderFields]);
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
@@ -2562,7 +2569,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	} else {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
         double filePercent = downloadedFileSize / self.show.fileSize*100;
-        DDLogDetail(@"finished loading TiVo file: %0.1f of %0.1f KB expected; %0.1f%% ", downloadedFileSize/1000, self.show.fileSize, filePercent);
+        DDLogDetail(@"finished loading TiVo file: %0.1f of %0.1f KB expected; %0.1f%% ", downloadedFileSize/1000, self.show.fileSize/1000, filePercent);
 		if (filePercent < 80.0 ||
              (!self.useTransportStream && filePercent < 90.0 )) {
                  //hmm, doesn't look like it's big enough  (90% for PS; 80% for TS

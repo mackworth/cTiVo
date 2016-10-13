@@ -74,7 +74,14 @@ __DDLOGHERE__
     
     [self.window.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
  
-	[NSBundle loadNibNamed:@"MTMainWindowDrawer" owner:self];
+    if ([[NSBundle mainBundle] respondsToSelector:@selector(loadNibNamed:owner:topLevelObjects:)]) {
+        [[NSBundle mainBundle] loadNibNamed:@"MTMainWindowDrawer" owner:self topLevelObjects:nil];
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        [NSBundle loadNibNamed:@"MTMainWindowDrawer" owner:self];  //10.7 only
+#pragma clang diagnostic pop
+    }
 	showDetailDrawer.parentWindow = self.window;
 	
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
