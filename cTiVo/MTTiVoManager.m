@@ -12,7 +12,9 @@
 #import "MTSubscription.h"
 #import "MTSubscriptionList.h"
 //#import "NSNotificationCenter+Threads.h"
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
 #import <Growl/Growl.h>
+#endif
 #import "NSString+Helpers.h"
 
 #include <arpa/inet.h>
@@ -20,8 +22,12 @@
 
 
 
-@interface MTTiVoManager () {
-	
+@interface MTTiVoManager ()
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
+    <NSUserNotificationCenterDelegate> 
+#endif
+        {
+
     NSNetServiceBrowser *tivoBrowser;
 
     int numEncoders;// numCommercials, numCaptions;//Want to limit launches to two encoders.
@@ -141,7 +147,7 @@ __DDLOGHERE__
 
 		_processingPaused = @(NO);
 		
-		[self loadGrowl];
+		[self loadUserNotifications];
 //		NSLog(@"Getting Host Addresses");
 //      Note that NSHost is unsafe in general
 //		hostAddresses = [[[NSHost currentHost] addresses] retain];
@@ -1356,8 +1362,9 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 #pragma mark - Growl/Apple Notifications
 
--(void) loadGrowl {
+-(void) loadUserNotifications {
 	
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
 	if(NSAppKitVersionNumber >= NSAppKitVersionNumber10_6) {
 		NSBundle *myBundle = [NSBundle mainBundle];
 		NSString *growlPath = [[myBundle privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
@@ -1377,25 +1384,43 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 			}
 		}
 	}
+#else
+    [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
+#endif
 }
 //Note that any new notification types need to be added to constants.h, but especially Growl Registration Ticket.growRegDict
-- (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification {
-	[self notifyWithTitle:title subTitle:subTitle isSticky:NO forNotification:notification];
+- (void)notifyForDownload: (MTDownload *) download withTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification {
+	[self notifyForDownload: download withTitle:title subTitle:subTitle isSticky:NO forNotification:notification];
 }
 
-- (void)notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notification {
-	DDLogReport(@"Notify: %@/n%@: %@", title, subTitle, notification);
+- (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center
+     shouldPresentNotification:(NSUserNotification *)notification {
+    return YES;
+}
+
+
+- (void)notifyForDownload: (MTDownload *) download withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notificationType {
+	DDLogReport(@"Notify: %@/n%@: %@", title, subTitle, notificationType);
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
+    NSString * subTitleShow = [NSString stringWithFormat:@"%@: ", subTitle, download.show.showTitle];
 	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
 	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
 		[GAB notifyWithTitle: title
-				 description: subTitle
-			notificationName: notification
+				 description: subTitleShow
+			notificationName: notificationType
 					iconData: nil  //use our app logo
 					priority: 0
 					isSticky: sticky
 				clickContext: nil
 		 ];
-	
+#else
+    NSUserNotification *notification = [[NSUserNotification alloc] init ];
+    notification.title = title;
+    notification.subtitle = download.show.showTitle;
+    notification.informativeText = subTitle;
+    notification.soundName = NSUserNotificationDefaultSoundName;
+    [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+#endif
 }
 
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget {
@@ -1443,8 +1468,9 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 -(void)encodeFinished:(NSNotification *)notification
 {
     if (numEncoders == 0) {
-        [tiVoManager  notifyWithTitle: @"Internal Logic Error! "
-                             subTitle:@"numEncoders < 0" forNotification:kMTGrowlEndDownload];
+        [tiVoManager  notifyForDownload: nil
+                              withTitle: @"Internal Logic Error! "
+                             subTitle:@"numEncoders < 0" forNotification:kMTGrowlPossibleProblem];
 
     } else {
         numEncoders--;
