@@ -152,6 +152,7 @@ __DDLOGHERE__
     NSString * subtitle = @"You may need '10.7' version of cTiVo";
 #endif
     [tiVoManager notifyForDownload:self.download withTitle:title subTitle:subtitle isSticky:YES forNotification:kMTGrowlPossibleProblem];
+    [self.download cancel];
 }
 
 -(void) saveLogFileType:(NSString *) type fromPath: (NSString *) path {
