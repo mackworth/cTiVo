@@ -1971,6 +1971,14 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             //see if we can find artwork for this series
             artwork = [self findArtWork];
         }
+        //dispose of 3-character (BOM) subtitle files
+        unsigned long long fileSize =  [[NSFileManager defaultManager] attributesOfItemAtPath:self.captionFilePath error:nil].fileSize;
+        if ( fileSize <= 3) {
+            if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
+                [[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
+            }
+            self.captionFilePath = nil;
+        }
         if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
             MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
             if (self.shouldMarkCommercials) {
@@ -2570,9 +2578,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
         double filePercent = downloadedFileSize / self.show.fileSize*100;
         DDLogDetail(@"finished loading TiVo file: %0.1f of %0.1f KB expected; %0.1f%% ", downloadedFileSize/1000, self.show.fileSize/1000, filePercent);
-		if (filePercent < 80.0 ||
-             (!self.useTransportStream && filePercent < 90.0 )) {
-                 //hmm, doesn't look like it's big enough  (90% for PS; 80% for TS
+		if (filePercent < 75.0 ||
+             (!self.useTransportStream && filePercent < 85.0 )) {
+                 //hmm, doesn't look like it's big enough  (85% for PS; 75% for TS
             BOOL foundAudioOnly = NO;
             if (!self.useTransportStream ) {
                 if (self.shouldSimulEncode) {
