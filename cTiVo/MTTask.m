@@ -140,6 +140,20 @@ __DDLOGHERE__
     self.taskRunning = NO;
 }
 
+-(void) reportOldProcessor {
+    NSString * title = @"Your processor may be too old";
+    if (_task.launchPath.length > 0) {
+        title = [title stringByAppendingString: @" for "];
+        title = [title stringByAppendingString: [_task.launchPath lastPathComponent]];
+    }
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
+    NSString * subtitle = @"Please let us know Mac model at cTiVo's help site";
+#else
+    NSString * subtitle = @"You may need '10.7' version of cTiVo";
+#endif
+    [tiVoManager notifyForDownload:self.download withTitle:title subTitle:subtitle isSticky:YES forNotification:kMTGrowlPossibleProblem];
+}
+
 -(void) saveLogFileType:(NSString *) type fromPath: (NSString *) path {
 	NSFileHandle *logHandle = [NSFileHandle fileHandleForReadingAtPath:path];
 	unsigned long long logFileSize = [logHandle seekToEndOfFile];
@@ -151,7 +165,7 @@ __DDLOGHERE__
 		if (tailOfFile.length > 0) {
 			NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
             if ([logString contains:@"Exit 132"]) {
-                [tiVoManager notifyForDownload:self.download withTitle:@"Your processor may be too old" subTitle:@"Please let us know which Mac this is at cTiVo's help site" isSticky:YES forNotification:kMTGrowlPossibleProblem];
+                [self reportOldProcessor];
             }
 			DDLogMajor(@"%@File for task %@: %@",type, _taskName,  [logString maskMediaKeys]);
 		}
@@ -171,6 +185,9 @@ __DDLOGHERE__
 {
     DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus,[self reasonForTermination]);
     if (self.taskFailed) {
+        if (_task.terminationStatus == 0x4 && _task.terminationReason == NSTaskTerminationReasonUncaughtSignal) {
+            [self reportOldProcessor];
+        }
 		[self failedTaskCompletion];
     } else {
         if (_completionHandler) {
