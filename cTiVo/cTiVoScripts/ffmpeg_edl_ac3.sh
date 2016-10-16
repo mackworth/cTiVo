@@ -15,6 +15,9 @@ no_video_stream_message="no video streams"
 # check the tail of the ffmpeg log to see where we're at
 sleep_duration=3
 
+# Do we want to pass through AC3?
+ac3="YES"
+
 usage() {
   cat << EOF 1>&2
 Usage: $0 -edl <edl file> <ffmpeg options>
@@ -22,6 +25,7 @@ Usage: $0 -edl <edl file> <ffmpeg options>
 Script to drive ffmpeg, adding Edit Decision List capability (e.g. comskip) and dual stereo/5.1 audio tracks capabilities
 Calls ffmpeg to get duration and audio stream information about the input file
 If a 5.1 audio stream exists, both it and a derived AAC stereo stream will be copied through
+To avoid AC3 passthrough, just add "-noAC3" to calling line
 For EDL, use the "-edl filename.edl" option
 For this text, use the "-h" option
 Other parameters will be passed through from calling program , with a few Limitations :
@@ -34,7 +38,7 @@ exit 1
 
 # use dirname $0 to get path to ourselves unless $FFMPEG_PATH 
 # is set, in which case use that
-ffmpeg_path=$(dirname "$0")/ffmpeg
+ffmpeg_path=$(dirname "$0")/../MacOS/ffmpeg
 if [ -n "$FFMPEG_PATH" ]; then
   ffmpeg_path="$FFMPEG_PATH"
 fi
@@ -153,6 +157,10 @@ while (( $# > 0 )); do
     edl_file="$2"
     shift 2
     continue
+  elif [ "$1" == "-noAC3" ]; then
+    ac3=''
+    shift 1
+    continue
   fi
   # last positional argument should be the output file
   if (( $# == 1 )); then
@@ -223,10 +231,12 @@ if [[ -n "$audio_stream" ]]; then
   map_opts+=(-map "$audio_stream")
   audio_opts+=(-c:a:0 aac -ac:a:0 2)
 fi
-if echo "$audio_line" | cut -d, -f2- | grep ac3 | grep --quiet '5\.1'; then
-  # if audio is ac3 5.1 (Dolby Digital), create an additional ac3 stream for surround sound
-  map_opts+=(-map "$audio_stream")
-  audio_opts+=(-c:a:1 ac3)
+if [[ ! -z "$ac3" ]]; then
+  if echo "$audio_line" | cut -d, -f2- | grep ac3 | grep --quiet '5\.1'; then
+    # if audio is ac3 5.1 (Dolby Digital), create an additional ac3 stream for surround sound
+    map_opts+=(-map "$audio_stream")
+    audio_opts+=(-c:a:1 ac3)
+  fi
 fi
 
 # attempt to munge users's ffmpeg args with our auto-generated -map and audio encoder opts.

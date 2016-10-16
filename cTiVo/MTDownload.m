@@ -1052,7 +1052,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     if ([decoder isEqualToString:@"TivoLibre"]) {
         // NSFileManager * fm = [NSFileManager defaultManager];
         decryptPath = @"/usr/bin/java";
-        libreJar = [[NSBundle mainBundle] pathForAuxiliaryExecutable: @"tivo-libre.jar"];
+        libreJar = [[NSBundle mainBundle] pathForResource: @"tivo-libre"ofType:@"jar"];
     } else {
         decryptPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable: decoder];
     }

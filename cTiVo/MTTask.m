@@ -150,6 +150,9 @@ __DDLOGHERE__
 		NSData *tailOfFile = [logHandle readDataOfLength:backup];
 		if (tailOfFile.length > 0) {
 			NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
+            if ([logString contains:@"Exit 132"]) {
+                [tiVoManager notifyForDownload:self.download withTitle:@"Your processor may be too old" subTitle:@"Please let us know which Mac this is at cTiVo's help site" isSticky:YES forNotification:kMTGrowlPossibleProblem];
+            }
 			DDLogMajor(@"%@File for task %@: %@",type, _taskName,  [logString maskMediaKeys]);
 		}
     } else {
