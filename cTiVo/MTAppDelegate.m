@@ -141,14 +141,6 @@ void signalHandler(int signal)
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
 @property (nonatomic, strong) NSTimer * pseudoTimer;
 
--(IBAction)togglePause:(id)sender;
--(IBAction)editFormats:(id)sender;
--(IBAction)editManualTiVos:(id)sender;
--(IBAction)createManualSubscription:(id)sender;
--(IBAction)findShows:(id)sender;
--(IBAction)clearHistory:(id)sender;
--(IBAction)showLogs:(id)sender;
-
 
 @end
 
@@ -271,7 +263,6 @@ __DDLOGHERE__
 	signal(SIGABRT, &signalHandler );
 	
     //Initialize tmp directory
-    [self validateTmpDirectory];
 	[self clearTmpDirectory];
 
 	//Turn off check mark on Pause/Resume queue menu item
@@ -411,12 +402,33 @@ Routine to update and combine both the manual tivo preferences and the media key
     }
 }
 
-BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for directory change.
+NSOpenPanel* myOpenPanel = nil;  //weird bug where sometimes we're called twice for directory change.
                           //from [NSUserDefaultsController _setSingleValue:forKey:]
+BOOL wasRunning = NO;
+
+-(void) closeTmpPanel {
+    [myOpenPanel close];
+    myOpenPanel = nil;
+    [[[NSWorkspace sharedWorkspace] notificationCenter  ] removeObserver:self];
+
+    if (wasRunning && [[NSUserDefaults standardUserDefaults] objectForKey:kMTTmpFilesDirectory]) {
+        [tiVoManager unPauseQueue];
+    }
+}
+
+-(void)newVolume: (NSNotification *) notification {
+    if (!myOpenPanel) return;
+    //new volume came online during openPanel for tempDir, so let's try it for tmpDir
+    [self closeTmpPanel];
+    [self validateTmpDirectory];
+}
 
 -(void) promptForNewTmpDirectory:(NSString *) oldTmpDir withMessage: (NSString *) message{
-    if (panelIsActive) return;
-    panelIsActive = YES;
+    if (myOpenPanel) return;
+    //need to pause until tmpDir is resolved
+    myOpenPanel = [[NSOpenPanel alloc] init];
+    wasRunning = [tiVoManager.processingPaused boolValue];
+    if (wasRunning) [tiVoManager pauseQueue:@(NO)];
     NSString *fullMessage = [NSString stringWithFormat:message,oldTmpDir];
     DDLogReport(@"Error \"%@\" while checking tmp directory.",fullMessage);
     if ( [oldTmpDir isEquivalentToPath:  kMTTmpDir]) {
@@ -424,7 +436,6 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     } else {
         fullMessage = [fullMessage stringByAppendingString:@"\nPlease choose a new location, or press 'Cancel' to use default temp directory." ] ;
     }
-    NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
     myOpenPanel.canChooseFiles = NO;
     myOpenPanel.canChooseDirectories = YES;
     myOpenPanel.canCreateDirectories = YES;
@@ -433,16 +444,11 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     myOpenPanel.prompt = @"Choose";
     [myOpenPanel setTitle:@"Select Directory for Temp cTiVo Files"];
 
+    [[[NSWorkspace sharedWorkspace] notificationCenter  ] addObserver:self selector:@selector(newVolume:) name:NSWorkspaceDidMountNotification object:nil];
     NSWindow * window = [NSApp keyWindow] ?: _mainWindowController.window;
     [myOpenPanel beginSheetModalForWindow:window completionHandler:^(NSInteger ret){
-        NSString *directoryName;
-        if (ret == NSFileHandlingPanelOKButton) {
-            directoryName = myOpenPanel.URL.path;
-        } else {
-            directoryName = kMTTmpDir;
-        }
-        [myOpenPanel close];
-        panelIsActive = NO;
+        NSString *directoryName = (ret == NSFileHandlingPanelOKButton) ? myOpenPanel.URL.path : kMTTmpDir;
+        [self closeTmpPanel];
         [[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
     }];
 
@@ -453,30 +459,40 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     //Validate users choice for tmpFilesDirectory
     NSString *tmpdir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
     NSFileManager *fm = [NSFileManager defaultManager];
-    BOOL isDir, newDir = YES;
+    BOOL isDir = YES;
+    if (!tmpdir) {
+        [self promptForNewTmpDirectory:kMTTmpDir withMessage:@"Need temporary directory?"];
+        return;
+    }
     if (![fm fileExistsAtPath:tmpdir isDirectory:&isDir]) {
         NSError *error = nil;
-        newDir = [fm createDirectoryAtPath:tmpdir withIntermediateDirectories:YES attributes:nil error:&error];
-        if (error) DDLogReport(@"Error %@ creating new tmp directory",error);
 
-        if (newDir) {
-            isDir = YES;
+        if ([tmpdir hasPrefix:@"/Volumes"]) {
+            NSArray <NSString *> * pathComponents = [tmpdir pathComponents];
+            if (pathComponents.count > 1) {
+                NSString * volume = [pathComponents[0] stringByAppendingPathComponent:pathComponents[1]];
+                if (![fm fileExistsAtPath:volume isDirectory:&isDir])
+                    DDLogReport(@"Volume %@ not online", volume);
+                [self promptForNewTmpDirectory:tmpdir withMessage:@"Unable to find volume for %@; maybe need to plug in?"];
+                return;
+            }
         }
-    }
-    
-    if (!newDir || !isDir) { //Something wrong with this choice
-        if (newDir && !isDir) {
-            [self promptForNewTmpDirectory:tmpdir withMessage:@"%@ is a file, not a directory"];
-        } else {
+        if (![fm createDirectoryAtPath:tmpdir withIntermediateDirectories:YES attributes:nil error:&error]) {
+            DDLogReport(@"Error %@ creating new tmp directory",error);
             [self promptForNewTmpDirectory:tmpdir withMessage:@"Unable to create directory %@; maybe need to fix permissions?"];
+            return;
         }
+        isDir = YES;
+    }
+    if ( !isDir) {
+        [self promptForNewTmpDirectory:tmpdir withMessage:@"%@ is a file, not a directory"];
         return;
-
-    } else if ( [[tiVoManager downloadDirectory] isEquivalentToPath:  kMTTmpDir]) {
+    }
+    if ( [[tiVoManager downloadDirectory] isEquivalentToPath:  kMTTmpDir]) {
         //well, that's not good
         tiVoManager.downloadDirectory = [tiVoManager defaultDownloadDirectory];
-        return;
-    } else if ([tmpdir isEquivalentToPath: [tiVoManager defaultDownloadDirectory]  ] ) {
+    }
+    if ([tmpdir isEquivalentToPath: [tiVoManager defaultDownloadDirectory]  ] ) {
         //Oops; user confused temp dir with download dir
         [self promptForNewTmpDirectory:tmpdir withMessage:@"Your temp directory %@ needs to be separate from your download directory."];
          return;
@@ -496,21 +512,20 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 -(void)clearTmpDirectory
 {
 	//Make sure the tmp directory exists
-	if (![[NSFileManager defaultManager] fileExistsAtPath:tiVoManager.tmpFilesDirectory]) {
-		[[NSFileManager defaultManager] createDirectoryAtPath:tiVoManager.tmpFilesDirectory withIntermediateDirectories:YES attributes:nil error:nil];
-    } else 	if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-        if ([tiVoManager.tmpFilesDirectory isEquivalentToPath:kMTTmpDir]){
+    NSString * tmpPath = tiVoManager.tmpFilesDirectory;
+    if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+      if ([tmpPath isEquivalentToPath:kMTTmpDir]){
         //only erase all files if we're in our original temp dir. Too risky elsewise;
 		//Clear it if not saving intermediate files
 			NSFileManager *fm = [NSFileManager defaultManager];
 			NSError *err = nil;
-			NSArray *filesToRemove = [fm contentsOfDirectoryAtPath:tiVoManager.tmpFilesDirectory error:&err];
+			NSArray *filesToRemove = [fm contentsOfDirectoryAtPath:tmpPath error:&err];
 			if (err) {
-				DDLogMajor(@"Could not get content of %@.  Got error %@",tiVoManager.tmpFilesDirectory,err);
+				DDLogMajor(@"Could not get content of %@.  Got error %@",tmpPath,err);
 			} else {
 				if (filesToRemove) {
 					for (NSString *file in filesToRemove) {
-						NSString * path = [NSString pathWithComponents:@[tiVoManager.tmpFilesDirectory,file]];
+						NSString * path = [NSString pathWithComponents:@[tmpPath,file]];
 						[fm removeItemAtPath:path error:&err];
 						if (err) {
 							DDLogMajor(@"Could not delete file %@.  Got error %@",file,err);
@@ -659,16 +674,12 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 
 -(IBAction)editManualTiVos:(id)sender
 {
-	//	[self.manualTiVoEditorController showWindow:nil];
-	//	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:_mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
 	self.preferencesController.startingTabIdentifier = @"TiVos";
 	[self showPreferences:nil];
 }
 
 -(IBAction)editChannels:(id)sender
 {
-    //	[self.manualTiVoEditorController showWindow:nil];
-    //	[NSApp beginSheet:self.manualTiVoEditorController.window modalForWindow:_mainWindowController.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
     self.preferencesController.startingTabIdentifier = @"Channels";
     [self showPreferences:nil];
 }
@@ -678,7 +689,11 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
     if (!controller.window) return;
     NSWindow * mainWindow =  _mainWindowController.window ?: [NSApp keyWindow];
     if (mainWindow) {
-        [NSApp beginSheet:controller.window modalForWindow:mainWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+        if ([mainWindow respondsToSelector:@selector(beginSheet:completionHandler:)]) {
+            [mainWindow beginSheet:controller.window completionHandler:nil];
+        } else {
+            [NSApp beginSheet:controller.window modalForWindow:mainWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+        }
     } else {
         [controller showWindow:nil];
     }
@@ -832,13 +847,13 @@ BOOL panelIsActive = NO;  //weird bug where sometimes we're called twice for dir
 -(IBAction)importFormats:(id)sender
 {
 	
-	NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
-	[myOpenPanel setTitle:@"Import User Formats"];
-	[myOpenPanel setAllowedFileTypes:@[@"plist",@"enc"]];
-	[myOpenPanel beginWithCompletionHandler:^(NSInteger ret){
+	NSOpenPanel *formatsOpenPanel = [[NSOpenPanel alloc] init];
+	[formatsOpenPanel setTitle:@"Import User Formats"];
+	[formatsOpenPanel setAllowedFileTypes:@[@"plist",@"enc"]];
+	[formatsOpenPanel beginWithCompletionHandler:^(NSInteger ret){
 		NSArray *newFormats = nil;
 		if (ret == NSFileHandlingPanelOKButton) {
-			NSString *filename = myOpenPanel.URL.path;
+			NSString *filename = formatsOpenPanel.URL.path;
 			if ([[[filename pathExtension ]lowercaseString] isEqualToString: @"plist"]) {
 				newFormats = [NSArray arrayWithContentsOfFile:filename];
 				[self->_tiVoGlobalManager addFormatsToList:newFormats];

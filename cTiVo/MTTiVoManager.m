@@ -1523,23 +1523,23 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	return [NSString stringWithFormat:@"%@/%@/",NSHomeDirectory(),kMTDefaultDownloadDir];
 //note this will fail in sandboxing. Need something like...
 
-//	if ([[NSFileManager defaultManager] respondsToSelector:@selector(URLsForDirectory:inDomains:)]) {
-//		//requires 10.6
 //		NSArray * movieDirs = [[NSFileManager defaultManager] URLsForDirectory:NSMoviesDirectory inDomains:NSUserDomainMask];
 //		if (movieDirs.count >0) {
 //			NSURL *movieURL = (NSURL *) movieDirs[0];
-//			[movieURL URLByAppendingPathComponent:kMTDefaultDownloadDir].path;
-//		}
-//	} else { //10.5
-//	return [NSString stringWithFormat:@"%@/@",NSHomeDirectory(),kMTDefaultDownloadDir]
-//
-//	}
+//			return [movieURL URLByAppendingPathComponent:@"TiVoShows"].path;
+//      }
 
 }
 
 -(NSString *)tmpFilesDirectory {
 
-    return [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
+    NSString * tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:tmpPath]) {
+            [[NSUserDefaults standardUserDefaults] setObject:tmpPath forKey: kMTTmpFilesDirectory]; //trigger validation process
+            tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
+        }
+//    }
+    return tmpPath;
  
 }
 

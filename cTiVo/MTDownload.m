@@ -472,16 +472,17 @@ __DDLOGHERE__
         [self deleteVideoFile];
     }
 	//Clean up files in TmpFilesDirectory
-	if (deleteFiles && self.baseFileName) {
-		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:tiVoManager.tmpFilesDirectory error:nil];
-		[fm changeCurrentDirectoryPath:tiVoManager.tmpFilesDirectory];
+    NSString *tmpDir = tiVoManager.tmpFilesDirectory;
+	if (deleteFiles && tmpDir && self.baseFileName) {
+		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:tmpDir error:nil];
+		[fm changeCurrentDirectoryPath:tmpDir];
 		for(NSString *file in tmpFiles){
 			NSRange tmpRange = [file rangeOfString:self.baseFileName];
 			if(tmpRange.location != NSNotFound) {
 				DDLogVerbose(@"Deleting tmp file %@", file);
                 NSError * error = nil;
                 if ( ![fm removeItemAtPath:file error:&error]) {
-                    DDLogMajor(@"Could not delete tmp file: %@/%@ because %@", tiVoManager.tmpFilesDirectory, file, error.localizedDescription ?:@"No reason found");
+                    DDLogMajor(@"Could not delete tmp file: %@/%@ because %@", tmpDir, file, error.localizedDescription ?:@"No reason found");
                 }
 			}
 		}
@@ -751,11 +752,10 @@ NSString * fourChar(long n, BOOL allowZero) {
 	 finalStr = [finalStr stringByReplacingOccurrencesOfString:@"|||" withString:@"/"];  ///insert intentional ones
 	 return finalStr;
  }
+#undef Null
 
-//#define Null(x) x ?  x : nullString
-//
 #pragma mark - Configure files
--(void)configureBaseFileNameAndDirectory {
+-(BOOL)configureBaseFileNameAndDirectory {
 	if (!self.baseFileName) {
 		// generate only once
 		NSString * baseTitle  = [self.show.showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
@@ -777,8 +777,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 		}
 		self.baseFileName = [self createUniqueBaseFileName:baseTitle inDownloadDir:self.downloadDir];
 	}
+    return self.baseFileName ? YES : NO;
 }
-#undef Null
 
 -(void) markCompleteCTiVoFile:(NSString *) path {
     if (path ) {
@@ -807,10 +807,12 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(NSString *)createUniqueBaseFileName:(NSString *)baseName inDownloadDir:(NSString *)downloadDir
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
+    NSString * tmpDir = tiVoManager.tmpFilesDirectory;
+    if (!tmpDir) return nil;
     NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,self.encodeFormat.filenameExtension];
-	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tiVoManager.tmpFilesDirectory,baseName];
-	self.tivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,baseName];
-	self.mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,baseName];
+	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tmpDir,baseName];
+	self.tivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tmpDir,baseName];
+	self.mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tmpDir,baseName];
     BOOL tivoFileExists = NO; // [self isCompleteCTiVoFile:self.tivoFilePath forFileType:@"TiVo"];  Note: if tivFileExists, then stomps on file w/ current basename!
     
     self.downloadingShowFromTiVoFile = NO;
@@ -864,13 +866,15 @@ NSString * fourChar(long n, BOOL allowZero) {
     return ddir;
 }
 
--(void)configureFiles
+-(BOOL)configureFiles
 {
     DDLogDetail(@"configuring files for %@",self);
 	//Release all previous attached pointers
     [self deallocDownloadHandling];
     NSFileManager *fm = [NSFileManager defaultManager];
-	[self configureBaseFileNameAndDirectory];
+    if (! [self configureBaseFileNameAndDirectory]) {
+        return NO;
+    }
     if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {  //We need to download from the TiVo
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
             self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",tiVoManager.tmpFilesDirectory,self.baseFileName];
@@ -905,6 +909,7 @@ NSString * fourChar(long n, BOOL allowZero) {
        NSString * filename = [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:self.baseFileName];
         [self.show retrieveArtworkIntoFile:filename];
  	}
+    return YES;
 }
 
 -(NSString *) encoderPath {
@@ -1568,13 +1573,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     self.downloadingShowFromTiVoFile = NO;
     self.downloadingShowFromMPGFile = NO;
     self.progressAt100Percent = nil;  //Reset end of progress failure delay
-    //Before starting make sure the encoder is OK.
-	if (![self encoderPath]) {
+    //Before starting make sure we can launch.
+	if (![self encoderPath] || ! [self configureFiles]) {
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
 		return;
 	}
-
-    [self configureFiles];
 
     self.activeTaskChain = [MTTaskChain new];
     self.activeTaskChain.download = self;
