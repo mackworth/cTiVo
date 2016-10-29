@@ -2089,7 +2089,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 #ifndef DEBUG
            [Answers logCustomEventWithName:@"Failure"
                            customAttributes:@{ @"Format" : self.encodeFormat.name,
-                                               @"Type" : @([self taskFlowType])}];
+                                               @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
 #endif
             [tiVoManager  notifyForDownload: self withTitle: @"TiVo show failed."
                                  subTitle:@"Retries Cancelled" forNotification:kMTGrowlEndDownload];
@@ -2101,7 +2101,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 #ifndef DEBUG
                 [Answers logCustomEventWithName:@"Retry"
                                customAttributes:@{ @"Format" : self.encodeFormat.name,
-                                                   @"Type" : @([self taskFlowType])}];
+                                                   @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
 #endif
                 DDLogMajor(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
             } else {

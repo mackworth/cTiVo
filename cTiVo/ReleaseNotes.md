@@ -1,3 +1,90 @@
+# Release 2.5; Beta 2
+
+### TL;DR:
+Cable companies are migrating to H.264 video streams, requiring many changes to cTiVo. Most of these changes should now be transparent in operation, but many of the old Formats won't work with these new streams, and we'll be revamping them. There's a new Preferences screen Channels which will show if channels have converted to H.264.
+
+## Older OS and processors:
+10.7 and 10.8 support. If you're using 10.7 or 10.8, you'll need to use the cTiVo-10.7 file below. It's getting much harder to support these older systems, but given the H.264 conversion, I wanted to provide at least one more release. It has the older binaries (such as mencoder, ffmpeg, ccextractor etc) but otherwise should run fine and , but be aware that after this release, we may not be able to keep it up to date. The 10.9 version on the other hand should be both faster (especially comskip) and more compatible with the binaries.
+
+Older processors: In some initial testing, the mencoder in the 10.9+ version ran into problems with some older processors. It should warn you if this is the case. If this happens to you, and you still want to use mencoder, then you'll have to revert to the 10.7 version of cTiVo.
+
+## Contacts:
+For some reason, on first launch on some Sierra systems, cTiVo asks for access to your Contacts. Haven't been able to figure out why, but just tell it politely NO, and all should be well.
+
+## Notice: Formats expected to change
+The `mencoder` program we have used for many of the original Formats (e.g. iPhone, AppleTV, iPod, H.264, DVD, QuickTime, PSP, YouTube) seems to be increasingly broken, with no active work going on to repair it. We're planning to change to `ffmpeg` as the primary converter, which means a lot of the existing Formats will change in an upcoming release. Existing subscriptions and queue items will still connect to the (renamed) older Formats, but there'll be new ones recommended for everyday use.  FYI, Some of the problems with mencoder are: Frequent incompatibility with the new H.264 formats; audio being dropped; doubling of video length, problems with commercial skipping, and other miscellaneous ones.
+
+I really need help testing all the different combinations and Formats. Any volunteers out there who can help test and, in particular, find the best way to re-encode the interlaced MP4 content to make them compatible with iTunes and iDevices would be great!
+
+Nonetheless, I believe 2.5 Beta2 is significantly more stable than the current release, so I encourage wide usage and expect to do a final release shortly. Any comments/discussions here at: https://github.com/dscottbuch/cTiVo/issues/206
+
+# Background
+As you may have read, Comcast and other cable companies is in the process of converting from MPEG-2 compression to MPEG-4 compression (aka H.264) They do this to reduce the size and improve the quality of a channel. Comcast seem to be rolling this out slowly, one market at a time and changing over one channel at a time.  If you have an active older TiVo, then you may have received an offer to upgrade as it won't be compatible with this transition. This change has implications, choices, and limitations on each phase of cTiVo's processing. 
+
+As a digression, there are some very confusing terms here. Video people talk about "Streams", the different types of content that are inside a file or transmission such as a video stream in MPEG-2 compression or an audio stream in 5.1 AC3 format, which are then stored in "Containers", a standardized format for a file, such as .AVI or .MPG.  Particularly confusing is that the MPEG-4 standard defines both a compression algorithm for a stream (MPEG-4, aka H.264) and a container file format (.mp4). If you'd like to see what's inside a file, I've also posted a new version of the open-source MediaInfo program, which shows you the different streams and their formats for all known container types.
+
+## Step 1: Transferring the .tivo file
+Unfortunately, this H.264 change causes TiVo to move from Program Stream (PS) to Transport Stream (TS) transmission. After a channel converts to H.264, then accessing a show via PS no longer works. (Oddly, the TiVo still sends over a file on PS, but that file now only contains an audio channel.) The good news is that TS is significantly smaller than PS.  Generally, TS does work with MPEG-2 video as well, so one could switch over completely, but there are sometimes decryption problems (see below). Thus, cTiVo still uses Program Streams by default, but will automatically detect when a channel has migrated to H.264 and switch to use Transport Streams on that channel from then on.
+
+While this should happen automatically, there is a new Preference panel Channels, which tells you the status of each channel. This panel will also let you ask cTiVo to try every channel that you currently have a recording for (including suggestions). These will run quite quickly as it only downloads enough of each show to test it (although it then waits a minute as usual to avoid overloading the TiVo downloader). Thus, you should be able to test all your channels within a couple hours.
+
+## Step 2: Decrypting the .tivo file to an MPG file
+The .tivo files are encrypted with your Media Access Key (MAK), which is why cTiVo needs that key to download your shows. The old program "tivodecode" doesn't handle Transport Stream at all. Two new programs, `tivodecode-ng` and `TivoLibre`, do handle that as well as the H.264 compression format. So there is now a pull-down in Advance Preferences to choose which decryption to use. AFAIK, there should be no reason to continue to use `tivodecode`, so I have shifted to `tivodecode-ng` as the default case. I have left tivodecode as an option just in case, but it will be removed in the final release unless I hear otherwise. (Specifically, if `tivodecode-ng` fails on a Program Stream download but `tivodecode` works, please let me know.) There is an alternative, `TiVoLibre`, which may handle more cases, but requires Java runtime to be installed on your Mac, which Apple no longer recommends.  
+
+The problem is that as we said, in testing, a few MPEG2 files that transmitted via Transport Stream are trashed when converted with either program, and it's unclear at this point whether this is due to a problem with the decryption software or if the original file is broken. For better or worse, the same file sent over Program Stream works fine, hence the continued use when possible.
+
+## Step 3: Encoding the MP4 (Formats)
+As said above, `mencoder` doesn't seem to work well with any of the TS files. `Handbrake` seems to be ok. I'm now bundling `ffmpeg` as well, and as mentioned above, will move to it as the default shortly.
+
+`Decrypted TiVo Show` just decrypts the .tivo file into an .MPG file, doing as few changes as possible. As we move to H.264 streams, theoretically, this should mean that we don't need to re-encode them, which is the longest (and most CPU-intensive) part of the downloading process. We have provided an `MP4 FFMpeg`  Format, which simply copies the audio and video streams into an MP4 format with very little overhead, operating at the full download speed. `MP4 FFMpeg` will be a better choice for most people to just copy the file over without re-encoding. Few applications expect to see H.264 streams inside an MPG container, and the MP4 container also lets us add the other metadata, commercial marking and subtitle information.
+
+However, I've seen two problems with this: first, if you do this with an MP2 channel, the resulting file will not be playable with QuickTime Player (although VLC works fine). Second, interlaced MP4 files are incompatible with iTunes and iOS devices, meaning that we have to re-encode (except for 720p shows). On the other hand, it has been reported that these files do work well with Plex; let me know if you find otherwise. I'd also like to know if they work well with pyTiVo.
+
+I'm also pleased to report that we've also added a `FFMpeg Comskip/5.1` format which adds commercial-skipping capabilities to ffmpeg. Thanks to Ryan Child for his impressive shell programming to pull off this trick. It also will detect 5.1 AC3 audio in the TiVo file, and create both a 5.1 and stereo version in the output file for maximum compatibility. The shell script still passes through other ffmpeg options (with a few limitations), so you should be able to use this in conjunction with your own parameter choices. This will probably be the basis of many of the new Formats to come.
+
+## Other major changes versus 2.4.4
+1) Updated versions of all binaries. comskip, in particular, should perform much better.
+* ccextractor 0.79
+* comskip 0.81.089
+* MEncoder 1.3.0-4.2.1 (C) 2000-201
+* HandBrake 0.10.1 (2015030800)
+* ffmpeg 3.1.3
+
+2) Added `ffmpeg` binary
+3) Filename template keywords Guests, StartTime, Format, and ExtraEpisode
+4) Better Plex folder naming
+5) Caption and commercial failures will no longer fail download, just reports failure.
+6) New "OnDisk" column in tables to sort by whether downloaded file already exists on disk
+7) New "H.264" column in tables indicates whether a channel has migrated to H.264 yet
+8) Channels page can also specify "commercial-free" channels, which then avoids running comskip
+9) New "Waiting" status for the time between downloads to allow TiVo to rest
+10) Anonymously reports via Crashlytics which Formats are used, to inform future development
+11) Changes needed for Rovi data transition
+12) Lower CPU priority of background tasks to avoid swamping user interface
+13 New ffmpeg Format, which allows comskip and 5.1AC3 to be used with ffmpeg (contributed by Ryan Child)
+14) New ffmpeg bash script can be used as a base for many interesting uses of ffmpeg
+
+## Minor changes
+* No need to confirm delete download if in Waiting mode
+* Initial changes for Rovi transition	
+* Avoids Rovi copyright msessages (and the *’s as well)
+* Avoids using Rovi numbers with theTVDB
+* Lower CPU priority of background tasks to avoid swamping user interface
+* New column H.264 indicates whether a channel has mgirated
+* Removed QuickTime MP1, MP2-HD, and Zune Formats (let me know if you want one of these, except Zune)
+* During Detail debug mode in TaskChain, prints out full config and command line invocation of helper apps
+* Warns of empty file after encoding
+* Many fixes for multitasking, iTunes, comskip, and Subscriptions.
+
+## Detailed changes versus Beta 1:
+* Miscellaneous bug fixes and performance tuneups.
+* New Format keyword for Filename Templates. Mostly for testing to track which video came out of which Format.
+* Detects and warns of antivirus blocking access to the server.
+* Detects TS-transition even with Decrypted Tivo downloads
+* Auto-deletes empty SRT files
+* Option to use comskip with ffmpeg without passing AC3 through
+
+
 # Release 2.5; Beta 1 
 ### TL; DR:
 Cable companies are migrating to H.264 video streams, requiring many changes to cTiVo. Most of these changes should now be transparent in operation, but many of the old Formats won't work with these new streams, and we'll be revamping them. There's a new Preferences screen Channels which will show if channels have converted to H.264.
