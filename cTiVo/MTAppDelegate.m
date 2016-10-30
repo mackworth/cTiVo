@@ -262,12 +262,13 @@ __DDLOGHERE__
 	signal(SIGPIPE, &signalHandler);
 	signal(SIGABRT, &signalHandler );
 	
-    //Initialize tmp directory
-	[self clearTmpDirectory];
 
 	//Turn off check mark on Pause/Resume queue menu item
 	[pauseMenuItem setOnStateImage:nil];
 	[self.tiVoGlobalManager determineCurrentProcessingState];
+
+    //Initialize tmp directory
+    [self clearTmpDirectory];
 
 	//Set up callback for sleep notification (this is 10.5 method and is still valid.  There is newer UI in 10.6 on.
 	
@@ -328,7 +329,7 @@ __DDLOGHERE__
     
 
     self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: 61 target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
-
+    DDLogDetail(@"Finished appDidFinishLaunch");
  }
 
 -(void) launchPseudoEvent {
@@ -404,15 +405,16 @@ Routine to update and combine both the manual tivo preferences and the media key
 
 NSOpenPanel* myOpenPanel = nil;  //weird bug where sometimes we're called twice for directory change.
                           //from [NSUserDefaultsController _setSingleValue:forKey:]
-BOOL wasRunning = NO;
+BOOL wasPaused = NO;
 
 -(void) closeTmpPanel {
     [myOpenPanel close];
     myOpenPanel = nil;
     [[[NSWorkspace sharedWorkspace] notificationCenter  ] removeObserver:self];
 
-    if (wasRunning && [[NSUserDefaults standardUserDefaults] objectForKey:kMTTmpFilesDirectory]) {
-        [tiVoManager unPauseQueue];
+    if ( [[NSUserDefaults standardUserDefaults] objectForKey:kMTTmpFilesDirectory]) {
+        [[NSUserDefaults standardUserDefaults] setBool:wasPaused forKey:kMTQueuePaused];
+        [tiVoManager determineCurrentProcessingState];
     }
 }
 
@@ -427,8 +429,9 @@ BOOL wasRunning = NO;
     if (myOpenPanel) return;
     //need to pause until tmpDir is resolved
     myOpenPanel = [[NSOpenPanel alloc] init];
-    wasRunning = [tiVoManager.processingPaused boolValue];
-    if (wasRunning) [tiVoManager pauseQueue:@(NO)];
+    wasPaused =     [[NSUserDefaults standardUserDefaults] boolForKey:kMTQueuePaused];
+    if (!wasPaused) [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTQueuePaused];
+    if (![tiVoManager.processingPaused boolValue]) [tiVoManager pauseQueue:@(NO)];
     NSString *fullMessage = [NSString stringWithFormat:message,oldTmpDir];
     DDLogReport(@"Error \"%@\" while checking tmp directory.",fullMessage);
     if ( [oldTmpDir isEquivalentToPath:  kMTTmpDir]) {
@@ -1024,8 +1027,8 @@ BOOL wasRunning = NO;
 }
 -(void) cancelUserQuit {
 	quitWhenCurrentDownloadsComplete = NO;
-	tiVoManager.processingPaused = @(NO);
-	[self.mainWindowController.cancelQuitView setHidden:YES];
+    [tiVoManager determineCurrentProcessingState];
+    [self.mainWindowController.cancelQuitView setHidden:YES];
 
 }
 

@@ -41,7 +41,12 @@ __DDLOGHERE__
     if ([mTTask.task respondsToSelector:@selector(setQualityOfService:)]) {  //os10.0 and later
         mTTask.task.qualityOfService = NSQualityOfServiceUtility;
     }
-    mTTask.task.currentDirectoryPath = [tiVoManager tmpFilesDirectory];
+    NSString * tmpDir = [tiVoManager tmpFilesDirectory];
+    if (tmpDir) {
+        mTTask.task.currentDirectoryPath = tmpDir;  //just protective
+    } else {
+        DDLogReport(@"Temp dir not found!");
+    }
     return mTTask;
 }
 

@@ -112,7 +112,7 @@ __DDLOGHERE__
     //Configure Table Columns depending on how many TiVos
     
 	//save selection to restore after reload
-	DDLogVerbose(@"Reloading DL table");
+	DDLogDetail(@"Reloading DL table");
 	NSArray * selectedShows = [self.sortedDownloads objectsAtIndexes: self.selectedRowIndexes];
 	[self sizeToFit];
     self.sortedDownloads =nil;
@@ -638,7 +638,7 @@ __DDLOGHERE__
 	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
 	NSInteger returnValue = [insertDownloadAlert runModal];
 	if (returnValue == 1) {
-		DDLogDetail(@"User did reschedule active show %@",download);
+		DDLogMajor(@"User did reschedule active show %@",download);
 		[download prepareForDownload: YES];
 		return YES;
 	} else {
@@ -677,7 +677,7 @@ __DDLOGHERE__
     NSArray	*classes = @[[MTTiVoShow class]];
     NSDictionary *options = [NSDictionary dictionary];
     NSArray	*draggedShows = [pboard readObjectsForClasses:classes options:options];
-    DDLogDetail(@"Accepting drop: %@", draggedShows);
+    DDLogMajor(@"Accepting drop: %@", draggedShows);
 
     //dragged shows are proxies, so we need to find the real show objects
     NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
@@ -872,7 +872,7 @@ __DDLOGHERE__
 }
 
 -(IBAction) delete:(id)sender {
-    DDLogDetail(@"user request to delete shows");
+    DDLogMajor(@"user request to delete shows");
     [myController removeFromDownloadQueue:sender];
 }
 

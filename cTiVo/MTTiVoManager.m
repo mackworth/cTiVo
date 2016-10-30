@@ -623,7 +623,7 @@ __DDLOGHERE__
 
 -(void)pauseQueue:(NSNumber *)askUser
 {
-    if ([self anyTivoActive] && [askUser boolValue]) {
+    if ([askUser boolValue] && [self anyTivoActive] ) {
 		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current show(s)" informativeTextWithFormat:@""];
 		NSInteger returnValue = [scheduleAlert runModal];
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
