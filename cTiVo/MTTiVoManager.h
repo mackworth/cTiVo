@@ -89,7 +89,6 @@
 //---------------Format Management methods ----------
 -(NSArray *)userFormats;
 -(NSArray *)userFormatDictionaries;
--(NSArray *)hiddenBuiltinFormatNames;
 -(MTFormat *) findFormat:(NSString *) formatName;
 -(MTFormat *) testPSFormat;
 -(void)addFormatsToList:(NSArray *)formats;

@@ -1057,7 +1057,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     if ([decoder isEqualToString:@"TivoLibre"]) {
         // NSFileManager * fm = [NSFileManager defaultManager];
         decryptPath = @"/usr/bin/java";
-        libreJar = [[NSBundle mainBundle] pathForResource: @"tivo-libre"ofType:@"jar"];
+        libreJar = [[NSBundle mainBundle] pathForResource: @"tivo-libre" ofType:@"jar"];
     } else {
         decryptPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable: decoder];
     }
@@ -1395,6 +1395,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     commercialTask.cleanupHandler = ^(){
         if (_commercialTask.taskFailed) {
             if ([self checkLogForAudio: self.commercialTask.logFilePath]) {
+                [self markMyChannelAsTSOnly];
                 [self rescheduleOnMain];
             } else {
                 [tiVoManager  notifyForDownload: self withTitle:@"Detecting Commercials Failed" subTitle:@"Not processing commercials" isSticky:YES forNotification:kMTGrowlCommercialDetFailed];

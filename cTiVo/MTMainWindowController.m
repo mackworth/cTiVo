@@ -168,7 +168,6 @@ __DDLOGHERE__
 -(void)refreshFormatListPopup {
 	formatListPopUp.showHidden = NO;
 	formatListPopUp.formatList =  tiVoManager.formatList;
-	[formatListPopUp refreshMenu];
 	[tiVoManager setValue:[formatListPopUp selectFormatNamed:tiVoManager.selectedFormat.name] forKey:@"selectedFormat"];
 
 }

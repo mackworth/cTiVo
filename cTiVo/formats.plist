@@ -40,7 +40,7 @@ audio: aac at 128kbs</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -112,7 +112,7 @@ audio: aac at 128kbs</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -148,7 +148,7 @@ audio: aac at 256kbps</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -184,7 +184,7 @@ audio: aac at 192kbs</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -220,7 +220,7 @@ audio: aac at 192kbs</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -256,7 +256,7 @@ audio: aac at 128kbs</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -292,7 +292,7 @@ audio: aac at 128kbs</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -330,7 +330,7 @@ NOTE: *MUST* install a codec (http://perian.org/)</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -368,7 +368,7 @@ NOTE: *MUST* install a codec (http://perian.org/)</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -404,7 +404,7 @@ audio: 2-channel aac at 128kbs</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -591,7 +591,7 @@ audio: aac at 128kbs
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -627,7 +627,7 @@ May not work in Quicktime</string>
 			<key>regExProgress</key>
 			<string>\( ?([\d\.]*?)\%\)</string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -664,7 +664,7 @@ audio: mp2 at 192kbs</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -1412,7 +1412,7 @@ Be careful when editing to use other options, as the script may interfere.</stri
 			<key>mustDownloadFirst</key>
 			<true/>
 			<key>name</key>
-			<string>ffmpeg ComSkip/5.1</string>
+			<string>Default</string>
 			<key>outputFileFlag</key>
 			<string></string>
 			<key>regExProgress</key>

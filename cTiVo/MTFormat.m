@@ -427,6 +427,10 @@ __DDLOGHERE__
 	return [NSString stringWithFormat:@" %@(%@) Encoder: %@ =>%@",self.name,self.formatDescription,self.encoderUsed, self.filenameExtension ];
 }
 
+-(BOOL) isDeprecated {
+    return [self.encoderUsed isEqualToString:@"mencoder"];
+}
+
 -(void)dealloc
 {
 	self.encoderUsed = nil;

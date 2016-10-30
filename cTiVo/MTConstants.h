@@ -154,6 +154,7 @@
 
 //USER DEFAULTS
 
+#define kMTUserDefaultVersion @"UserDefaultVersion"  //have we updated this users defaults (0 = original 2= mencoder transition
 #define kMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information
 #define kMTTrustTVDB @"TrustTVDB"          //Should we override TiVo with TVDB season/episode
 #define	kMTQueuePaused @"QueuePaused"			//State of pause for the download queue

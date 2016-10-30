@@ -19,9 +19,10 @@
 
 -(NSArray *) sortDescriptors {
 	if (!_sortDescriptors){
-		NSSortDescriptor *user = [NSSortDescriptor sortDescriptorWithKey:@"isFactoryFormat" ascending:YES];
+        NSSortDescriptor *notDeprecated = [NSSortDescriptor sortDescriptorWithKey:@"isDeprecated" ascending:YES];
+        NSSortDescriptor *user = [NSSortDescriptor sortDescriptorWithKey:@"isFactoryFormat" ascending:YES];
 		NSSortDescriptor *title = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)];
-		_sortDescriptors = [NSArray arrayWithObjects:user,title, nil];
+		_sortDescriptors = [NSArray arrayWithObjects:notDeprecated,user,title, nil];
 		
 
 		
@@ -55,11 +56,15 @@
 
 }
 
+-(IBAction)formatHelp:(id)sender {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/dscottbuch/cTiVo/wiki/Video-Formats"]];
+}
+
 -(void) refreshMenu {
 	NSString * currSelection = [(MTFormat *)self.selectedItem.representedObject name];
 	NSArray *tmpArray = [self.formatList  sortedArrayUsingDescriptors:self.sortDescriptors];
 	[self removeAllItems];
-	BOOL isFactory = YES;
+    int  sectionNum = 0;   //0= user; 1 = factory;  2 = deprecated
 	for (MTFormat *f in tmpArray) {
 		if(self.showHidden || !([f.isHidden boolValue] || ![f pathForExecutable])) {
 			if ( self.numberOfItems == 0 && ![f.isFactoryFormat boolValue]) {
@@ -67,17 +72,29 @@
 				[[self lastItem] setEnabled:NO];
 				[[self lastItem] setTarget:nil];
 			}
-			if ([f.isFactoryFormat boolValue] && isFactory) { //This is a changeover from user input to factory input (if any
+            if (f.isDeprecated  && sectionNum < 2) { //This is a changeover from factory to deprecated input
+                if ( self.numberOfItems > 0) {
+                    NSMenuItem *separator = [NSMenuItem separatorItem];
+                    [[self menu] addItem:separator];
+                }
+                [self addItemWithTitle:@"    Not Recommended"];
+                [[self lastItem] setEnabled:NO];
+                [[self lastItem] setTarget:nil];
+                sectionNum = 2;
+            }
+			if ([f.isFactoryFormat boolValue] && sectionNum == 0) { //This is a changeover from user input (if any) to factory input
 				if ( self.numberOfItems > 0) {
 					NSMenuItem *separator = [NSMenuItem separatorItem];
 					[[self menu] addItem:separator];
 				}
-				[self addItemWithTitle:@"    Built In Formats"];
+				[self addItemWithTitle:@"    Built-In Formats"];
 				[[self lastItem] setEnabled:NO];
 				[[self lastItem] setTarget:nil];
-				isFactory = NO;
+				sectionNum = 1;
 			}
-			[self addItemWithTitle:f.name];
+            NSString * title = f.name;
+            if (f.isDeprecated) title = [@"Old " stringByAppendingString:f.name];
+            [self addItemWithTitle:f.name];
 			NSMenuItem *thisItem = [self lastItem];
 			thisItem.attributedTitle = [f attributedFormatStringForFont: self.font];
 			
@@ -91,6 +108,15 @@
 
 		}
 	}
+    //Add Format Help item
+    NSMenuItem *separator = [NSMenuItem separatorItem];
+    [[self menu] addItem:separator];
+
+    [self addItemWithTitle:@"Help With Formats"];
+    [[self lastItem] setTarget:self];
+    [[self lastItem] setAction:@selector(formatHelp:)];
+
+
 	if (currSelection) {
 		//no longer in list
 		[self selectItemAtIndex:1]; //just beyond the first label.

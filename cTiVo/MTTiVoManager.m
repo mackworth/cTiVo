@@ -123,20 +123,12 @@ __DDLOGHERE__
 			}
 		}
 		
-		//Make sure there's a selected format, espeically on first launch
-		
-		_selectedFormat = nil;
+		//Make sure there's a selected format, especially on first launch
 
-		if ([defaults objectForKey:kMTSelectedFormat]) {
-			NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
-			self.selectedFormat = [self findFormat:formatName];
-			DDLogVerbose(@"defaultFormat %@", formatName);
-		}
-        
-		//If no selected format make it the first.
-		if (!_selectedFormat) {
-			self.selectedFormat = [_formatList objectAtIndex:0];
-		}
+        NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
+        self.selectedFormat = [self findFormat:formatName];
+        DDLogVerbose(@"defaultFormat %@", formatName);
+
 
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
 		DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
@@ -248,6 +240,38 @@ __DDLOGHERE__
 	}
 	DDLogVerbose(@"Restored downloadQueue: %@",newShows);
 	self.downloadQueue = newShows;
+
+    //update formats
+    if ([[NSUserDefaults standardUserDefaults] integerForKey:kMTUserDefaultVersion] < 2) {
+        if (self.selectedFormat.isDeprecated) {
+            self.selectedFormat =[self findFormat:@""];// switch to Default
+        }
+        NSString * warnUserDeprecated = nil;
+        for (MTSubscription * sub in self.subscribedShows) {
+            if (sub.encodeFormat.isDeprecated) {
+                warnUserDeprecated = sub.encodeFormat.name;
+                break;
+            }
+        }
+        if (!warnUserDeprecated) {
+            for (MTDownload * download in self.downloadQueue) {
+                if (download.isNew && download.encodeFormat.isDeprecated) {
+                    warnUserDeprecated = download.encodeFormat.name;
+                    break;
+                }
+            }
+        }
+        if (warnUserDeprecated) {
+            NSString *warnTitle = [NSString stringWithFormat: @"Formats like %@ are not recommended!", warnUserDeprecated ];
+           [self  notifyForDownload: nil
+                           withTitle: warnTitle
+                            subTitle:@"Switch to Default or other Format"
+                           isSticky:YES
+                    forNotification:kMTGrowlPossibleProblem];
+        }
+        [[NSUserDefaults standardUserDefaults] setInteger:2 forKey:kMTUserDefaultVersion];
+    }
+
 }
 
 -(NSInteger) findProxyShowInDLQueue:(MTTiVoShow *) showTarget {
@@ -903,18 +927,6 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     return [NSArray arrayWithArray:tmpFormats];
 }
 
--(NSArray *)hiddenBuiltinFormatNames
-{
-    NSMutableArray *tmpFormats = [NSMutableArray arrayWithArray:_formatList];
-    [tmpFormats filterUsingPredicate:[NSPredicate predicateWithFormat:@"isFactoryFormat == %@ && isHidden == %@",[NSNumber numberWithBool:YES],[NSNumber numberWithBool:YES]]];
-	NSMutableArray *tmpFormatNames = [NSMutableArray array];
-	for (MTFormat *f in tmpFormats) {
-		[tmpFormatNames addObject:f.name];
-	}
-    return [NSArray arrayWithArray:tmpFormatNames];
-	
-}
-
 -(void)setSelectedFormat:(MTFormat *)selectedFormat
 {
     if (selectedFormat == _selectedFormat) {
@@ -925,9 +937,14 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 }
 
 -(MTFormat *) findFormat:(NSString *) formatName {
+    MTFormat * defaultFormat = nil;
+    if (!formatName) formatName = @""; //avoid nil compare issues
     for (MTFormat *fd in _formatList) {
-        if ([formatName compare:fd.name] == NSOrderedSame) {
+        if ([fd.name compare:formatName] == NSOrderedSame) {
             return fd;
+        }
+        if ([formatName isEqualToString:@"Default"]) {
+            defaultFormat = fd;
         }
     }
 	//nobody found; let's see if one got renamed
@@ -936,19 +953,21 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
             return fd;
         }
     }
-	//Now do lookup on hardwired ones that got renamed!!
+	//Now do lookup on hardwired ones that got renamed by us!!
 	NSDictionary *  oldFormats =
 		@{@"Quicktime (H.264   10Mbps)" : @"H.264 High Quality ",
 		  @"Quicktime (H.264   5Mbps)" : @"H.264 Medium Quality",
 		  @"Quicktime (H.264   3Mbps)" : @"H.264 Low Quality",
 		  @"Quicktime (H.264   1Mbps)" : @"H.264 Small 1Mbps",
-		  @"Quicktime (H.264   256kbps)" : @"H.264 Very Small 256kbps"
-		  };
+		  @"Quicktime (H.264   256kbps)" : @"H.264 Very Small 256kbps",
+          @"ffmpeg ComSkip/5.1"         :@"Default"
+          };
 	
 	if (oldFormats[formatName]) {
 		return [self findFormat:oldFormats[formatName]]; //recursion will stop assuming no circularity in oldFormats
 	}
-	return _formatList[0];
+    if (!defaultFormat) defaultFormat = _formatList[0];
+    return defaultFormat;
 }
 
 -(MTFormat *) testPSFormat {

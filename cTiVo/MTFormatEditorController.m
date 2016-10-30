@@ -42,7 +42,6 @@
 //	self.currentFormat = [tiVoManager.selectedFormat copy];
 	formatPopUpButton.showHidden = YES;
 	formatPopUpButton.formatList =  self.formatList;
- 	[self refreshFormatPopUp:nil];
 	self.shouldSave = [NSNumber numberWithBool:NO];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateForFormatChange) name:kMTNotificationFormatChanged object:nil];
@@ -267,7 +266,15 @@
     //Now update the tiVoManger selectedFormat object and user preference
     tiVoManager.selectedFormat = [tiVoManager findFormat:tiVoManager.selectedFormat.name];
 	[[NSUserDefaults standardUserDefaults] setObject:tiVoManager.userFormatDictionaries forKey:kMTFormats];
-    [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.hiddenBuiltinFormatNames forKey:kMTHiddenFormats];
+
+    NSMutableArray *tmpFormats = [NSMutableArray arrayWithArray:_formatList];
+    [tmpFormats filterUsingPredicate:[NSPredicate predicateWithFormat:@"isFactoryFormat == %@ && isHidden == %@",@(YES),@(YES)]];
+    NSMutableArray *tmpFormatNames = [NSMutableArray array];
+    for (MTFormat *f in tmpFormats) {
+        [tmpFormatNames addObject:f.name];
+    }
+
+    [[NSUserDefaults standardUserDefaults] setObject:tmpFormatNames forKey:kMTHiddenFormats];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
 	[self updateForFormatChange];
 }
@@ -302,7 +309,7 @@
 
 -(void)refreshFormatPopUp:(NSNotification *)notification
 {
-	[formatPopUpButton refreshMenu];
+    formatPopUpButton.formatList =  self.formatList;
 	self.currentFormat = [formatPopUpButton selectFormatNamed:_currentFormat.name];
 }
 

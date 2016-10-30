@@ -15,7 +15,6 @@
 @property (nonatomic, strong) NSArray * formatList;
 @property (nonatomic, assign) BOOL showHidden;
 
--(void) refreshMenu;
 -(MTFormat *) selectFormatNamed: (NSString *) newName;
 
 @end
