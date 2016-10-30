@@ -84,10 +84,9 @@
 }
 
 -(void) addDecodeMenuTo:(NSPopUpButton*) cell withCurrentChoice: (NSString *) level{
-    NSArray * decodeNames = @[@"tivodecode",
-                               @"tivodecode-ng",
+    NSArray * decodeNames = @[ @"tivodecode-ng",
                                @"TivoLibre"];
-    NSArray * toolTips = @[@"Traditional decoder (No Transport Stream)", @"Updated decoder", @"Latest decoder (Requires Java)"];
+    NSArray * toolTips = @[ @"Traditional decoder", @"Alternate decoder (Requires Java)"];
     [cell addItemsWithTitles: decodeNames];
     for (NSUInteger i = 0; i < decodeNames.count; i++) {
         NSMenuItem *item =  [cell itemAtIndex:i];
@@ -97,9 +96,7 @@
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
-    if ([[menuItem title ] isEqualToString: @"tivodecode"]) {
-        return (![[NSUserDefaults standardUserDefaults] boolForKey:kMTDownloadTSFormat]);
-    } else if ([[menuItem title ] isEqualToString: @"TivoLibre"]) {
+   if ([[menuItem title ] isEqualToString: @"TivoLibre"]) {
         return ([self javaInstalled]);
     }
     return YES;

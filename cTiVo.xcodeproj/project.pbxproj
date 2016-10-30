@@ -283,7 +283,6 @@
 		1E6907581DA56EBB00C429C2 /* comskip in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E6907401DA56E7600C429C2 /* comskip */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E6907591DA56EBB00C429C2 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E6907411DA56E7600C429C2 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E69075A1DA56EBB00C429C2 /* mencoder in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E6907421DA56E7600C429C2 /* mencoder */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E69075B1DA56EBB00C429C2 /* tivodecode in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E6907431DA56E7600C429C2 /* tivodecode */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E69075C1DA56EBB00C429C2 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E6907441DA56E7600C429C2 /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E69075E1DA56F5900C429C2 /* ffmpeg in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E69075D1DA56F5100C429C2 /* ffmpeg */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E6907871DA5A29900C429C2 /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC1A1730296C0036125A /* libmp4v2.a */; };
@@ -316,7 +315,6 @@
 		1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49974174D898D0022E084 /* MTTiVoPopUpTableCellView.m */; };
 		1EDBDFA71B1CB82700E979F0 /* ccextractor in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EFD685A16D19AA100CC36E5 /* ccextractor */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EDBDFA91B1CB82700E979F0 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E69B2591AAD54060090B86F /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1EDBDFAB1B1CB82700E979F0 /* tivodecode in Copy Executables */ = {isa = PBXBuildFile; fileRef = D2D60BC316766F3200CE32DE /* tivodecode */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EDE323A19C502980052E6C6 /* tivo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323819C502980052E6C6 /* tivo.png */; };
 		1EDE323B19C502980052E6C6 /* tivo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323919C502980052E6C6 /* tivo@2x.png */; };
 		1EFE66FF1BE967460083386C /* sparklecast.xml in Resources */ = {isa = PBXBuildFile; fileRef = 1EFE66FE1BE967460083386C /* sparklecast.xml */; };
@@ -546,7 +544,6 @@
 				1E69075E1DA56F5900C429C2 /* ffmpeg in Copy Executables */,
 				1E6907591DA56EBB00C429C2 /* HandBrakeCLI in Copy Executables */,
 				1E69075A1DA56EBB00C429C2 /* mencoder in Copy Executables */,
-				1E69075B1DA56EBB00C429C2 /* tivodecode in Copy Executables */,
 				1E69075C1DA56EBB00C429C2 /* tivodecode-ng in Copy Executables */,
 			);
 			name = "Copy Executables";
@@ -572,7 +569,6 @@
 				1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */,
 				1EDBDFA71B1CB82700E979F0 /* ccextractor in Copy Executables */,
 				1EDBDFA91B1CB82700E979F0 /* HandBrakeCLI in Copy Executables */,
-				1EDBDFAB1B1CB82700E979F0 /* tivodecode in Copy Executables */,
 				1E557BCB1CD801350014D85B /* comskip in Copy Executables */,
 				1E557BCC1CD801350014D85B /* ffmpeg in Copy Executables */,
 				1E557BCD1CD801350014D85B /* mencoder in Copy Executables */,
@@ -770,7 +766,6 @@
 		1E6907401DA56E7600C429C2 /* comskip */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = comskip; sourceTree = "<group>"; };
 		1E6907411DA56E7600C429C2 /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
 		1E6907421DA56E7600C429C2 /* mencoder */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = mencoder; sourceTree = "<group>"; };
-		1E6907431DA56E7600C429C2 /* tivodecode */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = tivodecode; sourceTree = "<group>"; };
 		1E6907441DA56E7600C429C2 /* tivodecode-ng */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "tivodecode-ng"; sourceTree = "<group>"; };
 		1E69075D1DA56F5100C429C2 /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ffmpeg; sourceTree = "<group>"; };
 		1E6907861DA5A0A100C429C2 /* libmp4v2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libmp4v2.a; sourceTree = "<group>"; };
@@ -914,7 +909,6 @@
 		D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTAppDelegate.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D2D60BB716766EFD00CE32DE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		D2D60BC016766F3200CE32DE /* formats.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = formats.plist; sourceTree = "<group>"; };
-		D2D60BC316766F3200CE32DE /* tivodecode */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = tivodecode; path = ../../tivodecode; sourceTree = "<group>"; };
 		D2D60BC916766FA600CE32DE /* MTTiVoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoManager.m; sourceTree = "<group>"; };
 		D2D60BCA16766FA600CE32DE /* MTTiVoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTTiVoManager.h; sourceTree = "<group>"; };
 		D2D60BCB16766FA600CE32DE /* MTConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; lineEnding = 0; path = MTConstants.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -1065,7 +1059,6 @@
 			children = (
 				1EFD685A16D19AA100CC36E5 /* ccextractor */,
 				1E69B2591AAD54060090B86F /* HandBrakeCLI */,
-				D2D60BC316766F3200CE32DE /* tivodecode */,
 				1EB49B9C1C505D3000887240 /* tivodecode-ng */,
 				1E557B891CD127E90014D85B /* comskip */,
 				1E557B8A1CD127E90014D85B /* ffmpeg */,
@@ -1164,7 +1157,6 @@
 				1E69075D1DA56F5100C429C2 /* ffmpeg */,
 				1E6907411DA56E7600C429C2 /* HandBrakeCLI */,
 				1E6907421DA56E7600C429C2 /* mencoder */,
-				1E6907431DA56E7600C429C2 /* tivodecode */,
 				1E6907441DA56E7600C429C2 /* tivodecode-ng */,
 			);
 			name = bin10.7;

@@ -540,8 +540,6 @@ __DDLOGHERE__
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDecodeBinary options:NSKeyValueObservingOptionNew context:nil];
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDownloadTSFormat options:NSKeyValueObservingOptionNew context:nil];
 
 }
 
@@ -807,20 +805,6 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         DDLogMajor(@"Changed Update Time to %ld",(long)[defs integerForKey:kMTUpdateIntervalMinutes]);
         for (MTTiVo *tiVo in _tiVoList) {
             [tiVo scheduleNextUpdateAfterDelay:-1];
-        }
-    } else if ([keyPath isEqualToString:kMTDownloadTSFormat] ||
-                [keyPath isEqualToString:kMTDecodeBinary])  {
-        BOOL isTSFormat = [defs boolForKey:kMTDownloadTSFormat];
-        NSString * decodeBinary = [defs objectForKey:kMTDecodeBinary];
-        DDLogMajor(@"Changed: TS format %@; decoder: %@", isTSFormat ? @"On" : @"Off", decodeBinary);
-        if (isTSFormat && [decodeBinary isEqualToString:@"tivodecode"]) {
-                //can't be used with Transport streams so change the "other" key
-            if ([keyPath isEqualToString:kMTDownloadTSFormat]){
-                [defs setObject:@"tivodecode-ng" forKey:kMTDecodeBinary ];
-            } else {
-                [defs setBool:NO forKey:kMTDownloadTSFormat];
-            }
-
         }
     }
 
