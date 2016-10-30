@@ -501,9 +501,8 @@ static unsigned int numProcessors;
     for (NSUInteger i = 0; i < numClasses; i++) {
         Class class = classes[i];
 
-        if ([self isRegisteredClass:class]) {
-            if ([NSStringFromClass(class) hasPrefix:@"MT"]) {            [result addObject:class];
-            }
+        if ([NSStringFromClass(class) hasPrefix:@"MT"] && [self isRegisteredClass:class]) { //order matters, so we don't trigger classes
+            [result addObject:class];
         }
     }
     
