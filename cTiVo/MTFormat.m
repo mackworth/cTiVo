@@ -428,7 +428,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) isDeprecated {
-    return [self.encoderUsed isEqualToString:@"mencoder"];
+    return [self.encoderUsed isEqualToString:@"mencoder"] && !self.isTestPS;
 }
 
 -(void)dealloc
