@@ -219,7 +219,8 @@
 
 -(void) awakeFromNib {
 	
-	[self addDebugMenuTo:self.masterDebugLevel withCurrentLevel:[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel]];
+    [self updatePlexPattern];  //only needed once
+    [self addDebugMenuTo:self.masterDebugLevel withCurrentLevel:[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel]];
 	[self addKeywordMenuTo:self.keywordPopup];
     [self addDecodeMenuTo:self.decodePopup withCurrentChoice:[[NSUserDefaults standardUserDefaults] stringForKey:kMTDecodeBinary]];
 	self.debugClasses = [DDLog registeredClasses] ;

@@ -325,8 +325,6 @@ __DDLOGHERE__
 		[defaults setObject:md forKey:@"ExportMetaData"];
 	}
 
-    [self.advPreferencesController.advPreferencesViewController updatePlexPattern];  //only needed once
-    
 
     self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: 61 target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
     DDLogDetail(@"Finished appDidFinishLaunch");
