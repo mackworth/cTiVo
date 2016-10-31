@@ -943,7 +943,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         if ([fd.name compare:formatName] == NSOrderedSame) {
             return fd;
         }
-        if ([formatName isEqualToString:@"Default"]) {
+        if ([fd.name isEqualToString:@"Default"]) {
             defaultFormat = fd;
         }
     }
