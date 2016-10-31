@@ -12,10 +12,30 @@
 	
 }
 @property (nonatomic, strong) NSArray *sortDescriptors;
-
+@property (nonatomic, strong) NSString *preferredFormatName;
 @end
 
 @implementation MTFormatPopUpButton
+
+-(void) sharedInit {
+    self.preferredFormatName = @"";
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
+}
+
+-(instancetype) init {
+    if ((self = [super init])) {
+        [self sharedInit];
+    }
+    return self;
+}
+
+-(void) awakeFromNib {
+    [self sharedInit];
+}
+
+-(void) formatMayHaveChanged {
+    self.formatList = nil;
+}
 
 -(NSArray *) sortDescriptors {
 	if (!_sortDescriptors){
@@ -23,9 +43,6 @@
         NSSortDescriptor *user = [NSSortDescriptor sortDescriptorWithKey:@"isFactoryFormat" ascending:YES];
 		NSSortDescriptor *title = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)];
 		_sortDescriptors = [NSArray arrayWithObjects:notDeprecated,user,title, nil];
-		
-
-		
 	}
 	return _sortDescriptors;
 
@@ -33,8 +50,8 @@
 -(void)setFormatList:(NSArray *)formatList {
 	if (formatList != _formatList) {
 		_formatList = formatList;
+        [self refreshMenu];
 	}
-	[self refreshMenu];  //outside as it may be due to adding item to array
 }
 
 -(void) setShowHidden:(BOOL)showHidden {
@@ -45,28 +62,30 @@
 }
 
 -(MTFormat *) selectFormatNamed: (NSString *) newName {
-	NSString * oldName = [(MTFormat *) self.selectedItem.representedObject name];
-	[self selectItemWithTitle: newName];
-	NSString * foundName = [(MTFormat *) self.selectedItem.representedObject name];
-	if ([newName compare:foundName ] != NSOrderedSame) {
-		//hmm, must have deleted this one during editing.
-		[self selectItemWithTitle: oldName];
-	}
-	return self.selectedItem.representedObject;
-
+    if (!newName) return nil;
+    self.preferredFormatName = newName;
+    [self selectItemWithTitle:newName];
+    MTFormat *menuFormat = (MTFormat *)self.selectedItem.representedObject;
+    MTFormat * newFormat = [tiVoManager findFormat:newName];
+    if (![menuFormat isKindOfClass:[MTFormat class]] || ![menuFormat.name isEqualToString:newFormat.name]) {
+       [self refreshMenu];
+    }
+    return newFormat;
 }
 
 -(IBAction)formatHelp:(id)sender {
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/dscottbuch/cTiVo/wiki/Video-Formats"]];
+    [self selectItemWithTitle:self.preferredFormatName];
 }
 
 -(void) refreshMenu {
-	NSString * currSelection = [(MTFormat *)self.selectedItem.representedObject name];
 	NSArray *tmpArray = [self.formatList  sortedArrayUsingDescriptors:self.sortDescriptors];
 	[self removeAllItems];
     int  sectionNum = 0;   //0= user; 1 = factory;  2 = deprecated
 	for (MTFormat *f in tmpArray) {
-		if(self.showHidden || !([f.isHidden boolValue] || ![f pathForExecutable])) {
+		if (self.showHidden ||
+            [f.name isEqualToString:self.preferredFormatName] ||
+            (![f.isHidden boolValue] && [f pathForExecutable])) {
 			if ( self.numberOfItems == 0 && ![f.isFactoryFormat boolValue]) {
 				[self addItemWithTitle:@"    User Formats"];
 				[[self lastItem] setEnabled:NO];
@@ -92,19 +111,12 @@
 				[[self lastItem] setTarget:nil];
 				sectionNum = 1;
 			}
-            NSString * title = f.name;
-            if (f.isDeprecated) title = [@"Old " stringByAppendingString:f.name];
             [self addItemWithTitle:f.name];
 			NSMenuItem *thisItem = [self lastItem];
 			thisItem.attributedTitle = [f attributedFormatStringForFont: self.font];
 			
 			thisItem.toolTip = [NSString stringWithFormat:@"%@: %@", f.name, f.formatDescription];
 			thisItem.representedObject = f;
-			
-			if ( [currSelection compare: f.name] == NSOrderedSame) {
-				[self selectItem:thisItem];
-				currSelection = nil;
-			}
 
 		}
 	}
@@ -116,12 +128,7 @@
     [[self lastItem] setTarget:self];
     [[self lastItem] setAction:@selector(formatHelp:)];
 
-
-	if (currSelection) {
-		//no longer in list
-		[self selectItemAtIndex:1]; //just beyond the first label.
-	}
-	
+    [self selectItemWithTitle:self.preferredFormatName];
 }
 
 - (void)dealloc

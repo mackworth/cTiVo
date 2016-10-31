@@ -330,10 +330,10 @@ __DDLOGHERE__
 		popUpButton.owner = download;
        if (download.isNew) {
 		    popUpButton.owner = download;
-			popUpButton.formatList = tiVoManager.formatList;
 			//ensure this format is still "available"
-			download.encodeFormat = [popUpButton selectFormatNamed:download.encodeFormat.name];
-			popUpButton.hidden = NO;
+			download.encodeFormat = [ popUpButton selectFormatNamed:download.encodeFormat.name];
+            popUpButton.formatList = tiVoManager.formatList;
+ 			popUpButton.hidden = NO;
 			cell.textField.hidden= YES;
            popUpButton.target = myController;
            popUpButton.action = @selector(selectFormat:);

@@ -13,21 +13,6 @@
 
 @class MTFormatPopUpButton;
 
-@interface MTFormatEditorController : NSViewController <NSPopoverDelegate, MTTabViewItemControllerDelegate> {
-	IBOutlet MTFormatPopUpButton *formatPopUpButton;
-	NSAlert *deleteAlert, *saveOrCancelAlert, *cancelAlert;
-    IBOutlet NSButton *cancelButton, *saveButton, *encodeHelpButton, *comSkipHelpButton;
-	NSPopover *myPopover;
-	IBOutlet NSWindow *popoverDetachWindow;
-	IBOutlet MTHelpViewController *popoverDetachController, *helpContoller;
-}
-
-@property (nonatomic, strong) MTFormat *currentFormat;
-@property (nonatomic, strong) NSMutableArray *formatList;
-@property (nonatomic, strong) NSNumber *shouldSave;
-@property (nonatomic, strong) NSColor *validExecutableColor;
-@property (nonatomic, strong) NSNumber *validExecutable;
-@property (nonatomic, strong) NSString *validExecutableString;
-
+@interface MTFormatEditorController : NSViewController <NSPopoverDelegate, MTTabViewItemControllerDelegate> 
 
 @end

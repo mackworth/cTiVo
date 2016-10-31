@@ -11,6 +11,21 @@
 #import "MTFormatPopUpButton.h"
 
 @interface MTFormatEditorController ()
+{
+    IBOutlet MTFormatPopUpButton *formatPopUpButton;
+    NSAlert *deleteAlert, *saveOrCancelAlert, *cancelAlert;
+    IBOutlet NSButton *cancelButton, *saveButton, *encodeHelpButton, *comSkipHelpButton;
+    NSPopover *myPopover;
+    IBOutlet NSWindow *popoverDetachWindow;
+    IBOutlet MTHelpViewController *popoverDetachController, *helpContoller;
+}
+
+@property (nonatomic, strong) MTFormat *currentFormat;
+@property (nonatomic, strong) NSMutableArray *formatList;
+@property (nonatomic, strong) NSNumber *shouldSave;
+@property (nonatomic, strong) NSColor *validExecutableColor;
+@property (nonatomic, strong) NSNumber *validExecutable;
+@property (nonatomic, strong) NSString *validExecutableString;
 
 @property (nonatomic, strong) NSDictionary *alertResponseInfo;
 
@@ -29,6 +44,7 @@
 		self.validExecutableColor = [NSColor blackColor];
 		self.validExecutable = [NSNumber numberWithBool:YES];
 		self.validExecutableString = @"No valid executable found.";
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateForFormatChange) name:kMTNotificationFormatChanged object:nil];
     }
     
     return self;
@@ -38,33 +54,26 @@
 {
 	popoverDetachWindow.contentView = popoverDetachController.view;
 	[self refreshFormatList];
-//	self.formatList = [NSMutableArray arrayWithArray:tiVoManager.formatList];
-//	self.currentFormat = [tiVoManager.selectedFormat copy];
 	formatPopUpButton.showHidden = YES;
-	formatPopUpButton.formatList =  self.formatList;
-	self.shouldSave = [NSNumber numberWithBool:NO];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateForFormatChange) name:kMTNotificationFormatChanged object:nil];
-
-    // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
-	[self updateForFormatChange];
+	self.shouldSave = @NO;
 }
 
 -(void)refreshFormatList
 {
 	//Deepcopy array so we have new object
 	self.formatList = [NSMutableArray array];
-	formatPopUpButton.formatList = self.formatList;
-	
+    MTFormat * selectedFormat = nil;
+    NSString * searchName = self.currentFormat.name ?: tiVoManager.selectedFormat.name;
 	for (MTFormat *f in tiVoManager.formatList) {
 		MTFormat *newFormat = [f copy];
 		[_formatList addObject:newFormat];
 		newFormat.formerName = f.name;
-		if ([tiVoManager.selectedFormat.name compare:newFormat.name] == NSOrderedSame) {
-			self.currentFormat = newFormat;
+		if ([searchName isEqualToString:newFormat.name]){
+			selectedFormat = newFormat;
 		}
 	}
-
+    self.currentFormat = selectedFormat ?: self.formatList[0];  //wait until after formatList is built
+    [self updateForFormatChange];
 }
 
 - (BOOL)windowShouldClose:(id)sender
@@ -136,9 +145,6 @@
 //	[NSApp endSheet:self.window];
 //	[self.window orderOut:nil];
 	[self refreshFormatList]; //throw away all changes
- 	[self refreshFormatPopUp:nil];
-	[self updateForFormatChange];
-
 }
 
 
@@ -206,7 +212,7 @@
 	if (!name) return nil;
 	//Make sure the title isn't the same and if it is add a -1 modifier
     for (MTFormat *f in _formatList) {
-		if (f == self.currentFormat) break;  //checking our own name
+		if (f == self.currentFormat) continue;  //checking our own name
 		if ([name caseInsensitiveCompare:f.name] == NSOrderedSame) {
             NSRegularExpression *ending = [NSRegularExpression regularExpressionWithPattern:@"(.*)-([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
             NSTextCheckingResult *result = [ending firstMatchInString:name options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, name.length)];
@@ -220,7 +226,8 @@
         }
     }
 	return name;
-} 
+}
+
 - (BOOL)validateValue:(id *)ioValue forKeyPath:(NSString *)inKeyPath error:(out NSError **)outError {
 	if ([inKeyPath isEqualToString:@"currentFormat.name"]) {
 		NSString *proposedName = (NSString *)*ioValue;
@@ -287,11 +294,7 @@
     [newFormat checkAndUpdateFormatName:_formatList];
 	[self.formatList addObject:newFormat];
 	self.currentFormat = newFormat;
-	[self refreshFormatPopUp:nil];
-	[formatPopUpButton selectItemWithTitle:newFormat.name];
-	self.currentFormat = [[formatPopUpButton selectedItem] representedObject];
-	[self updateForFormatChange];
-	
+    [self updateForFormatChange];
 }
 
 -(IBAction)duplicateFormat:(id)sender
@@ -301,16 +304,13 @@
 	newFormat.isFactoryFormat = [NSNumber numberWithBool:NO];
 	[self.formatList addObject:newFormat];
 	self.currentFormat = newFormat;
-	[self refreshFormatPopUp:nil];
-	[formatPopUpButton selectItemWithTitle:newFormat.name];
-	self.currentFormat = [[formatPopUpButton selectedItem] representedObject];
-	[self updateForFormatChange];
+    [self updateForFormatChange];
 }
 
 -(void)refreshFormatPopUp:(NSNotification *)notification
 {
-    formatPopUpButton.formatList =  self.formatList;
-	self.currentFormat = [formatPopUpButton selectFormatNamed:_currentFormat.name];
+    formatPopUpButton.formatList =  [NSArray arrayWithArray: self.formatList];
+    [formatPopUpButton selectFormatNamed:_currentFormat.name];
 }
 
 -(IBAction)help:(id)sender
