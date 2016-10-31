@@ -47,16 +47,15 @@
 #define deleteXML 1   //placeholder to store deleted code in case we decide to restore XML export; need to add to downloadTable, subTable, menu and pref NIBx also
 
 //Download Status
-#define kMTStatusWaiting -1   //should reorder someday, but persistent queue stores these values in prefs
 #define kMTStatusNew 0
-#define kMTStatusDownloading 1
-#define kMTStatusDownloaded 2
-#define kMTStatusDecrypting 3
-#define kMTStatusDecrypted 4
-#define kMTStatusCommercialing 5
-#define kMTStatusCommercialed 6
-#define kMTStatusEncoding 7
-#define kMTStatusDoneOld 8		//don't reuse
+#define kMTStatusWaiting 1
+#define kMTStatusDownloading 2
+#define kMTStatusDownloaded 3
+#define kMTStatusDecrypting 4
+#define kMTStatusDecrypted 5
+#define kMTStatusCommercialing 6
+#define kMTStatusCommercialed 7
+#define kMTStatusEncoding 8
 #define kMTStatusCaptioning 9
 #define kMTStatusCaptioned 10
 #define kMTStatusMetaDataProcessing 11

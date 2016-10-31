@@ -1746,7 +1746,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     if (downloadDelay < 0) {
         downloadDelay = 0;
     }
-    [self setValue:[NSNumber numberWithInt:kMTStatusWaiting] forKeyPath:@"downloadStatus"];
+    [self setValue:@(kMTStatusWaiting) forKeyPath:@"downloadStatus"];
     [self performSelector:@selector(setDownloadStatus:) withObject:@(kMTStatusDownloading) afterDelay:downloadDelay];
 
 	if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile)
@@ -2696,14 +2696,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 //	return [allowedExtensions containsObject: extension];
 }
 
-
-
 #pragma mark - Custom Getters
 
--(NSNumber *)downloadIndex
-{
+-(NSNumber *)downloadIndex {
 	NSInteger index = [tiVoManager.downloadQueue indexOfObject:self];
-	return [NSNumber numberWithInteger:index+1];
+	return @(index+1);
 }
 
 
@@ -2720,34 +2717,24 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		case  kMTStatusEncoding :			return @"Encoding";
 		case  kMTStatusEncoded :			return @"Encoded";
         case  kMTStatusAddingToItunes:		return @"Adding To iTunes";
-		case  kMTStatusDone :				return @"Complete";
 		case  kMTStatusCaptioned:			return @"Subtitled";
 		case  kMTStatusCaptioning:			return @"Subtitling";
+        case  kMTStatusMetaDataProcessing:	return @"Adding MetaData";
+        case  kMTStatusDone :				return @"Complete";
 		case  kMTStatusDeleted :			return @"TiVo Deleted";
 		case  kMTStatusFailed :				return @"Failed";
-		case  kMTStatusMetaDataProcessing:	return @"Adding MetaData";
 		default: return @"";
 	}
 }
 
 -(NSInteger) downloadStatusSorter {
-//used to put column in right order  (hack due to adding kMTStatusWaiting as -1 to avoid fixing up queues)
-//#define kMTStatusWaiting -1   //should reorder someday, but persistent queue stores these values in prefs
-//#define kMTStatusNew 0
-//#define kMTStatusDownloading 1
-//also sorts Done/Failed together
+//used to put column in right order; sorts Done/Failed together
 
     NSInteger status = self.downloadStatus.integerValue;
-    if (status >= kMTStatusDone) {
+    if (status > kMTStatusDone) {
         status = kMTStatusDone;
     }
-     if (status >= kMTStatusDownloading) {
-        return status+1;
-    } else if (status == kMTStatusWaiting) {
-        return 1;
-    } else {  //new
-        return status;
-    }
+    return status;
 }
 
 -(NSString *) imageString {
