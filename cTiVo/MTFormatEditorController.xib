@@ -1,18 +1,22 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11191" systemVersion="15G31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11542" systemVersion="16B2657" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11191"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11542"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTFormatEditorController">
             <connections>
                 <outlet property="comSkipHelpButton" destination="2700" id="2703"/>
                 <outlet property="encodeHelpButton" destination="2454" id="2704"/>
+                <outlet property="executableTextField" destination="2465" id="Kqd-JY-IRJ"/>
                 <outlet property="formatPopUpButton" destination="2479" id="2677"/>
                 <outlet property="helpContoller" destination="1973" id="1974"/>
                 <outlet property="popoverDetachController" destination="1968" id="1971"/>
                 <outlet property="popoverDetachWindow" destination="1969" id="1972"/>
+                <outlet property="presetPopup" destination="VhS-V4-kCa" id="djb-a9-U1J"/>
+                <outlet property="saveButton" destination="2453" id="tYB-64-Wo5"/>
                 <outlet property="view" destination="2448" id="2676"/>
             </connections>
         </customObject>
@@ -171,7 +175,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" id="2465">
+                <textField verticalHuggingPriority="750" id="2465" userLabel="Encoder Text Field">
                     <rect key="frame" x="20" y="418" width="500" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="2595">
@@ -230,6 +234,21 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <popUpButton hidden="YES" toolTip="Presets defined by this encoder" verticalHuggingPriority="750" misplaced="YES" id="VhS-V4-kCa" userLabel="Preset Popup">
+                    <rect key="frame" x="267" y="414" width="256" height="26"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingMiddle" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="yzh-20-AK5" id="euQ-w1-w18">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" id="wLK-u4-zpz">
+                            <items>
+                                <menuItem title="Item 1" state="on" id="yzh-20-AK5"/>
+                                <menuItem title="Item 2" id="BlC-mc-Pqh"/>
+                                <menuItem title="Item 3" id="8Dm-GU-VRr"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                </popUpButton>
                 <button toolTip="Delete current format (not available for built-in formats)" verticalHuggingPriority="750" id="2456">
                     <rect key="frame" x="386" y="667" width="60" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -366,6 +385,14 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
+                        <binding destination="-2" name="enabled" keyPath="currentFormat.comSkip" previousBinding="eCh-VM-Vqm" id="a3Y-fK-iyC">
+                            <dictionary key="options">
+                                <integer key="NSMultipleValuesPlaceholder" value="-1"/>
+                                <integer key="NSNoSelectionPlaceholder" value="-1"/>
+                                <integer key="NSNotApplicablePlaceholder" value="-1"/>
+                                <integer key="NSNullPlaceholder" value="-1"/>
+                            </dictionary>
+                        </binding>
                         <binding destination="-2" name="value" keyPath="currentFormat.edlFlag" id="2723">
                             <dictionary key="options">
                                 <bool key="NSContinuouslyUpdatesValue" value="YES"/>
@@ -374,14 +401,6 @@
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="eCh-VM-Vqm">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                        <binding destination="-2" name="enabled" keyPath="currentFormat.comSkip" previousBinding="eCh-VM-Vqm" id="a3Y-fK-iyC">
-                            <dictionary key="options">
-                                <integer key="NSMultipleValuesPlaceholder" value="-1"/>
-                                <integer key="NSNoSelectionPlaceholder" value="-1"/>
-                                <integer key="NSNotApplicablePlaceholder" value="-1"/>
-                                <integer key="NSNullPlaceholder" value="-1"/>
                             </dictionary>
                         </binding>
                     </connections>
@@ -405,11 +424,6 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
-                        <binding destination="-2" name="value" keyPath="currentFormat.regExProgress" id="2725">
-                            <dictionary key="options">
-                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
-                            </dictionary>
-                        </binding>
                         <binding destination="-2" name="editable" keyPath="currentFormat.isFactoryFormat" id="wDR-ou-mmY">
                             <dictionary key="options">
                                 <string key="NSValueTransformerName">NSNegateBoolean</string>
@@ -421,6 +435,11 @@
                                 <integer key="NSNoSelectionPlaceholder" value="-1"/>
                                 <integer key="NSNotApplicablePlaceholder" value="-1"/>
                                 <integer key="NSNullPlaceholder" value="-1"/>
+                            </dictionary>
+                        </binding>
+                        <binding destination="-2" name="value" keyPath="currentFormat.regExProgress" id="2725">
+                            <dictionary key="options">
+                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
                             </dictionary>
                         </binding>
                     </connections>
@@ -685,6 +704,7 @@
                     </connections>
                 </button>
             </subviews>
+            <point key="canvasLocation" x="139.5" y="168"/>
         </view>
         <userDefaultsController representsSharedInstance="YES" id="562"/>
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="1969" userLabel="Popover Detach Windo">

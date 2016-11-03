@@ -9,6 +9,7 @@
 #import "MTFormatEditorController.h"
 #import "MTTiVoManager.h"
 #import "MTFormatPopUpButton.h"
+#import "NSString+Helpers.h"
 
 @interface MTFormatEditorController ()
 {
@@ -26,9 +27,10 @@
 @property (nonatomic, strong) NSColor *validExecutableColor;
 @property (nonatomic, strong) NSNumber *validExecutable;
 @property (nonatomic, strong) NSString *validExecutableString;
-
+@property (nonatomic, strong) IBOutlet NSTextField *executableTextField;
+@property (nonatomic, strong) IBOutlet NSPopUpButton *presetPopup;
 @property (nonatomic, strong) NSDictionary *alertResponseInfo;
-
+//@property (nonatomic, strong) NSArray * ;
 @end
 
 @implementation MTFormatEditorController
@@ -45,6 +47,7 @@
 		self.validExecutable = [NSNumber numberWithBool:YES];
 		self.validExecutableString = @"No valid executable found.";
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateForFormatChange) name:kMTNotificationFormatChanged object:nil];
+
     }
     
     return self;
@@ -52,10 +55,101 @@
 
 -(void)awakeFromNib
 {
-	popoverDetachWindow.contentView = popoverDetachController.view;
-	[self refreshFormatList];
-	formatPopUpButton.showHidden = YES;
-	self.shouldSave = @NO;
+    popoverDetachWindow.contentView = popoverDetachController.view;
+    [self launchReadPreset];
+    formatPopUpButton.showHidden = YES;
+    self.shouldSave = @NO;
+    [self refreshFormatList];
+}
+
+
+-(IBAction)selectedHandbrakePreset:(id)sender {
+    if (!self.presetPopup.selectedItem.enabled) return;
+    NSString * preset = self.presetPopup.selectedItem.title;
+    NSString * presetDesc = self.presetPopup.selectedItem.toolTip;
+   if (self.currentFormat.isFactoryFormat.boolValue) {
+        //if this is afactory one, create a user one to allow them to use it.
+        [self newFormat:self];
+        self.currentFormat.encoderUsed=@"HandbrakeCLI";
+        self.currentFormat.encoderVideoOptions = [[@"-Z\"" stringByAppendingString:preset] stringByAppendingString:@"\""];
+        [self updateForFormatChange];
+    }
+    
+    self.currentFormat.inputFileFlag = @"-i";
+    self.currentFormat.outputFileFlag = @"-o";
+    self.currentFormat.name = [@"HB " stringByAppendingString:preset] ;
+    self.currentFormat.regExProgress = @" ([\\d\\.]*?) \\%";
+    self.currentFormat.encoderVideoOptions = [[@"-Z\"" stringByAppendingString:preset] stringByAppendingString:@"\""];
+    self.currentFormat.comSkip = @NO;
+    NSString * extension = @".mp4";
+    BOOL iTunes = YES;
+    if ([preset contains:@"MKV"] || [presetDesc contains:@"MKV"]) {
+        extension = @".mkv";
+        iTunes = NO;
+    }
+    self.currentFormat.filenameExtension = extension;
+    self.currentFormat.formatDescription = presetDesc;
+    self.currentFormat.isHidden = @NO;
+    self.currentFormat.iTunes = @(iTunes);
+    [self updateForFormatChange];
+
+}
+
+- (NSString *) launchReadPreset {
+
+    NSTask * handbrake = [NSTask new];
+    NSPipe *pipe = [NSPipe pipe];
+
+    handbrake.standardError = pipe;
+    handbrake.standardOutput = pipe;
+    [handbrake setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"handbrakeCLI" ]];
+    [handbrake setArguments: @[ @"--preset-list"]];
+    [handbrake launch];
+
+    NSFileHandle *presetsReadHandle = pipe.fileHandleForReading;
+    NSString * result =  [[NSString alloc] initWithData:[presetsReadHandle readDataToEndOfFile] encoding:NSUTF8StringEncoding];
+
+    NSArray *presets = [result componentsSeparatedByString:@"\n"];
+    [self.presetPopup removeAllItems];
+    NSString * description = @"";
+    //    put a title here
+    [self.presetPopup addItemWithTitle:@"HANDBRAKE PRESETS"];
+    [self.presetPopup lastItem].enabled = NO;
+    [self.presetPopup lastItem].target = nil;
+    [self.presetPopup lastItem].onStateImage = [[NSImage alloc] initWithSize:CGSizeMake(0,0)];
+
+    for (NSUInteger index = 2; index < presets.count; index++) {
+        NSString * line = presets[index];
+        if ([line hasPrefix:@"        "]) {
+            NSString * newDesc = [line substringFromIndex:8];
+            if (description.length > 0) {
+                description = [NSString stringWithFormat:@"%@ %@", description, newDesc ];
+            } else {
+                description = newDesc;
+            }
+        } else {
+            if (description.length) {
+                [[self.presetPopup lastItem] setToolTip:description];
+                description = @"";
+            }
+            if ([line hasPrefix:@"    "]) {
+                [self.presetPopup addItemWithTitle:[line substringFromIndex:4]];
+                [[self.presetPopup lastItem] setEnabled:YES];
+                [[self.presetPopup lastItem] setTarget:self];
+                [[self.presetPopup lastItem] setAction:@selector(selectedHandbrakePreset:)];
+            } else {
+                if ([line hasSuffix:@"/"]){
+                    line = [line substringToIndex:line.length-1];
+                }
+                [self.presetPopup.menu addItem:[NSMenuItem separatorItem]];
+                [self.presetPopup addItemWithTitle:[@"      " stringByAppendingString:line]];
+                 [[self.presetPopup lastItem] setEnabled:NO];
+                 [[self.presetPopup lastItem] setTarget:nil];
+            }
+        }
+    }
+    return result;
+
 }
 
 -(void)refreshFormatList
@@ -98,13 +192,28 @@
 {
 	if (alert == deleteAlert) {
 		if (returnCode == 1) {
-			[self.formatList removeObject:_currentFormat];
-			self.currentFormat = _formatList[0];
+            NSInteger startIndex = [formatPopUpButton indexOfItemWithRepresentedObject:_currentFormat];
+            //move to next one
+            NSInteger index = startIndex+1;
+            MTFormat *newFormat = nil;
+
+            while (index < formatPopUpButton.numberOfItems && ![(newFormat = [formatPopUpButton itemAtIndex:index].representedObject) isKindOfClass:[MTFormat class]]) {
+                index ++;
+            }
+            //unless there isn't one, then move to previous one
+            if (!newFormat) {
+                while (index > 0 && ![(newFormat =[formatPopUpButton itemAtIndex:index].representedObject) isKindOfClass:[MTFormat class]]) {
+                    index --;
+                }
+            }
+            [self.formatList removeObject:self.currentFormat];
+            if (!newFormat) newFormat = _formatList[0];
+            self.currentFormat = newFormat;
+
 			[self refreshFormatPopUp:nil];
 			[self updateForFormatChange];
 		}
-	}
-	if (alert == saveOrCancelAlert) {
+    } else if (alert == saveOrCancelAlert) {
 		switch (returnCode) {
 			case 1:
 				//Save changes here
@@ -185,6 +294,40 @@
 	}
 	self.validExecutableColor = isValidColor;
 	self.validExecutable = [NSNumber numberWithBool:isValid];
+    CGRect execFrame = self.executableTextField.frame;
+    CGRect popupFrame = self.presetPopup.frame;
+    if ( [[self.currentFormat.encoderUsed lowercaseString] hasPrefix:@"handbrake"]) {
+        self.currentFormat.encoderUsed = @"HandbrakeCLI";
+        self.executableTextField.stringValue = self.currentFormat.encoderUsed;
+        //make room for preset and show it
+        self.presetPopup.hidden = NO;
+        CGFloat popupLeft = popupFrame.origin.x;
+        execFrame.size.width = popupLeft - execFrame.origin.x - 12 ;
+        self.executableTextField.frame = execFrame;
+        NSString * preset = self.presetPopup.selectedItem.title;
+        NSString * options = self.currentFormat.encoderVideoOptions;
+        if (!preset.length || ![options contains:preset]) {
+            //popup doesn't match preset (if any) in encoderVideoOptions
+            //so see if we have it
+            NSUInteger offset = [options rangeOfString:@"-Z\""].location;
+            if (offset == NSNotFound) {
+                [self.presetPopup selectItemAtIndex:0];
+            } else {
+                options = [options substringFromIndex:offset+3];
+                offset = [options rangeOfString:@"\""].location; //ending quote
+                if (offset != NSNotFound) {
+                    options = [options substringToIndex:offset];
+                }
+                [self.presetPopup selectItemWithTitle:options];
+            }
+        }
+        if (!self.presetPopup.selectedItem) [self.presetPopup selectItemAtIndex:0];
+    } else {
+        self.presetPopup.hidden = YES;
+        CGFloat popupRight = popupFrame.origin.x + popupFrame.size.width;
+        execFrame.size.width = popupRight ;
+        self.executableTextField.frame = execFrame;
+    }
 }
 
 -(void)checkShouldSave

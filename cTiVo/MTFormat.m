@@ -319,7 +319,8 @@ __DDLOGHERE__
 
 -(NSAttributedString *)attributedFormatDescription
 {
-	return [_isFactoryFormat boolValue] ? [[NSAttributedString alloc] initWithString:_formatDescription attributes:@{NSForegroundColorAttributeName : [NSColor grayColor]}] :
+    if (!_formatDescription) return nil;
+    return [_isFactoryFormat boolValue] ? [[NSAttributedString alloc] initWithString:_formatDescription attributes:@{NSForegroundColorAttributeName : [NSColor grayColor]}] :
 	[[NSAttributedString alloc] initWithString:_formatDescription];
 }
 
@@ -329,6 +330,9 @@ __DDLOGHERE__
     if (newString.length > 0) {
         self.formatDescription = newString;
     }
+}
++ (NSSet *)keyPathsForValuesAffectingAttributedFormatDescription {
+    return [NSSet setWithObjects:@"formatDescription", nil];
 }
 
 -(NSDictionary *)toDictionary
