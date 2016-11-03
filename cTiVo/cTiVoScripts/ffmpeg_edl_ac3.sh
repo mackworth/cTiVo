@@ -101,7 +101,7 @@ launch_and_monitor_ffmpeg() {
   rm -rf "$output"
 
   set -x
-# echo "launching ffmpeg $@ $output"  &> "$logfile"
+  echo "launching ffmpeg $@ $output"  >&2
   "$ffmpeg_path" "$@" "$output" &> "$logfile" &
   pid=$!
   set +x
@@ -300,7 +300,7 @@ END {print ss,""}
     segment_filename="$tmpdir/segments/segment_${segment_name}.$ext"
     segment_absolute_path=$(realpath "$segment_filename")
     segment_absolute_path_escaped=$(echo "$segment_absolute_path" | sed "s/'/'\\\''/g")
-    echo file \'$segment_absolute_path_escaped\' >> "$merge_filename"
+    echo file "'$segment_absolute_path_escaped'" >> "$merge_filename"
 
     launch_and_monitor_ffmpeg $(echo "$merge_start_percent * ($progress / $duration)" | bc -l) \
                               $(echo "$merge_start_percent * (($progress + $this_duration) / $duration)" | bc -l) \

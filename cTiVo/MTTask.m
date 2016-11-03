@@ -209,11 +209,11 @@ __DDLOGHERE__
 -(void)failedTaskCompletion
 {
 	DDLogReport(@"Task %@ failed",self.taskName);
+    [self saveLogFile];
 	if (!_download.isCanceled && _shouldReschedule){  // _shouldReschedule is for failure of non-critical tasks
 		_myTaskChain.beingRescheduled = YES;
 		[_download rescheduleShowWithDecrementRetries:@YES];
     } else {
-        [self saveLogFile];
         [self cleanUp];
     }
 	

@@ -175,7 +175,7 @@ __DDLOGHERE__
          }
         if (self.downloadStatus.intValue == kMTStatusEncoding) {
             //if done downloading, then maybe taskchain needs to update progress
-            if (!(self.encodeTask.progressCalc || self.encodeTask.trackingRegEx)) {
+            if (!(_encodeTask.progressCalc || _encodeTask.trackingRegEx)) {
                 self.activeTaskChain.providesProgress = YES;
             }
         }
@@ -956,37 +956,37 @@ NSString * fourChar(long n, BOOL allowZero) {
         if (f.encoderEarlyVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyVideoOptions]];
         if (f.encoderEarlyAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyAudioOptions]];
         if (f.encoderEarlyOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyOtherOptions]];
-        [arguments addObject:f.outputFileFlag];
-        [arguments addObject:outputFilePath];
+        [arguments addObject:f.outputFileFlag ?: @""];
+        [arguments addObject:outputFilePath ?: @""];
 		if ([f.comSkip boolValue] && self.skipCommercials && f.edlFlag.length) {
-			[arguments addObject:f.edlFlag];
-			[arguments addObject:self.commercialFilePath];
+			[arguments addObject:f.edlFlag ?: @""];
+			[arguments addObject:self.commercialFilePath ?: @""];
 		}
         if (f.inputFileFlag.length) {
-            [arguments addObject:f.inputFileFlag];
-			[arguments addObject:inputFilePath];
+            [arguments addObject:f.inputFileFlag ?: @""];
+			[arguments addObject:inputFilePath ?: @""];
 			if (f.encoderLateVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateVideoOptions]];
 			if (f.encoderLateAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateAudioOptions]];
 			if (f.encoderLateOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateOtherOptions]];
         } else {
-			[arguments addObject:inputFilePath];
+			[arguments addObject:inputFilePath ?: @""];
 		}
     } else {
         if (f.encoderEarlyVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyVideoOptions]];
         if (f.encoderEarlyAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyAudioOptions]];
         if (f.encoderEarlyOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyOtherOptions]];
 		if ([f.comSkip boolValue] && _skipCommercials && f.edlFlag.length) {
-			[arguments addObject:f.edlFlag];
-			[arguments addObject:self.commercialFilePath];
+			[arguments addObject:f.edlFlag ?: @""];
+			[arguments addObject:self.commercialFilePath ?: @""];
 		}
         if (f.inputFileFlag.length) {
-            [arguments addObject:f.inputFileFlag];
+            [arguments addObject:f.inputFileFlag ?: @""];
         }
-        [arguments addObject:inputFilePath];
+        [arguments addObject:inputFilePath ?: @""];
         if (f.encoderLateVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateVideoOptions]];
         if (f.encoderLateAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateAudioOptions]];
         if (f.encoderLateOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateOtherOptions]];
-		[arguments addObject:outputFilePath];
+		[arguments addObject:outputFilePath ?: @""];
     }
 	return arguments;
 }
