@@ -20,7 +20,7 @@ ac3="YES"
 
 usage() {
   cat << EOF 1>&2
-Usage: $0 -edl <edl file> <ffmpeg options>
+Usage: $0 -edl <edl file> [-noAC3] <ffmpeg options>
        $0 -h
 Script to drive ffmpeg, adding Edit Decision List capability (e.g. comskip) and dual stereo/5.1 audio tracks capabilities
 Calls ffmpeg to get duration and audio stream information about the input file
@@ -28,10 +28,11 @@ If a 5.1 audio stream exists, both it and a derived AAC stereo stream will be co
 To avoid AC3 passthrough, just add "-noAC3" to calling line
 For EDL, use the "-edl filename.edl" option
 For this text, use the "-h" option
-Other parameters will be passed through from calling program , with a few Limitations :
-* If -edl is provided, the video will be encoded in several chunks, so don't assume anything about duration. In particular, don't use -ss, -to or any filters that select or cut segments as these are likely to conflict with the script's own ffmpeg options used to implement the -edl option
+Other parameters will be passed through from calling program, with a few Limitations:
+* If -edl is provided, the video will be encoded in several chunks, so don't assume anything about duration. 
+* In particular, don't use -ss, -to or any filters that select or cut segments as these are likely to conflict with the script's own ffmpeg options used to implement the -edl option
 * By default, the stereo track is encoded with the aac ffmpeg codec and the 5.1 track is encoded with the ac3 ffmpeg codec, with no additional options.
-* Any audio encoder options will apply to both the 5.1 and stereo streams, if a video is known to include an ac3 5.1 track, it can be assumed that the stereo stream in the output will be audio 0 and the 5.1 stream will be audio 1. For example -b:a 128k will set a bitrate of 128k on both streams which is probably not desirable, instead if a custom bitrate is desired it should be set on both streams separately (5.1 requires a higher bitrate than stereo) i.e. -b:a:0 128k -b:a:1 396k
+* Any audio encoder options will apply to both the 5.1 and stereo streams. If a video is known to include an ac3 5.1 track, it can be assumed that the stereo stream in the output will be audio 0 and the 5.1 stream will be audio 1. For example -b:a 128k will set a bitrate of 128k on both streams, which is probably not desirable, instead if a custom bitrate is desired it should be set on both streams separately (5.1 requires a higher bitrate than stereo) i.e. -b:a:0 128k -b:a:1 396k
 EOF
 exit 1
 }
@@ -135,7 +136,7 @@ printf("%.2f",pct)
   [[ "$status" = "0" ]] || err_msg="$ffmpeg_path exited with a status of $status"
   if [[ -n "$err_msg" ]]; then
     echo "error: $err_msg, dumping contents of ffmpeg logfile ($logfile)" >&2
-    cat "$logfile"
+    cat "$logfile" >&2
     exit 1
   fi
 
