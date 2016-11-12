@@ -45,7 +45,7 @@
 -(void) prepareForDownload: (BOOL) notifyTiVo;  //reset for a new download
 -(void) rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
 -(void) cancel;
--(void) download;  //actually launch the download process
+-(void) launchDownload;  //actually launch the download process
 -(void) rescheduleOnMain; //convenience version for use in background threads
 
 

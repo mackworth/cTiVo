@@ -20,37 +20,15 @@
 
 @class MTTiVoManager, MTTiVoShow;
 
-@interface MTTiVo : NSObject <NSXMLParserDelegate> {
-	BOOL volatile isConnecting, managingDownloads, firstUpdate, canPing;
-	NSURLConnection *showURLConnection;
-	NSMutableData *urlData;
-	NSMutableArray *newShows;
-    SCNetworkReachabilityContext reachabilityContext;
-    int totalItemsOnTivo;
-    int lastChangeDate;
-    int itemStart;
-    int itemCount;
-    int numAddedThisBatch; //should be itemCount minus duplicates
-    int authenticationTries;
-    BOOL parsingShow, gettingContent, gettingDetails, gettingIcon;
-    NSMutableString *element;
-    MTTiVoShow *currentShow;
-    NSDictionary *elementToPropertyMap;
-	NSMutableDictionary *previousShowList;
-    
-}
+@interface MTTiVo : NSObject <NSXMLParserDelegate>
 
-@property (nonatomic, strong) MTNetService *tiVo;
-@property (strong) NSArray *shows;
-@property (nonatomic, strong) NSDate *networkAvailability;
-@property (nonatomic, strong) NSString *mediaKey;
-@property (nonatomic, strong) NSOperationQueue *opsQueue;
-@property (nonatomic, strong) MTTiVoManager *tiVoManager;
-@property (nonatomic, strong) NSURLConnection *showURLConnection;
-@property BOOL mediaKeyIsGood,storeMediaKeyInKeychain;
-@property BOOL isReachable, isResponding, manualTiVo, enabled;
 @property (nonatomic, strong) NSDate *lastDownloadEnded;
-@property (nonatomic, strong) 	NSDate *currentNPLStarted;
+@property (strong) NSArray *shows;
+@property (nonatomic, strong) MTNetService *tiVo;
+@property BOOL  manualTiVo, enabled;
+@property BOOL mediaKeyIsGood,storeMediaKeyInKeychain;
+@property BOOL isReachable;
+@property (nonatomic, strong) NSString *mediaKey;
 @property int manualTiVoID;
 @property (nonatomic) BOOL supportsTransportStream;
 

@@ -871,6 +871,9 @@ NSString * fourChar(long n, BOOL allowZero) {
     DDLogDetail(@"configuring files for %@",self);
 	//Release all previous attached pointers
     [self deallocDownloadHandling];
+    self.downloadingShowFromTiVoFile = NO;
+    self.downloadingShowFromMPGFile = NO;
+
     NSFileManager *fm = [NSFileManager defaultManager];
     if (! [self configureBaseFileNameAndDirectory]) {
         return NO;
@@ -916,9 +919,6 @@ NSString * fourChar(long n, BOOL allowZero) {
 	NSString *encoderLaunchPath = [self.encodeFormat pathForExecutable];
     if (!encoderLaunchPath) {
         DDLogReport(@"Encoding of %@ failed for %@ format, encoder %@ not found",self.show.showTitle,self.encodeFormat.name,self.encodeFormat.encoderUsed);
-        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
-        self.processProgress = 1.0;
-        [self progressUpdated];
         return nil;
     } else {
         DDLogVerbose(@"using encoder: %@", encoderLaunchPath);
@@ -1508,7 +1508,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
           8 * (int) self.markCommercials;
 }
 
--(void)download
+-(void)launchDownload
 {
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 
@@ -1520,10 +1520,12 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         NSCellStateValue channelUsesTS =     [ tiVoManager useTSForChannel:channelName];
         NSCellStateValue channelPSFailed =    [tiVoManager failedPSForChannel:channelName];
         self.useTransportStream =
-            [defaults boolForKey:kMTDownloadTSFormat] ||  //always use TS OR
-            channelUsesTS == NSOnState ||                   //user specified TS for this channel OR
-            (channelUsesTS == NSMixedState && channelPSFailed == NSOnState ); //user didn't care, but we've seen need
+             self.show.tiVo.supportsTransportStream && (
+                [defaults boolForKey:kMTDownloadTSFormat] ||  //always use TS OR
+                channelUsesTS == NSOnState ||                   //user specified TS for this channel OR
+                (channelUsesTS == NSMixedState && channelPSFailed == NSOnState )); //user didn't care, but we've seen need
     }
+
     BOOL channelCommercialsOff = [tiVoManager commercialsForChannel:channelName] == NSOffState;
     if ((channelCommercialsOff) &&
         (self.skipCommercials || self.markCommercials)) {
@@ -1571,11 +1573,13 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 				);
 	self.isCanceled = NO;
 	self.isRescheduled = NO;
-    self.downloadingShowFromTiVoFile = NO;
-    self.downloadingShowFromMPGFile = NO;
     self.progressAt100Percent = nil;  //Reset end of progress failure delay
     //Before starting make sure we can launch.
 	if (![self encoderPath] || ! [self configureFiles]) {
+        DDLogReport(@"Cancelling launch");
+        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+        self.processProgress = 1.0;
+        [self progressUpdated];
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
 		return;
 	}
@@ -2613,10 +2617,17 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
            } else if (foundAudioOnly) {
                [self markMyChannelAsTSOnly];
-                //On a regular file, throw away audio-only file and try again
+               //On a regular file, throw away audio-only file and try again
                [self deleteVideoFile];
-               [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
-            } else {
+              if (self.show.tiVo.supportsTransportStream) {
+                  [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+               } else {
+                   [self cancel];
+                   [self setValue:@(kMTStatusFailed) forKeyPath:@"downloadStatus"];
+                   [tiVoManager  notifyForDownload: self withTitle: @"Warning: This channel requires Transport Stream."
+                                          subTitle:@"But this TiVo does not support TS." forNotification:kMTGrowlPossibleProblem];
+               }
+           } else {
                 //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
                 DDLogMajor(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self.show,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
                 [tiVoManager  notifyForDownload: self withTitle: @"Warning: Show may be damaged/incomplete."

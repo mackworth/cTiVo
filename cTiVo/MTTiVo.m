@@ -29,6 +29,32 @@
 
 
 @interface MTTiVo ()
+{
+    BOOL volatile isConnecting, managingDownloads, firstUpdate, canPing;
+    NSURLConnection *showURLConnection;
+    NSMutableData *urlData;
+    NSMutableArray *newShows;
+    SCNetworkReachabilityContext reachabilityContext;
+    int totalItemsOnTivo;
+    int lastChangeDate;
+    int itemStart;
+    int itemCount;
+    int numAddedThisBatch; //should be itemCount minus duplicates
+    int authenticationTries;
+    BOOL parsingShow, gettingContent, gettingDetails, gettingIcon;
+    NSMutableString *element;
+    MTTiVoShow *currentShow;
+    NSDictionary *elementToPropertyMap;
+    NSMutableDictionary *previousShowList;
+
+}
+
+@property (nonatomic, strong) NSDate *networkAvailability;
+@property (nonatomic, strong) NSOperationQueue *opsQueue;
+@property (nonatomic, strong) NSURLConnection *showURLConnection;
+@property BOOL isResponding;
+@property (nonatomic, strong) 	NSDate *currentNPLStarted;
+
 @property SCNetworkReachabilityRef reachability;
 @property (nonatomic, readonly) NSArray *downloadQueue;
 @end
@@ -721,7 +747,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                 if(s.show.tiVo.isReachable) {  //isn't this self.isReachable?
 					tiVoManager.numEncoders++;
 					DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,s.show.showTitle, tiVoManager.numEncoders);
-					[s download];
+					[s launchDownload];
                 }
                 break;
             }
