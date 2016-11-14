@@ -131,13 +131,9 @@
 			[sUD setValue: downloadDir  forKey:kMTDownloadDirectory];  //will validate when loaded again
  
             //preferred format
-            NSString * format = [sUD objectForKey:kITiTivoFormat];
-            if (format.length > 0) {
-                [sUD setValue:format       forKey:kMTSelectedFormat];
-            } else{
-                format =@"iPhone";  //just for the heck of it
-            }
-             
+            NSString * format = @"Default";
+            [sUD setValue: format forKey:kMTSelectedFormat];
+
             //Subscriptions
             NSArray * iTivoSubscriptions = [sUD objectForKey:@"targetDataSList"];
             NSMutableArray * cTivoSubs = [[NSMutableArray alloc] initWithCapacity:iTivoSubscriptions.count];
@@ -203,8 +199,11 @@
             
             
             // Whether to use video frame (versus cTivo logo) for iTUnes icon  Example: "Video frame";
-            [sUD setBool:   [@"Video frame" compare:[sUD objectForKey:kITiTunesIcon]] ==NSOrderedSame
+            NSString * icon = [sUD objectForKey:kITiTunesIcon];
+            if ([icon isKindOfClass:[NSString class]]) {
+                [sUD setBool:   [@"Video frame" isEqualToString:icon]
                                              forKey:kMTiTunesIcon ];
+            }
             
             // Whether to sync iDevices after iTunes submital
             [sUD setBool:   [sUD boolForKey:kITiTunesSync]          forKey:kMTiTunesSync ];

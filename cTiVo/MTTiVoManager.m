@@ -830,6 +830,8 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         for (MTTiVo *tiVo in _tiVoList) {
             [tiVo scheduleNextUpdateAfterDelay:-1];
         }
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 
 }
@@ -1292,7 +1294,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	for (MTTiVoShow * thisShow in shows) {
 		NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 		DDLogDetail(@"Adding show: %@", thisShow);
-        MTDownload * newDownload = [MTDownload downloadForShow:thisShow withFormat: self.selectedFormat intoDirectory:self.downloadDirectory];
+        MTDownload * newDownload = [MTDownload downloadForShow:thisShow withFormat: self.selectedFormat intoDirectory:self.downloadDirectory withQueueStatus: kMTStatusNew];
 		newDownload.exportSubtitles = [defaults objectForKey:kMTExportSubtitles];
 		newDownload.addToiTunesWhenEncoded = newDownload.encodeFormat.canAddToiTunes &&
 											[defaults boolForKey:kMTiTunesSubmit];

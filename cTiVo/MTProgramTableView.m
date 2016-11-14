@@ -82,14 +82,15 @@ __DDLOGHERE__
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-	[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 	if ([keyPath compare:kMTShowCopyProtected] == NSOrderedSame) {
 		DDLogDetail(@"User changed ShowCopyProtected menu item");
  		[self reloadData];
 	} else 	if ([keyPath compare:kMTShowSuggestions] == NSOrderedSame) {
 		DDLogDetail(@"User changed ShowSuggestions menu item");
  		[self reloadData];
-	}
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 -(void)reloadEpisode:(NSNotification *)notification

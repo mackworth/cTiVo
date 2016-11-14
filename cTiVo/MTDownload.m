@@ -102,25 +102,28 @@ __DDLOGHERE__
         _baseFileName = nil;
         _processProgress = 0.0;
 
-        [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
-        [self addObserver:self forKeyPath:@"processProgress" options:NSKeyValueObservingOptionOld context:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
         _previousCheck = [NSDate date];
     }
     return self;
 }
 
-+(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format intoDirectory: (NSString *) downloadDirectory {
++(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format intoDirectory: (NSString *) downloadDirectory withQueueStatus: (NSInteger) status {
     MTDownload * download = [[MTDownload alloc] init];
     download.show = show;
     download.encodeFormat = format;
     download.downloadDirectory = downloadDirectory;
+    download.downloadStatus= @(status);
+
+    [download addObserver:download forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
+    [download addObserver:download forKeyPath:@"processProgress" options:NSKeyValueObservingOptionOld context:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:download selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
+
     return download;
 }
 
 +(MTDownload *) downloadTestPSForShow:(MTTiVoShow *) show {
     MTFormat * testFormat = [tiVoManager testPSFormat];
-    MTDownload * download = [self downloadForShow:show withFormat: testFormat intoDirectory:[tiVoManager tmpFilesDirectory]];
+    MTDownload * download = [self downloadForShow:show withFormat: testFormat intoDirectory:[tiVoManager tmpFilesDirectory] withQueueStatus: kMTStatusNew];
     download.exportSubtitles = NO;
     download.skipCommercials = NO;
     download.markCommercials = NO;
@@ -323,8 +326,10 @@ __DDLOGHERE__
 	fakeShow.tempTiVoName = queueEntry[kMTQueueTivo] ;
 
     MTFormat * format = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
+    NSInteger queueStatus = ((NSNumber *)queueEntry[kMTQueueStatus]).integerValue;
+    if (queueStatus < kMTStatusDone) queueStatus = kMTStatusNew;
 
-    MTDownload *download = [MTDownload downloadForShow:fakeShow withFormat:format intoDirectory:queueEntry[kMTQueueDirectory]];
+    MTDownload *download = [MTDownload downloadForShow:fakeShow withFormat:format intoDirectory:queueEntry[kMTQueueDirectory] withQueueStatus: queueStatus];
     if (format.isTestPS) {
         download.numRetriesRemaining = 0;
         download.numStartupRetriesRemaining = 0;
@@ -335,7 +340,7 @@ __DDLOGHERE__
 	download.addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
 	download.skipCommercials = [queueEntry[kMTSubscribedSkipCommercials ]  boolValue];
 	download.markCommercials = [queueEntry[kMTSubscribedMarkCommercials ]  boolValue];
-	download.downloadStatus = queueEntry[kMTQueueStatus];
+
 	if (download.isInProgress) download.downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
 	
 	download.encodeFilePath = queueEntry[kMTQueueFinalFile];

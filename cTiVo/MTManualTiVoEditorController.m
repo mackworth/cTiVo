@@ -97,6 +97,8 @@ __DDLOGHERE__
         DDLogDetail(@"manual tivos %@",[manualTiVoArrayController.arrangedObjects maskMediaKeys]);
         [manualTiVoArrayController rearrangeObjects];
         [networkTiVoArrayController rearrangeObjects];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 

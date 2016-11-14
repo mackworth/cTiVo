@@ -1680,6 +1680,8 @@ static void * originalAirDateContext = &originalAirDateContext;
         } else if (_movieYear.length > 0){
             _originalAirDateNoTime = _movieYear;
         }
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 

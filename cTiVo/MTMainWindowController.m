@@ -56,13 +56,9 @@ __DDLOGHERE__
         self.selectedTiVo = nil;
         _myTiVoManager = tiVoManager;
 	}
-	return self;
-}
-
--(void)awakeFromNib
-{
-	DDLogDetail(@"MainWindow awakeFromNib");
     [self refreshFormatListPopup];
+
+	return self;
 }
 
 - (void)windowDidLoad
@@ -126,6 +122,10 @@ __DDLOGHERE__
 		if (!dir) dir = @"Directory not available!";
 		downloadDirectory.title   = dir;
 		downloadDirectory.toolTip = dir;
+    } else 	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
+        formatListPopUp.formatList =  tiVoManager.formatList;
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 
@@ -167,7 +167,8 @@ __DDLOGHERE__
 
 -(void)refreshFormatListPopup {
 	formatListPopUp.showHidden = NO;
-    [tiVoManager setValue:[formatListPopUp selectFormatNamed:tiVoManager.selectedFormat.name] forKey:@"selectedFormat"];
+    MTFormat * selectedFormat = [formatListPopUp selectFormatNamed:tiVoManager.selectedFormat.name];
+    if (selectedFormat)[tiVoManager setValue: selectedFormat forKey:@"selectedFormat"];
 	formatListPopUp.formatList =  tiVoManager.formatList;
 
 }

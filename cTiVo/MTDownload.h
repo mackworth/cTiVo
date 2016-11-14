@@ -38,7 +38,7 @@
 
 
 #pragma mark - Methods for download/conversion work
-+(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format intoDirectory: (NSString *) downloadDirectory;
++(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format intoDirectory: (NSString *) downloadDirectory withQueueStatus: (NSInteger) status;
 +(MTDownload *) downloadTestPSForShow:(MTTiVoShow *) show;
 +(MTDownload *) downloadFromQueue:(NSDictionary *) queueEntry;
 

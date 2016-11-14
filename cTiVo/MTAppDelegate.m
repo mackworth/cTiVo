@@ -203,9 +203,6 @@ __DDLOGHERE__
     [DDLog addLogger:fileLogger];
 
      DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelUserQuit) name:kMTNotificationUserCanceledQuit object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
 
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
 										  @NO, kMTShowCopyProtected,
@@ -236,7 +233,11 @@ __DDLOGHERE__
     
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSaveMPGFile];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
-    
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelUserQuit) name:kMTNotificationUserCanceledQuit object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
+
 	if (![[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedFormat]) {
 		//What? No previous format,must be our first run. Let's see if there's any iTivo prefs.
 		[MTiTiVoImport checkForiTiVoPrefs];
@@ -541,7 +542,7 @@ BOOL wasPaused = NO;
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
-		DDLogDetail(@"Selecting Format");
+		DDLogDetail(@"Selecting Format: %@", tiVoManager.selectedFormat);
 		BOOL caniTune = [tiVoManager.selectedFormat.iTunes boolValue];
         BOOL canSkip = [tiVoManager.selectedFormat.comSkip boolValue];
 		BOOL canMark = tiVoManager.selectedFormat.canMarkCommercials;
