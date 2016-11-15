@@ -453,7 +453,7 @@
 -(void)refreshFormatPopUp:(NSNotification *)notification
 {
     formatPopUpButton.formatList =  [NSArray arrayWithArray: self.formatList];
-    [formatPopUpButton selectFormatNamed:_currentFormat.name];
+    [formatPopUpButton selectFormat:_currentFormat];
 }
 
 -(IBAction)help:(id)sender
@@ -466,7 +466,6 @@
 		helpFilePath = [[NSBundle mainBundle] pathForResource:@"ComSkipHelpText" ofType:@"rtf"];
 	}
 	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
-	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
 	NSButton *thisButton = (NSButton *)sender;
 	if (!myPopover) {
 		myPopover = [[NSPopover alloc] init];

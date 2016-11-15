@@ -680,7 +680,7 @@ audio: mp2 at 192kbs</string>
 			<key>encoderUsed</key>
 			<string>HandBrakeCLI</string>
 			<key>name</key>
-			<string>HandBrake iPhone</string>
+			<string>HB Old iPhone</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;iPhone &amp; iPod Touch&quot;</string>
 			<key>encoderAudioOptions</key>
@@ -698,7 +698,7 @@ audio: mp2 at 192kbs</string>
 			<key>regExProgress</key>
 			<string> ([\d\.]*?) \%</string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
@@ -714,111 +714,9 @@ audio: mp2 at 192kbs</string>
 			<key>encoderUsed</key>
 			<string>HandBrakeCLI</string>
 			<key>name</key>
-			<string>HandBrake AppleTV</string>
+			<string>HB Old AppleTV</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;AppleTV 2&quot;</string>
-			<key>encoderAudioOptions</key>
-			<string></string>
-			<key>encoderOtherOptions</key>
-			<string></string>
-			<key>iTunes</key>
-			<true/>
-			<key>mustDownloadFirst</key>
-			<true/>
-			<key>outputFileFlag</key>
-			<string>-o</string>
-			<key>inputFileFlag</key>
-			<string>-i</string>
-			<key>regExProgress</key>
-			<string> ([\d\.]*?) \%</string>
-			<key>isHidden</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>formatDescription</key>
-			<string>HandBrake using the built-in Television preset</string>
-			<key>comSkip</key>
-			<false/>
-			<key>edlFlag</key>
-			<string></string>
-			<key>comSkipOptions</key>
-			<string></string>
-			<key>filenameExtension</key>
-			<string>.mp4</string>
-			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
-			<key>name</key>
-			<string>HandBrake TV</string>
-			<key>encoderVideoOptions</key>
-			<string>-ZTelevision</string>
-			<key>encoderAudioOptions</key>
-			<string></string>
-			<key>encoderOtherOptions</key>
-			<string></string>
-			<key>iTunes</key>
-			<true/>
-			<key>mustDownloadFirst</key>
-			<true/>
-			<key>outputFileFlag</key>
-			<string>-o</string>
-			<key>inputFileFlag</key>
-			<string>-i</string>
-			<key>regExProgress</key>
-			<string> ([\d\.]*?) \%</string>
-			<key>isHidden</key>
-			<true/>
-		</dict>
-		<dict>
-			<key>formatDescription</key>
-			<string>HandBrake for SD TiVos (e.g. Series 2) using the built-in iPhone &amp; iPad Touch preset equivalent</string>
-			<key>comSkip</key>
-			<false/>
-			<key>edlFlag</key>
-			<string></string>
-			<key>comSkipOptions</key>
-			<string></string>
-			<key>filenameExtension</key>
-			<string>.mp4</string>
-			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
-			<key>name</key>
-			<string>HandBrake iPhone for SD TiVos </string>
-			<key>encoderVideoOptions</key>
-			<string>--width 640 --height 480 -e x264  -q 20.0 -a 1 -E faac -B 128 -6 dpl2 -R Auto -D 0.0 -f mp4 -x cabac=0:ref=2:me=umh:bframes=0:weightp=0:subme=6:8x8dct=0:trellis=0</string>
-			<key>encoderAudioOptions</key>
-			<string></string>
-			<key>encoderOtherOptions</key>
-			<string></string>
-			<key>iTunes</key>
-			<true/>
-			<key>mustDownloadFirst</key>
-			<true/>
-			<key>outputFileFlag</key>
-			<string>-o</string>
-			<key>inputFileFlag</key>
-			<string>-i</string>
-			<key>regExProgress</key>
-			<string> ([\d\.]*?) \%</string>
-			<key>isHidden</key>
-			<true/>
-		</dict>
-		<dict>
-			<key>formatDescription</key>
-			<string>HandBrake for SD TiVos (e.g. Series 2) using the built-in AppleTV  2 preset equivalent</string>
-			<key>comSkip</key>
-			<false/>
-			<key>edlFlag</key>
-			<string></string>
-			<key>comSkipOptions</key>
-			<string></string>
-			<key>filenameExtension</key>
-			<string>.m4v</string>
-			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
-			<key>name</key>
-			<string>HandBrake AppleTV for SD TiVos </string>
-			<key>encoderVideoOptions</key>
-			<string>--width 640 --height 480 -e x264  -q 20.0 -r 29.97 --pfr  -a 1,1 -E faac,copy:ac3 -B 160,160 -6 dpl2,auto -R Auto,Auto -D 0.0,0.0 -f mp4 -4</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
@@ -1261,7 +1159,7 @@ audio: mp3 at 192kbps</string>
 			<key>mustDownloadFirst</key>
 			<false/>
 			<key>name</key>
-			<string>Audio only (ffmpeg MP3)</string>
+			<string>Audio only (MP3)</string>
 			<key>outputFileFlag</key>
 			<string></string>
 			<key>regExProgress</key>
@@ -1359,8 +1257,7 @@ audio: mp3 at 192kbps</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>formatDescription</key>
-			<string>For use w/ TiVos that already produce H.264 video (e.g. new Comcast). REQUIRES ffmpeg
-                Converts to MP4 container</string>
+			<string>For use w/ channels that already produce H.264 video (e.g. new Comcast). Converts to MP4 container</string>
 			<key>isHidden</key>
 			<false/>
 			<key>iTunes</key>
@@ -1370,7 +1267,7 @@ audio: mp3 at 192kbps</string>
 			<key>mustDownloadFirst</key>
 			<false/>
 			<key>name</key>
-			<string>MP4 FFMpeg</string>
+			<string>Decrypt MP4</string>
 			<key>outputFileFlag</key>
 			<string></string>
 			<key>regExProgress</key>
@@ -1392,21 +1289,133 @@ audio: mp3 at 192kbps</string>
 			<key>encoderUsed</key>
 			<string>ffmpeg_edl_ac3.sh</string>
 			<key>encoderVideoOptions</key>
-			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt;-vcodec h264 -vf yadif</string>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt; -vcodec h264 -profile:v high -level 4.2 -preset slower -crf 19 -vf &quot;yadif&quot; </string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>formatDescription</key>
-			<string>Adds commercial skipping to ffmpeg
-(Converts an EDL into multiple ffmpeg encodings which are then merged into one output file)
-if audio includes 5.1, it includes both 5.1 and stereo audio tracks
-Converts video with no resolution change
-Runs deinterlacing filter
-Cannot be run simultaneous mode
-Be careful when editing to use other options, as the script may interfere.</string>
+			<string>Higher quality; Resolution same as original; Surround sound</string>
 			<key>iTunes</key>
 			<true/>
 			<key>inputFileFlag</key>
 			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>Higher Quality</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>(\d+\.\d+) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<true/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>ffmpeg_edl_ac3.sh</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt; -vcodec h264 -profile:v high -level 4.2 -vf &quot;yadif&quot; </string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>Resolution same as original; Surround sound</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>1080p</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>(\d+\.\d+) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<true/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>ffmpeg_edl_ac3.sh</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt; -vcodec h264 -profile:v high -level 4.0 -vf &quot;yadif,scale=w=floor(iw*min(1\,min(1280/iw\,720/ih))/2)*2:h=-2&quot; -noAC3</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>720P max res; Surround Sound
+Compatible with AppleTV 3+, iPad2+; iPhone 4s+; iPod Touch </string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>iPhone/iPad</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>(\d+\.\d+) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<true/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>ffmpeg_edl_ac3.sh</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt; -vcodec h264 -profile:v main -level 3.1 -vf &quot;yadif,scale=w=floor(iw*min(1\,min(1280/iw\,720/ih))/2)*2:h=-2&quot;</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>720P max res; Main 3.1; Surround Sound
+Compatible with AppleTV 2+; iPad; iPhone 4+; iPod Touch 4</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
 			<key>isHidden</key>
 			<false/>
 			<key>mustDownloadFirst</key>
@@ -1417,6 +1426,504 @@ Be careful when editing to use other options, as the script may interfere.</stri
 			<string></string>
 			<key>regExProgress</key>
 			<string>(\d+\.\d+) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>ffmpeg</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt;  -profile:v main -level 3.1 -preset veryfast -crf 25 -vf &quot;yadif,scale=w=floor(iw*min(1\,min(1280/iw\,720/ih))/2)*2:h=-2&quot; </string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>720P max res; Main 3.1; No Surround; No Commercial Skip
+Compatible with AppleTV 2+; iPad; iPhone 4+; iPod Touch 4</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<false/>
+			<key>name</key>
+			<string>Faster</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>(\d+\.\d+) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<true/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>ffmpeg_edl_ac3.sh</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt; -vcodec h264 -profile:v high -level 4.1 -preset slower -crf 28 -vf &quot;yadif,scale=w=floor(iw*min(1\,min(1280/iw\,720/ih))/2)*2:h=-2&quot; -noAC3 </string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>720P max res; No Surround
+Compatible with AppleTV 3+, iPad2+; iPhone 4s+; iPod Touch </string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>Smaller</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>(\d+\.\d+) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<true/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>ffmpeg_edl_ac3.sh</string>
+			<key>encoderVideoOptions</key>
+			<string>-filter:v &quot;scale=&apos;w=min(720,trunc((480*33/40*dar)/2+0.5)*2):h=min(480,trunc((720*40/33/dar)/2+0.5)*2)&apos;,pad=&apos;w=720:h=480:x=(ow-iw)/2:y=(oh-ih)/2&apos;,setsar=&apos;r=40/33&apos;&quot;  -target ntsc-dvd </string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>480P; MPEG2; Surround
+Use with burner software to create DVD</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>DVD Ready</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>(\d+\.\d+) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<true/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>ffmpeg_edl_ac3.sh</string>
+			<key>encoderVideoOptions</key>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt; -vcodec h264 -profile:v baseline -level 3.0 -vf &quot;scale=w=floor(iw*min(1\,min(640/iw\,480/ih))/2)*2:h=-2,yadif&quot; -noAC3</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>480P; Baseline 3.0; no Surround
+Should be compatible with all devices and Standard Def TVs</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>Standard Def</string>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string>(\d+\.\d+) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandbrakeCLI</string>
+			<key>encoderVideoOptions</key>
+			<string>-Z&quot;Super HQ 1080p30 Surround&quot;</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>Super high quality H.264 video (up to 1080p30), AAC stereo audio, and Dolby Digital (AC-3) surround audio, in an MP4 container.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB SuperHQ</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandbrakeCLI</string>
+			<key>encoderVideoOptions</key>
+			<string>-Z&quot;Android 720p30&quot;</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>H.264 video (up to 720p30) and AAC stereo audio, in an MP4 container. Compatible with Android devices.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB Android</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandbrakeCLI</string>
+			<key>encoderVideoOptions</key>
+			<string>-Z&quot;Apple 1080p30 Surround&quot;</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>H.264 video (up to 1080p30), AAC stereo audio, and Dolby Digital (AC-3) surround audio, in an MP4 container. Compatible with Apple iPhone 5, 5S, 6, 6s, and later; iPod touch 6th Generation and later; iPad Pro; iPad Air; iPad 3rd, 4th Generation and later; iPad mini; Apple TV 3rd Generation and later.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB 1080p</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandbrakeCLI</string>
+			<key>encoderVideoOptions</key>
+			<string>-Z&quot;Apple 720p30 Surround&quot;</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>H.264 video (up to 720p30), AAC stereo audio, and Dolby Digital (AC-3) surround audio, in an MP4 container. Compatible with Apple iPhone 4 and later; iPod touch 4th, 5th Generation and later; Apple TV 2nd Generation and later.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB Default</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandbrakeCLI</string>
+			<key>encoderVideoOptions</key>
+			<string>-Z&quot;Apple 720p30 Surround&quot;</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>H.264 video (up to 720p30), AAC stereo audio, and Dolby Digital (AC-3) surround audio, in an MP4 container. Compatible with Apple iPhone 4 and later; iPod touch 4th, 5th Generation and later; Apple TV 2nd Generation and later.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB Default</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandbrakeCLI</string>
+			<key>encoderVideoOptions</key>
+			<string>-Z&quot;Apple 540p30 Surround&quot;</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>H.264 video (up to 540p30), AAC stereo audio, and Dolby Digital (AC-3) surround audio, in an MP4 container. Compatible with Apple iPhone 1st Generation, 3G, 3GS, and later; iPod touch 1st, 2nd, 3rd Generation and later; iPod Classic; Apple TV 1st Generation and later.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB Std Def</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandbrakeCLI</string>
+			<key>encoderVideoOptions</key>
+			<string>-Z&quot;Apple 240p30&quot;</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>H.264 video (up to 240p30) and AAC stereo audio, in an MP4 container. Compatible with Apple iPod 5th Generation and later.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB Tiny</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandbrakeCLI</string>
+			<key>encoderVideoOptions</key>
+			<string>-Z&quot;Roku 1080p30 Surround&quot;</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>H.264 video (up to 1080p30), AAC stereo audio, and Dolby Digital (AC-3) surround audio, in an MP4 container. Compatible with Roku 1080p models.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB Roku</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<false/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandbrakeCLI</string>
+			<key>encoderVideoOptions</key>
+			<string>-Z&quot;Xbox 1080p30 Surround&quot;</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>H.264 video (up to 1080p30), AAC stereo audio, and Dolby Digital (AC-3) surround audio, in an MP4 container. Compatible with Xbox One.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<false/>
+			<key>isHidden</key>
+			<true/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB Xbox</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
 		</dict>
 	</array>
 </dict>

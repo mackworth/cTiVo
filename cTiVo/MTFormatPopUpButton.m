@@ -61,7 +61,8 @@
 	}
 }
 
--(MTFormat *) selectFormatNamed: (NSString *) newName {
+-(MTFormat *) selectFormat: (MTFormat *) format {
+    NSString * newName = format.name;
     if (!newName) return nil;
     self.preferredFormatName = newName;
     [self selectItemWithTitle:newName];
@@ -79,6 +80,7 @@
 }
 
 -(void) refreshMenu {
+    if (!self.formatList) _formatList = [tiVoManager formatList];
 	NSArray *tmpArray = [self.formatList  sortedArrayUsingDescriptors:self.sortDescriptors];
 	[self removeAllItems];
     int  sectionNum = 0;   //0= user; 1 = factory;  2 = deprecated

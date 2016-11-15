@@ -123,7 +123,7 @@ __DDLOGHERE__
 		downloadDirectory.title   = dir;
 		downloadDirectory.toolTip = dir;
     } else 	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
-        formatListPopUp.formatList =  tiVoManager.formatList;
+        [formatListPopUp selectFormat:[tiVoManager selectedFormat]];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
@@ -167,8 +167,7 @@ __DDLOGHERE__
 
 -(void)refreshFormatListPopup {
 	formatListPopUp.showHidden = NO;
-    MTFormat * selectedFormat = [formatListPopUp selectFormatNamed:tiVoManager.selectedFormat.name];
-    if (selectedFormat)[tiVoManager setValue: selectedFormat forKey:@"selectedFormat"];
+    tiVoManager.selectedFormat = [formatListPopUp selectFormat:tiVoManager.selectedFormat];
 	formatListPopUp.formatList =  tiVoManager.formatList;
 
 }
@@ -247,7 +246,6 @@ __DDLOGHERE__
    	//Get help text for encoder
 	NSString *helpFilePath = [[NSBundle mainBundle] pathForResource:@"FindTiVoHelpFile" ofType:@"rtf"];
 	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
-	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
     NSPopover *myPopover = [[NSPopover alloc] init];
     myPopover.delegate = self;
     myPopover.behavior = NSPopoverBehaviorTransient;
@@ -267,7 +265,6 @@ __DDLOGHERE__
     if (sender == formatListPopUp) {
         MTFormatPopUpButton *thisButton = (MTFormatPopUpButton *)sender;
         [tiVoManager setValue:[[thisButton selectedItem] representedObject] forKey:@"selectedFormat"];
-        [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.selectedFormat.name forKey:kMTSelectedFormat];
     } else {
         MTFormatPopUpButton *thisButton = (MTFormatPopUpButton *)sender;
         if ([thisButton.owner class] == [MTSubscription class]) {

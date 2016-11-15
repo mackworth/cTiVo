@@ -15,6 +15,6 @@
 @property (nonatomic, strong) NSArray * formatList;
 @property (nonatomic, assign) BOOL showHidden;
 
--(MTFormat *) selectFormatNamed: (NSString *) newName;
+-(MTFormat *) selectFormat: (MTFormat *) format;
 
 @end

@@ -931,6 +931,12 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(void)setSelectedFormat:(MTFormat *)selectedFormat
 {
+    if (![selectedFormat isKindOfClass:[MTFormat class]]) {
+        return;
+    }
+    if (selectedFormat == nil) {
+        selectedFormat = [self findFormat:@"Default"];
+    }
     if (selectedFormat == _selectedFormat) {
         return;
     }
@@ -962,7 +968,15 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 		  @"Quicktime (H.264   3Mbps)" : @"H.264 Low Quality",
 		  @"Quicktime (H.264   1Mbps)" : @"H.264 Small 1Mbps",
 		  @"Quicktime (H.264   256kbps)" : @"H.264 Very Small 256kbps",
-          @"ffmpeg ComSkip/5.1"         :@"Default"
+          @"ffmpeg ComSkip/5.1"         :@"Default",
+          @"MP4 FFMpeg"                     : @"Decrypt MP4",
+          @"ffmpeg ComSkip/5.1"             : @"Default",
+          @"Handbrake AppleTV"              : @"HB Old AppleTV ",
+          @"Handbrake iPhone"               : @"HB Old iPhone",
+          @"Handbrake AppleTV for SD TiVos" : @"HB Std Def",
+          @"Handbrake iPhone for SD TiVos"  : @"HB Std Def",
+          @"Handbrake TV"                   : @"HB Std Def",
+          @"Audio only (ffmpeg MP3)"        : @"Audio only (MP3)"
           };
 	
 	if (oldFormats[formatName]) {
