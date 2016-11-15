@@ -909,7 +909,7 @@ BOOL wasPaused = NO;
 		message = [NSString stringWithFormat:@"Incorrect Media Key for %@",tiVo.tiVo.name];
 	}
     if (message) {
-        NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:@"Ignore TiVo" otherButton:nil informativeTextWithFormat:@""];
+        NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"Save Key" alternateButton:@"Ignore TiVo" otherButton:nil informativeTextWithFormat:@""];
         NSView *accView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 100)];
         NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(10, 60, 200, 24)];
         [accView addSubview:input];
@@ -957,27 +957,6 @@ BOOL wasPaused = NO;
 	[self getMediaKeyFromUser:nil];//Process rest of queue
 }
 
--(NSAlert *)alertWithMessage:(NSString *)message andTiVo:(MTTiVo *)tiVo
-{
-    NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Key" alternateButton:@"Ignore TiVo" otherButton:nil informativeTextWithFormat:@""];
-    NSView *accView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 50)];
-    NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(10, 14, 200, 24)];
-    [accView addSubview:input];
-    NSButton *helpButton = [NSButton new];
-    [helpButton setButtonType:NSMomentaryPushInButton];
-    [helpButton setBezelStyle:NSRoundedBezelStyle];
-    [helpButton setTitle:@"Help"];
-    [helpButton sizeToFit];
-    [helpButton setFrame:NSMakeRect(220, 13, 70, 24) ];
-    [helpButton setTarget:self];
-    [helpButton setAction:@selector(help:)];
-    [accView addSubview:helpButton];
-    
-    if (tiVo.mediaKey) [input setStringValue:tiVo.mediaKey];
-    [keyAlert setAccessoryView:accView];
-    return keyAlert;
-
-}
 
 -(void)help:(id)sender
 {
