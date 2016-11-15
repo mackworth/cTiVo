@@ -1039,7 +1039,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     return catTask;
 }
 -(void) checkDecodeLog {
-    NSString *log = [NSString stringWithContentsOfFile:_decryptTask.errorFilePath encoding:NSUTF8StringEncoding error:nil];
+    NSString *log = [NSString stringWithEndOfFile:_decryptTask.errorFilePath ];
     if (log && log.length > 25 ) {
         NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
         if (badMAKRange.location != NSNotFound) {
@@ -1196,8 +1196,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     encodeTask.cleanupHandler = ^(){
         if (self.activeURLConnection || ! self.shouldSimulEncode) {  //else we've already checked
             if ([self checkLogForAudio: _encodeTask.errorFilePath] ) {
-                [self cancel];
-                [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+                [self handleNewTSChannel];
             }
             self.processProgress = 1.0;
         }
@@ -1400,8 +1399,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     commercialTask.cleanupHandler = ^(){
         if (_commercialTask.taskFailed) {
             if ([self checkLogForAudio: self.commercialTask.logFilePath]) {
-                [self markMyChannelAsTSOnly];
-                [self rescheduleOnMain];
+                [self handleNewTSChannel];
             } else {
                 [tiVoManager  notifyForDownload: self withTitle:@"Detecting Commercials Failed" subTitle:@"Not processing commercials" isSticky:YES forNotification:kMTGrowlCommercialDetFailed];
 
@@ -1539,7 +1537,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         self.skipCommercials = NO;
         self.markCommercials = NO;
     }
-	DDLogMajor(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@%@; %@",
+	DDLogReport(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@%@; %@",
 				(int)self.taskFlowType,
 				self,
 				self.encodeFormat.name ,
@@ -2401,7 +2399,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                                        @"Stream #0:0: Audio",               //ffmpeg
                                        @"Could not open video codec"        //comskip
                                        ];
-        NSString *log = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+        NSString *log = [NSString stringWithEndOfFile:filePath ];
         if ( ! log.length) return NO;
         for (NSString * errMsg in audioOnlyStrings) {
             if ([log rangeOfString:errMsg].location != NSNotFound) {
@@ -2422,6 +2420,20 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             //only notify if we're not (testing, OR previously seen, OR forcing PS)
             [tiVoManager  notifyForDownload: self withTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName] isSticky:NO forNotification:kMTGrowlTivodecodeFailed];
         }
+    }
+}
+
+-(void) handleNewTSChannel {
+    [self markMyChannelAsTSOnly];
+    //On a regular file, throw away audio-only file and try again
+    [self deleteVideoFile];
+    if (self.show.tiVo.supportsTransportStream) {
+        [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+    } else {
+        [self cancel];
+        [self setValue:@(kMTStatusFailed) forKeyPath:@"downloadStatus"];
+        [tiVoManager  notifyForDownload: self withTitle: @"Warning: This channel requires Transport Stream."
+                               subTitle:@"But this TiVo does not support TS." forNotification:kMTGrowlPossibleProblem];
     }
 }
 
@@ -2564,7 +2576,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         if (self.urlBuffer) {
             dataReceived = [[NSString alloc] initWithData:self.urlBuffer encoding:NSUTF8StringEncoding];
         } else {
-            dataReceived = [NSString stringWithContentsOfFile:self.bufferFilePath encoding:NSUTF8StringEncoding error:nil];
+            dataReceived = [NSString stringWithEndOfFile:self.bufferFilePath ];
         }
 		if (dataReceived) {
 			NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
@@ -2596,11 +2608,8 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                  //hmm, doesn't look like it's big enough  (85% for PS; 75% for TS
             BOOL foundAudioOnly = NO;
             if (!self.useTransportStream ) {
-                if (self.shouldSimulEncode) {
-                    //else encoder will fail later
-                    if ([self checkLogForAudio: self.encodeTask.errorFilePath]) {
-                        foundAudioOnly = YES;
-                    }
+                if ([self checkLogForAudio: self.encodeTask.errorFilePath]) {
+                    foundAudioOnly = YES;
                 }
                 if (!self.encodeFormat.testsForAudioOnly && filePercent > 2.0 && filePercent < 25.0) {
                     //decrypted file, so encoder won't check, so rely on size alone
@@ -2621,17 +2630,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 }
                 [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
            } else if (foundAudioOnly) {
-               [self markMyChannelAsTSOnly];
-               //On a regular file, throw away audio-only file and try again
-               [self deleteVideoFile];
-              if (self.show.tiVo.supportsTransportStream) {
-                  [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
-               } else {
-                   [self cancel];
-                   [self setValue:@(kMTStatusFailed) forKeyPath:@"downloadStatus"];
-                   [tiVoManager  notifyForDownload: self withTitle: @"Warning: This channel requires Transport Stream."
-                                          subTitle:@"But this TiVo does not support TS." forNotification:kMTGrowlPossibleProblem];
-               }
+               [self handleNewTSChannel];
            } else {
                 //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
                 DDLogMajor(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self.show,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);

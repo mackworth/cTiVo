@@ -161,23 +161,14 @@ __DDLOGHERE__
 }
 
 -(void) saveLogFileType:(NSString *) type fromPath: (NSString *) path {
-	NSFileHandle *logHandle = [NSFileHandle fileHandleForReadingAtPath:path];
-	unsigned long long logFileSize = [logHandle seekToEndOfFile];
-	if (logFileSize > 0) {
-		NSUInteger backup = 2000;  //how much to log
-		if (logFileSize < backup) backup = (NSInteger)logFileSize;
-		[logHandle seekToFileOffset:(logFileSize-backup)];
-		NSData *tailOfFile = [logHandle readDataOfLength:backup];
-		if (tailOfFile.length > 0) {
-			NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
-            if ([logString contains:@"Exit 132"]) {
-                [self reportOldProcessor];
-            }
-			DDLogMajor(@"%@File for task %@: %@",type, _taskName,  [logString maskMediaKeys]);
-		}
+    NSString * logString = [NSString stringWithEndOfFile:path ];
+    if ([logString contains:@"Exit 132"]) {
+        [self reportOldProcessor];
+    }
+    if (logString.length > 0) {
+        DDLogMajor(@"%@File for task %@: %@",type, _taskName,  [logString maskMediaKeys]);
     } else {
         DDLogVerbose(@"%@File for task %@ was empty", type, _taskName);
-
     }
 }
 
@@ -210,13 +201,15 @@ __DDLOGHERE__
 {
 	DDLogReport(@"Task %@ failed",self.taskName);
     [self saveLogFile];
-	if (!_download.isCanceled && _shouldReschedule){  // _shouldReschedule is for failure of non-critical tasks
+    [self cleanUp];
+
+	if (!_download.isCanceled && _shouldReschedule){
 		_myTaskChain.beingRescheduled = YES;
 		[_download rescheduleShowWithDecrementRetries:@YES];
     } else {
-        [self cleanUp];
+        // a non-critical task; so just continue
     }
-	
+
 }
 
 -(NSString *)reasonForTermination

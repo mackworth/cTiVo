@@ -74,6 +74,23 @@
     return NO;
 }
 
++(NSString *) stringWithEndofFileHandle:(NSFileHandle *) logHandle numBytes:(NSUInteger) numBytes {
+    unsigned long long logFileSize = [logHandle seekToEndOfFile];
+    if (logFileSize == 0)  return @"";
+    if (logFileSize <  numBytes) numBytes = (NSUInteger)logFileSize;
+    [logHandle seekToFileOffset:(logFileSize-numBytes)];
+    NSData *tailOfFile = [logHandle readDataOfLength:numBytes];
+    if (tailOfFile.length == 0) return @"";
+    NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
+    return  logString;
+
+}
+
++(NSString *) stringWithEndOfFile:(NSString *) path  {
+    NSUInteger backup = 5000;
+    NSFileHandle *logHandle = [NSFileHandle fileHandleForReadingAtPath:path];
+    return [NSString stringWithEndofFileHandle:logHandle numBytes:backup];
+}
 
 
 @end

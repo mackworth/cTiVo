@@ -18,4 +18,6 @@
 
 - (BOOL) isEquivalentToPath: (NSString *) path;
 
++(NSString *) stringWithEndOfFile:(NSString *) path;
+
 @end

@@ -208,7 +208,6 @@
     }
 
     NSAttributedString * results = [[NSAttributedString alloc] initWithString:fileNames];
-    //	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
     NSPopUpButton *thisButton = (NSPopUpButton *)sender;
     [myTextView setString:fileNames];
 
@@ -289,12 +288,10 @@
         statsString = [tiVoManager.theTVDBStatistics description];
     }
     NSAttributedString *        attrHelpText = [[NSAttributedString alloc] initWithString:statsString];
-	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
 	NSButton *thisButton = (NSButton *)sender;
 	[myTextView setAutomaticLinkDetectionEnabled:YES];
 	[myTextView setString:statsString];
 	[myTextView checkTextInDocument:nil];
-	//	[self.helpController.displayMessage insertText:helpText];
 	[popoverDetachController.displayMessage.textStorage setAttributedString:attrHelpText];
 	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
 }
