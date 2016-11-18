@@ -118,9 +118,7 @@ __DDLOGHERE__
 		NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTFormats];
 		if (userFormats) {
 			DDLogVerbose(@"User formats: %@", userFormats);
-			for (NSDictionary *fl in userFormats) {
-				[_formatList addObject:[MTFormat formatWithDictionary:fl]];
-			}
+            [self addFormatsToList:userFormats withNotification:NO];
 		}
 		
 		//Make sure there's a selected format, especially on first launch
@@ -1003,17 +1001,19 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	[[NSUserDefaults standardUserDefaults] setObject:tiVoManager.userFormatDictionaries forKey:kMTFormats];	
 }
 
--(void)addFormatsToList:(NSArray *)formats
+-(void)addFormatsToList:(NSArray *)formats withNotification:(BOOL) notify
 {
 	for (NSDictionary *f in formats) {
 		MTFormat *newFormat = [MTFormat formatWithDictionary:f];
 		//Lots of error checking here
         //Check that name is unique
-        [newFormat checkAndUpdateFormatName:tiVoManager.formatList];
-		[_formatList addObject:newFormat];
+        [newFormat checkAndUpdateFormatName:self.formatList];
+		[self.formatList addObject:newFormat];
 	}
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
-	[[NSUserDefaults standardUserDefaults] setValue:tiVoManager.userFormatDictionaries forKey:kMTFormats];
+    if (notify) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
+        [[NSUserDefaults standardUserDefaults] setValue:tiVoManager.userFormatDictionaries forKey:kMTFormats];
+    }
 }
 
 #pragma mark - Channel management

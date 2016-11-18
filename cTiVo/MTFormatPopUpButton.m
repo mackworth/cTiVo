@@ -29,6 +29,13 @@
     return self;
 }
 
+-(instancetype) initWithFrame:(NSRect)frameRect pullsDown:(BOOL)flag {
+    if ((self = [super initWithFrame:frameRect pullsDown:flag])) {
+        [self sharedInit];
+    }
+    return self;
+}
+
 -(void) awakeFromNib {
     [self sharedInit];
 }

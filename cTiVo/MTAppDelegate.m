@@ -858,9 +858,9 @@ BOOL wasPaused = NO;
 			NSString *filename = formatsOpenPanel.URL.path;
 			if ([[[filename pathExtension ]lowercaseString] isEqualToString: @"plist"]) {
 				newFormats = [NSArray arrayWithContentsOfFile:filename];
-				[self->_tiVoGlobalManager addFormatsToList:newFormats];
+				[self.tiVoGlobalManager addFormatsToList:newFormats withNotification:YES];
 			} else {
-				[self->_tiVoGlobalManager addEncFormatToList:filename];
+				[self.tiVoGlobalManager addEncFormatToList:filename];
 			}
 		}
 	}];

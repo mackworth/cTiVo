@@ -1509,7 +1509,7 @@ Compatible with AppleTV 3+, iPad2+; iPhone 4s+; iPod Touch </string>
 			<key>captionOptions</key>
 			<string></string>
 			<key>comSkip</key>
-			<true/>
+			<false/>
 			<key>comSkipOptions</key>
 			<string></string>
 			<key>edlFlag</key>
@@ -1519,14 +1519,14 @@ Compatible with AppleTV 3+, iPad2+; iPhone 4s+; iPod Touch </string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>ffmpeg_edl_ac3.sh</string>
+			<string>ffmpeg</string>
 			<key>encoderVideoOptions</key>
-			<string>-filter:v &quot;scale=&apos;w=min(720,trunc((480*33/40*dar)/2+0.5)*2):h=min(480,trunc((720*40/33/dar)/2+0.5)*2)&apos;,pad=&apos;w=720:h=480:x=(ow-iw)/2:y=(oh-ih)/2&apos;,setsar=&apos;r=40/33&apos;&quot;  -target ntsc-dvd </string>
+			<string>&lt;&lt;&lt;INPUT&gt;&gt;&gt;-vf yadif -target ntsc-dvd </string>
 			<key>filenameExtension</key>
-			<string>.mp4</string>
+			<string>.mpg</string>
 			<key>formatDescription</key>
 			<string>480P; MPEG2; Surround
-Use with burner software to create DVD</string>
+                Use with burner software to create DVD</string>
 			<key>iTunes</key>
 			<true/>
 			<key>inputFileFlag</key>
@@ -1536,13 +1536,13 @@ Use with burner software to create DVD</string>
 			<key>isHidden</key>
 			<true/>
 			<key>mustDownloadFirst</key>
-			<true/>
+			<false/>
 			<key>name</key>
 			<string>DVD Ready</string>
 			<key>outputFileFlag</key>
 			<string></string>
 			<key>regExProgress</key>
-			<string>(\d+\.\d+) \%</string>
+			<string></string>
 		</dict>
 		<dict>
 			<key>captionOptions</key>
@@ -1692,44 +1692,6 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<true/>
 			<key>name</key>
 			<string>HB 1080p</string>
-			<key>outputFileFlag</key>
-			<string>-o</string>
-			<key>regExProgress</key>
-			<string> ([\d\.]*?) \%</string>
-		</dict>
-		<dict>
-			<key>captionOptions</key>
-			<string></string>
-			<key>comSkip</key>
-			<false/>
-			<key>comSkipOptions</key>
-			<string></string>
-			<key>edlFlag</key>
-			<string></string>
-			<key>encoderAudioOptions</key>
-			<string></string>
-			<key>encoderOtherOptions</key>
-			<string></string>
-			<key>encoderUsed</key>
-			<string>HandbrakeCLI</string>
-			<key>encoderVideoOptions</key>
-			<string>-Z&quot;Apple 720p30 Surround&quot;</string>
-			<key>filenameExtension</key>
-			<string>.mp4</string>
-			<key>formatDescription</key>
-			<string>H.264 video (up to 720p30), AAC stereo audio, and Dolby Digital (AC-3) surround audio, in an MP4 container. Compatible with Apple iPhone 4 and later; iPod touch 4th, 5th Generation and later; Apple TV 2nd Generation and later.</string>
-			<key>iTunes</key>
-			<true/>
-			<key>inputFileFlag</key>
-			<string>-i</string>
-			<key>isFactoryFormat</key>
-			<false/>
-			<key>isHidden</key>
-			<true/>
-			<key>mustDownloadFirst</key>
-			<true/>
-			<key>name</key>
-			<string>HB Default</string>
 			<key>outputFileFlag</key>
 			<string>-o</string>
 			<key>regExProgress</key>

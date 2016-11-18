@@ -107,17 +107,20 @@ __DDLOGHERE__
     return self;
 }
 
+-(void) setupNotifications {
+    [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
+    [self addObserver:self forKeyPath:@"processProgress" options:NSKeyValueObservingOptionOld context:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
+}
+
+//always use this initializer; not init
 +(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format intoDirectory: (NSString *) downloadDirectory withQueueStatus: (NSInteger) status {
     MTDownload * download = [[MTDownload alloc] init];
     download.show = show;
     download.encodeFormat = format;
     download.downloadDirectory = downloadDirectory;
     download.downloadStatus= @(status);
-
-    [download addObserver:download forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
-    [download addObserver:download forKeyPath:@"processProgress" options:NSKeyValueObservingOptionOld context:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:download selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
-
+    [download setupNotifications];
     return download;
 }
 
@@ -375,6 +378,7 @@ __DDLOGHERE__
 		self.includeAPMMetaData = [decoder decodeObjectForKey:kMTQueueIncludeAPMMetaData]; if (!self.includeAPMMetaData) self.includeAPMMetaData= @(NO);
 #endif
 		self.exportSubtitles = [decoder decodeObjectForKey:kMTQueueExportSubtitles]; if (!self.exportSubtitles) self.exportSubtitles= @(NO);
+        [self setupNotifications];
 	}
 	DDLogDetail(@"initWithCoder for %@",self);
 	return self;
@@ -2055,6 +2059,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  //Currently Free up an encoder/ notify subscription module / update UI
     self.processProgress = 1.0;
+    [self progressUpdated];
 
     [self cleanupFiles];
     //Reset tasks

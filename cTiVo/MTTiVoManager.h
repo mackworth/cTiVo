@@ -91,7 +91,7 @@
 -(NSArray *)userFormatDictionaries;
 -(MTFormat *) findFormat:(NSString *) formatName;
 -(MTFormat *) testPSFormat;
--(void)addFormatsToList:(NSArray *)formats;
+-(void)addFormatsToList:(NSArray *)formats withNotification:(BOOL) notify;
 -(void)addEncFormatToList: (NSString *) filename ;
 
 //---------------TiVo Management methods ----------
