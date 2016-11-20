@@ -800,7 +800,7 @@ audio: mp2 at 192kbs</string>
 			<key>regExProgress</key>
 			<string></string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>edlFlag</key>
@@ -1259,7 +1259,7 @@ audio: mp3 at 192kbps</string>
 			<key>formatDescription</key>
 			<string>For use w/ channels that already produce H.264 video (e.g. new Comcast). Converts to MP4 container</string>
 			<key>isHidden</key>
-			<false/>
+			<true/>
 			<key>iTunes</key>
 			<true/>
 			<key>inputFileFlag</key>

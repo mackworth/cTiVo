@@ -29,6 +29,7 @@
 @property (nonatomic, strong) NSString *validExecutableString;
 @property (nonatomic, strong) IBOutlet NSTextField *executableTextField;
 @property (nonatomic, strong) IBOutlet NSPopUpButton *presetPopup;
+@property (nonatomic, assign) NSInteger customPresetStart;
 @property (nonatomic, strong) NSDictionary *alertResponseInfo;
 //@property (nonatomic, strong) NSArray * ;
 @end
@@ -65,13 +66,18 @@
 
 -(IBAction)selectedHandbrakePreset:(id)sender {
     if (!self.presetPopup.selectedItem.enabled) return;
+    BOOL customPreset = NO;
+    NSInteger menuIndex = [self.presetPopup indexOfItem: self.presetPopup.selectedItem]; //-1 if not found
+    if (menuIndex >= self.customPresetStart) {
+        customPreset =YES;
+    }
+
     NSString * preset = self.presetPopup.selectedItem.title;
     NSString * presetDesc = self.presetPopup.selectedItem.toolTip;
    if (self.currentFormat.isFactoryFormat.boolValue) {
         //if this is afactory one, create a user one to allow them to use it.
         [self newFormat:self];
         self.currentFormat.encoderUsed=@"HandbrakeCLI";
-        self.currentFormat.encoderVideoOptions = [[@"-Z\"" stringByAppendingString:preset] stringByAppendingString:@"\""];
         [self updateForFormatChange];
     }
     
@@ -79,7 +85,11 @@
     self.currentFormat.outputFileFlag = @"-o";
     self.currentFormat.name = [@"HB " stringByAppendingString:preset] ;
     self.currentFormat.regExProgress = @" ([\\d\\.]*?) \\%";
-    self.currentFormat.encoderVideoOptions = [[@"-Z\"" stringByAppendingString:preset] stringByAppendingString:@"\""];
+    NSString * importString = @"";
+    if (customPreset) {
+        importString = @"--preset-import-gui ";
+    }
+    self.currentFormat.encoderVideoOptions = [NSString stringWithFormat:@"%@-Z\"%@\"" , importString, preset];
     self.currentFormat.comSkip = @NO;
     NSString * extension = @".mp4";
     BOOL iTunes = YES;
@@ -103,13 +113,13 @@
     handbrake.standardError = pipe;
     handbrake.standardOutput = pipe;
     [handbrake setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"handbrakeCLI" ]];
-    [handbrake setArguments: @[ @"--preset-list"]];
+    [handbrake setArguments: @[ @"--preset-import-gui", @"--preset-list"]];
     [handbrake launch];
 
     NSFileHandle *presetsReadHandle = pipe.fileHandleForReading;
     NSString * result =  [[NSString alloc] initWithData:[presetsReadHandle readDataToEndOfFile] encoding:NSUTF8StringEncoding];
 
-    NSArray *presets = [result componentsSeparatedByString:@"\n"];
+    NSArray *presetLines = [result componentsSeparatedByString:@"\n"];
     [self.presetPopup removeAllItems];
     NSString * description = @"";
     //    put a title here
@@ -117,36 +127,55 @@
     [self.presetPopup lastItem].enabled = NO;
     [self.presetPopup lastItem].target = nil;
     [self.presetPopup lastItem].onStateImage = [[NSImage alloc] initWithSize:CGSizeMake(0,0)];
+    NSUInteger folderLevel = 0;
+    BOOL skipFirstLines = YES;
+    for (NSString * presetLine in presetLines) {
+        NSUInteger indent = 0;
+        while (indent < presetLine.length && [presetLine characterAtIndex:indent] == ' ') indent++;
+        if (indent >= presetLine.length) continue;
+        NSString * line = [presetLine substringFromIndex:indent];
+        if (skipFirstLines) {
+            if (![line isEqualToString:@"General/"]) continue;
+            skipFirstLines = NO;
+        }
+        if (folderLevel > indent) folderLevel= indent; //pop up a level
 
-    for (NSUInteger index = 2; index < presets.count; index++) {
-        NSString * line = presets[index];
-        if ([line hasPrefix:@"        "]) {
-            NSString * newDesc = [line substringFromIndex:8];
+        if (indent < 8 && description.length > 0) {
+            [[self.presetPopup lastItem] setToolTip:description];
+            description = @"";
+        }
+        if ([line hasSuffix:@"/"]){
+            //folder, but we only use top level ones
+            if (folderLevel == 0) {
+                line = [line substringToIndex:line.length-1];
+                [self.presetPopup.menu addItem:[NSMenuItem separatorItem]];
+                [self.presetPopup addItemWithTitle:[@"        " stringByAppendingString:line]];
+                [[self.presetPopup lastItem] setEnabled:NO];
+                [[self.presetPopup lastItem] setTarget:nil];
+            }
+            folderLevel = folderLevel+4;
+        } else if (indent >=  folderLevel + 4 ) {
+            //description text, but may be multi-line
             if (description.length > 0) {
-                description = [NSString stringWithFormat:@"%@ %@", description, newDesc ];
+                description = [NSString stringWithFormat:@"%@ %@", description, line ];
             } else {
-                description = newDesc;
+                description = line;
             }
         } else {
-            if (description.length) {
-                [[self.presetPopup lastItem] setToolTip:description];
-                description = @"";
-            }
-            if ([line hasPrefix:@"    "]) {
-                [self.presetPopup addItemWithTitle:[line substringFromIndex:4]];
-                [[self.presetPopup lastItem] setEnabled:YES];
-                [[self.presetPopup lastItem] setTarget:self];
-                [[self.presetPopup lastItem] setAction:@selector(selectedHandbrakePreset:)];
-            } else {
-                if ([line hasSuffix:@"/"]){
-                    line = [line substringToIndex:line.length-1];
-                }
-                [self.presetPopup.menu addItem:[NSMenuItem separatorItem]];
-                [self.presetPopup addItemWithTitle:[@"      " stringByAppendingString:line]];
-                 [[self.presetPopup lastItem] setEnabled:NO];
-                 [[self.presetPopup lastItem] setTarget:nil];
+            //got a preset
+            NSLog(@"    %@", line);
+            [self.presetPopup addItemWithTitle:line];
+            [[self.presetPopup lastItem] setEnabled:YES];
+            [[self.presetPopup lastItem] setTarget:self];
+            [[self.presetPopup lastItem] setAction:@selector(selectedHandbrakePreset:)];
+            if ([line isEqualToString:@"CLI Default"]) {
+                //no other way to tell if this is a user preset
+                self.customPresetStart = [self.presetPopup numberOfItems];
             }
         }
+    }
+    if (description.length) {
+        [[self.presetPopup lastItem] setToolTip:description];
     }
     return result;
 
