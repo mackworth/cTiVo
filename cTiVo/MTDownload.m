@@ -937,12 +937,12 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 #pragma mark - Download decrypt and encode Methods
 
-
--(NSMutableArray *)getArguments:(NSString *)argString
-{
-	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"([^\\s\"\']+)|\"(.*?)\"|'(.*?)'" options:NSRegularExpressionCaseInsensitive error:nil];
+//should be in an NSMutableArray extension
+-(void)addArguments:(NSString *)argString toArray:(NSMutableArray *) arguments {
+    if (argString.length == 0) return;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"([^\\s\"\']+)|\"(.*?)\"|'(.*?)'" options:NSRegularExpressionCaseInsensitive error:nil];
 	NSArray *matches = [regex matchesInString:argString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, argString.length)];
-	NSMutableArray *arguments = [NSMutableArray array];
+	NSMutableArray *newArgs = [NSMutableArray array];
 	for (NSTextCheckingResult *tr in matches) {
 		NSUInteger j;
 		for ( j=1; j<tr.numberOfRanges; j++) {
@@ -950,52 +950,55 @@ NSString * fourChar(long n, BOOL allowZero) {
 				break;
 			}
 		}
-		[arguments addObject:[argString substringWithRange:[tr rangeAtIndex:j]]];
+		[newArgs addObject:[argString substringWithRange:[tr rangeAtIndex:j]]];
 	}
-	return arguments;
-	
+    if (newArgs.count > 0) {
+        [arguments addObjectsFromArray:newArgs];
+    }
 }
 
+-(void)addArgument:(NSString *)argString toArray:(NSMutableArray *) arguments {
+    NSString * trimString = [argString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    if (trimString.length > 0) [arguments addObject:trimString];
+}
 
 -(NSMutableArray *)encodingArgumentsWithInputFile:(NSString *)inputFilePath outputFile:(NSString *)outputFilePath
 {
 	NSMutableArray *arguments = [NSMutableArray array];
     MTFormat * f = self.encodeFormat;
     if (f.outputFileFlag.length) {
-        if (f.encoderEarlyVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyVideoOptions]];
-        if (f.encoderEarlyAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyAudioOptions]];
-        if (f.encoderEarlyOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyOtherOptions]];
-        [arguments addObject:f.outputFileFlag ?: @""];
-        [arguments addObject:outputFilePath ?: @""];
+        [self addArguments:f.encoderEarlyVideoOptions toArray:arguments];
+        [self addArguments:f.encoderEarlyAudioOptions toArray:arguments];
+        [self addArguments:f.encoderEarlyOtherOptions toArray:arguments];
+        [self addArgument: f.outputFileFlag toArray:arguments];
+        [self addArgument: outputFilePath toArray:arguments];
 		if ([f.comSkip boolValue] && self.skipCommercials && f.edlFlag.length) {
-			[arguments addObject:f.edlFlag ?: @""];
-			[arguments addObject:self.commercialFilePath ?: @""];
+            [self addArgument:f.edlFlag toArray:arguments];
+            [self addArgument:self.commercialFilePath toArray:arguments];
 		}
         if (f.inputFileFlag.length) {
-            [arguments addObject:f.inputFileFlag ?: @""];
-			[arguments addObject:inputFilePath ?: @""];
-			if (f.encoderLateVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateVideoOptions]];
-			if (f.encoderLateAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateAudioOptions]];
-			if (f.encoderLateOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateOtherOptions]];
+            [self addArgument:f.inputFileFlag toArray:arguments];
+            [self addArgument:inputFilePath toArray:arguments];
+			[self addArguments:f.encoderLateVideoOptions toArray:arguments];
+			[self addArguments:f.encoderLateAudioOptions toArray:arguments];
+			[self addArguments:f.encoderLateOtherOptions toArray:arguments];
         } else {
-			[arguments addObject:inputFilePath ?: @""];
+            [self addArgument:inputFilePath toArray:arguments];
 		}
     } else {
-        if (f.encoderEarlyVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyVideoOptions]];
-        if (f.encoderEarlyAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyAudioOptions]];
-        if (f.encoderEarlyOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderEarlyOtherOptions]];
+        [self addArguments:f.encoderEarlyVideoOptions toArray:arguments];
+        [self addArguments:f.encoderEarlyAudioOptions toArray:arguments];
+        [self addArguments:f.encoderEarlyOtherOptions toArray:arguments];
 		if ([f.comSkip boolValue] && _skipCommercials && f.edlFlag.length) {
-			[arguments addObject:f.edlFlag ?: @""];
-			[arguments addObject:self.commercialFilePath ?: @""];
+            [self addArgument:f.edlFlag toArray:arguments];
+            [self addArgument:self.commercialFilePath toArray:arguments];
 		}
-        if (f.inputFileFlag.length) {
-            [arguments addObject:f.inputFileFlag ?: @""];
-        }
-        [arguments addObject:inputFilePath ?: @""];
-        if (f.encoderLateVideoOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateVideoOptions]];
-        if (f.encoderLateAudioOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateAudioOptions]];
-        if (f.encoderLateOtherOptions.length) [arguments addObjectsFromArray:[self getArguments:f.encoderLateOtherOptions]];
-		[arguments addObject:outputFilePath ?: @""];
+        [self addArgument:f.inputFileFlag toArray:arguments];
+        [self addArgument:inputFilePath toArray:arguments];
+        [self addArguments:f.encoderLateVideoOptions toArray:arguments];
+        [self addArguments:f.encoderLateAudioOptions toArray:arguments];
+        [self addArguments:f.encoderLateOtherOptions toArray:arguments];
+        [self addArgument:outputFilePath toArray:arguments];
     }
 	return arguments;
 }
@@ -1368,7 +1371,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     NSMutableArray * captionArgs = [NSMutableArray array];
     
-    if (self.encodeFormat.captionOptions.length) [captionArgs addObjectsFromArray:[self getArguments:self.encodeFormat.captionOptions]];
+    [self addArguments:self.encodeFormat.captionOptions toArray:captionArgs];
     
     // [captionArgs addObject:@"-bi"]; messes with most recent version of ccextractor
     [captionArgs addObject:@"-utf8"];
@@ -1461,9 +1464,8 @@ NSString * fourChar(long n, BOOL allowZero) {
         };
     }
 
-
 	NSMutableArray *arguments = [NSMutableArray array];
-    if (self.encodeFormat.comSkipOptions.length) [arguments addObjectsFromArray:[self getArguments:self.encodeFormat.comSkipOptions]];
+    [self addArguments:self.encodeFormat.comSkipOptions toArray:arguments];
     NSRange iniRange = [self.encodeFormat.comSkipOptions rangeOfString:@"--ini="];
 //	[arguments addObject:[NSString stringWithFormat: @"--output=%@",[self.commercialFilePath stringByDeletingLastPathComponent]]];  //0.92 version
     if (iniRange.location == NSNotFound) {
@@ -1591,6 +1593,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		return;
 	}
 
+    self.decryptTask = self.encodeTask = self.commercialTask = self.captionTask = nil; //make sure we're not reusing an old task from previous run.
     self.activeTaskChain = [MTTaskChain new];
     self.activeTaskChain.download = self;
     if (!self.downloadingShowFromMPGFile && !self.downloadingShowFromTiVoFile) {

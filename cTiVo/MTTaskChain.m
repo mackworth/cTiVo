@@ -78,7 +78,7 @@ __DDLOGHERE__
     //this is a kludge; putting it back the way it was before cleaning it up with MapTable
     self.teeBranches = [NSMutableDictionary new];
 #else
-    self.teeBranches = [NSMapTable strongToStrongObjectsMapTable];
+    self.teeBranches = [NSMapTable strongToStrongObjectsMapTable]; 
 #endif
 
     DDLogVerbose(@"tasks BEFORE config: %@", [self maskMediaKeys]);
@@ -99,7 +99,12 @@ __DDLOGHERE__
                 }
 			}
             if (sourceToTee) {
-                [self.teeBranches setObject:[NSArray arrayWithArray:inputPipes] forKey:sourceToTee];  //have to ignore warning for 10.7
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
+                //this is a kludge; putting it back the way it was before cleaning it up with MapTable
+                [self.teeBranches setObject:[NSArray arrayWithArray:inputPipes] forKey:(id<NSCopying> _Nonnull)sourceToTee];  //have to ignore warning for 10.7
+#else
+                [self.teeBranches setObject:[NSArray arrayWithArray:inputPipes] forKey:sourceToTee];
+#endif
             }
 		}
 		if (currentTaskGroup != self.taskArray.lastObject ) {
@@ -337,8 +342,13 @@ __DDLOGHERE__
                         } else {
                             NSMutableArray * newPipes = [pipes mutableCopy];
                             [newPipes removeObject:pipe];
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
+                            //this is a kludge; putting it back the way it was before cleaning it up with MapTable
+                            [self.teeBranches setObject:[NSArray arrayWithArray:newPipes] forKey:(id<NSCopying> _Nonnull)incomingHandle];  //have to ignore warning for 10.7
+#else
                             [self.teeBranches setObject:[NSArray arrayWithArray:newPipes] forKey:incomingHandle];
-                        }
+#endif
+                       }
                         [currentTask cancel];
                     }
 

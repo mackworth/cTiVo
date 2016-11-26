@@ -112,6 +112,7 @@ __DDLOGHERE__
 		isConnecting = NO;
 		_mediaKeyIsGood = NO;
         managingDownloads = NO;
+        _supportsTransportStream = YES;
         _manualTiVo = NO;
 		firstUpdate = YES;
 		_enabled = YES;
@@ -433,7 +434,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)parserElement:(NSString*) elementName {
 	//just gives a shorter method name for DDLog
-	DDLogDetail(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
+	DDLogVerbose(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
 }
 
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName

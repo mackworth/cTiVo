@@ -89,15 +89,23 @@ __DDLOGHERE__
         if (![[NSFileManager defaultManager] createFileAtPath:_errorFilePath contents:[NSData data] attributes:nil]) {
             DDLogReport(@"Could not create errfile at %@",_logFilePath);
         }
-
         self.errorFileHandle = [NSFileHandle fileHandleForWritingAtPath:_errorFilePath];
+        
         if (self.logFileWriteHandle) {
             [self setStandardOutput:self.logFileWriteHandle];
         } else {
-            DDLogReport(@"Could not open logfile at %@",_logFilePath);
+            DDLogReport(@"%@ Could not write logfile at %@",taskName, _logFilePath);
         }
-        [self setStandardInput:self.logFileReadHandle];
-        [self setStandardError:self.errorFileHandle];
+        if (self.logFileReadHandle) {
+            [self setStandardInput:self.logFileReadHandle];
+        } else {
+            DDLogReport(@"%@ Could not read logfile at %@",taskName, _logFilePath);
+        }
+        if (self.errorFileHandle) {
+            [self setStandardError:self.errorFileHandle];
+        } else {
+            DDLogReport(@"%@ Could not read error file at %@",taskName, _errorFilePath);
+        }
     }
 }
 

@@ -1409,7 +1409,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 }
 //Note that any new notification types need to be added to constants.h, but especially Growl Registration Ticket.growRegDict
 - (void)notifyForDownload: (MTDownload *) download withTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification {
-	[self notifyForDownload: download withTitle:title subTitle:subTitle isSticky:NO forNotification:notification];
+	[self notifyForDownload: download withTitle:title subTitle:subTitle isSticky:YES forNotification:notification];
 }
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center

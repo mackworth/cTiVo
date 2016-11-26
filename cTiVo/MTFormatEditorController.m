@@ -163,7 +163,6 @@
             }
         } else {
             //got a preset
-            NSLog(@"    %@", line);
             [self.presetPopup addItemWithTitle:line];
             [[self.presetPopup lastItem] setEnabled:YES];
             [[self.presetPopup lastItem] setTarget:self];

@@ -29,7 +29,7 @@
     //used to expire old subscriptions
     //incidentally drops really old tivos (over 90 days)
     //note that this may return "distant past" if a tivo has been seen, but not fully processed yet
-    NSDate * returnDate = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*7]; //keep at least 7 days
+    NSDate * returnDate = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*30]; //keep at least 30 days
     for (NSString * tivoName in [tiVoManager.lastLoadedTivoTimes allKeys]) {
         NSDate * tivoTime=  tiVoManager.lastLoadedTivoTimes[tivoName];
         if ((tivoTime != [NSDate distantPast] && [tivoTime timeIntervalSinceNow] >= 60*60*24*90)) {
@@ -46,6 +46,14 @@
 
 }
 
+/*
+ If your TiVo(s) record(s) two copies of the same episode more than a week apart, so will cTiVo.  It does remember episodeIds within the last month to avoid too many dups.
+
+ To be specific, MTSubscription>isSubscribed checks (an expanded version of) episodeID against prevRecording before confirming a subscription, but
+ every time we save out the subscription list (MTSubscriptionLIst>saveSubscription, we truncate the prevRecording lists to the most recent ones
+ (just ones since  MTSubscriptionList>oldestPossibleSubscriptionTime, which is a little complicated to handle
+ multiple TiVos that may not check in regularly, but at least 30 days worth  and at most 90
+ */
 
 -(void) checkSubscription: (NSNotification *) notification {
     //called by system when a new show appears in listing, including all shows at startup
