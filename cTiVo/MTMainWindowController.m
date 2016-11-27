@@ -522,7 +522,6 @@ __DDLOGHERE__
 	NSArray *selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:selectedRows];
 	[tiVoManager downloadShowsWithCurrentOptions:selectedShows beforeDownload:nil];
     
-	[tiVoShowTable deselectAll:nil];
 	[downloadQueueTable deselectAll:nil];
 }
 

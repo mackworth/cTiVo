@@ -1203,20 +1203,21 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 								 ^BOOL(id obj, NSUInteger idx, BOOL *stop) {
 									return [shows indexOfObject:obj] != NSNotFound;
 								 }];
-	if (fromIndexSet.count ==0) return nil;
-	
+
 	// If any of the removed objects come before the insertion index,
-	// we need to decrement the index appropriately
-	NSMutableArray * dlQueue = [self downloadQueue];
-	NSUInteger adjustedInsertIndex = insertIndex -
-	[fromIndexSet countOfIndexesInRange:(NSRange){0, insertIndex}];
-	NSRange destinationRange = NSMakeRange(adjustedInsertIndex, [fromIndexSet count]);
-	NSIndexSet *destinationIndexes = [NSIndexSet indexSetWithIndexesInRange:destinationRange];
-	
-	NSArray *objectsToMove = [dlQueue objectsAtIndexes:fromIndexSet];
-	DDLogVerbose(@"moving shows %@ from %@ to %@", objectsToMove,fromIndexSet, destinationIndexes);
-	[dlQueue removeObjectsAtIndexes: fromIndexSet];
-	[dlQueue insertObjects:objectsToMove atIndexes:destinationIndexes];
+    // we need to decrement the index appropriately
+    NSMutableArray * dlQueue = [self downloadQueue];
+    NSUInteger adjustedInsertIndex = insertIndex -
+    [fromIndexSet countOfIndexesInRange:(NSRange){0, insertIndex}];
+    NSRange destinationRange = NSMakeRange(adjustedInsertIndex, shows.count);
+    NSIndexSet *destinationIndexes = [NSIndexSet indexSetWithIndexesInRange:destinationRange];
+    DDLogVerbose(@"moving shows %@ from %@ to %@", shows,fromIndexSet, destinationIndexes);
+    if (fromIndexSet.count > 0) {
+        //objects may be copies, so not in queue already
+        [dlQueue removeObjectsAtIndexes: fromIndexSet];
+    }
+    [dlQueue insertObjects:shows atIndexes:destinationIndexes];
+
 	DDLogDetail(@"Posting DLUpdated notifications");
 	[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:nil];
 	return destinationIndexes;
@@ -1243,7 +1244,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(MTDownload *) findRealDownload: (MTDownload *) proxyDownload  {
 	for (MTDownload * download in self.downloadQueue) {
-		if ([download isEqual:proxyDownload]) {
+		if ([download isSimilarTo:proxyDownload]) {
 			return download;
 		}
 	}

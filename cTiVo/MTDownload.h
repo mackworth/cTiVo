@@ -48,6 +48,7 @@
 -(void) launchDownload;  //actually launch the download process
 -(void) rescheduleOnMain; //convenience version for use in background threads
 
+-(BOOL) isSimilarTo: (MTDownload *) testDownload;
 
 #pragma mark - Properties for download/conversion progress
 @property (atomic, strong) NSNumber *downloadStatus;

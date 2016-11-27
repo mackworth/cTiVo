@@ -720,8 +720,9 @@ __DDLOGHERE__
 }
 
 -(BOOL) isEqual:(id)object {
-	if (![object isKindOfClass:[self class]]) return NO;
     MTTiVoShow * show = (MTTiVoShow *) object;
+    if (show == self) return YES;
+	if (![object isKindOfClass:[self class]]) return NO;
 	return (self.showID == show.showID) &&
             [self.showTitle isEqualToString: show.showTitle] &&
             [self.tiVoName isEqualToString: show.tiVoName];

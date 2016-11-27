@@ -113,6 +113,23 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
 }
 
+-(id) copyWithZone:(NSZone *)zone {
+    MTDownload *download = [[[self class] allocWithZone:zone] init];
+    if (download) {
+        download.show = _show;
+        download.encodeFormat = _encodeFormat;
+        download.downloadDirectory = _downloadDirectory;
+        download.downloadStatus= @(kMTStatusNew);
+        download.exportSubtitles = _exportSubtitles;
+        download.skipCommercials = _skipCommercials;
+        download.markCommercials = _markCommercials;
+        download.genTextMetaData = _genTextMetaData;
+        [download prepareForDownload:NO];
+        [download setupNotifications];
+    }
+    return download;
+}
+
 //always use this initializer; not init
 +(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format intoDirectory: (NSString *) downloadDirectory withQueueStatus: (NSInteger) status {
     MTDownload * download = [[MTDownload alloc] init];
@@ -389,17 +406,16 @@ __DDLOGHERE__
     self.show.isQueued = YES;
 }
 
--(BOOL) isEqual:(id)object {
-	if (object == self) return YES;
-    if (!object || ![object isKindOfClass:MTDownload.class]) {
+-(BOOL) isSimilarTo:(MTDownload *) testDownload {
+    //not isEqualTo, as we only want to use with pasteboard copies, not in real arrays.
+	if (testDownload == self) return YES;
+    if (!testDownload || ![testDownload isKindOfClass:MTDownload.class]) {
 		return NO;
 	}
-	MTDownload * dl = (MTDownload *) object;
-	return ([self.show isEqual:dl.show] &&
-			[self.encodeFormat isEqual: dl.encodeFormat] &&
-			(self.encodeFilePath == dl.encodeFilePath || [self.encodeFilePath isEqualToString:dl.encodeFilePath]) &&
-			(self.downloadDirectory == dl.downloadDirectory || [self.downloadDirectory isEqualToString:dl.downloadDirectory]));
-	
+	return ([self.show isEqual:testDownload.show] &&
+			[self.encodeFormat isEqual: testDownload.encodeFormat] &&
+			(self.encodeFilePath == testDownload.encodeFilePath || [self.encodeFilePath isEqualToString:testDownload.encodeFilePath]) &&
+			(self.downloadDirectory == testDownload.downloadDirectory || [self.downloadDirectory isEqualToString:testDownload.downloadDirectory]));
 }
 
 -(NSUInteger) hash {
@@ -962,21 +978,26 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (trimString.length > 0) [arguments addObject:trimString];
 }
 
+-(BOOL) isArgument:(NSString *) argString {
+    NSString * trimString = [argString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    return trimString.length > 0;
+}
+
 -(NSMutableArray *)encodingArgumentsWithInputFile:(NSString *)inputFilePath outputFile:(NSString *)outputFilePath
 {
 	NSMutableArray *arguments = [NSMutableArray array];
     MTFormat * f = self.encodeFormat;
-    if (f.outputFileFlag.length) {
+    if ( [self isArgument: f.outputFileFlag] ) {
         [self addArguments:f.encoderEarlyVideoOptions toArray:arguments];
         [self addArguments:f.encoderEarlyAudioOptions toArray:arguments];
         [self addArguments:f.encoderEarlyOtherOptions toArray:arguments];
         [self addArgument: f.outputFileFlag toArray:arguments];
         [self addArgument: outputFilePath toArray:arguments];
-		if ([f.comSkip boolValue] && self.skipCommercials && f.edlFlag.length) {
+		if ([f.comSkip boolValue] && self.skipCommercials && [self isArgument:f.edlFlag ]) {
             [self addArgument:f.edlFlag toArray:arguments];
             [self addArgument:self.commercialFilePath toArray:arguments];
 		}
-        if (f.inputFileFlag.length) {
+        if ([self isArgument: f.inputFileFlag ]) {
             [self addArgument:f.inputFileFlag toArray:arguments];
             [self addArgument:inputFilePath toArray:arguments];
 			[self addArguments:f.encoderLateVideoOptions toArray:arguments];
@@ -989,7 +1010,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         [self addArguments:f.encoderEarlyVideoOptions toArray:arguments];
         [self addArguments:f.encoderEarlyAudioOptions toArray:arguments];
         [self addArguments:f.encoderEarlyOtherOptions toArray:arguments];
-		if ([f.comSkip boolValue] && _skipCommercials && f.edlFlag.length) {
+		if ([f.comSkip boolValue] && _skipCommercials && [self isArgument:f.edlFlag ]) {
             [self addArgument:f.edlFlag toArray:arguments];
             [self addArgument:self.commercialFilePath toArray:arguments];
 		}
@@ -1179,7 +1200,6 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (!encoderPath) return nil;
     [encodeTask setLaunchPath:encoderPath];
     encodeTask.requiresOutputPipe = NO;
-    NSArray * encoderArgs = nil;
 
     encodeTask.completionHandler = ^BOOL(){
         if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
@@ -1213,11 +1233,13 @@ NSString * fourChar(long n, BOOL allowZero) {
     };
 
     encodeTask.terminationHandler = nil;
-    
-    encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:self.encodeFilePath];
+    NSArray * encoderArgs = nil;
 
-    if (!self.shouldSimulEncode)  {
+    if (self.shouldSimulEncode)  {
+        encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:self.encodeFilePath];
+    } else {
         if (self.encodeFormat.canSimulEncode) {  //Need to setup up the startup for sequential processing to use the writeData progress tracking
+            encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:self.encodeFilePath];
             encodeTask.requiresInputPipe = YES;
             __block NSPipe *encodePipe = [NSPipe new];
             [encodeTask setStandardInput:encodePipe];

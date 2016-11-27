@@ -14,6 +14,8 @@
 
 @property (nonatomic, readonly) BOOL showingProgramsColumn;
 @property (nonatomic, strong) NSTimer *updateTimer;
+@property (nonatomic, strong) NSArray <MTDownload *> * lastCopy;
+
 @end
 
 @implementation MTDownloadTableView
@@ -528,6 +530,7 @@ __DDLOGHERE__
     // Drag and drop support
 	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
  	NSArray	*selectedObjects = [self.sortedDownloads objectsAtIndexes:rowIndexes ];
+    self.lastCopy = selectedObjects;
 	[pboard clearContents];
 	[pboard writeObjects:selectedObjects];
 	DDLogVerbose (@"DraggingObjects: %@",selectedObjects);
@@ -734,16 +737,29 @@ __DDLOGHERE__
     }
     NSArray	*classes = @[[MTDownload class]];
     NSDictionary *options = [NSDictionary dictionary];
-    NSArray	*draggedDLs = [pboard readObjectsForClasses:classes options:options];
+    NSArray	<MTDownload *> *draggedDLs = [pboard readObjectsForClasses:classes options:options];
     DDLogDetail(@"Accepting drop: %@", draggedDLs);
     if (draggedDLs.count == 0) return NO;
     //dragged downloads are proxies, so we need to find the real download objects
+    //we use lastCopy as a cheat to better handle "similar" downloads
     NSMutableArray * realDLs = [NSMutableArray arrayWithCapacity:draggedDLs.count ];
     NSMutableArray * completedDownloadsBeingMoved =[NSMutableArray array];
-    for (MTDownload * download in draggedDLs) {
-        MTDownload * realDownload= [tiVoManager findRealDownload:download];
-        if (realDownload) [realDLs addObject:realDownload];
-        if (realDownload.isDone) [completedDownloadsBeingMoved addObject:realDownload];
+    BOOL useLastCopy = draggedDLs.count == self.lastCopy.count;
+
+    for (NSUInteger i= 0; i<draggedDLs.count; i++) {
+        MTDownload * draggedDownload = draggedDLs[i];
+        MTDownload * realDownload = nil;
+        if (useLastCopy && [self.lastCopy[i] isSimilarTo:draggedDownload]) {
+            realDownload = self.lastCopy[i];
+        } else {
+            realDownload = [tiVoManager findRealDownload:draggedDownload];
+        }
+        if (realDownload) {
+            [realDLs addObject:realDownload];
+            if (realDownload.isDone) {
+                [completedDownloadsBeingMoved addObject:realDownload];
+            }
+        }
     }
 
     //Now look for reschedulings. Group could either be moving up over an active show, or moving an active show down...
@@ -845,10 +861,11 @@ __DDLOGHERE__
 
 -(IBAction)copy: (id) sender {
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    NSArray *selectedShows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
+    NSArray *selectedShows = [[NSArray alloc] initWithArray: [self.sortedDownloads objectsAtIndexes:selectedRowIndexes] copyItems:YES];
+
     if (selectedShows.count > 0) {
         MTDownload * firstDownload = selectedShows[0];
-
+        self.lastCopy = selectedShows;
         NSPasteboard * pboard = [NSPasteboard generalPasteboard];
         [pboard declareTypes:[firstDownload writableTypesForPasteboard:pboard] owner:nil];
         [pboard writeObjects:selectedShows];
