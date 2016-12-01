@@ -1597,7 +1597,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandbrakeCLI</string>
+			<string>HandBrakeCLI</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Super HQ 1080p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1635,7 +1635,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandbrakeCLI</string>
+			<string>HandBrakeCLI</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Android 720p30&quot;</string>
 			<key>filenameExtension</key>
@@ -1673,7 +1673,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandbrakeCLI</string>
+			<string>HandBrakeCLI</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Apple 1080p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1711,7 +1711,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandbrakeCLI</string>
+			<string>HandBrakeCLI</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Apple 720p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1749,7 +1749,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandbrakeCLI</string>
+			<string>HandBrakeCLI</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Apple 540p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1787,7 +1787,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandbrakeCLI</string>
+			<string>HandBrakeCLI</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Apple 240p30&quot;</string>
 			<key>filenameExtension</key>
@@ -1825,7 +1825,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandbrakeCLI</string>
+			<string>HandBrakeCLI</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Roku 1080p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1863,7 +1863,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandbrakeCLI</string>
+			<string>HandBrakeCLI</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Xbox 1080p30 Surround&quot;</string>
 			<key>filenameExtension</key>

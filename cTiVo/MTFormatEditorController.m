@@ -77,7 +77,7 @@
    if (self.currentFormat.isFactoryFormat.boolValue) {
         //if this is afactory one, create a user one to allow them to use it.
         [self newFormat:self];
-        self.currentFormat.encoderUsed=@"HandbrakeCLI";
+        self.currentFormat.encoderUsed=@"HandBrakeCLI";
         [self updateForFormatChange];
     }
     
@@ -112,7 +112,7 @@
 
     handbrake.standardError = pipe;
     handbrake.standardOutput = pipe;
-    [handbrake setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"handbrakeCLI" ]];
+    [handbrake setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"HandBrakeCLI" ]];
     [handbrake setArguments: @[ @"--preset-import-gui", @"--preset-list"]];
     [handbrake launch];
 
@@ -325,7 +325,7 @@
     CGRect execFrame = self.executableTextField.frame;
     CGRect popupFrame = self.presetPopup.frame;
     if ( [[self.currentFormat.encoderUsed lowercaseString] hasPrefix:@"handbrake"]) {
-        self.currentFormat.encoderUsed = @"HandbrakeCLI";
+        self.currentFormat.encoderUsed = @"HandBrakeCLI";
         self.executableTextField.stringValue = self.currentFormat.encoderUsed;
         //make room for preset and show it
         self.presetPopup.hidden = NO;

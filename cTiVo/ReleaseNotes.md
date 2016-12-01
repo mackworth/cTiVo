@@ -71,7 +71,7 @@ The `mencoder` program used for many of the original Formats (e.g. iPhone, Apple
   *  Remove old tivodecode, as new seems to be working well
   *  Commercialing audio-only failure will also mark channel as TS now
   *  Hidden formats used in downloads will still be shown (e.g. TestPS)
-  *  Assistance in creating Handbrake preset-based Formats
+  *  Assistance in creating HandBrake preset-based Formats
   *  Editing channel names without continous resorting
   *  Warn TivoHD users that they can't do Transport Streams
 
@@ -192,7 +192,7 @@ The .tivo files are encrypted with your Media Access Key (MAK), which is why cTi
 The problem is that as we said, in testing, a few MPEG2 files that transmitted via Transport Stream are trashed when converted with either program, and it's unclear at this point whether this is due to a problem with the decryption software or if the original file is broken. For better or worse, the same file sent over Program Stream works fine, hence the continued use when possible.
 
 ## Step 3: Encoding the MP4 (Formats)
-As said above, `mencoder` doesn't seem to work well with any of the TS files. `Handbrake` seems to be ok. I'm now bundling `ffmpeg` as well, and as mentioned above, will move to it as the default shortly.
+As said above, `mencoder` doesn't seem to work well with any of the TS files. `HandBrake` seems to be ok. I'm now bundling `ffmpeg` as well, and as mentioned above, will move to it as the default shortly.
 
 `Decrypted TiVo Show` just decrypts the .tivo file into an .MPG file, doing as few changes as possible. As we move to H.264 streams, theoretically, this should mean that we don't need to re-encode them, which is the longest (and most CPU-intensive) part of the downloading process. We have provided an `MP4 FFMpeg`  Format, which simply copies the audio and video streams into an MP4 format with very little overhead, operating at the full download speed. `MP4 FFMpeg` will be a better choice for most people to just copy the file over without re-encoding. Few applications expect to see H.264 streams inside an MPG container, and the MP4 container also lets us add the other metadata, commercial marking and subtitle information.
 
