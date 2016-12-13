@@ -6,7 +6,7 @@ Note: this page assumes you are familiar with TiVo and how to set up software. I
 cTiVo is intended to be very easy to get going, but it has a lot of configuration options if you choose to take advantage of them.  
 
 1. If you haven't already done so, [enable video downloads](https://www3.tivo.com/tivo-mma/dvrpref.do) on your TiVo.
-1. [Download](http://cTiVo.googlecode.com/download) the cTiVo software and run it.
+1. [Download](../../../releases) the cTiVo software and run it.
 1. cTiVo will find any TiVos on your local network,
 1. cTiVo will ask you for their password, known as a [Media Access Key or MAK](https://www3.tivo.com/tivo-mma/showmakey.do).
 1. cTiVo will then list all the recorded shows available on your TiVo's.
@@ -20,8 +20,8 @@ cTiVo is intended to be very easy to get going, but it has a lot of configuratio
 ## Further reading
 
 If you would like more information, check out the other documents:
-- [Installation](installation.md)
-- [Configuration](http://configuration.md)
+- [Installation](Installation.md)
+- [Configuration](Configuration.md)
 - [Subscriptions](Subscriptions.md)
 - [Video Formats](Video-Formats.md)
 - [Advanced Topics](Advanced-Topics.md)

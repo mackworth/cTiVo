@@ -3,12 +3,12 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 2.4.3; Metadata improvements</description>
+        <description>Version 2.4.4; Metadata improvements</description>
         <language>en</language>
         <item>
-            <title>Version 2.4.3; Metadata improvements</title>
+            <title>Version 2.4.4; Metadata improvements</title>
             <description><![CDATA[
-                <h2>Version 2.4.3</h2>
+                <h2>Version 2.4.4</h2>
 
                 <h3>Metadata Improvements:</h3>
 
@@ -38,6 +38,7 @@
                 <li>Prevent crash if deleting last TiVo in Manual TiVo Editor</li>
                 <li>Avoid duplicate listings from "Streaming Movies" bug in TiVo</li>
                 <li>Realtime updating of "Last Recorded" column in Subscriptions</li>
+                <li>Fixed crash for older machines in 2.4.3</li>
                 </ul>
 
                 <h3>Upgrade to Crashlytics 3.3.4 and Sparkle 1.11</h3>
@@ -132,13 +133,13 @@
                 See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
             ]]>
             </description>
-            <pubDate>Tues., November 3, 2015 14:00:00 -0800</pubDate>
+            <pubDate>Wed., November 4, 2015 20:00:00 -0800</pubDate>
             <!-- <sparkle:releaseNotesLink>http://andymatuschak.org/files/notes.html</sparkle:releaseNotesLink> -->
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.4.3/cTiVo.zip"
-            sparkle:version="564" sparkle:shortVersionString="2.4.3"
-            length="19160417"
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.4.4/cTiVo.zip"
+            sparkle:version="564" sparkle:shortVersionString="2.4.4"
+            length="19163798"
             type="application/octet-stream"
-            sparkle:dsaSignature="MC0CFAJYZZ8gXzcT03RzhQo8MxJU0xkrAhUAiYvS4lktlbjXGO5YLwumO8H9Avo=" />
+            sparkle:dsaSignature="MCwCFDrtmNcphHuCQj1+z1+t1OGyPIrKAhRaXPaW4htgi0x7f4kGnMza04881g==" />
         </item>
     </channel>
 </rss>
