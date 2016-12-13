@@ -174,9 +174,9 @@ __DDLOGHERE__
         [self reportOldProcessor];
     }
     if (logString.length > 0) {
-        DDLogMajor(@"%@File for task %@: %@",type, _taskName,  [logString maskMediaKeys]);
+        DDLogReport(@"%@File for task %@: %@",type, _taskName,  [logString maskMediaKeys]);
     } else {
-        DDLogVerbose(@"%@File for task %@ was empty", type, _taskName);
+        DDLogDetail(@"%@File for task %@ was empty", type, _taskName);
     }
 }
 
@@ -358,9 +358,17 @@ __DDLOGHERE__
 -(void)setLaunchPath:(NSString *)path
 {
     if (path.length > 0) {
-        [_task setLaunchPath:path];
+        if ([[NSFileManager defaultManager]  fileExistsAtPath:path]) {
+            if ([[NSFileManager defaultManager]  isExecutableFileAtPath:path]) {
+                [_task setLaunchPath:path];
+            } else {
+                DDLogReport(@"Error: %@ file at path %@ not marked as executable", self.taskName, path);
+            }
+        } else {
+            DDLogReport(@"Error: no %@ file at %@", self.taskName, path);
+        }
     } else {
-        DDLogReport(@"Error: executable path for %@ not found", self.taskName);
+        DDLogReport(@"Error: no executable path for %@ ", self.taskName);
     }
 }
 

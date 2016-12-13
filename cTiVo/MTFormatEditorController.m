@@ -312,16 +312,16 @@
 -(void)checkValidExecutable
 {
 	NSString *validPath = [_currentFormat pathForExecutable];
-	BOOL isValid = NO;
-	self.validExecutableString = @"No valid executable found.";
-	NSColor *isValidColor = [NSColor redColor];
 	if (validPath) {
-		isValidColor = [NSColor blackColor];
-		isValid = YES;
+        self.validExecutableColor = [NSColor blackColor];
 		self.validExecutableString = [NSString stringWithFormat:@"Found at %@",validPath];
-	}
-	self.validExecutableColor = isValidColor;
-	self.validExecutable = [NSNumber numberWithBool:isValid];
+        self.validExecutable = @YES;
+    } else {
+        self.validExecutableColor = [NSColor redColor];
+        self.validExecutableString = @"File not found or not executable.";
+        self.validExecutable = @NO;
+
+    }
     CGRect execFrame = self.executableTextField.frame;
     CGRect popupFrame = self.presetPopup.frame;
     if ( [[self.currentFormat.encoderUsed lowercaseString] hasPrefix:@"handbrake"]) {

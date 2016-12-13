@@ -1,3 +1,80 @@
+# Release 2.5
+2.5 is a major upgrade to cTiVo. There's been extensive beta testing, so it is even more reliable than 2.4.4, but please let us know if you have any problems at all in the [Issues area](https://github.com/dscottbuch/cTiVo/issues).
+
+## MPEG-4 Transition
+Comcast and other cable companies are migrating from MPEG-2 compressed streams to MPEG-4 (aka H.264). They do this to reduce the size and improve the quality of their signals. Comcast seem to be rolling this out slowly, one market at a time and changing over one channel at a time. Although this transition requires many changes to cTiVo, they are transparent in normal operation, except that older Formats may be incompatible. With this release, we've provided a whole new set of Formats, and taken the opportunity to make the Format selection process easier. 
+
+## Major Changes in 2.5
+  * H.264 compatibility (new format for cable companies)
+  * Autodetects H.264 transition by channel
+  * Redesigned Formats (simpler, more compatible)
+  * New Channels preference screen
+  * Better handling for AC3 5.1 audio
+  * Many bug fixes
+
+##  New Formats
+*  New ffmpeg Formats
+<table>
+<tr><td>Higher Quality</td><td>1080p</tr>       
+<tr><td>Default</td><td>iPhone/iPad</tr> 
+<tr><td>Faster</td><td>Smallest </tr> 
+<tr><td>Standard Def</td><td></td></tr>    
+</table>    
+*  New HandBrake Formats (Old ones deprecated)
+<table>
+<tr><td>HB SuperHQ</td><td>HB 1080p</tr>       
+<tr><td>HB Default</td><td>HB Android</tr> 
+<tr><td>HB Tiny</td><td>HB Roku </tr> 
+<tr><td>HB XBox</td><td>HB Std Def</td></tr>    
+</table> 
+*  All mencoder-based Formats are now marked as "Not Recommended"; warned if used
+*  Format Help command in Format menus to guide usage
+
+## Other significant changes versus 2.4.4
+1) Updated versions of all binaries. In particular, comskip should perform much better, and HandBrake has a large number of new presets
+2) `ffmpeg` encoder included
+3) New tivodecode-ng, as well as option for Java-based TiVoLibre
+4) New Filename template keywords: Guests, StartTime, Format, and ExtraEpisode
+5) Better Plex folder naming
+6) Caption and commercial failures  no longer fail download, just reports failure but continues.
+7) New "OnDisk" column in tables to sort by whether downloaded file already exists on disk
+8) New "H.264" column in tables indicates whether a channel has migrated to H.264 yet
+9) New Edit Channels preferenc page for H.264 status
+10) Channels page can also specify "commercial-free" channels, such as PBS, to avoid running comskip
+11) New "Waiting" status for the time between downloads required to allow TiVo to rest
+12) Anonymously reports via Crashlytics which Formats are used, to inform future development
+13) Changes needed for Rovi data transition
+14) Lower CPU priority of background tasks to avoid swamping user interface
+15) New ffmpeg script, which allows use of comskip and 5.1/AC3 audio with ffmpeg (contributed by Ryan Child)
+16) Allows "duplicate" downloads: more than one Download accessing the same show
+* Use at your own risk for now, let us know of any problems.
+* Requires `defaults write AllowDups YES` in Terminal
+17) Assistance in creating Handbrake preset-based Formats, including custom presets
+18) Misc fixes:
+*  Better handling if tmp directory is not available
+*  Fix for Addressbook access in Sierra
+*  Detect and warn TivoHD users that they can't do Transport Streams
+*  Detect and warn when antivirus may be blocking server
+*  Many crashing bug fixes
+
+## Older OS and processors
+If you're still using 10.7 or 10.8, you'll need to use the cTiVo-10.7 file below; everyone else should use the cTiVo file. In addition, if you have an older processor, you may get an incompatibility warning. Due to the included binaries from other open-source efforts, it's getting much harder to support these older systems, but given the H.264 conversion, We wanted to provide at least one more release. But be aware that after this release, we may not be able to keep it up to date. It has the older binaries (such as mencoder, ffmpeg, ccextractor etc) but otherwise should run fine. The 10.9 version, on the other hand, should be both faster (especially comskip) and properly handle more video files.
+
+## Older TiVos
+If you have a TiVo Series3 or older, then you may have received an offer to upgrade as it won't be compatible at all with the H.264 transition. In adddition, although TiVo HDs do work with the MPEG-4 signals, they unfortunately will not properly transfer the files to the Mac, so they will become unusable with cTiVo for channels migrated to MP4.
+
+
+
+<!---
+ NOT USED IN 2.5:
+ ## Transferring the file from your TiVo
+ As a digression, there are some very confusing terms here. Video people talk about "Streams", the types of content inside a file or transmission such as a MPEG-2  video stream or an 5.1-channel AC3 audio stream, which are then stored in "Containers", a standardized file format, such as .AVI or .MPG .  Particularly confusing is that the MPEG-4 standard defines both a compression algorithm for a stream (MPEG-4, aka H.264) and a container file format (.MP4). If you'd like to see what's inside a file, I've also posted a new version of the open-source MediaInfo program, which shows you the different streams and their formats for all known container types.
+ 
+ This H.264 change causes TiVo to move from Program Stream (PS) to Transport Stream (TS) transmission. After a channel converts to H.264, then accessing a show via PS no longer works. (Apparently just to be amusing, the TiVo still does send over a file on PS, but that file now only contains an audio channel.) The good news is that TS is significantly smaller than PS.  Generally, TS does work with MPEG-2 video as well, so one could switch over completely, but there may sometimes be decryption problems. Thus, cTiVo still uses Program Streams by default, but will automatically detect when a channel has migrated to H.264 and switch to use Transport Streams on that channel from then on.
+ 
+ While this will happen automatically, there is a new Preference panel, Channels, which tells you the status of each channel. This panel will also let you ask cTiVo to test every channel that you currently have a recording for (including suggestions). These tests will run quite quickly as it only downloads enough of each show to test it. Thus, you should be able to test all your channels within a couple hours.
+
+
 # Release 2.5; Beta 3
 
 Cable companies are migrating to H.264 video streams, requiring many changes to cTiVo. With this release, most of these changes should now be transparent in operation ... except that many of cTiVo's old Formats are incompatible. With this release, we've provided a whole new set of Formats, and taken the opportunity to make the Format selection process easier. 
@@ -243,7 +320,8 @@ Fixes:
 * Don’t crash if iTunes is Frozen
 * Fixes Play-Video crash in pre-Maverick systems
 
-<!---
+
+
 ====================
 RELEASE 2.5 ALPHA 10
 ((Release 10 should fix new Channel test process problem in v9

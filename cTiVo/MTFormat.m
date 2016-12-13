@@ -169,17 +169,18 @@ __DDLOGHERE__
 			for (NSString *searchPath in searchPaths) {
 				NSString * filePath = [[NSString stringWithFormat:searchPath,self.encoderUsed] stringByResolvingSymlinksInPath];
 				if ([fm fileExistsAtPath:filePath]){ //Its there now check that its executable
-					int permissions = [[fm attributesOfItemAtPath:filePath error:nil][NSFilePosixPermissions] shortValue];
-					if (permissions && 01) { //We have an executable file
-						DDLogVerbose(@"Found %@ in %@ (format %@)", self.encoderUsed, searchPath, self);
-						validPath = filePath;
-						break;
-					}
+                    DDLogVerbose(@"Found %@ in %@ (format %@)", self.encoderUsed, searchPath, self.name);
+                    validPath = filePath;
+                    break;
 				}
 			}
 		}
-        if (!validPath) {
-            DDLogMajor(@"For format %@, couldn't find %@ in %@ ", self, self.encoderUsed, searchPaths);
+        if (validPath && ![fm isExecutableFileAtPath:validPath]) {
+            DDLogReport(@"For %@ Format, %@ is not marked as executable ", self.name, validPath);
+            self.isHidden = @YES;
+            validPath = nil;
+        } else if (!validPath) {
+            DDLogMajor(@"For %@ Format, couldn't find %@ in %@ ", self.name, self.encoderUsed, searchPaths);
             self.isHidden = @YES;
         }
 		_pathForExecutable = validPath;

@@ -2074,10 +2074,12 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
         DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], self.show.showTitle);
 #ifndef DEBUG
+        NSInteger retries = ([[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries] - self.numRetriesRemaining) ;
+        NSString * retryString = [NSString stringWithFormat:@"%d",(int) retries];
         [Answers logCustomEventWithName:@"Success"
                        customAttributes:@{@"Format" : self.encodeFormat.name,
-                                          @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]
-                                          }];
+                                          @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
+                                          @"Retries" : retryString }];
 #endif
         [tiVoManager  notifyForDownload: self withTitle:@"TiVo show transferred." subTitle:nil forNotification:kMTGrowlEndDownload];
     }
