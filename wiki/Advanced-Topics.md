@@ -1,9 +1,7 @@
 #Advanced Topics
 ##Configuration options designed for advanced users
 
-This document is to cover some interesting topics that are intended for advanced users only.
-
-Sections:  
+This document is to cover some interesting topics, but really for advanced users only  
 
 - [Artwork](#artwork)
 - [Manual TiVos](#manual-tivos)
@@ -52,20 +50,18 @@ Interestingly, you may also be able to use cTiVo remotely, although this can tak
 
 # Edit Channels
 
-With the transition to H.264 by many cable companies, TiVo requires the use of Transport Stream to download an H.264 video. While Transport Stream can also be used for MPEG2 videos, this seems to be less reliable. Thus cTiVo tracks which channels seem to require H.264. While this process is automatic, this screen allows you to see what's happening and control it if desired. First, you can simply turn on Transport Stream always with the control at the top. These channels will get filled in as you download shows in Progressive Stream (PS) mode, depending on whether or we see the characteristic failure of no video, just audio in the downloaded file.
+With the transition to H.264 by many cable companies, TiVo requires the use of Transport Stream to download an H.264 video. While Transport Stream can also be used for MPEG2 videos, this seems to be less reliable. Thus cTiVo tracks which channels seem to require H.264. While this process is automatic, this screen allows you to see what's happening and control it if desired.  These channels will get filled in as you download shows in Progressive Stream (PS) mode, depending on whether or we see the characteristic failure of no video, just audio in the downloaded file.
+![](Images/cTiVoChannelsScreen.png)
 
-- The H.264 column indicates whether we've seen a channel use H.264 or not. 
-- The Use TS lets you control whether to use TS or not for a given channel. √ means "use TS". - means "cTiVo chooses" based on whether we have seen H.264 or not, and blank means "don't use TS".
-- Has Commercials allows you to specify that a given channel has no commercials, so don't bother doing comskip on it (e.g. PBS)
+First, you can simply turn on Transport Stream for all downloads with the control at the top.
+
+- **Has Commercials** allows you to specify that a given channel has no commercials, so don't bother doing comskip on it (e.g. PBS)
+- **Use TS** lets you control whether to use TS or not for a given channel. √ means "use TS". - means "cTiVo chooses" based on whether we have seen H.264 or not, and blank means "don't use TS".
+- **H.264** indicates whether we've seen a channel use H.264 or not. 
 
 You can manually remove channels from this list by selecting them and hitting the Minus sign at the bottom, or add one by hitting the Plus sign.  
 
 If you'd like us to check all your channels, then click on Test All Channels. This will add a show from every channel your TiVo has recorded (including Suggestions)with a special TestPS Format. This Format only downloads a short segment from each show to quickly test every channel. You can then remove all such Tests with the final button.
-
-![](Images/cTiVosFormatsScreen.png)
-
-- Start by selecting the closest format from the Formats pulldown.
-- If it's a built-in format (or you wish to have two versions of your own format), Duplicate it to create a new one that you will modify with your new parameters. You cannot edit a built-in format without duplicating it. You could create one from scratch with New, but it's probably easier to modify an existing one in most cases. Obviously, if you no longer want a user-defined format, you can Delete it here as well.
 
 # Edit Formats
 
@@ -139,7 +135,7 @@ If you are debugging a format, you can use the advance preferences to increase t
 
 There are a few preferences that are intended for debugging purposes or for very advanced users only. These are hidden, but can be activated by holding down the Option key while pulling down the cTiVo menu and selecting Adv Preferences (alternatively Option-Cmd-Comma). 
 
-![](Images/cTiVoAdvancedPreferencesScreen.png)
+![](Images/cTivoAdvancedPreferencesScreen.png)
 
 ### Debug Levels
 
