@@ -5,12 +5,12 @@
 Comcast and other cable companies are migrating from MPEG-2 compressed streams to MPEG-4 (aka H.264). They do this to reduce the size and improve the quality of their signals. Comcast seem to be rolling this out slowly, one market at a time and changing over one channel at a time. Although this transition requires many changes to cTiVo, they are transparent in normal operation, except that older Formats may be incompatible. With this release, we've provided a whole new set of Formats, and taken the opportunity to make the Format selection process easier. 
 
 ## Major Changes in 2.5
-  * H.264 compatibility (new format for cable companies)
-  * Autodetects H.264 transition by channel
-  * Redesigned Formats (simpler, more compatible)
-  * New Channels preference screen
-  * Better handling for AC3 5.1 audio
-  * Many bug fixes
+* H.264 compatibility (new format for cable companies)
+* Autodetects H.264 transition by channel
+* Redesigned Formats (simpler, more compatible)
+* New Channels preference screen
+* Better handling for AC3 5.1 audio
+* Many bug fixes
 
 ##  New Formats
 *  New ffmpeg Formats
@@ -36,7 +36,7 @@ Comcast and other cable companies are migrating from MPEG-2 compressed streams t
 3) New tivodecode-ng, as well as option for Java-based TiVoLibre
 4) New Filename template keywords: Guests, StartTime, Format, and ExtraEpisode
 5) Better Plex folder naming
-6) Caption and commercial failures  no longer fail download, just reports failure but continues.
+6) Caption and commercial failures  no longer fail download, just reports failure but continues
 7) New "OnDisk" column in tables to sort by whether downloaded file already exists on disk
 8) New "H.264" column in tables indicates whether a channel has migrated to H.264 yet
 9) New Edit Channels preferenc page for H.264 status
@@ -46,10 +46,8 @@ Comcast and other cable companies are migrating from MPEG-2 compressed streams t
 13) Changes needed for Rovi data transition
 14) Lower CPU priority of background tasks to avoid swamping user interface
 15) New ffmpeg script, which allows use of comskip and 5.1/AC3 audio with ffmpeg (contributed by Ryan Child)
-16) Allows "duplicate" downloads: more than one Download accessing the same show
-* Use at your own risk for now, let us know of any problems.
-* Requires `defaults write AllowDups YES` in Terminal
-17) Assistance in creating Handbrake preset-based Formats, including custom presets
+16) Assistance in creating Handbrake preset-based Formats, including custom presets
+17) Hidden feature: Allows "duplicate" downloads: more than one Download accessing the same show ( Requires `defaults write AllowDups YES` in Terminal. Use at your own risk for now, let us know of any problems.
 18) Misc fixes:
 *  Better handling if tmp directory is not available
 *  Fix for Addressbook access in Sierra

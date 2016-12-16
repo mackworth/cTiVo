@@ -1,4 +1,4 @@
-**cTiVo** is a free Mac application to download shows from your TiVo (Bolt, Roamio, Premiere, HD, S3, or S2 devices) and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, taking full advantage of the Mac OS, but very flexible. 
+**cTiVo** is a free Mac application to download shows from your TiVo and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, taking full advantage of the MacOS, but very flexible. 
 
 cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
 
@@ -43,22 +43,19 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
   * Show/Hide copy-protected shows and TiVo suggestions.
   * Growl or Apple notifications when downloads complete.
 
-## 2.4 features
+## 2.5.0 features
 
-*   MP4 metadata integration with PyTiVo (no TXT files needed)
-*   Performance monitoring.
-*   Simplified top bar of window
-*   New Drag/Drop options
-*   New Status column for Download table DL Stage to allow sorting by stage of downloads
-*   Added access to TheMovieDB posters for movies
-*   Option to choose to “trust” TVDB’s episode numbers over TiVo's
-*   Better background transfer management and Rate limiting for TVDB
-*   Show Logs command; many other logging improvements
+* H.264 compatibility (new format for cable companies)
+* Autodetects H.264 transition by channel
+* Redesigned Formats (simpler, more compatible)
+* New Channels preference screen
+* Better handling for AC3 5.1 audio
+* Many bug fixes
 
 ##To install:
 
 Download the [cTiVo application](https://github.com/dscottbuch/cTiVo/releases), and drag it to your Applications Folder.
 
-cTiVo is fully compatible with OS X El Capitan (10.11) back through Lion (10.7); not compatible with Snow Leopard or earlier.
+cTiVo is fully compatible with OS X Sierra (10.12) back through Mavericks (10.9); not compatible with Snow Leopard (10.6) or earlier. In addition, we provide a special version (cTiVo-10.7) for use with
 
 *cTiVo* is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/dscottbuch/cTiVo/releases).

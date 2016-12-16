@@ -70,6 +70,10 @@ By right-clicking onto the column headers of the three tables, you can hide or s
 - **Genre**: which genre does TiVo believe the show belongs in.
 - **TiVo ID**: a unique number for each show that identifies it to the TiVo.
 - **Status**: The TiVo icons that indicate how soon a show will be deleted. Will also show the TiVo logo for suggested shows, a red C for copy-protected, a blue ? when cTiVo doesn't know the status yet, or a red X when the show has been deleted from the TiVo.
+- **On Disk**: Whether this show is already downloaded to this Mac's disk (and is still there). Right-click to Reveal in Finder or Play the video. Same as bold face for row.
+- **Age Rating**: TiVo's' age rating for this show.
+- **Star Rating**: TiVo's' star rating for this show.
+- **H.264**: Whether cTiVo believes this channel has migrated to H.264.
 
 ## Download Table Columns
 
@@ -82,6 +86,8 @@ By right-clicking onto the column headers of the three tables, you can hide or s
 - **Skip**: Will this show have its commercials removed?
 - **Subtitles**: Should cTiVo generate subtitles for this show?
 - **pyTiVo**: Will this show have its metadata exported for use by pyTiVo?
+- **DL Stage**: What stage in download cycle have we reached? BTW, Waiting is due to need to delay between downloads to avoid stressing TiVo's download processing.'
+ 
 
 ## Subscription Table Columns
 

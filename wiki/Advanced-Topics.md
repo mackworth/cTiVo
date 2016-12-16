@@ -7,7 +7,8 @@ Sections:
 
 - [Artwork](#artwork)
 - [Manual TiVos](#manual-tivos)
-- [Edit Formats](#edit=formats)
+- [Edit Channels](#edit-channels)
+- [Edit Formats](#edit-formats)
 - [Advanced Settings](#advanced-settings)
 - [theTVDB](#thetvdb)
 - [Advanced Subscriptions ](#advanced-subscriptions)
@@ -49,6 +50,23 @@ Normally, cTiVo discovers TiVos on the local network automatically using a netwo
 
 Interestingly, you may also be able to use cTiVo remotely, although this can take considerable network ability and patience.  Patience both in the sense of trial and error as well as in the upload bandwidth available on your connection to the Internet. You will need to set your router to pass external accesses to your main IP address through to your TiVo. As you may be doing this for other devices as well, we also let you adjust the ports cTiVo uses to match whatever port mapping you're doing in your router.  If you didn't understand this paragraph so far, then you probably shouldn't be doing this. Note that whether this violates your terms of service with your cable company, TiVo Inc, your internet provider, any random film studio in Hollywood, or anybody else is entirely up to you. 
 
+# Edit Channels
+
+With the transition to H.264 by many cable companies, TiVo requires the use of Transport Stream to download an H.264 video. While Transport Stream can also be used for MPEG2 videos, this seems to be less reliable. Thus cTiVo tracks which channels seem to require H.264. While this process is automatic, this screen allows you to see what's happening and control it if desired. First, you can simply turn on Transport Stream always with the control at the top. These channels will get filled in as you download shows in Progressive Stream (PS) mode, depending on whether or we see the characteristic failure of no video, just audio in the downloaded file.
+
+- The H.264 column indicates whether we've seen a channel use H.264 or not. 
+- The Use TS lets you control whether to use TS or not for a given channel. √ means "use TS". - means "cTiVo chooses" based on whether we have seen H.264 or not, and blank means "don't use TS".
+- Has Commercials allows you to specify that a given channel has no commercials, so don't bother doing comskip on it (e.g. PBS)
+
+You can manually remove channels from this list by selecting them and hitting the Minus sign at the bottom, or add one by hitting the Plus sign.  
+
+If you'd like us to check all your channels, then click on Test All Channels. This will add a show from every channel your TiVo has recorded (including Suggestions)with a special TestPS Format. This Format only downloads a short segment from each show to quickly test every channel. You can then remove all such Tests with the final button.
+
+![](Images/cTiVosFormatsScreen.png)
+
+- Start by selecting the closest format from the Formats pulldown.
+- If it's a built-in format (or you wish to have two versions of your own format), Duplicate it to create a new one that you will modify with your new parameters. You cannot edit a built-in format without duplicating it. You could create one from scratch with New, but it's probably easier to modify an existing one in most cases. Obviously, if you no longer want a user-defined format, you can Delete it here as well.
+
 # Edit Formats
 
 If you'd like to configure a different video encoder, or provide different parameters to the built-in ones than we have configured, then you can use the Edit>Edit Formats menu item. This gives you a screen where you can configure a new encoder format, or use an existing format as a template. 
@@ -57,7 +75,8 @@ If you'd like to configure a different video encoder, or provide different param
 
 - Start by selecting the closest format from the Formats pulldown.
 - If it's a built-in format (or you wish to have two versions of your own format), Duplicate it to create a new one that you will modify with your new parameters. You cannot edit a built-in format without duplicating it. You could create one from scratch with New, but it's probably easier to modify an existing one in most cases. Obviously, if you no longer want a user-defined format, you can Delete it here as well.
-- All formats can either be hidden or visible in the main user interface. So if you don't have any use for many of the built-in formats, just mark them as hidden.
+- There is a special case for Handbrake as they have so many built-in presets and you can define your own as well in their GUI (as of 12/15, you have to use a recent version, called a "nightly"). Just select any built-in Handbrake Format and pull down the preset menu on the right. This will create a new User Format with that preset, which you can then modify as you see fit.
+- All formats can either be hidden or visible in the main user interface. So if you don't have any use for many of the built-in formats, just mark them as Hide in User Interface. Similarly we hide many that are not commonly used, just uncheck that box.
 - Below the line are all the parameters available for editing. Again, built-in formats cannot be edited without Duplicating, so their parameters will be greyed out.
 - **Name of the Format** as displayed in the menu. This must be unique versus all other built-in or user formats.
 - **File Extension for Encoded File**. cTiVo will use this to generate the filenames. Some encoders ignore an incorrect extension, and put the correct one in, which will cause problems, so be sure this is correct.
@@ -89,6 +108,7 @@ Enter either the name or the full path to the encoder to be used. The paths sear
 If the encoder accepts - (dash) for standard input, you should check 'Can run download and encode at the same time' to allow simultaneous encoding. The encoder must be marked as executable. mencoder & HandBrakeCLI are included in the cTiVo bundle. 
 
 Your encoder can be a script file (with standard first line of #! to specify script type, such as #/usr/bin/sh for shell script or #!/usr/bin/osascript for Applescript), provided it accepts the above arguments and is marked as executable. Be sure to test script-based encoders with shows having special characters like single or double quotes or Unicode characters in their names.
+
 ## Arguments
 The command line passed from the options are:
 ````
@@ -147,9 +167,14 @@ How often (in minutes) should cTiVo check the Now Playing list of your TiVos
 
 ### Opt-out of Crashlytics reporting
 
-If cTiVo crashes, it will report where in the program that occurred on the next startup, unless this option is checked.
+If cTiVo crashes, it will report where in the program that occurred on the next startup, unless this option is checked. In addition, cTiVo anonymously reports success/failure rates for different Formats.
+
+### Decode With:
+
+The .tivo files are encrypted with your Media Access Key (MAK), which is why cTiVo needs that key to download your shows. The old program "tivodecode" doesn't handle Transport Stream at all. Two new programs, `tivodecode-ng` and `TivoLibre`, do handle that as well as the H.264 compression format. So there is now a pull-down in Advance Preferences to choose which decryption to use. There is an alternative, `TiVoLibre`, which may handle more cases, but requires Java runtime to be installed on your Mac, which Apple no longer recommends.  If you don't have Java, TivoLibre will be disabled.
 
 ### Temporary Files Directory
+
 While the video files are stored in the download directory, during processing many other files are stored in a working directory. By default this is in /tmp/ctivo, and is emptied as each transaction is finished and when cTiVo starts up. You can change this directory here.
 
 ### View TVDB Statistics
@@ -159,9 +184,6 @@ Displays the results of theTVDB lookups since cTiVo has started, or since an Emp
 ### Empty Caches
 
 Empty Caches erases the caches stored in the program and reloads the information contained. The two caches are theTVDB information and the detailed XML loaded from the TiVo for each show. Be warned that if you have hundreds of shows on your TiVos, this will generate a lot of network traffic. If you think something is wrong with the information being displayed this might be useful, but more important reason for this command is to reset theTVDB statistics to go directly to the source rather than using the cache. See [theTVDB](theTVDB) below for more information.
-
-### Module Debug Levels
-The remaining controls let you set debug levels for each individual module.  See [Logging](Troubleshooting.md#logging) for more information.
 
 ## TheTVDB
 
@@ -219,6 +241,9 @@ There are two buttons relevant to this process in the Advance Preferences window
 ````
 For those series, episodes that weren't found or mismatched, a URL is provided to go to theTVDB and update their information if appropriate. Note that remarkably huge controversies have erupted about how to number seasons and episodes, so just because TiVo is providing one set of information doesn't necessarily mean that theTVDB is incorrect or will take kindly to being changed. See their forums for more context. On the other hand, series that are "Found by Name" that are missing EP IDs, or "Not Found" at all are probably good candidates to fix in the central database for the benefit of all.
 
+### Module Debug Levels
+The remaining controls let you set debug levels for each individual module.  See [Logging](Troubleshooting.md#logging) for more information.
+
 # Advanced Subscriptions
 
 For the basics of subscriptions, see [Subscriptions](Subscriptions.md). Manual subscriptions are actually implemented using standard Regular expressions, which you can enter by hand. Regular expressions are quite complicated, and a description of how the work is beyond the scope of this document. The offical syntax is at [ICU syntax](http://userguide.icu-project.org/strings/regexp). 
@@ -256,13 +281,17 @@ The keywords available, and the results for this case are:
 [originalAirDate] = 2013-09-26
 [season] = 07
 [episode] = 01
+[Guests] = Stephen Hawking
 [EpisodeNumber] = 701
 [SeriesEpNumber] = S07E01
+[ExtraEpisode] =                    //If cTiVo guesses this is a two-episode show, it will include the second one here "E01"
 [startTime] = 2013-10-17T04-00-00Z  //“zulu” time
-[TivoName] = Main	                      
+[TivoName] = Main	     
+[Format] = Default                  //which Format did cTiVo use for this conversion
 [movieYear] = 	                    //non-Movies don’t have a movieYear  
 [TVDBSeriesID] = 80379              //from website tvdb.com 
 [/] = subdirectory separator        //see below
+
 ````
 
 Example templates:
@@ -317,3 +346,4 @@ There are a few options that are not presented in the user interface. This choic
 * ThumbnailsDirectory* - Where to look for artwork thumbnails; default is either `<download directory>` or `<download directory>/thumbnails`; delete entirely to restore to default
 * iTunesContentID* - If set to 1, cTiVo will mark shows' "ContentID" in iTunes using the episode number. This has the benefit of merging HD/SD versions of a single show into one entry in iTunes. One warning is that there is a small statistical chance of two shows mapping onto the same contentID, which means that only one will appear in iTunes. The other video will still exist, but will be masked by the first one in iTunes UI.
 * ThumbnailsDirectory* - Where to look for artwork thumbnails; default is either `<download directory>` or `<download directory>/thumbnails`; delete entirely to restore to default
+* AllowDups* - If set to YES, cTiVo will allow multiple Downloads for the same Show. For example, if you wanted to use a high-res Format for your TV and a low-res Format for your phone.
