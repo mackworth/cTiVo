@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>cTiVo Updates</title>
+        <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
+        <description>Version 2.5.0; H.264 and other major improvements</description>
+        <language>en</language>
+        <item>
+            <title>Version 2.5.0; H.264 and other major improvements</title>
+            <description><![CDATA[
+                <h2 id="release-2.5">Release 2.5</h1>
+
+                <ul>
+                <li>H.264 compatibility (new format for cable companies)</li>
+                <li>Autodetects H.264 transition by channel</li>
+                <li>Redesigned Formats (simpler, more compatible)</li>
+                <li>New Channels preference screen</li>
+                <li>Better handling for AC3 5.1 audio</li>
+                <li>Many bug fixes</li>
+                </ul>
+                <h2 id="mpeg-4-transition">MPEG-4 Transition</h2>
+
+                <p>Comcast and other cable companies are migrating from MPEG-2 compressed streams to MPEG-4 (aka H.264). They do this to reduce the size and improve the quality of their signals. Comcast seem to be rolling this out slowly, one market at a time and changing over one channel at a time. Although this transition requires many changes to cTiVo, they are transparent in normal operation, except that older Formats may be incompatible. With this release, we&rsquo;ve provided a whole new set of Formats, and taken the opportunity to make the Format selection process easier.</p>
+
+                <h2 id="older-os-and-processors">Older OS and processors</h2>
+
+                <p>If you&rsquo;re still using 10.7 or 10.8, you&rsquo;ll need to use a different version: cTiVo-10.7 </p>
+
+                See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
+            ]]>
+            </description>
+            <pubDate>Tue., December 13, 2016 20:00:00 -0800</pubDate>
+            <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.0/cTiVo.zip"
+            sparkle:version="704" sparkle:shortVersionString="2.5.0"
+            length="40564681"
+            type="application/octet-stream"
+            sparkle:dsaSignature="MC0CFAj7iuUrdkwP8qiJPcqYWuwhs3HmAhUA4G1yLP4AjIQhLuwFsoON3jzp2nk=" />
+        </item>
+        <item>
+            <title>Version 2.5.0; H.264 and other major improvements</title>
+            <description><![CDATA[
+                <h2 id="release-2.5">Release 2.5 - 10.7 and 10.8</h1>
+
+                <p>This version is only for systems using 10.7 or 10.8. In addition, if you have an older processor, you may get an incompatibility warning. </p>
+                <p>Due to the included binaries from other open-source efforts, it&rsquo;s getting much harder to support these older systems, but given the H.264 conversion, We wanted to provide at least one more release. But be aware that after this release, we may not be able to keep it up to date. It has the older binaries (such as mencoder, ffmpeg, ccextractor etc) but otherwise should run fine.</p>
+                <ul>
+                <li>H.264 compatibility (new format for cable companies)</li>
+                <li>Autodetects H.264 transition by channel</li>
+                <li>Redesigned Formats (simpler, more compatible)</li>
+                <li>New Channels preference screen</li>
+                <li>Better handling for AC3 5.1 audio</li>
+                <li>Many bug fixes</li>
+                </ul>
+                <h2 id="mpeg-4-transition">MPEG-4 Transition</h2>
+
+                <p>Comcast and other cable companies are migrating from MPEG-2 compressed streams to MPEG-4 (aka H.264). They do this to reduce the size and improve the quality of their signals. Comcast seem to be rolling this out slowly, one market at a time and changing over one channel at a time. Although this transition requires many changes to cTiVo, they are transparent in normal operation, except that older Formats may be incompatible. With this release, we&rsquo;ve provided a whole new set of Formats, and taken the opportunity to make the Format selection process easier.</p>
+
+                See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
+            ]]>
+            </description>
+            <pubDate>Tue., December 13, 2016 20:00:00 -0800</pubDate>
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.0/cTiVo-10.7.zip"
+            sparkle:version="704" sparkle:shortVersionString="2.5.0"
+            length="39333410"
+            type="application/octet-stream"
+            sparkle:dsaSignature="MCwCFDF0sjfCN6WXIbCJwVEM99qGRgOAAhQslOZh7XF20XASzP6w4CYl6dmCHw==" />
+        </item>
+    </channel>
+</rss>

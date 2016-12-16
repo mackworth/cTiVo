@@ -746,6 +746,7 @@
 		1E59368319648C180008780B /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
 		1E59368819648C860008780B /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		1E59368B19648CFF0008780B /* MTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLog.m; sourceTree = "<group>"; };
+		1E5AB5FC1E047A5E00429667 /* sparklecast107.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = sparklecast107.xml; sourceTree = "<group>"; };
 		1E5C5C1A17FDF0B80056E794 /* readme.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme.md; sourceTree = "<group>"; };
 		1E5C5C1B17FE18BB0056E794 /* wiki */ = {isa = PBXFileReference; lastKnownFileType = folder; path = wiki; sourceTree = "<group>"; };
 		1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = cTiVo/Crashlytics.framework; sourceTree = "<group>"; };
@@ -1332,6 +1333,7 @@
 			isa = PBXGroup;
 			children = (
 				1EB757711D8712AB0045D040 /* ReleaseNotes.md */,
+				1E5AB5FC1E047A5E00429667 /* sparklecast107.xml */,
 				1EFE66FE1BE967460083386C /* sparklecast.xml */,
 			);
 			name = Update;
