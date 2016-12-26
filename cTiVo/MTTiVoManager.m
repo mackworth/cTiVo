@@ -1420,9 +1420,9 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 
 - (void)notifyForDownload: (MTDownload *) download withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notificationType {
-	DDLogReport(@"Notify: %@/n%@: %@", title, subTitle, notificationType);
+    DDLogReport(@"Notify: %@/n%@: %@", title, subTitle ?: @"", notificationType);
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-    NSString * subTitleShow = [NSString stringWithFormat:@"%@: %@", subTitle, download.show.showTitle];
+    NSString * subTitleShow = subTitle ? [NSString stringWithFormat:@"%@: %@", subTitle, download.show.showTitle] : download.show.showTitle;
 	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
 	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
 		[GAB notifyWithTitle: title

@@ -1104,7 +1104,9 @@ NSString * fourChar(long n, BOOL allowZero) {
 
     decryptTask.completionHandler = ^BOOL(){
         if (!self.shouldSimulEncode) {
-            [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
+            if (self.downloadStatus.intValue < kMTStatusDownloaded ) {
+                [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
+            }
             [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationDecryptDidFinish object:nil];
             if (self.decryptedFilePath) {
                 [self markCompleteCTiVoFile: self.decryptedFilePath ];
@@ -2458,8 +2460,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(void) handleNewTSChannel {
     [self markMyChannelAsTSOnly];
     //On a regular file, throw away audio-only file and try again
-    [self deleteVideoFile];
+        [self deleteVideoFile];
     if (self.show.tiVo.supportsTransportStream) {
+        self.numRetriesRemaining++;
         [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
     } else {
         [self cancel];
@@ -2670,11 +2673,15 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                              subTitle:@"Transfer is too short" forNotification:kMTGrowlPossibleProblem];
                 if (self.shouldSimulEncode) {
                     [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                } else if ( self.exportSubtitles.boolValue ){
+                    [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
                 }
             }
 		} else {
             if (self.shouldSimulEncode ) {
                 [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+            } else if (self.exportSubtitles.boolValue) {
+                [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
             }
 			self.show.fileSize = downloadedFileSize;  //More accurate file size
             if ([self.bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {

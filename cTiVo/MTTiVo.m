@@ -210,6 +210,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void) saveLastLoadTime:(NSDate *) newDate{
 	if (!newDate) return;
+    if (!self.tiVo.name.length) return;
 	NSDate * currentDate = tiVoManager.lastLoadedTivoTimes[self.tiVo.name];
 
 	if (!currentDate || [newDate isGreaterThan: currentDate]) {
