@@ -2578,7 +2578,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         }
     }
     DDLogMajor(@"ErrorCode2: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
-    if (error.code == 1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
+    if (labs(error.code) == 1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
         [tiVoManager  notifyForDownload: self withTitle: @"Warning: Could not reach TiVo!"
                              subTitle:@"Antivirus program may be blocking connection" forNotification:kMTGrowlPossibleProblem];
     }
