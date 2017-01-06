@@ -187,7 +187,9 @@ __DDLOGHERE__
 		for (int i=(int)_taskArray.count-1; i >=0 ; i--) {
 			for (MTTask *task in _taskArray[i]) {
                 DDLogMajor(@"Starting task %@ for show %@",task.taskName,task.download.show.showTitle);
-				[task launch];				
+                if (![task launch]) {
+                    return NO;
+                };
 			}
 		}
 
@@ -268,7 +270,9 @@ __DDLOGHERE__
         self.isRunning = NO;
         if (_nextTaskChain && !_beingRescheduled && !self.download.isCanceled) {
             self.download.activeTaskChain = _nextTaskChain;
-            [_nextTaskChain run];
+            if (![_nextTaskChain run]) {
+                [self.download rescheduleShowWithDecrementRetries:@YES];
+            };
         }
     } else if (self.isRunning) {
         [self performSelector:@selector(trackProgress) withObject:nil afterDelay:0.5];

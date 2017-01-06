@@ -62,7 +62,7 @@
 -(void)setStandardOutput:(id)stdo;
 -(void)setStandardInput:(id)stdi;
 -(void)setStandardError:(id)stde;
--(void)launch;
+-(BOOL)launch;
 -(void)terminate;
 -(void)interrupt;
 -(void)suspend;

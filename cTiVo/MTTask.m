@@ -14,6 +14,10 @@
 #import "NSArray+Map.h"
 #import "NSString+Helpers.h"
 
+#ifndef DEBUG
+#import "Crashlytics/Crashlytics.h"
+#endif
+
 @interface MTTask ()
 {
     BOOL launched;
@@ -402,11 +406,11 @@ __DDLOGHERE__
     [_task setStandardError:stde];
 }
 
--(void)launch
+-(BOOL)launch
 {
     if (!_task.launchPath) {
         DDLogReport(@"Error: no executable for %@; cannot launch", self.taskName);
-       return;
+       return NO;
     }
     BOOL shouldLaunch = YES;
     if (_startupHandler) {
@@ -414,16 +418,35 @@ __DDLOGHERE__
     }
     if (shouldLaunch) {
         DDLogVerbose(@"Launching: %@",self);
-        [_task launch];
-        launched = YES;
-        self.taskRunning = YES;
-        _pid = [_task processIdentifier];
-        [self trackProcess];
+        @try {
+            [_task launch];
+            launched = YES;
+            self.taskRunning = YES;
+            _pid = [_task processIdentifier];
+            [self trackProcess];
+        } @catch (NSException *exception) {
+            NSString * desc = self.description;
+            DDLogReport(@"Error on launch: %@ for %@; cannot launch: %@",  [exception reason], self.taskName, desc);
+#ifndef DEBUG
+            NSMutableDictionary * info = [NSMutableDictionary dictionary];
+            [info setValue:exception.name forKey:@"MTExceptionName"];
+            [info setValue:exception.reason forKey:@"MTExceptionReason"];
+            [info setValue:exception.callStackReturnAddresses forKey:@"MTExceptionCallStackReturnAddresses"];
+            [info setValue:exception.callStackSymbols forKey:@"MTExceptionCallStackSymbols"];
+            [info setValue:exception.userInfo forKey:@"MtExceptionUserInfo"];
+            [info setValue:desc forKey:@"MTExceptionTaskInfo"];
+
+            NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:1 userInfo:info];
+            [[Crashlytics sharedInstance] recordError:error];
+#endif
+            return NO;
+        }
     } else {
         if (_completionHandler) {
             _completionHandler();
         }
     }
+    return shouldLaunch;
 }
 
 -(void)terminate

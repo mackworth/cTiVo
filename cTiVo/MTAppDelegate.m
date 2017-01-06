@@ -159,7 +159,7 @@ __DDLOGHERE__
    [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
 #ifndef DEBUG
     if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTCrashlyticsOptOut]) {
-          [Fabric with:@[[Crashlytics class]]];
+        [Fabric with:@[[Crashlytics class]]];
     }
 #endif
     CGEventRef event = CGEventCreate(NULL);

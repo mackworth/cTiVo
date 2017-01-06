@@ -1053,6 +1053,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 }
 
 -(void) setFailedPS:(BOOL) psFailed forChannelNamed: (NSString *) channelName {
+    if (channelName.length == 0) return;
     NSDictionary * newChannel = [self channelNamed:channelName];
     if (newChannel) {
         NSMutableDictionary * mutChannel = [newChannel mutableCopy];

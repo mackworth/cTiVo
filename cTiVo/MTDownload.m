@@ -1779,7 +1779,10 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     self.processProgress = 0.0;
     self.previousProcessProgress = 0.0;
 
-    [self.activeTaskChain run];
+    if (![self.activeTaskChain run]) {
+        [self rescheduleShowWithDecrementRetries:@YES];
+        return;
+    };
     double downloadDelay = kMTTiVoAccessDelayServerFailure - [[NSDate date] timeIntervalSinceDate:self.show.tiVo.lastDownloadEnded];
     if (downloadDelay < 0) {
         downloadDelay = 0;
@@ -2530,27 +2533,24 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 - (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    if (challenge.proposedCredential) {
-        DDLogMajor(@"Using proposed Credential for %@",self.show.tiVoName);
-        [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
-    } else {
-        if (self.show.tiVo.mediaKey.length) {
+    BOOL sendingCredential = NO;
+    if (challenge.previousFailureCount == 0) {
+        if (challenge.proposedCredential) {
+            DDLogMajor(@"Using proposed Credential for %@",self.show.tiVoName);
+            [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
+            sendingCredential = YES;
+        } else if (self.show.tiVo.mediaKey.length) {
             DDLogMajor(@"Sending media Key for %@",self.show.tiVoName);
             [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:self.show.tiVo.mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
-            
-        } else {
-            [challenge.sender cancelAuthenticationChallenge:challenge];
-            DDLogMajor(@"No MAK, so failing URL Authentication %@",self.show.tiVoName);
-            if (self.activeURLConnection) {
-                [self.activeURLConnection cancel];
-                self.activeURLConnection = nil;
-            }
-            if (self.bufferFileWriteHandle) {
-                [self.bufferFileWriteHandle closeFile];
-                self.bufferFileWriteHandle = nil;
-            }
-            [self rescheduleOnMain];
+            sendingCredential = YES;
         }
+    }
+    if (!sendingCredential) {
+        [challenge.sender cancelAuthenticationChallenge:challenge];
+        BOOL noMAK = self.show.tiVo.mediaKey.length == 0;
+        DDLogMajor(@"%@ MAK, so failing URL Authentication %@",noMAK ? @"No" : @"Invalid", self.show.tiVoName);
+        [self cancel];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self.show.tiVo, @"reason" : @"incorrect"}];
     }
     
 }
@@ -2570,6 +2570,14 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 {
     DDLogMajor(@"URL Connection Failed with error %@",[error maskMediaKeys]);
     NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
+    if (!streamError) {
+        DDLogMajor(@"ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
+        NSError * underlyingError = error.userInfo[@"NSUnderlyingError"];
+        if ([underlyingError isKindOfClass:[NSError class]]) {
+            streamError = underlyingError.userInfo[@"_kCFStreamErrorCodeKey"];
+        }
+    }
+    DDLogMajor(@"ErrorCode2: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
     if (error.code == 1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
         [tiVoManager  notifyForDownload: self withTitle: @"Warning: Could not reach TiVo!"
                              subTitle:@"Antivirus program may be blocking connection" forNotification:kMTGrowlPossibleProblem];
@@ -2616,7 +2624,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		if (dataReceived) {
 			NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
 			if (noRecording.location != NSNotFound) { //This is a missing recording
-				DDLogMajor(@"Deleted TiVo show; marking %@",self);
+				DDLogReport(@"Deleted TiVo show; marking %@",self);
 				self.downloadStatus = [NSNumber numberWithInt: kMTStatusDeleted];
                 [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
                 [self.show.tiVo scheduleNextUpdateAfterDelay:0];
@@ -2626,9 +2634,19 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 if (serverBusy.location != NSNotFound) { //TiVo is overloaded
                     [tiVoManager  notifyForDownload: self withTitle: @"TiVo Warning: Server Busy."
                                            subTitle: [NSString stringWithFormat: @"If this recurs, your TiVo (%@) may need to be restarted.", self.show.tiVo.tiVo.name] forNotification:kMTGrowlPossibleProblem];
-                    DDLogMajor(@"Warning Server Busy %@", self);
+                    DDLogReport(@"Warning Server Busy %@", self);
                     [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
                     return;
+                } else {
+                    NSRange accessForbidden = [dataReceived rangeOfString:@"Access Forbidden" options:NSCaseInsensitiveSearch];
+                    if (accessForbidden.location != NSNotFound) { //TiVo is not allowing video transfers
+                        [tiVoManager  notifyForDownload: self withTitle: @"TiVo Warning: Forbidden Access."
+                                               subTitle: @"Enable Video Sharing at https://www.tivo.com/tivo-mma/dvrpref.do" forNotification:kMTGrowlPossibleProblem];
+                        DDLogReport(@"Warning: Forbidden Access %@", self);
+                        [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+                        return;
+                    }
+
                 }
             }
 		}
@@ -2638,9 +2656,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
         double filePercent = downloadedFileSize / self.show.fileSize*100;
         DDLogDetail(@"finished loading TiVo file: %0.1f of %0.1f KB expected; %0.1f%% ", downloadedFileSize/1000, self.show.fileSize/1000, filePercent);
-		if (filePercent < 75.0 ||
-             (!self.useTransportStream && filePercent < 85.0 )) {
-                 //hmm, doesn't look like it's big enough  (85% for PS; 75% for TS
+		if (filePercent < 70.0 ||
+             (!self.useTransportStream && filePercent < 80.0 )) {
+                 //hmm, doesn't look like it's big enough  (80% for PS; 70% for TS
             BOOL foundAudioOnly = NO;
             if (!self.useTransportStream ) {
                 if ([self checkLogForAudio: self.encodeTask.errorFilePath]) {
