@@ -44,6 +44,7 @@
 -(NSInteger)isProcessing;
 -(void)rescheduleAllShows;
 -(void)setupNotifications;
+-(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle; // notification of Tivo problem
 
 -(void) saveLastLoadTime:(NSDate *) newDate;
 -(void)resetAllDetails;

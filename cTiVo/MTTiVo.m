@@ -776,6 +776,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 #pragma mark - NSURL Delegate Methods
 
+-(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle { // notification of Tivo problem
+    [tiVoManager notifyForName: self.tiVo.name
+              withTitle: title
+               subTitle: subTitle
+               isSticky: YES
+        forNotification:kMTGrowlPossibleProblem
+     ];
+}
+
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
 	DDLogVerbose(@"TiVo %@ sent data",self);
@@ -816,7 +825,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    DDLogReport(@"URL Connection Failed with error %@",error);
+    DDLogReport(@"TiVo URL Connection Failed with error %@",[error maskMediaKeys]);
+    NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
+    DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
+    if (error.code == -1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
+        [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
+                          subTitle:@"Antivirus program may be blocking connection"];
+    }
+
     [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationTiVoUpdated object:self];
 //    [self reportNetworkFailure];
     if(self.manualTiVo) _isReachable = NO;

@@ -1073,7 +1073,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         if (badMAKRange.location != NSNotFound) {
             DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
             DDLogVerbose(@"log file: %@",[log maskMediaKeys]);
-            [tiVoManager  notifyForDownload: self withTitle:@"Decoding Failed" subTitle: @"Invalid Media Access Key? " isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
+            [self notifyUserWithTitle:@"Decoding Failed" subTitle: @"Invalid Media Access Key? " forNotification:kMTGrowlTivodecodeFailed];
         }
     }
 }
@@ -1095,7 +1095,9 @@ NSString * fourChar(long n, BOOL allowZero) {
         decryptPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable: decoder];
     }
     if (!decryptPath) { //should never happen, but did once.
-        [tiVoManager  notifyForDownload: nil withTitle:[NSString stringWithFormat:@"Can't Find %@", decoder] subTitle:@"Please go to cTiVo site for help!" isSticky:YES forNotification:kMTGrowlTivodecodeFailed];
+        [self notifyUserWithTitle:[NSString stringWithFormat:@"Can't Find %@", decoder]
+                         subTitle:@"Please go to cTiVo site for help!"
+                   forNotification:kMTGrowlTivodecodeFailed];
         DDLogReport(@"Fatal Error: decoder %@ not found???", decoder);
         return nil;
     }
@@ -1382,7 +1384,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     captionTask.cleanupHandler = ^(){
         if (_captionTask.taskFailed) {
-            [tiVoManager  notifyForDownload: self withTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" isSticky:YES forNotification:kMTGrowlCommercialDetFailed];
+            [self notifyUserWithTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" forNotification:kMTGrowlCommercialDetFailed];
         }
         if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] &&
             (self.isCanceled)) {
@@ -1432,7 +1434,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             if ([self checkLogForAudio: self.commercialTask.logFilePath]) {
                 [self handleNewTSChannel];
             } else {
-                [tiVoManager  notifyForDownload: self withTitle:@"Detecting Commercials Failed" subTitle:@"Not processing commercials" isSticky:YES forNotification:kMTGrowlCommercialDetFailed];
+                [self notifyUserWithTitle:@"Detecting Commercials Failed" subTitle:@"Not processing commercials" forNotification:kMTGrowlCommercialDetFailed];
 
                 if ([[NSFileManager defaultManager] fileExistsAtPath:self.commercialFilePath]) {
                     [[NSFileManager defaultManager] removeItemAtPath:self.commercialFilePath error:nil];
@@ -2086,7 +2088,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                                           @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
                                           @"Retries" : retryString }];
 #endif
-        [tiVoManager  notifyForDownload: self withTitle:@"TiVo show transferred." subTitle:nil forNotification:kMTGrowlEndDownload];
+        [self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil forNotification:kMTGrowlEndDownload];
     }
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  //Currently Free up an encoder/ notify subscription module / update UI
@@ -2100,6 +2102,26 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 
 #pragma mark - Download/Conversion  Progress Tracking
+
+-(void)transientNotifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification {   //download  notification
+    [tiVoManager notifyForName: self.show.showTitle
+                     withTitle: title
+                      subTitle: subTitle
+                      isSticky: NO
+               forNotification: notification
+     ];
+}
+
+
+-(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle  forNotification: (NSString *) notification {   //download  notification
+    [tiVoManager notifyForName: self.show.showTitle
+              withTitle: title
+               subTitle: subTitle
+               isSticky: YES
+        forNotification: notification
+     ];
+}
+
 
 -(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries
 {
@@ -2128,8 +2150,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         if (self.downloadStatus.intValue == kMTStatusDeleted) {
             self.numRetriesRemaining = 0;
             self.processProgress = 1.0;
-            [tiVoManager  notifyForDownload: self withTitle: @"TiVo deleted program."
-                                   subTitle:@"Download cancelled" forNotification:kMTGrowlEndDownload];
+            [self notifyUserWithTitle: @"TiVo deleted program."
+                             subTitle:@"Download cancelled"
+                      forNotification:kMTGrowlEndDownload];
         } else if (([decrementRetries boolValue] && self.numRetriesRemaining <= 0) ||
                    (![decrementRetries boolValue] && self.numStartupRetriesRemaining <=0)) {
             [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
@@ -2139,13 +2162,14 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                            customAttributes:@{ @"Format" : self.encodeFormat.name,
                                                @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
 #endif
-            [tiVoManager  notifyForDownload: self withTitle: @"TiVo show failed."
-                                 subTitle:@"Retries Cancelled" forNotification:kMTGrowlEndDownload];
+            [self notifyUserWithTitle: @"TiVo show failed."
+                             subTitle:@"Retries Cancelled"
+                      forNotification:kMTGrowlEndDownload];
 
         } else {
             if ([decrementRetries boolValue]) {
                 self.numRetriesRemaining--;
-                [tiVoManager  notifyForDownload: self withTitle:@"TiVo show failed" subTitle:@"Retrying" forNotification:kMTGrowlCantDownload];
+                [self notifyUserWithTitle:@"TiVo show failed" subTitle:@"Retrying" forNotification:kMTGrowlCantDownload];
 #ifndef DEBUG
                 [Answers logCustomEventWithName:@"Retry"
                                customAttributes:@{ @"Format" : self.encodeFormat.name,
@@ -2455,7 +2479,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         [tiVoManager setFailedPS:YES forChannelNamed:channelName];
         if ([tiVoManager useTSForChannel:channelName] == NSOffState && !self.encodeFormat.isTestPS) {
             //only notify if we're not (testing, OR previously seen, OR forcing PS)
-            [tiVoManager  notifyForDownload: self withTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName] isSticky:NO forNotification:kMTGrowlTivodecodeFailed];
+            [self transientNotifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName]  forNotification:kMTGrowlTivodecodeFailed];
         }
     }
 }
@@ -2470,7 +2494,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     } else {
         [self cancel];
         [self setValue:@(kMTStatusFailed) forKeyPath:@"downloadStatus"];
-        [tiVoManager  notifyForDownload: self withTitle: @"Warning: This channel requires Transport Stream."
+        [self notifyUserWithTitle: @"Warning: This channel requires Transport Stream."
                                subTitle:@"But this TiVo does not support TS." forNotification:kMTGrowlPossibleProblem];
     }
 }
@@ -2568,19 +2592,14 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    DDLogMajor(@"URL Connection Failed with error %@",[error maskMediaKeys]);
+    DDLogMajor(@"Download URL Connection Failed with error %@",[error maskMediaKeys]);
+    
     NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
-    if (!streamError) {
-        DDLogMajor(@"ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
-        NSError * underlyingError = error.userInfo[@"NSUnderlyingError"];
-        if ([underlyingError isKindOfClass:[NSError class]]) {
-            streamError = underlyingError.userInfo[@"_kCFStreamErrorCodeKey"];
-        }
-    }
-    DDLogMajor(@"ErrorCode2: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
-    if (labs(error.code) == 1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
-        [tiVoManager  notifyForDownload: self withTitle: @"Warning: Could not reach TiVo!"
-                             subTitle:@"Antivirus program may be blocking connection" forNotification:kMTGrowlPossibleProblem];
+    DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
+    if (error.code == -1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
+        [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
+                         subTitle: @"Antivirus program may be blocking connection"
+                  forNotification: kMTGrowlPossibleProblem];
     }
    if (self.activeURLConnection) {
         [self.activeURLConnection cancel];
@@ -2632,16 +2651,16 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             } else {
                 NSRange serverBusy = [dataReceived rangeOfString:@"Server Busy" options:NSCaseInsensitiveSearch];
                 if (serverBusy.location != NSNotFound) { //TiVo is overloaded
-                    [tiVoManager  notifyForDownload: self withTitle: @"TiVo Warning: Server Busy."
-                                           subTitle: [NSString stringWithFormat: @"If this recurs, your TiVo (%@) may need to be restarted.", self.show.tiVo.tiVo.name] forNotification:kMTGrowlPossibleProblem];
+                    [self.show.tiVo notifyUserWithTitle: @"TiVo Warning: Server Busy."
+                                           subTitle: @"If this recurs, your TiVo (%@) may need to be restarted."];
                     DDLogReport(@"Warning Server Busy %@", self);
                     [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
                     return;
                 } else {
                     NSRange accessForbidden = [dataReceived rangeOfString:@"Access Forbidden" options:NSCaseInsensitiveSearch];
                     if (accessForbidden.location != NSNotFound) { //TiVo is not allowing video transfers
-                        [tiVoManager  notifyForDownload: self withTitle: @"TiVo Warning: Forbidden Access."
-                                               subTitle: @"Enable Video Sharing at https://www.tivo.com/tivo-mma/dvrpref.do" forNotification:kMTGrowlPossibleProblem];
+                        [self.show.tiVo notifyUserWithTitle: @"TiVo Warning: Forbidden Access."
+                                           subTitle: @"Enable Video Sharing at https://www.tivo.com/tivo-mma/dvrpref.do."];
                         DDLogReport(@"Warning: Forbidden Access %@", self);
                         [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
                         return;
@@ -2687,7 +2706,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
            } else {
                 //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
                 DDLogMajor(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self.show,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
-                [tiVoManager  notifyForDownload: self withTitle: @"Warning: Show may be damaged/incomplete."
+                [self notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
                              subTitle:@"Transfer is too short" forNotification:kMTGrowlPossibleProblem];
                 if (self.shouldSimulEncode) {
                     [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];

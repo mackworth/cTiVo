@@ -168,7 +168,8 @@ __DDLOGHERE__
 #else
     NSString * subtitle = @"You may need '10.7' version of cTiVo";
 #endif
-    [tiVoManager notifyForDownload:self.download withTitle:title subTitle:subtitle isSticky:YES forNotification:kMTGrowlPossibleProblem];
+    [tiVoManager notifyWithTitle: title
+                      subTitle: subtitle ];
     [self.download cancel];
 }
 

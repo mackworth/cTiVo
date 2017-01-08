@@ -260,12 +260,8 @@ __DDLOGHERE__
             }
         }
         if (warnUserDeprecated) {
-            NSString *warnTitle = [NSString stringWithFormat: @"Formats like %@ are not recommended!", warnUserDeprecated ];
-           [self  notifyForDownload: nil
-                           withTitle: warnTitle
-                            subTitle:@"Switch to Default or other Format"
-                           isSticky:YES
-                    forNotification:kMTGrowlPossibleProblem];
+            [self notifyWithTitle: [NSString stringWithFormat: @"Formats like %@ are not recommended!", warnUserDeprecated ]
+                         subTitle: @"Switch to Default or another Format" ];
         }
         [[NSUserDefaults standardUserDefaults] setInteger:2 forKey:kMTUserDefaultVersion];
     }
@@ -1410,37 +1406,40 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 #endif
 }
 //Note that any new notification types need to be added to constants.h, but especially Growl Registration Ticket.growRegDict
-- (void)notifyForDownload: (MTDownload *) download withTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification {
-	[self notifyForDownload: download withTitle:title subTitle:subTitle isSticky:YES forNotification:notification];
-}
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center
      shouldPresentNotification:(NSUserNotification *)notification {
     return YES;
 }
+-(void) notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle {
+    [self notifyForName: nil withTitle:title subTitle:subTitle isSticky:YES forNotification:kMTGrowlPossibleProblem];
+}
 
+- (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notification {
+    DDLogReport(@"Notify: %@/n%@", title, subTitle ?: @"");
 
-- (void)notifyForDownload: (MTDownload *) download withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notificationType {
-    DDLogReport(@"Notify: %@/n%@: %@", title, subTitle ?: @"", notificationType);
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-    NSString * subTitleShow = subTitle ? [NSString stringWithFormat:@"%@: %@", subTitle, download.show.showTitle] : download.show.showTitle;
+    //Note: when removing in future, remove all kMTGrowlxxx strings as well
+    NSString * subTitleCombo = subTitle.length ? (objName.length ? [NSString stringWithFormat:@"%@: %@", subTitle, objName]
+                                                                 : subTitle)
+                                                : objName;
 	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
 	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
 		[GAB notifyWithTitle: title
-				 description: subTitleShow
-			notificationName: notificationType
+				 description: subTitleCombo
+			notificationName: notification
 					iconData: nil  //use our app logo
 					priority: 0
 					isSticky: sticky
 				clickContext: nil
 		 ];
 #else
-    NSUserNotification *notification = [[NSUserNotification alloc] init ];
-    notification.title = title;
-    notification.subtitle = download.show.showTitle;
-    notification.informativeText = subTitle;
-    notification.soundName = NSUserNotificationDefaultSoundName;
-    [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+    NSUserNotification *userNot = [[NSUserNotification alloc] init ];
+    userNot.title = title;
+    userNot.subtitle = objName;
+    userNot.informativeText = subTitle;
+    userNot.soundName = NSUserNotificationDefaultSoundName;
+    [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:userNot];
 #endif
 }
 
@@ -1489,9 +1488,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 -(void)encodeFinished:(NSNotification *)notification
 {
     if (numEncoders == 0) {
-        [tiVoManager  notifyForDownload: nil
-                              withTitle: @"Internal Logic Error! "
-                             subTitle:@"numEncoders < 0" forNotification:kMTGrowlPossibleProblem];
+        [self notifyWithTitle: @"Internal Logic Error! " subTitle: @"numEncoders under 0" ];
 
     } else {
         numEncoders--;

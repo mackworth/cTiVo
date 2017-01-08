@@ -120,8 +120,8 @@
 -(void) removeAllPSTests;
 
 //---------------Other methods ----------
-- (void)notifyForDownload: self withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky: (BOOL) sticky forNotification: (NSString *) notification; //Gowl notification with Sticky
-- (void)notifyForDownload: self withTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification;   //Growl notification
+-(void) notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle;
+- (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notification;
 -(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path;
 -(NSString *)getAMediaKey;
 -(BOOL) checkForExit;
