@@ -242,7 +242,11 @@ __DDLOGHERE__
 		//What? No previous format,must be our first run. Let's see if there's any iTivo prefs.
 		[MTiTiVoImport checkForiTiVoPrefs];
 	}
-	
+
+    if ([[[NSUserDefaults standardUserDefaults] stringForKey:kMTDecodeBinary] isEqualToString:@"tivodecode"]) {  //leftover from beta testing
+        [[NSUserDefaults standardUserDefaults] setObject: @"tivodecode-ng" forKey:kMTDecodeBinary];
+    }
+
     quitWhenCurrentDownloadsComplete = NO;
 	mediaKeyQueue = [NSMutableArray new];
 //	[self updateManualTiVosWithID];
