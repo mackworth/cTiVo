@@ -3,13 +3,12 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 2.5.0; H.264 and other major improvements</description>
+        <description>Version 2.5.1; H.264 and other major improvements</description>
         <language>en</language>
         <item>
-            <title>Version 2.5.0; H.264 and other major improvements</title>
+            <title>Version 2.5.1`; H.264 and other major improvements</title>
             <description><![CDATA[
-                <h2 id="release-2.5">Release 2.5</h1>
-
+                <h2 id="release-2.5">Release 2.5.1</h1>
                 <ul>
                 <li>H.264 compatibility (new format for cable companies)</li>
                 <li>Autodetects H.264 transition by channel</li>
@@ -17,6 +16,7 @@
                 <li>New Channels preference screen</li>
                 <li>Better handling for AC3 5.1 audio</li>
                 <li>Many bug fixes</li>
+                <li>Full 10.9 and 10.10 compatability</li>
                 </ul>
                 <h2 id="mpeg-4-transition">MPEG-4 Transition</h2>
 
@@ -29,20 +29,20 @@
                 See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
             ]]>
             </description>
-            <pubDate>Tue., December 13, 2016 20:00:00 -0800</pubDate>
+            <pubDate>Sun., February 3, 2017 20:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
             <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.0/cTiVo.zip"
-            sparkle:version="704" sparkle:shortVersionString="2.5.0"
-            length="40564681"
+            sparkle:version="714" sparkle:shortVersionString="2.5.1"
+            length="41189839"
             type="application/octet-stream"
-            sparkle:dsaSignature="MC0CFAj7iuUrdkwP8qiJPcqYWuwhs3HmAhUA4G1yLP4AjIQhLuwFsoON3jzp2nk=" />
+            sparkle:dsaSignature="MC0CFFr5NDsYyL7iHoEqtO5sjpNrlZXvAhUA5w5eyUF2BEf7EN6QbTHHXqH2VRc=" />
         </item>
         <item>
-            <title>Version 2.5.0; H.264 and other major improvements</title>
+            <title>Version 2.5.1; H.264 and other major improvements</title>
             <description><![CDATA[
-                <h2 id="release-2.5">Release 2.5 - 10.7 and 10.8</h1>
+                <h2 id="release-2.5.1">Release 2.5.1 - 10.7 and 10.8</h1>
 
-                <p>This version is only for systems using 10.7 or 10.8. In addition, if you have an older processor, you may get an incompatibility warning. </p>
+                <p>This version is only for systems using 10.7 or 10.8 (and possibly older Macs) </p>
                 <p>Due to the included binaries from other open-source efforts, it&rsquo;s getting much harder to support these older systems, but given the H.264 conversion, We wanted to provide at least one more release. But be aware that after this release, we may not be able to keep it up to date. It has the older binaries (such as mencoder, ffmpeg, ccextractor etc) but otherwise should run fine.</p>
                 <ul>
                 <li>H.264 compatibility (new format for cable companies)</li>
@@ -59,12 +59,12 @@
                 See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
             ]]>
             </description>
-            <pubDate>Tue., December 13, 2016 20:00:00 -0800</pubDate>
+            <pubDate>Sun., February 3, 2017 20:00:00 -0800</pubDate>
             <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.0/cTiVo-10.7.zip"
-            sparkle:version="704" sparkle:shortVersionString="2.5.0"
-            length="39333410"
+            sparkle:version="714" sparkle:shortVersionString="2.5.1"
+            length="39761117"
             type="application/octet-stream"
-            sparkle:dsaSignature="MCwCFDF0sjfCN6WXIbCJwVEM99qGRgOAAhQslOZh7XF20XASzP6w4CYl6dmCHw==" />
+            sparkle:dsaSignature="MCwCFCzjur8pKwIFBlf5ynAWY/pw4qyQAhQZ0mihBVOmsmah1E9o9hvBnsE65w==" />
         </item>
     </channel>
 </rss>

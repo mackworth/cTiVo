@@ -733,7 +733,7 @@
 		1E684A8616E3A010000F5C6E /* status-unknown.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "status-unknown.png"; sourceTree = "<group>"; };
 		1E684A8A16E3A338000F5C6E /* deleted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = deleted.png; sourceTree = "<group>"; };
 		1E69073C1DA56DC400C429C2 /* cTiVo-10.7.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "cTiVo-10.7.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		1E69073D1DA56DC400C429C2 /* cTiVo-10.7-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTiVo-10.7-Info.plist"; path = "/Users/hugh/Documents/Develop/cTiVoGithub/cTiVo-10.7-Info.plist"; sourceTree = "<absolute>"; };
+		1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTiVo-10.7-Info.plist"; path = "../cTiVo-10.7-Info.plist"; sourceTree = "<group>"; };
 		1E69073F1DA56E7600C429C2 /* ccextractor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ccextractor; sourceTree = "<group>"; };
 		1E6907401DA56E7600C429C2 /* comskip */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = comskip; sourceTree = "<group>"; };
 		1E6907411DA56E7600C429C2 /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = HandBrakeCLI; path = ../bin/HandBrakeCLI; sourceTree = "<group>"; };
@@ -1392,7 +1392,7 @@
 			isa = PBXGroup;
 			children = (
 				D2D60BA916766EFD00CE32DE /* cTiVo-Info.plist */,
-				1E69073D1DA56DC400C429C2 /* cTiVo-10.7-Info.plist */,
+				1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */,
 				D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */,
 				D2D60BAD16766EFD00CE32DE /* main.m */,
 				D2D60BAF16766EFD00CE32DE /* cTiVo-Prefix.pch */,
