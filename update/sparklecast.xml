@@ -31,7 +31,7 @@
             </description>
             <pubDate>Sun., February 3, 2017 20:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.0/cTiVo.zip"
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.1/cTiVo.zip"
             sparkle:version="714" sparkle:shortVersionString="2.5.1"
             length="41189839"
             type="application/octet-stream"
@@ -60,7 +60,7 @@
             ]]>
             </description>
             <pubDate>Sun., February 3, 2017 20:00:00 -0800</pubDate>
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.0/cTiVo-10.7.zip"
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.1/cTiVo-10.7.zip"
             sparkle:version="714" sparkle:shortVersionString="2.5.1"
             length="39761117"
             type="application/octet-stream"
