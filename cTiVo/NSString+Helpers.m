@@ -92,5 +92,12 @@
     return [NSString stringWithEndofFileHandle:logHandle numBytes:backup];
 }
 
+-(BOOL) hasCaseInsensitivePrefix: (NSString *) prefix {
+    NSRange prefixRange = [self rangeOfString:prefix
+                                      options:(NSAnchoredSearch | NSCaseInsensitiveSearch)];
+    return prefixRange.location == 0 ;
+}
+
+
 
 @end

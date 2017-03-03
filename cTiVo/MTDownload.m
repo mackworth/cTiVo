@@ -692,7 +692,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 	 
      NSString *TVDBseriesID = nil;
      @synchronized (tiVoManager.tvdbSeriesIdMapping) {
-         TVDBseriesID = [tiVoManager.tvdbSeriesIdMapping objectForKey:self.show.seriesTitle]; // see if we've already done this
+         TVDBseriesID = [[tiVoManager.tvdbSeriesIdMapping objectForKey:self.show.seriesTitle] componentsJoinedByString:@" OR "]; // see if we've already done this
      }
 	 if (!TVDBseriesID) {
          @synchronized (tiVoManager.tvdbCache) {

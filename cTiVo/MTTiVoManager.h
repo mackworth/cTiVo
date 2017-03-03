@@ -27,7 +27,7 @@
 @property (nonatomic, strong) NSMutableDictionary *lastLoadedTivoTimes;
 @property (atomic, strong) NSMutableArray *downloadQueue;
 @property (nonatomic, strong) NSMutableArray *subscribedShows;
-@property (atomic, strong) NSMutableDictionary *tvdbSeriesIdMapping;
+@property (atomic, strong) NSMutableDictionary <NSString *, NSArray <NSString *> *> *tvdbSeriesIdMapping;
 @property (atomic, strong) NSMutableDictionary *tvdbCache;
 @property (atomic, strong) NSMutableDictionary * theTVDBStatistics;
 

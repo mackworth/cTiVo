@@ -113,39 +113,6 @@ __DDLOGHERE__
 #define kMTVDBNoSeriesInfo @"Series Info Not Found"
 #define kMTVDBNoSeries @"Show Not Found"
 
--(NSString *) retrieveTVDBIdFromZap2itId: (NSString *) zapItID ofType:(NSString *) type {
-    //called from background to translate TiVos (aka Zap2It) id to TVDB
-    //Tracks overall results through TVDBStatistics; No side effects otherwise;
-	//Type is just for statistics reporting
-    NSAssert (![NSThread isMainThread], @"retrieveTVDBIdFromZap2itId not running in background");
-	if (zapItID == nil) return nil;
-	DDLogVerbose(@"Trying TVDB: %@==>%@",self.seriesId, zapItID);
-	NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeriesByRemoteID.php?zap2it=%@&language=all",zapItID] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-	NSURL *url = [NSURL URLWithString:urlString];
-	DDLogVerbose(@"Getting %@ details for %@ using %@",type, self, urlString);
-	NSString *TVDBText = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
-    if (!TVDBText) return nil;
-	NSString *seriesIDTVDB = [self getStringForPattern:@"<seriesid>(\\d*)" fromString:TVDBText];
-	if (seriesIDTVDB) {
-        [self rememberTVDBSeriesID:seriesIDTVDB];
-        DDLogVerbose(@"Got series by %@ for %@ using %@", type, self, zapItID);
-        if ([type isEqualToString:kMTVDBSeriesFoundWithEP]) {
-            [self incrementStatistic:type];
-        } else {
-            NSString *longSeriesID = self.seriesId;
-            if (self.seriesId.length < 10) {
-                longSeriesID = [NSString stringWithFormat:@"SH00%@",[longSeriesID substringFromIndex:2]];
-            }
-            NSString * epSeriesID = [NSString stringWithFormat:@"EP%@",[longSeriesID substringFromIndex:2]];
-
-            NSString * details = [NSString stringWithFormat:@"Their %@ Zap2It ID should be %@; %@",zapItID, epSeriesID, [self urlForReporting:seriesIDTVDB]];
-            [self addValue:details inStatistic:type forShow:self.seriesTitle];
-        }
-		return seriesIDTVDB;
-	} else {
-		return nil;
-	}
-}
 
 -(NSString *) seriesIDForReporting {
 	NSString *epID = nil;
@@ -160,21 +127,16 @@ __DDLOGHERE__
 	return epID;
 }
 
--(NSString *) urlForReporting:(NSString *) tvdbID {
-	NSString * showURL = [NSString stringWithFormat:@"http://thetvdb.com/?tab=series&id=%@",tvdbID];
-	return showURL;
-}
-
--(NSString *) tvdbURLForSeries {
-    NSString * tvdbID = [self checkTVDBSeriesID:self.seriesTitle];
-    if (tvdbID) {
-        return [self urlForReporting:tvdbID];
-    } else {
-        return @"";
+-(NSString *) urlsForReporting:(NSArray *) tvdbIDs {
+    NSMutableArray * urls = [NSMutableArray arrayWithCapacity:tvdbIDs.count];
+    for (NSString * tvdbID in tvdbIDs) {
+        NSString * showURL = [NSString stringWithFormat:@"http://thetvdb.com/?tab=series&id=%@",tvdbID];
+        [urls addObject:showURL];
     }
+	return [urls componentsJoinedByString: @" OR "];
 }
 
--(NSString *) retrieveTVDBIdFromSeriesName: (NSString *) name  {
+-(NSArray <NSString *> *) retrieveTVDBIdFromSeriesName: (NSString *) name  {
     //probably called on background thread to check if series with same name is available
     NSAssert (![NSThread isMainThread], @"retrieveTVDBIdFromSeriesName not running in background");
 	NSString * urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetSeries.php?seriesname=%@&language=all",name] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -183,23 +145,39 @@ __DDLOGHERE__
 	NSString *seriesID = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
 	//This can result in multiple series return only 1 of which is correct.  First break up into Series
 	NSArray *serieses = [seriesID componentsSeparatedByString:@"<Series>"];
-	DDLogVerbose(@"Series for %@: %@",self,serieses);
+    NSMutableSet <NSString *> *tvdbIDs = [NSMutableSet set];
+	DDLogDetail(@"Series for %@: %@",self,serieses);
 	for (NSString *series in serieses) {
+        if ([series hasPrefix: @"<?xml"]) continue;
 		NSString *seriesName = [[self getStringForPattern:@"<SeriesName>(.*)<\\/SeriesName>" fromString:series] stringByConvertingHTMLToPlainText];
-		if (seriesName && [seriesName caseInsensitiveCompare:name] == NSOrderedSame) {
+        if (![seriesName hasCaseInsensitivePrefix:name]) {
+            //check aliases
+            NSString * aliasesString = [[self getStringForPattern:@"<AliasNames>(.*)<\\/AliasNames>" fromString:series] stringByConvertingHTMLToPlainText];
+            if (aliasesString.length > 0) {
+                NSArray <NSString *> * aliases = [aliasesString componentsSeparatedByString:@"|"];
+                for (NSString * alias in aliases) {
+                    if ([alias hasCaseInsensitivePrefix:name] ) {
+                        seriesName = name;
+                        break;
+                    }
+                }
+            }
+        }
+		if (seriesName && [seriesName hasCaseInsensitivePrefix:name]) {
 			NSString * tvdbID= [self getStringForPattern:@"<seriesid>(\\d*)" fromString:series];
 			NSString * zap2ID= [self getStringForPattern:@"<zap2it_id>(.*)</zap2it_id>" fromString:series];
-			if (tvdbID) {
-				NSString * details = [NSString stringWithFormat:@"tvdb has %@ for our %@; %@ ", zap2ID, [self seriesIDForReporting],[self urlForReporting:tvdbID]  ];
+			if (tvdbID.length) {
+				NSString * details = [NSString stringWithFormat:@"tvdb has %@ for our %@; %@ ", zap2ID, [self seriesIDForReporting],[self urlsForReporting:@[tvdbID] ]];
 				DDLogVerbose(@"Had to search by name %@, %@",self.showTitle, details);
                 [self addValue:details inStatistic:kMTVDBSeriesFoundName forShow:self.seriesTitle];
-				return tvdbID;
-			} else {
-				return nil;
-			}
+                if (![tvdbIDs containsObject:tvdbID]){
+                    [tvdbIDs addObject:tvdbID];
+                }
+            }
 		}
 	}
-	return nil;
+    DDLogDetail(@"Mapped %@ series to %@", name, [[tvdbIDs allObjects] componentsJoinedByString:@" OR "]);
+	return [tvdbIDs allObjects];
 
 }
 
@@ -235,92 +213,117 @@ __DDLOGHERE__
     [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
 }
 
--(void) rememberTVDBSeriesID: (NSString *) seriesID {
-    if (seriesID) {
+-(void) rememberTVDBSeriesID: (NSArray *) seriesIDs {
+    if (seriesIDs.count) {
         @synchronized (tiVoManager.tvdbSeriesIdMapping) {
-            [tiVoManager.tvdbSeriesIdMapping setObject:seriesID forKey:self.seriesTitle];
+            [tiVoManager.tvdbSeriesIdMapping setObject:[NSArray arrayWithArray: seriesIDs] forKey:self.seriesTitle];
         }
     }
 }
 
--(NSString *) checkTVDBSeriesID:(NSString *) title {
-    NSString *seriesID = nil;
+-(NSArray <NSString *> *) checkTVDBSeriesID:(NSString *) title {
     @synchronized (tiVoManager.tvdbSeriesIdMapping) {
-       seriesID = [tiVoManager.tvdbSeriesIdMapping objectForKey:title];
+       return  [tiVoManager.tvdbSeriesIdMapping objectForKey:title];
     }
-    return seriesID;
 }
 
--(void) retrieveTVDBEpisodeInfo:(NSString *) seriesIDTVDB {
+-(void) retrieveTVDBEpisodeInfo:(NSArray <NSString *> *) seriesIDTVDBs {
     //Now get the details
 @autoreleasepool {
     NSAssert (![NSThread isMainThread], @"retrieveTVDBEpisodeInfo not running in background");
-    NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetEpisodeByAirDate.php?apikey=%@&seriesid=%@&airdate=%@",kMTTheTVDBAPIKey,seriesIDTVDB,self.originalAirDateNoTime] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString * reportURL = [urlString stringByReplacingOccurrencesOfString:kMTTheTVDBAPIKey withString:@"APIKEY" ];
-    DDLogDetail (@"launching %@ for %@", reportURL, self.showTitle);
-    NSURL *url = [NSURL URLWithString:urlString];
-    NSError * error = nil;
-    NSString * episodeInfo = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&error];
+    NSString * reportURL = nil;
 
-    if (error) {
-        DDLogMajor(@"Failed to get info from TVDB for %@ at %@: %@",self.showTitle, reportURL, error.localizedDescription);
-    } else if (!episodeInfo.length) {
-        DDLogMajor(@"No error from TVDB for %@ at %@, but no content",self.showTitle, reportURL);
-    } else if ([self getStringForPattern:@"<Error>(.*)<\\/Error>" fromString:episodeInfo].length > 0) {
-        //So, an episode not found case, let's report but try series lookup for artwork
+    for (NSString * seriesIDTVDB in seriesIDTVDBs) {
 
-        NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self seriesIDForReporting ], self.originalAirDateNoTime, self.season, self.episode, [self urlForReporting:seriesIDTVDB] ];
-        DDLogDetail(@"No episode info for %@ %@ ",self.showTitle, details);
-        [self addValue:details inStatistic:kMTVDBNoEpisode forShow:self.showTitle];
+        NSString *urlString = [[NSString stringWithFormat:@"http://thetvdb.com/api/GetEpisodeByAirDate.php?apikey=%@&seriesid=%@&airdate=%@",kMTTheTVDBAPIKey,seriesIDTVDB,self.originalAirDateNoTime] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        reportURL = [urlString stringByReplacingOccurrencesOfString:kMTTheTVDBAPIKey withString:@"APIKEY" ];
+        DDLogDetail (@"launching %@ for %@", reportURL, self.showTitle);
+        NSURL *url = [NSURL URLWithString:urlString];
+        NSError * error = nil;
+        NSString * episodeInfo = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&error];
 
-        BOOL gotsOne;
-        @synchronized (tiVoManager.tvdbCache) {
-             gotsOne = ( tiVoManager.tvdbCache [self.seriesId][@"artwork"]) !=nil;
-        }
-        if (gotsOne) {
-            _gotTVDBDetails = YES;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self finishTVDBProcessing];
-            });
+        if (error) {
+            DDLogMajor(@"Failed to get info from TVDB for %@ at %@: %@",self.showTitle, reportURL, error.localizedDescription);
+        } else if (!episodeInfo.length) {
+            DDLogMajor(@"No error from TVDB for %@ at %@, but no content",self.showTitle, reportURL);
         } else {
-            [self retrieveTVDBSeriesInfo:seriesIDTVDB];
-        }
-    } else {
-        NSString * newEpisodeNum = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo] ?: @"";
-        NSString * newSeasonNum = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo] ?: @"";
-        NSString * newArtwork = [self getStringForPattern:@"<filename>(.*)<\\/filename>" fromString:episodeInfo] ?: @"";
-        if (newEpisodeNum.length + newSeasonNum.length + newArtwork.length == 0) {
-            //TVDB gateway gives error code in HTML so this hack parses
-            DDLogDetail(@"QQQ: episodeInfo: %@", episodeInfo);
-            NSString * gatewayErrorNum = [self getStringForPattern:@"<span class=\"cf-error-code\">(\\d*)</span>" fromString:episodeInfo] ?: @"";
-            NSString * gatewayError = [self getStringForPattern:@"<h2 class=\"cf-subheadline\" data-translate=\"error_desc\">(.*)</h2>" fromString:episodeInfo] ?: @"";
-            DDLogMajor(@"TVDB server %@ problem for %@ at %@: %@",gatewayErrorNum, self.showTitle, reportURL, gatewayError);
-        } else {
-            @synchronized (tiVoManager.tvdbCache) {
-                [tiVoManager.tvdbCache setObject:@{
-                                                   @"season":newSeasonNum,
-                                                   @"episode":newEpisodeNum,
-                                                   @"artwork":newArtwork,
-                                                   @"series": seriesIDTVDB,
-                                                   @"date":[NSDate date]
-                                                   } forKey:self.episodeID];
+            NSString * errorMsg = [self getStringForPattern:@"<Error>(.*)<\\/Error>" fromString:episodeInfo];
+            if (errorMsg.length > 0) {
+                DDLogDetail(@"TVDB Error for %@(%@) aired %@ at %@ : %@ ",self.showTitle,[self seriesIDForReporting ], self.originalAirDateNoTime, reportURL, errorMsg );
+            } else {
+                NSString * newEpisodeNum = [self getStringForPattern:@"<Combined_episodenumber>(\\d*)" fromString:episodeInfo] ?: @"";
+                NSString * newSeasonNum = [self getStringForPattern:@"<Combined_season>(\\d*)" fromString:episodeInfo] ?: @"";
+                NSString * newArtwork = [self getStringForPattern:@"<filename>(.*)<\\/filename>" fromString:episodeInfo] ?: @"";
+                if (newEpisodeNum.length + newSeasonNum.length + newArtwork.length == 0) {
+                    //TVDB gateway gives error code in HTML so this hack parses
+                    NSString * gatewayErrorNum = [self getStringForPattern:@"<span class=\"cf-error-code\">(\\d*)</span>" fromString:episodeInfo] ?: @"";
+                    NSString * gatewayError = [self getStringForPattern:@"<h2 class=\"cf-subheadline\" data-translate=\"error_desc\">(.*)</h2>" fromString:episodeInfo] ?: @"";
+                    if (gatewayErrorNum.length + gatewayError.length > 0) {
+                        DDLogMajor(@"TVDB server %@ problem for %@ at %@: %@",gatewayErrorNum, self.showTitle, reportURL, gatewayError);
+                    } else {
+                        DDLogMajor(@"TVDB server failure; no error msg for %@ at %@", self.showTitle, reportURL);
+                    }
+                } else {
+                    if (![seriesIDTVDBs[0] isEqualToString:seriesIDTVDB]) {
+                        DDLogDetail(@"Found theTVDB on second+ try for %@", self.episodeTitle);
+                        //move to first position for other episodes
+                        NSMutableArray <NSString *> * newSeriesIDTVBs = [NSMutableArray arrayWithArray:seriesIDTVDBs];
+                        [newSeriesIDTVBs removeObject:seriesIDTVDB];
+                        [newSeriesIDTVBs insertObject:seriesIDTVDB atIndex:0];
+                        [self rememberTVDBSeriesID:newSeriesIDTVBs];
+                    }
+                    @synchronized (tiVoManager.tvdbCache) {
+                        [tiVoManager.tvdbCache setObject:@{
+                                                           @"season":newSeasonNum,
+                                                           @"episode":newEpisodeNum,
+                                                           @"artwork":newArtwork,
+                                                           @"series": seriesIDTVDB,
+                                                           @"date":[NSDate date]
+                                                           } forKey:self.episodeID];
+                    }
+                    _gotTVDBDetails = YES;
+                   dispatch_async(dispatch_get_main_queue(), ^{
+                       [self finishTVDBProcessing];
+                   });
+                    DDLogDetail (@"Got episode Info for %@: %@ ops",  self.showTitle, @(tiVoManager.tvdbQueue.operationCount));
+                    return;
+                }
             }
-            _gotTVDBDetails = YES;
-           dispatch_async(dispatch_get_main_queue(), ^{
-               [self finishTVDBProcessing];
-           });
-            DDLogDetail (@"Got episode Info for %@: %@ ops",  self.showTitle, @(tiVoManager.tvdbQueue.operationCount));
         }
     }
+    //So, an episode not found case, let's report but also try series lookup for artwork
+    if (seriesIDTVDBs.count > 1) {
+        DDLogDetail(@"Did not find TVDB on second+ try for %@", self.showTitle);
+    }
+
+    NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) at %@ ",[self seriesIDForReporting ], self.originalAirDateNoTime, self.season, self.episode, reportURL ];
+    DDLogDetail(@"No episode info for %@ (%@) %@ ",self.showTitle, [seriesIDTVDBs componentsJoinedByString:@"OR"], details );
+    [self addValue:details inStatistic:kMTVDBNoEpisode forShow:self.showTitle];
+
+    BOOL gotsOne;
+    @synchronized (tiVoManager.tvdbCache) {
+        gotsOne = ( tiVoManager.tvdbCache [self.seriesId][@"artwork"]) !=nil;
+    }
+    if (gotsOne) {
+        _gotTVDBDetails = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self finishTVDBProcessing];
+        });
+    } else {
+        [self retrieveTVDBSeriesInfo:seriesIDTVDBs];
+    }
+
     //    NSTimeInterval time = 1.0/kMTMaxTVDBRate + [date timeIntervalSinceNow];
     //    if (time > 0) [NSThread sleepForTimeInterval:time];
     //ensures our operation stays officially running, so not hammering the TVDB API
 }
 }
 
--(void) retrieveTVDBSeriesInfo:(NSString *) seriesIDTVDB {
+-(void) retrieveTVDBSeriesInfo:(NSArray <NSString *> *) seriesIDTVDBs {
     //for non-episodic series, get the artwork info
     @autoreleasepool {
+        if (seriesIDTVDBs.count ==0) return;
+        NSString * seriesIDTVDB = seriesIDTVDBs[0];
         NSAssert (![NSThread isMainThread], @"retrieveTVDBESeriesInfo not running in background");
         //      <mirrorpath>/api/GetSeries.php?seriesname=<seriesname> <mirrorpath>/api/GetSeries.php?seriesname=<seriesname>&language=<language>
         NSString *urlString = [NSString stringWithFormat:@"http://thetvdb.com/api/%@/series/%@/banners.xml",kMTTheTVDBAPIKey,seriesIDTVDB];
@@ -362,17 +365,17 @@ __DDLOGHERE__
 @autoreleasepool {
     NSAssert (![NSThread isMainThread], @"getTVDBSeriesID not running in background");
 
-    NSString * mySeriesIDTVDB = [self retrieveTVDBIdFromSeriesName:self.seriesTitle];
+    NSArray <NSString *> * mySeriesIDTVDB = [self retrieveTVDBIdFromSeriesName:self.seriesTitle];
     //Don't give up yet; look for "Series: subseries" format
-    if (!mySeriesIDTVDB)  {
+    if (!mySeriesIDTVDB.count)  {
         NSArray * splitName = [self.seriesTitle componentsSeparatedByString:@":"];
         if (splitName.count > 1) {
             mySeriesIDTVDB = [self retrieveTVDBIdFromSeriesName:splitName[0]];
         }
     }
 
-    if (mySeriesIDTVDB) {
-        DDLogDetail(@"Got TVDB for %@: %@ ",self, mySeriesIDTVDB);
+    if (mySeriesIDTVDB.count) {
+        DDLogDetail(@"Got TVDB for %@: %@ ",self, [mySeriesIDTVDB componentsJoinedByString:@" OR "]);
         [self rememberTVDBSeriesID:mySeriesIDTVDB];
         if ([self.episodeID hasPrefix:@"SH"]){
             [self retrieveTVDBSeriesInfo:mySeriesIDTVDB];
@@ -380,7 +383,7 @@ __DDLOGHERE__
             [self retrieveTVDBEpisodeInfo:mySeriesIDTVDB];
         }
    } else {
-        [self rememberTVDBSeriesID:@""];
+        [self rememberTVDBSeriesID: @[ ] ];
         DDLogDetail(@"TheTVDB series not found: %@: %@ ",self.seriesTitle, self.seriesId);
         [self addValue: self.seriesId   inStatistic: kMTVDBNoSeries forShow:self.seriesTitle];
         self.gotTVDBDetails = YES;
@@ -414,24 +417,24 @@ __DDLOGHERE__
             [self incrementStatistic: ([self.episodeID hasPrefix:@"SH" ] ? kMTVDBSeriesFoundCached : kMTVDBEpisodeCached) ];
              [self finishTVDBProcessing];
         } else {
-            NSString *seriesIDTVDB = [self checkTVDBSeriesID:self.seriesTitle];
+            NSArray *seriesIDTVDBs = [self checkTVDBSeriesID:self.seriesTitle];
             //Need to pace calls to TVDB API
             SEL whichTVDBMethod;
-            if (seriesIDTVDB.length) {
+            if (seriesIDTVDBs.count) {
                 // already have series ID, but not this episode info
                 if ([self.episodeID hasPrefix:@"SH"]) {
                     whichTVDBMethod = @selector(retrieveTVDBSeriesInfo:);
-                    DDLogDetail (@"queuing seriesInfo for %@ (%@): %@ ops", seriesIDTVDB, self.showTitle, @(tiVoManager.tvdbQueue.operationCount));
+                    DDLogDetail (@"queuing seriesInfo for %@ (%@): %@ ops", [seriesIDTVDBs componentsJoinedByString:@"OR"], self.showTitle, @(tiVoManager.tvdbQueue.operationCount));
                } else {
                     whichTVDBMethod = @selector(retrieveTVDBEpisodeInfo:);
-                    DDLogDetail (@"queuing episodeInfo for %@ (%@): %@ ops", seriesIDTVDB, self.showTitle, @(tiVoManager.tvdbQueue.operationCount));
+                    DDLogDetail (@"queuing episodeInfo for %@ (%@): %@ ops", [seriesIDTVDBs componentsJoinedByString:@"OR"], self.showTitle, @(tiVoManager.tvdbQueue.operationCount));
                 }
             } else {
                 //first get seriesID, then Episode Info
                 whichTVDBMethod = @selector(retrieveTVDBSeriesID);
                 DDLogDetail (@"queuing series ID for %@: %@ ops", self.showTitle, @(tiVoManager.tvdbQueue.operationCount));
             }
-            NSInvocationOperation * op = [[NSInvocationOperation alloc] initWithTarget:self selector: whichTVDBMethod object:seriesIDTVDB ];
+            NSInvocationOperation * op = [[NSInvocationOperation alloc] initWithTarget:self selector: whichTVDBMethod object:seriesIDTVDBs ];
             [tiVoManager.tvdbQueue addOperation:op];
         }
     } else {
@@ -453,14 +456,21 @@ __DDLOGHERE__
         return;
     }
 
-    NSString *seriesIDTVDB = [self checkTVDBSeriesID:self.seriesTitle];
     if (episodeEntry) { // We already have this information
         episodeNum = [episodeEntry objectForKey:@"episode"];
         seasonNum = [episodeEntry objectForKey:@"season"];
         artwork = [episodeEntry objectForKey:@"artwork"];
-        if (!seriesIDTVDB) {
-            seriesIDTVDB = [episodeEntry objectForKey:@"series"];
-            [self rememberTVDBSeriesID:seriesIDTVDB];
+        NSArray *seriesIDTVDBs = [self checkTVDBSeriesID:self.seriesTitle];
+
+        if (!seriesIDTVDBs.count) {
+            NSString * seriesIDTVDB = [episodeEntry objectForKey:@"series"];
+            if (seriesIDTVDB.length) {
+                seriesIDTVDBs = @[seriesIDTVDB];
+                [self rememberTVDBSeriesID:seriesIDTVDBs];
+            } else {
+                DDLogMajor(@"Missing series info in TVDB data for %@: %@",self.showTitle, episodeEntry);
+            }
+
         }
         _gotTVDBDetails = YES;
         if (artwork.length+episodeNum.length+seasonNum.length > 0) {
@@ -469,7 +479,7 @@ __DDLOGHERE__
             if (artwork.length) self.tvdbArtworkLocation = artwork;
         } else {
             DDLogDetail(@"QQQ %@", episodeEntry);
-            NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self seriesIDForReporting ], self.originalAirDateNoTime, self.season, self.episode, [self urlForReporting:seriesIDTVDB] ];
+            NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self seriesIDForReporting ], self.originalAirDateNoTime, self.season, self.episode, [self urlsForReporting:seriesIDTVDBs] ];
             DDLogDetail(@"No series info for %@ %@ ",self.showTitle, details);
             [self addValue:details inStatistic:kMTVDBNoSeriesInfo forShow:self.showTitle];
         }
@@ -479,7 +489,7 @@ __DDLOGHERE__
             //special case due to parsing of tivo's season/episode combined string
 			if (self.season > 0 && self.season/10 == [seasonNum intValue]  && [episodeNum intValue] == self.episode + (self.season % 10)*10) {
 				//must have mis-parsed (assumed SSEE, but actually SEEE, so let's fix
-				NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d aired %@ %@ ",seasonNum, episodeNum, self.season, self.episode, self.originalAirDateNoTime,  [self urlForReporting:seriesIDTVDB]];
+				NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d aired %@ %@ ",seasonNum, episodeNum, self.season, self.episode, self.originalAirDateNoTime,  [self urlsForReporting:seriesIDTVDBs]];
 				DDLogDetail(@"TVDB says we misparsed for %@: %@", self.showTitle, details );
 				self.season = [seasonNum intValue];
                 self.episode = [episodeNum intValue];
@@ -487,7 +497,7 @@ __DDLOGHERE__
 			if (self.episode >0 && self.season > 0) {
 				//both sources have sea/epi; so compare for report
 				if ([episodeNum intValue] != self.episode || [seasonNum intValue] != self.season) {
-					NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d; %@ aired %@; %@ ",seasonNum, episodeNum, self.season, self.episode, [self seriesIDForReporting], self.originalAirDateNoTime,  [self urlForReporting:seriesIDTVDB]];
+					NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d; %@ aired %@; %@ ",seasonNum, episodeNum, self.season, self.episode, [self seriesIDForReporting], self.originalAirDateNoTime,  [self urlsForReporting:seriesIDTVDBs]];
 					DDLogDetail(@"TheTVDB has different Sea/Eps info for %@: %@ %@", self.showTitle, details, [[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB] ? @"updating": @"leaving" );
                     [self addValue: details   inStatistic: kMTVDBWrongInfo forShow:self.showTitle];
 
@@ -689,16 +699,33 @@ __DDLOGHERE__
     }
 }
 
+static NSMutableDictionary <NSString *, NSRegularExpression *> * cacheRegexes;
+
 
 -(NSString *)getStringForPattern:(NSString *)pattern fromString:(NSString *)string
 {
-    NSError *error = nil;
     NSString *answer = nil;
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
-    if (error) {
-        DDLogReport(@"GetStringFormPattern error %@",error.userInfo);
-        return nil;
+
+    //next few lines are just perfomance optimization to avoid recreating regexes.
+    static dispatch_once_t onceToken = 0;
+    dispatch_once(&onceToken, ^{
+        cacheRegexes = [[NSMutableDictionary alloc] init];
+    });
+
+    NSRegularExpression * regex = nil;
+    @synchronized (cacheRegexes) {
+        regex = cacheRegexes[pattern];
+       if (!regex) {
+           NSError *error = nil;
+           regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
+           if (error || ! regex) {
+               DDLogReport(@"GetStringFormPattern error %@",error.userInfo);
+               return nil;
+           }
+           [cacheRegexes setValue:regex forKey:pattern];
+       }
     }
+
     NSTextCheckingResult *result = [regex firstMatchInString:string options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, string.length)];
     if (result && [result numberOfRanges] > 1) {
         NSRange rangeOfanswer = [result rangeAtIndex:1];

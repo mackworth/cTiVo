@@ -20,4 +20,6 @@
 
 +(NSString *) stringWithEndOfFile:(NSString *) path;
 
+-(BOOL) hasCaseInsensitivePrefix: (NSString *) prefix;
+
 @end

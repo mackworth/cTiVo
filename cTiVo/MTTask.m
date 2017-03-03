@@ -363,8 +363,9 @@ __DDLOGHERE__
 -(void)setLaunchPath:(NSString *)path
 {
     if (path.length > 0) {
-        if ([[NSFileManager defaultManager]  fileExistsAtPath:path]) {
-            if ([[NSFileManager defaultManager]  isExecutableFileAtPath:path]) {
+        BOOL isDir = NO;
+        if ([[NSFileManager defaultManager]  fileExistsAtPath:path isDirectory:&isDir ]) {
+            if (!isDir && [[NSFileManager defaultManager]  isExecutableFileAtPath:path]) {
                 [_task setLaunchPath:path];
             } else {
                 DDLogReport(@"Error: %@ file at path %@ not marked as executable", self.taskName, path);
