@@ -13,7 +13,6 @@
 #import "MTSubscriptionTableView.h"
 #import "MTPreferencesWindowController.h"
 #import "MTAdvPreferencesViewController.h"
-#import "MTiTivoImport.h"
 #import "MTHelpViewController.h"
 #import "MTTiVo.h"
 #import "MTSubscriptionList.h"
@@ -238,19 +237,12 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
 
-	if (![[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedFormat]) {
-		//What? No previous format,must be our first run. Let's see if there's any iTivo prefs.
-		[MTiTiVoImport checkForiTiVoPrefs];
-	}
-
-    if ([[[NSUserDefaults standardUserDefaults] stringForKey:kMTDecodeBinary] isEqualToString:@"tivodecode"]) {  //leftover from beta testing
+    if ([[[NSUserDefaults standardUserDefaults] stringForKey:kMTDecodeBinary] isEqualToString:@"tivodecode"]) {  //leftover from beta testing; only done once
         [[NSUserDefaults standardUserDefaults] setObject: @"tivodecode-ng" forKey:kMTDecodeBinary];
     }
 
     quitWhenCurrentDownloadsComplete = NO;
 	mediaKeyQueue = [NSMutableArray new];
-//	[self updateManualTiVosWithID];
-    [self updateTiVos];
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
     [_tiVoGlobalManager loadManualTiVos];
     [_tiVoGlobalManager searchForBonjourTiVos];
@@ -343,67 +335,6 @@ __DDLOGHERE__
 }
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
     [self showMainWindow:notification];
-}
-/* 
-Routine to update and combine both the manual tivo preferences and the media keys, all of which are TiVo related into 1 preference
- array for TiVos to eliminate duplication and simplify maintanence.  This only needs to be done once.
- 
- */
-
--(void)updateTiVos
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    if ([defaults objectForKey:kMTTiVos]) return;  //We've already done this.
-    NSArray *manualTiVos = [self updateManualTiVosWithID];
-    NSMutableDictionary *mediaKeys = [NSMutableDictionary dictionaryWithDictionary:[defaults objectForKey:kMTMediaKeys]];
-    NSDictionary *mediaKeyFixed = [defaults objectForKey:kMTMediaKeys];
-    NSMutableArray *newTiVoList = [NSMutableArray array];
-    for (NSDictionary *manualTiVo in manualTiVos) {
-        NSMutableDictionary *newManualTiVo = [NSMutableDictionary dictionaryWithDictionary:manualTiVo];
-        //correct for change from iPAddress to IPAddress
-        if (newManualTiVo[@"iPAddress"]) {
-            newManualTiVo[kMTTiVoIPAddress] = newManualTiVo[@"iPAddress"];
-            [newManualTiVo removeObjectForKey:@"iPAddress"];
-        }
-        newManualTiVo[kMTTiVoManualTiVo] = @YES;
-        NSString *tname = [manualTiVo objectForKey:kMTTiVoUserName];
-        for (NSString *key in mediaKeyFixed) {
-            if ([key isEqualTo:tname]) {
-                newManualTiVo[kMTTiVoMediaKey] = mediaKeys[key];
-                [mediaKeys removeObjectForKey:key];
-            }
-        }
-        [newTiVoList addObject:newManualTiVo];  //Updated manual tivo added to TiVo list
-    }
-    for (NSString *name in mediaKeys) {
-        [newTiVoList addObject:@{kMTTiVoEnabled : @YES, kMTTiVoUserName : name, kMTTiVoMediaKey : mediaKeys[name]}];
-    }
-    [defaults removeObjectForKey:kMTMediaKeys];
-    [defaults removeObjectForKey:kMTManualTiVos];
-    [defaults setValue:newTiVoList forKeyPath:kMTTiVos];
-    [defaults synchronize];
-    
-}
-
-/*
- Routine to update the manual tivo list with an ID.  This only needs to be done once.
- 
- */
--(NSArray *)updateManualTiVosWithID
-{
-	NSArray *manualTiVoDescriptions = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos];
-	if (manualTiVoDescriptions && manualTiVoDescriptions.count && ![manualTiVoDescriptions[0] objectForKey:@"id"]) {
-		int idNum = 1;
-		NSMutableArray *newManualTiVos = [NSMutableArray array];
-		for (NSDictionary *mTiVo in manualTiVoDescriptions) {
-			NSMutableDictionary *newMTiVo = [NSMutableDictionary dictionaryWithDictionary:mTiVo];
-			newMTiVo[@"id"] = [NSNumber numberWithInt:idNum++];
-			[newManualTiVos addObject:newMTiVo];
-		}
-        return [NSArray arrayWithArray:newManualTiVos];
-	} else {
-        return manualTiVoDescriptions;
-    }
 }
 
 NSOpenPanel* myOpenPanel = nil;  //weird bug where sometimes we're called twice for directory change.

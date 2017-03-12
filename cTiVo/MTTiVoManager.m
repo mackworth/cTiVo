@@ -7,7 +7,6 @@
 //
 
 #import "MTTiVoManager.h"
-#import "MTiTivoImport.h"
 #import "MTAppDelegate.h"
 #import "MTSubscription.h"
 #import "MTSubscriptionList.h"

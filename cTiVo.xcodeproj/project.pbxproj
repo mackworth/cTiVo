@@ -173,7 +173,6 @@
 		1E6906841DA56DC400C429C2 /* MTTiVo.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A648F116991CD300C7DA01 /* MTTiVo.m */; };
 		1E6906851DA56DC400C429C2 /* MTSubscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E791BD31697C59300E47E84 /* MTSubscription.m */; };
 		1E6906861DA56DC400C429C2 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */; };
-		1E6906871DA56DC400C429C2 /* MTiTivoImport.m in Sources */ = {isa = PBXBuildFile; fileRef = D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */; };
 		1E6906881DA56DC400C429C2 /* MTFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A7269716A23E3D00C58C5F /* MTFormat.m */; };
 		1E6906891DA56DC400C429C2 /* MTFormatEditorController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A7269A16A25DEB00C58C5F /* MTFormatEditorController.m */; };
 		1E69068A1DA56DC400C429C2 /* MTHelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D219D5E816A4F88D00C79962 /* MTHelpViewController.m */; };
@@ -347,7 +346,6 @@
 		D2A7269816A23E3D00C58C5F /* MTFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A7269716A23E3D00C58C5F /* MTFormat.m */; };
 		D2A7269C16A25DEB00C58C5F /* MTFormatEditorController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A7269A16A25DEB00C58C5F /* MTFormatEditorController.m */; };
 		D2A7269D16A25DEB00C58C5F /* MTFormatEditorController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2A7269B16A25DEB00C58C5F /* MTFormatEditorController.xib */; };
-		D2AFDBE8169B2D3A00D7DA3B /* MTiTivoImport.m in Sources */ = {isa = PBXBuildFile; fileRef = D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */; };
 		D2B4B4F41732D69C005B97F1 /* elgatoQuit.scpt in Resources */ = {isa = PBXBuildFile; fileRef = D2B4B4F31732D69C005B97F1 /* elgatoQuit.scpt */; };
 		D2B6706D169CA91F009CB164 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */; };
 		D2B73F3616BC8A90003CB4ED /* comskip.ini in Resources */ = {isa = PBXBuildFile; fileRef = D2B73F3516BC8A90003CB4ED /* comskip.ini */; };
@@ -792,7 +790,6 @@
 		D2001C221704F93F00B75D9C /* MTSrt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSrt.m; sourceTree = "<group>"; };
 		D2001C231704F93F00B75D9C /* MTEdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTEdl.h; sourceTree = "<group>"; };
 		D2001C241704F93F00B75D9C /* MTEdl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTEdl.m; sourceTree = "<group>"; };
-		D202E09F169778DA00514213 /* MTiTivoImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTiTivoImport.h; sourceTree = "<group>"; };
 		D208560416B61B9B002F5F8C /* MTPreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTPreferencesViewController.h; sourceTree = "<group>"; };
 		D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTPreferencesViewController.m; sourceTree = "<group>"; };
 		D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTPreferencesViewController.xib; sourceTree = "<group>"; };
@@ -857,7 +854,6 @@
 		D2A7269916A25DEB00C58C5F /* MTFormatEditorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTFormatEditorController.h; sourceTree = "<group>"; };
 		D2A7269A16A25DEB00C58C5F /* MTFormatEditorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTFormatEditorController.m; sourceTree = "<group>"; };
 		D2A7269B16A25DEB00C58C5F /* MTFormatEditorController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTFormatEditorController.xib; sourceTree = "<group>"; };
-		D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTiTivoImport.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D2B4B4F31732D69C005B97F1 /* elgatoQuit.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; lineEnding = 1; name = elgatoQuit.scpt; path = ../elgatoQuit.scpt; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.simpleColoring; };
 		D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		D2B73F3516BC8A90003CB4ED /* comskip.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = comskip.ini; sourceTree = "<group>"; };
@@ -1433,8 +1429,6 @@
 				D295CE82175A6AE500D010B8 /* NSString+Helpers.m */,
 				D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */,
 				D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */,
-				D202E09F169778DA00514213 /* MTiTivoImport.h */,
-				D2AFDBE7169B2D3A00D7DA3B /* MTiTivoImport.m */,
 				1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */,
 				1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */,
 			);
@@ -1824,7 +1818,6 @@
 				1E6906841DA56DC400C429C2 /* MTTiVo.m in Sources */,
 				1E6906851DA56DC400C429C2 /* MTSubscription.m in Sources */,
 				1E6906861DA56DC400C429C2 /* MTSubscriptionList.m in Sources */,
-				1E6906871DA56DC400C429C2 /* MTiTivoImport.m in Sources */,
 				1E6906881DA56DC400C429C2 /* MTFormat.m in Sources */,
 				1E6906891DA56DC400C429C2 /* MTFormatEditorController.m in Sources */,
 				1E69068A1DA56DC400C429C2 /* MTHelpViewController.m in Sources */,
@@ -1878,7 +1871,6 @@
 				D2A648F216991CD300C7DA01 /* MTTiVo.m in Sources */,
 				D2A648FB16994D2A00C7DA01 /* MTSubscription.m in Sources */,
 				1E4A38481A37C0F4001D84A7 /* MTSubscriptionList.m in Sources */,
-				D2AFDBE8169B2D3A00D7DA3B /* MTiTivoImport.m in Sources */,
 				D2A7269816A23E3D00C58C5F /* MTFormat.m in Sources */,
 				D2A7269C16A25DEB00C58C5F /* MTFormatEditorController.m in Sources */,
 				D219D5EA16A4F88D00C79962 /* MTHelpViewController.m in Sources */,
