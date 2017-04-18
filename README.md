@@ -4,7 +4,7 @@ cTiVo provides complete hands-off operation: once you choose or subscribe to you
 
 cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance and  compatibility. Current or former users of iTiVo will find a detailed comparison and upgrade path described in [iTivo Users](wiki/iTiVoUsers.md).
 
-##Automatic Download and Conversions
+## Automatic Download and Conversions
   * Auto-discovery of all your TiVos (using Bonjour).
   * Drag/drop and contextual menus for ease of use; submit, reschedule, delete all by dragging the shows.
   * Download queue for batch processing, restored on restart.
@@ -21,7 +21,7 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
   * Target devices include iPhone, iPad, AppleTV, Xbox, YouTube.
   * Imports old iTiVo preferences, including subscriptions and Media Access Key.
 
-##Complete Control Over Process
+## Complete Control Over Process
   * Change conversion formats for each download or subscription.
   * Change commercial handling/captioning/metadata/iTunes submittal for each download or subscription.
   * Change download directories for each download.
@@ -34,7 +34,7 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
   * Access remote TiVos (requires network reconfiguration).
   * Folders optionally created for each series.
 
-##Information About Your Shows
+## Information About Your Shows
   * Customizable columns about shows, downloads and subscriptions; show exactly what you want to see and no more.
   * Detailed info available for each show.
   * Contextual menus to play downloaded video, show in Finder, etc.
@@ -52,7 +52,7 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 * Better handling for AC3 5.1 audio
 * Many bug fixes
 
-##To install:
+## To install:
 
 Download the [cTiVo application](https://github.com/dscottbuch/cTiVo/releases), and drag it to your Applications Folder.
 

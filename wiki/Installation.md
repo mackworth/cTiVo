@@ -1,4 +1,4 @@
-#Installation
+# Installation
 ## How to install cTiVo
 
 1. cTiVo requires MacOS X 10.7 (Lion) or newer.

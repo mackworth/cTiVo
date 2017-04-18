@@ -1,5 +1,5 @@
-#Advanced Topics
-##Configuration options designed for advanced users
+# Advanced Topics
+## Configuration options designed for advanced users
 
 This document is to cover some interesting topics that are intended for advanced users only.
 

@@ -1,9 +1,9 @@
-##Video Formats
+## Video Formats
 Video can be stored in many different ways in a file. Many factors such as resolution (the number of horizontal and vertical pixels), the encoder used, the amount of compression, all affect both the amount of space used and the quality of the resulting video. The video formats used by broadcasters are not very compatible with those used by computer industry so cTiVo needs to convert the vido files that you bring over from your TiVo. 
 
 In order to maximize flexibilty while keeping it simple, cTiVo gives you a choices of "Formats". A Format stores the information needed to convert to a specific video format. We provide a wide range, in addition, you can use the Format Editor to build your own. 
 
-##Selecting a Format for cTiVo
+## Selecting a Format for cTiVo
 As the name suggests, the "Default" Format should work well for most uses, but we've provided many alternatives to handle different situations. 
 
 Generally speaking, there are tradeoffs between:
@@ -48,7 +48,7 @@ Certain other formats are built-in, but hidden to keep thing simple. To enable, 
 
 Finally, we also have a full set of Formats using two other encoders: Handbrake and Elgato's Turbo.264HD. While Elgato is relatively uncommon, Handbrake is also highly recommended, and has a large number of predefined settings. To keep things simple, these are hidden in the default settings, but if the ffmpeg-based ones don't work for you, feel free to give Handbrake a try. Note that Handbrake does not support Commercial skipping (actually cutting the commercials out the videO), only marking (which makes it easy to skip commercials during playback).
 
-##Relative Performance
+## Relative Performance
 To give you an indication of relative performance of these encoders, we ran 8 different files with each Format. As the performance varies widely, particularly depending on output resolution, the results are separated for 1080i source shows as well as shows smaller than that.
 
 |  Name           | AC3 | Max Res | Small Size |Small Time| 1080i Size | 1080i Time|
@@ -75,7 +75,7 @@ AC3 = Includes Surround sound in output file (vs just stereo), which will add 5-
 Size and Time ratios are versus the original TiVo file, so 50% and .7x for a 1GB, 1hr show would mean that the resulting file was 500MB and took 42 minutes to convert.
 Time values given are run on a 2014 MacBook Pro; 2.5 GHz Intel Core i7. Only one conversion occuring at a time, with no other work going on in the same machine. Does not include download time. Your mileage may vary.
 
-##Building your Own Format
+## Building your Own Format
 If none of these work for you, and you're somewhat technical, feel free to create your own Format. The [detailed instructions are here](Advanced-Topics#edit-formats), but the general idea is to (a) select an existing one that's close to what you want, (b) Duplicate it in the Format Editor, and (c) modify however you choose. If it doesn't do what you expect, look in the logs to see messages from the encoders. Due to the wide range of Handbrake presets, there's an easy mechanism to create a new Handbrake Format: just select an existing Handbrake Format in the Editor, and select a new Preset including user-defined ones.
 
 If you'd like more information on these topics, here's a couple of good resources:
