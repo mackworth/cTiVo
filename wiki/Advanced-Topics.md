@@ -1,5 +1,5 @@
-#Advanced Topics
-##Configuration options designed for advanced users
+# Advanced Topics
+## Configuration options designed for advanced users
 
 This document is to cover some interesting topics, but really for advanced users only  
 
@@ -325,7 +325,7 @@ And you can put these together:
 	==>`The Big Bang Theory/Season 07/The Big Bang Theory - S07E01 - The Hofstadter Insufficiency.mp4`
 	==>`Movies/Machete (2010)`
 
-##A couple of final notes:
+## A couple of final notes:
 * Capitalization is irrelevant in keywords. 
 * Quotes are not allowed inside quotes.
 * Brackets cannot be used as text.
