@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "MTTivoPopUpButton.h"
+#import "MTTiVoPopUpButton.h"
 
 @interface MTTiVoPopUpTableCellView : NSTableCellView
 

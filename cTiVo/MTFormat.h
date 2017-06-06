@@ -32,6 +32,8 @@
 										*captionOptions,
 										*regExProgress;
 
+@property (nonatomic, readonly) NSString *transportStreamExtension;
+
 @property (nonatomic, strong) NSNumber	*comSkip,
 										*iTunes,
 										*mustDownloadFirst,

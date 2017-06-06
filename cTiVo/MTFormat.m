@@ -418,6 +418,14 @@ __DDLOGHERE__
     return [self.name isEqualToString:@"Test PS"];
 }
 
+-(NSString *)transportStreamExtension {
+    if ( [self.encoderUsed isEqualToString:@"catToFile"]) {
+        return @".ts";
+    } else {
+        return self.filenameExtension;
+    }
+}
+
 -(BOOL) testsForAudioOnly {
     return !([self.encoderUsed isEqualToString: @"catToFile"] || [self.encoderVideoOptions contains:@"copy"]);
 }

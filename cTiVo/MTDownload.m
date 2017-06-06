@@ -834,7 +834,9 @@ NSString * fourChar(long n, BOOL allowZero) {
 	NSFileManager *fm = [NSFileManager defaultManager];
     NSString * tmpDir = tiVoManager.tmpFilesDirectory;
     if (!tmpDir) return nil;
-    NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,self.encodeFormat.filenameExtension];
+    NSString * extension = self.useTransportStream ? self.encodeFormat.transportStreamExtension :
+                                                     self.encodeFormat.filenameExtension;
+    NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,extension];
 	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tmpDir,baseName];
 	self.tivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tmpDir,baseName];
 	self.mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tmpDir,baseName];
@@ -924,7 +926,9 @@ NSString * fourChar(long n, BOOL allowZero) {
         DDLogVerbose(@"setting decrypt path: %@", self.decryptedFilePath);
         [[NSFileManager defaultManager] createFileAtPath:self.decryptedFilePath contents:[NSData data] attributes:nil];
     }
-	self.encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.downloadDir,self.baseFileName,self.encodeFormat.filenameExtension];
+    NSString * extension = self.useTransportStream ? self.encodeFormat.transportStreamExtension :
+                                                     self.encodeFormat.filenameExtension;
+	self.encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.downloadDir,self.baseFileName,extension];
 	DDLogVerbose(@"setting encodepath: %@", self.encodeFilePath);
     self.captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDir ,self.baseFileName];
     DDLogVerbose(@"setting self.captionFilePath: %@", self.captionFilePath);
@@ -2487,8 +2491,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(void) handleNewTSChannel {
     [self markMyChannelAsTSOnly];
     //On a regular file, throw away audio-only file and try again
-        [self deleteVideoFile];
+    [self deleteVideoFile];
     if (self.show.tiVo.supportsTransportStream) {
+        self.baseFileName = nil;  //recreate jsut in case if Decrypt channel
         self.numRetriesRemaining++;
         [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
     } else {

@@ -483,7 +483,7 @@ __DDLOGHERE__
             DDLogDetail(@"No series info for %@ %@ ",self.showTitle, details);
             [self addValue:details inStatistic:kMTVDBNoSeriesInfo forShow:self.showTitle];
         }
-        if (episodeNum.length && seasonNum.length && [episodeNum intValue] > 0 && [seasonNum intValue] > 0) {
+        if (episodeNum.length && seasonNum.length && [episodeNum intValue] > 0) {  //season 0 = specials on theTVDB
             DDLogDetail(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, self);
             [self incrementStatistic:kMTVDBEpisode];
             //special case due to parsing of tivo's season/episode combined string
