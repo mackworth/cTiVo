@@ -84,7 +84,7 @@ __DDLOGHERE__
         }
         if (!self.canMarkCommercials && self.shouldMarkCommercials) {
             //no longer possible
-            self.markCommercials = NO;
+            self.markCommercials = @NO;
         } else if (markWasDisabled && [self canMarkCommercials]) {
             //newly possible, so take user default
             self.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:@"MarkCommercials"];

@@ -57,7 +57,6 @@
 
 //Properties loaded in from TiVo's Detail XML
 @property (atomic, strong, readonly) NSString
-                                    *episodeNumber,
                                     *movieYear,
                                     *originalAirDate,
                                     *showTime,
@@ -67,6 +66,8 @@
                                     *colorCode,
                                     *starRating,
                                     *episodeGenre;
+
+@property (atomic, strong) NSString *episodeNumber;
 
 @property (strong, nonatomic, readonly) NSAttributedString
                                     *writers,
@@ -88,11 +89,12 @@
 #pragma mark - Calculated properties for display 
 @property (strong)	NSString *showTitle;  //calculated from series: episode
 @property (nonatomic, readonly) NSString *originalAirDateNoTime,
+                                         *showTitlePlusAirDate,
 										 *showDateString,
 										*showKey,
                                         *showDateRFCString,
 										 *showMediumDateString;
-@property						int	season, episode; //calculated from EpisodeNumber
+@property (atomic)						int	season, episode; //calculated from EpisodeNumber
 @property (weak, nonatomic, readonly) NSString *seasonString;
 @property (weak, nonatomic, readonly) NSString *seasonEpisode; // S02 E04 version
 @property (readonly, nonatomic) NSString *attribDescription;
@@ -119,7 +121,7 @@
 @property BOOL isQueued;
 @property (nonatomic, readonly) BOOL isOnDisk;
 
-@property (nonatomic, assign) BOOL	gotDetails, gotTVDBDetails;
+@property (atomic, assign) BOOL	gotDetails, gotTVDBDetails;
 
 -(void)getShowDetail;
 

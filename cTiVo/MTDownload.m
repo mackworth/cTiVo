@@ -144,10 +144,10 @@ __DDLOGHERE__
 +(MTDownload *) downloadTestPSForShow:(MTTiVoShow *) show {
     MTFormat * testFormat = [tiVoManager testPSFormat];
     MTDownload * download = [self downloadForShow:show withFormat: testFormat intoDirectory:[tiVoManager tmpFilesDirectory] withQueueStatus: kMTStatusNew];
-    download.exportSubtitles = NO;
+    download.exportSubtitles = @NO;
     download.skipCommercials = NO;
     download.markCommercials = NO;
-    download.genTextMetaData = NO;
+    download.genTextMetaData = @NO;
     download.numRetriesRemaining = 0;
     return download;
 }
