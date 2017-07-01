@@ -674,11 +674,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     //called when each show completes its details
     //DDLogReport (@"Ops Count = %lu; shows = %lu; connection: %@; queue = %@", (unsigned long)self.opsQueue.operationCount, self.shows.count, self.showURLConnection, self.opsQueue);
 
-    if (self.opsQueue.operationCount <= 1 && [tiVoManager tvdbQueue].operationCount <= 1 &&!isConnecting) {
+    if (self.opsQueue.operationCount <= 1 && !tiVoManager.tvdb.isActive && !isConnecting) {
         DDLogMajor(@"Got all details for %@",self.tiVo.name);
-        @synchronized(tiVoManager.theTVDBStatistics) {
-            DDLogDetail(@"Statistics for TVDB since start or reset: %@",tiVoManager.theTVDBStatistics);
-        }
+        DDLogDetail(@"Statistics for TVDB since start or reset: %@",[tiVoManager.tvdb stats]);
+
         //        for testing the movidedB
         //        for (MTTiVoShow * show in [self.shows copy]) {
         //            if (show.isMovie) {

@@ -130,7 +130,6 @@
 
 -(void)playVideo:(NSString *)path;
 -(void)revealInFinder:(NSArray *)paths;
--(void)getTheTVDBDetails;
 -(void)retrieveArtworkIntoFile: (NSString *) filename;
 -(void) addExtendedMetaDataToFile:(MP4FileHandle *)fileHandle withImage:(NSImage *) artwork ;
 -(void)createTestMP4;

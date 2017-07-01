@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 48;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -299,6 +299,8 @@
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9C1C505D3000887240 /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EB49BA01C50A4B100887240 /* tivo-libre.jar in Resources */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1EC44B2F1F06F12100B73DE1 /* MTTVDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */; };
+		1EC44B301F06F12200B73DE1 /* MTTVDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */; };
 		1ECD9D411C8265D600FBC78D /* MTChannelEditorController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD9D3F1C8265D600FBC78D /* MTChannelEditorController.m */; };
 		1ECD9D421C8265D600FBC78D /* MTChannelEditorController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1ECD9D401C8265D600FBC78D /* MTChannelEditorController.xib */; };
 		1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */; };
@@ -773,6 +775,8 @@
 		1EB49B9C1C505D3000887240 /* tivodecode-ng */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "tivodecode-ng"; path = "../../tivodecode-ng"; sourceTree = "<group>"; };
 		1EB49B9F1C50A49000887240 /* tivo-libre.jar */ = {isa = PBXFileReference; lastKnownFileType = archive.jar; name = "tivo-libre.jar"; path = "../tivo-libre.jar"; sourceTree = "<group>"; };
 		1EB757711D8712AB0045D040 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = ReleaseNotes.md; path = ../cTiVo/ReleaseNotes.md; sourceTree = "<group>"; };
+		1EC44B2D1F06F12100B73DE1 /* MTTVDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTVDB.h; sourceTree = "<group>"; };
+		1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTVDB.m; sourceTree = "<group>"; };
 		1ECD9D3E1C8265D600FBC78D /* MTChannelEditorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTChannelEditorController.h; sourceTree = "<group>"; };
 		1ECD9D3F1C8265D600FBC78D /* MTChannelEditorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTChannelEditorController.m; sourceTree = "<group>"; };
 		1ECD9D401C8265D600FBC78D /* MTChannelEditorController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTChannelEditorController.xib; sourceTree = "<group>"; };
@@ -1452,6 +1456,8 @@
 				1E6F22D516DD1F4C0071D291 /* MTDownload.m */,
 				D22BC41D1680DB5E007D699C /* MTTiVoShow.h */,
 				D22BC41E1680DB5E007D699C /* MTTiVoShow.m */,
+				1EC44B2D1F06F12100B73DE1 /* MTTVDB.h */,
+				1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */,
 				1E791BD21697C59300E47E84 /* MTSubscription.h */,
 				1E791BD31697C59300E47E84 /* MTSubscription.m */,
 				1E4A38461A37C0F4001D84A7 /* MTSubscriptionList.h */,
@@ -1549,7 +1555,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = MT;
-				LastUpgradeCheck = 0810;
+				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = cTiVo;
 				TargetAttributes = {
 					1E6906731DA56DC400C429C2 = {
@@ -1567,7 +1573,7 @@
 				};
 			};
 			buildConfigurationList = D2D60B9716766EFD00CE32DE /* Build configuration list for PBXProject "cTiVo" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1803,6 +1809,7 @@
 				1E6906751DA56DC400C429C2 /* DDLog.m in Sources */,
 				1E6906761DA56DC400C429C2 /* main.m in Sources */,
 				1E6906771DA56DC400C429C2 /* MTAppDelegate.m in Sources */,
+				1EC44B301F06F12200B73DE1 /* MTTVDB.m in Sources */,
 				1E6906781DA56DC400C429C2 /* MTTiVoManager.m in Sources */,
 				1E6906791DA56DC400C429C2 /* MTDownloadTableView.m in Sources */,
 				1E69067A1DA56DC400C429C2 /* MTProgramTableView.m in Sources */,
@@ -1856,6 +1863,7 @@
 				1E59368919648C860008780B /* DDLog.m in Sources */,
 				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
 				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
+				1EC44B2F1F06F12100B73DE1 /* MTTVDB.m in Sources */,
 				D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */,
 				D2D60BD716766FA600CE32DE /* MTDownloadTableView.m in Sources */,
 				D2D60BD916766FA600CE32DE /* MTProgramTableView.m in Sources */,
@@ -2010,14 +2018,20 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = NO;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -2065,14 +2079,20 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = NO;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;

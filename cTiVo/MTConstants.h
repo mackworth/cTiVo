@@ -98,6 +98,8 @@
 #define kMTSubscribedSDOnly  @"SDOnly"
 #define kMTSubscribedPrevRecorded @"PrevRecorded" //not used
 #define kMTSubscribedRegExPattern @"RegExPattern"
+#define kMTTVDBToken @"TVDBToken"
+#define kMTTVDBTokenExpire @"TVDBTokenExpire"
 
 //Download queue userDefaults
 #define kMTQueue      @"Queue"

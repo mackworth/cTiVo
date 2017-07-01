@@ -145,23 +145,7 @@ __DDLOGHERE__
 //        NSLog(@"Host addresses for first name %@",[[NSHost hostWithName:[[NSHost currentHost] names][0]] addresses]);
         [self setupMetadataQuery];
  		loadingManualTiVos = NO;
-        self.tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
-		self.tvdbCache = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTheTVDBCache]];
-        self.theTVDBStatistics = [NSMutableDictionary dictionary];
-        self.tvdbQueue = [[NSOperationQueue alloc] init];
-        self.tvdbQueue.maxConcurrentOperationCount = kMTMaxTVDBRate;
-        
-        //Clean up old entries
-        NSMutableArray *keysToDelete = [NSMutableArray array];
-        for (NSString *key in _tvdbCache) {
-            NSDate *d = [[_tvdbCache objectForKey:key] objectForKey:@"date"];
-            if ([[NSDate date] timeIntervalSinceDate:d] > 60.0 * 60.0 * 24.0 * 30.0) { //Too old so throw out
-                [keysToDelete addObject:key];
-            }
-        }
-        for (NSString *key in keysToDelete) {
-            [_tvdbCache removeObjectForKey:key];
-        }
+        self.tvdb = [MTTVDB sharedManager];
 	}
 	return self;
 }
@@ -870,13 +854,8 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 -(void)resetAllDetails
 {
 	DDLogMajor(@"Resetting the caches!");
-	//Remove TVDB Cache
-    [[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTTheTVDBCache];
-	self.tvdbCache =  [NSMutableDictionary dictionary];
-	self.tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
-    @synchronized(self.theTVDBStatistics) {
-        self.theTVDBStatistics = [NSMutableDictionary dictionary];
-    }
+    [self.tvdb resetAll];
+
     //Remove TiVo Detail Cache
     NSFileManager *fm = [NSFileManager defaultManager];
     NSArray *files = [fm contentsOfDirectoryAtPath:kMTTmpDetailsDir error:nil];
@@ -1379,7 +1358,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 #pragma mark - Growl/Apple Notifications
 
 -(void) loadUserNotifications {
-	
+
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
 	if(NSAppKitVersionNumber >= NSAppKitVersionNumber10_6) {
 		NSBundle *myBundle = [NSBundle mainBundle];

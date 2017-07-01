@@ -14,7 +14,7 @@
 #import "MTSubscription.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "MTFormat.h"
-
+#import "MTTVDB.h"
 
 @interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
 }
@@ -27,9 +27,6 @@
 @property (nonatomic, strong) NSMutableDictionary *lastLoadedTivoTimes;
 @property (atomic, strong) NSMutableArray *downloadQueue;
 @property (nonatomic, strong) NSMutableArray *subscribedShows;
-@property (atomic, strong) NSMutableDictionary <NSString *, NSArray <NSString *> *> *tvdbSeriesIdMapping;
-@property (atomic, strong) NSMutableDictionary *tvdbCache;
-@property (atomic, strong) NSMutableDictionary * theTVDBStatistics;
 
 @property (nonatomic, strong) NSString *downloadDirectory;
 @property (nonatomic, weak, readonly) NSString *tmpFilesDirectory;
@@ -42,7 +39,8 @@
 
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
-@property (nonatomic, strong) NSOperationQueue * tvdbQueue;
+@property (nonatomic, strong) MTTVDB *tvdb;
+
 @property (nonatomic, strong) MTFormat *selectedFormat;
 @property (atomic) int numEncoders;
 @property (nonatomic,readonly) int totalShows; // numCommercials, numCaptions;//Want to limit launches to two encoders.

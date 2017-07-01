@@ -690,20 +690,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 													   objectAtIndex:[components month]-1] :
 								@"";
 	 
-     NSString *TVDBseriesID = nil;
-     @synchronized (tiVoManager.tvdbSeriesIdMapping) {
-         TVDBseriesID = [[tiVoManager.tvdbSeriesIdMapping objectForKey:self.show.seriesTitle] componentsJoinedByString:@" OR "]; // see if we've already done this
-     }
-	 if (!TVDBseriesID) {
-         @synchronized (tiVoManager.tvdbCache) {
-             NSDictionary *TVDBepisodeEntry = [tiVoManager.tvdbCache objectForKey:self.show.episodeID];
-		 //could provide these ,too?
-		 // NSNumber * TVDBepisodeNum = [TVDBepisodeEntry objectForKey:@"episode"];
-		 //NSNumber * TVDBseasonNum = [TVDBepisodeEntry objectForKey:@"season"];
-             TVDBseriesID = [TVDBepisodeEntry objectForKey:@"series"];
-         };
-	 }
-     NSString * guests = [[self.show.guestStars.string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@", "];
+     NSString *TVDBseriesID = [[[tiVoManager.tvdb seriesIDsForShow:self.show] componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] componentsJoinedByString:@","];
+     NSString * guests = [[self.show.guestStars.string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@","];
      NSString * extraEpisode = @"";
      if (self.show.episode && self.show.season &&   //if we have an SxxExx AND either a 2 hr show OR a semicolon in episode title, then it might be a double episode
          ((self.show.showLength > 115*60 && self.show.showLength < 125*60) ||

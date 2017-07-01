@@ -987,9 +987,7 @@ BOOL wasPaused = NO;
 	[saveQueueTimer invalidate];
 	[tiVoManager cancelAllDownloads];
 	[tiVoManager writeDownloadQueueToUserDefaults];
-    @synchronized(tiVoManager.tvdbCache) {
-        [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.tvdbCache forKey:kMTTheTVDBCache];
-    }
+    [tiVoManager.tvdb saveDefaults];
 	 mediaKeyQueue = nil;
     DDLogReport(@"cTiVo exiting");
 }
