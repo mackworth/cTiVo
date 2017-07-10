@@ -851,18 +851,19 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	}
 }
 
--(void)resetAllDetails
-{
+-(void)resetAllDetails {
 	DDLogMajor(@"Resetting the caches!");
     [self.tvdb resetAll];
 
     //Remove TiVo Detail Cache
+/* FIX; temp for tvdb debug
     NSFileManager *fm = [NSFileManager defaultManager];
     NSArray *files = [fm contentsOfDirectoryAtPath:kMTTmpDetailsDir error:nil];
     for (NSString *file in files) {
         NSString *filePath = [NSString stringWithFormat:@"%@/%@",kMTTmpDetailsDir,file];
         [fm removeItemAtPath:filePath error:nil];
     }
+ */
 	for (MTTiVo *tiVo in _tiVoList) {
         [tiVo resetAllDetails];
 	}

@@ -478,18 +478,21 @@ __DDLOGHERE__
 //and any access to global data needs to @synchronized
 //These will be printed out in alpha order...
 
-#define kMTVDBMovie @"Movie"
 #define kMTVDBAll @"All"
+#define kMTVDBMovie @"Movie"
 //#define kMTVDBMovieFound @"Movie Found"   //not used today
-//#define kMTVDBMovieNotFound2 @"Movie Not Found"
-#define kMTVDBNonEpisodicSeriesFoundCached @"Non-episodic Series Found in cache"
-#define kMTVDBSeriesEpisodeFoundCached @"Series and Episode Found in cache"
-#define kMTVDBNonEpisodicSeriesFound @"Non-episodic Series Found at TVDB"
-#define kMTVDBSeriesEpisodeFound @"Series and Episode Found at TVDB"
-#define kMTVDBSeriesNotFound @"Series Info Not Found"
-#define kMTVDBSeriesKnownMissing @"Already know TVDB doesn't have Series"
-#define kMTVDBEpisodeKnownMissing @"Already know TVDB doesn't have Episode"
-#define kMTVDBSeriesFoundEpisodeNotFound @"Series Found, but Episode Not Found"
+//#define kMTVDBMovieNotFound @"Movie Not Found"
+#define kMTVDBNonEpisodicSeriesFound          @"Non-episodic Series Found"
+#define kMTVDBNonEpisodicSeriesFoundCached    @"Non-episodic Series Found Cached"
+#define kMTVDBNonEpisodicSeriesNotFound       @"Non-episodic Series Info Not Found"
+#define kMTVDBNonEpisodicSeriesNotFoundCached @"Non-episodic Series Info Not Found Cached"
+
+#define kMTVDBSeriesEpisodeFound              @"Series and Episode Found"
+#define kMTVDBSeriesEpisodeFoundCached        @"Series and Episode Found Cached"
+#define kMTVDBEpisodicSeriesNotFound          @"Series Info Not Found"
+#define kMTVDBEpisodicSeriesNotFoundCached    @"Series Info Not Found Cached"
+#define kMTVDBEpisodeNotFound                 @"Series Found, but Episode Not Found"
+#define kMTVDBEpisodeNotFoundCached           @"Series Found, but Episode Not Found Cached"
 
 -(NSString *) seriesIDForReporting: (NSString *) seriesId {
     NSString *epID = nil;
@@ -504,7 +507,7 @@ __DDLOGHERE__
     return epID;
 }
 
--(NSString *) urlsForReporting:(NSArray *) tvdbIDs {
+-(NSString *) urlsForReporting:(NSArray <NSString *> *) tvdbIDs {
     NSMutableArray * urls = [NSMutableArray arrayWithCapacity:tvdbIDs.count];
     for (NSString * tvdbID in tvdbIDs) {
         NSString * showURL = [NSString stringWithFormat:@"http://thetvdb.com/?tab=seasonall&id=%@lid=7",tvdbID];
@@ -518,7 +521,77 @@ __DDLOGHERE__
     @synchronized(self.theTVDBStatistics) {
         statsCopy = self.theTVDBStatistics.copy;
     }
-    return [self.theTVDBStatistics description];
+    NSString * statisticsReport =
+    @"\nAs TiVo doesn't provide us season/episode information or artwork, cTiVo looks up the TiVo's shows on theTVDB.\n"
+    "You can click on the individual URLs to see what information is available for shows where the lookup failed.\n\n"
+    "Total number of shows is %lu\n"
+    "%lu shows are marked as Movies (so not looked up)\n"
+    "%lu shows are marked as Episodic\n"
+    "%lu shows are marked as Non-Episodic (e.g. news/sports events)\n"
+    "\n"
+    "cTiVo caches information as possible; successful lookups for 30 days; unsuccessful for 1 day\n"
+    "\n"
+    "In the last non-movie group we looked up, we had the following results:\n"
+    "Episodic:\n"
+    "   %lu shows found (cached: %0.0f%%)\n"
+    "   %lu series found, but episodes not Found (cached: %0.0f%%)\n"
+    "   %lu series not found (cached: %0.0f%%)\n"
+    "\n"
+    "Non-Episodic:\n"
+    "   %lu shows found (cached: %0.0f%%)\n"
+    "   %lu series not found (cached: %0.0f%%)\n"
+    "\n"
+    "Here are the shows that had issues:\n"
+    "Episodic Series not Found at TVDB\n"
+    "%@\n\n"
+    "Episodic Series not Found (Cached)\n"
+    "%@\n\n"
+    "Episodic Series Found, but episodes not found at TVDB\n"
+    "%@\n\n"
+    "Episodic Series Found, but episodes not found (Cached)\n"
+    "%@\n\n"
+    "Non-Episodic Series not Found at TVDB\n"
+    "%@\n\n"
+    "Non-Episodic Series not Found (Cached)\n"
+    "%@\n\n"
+
+    ;
+#define val(x) (unsigned long)(((NSNumber *)statsCopy[x]).integerValue)
+#define combineVal(x) (val(x) + val(x " Cached"))
+#define percentVal(x) combineVal(x) , (100.0 * (float)val(x " Cached") / (float)combineVal(x))
+#define cval(x) val(x " Count")
+#define combineCval(x) (cval(x) + cval(x " Cached"))
+#define percentCval(x) combineCval(x) , (100.0 * (float)cval(x " Cached") / (float)combineCval(x))
+#define list(x) statsCopy[x " List"] ?: @"None", statsCopy[x " Cached List"]  ?: @"None"
+    statisticsReport = [NSString stringWithFormat:
+                            statisticsReport
+                        ,
+
+                        val(kMTVDBAll),
+                        val(kMTVDBMovie),
+
+                        combineVal(kMTVDBSeriesEpisodeFound) +
+                        combineCval(kMTVDBEpisodicSeriesNotFound) +
+                        combineCval(kMTVDBEpisodeNotFound),
+
+                        combineVal(kMTVDBNonEpisodicSeriesFound) +
+                        combineCval(kMTVDBNonEpisodicSeriesNotFound),
+
+                        percentVal(kMTVDBSeriesEpisodeFound),
+                        percentCval(kMTVDBEpisodicSeriesNotFound),
+                        percentCval(kMTVDBEpisodeNotFound),
+
+                        percentVal(kMTVDBNonEpisodicSeriesFound),
+                        percentCval(kMTVDBNonEpisodicSeriesNotFound),
+
+                        list(kMTVDBEpisodicSeriesNotFound),
+                        list(kMTVDBEpisodeNotFound),
+
+                        list(kMTVDBNonEpisodicSeriesNotFound)
+
+                        ];
+
+    return statisticsReport;
 }
 
 -(void) incrementStatistic: (NSString *) statistic {
@@ -636,12 +709,14 @@ __DDLOGHERE__
                     [strongSelf checkType:@"airedEpisodeNumber" inDict:episodeInfo] &&
                     [strongSelf checkType:@"id" inDict:episodeInfo]) {
                     NSString * artworkLocation = [NSString stringWithFormat:@"episodes/%@/%@.jpg",seriesID, episodeInfo[@"id"]];
-                    DDLogReport(@"TVDB Artwork at %@",artworkLocation);
+                    DDLogDetail(@"TVDB Artwork for %@ at %@",show, artworkLocation);
                     [strongSelf incrementStatistic:kMTVDBSeriesEpisodeFound];
+                    NSNumber * season = episodeInfo[@"airedSeason"];
+                    NSNumber * episode = episodeInfo[@"airedEpisodeNumber"];
                     @synchronized (strongSelf.tvdbCache) {
                         [strongSelf.tvdbCache setObject:@{
-                                                    @"season":  episodeInfo[@"airedSeason"],
-                                                    @"episode": episodeInfo[@"airedEpisodeNumber"],
+                                                    @"season":  season.description,
+                                                    @"episode": episode.description,
                                                     @"artwork": artworkLocation,
                                                     @"series": seriesID,
                                                     @"date":[NSDate date]
@@ -658,7 +733,7 @@ __DDLOGHERE__
               }
             } failureHandler:^(){
                 typeof(self) strongSelf = weakSelf;
-                [strongSelf addValue:[NSString stringWithFormat:@"Date: %@, URLs:%@",show.originalAirDateNoTime, [self urlsForReporting:seriesIDs]] inStatistic:kMTVDBSeriesFoundEpisodeNotFound forShow:show.showTitle];
+                [strongSelf addValue:[NSString stringWithFormat:@"Date: %@, URLs:%@",show.originalAirDateNoTime, [self urlsForReporting:seriesIDs]] inStatistic:kMTVDBEpisodeNotFound forShow:show.showTitle];
                 @synchronized (strongSelf.tvdbCache) {
                     [strongSelf.tvdbCache setObject:@{
                                                       @"series": kMTVDBMissing,  //mark as "TVDB doesn't have this episode"
@@ -709,7 +784,11 @@ __DDLOGHERE__
                                                } forKey:  show.seriesTitle ];
                }
                NSString *URL = [[NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", show.seriesTitle] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-               [strongSelf addValue: URL   inStatistic: kMTVDBSeriesNotFound forShow:show.seriesTitle];
+               if (isNonEpisodic) {
+                   [strongSelf addValue: URL   inStatistic: kMTVDBEpisodicSeriesNotFound forShow:show.seriesTitle];
+               } else {
+                   [strongSelf addValue: URL   inStatistic: kMTVDBNonEpisodicSeriesNotFound forShow:show.seriesTitle];
+               }
                DDLogDetail(@"TVDB, no series found for %@", show.seriesTitle);
            }
        }];
@@ -746,11 +825,16 @@ __DDLOGHERE__
             show.gotTVDBDetails = YES;
             if ([episodeEntry[@"series"] isEqualToString:kMTVDBMissing]) {
                 if (episodeEntry[@"possibleIds"]) {
-                    NSString *URL = [self urlsForReporting:@[episodeEntry[@"possibleIds"]]];
-                    [self addValue: URL inStatistic:kMTVDBEpisodeKnownMissing forShow:show.showTitle  ];
+                    NSString *URL = [self urlsForReporting:episodeEntry[@"possibleIds"]];
+                    [self addValue: URL inStatistic:kMTVDBEpisodeNotFoundCached forShow:show.showTitle  ];
                 } else {
                     NSString *URL = [[NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", show.seriesTitle] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-                    [self addValue: URL inStatistic:kMTVDBSeriesKnownMissing forShow:show.showTitle  ];
+                    if (isNonEpisodic) {
+                        [self addValue: URL inStatistic:kMTVDBNonEpisodicSeriesNotFoundCached forShow:show.showTitle  ];
+                    } else {
+                        [self addValue: URL inStatistic:kMTVDBEpisodicSeriesNotFoundCached forShow:show.showTitle  ];
+
+                    }
                 }
             } else if (isNonEpisodic) {
                  [self incrementStatistic: kMTVDBNonEpisodicSeriesFoundCached ];
