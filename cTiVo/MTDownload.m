@@ -926,8 +926,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     
 	if (!self.encodeFormat.isTestPS &&
         [[NSUserDefaults standardUserDefaults] boolForKey:kMTGetEpisodeArt]) {
-       NSString * filename = [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:self.baseFileName];
-        [self.show retrieveArtworkIntoFile:filename];
+        [self retrieveArtwork];
  	}
     return YES;
 }
@@ -1796,6 +1795,42 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 #pragma mark -
 #pragma mark Post processing methods
+
+-(void) retrieveArtwork {
+
+    if (self.show.tvdbArtworkLocation.length == 0) {
+        return;
+    }
+
+    NSString * filename = [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:self.baseFileName];
+
+    NSString * fileNameDetail;
+    if (self.show.isMovie) {
+        fileNameDetail = [self.show movieYear];
+    } else {
+        fileNameDetail = [self.show seasonEpisode];
+    }
+
+    NSString * destination;
+    if (fileNameDetail.length) {
+        destination = [NSString stringWithFormat:@"%@_%@",filename, fileNameDetail];
+    } else {
+        destination = filename;
+    }
+
+    NSString * path = [destination stringByDeletingLastPathComponent];
+    NSString * base = [destination lastPathComponent];
+    NSString * extension = [self.show.tvdbArtworkLocation pathExtension] ?: @".jpg";
+
+    base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    base = [base stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+
+    NSString * realDestination = [[path stringByAppendingPathComponent:base] stringByAppendingPathExtension:extension];
+
+
+    [tiVoManager.tvdb retrieveArtworkIntoFile:realDestination forShow:self.show ];
+}
+
 - (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
 	prefix = [prefix lowercaseString];
 	suffix = [suffix lowercaseString];

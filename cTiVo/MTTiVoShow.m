@@ -15,6 +15,7 @@
 #import "mp4v2.h"
 #import "NSString+Helpers.h"
 #import "NSNotificationCenter+Threads.h"
+#import "NSString+Helpers.h"
 
 @interface MTTiVoShow () {
 	
@@ -282,9 +283,7 @@ __DDLOGHERE__
         }
 
     } else {
-        if (!self.isMovie) { //no need for movie info, just artwork when we download.
-            [tiVoManager.tvdb getTheTVDBDetails:self ];
-        }
+        [tiVoManager.tvdb getTheTVDBDetails:self ];
         DDLogDetail(@"GetDetails parsing Finished: %@", self.showTitle);
     }
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
@@ -388,11 +387,7 @@ __DDLOGHERE__
     if ([self.episodeID hasPrefix:@"SH" ]) return @"";  //non-episodic shows don't have episodes
     NSString *returnString = @"";
     if (self.episode > 0) {
-		if (self.season > 0) {
 			returnString = [NSString stringWithFormat:@"S%0.2dE%0.2d",self.season,self.episode ];
-		} else {
-			returnString = [NSString stringWithFormat:@"%d",self.episode];
-		}
      } else {
         returnString = self.episodeNumber;
     }
@@ -1118,7 +1113,15 @@ static void * originalAirDateContext = &originalAirDateContext;
 		if (_episodeTitle.length > 0 ) {
 			self.showTitle =[NSString stringWithFormat:@"%@: %@",_seriesTitle, _episodeTitle];
 		} else {
-			self.showTitle =_seriesTitle;
+            if ([_episodeID hasPrefix:@"EP"] &&
+                [seriesTitle contains:@": "]) {
+                NSArray * splitTitle = [seriesTitle componentsSeparatedByString:@": "];
+                if (splitTitle.count > 0) {
+                    _seriesTitle = splitTitle[0];
+                    _episodeTitle = splitTitle[1];
+                }
+            }
+			self.showTitle =seriesTitle;
 		}
 	}
 }

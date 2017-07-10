@@ -98,6 +98,20 @@
     return prefixRange.location == 0 ;
 }
 
+-(NSString *) removeParenthetical {
+    NSUInteger locOpen = [self rangeOfString:@"("].location;
+    NSUInteger locClose = [self rangeOfString:@")"].location;
+
+    if (locOpen != NSNotFound &&
+        locClose != NSNotFound &&
+        locOpen < locClose) {
+        return [self stringByReplacingCharactersInRange:NSMakeRange(locOpen, locClose-locOpen+1) withString:@""];
+    } else {
+        return self;
+    }
+
+
+}
 
 
 @end

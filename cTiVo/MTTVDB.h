@@ -18,7 +18,7 @@
 
 -(void)getTheTVDBDetails: (MTTiVoShow *) show;
 
--(void) rememberArtWork: (NSString *) newArtwork forSeries: (NSString *) seriesId;
+-(void)retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show;
 
 -(NSString *) stats;
 -(BOOL) isActive;

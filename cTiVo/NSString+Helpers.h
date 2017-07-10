@@ -22,4 +22,6 @@
 
 -(BOOL) hasCaseInsensitivePrefix: (NSString *) prefix;
 
+-(NSString *) removeParenthetical;
+
 @end

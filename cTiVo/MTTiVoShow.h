@@ -128,11 +128,10 @@
 //-(NSArray *) apmArguments;
 -(void) setShowSeriesAndEpisodeFrom:(NSString *) newTitle ;
 
--(void)playVideo:(NSString *)path;
--(void)revealInFinder:(NSArray *)paths;
--(void)retrieveArtworkIntoFile: (NSString *) filename;
+-(void) playVideo:(NSString *)path;
+-(void) revealInFinder:(NSArray *)paths;
 -(void) addExtendedMetaDataToFile:(MP4FileHandle *)fileHandle withImage:(NSImage *) artwork ;
--(void)createTestMP4;
+-(void) createTestMP4;
 
 typedef enum {
 	HDTypeNotAvailable = -1,
