@@ -9,6 +9,7 @@
 
 #import "MTTiVoShow.h"
 #import "MTProgramTableView.h"
+#import "MTTVDB.h"
 #import "MTiTunes.h"
 #import "MTTiVoManager.h"
 #import "NSString+RFC3339Date.h"
@@ -384,11 +385,12 @@ __DDLOGHERE__
 }
 												  
 -(NSString *) seasonEpisode {
-    if ([self.episodeID hasPrefix:@"SH" ]) return @"";  //non-episodic shows don't have episodes
     NSString *returnString = @"";
     if (self.episode > 0) {
 			returnString = [NSString stringWithFormat:@"S%0.2dE%0.2d",self.season,self.episode ];
-     } else {
+    } else if ([self.episodeID hasPrefix:@"SH" ]) {
+        return @"";  //non-episodic shows don't have episodes
+    } else {
         returnString = self.episodeNumber;
     }
     return returnString;
@@ -1238,6 +1240,18 @@ static void * originalAirDateContext = &originalAirDateContext;
 
 }
 
+-(void) setSeasonEpisode:(NSString *)seasonEpisode {
+    DDLogDetail(@"Setting seasonEpisode of %@ to %@", self, seasonEpisode);
+    NSRegularExpression *seRegex = [NSRegularExpression regularExpressionWithPattern:@"S([0-9]+)\\s*E([0-9]+)" options:NSRegularExpressionCaseInsensitive error:nil];
+    NSTextCheckingResult *result = [seRegex firstMatchInString:seasonEpisode options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, seasonEpisode.length)];
+    if (result) {
+        self.season  = [[seasonEpisode substringWithRange:[result rangeAtIndex:1]] intValue];
+        self.episode = [[seasonEpisode substringWithRange:[result rangeAtIndex:2]] intValue];
+        [tiVoManager.tvdb cacheSeason:self.season andEpisode:self.episode forShow:self];
+    } else {
+        self.season = 0; self.episode = 0;
+    }
+}
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-property-ivar"

@@ -67,7 +67,7 @@ __DDLOGHERE__
 -(void) resetAll {
     //Remove TVDB Cache
     [[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTTheTVDBCache];
-    self.tvdbCache =  [NSMutableDictionary dictionary];
+
     self.tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
     @synchronized(self.theTVDBStatistics) {
         self.theTVDBStatistics = [NSMutableDictionary dictionary];
@@ -97,7 +97,7 @@ __DDLOGHERE__
         NSInteger numTries = 10;
         while (![self checkToken]  && numTries > 0) {
             DDLogMajor(@"Still checking for TVDB token");
-            usleep(500000);   //FIX: this is not good
+            usleep(250000);   //FIX: pausing for a quarter-second up to 2.5 seconds on main queue is not good
             numTries--;
         }
         if (self.tvdbToken) {
@@ -632,8 +632,8 @@ __DDLOGHERE__
         [statisticList setValue: value forKey: show]; //keep latest version in case it changed
     }
 }
-#pragma mark caching routines
-
+#pragma mark - Caching routines
+//These should be in TiVoManager, so we can access from MTTiVoShow more appropriately.
 #define kMTVDBMissing @"Series Not Found in TVDB"
 
 -(void) cleanCache {
@@ -645,6 +645,9 @@ __DDLOGHERE__
             NSInteger numDays = 30;
             if ([episodeInfo[@"series"] isEqualToString:kMTVDBMissing]) {
                 numDays = 1;
+            } else if ([episodeInfo[@"manual"] isEqual:@(YES)]) {
+                numDays = 365;
+                //would be better to purge tvdbcache after finishing loading episodes.
             }
             if ([[NSDate date] timeIntervalSinceDate:createDate] > 60.0 * 60.0 * 24.0 * numDays) { //Too old so throw out
                 [keysToDelete addObject:key];
@@ -656,7 +659,7 @@ __DDLOGHERE__
     }
 }
 
--(void) rememberArtWork: (NSString *) newArtwork forSeries: (NSString *) series {
+-(void) cacheArtWork: (NSString *) newArtwork forSeries: (NSString *) series {
     if ( series.length > 0) {  //protective only
         @synchronized (self.tvdbCache) {
             NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:series] mutableCopy];
@@ -668,6 +671,26 @@ __DDLOGHERE__
                                forKey:series];
         }
     }
+}
+
+-(void) cacheSeason:(NSInteger) season andEpisode:(NSInteger) episode forShow: (MTTiVoShow *) show {
+    NSString * episodeID = show.episodeID;
+    if ( episodeID.length > 0) {  //protective only
+        @synchronized (self.tvdbCache) {
+            NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:episodeID] mutableCopy];
+            if (!oldEntry) {
+                oldEntry = [NSMutableDictionary dictionaryWithObject: [NSDate date] forKey:@"date"];
+            }
+            [oldEntry setObject:@(season) forKey:@"season"];
+            [oldEntry setObject:@(episode) forKey:@"episode"];
+            [oldEntry setObject:@(YES) forKey:@"manual"];
+
+            [self.tvdbCache setObject:[oldEntry copy]
+                               forKey:episodeID];
+        }
+        [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
+    }
+
 }
 
 -(void) cacheTVDBSeriesID: (NSArray *) seriesIDs forSeries: (NSString *) seriesTitle{
@@ -704,7 +727,7 @@ __DDLOGHERE__
 }
 
 
-#pragma mark External routines
+#pragma mark - External routines
 
 -(BOOL) checkType:(NSString *) type inDict: (NSDictionary *) dict {
     BOOL result = [dict[type] isKindOfClass:[NSString class]] ||
@@ -1017,7 +1040,6 @@ __DDLOGHERE__
             NSString * releaseYear = [releaseDate substringToIndex:4];
             releaseMatch = [releaseYear isEqualToString:show.movieYear];
         }
-
     }
     if ((perfectMatch && titlesMatch && releaseMatch) ||
         (!perfectMatch && (titlesMatch || releaseMatch))) {
@@ -1093,9 +1115,7 @@ __DDLOGHERE__
     }
     if (newArtwork.length > 0 ) {
         show.tvdbArtworkLocation = newArtwork;
-        [self rememberArtWork:newArtwork forSeries:show.seriesTitle];
-    } else {
-
+        [self cacheArtWork:newArtwork forSeries:show.seriesTitle];
     }
 }
 
