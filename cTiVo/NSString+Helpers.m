@@ -113,5 +113,16 @@
 
 }
 
+-(NSString *) escapedQueryString {
+    //do not use with whole URL, only with parts that are "quoted" within the query part of URL
+
+    return (NSString *) CFBridgingRelease (
+    CFURLCreateStringByAddingPercentEscapes(NULL,
+                                            (CFStringRef)self,
+                                            NULL,
+                                            CFSTR("￼=,$&+;@?\n\"<>#\t :/"),
+                                            kCFStringEncodingUTF8)) ;
+
+}
 
 @end

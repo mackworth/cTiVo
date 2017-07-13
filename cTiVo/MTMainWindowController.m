@@ -16,6 +16,8 @@
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"
 #import "MTTiVo.h"
+#import "MTTVDB.h"
+
 #import <Quartz/Quartz.h>
 
 @implementation NSView (HS)
@@ -393,8 +395,11 @@ __DDLOGHERE__
 		}
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		[self subscribe:menu];
-	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
-		[self openDrawer:tiVoShowTable.sortedShows[menuTableRow]];
+    } else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
+        [self openDrawer:tiVoShowTable.sortedShows[menuTableRow]];
+    } else if ([menu.title caseInsensitiveCompare:@"Reload TVDB Info"] == NSOrderedSame) {
+        MTTiVoShow * show = tiVoShowTable.sortedShows[menuTableRow];
+        [tiVoManager.tvdb reloadTVDBInfo:show];
 	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
 		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
         //Eventually if more than 1 download present will open up choice alert (or extend menu with a right pull)

@@ -2368,10 +2368,16 @@
                         <action selector="programMenuHandler:" target="-2" id="424"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Show Details" toolTip="Reveal more information about this show" id="588">
+                <menuItem title="Reload TVDB Info" toolTip="Reveal more information about this show" id="588">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="programMenuHandler:" target="-2" id="589"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Show Details" toolTip="Reveal more information about this show" id="1zO-Hi-mg8">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="programMenuHandler:" target="-2" id="RgB-We-OiU"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Show in Finder" tag="2" toolTip="Show video file in Finder" id="888">

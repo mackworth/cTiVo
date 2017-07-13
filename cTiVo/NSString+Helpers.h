@@ -24,4 +24,6 @@
 
 -(NSString *) removeParenthetical;
 
+-(NSString *) escapedQueryString;
+
 @end

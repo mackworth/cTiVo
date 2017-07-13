@@ -13,12 +13,12 @@
 
 + (MTTVDB *)sharedManager;
 
+-(void) getTheTVDBDetails: (MTTiVoShow *) show;
+-(void) retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show;
+
+-(void) reloadTVDBInfo:(MTTiVoShow *) show;
 -(void) resetAll;  //destroys all caches
 -(void) saveDefaults; //writes caches to userdefaults
-
--(void)getTheTVDBDetails: (MTTiVoShow *) show;
-
--(void)retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show;
 
 -(NSString *) stats;
 -(BOOL) isActive;

@@ -77,11 +77,28 @@ __DDLOGHERE__
 
 #pragma mark -
 #pragma mark HTTP sessions for TVDB
+
+-(void) cancelSession {
+    if (self.tvdbURLSession) DDLogReport(@"canceling TVDB Session");
+    [self.tvdbURLSession getAllTasksWithCompletionHandler:^(NSArray<__kindof NSURLSessionTask *> * _Nonnull tasks) {
+        for (NSURLSessionTask * task in tasks) {
+            [task cancel];
+        }
+        [self checkToken];
+    }];
+    self.tvdbToken = nil; self.tvdbURLSession = nil;
+
+}
+
 -(NSURLSession *) tvdbURLSession {
     if (!_tvdbURLSession) {
-        while (![self checkToken] ) {
+        DDLogReport(@"Establishing Session");
+
+        NSInteger numTries = 10;
+        while (![self checkToken]  && numTries > 0) {
             DDLogMajor(@"Still checking for TVDB token");
-            sleep(0.5);   //FIX: this is not good
+            usleep(500000);   //FIX: this is not good
+            numTries--;
         }
         if (self.tvdbToken) {
             NSURLSessionConfiguration * config = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -89,6 +106,8 @@ __DDLOGHERE__
                                              @"Content-Type": @"application/json",
                                              @"Authorization": [NSString stringWithFormat:@"Bearer %@",self.tvdbToken]};
             _tvdbURLSession = [NSURLSession sessionWithConfiguration:config];
+        } else {
+            DDLogReport(@"Cannot establish session with TVDB");
         }
     }
     return _tvdbURLSession;
@@ -141,7 +160,8 @@ __DDLOGHERE__
                             DDLogReport(@"TVDB Token JSON parsing Error: %@", data);
                         }
                     } else {
-                        DDLogReport(@"TVDB Token HTTP Response Error %ld: %@, %@", (long)httpResponse.statusCode, data, response );
+                        DDLogReport(@"TVDB Token HTTP Response Error %ld: %@, %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL );
+                        [self cancelSession];
                     }
                 }
 
@@ -158,7 +178,7 @@ __DDLOGHERE__
          failureHandler: (void(^) (void)) failureBlock {
     NSAssert ([NSThread isMainThread], @"seriesIDForShow running in background");
 
-    NSURL *seriesURL = [NSURL URLWithString: [[NSString stringWithFormat:@"https://api.thetvdb.com/search/series?name=%@",series] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    NSURL *seriesURL = [NSURL URLWithString: [NSString stringWithFormat:@"https://api.thetvdb.com/search/series?name=%@",[series escapedQueryString]] ];
     NSURLSessionDataTask *task = [self.tvdbURLSession  dataTaskWithURL: seriesURL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (!error) {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
@@ -177,14 +197,14 @@ __DDLOGHERE__
                                     NSString * seriesName = seriesDict[@"seriesName"];
                                     if ([seriesID isKindOfClass:[NSNumber class]] &&
                                         [seriesName isKindOfClass:[NSString class]]) {
-                                            NSString * seriesNameNoYear = [[seriesName removeParenthetical] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]; //tvdb adds (2011) to distinguish series
+                                        NSString * seriesNameNoYear = [[seriesName removeParenthetical] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]; //tvdb adds (2011) to distinguish series
                                         if ([series isEqualTo:seriesName] ||
                                              [series isEqualTo:seriesNameNoYear]) {
                                             [seriesIDs insertObject:seriesID.description atIndex:0];
                                         } else {
                                             [seriesIDs addObject:seriesID.description];
                                         }
-                                    } else {
+                                    } else if (![seriesName isKindOfClass:[NSNull class]]) {
                                         DDLogReport(@"TVDB Series JSON type Error ('id' Number; seriesName String): %@ for %@", seriesDict, series);
                                     }
                                 } else {
@@ -204,12 +224,13 @@ __DDLOGHERE__
                         DDLogDetail(@"TVDB Series not found: %@ for %@", series, jsonData[@"error"]);
                     }
                 } else {
-                    DDLogReport(@"TVDB Series JSON parsing Error: %@ for %@", data, series);
+                    DDLogReport(@"TVDB Series JSON parsing Error: %@ for %@",  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], series);
                 }
             } else if (httpResponse.statusCode == 404){
                 DDLogVerbose(@"TVDB Series %@ not found at %@" , series, seriesURL );
             } else {
-                DDLogReport(@"TVDB Series HTTP Response Error %ld: %@, %@ fr %@", (long)httpResponse.statusCode, data, response, series );
+                DDLogReport(@"TVDB Series HTTP Response Error %ld: %@, %@ for %@", (long)httpResponse.statusCode, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL, series );
+                [self cancelSession];
             }
         }
         if (failureBlock) {
@@ -237,7 +258,7 @@ __DDLOGHERE__
         if (episodeSplit.count > 0) partialEpisodeName = episodeSplit[0];
     }
     partialEpisodeName = [[partialEpisodeName removeParenthetical] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSURL *episodeURL = [NSURL URLWithString:[episodeURLString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    NSURL *episodeURL = [NSURL URLWithString:episodeURLString];
     NSURLSessionDataTask *task = [self.tvdbURLSession dataTaskWithURL:episodeURL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         NSNumber *nextPage = @(-1);
         if (!error) {
@@ -254,9 +275,6 @@ __DDLOGHERE__
                             for (NSDictionary * episodeDict in episodeList) {
                                 if ([episodeDict isKindOfClass:[NSDictionary class]]) {
                                     NSString * tvdbEpisodeName = episodeDict[@"episodeName"];
-                                    if ([episodeName isEqualToString:@"The Sound of Drums"]) {
-                                        NSLog(@"Qwerty %@ v %@", episodeName, tvdbEpisodeName);
-                                    }
                                     if ([tvdbEpisodeName isKindOfClass:[NSString class]]) {
                                         NSString * partialTVDB = [[tvdbEpisodeName removeParenthetical] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
                                         if ([tvdbEpisodeName localizedCaseInsensitiveCompare: episodeName] == NSOrderedSame ||
@@ -268,7 +286,7 @@ __DDLOGHERE__
                                             }
                                             return; // found exact match, so no more processing.
                                         }
-                                    } else {
+                                    } else if (![tvdbEpisodeName isKindOfClass:[NSNull class]]) {
                                         DDLogReport(@"TVDB Episode JSON type Error ('episodeName' should be String). For %@ on page %@ tvdb has %@",  seriesID, @(pageNumber), episodeDict);
                                     }
                                 } else {
@@ -282,13 +300,14 @@ __DDLOGHERE__
                         DDLogDetail(@"TVDB error for %@: %@", seriesID, error.localizedFailureReason);
                     }
                 } else {
-                    DDLogReport(@"TVDB Episode JSON parsing Error: %@ for %@", data, seriesID);
+                    DDLogReport(@"TVDB Episode JSON parsing Error: %@ for %@",  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], seriesID);
                 }
             } else if (httpResponse.statusCode == 404){
                 DDLogVerbose(@"TVDB episode %@ in series %@ not found on page %@", episodeName, seriesID, @(pageNumber));
             } else {
-                DDLogReport(@"TVDB Episode HTTP Response Error %ld: %@, %@ fr %@", (long)httpResponse.statusCode, data, httpResponse, seriesID );
-            }
+                DDLogReport(@"TVDB Episode HTTP Response Error %ld: %@, %@ fr %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL, seriesID );
+                [self cancelSession];
+           }
         } else {
             DDLogReport(@"TVDB Episode Call Error %@: for %@", error.localizedFailureReason, episodeURL );
 
@@ -296,7 +315,6 @@ __DDLOGHERE__
 
         //so this one didn't work; let's try the next one, either next page or next seriesID
         if ([nextPage isKindOfClass: NSNumber.class] && nextPage.integerValue > 0) {
-            NSLog(@"Getting next page %@ for %@", nextPage, episodeName);
             [self searchForEpisodeNamed: episodeName
                                inSeries: seriesIDs
                       completionHandler: completionBlock
@@ -314,7 +332,7 @@ __DDLOGHERE__
                              pageNumber: 1];
         }
     }];
-    DDLogDetail(@"search by episodeName %@ for show in%@ : %@", episodeName, seriesIDs, episodeURL);
+    DDLogDetail(@"searching by episodeName %@ for show in TVDB show %@ : %@", episodeName, seriesID, episodeURL);
    [task resume];
 }
 
@@ -339,7 +357,7 @@ __DDLOGHERE__
          NSArray * episodeSplit = [episodeName componentsSeparatedByString:@";"];
          if (episodeSplit.count > 0) partialEpisodeName = episodeSplit[0];
      }
-    NSURL *episodeURL = [NSURL URLWithString:[episodeURLString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    NSURL *episodeURL = [NSURL URLWithString: episodeURLString];
      NSURLSessionDataTask *task = [self.tvdbURLSession dataTaskWithURL:episodeURL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (!error) {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
@@ -369,7 +387,7 @@ __DDLOGHERE__
                                             localEpisodeCandidate = episodeDict;
                                             localSeriesIDCandidate = seriesID;
                                         }
-                                    } else {
+                                    } else if (![tvdbEpisodeName isKindOfClass:[NSNull class]]) {
                                         DDLogReport(@"TVDB Episode JSON type Error ('episodeNumber' should be String). For %@ on %@ tvdb has %@",  seriesID, originalAirDate,episodeDict);
                                     }
                                 } else {
@@ -383,13 +401,14 @@ __DDLOGHERE__
                         DDLogDetail(@"TVDB error for %@: %@", seriesID, error.localizedFailureReason);
                     }
                 } else {
-                    DDLogReport(@"TVDB Episode JSON parsing Error: %@ for %@", data, seriesID);
+                    DDLogReport(@"TVDB Episode JSON parsing Error: %@ for %@",  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], seriesID);
                 }
             } else if (httpResponse.statusCode == 404){
                 DDLogVerbose(@"TVDB episode %@ in series %@ not found on %@", episodeName, seriesID, originalAirDate);
             } else {
-                DDLogReport(@"TVDB Episode HTTP Response Error %ld: %@, %@ fr %@", (long)httpResponse.statusCode, data, httpResponse, seriesID );
-            }
+                DDLogReport(@"TVDB Episode HTTP Response Error %ld: %@, %@ fr %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL, seriesID );
+                [self cancelSession];
+           }
         } else {
             DDLogReport(@"TVDB Episode Call Error %@: for %@", error.localizedFailureReason, episodeURL );
 
@@ -417,7 +436,7 @@ __DDLOGHERE__
                   andEpisodeCandidate:localEpisodeCandidate];
         }
     }];
-     DDLogDetail(@"search by OAD %@ for show (episode %@) in %@ : %@", originalAirDate, episodeName, seriesIDs, episodeURL);
+     DDLogDetail(@"searching by OAD %@ for show (episode %@) in TVDB %@ : %@", originalAirDate, episodeName, seriesID, episodeURL);
     [task resume];
 
 }
@@ -578,8 +597,8 @@ __DDLOGHERE__
                         combineCval(kMTVDBNonEpisodicSeriesNotFound),
 
                         percentVal(kMTVDBSeriesEpisodeFound),
-                        percentCval(kMTVDBEpisodicSeriesNotFound),
                         percentCval(kMTVDBEpisodeNotFound),
+                        percentCval(kMTVDBEpisodicSeriesNotFound),
 
                         percentVal(kMTVDBNonEpisodicSeriesFound),
                         percentCval(kMTVDBNonEpisodicSeriesNotFound),
@@ -652,8 +671,10 @@ __DDLOGHERE__
 }
 
 -(void) cacheTVDBSeriesID: (NSArray *) seriesIDs forSeries: (NSString *) seriesTitle{
-    if (seriesIDs.count) {
-        @synchronized (self.tvdbSeriesIdMapping) {
+    @synchronized (self.tvdbSeriesIdMapping) {
+        if (!seriesIDs.count) {
+            [self.tvdbSeriesIdMapping removeObjectForKey:seriesTitle];
+        } else {
             [self.tvdbSeriesIdMapping setObject:[NSArray arrayWithArray: seriesIDs] forKey:seriesTitle];
         }
     }
@@ -783,7 +804,7 @@ __DDLOGHERE__
                                                @"date":[NSDate date]
                                                } forKey:  show.seriesTitle ];
                }
-               NSString *URL = [[NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", show.seriesTitle] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+               NSString *URL = [NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", [show.seriesTitle escapedQueryString]];
                if (isNonEpisodic) {
                    [strongSelf addValue: URL   inStatistic: kMTVDBEpisodicSeriesNotFound forShow:show.seriesTitle];
                } else {
@@ -793,6 +814,16 @@ __DDLOGHERE__
            }
        }];
 
+}
+
+-(void) reloadTVDBInfo:(MTTiVoShow *) show {
+    show.gotTVDBDetails = NO;
+    @synchronized (self.tvdbCache) {
+        [self.tvdbCache removeObjectForKey:show.episodeID];
+        [self.tvdbCache removeObjectForKey:show.seriesTitle];
+        [self cacheTVDBSeriesID:nil forSeries:show.seriesTitle];
+    }
+    [self getTheTVDBDetails:show];
 }
 
 -(void)getTheTVDBDetails: (MTTiVoShow *) show {
@@ -828,7 +859,7 @@ __DDLOGHERE__
                     NSString *URL = [self urlsForReporting:episodeEntry[@"possibleIds"]];
                     [self addValue: URL inStatistic:kMTVDBEpisodeNotFoundCached forShow:show.showTitle  ];
                 } else {
-                    NSString *URL = [[NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", show.seriesTitle] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                    NSString *URL = [NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", [show.seriesTitle escapedQueryString]];
                     if (isNonEpisodic) {
                         [self addValue: URL inStatistic:kMTVDBNonEpisodicSeriesNotFoundCached forShow:show.showTitle  ];
                     } else {
@@ -922,12 +953,12 @@ __DDLOGHERE__
         if (artwork.length+episodeNum.intValue +episodeNum.intValue > 0) {
             //got at least one
             if (artwork.length) show.tvdbArtworkLocation = artwork;
-        } else {
+            DDLogDetail(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, show);
+       } else {
             NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self seriesIDForReporting:show.seriesId ], show.originalAirDateNoTime, show.season, show.episode, [self urlsForReporting:seriesIDTVDBs] ];
             DDLogDetail(@"No series info for %@ %@ ",show.showTitle, details);
         }
         if ([episodeNum intValue] > 0) {  //season 0 = specials on theTVDB
-            DDLogDetail(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, show);
             //special case due to parsing of tivo's season/episode combined string
             if (show.season > 0 && show.season/10 == [seasonNum intValue]  && [episodeNum intValue] == show.episode + (show.season % 10)*10) {
                 //must have mis-parsed (assumed SSEE, but actually SEEE, so let's fix
@@ -1005,7 +1036,8 @@ __DDLOGHERE__
     if (show.gotTVDBDetails) return;
 
     //we only get artwork
-    NSString * urlString = [[NSString stringWithFormat:@"https://api.themoviedb.org/3/search/movie?query=\"%@\"&api_key=%@",show.seriesTitle, kMTTheMoviedDBAPIKey] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString * urlString = [NSString stringWithFormat:@"https://api.themoviedb.org/3/search/movie?query=\"%@\"&api_key=%@",
+                             [show.seriesTitle escapedQueryString], kMTTheMoviedDBAPIKey];
     NSString * reportURL = [urlString stringByReplacingOccurrencesOfString:kMTTheMoviedDBAPIKey withString:@"APIKEY" ];
     DDLogDetail(@"Getting movie Data for %@ using %@",show,reportURL);
     NSURL *url = [NSURL URLWithString:urlString];
@@ -1092,8 +1124,7 @@ __DDLOGHERE__
     } else {
         baseUrlString = @"http://thetvdb.com/banners/%@";
     }
-    NSString *urlString = [[NSString stringWithFormat: baseUrlString, show.tvdbArtworkLocation ]
-                           stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *urlString = [NSString stringWithFormat: baseUrlString, show.tvdbArtworkLocation ];
     //download only if we don't have it already
     if (![[NSFileManager defaultManager] fileExistsAtPath:filename]) {
         DDLogDetail(@"downloading artwork at %@ to %@",urlString, filename);
