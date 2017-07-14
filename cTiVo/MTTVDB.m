@@ -674,19 +674,23 @@ __DDLOGHERE__
 }
 
 -(void) cacheSeason:(NSInteger) season andEpisode:(NSInteger) episode forShow: (MTTiVoShow *) show {
-    NSString * episodeID = show.episodeID;
-    if ( episodeID.length > 0) {  //protective only
+    NSString * uniqueID = show.uniqueID;
+    if ( uniqueID.length > 0) {  //protective only
         @synchronized (self.tvdbCache) {
-            NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:episodeID] mutableCopy];
-            if (!oldEntry) {
-                oldEntry = [NSMutableDictionary dictionaryWithObject: [NSDate date] forKey:@"date"];
-            }
-            [oldEntry setObject:@(season) forKey:@"season"];
-            [oldEntry setObject:@(episode) forKey:@"episode"];
-            [oldEntry setObject:@(YES) forKey:@"manual"];
+            NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:uniqueID] mutableCopy];
+            if (season > 0 || episode > 0) {
+                if (!oldEntry) {
+                    oldEntry = [NSMutableDictionary dictionaryWithObject: [NSDate date] forKey:@"date"];
+                }
+                [oldEntry setObject:@(season) forKey:@"season"];
+                [oldEntry setObject:@(episode) forKey:@"episode"];
+                [oldEntry setObject:@(YES) forKey:@"manual"];
 
-            [self.tvdbCache setObject:[oldEntry copy]
-                               forKey:episodeID];
+                [self.tvdbCache setObject:[oldEntry copy]
+                                   forKey:uniqueID];
+            } else if (oldEntry && [oldEntry[@"manual"] isEqual:@(YES)]) {
+                [self.tvdbCache removeObjectForKey: uniqueID];
+            }
         }
         [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
     }
@@ -713,7 +717,7 @@ __DDLOGHERE__
     NSString * seriesIDs = [[self cachedTVDBSeriesID:show.seriesTitle] componentsJoinedByString:@" OR "]; // see if we've already done this
     if (!seriesIDs) {
         @synchronized (self.tvdbCache) {
-            NSDictionary *TVDBepisodeEntry = [self.tvdbCache objectForKey:show.episodeID];
+            NSDictionary *TVDBepisodeEntry = [self.tvdbCache objectForKey:show.uniqueID];
             //could provide these ,too?
             // NSNumber * TVDBepisodeNum = [TVDBepisodeEntry objectForKey:@"episode"];
             //NSNumber * TVDBseasonNum = [TVDBepisodeEntry objectForKey:@"season"];
@@ -764,7 +768,7 @@ __DDLOGHERE__
                                                     @"artwork": artworkLocation,
                                                     @"series": seriesID,
                                                     @"date":[NSDate date]
-                                                    } forKey:show.episodeID];
+                                                    } forKey:show.uniqueID];
                     }
                     //remember the one that worked, not all the others
                     NSArray *seriesIDTVDBs = @[seriesID];
@@ -783,7 +787,7 @@ __DDLOGHERE__
                                                       @"series": kMTVDBMissing,  //mark as "TVDB doesn't have this episode"
                                                       @"possibleIds": seriesIDs,
                                                       @"date":[NSDate date]
-                                                      } forKey:show.episodeID];
+                                                      } forKey:show.uniqueID];
                 }
                 DDLogDetail(@"TVDB doesn't have episodeInfo for %@ on %@ (%@)", show.showTitle, show.originalAirDateNoTime, [self urlsForReporting:seriesIDs]);
             }];
@@ -794,23 +798,22 @@ __DDLOGHERE__
     //secondary call necessary to check both seriesName and seriesName w/o a subtitle (e.g. 24: The Lost Weekend)
     __weak typeof(self) weakSelf = self;
     //   void  (^successHandler) ( NSArray<NSString *> *) =
-    BOOL isNonEpisodic = [show.episodeID hasPrefix:@"SH" ];
     [self seriesIDForShow:seriesName
         completionHandler: ^(NSArray<NSString *> *seriesIDs) {
             typeof(self) strongSelf = weakSelf;
             [strongSelf cacheTVDBSeriesID:seriesIDs forSeries:seriesName];
-            if (isNonEpisodic) {
+            if (show.isEpisodicShow) {
+                [strongSelf getEpisodeDetailsForShow:show withIDs:seriesIDs];
+            } else {
                 [strongSelf incrementStatistic:kMTVDBNonEpisodicSeriesFound];
                 //need to get series artwork here  (caching in episode entry) and then call
                 @synchronized (self.tvdbCache) {
                     [self.tvdbCache setObject:@{
                                                 @"series": seriesIDs[0],
                                                 @"date":[NSDate date]
-                                                } forKey:show.episodeID];
+                                                } forKey:show.seriesTitle];
                 }
                 [strongSelf finishTVDBProcessing:show];
-            } else {
-                [strongSelf getEpisodeDetailsForShow:show withIDs:seriesIDs];
             }
         }
 
@@ -828,7 +831,7 @@ __DDLOGHERE__
                                                } forKey:  show.seriesTitle ];
                }
                NSString *URL = [NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", [show.seriesTitle escapedQueryString]];
-               if (isNonEpisodic) {
+               if (show.isEpisodicShow) {
                    [strongSelf addValue: URL   inStatistic: kMTVDBEpisodicSeriesNotFound forShow:show.seriesTitle];
                } else {
                    [strongSelf addValue: URL   inStatistic: kMTVDBNonEpisodicSeriesNotFound forShow:show.seriesTitle];
@@ -842,7 +845,7 @@ __DDLOGHERE__
 -(void) reloadTVDBInfo:(MTTiVoShow *) show {
     show.gotTVDBDetails = NO;
     @synchronized (self.tvdbCache) {
-        [self.tvdbCache removeObjectForKey:show.episodeID];
+        [self.tvdbCache removeObjectForKey:show.uniqueID];
         [self.tvdbCache removeObjectForKey:show.seriesTitle];
         [self cacheTVDBSeriesID:nil forSeries:show.seriesTitle];
     }
@@ -865,69 +868,63 @@ __DDLOGHERE__
         [self incrementStatistic: kMTVDBMovie ];
         return;
     }
-
-    if ([show.seriesId hasPrefix:@"SH"]) { //if we have a series get the other information
-        NSDictionary *episodeEntry;
-        BOOL isNonEpisodic = [show.episodeID hasPrefix:@"SH" ];
-        @synchronized (self.tvdbCache) {
-            episodeEntry = [self.tvdbCache objectForKey:show.episodeID];
-            if (!episodeEntry) {
-                episodeEntry = [self.tvdbCache objectForKey:show.seriesTitle];
-            }
+    //if we have a series get the other information
+    NSDictionary *episodeEntry;
+    @synchronized (self.tvdbCache) {
+        episodeEntry = [self.tvdbCache objectForKey:show.uniqueID];
+        if (!episodeEntry) {
+            episodeEntry = [self.tvdbCache objectForKey:show.seriesTitle];
         }
-        if (episodeEntry) { // We already had this information
-            show.gotTVDBDetails = YES;
-            if ([episodeEntry[@"series"] isEqualToString:kMTVDBMissing]) {
-                if (episodeEntry[@"possibleIds"]) {
-                    NSString *URL = [self urlsForReporting:episodeEntry[@"possibleIds"]];
-                    [self addValue: URL inStatistic:kMTVDBEpisodeNotFoundCached forShow:show.showTitle  ];
-                } else {
-                    NSString *URL = [NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", [show.seriesTitle escapedQueryString]];
-                    if (isNonEpisodic) {
-                        [self addValue: URL inStatistic:kMTVDBNonEpisodicSeriesNotFoundCached forShow:show.showTitle  ];
-                    } else {
-                        [self addValue: URL inStatistic:kMTVDBEpisodicSeriesNotFoundCached forShow:show.showTitle  ];
-
-                    }
-                }
-            } else if (isNonEpisodic) {
-                 [self incrementStatistic: kMTVDBNonEpisodicSeriesFoundCached ];
-            } else {
-                [self incrementStatistic: kMTVDBSeriesEpisodeFoundCached];
-            }
-            [self finishTVDBProcessing:show];
-        } else {
-            DDLogDetail(@"Need to get %@", show.showTitle);
-            NSArray <NSString *> *seriesIDTVDBs = [self cachedTVDBSeriesID:show.seriesTitle ];
-
-            NSArray * splitNameArray = [show.seriesTitle componentsSeparatedByString:@":"];
-            NSString * splitName = (splitNameArray.count > 1) ? splitNameArray[0] : nil;
-
-            if (!seriesIDTVDBs.count && splitName) {
-                seriesIDTVDBs = [self cachedTVDBSeriesID:splitName];
-            }
-            if (seriesIDTVDBs.count) {
-                // already have series ID, but not this episode info
-                if (isNonEpisodic) {
-                    [self incrementStatistic:kMTVDBNonEpisodicSeriesFoundCached];
-                    @synchronized (self.tvdbCache) {
-                        [self.tvdbCache setObject:@{
-                              @"series": seriesIDTVDBs[0],
-                              @"date":[NSDate date]
-                              } forKey:show.episodeID];
-                    }
-                    [self finishTVDBProcessing:show];
-                } else {
-                    [self getEpisodeDetailsForShow:show withIDs:seriesIDTVDBs];
-                }
-            } else {
-                //first get seriesIDs, then Episode Info
-                [self callSeriesIDForShow: show withSeriesName:show.seriesTitle andSecondCall:splitName];
-            }
-        }
-    } else {
-        //not a series; no TVDB available
+    }
+    if (episodeEntry) { // We already had this information
         show.gotTVDBDetails = YES;
+        if ([episodeEntry[@"series"] isEqualToString:kMTVDBMissing]) {
+            if (episodeEntry[@"possibleIds"]) {
+                NSString *URL = [self urlsForReporting:episodeEntry[@"possibleIds"]];
+                [self addValue: URL inStatistic:kMTVDBEpisodeNotFoundCached forShow:show.showTitle  ];
+            } else {
+                NSString *URL = [NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", [show.seriesTitle escapedQueryString]];
+                if (!show.isEpisodicShow) {
+                    [self addValue: URL inStatistic:kMTVDBNonEpisodicSeriesNotFoundCached forShow:show.showTitle  ];
+                } else {
+                    [self addValue: URL inStatistic:kMTVDBEpisodicSeriesNotFoundCached forShow:show.showTitle  ];
+
+                }
+            }
+        } else if (!show.isEpisodicShow) {
+             [self incrementStatistic: kMTVDBNonEpisodicSeriesFoundCached ];
+        } else {
+            [self incrementStatistic: kMTVDBSeriesEpisodeFoundCached];
+        }
+        [self finishTVDBProcessing:show];
+    } else {
+        DDLogDetail(@"Need to get %@", show.showTitle);
+        NSArray <NSString *> *seriesIDTVDBs = [self cachedTVDBSeriesID:show.seriesTitle ];
+
+        NSArray * splitNameArray = [show.seriesTitle componentsSeparatedByString:@":"];
+        NSString * splitName = (splitNameArray.count > 1) ? splitNameArray[0] : nil;
+
+        if (!seriesIDTVDBs.count && splitName) {
+            seriesIDTVDBs = [self cachedTVDBSeriesID:splitName];
+        }
+        if (seriesIDTVDBs.count) {
+            // already have series ID, but not this episode info
+            if (!show.isEpisodicShow) {
+                [self incrementStatistic:kMTVDBNonEpisodicSeriesFoundCached];
+                @synchronized (self.tvdbCache) {
+                    [self.tvdbCache setObject:@{
+                          @"series": seriesIDTVDBs[0],
+                          @"date":[NSDate date]
+                          } forKey:show.uniqueID];
+                }
+                [self finishTVDBProcessing:show];
+            } else {
+                [self getEpisodeDetailsForShow:show withIDs:seriesIDTVDBs];
+            }
+        } else {
+            //first get seriesIDs, then Episode Info
+            [self callSeriesIDForShow: show withSeriesName:show.seriesTitle andSecondCall:splitName];
+        }
     }
 }
 
@@ -946,7 +943,7 @@ __DDLOGHERE__
     NSString *artwork = nil;
     NSDictionary *episodeEntry;
     @synchronized (self.tvdbCache) {
-        episodeEntry = [self.tvdbCache objectForKey:show.episodeID];
+        episodeEntry = [self.tvdbCache objectForKey:show.uniqueID];
         if (!episodeEntry) episodeEntry = [self.tvdbCache objectForKey:show.seriesTitle];
     }
     if (!episodeEntry) {

@@ -135,7 +135,7 @@ __DDLOGHERE__
 			newTrack.name = show.showTitle;
             newTrack.artist = show.directors.string;
 		} else {
-			if (![show.programId hasPrefix:@"SH"] && show.season > 0) {
+			if (show.season > 0) {
 				newTrack.album = [NSString stringWithFormat: @"%@, Season %d",show.seriesTitle, show.season];
 				newTrack.seasonNumber = show.season;
 			} else {
@@ -157,7 +157,7 @@ __DDLOGHERE__
 			}
             NSInteger episodeNum = show.episode;
             if (episodeNum == 0) episodeNum = show.episodeNumber.integerValue;
-			if (![show.programId hasPrefix:@"SH"] && episodeNum > 0) {
+			if (episodeNum > 0) {
 				newTrack.episodeNumber = show.episode;
 				newTrack.trackNumber = show.episode;
 			}

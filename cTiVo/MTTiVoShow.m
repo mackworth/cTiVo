@@ -388,10 +388,10 @@ __DDLOGHERE__
     NSString *returnString = @"";
     if (self.episode > 0) {
 			returnString = [NSString stringWithFormat:@"S%0.2dE%0.2d",self.season,self.episode ];
-    } else if ([self.episodeID hasPrefix:@"SH" ]) {
-        return @"";  //non-episodic shows don't have episodes
-    } else {
+    } else if (self.isEpisodicShow) {
         returnString = self.episodeNumber;
+    } else {
+        return @"";  //non-episodic shows don't have episodes
     }
     return returnString;
 }
@@ -410,8 +410,11 @@ __DDLOGHERE__
 }
 
 -(BOOL) isMovie {
-	BOOL value =  ([self.episodeID hasPrefix:@"MV"]) ;
-	return value;
+	return [self.episodeID hasPrefix:@"MV"];
+}
+
+-(BOOL) isEpisodicShow {
+    return [self.episodeID hasPrefix:@"EP"];
 }
 
 -(NSAttributedString *)attrStringFromDictionaries:(id)nameList
@@ -475,40 +478,36 @@ __DDLOGHERE__
             MP4TagsSetArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
             MP4TagsSetAlbumArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
         }
-        if (![self.programId hasPrefix: @"SH"]) {
-            //else it's 'non-episodic" show, so no seasons or episodes.
-            if (self.season > 0 ) {
-                uint32_t showSeason =  self.season;
-                MP4TagsSetTVSeason(tags, &showSeason);
-                MP4TagsSetAlbum(tags,[[NSString stringWithFormat: @"%@, Season %d",self.seriesTitle, self.season] cStringUsingEncoding:NSUTF8StringEncoding]) ;
-            } else {
-                MP4TagsSetAlbum(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-            }
+        if (self.season > 0 ) {
+            uint32_t showSeason =  self.season;
+            MP4TagsSetTVSeason(tags, &showSeason);
+            MP4TagsSetAlbum(tags,[[NSString stringWithFormat: @"%@, Season %d",self.seriesTitle, self.season] cStringUsingEncoding:NSUTF8StringEncoding]) ;
+        } else {
+            MP4TagsSetAlbum(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+        }
 
-            if (self.episodeTitle.length==0) {
-                NSString * dateString = self.originalAirDateNoTime;
-                if (dateString.length == 0) {
-                    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
-                    [dateFormat setDateStyle:NSDateFormatterShortStyle];
-                    [dateFormat setTimeStyle:NSDateFormatterNoStyle];
-                    dateString =  [dateFormat stringFromDate: self.showDate ];
-                }
-                MP4TagsSetName(tags,[[NSString stringWithFormat:@"%@ - %@",self.showTitle, dateString] cStringUsingEncoding:NSUTF8StringEncoding]);
-            } else {
-                MP4TagsSetName(tags,[self.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+        if (self.episodeTitle.length==0) {
+            NSString * dateString = self.originalAirDateNoTime;
+            if (dateString.length == 0) {
+                NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+                [dateFormat setDateStyle:NSDateFormatterShortStyle];
+                [dateFormat setTimeStyle:NSDateFormatterNoStyle];
+                dateString =  [dateFormat stringFromDate: self.showDate ];
             }
-            uint32_t episodeNum = (uint32_t) self.episode;
-            if (episodeNum == 0) {
-                episodeNum = (uint32_t) [self.episodeNumber integerValue];
-            }
-            if ( episodeNum> 0) {
-                MP4TagsSetTVEpisode(tags, &episodeNum);
-                MP4TagTrack track;
-                track.index = (uint16)episodeNum;
-                track.total = 0;
-                MP4TagsSetTrack(tags, &track);
-                
-            }
+            MP4TagsSetName(tags,[[NSString stringWithFormat:@"%@ - %@",self.showTitle, dateString] cStringUsingEncoding:NSUTF8StringEncoding]);
+        } else {
+            MP4TagsSetName(tags,[self.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+        }
+        uint32_t episodeNum = (uint32_t) self.episode;
+        if (episodeNum == 0) {
+            episodeNum = (uint32_t) [self.episodeNumber integerValue];
+        }
+        if ( episodeNum> 0) {
+            MP4TagsSetTVEpisode(tags, &episodeNum);
+            MP4TagTrack track;
+            track.index = (uint16)episodeNum;
+            track.total = 0;
+            MP4TagsSetTrack(tags, &track);
         }
 	}
 	if (self.episodeID.length >0) {
@@ -992,6 +991,14 @@ __DDLOGHERE__
     return _episodeID;
 }
 
+-(NSString *) uniqueID {
+    if (self.isEpisodicShow) {
+        return self.episodeID;
+    } else {
+        return [self.episodeID stringByAppendingFormat:@"-%@", self.showDateRFCString];
+    }
+}
+
 #pragma mark - Custom Setters; many for parsing
 
 -(NSString *)nameString:(NSDictionary *)nameDictionary
@@ -1048,7 +1055,7 @@ static void * originalAirDateContext = &originalAirDateContext;
         }
     } else if (context == originalAirDateContext) {
 
-        if ([self.episodeID hasPrefix:@"SH"] && self.showDate) {
+        if (!self.isEpisodicShow && self.showDate) {
             _originalAirDateNoTime = [self showDateRFCString];
         } else if (_originalAirDate.length >= 10) {
             _originalAirDateNoTime = [_originalAirDate substringToIndex:10];
@@ -1243,14 +1250,15 @@ static void * originalAirDateContext = &originalAirDateContext;
 -(void) setSeasonEpisode:(NSString *)seasonEpisode {
     DDLogDetail(@"Setting seasonEpisode of %@ to %@", self, seasonEpisode);
     NSRegularExpression *seRegex = [NSRegularExpression regularExpressionWithPattern:@"S([0-9]+)\\s*E([0-9]+)" options:NSRegularExpressionCaseInsensitive error:nil];
-    NSTextCheckingResult *result = [seRegex firstMatchInString:seasonEpisode options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, seasonEpisode.length)];
+    NSTextCheckingResult *result = seasonEpisode ? [seRegex firstMatchInString:seasonEpisode options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, seasonEpisode.length)] : nil;
     if (result) {
         self.season  = [[seasonEpisode substringWithRange:[result rangeAtIndex:1]] intValue];
         self.episode = [[seasonEpisode substringWithRange:[result rangeAtIndex:2]] intValue];
-        [tiVoManager.tvdb cacheSeason:self.season andEpisode:self.episode forShow:self];
     } else {
         self.season = 0; self.episode = 0;
     }
+    [tiVoManager.tvdb cacheSeason:self.season andEpisode:self.episode forShow:self];
+
 }
 
 #pragma clang diagnostic push

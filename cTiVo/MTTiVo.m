@@ -305,6 +305,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     NSInteger updateTime = [[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0;
     if (updateTime > 0) {
         if (delay < 0) delay = updateTime;
+        DDLogDetail(@"Scheduling Update with delay of %lu seconds", (long)delay);
         [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay ];
     }
 }

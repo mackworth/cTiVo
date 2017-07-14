@@ -138,7 +138,7 @@ __DDLOGHERE__
 	}
 	
 	//Check if we've already recorded it
-    NSString * thisShowID = [self subscriptionID:tivoShow];
+    NSString * thisShowID = tivoShow.uniqueID;
 	for (NSDictionary * prevShow in self.prevRecorded ) {
         if ([prevShow[@"episodeID"] isEqualToString: thisShowID]) {
 			DDLogVerbose(@"Already recorded: %@ ",prevShow);
@@ -146,19 +146,6 @@ __DDLOGHERE__
 		}
 	}
 	return YES;
-	
-}
-
--(NSString *) subscriptionID: (MTTiVoShow *) thisShow {
-    NSString * epID = thisShow.episodeID;
-    if (!epID) {
-        return thisShow.showTitle ?: @"NeverHappens";
-    }
-    if ([epID hasPrefix:@"SH"]) {
-        return [epID stringByAppendingFormat:@"-%@", thisShow.showDateRFCString];
-    } else {
-        return epID;
-    }
 }
 
 -(MTDownload *) downloadForSubscribedShow: (MTTiVoShow *) thisShow {
@@ -177,11 +164,11 @@ __DDLOGHERE__
 	newDownload.genXMLMetaData = self.genXMLMetaData;
 	newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAcceptMetaData && self.includeAPMMetaData.boolValue)];
 #endif
-    DDLogDetail(@"Adding %@: ID: %@, Sub: %@, date: %@, Tivo: %@", thisShow, thisShow.episodeID, [self subscriptionID:thisShow], thisShow.showDate, thisShow.tiVoName );
+    DDLogDetail(@"Adding %@: ID: %@, Sub: %@, date: %@, Tivo: %@", thisShow, thisShow.episodeID, thisShow.uniqueID, thisShow.showDate, thisShow.tiVoName );
 
     NSDictionary *thisRecording = @{
 		 @"showTitle": thisShow.showTitle ,
-		 @"episodeID": [self subscriptionID: thisShow],
+		 @"episodeID": thisShow.uniqueID,
 		 @"startTime": thisShow.showDate,
 		 @"tiVoName":  thisShow.tiVoName
 	};

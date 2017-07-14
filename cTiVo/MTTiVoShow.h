@@ -76,7 +76,9 @@
                                     *directors,
                                     *producers;
 
-@property (strong, nonatomic) NSString *episodeID;  //normalized version of programID (convert 12 digit to 14 
+@property (strong, nonatomic) NSString *episodeID;  //normalized version of programID (convert 12 digit to 14
+@property (strong, readonly) NSString *uniqueID; //episodeID for episodic
+                                                 //episodeID+showDateRFC for non-episodic
 
 @property (atomic, strong) NSString * artworkFile;
 
@@ -103,9 +105,9 @@
 @property (nonatomic, readonly) NSString *ageRatingString; //computed from tvRating and MPRating
 @property (nonatomic, readonly) NSNumber *ageRatingValue; //computed from tvRating and MPRating
 
-
-
 @property (nonatomic, readonly) BOOL    isMovie;
+@property (nonatomic, readonly) BOOL    isEpisodicShow;
+
 @property (nonatomic, readonly) BOOL    isSuggestion;
 
 @property (nonatomic, readonly) NSNumber *channelNumber;  //numeric version of channel. Used only for sorting; NA => big number

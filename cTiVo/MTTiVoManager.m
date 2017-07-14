@@ -62,6 +62,7 @@ __DDLOGHERE__
     });
     if (firstTime) {
         [myManager restoreOldQueue]; //no reason to fire all notifications on initial queue
+        [[NSUserDefaults standardUserDefaults] synchronize];
         [myManager setupNotifications];
     }
     return myManager;
@@ -1656,8 +1657,6 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:self.opsQueue];
     newTiVo.supportsTransportStream = [TSN characterAtIndex:0] > '6' || [TSN hasPrefix:@"663"];
 
-    [newTiVo scheduleNextUpdateAfterDelay:0];
-  
 	self.tiVoList = [_tiVoList arrayByAddingObject: newTiVo];
 	if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
@@ -1665,6 +1664,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	}
 	DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+    [newTiVo scheduleNextUpdateAfterDelay:0];
 
 }
 
