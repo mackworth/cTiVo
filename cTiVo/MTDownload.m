@@ -1828,7 +1828,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     NSString * realDestination = [[path stringByAppendingPathComponent:base] stringByAppendingPathExtension:extension];
 
 
-    [tiVoManager.tvdb retrieveArtworkIntoFile:realDestination forShow:self.show ];
+    [tiVoManager.tvdb retrieveArtworkIntoFile:realDestination forShow:self.show cacheVersion:NO ];
 }
 
 - (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {

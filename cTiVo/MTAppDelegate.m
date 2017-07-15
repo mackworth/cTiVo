@@ -289,29 +289,11 @@ __DDLOGHERE__
     CFRunLoopAddSource( CFRunLoopGetCurrent(),
 					   IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes );
     
-    //Make sure details directory is available
-    NSFileManager *fm = [NSFileManager defaultManager];
-    BOOL isDir;
-    BOOL fileExists = [fm fileExistsAtPath:kMTTmpDetailsDir isDirectory:&isDir];
-    if (fileExists && !isDir) {
-        [fm removeItemAtPath:kMTTmpDetailsDir error:nil];
-        fileExists = NO;
-    }
-    if (!fileExists) {
-        [fm createDirectoryAtPath:kMTTmpDetailsDir withIntermediateDirectories:YES attributes:nil error:nil];
-    } else {  //Get rid of 'old' file
-		NSArray *files = [fm contentsOfDirectoryAtPath:kMTTmpDetailsDir error:nil];
-		for (NSString *file in files) {
-			NSString *filePath = [NSString stringWithFormat:@"%@/%@",kMTTmpDetailsDir,file];
-			NSDictionary *attrs = [fm attributesOfItemAtPath:filePath error:nil];
-			NSDate *creationDate = [attrs objectForKey: NSFileModificationDate];
-			if ([[NSDate date] timeIntervalSinceDate:creationDate] > 3600 * 24 * 30) {
-				[fm removeItemAtPath:filePath error:nil];
-				DDLogVerbose(@"Removed file %@",filePath);
-			}
-		}
-		
-	}
+    //Make sure details and thumbnails directories are available
+    [self checkDirectoryAndPurge:kMTTmpDetailsDir];
+    [self checkDirectoryAndPurge:kMTThumbnailsDirectory];
+
+
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(writeDownloadQueueToUserDefaults) userInfo:nil repeats:YES];
 	
 	//Update atomicparsley default to metatdata default
@@ -357,6 +339,32 @@ BOOL wasPaused = NO;
     //new volume came online during openPanel for tempDir, so let's try it for tmpDir
     [self closeTmpPanel];
     [self validateTmpDirectory];
+}
+
+-(void) checkDirectoryAndPurge: (NSString *) dirName {
+    NSFileManager *fm = [NSFileManager defaultManager];
+    BOOL isDir;
+    BOOL fileExists = [fm fileExistsAtPath:dirName isDirectory:&isDir];
+    if (fileExists && !isDir) {
+        [fm removeItemAtPath:dirName error:nil];
+        fileExists = NO;
+    }
+    if (!fileExists) {
+        [fm createDirectoryAtPath:dirName withIntermediateDirectories:YES attributes:nil error:nil];
+    } else {  //Get rid of 'old' file
+        NSArray *files = [fm contentsOfDirectoryAtPath:dirName error:nil];
+        for (NSString *file in files) {
+            NSString *filePath = [NSString stringWithFormat:@"%@/%@",dirName,file];
+            NSDictionary *attrs = [fm attributesOfItemAtPath:filePath error:nil];
+            NSDate *creationDate = [attrs objectForKey: NSFileModificationDate];
+            if ([[NSDate date] timeIntervalSinceDate:creationDate] > 3600 * 24 * 30) {
+                [fm removeItemAtPath:filePath error:nil];
+                DDLogVerbose(@"Removed file %@",filePath);
+            }
+        }
+        
+    }
+
 }
 
 -(void) promptForNewTmpDirectory:(NSString *) oldTmpDir withMessage: (NSString *) message{

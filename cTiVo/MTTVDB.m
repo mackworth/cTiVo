@@ -21,6 +21,10 @@
     @property (atomic, strong) NSMutableDictionary *tvdbCache;
     @property (atomic, strong) NSMutableDictionary * theTVDBStatistics;
 
+    @property (atomic, strong) NSDate * movieDBRateLimitEnd;
+    @property (atomic, strong) NSNumber * movieDBRateLimitLock;
+    @property (atomic, assign) NSInteger movieDBRateLimitCalls;
+
 @end
 
 @implementation MTTVDB
@@ -53,6 +57,7 @@ __DDLOGHERE__
     if ((self = [super init])) {
         self.tvdbTokenExpireTime =  [[NSUserDefaults standardUserDefaults] objectForKey: kMTTVDBTokenExpire ] ?: [NSDate distantPast];
         self.tvdbToken = [[NSUserDefaults standardUserDefaults] objectForKey: kMTTVDBToken ];
+        self.movieDBRateLimitLock = @(1); //just for locking
 
         self.tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
         self.tvdbCache = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTheTVDBCache]];
@@ -499,8 +504,11 @@ __DDLOGHERE__
 
 #define kMTVDBAll @"All"
 #define kMTVDBMovie @"Movie"
-//#define kMTVDBMovieFound @"Movie Found"   //not used today
-//#define kMTVDBMovieNotFound @"Movie Not Found"
+#define kMTVDBMovieFound @"Movie Found"
+#define kMTVDBMovieFoundCached @"Movie Found Cached"
+#define kMTVDBMovieNotFound @"Movie Not Found"
+#define kMTVDBMovieNotFoundCached @"Movie Not Found Cached"
+
 #define kMTVDBNonEpisodicSeriesFound          @"Non-episodic Series Found"
 #define kMTVDBNonEpisodicSeriesFoundCached    @"Non-episodic Series Found Cached"
 #define kMTVDBNonEpisodicSeriesNotFound       @"Non-episodic Series Info Not Found"
@@ -541,16 +549,20 @@ __DDLOGHERE__
         statsCopy = self.theTVDBStatistics.copy;
     }
     NSString * statisticsReport =
-    @"\nAs TiVo doesn't provide us season/episode information or artwork, cTiVo looks up the TiVo's shows on theTVDB.\n"
+    @"\nAs TiVo doesn't provide us season/episode information or artwork, cTiVo looks up the TiVo's shows on theTVDB and the movies on theMovieDB.\n"
     "You can click on the individual URLs to see what information is available for shows where the lookup failed.\n\n"
     "Total number of shows is %lu\n"
-    "%lu shows are marked as Movies (so not looked up)\n"
+    "%lu shows are marked as Movies\n"
     "%lu shows are marked as Episodic\n"
     "%lu shows are marked as Non-Episodic (e.g. news/sports events)\n"
     "\n"
     "cTiVo caches information as possible; successful lookups for 30 days; unsuccessful for 1 day\n"
     "\n"
-    "In the last non-movie group we looked up, we had the following results:\n"
+    "In the last group we looked up, we had the following results:\n"
+    "Movies:\n"
+    "   %lu shows found (cached: %0.0f%%)\n"
+    "   %lu series not found (cached: %0.0f%%)\n"
+    "\n"
     "Episodic:\n"
     "   %lu shows found (cached: %0.0f%%)\n"
     "   %lu series found, but episodes not Found (cached: %0.0f%%)\n"
@@ -561,6 +573,11 @@ __DDLOGHERE__
     "   %lu series not found (cached: %0.0f%%)\n"
     "\n"
     "Here are the shows that had issues:\n"
+    "Movies not Found at theMovieDB\n"
+    "%@\n\n"
+    "Movies not Found (Cached)\n"
+    "%@\n\n"
+
     "Episodic Series not Found at TVDB\n"
     "%@\n\n"
     "Episodic Series not Found (Cached)\n"
@@ -583,7 +600,7 @@ __DDLOGHERE__
 #define percentCval(x) combineCval(x) , (100.0 * (float)cval(x " Cached") / (float)combineCval(x))
 #define list(x) statsCopy[x " List"] ?: @"None", statsCopy[x " Cached List"]  ?: @"None"
     statisticsReport = [NSString stringWithFormat:
-                            statisticsReport
+                        statisticsReport
                         ,
 
                         val(kMTVDBAll),
@@ -596,12 +613,17 @@ __DDLOGHERE__
                         combineVal(kMTVDBNonEpisodicSeriesFound) +
                         combineCval(kMTVDBNonEpisodicSeriesNotFound),
 
+                        percentVal(kMTVDBMovieFound),
+                        percentCval(kMTVDBMovieNotFound),
+
                         percentVal(kMTVDBSeriesEpisodeFound),
                         percentCval(kMTVDBEpisodeNotFound),
                         percentCval(kMTVDBEpisodicSeriesNotFound),
 
                         percentVal(kMTVDBNonEpisodicSeriesFound),
                         percentCval(kMTVDBNonEpisodicSeriesNotFound),
+
+                        list(kMTVDBMovieNotFound),
 
                         list(kMTVDBEpisodicSeriesNotFound),
                         list(kMTVDBEpisodeNotFound),
@@ -659,17 +681,28 @@ __DDLOGHERE__
     }
 }
 
--(void) cacheArtWork: (NSString *) newArtwork forSeries: (NSString *) series {
-    if ( series.length > 0) {  //protective only
+-(void) cacheArtWork: (NSString *) newArtwork forShow: (NSString *) name {
+    if ( name.length > 0) {  //protective only
         @synchronized (self.tvdbCache) {
-            NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:series] mutableCopy];
+            NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:name] mutableCopy];
             if (!oldEntry) {
                 oldEntry = [NSMutableDictionary dictionaryWithObject: [NSDate date] forKey:@"date"];
             }
             [oldEntry setObject:newArtwork forKey:@"artwork"];
             [self.tvdbCache setObject:[oldEntry copy]
-                               forKey:series];
+                               forKey:name];
         }
+    }
+}
+
+-(NSString *) cachedArtWorkForShow: (NSString *) name {
+    if ( name.length > 0) {  //protective only
+        @synchronized (self.tvdbCache) {
+            NSDictionary * entry = [self.tvdbCache objectForKey:name];
+            return entry[@"artwork"];
+        }
+    } else {
+        return nil;
     }
 }
 
@@ -694,7 +727,6 @@ __DDLOGHERE__
         }
         [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
     }
-
 }
 
 -(void) cacheTVDBSeriesID: (NSArray *) seriesIDs forSeries: (NSString *) seriesTitle{
@@ -866,6 +898,11 @@ __DDLOGHERE__
 
     if (show.isMovie) { //no need for movie info, just get the artwork when we download.
         [self incrementStatistic: kMTVDBMovie ];
+        __weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+            typeof(self) strongSelf = weakSelf;
+            [strongSelf getTheMovieDBDetailsForShow:show];
+        });
         return;
     }
     //if we have a series get the other information
@@ -972,7 +1009,10 @@ __DDLOGHERE__
         show.gotTVDBDetails = YES;
         if (artwork.length+episodeNum.intValue +episodeNum.intValue > 0) {
             //got at least one
-            if (artwork.length) show.tvdbArtworkLocation = artwork;
+            if (artwork.length) {
+                show.tvdbArtworkLocation = artwork;
+                [self retrieveArtworkIntoFile: [kMTThumbnailsDirectory stringByAppendingPathComponent:artwork] forShow:show cacheVersion:YES];
+            }
             DDLogDetail(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, show);
        } else {
             NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self seriesIDForReporting:show.seriesId ], show.originalAirDateNoTime, show.season, show.episode, [self urlsForReporting:seriesIDTVDBs] ];
@@ -993,7 +1033,7 @@ __DDLOGHERE__
                     NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d; %@ aired %@; %@ ",seasonNum, episodeNum, show.season, show.episode, [self seriesIDForReporting:show.seriesId], show.originalAirDateNoTime,  [self urlsForReporting:seriesIDTVDBs]];
                     DDLogDetail(@"TheTVDB has different Sea/Eps info for %@: %@ %@", show.showTitle, details, [[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB] ? @"updating": @"leaving" );
 
-                    if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB]) {
+                    if (YES) {//([[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB]) {
                         //user asked us to prefer TVDB
                         [self updateSeason: [seasonNum intValue] andEpisode: [episodeNum intValue]forShow:show];
                     }
@@ -1041,10 +1081,15 @@ __DDLOGHERE__
     if ((perfectMatch && titlesMatch && releaseMatch) ||
         (!perfectMatch && (titlesMatch || releaseMatch))) {
         NSString * artwork = movie[@"poster_path"];
+        if (([artwork isKindOfClass:[NSNull class]])) {
+            return nil;
+        }
         if (!([artwork isKindOfClass:[NSString class]])) {
             DDLogMajor(@"theMovieDB returned invalid JSON format: poster_path is invalid : %@", movie);
             return kFormatError;
         }
+        DDLogMajor(@"theMovieDB success : %@ = %@", movie, artwork);
+
         return artwork;
     } else {
         return nil;
@@ -1052,49 +1097,90 @@ __DDLOGHERE__
 }
 
 -(void) getTheMovieDBDetailsForShow: (MTTiVoShow *) show {
-    if (show.gotTVDBDetails) return;
+    NSAssert (![NSThread isMainThread], @"getTheMovieDBDetailsForShow running in foreground");
 
+    if (show.gotTVDBDetails) return;
     //we only get artwork
-    NSString * urlString = [NSString stringWithFormat:@"https://api.themoviedb.org/3/search/movie?query=\"%@\"&api_key=%@",
-                             [show.seriesTitle escapedQueryString], kMTTheMoviedDBAPIKey];
+
+    NSString * cachedArt = [self cachedArtWorkForShow:show.seriesTitle];
+    if (cachedArt.length > 0) {
+        show.artworkFile = cachedArt;
+        show.gotTVDBDetails = YES;
+        [self incrementStatistic:kMTVDBMovieFoundCached];
+        return;
+    }
+    @synchronized (self.movieDBRateLimitLock) {
+        DDLogDetail(@"themovieDB %ld, Entering  =  %@ at %@", (long)self.movieDBRateLimitCalls, show, self.movieDBRateLimitEnd);
+
+        self.movieDBRateLimitCalls ++;
+        NSTimeInterval delay = [self.movieDBRateLimitEnd timeIntervalSinceNow];
+
+        if (delay > 0 && self.movieDBRateLimitCalls >= 40) {
+            DDLogDetail(@"For Show: %@, theMovieDB sleeping %f", show, delay);
+            usleep (delay*1000000);
+            DDLogDetail(@"For Show: %@, theMovieDB awaking", show);
+            delay = 0;
+        }
+
+        if (!self.movieDBRateLimitEnd || delay <= 0) {
+            self.movieDBRateLimitEnd = [NSDate dateWithTimeIntervalSinceNow:11];
+            self.movieDBRateLimitCalls = 1; //this one
+        }
+        DDLogDetail(@"themovieDB %ld, Exiting %@ at %@", (long)self.movieDBRateLimitCalls, show, self.movieDBRateLimitEnd);
+    }
+    NSString * searchString = [show.seriesTitle escapedQueryString];
+    NSString * urlString = [NSString stringWithFormat:@"https://api.themoviedb.org/3/search/movie?query=%@&api_key=%@",
+                             searchString, kMTTheMoviedDBAPIKey];
     NSString * reportURL = [urlString stringByReplacingOccurrencesOfString:kMTTheMoviedDBAPIKey withString:@"APIKEY" ];
-    DDLogDetail(@"Getting movie Data for %@ using %@",show,reportURL);
+    NSString * lookupURL = [@"https://www.themoviedb.org/search?query=" stringByAppendingString:searchString];
+
+    DDLogDetail(@"Getting movie Data for %@ using %@", show, reportURL);
     NSURL *url = [NSURL URLWithString:urlString];
-    NSData *movieInfo = [NSData dataWithContentsOfURL:url options:NSDataReadingUncached error:nil];
-    if (!movieInfo) return;
+    NSError * error = nil;
+    NSData *movieInfo = [NSData dataWithContentsOfURL:url options:NSDataReadingUncached error:&error];
+    if (!movieInfo || error) {
+        if ([error.localizedDescription isEqualToString:@"The file “movie” couldn’t be opened."]) {
+            DDLogReport(@"On %@, hit theMovieDB Rate Limit; please report to cTiVo support site", show);
+        } else {
+            DDLogMajor(@"For %@, theMovieDB returned %@", show, error.localizedDescription ? [@"error: " stringByAppendingString:error.localizedDescription] : @"no information");
+        }
+        [self addValue:urlString inStatistic:kMTVDBMovieNotFound forShow:show.seriesTitle];
+        return;
+    }
     show.gotTVDBDetails = YES;
 
-    NSError *error = nil;
+    error = nil;
     NSDictionary *topLevel = [NSJSONSerialization
                               JSONObjectWithData:movieInfo
                               options:0
                               error:&error];
-
     if (!topLevel || error) {
-        DDLogMajor(@"theMovieDB returned invalid JSON format: %@ Data: %@",error.localizedDescription, movieInfo);
+        DDLogMajor(@"For &@, theMovieDB returned invalid JSON format: %@ Data: %@",error.localizedDescription, movieInfo);
+        [self addValue:lookupURL inStatistic:kMTVDBMovieNotFound forShow:show.seriesTitle];
         return;
     }
     if(![topLevel isKindOfClass:[NSDictionary class]]) {
-        DDLogMajor(@"theMovieDB returned invalid JSON format:Top Level is not a dictionary; Data: %@", movieInfo);
+        DDLogMajor(@"For &@, theMovieDB returned invalid JSON format:Top Level is not a dictionary; Data: %@", movieInfo);
+        [self addValue:lookupURL inStatistic:kMTVDBMovieNotFound forShow:show.seriesTitle];
         return;
     }
     NSArray * results = topLevel[@"results"];
     if(![results isKindOfClass:[NSArray class]]) {
-        DDLogMajor(@"theMovieDB returned invalid JSON format: Results not an array; Data: %@", movieInfo);
+        DDLogMajor(@"For &@, theMovieDB returned invalid JSON format: Results not an array; Data: %@", movieInfo);
+        [self addValue:lookupURL inStatistic:kMTVDBMovieNotFound forShow:show.seriesTitle];
         return;
     }
     if (results.count == 0) {
         DDLogMajor(@"theMovieDB couldn't find any movies named %@", show.seriesTitle);
+        [self addValue:lookupURL inStatistic:kMTVDBMovieNotFound forShow:show.seriesTitle];
         return;
     }
     NSString * newArtwork = nil;
     for (NSDictionary * movie in results) {
         //look for a perfect title/release match
         NSString * location = [self checkMovie:movie exact:YES forShow:show];
-        if (location) {
-            if (![location isEqualToString:kFormatError]) {
-                newArtwork = location;
-            }
+        if (location.length && ![kFormatError isEqualToString:location]) {
+            newArtwork = location;
             break;
         }
     }
@@ -1102,23 +1188,24 @@ __DDLOGHERE__
         for (NSDictionary * movie in results) {
             // return first that matches either title or release year
             NSString * location = [self checkMovie:movie exact:NO forShow:show];
-            if (location) {
-                if (![location isEqualToString:kFormatError]) {
-                    newArtwork = location;
-                }
+            if (location && ![kFormatError isEqualToString:location]) {
+                newArtwork = location;
                 break;
             }
         }
     }
     if (newArtwork.length > 0 ) {
         show.tvdbArtworkLocation = newArtwork;
-        [self cacheArtWork:newArtwork forSeries:show.seriesTitle];
+        [self incrementStatistic:kMTVDBMovieFound];
+        [self cacheArtWork:newArtwork forShow:show.seriesTitle];
+    } else {
+        DDLogMajor(@"theMovieDB doesn't have any images for %@", show.seriesTitle);
+        [self addValue:lookupURL inStatistic:kMTVDBMovieNotFound forShow:show.seriesTitle];
     }
 }
 
--(void)retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show
+-(void)retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache
 {
-    //should split this into show-specific stuff (filename calc) vs service stuff (URLS and retrieval), and put former back in MTTiVoShow
     if(!show.gotTVDBDetails && show.isMovie) {
         //we don't get movie data upfront, so go get it now, but call us back when you have it
         __weak typeof(self) weakSelf = self;
@@ -1126,10 +1213,14 @@ __DDLOGHERE__
             typeof(self) strongSelf = weakSelf;
             [strongSelf getTheMovieDBDetailsForShow:show];
             dispatch_async(dispatch_get_main_queue(), ^(void){
-                [strongSelf retrieveArtworkIntoFile:filename forShow:show];
+                [strongSelf retrieveArtworkIntoFile:filename forShow:show cacheVersion:cache];
             });
         });
         return;
+    }
+    NSString *artLocation = show.tvdbArtworkLocation;
+    if (artLocation.length == 0) {
+
     }
     if (show.tvdbArtworkLocation.length == 0) {
         return;
@@ -1137,9 +1228,17 @@ __DDLOGHERE__
 
     NSString *baseUrlString;
     if (show.isMovie) {
-        baseUrlString = @"http://image.tmdb.org/t/p/w780%@";
+        if (cache) {
+            baseUrlString = @"http://image.tmdb.org/t/p/w92%@";
+        } else {
+            baseUrlString = @"http://image.tmdb.org/t/p/w780%@";
+        }
     } else {
-        baseUrlString = @"http://thetvdb.com/banners/%@";
+        if (cache) {
+            baseUrlString = @"http://thetvdb.com/_cache/%@";
+        } else {
+            baseUrlString = @"http://thetvdb.com/%@";
+        }
     }
     NSString *urlString = [NSString stringWithFormat: baseUrlString, show.tvdbArtworkLocation ];
     //download only if we don't have it already
