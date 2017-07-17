@@ -296,6 +296,8 @@
 		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1E9EA3FD1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */; };
 		1E9EA3FE1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */; };
+		1E9EA4011F1D439800F0A2C9 /* RSVerticallyCenteredTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA4001F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.m */; };
+		1E9EA4021F1D439800F0A2C9 /* RSVerticallyCenteredTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA4001F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.m */; };
 		1EA0FF381DCAA1A400E82971 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EA0FF361DCAA0D900E82971 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EABFF841E185EEC005A9975 /* ccextractor in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EABFF831E185ED5005A9975 /* ccextractor */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
@@ -770,6 +772,8 @@
 		1E9A10EE1757200000863C44 /* cTiVo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cTiVo.png; sourceTree = "<group>"; };
 		1E9EA3FB1F1AD91C00F0A2C9 /* MTProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressCell.h; sourceTree = "<group>"; };
 		1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressCell.m; sourceTree = "<group>"; };
+		1E9EA3FF1F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSVerticallyCenteredTextFieldCell.h; sourceTree = "<group>"; };
+		1E9EA4001F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSVerticallyCenteredTextFieldCell.m; sourceTree = "<group>"; };
 		1EA0FF361DCAA0D900E82971 /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
 		1EABE6F316B0A254004DDB61 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = cTiVo/Growl.framework; sourceTree = "<group>"; };
 		1EABE6FD16B0DA21004DDB61 /* Growl Registration Ticket.growlRegDict */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Growl Registration Ticket.growlRegDict"; sourceTree = "<group>"; };
@@ -1441,6 +1445,8 @@
 				D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */,
 				1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */,
 				1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */,
+				1E9EA3FF1F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.h */,
+				1E9EA4001F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.m */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -1847,6 +1853,7 @@
 				1E6906941DA56DC400C429C2 /* MTIsStringEmpty.m in Sources */,
 				1E6906951DA56DC400C429C2 /* NSArray+Map.m in Sources */,
 				1E6906961DA56DC400C429C2 /* MTSrt.m in Sources */,
+				1E9EA4021F1D439800F0A2C9 /* RSVerticallyCenteredTextFieldCell.m in Sources */,
 				1E6906971DA56DC400C429C2 /* MTChannelEditorController.m in Sources */,
 				1E6906981DA56DC400C429C2 /* MTEdl.m in Sources */,
 				1E6906991DA56DC400C429C2 /* NSString+HTML.m in Sources */,
@@ -1902,6 +1909,7 @@
 				1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */,
 				1E3C43C01D79EA1100367866 /* NSArray+Map.m in Sources */,
 				D2001C261704F93F00B75D9C /* MTSrt.m in Sources */,
+				1E9EA4011F1D439800F0A2C9 /* RSVerticallyCenteredTextFieldCell.m in Sources */,
 				1ECD9D411C8265D600FBC78D /* MTChannelEditorController.m in Sources */,
 				D2001C281704F93F00B75D9C /* MTEdl.m in Sources */,
 				D291436E1713467A00CE3202 /* NSString+HTML.m in Sources */,
