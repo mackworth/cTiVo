@@ -80,7 +80,9 @@
 @property (strong, readonly) NSString *uniqueID; //episodeID for episodic
                                                  //episodeID+showDateRFC for non-episodic
 
-@property (atomic, strong) NSString * artworkFile;
+@property (atomic, strong) NSString * artworkFile,
+                            * thumbnailArtworkFile;   //uses @"" as signal that it's never coming
+@property (nonatomic, strong) NSImage * thumbnailArtworkImage;
 
 @property					  time_t showLength;  //length of show in seconds
 

@@ -291,7 +291,7 @@ __DDLOGHERE__
     
     //Make sure details and thumbnails directories are available
     [self checkDirectoryAndPurge:kMTTmpDetailsDir];
-    [self checkDirectoryAndPurge:kMTThumbnailsDirectory];
+    [self checkDirectoryAndPurge:kMTTmpThumbnailsDir];
 
 
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(writeDownloadQueueToUserDefaults) userInfo:nil repeats:YES];

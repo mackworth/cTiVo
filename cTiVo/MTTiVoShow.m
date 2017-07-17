@@ -999,6 +999,30 @@ __DDLOGHERE__
     }
 }
 
+-(NSImage *) thumbnailArtworkImage {
+    //we automtically ask for artworkLocation from services, and when that arrives, there will be a notification to update the show in the window, which wil call us again.
+    //Then we request image, and get the same notification when that arrives
+    if (!_thumbnailArtworkImage){
+        if ( self.tvdbArtworkLocation.length > 0 && !self.thumbnailArtworkFile) {
+            NSString * base = self.showTitle;
+            base = [base stringByReplacingOccurrencesOfString:@": " withString:@"-"];
+            base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+            base = [base stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+
+            NSString *thumbnailsFilePath = self.episode == 0
+                ? (self.isMovie ? [NSString stringWithFormat:@"%@/%@_%@.jpg",kMTTmpThumbnailsDir,base,self.movieYear]
+                              : [NSString stringWithFormat:@"%@/%@.jpg",kMTTmpThumbnailsDir,base])
+                : [NSString stringWithFormat:@"%@/%@_%@.jpg",kMTTmpThumbnailsDir,base,self.seasonEpisode]
+            ;
+            [tiVoManager.tvdb retrieveArtworkIntoFile:thumbnailsFilePath forShow:self cacheVersion:YES]; //may set thumbnail immediately
+        }
+        if (self.thumbnailArtworkFile.length > 0 ) {
+            _thumbnailArtworkImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailArtworkFile];
+        }
+    }
+    return _thumbnailArtworkImage;
+}
+
 #pragma mark - Custom Setters; many for parsing
 
 -(NSString *)nameString:(NSDictionary *)nameDictionary

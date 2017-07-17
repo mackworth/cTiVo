@@ -401,6 +401,8 @@ __DDLOGHERE__
         for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {
             [tiVoManager.tvdb reloadTVDBInfo:show];
         }
+        NSIndexSet * columns = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.tiVoShowTable.numberOfColumns)];
+        [self.tiVoShowTable reloadDataForRowIndexes:[tiVoShowTable selectedRowIndexes] columnIndexes:columns];
 	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
 		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
         //Eventually if more than 1 download present will open up choice alert (or extend menu with a right pull)

@@ -684,11 +684,16 @@ __DDLOGHERE__
 -(void) cacheArtWork: (NSString *) newArtwork forShow: (NSString *) name {
     if ( name.length > 0) {  //protective only
         @synchronized (self.tvdbCache) {
-            NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:name] mutableCopy];
-            if (!oldEntry) {
-                oldEntry = [NSMutableDictionary dictionaryWithObject: [NSDate date] forKey:@"date"];
+           NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:name] mutableCopy];
+            if (newArtwork) {
+                if (!oldEntry ) {
+                    oldEntry = [NSMutableDictionary dictionaryWithObject: [NSDate date] forKey:@"date"];
+                }
+                [oldEntry setObject:newArtwork forKey:@"artwork"];
+            } else {
+                if (!oldEntry) return;
+                [oldEntry removeObjectForKey:@"artwork"];
             }
-            [oldEntry setObject:newArtwork forKey:@"artwork"];
             [self.tvdbCache setObject:[oldEntry copy]
                                forKey:name];
         }
@@ -881,6 +886,10 @@ __DDLOGHERE__
         [self.tvdbCache removeObjectForKey:show.seriesTitle];
         [self cacheTVDBSeriesID:nil forSeries:show.seriesTitle];
     }
+    show.tvdbArtworkLocation = nil;
+    show.artworkFile = nil;
+    show.thumbnailArtworkFile = nil;
+    show.thumbnailArtworkImage = nil;
     [self getTheTVDBDetails:show];
 }
 
@@ -896,7 +905,7 @@ __DDLOGHERE__
     }
     [self incrementStatistic: kMTVDBAll ];
 
-    if (show.isMovie) { //no need for movie info, just get the artwork when we download.
+    if (show.isMovie) {
         [self incrementStatistic: kMTVDBMovie ];
         __weak typeof(self) weakSelf = self;
         dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
@@ -909,7 +918,7 @@ __DDLOGHERE__
     NSDictionary *episodeEntry;
     @synchronized (self.tvdbCache) {
         episodeEntry = [self.tvdbCache objectForKey:show.uniqueID];
-        if (!episodeEntry) {
+        if (!episodeEntry && !show.isEpisodicShow ) {
             episodeEntry = [self.tvdbCache objectForKey:show.seriesTitle];
         }
     }
@@ -1002,7 +1011,7 @@ __DDLOGHERE__
 
         NSString * seriesIDTVDB = [episodeEntry objectForKey:@"series"];
         if (!seriesIDTVDB) {
-            DDLogMajor(@"Missing series info in TVDB data for %@: %@",show.showTitle, episodeEntry);
+            DDLogDetail(@"Missing series info in TVDB data for %@: %@",show.showTitle, episodeEntry);
             seriesIDTVDBs =[self cachedTVDBSeriesID:show.seriesTitle];
         }
 
@@ -1011,7 +1020,6 @@ __DDLOGHERE__
             //got at least one
             if (artwork.length) {
                 show.tvdbArtworkLocation = artwork;
-                [self retrieveArtworkIntoFile: [kMTThumbnailsDirectory stringByAppendingPathComponent:artwork] forShow:show cacheVersion:YES];
             }
             DDLogDetail(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, show);
        } else {
@@ -1046,6 +1054,7 @@ __DDLOGHERE__
     } else {
         show.gotTVDBDetails = YES; //never going to find it
     }
+    [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
 }
 
 -(BOOL) isActive {
@@ -1104,7 +1113,7 @@ __DDLOGHERE__
 
     NSString * cachedArt = [self cachedArtWorkForShow:show.seriesTitle];
     if (cachedArt.length > 0) {
-        show.artworkFile = cachedArt;
+        show.tvdbArtworkLocation = cachedArt;
         show.gotTVDBDetails = YES;
         [self incrementStatistic:kMTVDBMovieFoundCached];
         return;
@@ -1202,27 +1211,15 @@ __DDLOGHERE__
         DDLogMajor(@"theMovieDB doesn't have any images for %@", show.seriesTitle);
         [self addValue:lookupURL inStatistic:kMTVDBMovieNotFound forShow:show.seriesTitle];
     }
+    dispatch_async(dispatch_get_main_queue(), ^(void){
+        [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
+    });
+
 }
 
--(void)retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache
-{
-    if(!show.gotTVDBDetails && show.isMovie) {
-        //we don't get movie data upfront, so go get it now, but call us back when you have it
-        __weak typeof(self) weakSelf = self;
-        dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-            typeof(self) strongSelf = weakSelf;
-            [strongSelf getTheMovieDBDetailsForShow:show];
-            dispatch_async(dispatch_get_main_queue(), ^(void){
-                [strongSelf retrieveArtworkIntoFile:filename forShow:show cacheVersion:cache];
-            });
-        });
-        return;
-    }
+-(void)retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache{
     NSString *artLocation = show.tvdbArtworkLocation;
     if (artLocation.length == 0) {
-
-    }
-    if (show.tvdbArtworkLocation.length == 0) {
         return;
     }
 
@@ -1235,41 +1232,57 @@ __DDLOGHERE__
         }
     } else {
         if (cache) {
-            baseUrlString = @"http://thetvdb.com/_cache/%@";
+            baseUrlString = @"http://thetvdb.com/banners/_cache/%@";
         } else {
-            baseUrlString = @"http://thetvdb.com/%@";
+            baseUrlString = @"http://thetvdb.com/banners/%@";
         }
     }
     NSString *urlString = [NSString stringWithFormat: baseUrlString, show.tvdbArtworkLocation ];
     //download only if we don't have it already
-    if (![[NSFileManager defaultManager] fileExistsAtPath:filename]) {
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
+        if (cache) {
+            show.thumbnailArtworkFile = filename;
+        } else {
+            show.artworkFile = filename;
+        }
+   } else {
         DDLogDetail(@"downloading artwork at %@ to %@",urlString, filename);
         NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
         [NSURLConnection sendAsynchronousRequest:req queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^(void){
+                NSString * resultFile = filename;
                if (!data || error ) {
                     DDLogReport(@"Couldn't get artwork for %@ from %@ , Error: %@", show.seriesTitle, urlString, error.localizedDescription);
-                    show.tvdbArtworkLocation = nil;
+                    resultFile = @"";
                 } else {
-                    if ( data.length < 3000) {  //too short for a real image
-                        NSString * htmlString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                        if ([htmlString contains:@"404 Not Found"]) {
-                            //file not found in html
-                            DDLogDetail(@"No artwork for %@ from %@ ", show.seriesTitle, urlString);
-                            show.tvdbArtworkLocation = nil;
-                            // [self removeArtwork:show.episodeID]; FIX
-    //                        [self searchArtwork]
-    //                        https://api.thetvdb.com/series/281470/images/query/params
-                            return;
+                    NSInteger statusCode = ((NSHTTPURLResponse *) response).statusCode;
+                    if ( statusCode == 404 || statusCode == 500) {
+                        resultFile = @"";
+                        DDLogDetail(@"No artwork for %@ from %@ ", show.seriesTitle, urlString);
+                        // [self removeArtwork:show.episodeID]; FIX
+//                        [self searchArtwork]
+//                        https://api.thetvdb.com/series/281470/images/query/params
+                    } else {
+                        [[NSFileManager defaultManager] createDirectoryAtPath:[filename stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nil];
+                        if ([data writeToFile:filename atomically:YES]) {
+                            DDLogDetail(@"Saved artwork file for %@ at %@",show.showTitle, filename);
+                            [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
+                        } else {
+                            DDLogReport(@"Couldn't write to artwork file %@", filename);
+                            resultFile = @"";
                         }
                     }
-                    if ([data writeToFile:filename atomically:YES]) {
-                        show.artworkFile = filename;
-                        DDLogDetail(@"Saved artwork file for %@ at %@",show.showTitle, filename);
-                    } else {
-                        DDLogReport(@"Couldn't write to artwork file %@", filename);
-                    }
                 }
+                if (resultFile.length == 0) {
+                    show.tvdbArtworkLocation = nil;
+                    [self cacheArtWork:nil forShow:show.seriesTitle];
+                }
+                if (cache) {
+                    show.thumbnailArtworkFile = resultFile;
+                } else {
+                    show.artworkFile = resultFile;
+                }
+                [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
             });
         }];
     }

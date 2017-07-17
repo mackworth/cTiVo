@@ -10,13 +10,19 @@
 #import "MTDownloadCheckTableCell.h"
 #import "MTTiVoManager.h"
 #import "MTMainWindowController.h"
+#import "MTProgressCell.h"
 
+@interface MTProgramTableView ()
 
+@property (nonatomic, assign) CGFloat imageRowHeight;
+
+@end
 @implementation MTProgramTableView
 @synthesize  sortedShows= _sortedShows;
 
 __DDLOGHERE__
 
+#define kMTArtColumn @"Art"
 -(id) initWithCoder:(NSCoder *)aDecoder
 {
 	self = [super initWithCoder:aDecoder];
@@ -33,6 +39,7 @@ __DDLOGHERE__
         if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
             [tiVoColumn setHidden:YES];
         }
+        self.imageRowHeight = -1;
 	}
 	return self;
 }
@@ -82,10 +89,10 @@ __DDLOGHERE__
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-	if ([keyPath compare:kMTShowCopyProtected] == NSOrderedSame) {
+	if ([keyPath isEqualToString:kMTShowCopyProtected] ) {
 		DDLogDetail(@"User changed ShowCopyProtected menu item");
  		[self reloadData];
-	} else 	if ([keyPath compare:kMTShowSuggestions] == NSOrderedSame) {
+	} else 	if ([keyPath isEqualToString:kMTShowSuggestions]) {
 		DDLogDetail(@"User changed ShowSuggestions menu item");
  		[self reloadData];
     } else {
@@ -100,11 +107,8 @@ __DDLOGHERE__
     if (row != NSNotFound) {
         NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
         [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
-
     }
 }
-
-
 
 -(void)dealloc
 {
@@ -251,12 +255,17 @@ __DDLOGHERE__
 -(void) tableViewColumnDidResize:(NSNotification *) notification {
 
 	NSTableColumn * column = notification.userInfo[@"NSTableColumn"];
-    if (([column.identifier compare:@"Date" ] ==NSOrderedSame) || ([column.identifier compare:@"icon" ] ==NSOrderedSame)) {
-        NSInteger columnNum = [self columnWithIdentifier:column.identifier];
-		[self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.sortedShows.count)]
-							 columnIndexes:[NSIndexSet indexSetWithIndex:columnNum]];
-	}
-
+    if ([column.identifier isEqualToString:@"Date" ]  ||
+        [column.identifier isEqualToString:@"icon" ]  ||
+         [column.identifier isEqualToString:kMTArtColumn ]  ) {
+        if ( [column.identifier isEqualToString:kMTArtColumn ] && self.imageRowHeight > 0) {
+            self.imageRowHeight = -self.imageRowHeight;  //use as trigger to recalculate, but remember old size in case it hasn't changed.
+        } else {
+            NSInteger columnNum = [self columnWithIdentifier:column.identifier];
+            [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.sortedShows.count)]
+                            columnIndexes:[NSIndexSet indexSetWithIndex:columnNum]];
+        }
+   }
 }
 
 #pragma mark - Table Data Source Protocol
@@ -269,6 +278,27 @@ __DDLOGHERE__
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
     return self.sortedShows.count;
+}
+
+-(CGFloat) rowHeight {
+    //use negative numbers to indicate we need to recalculate, but save old one as negative to see if we need to reload or not.
+    //Yes, it's ugly.
+    if (self.imageRowHeight < 0) {
+        NSTableColumn *imageColumn = [self tableColumnWithIdentifier:kMTArtColumn];
+        CGFloat newRowHeight;
+        if  ( imageColumn.hidden ) {
+           newRowHeight = [super rowHeight];
+        } else {
+           newRowHeight =  MAX([super rowHeight], 9.0/16.0*imageColumn.width);
+        }
+        //now preserve the current first row.
+        CGPoint scroll = self.enclosingScrollView.contentView.bounds.origin;
+        scroll.y = scroll.y/(-self.imageRowHeight) * newRowHeight;
+        self.imageRowHeight = newRowHeight;
+        [self reloadData];
+        [self scrollPoint:scroll];
+    }
+    return self.imageRowHeight;
 }
 
 -(void)prepareContentInRect:(NSRect)rect {
@@ -293,93 +323,99 @@ __DDLOGHERE__
     // get an existing cell with the MyView identifier if it exists
    NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
 	MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
-    // There is no existing cell to reuse so we will create a new one
- 	if (result == nil) {
-        
-        // create the new NSTextField with a frame of the {0,0} with the width of the table
-        // note that the height of the frame is not really relevant, the row-height will modify the height
-        // the new text field is then returned as an autoreleased object
-        result = [[NSTableCellView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 20)];
-        //        result.textField.font = [NSFont userFontOfSize:14];
-        result.textField.editable = NO;
-        // the identifier of the NSTextField instance is set to MyView. This
-        // allows it to be re-used
-        result.identifier = tableColumn.identifier;
-	}
 
-    // result is now guaranteed to be valid, either as a re-used cell
-    // or as a new cell, so set the stringValue of the cell to the
-    // nameArray value at row
-    
     NSString * textVal = @"";
     result.toolTip = @"";
-    if ([tableColumn.identifier compare:@"Programs"] == NSOrderedSame) {
+    result.imageView.image = nil;
+    NSString* identifier = tableColumn.identifier;
+    if ([tableColumn.identifier isEqualToString:@"Programs"]) {
        textVal = thisShow.showTitle?: @"" ;
         result.toolTip = textVal;
-    } else if ([tableColumn.identifier compare:@"TiVo"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"TiVo"]) {
         textVal = thisShow.tiVoName;
         result.textField.textColor = [NSColor blackColor];
         if (!thisShow.tiVo.isReachable) {
             result.textField.textColor = [NSColor redColor];
         }
         result.toolTip = thisShow.tiVoName;
-    } else if ([tableColumn.identifier compare:@"Date"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"Date"]) {
         if ([tableColumn width] > 135) {
             textVal = thisShow.showMediumDateString;
         } else {
             textVal = thisShow.showDateString;
         }
         result.toolTip = textVal;
-    } else if ([tableColumn.identifier compare:@"Length"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"Length"]) {
         textVal = thisShow.lengthString;
         result.toolTip = textVal;
-    } else if ([tableColumn.identifier compare:@"Series"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"Series"]) {
         textVal = thisShow.seriesTitle;
         result.toolTip = textVal;
-    } else if ([tableColumn.identifier compare:@"Episode"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"Episode"]) {
         textVal = thisShow.seasonEpisode;
         result.toolTip = textVal;
-    } else if ([tableColumn.identifier compare:@"Queued"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"Queued"]) {
         textVal = thisShow.isQueuedString;
-    } else if ([tableColumn.identifier compare:@"OnDisk"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"OnDisk"]) {
         textVal = thisShow.isOnDiskString;
         result.toolTip =@"Is program already downloaded and still on disk?";
-   } else if ([tableColumn.identifier compare:@"HD"] == NSOrderedSame) {
+   } else if ([identifier isEqualToString:@"HD"]) {
         textVal = thisShow.isHDString;
         result.textField.alignment = NSCenterTextAlignment;
-    } else if ([tableColumn.identifier compare:@"Channel"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"Channel"]) {
         textVal = thisShow.channelString;
-    } else if ([tableColumn.identifier compare:@"Size"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"Size"]) {
         textVal = thisShow.sizeString;
-    } else if ([tableColumn.identifier compare:@"TiVoID"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"TiVoID"]) {
         textVal = thisShow.idString;
-    } else if ([tableColumn.identifier compare:@"EpisodeID"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"EpisodeID"]) {
         textVal = thisShow.episodeID;
-    } else if ([tableColumn.identifier compare:@"Title"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"Title"]) {
         textVal = thisShow.episodeTitle;
         result.toolTip = textVal;
-    } else if ([tableColumn.identifier compare:@"Station"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"Station"]) {
         textVal = thisShow.stationCallsign;
-    } else if ([tableColumn.identifier compare:@"Genre"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"Genre"]) {
         textVal = thisShow.episodeGenre;
         result.toolTip = textVal;
-    } else if ([tableColumn.identifier compare:@"AgeRating"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"AgeRating"]) {
         textVal = thisShow.ageRatingString;
         result.toolTip = textVal;
-    } else if ([tableColumn.identifier compare:@"StarRating"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"StarRating"]) {
         textVal = thisShow.starRatingString;
-    } else if ([tableColumn.identifier compare:@"FirstAirDate"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"FirstAirDate"]) {
         textVal = thisShow.originalAirDateNoTime ?: @"";
-    } else if ([tableColumn.identifier compare:@"H.264"] == NSOrderedSame) {
+    } else if ([identifier isEqualToString:@"H.264"]) {
         textVal = thisShow.h264String;
         result.textField.alignment = NSCenterTextAlignment;
         result.toolTip =@"Does this channel use H.264 compression?";
-    } else if ([tableColumn.identifier isEqualToString:@"icon"]) {
+    } else if ([identifier isEqualToString: kMTArtColumn]) {
+        MTProgressCell * cell = (MTProgressCell *) result;
+
+        NSImage * image = thisShow.thumbnailArtworkImage;
+        if (image) {
+            result.imageView.image = image ;
+            result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
+            result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
+            cell.progressIndicator.hidden = YES;
+            [cell.progressIndicator stopAnimation:self];
+        } else if ([thisShow.thumbnailArtworkFile isEqualToString:@""]) {
+            //no image, and it's never coming
+            cell.progressIndicator.hidden = YES;
+            [cell.progressIndicator stopAnimation:self];
+       } else {
+            //no image, but it may be coming
+            cell.progressIndicator.hidden = NO;
+            [cell.progressIndicator startAnimation:self];
+        }
+    } else if ([identifier isEqualToString:@"icon"]) {
         NSString * imageName = thisShow.imageString;
         result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
         result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
         result.imageView.image = [NSImage imageNamed: imageName];
         result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
+    } else {
+        DDLogReport(@"Invalid Column: %@", identifier);
     }
     result.textField.stringValue = textVal ?: @"";
     result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
@@ -395,6 +431,13 @@ __DDLOGHERE__
     
     // return the result.
     return result;
+}
+
+
+-(void) didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row {
+    NSInteger column = [self columnWithIdentifier: kMTArtColumn];
+    MTProgressCell * cell = [rowView  viewAtColumn:column];
+    cell.imageView.frame = cell.bounds;
 }
 
 #pragma mark Drag N Drop support
