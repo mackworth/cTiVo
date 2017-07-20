@@ -34,7 +34,6 @@
 @property (weak, readonly) NSArray *savedTiVos;
 @property (weak, readonly) NSArray *savedManualTiVos;
 @property (weak, readonly) NSArray *savedBonjourTiVos;
-
 @property int volatile signalError;
 
 //Other Properties
@@ -45,7 +44,6 @@
 @property (atomic) int numEncoders;
 @property (nonatomic,readonly) int totalShows; // numCommercials, numCaptions;//Want to limit launches to two encoders.
 @property (nonatomic, strong) NSNumber *processingPaused;
-@property (nonatomic, strong) NSDictionary *showsOnDisk;
 @property (nonatomic, readonly) BOOL anyShowsCompleted;
 @property (nonatomic, strong) NSArray *currentMediaKeys;
 @property (nonatomic, readonly) double aggregateSpeed; //sum of the speed of all downloads .
@@ -71,7 +69,7 @@
 -(void) clearDownloadHistory;
 
 //---------------Download Queue userDefaults writing/reading  ----------
--(void)writeDownloadQueueToUserDefaults;
+-(void)saveState;
 -(MTDownload *) findRealDownload: (MTDownload *) proxyDownload;
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget;
 -(void) replaceProxyInQueue: (MTTiVoShow *) newShow;
@@ -120,7 +118,13 @@
 //---------------Other methods ----------
 -(void) notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle;
 - (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notification;
--(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path;
+
+-(NSArray <NSString *> *) copiesOnDiskForShow:(MTTiVoShow *) show;
+-(void) addShow:(MTTiVoShow *) show onDiskAtPath:(NSString *)path;
+
+-(void) updateManualInfo:(NSDictionary *) info forShow: (MTTiVoShow *) show;
+-(NSDictionary *) getManualInfo: (MTTiVoShow *) show;
+
 -(NSString *)getAMediaKey;
 -(BOOL) checkForExit;
 

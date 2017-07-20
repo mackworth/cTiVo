@@ -171,6 +171,7 @@
 #define kMTThumbnailsDirectory  @"ThumbnailsDirectory"  //Pathname for directory for dowloaded files (no GUI)
 #define kMTSubscriptionList @"SubscriptionList"     //Array of subscription dictionaries
 #define kMTTiVoLastLoadTimes @"TiVoLastLoadTImes"   //Array of Date each tivo last processed
+#define kMTManualEpisodeData @"ManualEpisodeData"   //Array of manually entered episode data (esp season/episode nums)
 #define kMTiTunesSubmit @"iTunesSubmit"             //Whether to submit to iTunes after encoding
 #define kMTiTunesSync @"iTunesSync"                 // Whether to sync iDevices after iTunes submital
 #define kMTiTunesDelete @"iTunesDelete"				//Whether to delete original file after submitting to iTunes
@@ -190,6 +191,8 @@
 
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
 #define kMTUpdateIntervalMinutes @"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes (No GUI)
+#define kMTSubscriptionExpiration @"kMTSubscriptionExpirationDays" //How many days to wait before deleting previous recording info (potentially leading to duplicates) (No GUI)
+
 #define kMTMaxNumEncoders @"MaxNumberEncoders"	//Limit number of encoders to limit cpu usage (No GUI) //
 #define kMTMaxProgressDelay @"MaxProgressDelay"      //Maximum time of no encoder progress before giving up (No GUI)  //
 

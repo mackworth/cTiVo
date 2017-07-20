@@ -26,4 +26,10 @@
 
 -(NSString *) escapedQueryString;
 
+
+//for these two, assumed that self is a filename and we're getting/setting filesystem attributes
+-(NSString *) getXAttr:(NSString *) key;
+
+-(void) setXAttr:(NSString *) key toValue:(NSString *) value;
+
 @end

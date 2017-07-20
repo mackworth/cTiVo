@@ -13,8 +13,6 @@
 #import "MTTiVoManager.h"
 #import "NSNotificationCenter+Threads.h"
 
-#include <sys/xattr.h>
-
 #define kMTStringType 0
 #define kMTBoolType 1
 #define kMTNumberType 2

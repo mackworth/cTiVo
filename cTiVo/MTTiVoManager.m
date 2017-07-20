@@ -17,7 +17,6 @@
 #import "NSString+Helpers.h"
 
 #include <arpa/inet.h>
-#include <sys/xattr.h>
 
 
 
@@ -37,6 +36,8 @@
 }
 
 @property (atomic, strong)     NSOperationQueue *opsQueue;
+@property (nonatomic, strong) NSMutableDictionary <NSString *, NSDictionary  *> * manualEpisodeData;
+@property (nonatomic, strong) NSDictionary *showsOnDisk;
 
 @end
 
@@ -83,53 +84,10 @@ __DDLOGHERE__
 		if (!_lastLoadedTivoTimes) {
 			_lastLoadedTivoTimes = [NSMutableDictionary new];
 		}
-		
-		NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
-		NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
-		_formatList = [NSMutableArray arrayWithArray:[formats objectForKey:@"formats"]];
-		NSMutableArray *tmpArray = [NSMutableArray array];
-		for (NSDictionary *fl in _formatList) {
-			MTFormat *thisFormat = [MTFormat formatWithDictionary:fl];
-			thisFormat.isFactoryFormat = [NSNumber numberWithBool:YES];
-			[tmpArray addObject:thisFormat];
-		}
-		_formatList = tmpArray;
-        DDLogVerbose(@"factory Formats: %@", tmpArray);
-		
-        //Set user desired hiding of the user pref, if any
-        
-        NSArray *hiddenFormatNames = [defaults objectForKey:kMTHiddenFormats];
-        if (hiddenFormatNames) {
-            //Un hide all 
-            DDLogVerbose(@"Hiding formats: %@", hiddenFormatNames);
-			for (MTFormat *f in _formatList) {
-                f.isHidden = [NSNumber numberWithBool:NO];
-            }
-            //Hide what the user wants
-            for (NSString *name in hiddenFormatNames) {
-                MTFormat *f = [self findFormat:name];
-                if ([name isEqualToString:f.name]) {  //confirm find didn't return a default format
-					f.isHidden = [NSNumber numberWithBool:YES];
-				}
-            }
-        }
-		
-		//Load user formats from preferences if any
-		NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTFormats];
-		if (userFormats) {
-			DDLogVerbose(@"User formats: %@", userFormats);
-            [self addFormatsToList:userFormats withNotification:NO];
-		}
-		
-		//Make sure there's a selected format, especially on first launch
-
-        NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
-        self.selectedFormat = [self findFormat:formatName];
-        DDLogVerbose(@"defaultFormat %@", formatName);
-
-
+        [self initialFormatSetup];
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
 		DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
+        [self restoreManualEpisodeInfo];
 
 		numEncoders = 0;
 		_signalError = 0;
@@ -138,17 +96,57 @@ __DDLOGHERE__
 		_processingPaused = @(NO);
 		
 		[self loadUserNotifications];
-//		NSLog(@"Getting Host Addresses");
-//      Note that NSHost is unsafe in general
-//		hostAddresses = [[[NSHost currentHost] addresses] retain];
-//        NSLog(@"Host Addresses = %@",self.hostAddresses);
-//        NSLog(@"Host Names = %@",[[NSHost currentHost] names]);
-//        NSLog(@"Host addresses for first name %@",[[NSHost hostWithName:[[NSHost currentHost] names][0]] addresses]);
         [self setupMetadataQuery];
  		loadingManualTiVos = NO;
         self.tvdb = [MTTVDB sharedManager];
 	}
 	return self;
+}
+
+-(void) initialFormatSetup {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+
+    NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
+    NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
+    _formatList = [NSMutableArray arrayWithArray:[formats objectForKey:@"formats"]];
+    NSMutableArray *tmpArray = [NSMutableArray array];
+    for (NSDictionary *fl in _formatList) {
+        MTFormat *thisFormat = [MTFormat formatWithDictionary:fl];
+        thisFormat.isFactoryFormat = [NSNumber numberWithBool:YES];
+        [tmpArray addObject:thisFormat];
+    }
+    _formatList = tmpArray;
+    DDLogVerbose(@"factory Formats: %@", tmpArray);
+
+    //Set user desired hiding of the user pref, if any
+    NSArray *hiddenFormatNames = [defaults objectForKey:kMTHiddenFormats];
+    if (hiddenFormatNames) {
+        //Un hide all
+        DDLogVerbose(@"Hiding formats: %@", hiddenFormatNames);
+        for (MTFormat *f in _formatList) {
+            f.isHidden = [NSNumber numberWithBool:NO];
+        }
+        //Hide what the user wants
+        for (NSString *name in hiddenFormatNames) {
+            MTFormat *f = [self findFormat:name];
+            if ([name isEqualToString:f.name]) {  //confirm find didn't return a default format
+                f.isHidden = [NSNumber numberWithBool:YES];
+            }
+        }
+    }
+
+    //Load user formats from preferences if any
+    NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTFormats];
+    if (userFormats) {
+        DDLogVerbose(@"User formats: %@", userFormats);
+        [self addFormatsToList:userFormats withNotification:NO];
+    }
+
+    //Make sure there's a selected format, especially on first launch
+
+    NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
+    self.selectedFormat = [self findFormat:formatName];
+    DDLogVerbose(@"defaultFormat %@", formatName);
 }
 
 -(void) setupMetadataQuery {
@@ -167,48 +165,54 @@ __DDLOGHERE__
 {
 	DDLogDetail(@"Got Metadata Result with count %ld",[cTiVoQuery resultCount]);
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
-    NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
 	for (NSUInteger i =0; i < [cTiVoQuery resultCount]; i++) {
         NSMetadataItem * item = [cTiVoQuery resultAtIndex:i];
         if (![item isKindOfClass:[NSMetadataItem class]]) continue;
         NSString *filePath = [item valueForAttribute:NSMetadataItemPathKey];
-		ssize_t len = getxattr([filePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], (void *)[buffer bytes], 256, 0, 0);
-		if (len > 0) {
-			NSData *idData = [NSData dataWithBytes:[buffer bytes] length:(NSUInteger)len];
-			NSString  *showID = [[NSString alloc] initWithData:idData encoding:NSUTF8StringEncoding];
-			len = getxattr([filePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], (void *)[buffer bytes], 256, 0, 0);
-			if (len > 0) {
-				NSData *nameData = [NSData dataWithBytes:[buffer bytes] length:len];
-				NSString *tiVoName = [[NSString alloc] initWithData:nameData encoding:NSUTF8StringEncoding];
-				NSString *key = [NSString stringWithFormat:@"%@: %@",tiVoName,showID];
-				if ([tmpDict objectForKey:key]) {
-					NSArray *paths = [tmpDict objectForKey:key];
-					[tmpDict setObject:[paths arrayByAddingObject:filePath] forKey:key];
-				} else {
-					[tmpDict setObject:@[filePath] forKey:key];
-				}
+        NSString * showID = [filePath getXAttr:kMTXATTRTiVoID ];
+        NSString * tiVoName = [filePath getXAttr:kMTXATTRTiVoName ];
+        if (showID.length && tiVoName.length) {
+            NSString *key = [NSString stringWithFormat:@"%@: %@",tiVoName,showID];
+            if ([tmpDict objectForKey:key]) {
+                NSArray *paths = [tmpDict objectForKey:key];
+                [tmpDict setObject:[paths arrayByAddingObject:filePath] forKey:key];
+            } else {
+                [tmpDict setObject:@[filePath] forKey:key];
 			}
 		}
-
 	}
 	self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	DDLogVerbose(@"showsOnDisk = %@",self.showsOnDisk);
-    
 }
-#pragma mark - Loading queue from Preferences
 
--(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path
-{
-	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:self.showsOnDisk];
-	if ([tmpDict objectForKey:key]) {
-		NSArray *paths = [tmpDict objectForKey:key];
-		[tmpDict setObject:[paths arrayByAddingObject:path] forKey:key];
-	} else {
-		[tmpDict setObject:@[path] forKey:key];
-	}
-	self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
+-(NSString *)keyForShow: (MTTiVoShow *) show {
+    return [NSString stringWithFormat:@"%@: %@",show.tiVoName,show.idString];
 }
+
+-(NSArray <NSString *> *) copiesOnDiskForShow:(MTTiVoShow *) show {
+    return [self.showsOnDisk objectForKey: [self keyForShow:show]];
+}
+
+-(void) addShow:(MTTiVoShow *) show onDiskAtPath:(NSString *)path {
+    //Add xattrs
+    [path setXAttr:kMTXATTRTiVoName toValue:show.tiVoName ];
+    [path setXAttr:kMTXATTRTiVoID toValue:show.idString ];
+    [path setXAttr:kMTXATTRSpotlight toValue:kMTSpotlightKeyword ];
+
+    NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:self.showsOnDisk];
+    NSString * key = [self keyForShow:show];
+    if ([tmpDict objectForKey:key]) {
+        NSArray *paths = [tmpDict objectForKey:key];
+        [tmpDict setObject:[paths arrayByAddingObject:path] forKey:key];
+    } else {
+        [tmpDict setObject:@[path] forKey:key];
+    }
+    self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
+}
+
+
+#pragma mark - Loading queue from Preferences
 
 -(void) restoreOldQueue {
 	NSArray *oldQueue = [[NSUserDefaults standardUserDefaults] objectForKey:kMTQueue];
@@ -293,14 +297,15 @@ __DDLOGHERE__
 }
 
 
--(void)writeDownloadQueueToUserDefaults {
+-(void)saveState {
 	NSMutableArray * downloadArray = [NSMutableArray arrayWithCapacity:_downloadQueue.count];
 	for (MTDownload * download in _downloadQueue) {
 		[downloadArray addObject:[download queueRecord]];
 	}
     DDLogVerbose(@"writing DL queue: %@", downloadArray);
 	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];
-		
+
+    [self saveManualEpisodeInfo];
 	[self.subscribedShows saveSubscriptions];
 	[[NSUserDefaults standardUserDefaults] synchronize];
 
@@ -1554,7 +1559,46 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	}
 	return totalShows;
 }
+#pragma mark - Manual Show information
 
+-(void) saveManualEpisodeInfo {
+    @synchronized (self.manualEpisodeData) {
+        for (NSString *key in self.manualEpisodeData.allKeys) {
+            NSDictionary * info = self.manualEpisodeData[key];
+            if (-[(NSDate *)info[@"date"] timeIntervalSinceNow ] > 60*60*24*90) {
+                [self.manualEpisodeData removeObjectForKey:key];
+            }
+        }
+        [[NSUserDefaults standardUserDefaults] setObject:
+                                             (self.manualEpisodeData.count > 0) ?
+                                              self.manualEpisodeData :
+                                              nil
+                                              forKey:kMTManualEpisodeData];
+    }
+}
+
+-(void) restoreManualEpisodeInfo {
+    self.manualEpisodeData = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTManualEpisodeData] mutableCopy]
+    ?: [NSMutableDictionary dictionary];
+}
+
+-(void) updateManualInfo:(NSDictionary *)info forShow:(MTTiVoShow *)show {
+    @synchronized(self.manualEpisodeData) {
+        NSMutableDictionary * newDatedInfo = [info mutableCopy];
+        [newDatedInfo setValue:[NSDate date] forKey:@"date"];
+        [self.manualEpisodeData setValue:[newDatedInfo copy] forKey: show.uniqueID];
+    }
+}
+
+-(NSDictionary *) getManualInfo: (MTTiVoShow *) show {
+    NSDictionary <NSString *, NSString *> *info;
+    @synchronized (self.manualEpisodeData) {
+        info = self.manualEpisodeData[show.uniqueID];
+    }
+    //we mark current date every time we access
+    if (info) [self updateManualInfo: info forShow:show];
+    return info;
+}
 
 #pragma mark - Bonjour browser delegate methods
 

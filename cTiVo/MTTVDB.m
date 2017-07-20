@@ -763,8 +763,6 @@ __DDLOGHERE__
             NSInteger numDays = 30;
             if ([episodeInfo[@"series"] isEqualToString:kMTVDBMissing]) {
                 numDays = 1;
-            } else if ([episodeInfo[@"manual"] isEqual:@(YES)]) {
-                numDays = 365;
                 //would be better to purge tvdbcache after finishing loading episodes.
             }
             if ([[NSDate date] timeIntervalSinceDate:createDate] > 60.0 * 60.0 * 24.0 * numDays) { //Too old so throw out
@@ -804,29 +802,6 @@ __DDLOGHERE__
         }
     } else {
         return nil;
-    }
-}
-
--(void) cacheSeason:(NSInteger) season andEpisode:(NSInteger) episode forShow: (MTTiVoShow *) show {
-    NSString * uniqueID = show.uniqueID;
-    if ( uniqueID.length > 0) {  //protective only
-        @synchronized (self.tvdbCache) {
-            NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:uniqueID] mutableCopy];
-            if (season > 0 || episode > 0) {
-                if (!oldEntry) {
-                    oldEntry = [NSMutableDictionary dictionaryWithObject: [NSDate date] forKey:@"date"];
-                }
-                [oldEntry setObject:@(season) forKey:@"season"];
-                [oldEntry setObject:@(episode) forKey:@"episode"];
-                [oldEntry setObject:@(YES) forKey:@"manual"];
-
-                [self.tvdbCache setObject:[oldEntry copy]
-                                   forKey:uniqueID];
-            } else if (oldEntry && [oldEntry[@"manual"] isEqual:@(YES)]) {
-                [self.tvdbCache removeObjectForKey: uniqueID];
-            }
-        }
-        [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
     }
 }
 

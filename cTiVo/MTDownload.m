@@ -11,7 +11,6 @@
 #import "MTTiVoManager.h"
 #import "MTDownload.h"
 #import "NSString+Helpers.h"
-#include <sys/xattr.h>
 #include "mp4v2.h"
 #include "NSNotificationCenter+Threads.h"
 #ifndef DEBUG
@@ -794,24 +793,18 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 -(void) markCompleteCTiVoFile:(NSString *) path {
-    if (path ) {
-        NSData *tiVoID = [self.show.idString dataUsingEncoding:NSUTF8StringEncoding];
-        setxattr([path cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with show ID
-    }
-}
+    //This is for a checkpoint and tell us the file is complete with show ID
+    [path setXAttr:kMTXATTRFileComplete toValue:self.show.idString];
 
+}
 
 -(BOOL) isCompleteCTiVoFile: (NSString *) path forFileType: (NSString *) fileType {
     NSFileManager *fm = [NSFileManager defaultManager];
     if ([fm fileExistsAtPath:path]) {
-        NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
-		ssize_t len = getxattr([path cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
-        if (len >=0) {
-            NSString *tiVoID = [[NSString alloc] initWithData:[NSData dataWithBytes:[buffer bytes] length:len] encoding:NSUTF8StringEncoding];
-            if ([tiVoID compare:self.show.idString] == NSOrderedSame) {
-                DDLogMajor(@"Found Complete %@ File at %@", fileType, path);
-                return YES;
-            }
+        NSString *tiVoID = [path getXAttr:kMTXATTRFileComplete];
+        if ([tiVoID compare:self.show.idString] == NSOrderedSame) {
+            DDLogMajor(@"Found Complete %@ File at %@", fileType, path);
+            return YES;
         }
     }
     return NO;
@@ -1981,18 +1974,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	}
 }
 
--(void) addXAttrs:(NSString *) videoFilePath {
-	//Add xattrs
-	NSData *tiVoName = [self.show.tiVoName dataUsingEncoding:NSUTF8StringEncoding];
-	NSData *tiVoID = [self.show.idString dataUsingEncoding:NSUTF8StringEncoding];
-	NSData *spotlightKeyword = [kMTSpotlightKeyword dataUsingEncoding:NSUTF8StringEncoding];
-	setxattr([videoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], [tiVoName bytes], tiVoName.length, 0, 0);
-	setxattr([videoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);
-	setxattr([videoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRSpotlight UTF8String], [spotlightKeyword bytes], spotlightKeyword.length, 0, 0);
-    
-	[tiVoManager updateShowOnDisk:self.show.showKey withPath: videoFilePath];
-}
-
 
 -(NSString *) moveFile:(NSString *) path toITunes: (NSString *)iTunesBaseName forType:(NSString *) typeString andExtension: (NSString *) extension {
     if (!path) return nil;
@@ -2100,11 +2081,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                     self.encodeFilePath= iTunesPath;
                 } else {
                     //two copies now, so add xattrs to iTunes copy as well; leave captions/metadata/commercials with original
-                    [self addXAttrs:iTunesPath];
+                    [tiVoManager addShow: self.show onDiskAtPath: iTunesPath];
                 }
             }
         }
-        [self addXAttrs:self.encodeFilePath];
+        [tiVoManager addShow: self.show onDiskAtPath:self.encodeFilePath];
     //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
         DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], self.show.showTitle);
 #ifndef DEBUG

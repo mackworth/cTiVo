@@ -169,7 +169,7 @@ __DDLOGHERE__
 	if ([type isEqualToString:kMTTivoShowPasteBoardType]) {
 		return  [NSKeyedArchiver archivedDataWithRootObject:self];
     } else if ( [type isEqualToString:(NSString *)kUTTypeFileURL]) {
-        NSArray * files = [tiVoManager.showsOnDisk objectForKey:self.showKey];
+        NSArray * files = [self copiesOnDisk];
         if (files.count > 0) {
             NSURL *URL = [NSURL fileURLWithPath:files[0] isDirectory:NO];
             id temp =  [URL pasteboardPropertyListForType:(id)kUTTypeFileURL];
@@ -189,7 +189,7 @@ __DDLOGHERE__
 }
 
 -(NSArray *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
-    if ([tiVoManager.showsOnDisk objectForKey:self.showKey]) {
+    if (self.isOnDisk) {
         return @[kMTTivoShowPasteBoardType, (NSString *)kUTTypeFileURL, NSPasteboardTypeString];
     } else {
         return @[kMTTivoShowPasteBoardType, NSPasteboardTypeString];
@@ -286,6 +286,7 @@ __DDLOGHERE__
     } else {
         [tiVoManager.tvdb getTheTVDBDetails:self ];
         DDLogDetail(@"GetDetails parsing Finished: %@", self.showTitle);
+        [self checkManualInfo];
     }
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
 
@@ -379,11 +380,6 @@ __DDLOGHERE__
 
 #pragma mark - Custom Getters
 
--(NSString *)showKey
-{
-	return [NSString stringWithFormat:@"%@: %@",self.tiVoName,self.idString];
-}
-												  
 -(NSString *) seasonEpisode {
     NSString *returnString = @"";
     if (self.episode > 0) {
@@ -880,8 +876,13 @@ __DDLOGHERE__
                     [components day]];
 
 }
+
 -(BOOL) isOnDisk {
-    return [tiVoManager.showsOnDisk objectForKey:self.showKey] != nil;
+    return [tiVoManager copiesOnDiskForShow: self] != nil;
+}
+
+-(NSArray <NSString *> *) copiesOnDisk {
+    return [tiVoManager copiesOnDiskForShow: self];
 }
 
 -(NSString *) isOnDiskString {
@@ -1191,8 +1192,6 @@ static void * originalAirDateContext = &originalAirDateContext;
     }
 }
 
-
-
 -(NSAttributedString *)parseNames:(NSArray *)nameSet
 {
     if (!nameSet || ![nameSet respondsToSelector:@selector(count)] || nameSet.count == 0 ) { //|| [nameSet[0] isKindOfClass:[NSString class]]) {
@@ -1278,11 +1277,20 @@ static void * originalAirDateContext = &originalAirDateContext;
     if (result) {
         self.season  = [[seasonEpisode substringWithRange:[result rangeAtIndex:1]] intValue];
         self.episode = [[seasonEpisode substringWithRange:[result rangeAtIndex:2]] intValue];
+        NSDictionary * info = @{@"season": @(self.season),
+                                @"episode": @(self.episode)};
+        [tiVoManager updateManualInfo:info forShow:self];
     } else {
         self.season = 0; self.episode = 0;
+        [tiVoManager updateManualInfo:nil forShow:self];
     }
-    [tiVoManager.tvdb cacheSeason:self.season andEpisode:self.episode forShow:self];
+    [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
+}
 
+-(void) checkManualInfo {
+    NSDictionary * manualInfo = [tiVoManager getManualInfo:self];
+    if (manualInfo[@"episode"]) self.episode =  ((NSNumber *)manualInfo[@"episode"]).intValue;
+    if (manualInfo[@"season"]) self.season =  ((NSNumber *)manualInfo[@"season"]).intValue;
 }
 
 #pragma clang diagnostic push

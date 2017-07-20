@@ -19,7 +19,6 @@
 -(void) reloadTVDBInfo:(MTTiVoShow *) show;
 -(void) resetAll;  //destroys all caches
 -(void) saveDefaults; //writes caches to userdefaults
--(void) cacheSeason:(NSInteger) season andEpisode:(NSInteger) episode forShow: (MTTiVoShow *) show;
 -(NSString *) stats;
 -(BOOL) isActive;
 

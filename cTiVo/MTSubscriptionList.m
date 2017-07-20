@@ -29,7 +29,9 @@
     //used to expire old subscriptions
     //incidentally drops really old tivos (over 90 days)
     //note that this may return "distant past" if a tivo has been seen, but not fully processed yet
-    NSDate * returnDate = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*30]; //keep at least 30 days
+    NSInteger numDays = [[NSUserDefaults standardUserDefaults] integerForKey: kMTSubscriptionExpiration];
+    if (numDays == 0) numDays = 30;
+    NSDate * returnDate = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*numDays]; //keep at least 30 days
     for (NSString * tivoName in [tiVoManager.lastLoadedTivoTimes allKeys]) {
         NSDate * tivoTime=  tiVoManager.lastLoadedTivoTimes[tivoName];
         if ((tivoTime != [NSDate distantPast] && [tivoTime timeIntervalSinceNow] >= 60*60*24*90)) {
@@ -62,12 +64,16 @@
     //any show that started within twelve hours of last checkin is worth looking at.
     //note that theoretically, 12 hours could be replace by thisshow.duration if we parsed Tivos'  PT00H0M0S format;
     if ([thisShow.showDate isGreaterThan: earliestTime]) {
-        DDLogVerbose(@"Subscription check: recent enough %@", thisShow);
-        for (MTSubscription * possMatch in self) {
-            if ([possMatch isSubscribed:thisShow ignoreDate:NO]) {
-                MTDownload * newDownload = [possMatch downloadForSubscribedShow:thisShow];
-                [tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];
+        if (!thisShow.isOnDisk) {
+            DDLogVerbose(@"Subscription check: recent enough %@", thisShow);
+            for (MTSubscription * possMatch in self) {
+                if ([possMatch isSubscribed:thisShow ignoreDate:NO]) {
+                    MTDownload * newDownload = [possMatch downloadForSubscribedShow:thisShow];
+                    [tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];
+                }
             }
+        } else {
+            DDLogVerbose(@"Subscription check: already recorded: %@", thisShow);
         }
     } else {
         DDLogVerbose(@"Subscription check: too old: %@", thisShow);
@@ -84,7 +90,6 @@
                 [tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];
             }
         }
-
     }
 }
 

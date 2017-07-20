@@ -294,17 +294,8 @@ __DDLOGHERE__
     [self checkDirectoryAndPurge:kMTTmpThumbnailsDir];
 
 
-	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(writeDownloadQueueToUserDefaults) userInfo:nil repeats:YES];
+	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(saveState) userInfo:nil repeats:YES];
 	
-	//Update atomicparsley default to metatdata default
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	if ([defaults objectForKey:@"ExportAtomicParsleyMetaData"]) {  //Old name
-		NSNumber *md = [defaults objectForKey:@"ExportAtomicParsleyMetaData"];
-		[defaults removeObjectForKey:@"ExportAtomicParsleyMetaData"];
-		[defaults setObject:md forKey:@"ExportMetaData"];
-	}
-
-
     self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: 61 target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
     DDLogDetail(@"Finished appDidFinishLaunch");
  }
@@ -362,7 +353,7 @@ BOOL wasPaused = NO;
                 DDLogVerbose(@"Removed file %@",filePath);
             }
         }
-        
+
     }
 
 }
@@ -994,7 +985,7 @@ BOOL wasPaused = NO;
 	
 	[saveQueueTimer invalidate];
 	[tiVoManager cancelAllDownloads];
-	[tiVoManager writeDownloadQueueToUserDefaults];
+	[tiVoManager saveState];
     [tiVoManager.tvdb saveDefaults];
 	 mediaKeyQueue = nil;
     DDLogReport(@"cTiVo exiting");

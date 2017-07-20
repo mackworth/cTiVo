@@ -7,6 +7,7 @@
 //
 
 #import "NSString+Helpers.h"
+#include <sys/xattr.h>
 
 @implementation NSString (Helpers)
 
@@ -124,5 +125,29 @@
                                             kCFStringEncodingUTF8)) ;
 
 }
+
+
+
+-(NSString *) getXAttr:(NSString *) key  {
+    NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
+    ssize_t len = getxattr([self cStringUsingEncoding:NSASCIIStringEncoding], [key UTF8String], (void *)[buffer bytes], 256, 0, 0);
+    if (len > 0) {
+        NSData *idData = [NSData dataWithBytes:[buffer bytes] length:(NSUInteger)len];
+        NSString  *result = [[NSString alloc] initWithData:idData encoding:NSUTF8StringEncoding];
+        return result;
+    }
+    return nil;
+}
+
+
+-(void) setXAttr:(NSString *) key toValue:(NSString *) value  {
+    NSData * data = [value dataUsingEncoding:NSUTF8StringEncoding];
+    setxattr([self cStringUsingEncoding:NSASCIIStringEncoding],
+             [key UTF8String],
+             [data bytes],
+             data.length,
+             0, 0);
+}
+
 
 @end

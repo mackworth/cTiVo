@@ -352,7 +352,7 @@ __DDLOGHERE__
 			if (workingTable == tiVoShowTable) {
 				MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
 				//diable menu items that depend on having a completed show tag = 2
-				if (![tiVoManager.showsOnDisk objectForKey:thisShow.showKey]) {
+				if (!thisShow.isOnDisk) {
 					for (NSMenuItem *mi in [menu itemArray]) {
 						if (mi.tag == 2 ) {
 							[mi setAction:NULL];
@@ -407,15 +407,13 @@ __DDLOGHERE__
 		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
         //Eventually if more than 1 download present will open up choice alert (or extend menu with a right pull)
         //For now just play the first
-        if ([tiVoManager.showsOnDisk objectForKey:thisShow.showKey]) {
-                [thisShow playVideo:[tiVoManager.showsOnDisk objectForKey:thisShow.showKey][0]];
+        if (thisShow.isOnDisk) {
+                [thisShow playVideo:[thisShow copiesOnDisk][0]];
         }
     } else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
 		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
-        //Eventually if more than 1 download present will open up choice alert (or extend menu with a right pull)
-        //For now just play the first
-        if ([tiVoManager.showsOnDisk objectForKey:thisShow.showKey]) {
-            [thisShow revealInFinder:[tiVoManager.showsOnDisk objectForKey:thisShow.showKey]];
+        if (thisShow.isOnDisk) {
+            [thisShow revealInFinder:[thisShow copiesOnDisk]];
         }
 	}
 }
