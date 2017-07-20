@@ -36,7 +36,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="800" height="758"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <userGuides>
-                    <userLayoutGuide location="658" affinity="minY"/>
+                    <userLayoutGuide location="657" affinity="minY"/>
                     <userLayoutGuide location="618" affinity="minY"/>
                 </userGuides>
                 <subviews>
@@ -108,7 +108,7 @@
                                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
-                                                            <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="showTitlePlusAirDate"/>
+                                                            <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="tvdbArtworkLocation"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView misplaced="YES" id="HFS-Zq-cHx" customClass="MTProgressCell">
@@ -279,11 +279,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="722">
-                                                                    <rect key="frame" x="1" y="1" width="100.0" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="723">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="100" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="724" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>
@@ -347,11 +347,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="728">
-                                                                    <rect key="frame" x="1" y="1" width="120.0" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="729">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="120" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="730" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>
@@ -381,11 +381,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="835">
-                                                                    <rect key="frame" x="1" y="1" width="40.0" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="836">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="40" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="837" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>
@@ -415,11 +415,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="672">
-                                                                    <rect key="frame" x="1" y="1" width="74.0" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="674">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="74" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="675" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>
@@ -483,11 +483,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="a61-iM-6jD">
-                                                                    <rect key="frame" x="1" y="1" width="42.0" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="MqE-OC-qPp">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="42" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="✔" allowsEditingTextAttributes="YES" id="Xeb-RF-j9I" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" size="13" name="ZapfDingbatsITC"/>
@@ -517,11 +517,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="kAz-l4-j0i">
-                                                                    <rect key="frame" x="1" y="1" width="42.0" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="1ez-M1-jIP">
-                                                                            <rect key="frame" x="0" y="0.0" width="42" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="✔" allowsEditingTextAttributes="YES" id="IS7-ov-SYR" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" size="13" name="ZapfDingbatsITC"/>
@@ -619,11 +619,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="GC0-nY-Qpf">
-                                                                    <rect key="frame" x="1" y="1" width="50.0" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="U9n-7i-4zi">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="50" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="fFR-lU-jpV" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>
@@ -653,11 +653,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="ncb-q6-t15">
-                                                                    <rect key="frame" x="1" y="1" width="50.0" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="YLQ-Us-TNB">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="50" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="h1N-Fa-KvR" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>
@@ -687,11 +687,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="678">
-                                                                    <rect key="frame" x="1" y="1" width="80" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="680">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="80" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="681" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>
@@ -721,11 +721,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="734">
-                                                                    <rect key="frame" x="1" y="1" width="50.0" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="735">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="50" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="736" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>
@@ -755,11 +755,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="716">
-                                                                    <rect key="frame" x="1" y="1" width="64.0" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="717">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="64" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="718" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>
@@ -789,11 +789,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="1337">
-                                                                    <rect key="frame" x="1" y="1" width="64.0" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="1339">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="64" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="1340" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>
@@ -823,11 +823,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="740">
-                                                                    <rect key="frame" x="1" y="1" width="100.0" height="17.0"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="741">
-                                                                            <rect key="frame" x="-2" y="0.0" width="100" height="17.0"/>
+                                                                            <rect key="frame" x="-3" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="742" customClass="RSVerticallyCenteredTextFieldCell">
                                                                                 <font key="font" metaFont="system"/>

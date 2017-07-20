@@ -268,6 +268,16 @@ __DDLOGHERE__
    }
 }
 
+-(void) columnChanged: (NSTableColumn *) column {
+    //called when column added or deleted
+    if ([column.identifier isEqualToString: kMTArtColumn]) {
+        //have to confirm height changed
+        if (self.imageRowHeight > 0) {
+            self.imageRowHeight = -self.imageRowHeight;  //use as trigger to recalculate, but remember old size in case it hasn't changed.
+        }
+   }
+}
+
 #pragma mark - Table Data Source Protocol
 
 -(void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors
@@ -291,12 +301,14 @@ __DDLOGHERE__
         } else {
            newRowHeight =  MAX([super rowHeight], 9.0/16.0*imageColumn.width);
         }
-        //now preserve the current first row.
-        CGPoint scroll = self.enclosingScrollView.contentView.bounds.origin;
-        scroll.y = scroll.y/(-self.imageRowHeight) * newRowHeight;
-        self.imageRowHeight = newRowHeight;
-        [self reloadData];
-        [self scrollPoint:scroll];
+        if (newRowHeight != self.imageRowHeight) {
+            //now preserve the current first row.
+            CGPoint scroll = self.enclosingScrollView.contentView.bounds.origin;
+            scroll.y = scroll.y/(-self.imageRowHeight) * newRowHeight;
+            self.imageRowHeight = newRowHeight;
+            [self reloadData];
+            [self scrollPoint:scroll];
+        }
     }
     return self.imageRowHeight;
 }
@@ -438,6 +450,7 @@ __DDLOGHERE__
     NSInteger column = [self columnWithIdentifier: kMTArtColumn];
     MTProgressCell * cell = [rowView  viewAtColumn:column];
     cell.imageView.frame = cell.bounds;
+    cell.progressIndicator.frame = cell.bounds;
 }
 
 #pragma mark Drag N Drop support

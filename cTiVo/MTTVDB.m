@@ -119,7 +119,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) checkToken {
-    @synchronized (self.tvdbTokenExpireTime) {
+    @synchronized (self) {
         static BOOL inProgress = NO;
         if (self.tvdbToken && [self.tvdbTokenExpireTime compare:[NSDate date]] == NSOrderedDescending) {
             return YES;
@@ -302,7 +302,7 @@ __DDLOGHERE__
                             DDLogReport(@"TVDB Episode JSON type Error (should be Array): %@ for %@", episodeList, seriesID);
                         }
                     } else {
-                        DDLogDetail(@"TVDB error for %@: %@", seriesID, error.localizedFailureReason);
+                        DDLogDetail(@"TVDB error for %@: %@", seriesID, jsonData[@"error"]);
                     }
                 } else {
                     DDLogReport(@"TVDB Episode JSON parsing Error: %@ for %@",  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], seriesID);
@@ -403,7 +403,7 @@ __DDLOGHERE__
                             DDLogReport(@"TVDB Episode JSON type Error (should be Array): %@ for %@", episodeList, seriesID);
                         }
                     } else {
-                        DDLogDetail(@"TVDB error for %@: %@", seriesID, error.localizedFailureReason);
+                        DDLogDetail(@"TVDB error for %@: %@", seriesID, jsonData[@"error"]);
                     }
                 } else {
                     DDLogReport(@"TVDB Episode JSON parsing Error: %@ for %@",  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], seriesID);
@@ -477,23 +477,119 @@ __DDLOGHERE__
 
 }
 
--(void) test {
-//    [ self seriesIDForShow:@"Counting Cars" completionHandler:^(NSArray<NSString *> *seriesIDs) {
-//        NSLog(@"TESTING!!! Found %@ for Counting Cars", seriesIDs);
-//    } failureHandler:^{
-//        NSLog(@"TESTING!!! Couldn't find Counting Cars");
-//    }];
-//
-//    [self infoForEpisodeNamed:@"Patriotic Chopper"
-//                     inSeries:@[@"316390",
-//                                @"261181"]
-//                onAirDate:@"2017-04-08"
-//            completionHandler:^(NSString * seriesID, NSDictionary *episodeInfo) {
-//                NSLog(@"For SeriesID: %@, episodeInfo: %@", seriesID, episodeInfo);
-//            } failureHandler:^{
-//                NSLog(@"Couldn't find Chopper");
-//            }];
+
+-(void) searchSeriesArtwork:(MTTiVoShow *) show
+                    artType:(NSString *) artType
+          completionHandler: (void(^) (NSString *filename)) completionBlock
+             failureHandler: (void(^) (void)) failureBlock {
+    NSString * seriesID = nil;
+    if (!artType) artType = @"fanart";
+    @synchronized (self.tvdbCache) {
+        seriesID = self.tvdbCache[show.uniqueID][@"series"];
+        if (!seriesID) {
+            NSArray <NSString *> * ids = [self cachedTVDBSeriesID:show.seriesTitle];
+            if (ids.count > 0) seriesID = ids[0];
+        }
+    }
+    if (!seriesID) {
+        DDLogReport(@"Looking for show %@ with no ID?", show);
+        if (failureBlock) {
+            dispatch_async(dispatch_get_main_queue(),failureBlock);
+        }
+        return;
+    }
+    NSURL *imageURL = [NSURL URLWithString: [NSString stringWithFormat:@"https://api.thetvdb.com/series/%@/images/query?keyType=%@",seriesID, artType]];
+    NSURLSessionDataTask *task = [self.tvdbURLSession dataTaskWithURL:imageURL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        float bestRating = 0.0;
+        float bestTextRating = 0.0;
+        NSString * bestFile = nil;
+        NSString * bestTextFile = nil;
+        //look for the highest rated image, preferably a "text" file
+        if (!error) {
+            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+            if (httpResponse.statusCode == 200){
+                NSError * jsonError;
+                NSDictionary *jsonData = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error: &jsonError];
+                if (!jsonError && [jsonData isKindOfClass:[NSDictionary class]]) {
+                    if (!jsonData[@"error"]) {
+                        DDLogVerbose(@"TVDB SeriesImage JSON: %@", jsonData);
+                        NSArray * imageList = jsonData[@"data"];
+                        if ([imageList isKindOfClass:[NSArray class]]) {
+                            for (NSDictionary * imageDict in imageList) {
+                                //possibly multiple shows on same airdate
+                                if ([imageDict                 isKindOfClass:[NSDictionary class]] &&
+                                    [imageDict[@"fileName"]    isKindOfClass:[NSString class]] &&
+                                    [imageDict[@"ratingsInfo"] isKindOfClass:[NSDictionary class]]) {
+                                    NSNumber * average = imageDict[@"ratingsInfo"][@"average"];
+
+                                    if ([average isKindOfClass:[NSNumber class]]){
+                                        if (average.floatValue > bestRating || !bestFile) {
+                                            bestRating = average.floatValue;
+                                            bestFile = imageDict[@"fileName"];
+                                        }
+                                        if ([imageDict[@"subkey"] isEqualToString:@"text"] &&
+                                            (average.floatValue > bestTextRating || !bestTextFile)) {
+                                            bestTextRating = average.floatValue;
+                                            bestTextFile = imageDict[@"fileName"];
+                                        }
+                                    } else {
+                                        DDLogReport(@"TVDB Image JSON type Error ('average' should be Number). For %@ on %@ tvdb has %@",  show, seriesID, imageDict);
+                                    }
+                                } else {
+                                    DDLogReport(@"TVDB Image JSON dictionarytype Error . For %@ on %@ tvdb has %@",  show, seriesID, imageDict);
+                                }
+                            }
+                        } else {
+                            DDLogReport(@"TVDB Image JSON type Error (should be Array): For %@ on %@ tvdb has %@",  show, seriesID, imageList);
+                        }
+                    } else {
+                        DDLogDetail(@"TVDB error for %@, %@: %@ at %@", show, seriesID, jsonData[@"error"], imageURL);
+                    }
+                } else {
+                    DDLogReport(@"TVDB Episode JSON parsing Error: %@  (%@) for %@",  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], jsonError.localizedDescription, seriesID );
+                }
+            } else if (httpResponse.statusCode == 404){
+                DDLogDetail(@"TVDB %@ images not found for show %@ in series %@ at %@", artType, show, seriesID, imageURL);
+                if ([artType isEqualToString:@"fanart"]) {
+                    //well, if at first you don't ...
+                    [self searchSeriesArtwork:show
+                                      artType:@"poster"
+                            completionHandler:completionBlock
+                               failureHandler:failureBlock];
+                    return;
+                }
+            } else {
+                DDLogReport(@"TVDB Episode HTTP Response Error %ld: %@, %@ from %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL, seriesID );
+                [self cancelSession];
+            }
+        } else {
+            DDLogReport(@"TVDB Episode Call Error %@: for %@", error.localizedFailureReason, imageURL );
+
+        }
+        if (bestTextFile) {
+            if (bestTextRating >= bestRating /2) {
+                //so if text version is within half the rating of the best graphical, then use it
+                bestFile = bestTextFile;
+            }
+        }
+        if (bestFile) {
+            if (completionBlock) {
+              dispatch_async(dispatch_get_main_queue(), ^{
+                  completionBlock( bestFile );
+              });
+            }
+        } else {
+            DDLogDetail(@"No Images for %@: at %@ for %@", show, seriesID, imageURL );
+            if (failureBlock) {
+                dispatch_async(dispatch_get_main_queue(),failureBlock);
+            }
+        }
+        }];
+    DDLogDetail(@"searching Series Image for show %@ in TVDB %@ : %@", show, imageURL, seriesID);
+    [task resume];
+
 }
+
 
 #pragma mark -
 #pragma mark statistics
@@ -830,6 +926,37 @@ __DDLOGHERE__
             }];
 }
 
+-(void) getNonEpisodicArworkforShow: (MTTiVoShow *) show withSeriesID: (NSString *) seriesID {
+    __weak typeof(self) weakSelf = self;
+    [self searchSeriesArtwork:show
+                      artType:nil
+            completionHandler:^(NSString *filename) {
+                typeof(self) strongSelf2 = weakSelf;
+
+                show.tvdbArtworkLocation = filename;
+                @synchronized (strongSelf2.tvdbCache) {
+                    [strongSelf2.tvdbCache setObject:@{
+                                                       @"series": seriesID,
+                                                       @"artwork": filename,
+                                                       @"date":[NSDate date]
+                                                       } forKey:show.seriesTitle];
+                }
+                [strongSelf2 finishTVDBProcessing:show];
+
+            } failureHandler:^{
+                typeof(self) strongSelf2 = weakSelf;
+                NSLog(@"XXX Don't know what happens next for %@", show);
+                @synchronized (strongSelf2.tvdbCache) {
+                    [strongSelf2.tvdbCache setObject:@{
+                                                       @"series": seriesID,
+                                                       @"artwork": @"",
+                                                       @"date":[NSDate date]
+                                                       } forKey:show.seriesTitle];
+                }
+                [strongSelf2 finishTVDBProcessing:show];
+            }];
+}
+
 -(void) callSeriesIDForShow: (MTTiVoShow *) show withSeriesName: (NSString *) seriesName andSecondCall: (NSString *) secondName {
     //helper routine to allow secondary call to seriesID without having to duplicateCode
     //secondary call necessary to check both seriesName and seriesName w/o a subtitle (e.g. 24: The Lost Weekend)
@@ -843,14 +970,7 @@ __DDLOGHERE__
                 [strongSelf getEpisodeDetailsForShow:show withIDs:seriesIDs];
             } else {
                 [strongSelf incrementStatistic:kMTVDBNonEpisodicSeriesFound];
-                //need to get series artwork here  (caching in episode entry) and then call
-                @synchronized (self.tvdbCache) {
-                    [self.tvdbCache setObject:@{
-                                                @"series": seriesIDs[0],
-                                                @"date":[NSDate date]
-                                                } forKey:show.seriesTitle];
-                }
-                [strongSelf finishTVDBProcessing:show];
+                [self getNonEpisodicArworkforShow:show withSeriesID:seriesIDs[0]];
             }
         }
 
@@ -864,9 +984,12 @@ __DDLOGHERE__
                @synchronized (self.tvdbCache) {
                    [self.tvdbCache setObject:@{
                                                @"series": kMTVDBMissing,  //mark as "TVDB doesn't have this series"
+                                               @"artwork": @"",
                                                @"date":[NSDate date]
                                                } forKey:  show.seriesTitle ];
                }
+               show.tvdbArtworkLocation = @""; //mark as not happening.
+               [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
                NSString *URL = [NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", [show.seriesTitle escapedQueryString]];
                if (show.isEpisodicShow) {
                    [strongSelf addValue: URL   inStatistic: kMTVDBEpisodicSeriesNotFound forShow:show.seriesTitle];
@@ -934,7 +1057,6 @@ __DDLOGHERE__
                     [self addValue: URL inStatistic:kMTVDBNonEpisodicSeriesNotFoundCached forShow:show.showTitle  ];
                 } else {
                     [self addValue: URL inStatistic:kMTVDBEpisodicSeriesNotFoundCached forShow:show.showTitle  ];
-
                 }
             }
         } else if (!show.isEpisodicShow) {
@@ -957,13 +1079,7 @@ __DDLOGHERE__
             // already have series ID, but not this episode info
             if (!show.isEpisodicShow) {
                 [self incrementStatistic:kMTVDBNonEpisodicSeriesFoundCached];
-                @synchronized (self.tvdbCache) {
-                    [self.tvdbCache setObject:@{
-                          @"series": seriesIDTVDBs[0],
-                          @"date":[NSDate date]
-                          } forKey:show.uniqueID];
-                }
-                [self finishTVDBProcessing:show];
+                [self getNonEpisodicArworkforShow:show withSeriesID:seriesIDTVDBs[0]];
             } else {
                 [self getEpisodeDetailsForShow:show withIDs:seriesIDTVDBs];
             }
@@ -1018,15 +1134,15 @@ __DDLOGHERE__
         show.gotTVDBDetails = YES;
         if (artwork.length+episodeNum.intValue +episodeNum.intValue > 0) {
             //got at least one
-            if (artwork.length) {
-                show.tvdbArtworkLocation = artwork;
-            }
             DDLogDetail(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, show);
        } else {
             NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self seriesIDForReporting:show.seriesId ], show.originalAirDateNoTime, show.season, show.episode, [self urlsForReporting:seriesIDTVDBs] ];
             DDLogDetail(@"No series info for %@ %@ ",show.showTitle, details);
         }
-        if ([episodeNum intValue] > 0) {  //season 0 = specials on theTVDB
+        if (artwork) {
+            show.tvdbArtworkLocation = artwork;
+        }
+       if ([episodeNum intValue] > 0) {  //season 0 = specials on theTVDB
             //special case due to parsing of tivo's season/episode combined string
             if (show.season > 0 && show.season/10 == [seasonNum intValue]  && [episodeNum intValue] == show.episode + (show.season % 10)*10) {
                 //must have mis-parsed (assumed SSEE, but actually SEEE, so let's fix
@@ -1209,6 +1325,8 @@ __DDLOGHERE__
         [self cacheArtWork:newArtwork forShow:show.seriesTitle];
     } else {
         DDLogMajor(@"theMovieDB doesn't have any images for %@", show.seriesTitle);
+        show.tvdbArtworkLocation = @"";
+        [self cacheArtWork:@"" forShow:show.seriesTitle];
         [self addValue:lookupURL inStatistic:kMTVDBMovieNotFound forShow:show.seriesTitle];
     }
     dispatch_async(dispatch_get_main_queue(), ^(void){
@@ -1217,7 +1335,7 @@ __DDLOGHERE__
 
 }
 
--(void)retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache{
+-(void)retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache {
     NSString *artLocation = show.tvdbArtworkLocation;
     if (artLocation.length == 0) {
         return;
@@ -1258,10 +1376,15 @@ __DDLOGHERE__
                     NSInteger statusCode = ((NSHTTPURLResponse *) response).statusCode;
                     if ( statusCode == 404 || statusCode == 500) {
                         resultFile = @"";
-                        DDLogDetail(@"No artwork for %@ from %@ ", show.seriesTitle, urlString);
-                        // [self removeArtwork:show.episodeID]; FIX
-//                        [self searchArtwork]
-//                        https://api.thetvdb.com/series/281470/images/query/params
+                        DDLogDetail(@"No episode artwork for %@ from %@ ", show.seriesTitle, urlString);
+                        [self searchSeriesArtwork:show
+                                          artType:nil
+                                completionHandler:^(NSString *filename2) {
+                            show.tvdbArtworkLocation = filename2;
+                            [self retrieveArtworkIntoFile:filename2 forShow:show cacheVersion:cache];
+                        } failureHandler:^{
+                            NSLog(@"XXX Don't know what happens next for %@", show);
+                        } ];
                     } else {
                         [[NSFileManager defaultManager] createDirectoryAtPath:[filename stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nil];
                         if ([data writeToFile:filename atomically:YES]) {
