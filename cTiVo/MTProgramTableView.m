@@ -60,11 +60,9 @@ __DDLOGHERE__
 
 }
 
--(void)showTiVoColumn:(NSNotification *)notification
-{
+-(void)showTiVoColumn:(NSNotification *)notification {
     NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
 	[tiVoColumn setHidden:NO];
-	
 }
 
 -(void) reloadData {
@@ -81,8 +79,6 @@ __DDLOGHERE__
 	NSIndexSet * showIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
 		return [selectedShows indexOfObject:obj] !=NSNotFound;
 	}];
-	
-
     [self selectRowIndexes:showIndexes byExtendingSelection:NO];
     
 }
@@ -171,19 +167,16 @@ __DDLOGHERE__
 #pragma mark - Table Delegate Protocol
 
 
--(IBAction)selectTivo:(id)sender
-{
+-(IBAction)selectTivo:(id)sender {
     if (tiVoManager.tiVoList.count > 1) { //Nothing to change otherwise
         self.selectedTiVo = ((MTTiVo *)[(NSPopUpButton *)sender selectedItem].representedObject).tiVo.name;
         [[NSUserDefaults standardUserDefaults] setObject:self.selectedTiVo forKey:kMTSelectedTiVo];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:_selectedTiVo];
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
     }
-    
 }
 
--(NSInteger)numberOfSelectedRows
-{
+-(NSInteger)numberOfSelectedRows {
     NSIndexSet *currentSelectedRows = [self selectedRowIndexes];
     __block NSInteger numSelected = 0;
     NSArray *showsToCheck = self.sortedShows;
@@ -192,7 +185,6 @@ __DDLOGHERE__
        if (![thisShow.protectedShow boolValue]) {
             numSelected++;
         }
-
     }];
     return numSelected;
 }
@@ -275,6 +267,8 @@ __DDLOGHERE__
         if (self.imageRowHeight > 0) {
             self.imageRowHeight = -self.imageRowHeight;  //use as trigger to recalculate, but remember old size in case it hasn't changed.
         }
+        [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.sortedShows.count)]
+                        columnIndexes:[NSIndexSet indexSetWithIndex: [[self tableColumns] indexOfObject:column]]];
    }
 }
 
@@ -304,7 +298,8 @@ __DDLOGHERE__
         if (newRowHeight != self.imageRowHeight) {
             //now preserve the current first row.
             CGPoint scroll = self.enclosingScrollView.contentView.bounds.origin;
-            scroll.y = scroll.y/(-self.imageRowHeight) * newRowHeight;
+            NSInteger spacing = [self intercellSpacing].height;
+            scroll.y = scroll.y/(-self.imageRowHeight+spacing) * (newRowHeight+spacing);
             self.imageRowHeight = newRowHeight;
             [self reloadData];
             [self scrollPoint:scroll];
@@ -411,7 +406,7 @@ __DDLOGHERE__
             result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
             cell.progressIndicator.hidden = YES;
             [cell.progressIndicator stopAnimation:self];
-        } else if ([thisShow.thumbnailArtworkFile isEqualToString:@""]) {
+        } else if ([thisShow.tvdbArtworkLocation isEqualToString:@""]) {
             //no image, and it's never coming
             cell.progressIndicator.hidden = YES;
             [cell.progressIndicator stopAnimation:self];

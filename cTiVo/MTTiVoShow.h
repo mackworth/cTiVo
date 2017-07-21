@@ -81,12 +81,12 @@
                                                  //episodeID+showDateRFC for non-episodic
 
 @property (atomic, strong) NSString * artworkFile,
-                            * thumbnailArtworkFile;   //uses @"" as signal that it's never coming
+                            * thumbnailArtworkFile;
 @property (nonatomic, strong) NSImage * thumbnailArtworkImage;
 
 @property					  time_t showLength;  //length of show in seconds
 
-@property (atomic, strong) NSString *tvdbArtworkLocation;
+@property (atomic, strong) NSString *tvdbArtworkLocation;    //uses @"" as signal that it's never coming
 
 
 //--------------------------------------------------------------
@@ -101,6 +101,8 @@
 @property (atomic)						int	season, episode; //calculated from EpisodeNumber
 @property (weak, nonatomic, readonly) NSString *seasonString;
 @property (weak, nonatomic, readonly) NSString *seasonEpisode; // S02 E04 version
+@property (readonly) BOOL manualSeasonInfo;
+
 @property (readonly, nonatomic) NSString *attribDescription;
 @property (readonly, nonatomic) NSString *starRatingString;
 

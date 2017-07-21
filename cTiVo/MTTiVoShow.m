@@ -43,6 +43,7 @@
                                 *producers;
 
 @property (nonatomic, assign) BOOL ignoreSection; //are we skipping this section in XML (esp vActualShowing)
+@property (nonatomic, assign) BOOL manualSeasonInfo;
 
 @end
 
@@ -1279,8 +1280,10 @@ static void * originalAirDateContext = &originalAirDateContext;
         self.episode = [[seasonEpisode substringWithRange:[result rangeAtIndex:2]] intValue];
         NSDictionary * info = @{@"season": @(self.season),
                                 @"episode": @(self.episode)};
+        self.manualSeasonInfo = YES;
         [tiVoManager updateManualInfo:info forShow:self];
     } else {
+        self.manualSeasonInfo = NO;
         self.season = 0; self.episode = 0;
         [tiVoManager updateManualInfo:nil forShow:self];
     }
@@ -1289,6 +1292,7 @@ static void * originalAirDateContext = &originalAirDateContext;
 
 -(void) checkManualInfo {
     NSDictionary * manualInfo = [tiVoManager getManualInfo:self];
+    self.manualSeasonInfo = manualInfo != nil;
     if (manualInfo[@"episode"]) self.episode =  ((NSNumber *)manualInfo[@"episode"]).intValue;
     if (manualInfo[@"season"]) self.season =  ((NSNumber *)manualInfo[@"season"]).intValue;
 }
