@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13156.6" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment version="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
+        <deployment version="1090" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13156.6"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -34,7 +34,7 @@
                         <action selector="close:" target="4" id="641"/>
                     </connections>
                 </button>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="19" userLabel="Title Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="19" userLabel="Title Text">
                     <rect key="frame" x="115" y="500" width="182" height="14"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="21"/>
@@ -48,7 +48,7 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.showTitle" id="30"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="50" userLabel="Channel Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="50" userLabel="Channel Text">
                     <rect key="frame" x="115" y="478" width="182" height="14"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="54"/>
@@ -67,7 +67,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="67" userLabel="ShowDate Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="67" userLabel="ShowDate Text">
                     <rect key="frame" x="115" y="456" width="182" height="14"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="71"/>
@@ -86,7 +86,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="350" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="108" userLabel="OriginalAirDate Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="350" translatesAutoresizingMaskIntoConstraints="NO" id="108" userLabel="OriginalAirDate Text">
                     <rect key="frame" x="115" y="434" width="182" height="14"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="109"/>
@@ -101,7 +101,7 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.originalAirDateNoTime" id="730"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="84" userLabel="Year Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="84" userLabel="Year Text">
                     <rect key="frame" x="115" y="434" width="182" height="14"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="86"/>
@@ -120,7 +120,7 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.movieYear" id="567"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="100" userLabel="Series Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="100" userLabel="Series Text">
                     <rect key="frame" x="115" y="412" width="182" height="14"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="102"/>
@@ -135,7 +135,7 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.seriesTitle" id="645"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="117" userLabel="Episode Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="117" userLabel="Episode Text">
                     <rect key="frame" x="115" y="390" width="182" height="14"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="119"/>
@@ -150,7 +150,7 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="eH7-ib-OZy"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="125" userLabel="EpisodeNumber Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="125" userLabel="EpisodeNumber Text">
                     <rect key="frame" x="115" y="368" width="182" height="14"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="126"/>
@@ -172,7 +172,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="133" userLabel="Season Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="133" userLabel="Season Text">
                     <rect key="frame" x="115" y="346" width="182" height="14"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="135"/>
@@ -187,7 +187,7 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.seasonString" id="504"/>
                     </connections>
                 </textField>
-                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="92" userLabel="Genre Text">
+                <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="92" userLabel="Genre Text">
                     <rect key="frame" x="115" y="324" width="182" height="14"/>
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="93"/>
@@ -207,7 +207,7 @@
                         <binding destination="-2" name="value" keyPath="self.showForDetail.episodeGenre" id="646"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="31" userLabel="Title Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="31" userLabel="Title Label">
                     <rect key="frame" x="60" y="500" width="51" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Title:" id="32">
                         <font key="font" metaFont="smallSystem"/>
@@ -218,7 +218,7 @@
                         <binding destination="bBo-BX-KKt" name="hidden" keyPath="values.self" id="Ogh-bv-l5k"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="51" userLabel="Channel Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="51" userLabel="Channel Label">
                     <rect key="frame" x="60" y="478" width="51" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Channel:" id="53">
                         <font key="font" metaFont="smallSystem"/>
@@ -233,7 +233,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="68" userLabel="ShowDate Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="68" userLabel="ShowDate Label">
                     <rect key="frame" x="43" y="456" width="68" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Show Date:" id="70">
                         <font key="font" metaFont="smallSystem"/>
@@ -248,7 +248,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="141" userLabel="OriginalAirDate Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="141" userLabel="OriginalAirDate Label">
                     <rect key="frame" x="17" y="434" width="94" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Original Air Date:" id="142">
                         <font key="font" metaFont="smallSystem"/>
@@ -259,7 +259,7 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="728"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="356" userLabel="Year Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="356" userLabel="Year Label">
                     <rect key="frame" x="46" y="434" width="65" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Movie Year:" id="357">
                         <font key="font" metaFont="smallSystem"/>
@@ -274,7 +274,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="153" userLabel="Series Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="153" userLabel="Series Label">
                     <rect key="frame" x="46" y="412" width="65" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Series:" id="154">
                         <font key="font" metaFont="smallSystem"/>
@@ -285,7 +285,7 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="XfP-JO-UhQ"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="159" userLabel="Episode Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="159" userLabel="Episode Label">
                     <rect key="frame" x="61" y="390" width="50" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Episode:" id="160">
                         <font key="font" metaFont="smallSystem"/>
@@ -300,7 +300,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="165" userLabel="Episode Number Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="165" userLabel="Episode Number Label">
                     <rect key="frame" x="17" y="368" width="94" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Episode Number:" placeholderString="" id="166">
                         <font key="font" metaFont="smallSystem"/>
@@ -311,7 +311,7 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="pUO-OG-tNP"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="171" userLabel="Season Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="171" userLabel="Season Label">
                     <rect key="frame" x="46" y="346" width="65" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Season:" id="172">
                         <font key="font" metaFont="smallSystem"/>
@@ -322,7 +322,7 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="OFQ-xw-ANb"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="147" userLabel="Genre Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="147" userLabel="Genre Label">
                     <rect key="frame" x="46" y="324" width="65" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Genre:" id="148">
                         <font key="font" metaFont="smallSystem"/>
@@ -337,7 +337,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="177" userLabel="Description Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="177" userLabel="Description Label">
                     <rect key="frame" x="43" y="282" width="68" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Description:" id="178">
                         <font key="font" metaFont="smallSystem"/>
@@ -345,7 +345,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="272" userLabel="Actors Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="272" userLabel="Actors Label">
                     <rect key="frame" x="46" y="225" width="65" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Actors:" id="273">
                         <font key="font" metaFont="smallSystem"/>
@@ -353,7 +353,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="280" userLabel="Guest Stars Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="280" userLabel="Guest Stars Label">
                     <rect key="frame" x="42" y="168" width="69" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Guest Stars:" id="281">
                         <font key="font" metaFont="smallSystem"/>
@@ -361,7 +361,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="287" userLabel="DIrectors Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="287" userLabel="DIrectors Label">
                     <rect key="frame" x="55" y="112" width="56" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Directors:" id="288">
                         <font key="font" metaFont="smallSystem"/>
@@ -369,7 +369,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="295" userLabel="Producers Label">
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="295" userLabel="Producers Label">
                     <rect key="frame" x="50" y="55" width="61" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Producers:" id="296">
                         <font key="font" metaFont="smallSystem"/>
@@ -383,7 +383,7 @@
                         <rect key="frame" x="1" y="1" width="176" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="184">
+                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="184">
                                 <rect key="frame" x="0.0" y="0.0" width="176" height="47"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -420,7 +420,7 @@
                         <rect key="frame" x="1" y="1" width="176" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="205">
+                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="205">
                                 <rect key="frame" x="0.0" y="0.0" width="176" height="47"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -457,7 +457,7 @@
                         <rect key="frame" x="1" y="1" width="176" height="46"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="232">
+                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="232">
                                 <rect key="frame" x="0.0" y="0.0" width="176" height="46"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -494,7 +494,7 @@
                         <rect key="frame" x="1" y="1" width="176" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="247">
+                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="247">
                                 <rect key="frame" x="0.0" y="0.0" width="176" height="47"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -531,7 +531,7 @@
                         <rect key="frame" x="1" y="1" width="176" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="258">
+                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="258">
                                 <rect key="frame" x="0.0" y="0.0" width="176" height="47"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>

@@ -218,7 +218,6 @@
 		1E6906B51DA56DC400C429C2 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BB616766EFD00CE32DE /* MainMenu.xib */; };
 		1E6906B61DA56DC400C429C2 /* formats.plist in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC016766F3200CE32DE /* formats.plist */; };
 		1E6906B71DA56DC400C429C2 /* save-until-i-delete-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C9A1882768A00C19046 /* save-until-i-delete-recording@2x.png */; };
-		1E6906B81DA56DC400C429C2 /* MTMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */; };
 		1E6906B91DA56DC400C429C2 /* cTiVo_sparkle_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = D2995CAA168D08B300B960B9 /* cTiVo_sparkle_pub.pem */; };
 		1E6906BA1DA56DC400C429C2 /* MTFormatEditorController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2A7269B16A25DEB00C58C5F /* MTFormatEditorController.xib */; };
 		1E6906BB1DA56DC400C429C2 /* MTHelpViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */; };
@@ -1615,7 +1614,6 @@
 				1E6906B51DA56DC400C429C2 /* MainMenu.xib in Resources */,
 				1E6906B61DA56DC400C429C2 /* formats.plist in Resources */,
 				1E6906B71DA56DC400C429C2 /* save-until-i-delete-recording@2x.png in Resources */,
-				1E6906B81DA56DC400C429C2 /* MTMainWindowController.xib in Resources */,
 				1E6906B91DA56DC400C429C2 /* cTiVo_sparkle_pub.pem in Resources */,
 				1E6906BA1DA56DC400C429C2 /* MTFormatEditorController.xib in Resources */,
 				1E6906BB1DA56DC400C429C2 /* MTHelpViewController.xib in Resources */,
