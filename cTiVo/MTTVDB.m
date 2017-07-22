@@ -17,12 +17,17 @@
     @property (nonatomic, strong) NSDate * tvdbTokenExpireTime;
     @property (nonatomic, strong) NSURLSession * tvdbURLSession;
 
-    @property (atomic, strong) NSMutableDictionary <NSString *, NSArray <NSString *> *> *tvdbSeriesIdMapping;
     @property (atomic, strong) NSMutableDictionary *tvdbCache;
+        //Remembering info from tvdb (and moviedb).
+        //key is either uniqueid for episodes, or seriesTitle for series/movies
+        //series: series number (or "unknown")
+        //artwork: URL fragment for art
+        //date: last used timestamp to allow expiration
+    @property (atomic, strong) NSMutableDictionary <NSString *, NSArray <NSString *> *> *tvdbSeriesIdMapping;
     @property (atomic, strong) NSMutableDictionary * theTVDBStatistics;
 
     @property (atomic, strong) NSDate * movieDBRateLimitEnd;
-    @property (atomic, strong) NSNumber * movieDBRateLimitLock;
+    @property (atomic, strong) NSNumber * movieDBRateLimitLock; //just used to lock other calls
     @property (atomic, assign) NSInteger movieDBRateLimitCalls;
 
 @end
@@ -358,6 +363,8 @@ __DDLOGHERE__
 
 
 -(void) infoForEpisodeNamed: (NSString *) episodeName
+                   orSeason: (NSInteger) season
+                 andEpisode: (NSInteger) episode
                    inSeries: (NSArray <NSString *> *) seriesIDs
                   onAirDate: (NSString *) originalAirDate
           completionHandler: (void(^) (NSString * seriesID, NSDictionary * episodeInfo)) completionBlock
@@ -403,6 +410,23 @@ __DDLOGHERE__
                                                 });
                                             }
                                             return; // found exact match, so no more processing.
+                                        } else if (episode > 0) {
+                                            //check for exact episode match
+                                            NSNumber * tvdbEpisode = episodeDict[@"airedEpisodeNumber"];
+                                            NSNumber * tvdbSeason = episodeDict[@"airedSeason"];
+                                            if ([tvdbSeason isKindOfClass:[NSNumber class]] &&
+                                                [tvdbEpisode isKindOfClass:[NSNumber class]]) {
+                                                if (tvdbEpisode.integerValue == episode && tvdbSeason.integerValue == season ){
+                                                    if (completionBlock) {
+                                                        dispatch_async(dispatch_get_main_queue(), ^{
+                                                            completionBlock(seriesID, episodeDict);
+                                                        });
+                                                    }
+                                                    return; // found exact episode match, so no more processing.
+                                                }
+                                            } else {
+                                                DDLogReport(@"TVDB Episode JSON type Error ('airedEpisodeNumber and airedSeason' should be Numbers). For %@ on %@ tvdb has %@",  seriesID, originalAirDate,episodeDict);
+                                            }
                                         } else if (!localEpisodeCandidate) {
                                             //remember first match
                                             localEpisodeCandidate = episodeDict;
@@ -449,6 +473,8 @@ __DDLOGHERE__
             //so this one didn't work; let's try the next one.
             NSArray * restSeriesIDs = [seriesIDs subarrayWithRange:NSMakeRange(1, seriesIDs.count - 1)];
             [self infoForEpisodeNamed:episodeName
+                             orSeason: season
+                           andEpisode: episode
                              inSeries:restSeriesIDs
                             onAirDate:originalAirDate
                     completionHandler:completionBlock
@@ -475,7 +501,9 @@ __DDLOGHERE__
     //then call completionBlock to hand values back to original caller.
     //use recursion to index across seriesIDs
     [self infoForEpisodeNamed:episodeName
-                     inSeries:seriesIDs
+                     orSeason: season
+                   andEpisode: episode
+                    inSeries:seriesIDs
                     onAirDate:originalAirDate
             completionHandler:completionBlock
                failureHandler:^{
@@ -502,15 +530,16 @@ __DDLOGHERE__
                     artType:(NSString *) artType
           completionHandler: (void(^) (NSString *filename)) completionBlock
              failureHandler: (void(^) (void)) failureBlock {
-    NSString * seriesID = nil;
     if (!artType) artType = @"fanart";
+    NSString * seriesID = nil;
     @synchronized (self.tvdbCache) {
         seriesID = self.tvdbCache[show.uniqueID][@"series"];
-        if (!seriesID) {
-            NSArray <NSString *> * ids = [self cachedTVDBSeriesID:show.seriesTitle];
-            if (ids.count > 0) seriesID = ids[0];
-        }
     }
+    if (!seriesID) {
+        NSArray <NSString *> * ids = [self cachedTVDBSeriesID:show.seriesTitle];
+        if (ids.count > 0) seriesID = ids[0];
+    }
+
     if (!seriesID) {
         DDLogReport(@"Looking for show %@ with no ID?", show);
         if (failureBlock) {
@@ -771,7 +800,7 @@ __DDLOGHERE__
     }
 }
 #pragma mark - Caching routines
-//These should be in TiVoManager, so we can access from MTTiVoShow more appropriately.
+
 #define kMTVDBMissing @"unknown"
 
 -(void) cleanCache {
@@ -825,6 +854,8 @@ __DDLOGHERE__
     }
 }
 
+//tvdbSeriesIdMapping is rebuilt each run to remember seriesIDs across episodes
+//picked up from either tvdbcached episodes or from accessing tvdb
 -(void) cacheTVDBSeriesID: (NSArray *) seriesIDs forSeries: (NSString *) seriesTitle{
     @synchronized (self.tvdbSeriesIdMapping) {
         if (!seriesIDs.count) {
@@ -880,11 +911,11 @@ __DDLOGHERE__
         searchSeason = show.season;
         searchEpisode = show.episode;
     }
-    [self infoForEpisodeNamed:show.episodeTitle
-                     orSeason:  searchSeason
+    [self infoForEpisodeNamed: show.episodeTitle
+                     orSeason: searchSeason
                    andEpisode: searchEpisode
-                     inSeries:seriesIDs
-                    onAirDate:show.originalAirDateNoTime
+                     inSeries: seriesIDs
+                    onAirDate: show.originalAirDateNoTime
             completionHandler:^(NSString *seriesID, NSDictionary *episodeInfo ) {
                 typeof(self) strongSelf = weakSelf;
 
@@ -901,8 +932,8 @@ __DDLOGHERE__
                                                     @"season":  season.description,
                                                     @"episode": episode.description,
                                                     @"artwork": artworkLocation,
-                                                    @"series": seriesID,
-                                                    @"date":[NSDate date]
+                                                    @"series":  seriesID,
+                                                    @"date":    [NSDate date]
                                                     } forKey:show.uniqueID];
                     }
                     //remember the one that worked, not all the others
@@ -919,10 +950,10 @@ __DDLOGHERE__
                 [strongSelf addValue:[NSString stringWithFormat:@"Date: %@, URLs:%@",show.originalAirDateNoTime, [self urlsForReporting:seriesIDs]] inStatistic:kMTVDBEpisodeNotFound forShow:show.showTitle];
                 @synchronized (strongSelf.tvdbCache) {
                     [strongSelf.tvdbCache setObject:@{
-                                                      @"series": kMTVDBMissing,  //mark as "TVDB doesn't have this episode"
-                                                      @"artwork": @"",
+                                                      @"series":      kMTVDBMissing,  //mark as "TVDB doesn't have this episode"
+                                                      @"artwork":     @"",
                                                       @"possibleIds": seriesIDs,
-                                                      @"date":[NSDate date]
+                                                      @"date":        [NSDate date]
                                                       } forKey:show.uniqueID];
                 }
                 DDLogDetail(@"TVDB doesn't have episodeInfo for %@ on %@ (%@)", show.showTitle, show.originalAirDateNoTime, [self urlsForReporting:seriesIDs]);
@@ -1014,6 +1045,7 @@ __DDLOGHERE__
         [self.tvdbCache removeObjectForKey:show.seriesTitle];
         [self cacheTVDBSeriesID:nil forSeries:show.seriesTitle];
     }
+    [[NSFileManager defaultManager] removeItemAtPath:show.thumbnailArtworkFile error:nil];
     show.tvdbArtworkLocation = nil;
     show.artworkFile = nil;
     show.thumbnailArtworkFile = nil;
@@ -1052,7 +1084,8 @@ __DDLOGHERE__
     }
     if (episodeEntry) { // We already had this information
         show.gotTVDBDetails = YES;
-        if ([episodeEntry[@"series"] isEqualToString:kMTVDBMissing]) {
+        NSString * seriesID = episodeEntry[@"series"];
+        if ([seriesID isEqualToString:kMTVDBMissing]) {
             if (episodeEntry[@"possibleIds"]) {
                 NSString *URL = [self urlsForReporting:episodeEntry[@"possibleIds"]];
                 [self addValue: URL inStatistic:kMTVDBEpisodeNotFoundCached forShow:show.showTitle  ];
@@ -1064,10 +1097,15 @@ __DDLOGHERE__
                     [self addValue: URL inStatistic:kMTVDBEpisodicSeriesNotFoundCached forShow:show.showTitle  ];
                 }
             }
-        } else if (!show.isEpisodicShow) {
-             [self incrementStatistic: kMTVDBNonEpisodicSeriesFoundCached ];
         } else {
-            [self incrementStatistic: kMTVDBSeriesEpisodeFoundCached];
+            if (seriesID) {
+                [self cacheTVDBSeriesID:@[seriesID] forSeries:show.seriesTitle];
+            }
+            if (!show.isEpisodicShow) {
+                 [self incrementStatistic: kMTVDBNonEpisodicSeriesFoundCached ];
+            } else {
+                [self incrementStatistic: kMTVDBSeriesEpisodeFoundCached];
+            }
         }
         [self finishTVDBProcessing:show];
     } else {
@@ -1336,26 +1374,10 @@ __DDLOGHERE__
 }
 
 -(void)retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache {
-    NSString *artLocation = show.tvdbArtworkLocation;
-    if (artLocation.length == 0) {
+    if (show.tvdbArtworkLocation.length == 0) {
         return;
     }
 
-    NSString *baseUrlString;
-    if (show.isMovie) {
-        if (cache) {
-            baseUrlString = @"http://image.tmdb.org/t/p/w92%@";
-        } else {
-            baseUrlString = @"http://image.tmdb.org/t/p/w780%@";
-        }
-    } else {
-        if (cache) {
-            baseUrlString = @"http://thetvdb.com/banners/_cache/%@";
-        } else {
-            baseUrlString = @"http://thetvdb.com/banners/%@";
-        }
-    }
-    NSString *urlString = [NSString stringWithFormat: baseUrlString, show.tvdbArtworkLocation ];
     //download only if we don't have it already
     if ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
         if (cache) {
@@ -1364,6 +1386,21 @@ __DDLOGHERE__
             show.artworkFile = filename;
         }
    } else {
+       NSString *baseUrlString;
+       if (show.isMovie) {
+           if (cache) {
+               baseUrlString = @"http://image.tmdb.org/t/p/w92%@";
+           } else {
+               baseUrlString = @"http://image.tmdb.org/t/p/w780%@";
+           }
+       } else {
+           if (cache) {
+               baseUrlString = @"http://thetvdb.com/banners/_cache/%@";
+           } else {
+               baseUrlString = @"http://thetvdb.com/banners/%@";
+           }
+       }
+       NSString *urlString = [NSString stringWithFormat: baseUrlString, show.tvdbArtworkLocation ];
         DDLogDetail(@"downloading artwork at %@ to %@",urlString, filename);
         NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
         [NSURLConnection sendAsynchronousRequest:req queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
@@ -1375,7 +1412,7 @@ __DDLOGHERE__
                 } else {
                     NSInteger statusCode = ((NSHTTPURLResponse *) response).statusCode;
                     if ( statusCode == 404 || statusCode == 500) {
-                        resultFile = @"";
+                        resultFile = nil;
                         DDLogDetail(@"No episode artwork for %@ from %@ ", show.seriesTitle, urlString);
                         //try and get artwork for Series instead
                         [self searchSeriesArtwork:show
@@ -1398,9 +1435,9 @@ __DDLOGHERE__
                         }
                     }
                 }
-                if (resultFile.length == 0) {
+                if ([resultFile isEqualToString:@""]) {
                     show.tvdbArtworkLocation = @"";
-                    [self cacheArtWork:nil forShow:show.seriesTitle];
+                    [self cacheArtWork:@"" forShow:show.seriesTitle];
                 }
                 if (cache) {
                     show.thumbnailArtworkFile = resultFile;

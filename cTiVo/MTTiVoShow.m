@@ -1282,6 +1282,7 @@ static void * originalAirDateContext = &originalAirDateContext;
                                 @"episode": @(self.episode)};
         self.manualSeasonInfo = YES;
         [tiVoManager updateManualInfo:info forShow:self];
+        [tiVoManager.tvdb reloadTVDBInfo:self];
     } else {
         self.manualSeasonInfo = NO;
         self.season = 0; self.episode = 0;
