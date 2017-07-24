@@ -132,7 +132,6 @@
 
 -(void)getShowDetail;
 
-//-(NSArray *) apmArguments;
 -(void) setShowSeriesAndEpisodeFrom:(NSString *) newTitle ;
 
 -(void) playVideo:(NSString *)path;
@@ -147,6 +146,9 @@ typedef enum {
 	HDType1080p = 2
 } HDTypes;
 
+-(NSString *) downloadFileNameWithFormat:(NSString *) formatName;
+-(NSString *) swapKeywordsInString: (NSString *) str withFormat:(NSString *) format;  //exposed for test only
+- (NSImage *) findArtWorkOnDisk;
 
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image andResolution:(HDTypes) hdType;
 

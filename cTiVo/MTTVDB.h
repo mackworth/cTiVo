@@ -14,7 +14,7 @@
 + (MTTVDB *)sharedManager;
 
 -(void) getTheTVDBDetails: (MTTiVoShow *) show;
--(void) retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache;
+-(void) retrieveArtworkForShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache;
 
 -(void) reloadTVDBInfo:(MTTiVoShow *) show;
 -(void) resetAll;  //destroys all caches

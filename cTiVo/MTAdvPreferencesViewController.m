@@ -201,8 +201,8 @@
 
     NSArray	*shows = [((MTAppDelegate *) [NSApp delegate]) currentSelectedShows] ;
     for (MTTiVoShow * show in shows) {
-        MTDownload * testDownload = [MTDownload downloadForShow:show withFormat:[tiVoManager selectedFormat] intoDirectory:[tiVoManager downloadDirectory ]withQueueStatus: kMTStatusNew];
-        [fileNames appendFormat:@"%@ >>>> %@\n",show.showTitle, [testDownload swapKeywordsInString:pattern]];
+        MTDownload * testDownload = [MTDownload downloadForShow:show withFormat:[tiVoManager selectedFormat] withQueueStatus: kMTStatusNew];
+        [fileNames appendFormat:@"%@ >>>> %@\n",show.showTitle, [testDownload.show swapKeywordsInString:pattern withFormat: [tiVoManager selectedFormat].name]];
     }
 
     NSAttributedString * results = [[NSAttributedString alloc] initWithString:fileNames];

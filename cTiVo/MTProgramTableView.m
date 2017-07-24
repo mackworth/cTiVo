@@ -7,12 +7,14 @@
 //
 
 #import "MTProgramTableView.h"
-#import "MTDownloadCheckTableCell.h"
+
 #import "MTTiVoManager.h"
 #import "MTMainWindowController.h"
+
+#import "MTDownloadCheckTableCell.h"
 #import "MTProgressCell.h"
 
-@interface MTProgramTableView ()
+@interface MTProgramTableView  ()
 
 @property (nonatomic, assign) CGFloat imageRowHeight;
 
@@ -264,6 +266,12 @@ __DDLOGHERE__
     //called when column added or deleted
     if ([column.identifier isEqualToString: kMTArtColumn]) {
         //have to confirm height changed
+        if (column.isHidden) {
+            //free up memory from images
+            for (MTTiVoShow * show in tiVoManager.tiVoShows) {
+                show.thumbnailArtworkImage = nil;
+            }
+        }
         if (self.imageRowHeight > 0) {
             self.imageRowHeight = -self.imageRowHeight;  //use as trigger to recalculate, but remember old size in case it hasn't changed.
         }
@@ -450,6 +458,9 @@ __DDLOGHERE__
 
 #pragma mark Drag N Drop support
 
+-(void) dropComplete:(NSString *)filePath {
+    NSLog(@"Got file: %@", filePath);
+}
 
 - (NSDragOperation)draggingSession:(NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context {
 	

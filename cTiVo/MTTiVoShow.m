@@ -1005,21 +1005,16 @@ __DDLOGHERE__
     //we automtically ask for artworkLocation from services, and when that arrives, there will be a notification to update the show in the window, which wil call us again.
     //Then we request image, and get the same notification when that arrives
     if (!_thumbnailArtworkImage){
-        if ( self.tvdbArtworkLocation.length > 0 && !self.thumbnailArtworkFile) {
-            NSString * base = self.showTitle;
-            base = [base stringByReplacingOccurrencesOfString:@": " withString:@"-"];
-            base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-            base = [base stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
-
-            NSString *thumbnailsFilePath = self.episode == 0
-                ? (self.isMovie ? [NSString stringWithFormat:@"%@/%@_%@.jpg",kMTTmpThumbnailsDir,base,self.movieYear]
-                              : [NSString stringWithFormat:@"%@/%@.jpg",kMTTmpThumbnailsDir,base])
-                : [NSString stringWithFormat:@"%@/%@_%@.jpg",kMTTmpThumbnailsDir,base,self.seasonEpisode]
-            ;
-            [tiVoManager.tvdb retrieveArtworkIntoFile:thumbnailsFilePath forShow:self cacheVersion:YES]; //may set thumbnail immediately
-        }
-        if (self.thumbnailArtworkFile.length > 0 ) {
-            _thumbnailArtworkImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailArtworkFile];
+        NSImage * imageOnDisk = [self findArtWorkOnDisk];
+        if (imageOnDisk) {
+            _thumbnailArtworkImage = imageOnDisk;
+        } else {
+            if ( self.tvdbArtworkLocation.length > 0 && !self.thumbnailArtworkFile) {
+                [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:YES]; //may set thumbnail immediately
+            }
+            if (self.thumbnailArtworkFile.length > 0 ) {
+                _thumbnailArtworkImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailArtworkFile];
+            }
         }
     }
     return _thumbnailArtworkImage;
@@ -1273,7 +1268,10 @@ static void * originalAirDateContext = &originalAirDateContext;
 
 -(void) setSeasonEpisode:(NSString *)seasonEpisode {
     DDLogDetail(@"Setting seasonEpisode of %@ to %@", self, seasonEpisode);
-    NSRegularExpression *seRegex = [NSRegularExpression regularExpressionWithPattern:@"S([0-9]+)\\s*E([0-9]+)" options:NSRegularExpressionCaseInsensitive error:nil];
+    static NSRegularExpression *seRegex;
+    if (!seRegex) {
+        seRegex = [NSRegularExpression regularExpressionWithPattern:@"S([0-9]+)\\s*E([0-9]+)" options:NSRegularExpressionCaseInsensitive error:nil];
+    }
     NSTextCheckingResult *result = seasonEpisode ? [seRegex firstMatchInString:seasonEpisode options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, seasonEpisode.length)] : nil;
     if (result) {
         self.season  = [[seasonEpisode substringWithRange:[result rangeAtIndex:1]] intValue];
@@ -1341,6 +1339,476 @@ static void * originalAirDateContext = &originalAirDateContext;
     self.episodeGenre = [vSeriesGenre[0] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\""]];
     
 }
+
+
+#pragma mark - Keyword Processing:
+/*
+ From KMTTG:
+ [title] = The Big Bang Theory – The Loobenfeld Decay
+ [mainTitle] = The Big Bang Theory
+ [episodeTitle] = The Loobenfeld Decay
+ [channelNum] = 702
+ [channel] = KCBSDT
+ [min] = 00
+ [hour] = 20
+ [wday] = Mon
+ [mday] = 24
+ [month] = Mar
+ [monthNum] = 03
+ [year] = 2008
+ [originalAirDate] = 2007-11-20
+ [EpisodeNumber] = 302
+ [tivoName]
+ [/]
+
+
+ By request some more advanced keyword processing was introduced to allow for conditional text.
+
+ You can define multiple space-separated fields within square brackets.
+ Fields surrounded by quotes are treated as literal text.
+ A single field with no quotes should be supplied which represents a conditional keyword
+ If that keyword is available for the show in question then the keyword value along with any literal text surrounding it will be included in file name.
+ If the keyword evaluates to null then the entire advanced keyword becomes null.
+ For example:
+ [mainTitle]["_Ep#" EpisodeNumber]_[wday]_[month]_[mday]
+ The advanced keyword is highlighted in bold and signifies only include “_Ep#xxx” if EpisodeNumber exists for the show in question. “_Ep#” is literal string to which the evaluated contents of EpisodeNumber keyword are appended. If EpisodeNumber does not exist then the whole advanced keyword evaluates to empty string.
+
+ Added to KMTTG:
+ startTime
+ seriesEpNumber
+ TivoName
+ TVDBSeriesID
+ plexID
+	OR (|) option, uses second keyword if first is empty
+	Embedded optional values [ this option [with this embedded option] ]
+
+
+ */
+
+//test routines moved to Advanced Preferences
+
+- (NSString *) replacementForKeyword:(NSString *) key usingDictionary: (NSDictionary*) keys {
+    NSMutableString * outStr = [NSMutableString string];
+
+    NSScanner *scanner = [NSScanner scannerWithString:key];
+    [scanner setCharactersToBeSkipped:nil];
+    NSCharacterSet * whitespaceSet = [NSCharacterSet whitespaceCharacterSet];
+    NSCharacterSet * brackets = [NSCharacterSet characterSetWithCharactersInString:@"[]"];
+    BOOL skipOne = NO;  //have we found a good alternative, so skip the rest?
+    NSString * foundKey;
+
+    while (![scanner isAtEnd]) {
+        [scanner scanCharactersFromSet:whitespaceSet intoString:nil];
+        //get any literal characters
+        if ([scanner scanString:@"\"" intoString:nil]) {
+            NSString * tempString;
+            if ([scanner scanUpToString: @"\"" intoString:&tempString]) {
+                if (skipOne) {
+                    skipOne = NO;
+                } else {
+                    [outStr appendString:tempString];
+                }
+            } //else no chars scanned before quote (or end of line), so ignore this quote
+            [scanner scanString:@"\"" intoString:nil];
+            [scanner scanCharactersFromSet:whitespaceSet intoString:nil];
+        } else if ([scanner scanString:@"[" intoString:nil]) {
+            //get any recursive fields
+            NSString * tempString;
+            int numBrackets = 1;
+            NSMutableString *bracketedString = [NSMutableString string];
+            tempString = @"";
+            while (numBrackets > 0) {
+                [bracketedString appendString:tempString];  //get recursive [ if any
+                if ([scanner scanUpToCharactersFromSet:brackets intoString:&tempString]) {
+                    [bracketedString appendString:tempString];
+                }
+                if ([scanner scanString:@"[" intoString:&tempString]) {
+                    numBrackets++;
+                } else if ([scanner scanString:@"]" intoString:&tempString]) {
+                    numBrackets--;
+                }
+            }
+            [scanner scanCharactersFromSet:whitespaceSet intoString:nil];
+            if (skipOne) {
+                skipOne = NO;
+            } else {
+                [outStr appendString: [self replacementForKeyword:bracketedString usingDictionary:keys]];
+            }
+        } else if ([scanner scanString:@"|" intoString:nil]) {
+            //got an alternative, but previous one must have been good (or we'd have eaten this)
+            skipOne = YES;
+        } else  {
+            //not space, quote, alternative or recursive, so get keyword and replace with value from Dictionary
+            if ([scanner scanUpToString:@" " intoString:&foundKey]) {
+                if (skipOne) {
+                    skipOne = NO;
+                } else {
+                    foundKey = foundKey.lowercaseString;
+                    if ([keys[foundKey] length] == 0) {
+                        DDLogDetail(@"No filename key: %@",foundKey);
+                        //found invalid or empty key so entire conditional fails and should be empty; ignore everything else, unless there's an OR (vertical bar)
+                        [scanner scanCharactersFromSet:whitespaceSet intoString:nil];
+                        if ([scanner scanString:@"|" intoString:nil]) {
+                            //ah, we've got an alternative, so let's keep going
+                        } else {
+                            return @"";
+                        }
+                    } else {
+                        DDLogVerbose(@"Swapping key %@ with %@",foundKey, keys[foundKey]);
+                        [outStr appendString:keys[foundKey]];
+                    }
+                }
+            }
+        } //else no chars scanned before ] (or end of line) so ignore this
+    }
+    return [NSString stringWithString:outStr];
+}
+
+NSString * twoChar(long n, BOOL allowZero) {
+    if (!allowZero && n == 0) return @"";
+    return [NSString stringWithFormat:@"%02ld", n];
+}
+NSString * fourChar(long n, BOOL allowZero) {
+    if (!allowZero && n == 0) return @"";
+    return [NSString stringWithFormat:@"%04ld", n];
+}
+
+#define NULLT(x) (x ?: @"")
+
+-(NSString *) swapKeywordsInString: (NSString *) str withFormat:(NSString *) format{
+    NSDateComponents *components;
+    if (self.showDate) {
+        components = [[NSCalendar currentCalendar]
+                      components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear |NSCalendarUnitWeekday  |
+                      NSCalendarUnitMinute | NSCalendarUnitHour
+                      fromDate:self.showDate];
+    } else {
+        components = [[NSDateComponents alloc] init];
+    }
+    NSString * originalAirDate =self.originalAirDateNoTime;
+    if (!originalAirDate && [components year] > 0) {
+        originalAirDate = [NSString stringWithFormat:@"%@-%@-%@",
+                           fourChar([components year], NO),
+                           twoChar([components month], YES),
+                           twoChar([components day], YES)];
+    }
+    NSString * monthName = ([components month]> 0 && [components month] != NSUndefinedDateComponent) ?
+    [[[[NSDateFormatter alloc] init] shortMonthSymbols]
+     objectAtIndex:[components month]-1] :
+    @"";
+
+    NSString *TVDBseriesID = [[[tiVoManager.tvdb seriesIDsForShow:self] componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] componentsJoinedByString:@","];
+    NSString * guests = [[self.guestStars.string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@","];
+    NSString * extraEpisode = @"";
+    if (self.episode && self.season &&   //if we have an SxxExx AND either a 2 hr show OR a semicolon in episode title, then it might be a double episode
+        ((self.showLength > 115*60 && self.showLength < 125*60) ||
+         ([self.episodeTitle contains:@";"]))) {
+            extraEpisode = [NSString stringWithFormat:@"E%02d",self.episode+1];
+        }
+    NSDictionary * keywords = @{  //lowercase so we can just lowercase keyword when found
+                                @"/":				@"|||",						//allows [/] for subdirs
+                                @"title":			NULLT(self.showTitle) ,
+                                @"maintitle":		NULLT(self.seriesTitle),
+                                @"episodetitle":	NULLT(self.episodeTitle),
+                                @"channelnum":		NULLT(self.channelString),
+                                @"channel":		NULLT(self.stationCallsign),
+                                @"starttime":		NULLT(self.showTime),
+                                @"min":			twoChar([components minute], YES),
+                                @"hour":			twoChar([components hour], YES),
+                                @"wday":			twoChar([components weekday], NO),
+                                @"mday":			twoChar([components day], NO),
+                                @"month":			monthName,
+                                @"monthnum":		twoChar([components month], NO),
+                                @"year": 			self.isMovie ? @"" : fourChar([components year], NO),
+                                @"originalairdate": originalAirDate,
+                                @"episode":		twoChar(self.episode, NO),
+                                @"extraepisode":  NULLT(extraEpisode),
+                                @"season":			twoChar(self.season, NO),
+                                @"episodenumber":	NULLT(self.episodeNumber),
+                                @"StartTime":     NULLT(self.startTime),
+                                @"seriesepnumber": NULLT(self.seasonEpisode),
+                                @"guests":        NULLT(guests),
+                                @"tivoname":		NULLT(self.tiVoName),
+                                @"movieyear":		NULLT(self.movieYear),
+                                @"tvdbseriesid":	NULLT(TVDBseriesID),
+                                @"format":         NULLT(format)
+                                //         @"plexid":        [self ifString: self.show.seasonEpisode
+                                //                                elseString: originalAirDate],
+                                //         @"plexseason":    [self ifString: twoChar(self.show.season, NO)
+                                //                                 elseString: fourChar([components year], NO) ]
+                                };
+    NSMutableString * outStr = [NSMutableString string];
+
+    NSScanner *scanner = [NSScanner scannerWithString:str];
+    [scanner setCharactersToBeSkipped:nil];
+    NSCharacterSet * brackets = [NSCharacterSet characterSetWithCharactersInString:@"[]"];
+    while (![scanner isAtEnd]) {
+        NSString * tempString;
+        //get any literal characters
+        if ([scanner scanUpToString: @"[" intoString:&tempString]) {
+            [outStr appendString:tempString];
+        }
+        //get keyword and replace with values
+        if ([scanner scanString:@"[" intoString:nil]) {
+            
+            int numBrackets = 1;
+            NSMutableString *bracketedString = [NSMutableString string];
+            tempString = @"";
+            while (numBrackets > 0) {
+                [bracketedString appendString:tempString];  //get recursive [ if any
+                if ([scanner scanUpToCharactersFromSet:brackets intoString:&tempString]) {
+                    [bracketedString appendString:tempString];
+                }
+                if ([scanner scanString:@"[" intoString:&tempString]) {
+                    numBrackets++;
+                } else if ([scanner scanString:@"]" intoString:&tempString]) {
+                    numBrackets--;
+                }
+            }
+            [outStr appendString: [self replacementForKeyword:bracketedString usingDictionary:keywords]];
+        }
+    }
+    NSString * finalStr = [outStr stringByReplacingOccurrencesOfString:@"/" withString:@"-"]; //remove accidental directory markers
+    finalStr = [finalStr stringByReplacingOccurrencesOfString:@"|||" withString:@"/"];  ///insert intentional ones
+    return finalStr;
+}
+#undef Null
+
+-(NSString *) directoryForShowInDirectory:(NSString*) tryDirectory createIfMissing:(BOOL) create {
+    //Check that download directory (including show directory) exists.  If create it.  If unsuccessful return nil
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs]) {
+        NSString *whichFolder = ([self isMovie])  ? @"Movies"  : self.seriesTitle;
+        if ( ! [tryDirectory.lastPathComponent isEqualToString:whichFolder]){
+            tryDirectory = [tryDirectory stringByAppendingPathComponent:whichFolder];
+            DDLogVerbose(@"Using sub folder %@",tryDirectory);
+        }
+    }
+    if (create && ![[NSFileManager defaultManager] fileExistsAtPath: tryDirectory]) { // try to create it
+        DDLogDetail(@"Creating folder %@",tryDirectory);
+        if (![[NSFileManager defaultManager] createDirectoryAtPath:tryDirectory withIntermediateDirectories:YES attributes:nil error:nil]) {
+            DDLogDetail(@"Couldn't create folder %@",tryDirectory);
+            return nil;
+        }
+    }
+    return tryDirectory;
+}
+
+-(NSString *)downloadDirCreateIfNecessary:(BOOL) create {
+
+    NSString * tempFileName = [self downloadFileNameWithFormat:nil];
+    NSString * subdirs =  [tempFileName stringByDeletingLastPathComponent ];
+
+    NSString *ddir = [self directoryForShowInDirectory: [[tiVoManager downloadDirectory] stringByAppendingPathComponent:subdirs] createIfMissing:create];
+
+    //OR, go to default if not successful
+    if (!ddir) {
+              ddir = [self directoryForShowInDirectory: [[tiVoManager defaultDownloadDirectory] stringByAppendingPathComponent:subdirs ] createIfMissing:create];
+    }
+    return ddir;
+}
+
+
+-(NSString *) downloadFileNameWithFormat:(NSString *)formatName {
+    NSString *baseTitle  = nil;
+    NSString *keyPathPart = nil;
+
+    NSString *filenamePattern = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormat];
+    if (filenamePattern.length >0) {
+
+        //we have a pattern, so generate a name that way
+        NSString *keyBaseTitle = [self swapKeywordsInString:filenamePattern withFormat:formatName];
+        DDLogDetail(@"With file pattern %@ for show %@, got %@", filenamePattern, self, keyBaseTitle);
+        NSString * candidateBaseTitle = [keyBaseTitle lastPathComponent];
+        if (candidateBaseTitle.length > 0) {
+            baseTitle = candidateBaseTitle;
+            keyPathPart = [keyBaseTitle stringByDeletingLastPathComponent];
+        }
+    }
+    if (!baseTitle) {
+        baseTitle = [self.showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    }
+    if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
+    baseTitle = [baseTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+    if ([baseTitle compare: self.showTitle ]  != NSOrderedSame) {
+        DDLogDetail(@"changed filename %@ to %@",self.showTitle, baseTitle);
+    }
+
+    if (keyPathPart) {
+        return [keyPathPart stringByAppendingPathComponent:baseTitle];
+    } else {
+        return baseTitle;
+    }
+
+}
+
+#pragma mark - Artwork
+
+-(NSString *) artWorkFileName {
+    if (!_artworkFile) {
+        NSString * filename = [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:self.seriesTitle];
+
+        NSString * fileNameDetail;
+        if (self.isMovie) {
+            fileNameDetail = [self movieYear];
+        } else {
+            fileNameDetail = [self seasonEpisode];
+        }
+
+        NSString * destination;
+        if (fileNameDetail.length) {
+            destination = [NSString stringWithFormat:@"%@_%@",filename, fileNameDetail];
+        } else {
+            destination = filename;
+        }
+
+        NSString * path = [destination stringByDeletingLastPathComponent];
+        NSString * base = [destination lastPathComponent];
+        NSString * extension = [self.tvdbArtworkLocation pathExtension] ?: @".jpg";
+        base = [base stringByReplacingOccurrencesOfString:@": " withString:@"-"] ;
+        base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+        base = [base stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+
+        _artworkFile = [[path stringByAppendingPathComponent:base] stringByAppendingPathExtension:extension];
+    }
+    return _artworkFile;
+}
+
+- (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
+    prefix = [prefix lowercaseString];
+    suffix = [suffix lowercaseString];
+    if (directory.length == 0) return nil;
+    NSString * realDirectory = [directory stringByStandardizingPath];
+    DDLogVerbose(@"Checking for %@_%@ artwork in %@", prefix, suffix ?:@"", realDirectory);
+    NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:realDirectory error:nil];
+    for (NSString *filename in dirContents) {
+        NSString *lowerCaseFilename = [filename lowercaseString];
+        if (!prefix || [lowerCaseFilename hasPrefix:prefix]) {
+            NSString * extension = [lowerCaseFilename pathExtension];
+            if ([[NSImage imageFileTypes] indexOfObject:extension] != NSNotFound) {
+                NSString * base = [lowerCaseFilename stringByDeletingPathExtension];
+                if (!suffix || [base hasSuffix:suffix]){
+                    if (!suffix) {
+                        //need to validate it does NOT have season/episode info.
+                        static NSRegularExpression * seasonRegex, *episodeRegex;
+                        if (!seasonRegex) {
+                            seasonRegex = [NSRegularExpression regularExpressionWithPattern:@"S[0-9]+$" options:NSRegularExpressionCaseInsensitive error:nil];
+                            episodeRegex = [NSRegularExpression regularExpressionWithPattern:@"S[0-9]+\\s*E([0-9]+)$" options:NSRegularExpressionCaseInsensitive error:nil];
+                        }
+                        if ([episodeRegex firstMatchInString:base options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, base.length)] ||
+                             [seasonRegex firstMatchInString:base options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, base.length)]) {
+                            continue;
+                        }
+                    }
+                    NSString * path = [realDirectory stringByAppendingPathComponent: filename];
+                    DDLogDetail(@"found artwork for %@ in %@",prefix, path);
+                    NSImage * image = [[NSImage alloc] initWithContentsOfFile:path];
+                    if (image) {
+                        self.artworkFile = path;
+                        return image;
+                    } else {
+                        DDLogReport(@"Couldn't load artwork for %@ from %@",prefix, path);
+                    }
+                }
+            }
+        }
+    }
+    return nil;
+}
+
+-(void) storeArtworkOnDisk: (NSImage *) artwork {
+    //keep parallel with findArtWorkOnDisk
+    NSString *currentDir   = [self downloadDirCreateIfNecessary:YES];
+    if(!currentDir) return;
+    NSString * directory = nil;
+    NSString * legalSeriesName = [self.seriesTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    legalSeriesName = [legalSeriesName stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+
+    directory = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
+    if (!directory) {
+        directory = [currentDir stringByAppendingPathComponent:@"thumbnails"];
+    }
+    //[self artworkWithPrefix:legalSeriesName andSuffix:self.seasonEpisode  InPath:dir ];
+
+    NSString * fileName = [directory stringByAppendingPathComponent:[NSString stringWithFormat: @"%@ %@.jpg", legalSeriesName, self.seasonEpisode] ];
+
+    NSData *imageData = [artwork TIFFRepresentation];
+    NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData:imageData];
+    NSDictionary *imageProps = [NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:1.0] forKey:NSImageCompressionFactor];
+    imageData = [imageRep representationUsingType:NSJPEGFileType properties:imageProps];
+    [imageData writeToFile:fileName atomically:NO];
+}
+
+
+- (NSImage *) findArtWorkOnDisk {
+    NSMutableArray * directories = [NSMutableArray array];
+    NSString * topDirectory = [[tiVoManager downloadDirectory] stringByAppendingPathComponent:@"thumbnails"];
+    NSString *currentDir   = [self downloadDirCreateIfNecessary:NO];
+    NSString *parentDir = [currentDir stringByDeletingLastPathComponent];
+
+    NSString * userThumbnailDir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
+    if (userThumbnailDir) {
+        [directories addObject:userThumbnailDir];
+    } else if (currentDir) {
+        [directories addObject: currentDir];
+        [directories addObject: [currentDir stringByAppendingPathComponent:@"thumbnails"]];
+        [directories addObject: parentDir];
+        [directories addObject:  [parentDir stringByAppendingPathComponent:@"thumbnails"]];
+    }
+    [directories addObject: topDirectory];
+
+    NSString * legalSeriesName = [self.seriesTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    legalSeriesName = [legalSeriesName stringByReplacingOccurrencesOfString:@": " withString:@"-"] ;
+    legalSeriesName = [legalSeriesName stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+    legalSeriesName = [legalSeriesName stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+
+    if (self.isMovie) {
+        for (NSString * dir in directories) {
+            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:self.movieYear  InPath:dir ];
+            if (artwork) return artwork;
+        }
+        for (NSString * dir in directories) {
+            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
+            if (artwork) return artwork;
+        }
+
+    } else {
+        if (self.episode > 0) {
+            //first check for user-specified, episode-specific art
+            if (self.seasonEpisode.length > 0) {
+                for (NSString * dir in directories) {
+                    NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:self.seasonEpisode  InPath:dir ];
+                    if (artwork) return artwork;
+                }
+            }
+        }
+        //then for season-specific art
+        NSString * season = [NSString stringWithFormat:@"S%0.2d",self.season];
+        for (NSString * dir in directories) {
+            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:season InPath:dir ];
+            if (artwork) return artwork;
+        }
+    }
+    //finally for series-level art
+    for (NSString * dir in directories) {
+        NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
+        if (artwork) return artwork;
+    }
+    //then for downloaded temp art
+    if (self.artworkFile) {
+        NSImage * image = [[NSImage alloc] initWithContentsOfFile:self.artworkFile];
+        if (image) {
+            return image;
+        } else {
+            DDLogReport(@"Couldn't load downloaded artwork for %@ from %@",self.seriesTitle, self.artworkFile);
+        }
+    }
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesIcon]) {
+        return [NSImage imageNamed:@"cTiVo.png"];  //from iTivo; use our logo for any new video files.
+    }
+    DDLogDetail(@"artwork for %@ not found",self.seriesTitle);
+    return nil;
+}
+
 
 #pragma mark - Memory Management
 

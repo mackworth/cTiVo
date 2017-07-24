@@ -1373,11 +1373,29 @@ __DDLOGHERE__
 
 }
 
--(void)retrieveArtworkIntoFile: (NSString *) filename forShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache {
+-(void)retrieveArtworkForShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache {
+
     if (show.tvdbArtworkLocation.length == 0) {
         return;
     }
+    NSString * filename = nil;
+    if (cache) {
+        filename = show.thumbnailArtworkFile;
+    } else {
+        filename = show.artworkFile;
+    }
 
+    if (!filename) {
+        NSString * base = show.showTitle;
+        base = [base stringByReplacingOccurrencesOfString:@": " withString:@"-"];
+        base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+        base = [base stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+        NSString * thumb = cache ? @"_thumb" : @"";
+        filename = (show.episode == 0)
+                ? (show.isMovie ? [NSString stringWithFormat:@"%@/%@%@_%@.jpg",kMTTmpThumbnailsDir,base,thumb, show.movieYear]
+                                : [NSString stringWithFormat:@"%@/%@%@.jpg",kMTTmpThumbnailsDir,base, thumb])
+                : [NSString stringWithFormat:@"%@/%@%@_%@.jpg",kMTTmpThumbnailsDir,base, thumb, show.seasonEpisode];
+    }
     //download only if we don't have it already
     if ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
         if (cache) {
@@ -1417,9 +1435,9 @@ __DDLOGHERE__
                         //try and get artwork for Series instead
                         [self searchSeriesArtwork:show
                                           artType:nil
-                                completionHandler:^(NSString *filename2) {
-                            show.tvdbArtworkLocation = filename2;
-                            [self retrieveArtworkIntoFile:filename2 forShow:show cacheVersion:cache];
+                                completionHandler:^(NSString *tvdbFile) {
+                            show.tvdbArtworkLocation = tvdbFile;
+                            [self retrieveArtworkForShow:show cacheVersion:cache];
                         } failureHandler:^{
                             show.tvdbArtworkLocation =@"";
                             [self cacheArtWork:nil forShow:show.seriesTitle];
