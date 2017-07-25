@@ -508,9 +508,13 @@ __DDLOGHERE__
 -(BOOL)configureBaseFileNameAndDirectory {
 	if (!self.baseFileName) {
         // generate only once
-        self.downloadDirectory = tiVoManager.downloadDirectory;
-        NSString * baseTitle = [self.show downloadFileNameWithFormat:self.encodeFormat.name];
+        NSString * downloadName = [self.show downloadFileNameWithFormat:self.encodeFormat.name CreateIfNecessary:YES];
+
+        self.downloadDirectory = [downloadName stringByDeletingLastPathComponent];
+
+        NSString * baseTitle = [downloadName lastPathComponent];
 		self.baseFileName = [self createUniqueBaseFileName:baseTitle ];
+
 	}
     return self.baseFileName ? YES : NO;
 }
@@ -624,7 +628,7 @@ __DDLOGHERE__
     
 	if (!self.encodeFormat.isTestPS &&
         [[NSUserDefaults standardUserDefaults] boolForKey:kMTGetEpisodeArt]) {
-        [tiVoManager.tvdb retrieveArtworkForShow:self.show cacheVersion:NO ];
+        [self.show artWorkImage];  //make sure it's available by time we finish
  	}
     return YES;
 }
@@ -1588,7 +1592,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         NSImage * artwork = nil;
         if (self.encodeFormat.canAcceptMetaData || self.addToiTunesWhenEncoded) {
             //see if we can find artwork already downloaded for this show
-            artwork = [self.show findArtWorkOnDisk];
+            artwork = self.show.artWorkImage;
         }
         //dispose of 3-character (BOM) subtitle files
         unsigned long long fileSize =  [[NSFileManager defaultManager] attributesOfItemAtPath:self.captionFilePath error:nil].fileSize;

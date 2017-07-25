@@ -1045,11 +1045,14 @@ __DDLOGHERE__
         [self.tvdbCache removeObjectForKey:show.seriesTitle];
         [self cacheTVDBSeriesID:nil forSeries:show.seriesTitle];
     }
-    [[NSFileManager defaultManager] removeItemAtPath:show.thumbnailArtworkFile error:nil];
+    NSString * thumbnailPath = show.thumbnailFile;
+    if ([thumbnailPath containsString:kMTTmpThumbnailsDir]) {
+            [[NSFileManager defaultManager] removeItemAtPath:show.thumbnailFile error:nil];
+    }
     show.tvdbArtworkLocation = nil;
     show.artworkFile = nil;
-    show.thumbnailArtworkFile = nil;
-    show.thumbnailArtworkImage = nil;
+    show.thumbnailFile = nil;
+    show.thumbnailImage = nil;
     [self getTheTVDBDetails:show];
 }
 
@@ -1378,28 +1381,20 @@ __DDLOGHERE__
     if (show.tvdbArtworkLocation.length == 0) {
         return;
     }
-    NSString * filename = nil;
-    if (cache) {
-        filename = show.thumbnailArtworkFile;
-    } else {
-        filename = show.artworkFile;
-    }
-
-    if (!filename) {
-        NSString * base = show.showTitle;
-        base = [base stringByReplacingOccurrencesOfString:@": " withString:@"-"];
-        base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-        base = [base stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
-        NSString * thumb = cache ? @"_thumb" : @"";
-        filename = (show.episode == 0)
-                ? (show.isMovie ? [NSString stringWithFormat:@"%@/%@%@_%@.jpg",kMTTmpThumbnailsDir,base,thumb, show.movieYear]
-                                : [NSString stringWithFormat:@"%@/%@%@.jpg",kMTTmpThumbnailsDir,base, thumb])
-                : [NSString stringWithFormat:@"%@/%@%@_%@.jpg",kMTTmpThumbnailsDir,base, thumb, show.seasonEpisode];
-    }
+    NSString * base = show.showTitle;
+    base = [base stringByReplacingOccurrencesOfString:@": " withString:@"-"];
+    base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    base = [base stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+    NSString * directory = cache ? kMTTmpThumbnailsDir : kMTTmpDir;
+    NSString * specifier = (show.episode == 0)
+        ? (show.isMovie ? show.movieYear : nil)
+        : show.seasonEpisode;
+    NSString * filename = specifier ? [NSString stringWithFormat:@"%@/%@_%@.jpg",directory, base, specifier]
+                                    : [NSString stringWithFormat:@"%@/%@.jpg",directory, base];
     //download only if we don't have it already
     if ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
         if (cache) {
-            show.thumbnailArtworkFile = filename;
+            show.thumbnailFile = filename;
         } else {
             show.artworkFile = filename;
         }
@@ -1417,6 +1412,12 @@ __DDLOGHERE__
            } else {
                baseUrlString = @"http://thetvdb.com/banners/%@";
            }
+       }
+       //mark as downloading
+       if (cache) {
+           show.thumbnailFile = @"";
+       } else {
+           show.artworkFile = @"";
        }
        NSString *urlString = [NSString stringWithFormat: baseUrlString, show.tvdbArtworkLocation ];
         DDLogDetail(@"downloading artwork at %@ to %@",urlString, filename);
@@ -1458,7 +1459,7 @@ __DDLOGHERE__
                     [self cacheArtWork:@"" forShow:show.seriesTitle];
                 }
                 if (cache) {
-                    show.thumbnailArtworkFile = resultFile;
+                    show.thumbnailFile = resultFile;
                 } else {
                     show.artworkFile = resultFile;
                 }

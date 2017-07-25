@@ -42,6 +42,8 @@
                                 *directors,
                                 *producers;
 
+@property (nonatomic, strong) NSString *userSpecifiedArtworkFile;
+
 @property (nonatomic, assign) BOOL ignoreSection; //are we skipping this section in XML (esp vActualShowing)
 @property (nonatomic, assign) BOOL manualSeasonInfo;
 
@@ -291,6 +293,13 @@ __DDLOGHERE__
     }
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
 
+}
+
+-(void) checkManualInfo {
+    NSDictionary * manualInfo = [tiVoManager getManualInfo:self];
+    self.manualSeasonInfo = manualInfo != nil;
+    if (manualInfo[@"episode"]) self.episode =  ((NSNumber *)manualInfo[@"episode"]).intValue;
+    if (manualInfo[@"season"]) self.season =  ((NSNumber *)manualInfo[@"season"]).intValue;
 }
 
 #pragma  mark - parser methods
@@ -941,7 +950,31 @@ __DDLOGHERE__
 -(NSString*) idString {
 	return[NSString stringWithFormat:@"%d", _showID ];
 }
-												  
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-property-ivar"
+-(NSString *) ageRatingString {
+    NSUInteger index;
+    NSArray * ratingArray;
+    if  (self.mpaaRating > self.tvRating) {
+        index  = self.mpaaRating > 0 ? self.mpaaRating : 0;
+        ratingArray = @[ @"", @"G", @"PG", @"PG-13",  @"R", @"NC-17"];
+    } else {
+        index = self.tvRating > 0 ? self.tvRating : 0;
+        ratingArray = @[ @"", @"TV-Y", @"TV-Y7", @"TV-G",  @"TV-PG", @"TV-14", @"TV-MA"];
+    }
+    if ( index < ratingArray.count ) {
+        return ratingArray[index];
+    } else {
+        return @"";
+    }
+}
+
+-(NSNumber *) ageRatingValue {
+    return @(MAX(self.mpaaRating , self.tvRating));
+}
+
+
 -(NSString*) sizeString {
   
   if (_fileSize >= 1000000000) {
@@ -999,25 +1032,6 @@ __DDLOGHERE__
     } else {
         return [self.episodeID stringByAppendingFormat:@"-%@", self.showDateRFCString];
     }
-}
-
--(NSImage *) thumbnailArtworkImage {
-    //we automtically ask for artworkLocation from services, and when that arrives, there will be a notification to update the show in the window, which wil call us again.
-    //Then we request image, and get the same notification when that arrives
-    if (!_thumbnailArtworkImage){
-        NSImage * imageOnDisk = [self findArtWorkOnDisk];
-        if (imageOnDisk) {
-            _thumbnailArtworkImage = imageOnDisk;
-        } else {
-            if ( self.tvdbArtworkLocation.length > 0 && !self.thumbnailArtworkFile) {
-                [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:YES]; //may set thumbnail immediately
-            }
-            if (self.thumbnailArtworkFile.length > 0 ) {
-                _thumbnailArtworkImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailArtworkFile];
-            }
-        }
-    }
-    return _thumbnailArtworkImage;
 }
 
 #pragma mark - Custom Setters; many for parsing
@@ -1287,36 +1301,6 @@ static void * originalAirDateContext = &originalAirDateContext;
         [tiVoManager updateManualInfo:nil forShow:self];
     }
     [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
-}
-
--(void) checkManualInfo {
-    NSDictionary * manualInfo = [tiVoManager getManualInfo:self];
-    self.manualSeasonInfo = manualInfo != nil;
-    if (manualInfo[@"episode"]) self.episode =  ((NSNumber *)manualInfo[@"episode"]).intValue;
-    if (manualInfo[@"season"]) self.season =  ((NSNumber *)manualInfo[@"season"]).intValue;
-}
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-property-ivar"
--(NSString *) ageRatingString {
-    NSUInteger index;
-    NSArray * ratingArray;
-    if  (self.mpaaRating > self.tvRating) {
-       index  = self.mpaaRating > 0 ? self.mpaaRating : 0;
-        ratingArray = @[ @"", @"G", @"PG", @"PG-13",  @"R", @"NC-17"];
-     } else {
-        index = self.tvRating > 0 ? self.tvRating : 0;
-        ratingArray = @[ @"", @"TV-Y", @"TV-Y7", @"TV-G",  @"TV-PG", @"TV-14", @"TV-MA"];
-    }
-    if ( index < ratingArray.count ) {
-        return ratingArray[index];
-    } else {
-        return @"";
-    }
-}
-
--(NSNumber *) ageRatingValue {
-    return @(MAX(self.mpaaRating , self.tvRating));
 }
 
 #pragma clang diagnostic pop
@@ -1593,22 +1577,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     return tryDirectory;
 }
 
--(NSString *)downloadDirCreateIfNecessary:(BOOL) create {
-
-    NSString * tempFileName = [self downloadFileNameWithFormat:nil];
-    NSString * subdirs =  [tempFileName stringByDeletingLastPathComponent ];
-
-    NSString *ddir = [self directoryForShowInDirectory: [[tiVoManager downloadDirectory] stringByAppendingPathComponent:subdirs] createIfMissing:create];
-
-    //OR, go to default if not successful
-    if (!ddir) {
-              ddir = [self directoryForShowInDirectory: [[tiVoManager defaultDownloadDirectory] stringByAppendingPathComponent:subdirs ] createIfMissing:create];
-    }
-    return ddir;
-}
-
-
--(NSString *) downloadFileNameWithFormat:(NSString *)formatName {
+-(NSString *) downloadFileNameWithFormat:(NSString *)formatName createIfNecessary:(BOOL) create {
     NSString *baseTitle  = nil;
     NSString *keyPathPart = nil;
 
@@ -1625,55 +1594,32 @@ NSString * fourChar(long n, BOOL allowZero) {
         }
     }
     if (!baseTitle) {
-        baseTitle = [self.showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+        baseTitle = self.showTitle;
     }
     if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
-    baseTitle = [baseTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+    baseTitle = [self cleanBaseFileName: baseTitle];
     if ([baseTitle compare: self.showTitle ]  != NSOrderedSame) {
         DDLogDetail(@"changed filename %@ to %@",self.showTitle, baseTitle);
     }
 
-    if (keyPathPart) {
-        return [keyPathPart stringByAppendingPathComponent:baseTitle];
-    } else {
-        return baseTitle;
-    }
+    NSString *ddir = [self directoryForShowInDirectory: [[tiVoManager downloadDirectory] stringByAppendingPathComponent:keyPathPart ] createIfMissing:create];
 
+    //OR, go to default if not successful
+    if (!ddir) {
+        ddir = [self directoryForShowInDirectory: [[tiVoManager defaultDownloadDirectory] stringByAppendingPathComponent:keyPathPart ] createIfMissing:create];
+    }
+    return [ddir stringByAppendingPathComponent:baseTitle];
+
+}
+
+-(NSString *) downloadDirCreateIfNecessary: (BOOL) create {
+    NSString * filename = [self downloadFileNameWithFormat:nil CreateIfNecessary:create];
+    return [filename stringByDeletingLastPathComponent];
 }
 
 #pragma mark - Artwork
 
--(NSString *) artWorkFileName {
-    if (!_artworkFile) {
-        NSString * filename = [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:self.seriesTitle];
-
-        NSString * fileNameDetail;
-        if (self.isMovie) {
-            fileNameDetail = [self movieYear];
-        } else {
-            fileNameDetail = [self seasonEpisode];
-        }
-
-        NSString * destination;
-        if (fileNameDetail.length) {
-            destination = [NSString stringWithFormat:@"%@_%@",filename, fileNameDetail];
-        } else {
-            destination = filename;
-        }
-
-        NSString * path = [destination stringByDeletingLastPathComponent];
-        NSString * base = [destination lastPathComponent];
-        NSString * extension = [self.tvdbArtworkLocation pathExtension] ?: @".jpg";
-        base = [base stringByReplacingOccurrencesOfString:@": " withString:@"-"] ;
-        base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-        base = [base stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
-
-        _artworkFile = [[path stringByAppendingPathComponent:base] stringByAppendingPathExtension:extension];
-    }
-    return _artworkFile;
-}
-
-- (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
+- (NSString *) artworkFileWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
     prefix = [prefix lowercaseString];
     suffix = [suffix lowercaseString];
     if (directory.length == 0) return nil;
@@ -1688,7 +1634,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 NSString * base = [lowerCaseFilename stringByDeletingPathExtension];
                 if (!suffix || [base hasSuffix:suffix]){
                     if (!suffix) {
-                        //need to validate it does NOT have season/episode info.
+                        //if no suffix, then need to validate it does NOT have season/episode info.
                         static NSRegularExpression * seasonRegex, *episodeRegex;
                         if (!seasonRegex) {
                             seasonRegex = [NSRegularExpression regularExpressionWithPattern:@"S[0-9]+$" options:NSRegularExpressionCaseInsensitive error:nil];
@@ -1701,13 +1647,8 @@ NSString * fourChar(long n, BOOL allowZero) {
                     }
                     NSString * path = [realDirectory stringByAppendingPathComponent: filename];
                     DDLogDetail(@"found artwork for %@ in %@",prefix, path);
-                    NSImage * image = [[NSImage alloc] initWithContentsOfFile:path];
-                    if (image) {
-                        self.artworkFile = path;
-                        return image;
-                    } else {
-                        DDLogReport(@"Couldn't load artwork for %@ from %@",prefix, path);
-                    }
+                    self.artworkFile = path;
+                    return path;
                 }
             }
         }
@@ -1715,98 +1656,177 @@ NSString * fourChar(long n, BOOL allowZero) {
     return nil;
 }
 
--(void) storeArtworkOnDisk: (NSImage *) artwork {
-    //keep parallel with findArtWorkOnDisk
-    NSString *currentDir   = [self downloadDirCreateIfNecessary:YES];
-    if(!currentDir) return;
+-(void) setArtworkFromImageOrFileFrom:(id)imageSource {
+    //keep parallel with UserSpecificArtworkFile
+
     NSString * directory = nil;
-    NSString * legalSeriesName = [self.seriesTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-    legalSeriesName = [legalSeriesName stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+    NSString * legalSeriesName = [self cleanBaseFileName: self.seriesTitle];
 
     directory = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
     if (!directory) {
+        NSString *currentDir   = [[self downloadFileNameWithFormat:nil CreateIfNecessary:YES] stringByDeletingLastPathComponent];
+        currentDir = [currentDir pathForParentDirectoryWithName:legalSeriesName];
         directory = [currentDir stringByAppendingPathComponent:@"thumbnails"];
     }
-    //[self artworkWithPrefix:legalSeriesName andSuffix:self.seasonEpisode  InPath:dir ];
 
-    NSString * fileName = [directory stringByAppendingPathComponent:[NSString stringWithFormat: @"%@ %@.jpg", legalSeriesName, self.seasonEpisode] ];
-
-    NSData *imageData = [artwork TIFFRepresentation];
-    NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData:imageData];
-    NSDictionary *imageProps = [NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:1.0] forKey:NSImageCompressionFactor];
-    imageData = [imageRep representationUsingType:NSJPEGFileType properties:imageProps];
-    [imageData writeToFile:fileName atomically:NO];
+    NSString * fileName = [[directory stringByAppendingPathComponent: self.seasonEpisode ? [NSString stringWithFormat: @"%@ %@", legalSeriesName, self.seasonEpisode ]
+                                                                                        : legalSeriesName ]
+                                     stringByAppendingPathExtension:@"jpg"];
+    if ([imageSource isKindOfClass:[NSImage class]]) {
+        NSImage * artwork = (NSImage *) imageSource;
+        NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData: [artwork TIFFRepresentation]];
+        NSData * imageData = [imageRep representationUsingType:NSJPEGFileType properties:@{NSImageCompressionFactor: @(1.0)}];
+        [imageData writeToFile:fileName atomically:NO];
+    } else if ([[imageSource class] isKindOfClass:[NSURL class ]]) {
+        DDLogReport(@"XXXX WRITE THIS!");
+    } else {
+        DDLogReport(@"XXXX WRITE THIS!");
+    }
 }
 
+-(NSString *) cleanBaseFileName: (NSString *) base {
+    NSString * newBase = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    newBase = [newBase stringByReplacingOccurrencesOfString:@": " withString:@"-"] ;
+    newBase = [newBase stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+    newBase = [newBase stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+    return newBase;
+}
 
-- (NSImage *) findArtWorkOnDisk {
-    NSMutableArray * directories = [NSMutableArray array];
-    NSString * topDirectory = [[tiVoManager downloadDirectory] stringByAppendingPathComponent:@"thumbnails"];
-    NSString *currentDir   = [self downloadDirCreateIfNecessary:NO];
-    NSString *parentDir = [currentDir stringByDeletingLastPathComponent];
+-(NSString *) userSpecifiedArtworkFile {
+    if (!_userSpecifiedArtworkFile) {
+        NSString * legalSeriesName =  [self cleanBaseFileName:self.seriesTitle];
 
-    NSString * userThumbnailDir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
-    if (userThumbnailDir) {
-        [directories addObject:userThumbnailDir];
-    } else if (currentDir) {
-        [directories addObject: currentDir];
-        [directories addObject: [currentDir stringByAppendingPathComponent:@"thumbnails"]];
-        [directories addObject: parentDir];
-        [directories addObject:  [parentDir stringByAppendingPathComponent:@"thumbnails"]];
-    }
-    [directories addObject: topDirectory];
+        NSMutableArray * directories = [NSMutableArray array];
+        NSString * topDirectory = [[tiVoManager downloadDirectory] stringByAppendingPathComponent:@"thumbnails"];
+        NSString *currentDir   = [self downloadDirCreateIfNecessary:NO];
+        NSString *parentDir = [currentDir stringByDeletingLastPathComponent];
+        parentDir = [parentDir pathForParentDirectoryWithName:legalSeriesName];
 
-    NSString * legalSeriesName = [self.seriesTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-    legalSeriesName = [legalSeriesName stringByReplacingOccurrencesOfString:@": " withString:@"-"] ;
-    legalSeriesName = [legalSeriesName stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
-    legalSeriesName = [legalSeriesName stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
-
-    if (self.isMovie) {
-        for (NSString * dir in directories) {
-            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:self.movieYear  InPath:dir ];
-            if (artwork) return artwork;
+        NSString * userThumbnailDir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
+        if (userThumbnailDir) {
+            [directories addObject:userThumbnailDir];
+        } else if (currentDir) {
+            [directories addObject: currentDir];
+            [directories addObject: [currentDir stringByAppendingPathComponent:@"thumbnails"]];
+            [directories addObject: parentDir];
+            [directories addObject:  [parentDir stringByAppendingPathComponent:@"thumbnails"]];
         }
-        for (NSString * dir in directories) {
-            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
-            if (artwork) return artwork;
-        }
+        [directories addObject: topDirectory];
 
-    } else {
-        if (self.episode > 0) {
-            //first check for user-specified, episode-specific art
-            if (self.seasonEpisode.length > 0) {
-                for (NSString * dir in directories) {
-                    NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:self.seasonEpisode  InPath:dir ];
-                    if (artwork) return artwork;
+        if (self.isMovie) {
+            for (NSString * dir in directories) {
+                _userSpecifiedArtworkFile = [self artworkFileWithPrefix:legalSeriesName andSuffix:self.movieYear  InPath:dir ];
+                if ( _userSpecifiedArtworkFile ) break;
+            }
+            if ( !_userSpecifiedArtworkFile) for (NSString * dir in directories) {
+                _userSpecifiedArtworkFile = [self artworkFileWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
+                if ( _userSpecifiedArtworkFile ) break;
+            }
+
+        } else {
+            if (self.episode > 0) {
+                //first check for user-specified, episode-specific art
+                if (self.seasonEpisode.length > 0) {
+                    for (NSString * dir in directories) {
+                        _userSpecifiedArtworkFile = [self artworkFileWithPrefix:legalSeriesName andSuffix:self.seasonEpisode  InPath:dir ];
+                        if ( _userSpecifiedArtworkFile ) break;
+                    }
                 }
             }
+            //then for season-specific art
+            NSString * season = [NSString stringWithFormat:@"S%0.2d",self.season];
+            if ( !_userSpecifiedArtworkFile ) for (NSString * dir in directories) {
+                _userSpecifiedArtworkFile = [self artworkFileWithPrefix:legalSeriesName andSuffix:season InPath:dir ];
+                if ( _userSpecifiedArtworkFile ) break;
+            }
         }
-        //then for season-specific art
-        NSString * season = [NSString stringWithFormat:@"S%0.2d",self.season];
-        for (NSString * dir in directories) {
-            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:season InPath:dir ];
-            if (artwork) return artwork;
+        //finally for series-level art
+        if ( !_userSpecifiedArtworkFile) for (NSString * dir in directories) {
+            _userSpecifiedArtworkFile = [self artworkFileWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
+            if ( _userSpecifiedArtworkFile ) break;
+        }
+        if (!_userSpecifiedArtworkFile) {
+            _userSpecifiedArtworkFile = @""; //mark that we've looked but not available; could add filesystem observer to downloadDir to discover user adding photos
         }
     }
-    //finally for series-level art
-    for (NSString * dir in directories) {
-        NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
-        if (artwork) return artwork;
+    return _userSpecifiedArtworkFile;
+}
+
+-(NSString *) findArtwork:(NSString *) tmpDirectory {
+    //if art is on non-temporary disk, then thumbnail is same as artwork.
+    //if in kMTTempThumbnailDir, then it's smaller, so we  use for tableView
+    //if in kMTTemporary, then it's larger, so we use for file downloads.
+    //including @"" for "I'm currently downloading or already tried"
+    NSString * location = self.userSpecifiedArtworkFile;
+    if (location.length == 0) {
+        NSString * legalSeriesName = [self cleanBaseFileName:self.seriesTitle];
+
+        //check in temp directory
+        if (self.isMovie) {
+            location = [self artworkFileWithPrefix:legalSeriesName andSuffix:self.movieYear InPath:tmpDirectory ];
+        } else if (self.episode> 0) {
+            location = [self artworkFileWithPrefix:legalSeriesName andSuffix:self.seasonEpisode InPath:tmpDirectory ];
+        }
+        if (location.length == 0) {
+            location = [self artworkFileWithPrefix:legalSeriesName andSuffix:nil InPath:tmpDirectory ];
+        }
     }
-    //then for downloaded temp art
-    if (self.artworkFile) {
-        NSImage * image = [[NSImage alloc] initWithContentsOfFile:self.artworkFile];
-        if (image) {
-            return image;
+    if (location.length == 0) DDLogDetail(@"artwork for %@ not found on disk",self.seriesTitle);
+    return location;
+}
+
+-(NSString *) thumbnailFile {
+    if (!_thumbnailFile) {
+        _thumbnailFile = [self findArtwork:kMTTmpThumbnailsDir];
+    }
+    return _thumbnailFile;
+}
+
+- (NSString *) artworkFile {
+    if (!_artworkFile) {
+        _artworkFile = [self findArtwork:kMTTmpDir];
+    }
+    return _artworkFile;
+}
+
+-(NSImage *) thumbnailImage {
+    //we automtically ask for artworkLocation from services, and when that arrives, there will be a notification to update the show in the window, which wil call us again.
+    //Then we request image, and get the same notification when that arrives
+    if (!_thumbnailImage){
+        if (self.thumbnailFile.length  > 0 ) {
+            _thumbnailImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailFile];
         } else {
-            DDLogReport(@"Couldn't load downloaded artwork for %@ from %@",self.seriesTitle, self.artworkFile);
+            if ( self.tvdbArtworkLocation.length > 0 && !self.thumbnailFile) {
+                [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:YES]; //may set thumbnail immediately
+            }
+            if (self.thumbnailFile.length > 0 ) {
+                _thumbnailImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailFile];
+            }
         }
     }
-    if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesIcon]) {
-        return [NSImage imageNamed:@"cTiVo.png"];  //from iTivo; use our logo for any new video files.
+    return _thumbnailImage;
+}
+
+-(NSImage *) artWorkImage {
+    //we automtically ask for artworkLocation from services, and when that arrives, there will be a notification to update the show in the window, which wil call us again.
+    //Then we request image, and get the same notification when that arrives
+    if (!_artWorkImage){
+        if (self.artworkFile.length  > 0 ) {
+            if ([self.thumbnailFile isEqualToString:self.artworkFile] && _thumbnailImage) {
+                _artWorkImage = self.thumbnailImage;
+            } else {
+                _artWorkImage = [[NSImage alloc] initWithContentsOfFile:self.artworkFile];
+            }
+        } else {
+            if ( self.tvdbArtworkLocation.length > 0 && !self.artworkFile) {
+                [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:NO]; //may set artworkFile immediately
+            }
+            if (self.thumbnailFile.length > 0 ) {
+                _artWorkImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailFile];
+            }
+        }
     }
-    DDLogDetail(@"artwork for %@ not found",self.seriesTitle);
-    return nil;
+    return _artWorkImage;
 }
 
 

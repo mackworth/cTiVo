@@ -269,7 +269,7 @@ __DDLOGHERE__
         if (column.isHidden) {
             //free up memory from images
             for (MTTiVoShow * show in tiVoManager.tiVoShows) {
-                show.thumbnailArtworkImage = nil;
+                show.thumbnailImage = nil;
             }
         }
         if (self.imageRowHeight > 0) {
@@ -407,7 +407,7 @@ __DDLOGHERE__
     } else if ([identifier isEqualToString: kMTArtColumn]) {
         MTProgressCell * cell = (MTProgressCell *) result;
 
-        NSImage * image = thisShow.thumbnailArtworkImage;
+        NSImage * image = thisShow.thumbnailImage;
         if (image) {
             result.imageView.image = image ;
             result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
@@ -460,7 +460,7 @@ __DDLOGHERE__
 
 -(void) dropComplete:(NSString *)filePath {
     NSLog(@"Got file: %@", filePath);
-}
+}	
 
 - (NSDragOperation)draggingSession:(NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context {
 	

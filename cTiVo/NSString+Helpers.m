@@ -126,7 +126,18 @@
 
 }
 
-
+-(NSString *) pathForParentDirectoryWithName: (NSString *) parent {
+    NSString * searchParent = self;
+    //if we're doing
+    while (searchParent.length > 1 && ![parent isEqualToString: [searchParent lastPathComponent]]) {
+        searchParent = [searchParent stringByDeletingLastPathComponent];
+    }
+    if ([parent isEqualToString: [searchParent lastPathComponent]]) {
+        return searchParent;
+    } else {
+        return self;
+    }
+}
 
 -(NSString *) getXAttr:(NSString *) key  {
     NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];

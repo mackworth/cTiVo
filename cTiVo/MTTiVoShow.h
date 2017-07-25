@@ -77,31 +77,32 @@
                                     *producers;
 
 @property (strong, nonatomic) NSString *episodeID;  //normalized version of programID (convert 12 digit to 14
-@property (strong, readonly) NSString *uniqueID; //episodeID for episodic
+@property (nonatomic, readonly) NSString *uniqueID; //episodeID for episodic
                                                  //episodeID+showDateRFC for non-episodic
 
-@property (atomic, strong) NSString * artworkFile,
-                            * thumbnailArtworkFile;
-@property (nonatomic, strong) NSImage * thumbnailArtworkImage;
+@property (nonatomic, strong) NSString  * artworkFile,  //location of images on disk, if they exist
+                                        * thumbnailFile;
+@property (nonatomic, strong) NSImage   * artWorkImage,
+                                        * thumbnailImage; //image after loading (triggers download if necessary)
 
-@property					  time_t showLength;  //length of show in seconds
+@property (nonatomic, assign)  time_t showLength;  //length of show in seconds
 
 @property (atomic, strong) NSString *tvdbArtworkLocation;    //uses @"" as signal that it's never coming
 
 
 //--------------------------------------------------------------
 #pragma mark - Calculated properties for display 
-@property (strong)	NSString *showTitle;  //calculated from series: episode
+@property (nonatomic, strong)	NSString *showTitle;  //calculated from series: episode
 @property (nonatomic, readonly) NSString *originalAirDateNoTime,
                                          *showTitlePlusAirDate,
 										 *showDateString,
 										*showKey,
                                         *showDateRFCString,
 										 *showMediumDateString;
-@property (atomic)						int	season, episode; //calculated from EpisodeNumber
-@property (weak, nonatomic, readonly) NSString *seasonString;
-@property (weak, nonatomic, readonly) NSString *seasonEpisode; // S02 E04 version
-@property (readonly) BOOL manualSeasonInfo;
+@property (atomic, assign)						int	season, episode; //calculated from EpisodeNumber
+@property (nonatomic, readonly) NSString *seasonString;
+@property (nonatomic, readonly) NSString *seasonEpisode; // S02 E04 version
+@property (nonatomic, readonly) BOOL manualSeasonInfo;
 
 @property (readonly, nonatomic) NSString *attribDescription;
 @property (readonly, nonatomic) NSString *starRatingString;
@@ -146,9 +147,10 @@ typedef enum {
 	HDType1080p = 2
 } HDTypes;
 
--(NSString *) downloadFileNameWithFormat:(NSString *) formatName;
+-(NSString *) downloadFileNameWithFormat:(NSString *)formatName CreateIfNecessary:(BOOL) create;
+
 -(NSString *) swapKeywordsInString: (NSString *) str withFormat:(NSString *) format;  //exposed for test only
-- (NSImage *) findArtWorkOnDisk;
+-(void) setArtworkFromImageOrFileFrom:(id) imageSource;
 
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image andResolution:(HDTypes) hdType;
 
