@@ -13,6 +13,7 @@
 
 #import "MTDownloadCheckTableCell.h"
 #import "MTProgressCell.h"
+#import "DragDropImageView.h"
 
 @interface MTProgramTableView  ()
 
@@ -406,20 +407,23 @@ __DDLOGHERE__
         result.toolTip =@"Does this channel use H.264 compression?";
     } else if ([identifier isEqualToString: kMTArtColumn]) {
         MTProgressCell * cell = (MTProgressCell *) result;
-
+        DragDropImageView * imageView = (DragDropImageView *) result.imageView;
+        imageView.delegate = thisShow;
         NSImage * image = thisShow.thumbnailImage;
         if (image) {
-            result.imageView.image = image ;
-            result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
+            imageView.image = image ;
+            imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
             result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
             cell.progressIndicator.hidden = YES;
             [cell.progressIndicator stopAnimation:self];
         } else if ([thisShow.tvdbArtworkLocation isEqualToString:@""]) {
             //no image, and it's never coming
+            imageView.image = nil ;
             cell.progressIndicator.hidden = YES;
             [cell.progressIndicator stopAnimation:self];
        } else {
             //no image, but it may be coming
+           imageView.image = nil ;
             cell.progressIndicator.hidden = NO;
             [cell.progressIndicator startAnimation:self];
         }
@@ -458,12 +462,46 @@ __DDLOGHERE__
 
 #pragma mark Drag N Drop support
 
--(void) dropComplete:(NSString *)filePath {
-    NSLog(@"Got file: %@", filePath);
-}	
+/*// What kind of drag operation should I perform?
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id )info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op {
+    return op == NSTableViewDropOn ? NSDragOperationCopy : NSDragOperationNone; // Specifies that the drop should occur on the specified row.
+}
+
+// The mouse button was released over a row in the table view, should I accept the drop?
+- (BOOL)tableView:(NSTableView *) tv acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op {
+    MTTiVoShow * show = self.sortedShows[row];
+    NSLog(@"Dragged Show: %@", show);
+    return YES;
+}
+
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
+{
+    if ([[[sender draggingPasteboard] types] containsObject:NSFilenamesPboardType]) {
+        return NSDragOperationCopy;
+    }
+    
+    return NSDragOperationNone;
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
+    NSPasteboard *pboard;
+    pboard = [sender draggingPasteboard];
+    NSPoint windowDropPoint = [sender draggingLocation];
+    NSPoint tableDropPoint = [self convertPoint:windowDropPoint fromView:nil];
+    NSUInteger row = [self rowAtPoint:tableDropPoint];
+    if (row >= self.sortedShows.count) return NO;
+    MTTiVoShow * show = self.sortedShows[row];
+    NSImage * image = [[NSImage alloc] initWithPasteboard:pboard];
+    if (image) {
+        [show setArtworkFromImage: image];
+        return YES;
+    } else {
+        return NO;
+    }
+}
+*/
 
 - (NSDragOperation)draggingSession:(NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context {
-	
     switch(context) {
         case NSDraggingContextOutsideApplication:
             return NSDragOperationCopy;  //could theoretically allow, as completed shows are also here.
@@ -476,6 +514,22 @@ __DDLOGHERE__
 	}
 }
 
+-(void) mouseDown:(NSEvent *)event {
+    //pass drag drop to ArtColumn if present
+    NSPoint p = [self convertPoint: event.locationInWindow fromView:nil];
+    NSInteger c = [self columnAtPoint:p];
+    if (c >= 0 && [self.tableColumns[c].identifier isEqualToString:kMTArtColumn]){
+        NSInteger r = [self rowAtPoint:p];
+        NSTableCellView *showCellView = [self viewAtColumn:c row:r makeIfNecessary:NO];
+        [showCellView.imageView mouseDown:event];
+    } else {
+        [super mouseDown:event];
+    }
+
+}
+-(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender {
+    return NSDragOperationCopy;
+}
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
 	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {

@@ -824,7 +824,8 @@ __DDLOGHERE__
     }
 }
 
--(void) cacheArtWork: (NSString *) newArtwork forShow: (NSString *) name {
+-(void) cacheArtWork: (NSString *) newArtwork forShow: (MTTiVoShow *) show {
+    NSString * name = (show.isEpisodicShow) ? show.uniqueID : show.seriesTitle;
     if ( name.length > 0) {  //protective only
         @synchronized (self.tvdbCache) {
            NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:name] mutableCopy];
@@ -843,7 +844,8 @@ __DDLOGHERE__
     }
 }
 
--(NSString *) cachedArtWorkForShow: (NSString *) name {
+-(NSString *) cachedArtWorkForShow: (MTTiVoShow *) show {
+    NSString * name = (show.isEpisodicShow) ? show.uniqueID : show.seriesTitle;
     if ( name.length > 0) {  //protective only
         @synchronized (self.tvdbCache) {
             NSDictionary * entry = [self.tvdbCache objectForKey:name];
@@ -1272,8 +1274,8 @@ __DDLOGHERE__
     if (show.gotTVDBDetails) return;
     //we only get artwork
 
-    NSString * cachedArt = [self cachedArtWorkForShow:show.seriesTitle];
-    if (cachedArt.length > 0) {
+    NSString * cachedArt = [self cachedArtWorkForShow:show];
+    if (cachedArt) {
         show.tvdbArtworkLocation = cachedArt;
         show.gotTVDBDetails = YES;
         [self incrementStatistic:kMTVDBMovieFoundCached];
@@ -1366,7 +1368,7 @@ __DDLOGHERE__
             }
         }
     }
-    [self cacheArtWork:newArtwork forShow:show.seriesTitle];
+    [self cacheArtWork:newArtwork forShow:show];
 
     dispatch_async(dispatch_get_main_queue(), ^(void){
         show.tvdbArtworkLocation = newArtwork;
@@ -1441,7 +1443,7 @@ __DDLOGHERE__
                             [self retrieveArtworkForShow:show cacheVersion:cache];
                         } failureHandler:^{
                             show.tvdbArtworkLocation =@"";
-                            [self cacheArtWork:nil forShow:show.seriesTitle];
+                            [self cacheArtWork:nil forShow:show];
                        } ];
                     } else {
                         [[NSFileManager defaultManager] createDirectoryAtPath:[filename stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nil];
@@ -1456,7 +1458,7 @@ __DDLOGHERE__
                 }
                 if ([resultFile isEqualToString:@""]) {
                     show.tvdbArtworkLocation = @"";
-                    [self cacheArtWork:@"" forShow:show.seriesTitle];
+                    [self cacheArtWork:@"" forShow:show];
                 }
                 if (cache) {
                     show.thumbnailFile = resultFile;

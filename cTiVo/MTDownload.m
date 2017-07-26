@@ -508,7 +508,7 @@ __DDLOGHERE__
 -(BOOL)configureBaseFileNameAndDirectory {
 	if (!self.baseFileName) {
         // generate only once
-        NSString * downloadName = [self.show downloadFileNameWithFormat:self.encodeFormat.name CreateIfNecessary:YES];
+        NSString * downloadName = [self.show downloadFileNameWithFormat:self.encodeFormat.name createIfNecessary:YES];
 
         self.downloadDirectory = [downloadName stringByDeletingLastPathComponent];
 

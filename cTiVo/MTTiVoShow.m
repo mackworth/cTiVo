@@ -627,226 +627,6 @@ __DDLOGHERE__
     return stars;
 }
 
--(HDTypes) hdTypeForMP4File:(MP4FileHandle *) fileHandle {
-    uint32_t tracksCount = MP4GetNumberOfTracks(fileHandle, 0, 0);
-
-    for (uint16_t i=0; i< tracksCount; i++) {
-        MP4TrackId trackId = MP4FindTrackId(fileHandle, i, 0, 0);
-        const char* type = MP4GetTrackType(fileHandle, trackId);
-
-        if (MP4_IS_VIDEO_TRACK_TYPE(type)) {
-            uint16 height = MP4GetTrackVideoHeight(fileHandle, trackId);
-            if (height == 0) {
-                return HDTypeNotAvailable;
-            } else  if (height <=  480) {
-                return HDTypeStandard;
-            } else if (height <= 720 ) {
-                return HDType720p;
-            } else if (height <= 10000) {
-                return HDType1080p;
-            } else {
-                return HDTypeNotAvailable;
-            }
-        }
-    }
-    return HDTypeNotAvailable;
-}
-
--(void) writeTextMetaData:(NSString*) value forKey: (NSString *) key toFile: (NSFileHandle *) handle {
-    if ( key.length > 0 && value.length > 0) {
-
-        [handle writeData:[[NSString stringWithFormat:@"%@ : %@\n",key, value] dataUsingEncoding:NSUTF8StringEncoding]];
-    }
-}
-
--(void) createTestMP4 {
-    //test routine to create dummy MP4 with all metadata stored
-    //sample call code: add to MainWindowController programMenuHandler
-    // and add to right-click menu in mainWindowController
-    //    } else if ([menu.title caseInsensitiveCompare:@"Test Metadata"] == NSOrderedSame) {
-    //		for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {
-    //            [show createTestMP4];
-    //        }
-
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString * baseTitle  = [self.showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-    if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
-    baseTitle = [baseTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
-    NSString * filePath = [NSString stringWithFormat:@"%@/ZTEST%@.mp4", [tiVoManager downloadDirectory], baseTitle];
-    NSString * testPath =[NSString stringWithFormat:@"%@/test.mp4", [tiVoManager downloadDirectory]];
-    NSString * textMetaPath = [filePath stringByAppendingPathExtension:@"txt"];
-    NSString * textFromMP4Path =[[filePath stringByAppendingString:@"2" ] stringByAppendingPathExtension:@"txt"];
-    NSString * diffPath =[[filePath stringByAppendingString:@".diff" ] stringByAppendingPathExtension:@"txt"];
-    NSError * error = nil;
-    if (![fm copyItemAtPath:testPath toPath:filePath error:&error]) {
-        DDLogMajor(@"couldn't copy file %@ to %@; Error %@", testPath, filePath, error.localizedDescription);
-        return;
-    };
-
-
-    MP4FileHandle *encodedFile = MP4Modify([filePath cStringUsingEncoding:NSUTF8StringEncoding],0);
-    
-    [self addExtendedMetaDataToFile:encodedFile withImage:nil];
-    MP4Close(encodedFile,MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
-
-    NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.tiVo.tiVo.name,self.showID];
-
-    NSData * xml = [NSData dataWithContentsOfFile:detailFilePath];
-    NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:xml options:0 error:nil];
-    NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
-    NSData * returnxml = [xmldoc objectByApplyingXSLTAtURL:[NSURL fileURLWithPath:xltTemplate] arguments:nil error:nil	];
-    NSString *returnString = [[NSString alloc] initWithData:returnxml encoding:NSUTF8StringEncoding];
-    if (![returnString writeToFile:textMetaPath atomically:NO encoding:NSUTF8StringEncoding error:nil]) {
-        DDLogReport(@"Couldn't write pyTiVo Data to file %@", textMetaPath);
-    } else {
-        NSFileHandle *textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
-        [textMetaHandle seekToEndOfFile];
-        [self writeTextMetaData:self.seriesId		  forKey:@"seriesId"			toFile:textMetaHandle];
-        [self writeTextMetaData:self.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
-        [self writeTextMetaData:self.stationCallsign forKey:@"callsign"		    toFile:textMetaHandle];
-         [self writeTextMetaData:self.programId       forKey:@"programId"       toFile:textMetaHandle];
-        [textMetaHandle closeFile];
-    }
-
-    NSTask * pythonTask = [[NSTask alloc] init];
-    [pythonTask setLaunchPath:[@"~/Documents/develop/pytivo/metadata.py" stringByExpandingTildeInPath]];
-    [pythonTask setArguments:@[ [filePath stringByExpandingTildeInPath]]];
-    [fm createFileAtPath:textFromMP4Path contents:nil attributes:nil];
-    NSFileHandle * textHandle = [NSFileHandle fileHandleForWritingAtPath:textFromMP4Path];
-    [pythonTask setStandardOutput:textHandle];
-    [pythonTask launch];
-    [pythonTask  waitUntilExit];
-    [textHandle closeFile];
-
-    if ([pythonTask terminationStatus] == 0) {
-          NSString * bashCmd = [NSString stringWithFormat:@"diff -u <(sort \"%@\") <(sort \"%@\") >\"%@\"",textMetaPath, textFromMP4Path, diffPath ];
-          NSTask * proc = [[NSTask alloc] init];
-          [proc setLaunchPath:@"/bin/bash"];
-          [proc setArguments:@[ @"-c", bashCmd]];
-          [proc launch];
-          [proc  waitUntilExit];
-
-        if ([proc terminationStatus] != 0) {
-                   DDLogMajor(@"Diff metadata failed for %@", self);
-        }
-    } else {
-        DDLogMajor(@"Python metadata failed for %@", self);
-    }
-
-
-}
--(void) addExtendedMetaDataToFile:(MP4FileHandle *)fileHandle withImage:(NSImage *) artwork {
-
-    HDTypes hdType = [self hdTypeForMP4File:fileHandle ];
-    const MP4Tags* tags = [self metaDataTagsWithImage: artwork andResolution:hdType];
-    MP4TagsStore(tags, fileHandle );
-    MP4TagsFree(tags);
-
-
-
-    //   for (NSString * key in [@'vActor', 'directors': 'vDirector',  'producers': 'vProducer', 'screenwriters': 'vWriter']);
-
-    NSMutableDictionary * iTunMovi = [NSMutableDictionary dictionary];
-    if (self.directors.string.length) {
-        [iTunMovi setObject:[self dictArrayFromString:self.directors] forKey:@"directors"];
-    }
-    if (self.actors.string.length > 0 ||
-        self.guestStars.string.length > 0){
-        NSArray * castArray = [[self dictArrayFromString: self.actors    ]  arrayByAddingObjectsFromArray:
-                           [self dictArrayFromString: self.guestStars]];
-        [iTunMovi setObject:castArray forKey:@"cast"];
-    }
-    if (self.producers.string.length) {
-        [iTunMovi setObject:[self dictArrayFromString:self.producers] forKey:@"producers"];
-    }
-    if (self.writers.string.length) {
-        [iTunMovi setObject:[self dictArrayFromString:self.writers] forKey:@"screenwriters"];
-    }
-
-    if (iTunMovi.count) {
-        NSData *serializedPlist = [NSPropertyListSerialization
-                                   dataFromPropertyList:iTunMovi
-                                   format:NSPropertyListXMLFormat_v1_0
-                                   errorDescription:nil];
-        MP4ItmfItem* newItem = MP4ItmfItemAlloc( "----", 1 );
-        newItem->mean = strdup( "com.apple.iTunes" );
-        newItem->name = strdup( "iTunMOVI" );
-
-        MP4ItmfData* data = &newItem->dataList.elements[0];
-        data->typeCode = MP4_ITMF_BT_UTF8;
-        data->valueSize = (unsigned int) [serializedPlist length];
-        data->value = (uint8_t*)malloc( data->valueSize );
-        memcpy( data->value, [serializedPlist bytes], data->valueSize );
-
-        MP4ItmfAddItem(fileHandle, newItem);
-        MP4ItmfItemFree(newItem);
-    }
-
-    NSMutableDictionary * tiVoInfo = [NSMutableDictionary dictionary];
-    if (self.channelString.length >0) {
-        [tiVoInfo setObject:self.channelString forKey:@"displayMajorNumber"];
-    }
-    if (self.showTime.length >0){
-        [tiVoInfo setObject:self.showTime forKey:@"time"];
-    }
-    if (self.colorCode.length >0){
-        [tiVoInfo setObject:self.colorCode forKey:@"colorCode"];
-    }
-    if (self.showingBits.length >0){
-        [tiVoInfo setObject:self.showingBits forKey:@"showingBits"];
-    }
-    if (self.starRating.length >0){
-        [tiVoInfo setObject:self.starRating forKey:@"starRating"];
-    }
-    if (self.startTime.length >0){
-        [tiVoInfo setObject:self.startTime forKey:@"startTime"];
-    }
-    if (self.stopTime.length >0){
-        [tiVoInfo setObject:self.stopTime forKey:@"stopTime"];
-    }
-    if (self.programId.length >0){
-        [tiVoInfo setObject:self.programId forKey:@"programId"];
-    }
-    if (self.seriesId.length >0){
-        [tiVoInfo setObject:self.seriesId forKey:@"seriesId"];
-    }
-    if (tiVoInfo.count) {
-        NSData *serializedPlist = [NSPropertyListSerialization
-                                   dataFromPropertyList:tiVoInfo
-                                   format:NSPropertyListXMLFormat_v1_0
-                                   errorDescription:nil];
-        MP4ItmfItem* newItem = MP4ItmfItemAlloc( "----", 1 );
-        newItem->mean = strdup( "com.pyTivo.pyTivo" );
-        newItem->name = strdup( "tiVoINFO" );
-
-        MP4ItmfData* data = &newItem->dataList.elements[0];
-        data->typeCode = MP4_ITMF_BT_UTF8;
-        data->valueSize = (unsigned int) [serializedPlist length];
-        data->value = (uint8_t*)malloc( data->valueSize );
-        memcpy( data->value, [serializedPlist bytes], data->valueSize );
-
-        MP4ItmfAddItem(fileHandle, newItem);
-        MP4ItmfItemFree(newItem);
-    }
-
-    //Now for ratings
-
-    NSString * itunesRating = [self iTunesCode];
-    if (itunesRating.length >0) {
-        MP4ItmfItem *newItem = MP4ItmfItemAlloc("----", 1);
-        newItem->mean = strdup("com.apple.iTunes");
-        newItem->name = strdup("iTunEXTC");
-
-        MP4ItmfData *data = &newItem->dataList.elements[0];
-        data->typeCode = MP4_ITMF_BT_UTF8;
-        data->valueSize = (unsigned int) strlen([itunesRating UTF8String]);
-        data->value = (uint8_t*)malloc( data->valueSize );
-        memcpy( data->value, [itunesRating UTF8String], data->valueSize );
-
-        MP4ItmfAddItem(fileHandle, newItem);
-    }
-}
-
 -(NSString *)showDateString
 {
 	static NSDateFormatter *dateFormat;
@@ -1613,8 +1393,230 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 -(NSString *) downloadDirCreateIfNecessary: (BOOL) create {
-    NSString * filename = [self downloadFileNameWithFormat:nil CreateIfNecessary:create];
+    NSString * filename = [self downloadFileNameWithFormat:nil createIfNecessary:create];
     return [filename stringByDeletingLastPathComponent];
+}
+
+#pragma mark - Metadata
+
+-(HDTypes) hdTypeForMP4File:(MP4FileHandle *) fileHandle {
+    uint32_t tracksCount = MP4GetNumberOfTracks(fileHandle, 0, 0);
+
+    for (uint16_t i=0; i< tracksCount; i++) {
+        MP4TrackId trackId = MP4FindTrackId(fileHandle, i, 0, 0);
+        const char* type = MP4GetTrackType(fileHandle, trackId);
+
+        if (MP4_IS_VIDEO_TRACK_TYPE(type)) {
+            uint16 height = MP4GetTrackVideoHeight(fileHandle, trackId);
+            if (height == 0) {
+                return HDTypeNotAvailable;
+            } else  if (height <=  480) {
+                return HDTypeStandard;
+            } else if (height <= 720 ) {
+                return HDType720p;
+            } else if (height <= 10000) {
+                return HDType1080p;
+            } else {
+                return HDTypeNotAvailable;
+            }
+        }
+    }
+    return HDTypeNotAvailable;
+}
+
+-(void) writeTextMetaData:(NSString*) value forKey: (NSString *) key toFile: (NSFileHandle *) handle {
+    if ( key.length > 0 && value.length > 0) {
+
+        [handle writeData:[[NSString stringWithFormat:@"%@ : %@\n",key, value] dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+}
+
+-(void) createTestMP4 {
+    //test routine to create dummy MP4 with all metadata stored
+    //sample call code: add to MainWindowController programMenuHandler
+    // and add to right-click menu in mainWindowController
+    //    } else if ([menu.title caseInsensitiveCompare:@"Test Metadata"] == NSOrderedSame) {
+    //		for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {
+    //            [show createTestMP4];
+    //        }
+
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString * baseTitle  = [self.showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+    if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
+    baseTitle = [baseTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+    NSString * filePath = [NSString stringWithFormat:@"%@/ZTEST%@.mp4", [tiVoManager downloadDirectory], baseTitle];
+    NSString * testPath =[NSString stringWithFormat:@"%@/test.mp4", [tiVoManager downloadDirectory]];
+    NSString * textMetaPath = [filePath stringByAppendingPathExtension:@"txt"];
+    NSString * textFromMP4Path =[[filePath stringByAppendingString:@"2" ] stringByAppendingPathExtension:@"txt"];
+    NSString * diffPath =[[filePath stringByAppendingString:@".diff" ] stringByAppendingPathExtension:@"txt"];
+    NSError * error = nil;
+    if (![fm copyItemAtPath:testPath toPath:filePath error:&error]) {
+        DDLogMajor(@"couldn't copy file %@ to %@; Error %@", testPath, filePath, error.localizedDescription);
+        return;
+    };
+
+
+    MP4FileHandle *encodedFile = MP4Modify([filePath cStringUsingEncoding:NSUTF8StringEncoding],0);
+
+    [self addExtendedMetaDataToFile:encodedFile withImage:nil];
+    MP4Close(encodedFile,MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
+
+    NSString *detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.tiVo.tiVo.name,self.showID];
+
+    NSData * xml = [NSData dataWithContentsOfFile:detailFilePath];
+    NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:xml options:0 error:nil];
+    NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
+    NSData * returnxml = [xmldoc objectByApplyingXSLTAtURL:[NSURL fileURLWithPath:xltTemplate] arguments:nil error:nil	];
+    NSString *returnString = [[NSString alloc] initWithData:returnxml encoding:NSUTF8StringEncoding];
+    if (![returnString writeToFile:textMetaPath atomically:NO encoding:NSUTF8StringEncoding error:nil]) {
+        DDLogReport(@"Couldn't write pyTiVo Data to file %@", textMetaPath);
+    } else {
+        NSFileHandle *textMetaHandle = [NSFileHandle fileHandleForWritingAtPath:textMetaPath];
+        [textMetaHandle seekToEndOfFile];
+        [self writeTextMetaData:self.seriesId		  forKey:@"seriesId"			toFile:textMetaHandle];
+        [self writeTextMetaData:self.channelString   forKey:@"displayMajorNumber"	toFile:textMetaHandle];
+        [self writeTextMetaData:self.stationCallsign forKey:@"callsign"		    toFile:textMetaHandle];
+        [self writeTextMetaData:self.programId       forKey:@"programId"       toFile:textMetaHandle];
+        [textMetaHandle closeFile];
+    }
+
+    NSTask * pythonTask = [[NSTask alloc] init];
+    [pythonTask setLaunchPath:[@"~/Documents/develop/pytivo/metadata.py" stringByExpandingTildeInPath]];
+    [pythonTask setArguments:@[ [filePath stringByExpandingTildeInPath]]];
+    [fm createFileAtPath:textFromMP4Path contents:nil attributes:nil];
+    NSFileHandle * textHandle = [NSFileHandle fileHandleForWritingAtPath:textFromMP4Path];
+    [pythonTask setStandardOutput:textHandle];
+    [pythonTask launch];
+    [pythonTask  waitUntilExit];
+    [textHandle closeFile];
+
+    if ([pythonTask terminationStatus] == 0) {
+        NSString * bashCmd = [NSString stringWithFormat:@"diff -u <(sort \"%@\") <(sort \"%@\") >\"%@\"",textMetaPath, textFromMP4Path, diffPath ];
+        NSTask * proc = [[NSTask alloc] init];
+        [proc setLaunchPath:@"/bin/bash"];
+        [proc setArguments:@[ @"-c", bashCmd]];
+        [proc launch];
+        [proc  waitUntilExit];
+
+        if ([proc terminationStatus] != 0) {
+            DDLogMajor(@"Diff metadata failed for %@", self);
+        }
+    } else {
+        DDLogMajor(@"Python metadata failed for %@", self);
+    }
+
+
+}
+-(void) addExtendedMetaDataToFile:(MP4FileHandle *)fileHandle withImage:(NSImage *) artwork {
+
+    HDTypes hdType = [self hdTypeForMP4File:fileHandle ];
+    const MP4Tags* tags = [self metaDataTagsWithImage: artwork andResolution:hdType];
+    MP4TagsStore(tags, fileHandle );
+    MP4TagsFree(tags);
+
+
+
+    //   for (NSString * key in [@'vActor', 'directors': 'vDirector',  'producers': 'vProducer', 'screenwriters': 'vWriter']);
+
+    NSMutableDictionary * iTunMovi = [NSMutableDictionary dictionary];
+    if (self.directors.string.length) {
+        [iTunMovi setObject:[self dictArrayFromString:self.directors] forKey:@"directors"];
+    }
+    if (self.actors.string.length > 0 ||
+        self.guestStars.string.length > 0){
+        NSArray * castArray = [[self dictArrayFromString: self.actors    ]  arrayByAddingObjectsFromArray:
+                               [self dictArrayFromString: self.guestStars]];
+        [iTunMovi setObject:castArray forKey:@"cast"];
+    }
+    if (self.producers.string.length) {
+        [iTunMovi setObject:[self dictArrayFromString:self.producers] forKey:@"producers"];
+    }
+    if (self.writers.string.length) {
+        [iTunMovi setObject:[self dictArrayFromString:self.writers] forKey:@"screenwriters"];
+    }
+
+    if (iTunMovi.count) {
+        NSData *serializedPlist = [NSPropertyListSerialization
+                                   dataFromPropertyList:iTunMovi
+                                   format:NSPropertyListXMLFormat_v1_0
+                                   errorDescription:nil];
+        MP4ItmfItem* newItem = MP4ItmfItemAlloc( "----", 1 );
+        newItem->mean = strdup( "com.apple.iTunes" );
+        newItem->name = strdup( "iTunMOVI" );
+
+        MP4ItmfData* data = &newItem->dataList.elements[0];
+        data->typeCode = MP4_ITMF_BT_UTF8;
+        data->valueSize = (unsigned int) [serializedPlist length];
+        data->value = (uint8_t*)malloc( data->valueSize );
+        memcpy( data->value, [serializedPlist bytes], data->valueSize );
+
+        MP4ItmfAddItem(fileHandle, newItem);
+        MP4ItmfItemFree(newItem);
+    }
+
+    NSMutableDictionary * tiVoInfo = [NSMutableDictionary dictionary];
+    if (self.channelString.length >0) {
+        [tiVoInfo setObject:self.channelString forKey:@"displayMajorNumber"];
+    }
+    if (self.showTime.length >0){
+        [tiVoInfo setObject:self.showTime forKey:@"time"];
+    }
+    if (self.colorCode.length >0){
+        [tiVoInfo setObject:self.colorCode forKey:@"colorCode"];
+    }
+    if (self.showingBits.length >0){
+        [tiVoInfo setObject:self.showingBits forKey:@"showingBits"];
+    }
+    if (self.starRating.length >0){
+        [tiVoInfo setObject:self.starRating forKey:@"starRating"];
+    }
+    if (self.startTime.length >0){
+        [tiVoInfo setObject:self.startTime forKey:@"startTime"];
+    }
+    if (self.stopTime.length >0){
+        [tiVoInfo setObject:self.stopTime forKey:@"stopTime"];
+    }
+    if (self.programId.length >0){
+        [tiVoInfo setObject:self.programId forKey:@"programId"];
+    }
+    if (self.seriesId.length >0){
+        [tiVoInfo setObject:self.seriesId forKey:@"seriesId"];
+    }
+    if (tiVoInfo.count) {
+        NSData *serializedPlist = [NSPropertyListSerialization
+                                   dataFromPropertyList:tiVoInfo
+                                   format:NSPropertyListXMLFormat_v1_0
+                                   errorDescription:nil];
+        MP4ItmfItem* newItem = MP4ItmfItemAlloc( "----", 1 );
+        newItem->mean = strdup( "com.pyTivo.pyTivo" );
+        newItem->name = strdup( "tiVoINFO" );
+
+        MP4ItmfData* data = &newItem->dataList.elements[0];
+        data->typeCode = MP4_ITMF_BT_UTF8;
+        data->valueSize = (unsigned int) [serializedPlist length];
+        data->value = (uint8_t*)malloc( data->valueSize );
+        memcpy( data->value, [serializedPlist bytes], data->valueSize );
+
+        MP4ItmfAddItem(fileHandle, newItem);
+        MP4ItmfItemFree(newItem);
+    }
+
+    //Now for ratings
+
+    NSString * itunesRating = [self iTunesCode];
+    if (itunesRating.length >0) {
+        MP4ItmfItem *newItem = MP4ItmfItemAlloc("----", 1);
+        newItem->mean = strdup("com.apple.iTunes");
+        newItem->name = strdup("iTunEXTC");
+
+        MP4ItmfData *data = &newItem->dataList.elements[0];
+        data->typeCode = MP4_ITMF_BT_UTF8;
+        data->valueSize = (unsigned int) strlen([itunesRating UTF8String]);
+        data->value = (uint8_t*)malloc( data->valueSize );
+        memcpy( data->value, [itunesRating UTF8String], data->valueSize );
+        
+        MP4ItmfAddItem(fileHandle, newItem);
+    }
 }
 
 #pragma mark - Artwork
@@ -1656,7 +1658,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     return nil;
 }
 
--(void) setArtworkFromImageOrFileFrom:(id)imageSource {
+-(NSString *) filenameForArtwork {
     //keep parallel with UserSpecificArtworkFile
 
     NSString * directory = nil;
@@ -1664,24 +1666,69 @@ NSString * fourChar(long n, BOOL allowZero) {
 
     directory = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
     if (!directory) {
-        NSString *currentDir   = [[self downloadFileNameWithFormat:nil CreateIfNecessary:YES] stringByDeletingLastPathComponent];
+        NSString *currentDir   = [[self downloadFileNameWithFormat:nil createIfNecessary:YES] stringByDeletingLastPathComponent];
         currentDir = [currentDir pathForParentDirectoryWithName:legalSeriesName];
         directory = [currentDir stringByAppendingPathComponent:@"thumbnails"];
     }
-
-    NSString * fileName = [[directory stringByAppendingPathComponent: self.seasonEpisode ? [NSString stringWithFormat: @"%@ %@", legalSeriesName, self.seasonEpisode ]
+    NSError * error = nil;
+    [[NSFileManager defaultManager] createDirectoryAtPath:directory
+                              withIntermediateDirectories:YES
+                                               attributes:NULL
+                                                    error: &error];
+    NSString * fileName = [[directory stringByAppendingPathComponent: self.seasonEpisode.length > 0 ? [NSString stringWithFormat: @"%@ %@", legalSeriesName, self.seasonEpisode ]
                                                                                         : legalSeriesName ]
                                      stringByAppendingPathExtension:@"jpg"];
-    if ([imageSource isKindOfClass:[NSImage class]]) {
-        NSImage * artwork = (NSImage *) imageSource;
+    return fileName;
+}
+
+-(void) dropComplete:(NSImage *)artwork {
+
+
+    if (!artwork) {
+        NSError * error = nil;
+        NSString * fileName = _thumbnailFile;
+        DDLogDetail(@"Deleting image for show %@", self);
+        if (![[NSFileManager defaultManager] removeItemAtPath:fileName error:&error]) {
+            DDLogReport(@"Could not delete image file %@. Error: %@", fileName, error.localizedDescription);
+        }
+        if (![fileName isEqualToString:_artworkFile] &&
+            [[NSFileManager defaultManager] fileExistsAtPath:_artworkFile]) {
+            if (![[NSFileManager defaultManager] removeItemAtPath:_artworkFile error:&error]) {
+                DDLogReport(@"Could not delete artwork file %@. Error: %@", fileName, error.localizedDescription);
+            }
+        }
+
+        if ([fileName containsString:kMTTmpThumbnailsDir ]) {
+            //tvdb cache file, so remember the deletion
+            DDLogDetail(@"Removing TVDB image %@", fileName);
+            self.tvdbArtworkLocation = @"";
+            self.thumbnailFile = @"";
+            self.artworkFile = @"";
+            [tiVoManager.tvdb cacheArtWork:@"" forShow:self];
+        } else {
+            //user specified file, so allow TVDB to update
+            self.thumbnailFile = nil;
+            self.artworkFile = nil;
+        }
+    } else {
+        NSString * fileName = [self filenameForArtwork];
+       if (![artwork isKindOfClass:[NSImage class]]) {
+            DDLogReport(@"Invalid image format %@?", artwork);
+            return;
+        }
         NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData: [artwork TIFFRepresentation]];
         NSData * imageData = [imageRep representationUsingType:NSJPEGFileType properties:@{NSImageCompressionFactor: @(1.0)}];
-        [imageData writeToFile:fileName atomically:NO];
-    } else if ([[imageSource class] isKindOfClass:[NSURL class ]]) {
-        DDLogReport(@"XXXX WRITE THIS!");
-    } else {
-        DDLogReport(@"XXXX WRITE THIS!");
+        if ([imageData writeToFile:fileName atomically:YES]) {
+            self.thumbnailFile = fileName;
+            self.artworkFile = fileName;
+        } else {
+            DDLogReport(@"could not write image file to %@. ", fileName);
+       }
     }
+    self.thumbnailImage = nil;
+    self.artWorkImage = nil;
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
+    //bug: need to refresh/notify all other shows in same non-episodic series
 }
 
 -(NSString *) cleanBaseFileName: (NSString *) base {
@@ -1795,7 +1842,8 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (!_thumbnailImage){
         if (self.thumbnailFile.length  > 0 ) {
             _thumbnailImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailFile];
-        } else {
+        }
+        if (!_thumbnailImage) {
             if ( self.tvdbArtworkLocation.length > 0 && !self.thumbnailFile) {
                 [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:YES]; //may set thumbnail immediately
             }

@@ -141,6 +141,7 @@
 		1E3D27E01A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */; };
 		1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */; };
 		1E4A38481A37C0F4001D84A7 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */; };
+		1E52C5261F2420A700389E93 /* DragDropImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E52C5251F2420A700389E93 /* DragDropImageView.m */; };
 		1E557BCB1CD801350014D85B /* comskip in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B891CD127E90014D85B /* comskip */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E557BCC1CD801350014D85B /* ffmpeg in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B8A1CD127E90014D85B /* ffmpeg */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E557BCD1CD801350014D85B /* mencoder in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B8B1CD127E90014D85B /* mencoder */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -713,6 +714,8 @@
 		1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTIsStringEmpty.m; sourceTree = "<group>"; };
 		1E4A38461A37C0F4001D84A7 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
 		1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionList.m; sourceTree = "<group>"; };
+		1E52C5241F2420A700389E93 /* DragDropImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DragDropImageView.h; sourceTree = "<group>"; };
+		1E52C5251F2420A700389E93 /* DragDropImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DragDropImageView.m; sourceTree = "<group>"; };
 		1E557B891CD127E90014D85B /* comskip */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = comskip; sourceTree = "<group>"; };
 		1E557B8A1CD127E90014D85B /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ffmpeg; sourceTree = "<group>"; };
 		1E557B8B1CD127E90014D85B /* mencoder */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = mencoder; sourceTree = "<group>"; };
@@ -1149,6 +1152,8 @@
 			children = (
 				D2995CA4168B8BB200B960B9 /* MTCheckBox.h */,
 				D2995CA5168B8BB200B960B9 /* MTCheckBox.m */,
+				1E52C5241F2420A700389E93 /* DragDropImageView.h */,
+				1E52C5251F2420A700389E93 /* DragDropImageView.m */,
 				D2DFA68D1683C27600CD6CE0 /* MTDownloadCheckTableCell.h */,
 				D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */,
 				D257C6E11697400600EBE30B /* MTFormatPopUpButton.h */,
@@ -1917,6 +1922,7 @@
 				1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */,
 				1E9959CA173DC7D100B47539 /* DDTTYLogger.m in Sources */,
 				1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */,
+				1E52C5261F2420A700389E93 /* DragDropImageView.m in Sources */,
 				1E59368C19648CFF0008780B /* MTLog.m in Sources */,
 				1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */,
 				1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */,

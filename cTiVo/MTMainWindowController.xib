@@ -1436,12 +1436,12 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="show.showLength"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView id="774">
-                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
+                                                                <tableCellView misplaced="YES" id="774">
+                                                                    <rect key="frame" x="1" y="1" width="52" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="776">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="776">
+                                                                            <rect key="frame" x="0.0" y="0.0" width="52" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="777">
                                                                                 <font key="font" metaFont="system"/>
@@ -2329,10 +2329,13 @@
                             <outlet property="searchMenuTemplate" destination="1381" id="1385"/>
                         </connections>
                     </searchField>
-                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="wQl-yv-x1f">
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="wQl-yv-x1f" customClass="DragDropImageView">
                         <rect key="frame" x="0.0" y="671" width="88" height="88"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="tivo" id="7N2-Bd-qq3"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="boolean" keyPath="allowDrop" value="NO"/>
+                        </userDefinedRuntimeAttributes>
                     </imageView>
                     <customView hidden="YES" id="894" userLabel="Cancel Quit View">
                         <rect key="frame" x="0.0" y="0.0" width="800" height="758"/>

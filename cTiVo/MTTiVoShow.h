@@ -11,10 +11,11 @@
 #import "MTTiVo.h"
 #import "MTFormat.h"
 #import "mp4v2.h"
+#import "DragDropImageView.h"
 
 @class MTProgramTableView;
 
-@interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding, NSURLDownloadDelegate> {
+@interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding, NSURLDownloadDelegate, DragDropImageViewDelegate> {
  }
 
 
@@ -80,12 +81,22 @@
 @property (nonatomic, readonly) NSString *uniqueID; //episodeID for episodic
                                                  //episodeID+showDateRFC for non-episodic
 
+@property (nonatomic, assign)  time_t showLength;  //length of show in seconds
+
+//Art can come from
+//   A) TVDB/TMDB (cached in temp directory in either thumb or regular format),
+//   B) Searching in the download directory, or
+//   C) The user interface (cached in download directory)
+//There are multiple states for Artwork wrt to a show
+//  1) art not found yet (thumbnailFile/artWorkFile = nil, but accessing searches for them on disk)
+//  2) art not on disk, but we're searching online (thumbnail = @"", tvdbArtworkLocation = nil;
+//  3) artwork on disk (artworkFile > zero length)
+//  4) artwork not available online (tvdbartworkLocation = @"")
+//We cache TVDB artworklocation in tvdb cache.
 @property (nonatomic, strong) NSString  * artworkFile,  //location of images on disk, if they exist
-                                        * thumbnailFile;
+                                        * thumbnailFile; //@"" means we've looked and file not available
 @property (nonatomic, strong) NSImage   * artWorkImage,
                                         * thumbnailImage; //image after loading (triggers download if necessary)
-
-@property (nonatomic, assign)  time_t showLength;  //length of show in seconds
 
 @property (atomic, strong) NSString *tvdbArtworkLocation;    //uses @"" as signal that it's never coming
 
@@ -147,10 +158,9 @@ typedef enum {
 	HDType1080p = 2
 } HDTypes;
 
--(NSString *) downloadFileNameWithFormat:(NSString *)formatName CreateIfNecessary:(BOOL) create;
+-(NSString *) downloadFileNameWithFormat:(NSString *)formatName createIfNecessary:(BOOL) create;
 
 -(NSString *) swapKeywordsInString: (NSString *) str withFormat:(NSString *) format;  //exposed for test only
--(void) setArtworkFromImageOrFileFrom:(id) imageSource;
 
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image andResolution:(HDTypes) hdType;
 
