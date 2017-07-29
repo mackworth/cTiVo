@@ -82,7 +82,6 @@ __DDLOGHERE__
     @synchronized(self.theTVDBStatistics) {
         self.theTVDBStatistics = [NSMutableDictionary dictionary];
     }
-
 }
 
 #pragma mark -
@@ -97,7 +96,6 @@ __DDLOGHERE__
         [self checkToken];
     }];
     self.tvdbToken = nil; self.tvdbURLSession = nil;
-
 }
 
 -(NSURLSession *) tvdbURLSession {
@@ -255,6 +253,7 @@ __DDLOGHERE__
                failureHandler: (void(^) (void)) failureBlock
                    pageNumber: (NSInteger) pageNumber
 {
+    //Could be in either background or foreground
     if (seriesIDs.count == 0) return;
 
     NSString * seriesID = [seriesIDs firstObject];
@@ -517,7 +516,9 @@ __DDLOGHERE__
                                 failureHandler: failureBlock
                                     pageNumber: 1];
                    } else {
-                       if (failureBlock) failureBlock();
+                       if (failureBlock) {
+                           dispatch_async(dispatch_get_main_queue(),failureBlock);
+                       }
                    }
                }
         withSeriesIDCandidate:nil
@@ -942,8 +943,8 @@ __DDLOGHERE__
                     NSArray *seriesIDTVDBs = @[seriesID];
                     [self cacheTVDBSeriesID:seriesIDTVDBs forSeries:show.seriesTitle];
 
-                    [strongSelf finishTVDBProcessing:show];
                     DDLogVerbose(@"Got TVDB episodeInfo for %@: %@", show.showTitle, episodeInfo);
+                    [strongSelf finishTVDBProcessing:show];
               } else {
                   DDLogReport(@"TVDB Failure for %@; missing Season, Episode or id: %@", [self urlsForReporting:@[seriesID]],episodeInfo);
               }
@@ -1037,7 +1038,6 @@ __DDLOGHERE__
                [self finishTVDBProcessing:show];
            }
        }];
-
 }
 
 -(void) reloadTVDBInfo:(MTTiVoShow *) show {
@@ -1047,14 +1047,7 @@ __DDLOGHERE__
         [self.tvdbCache removeObjectForKey:show.seriesTitle];
         [self cacheTVDBSeriesID:nil forSeries:show.seriesTitle];
     }
-    NSString * thumbnailPath = show.thumbnailFile;
-    if ([thumbnailPath containsString:kMTTmpThumbnailsDir]) {
-            [[NSFileManager defaultManager] removeItemAtPath:show.thumbnailFile error:nil];
-    }
-    show.tvdbArtworkLocation = nil;
-    show.artworkFile = nil;
-    show.thumbnailFile = nil;
-    show.thumbnailImage = nil;
+    [show resetTVDBInfo];
     [self getTheTVDBDetails:show];
 }
 
@@ -1115,6 +1108,8 @@ __DDLOGHERE__
         [self finishTVDBProcessing:show];
     } else {
         DDLogDetail(@"Need to get %@", show.showTitle);
+        show.thumbnailStatus = MTArtSearchingInfo;
+        show.artworkStatus = MTArtSearchingInfo;
         NSArray <NSString *> *seriesIDTVDBs = [self cachedTVDBSeriesID:show.seriesTitle ];
 
         NSArray * splitNameArray = [show.seriesTitle componentsSeparatedByString:@":"];
@@ -1189,6 +1184,13 @@ __DDLOGHERE__
         }
         if (artwork) {
             show.tvdbArtworkLocation = artwork;
+            if (artwork.length > 0) {
+                show.thumbnailStatus = MTArtFoundInfo;
+                show.artworkStatus = MTArtFoundInfo;
+            } else {
+                show.thumbnailStatus = MTArtNotAvailable;
+                show.artworkStatus = MTArtNotAvailable;
+           }
         }
        if ([episodeNum intValue] > 0) {  //season 0 = specials on theTVDB
             //special case due to parsing of tivo's season/episode combined string
@@ -1215,6 +1217,8 @@ __DDLOGHERE__
             }
         }
     } else {
+        show.thumbnailStatus = MTArtNotAvailable;
+        show.artworkStatus = MTArtNotAvailable;
         show.gotTVDBDetails = YES; //never going to find it
     }
     [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
@@ -1271,14 +1275,17 @@ __DDLOGHERE__
 -(void) getTheMovieDBDetailsForShow: (MTTiVoShow *) show {
     NSAssert (![NSThread isMainThread], @"getTheMovieDBDetailsForShow running in foreground");
 
-    if (show.gotTVDBDetails) return;
-    //we only get artwork
+    if (show.gotTVDBDetails && (show.thumbnailStatus != MTArtNew)) return;
 
     NSString * cachedArt = [self cachedArtWorkForShow:show];
     if (cachedArt) {
-        show.tvdbArtworkLocation = cachedArt;
-        show.gotTVDBDetails = YES;
-        [self incrementStatistic:kMTVDBMovieFoundCached];
+        dispatch_async(dispatch_get_main_queue(), ^(void){
+           show.tvdbArtworkLocation = cachedArt;
+            show.gotTVDBDetails = YES;
+            [self incrementStatistic:kMTVDBMovieFoundCached];
+            show.thumbnailStatus = MTArtFoundInfo;
+            show.artworkStatus = MTArtFoundInfo;
+        });
         return;
     }
     @synchronized (self.movieDBRateLimitLock) {
@@ -1310,12 +1317,14 @@ __DDLOGHERE__
     NSURL *url = [NSURL URLWithString:urlString];
     NSError * error = nil;
     NSData *movieInfo = [NSData dataWithContentsOfURL:url options:NSDataReadingUncached error:&error];
+
+    MTArtStatus status = MTArtNotAvailable;  //until proven otherwise.
     if (!movieInfo || error) {
         if ([error.localizedDescription isEqualToString:@"The file “movie” couldn’t be opened."]) {
             DDLogReport(@"On %@, hit theMovieDB Rate Limit; please report to cTiVo support site", show);
         } else {
             DDLogMajor(@"For %@, theMovieDB returned %@", show, error.localizedDescription ? [@"error: " stringByAppendingString:error.localizedDescription] : @"no information");
-        }
+       }
         [self addValue:urlString inStatistic:kMTVDBMovieNotFound forShow:show.seriesTitle];
         return;
     }
@@ -1361,6 +1370,7 @@ __DDLOGHERE__
             }
             if (newArtwork.length > 0 ) {
                 DDLogDetail(@"for movie %@, theMovieDB had image %@", show.seriesTitle, newArtwork);
+                status = MTArtFoundInfo;
                 [self incrementStatistic:kMTVDBMovieFound];
             } else {
                 DDLogMajor(@"theMovieDB doesn't have any images for %@", show.seriesTitle);
@@ -1368,9 +1378,11 @@ __DDLOGHERE__
             }
         }
     }
-    [self cacheArtWork:newArtwork forShow:show];
 
     dispatch_async(dispatch_get_main_queue(), ^(void){
+        show.artworkStatus = status;
+        show.thumbnailStatus = status;
+        [self cacheArtWork:newArtwork forShow:show];
         show.tvdbArtworkLocation = newArtwork;
         show.gotTVDBDetails = YES;
         [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
@@ -1378,11 +1390,23 @@ __DDLOGHERE__
 
 }
 
+-(void) failureHandler:(MTTiVoShow *) show cache: (BOOL) cache {
+    show.tvdbArtworkLocation = @"";
+    [self cacheArtWork:@"" forShow:show];
+    if (cache) {
+        show.thumbnailStatus = MTArtNotAvailable;
+        show.thumbnailFile = nil;
+    } else {
+        show.artworkStatus = MTArtNotAvailable;
+        show.artworkFile = nil;
+    }
+    [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
+
+}
 -(void)retrieveArtworkForShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache {
 
-    if (show.tvdbArtworkLocation.length == 0) {
-        return;
-    }
+    MTArtStatus status = cache ? show.thumbnailStatus : show.artworkStatus;
+
     NSString * base = show.showTitle;
     base = [base stringByReplacingOccurrencesOfString:@": " withString:@"-"];
     base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
@@ -1393,14 +1417,21 @@ __DDLOGHERE__
         : show.seasonEpisode;
     NSString * filename = specifier ? [NSString stringWithFormat:@"%@/%@_%@.jpg",directory, base, specifier]
                                     : [NSString stringWithFormat:@"%@/%@.jpg",directory, base];
+
     //download only if we don't have it already
     if ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
+        DDLogDetail (@"Cached artwork found for %@ at %@", show, filename);
         if (cache) {
+            show.thumbnailStatus = MTArtOnDisk;
             show.thumbnailFile = filename;
         } else {
+            show.artworkStatus = MTArtOnDisk;
             show.artworkFile = filename;
         }
    } else {
+       if (status == MTArtRetrievingArt || status == MTArtSearchingInfo) {
+           return;  //already in progress
+       }
        NSString *baseUrlString;
        if (show.isMovie) {
            if (cache) {
@@ -1417,55 +1448,54 @@ __DDLOGHERE__
        }
        //mark as downloading
        if (cache) {
-           show.thumbnailFile = @"";
+           show.thumbnailStatus = MTArtRetrievingArt;
        } else {
-           show.artworkFile = @"";
+           show.artworkStatus = MTArtRetrievingArt;
        }
        NSString *urlString = [NSString stringWithFormat: baseUrlString, show.tvdbArtworkLocation ];
         DDLogDetail(@"downloading artwork at %@ to %@",urlString, filename);
         NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
         [NSURLConnection sendAsynchronousRequest:req queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^(void){
-                NSString * resultFile = filename;
                if (!data || error ) {
                     DDLogReport(@"Couldn't get artwork for %@ from %@ , Error: %@", show.seriesTitle, urlString, error.localizedDescription);
-                    resultFile = @"";
-                } else {
+                   [self failureHandler:show cache:cache];
+               } else {
                     NSInteger statusCode = ((NSHTTPURLResponse *) response).statusCode;
                     if ( statusCode == 404 || statusCode == 500) {
-                        resultFile = nil;
-                        DDLogDetail(@"No episode artwork for %@ from %@ ", show.seriesTitle, urlString);
+                        DDLogDetail(@"No episode artwork for %@ from %@; trying series", show.seriesTitle, urlString);
                         //try and get artwork for Series instead
+                        show.thumbnailStatus = MTArtSearchingInfo;
+                        show.artworkStatus = MTArtSearchingInfo;
                         [self searchSeriesArtwork:show
                                           artType:nil
                                 completionHandler:^(NSString *tvdbFile) {
                             show.tvdbArtworkLocation = tvdbFile;
+                            show.thumbnailStatus = MTArtFoundInfo;
+                            show.artworkStatus = MTArtFoundInfo;
+
                             [self retrieveArtworkForShow:show cacheVersion:cache];
                         } failureHandler:^{
-                            show.tvdbArtworkLocation =@"";
-                            [self cacheArtWork:nil forShow:show];
-                       } ];
+                            [self failureHandler:show cache:cache];
+                      } ];
                     } else {
                         [[NSFileManager defaultManager] createDirectoryAtPath:[filename stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nil];
                         if ([data writeToFile:filename atomically:YES]) {
                             DDLogDetail(@"Saved artwork file for %@ at %@",show.showTitle, filename);
+                            if (cache) {
+                                show.thumbnailFile = filename;
+                                show.thumbnailStatus = MTArtOnDisk;
+                            } else {
+                                show.artworkFile = filename;
+                                show.artworkStatus = MTArtOnDisk;
+                            }
                             [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
                         } else {
-                            DDLogReport(@"Couldn't write to artwork file %@", filename);
-                            resultFile = @"";
+                            DDLogReport(@"Couldn't write to artwork file %@!", filename);
+                            [self failureHandler:show cache:cache];
                         }
                     }
                 }
-                if ([resultFile isEqualToString:@""]) {
-                    show.tvdbArtworkLocation = @"";
-                    [self cacheArtWork:@"" forShow:show];
-                }
-                if (cache) {
-                    show.thumbnailFile = resultFile;
-                } else {
-                    show.artworkFile = resultFile;
-                }
-                [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
             });
         }];
     }

@@ -76,7 +76,9 @@ __DDLOGHERE__
 		_seriesTitle = @"";
 //		_originalAirDate = @"";
         _tvdbArtworkLocation = nil;
-		
+        _thumbnailStatus = MTArtNew;
+        _artworkStatus = MTArtNew;
+
 		self.protectedShow = @(NO); //This is the default
 		parseTermMapping = @{
 					   @"description" : @"",  //mark to not load these values as they come from main XML, not detail
@@ -465,108 +467,6 @@ __DDLOGHERE__
 		}
 	}
 	return _tiVo;
-}
-
--(const MP4Tags * ) metaDataTagsWithImage: (NSImage* ) image andResolution:(HDTypes) hdType {
-	//maintain source code parallel with MTiTunes.m>importIntoiTunes
-	const MP4Tags *tags = MP4TagsAlloc();
-    uint8_t mediaType = 10;  //MP4 can't be audio only?
-	if (self.isMovie) {
-		mediaType = 9;
-		MP4TagsSetMediaType(tags, &mediaType);
-		MP4TagsSetName(tags,[self.showTitle cStringUsingEncoding:NSUTF8StringEncoding]) ;
-        MP4TagsSetArtist(tags,[self.directors.string cStringUsingEncoding:NSUTF8StringEncoding]);
-	} else {
-		mediaType = 10;
-		MP4TagsSetMediaType(tags, &mediaType);
-        if (self.seriesTitle.length>0) {
-            MP4TagsSetTVShow(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-            MP4TagsSetArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-            MP4TagsSetAlbumArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-        }
-        if (self.season > 0 ) {
-            uint32_t showSeason =  self.season;
-            MP4TagsSetTVSeason(tags, &showSeason);
-            MP4TagsSetAlbum(tags,[[NSString stringWithFormat: @"%@, Season %d",self.seriesTitle, self.season] cStringUsingEncoding:NSUTF8StringEncoding]) ;
-        } else {
-            MP4TagsSetAlbum(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-        }
-
-        if (self.episodeTitle.length==0) {
-            NSString * dateString = self.originalAirDateNoTime;
-            if (dateString.length == 0) {
-                NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
-                [dateFormat setDateStyle:NSDateFormatterShortStyle];
-                [dateFormat setTimeStyle:NSDateFormatterNoStyle];
-                dateString =  [dateFormat stringFromDate: self.showDate ];
-            }
-            MP4TagsSetName(tags,[[NSString stringWithFormat:@"%@ - %@",self.showTitle, dateString] cStringUsingEncoding:NSUTF8StringEncoding]);
-        } else {
-            MP4TagsSetName(tags,[self.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-        }
-        uint32_t episodeNum = (uint32_t) self.episode;
-        if (episodeNum == 0) {
-            episodeNum = (uint32_t) [self.episodeNumber integerValue];
-        }
-        if ( episodeNum> 0) {
-            MP4TagsSetTVEpisode(tags, &episodeNum);
-            MP4TagTrack track;
-            track.index = (uint16)episodeNum;
-            track.total = 0;
-            MP4TagsSetTrack(tags, &track);
-        }
-	}
-	if (self.episodeID.length >0) {
-		MP4TagsSetTVEpisodeID(tags, [self.episodeID cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-	
-	if (self.showDescription.length > 0) {
-		if (self.showDescription.length < 255) {
-			MP4TagsSetDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
-			MP4TagsSetComments(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);			
-		} else {
-			MP4TagsSetDescription(tags,[[self.showDescription  substringToIndex:255] cStringUsingEncoding:NSUTF8StringEncoding]);
-			MP4TagsSetLongDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
-			MP4TagsSetComments(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
-		}
-	}
-	if (self.seriesTitle.length>0) {
-		MP4TagsSetTVShow(tags, [self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-	//no year equivalent?
-    NSString * releaseDate = self.isMovie ? self.movieYear : self.originalAirDate;
-	if (releaseDate.length == 0) {
-        releaseDate = self.isMovie ? self.originalAirDate : self.movieYear ;
-	}
-	if (releaseDate.length>0) {
-		MP4TagsSetReleaseDate(tags,[releaseDate cStringUsingEncoding:NSUTF8StringEncoding]);
-    } else {
-        DDLogMajor(@"No release date? for %@", self);
-    }
-	if (self.stationCallsign) {
-		MP4TagsSetTVNetwork(tags, [self.stationCallsign cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-	if (self.episodeGenre.length>0) {
-		MP4TagsSetGenre(tags,[self.episodeGenre cStringUsingEncoding:NSUTF8StringEncoding]);
-	}
-
-	if (image) {
-		NSData *PNGData  = [NSBitmapImageRep representationOfImageRepsInArray: [image representations]
-                                                                    usingType:NSPNGFileType properties:@{NSImageInterlaced: @NO}];
-		MP4TagArtwork artwork;
-		
-		artwork.data = (void *)[PNGData bytes];
-		artwork.size = (uint32_t)[PNGData length];
-		artwork.type = MP4_ART_PNG;
-		
-		MP4TagsAddArtwork(tags, &artwork);
-	}
-	
-	if (hdType != HDTypeNotAvailable ) {
-		uint8_t myHDType = (uint8_t) hdType;
-		MP4TagsSetHDVideo(tags, &myHDType);
-	}
-	return tags;
 }
 
 - (NSArray *) dictArrayFromString:(NSAttributedString *) string {
@@ -1399,6 +1299,108 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 #pragma mark - Metadata
 
+-(const MP4Tags * ) metaDataTagsWithImage: (NSImage* ) image andResolution:(HDTypes) hdType {
+    //maintain source code parallel with MTiTunes.m>importIntoiTunes
+    const MP4Tags *tags = MP4TagsAlloc();
+    uint8_t mediaType = 10;  //MP4 can't be audio only?
+    if (self.isMovie) {
+        mediaType = 9;
+        MP4TagsSetMediaType(tags, &mediaType);
+        MP4TagsSetName(tags,[self.showTitle cStringUsingEncoding:NSUTF8StringEncoding]) ;
+        MP4TagsSetArtist(tags,[self.directors.string cStringUsingEncoding:NSUTF8StringEncoding]);
+    } else {
+        mediaType = 10;
+        MP4TagsSetMediaType(tags, &mediaType);
+        if (self.seriesTitle.length>0) {
+            MP4TagsSetTVShow(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+            MP4TagsSetArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+            MP4TagsSetAlbumArtist(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+        }
+        if (self.season > 0 ) {
+            uint32_t showSeason =  self.season;
+            MP4TagsSetTVSeason(tags, &showSeason);
+            MP4TagsSetAlbum(tags,[[NSString stringWithFormat: @"%@, Season %d",self.seriesTitle, self.season] cStringUsingEncoding:NSUTF8StringEncoding]) ;
+        } else {
+            MP4TagsSetAlbum(tags,[self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+        }
+
+        if (self.episodeTitle.length==0) {
+            NSString * dateString = self.originalAirDateNoTime;
+            if (dateString.length == 0) {
+                NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+                [dateFormat setDateStyle:NSDateFormatterShortStyle];
+                [dateFormat setTimeStyle:NSDateFormatterNoStyle];
+                dateString =  [dateFormat stringFromDate: self.showDate ];
+            }
+            MP4TagsSetName(tags,[[NSString stringWithFormat:@"%@ - %@",self.showTitle, dateString] cStringUsingEncoding:NSUTF8StringEncoding]);
+        } else {
+            MP4TagsSetName(tags,[self.episodeTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+        }
+        uint32_t episodeNum = (uint32_t) self.episode;
+        if (episodeNum == 0) {
+            episodeNum = (uint32_t) [self.episodeNumber integerValue];
+        }
+        if ( episodeNum> 0) {
+            MP4TagsSetTVEpisode(tags, &episodeNum);
+            MP4TagTrack track;
+            track.index = (uint16)episodeNum;
+            track.total = 0;
+            MP4TagsSetTrack(tags, &track);
+        }
+    }
+    if (self.episodeID.length >0) {
+        MP4TagsSetTVEpisodeID(tags, [self.episodeID cStringUsingEncoding:NSUTF8StringEncoding]);
+    }
+
+    if (self.showDescription.length > 0) {
+        if (self.showDescription.length < 255) {
+            MP4TagsSetDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+            MP4TagsSetComments(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+        } else {
+            MP4TagsSetDescription(tags,[[self.showDescription  substringToIndex:255] cStringUsingEncoding:NSUTF8StringEncoding]);
+            MP4TagsSetLongDescription(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+            MP4TagsSetComments(tags,[self.showDescription cStringUsingEncoding:NSUTF8StringEncoding]);
+        }
+    }
+    if (self.seriesTitle.length>0) {
+        MP4TagsSetTVShow(tags, [self.seriesTitle cStringUsingEncoding:NSUTF8StringEncoding]);
+    }
+    //no year equivalent?
+    NSString * releaseDate = self.isMovie ? self.movieYear : self.originalAirDate;
+    if (releaseDate.length == 0) {
+        releaseDate = self.isMovie ? self.originalAirDate : self.movieYear ;
+    }
+    if (releaseDate.length>0) {
+        MP4TagsSetReleaseDate(tags,[releaseDate cStringUsingEncoding:NSUTF8StringEncoding]);
+    } else {
+        DDLogMajor(@"No release date? for %@", self);
+    }
+    if (self.stationCallsign) {
+        MP4TagsSetTVNetwork(tags, [self.stationCallsign cStringUsingEncoding:NSUTF8StringEncoding]);
+    }
+    if (self.episodeGenre.length>0) {
+        MP4TagsSetGenre(tags,[self.episodeGenre cStringUsingEncoding:NSUTF8StringEncoding]);
+    }
+
+    if (image) {
+        NSData *PNGData  = [NSBitmapImageRep representationOfImageRepsInArray: [image representations]
+                                                                    usingType:NSPNGFileType properties:@{NSImageInterlaced: @NO}];
+        MP4TagArtwork artwork;
+
+        artwork.data = (void *)[PNGData bytes];
+        artwork.size = (uint32_t)[PNGData length];
+        artwork.type = MP4_ART_PNG;
+        
+        MP4TagsAddArtwork(tags, &artwork);
+    }
+    
+    if (hdType != HDTypeNotAvailable ) {
+        uint8_t myHDType = (uint8_t) hdType;
+        MP4TagsSetHDVideo(tags, &myHDType);
+    }
+    return tags;
+}
+
 -(HDTypes) hdTypeForMP4File:(MP4FileHandle *) fileHandle {
     uint32_t tracksCount = MP4GetNumberOfTracks(fileHandle, 0, 0);
 
@@ -1619,7 +1621,55 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
 }
 
+-(void) addArtwork:(NSImage *) image ToMP4File: (NSString *) fileName {
+
+    MP4FileHandle *fileOnDisk = MP4Modify([fileName cStringUsingEncoding:NSUTF8StringEncoding],0);
+    if (fileOnDisk) {
+        const MP4Tags *tags = MP4TagsAlloc();
+        if (MP4TagsFetch( tags, fileOnDisk )) {
+
+            if (image) {
+                NSData *PNGData  = [NSBitmapImageRep representationOfImageRepsInArray: [image representations]
+                                                                        usingType:NSPNGFileType properties:@{NSImageInterlaced: @NO}];
+                MP4TagArtwork artwork;
+
+                artwork.data = (void *)[PNGData bytes];
+                artwork.size = (uint32_t)[PNGData length];
+                artwork.type = MP4_ART_PNG;
+                MP4TagsSetArtwork(tags, 0, &artwork);
+            } else {
+                MP4TagsRemoveArtwork(tags, 0);
+            }
+            if (!MP4TagsStore(tags, fileOnDisk )) {
+                DDLogReport (@"could not write MP4 tags tp file %@", fileName);
+            }
+        } else {
+            DDLogReport (@"could not read MP4 tags from file %@", fileName);
+        }
+        MP4TagsFree(tags);
+    } else {
+        DDLogReport (@"could not open MP4 file %@", fileName);
+    }
+    MP4Close(fileOnDisk,MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
+}
+
 #pragma mark - Artwork
+
+-(void) resetTVDBInfo {
+    if ([_thumbnailFile containsString:kMTTmpThumbnailsDir]) {
+        [[NSFileManager defaultManager] removeItemAtPath:_thumbnailFile error:nil];
+    }
+    if ([_artworkFile containsString:kMTTmpDir]) {
+        [[NSFileManager defaultManager] removeItemAtPath:_artworkFile error:nil];
+    }
+    _tvdbArtworkLocation = nil;
+    _userSpecifiedArtworkFile = nil;
+    _artworkFile = nil;
+    _thumbnailFile = nil;
+    _thumbnailImage = nil;
+    _thumbnailStatus = MTArtNew;
+    _artworkStatus = MTArtNew;
+}
 
 - (NSString *) artworkFileWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
     prefix = [prefix lowercaseString];
@@ -1683,50 +1733,61 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(void) dropComplete:(NSImage *)artwork {
 
-
+    self.thumbnailImage = nil;
+    self.artWorkImage = nil;
     if (!artwork) {
-        NSError * error = nil;
         NSString * fileName = _thumbnailFile;
-        DDLogDetail(@"Deleting image for show %@", self);
+        DDLogDetail(@"Deleting image for show %@ at %@", self, fileName);
+        NSError * error = nil;
         if (![[NSFileManager defaultManager] removeItemAtPath:fileName error:&error]) {
             DDLogReport(@"Could not delete image file %@. Error: %@", fileName, error.localizedDescription);
         }
-        if (![fileName isEqualToString:_artworkFile] &&
+        if (_artworkFile && ![fileName isEqualToString:_artworkFile] &&
             [[NSFileManager defaultManager] fileExistsAtPath:_artworkFile]) {
             if (![[NSFileManager defaultManager] removeItemAtPath:_artworkFile error:&error]) {
                 DDLogReport(@"Could not delete artwork file %@. Error: %@", fileName, error.localizedDescription);
             }
         }
 
+        self.thumbnailFile = nil;
+        self.artworkFile = nil;
         if ([fileName containsString:kMTTmpThumbnailsDir ]) {
             //tvdb cache file, so remember the deletion
             DDLogDetail(@"Removing TVDB image %@", fileName);
+            self.thumbnailStatus = MTArtNotAvailable;
             self.tvdbArtworkLocation = @"";
-            self.thumbnailFile = @"";
-            self.artworkFile = @"";
             [tiVoManager.tvdb cacheArtWork:@"" forShow:self];
         } else {
             //user specified file, so allow TVDB to update
-            self.thumbnailFile = nil;
-            self.artworkFile = nil;
+            self.thumbnailStatus = MTArtNew;
+            self.userSpecifiedArtworkFile = nil;
+            artwork = self.artWorkImage; //triggers loading
+        }
+        for (NSString * fileOnDisk in self.copiesOnDisk) {
+            [self addArtwork:self.artWorkImage ToMP4File:fileOnDisk];
         }
     } else {
-        NSString * fileName = [self filenameForArtwork];
        if (![artwork isKindOfClass:[NSImage class]]) {
             DDLogReport(@"Invalid image format %@?", artwork);
             return;
         }
         NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData: [artwork TIFFRepresentation]];
         NSData * imageData = [imageRep representationUsingType:NSJPEGFileType properties:@{NSImageCompressionFactor: @(1.0)}];
+
+        NSString * fileName = [self filenameForArtwork];
         if ([imageData writeToFile:fileName atomically:YES]) {
             self.thumbnailFile = fileName;
             self.artworkFile = fileName;
-        } else {
+            self.thumbnailStatus = MTArtOnDisk;
+            self.artworkStatus = MTArtOnDisk;
+            for (NSString * fileOnDisk in self.copiesOnDisk) {
+                [self addArtwork:artwork ToMP4File:fileOnDisk];
+            }
+       } else {
             DDLogReport(@"could not write image file to %@. ", fileName);
+           self.artworkStatus = MTArtNew;
        }
     }
-    self.thumbnailImage = nil;
-    self.artWorkImage = nil;
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
     //bug: need to refresh/notify all other shows in same non-episodic series
 }
@@ -1788,24 +1849,27 @@ NSString * fourChar(long n, BOOL allowZero) {
             }
         }
         //finally for series-level art
-        if ( !_userSpecifiedArtworkFile) for (NSString * dir in directories) {
-            _userSpecifiedArtworkFile = [self artworkFileWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
-            if ( _userSpecifiedArtworkFile ) break;
+        if ( !_userSpecifiedArtworkFile && (!self.isEpisodicShow || self.tvdbArtworkLocation.length )) {
+            for (NSString * dir in directories) {
+                _userSpecifiedArtworkFile = [self artworkFileWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
+                if ( _userSpecifiedArtworkFile ) break;
+            }
         }
         if (!_userSpecifiedArtworkFile) {
             _userSpecifiedArtworkFile = @""; //mark that we've looked but not available; could add filesystem observer to downloadDir to discover user adding photos
         }
     }
-    return _userSpecifiedArtworkFile;
+    return _userSpecifiedArtworkFile.length > 0 ? _userSpecifiedArtworkFile : nil;
 }
 
 -(NSString *) findArtwork:(NSString *) tmpDirectory {
     //if art is on non-temporary disk, then thumbnail is same as artwork.
-    //if in kMTTempThumbnailDir, then it's smaller, so we  use for tableView
+    //if in kMTTempThumbnailDir, then it's smaller, so we  use only for tableView
     //if in kMTTemporary, then it's larger, so we use for file downloads.
-    //including @"" for "I'm currently downloading or already tried"
+
     NSString * location = self.userSpecifiedArtworkFile;
-    if (location.length == 0) {
+
+    if (!location) {
         NSString * legalSeriesName = [self cleanBaseFileName:self.seriesTitle];
 
         //check in temp directory
@@ -1814,24 +1878,34 @@ NSString * fourChar(long n, BOOL allowZero) {
         } else if (self.episode> 0) {
             location = [self artworkFileWithPrefix:legalSeriesName andSuffix:self.seasonEpisode InPath:tmpDirectory ];
         }
-        if (location.length == 0) {
+        if (!location && (self.episode == 0 || !self.tvdbArtworkLocation )) {
+            //so if we haven't found already and it's not a episode, for which we might have artworkrt
             location = [self artworkFileWithPrefix:legalSeriesName andSuffix:nil InPath:tmpDirectory ];
         }
+        if (!location) {
+            DDLogDetail(@"artwork for %@ not found on disk",self.seriesTitle);
+        }
     }
-    if (location.length == 0) DDLogDetail(@"artwork for %@ not found on disk",self.seriesTitle);
     return location;
 }
 
 -(NSString *) thumbnailFile {
-    if (!_thumbnailFile) {
+    if (self.thumbnailStatus == MTArtNew) {
         _thumbnailFile = [self findArtwork:kMTTmpThumbnailsDir];
+        if (_thumbnailFile) {
+            self.thumbnailStatus = MTArtOnDisk;
+        }
     }
+    NSAssert (self.thumbnailStatus != MTArtOnDisk || _thumbnailFile, @"thumbnailFile without ArtOnDisk");
     return _thumbnailFile;
 }
 
 - (NSString *) artworkFile {
-    if (!_artworkFile) {
+    if (self.artworkStatus == MTArtNew) {
         _artworkFile = [self findArtwork:kMTTmpDir];
+        if (_artworkFile) {
+            self.artworkStatus = MTArtOnDisk;
+        }
     }
     return _artworkFile;
 }
@@ -1840,14 +1914,14 @@ NSString * fourChar(long n, BOOL allowZero) {
     //we automtically ask for artworkLocation from services, and when that arrives, there will be a notification to update the show in the window, which wil call us again.
     //Then we request image, and get the same notification when that arrives
     if (!_thumbnailImage){
-        if (self.thumbnailFile.length  > 0 ) {
+        if (self.thumbnailStatus == MTArtOnDisk ) {
             _thumbnailImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailFile];
         }
         if (!_thumbnailImage) {
-            if ( self.tvdbArtworkLocation.length > 0 && !self.thumbnailFile) {
+            if ( self.thumbnailStatus == MTArtFoundInfo || self.thumbnailStatus == MTArtOnDisk ) { //second shouldn't happen
                 [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:YES]; //may set thumbnail immediately
             }
-            if (self.thumbnailFile.length > 0 ) {
+            if (_thumbnailFile.length > 0 ) {
                 _thumbnailImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailFile];
             }
         }
@@ -1860,17 +1934,17 @@ NSString * fourChar(long n, BOOL allowZero) {
     //Then we request image, and get the same notification when that arrives
     if (!_artWorkImage){
         if (self.artworkFile.length  > 0 ) {
-            if ([self.thumbnailFile isEqualToString:self.artworkFile] && _thumbnailImage) {
+            if ([_thumbnailFile isEqualToString:self.artworkFile] && _thumbnailImage) {
                 _artWorkImage = self.thumbnailImage;
             } else {
                 _artWorkImage = [[NSImage alloc] initWithContentsOfFile:self.artworkFile];
             }
         } else {
-            if ( self.tvdbArtworkLocation.length > 0 && !self.artworkFile) {
+            if ( self.tvdbArtworkLocation.length > 0) {
                 [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:NO]; //may set artworkFile immediately
             }
-            if (self.thumbnailFile.length > 0 ) {
-                _artWorkImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailFile];
+            if (_artworkFile.length > 0 ) {
+                _artWorkImage = [[NSImage alloc] initWithContentsOfFile:self.artworkFile];
             }
         }
     }

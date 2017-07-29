@@ -416,7 +416,7 @@ __DDLOGHERE__
             result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
             cell.progressIndicator.hidden = YES;
             [cell.progressIndicator stopAnimation:self];
-        } else if ([thisShow.tvdbArtworkLocation isEqualToString:@""]) {
+        } else if (thisShow.thumbnailStatus == MTArtNotAvailable) {
             //no image, and it's never coming
             imageView.image = nil ;
             cell.progressIndicator.hidden = YES;
