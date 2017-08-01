@@ -77,7 +77,6 @@ __DDLOGHERE__
 //		_originalAirDate = @"";
         _tvdbArtworkLocation = nil;
         _thumbnailStatus = MTArtNew;
-        _artworkStatus = MTArtNew;
 
 		self.protectedShow = @(NO); //This is the default
 		parseTermMapping = @{
@@ -1621,7 +1620,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
 }
 
--(void) addArtwork:(NSImage *) image ToMP4File: (NSString *) fileName {
+-(void) addArtwork:(NSImage *) image toMP4File: (NSString *) fileName {
 
     MP4FileHandle *fileOnDisk = MP4Modify([fileName cStringUsingEncoding:NSUTF8StringEncoding],0);
     if (fileOnDisk) {
@@ -1636,7 +1635,11 @@ NSString * fourChar(long n, BOOL allowZero) {
                 artwork.data = (void *)[PNGData bytes];
                 artwork.size = (uint32_t)[PNGData length];
                 artwork.type = MP4_ART_PNG;
-                MP4TagsSetArtwork(tags, 0, &artwork);
+                if (tags->artworkCount == 0) {
+                    MP4TagsAddArtwork(tags, &artwork);
+                } else {
+                    MP4TagsSetArtwork(tags, 0, &artwork);
+                }
             } else {
                 MP4TagsRemoveArtwork(tags, 0);
             }
@@ -1668,7 +1671,6 @@ NSString * fourChar(long n, BOOL allowZero) {
     _thumbnailFile = nil;
     _thumbnailImage = nil;
     _thumbnailStatus = MTArtNew;
-    _artworkStatus = MTArtNew;
 }
 
 - (NSString *) artworkFileWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
@@ -1699,7 +1701,6 @@ NSString * fourChar(long n, BOOL allowZero) {
                     }
                     NSString * path = [realDirectory stringByAppendingPathComponent: filename];
                     DDLogDetail(@"found artwork for %@ in %@",prefix, path);
-                    self.artworkFile = path;
                     return path;
                 }
             }
@@ -1737,35 +1738,38 @@ NSString * fourChar(long n, BOOL allowZero) {
     self.artWorkImage = nil;
     if (!artwork) {
         NSString * fileName = _thumbnailFile;
-        DDLogDetail(@"Deleting image for show %@ at %@", self, fileName);
-        NSError * error = nil;
-        if (![[NSFileManager defaultManager] removeItemAtPath:fileName error:&error]) {
-            DDLogReport(@"Could not delete image file %@. Error: %@", fileName, error.localizedDescription);
+        if (fileName) {
+            self.thumbnailFile = nil;
+            DDLogDetail(@"Deleting image for show %@ at %@", self, fileName);
+            NSError * error = nil;
+            if (![[NSFileManager defaultManager] removeItemAtPath:fileName error:&error]) {
+                DDLogDetail(@"Could not delete image file %@. Error: %@", fileName, error.localizedDescription);
+            }
+            if ([fileName containsString:kMTTmpThumbnailsDir ]) {
+                //tvdb cache file, so remember the deletion
+                DDLogDetail(@"Removing TVDB image %@", fileName);
+                self.thumbnailStatus = MTArtNotAvailable;
+                self.tvdbArtworkLocation = @"";
+                [tiVoManager.tvdb cacheArtWork:@"" forShow:self];
+            } else {
+                //user specified file, so allow TVDB to update
+                if ([self.tvdbArtworkLocation isEqualToString:@""]) {
+                    self.thumbnailStatus = MTArtNotAvailable;
+                } else {
+                    self.thumbnailStatus = MTArtFoundInfo;
+                    self.userSpecifiedArtworkFile = nil;
+                    artwork = self.artWorkImage;
+                }
+            }
         }
-        if (_artworkFile && ![fileName isEqualToString:_artworkFile] &&
-            [[NSFileManager defaultManager] fileExistsAtPath:_artworkFile]) {
+        if (_artworkFile  &&  [[NSFileManager defaultManager] fileExistsAtPath:_artworkFile]) {
+            NSError * error = nil;
             if (![[NSFileManager defaultManager] removeItemAtPath:_artworkFile error:&error]) {
                 DDLogReport(@"Could not delete artwork file %@. Error: %@", fileName, error.localizedDescription);
             }
         }
-
-        self.thumbnailFile = nil;
         self.artworkFile = nil;
-        if ([fileName containsString:kMTTmpThumbnailsDir ]) {
-            //tvdb cache file, so remember the deletion
-            DDLogDetail(@"Removing TVDB image %@", fileName);
-            self.thumbnailStatus = MTArtNotAvailable;
-            self.tvdbArtworkLocation = @"";
-            [tiVoManager.tvdb cacheArtWork:@"" forShow:self];
-        } else {
-            //user specified file, so allow TVDB to update
-            self.thumbnailStatus = MTArtNew;
-            self.userSpecifiedArtworkFile = nil;
-            artwork = self.artWorkImage; //triggers loading
-        }
-        for (NSString * fileOnDisk in self.copiesOnDisk) {
-            [self addArtwork:self.artWorkImage ToMP4File:fileOnDisk];
-        }
+        artwork = self.artWorkImage;
     } else {
        if (![artwork isKindOfClass:[NSImage class]]) {
             DDLogReport(@"Invalid image format %@?", artwork);
@@ -1778,17 +1782,30 @@ NSString * fourChar(long n, BOOL allowZero) {
         if ([imageData writeToFile:fileName atomically:YES]) {
             self.thumbnailFile = fileName;
             self.artworkFile = fileName;
-            self.thumbnailStatus = MTArtOnDisk;
-            self.artworkStatus = MTArtOnDisk;
-            for (NSString * fileOnDisk in self.copiesOnDisk) {
-                [self addArtwork:artwork ToMP4File:fileOnDisk];
-            }
        } else {
             DDLogReport(@"could not write image file to %@. ", fileName);
-           self.artworkStatus = MTArtNew;
        }
     }
+    for (NSString * fileOnDisk in self.copiesOnDisk) {
+        [self addArtwork:self.artWorkImage toMP4File:fileOnDisk];
+    }
+
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
+    //now update other shows in same series (only if nonEpisodic OR deleting artwork from episodes, which could be series-wide)
+    if (!self.isMovie  && (!artwork || !self.isEpisodicShow)) {
+        for (MTTiVoShow * show in [tiVoManager tiVoShows ]) {
+            if ([show.seriesTitle isEqualToString:self.seriesTitle]) {
+                if (show != self) {
+                    show.artWorkImage = nil;
+                    show.thumbnailImage = nil;
+                    show.thumbnailFile = nil;
+                    show.artworkFile = nil;
+                    show.userSpecifiedArtworkFile = nil;
+                    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:show ];
+                }
+            }
+        }
+    }
     //bug: need to refresh/notify all other shows in same non-episodic series
 }
 
@@ -1883,42 +1900,36 @@ NSString * fourChar(long n, BOOL allowZero) {
             location = [self artworkFileWithPrefix:legalSeriesName andSuffix:nil InPath:tmpDirectory ];
         }
         if (!location) {
-            DDLogDetail(@"artwork for %@ not found on disk",self.seriesTitle);
+            DDLogVerbose(@"artwork for %@ not found on disk",self.seriesTitle);
         }
     }
     return location;
 }
 
 -(NSString *) thumbnailFile {
-    if (self.thumbnailStatus == MTArtNew) {
+    if (!_thumbnailFile && (![_userSpecifiedArtworkFile isEqualToString:@""] ||
+                            self.thumbnailStatus != MTArtNotAvailable )) {
         _thumbnailFile = [self findArtwork:kMTTmpThumbnailsDir];
-        if (_thumbnailFile) {
-            self.thumbnailStatus = MTArtOnDisk;
-        }
     }
-    NSAssert (self.thumbnailStatus != MTArtOnDisk || _thumbnailFile, @"thumbnailFile without ArtOnDisk");
     return _thumbnailFile;
 }
 
 - (NSString *) artworkFile {
-    if (self.artworkStatus == MTArtNew) {
-        _artworkFile = [self findArtwork:kMTTmpDir];
-        if (_artworkFile) {
-            self.artworkStatus = MTArtOnDisk;
-        }
+    if (!_artworkFile) {
+        _artworkFile = [self findArtwork:kMTTmpThumbnailsDir];
     }
     return _artworkFile;
 }
 
 -(NSImage *) thumbnailImage {
-    //we automtically ask for artworkLocation from services, and when that arrives, there will be a notification to update the show in the window, which wil call us again.
+    //we automatically ask for artworkLocation from services, and when that arrives, there will be a notification to update the show in the window, which wil call us again.
     //Then we request image, and get the same notification when that arrives
     if (!_thumbnailImage){
-        if (self.thumbnailStatus == MTArtOnDisk ) {
+        if (self.thumbnailFile) {
             _thumbnailImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailFile];
         }
         if (!_thumbnailImage) {
-            if ( self.thumbnailStatus == MTArtFoundInfo || self.thumbnailStatus == MTArtOnDisk ) { //second shouldn't happen
+            if ( self.thumbnailStatus == MTArtFoundInfo ) {
                 [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:YES]; //may set thumbnail immediately
             }
             if (_thumbnailFile.length > 0 ) {
@@ -1930,17 +1941,11 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 -(NSImage *) artWorkImage {
-    //we automtically ask for artworkLocation from services, and when that arrives, there will be a notification to update the show in the window, which wil call us again.
-    //Then we request image, and get the same notification when that arrives
-    if (!_artWorkImage){
-        if (self.artworkFile.length  > 0 ) {
-            if ([_thumbnailFile isEqualToString:self.artworkFile] && _thumbnailImage) {
-                _artWorkImage = self.thumbnailImage;
-            } else {
-                _artWorkImage = [[NSImage alloc] initWithContentsOfFile:self.artworkFile];
-            }
+    if (!_artWorkImage) {
+        if (self.artworkFile) {
+            _artWorkImage = [[NSImage alloc] initWithContentsOfFile:self.artworkFile];
         } else {
-            if ( self.tvdbArtworkLocation.length > 0) {
+            if ( self.thumbnailStatus == MTArtFoundInfo ) {
                 [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:NO]; //may set artworkFile immediately
             }
             if (_artworkFile.length > 0 ) {

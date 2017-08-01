@@ -93,11 +93,12 @@ typedef NS_ENUM(NSUInteger, MTArtStatus) {
     MTArtSearchingInfo,
     MTArtFoundInfo,
     MTArtRetrievingArt,
-    MTArtOnDisk,
+    MTArtDownloaded,
     MTArtNotAvailable
 };
 
-@property (atomic, assign) MTArtStatus thumbnailStatus, artworkStatus;
+@property (atomic, assign) MTArtStatus thumbnailStatus;
+
 //transitions are
 //   New --> ArtOnDisk if found, or SearchingInfo if not
 //   SearchingInfo --> FoundInfo, or ArtNotAvailable if fail
@@ -111,7 +112,6 @@ typedef NS_ENUM(NSUInteger, MTArtStatus) {
                                         * thumbnailImage;
 
 @property (atomic, strong) NSString *tvdbArtworkLocation;
-
 
 //--------------------------------------------------------------
 #pragma mark - Calculated properties for display 

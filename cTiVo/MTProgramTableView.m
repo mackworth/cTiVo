@@ -518,8 +518,8 @@ __DDLOGHERE__
     //pass drag drop to ArtColumn if present
     NSPoint p = [self convertPoint: event.locationInWindow fromView:nil];
     NSInteger c = [self columnAtPoint:p];
-    if (c >= 0 && [self.tableColumns[c].identifier isEqualToString:kMTArtColumn]){
-        NSInteger r = [self rowAtPoint:p];
+    NSInteger r = [self rowAtPoint:p];
+    if (c >= 0 && r >= 0 && [self.tableColumns[c].identifier isEqualToString:kMTArtColumn]){
         NSTableCellView *showCellView = [self viewAtColumn:c row:r makeIfNecessary:NO];
         [showCellView.imageView mouseDown:event];
     } else {
