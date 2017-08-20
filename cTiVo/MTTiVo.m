@@ -295,6 +295,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
     if (foundMediaKey) {
         self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName onPort:1413 andMAK:self.mediaKey];
+        self.myRPC.delegate = tiVoManager;
     } else {
         //Need to update defaults
         [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:YES];

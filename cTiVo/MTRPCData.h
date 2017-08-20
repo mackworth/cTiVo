@@ -27,5 +27,11 @@ typedef NS_ENUM(NSUInteger, MPEGFormat) {
 @property (nonatomic, strong) NSString * imageURL;
 @property (nonatomic, strong) NSString * series;
 
+@end
+
+@protocol MTRPCDelegate <NSObject>
+
+- (void)receivedRPCData:(MTRPCData *) data;
 
 @end
+

@@ -17,8 +17,7 @@
 -(MTRPCData *) rpcDataForID: (NSString *) idString;
 -(void) emptyCaches;
 
+@property (nonatomic, weak) id <MTRPCDelegate> delegate;
+
 @end
 
-@interface NSArray ()
--(NSData *) archiveRPC;
-@end

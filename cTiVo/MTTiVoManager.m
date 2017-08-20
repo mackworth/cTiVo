@@ -543,7 +543,6 @@ __DDLOGHERE__
 //    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
-    [defaultCenter addObserver:self selector:@selector(gotRPCData:) name:kMTNotificationRPCLoaded object:nil];
 
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTUpdateIntervalMinutes options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
@@ -1635,9 +1634,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 }
 #pragma mark - RPC switchboard
 
--(void) gotRPCData: (NSNotification *) notification {
-    MTRPCData * rpcData =      (MTRPCData *)notification.object;
-    //don't really want to notify all shows when data received
+-(void) receivedRPCData:(MTRPCData *)rpcData {
     [self.rpcIDs[rpcData.rpcID] notifyRPCDataReceived: rpcData];
 }
 

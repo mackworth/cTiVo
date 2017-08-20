@@ -141,6 +141,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
 -(void) emptyCaches {
     self.showMap = [NSMutableDictionary dictionaryWithCapacity:self.showMap.count];
     self.seriesImages = [NSMutableDictionary dictionaryWithCapacity:self.seriesImages.count];
+    [self getAllShows];
 }
 
 -(NSDictionary <NSString *, NSString *> *) _seriesImages {
@@ -665,6 +666,7 @@ NSDate * startTime = nil;
                NSString * imageURL = self.seriesImages[rpcData.series];
                if (imageURL) {
                    rpcData.imageURL = imageURL;
+                   [self.delegate receivedRPCData:rpcData];
                } else {
                    [self getImageFor:showInfo[@"recordingId"] withObjectId: objectId];
                }
@@ -729,8 +731,7 @@ static NSArray * imageResponseTemplate = nil;
            episodeInfo = self.showMap[objectId];
            episodeInfo.imageURL  = imageURL;  //if none available, still mark as ""
        }
-
-       [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationRPCLoaded object: episodeInfo];
+        [self.delegate receivedRPCData:episodeInfo];
     }];
 }
 

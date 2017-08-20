@@ -31,7 +31,6 @@
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"  // optional object: which MTDownload, 
 #define kMTNotificationNetworkChanged @"MTNotificationNetworkChanged"
 #define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"  //object: which MTTiVoShow was loaded
-#define kMTNotificationRPCLoaded @"MTNotificationRPCLoaded"  //object: objectID and TiVo name
 #define kMTNotificationDownloadRowChanged @"NotificationDownloadRowChanged"  //object: which MTDownload was changed
 #define kMTNotificationSubscriptionChanged @"NotificationSubscriptionChanged"  //object: which MTSubscription was changed
 //#define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
