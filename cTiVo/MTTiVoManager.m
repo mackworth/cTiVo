@@ -10,6 +10,8 @@
 #import "MTAppDelegate.h"
 #import "MTSubscription.h"
 #import "MTSubscriptionList.h"
+#import "MTNetService.h"
+
 //#import "NSNotificationCenter+Threads.h"
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
 #import <Growl/Growl.h>
@@ -38,7 +40,7 @@
 @property (atomic, strong)     NSOperationQueue *opsQueue;
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSDictionary  *> * manualEpisodeData;
 @property (nonatomic, strong) NSDictionary *showsOnDisk;
-
+@property (atomic, strong) NSMutableDictionary <NSString *, MTTiVoShow *> * rpcIDs;
 @end
 
 
@@ -94,7 +96,7 @@ __DDLOGHERE__
 		self.opsQueue.maxConcurrentOperationCount = 4;
 
 		_processingPaused = @(NO);
-		
+        self.rpcIDs = [NSMutableDictionary dictionary];
 		[self loadUserNotifications];
         [self setupMetadataQuery];
  		loadingManualTiVos = NO;
@@ -541,6 +543,7 @@ __DDLOGHERE__
 //    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
+    [defaultCenter addObserver:self selector:@selector(gotRPCData:) name:kMTNotificationRPCLoaded object:nil];
 
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTUpdateIntervalMinutes options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
@@ -1630,6 +1633,17 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     DDLogReport(@"Removing Service: %@",aNetService.name);
 
 }
+#pragma mark - RPC switchboard
+
+-(void) gotRPCData: (NSNotification *) notification {
+    MTRPCData * rpcData =      (MTRPCData *)notification.object;
+    //don't really want to notify all shows when data received
+    [self.rpcIDs[rpcData.rpcID] notifyRPCDataReceived: rpcData];
+}
+
+-(void) registerRPCforShow: (MTTiVoShow *) show  {
+    [self.rpcIDs setObject:show forKey:[NSString stringWithFormat:@"%@|%@",show.tiVo.tiVo.hostName, show.idString] ];
+}
 
 #pragma mark - NetService delegate methods
 
@@ -1644,7 +1658,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     return resultString;
 }
 
-- (void)netServiceDidResolveAddress:(NSNetService *)sender
+- (void)netServiceDidResolveAddress:(MTNetService *)sender
 {
     [sender stop];
 	NSArray * addresses = [sender addresses];
@@ -1712,7 +1726,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	}
 	DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
-    [newTiVo scheduleNextUpdateAfterDelay:0];
+    [newTiVo updateShows:self];
 
 }
 

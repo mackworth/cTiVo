@@ -100,6 +100,7 @@
 -(BOOL)anyTivoActive;
 -(int) nextManualTiVoID;
 -(void)updateTiVoDefaults:(MTTiVo *)tiVo;
+-(void)registerRPCforShow: (MTTiVoShow *) show ;
 
 //----------------Channel Management Methods --------
 -(void) updateChannel: (NSDictionary *) newChannel;

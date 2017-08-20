@@ -12,6 +12,7 @@
 #import "MTFormat.h"
 #import "mp4v2.h"
 #import "DragDropImageView.h"
+#import "MTRPCData.h"
 
 @class MTProgramTableView;
 
@@ -85,8 +86,9 @@
 
 //Art is complicated. It can come from
 //   A) TVDB/TMDB (cached in temp directory in either thumb or regular format),
-//   B) Searching in the download directory, or
-//   C) The user interface (cached in download directory)
+//   B) TiVo
+//   C) Searching in the download directory, or
+//   D) The user interface (cached in download directory)
 
 typedef NS_ENUM(NSUInteger, MTArtStatus) {
     MTArtNew,
@@ -97,7 +99,7 @@ typedef NS_ENUM(NSUInteger, MTArtStatus) {
     MTArtNotAvailable
 };
 
-@property (atomic, assign) MTArtStatus thumbnailStatus;
+@property (atomic, assign) MTArtStatus tvdbThumbnailStatus, tivoThumbnailStatus;
 
 //transitions are
 //   New --> ArtOnDisk if found, or SearchingInfo if not
@@ -177,5 +179,6 @@ typedef enum {
 
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image andResolution:(HDTypes) hdType;
 
+-(void) notifyRPCDataReceived: (MTRPCData *) rpcData;
 
 @end

@@ -7,6 +7,7 @@
 //
 
 #import "MTTiVo.h"
+#import "MTTivoRPC.h"
 #import "MTTiVoShow.h"
 #import "MTDownload.h"
 #import "NSString+HTML.h"
@@ -55,6 +56,8 @@
 
 @property SCNetworkReachabilityRef reachability;
 @property (nonatomic, readonly) NSArray *downloadQueue;
+@property (nonatomic, strong) MTTivoRPC * myRPC;
+
 @end
 
 @implementation MTTiVo
@@ -63,12 +66,12 @@
 
 __DDLOGHERE__
 
-+(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue
++(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue
 {
     return [MTTiVo tiVoWithTiVo:tiVo withOperationQueue:queue manual:NO  withID:0];
 }
 
-+(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID
++(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID
     {
 	return [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue manual:isManual withID:(int)manualTiVoID];
 }
@@ -149,7 +152,7 @@ __DDLOGHERE__
 	
 }
 
--(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID
+-(id) initWithTivo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID
 {
 	self = [self init];
 	if (self) {
@@ -290,10 +293,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             foundMediaKey = YES;
         }
     }
-    if (!foundMediaKey) {  //Need to update defaults
+    if (foundMediaKey) {
+        self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName onPort:1413 andMAK:self.mediaKey];
+    } else {
+        //Need to update defaults
         [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:YES];
     }
-    
+}
+
+-(MTRPCData *) rpcDataForID: (NSString *) idString {
+    return [self.myRPC rpcDataForID:idString];
 }
 
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {
@@ -390,6 +399,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         show.gotTVDBDetails = NO;
         show.gotDetails = NO;
     }
+    [self.myRPC emptyCaches];
 }
 
 #pragma mark - NSXMLParser Delegate Methods

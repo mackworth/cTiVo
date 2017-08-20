@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "MTNetService.h"
+#import "MTRPCData.h"
 
 @protocol MTTableViewProtocol
 
@@ -32,8 +33,8 @@
 @property int manualTiVoID;
 @property (nonatomic) BOOL supportsTransportStream;
 
-+(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
-+(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;
++(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
++(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;
 +(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue;
 
 -(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;
@@ -50,5 +51,6 @@
 -(void)resetAllDetails;
 -(void)getMediaKey;
 -(NSDictionary *)defaultsDictionary;
+-(MTRPCData *) rpcDataForID: (NSString *) idString;
 
 @end

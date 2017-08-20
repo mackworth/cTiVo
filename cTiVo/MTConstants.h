@@ -31,6 +31,7 @@
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"  // optional object: which MTDownload, 
 #define kMTNotificationNetworkChanged @"MTNotificationNetworkChanged"
 #define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"  //object: which MTTiVoShow was loaded
+#define kMTNotificationRPCLoaded @"MTNotificationRPCLoaded"  //object: objectID and TiVo name
 #define kMTNotificationDownloadRowChanged @"NotificationDownloadRowChanged"  //object: which MTDownload was changed
 #define kMTNotificationSubscriptionChanged @"NotificationSubscriptionChanged"  //object: which MTSubscription was changed
 //#define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
@@ -159,6 +160,7 @@
 #define kMTUserDefaultVersion @"UserDefaultVersion"  //have we updated this users defaults (0 = original 2= mencoder transition
 #define kMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information
 #define kMTTrustTVDB @"TrustTVDB"          //Should we override TiVo with TVDB season/episode
+#define kMTRPCMap @"RPCMap"                     //Cache for TiVo RPC information; use " - " hostname afterwards
 #define	kMTQueuePaused @"QueuePaused"			//State of pause for the download queue
 #define kMTTiVos @"TiVos"           //List of defined tiVos both discovered and manually defined.
 #define kMTPreventSleep @"PreventSleep"			//If true this will prevent sleep when possible

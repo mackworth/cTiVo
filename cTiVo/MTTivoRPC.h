@@ -1,0 +1,24 @@
+//
+//  MTTivoRPC.h
+//  TestTivo
+//
+//  Created by Hugh Mackworth on 11/27/16.
+//  Copyright © 2016 Hugh Mackworth. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "MTRPCData.h"
+
+@interface MTTivoRPC : NSObject
+
+-(instancetype) initServer: (NSString *)serverAddress onPort: (int32_t) port andMAK: (NSString *) mediaAccessKey;
+-(instancetype) initServer: (NSString *)serverAddress forUser:(NSString *) user withPassword: (NSString *) password;
+
+-(MTRPCData *) rpcDataForID: (NSString *) idString;
+-(void) emptyCaches;
+
+@end
+
+@interface NSArray ()
+-(NSData *) archiveRPC;
+@end
