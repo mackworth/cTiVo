@@ -144,7 +144,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
     [self getAllShows];
 }
 
--(NSDictionary <NSString *, NSString *> *) _seriesImages {
+-(NSDictionary <NSString *, NSString *> *) seriesImages {
     if (!_seriesImages) {
         _seriesImages = [NSMutableDictionary dictionary];
         for (NSString * key in self.showMap.allKeys){
@@ -730,6 +730,11 @@ static NSArray * imageResponseTemplate = nil;
        @synchronized (self.showMap) {
            episodeInfo = self.showMap[objectId];
            episodeInfo.imageURL  = imageURL;  //if none available, still mark as ""
+           NSString * title= episodeInfo.series;
+           if (!_seriesImages[title]) {
+               _seriesImages[title] = imageURL;
+           }
+
        }
         [self.delegate receivedRPCData:episodeInfo];
     }];
