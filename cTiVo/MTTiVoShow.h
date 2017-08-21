@@ -155,8 +155,9 @@ typedef NS_ENUM(NSUInteger, MTArtStatus) {
 @property (nonatomic, readonly) NSArray <NSString *> *copiesOnDisk;
 
 @property (atomic, assign) BOOL	gotDetails, gotTVDBDetails;
+@property (nonatomic, strong) MTRPCData * rpcData;
 
--(void)getShowDetail;
+-(void) getShowDetail;
 
 -(void) setShowSeriesAndEpisodeFrom:(NSString *) newTitle ;
 -(void) resetTVDBInfo;
@@ -178,7 +179,5 @@ typedef enum {
 -(NSString *) swapKeywordsInString: (NSString *) str withFormat:(NSString *) format;  //exposed for test only
 
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image andResolution:(HDTypes) hdType;
-
--(void) notifyRPCDataReceived: (MTRPCData *) rpcData;
 
 @end

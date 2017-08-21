@@ -47,8 +47,6 @@
 @property (nonatomic, assign) BOOL ignoreSection; //are we skipping this section in XML (esp vActualShowing)
 @property (nonatomic, assign) BOOL manualSeasonInfo;
 
-@property (nonatomic, strong) MTRPCData * myRPCData;
-
 @end
 
 @implementation MTTiVoShow
@@ -289,50 +287,52 @@ __DDLOGHERE__
                 [fileMgr removeItemAtPath:detailFilePath error:nil];
             }
         }
-
     }
     [tiVoManager.tvdb getTheTVDBDetails:self ];
     DDLogDetail(@"GetDetails parsing Finished: %@", self.showTitle);
-    [tiVoManager registerRPCforShow: self];
-    [self handleRPCdata:[self.tiVo rpcDataForID:self.idString]];
-    [self checkManualInfo];
-    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
-
+    self.rpcData = [tiVoManager registerRPCforShow: self]; //sends detailsLoaded notification
+    if (!self.rpcData) {
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
+    }
 }
--(void) notifyRPCDataReceived: (MTRPCData *) rpcData {
-    if (!rpcData) {
-        self.myRPCData = nil;
+
+-(void) setRpcData:(MTRPCData *)rpcData {
+    if (rpcData == _rpcData) return;
+    if (!rpcData ) { //resetting existing info
+        _rpcData = nil;
         self.tivoThumbnailStatus = MTArtNew;
         self.tvdbThumbnailStatus = MTArtNew;
         self.thumbnailFile = nil;
         self.thumbnailImage = nil;
         self.userSpecifiedArtworkFile = nil;
     } else {
-        [self handleRPCdata:rpcData];
-        [self checkManualInfo];
-       [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
+        _rpcData = rpcData;
+        [self checkRPCInfo];
     }
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
 }
+//XXX add checkoriginalInfo and checkTVDBInfo, then checkAllInfoSources to prioritize tvdb or TiVo
 
--(void) handleRPCdata:  (MTRPCData *) rpcData {
-    if (!rpcData) return;
-    BOOL useTiVoData = ![[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB];
-    self.myRPCData = rpcData;
-    if (rpcData.episodeNum != 0 && (self.episode == 0 || useTiVoData )) {
-        self.episode = (int) rpcData.episodeNum;
-        self.season = (int)rpcData.seasonNum;
-    }
-    self.episodeGenre = rpcData.genre;
-    ///XXXNeed to use MPEGFormat here (and generate it
-    if (rpcData.imageURL) {
-        self.tivoThumbnailStatus = MTArtFoundInfo;
-        if (!self.tvdbArtworkLocation || useTiVoData) {
-            self.tvdbArtworkLocation = rpcData.imageURL;
+-(void) checkRPCInfo {
+    MTRPCData * rpcData = self.rpcData;
+    if (rpcData) {
+        BOOL useTiVoData = ![[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB];
+        if (rpcData.episodeNum != 0 && (self.episode == 0 || useTiVoData )) {
+            self.episode = (int) rpcData.episodeNum;
+            self.season = (int)rpcData.seasonNum;
         }
-
-    } else {
-        self.tivoThumbnailStatus = MTArtNotAvailable;
+        self.episodeGenre = self.rpcData.genre;
+        ///XXXNeed to use MPEGFormat here (and generate it
+        if (rpcData.imageURL) {
+            self.tivoThumbnailStatus = MTArtFoundInfo;
+            if (!self.tvdbArtworkLocation || useTiVoData) {
+                self.tvdbArtworkLocation = rpcData.imageURL;
+            }
+        } else {
+            self.tivoThumbnailStatus = MTArtNotAvailable;
+        }
     }
+    [self checkManualInfo];
 }
 
 -(void) checkManualInfo {
@@ -1806,7 +1806,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 if (clearTiVo) {
                     self.tivoThumbnailStatus = MTArtNotAvailable;
                     self.tvdbArtworkLocation = @"";
-                    self.myRPCData.imageURL = @"";
+                    self.rpcData.imageURL = @"";
                 } else if (clearTVDB) {
                    self.tvdbThumbnailStatus = MTArtNotAvailable;
                    self.tvdbArtworkLocation = @"";
@@ -1983,11 +1983,18 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 -(void) getTiVoImage {
+    if (self.tivoThumbnailStatus == MTArtNotAvailable) return;
+    NSString * baseName = (self.isMovie && self.movieYear) ? [NSString stringWithFormat:@"%@_%@", self.seriesTitle, self.movieYear] : self.seriesTitle;
+    NSString * filename = [[NSString pathWithComponents:@[kMTTmpThumbnailsDir, [self cleanBaseFileName:baseName]]] stringByAppendingPathExtension:@"jpg"];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
+        self.tivoThumbnailStatus = MTArtDownloaded;
+        self.thumbnailFile = filename;
+        return;
+    }
     if (self.tivoThumbnailStatus == MTArtFoundInfo){
-        NSString * filename = [[NSString pathWithComponents:@[kMTTmpThumbnailsDir, [self cleanBaseFileName:self.seriesTitle]]]stringByAppendingPathExtension:@"jpg"];
         self.tivoThumbnailStatus = MTArtRetrievingArt;
         NSURLSession *session =[NSURLSession sharedSession];
-        NSURL *url = [NSURL URLWithString:self.myRPCData.imageURL];
+        NSURL *url = [NSURL URLWithString:self.rpcData.imageURL];
         [[session dataTaskWithURL:url completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
             if (error || data.length < 100 ) {
                 DDLogDetail(@"No TiVo imagefile: %@ Error: %@", url, error);
@@ -2017,15 +2024,16 @@ NSString * fourChar(long n, BOOL allowZero) {
                  self.tivoThumbnailStatus == MTArtNotAvailable) {
                if ( self.tvdbThumbnailStatus == MTArtFoundInfo ) {
                    [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:YES]; //may set thumbnail immediately
-                   if (_thumbnailFile.length > 0 ) {
-                       _thumbnailImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailFile];
-                   }
                }
             } else {
                 //get Tivo image if available
                 [self getTiVoImage];
             }
         }
+        if (_thumbnailFile.length > 0 ) {
+            _thumbnailImage = [[NSImage alloc] initWithContentsOfFile:self.thumbnailFile];
+        }
+
     }
     return _thumbnailImage;
 }

@@ -1635,11 +1635,13 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 #pragma mark - RPC switchboard
 
 -(void) receivedRPCData:(MTRPCData *)rpcData {
-    [self.rpcIDs[rpcData.rpcID] notifyRPCDataReceived: rpcData];
+    self.rpcIDs[rpcData.rpcID].rpcData = rpcData;
 }
 
--(void) registerRPCforShow: (MTTiVoShow *) show  {
-    [self.rpcIDs setObject:show forKey:[NSString stringWithFormat:@"%@|%@",show.tiVo.tiVo.hostName, show.idString] ];
+-(MTRPCData *) registerRPCforShow: (MTTiVoShow *) show  {
+    NSString * rpcKey = [NSString stringWithFormat:@"%@|%@",show.tiVo.tiVo.hostName, show.idString];
+    [self.rpcIDs setObject:show forKey:rpcKey ];
+    return [show.tiVo rpcDataForID:show.idString];
 }
 
 #pragma mark - NetService delegate methods
