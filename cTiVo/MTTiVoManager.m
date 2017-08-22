@@ -1717,7 +1717,6 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     
 	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:self.opsQueue];
     newTiVo.supportsTransportStream = [TSN characterAtIndex:0] > '6' || [TSN hasPrefix:@"663"];
-
 	self.tiVoList = [_tiVoList arrayByAddingObject: newTiVo];
 	if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];

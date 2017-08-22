@@ -112,7 +112,7 @@ typedef NS_ENUM(NSUInteger, MTArtStatus) {
                                         * thumbnailFile;
 @property (nonatomic, strong) NSImage   * artWorkImage, //image after loading (triggers download when loaded )
                                         * thumbnailImage;
-
+@property (nonatomic, readonly) BOOL noImageAvailable; //and it'll never arrive
 @property (atomic, strong) NSString *tvdbArtworkLocation;
 
 //--------------------------------------------------------------

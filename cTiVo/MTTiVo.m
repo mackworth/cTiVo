@@ -294,8 +294,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         }
     }
     if (foundMediaKey) {
-        self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName onPort:1413 andMAK:self.mediaKey];
-        self.myRPC.delegate = tiVoManager;
+        if (self.supportsTransportStream) {
+            self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName onPort:1413 andMAK:self.mediaKey];
+            self.myRPC.delegate = tiVoManager;
+        }
     } else {
         //Need to update defaults
         [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:YES];
@@ -304,6 +306,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(MTRPCData *) rpcDataForID: (NSString *) idString {
     return [self.myRPC rpcDataForID:idString];
+}
+-(BOOL) rpcActive {
+    //XXX Need to see if validation failed etc
+    return self.myRPC != nil;
 }
 
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {

@@ -111,6 +111,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
 }
 
 -(instancetype) initServer: (NSString *)serverAddress onPort: (int32_t) port andMAK:(NSString *) mediaAccessKey{
+    return nil;
     if (!serverAddress.length) return nil;
     if ((self = [super init])){
         self.hostName = serverAddress;
@@ -140,6 +141,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
 
 -(void) emptyCaches {
     self.showMap = [NSMutableDictionary dictionaryWithCapacity:self.showMap.count];
+    [[NSUserDefaults standardUserDefaults] setObject:nil forKey:self.defaultsKey ];
     self.seriesImages = [NSMutableDictionary dictionaryWithCapacity:self.seriesImages.count];
     [self getAllShows];
 }

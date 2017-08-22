@@ -15,15 +15,17 @@
 
 -(void) getTheTVDBDetails: (MTTiVoShow *) show;
 
--(void) retrieveArtworkForShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache;
--(void) cacheArtWork: (NSString *) newArtwork forShow: (MTTiVoShow *) show;
+-(void) getTheMovieDBDetails: (MTTiVoShow *) show completion: (void (^)(NSString *))complete;
 
+-(void) retrieveArtworkForShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache;
+-(void) clearArtworkCacheForShow: (MTTiVoShow *) show;
 -(void) reloadTVDBInfo:(MTTiVoShow *) show;
+
 -(void) resetAll;  //destroys all caches
 -(void) saveDefaults; //writes caches to userdefaults
 -(NSString *) stats;
 -(BOOL) isActive;
 
--(NSString *) seriesIDsForShow: (MTTiVoShow *) show;
+-(NSArray <NSString *> *) seriesIDsForShow: (MTTiVoShow *) show;
 
 @end

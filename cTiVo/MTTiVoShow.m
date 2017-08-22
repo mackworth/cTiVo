@@ -288,11 +288,23 @@ __DDLOGHERE__
             }
         }
     }
-    [tiVoManager.tvdb getTheTVDBDetails:self ];
+    if (!self.gotTVDBDetails) {
+        if (self.isMovie) {
+            [tiVoManager.tvdb getTheMovieDBDetails:self completion:^(NSString * cachedArt)  {
+                self.tvdbArtworkLocation = cachedArt;
+                self.gotTVDBDetails = YES;
+                self.tvdbThumbnailStatus = cachedArt.length > 0 ? MTArtFoundInfo : MTArtNotAvailable;
+            }];
+        } else {
+            [tiVoManager.tvdb getTheTVDBDetails:self ];
+        }
+    }
     DDLogDetail(@"GetDetails parsing Finished: %@", self.showTitle);
-    self.rpcData = [tiVoManager registerRPCforShow: self]; //sends detailsLoaded notification
+    self.rpcData = [tiVoManager registerRPCforShow: self];
     if (!self.rpcData) {
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
+    } else {
+        //setRPCData sends detailsLoaded notification
     }
 }
 
@@ -1199,7 +1211,7 @@ NSString * fourChar(long n, BOOL allowZero) {
      objectAtIndex:[components month]-1] :
     @"";
 
-    NSString *TVDBseriesID = [[[tiVoManager.tvdb seriesIDsForShow:self] componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] componentsJoinedByString:@","];
+    NSString *TVDBseriesID = [[tiVoManager.tvdb seriesIDsForShow:self] componentsJoinedByString:@","];
     NSString * guests = [[self.guestStars.string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@","];
     NSString * extraEpisode = @"";
     if (self.episode && self.season &&   //if we have an SxxExx AND either a 2 hr show OR a semicolon in episode title, then it might be a double episode
@@ -1711,6 +1723,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     _thumbnailImage = nil;
     _tvdbThumbnailStatus = MTArtNew;
     _tivoThumbnailStatus = MTArtNew;
+    [tiVoManager.tvdb getTheTVDBDetails:self];
 }
 
 - (NSString *) artworkFileWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
@@ -1810,7 +1823,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 } else if (clearTVDB) {
                    self.tvdbThumbnailStatus = MTArtNotAvailable;
                    self.tvdbArtworkLocation = @"";
-                   [tiVoManager.tvdb cacheArtWork:@"" forShow:self];
+                   [tiVoManager.tvdb clearArtworkCacheForShow:self];
                 }
             } else {
                 //user specified file, so allow TVDB to update
@@ -2021,7 +2034,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         if (!_thumbnailImage) {
             BOOL tvdbPrimary = [[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB];
             if ((tvdbPrimary && self.tvdbThumbnailStatus != MTArtNotAvailable)  ||
-                 self.tivoThumbnailStatus == MTArtNotAvailable) {
+                 self.tivoThumbnailStatus == MTArtNotAvailable || !self.tiVo.rpcActive) {
                if ( self.tvdbThumbnailStatus == MTArtFoundInfo ) {
                    [tiVoManager.tvdb retrieveArtworkForShow:self cacheVersion:YES]; //may set thumbnail immediately
                }
@@ -2037,7 +2050,9 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
     return _thumbnailImage;
 }
-
+-(BOOL) noImageAvailable {
+    return (self.tvdbThumbnailStatus == MTArtNotAvailable  && (self.tivoThumbnailStatus == MTArtNotAvailable || !self.tiVo.rpcActive));
+}
 -(NSImage *) artWorkImage {
     if (!_artWorkImage) {
         if (self.artworkFile) {
