@@ -101,7 +101,7 @@ __DDLOGHERE__
 
 -(void)reloadEpisode:(NSNotification *)notification
 {
-	MTTiVoShow *thisShow = notification.object;
+    MTTiVoShow *thisShow = notification.object;
 	NSInteger row = [self.sortedShows indexOfObject:thisShow];
     if (row != NSNotFound) {
         NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
@@ -315,13 +315,6 @@ __DDLOGHERE__
         }
     }
     return self.imageRowHeight;
-}
-
--(void)prepareContentInRect:(NSRect)rect {
-    NSRect visibleRect = [self visibleRect];
-    CGFloat newHeight = (rect.size.height + visibleRect.size.height)/2.0;
-    NSRect newRect = CGRectMake(rect.origin.x, rect.origin.y, rect.size.width, newHeight);
-    [super prepareContentInRect:newRect];
 }
 
 - (void)tableView:(NSTableView *)tableView didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row

@@ -13,8 +13,8 @@
 
 @interface MTTVDB ()
     @property (atomic, strong) NSString * tvdbToken;
-    @property (nonatomic, strong) NSDate * tvdbTokenExpireTime;
-    @property (nonatomic, strong) NSURLSession * tvdbURLSession;
+    @property (atomic, strong) NSDate * tvdbTokenExpireTime;
+    @property (atomic, strong) NSURLSession * tvdbURLSession;
 
     @property (atomic, strong) NSMutableDictionary *tvdbCache;
         //Remembering info from tvdb (and moviedb).
@@ -34,6 +34,7 @@
 @implementation MTTVDB
 
 __DDLOGHERE__
+@synthesize  tvdbURLSession = _tvdbURLSession;
 
 #pragma mark - TVDB lifetime
 
@@ -76,11 +77,10 @@ __DDLOGHERE__
 -(void) resetAll {
     //Remove TVDB Cache
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:kMTTheTVDBCache];
-
-    self.tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
-    @synchronized(self.theTVDBStatistics) {
-        self.theTVDBStatistics = [NSMutableDictionary dictionary];
-    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    self.tvdbSeriesIdMapping = [NSMutableDictionary dictionaryWithCapacity:self.tvdbSeriesIdMapping.count];
+    self.theTVDBStatistics = [NSMutableDictionary dictionary];
+    self.tvdbCache = [NSMutableDictionary dictionaryWithCapacity:self.tvdbCache.count];
 }
 
 #pragma mark -
@@ -98,26 +98,36 @@ __DDLOGHERE__
 }
 
 -(NSURLSession *) tvdbURLSession {
-    if (!_tvdbURLSession) {
-        DDLogReport(@"Establishing Session");
-
-        NSInteger numTries = 10;
-        while (![self checkToken]  && numTries > 0) {
-            DDLogMajor(@"Still checking for TVDB token");
-            usleep(250000);   //FIX: pausing for a quarter-second up to 2.5 seconds on main queue is not good
-            numTries--;
-        }
-        if (self.tvdbToken) {
-            NSURLSessionConfiguration * config = [NSURLSessionConfiguration defaultSessionConfiguration];
-            config.HTTPAdditionalHeaders = @{@"Accept": @"application/json",
-                                             @"Content-Type": @"application/json",
-                                             @"Authorization": [NSString stringWithFormat:@"Bearer %@",self.tvdbToken]};
-            _tvdbURLSession = [NSURLSession sessionWithConfiguration:config];
-        } else {
-            DDLogReport(@"Cannot establish session with TVDB");
-        }
+    @synchronized (self) {
+         if (_tvdbURLSession) return _tvdbURLSession;
     }
-    return _tvdbURLSession;
+    NSURLSession * session = nil;
+    DDLogReport(@"Establishing Session");
+
+    NSInteger numTries = 10;
+    while (![self checkToken]  && numTries > 0) {
+        DDLogMajor(@"Still checking for TVDB token");
+        usleep(250000);   //FIX: pausing for a quarter-second up to 2.5 seconds on main queue is not good
+        numTries--;
+    }
+    if (self.tvdbToken) {
+        NSURLSessionConfiguration * config = [NSURLSessionConfiguration defaultSessionConfiguration];
+        config.HTTPAdditionalHeaders = @{@"Accept": @"application/json",
+                                         @"Content-Type": @"application/json",
+                                         @"Authorization": [NSString stringWithFormat:@"Bearer %@",self.tvdbToken]};
+        session = [NSURLSession sessionWithConfiguration:config];
+        self.tvdbURLSession = session;
+    } else {
+        DDLogReport(@"Cannot establish session with TVDB");
+    }
+
+    return session;
+}
+
+-(void) setTvdbURLSession:(NSURLSession *)tvdbURLSession {
+    @synchronized (self) {
+        _tvdbURLSession = tvdbURLSession;
+    }
 }
 
 -(BOOL) checkToken {
@@ -659,19 +669,6 @@ __DDLOGHERE__
 #define kMTVDBEpisodeNotFound                 @"Series Found, but Episode Not Found"
 #define kMTVDBEpisodeNotFoundCached           @"Series Found, but Episode Not Found Cached"
 
--(NSString *) seriesIDForReporting: (NSString *) seriesId {
-    NSString *epID = nil;
-    if (seriesId.length > 1) {
-        epID = [seriesId  substringFromIndex:2];
-        if (epID.length < 8) {
-            epID = [NSString stringWithFormat:@"EP00%@",epID];
-        } else {
-            epID = [NSString stringWithFormat:@"EP%@",epID];
-        }
-    }
-    return epID;
-}
-
 -(NSString *) urlsForReporting:(NSArray <NSString *> *) tvdbIDs {
     NSMutableArray * urls = [NSMutableArray arrayWithCapacity:tvdbIDs.count];
     for (NSString * tvdbID in tvdbIDs) {
@@ -795,13 +792,7 @@ __DDLOGHERE__
 #pragma mark - Caching routines
 
 //TVDBCache keys
-#define kTVDBDateKey    @"date" //when was this record created (used to expire old ones)
-#define kTVDBSeriesKey  @"series" //what TVDB SeriesID does this belong to?
-#define kMTVDBMissing   @"unknown"  //used as value for kTVDBKeySeries, if we've tried and not avaiable
-#define kTVDBArtworkKey @"artwork" //URL for artwork at TVDB
-#define kTVDBEpisodeKey @"episode"
-#define kTVDBSeasonKey  @"season"
-#define kTVDBPossibleIDsKey  @"possibleIds" //IDs that we checked to find series
+#define kTVDBDateKey    @"date" //NSDate when this record was created (used to expire old ones)
 
 -(void) cleanCache {
     @synchronized (self.tvdbCache) {    //Clean up old entries
@@ -825,8 +816,9 @@ __DDLOGHERE__
     }
 }
 
--(void) cacheArtWork: (NSString *) newArtwork forShow: (MTTiVoShow *) show {
-    if ( show.episodeID.length== 0) return;  //protective only
+-(NSDictionary *) cacheArtWork: (NSString *) newArtwork forShow: (MTTiVoShow *) show {
+    if ( show.episodeID.length== 0) return nil;  //protective only
+    NSDictionary * returnDict = nil;
     @synchronized (self.tvdbCache) {
        NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:show.episodeID] mutableCopy];
         if (newArtwork) {
@@ -835,12 +827,14 @@ __DDLOGHERE__
             }
             [oldEntry setObject:newArtwork forKey:kTVDBArtworkKey];
         } else {
-            if (!oldEntry) return;
+            if (!oldEntry) return nil;
             [oldEntry removeObjectForKey:kTVDBArtworkKey];
         }
-        [self.tvdbCache setObject:[oldEntry copy]
+        returnDict = [oldEntry copy];
+        [self.tvdbCache setObject:returnDict
                            forKey:show.episodeID];
     }
+    return returnDict;
 }
 
 -(NSString *) cachedArtWorkForShow: (MTTiVoShow *) show {
@@ -850,11 +844,6 @@ __DDLOGHERE__
         return entry[kTVDBArtworkKey];
     }
 }
-
--(void) clearArtworkCacheForShow: (MTTiVoShow *) show {
-    [self cacheArtWork:nil forShow:show];
-}
-
 
 -(void) reloadTVDBInfo:(MTTiVoShow *) show {
     show.gotTVDBDetails = NO;
@@ -867,22 +856,30 @@ __DDLOGHERE__
 }
 
 -(void) cache: (NSDictionary <NSString *, id> *) value forShow: (MTTiVoShow *) show {
+    NSMutableDictionary * newValue = [value mutableCopy];
+
+    newValue[kTVDBDateKey ] = [NSDate date];
+
+    NSString * seriesIDTVDB = value [kTVDBSeriesKey];
+    NSArray <NSString *> * seriesIDs = nil;  //just for reporting
+
+    if (seriesIDTVDB) {
+        seriesIDs = @[seriesIDTVDB];
+    } else {
+        DDLogDetail(@"Missing series info in TVDB data for %@: %@",show.showTitle, value);
+        seriesIDs = [self cachedTVDBSeriesID:show.seriesTitle];
+    }
+    newValue[kTVDBURLsKey] = [self urlsForReporting:seriesIDs];
+
+
     @synchronized (self.tvdbCache) {
-        if (show.isEpisodicShow) {
-            [self.tvdbCache setObject:value forKey:show.episodeID];
-        } else {
-            [self.tvdbCache setObject:value forKey:show.seriesTitle];
-        }
+       [self.tvdbCache setObject:[newValue copy] forKey:show.episodeID];
     }
 }
 
 -(NSDictionary <NSString *, id> *) getCacheForShow: (MTTiVoShow *) show {
     @synchronized (self.tvdbCache) {
-        NSDictionary <NSString *, id> *episodeEntry = [self.tvdbCache objectForKey:show.episodeID];
-        if (!episodeEntry && !show.isEpisodicShow ) {
-            episodeEntry = [self.tvdbCache objectForKey:show.seriesTitle];
-        }
-        return episodeEntry;
+        return [self.tvdbCache objectForKey:show.episodeID];
     }
 }
 
@@ -944,6 +941,7 @@ __DDLOGHERE__
 }
 
 -(void)getEpisodeDetailsForShow: (MTTiVoShow *) show withIDs: (NSArray <NSString *> *) seriesIDs {
+
     //We have found seriesIDs, now get episodeInfo and process for Show
     NSAssert ([NSThread isMainThread], @"getEpisodeDetailsForShow completion running in background");
     __weak typeof(self) weakSelf = self;
@@ -980,7 +978,7 @@ __DDLOGHERE__
                     [self cacheTVDBSeriesID:@[seriesID] forSeries:show.seriesTitle];
 
                     DDLogVerbose(@"Got TVDB episodeInfo for %@: %@", show.showTitle, episodeInfo);
-                    [strongSelf finishTVDBProcessing:show];
+                    [strongSelf finishTVDBProcessing:show ];
               } else {
                   DDLogReport(@"TVDB Failure for %@; missing Season, Episode or id: %@", [self urlsForReporting:@[seriesID]],episodeInfo);
               }
@@ -994,40 +992,37 @@ __DDLOGHERE__
                               kTVDBDateKey:        [NSDate date]
                               } forShow: show];
                 DDLogDetail(@"TVDB doesn't have episodeInfo for %@ on %@ (%@)", show.showTitle, show.originalAirDateNoTime, [self urlsForReporting:seriesIDs]);
-                [strongSelf finishTVDBProcessing:show];
+                [strongSelf finishTVDBProcessing:show ];
             }];
 }
 
--(void) getNonEpisodicArworkforShow: (MTTiVoShow *) show withSeriesID: (NSString *) seriesID {
+-(void) getNonEpisodicArworkforShow: (MTTiVoShow *) show withSeriesID: (NSString *) seriesID  {
     __weak typeof(self) weakSelf = self;
     [self searchSeriesArtwork:show
                       artType:nil
             completionHandler:^(NSString *filename) {
-                typeof(self) strongSelf2 = weakSelf;
+                typeof(self) strongSelf = weakSelf;
 
-                show.tvdbArtworkLocation = filename;
-                [strongSelf2 cache:@{
+                [strongSelf cache:@{
                            kTVDBSeriesKey: seriesID,
                            kTVDBArtworkKey: filename,
                            kTVDBDateKey:[NSDate date]
                            } forShow: show];
-                [strongSelf2 finishTVDBProcessing:show];
+                [strongSelf finishTVDBProcessing:show ];
 
             } failureHandler:^{
-                typeof(self) strongSelf2 = weakSelf;
+                typeof(self) strongSelf = weakSelf;
                 DDLogDetail(@"No artwork for %@ (%@)", show, [self urlsForReporting: @[seriesID]]);
-                show.tvdbArtworkLocation = @"";
-                show.tvdbThumbnailStatus = MTArtNotAvailable;
-                [strongSelf2 cache:@{
+                [strongSelf cache:@{
                            kTVDBSeriesKey: seriesID,
                            kTVDBArtworkKey: @"",
                            kTVDBDateKey:[NSDate date]
                            } forShow: show];
-                [strongSelf2 finishTVDBProcessing:show];
+                [strongSelf finishTVDBProcessing:show ];
             }];
 }
 
--(void) callSeriesIDForShow: (MTTiVoShow *) show withSeriesName: (NSString *) seriesName andSecondCall: (NSString *) secondName {
+-(void) callSeriesIDForShow: (MTTiVoShow *) show withSeriesName: (NSString *) seriesName andSecondCall: (NSString *) secondName  {
     //helper routine to allow secondary call to seriesID without having to duplicateCode
     //secondary call necessary to check both seriesName and seriesName w/o a subtitle (e.g. 24: The Lost Weekend)
     __weak typeof(self) weakSelf = self;
@@ -1056,8 +1051,6 @@ __DDLOGHERE__
                            kTVDBArtworkKey: @"",
                            kTVDBDateKey:[NSDate date]
                            } forShow: show ];
-               show.tvdbArtworkLocation = @"";
-               show.tvdbThumbnailStatus = MTArtNotAvailable;
                NSString *URL = [NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", [show.seriesTitle escapedQueryString]];
                if (show.isEpisodicShow) {
                    [strongSelf addValue: URL   inStatistic: kMTVDBEpisodicSeriesNotFound forShow:show.seriesTitle];
@@ -1111,7 +1104,6 @@ __DDLOGHERE__
         [self finishTVDBProcessing:show];
     } else {
         DDLogDetail(@"Need to get %@", show.showTitle);
-        show.tvdbThumbnailStatus = MTArtSearchingInfo;
         NSArray <NSString *> *seriesIDTVDBs = [self cachedTVDBSeriesID:show.seriesTitle ];
 
         NSArray * splitNameArray = [show.seriesTitle componentsSeparatedByString:@":"];
@@ -1135,89 +1127,16 @@ __DDLOGHERE__
     }
 }
 
--(void)  updateSeason: (int) season andEpisode: (int) episode forShow: (MTTiVoShow *) show {
-    NSAssert ([NSThread isMainThread], @"updateSeason running in background");
-    if (show.manualSeasonInfo) return;
-    show.episodeNumber = [NSString stringWithFormat:@"%d%02d",season, episode];
-    show.episode = episode;
-    show.season = season;
-}
-
 -(void) finishTVDBProcessing: (MTTiVoShow *) show {
     NSAssert ([NSThread isMainThread], @"finishTVDB running in background");
 
-    NSNumber *episodeNum = nil, *seasonNum = nil;
-    NSString *artwork = nil;
-
-    NSDictionary *episodeEntry = [self getCacheForShow:show];
-    if (!episodeEntry) {
+    NSDictionary *tvdbData = [self getCacheForShow:show];
+    if (!tvdbData) {
         DDLogReport(@"Trying to process missing TVDB data for %@",show.showTitle);
-        return;
     }
 
-    if (episodeEntry) { // We already have this information
-        episodeNum = [episodeEntry objectForKey:kTVDBEpisodeKey];
-        if ([episodeNum isKindOfClass:[NSString class]]) {
-            episodeNum = @(((NSString *) episodeNum).integerValue);
-        }
-        seasonNum = [episodeEntry objectForKey:kTVDBSeasonKey];
-        if ([seasonNum isKindOfClass:[NSString class]]) {
-            seasonNum = @(((NSString *) seasonNum).integerValue);
-        }
-        artwork = [episodeEntry objectForKey:kTVDBArtworkKey];
-        NSArray *seriesIDTVDBs = nil;
+    show.tvdbData = tvdbData;
 
-        NSString * seriesIDTVDB = [episodeEntry objectForKey:kTVDBSeriesKey];
-        if (!seriesIDTVDB) {
-            DDLogDetail(@"Missing series info in TVDB data for %@: %@",show.showTitle, episodeEntry);
-            seriesIDTVDBs =[self cachedTVDBSeriesID:show.seriesTitle];
-        }
-
-        show.gotTVDBDetails = YES;
-        if (artwork.length+episodeNum.intValue +episodeNum.intValue > 0) {
-            //got at least one
-            DDLogDetail(@"Got episode %@, season %@ and artwork %@ from %@",episodeNum, seasonNum, artwork, show);
-       } else {
-            NSString * details = [NSString stringWithFormat:@"%@ aired %@ (our  %d/%d) %@ ",[self seriesIDForReporting:show.seriesId ], show.originalAirDateNoTime, show.season, show.episode, [self urlsForReporting:seriesIDTVDBs] ];
-            DDLogDetail(@"No episode info for %@ %@ ",show.showTitle, details);
-        }
-        if (artwork) {
-            show.tvdbArtworkLocation = artwork;
-            if (artwork.length > 0) {
-                show.tvdbThumbnailStatus = MTArtFoundInfo;
-            } else {
-                show.tvdbThumbnailStatus = MTArtNotAvailable;
-           }
-        }
-       if ([episodeNum intValue] > 0) {  //season 0 = specials on theTVDB
-            //special case due to parsing of tivo's season/episode combined string
-            if (show.season > 0 && show.season/10 == [seasonNum intValue]  && [episodeNum intValue] == show.episode + (show.season % 10)*10) {
-                //must have mis-parsed (assumed SSEE, but actually SEEE, so let's fix
-                NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d aired %@ %@ ",seasonNum, episodeNum, show.season, show.episode, show.originalAirDateNoTime,  [self urlsForReporting:seriesIDTVDBs]];
-                DDLogDetail(@"TVDB says we misparsed for %@: %@", show.showTitle, details );
-                [self updateSeason: [seasonNum intValue] andEpisode: [episodeNum intValue]forShow:show];
-            }
-            if (show.episode >0 && show.season > 0) {
-                //both sources have sea/epi; so compare for report
-                if ([episodeNum intValue] != show.episode || [seasonNum intValue] != show.season) {
-                    NSString * details = [NSString stringWithFormat:@"%@/%@ v our %d/%d; %@ aired %@; %@ ",seasonNum, episodeNum, show.season, show.episode, [self seriesIDForReporting:show.seriesId], show.originalAirDateNoTime,  [self urlsForReporting:seriesIDTVDBs]];
-                    DDLogDetail(@"TheTVDB has different Sea/Eps info for %@: %@ %@", show.showTitle, details, [[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB] ? @"updating": @"leaving" );
-
-                    if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDB]) {
-                        //user asked us to prefer TVDB
-                        [self updateSeason: [seasonNum intValue] andEpisode: [episodeNum intValue]forShow:show];
-                    }
-                }
-            } else {
-                [self updateSeason: [seasonNum intValue] andEpisode: [episodeNum intValue] forShow:show];
-                DDLogVerbose(@"Adding TVDB season/episode %d/%d to show %@",show.season, show.episode, show.showTitle);
-            }
-        }
-    } else {
-        show.tvdbThumbnailStatus = MTArtNotAvailable;
-        show.gotTVDBDetails = YES; //never going to find it
-    }
-    [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
 }
 
 -(BOOL) isActive {
@@ -1268,34 +1187,32 @@ __DDLOGHERE__
     }
 }
 
--(void) getTheMovieDBDetails: (MTTiVoShow *) show completion: (void (^)(NSString *))complete {
+-(void) getTheMovieDBDetails: (MTTiVoShow *) show {
     [self incrementStatistic: kMTVDBAll ];
     [self incrementStatistic: kMTVDBMovie ];
 
     NSString * cachedArt = [self cachedArtWorkForShow:show];
     if (cachedArt) {
         [self incrementStatistic: cachedArt.length > 0? kMTVDBMovieFoundCached : kMTVDBMovieNotFoundCached];
-        if (complete) dispatch_async(dispatch_get_main_queue(), ^(void){
-            complete(cachedArt);
-        });
+        [self finishTVDBProcessing:show];
     } else {
         __weak typeof(self) weakSelf = self;
         dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
             typeof(self) strongSelf = weakSelf;
-            [strongSelf getTheMovieDBDetailsBackground:show completion:complete];
+            [strongSelf getTheMovieDBDetailsBackground:show ];
         });
     }
 }
 
--(void) getTheMovieDBDetailsBackground: (MTTiVoShow *) show completion: (void (^)(NSString *))complete {
+-(void) getTheMovieDBDetailsBackground: (MTTiVoShow *) show  {
 
     @synchronized (self.movieDBRateLimitLock) {
+        self.movieDBRateLimitCalls ++;
         DDLogDetail(@"themovieDB %ld, Entering  =  %@ at %@", (long)self.movieDBRateLimitCalls, show, self.movieDBRateLimitEnd);
 
-        self.movieDBRateLimitCalls ++;
         NSTimeInterval delay = [self.movieDBRateLimitEnd timeIntervalSinceNow];
 
-        if (delay > 0 && self.movieDBRateLimitCalls >= 40) {
+        if (delay > 0 && self.movieDBRateLimitCalls >= 39) {
             DDLogDetail(@"For Show: %@, theMovieDB sleeping %f", show, delay);
             usleep (delay*1000000);
             DDLogDetail(@"For Show: %@, theMovieDB awaking", show);
@@ -1379,115 +1296,9 @@ __DDLOGHERE__
     }
 
     [self cacheArtWork:newArtwork forShow:show];
-    if (complete) dispatch_async(dispatch_get_main_queue(), ^(void){
-        complete (newArtwork);
+    dispatch_async(dispatch_get_main_queue(), ^(void){
+        [self finishTVDBProcessing:show];
     });
-}
-
--(void) failureHandler:(MTTiVoShow *) show cache: (BOOL) cache {
-    show.tvdbArtworkLocation = @"";
-    [self clearArtworkCacheForShow:show];
-    if (cache) {
-        show.tvdbThumbnailStatus = MTArtNotAvailable;
-        show.thumbnailFile = nil;
-    } else {
-        show.artworkFile = nil;
-    }
-    [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
-
-}
--(void)retrieveArtworkForShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache {
-
-
-    NSString * base = show.showTitle;
-    base = [base stringByReplacingOccurrencesOfString:@": " withString:@"-"];
-    base = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-    base = [base stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
-    NSString * directory = cache ? kMTTmpThumbnailsDir : kMTTmpDir;
-    NSString * specifier = (show.episode == 0)
-        ? (show.isMovie ? show.movieYear : nil)
-        : show.seasonEpisode;
-    NSString * filename = specifier ? [NSString stringWithFormat:@"%@/%@_%@.jpg",directory, base, specifier]
-                                    : [NSString stringWithFormat:@"%@/%@.jpg",directory, base];
-
-    //download only if we don't have it already
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
-        DDLogDetail (@"Cached artwork found for %@ at %@", show, filename);
-        if (cache) {
-            show.tvdbThumbnailStatus = MTArtDownloaded;
-            show.thumbnailFile = filename;
-        } else {
-            show.artworkFile = filename;
-        }
-   } else {
-       if (show.tvdbThumbnailStatus == MTArtRetrievingArt || show.tvdbThumbnailStatus == MTArtSearchingInfo) {
-           return;  //already in progress
-       }
-       if ( show.tvdbArtworkLocation.length == 0) {
-           return;
-       }
-       NSString *baseUrlString;
-       if (show.isMovie) {
-           if (cache) {
-               baseUrlString = @"http://image.tmdb.org/t/p/w92%@";
-           } else {
-               baseUrlString = @"http://image.tmdb.org/t/p/w780%@";
-           }
-       } else {
-           if (cache) {
-               baseUrlString = @"http://thetvdb.com/banners/_cache/%@";
-           } else {
-               baseUrlString = @"http://thetvdb.com/banners/%@";
-           }
-       }
-       //mark as downloading
-       if (cache) {
-           show.tvdbThumbnailStatus = MTArtRetrievingArt;
-       }
-       NSString *urlString = [NSString stringWithFormat: baseUrlString, show.tvdbArtworkLocation ];
-        DDLogDetail(@"downloading artwork at %@ to %@",urlString, filename);
-        NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
-        [NSURLConnection sendAsynchronousRequest:req queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
-            dispatch_async(dispatch_get_main_queue(), ^(void){
-               if (!data || error ) {
-                    DDLogReport(@"Couldn't get artwork for %@ from %@ , Error: %@", show.seriesTitle, urlString, error.localizedDescription);
-                   [self failureHandler:show cache:cache];
-               } else {
-                    NSInteger statusCode = ((NSHTTPURLResponse *) response).statusCode;
-                    if ( statusCode == 404 || statusCode == 500) {
-                        DDLogDetail(@"No episode artwork for %@ from %@; trying series", show.seriesTitle, urlString);
-                        //try and get artwork for Series instead
-                        show.tvdbThumbnailStatus = MTArtSearchingInfo;
-                        [self searchSeriesArtwork:show
-                                          artType:nil
-                                completionHandler:^(NSString *tvdbFile) {
-                            show.tvdbArtworkLocation = tvdbFile;
-                            show.tvdbThumbnailStatus = MTArtFoundInfo;
-
-                            [self retrieveArtworkForShow:show cacheVersion:cache];
-                        } failureHandler:^{
-                            [self failureHandler:show cache:cache];
-                      } ];
-                    } else {
-                        [[NSFileManager defaultManager] createDirectoryAtPath:[filename stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nil];
-                        if ([data writeToFile:filename atomically:YES]) {
-                            DDLogDetail(@"Saved artwork file for %@ at %@",show.showTitle, filename);
-                            if (cache) {
-                                show.thumbnailFile = filename;
-                                show.tvdbThumbnailStatus = MTArtDownloaded;
-                            } else {
-                                show.artworkFile = filename;
-                            }
-                            [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:show];
-                        } else {
-                            DDLogReport(@"Couldn't write to artwork file %@!", filename);
-                            [self failureHandler:show cache:cache];
-                        }
-                    }
-                }
-            });
-        }];
-    }
 }
 
 @end

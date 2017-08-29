@@ -37,6 +37,7 @@
 
 typedef void (^ReadBlock)(NSDictionary *, BOOL);
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, ReadBlock > * readBlocks;
+@property (nonatomic, strong) NSMutableDictionary <NSNumber *, NSDictionary* > * requests; //debug only
 @end
 
 @implementation MTTivoRPC
@@ -90,7 +91,7 @@ static NSArray * _myCerts = nil;        //across all TiVos; never deallocated
 
             // the certificates array, containing the identity then the root certificate
             NSMutableArray * chain =  CFDictionaryGetValue(identityDict, @"chain");
-            _myCerts = @[(__bridge_transfer id)identityApp, chain[0], chain[1], chain[2]];
+            _myCerts = @[(__bridge_transfer id)identityApp, chain[1], chain[2]];
         }
         //clean up after ourselves; note: we could keep around and reuse if stream fails, but it locks automatically and asks user to unlock
         [[NSFileManager defaultManager] removeItemAtPath:keychainPath error:nil];
@@ -111,7 +112,6 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
 }
 
 -(instancetype) initServer: (NSString *)serverAddress onPort: (int32_t) port andMAK:(NSString *) mediaAccessKey{
-    return nil;
     if (!serverAddress.length) return nil;
     if ((self = [super init])){
         self.hostName = serverAddress;
@@ -127,7 +127,13 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
     self.remainingData = [NSMutableData data];
     self.incomingData = [NSMutableData dataWithCapacity:50000];
     self.readBlocks = [NSMutableDictionary dictionary];
-    NSData * archiveMap = [[NSUserDefaults standardUserDefaults] objectForKey:self.defaultsKey];
+    self.requests =
+#ifndef DEBUG
+            nil;
+#else
+            [NSMutableDictionary dictionary];
+#endif
+  NSData * archiveMap = [[NSUserDefaults standardUserDefaults] objectForKey:self.defaultsKey];
     self.showMap = [NSKeyedUnarchiver unarchiveObjectWithData: archiveMap] ?: [NSMutableDictionary dictionary];
 
     self.authenticationLaunched = NO;
@@ -137,6 +143,10 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receiveWakeNotification:)
                                                                name: NSWorkspaceDidWakeNotification object: NULL];
+[[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(appWillTerminate:) 
+            name:NSApplicationWillTerminateNotification 
+          object:nil];
 }
 
 -(void) emptyCaches {
@@ -144,6 +154,11 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:self.defaultsKey ];
     self.seriesImages = [NSMutableDictionary dictionaryWithCapacity:self.seriesImages.count];
     [self getAllShows];
+}
+
+-(void) saveDefaults {
+   NSData * archive = [NSKeyedArchiver archivedDataWithRootObject:self.showMap];
+   [[NSUserDefaults standardUserDefaults] setObject:archive forKey:self.defaultsKey ];
 }
 
 -(NSDictionary <NSString *, NSString *> *) seriesImages {
@@ -205,7 +220,6 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
  }
 
 -(void) checkStreamStatus {
-    DDLogVerbose(@"checking: iStream: %lu, oStream: %lu",(unsigned long)self.iStream.streamStatus, (unsigned long)self.oStream.streamStatus);
     if (self.iStream.streamStatus == NSStreamStatusNotOpen ||
         self.iStream.streamStatus == NSStreamStatusAtEnd ||
         self.iStream.streamStatus == NSStreamStatusClosed ||
@@ -295,8 +309,11 @@ static NSRegularExpression * isFinalRegex = nil;
                         isFinal = NO;
                     }
                     ReadBlock readBlock = nil;
+                    NSDictionary * readPacket = nil;
                     @synchronized (self.readBlocks) {
                         readBlock = [self.readBlocks objectForKey:@(rpcID)];
+                        readPacket = self.requests[@(rpcID)];
+                        [self.requests removeObjectForKey:@(rpcID)];
                         if (isFinal && readBlock) {
                             [self.readBlocks removeObjectForKey:@(rpcID)];
                             DDLogVerbose(@"Final for %@; %d remaining", @(rpcID), (int)self.readBlocks.count-1);
@@ -305,7 +322,7 @@ static NSRegularExpression * isFinalRegex = nil;
                         }
                     }
                     if ([jsonData[@"type"] isEqualToString:@"error"]) {
-                        DDLogReport(@"Error: error JSON response. %@\n%@", headers, jsonData);
+                        DDLogReport(@"Error: error JSON response. %@\n%@\n%@", headers, readPacket, jsonData);
                         return -packetLength;
                     } else {
                         if (readBlock) {
@@ -468,6 +485,8 @@ static NSRegularExpression * isFinalRegex = nil;
     [request appendData:headerData];
     [request appendData:body];
     [request appendData:[@"\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [self.requests setObject:finalData forKey:@(self.rpcID)];
+    DDLogVerbose(@"RPC Packet: %@\n%@\n", headers, data);
     @synchronized (self.remainingData) {
         [self.remainingData appendData:request];
     }
@@ -531,12 +550,9 @@ static NSRegularExpression * isFinalRegex = nil;
        }];
 }
 
-NSDate * startTime = nil;
 
 -(void) getAllShows {
     DDLogVerbose(@"Calling GetAllShows");
-
-    startTime = [NSDate date];
 
     NSDictionary * data = @{@"flatten": @"true",
                             @"format": @"idSequence",
@@ -562,7 +578,12 @@ NSDate * startTime = nil;
                        if (!self.showMap[objectID]) {
                            [newIDs addObject:objectID];
                        } else {
+                           //have seen before, so don't lookup, but also don't delete
                            [deletedShowSet removeObject:objectID];
+                           if (monitorThisLaunch && !self.showMap[objectID].imageURL) {
+                               //saved last time without having finished checking the art
+                               [newIDs addObject:objectID];
+                           }
                        }
                    }
                    for (NSString * objectID in deletedShowSet) {
@@ -570,13 +591,11 @@ NSDate * startTime = nil;
                    }
                    [self getShowInfoForShows: newIDs];
                    if (!monitorThisLaunch) {
-                       //Send delta information to update show list
+                       //XXX Use delta information to update show list
                    }
                }
-               if (shows.count > 0) {
-                   DDLogVerbose(@"Timer = %0.2f",-[startTime timeIntervalSinceNow]);
-               }
            }
+
        } ];
 
 }
@@ -633,6 +652,9 @@ NSDate * startTime = nil;
            if (responseShows.count != subArray.count) {
                DDLogMajor(@"Invalid # of shows: /n%@ /n%@", responseShows, subArray);
            }
+           NSMutableArray * showsWithoutImage = [NSMutableArray arrayWithCapacity:responseShows.count];
+           NSMutableArray * showsObjectIDs = [NSMutableArray arrayWithCapacity:responseShows.count];
+
            NSUInteger objectIDIndex = 0;
            for (NSDictionary * showInfo in responseShows) {
                NSString * objectId = subArray[objectIDIndex];
@@ -665,22 +687,26 @@ NSDate * startTime = nil;
                    [self.showMap setObject:rpcData forKey:objectId];
                }
                //very annoying that TiVo won't send over image information with the rest of the show info.
-               NSString * imageURL = self.seriesImages[rpcData.series];
+               NSString * imageURL = self.seriesImages[rpcData.series]; //tivo only has series images
                if (imageURL) {
                    rpcData.imageURL = imageURL;
                    [self.delegate receivedRPCData:rpcData];
                } else {
-                   [self getImageFor:showInfo[@"recordingId"] withObjectId: objectId];
+                   NSString * contentId = showInfo[@"contentId"];
+                   if (contentId.length) {
+                        [showsWithoutImage addObject:contentId];
+                        [showsObjectIDs addObject:objectId];
+                    }
                }
                if (showInfo == responseShows.lastObject) {
                    //leave some time for imageURLS, then save defaults.
                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                       NSData * archive = [NSKeyedArchiver archivedDataWithRootObject:self.showMap];
-                       [[NSUserDefaults standardUserDefaults] setObject:archive forKey:self.defaultsKey ];
+                   [self saveDefaults];
                    });
                }
                objectIDIndex++;
            }
+        [self getImageFor:showsWithoutImage withObjectIds: showsObjectIDs];
        }
    } ];
 }
@@ -693,9 +719,10 @@ NSDate * startTime = nil;
 
 static NSArray * imageResponseTemplate = nil;
 
--(void) getImageFor: (NSString *) recordingId withObjectId: (NSString *) objectId {
-
-    DDLogVerbose(@"launching %@", objectId);
+-(void) getImageFor: (NSArray <NSString *> *) contentIds withObjectIds: (NSArray <NSString *> *) objectIds {
+    if (contentIds.count ==0) return;
+    NSAssert(contentIds.count == objectIds.count,@"Invalid ObjectIds");
+    DDLogVerbose(@"launching %@", objectIds);
     if (!imageResponseTemplate) {
         imageResponseTemplate =
         @[@{
@@ -706,39 +733,44 @@ static NSArray * imageResponseTemplate = nil;
 
     NSDictionary * data = @{
                         @"bodyId": self.bodyID,
+                        @"levelOfDetail": @"high",
                         @"responseTemplate": imageResponseTemplate,
-                        @"recordingId": recordingId
+                        @"contentId": contentIds
                         };
 
-    [self sendRpcRequest:@"recordingSearch"
+    [self sendRpcRequest:@"contentSearch"
                  monitor:NO
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
-       DDLogVerbose(@"Got ImageInfo : %@", objectId);
-       NSArray * shows = jsonResponse[@"recording"];
-       NSString * imageURL = @"";
-       if (shows.count > 0) {
-           NSDictionary * showInfo = shows[0];  //only one expected
-           NSInteger maxSize = 0;
-           for (NSDictionary * image in showInfo[@"image"]) {
-               NSInteger imageWidth = ((NSNumber *)image[@"width"]).integerValue;
-               if (imageWidth > maxSize) {
-                   maxSize = imageWidth;
-                   imageURL = image[@"imageUrl"];
-               }
+        NSArray * shows = jsonResponse[@"content"];
+        DDLogVerbose(@"Got ImageInfo : %@", shows);
+        for (NSDictionary * showInfo in shows) {
+            NSString * imageURL = @"";
+            NSInteger maxSize = 0;
+            NSUInteger index = [contentIds indexOfObject: showInfo[@"contentId"]];
+            if (index == NSNotFound) {
+                DDLogReport(@"Could not find %@ in %@",showInfo, contentIds);
+            } else {
+                for (NSDictionary * image in showInfo[@"image"]) {
+                   NSInteger imageWidth = ((NSNumber *)image[@"width"]).integerValue;
+                   if (imageWidth > maxSize) {
+                       maxSize = imageWidth;
+                       imageURL = image[@"imageUrl"];
+                   }
+                }
+                MTRPCData * episodeInfo = nil;
+                DDLogDetail(@"For %@, found TiVo imageInfo %@",objectIds[index], imageURL);
+                @synchronized (self.showMap) {
+                   episodeInfo = self.showMap[objectIds[index]];
+                   episodeInfo.imageURL  = imageURL;  //if none available, still mark as ""
+                   NSString * title= episodeInfo.series;
+                   if (!_seriesImages[title]) {
+                       _seriesImages[title] = imageURL;
+                   }
+                }
+                [self.delegate receivedRPCData:episodeInfo];
            }
        }
-       MTRPCData * episodeInfo = nil;
-       @synchronized (self.showMap) {
-           episodeInfo = self.showMap[objectId];
-           episodeInfo.imageURL  = imageURL;  //if none available, still mark as ""
-           NSString * title= episodeInfo.series;
-           if (!_seriesImages[title]) {
-               _seriesImages[title] = imageURL;
-           }
-
-       }
-        [self.delegate receivedRPCData:episodeInfo];
     }];
 }
 
@@ -746,9 +778,18 @@ static NSArray * imageResponseTemplate = nil;
     [self checkStreamStatus];
 }
 
--(void) dealloc {
+-(void) sharedShutdown {
     [self.deadmanTimer invalidate];
     [self tearDownStreams];
+    [self saveDefaults];
+}
+
+-(void) dealloc {
+    [self sharedShutdown];
+}
+
+-(void) appWillTerminate: (id) notification {
+    [self sharedShutdown];
 }
 
 @end

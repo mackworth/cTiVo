@@ -84,36 +84,21 @@
 
 @property (nonatomic, assign)  time_t showLength;  //length of show in seconds
 
-//Art is complicated. It can come from
-//   A) TVDB/TMDB (cached in temp directory in either thumb or regular format),
-//   B) TiVo
-//   C) Searching in the download directory, or
-//   D) The user interface (cached in download directory)
-
-typedef NS_ENUM(NSUInteger, MTArtStatus) {
-    MTArtNew,
-    MTArtSearchingInfo,
-    MTArtFoundInfo,
-    MTArtRetrievingArt,
-    MTArtDownloaded,
-    MTArtNotAvailable
-};
-
-@property (atomic, assign) MTArtStatus tvdbThumbnailStatus, tivoThumbnailStatus;
-
-//transitions are
-//   New --> ArtOnDisk if found, or SearchingInfo if not
-//   SearchingInfo --> FoundInfo, or ArtNotAvailable if fail
-//   FoundInfo --> RetrievingArt when image needed
-//   RetrievingArt --> ArtOnDisk, or ArtNotAvailable if fail
-//   Any -->ArtNew (User says reset TVDB info)
-
 @property (nonatomic, strong) NSString  * artworkFile,  //location of images on disk, if they exist
                                         * thumbnailFile;
 @property (nonatomic, strong) NSImage   * artWorkImage, //image after loading (triggers download when loaded )
                                         * thumbnailImage;
 @property (nonatomic, readonly) BOOL noImageAvailable; //and it'll never arrive
-@property (atomic, strong) NSString *tvdbArtworkLocation;
+
+#define kTVDBSeriesKey  @"series" //what TVDB SeriesID does this belong to?
+#define kMTVDBMissing   @"unknown"  //used as value for kTVDBKeySeries, if we've tried and not avaiable
+#define kTVDBArtworkKey @"artwork" //URL for artwork at TVDB
+#define kTVDBEpisodeKey @"episode"  //string with episode number
+#define kTVDBSeasonKey  @"season"   //string with season number
+#define kTVDBURLsKey    @"reportURL" //URLs for reporting to user
+#define kTVDBPossibleIDsKey  @"possibleIds" //Array of IDs that we checked to find series
+
+@property (nonatomic, strong) NSDictionary <NSString *, id> * tvdbData;
 
 //--------------------------------------------------------------
 #pragma mark - Calculated properties for display 

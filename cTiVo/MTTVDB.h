@@ -15,11 +15,15 @@
 
 -(void) getTheTVDBDetails: (MTTiVoShow *) show;
 
--(void) getTheMovieDBDetails: (MTTiVoShow *) show completion: (void (^)(NSString *))complete;
+-(void) getTheMovieDBDetails: (MTTiVoShow *) show;
 
--(void) retrieveArtworkForShow: (MTTiVoShow *) show cacheVersion: (BOOL) cache;
--(void) clearArtworkCacheForShow: (MTTiVoShow *) show;
+-(NSDictionary *) cacheArtWork: (NSString *) newArtwork forShow: (MTTiVoShow *) show;
 -(void) reloadTVDBInfo:(MTTiVoShow *) show;
+
+-(void) searchSeriesArtwork:(MTTiVoShow *) show
+                    artType:(NSString *) artType
+          completionHandler: (void(^) (NSString *filename)) completionBlock
+             failureHandler: (void(^) (void)) failureBlock;
 
 -(void) resetAll;  //destroys all caches
 -(void) saveDefaults; //writes caches to userdefaults
