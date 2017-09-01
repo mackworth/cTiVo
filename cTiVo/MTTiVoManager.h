@@ -121,7 +121,7 @@
 
 //---------------Other methods ----------
 -(void) notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle;
-- (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notification;
+- (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky ;
 
 -(NSArray <NSString *> *) copiesOnDiskForShow:(MTTiVoShow *) show;
 -(void) addShow:(MTTiVoShow *) show onDiskAtPath:(NSString *)path;

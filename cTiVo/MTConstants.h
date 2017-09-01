@@ -240,14 +240,6 @@
 #define kMTTiVoNullKey @"00000000"
 
 
-//Growl notification constants (see growlRegDict file)
-#define kMTGrowlBeginDownload @"Begin Download"
-#define kMTGrowlEndDownload   @"End Download"
-#define kMTGrowlCantDownload  @"Can't Download"
-#define kMTGrowlPossibleProblem  @"Possible Problem"
-#define kMTGrowlCommercialDetFailed @"Commercial Detection Failed"
-#define kMTGrowlTivodecodeFailed @"Tivodecode Failed"
-
 //NOT IMPLEMENTED
 #define kMTiTunesIcon @"iTunesIcon"                 // Whether to use video frame (versus cTivo logo) for iTUnes icon
 #define kMTPostDownloadCommand @"PostDownloadCommand" // Example: "# mv \"$file\" ~/.Trash ;";

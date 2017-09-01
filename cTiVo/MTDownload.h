@@ -47,7 +47,7 @@
 -(void) cancel;
 -(void) launchDownload;  //actually launch the download process
 -(void) rescheduleOnMain; //convenience version for use in background threads
--(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle  forNotification: (NSString *) notification;   //download  notification
+-(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle ;   //download  notification
 
 -(BOOL) isSimilarTo: (MTDownload *) testDownload;
 

@@ -798,7 +798,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
               withTitle: title
                subTitle: subTitle
                isSticky: YES
-        forNotification:kMTGrowlPossibleProblem
      ];
 }
 

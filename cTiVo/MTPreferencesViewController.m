@@ -19,5 +19,18 @@
 	[DDLog setAllClassesLogLevelFromUserDefaults: kMTDebugLevel];
 }
 
-
+//XXX Keep TVDB episode Info, but default to TiVo now
+//XXXRemove cTiVo artwork option
+//XXX Artwork Primary Source:
+/*
+ None
+ TiVo Series
+ TVDB Episode
+ TVDB Season
+ TVDB Series
+ */
+//implement Season level and prioritization as above
+//handle delta changes to showlist
+///Test unplugged drive. Pause queue if Tmp not available
+// New executables
 @end

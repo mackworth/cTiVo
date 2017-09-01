@@ -14,20 +14,13 @@
 #import "NSURL+MTURLExtensions.h"
 #import "NSNotificationCenter+Threads.h"
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-#import <Growl/Growl.h>
-#endif
 #import "NSString+Helpers.h"
 
 #include <arpa/inet.h>
 
 
 
-@interface MTTiVoManager ()
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
-    <NSUserNotificationCenterDelegate>  
-#endif
-        {
+@interface MTTiVoManager ()    <NSUserNotificationCenterDelegate>        {
 
     NSNetServiceBrowser *tivoBrowser;
 
@@ -1381,70 +1374,29 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     return [(MTAppDelegate *) [NSApp delegate] checkForExit];
 }
 
-#pragma mark - Growl/Apple Notifications
+#pragma mark - Apple Notifications
 
 -(void) loadUserNotifications {
-
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-	if(NSAppKitVersionNumber >= NSAppKitVersionNumber10_6) {
-		NSBundle *myBundle = [NSBundle mainBundle];
-		NSString *growlPath = [[myBundle privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
-		NSBundle *growlFramework = [NSBundle bundleWithPath:growlPath];
-		
-		if (growlFramework && [growlFramework load]) {
-			// Register ourselves as a Growl delegate
-			
-			NSDictionary *infoDictionary = [growlFramework infoDictionary];
-			DDLogMajor(@"Using Growl.framework %@ (%@)",
-				  [infoDictionary objectForKey:@"CFBundleShortVersionString"],
-				  [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey]);
-			
-			Class GAB = NSClassFromString(@"GrowlApplicationBridge");
-			if([GAB respondsToSelector:@selector(setGrowlDelegate:)]) {
-				[GAB performSelector:@selector(setGrowlDelegate:) withObject:self];
-			}
-		}
-	}
-#else
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
-#endif
 }
-//Note that any new notification types need to be added to constants.h, but especially Growl Registration Ticket.growRegDict
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center
      shouldPresentNotification:(NSUserNotification *)notification {
     return YES;
 }
 -(void) notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle {
-    [self notifyForName: nil withTitle:title subTitle:subTitle isSticky:YES forNotification:kMTGrowlPossibleProblem];
+    [self notifyForName: nil withTitle:title subTitle:subTitle isSticky:YES ];
 }
 
-- (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notification {
+- (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky {
     DDLogReport(@"Notify: %@/n%@", title, subTitle ?: @"");
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-    //Note: when removing in future, remove all kMTGrowlxxx strings as well
-    NSString * subTitleCombo = subTitle.length ? (objName.length ? [NSString stringWithFormat:@"%@: %@", subTitle, objName]
-                                                                 : subTitle)
-                                                : objName;
-	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
-	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
-		[GAB notifyWithTitle: title
-				 description: subTitleCombo
-			notificationName: notification
-					iconData: nil  //use our app logo
-					priority: 0
-					isSticky: sticky
-				clickContext: nil
-		 ];
-#else
     NSUserNotification *userNot = [[NSUserNotification alloc] init ];
     userNot.title = title;
     userNot.subtitle = objName;
     userNot.informativeText = subTitle;
     userNot.soundName = NSUserNotificationDefaultSoundName;
     [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:userNot];
-#endif
 }
 
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget {
