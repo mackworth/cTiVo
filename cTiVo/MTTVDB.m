@@ -845,14 +845,13 @@ __DDLOGHERE__
     }
 }
 
--(void) reloadTVDBInfo:(MTTiVoShow *) show {
-    show.gotTVDBDetails = NO;
+-(void) resetTVDBInfo:(MTTiVoShow *) show {
+    show.tvdbData = nil;
     @synchronized (self.tvdbCache) {
-        [self.tvdbCache removeObjectForKey:show.uniqueID];
+        [self.tvdbCache removeObjectForKey:show.episodeID];
         [self.tvdbCache removeObjectForKey:show.seriesTitle];
         [self cacheTVDBSeriesID:nil forSeries:show.seriesTitle];
     }
-    [show resetTVDBInfo];
 }
 
 -(void) cache: (NSDictionary <NSString *, id> *) value forShow: (MTTiVoShow *) show {
@@ -1022,6 +1021,13 @@ __DDLOGHERE__
             }];
 }
 
+-(void) searchSeriesArtwork:(MTTiVoShow *) show {
+    NSString * seriesID = [self cachedSeriesIDForShow:show];
+    if (seriesID) {
+        [self getNonEpisodicArworkforShow:show withSeriesID:seriesID];
+    }
+}
+
 -(void) callSeriesIDForShow: (MTTiVoShow *) show withSeriesName: (NSString *) seriesName andSecondCall: (NSString *) secondName  {
     //helper routine to allow secondary call to seriesID without having to duplicateCode
     //secondary call necessary to check both seriesName and seriesName w/o a subtitle (e.g. 24: The Lost Weekend)
@@ -1070,7 +1076,7 @@ __DDLOGHERE__
     //3) call finishTVDBProcessing on main thread to augment TiVo's info with theTVDB
     NSAssert ([NSThread isMainThread], @"getTheTVDBDetails running in background");
 
-    if (show.gotTVDBDetails) {
+    if (show.tvdbData) {
         return;
     }
     [self incrementStatistic: kMTVDBAll ];
@@ -1133,6 +1139,7 @@ __DDLOGHERE__
     NSDictionary *tvdbData = [self getCacheForShow:show];
     if (!tvdbData) {
         DDLogReport(@"Trying to process missing TVDB data for %@",show.showTitle);
+        tvdbData = @{};
     }
 
     show.tvdbData = tvdbData;

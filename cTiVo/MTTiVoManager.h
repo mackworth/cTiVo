@@ -30,10 +30,13 @@
 
 @property (nonatomic, strong) NSString *downloadDirectory;
 @property (nonatomic, weak, readonly) NSString *tmpFilesDirectory;
-@property (weak, readonly) NSString *defaultDownloadDirectory;
-@property (weak, readonly) NSArray *savedTiVos;
-@property (weak, readonly) NSArray *savedManualTiVos;
-@property (weak, readonly) NSArray *savedBonjourTiVos;
+@property (nonatomic,readonly) NSString *defaultDownloadDirectory;
+@property (nonatomic,readonly) NSURL *tivoTempDirectory;
+@property (nonatomic,readonly) NSURL *tvdbTempDirectory;
+@property (nonatomic,readonly) NSURL *detailsTempDirectory;
+@property (readonly) NSArray *savedTiVos;
+@property (readonly) NSArray *savedManualTiVos;
+@property (readonly) NSArray *savedBonjourTiVos;
 @property int volatile signalError;
 
 //Other Properties

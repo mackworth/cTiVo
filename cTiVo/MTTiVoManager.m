@@ -11,8 +11,9 @@
 #import "MTSubscription.h"
 #import "MTSubscriptionList.h"
 #import "MTNetService.h"
+#import "NSURL+MTURLExtensions.h"
+#import "NSNotificationCenter+Threads.h"
 
-//#import "NSNotificationCenter+Threads.h"
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
 #import <Growl/Growl.h>
 #endif
@@ -41,6 +42,11 @@
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSDictionary  *> * manualEpisodeData;
 @property (nonatomic, strong) NSDictionary *showsOnDisk;
 @property (atomic, strong) NSMutableDictionary <NSString *, MTTiVoShow *> * rpcIDs;
+@property (nonatomic, strong) NSURL *cacheDirectory;
+@property (nonatomic, strong) NSURL *tivoTempDirectory;
+@property (nonatomic, strong) NSURL *tvdbTempDirectory;
+@property (nonatomic, strong) NSURL *detailsTempDirectory;
+
 @end
 
 
@@ -543,12 +549,13 @@ __DDLOGHERE__
 //    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
-
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTUpdateIntervalMinutes options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+    [defaults addObserver:self forKeyPath:kMTUpdateIntervalMinutes options:NSKeyValueObservingOptionNew context:nil];
+	[defaults addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
+	[defaults addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
+	[defaults addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
+    [defaults addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
+    [defaults addObserver:self forKeyPath:kMTTrustTVDB options:NSKeyValueObservingOptionNew context:nil];
 
 }
 
@@ -815,6 +822,11 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         for (MTTiVo *tiVo in _tiVoList) {
             [tiVo scheduleNextUpdateAfterDelay:-1];
         }
+    } else if ([keyPath isEqualToString:kMTTrustTVDB]){
+        DDLogMajor(@"Changed User TVDB preference to %@", [defs boolForKey:kMTTrustTVDB] ? @"YES": @"NO");
+        for (MTTiVoShow * show in self.tiVoShows) {
+            [show resetSourceInfo];
+        }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
@@ -859,30 +871,31 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	}
 }
 
--(void)resetAllDetails {
+-(void) emptyDirectory: (NSURL *) directoryURL {
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSArray <NSURL *> *files = [fm contentsOfDirectoryAtURL:directoryURL
+                                 includingPropertiesForKeys:@[]
+                                                    options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                      error:nil];
+    for (NSURL *fileURL in files) {
+       [fm removeItemAtURL:fileURL  error:nil];
+    }
+
+}
+-(void)resetAllDetails{
 	DDLogMajor(@"Resetting the caches!");
     [self.tvdb resetAll];
-    NSFileManager *fm = [NSFileManager defaultManager];
 
     //Remove TiVo Detail Cache
-    NSArray *files = [fm contentsOfDirectoryAtPath:kMTTmpDetailsDir error:nil];
-    for (NSString *file in files) {
-        NSString *filePath = [NSString stringWithFormat:@"%@/%@",kMTTmpDetailsDir,file];
-        [fm removeItemAtPath:filePath error:nil];
-    }
-    files = [fm contentsOfDirectoryAtPath:kMTTmpThumbnailsDir error:nil];
-    for (NSString *file in files) {
-        NSString *filePath = [NSString stringWithFormat:@"%@/%@",kMTTmpThumbnailsDir,file];
-        [fm removeItemAtPath:filePath error:nil];
-    }
+    [self emptyDirectory:[self detailsTempDirectory]];
+    [self emptyDirectory:[self tivoTempDirectory]];
+    [self emptyDirectory:[self tvdbTempDirectory]];
 
 	for (MTTiVo *tiVo in _tiVoList) {
         [tiVo resetAllDetails];
 	}
 	[self refreshAllTiVos];
-
 }
-
 
 -(NSMutableArray *) subscribedShows {
     
@@ -1492,6 +1505,57 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 #pragma mark - Handle directory
 
+-(NSURL *) cacheDirectory {
+    if (!_cacheDirectory) {
+    }
+    return _cacheDirectory;
+}
+
+-(NSURL *) checkAndCreateCacheDirectoryForType:(NSString *) type {
+    NSFileManager *fm =[NSFileManager defaultManager];
+
+    NSArray <NSURL *> * caches =  [fm URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
+    if (caches.count == 0) {
+        DDLogReport(@"Could not open main cache directory");
+    } else {
+        NSString* bundleID = [[NSBundle mainBundle] bundleIdentifier];
+
+        NSURL * ctiVoCache = [caches[0] URLByAppendingPathComponent:bundleID];
+        NSURL * tempURL = [ctiVoCache URLByAppendingPathComponent:type];
+        NSError * error = nil;
+        if ([fm createDirectoryAtURL:tempURL
+          withIntermediateDirectories:YES
+                           attributes:nil
+                                error:&error]) {
+            return tempURL;
+        } else {
+            DDLogReport(@"Could not open  cache directory: %@", error.localizedDescription);
+        }
+    }
+    return nil;
+}
+
+-(NSURL *) tivoTempDirectory {
+    if (!_tivoTempDirectory) {
+        _tivoTempDirectory =  [self checkAndCreateCacheDirectoryForType:@"TiVo Images/"];
+    }
+    return _tivoTempDirectory;
+}
+
+-(NSURL *) tvdbTempDirectory {
+    if (!_tvdbTempDirectory) {
+        _tvdbTempDirectory =  [self checkAndCreateCacheDirectoryForType:@"TVDB Images/"];
+    }
+    return _tvdbTempDirectory;
+}
+
+-(NSURL *) detailsTempDirectory {
+    if (!_detailsTempDirectory) {
+        _detailsTempDirectory =  [self checkAndCreateCacheDirectoryForType:@"Details/"];
+    }
+    return _detailsTempDirectory;
+}
+
 -(BOOL) checkDirectory: (NSString *) directory {
 	return ([[NSFileManager defaultManager]	createDirectoryAtPath:[directory stringByExpandingTildeInPath]
 										  withIntermediateDirectories:YES
@@ -1635,7 +1699,9 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 #pragma mark - RPC switchboard
 
 -(void) receivedRPCData:(MTRPCData *)rpcData {
-    self.rpcIDs[rpcData.rpcID].rpcData = rpcData;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.rpcIDs[rpcData.rpcID].rpcData = rpcData;
+    });
 }
 
 -(MTRPCData *) registerRPCforShow: (MTTiVoShow *) show  {

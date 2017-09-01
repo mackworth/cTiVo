@@ -19,15 +19,5 @@
 	[DDLog setAllClassesLogLevelFromUserDefaults: kMTDebugLevel];
 }
 
--(IBAction) changeTVDBPreference:(NSButton *) mySwitch {
-    NSAlert *cacheAlert = [NSAlert alertWithMessageText:@"Changing this preference will reload all information from the TiVos and from TheTVDB.\nDo you want to continue?" defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
-    NSInteger returnButton = [cacheAlert runModal];
-    if (returnButton != 1) {
-        mySwitch.state = !mySwitch.state ;
-        return;
-    } else {
-        [tiVoManager resetAllDetails];
-    }
-}
 
 @end

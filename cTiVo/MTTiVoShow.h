@@ -51,6 +51,7 @@
 
 @property (nonatomic, strong)  NSURL *downloadURL,
                                     *detailURL;
+@property (readonly) NSURL * detailFileURL;
 
 //computed from TiVo's XML
 @property					  int    showID;  //pulled out of URL; unique for this TiVo
@@ -84,7 +85,7 @@
 
 @property (nonatomic, assign)  time_t showLength;  //length of show in seconds
 
-@property (nonatomic, strong) NSString  * artworkFile,  //location of images on disk, if they exist
+@property (nonatomic, strong) NSURL  * artworkFile,  //location of images on disk, if they exist
                                         * thumbnailFile;
 @property (nonatomic, strong) NSImage   * artWorkImage, //image after loading (triggers download when loaded )
                                         * thumbnailImage;
@@ -99,6 +100,7 @@
 #define kTVDBPossibleIDsKey  @"possibleIds" //Array of IDs that we checked to find series
 
 @property (nonatomic, strong) NSDictionary <NSString *, id> * tvdbData;
+@property (nonatomic, strong) MTRPCData * rpcData;
 
 //--------------------------------------------------------------
 #pragma mark - Calculated properties for display 
@@ -139,13 +141,13 @@
 @property (nonatomic, readonly) BOOL isOnDisk;
 @property (nonatomic, readonly) NSArray <NSString *> *copiesOnDisk;
 
-@property (atomic, assign) BOOL	gotDetails, gotTVDBDetails;
-@property (nonatomic, strong) MTRPCData * rpcData;
+@property (atomic, assign) BOOL	gotDetails;
 
 -(void) getShowDetail;
 
 -(void) setShowSeriesAndEpisodeFrom:(NSString *) newTitle ;
--(void) resetTVDBInfo;
+-(void) resetSourceInfo;
+-(void) resetAllSourceInfo;
 
 -(void) playVideo:(NSString *)path;
 -(void) revealInFinder:(NSArray *)paths;

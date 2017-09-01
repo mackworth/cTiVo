@@ -143,8 +143,6 @@
 #define kMTDownloadPasteBoardType @"com.cTiVo.Download"
 #define kMTInputLocationToken @"<<<INPUT>>>"
 #define kMTTmpDir @"/tmp/ctivo/"
-#define kMTTmpDetailsDir @"/tmp/ctivo_details"
-#define kMTTmpThumbnailsDir @"/tmp/ctivo_thumbnails"
 
 //XATTRs
 

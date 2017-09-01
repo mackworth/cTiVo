@@ -16,6 +16,7 @@
 
 -(MTRPCData *) rpcDataForID: (NSString *) idString;
 -(void) emptyCaches;
+-(void) reloadShowInfoForID: (NSString *) showID;
 
 @property (nonatomic, weak) id <MTRPCDelegate> delegate;
 

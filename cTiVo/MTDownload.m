@@ -13,6 +13,8 @@
 #import "NSString+Helpers.h"
 #include "mp4v2.h"
 #include "NSNotificationCenter+Threads.h"
+#include "NSURL+MTURLExtensions.h"
+
 #ifndef DEBUG
 #import "Crashlytics/Crashlytics.h"
 #endif
@@ -1507,7 +1509,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void) writeMetaDataFiles {
 	
-	NSString * detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.show.tiVoName,self.show.showID];
 #ifndef deleteXML
 	if (self.genXMLMetaData.boolValue) {
 		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
@@ -1517,8 +1518,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		}
 	}
 #endif
-	if (self.genTextMetaData.boolValue && [[NSFileManager defaultManager] fileExistsAtPath:detailFilePath]) {
-		NSData * xml = [NSData dataWithContentsOfFile:detailFilePath];
+    NSURL * detailFileURL = self.show.detailFileURL;
+	if (self.genTextMetaData.boolValue && [detailFileURL fileExists]) {
+		NSData * xml = [NSData dataWithContentsOfURL:detailFileURL];
 		NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:xml options:0 error:nil];
 		NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
 		id returnxml = [xmldoc objectByApplyingXSLTAtURL:[NSURL fileURLWithPath:xltTemplate] arguments:nil error:nil	];

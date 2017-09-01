@@ -52,6 +52,7 @@
 -(void)getMediaKey;
 -(NSDictionary *)defaultsDictionary;
 -(MTRPCData *) rpcDataForID: (NSString *) idString;
+-(void) reloadShowInfoForID: (NSString *) showID;
 -(BOOL) rpcActive;
 
 @end

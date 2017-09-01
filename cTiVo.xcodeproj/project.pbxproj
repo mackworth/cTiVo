@@ -281,6 +281,7 @@
 		1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
 		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
 		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
+		1E7BED701F565AD500AB8E5F /* NSURL+MTURLExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */; };
 		1E7F5ADB1701877A003AA96C /* in-progress-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7F5ADA1701877A003AA96C /* in-progress-recording.png */; };
 		1E81D3171BE9477200321370 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		1E964C9C1882768A00C19046 /* copyright@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C931882768900C19046 /* copyright@2x.png */; };
@@ -763,6 +764,8 @@
 		1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTiVo-10.7-Info.plist"; path = "../cTiVo-10.7-Info.plist"; sourceTree = "<group>"; };
 		1E791BD21697C59300E47E84 /* MTSubscription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscription.h; sourceTree = "<group>"; };
 		1E791BD31697C59300E47E84 /* MTSubscription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTSubscription.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		1E7BED6E1F565AD500AB8E5F /* NSURL+MTURLExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+MTURLExtensions.h"; sourceTree = "<group>"; };
+		1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+MTURLExtensions.m"; sourceTree = "<group>"; };
 		1E7F5ADA1701877A003AA96C /* in-progress-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "in-progress-recording.png"; sourceTree = "<group>"; };
 		1E964C931882768900C19046 /* copyright@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "copyright@2x.png"; sourceTree = "<group>"; };
 		1E964C941882768A00C19046 /* deleted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "deleted@2x.png"; sourceTree = "<group>"; };
@@ -1455,6 +1458,8 @@
 				D295CE81175A6AE500D010B8 /* NSString+Helpers.h */,
 				D295CE82175A6AE500D010B8 /* NSString+Helpers.m */,
 				D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */,
+				1E7BED6E1F565AD500AB8E5F /* NSURL+MTURLExtensions.h */,
+				1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */,
 				D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */,
 				1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */,
 				1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */,
@@ -1924,6 +1929,7 @@
 				1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */,
 				1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */,
 				1E3D27E01A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m in Sources */,
+				1E7BED701F565AD500AB8E5F /* NSURL+MTURLExtensions.m in Sources */,
 				1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */,
 				1E3C43C01D79EA1100367866 /* NSArray+Map.m in Sources */,
 				D2001C261704F93F00B75D9C /* MTSrt.m in Sources */,

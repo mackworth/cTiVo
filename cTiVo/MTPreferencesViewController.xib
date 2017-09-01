@@ -145,7 +145,6 @@
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
-                        <action selector="changeTVDBPreference:" target="-2" id="T2K-FN-EU9"/>
                         <binding destination="248" name="value" keyPath="values.TrustTVDB" id="zaF-da-dbV">
                             <dictionary key="options">
                                 <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>

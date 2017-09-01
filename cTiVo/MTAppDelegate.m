@@ -290,8 +290,9 @@ __DDLOGHERE__
 					   IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes );
     
     //Make sure details and thumbnails directories are available
-    [self checkDirectoryAndPurge:kMTTmpDetailsDir];
-    [self checkDirectoryAndPurge:kMTTmpThumbnailsDir];
+    [self checkDirectoryAndPurge:[tiVoManager tivoTempDirectory]];
+    [self checkDirectoryAndPurge:[tiVoManager tvdbTempDirectory]];
+    [self checkDirectoryAndPurge:[tiVoManager detailsTempDirectory]];
 
 
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(saveState) userInfo:nil repeats:YES];
@@ -332,30 +333,40 @@ BOOL wasPaused = NO;
     [self validateTmpDirectory];
 }
 
--(void) checkDirectoryAndPurge: (NSString *) dirName {
+-(void) checkDirectoryAndPurge: (NSURL *) directory {
     NSFileManager *fm = [NSFileManager defaultManager];
-    BOOL isDir;
-    BOOL fileExists = [fm fileExistsAtPath:dirName isDirectory:&isDir];
-    if (fileExists && !isDir) {
-        [fm removeItemAtPath:dirName error:nil];
+
+    NSNumber *isDirectory = nil;
+    NSError * error;
+    BOOL fileExists = [directory getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:nil];
+
+    if (fileExists && (isDirectory && !(isDirectory.boolValue))) {
+        [fm removeItemAtURL:directory error:nil];
         fileExists = NO;
+    } else if (error) {
+        DDLogReport(@"Error in checking directory %@: %@", directory, error.localizedDescription);
+        return;
     }
+
     if (!fileExists) {
-        [fm createDirectoryAtPath:dirName withIntermediateDirectories:YES attributes:nil error:nil];
-    } else {  //Get rid of 'old' file
-        NSArray *files = [fm contentsOfDirectoryAtPath:dirName error:nil];
-        for (NSString *file in files) {
-            NSString *filePath = [NSString stringWithFormat:@"%@/%@",dirName,file];
-            NSDictionary *attrs = [fm attributesOfItemAtPath:filePath error:nil];
-            NSDate *creationDate = [attrs objectForKey: NSFileModificationDate];
-            if ([[NSDate date] timeIntervalSinceDate:creationDate] > 3600 * 24 * 30) {
-                [fm removeItemAtPath:filePath error:nil];
-                DDLogVerbose(@"Removed file %@",filePath);
+        [fm createDirectoryAtURL:directory
+     withIntermediateDirectories:YES
+                      attributes:nil
+                           error:&error];
+    } else {  //Get rid of 'old' files    }
+        NSArray <NSURL *> *files = [fm contentsOfDirectoryAtURL:directory
+                                     includingPropertiesForKeys:@[NSURLContentModificationDateKey]
+                                                        options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                          error:nil];
+        for (NSURL *fileURL in files) {
+            NSDictionary *attributes = [fm attributesOfItemAtPath:fileURL.path error:nil];
+            NSDate * modifiedDate = attributes[NSFileModificationDate];
+            if (modifiedDate && [[NSDate date] timeIntervalSinceDate:modifiedDate] > 3600 * 24 * 30) {
+                [fm removeItemAtURL:fileURL  error:nil];
+                DDLogVerbose(@"Removed file %@",fileURL);
             }
         }
-
     }
-
 }
 
 -(void) promptForNewTmpDirectory:(NSString *) oldTmpDir withMessage: (NSString *) message{

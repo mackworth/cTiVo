@@ -8,6 +8,7 @@
 
 #import "MTTivoRPC.h"
 #import "DDLog.h"
+#import "MTTiVoManager.h" //just for maskMediaKeys
 
 @interface MTTivoRPC () <NSStreamDelegate>
 @property (nonatomic, strong) NSInputStream *iStream;
@@ -316,9 +317,9 @@ static NSRegularExpression * isFinalRegex = nil;
                         [self.requests removeObjectForKey:@(rpcID)];
                         if (isFinal && readBlock) {
                             [self.readBlocks removeObjectForKey:@(rpcID)];
-                            DDLogVerbose(@"Final for %@; %d remaining", @(rpcID), (int)self.readBlocks.count-1);
+                            DDLogDetail(@"Final for %@; %d remaining", @(rpcID), (int)self.readBlocks.count-1);
                         } else {
-                            DDLogVerbose(@"Not final for %@", @(rpcID));
+                            DDLogDetail(@"Not final for %@", @(rpcID));
                         }
                     }
                     if ([jsonData[@"type"] isEqualToString:@"error"]) {
@@ -486,7 +487,7 @@ static NSRegularExpression * isFinalRegex = nil;
     [request appendData:body];
     [request appendData:[@"\n" dataUsingEncoding:NSUTF8StringEncoding]];
     [self.requests setObject:finalData forKey:@(self.rpcID)];
-    DDLogVerbose(@"RPC Packet: %@\n%@\n", headers, data);
+    DDLogVerbose(@"RPC Packet: %@\n%@\n", headers, [data  maskMediaKeys]);
     @synchronized (self.remainingData) {
         [self.remainingData appendData:request];
     }
@@ -520,7 +521,7 @@ static NSRegularExpression * isFinalRegex = nil;
                  monitor:NO
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
-           DDLogVerbose(@"Authenticate: %@",jsonResponse);
+           DDLogVerbose(@"Authenticate from TiVo RPC: %@",jsonResponse);
            if (self.mediaAccessKey && !self.bodyID) {
                [self getBodyID];
            }
@@ -535,7 +536,7 @@ static NSRegularExpression * isFinalRegex = nil;
                  monitor:NO
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
-           DDLogVerbose(@"BodyID: %@",jsonResponse);
+           DDLogVerbose(@"BodyID from TiVo RPC: %@",jsonResponse);
            NSArray * bodyConfigs = jsonResponse[@"bodyConfig"];
            if (bodyConfigs.count > 0) {
                NSDictionary * bodyConfig = (NSDictionary *)bodyConfigs[0];
@@ -564,7 +565,7 @@ static NSRegularExpression * isFinalRegex = nil;
                  monitor:monitorThisLaunch   //in other words, we monitor this only from the first time per session
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
-           DDLogVerbose(@"Got All Shows from TiVo: %@", jsonResponse);
+           DDLogVerbose(@"Got All Shows from TiVo RPC: %@", jsonResponse);
            NSArray * shows = jsonResponse[@"objectIdAndType"];
            if (shows.count > 0) {
                DDLogDetail (@"Got %lu shows from TiVo", shows.count);
@@ -582,7 +583,9 @@ static NSRegularExpression * isFinalRegex = nil;
                            [deletedShowSet removeObject:objectID];
                            if (monitorThisLaunch && !self.showMap[objectID].imageURL) {
                                //saved last time without having finished checking the art
+                               //xxx Could handle this without getting show details first
                                [newIDs addObject:objectID];
+                               //XXX Deal with shows being recorded/changes to done
                            }
                        }
                    }
@@ -595,118 +598,127 @@ static NSRegularExpression * isFinalRegex = nil;
                    }
                }
            }
-
        } ];
-
 }
 
+-(void) reloadShowInfoForID: (NSString *) showID {
+    if (!showID) return;
+    MTRPCData * rpcData = self.showMap[showID];
+    if (rpcData) {
+        if (rpcData.series){
+            [self.seriesImages removeObjectForKey:rpcData.series];
+        }
+        [self.showMap removeObjectForKey:showID];
+    }
+    [self getShowInfoForShows:@[showID]];
+}
 
-//static NSArray * showInfoResponseTemplate = nil;
+static NSArray * showInfoResponseTemplate = nil;
 
 -(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows  {
     if (requestShows.count ==0) return;
     const int idsPerCall = 10;
     const float minTimePerCall = 1.0;
     NSArray <NSString *> *  subArray = nil;
-    if ( idsPerCall < requestShows.count) {
-//    for (NSInteger startPoint = 0; startPoint < shows.count; startPoint = startPoint+idsPerCall) {
+    BOOL lastBatch = idsPerCall >= requestShows.count;
+    if ( lastBatch) {
+        subArray = requestShows;
+    } else {
         subArray = [requestShows subarrayWithRange:NSMakeRange(0, idsPerCall)];
         NSArray <NSString *> * restArray = [requestShows subarrayWithRange:NSMakeRange(idsPerCall, requestShows.count -idsPerCall)];
         [self performSelector:@selector(getShowInfoForShows:) withObject:restArray afterDelay:minTimePerCall];
-    } else {
-        subArray = requestShows;
     }
     DDLogDetail(@"Getting showInfo for %@", subArray);
-//    if (!showInfoResponseTemplate) {
-//        showInfoResponseTemplate =
-//        @[@{
-//              @"type": @"responseTemplate",
-//              @"fieldName": @[@"recording"],
-//              @"typeName": @"recordingList"
-//          },@{
-//              @"type":      @"responseTemplate",
-//              @"fieldName": @[@"seasonNumber",  @"recordingId", @"title", @"mimeType"],
-//              @"fieldInfo": @[
-//                                @{@"maxArity": @[@1],
-//                                  @"fieldName": @[@"category"],
-//                                  @"type": @"responseTemplateFieldInfo"},
-//                                @{@"maxArity": @[@1],
-//                                  @"fieldName": @[@"episodeNum"],
-//                                  @"type": @"responseTemplateFieldInfo"},
-//                      ],
-//              @"typeName":  @"recording"}];
-//    }
-//
+    if (!showInfoResponseTemplate) {
+        showInfoResponseTemplate =
+        @[@{
+              @"type": @"responseTemplate",
+              @"fieldName": @[@"recording"],
+              @"typeName": @"recordingList"
+          },@{
+              @"type":      @"responseTemplate",
+              @"fieldName": @[@"seasonNumber",  @"recordingId", @"contentId", @"title", @"mimeType"],
+              @"fieldInfo": @[
+                                @{@"maxArity": @[@1],
+                                  @"fieldName": @[@"category"],
+                                  @"type": @"responseTemplateFieldInfo"},
+                                @{@"maxArity": @[@1],
+                                  @"fieldName": @[@"episodeNum"],
+                                  @"type": @"responseTemplateFieldInfo"},
+                      ],
+              @"typeName":  @"recording"}];
+    }
+
     NSDictionary * data = @{@"bodyId": self.bodyID,
                             @"levelOfDetail": @"high",
                             @"objectIdAndType": subArray,
-////                            @"imageRuleSet" : imageRuleSet,
-//                           @"responseTemplate": showInfoResponseTemplate
+                            @"responseTemplate": showInfoResponseTemplate
                             };
     [self sendRpcRequest:@"recordingSearch"
              monitor:NO
             withData:data
    completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
        NSArray * responseShows = jsonResponse[@"recording"];
-       if (responseShows.count > 0) {
-           if (responseShows.count != subArray.count) {
-               DDLogMajor(@"Invalid # of shows: /n%@ /n%@", responseShows, subArray);
-           }
-           NSMutableArray * showsWithoutImage = [NSMutableArray arrayWithCapacity:responseShows.count];
-           NSMutableArray * showsObjectIDs = [NSMutableArray arrayWithCapacity:responseShows.count];
+       DDLogVerbose(@"Got ShowInfo from TiVo RPC: %@", jsonResponse);
+       if (responseShows.count == 0) return;
+       if (responseShows.count != subArray.count) {
+           DDLogMajor(@"Invalid # of TivoRPC shows: /n%@ /n%@", responseShows, subArray);
+           return;
+       }
+       NSMutableArray * showsWithoutImage = [NSMutableArray arrayWithCapacity:responseShows.count];
+       NSMutableArray * showsObjectIDs = [NSMutableArray arrayWithCapacity:responseShows.count];
 
-           NSUInteger objectIDIndex = 0;
-           for (NSDictionary * showInfo in responseShows) {
-               NSString * objectId = subArray[objectIDIndex];
-               NSNumber * episodeNum = @0;
-               NSArray * episodeNumbers = showInfo[@"episodeNum"];
-               if (episodeNumbers.count > 0) {
-                   episodeNum = episodeNumbers[0];
-               }
-               NSString * genre = @"";
-               NSArray * categories = showInfo[@"category"];
-               if  (categories.count > 0) {
-                   genre = categories[0][@"label"];
-               }
-               MTRPCData * rpcData = [[MTRPCData alloc] init];
-               rpcData.episodeNum = episodeNum.integerValue;
-               rpcData.seasonNum = ((NSNumber *)showInfo[@"seasonNumber"] ?: @(0)).integerValue;
-               rpcData.genre = genre;
-               rpcData.series = (NSString *)showInfo[@"title"];
-               NSString * mimeType = (NSString *)showInfo[@"mimeType"];
-               if ([@"video/mpg2" isEqualToString:mimeType] ){
-                   rpcData.format = MPEGFormatMP2;
-               } else if ([@"video/mpg4" isEqualToString:mimeType] ){
-                   rpcData.format = MPEGFormatMP4;
-               } else {
-                   rpcData.format = MPEGFormatOther;
-               }
-
-               rpcData.rpcID = [NSString stringWithFormat: @"%@|%@", self.hostName, objectId];
-               @synchronized (self.showMap) {
-                   [self.showMap setObject:rpcData forKey:objectId];
-               }
-               //very annoying that TiVo won't send over image information with the rest of the show info.
-               NSString * imageURL = self.seriesImages[rpcData.series]; //tivo only has series images
-               if (imageURL) {
-                   rpcData.imageURL = imageURL;
-                   [self.delegate receivedRPCData:rpcData];
-               } else {
-                   NSString * contentId = showInfo[@"contentId"];
-                   if (contentId.length) {
-                        [showsWithoutImage addObject:contentId];
-                        [showsObjectIDs addObject:objectId];
-                    }
-               }
-               if (showInfo == responseShows.lastObject) {
-                   //leave some time for imageURLS, then save defaults.
-                   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                   [self saveDefaults];
-                   });
-               }
-               objectIDIndex++;
+       NSUInteger objectIDIndex = 0;
+       for (NSDictionary * showInfo in responseShows) {
+           NSString * objectId = subArray[objectIDIndex];
+           NSNumber * episodeNum = @0;
+           NSArray * episodeNumbers = showInfo[@"episodeNum"];
+           if (episodeNumbers.count > 0) {
+               episodeNum = episodeNumbers[0];
            }
-        [self getImageFor:showsWithoutImage withObjectIds: showsObjectIDs];
+           NSString * genre = @"";
+           NSArray * categories = showInfo[@"category"];
+           if  (categories.count > 0) {
+               genre = categories[0][@"label"];
+           }
+           MTRPCData * rpcData = [[MTRPCData alloc] init];
+           rpcData.episodeNum = episodeNum.integerValue;
+           rpcData.seasonNum = ((NSNumber *)showInfo[@"seasonNumber"] ?: @(0)).integerValue;
+           rpcData.genre = genre;
+           rpcData.series = (NSString *)showInfo[@"title"];
+           NSString * mimeType = (NSString *)showInfo[@"mimeType"];
+           if ([@"video/mpg2" isEqualToString:mimeType] ){
+               rpcData.format = MPEGFormatMP2;
+           } else if ([@"video/mpg4" isEqualToString:mimeType] ){
+               rpcData.format = MPEGFormatMP4;
+           } else {
+               rpcData.format = MPEGFormatOther;
+           }
+
+           rpcData.rpcID = [NSString stringWithFormat: @"%@|%@", self.hostName, objectId];
+           @synchronized (self.showMap) {
+               [self.showMap setObject:rpcData forKey:objectId];
+           }
+           //very annoying that TiVo won't send over image information with the rest of the show info.
+           NSString * imageURL = self.seriesImages[rpcData.series]; //tivo only has series images
+           if (imageURL) {
+               rpcData.imageURL = imageURL;
+               [self.delegate receivedRPCData:rpcData];
+           } else {
+               NSString * contentId = showInfo[@"contentId"];
+               if (contentId.length) {
+                    [showsWithoutImage addObject:contentId];
+                    [showsObjectIDs addObject:objectId];
+                }
+           }
+           objectIDIndex++;
+       }
+       [self getImageFor:showsWithoutImage withObjectIds: showsObjectIDs];
+           //leave some time for imageURLS, then save defaults.
+       if (lastBatch) {
+           dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+               [self saveDefaults];
+           });
        }
    } ];
 }
@@ -743,7 +755,7 @@ static NSArray * imageResponseTemplate = nil;
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
         NSArray * shows = jsonResponse[@"content"];
-        DDLogVerbose(@"Got ImageInfo : %@", shows);
+        DDLogVerbose(@"Got ImageInfo from TiVo RPC: %@", shows);
         for (NSDictionary * showInfo in shows) {
             NSString * imageURL = @"";
             NSInteger maxSize = 0;

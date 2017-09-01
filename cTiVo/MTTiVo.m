@@ -303,10 +303,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:YES];
     }
 }
+-(void) reloadShowInfoForID: (NSString *) showID {
+    [self.myRPC rpcDataForID:showID];
+
+}
 
 -(MTRPCData *) rpcDataForID: (NSString *) idString {
     return [self.myRPC rpcDataForID:idString];
 }
+
 -(BOOL) rpcActive {
     //XXX Need to see if validation failed etc
     return self.myRPC != nil;
@@ -402,11 +407,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)resetAllDetails
 {
-    for (MTTiVoShow *show in _shows) {
-        show.gotTVDBDetails = NO;
-        show.gotDetails = NO;
-    }
     [self.myRPC emptyCaches];
+    self.shows = nil;
 }
 
 #pragma mark - NSXMLParser Delegate Methods
@@ -568,7 +570,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				
 			} else {
 				DDLogDetail(@"Updated show %@", currentShow.showTitle);
-				if (!thisShow.gotDetails || !thisShow.gotTVDBDetails) {
+				if (!thisShow.gotDetails || !thisShow.tvdbData) {
 					NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil];
 					[self.opsQueue addOperation:nextDetail];
 
