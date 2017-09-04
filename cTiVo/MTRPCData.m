@@ -12,16 +12,16 @@
 static NSString * kEpisodeNum  = @"episodeNum";
 static NSString * kSeasonNum  = @"seasonNum";
 static NSString * kGenre  = @"genre";
-static NSString * kFormat  = @"format";
+//static NSString * kFormat  = @"format";
 static NSString * kImageURL  = @"imageURL";
 static NSString * kTitle = @"title";
 
 
 - (instancetype)init {
     self = [super init];
-    if (self) {
-        self.format = MPEGFormatUnknown;
-    }
+//    if (self) {
+//        self.format = MPEGFormatUnknown;
+//    }
     return self;
 }
 
@@ -31,7 +31,7 @@ static NSString * kTitle = @"title";
         _episodeNum = [coder decodeIntegerForKey: kEpisodeNum];
         _seasonNum =  [coder decodeIntegerForKey: kSeasonNum];
         _genre =      [coder decodeObjectForKey: kGenre];
-        _format =     [coder decodeIntegerForKey: kFormat];
+//        _format =     [coder decodeIntegerForKey: kFormat];
         _imageURL =   [coder decodeObjectForKey: kImageURL];
         _series =      [coder decodeObjectForKey: kTitle];
 
@@ -44,13 +44,13 @@ static NSString * kTitle = @"title";
      [coder encodeInteger:_episodeNum forKey:kEpisodeNum];
      [coder encodeInteger:_seasonNum forKey:kSeasonNum];
      [coder encodeObject:_genre forKey:kGenre];
-     [coder encodeInteger:_format forKey:kFormat];
+//     [coder encodeInteger:_format forKey:kFormat];
      [coder encodeObject:_imageURL forKey:kImageURL];
      [coder encodeObject:_series forKey:kTitle];
 }
 
 -(NSString *)description {
-    return [NSString stringWithFormat:@"%@: S%0.2dE%0.2d (%@); Format: %d @ %@", self.series, (int)self.seasonNum, (int)self.episodeNum, self.genre, (int)self.format, self.imageURL];
+    return [NSString stringWithFormat:@"%@: S%0.2dE%0.2d (%@); @ %@", self.series, (int)self.seasonNum, (int)self.episodeNum, self.genre, self.imageURL];
 }
 
 

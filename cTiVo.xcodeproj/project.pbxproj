@@ -99,6 +99,7 @@
 		1E7BED701F565AD500AB8E5F /* NSURL+MTURLExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */; };
 		1E7F5ADB1701877A003AA96C /* in-progress-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7F5ADA1701877A003AA96C /* in-progress-recording.png */; };
 		1E81D3171BE9477200321370 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
+		1E8F6D2A1F5CA4D700830CB4 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E1395941F5928E800FFA4E7 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E964C9C1882768A00C19046 /* copyright@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C931882768900C19046 /* copyright@2x.png */; };
 		1E964C9D1882768A00C19046 /* deleted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C941882768A00C19046 /* deleted@2x.png */; };
 		1E964C9E1882768A00C19046 /* expired-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C951882768A00C19046 /* expired-recording@2x.png */; };
@@ -115,7 +116,6 @@
 		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1E9EA3FD1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */; };
 		1E9EA4011F1D439800F0A2C9 /* RSVerticallyCenteredTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA4001F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.m */; };
-		1EA0FF381DCAA1A400E82971 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EA0FF361DCAA0D900E82971 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EABFF841E185EEC005A9975 /* ccextractor in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EABFF831E185ED5005A9975 /* ccextractor */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9C1C505D3000887240 /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -265,9 +265,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
+				1E8F6D2A1F5CA4D700830CB4 /* HandBrakeCLI in Copy Executables */,
 				1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */,
 				1EABFF841E185EEC005A9975 /* ccextractor in Copy Executables */,
-				1EA0FF381DCAA1A400E82971 /* HandBrakeCLI in Copy Executables */,
 				1E557BCB1CD801350014D85B /* comskip in Copy Executables */,
 				1E557BCC1CD801350014D85B /* ffmpeg in Copy Executables */,
 				1E557BCD1CD801350014D85B /* mencoder in Copy Executables */,
@@ -290,6 +290,7 @@
 /* Begin PBXFileReference section */
 		1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowDrawer.xib; sourceTree = "<group>"; };
 		1E0C5DD8170236B30015C55D /* recent-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "recent-recording.png"; sourceTree = "<group>"; };
+		1E1395941F5928E800FFA4E7 /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
 		1E18145D1708AC1500166E5F /* cTiVo.help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cTiVo.help; sourceTree = "<group>"; };
 		1E18145F1708AF7000166E5F /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cTiVo.icns; sourceTree = "<group>"; };
 		1E186E781D81D97F00AB755D /* libargtable2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libargtable2.0.dylib; sourceTree = "<group>"; };
@@ -422,7 +423,6 @@
 		1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressCell.m; sourceTree = "<group>"; };
 		1E9EA3FF1F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSVerticallyCenteredTextFieldCell.h; sourceTree = "<group>"; };
 		1E9EA4001F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSVerticallyCenteredTextFieldCell.m; sourceTree = "<group>"; };
-		1EA0FF361DCAA0D900E82971 /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = HandBrakeCLI; path = cTiVo/cTivoBinaries/bin/HandBrakeCLI; sourceTree = SOURCE_ROOT; };
 		1EABFF831E185ED5005A9975 /* ccextractor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = ccextractor; path = cTiVo/cTivoBinaries/bin/ccextractor; sourceTree = SOURCE_ROOT; };
 		1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLogFormatter.h; sourceTree = "<group>"; };
 		1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLogFormatter.m; sourceTree = "<group>"; };
@@ -459,7 +459,7 @@
 		D219D5E816A4F88D00C79962 /* MTHelpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTHelpViewController.m; sourceTree = "<group>"; };
 		D219D5F316A503C100C79962 /* EncoderHelpText.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = EncoderHelpText.rtf; sourceTree = "<group>"; };
 		D22BC41D1680DB5E007D699C /* MTTiVoShow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVoShow.h; sourceTree = "<group>"; };
-		D22BC41E1680DB5E007D699C /* MTTiVoShow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoShow.m; sourceTree = "<group>"; };
+		D22BC41E1680DB5E007D699C /* MTTiVoShow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTTiVoShow.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D22E4B1716B76DCD00619A6E /* MTAdvPreferencesViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTAdvPreferencesViewController.xib; sourceTree = "<group>"; };
 		D235BEFF168F52DE00320FA5 /* MTSubscriptionTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionTableView.h; sourceTree = "<group>"; };
 		D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionTableView.m; sourceTree = "<group>"; };
@@ -591,7 +591,7 @@
 			isa = PBXGroup;
 			children = (
 				1EABFF831E185ED5005A9975 /* ccextractor */,
-				1EA0FF361DCAA0D900E82971 /* HandBrakeCLI */,
+				1E1395941F5928E800FFA4E7 /* HandBrakeCLI */,
 				1EB49B9C1C505D3000887240 /* tivodecode-ng */,
 				1E557B891CD127E90014D85B /* comskip */,
 				1E557B8A1CD127E90014D85B /* ffmpeg */,

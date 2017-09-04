@@ -91,14 +91,6 @@
                                         * thumbnailImage;
 @property (nonatomic, readonly) BOOL noImageAvailable; //and it'll never arrive
 
-#define kTVDBSeriesKey  @"series" //what TVDB SeriesID does this belong to?
-#define kMTVDBMissing   @"unknown"  //used as value for kTVDBKeySeries, if we've tried and not avaiable
-#define kTVDBArtworkKey @"artwork" //URL for artwork at TVDB
-#define kTVDBEpisodeKey @"episode"  //string with episode number
-#define kTVDBSeasonKey  @"season"   //string with season number
-#define kTVDBURLsKey    @"reportURL" //URLs for reporting to user
-#define kTVDBPossibleIDsKey  @"possibleIds" //Array of IDs that we checked to find series
-
 @property (nonatomic, strong) NSDictionary <NSString *, id> * tvdbData;
 @property (nonatomic, strong) MTRPCData * rpcData;
 

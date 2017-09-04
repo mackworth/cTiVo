@@ -219,9 +219,9 @@ __DDLOGHERE__
                                           kMTTmpDir,kMTTmpFilesDirectory,
                                           @{},kMTTheTVDBCache,
 										  @"",kMTFileNameFormat,
-										  @YES,kMTGetEpisodeArt,
 										  @NO, kMTiTunesContentIDExperiment,
-										  @NO, kMTTrustTVDB,
+										  @NO, kMTTrustTVDBEpisodes,
+                                          @(MTTiVoSource), KMTPreferredImageSource,
                                           @2, kMTMaxNumEncoders,
                                           @240, kMTMaxProgressDelay,
                                           @"tivodecode-ng", kMTDecodeBinary,
@@ -240,7 +240,6 @@ __DDLOGHERE__
     if ([[[NSUserDefaults standardUserDefaults] stringForKey:kMTDecodeBinary] isEqualToString:@"tivodecode"]) {  //leftover from beta testing; only done once
         [[NSUserDefaults standardUserDefaults] setObject: @"tivodecode-ng" forKey:kMTDecodeBinary];
     }
-
     quitWhenCurrentDownloadsComplete = NO;
 	mediaKeyQueue = [NSMutableArray new];
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];

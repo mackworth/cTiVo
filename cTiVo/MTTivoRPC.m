@@ -613,10 +613,11 @@ static NSRegularExpression * isFinalRegex = nil;
     [self getShowInfoForShows:@[showID]];
 }
 
-static NSArray * showInfoResponseTemplate = nil;
+//static NSArray * showInfoResponseTemplate = nil;
 
 -(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows  {
     if (requestShows.count ==0) return;
+    if (!self.bodyID) return;
     const int idsPerCall = 10;
     const float minTimePerCall = 1.0;
     NSArray <NSString *> *  subArray = nil;
@@ -629,30 +630,30 @@ static NSArray * showInfoResponseTemplate = nil;
         [self performSelector:@selector(getShowInfoForShows:) withObject:restArray afterDelay:minTimePerCall];
     }
     DDLogDetail(@"Getting showInfo for %@", subArray);
-    if (!showInfoResponseTemplate) {
-        showInfoResponseTemplate =
-        @[@{
-              @"type": @"responseTemplate",
-              @"fieldName": @[@"recording"],
-              @"typeName": @"recordingList"
-          },@{
-              @"type":      @"responseTemplate",
-              @"fieldName": @[@"seasonNumber",  @"recordingId", @"contentId", @"title", @"mimeType"],
-              @"fieldInfo": @[
-                                @{@"maxArity": @[@1],
-                                  @"fieldName": @[@"category"],
-                                  @"type": @"responseTemplateFieldInfo"},
-                                @{@"maxArity": @[@1],
-                                  @"fieldName": @[@"episodeNum"],
-                                  @"type": @"responseTemplateFieldInfo"},
-                      ],
-              @"typeName":  @"recording"}];
-    }
-
+    //    if (!showInfoResponseTemplate) {    //DOESN"T WORK for episodeNum??
+//        showInfoResponseTemplate =
+//        @[@{
+//              @"type": @"responseTemplate",
+//              @"fieldName": @[@"recording"],
+//              @"typeName": @"recordingList"
+//          },@{
+//              @"type":      @"responseTemplate",
+//              @"fieldName": @[@"episodeNum", @"seasonNumber",  @"recordingId", @"contentId", @"title"],
+//              @"fieldInfo": @[
+//                                @{@"maxArity": @[@1],
+//                                  @"fieldName": @[@"category"],
+//                                  @"type": @"responseTemplateFieldInfo"},
+//                                @{@"maxArity": @[@1],
+//                                  @"fieldName": @[@"episodeNum"],
+//                                  @"type": @"responseTemplateFieldInfo"},
+//                      ],
+//              @"typeName":  @"recording"}];
+//    }
+//
     NSDictionary * data = @{@"bodyId": self.bodyID,
                             @"levelOfDetail": @"high",
                             @"objectIdAndType": subArray,
-                            @"responseTemplate": showInfoResponseTemplate
+//                          @"responseTemplate": showInfoResponseTemplate
                             };
     [self sendRpcRequest:@"recordingSearch"
              monitor:NO
@@ -686,14 +687,14 @@ static NSArray * showInfoResponseTemplate = nil;
            rpcData.seasonNum = ((NSNumber *)showInfo[@"seasonNumber"] ?: @(0)).integerValue;
            rpcData.genre = genre;
            rpcData.series = (NSString *)showInfo[@"title"];
-           NSString * mimeType = (NSString *)showInfo[@"mimeType"];
-           if ([@"video/mpg2" isEqualToString:mimeType] ){
-               rpcData.format = MPEGFormatMP2;
-           } else if ([@"video/mpg4" isEqualToString:mimeType] ){
-               rpcData.format = MPEGFormatMP4;
-           } else {
-               rpcData.format = MPEGFormatOther;
-           }
+//           NSString * mimeType = (NSString *)showInfo[@"mimeType"];  doesn't work!
+//           if ([@"video/mpg2" isEqualToString:mimeType] ){
+//               rpcData.format = MPEGFormatMP2;
+//           } else if ([@"video/mpg4" isEqualToString:mimeType] ){
+//               rpcData.format = MPEGFormatMP4;
+//           } else {
+//               rpcData.format = MPEGFormatOther;
+//           }
 
            rpcData.rpcID = [NSString stringWithFormat: @"%@|%@", self.hostName, objectId];
            @synchronized (self.showMap) {

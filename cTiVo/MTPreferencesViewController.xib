@@ -13,12 +13,12 @@
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <customView id="1">
-            <rect key="frame" x="0.0" y="0.0" width="528" height="490"/>
+        <customView misplaced="YES" id="1">
+            <rect key="frame" x="0.0" y="0.0" width="541" height="494"/>
             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <button toolTip="Adds video file and metadata to iTunes when processing is complete (per show)" id="7">
-                    <rect key="frame" x="18" y="337" width="217" height="18"/>
+                    <rect key="frame" x="18" y="341" width="217" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Add To iTunes When Complete" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="8">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -29,7 +29,7 @@
                     </connections>
                 </button>
                 <button toolTip="Run comSkip to try to remove commercial.   Prevents Simultaneous Encoding." id="327">
-                    <rect key="frame" x="18" y="417" width="135" height="18"/>
+                    <rect key="frame" x="18" y="421" width="135" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Skip Commercials" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="328">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -40,7 +40,7 @@
                     </connections>
                 </button>
                 <button toolTip="Run comSkip to mark commercials as chapters in video.  Prevents Simultaneous Encoding." id="382">
-                    <rect key="frame" x="18" y="377" width="140" height="18"/>
+                    <rect key="frame" x="18" y="381" width="140" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Mark Commercials" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="383">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -51,7 +51,7 @@
                     </connections>
                 </button>
                 <button toolTip="Disables sleep while queue is processing" id="11">
-                    <rect key="frame" x="275" y="417" width="106" height="18"/>
+                    <rect key="frame" x="275" y="421" width="106" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Disable Sleep" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="12">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -62,7 +62,7 @@
                     </connections>
                 </button>
                 <button toolTip="Display copy-protected shows on TiVo,  (still not accessible)" id="19">
-                    <rect key="frame" x="275" y="377" width="163" height="18"/>
+                    <rect key="frame" x="275" y="381" width="163" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Show Protected Shows" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="20">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -73,7 +73,7 @@
                     </connections>
                 </button>
                 <button toolTip="Include TiVo's Suggestions in list. (Shows recorded because of your interests, not because you requested that show)" id="340">
-                    <rect key="frame" x="275" y="337" width="167" height="18"/>
+                    <rect key="frame" x="275" y="341" width="167" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Show Tivo Suggestions" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="341">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -84,7 +84,7 @@
                     </connections>
                 </button>
                 <button toolTip="Create a separate sub-folder in download folder for each series" id="15">
-                    <rect key="frame" x="275" y="297" width="205" height="18"/>
+                    <rect key="frame" x="275" y="301" width="205" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Create Sub-folders for Series" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="16">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -95,7 +95,7 @@
                     </connections>
                 </button>
                 <button toolTip="After adding to iTunes, have it sync devices to ensure video files available" id="23">
-                    <rect key="frame" x="275" y="177" width="148" height="18"/>
+                    <rect key="frame" x="275" y="181" width="148" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Sync iTunes devices" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="24">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -106,7 +106,7 @@
                     </connections>
                 </button>
                 <button toolTip="Displays warning if user quits while download in process" id="331">
-                    <rect key="frame" x="277" y="257" width="233" height="18"/>
+                    <rect key="frame" x="277" y="261" width="233" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Warn if Quitting during download" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="332">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -120,42 +120,8 @@
                         </binding>
                     </connections>
                 </button>
-                <button toolTip="Retrieves episode-specific artwork from theTVDB.com and adds to video file/iTunes. Fan-generated, so not always available." id="408">
-                    <rect key="frame" x="275" y="57" width="221" height="18"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Get Artwork from theTVDB.com" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="409">
-                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <binding destination="248" name="value" keyPath="values.GetEpisodeArt" id="415">
-                            <dictionary key="options">
-                                <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
-                                <bool key="NSConditionallySetsEnabled" value="NO"/>
-                                <bool key="NSRaisesForNotApplicableKeys" value="NO"/>
-                            </dictionary>
-                        </binding>
-                    </connections>
-                </button>
-                <button toolTip="Allows cTiVo to replace TiVo's episode information with theTVDB's when available" id="Z5N-if-7Oh">
-                    <rect key="frame" x="275" y="17" width="198" height="18"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Prefer theTVDB episode Info" bezelStyle="regularSquare" imagePosition="left" inset="2" id="ZfI-E4-yYK">
-                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <binding destination="248" name="value" keyPath="values.TrustTVDB" id="zaF-da-dbV">
-                            <dictionary key="options">
-                                <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
-                                <bool key="NSConditionallySetsEnabled" value="NO"/>
-                                <bool key="NSRaisesForNotApplicableKeys" value="NO"/>
-                            </dictionary>
-                        </binding>
-                    </connections>
-                </button>
                 <button toolTip="After iTunes copies downloaded file into its folders, delete cTiVo copy" id="374">
-                    <rect key="frame" x="275" y="137" width="248" height="18"/>
+                    <rect key="frame" x="275" y="141" width="248" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Delete file after copying into iTunes" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="375">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -168,30 +134,8 @@
                         <binding destination="248" name="value" keyPath="values.iTunesDelete" id="381"/>
                     </connections>
                 </button>
-                <button toolTip="Use cTiVo logo for video files created (versus a frame from the video). Overriden by series graphic file in download directory." id="400">
-                    <rect key="frame" x="275" y="97" width="207" height="18"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Use cTiVo logo for video files" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="401">
-                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                        <font key="font" metaFont="system"/>
-                        <connections>
-                            <binding destination="248" name="value" keyPath="values.iTunesIcon" id="405">
-                                <dictionary key="options">
-                                    <string key="NSValueTransformerName">NSNegateBoolean</string>
-                                </dictionary>
-                            </binding>
-                        </connections>
-                    </buttonCell>
-                    <connections>
-                        <binding destination="248" name="value" keyPath="values.iTunesIcon" id="407">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">NSNegateBoolean</string>
-                            </dictionary>
-                        </binding>
-                    </connections>
-                </button>
                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="28">
-                    <rect key="frame" x="17" y="453" width="94" height="17"/>
+                    <rect key="frame" x="17" y="457" width="94" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Recordings:" id="29">
                         <font key="font" metaFont="systemBold"/>
@@ -200,7 +144,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="309">
-                    <rect key="frame" x="17" y="176" width="81" height="17"/>
+                    <rect key="frame" x="17" y="180" width="81" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Scheduling:" id="310">
                         <font key="font" metaFont="systemBold"/>
@@ -209,7 +153,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="32">
-                    <rect key="frame" x="274" y="453" width="61" height="17"/>
+                    <rect key="frame" x="274" y="457" width="61" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="General:" id="33">
                         <font key="font" metaFont="systemBold"/>
@@ -218,7 +162,7 @@
                     </textFieldCell>
                 </textField>
                 <button toolTip="Embeds subtitles in MP4 files, and creates a subtitle file (SubRip Title format) for use by video players" id="345">
-                    <rect key="frame" x="18" y="257" width="126" height="18"/>
+                    <rect key="frame" x="18" y="261" width="126" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Handle Captions" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="352">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -229,7 +173,7 @@
                     </connections>
                 </button>
                 <button toolTip="Stores Metadata in a file for use by pyTiVo" id="346">
-                    <rect key="frame" x="18" y="217" width="247" height="18"/>
+                    <rect key="frame" x="18" y="221" width="247" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Export Metadata to pyTiVo .TXT file" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="351">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -240,7 +184,7 @@
                     </connections>
                 </button>
                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="348">
-                    <rect key="frame" x="17" y="296" width="137" height="17"/>
+                    <rect key="frame" x="17" y="300" width="137" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Metadata Handling:" id="349">
                         <font key="font" metaFont="systemBold"/>
@@ -248,10 +192,10 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <popUpButton toolTip="Used to increase log level during debugging sessions" verticalHuggingPriority="750" id="271">
-                    <rect key="frame" x="92" y="52" width="100" height="26"/>
+                <popUpButton toolTip="Used to increase log level during debugging sessions" verticalHuggingPriority="750" id="271" userLabel="Debug level">
+                    <rect key="frame" x="92" y="56" width="100" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <popUpButtonCell key="cell" type="push" title="Major" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="3" imageScaling="proportionallyDown" inset="2" selectedItem="276" id="272">
+                    <popUpButtonCell key="cell" type="push" title="Major" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="3" imageScaling="proportionallyDown" inset="2" selectedItem="276" id="272" userLabel="Debug level menu">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="menu"/>
                         <menu key="menu" title="OtherViews" id="273">
@@ -270,7 +214,7 @@
                     </connections>
                 </popUpButton>
                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="277">
-                    <rect key="frame" x="17" y="55" width="81" height="20"/>
+                    <rect key="frame" x="17" y="59" width="81" height="20"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Log Level:" id="278">
                         <font key="font" metaFont="systemBold"/>
@@ -278,8 +222,17 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="4wM-Zw-G6m">
+                    <rect key="frame" x="277" y="61" width="104" height="20"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Pref Artwork:" id="mel-bp-XiF">
+                        <font key="font" metaFont="systemBold"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
                 <button toolTip="Only download/process shows during the displayed times." id="311">
-                    <rect key="frame" x="18" y="146" width="134" height="18"/>
+                    <rect key="frame" x="18" y="150" width="134" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Scheduling Active" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="312">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -290,7 +243,7 @@
                     </connections>
                 </button>
                 <datePicker verticalHuggingPriority="750" id="313">
-                    <rect key="frame" x="70" y="118" width="104" height="27"/>
+                    <rect key="frame" x="70" y="122" width="104" height="27"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <datePickerCell key="cell" continuous="YES" borderStyle="bezel" alignment="left" id="314">
                         <font key="font" metaFont="system"/>
@@ -306,7 +259,7 @@
                     </connections>
                 </datePicker>
                 <datePicker verticalHuggingPriority="750" id="315">
-                    <rect key="frame" x="70" y="88" width="104" height="27"/>
+                    <rect key="frame" x="70" y="92" width="104" height="27"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <datePickerCell key="cell" continuous="YES" borderStyle="bezel" alignment="left" id="316">
                         <font key="font" metaFont="system"/>
@@ -322,7 +275,7 @@
                     </connections>
                 </datePicker>
                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="317">
-                    <rect key="frame" x="17" y="121" width="34" height="17"/>
+                    <rect key="frame" x="17" y="125" width="34" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Start" id="318">
                         <font key="font" metaFont="system"/>
@@ -331,7 +284,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="319">
-                    <rect key="frame" x="17" y="91" width="28" height="17"/>
+                    <rect key="frame" x="17" y="95" width="28" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="End" id="320">
                         <font key="font" metaFont="system"/>
@@ -340,7 +293,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="398">
-                    <rect key="frame" x="274" y="216" width="127" height="17"/>
+                    <rect key="frame" x="274" y="220" width="127" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="iTunes / theTVDB:" id="399">
                         <font key="font" metaFont="systemBold"/>
@@ -348,7 +301,40 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <button toolTip="Allows cTiVo to replace TiVo's episode information with theTVDB's when available" misplaced="YES" id="Z5N-if-7Oh">
+                    <rect key="frame" x="274" y="101" width="232" height="18"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="check" title="Prefer TVDB episode Info to TiVo's" bezelStyle="regularSquare" imagePosition="left" inset="2" id="ZfI-E4-yYK">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="248" name="value" keyPath="values.TrustTVDBEpisodes" id="aBp-T7-gJZ"/>
+                    </connections>
+                </button>
+                <popUpButton toolTip="Where should cTiVo first look for show artwork? (For UI and for embedding in dowloading files)" verticalHuggingPriority="750" misplaced="YES" id="PBe-uJ-vSv" userLabel="Preferred Artwork">
+                    <rect key="frame" x="391" y="58" width="120" height="26"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <popUpButtonCell key="cell" type="push" title="TVDB Episode" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="2" imageScaling="proportionallyDown" inset="2" selectedItem="NFN-Kw-F85" id="VNJ-Kg-ae7" userLabel="Artwork menu">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="OtherViews" id="Ntd-3G-dnB">
+                            <items>
+                                <menuItem title="None" id="EyR-L9-4C6"/>
+                                <menuItem title="TiVo" tag="1" id="50q-Bl-dWC"/>
+                                <menuItem title="TVDB Episode" state="on" tag="2" id="NFN-Kw-F85"/>
+                                <menuItem title="TVDB Season" tag="3" id="lMp-CG-MnP"/>
+                                <menuItem title="TVDB Series" tag="4" id="aFN-1i-Jjl"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <action selector="setDebugLevel:" target="-2" id="hog-BZ-t4o"/>
+                        <binding destination="248" name="selectedTag" keyPath="values.PrefImageSource" id="sF0-Bt-Lov"/>
+                    </connections>
+                </popUpButton>
             </subviews>
+            <point key="canvasLocation" x="145.5" y="171"/>
         </customView>
         <userDefaultsController representsSharedInstance="YES" id="248"/>
     </objects>

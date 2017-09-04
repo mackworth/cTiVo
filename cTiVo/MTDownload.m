@@ -628,8 +628,7 @@ __DDLOGHERE__
     self.commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version
     DDLogVerbose(@"setting self.commercialFilePath: %@", self.commercialFilePath);
     
-	if (!self.encodeFormat.isTestPS &&
-        [[NSUserDefaults standardUserDefaults] boolForKey:kMTGetEpisodeArt]) {
+	if (!self.encodeFormat.isTestPS) {
         [self.show artWorkImage];  //make sure it's available by time we finish
  	}
     return YES;
@@ -1263,7 +1262,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         self.skipCommercials = NO;
         self.markCommercials = NO;
     }
-	DDLogReport(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@%@; %@",
+	DDLogReport(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@; %@",
 				(int)self.taskFlowType,
 				self,
 				self.encodeFormat.name ,
@@ -1294,9 +1293,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 				[defaults boolForKey:kMTUseMemoryBufferForDownload]?
 					@"" :
 					@" No Memory Buffer;",
-               [defaults boolForKey:kMTGetEpisodeArt] ?
-                    @" " :
-					@" No TVDB art; ",
                [defaults objectForKey:kMTDecodeBinary],
                self.useTransportStream ? @"Transport Stream" : @"Program Stream"
 				);

@@ -304,7 +304,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 -(void) reloadShowInfoForID: (NSString *) showID {
-    [self.myRPC rpcDataForID:showID];
+    [self.myRPC reloadShowInfoForID:showID];
 
 }
 

@@ -548,7 +548,8 @@ __DDLOGHERE__
 	[defaults addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
     [defaults addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
-    [defaults addObserver:self forKeyPath:kMTTrustTVDB options:NSKeyValueObservingOptionNew context:nil];
+    [defaults addObserver:self forKeyPath:kMTTrustTVDBEpisodes options:NSKeyValueObservingOptionNew context:nil];
+    [defaults addObserver:self forKeyPath:KMTPreferredImageSource options:NSKeyValueObservingOptionNew context:nil];
 
 }
 
@@ -815,11 +816,15 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         for (MTTiVo *tiVo in _tiVoList) {
             [tiVo scheduleNextUpdateAfterDelay:-1];
         }
-    } else if ([keyPath isEqualToString:kMTTrustTVDB]){
-        DDLogMajor(@"Changed User TVDB preference to %@", [defs boolForKey:kMTTrustTVDB] ? @"YES": @"NO");
+    } else if ( [keyPath isEqualToString:KMTPreferredImageSource] ){
+        DDLogMajor(@"Changed User TVDB preference to imageSource: %@", [defs objectForKey:KMTPreferredImageSource]);
         for (MTTiVoShow * show in self.tiVoShows) {
             [show resetSourceInfo];
         }
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+    } else if ([keyPath isEqualToString:kMTTrustTVDBEpisodes]) {
+        DDLogMajor(@"Changed User TVDB preference to episodes: %@", [defs objectForKey:kMTTrustTVDBEpisodes] ? @"YES": @"NO" );
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
@@ -851,7 +856,8 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 			}
 		}
     }
-	DDLogDetail(@"Notifying %@",kMTNotificationTiVoListUpdated);[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+	DDLogDetail(@"Notifying %@",kMTNotificationTiVoListUpdated);
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
 }
 
 -(void)refreshAllTiVos

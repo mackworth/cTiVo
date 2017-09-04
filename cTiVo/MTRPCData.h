@@ -8,14 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSUInteger, MPEGFormat) {
-    MPEGFormatUnknown,
-    MPEGFormatMP2,
-    MPEGFormatMP4,
-    MPEGFormatOther,
-
-};
-
+//typedef NS_ENUM(NSUInteger, MPEGFormat) {
+//    MPEGFormatUnknown,
+//    MPEGFormatMP2,
+//    MPEGFormatMP4,
+//    MPEGFormatOther,
+//
+//};
+//
 @interface MTRPCData : NSObject
 
 @property (nonatomic, strong) NSString * rpcID; //format: @"TiVo|objectID"
@@ -23,7 +23,7 @@ typedef NS_ENUM(NSUInteger, MPEGFormat) {
 @property (nonatomic, assign) NSInteger episodeNum;
 @property (nonatomic, assign) NSInteger seasonNum;
 @property (nonatomic, strong) NSString * genre;
-@property (nonatomic, assign) MPEGFormat format;
+//@property (nonatomic, assign) MPEGFormat format;
 @property (nonatomic, strong) NSString * imageURL;
 @property (nonatomic, strong) NSString * series;
 

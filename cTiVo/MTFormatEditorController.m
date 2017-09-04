@@ -112,7 +112,12 @@
 
     handbrake.standardError = pipe;
     handbrake.standardOutput = pipe;
-    [handbrake setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"HandBrakeCLI" ]];
+    NSString * cliLocation = [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"HandBrakeCLI" ];
+    if (!cliLocation) {
+        NSLog(@"HandbrakeCLI is missing?");
+        return nil;
+    }
+    [handbrake setLaunchPath:cliLocation];
     [handbrake setArguments: @[ @"--preset-import-gui", @"--preset-list"]];
     [handbrake launch];
 

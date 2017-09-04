@@ -41,7 +41,7 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
   * See which shows have already been downloaded with Spotlight tracking of shows already downloaded by cTiVo.
   * Filter which shows are seen by keywords or TiVo.
   * Show/Hide copy-protected shows and TiVo suggestions.
-  * Growl or Apple notifications when downloads complete.
+  * Notifications when downloads complete.
 
 ## 2.5.0 features
 
