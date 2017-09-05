@@ -137,9 +137,9 @@
 
 -(void) getShowDetail;
 
--(void) setShowSeriesAndEpisodeFrom:(NSString *) newTitle ;
--(void) resetSourceInfo;
--(void) resetAllSourceInfo;
+-(void) setShowSeriesAndEpisodeFrom:(NSString *) newTitle ; //used only while reloading
+-(void) resetSourceInfo:(BOOL) all;
+-(void) checkAllInfoSources;
 
 -(void) playVideo:(NSString *)path;
 -(void) revealInFinder:(NSArray *)paths;

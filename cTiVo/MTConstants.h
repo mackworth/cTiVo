@@ -156,16 +156,8 @@
 #define kMTUserDefaultVersion @"UserDefaultVersion"  //have we updated this users defaults (0 = original 2= mencoder transition
 #define kMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information
 #define kMTTrustTVDB @"TrustTVDB"          //Should we override TiVo with TVDB season/episode; obsolete
-#define kMTTrustTVDBEpisodes @"TrustTVDBEpisodes"          //Should we override TiVo with TVDB season/episode
-#define KMTPreferredImageSource @"PrefImageSource"
-
-typedef NS_ENUM(NSUInteger, MTImageSource) {
-    MTNoSource = 0,
-    MTTiVoSource,  //must be before all TVDB ones
-    MTTVDBEpisode, //but if this fails, we delete old info and try for TVDBSeries instead
-    MTTVDBSeason,  //ditto
-    MTTVDBSeries,  //also movieDB
-};
+#define kMTTrustTVDBEpisodes @"TrustTVDBEpisodes"     //Should we override TiVo with TVDB season/episode
+#define KMTPreferredImageSource @"PrefImageSource"   //which source does user prefer (see tivoshow.m for MTImageSource enum)
 
 #define kMTRPCMap @"RPCMap"                     //Cache for TiVo RPC information; use " - " hostname afterwards
 #define	kMTQueuePaused @"QueuePaused"			//State of pause for the download queue

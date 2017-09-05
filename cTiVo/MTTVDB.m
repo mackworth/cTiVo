@@ -96,7 +96,7 @@ __DDLOGHERE__
         }
         [self checkToken];
     }];
-    self.tvdbToken = nil; self.tvdbURLSession = nil;
+   self.tvdbURLSession = nil;
 }
 
 -(NSURLSession *) tvdbURLSession {
@@ -132,60 +132,63 @@ __DDLOGHERE__
     }
 }
 
+static BOOL inProgress = NO;
+
 -(BOOL) checkToken {
     @synchronized (self) {
-        static BOOL inProgress = NO;
         if (self.tvdbToken && [self.tvdbTokenExpireTime compare:[NSDate date]] == NSOrderedDescending) {
             return YES;
         } else if (inProgress) {
             return NO;
         } else {
             inProgress = YES;
-            //don't have a token or it's expired
-            self.tvdbToken = nil;
-
-            NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
-            sessionConfiguration.HTTPAdditionalHeaders = @{@"Accept": @"application/json"};
-            sessionConfiguration.HTTPAdditionalHeaders = @{@"Content-Type": @"application/json"};
-
-            NSURLSession *session = [NSURLSession sessionWithConfiguration:sessionConfiguration];
-
-            NSString *tokenURL = @"https://api.thetvdb.com/login";
-            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:tokenURL]];
-            request.HTTPMethod = @"POST";
-            NSString * body = @"{\"apikey\": \"" kMTTheTVDBAPIKey "\"}";
-            request.HTTPBody = [body dataUsingEncoding:NSUTF8StringEncoding];
-            NSDate * tokenExpiration = [NSDate dateWithTimeIntervalSinceNow:24*60*60];
-            NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-                if (!error) {
-                    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-                    if (httpResponse.statusCode == 200){
-                        NSError * jsonError;
-                        NSDictionary *jsonData = [NSJSONSerialization JSONObjectWithData:data options: 0 error: &jsonError];
-                        if (!jsonError || ![jsonData isKindOfClass:[NSDictionary class]]) {
-                            NSString * token = jsonData[@"token"];
-                            if (token.length) {
-                                self.tvdbToken = token;
-                                self.tvdbTokenExpireTime = tokenExpiration;
-                                DDLogDetail(@"Got TVDB token: %@", token);
-                            } else {
-                                DDLogReport(@"NO Token?? %@", jsonData);
-                            }
-                        } else {
-                            DDLogReport(@"TVDB Token JSON parsing Error: %@", data);
-                        }
-                    } else {
-                        DDLogReport(@"TVDB Token HTTP Response Error %ld: %@, %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL );
-                        [self cancelSession];
-                    }
-                }
-            }];
-            DDLogDetail(@"requesting token: %@", tokenURL);
-            [task resume];
-            return NO; //no token available right now
         }
     }
+    //don't have a token or it's expired
+    self.tvdbToken = nil;
+
+    NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    sessionConfiguration.HTTPAdditionalHeaders = @{@"Accept": @"application/json"};
+    sessionConfiguration.HTTPAdditionalHeaders = @{@"Content-Type": @"application/json"};
+
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:sessionConfiguration];
+
+    NSString *tokenURL = @"https://api.thetvdb.com/login";
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:tokenURL]];
+    request.HTTPMethod = @"POST";
+    NSString * body = @"{\"apikey\": \"" kMTTheTVDBAPIKey "\"}";
+    request.HTTPBody = [body dataUsingEncoding:NSUTF8StringEncoding];
+    NSDate * tokenExpiration = [NSDate dateWithTimeIntervalSinceNow:24*60*60];
+    NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (!error) {
+            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+            if (httpResponse.statusCode == 200){
+                NSError * jsonError;
+                NSDictionary *jsonData = [NSJSONSerialization JSONObjectWithData:data options: 0 error: &jsonError];
+                if (!jsonError || ![jsonData isKindOfClass:[NSDictionary class]]) {
+                    NSString * token = jsonData[@"token"];
+                    if (token.length) {
+                        self.tvdbToken = token;
+                        self.tvdbTokenExpireTime = tokenExpiration;
+                        DDLogDetail(@"Got TVDB token: %@", token);
+                    } else {
+                        DDLogReport(@"NO Token?? %@", jsonData);
+                    }
+                } else {
+                    DDLogReport(@"TVDB Token JSON parsing Error: %@", data);
+                }
+            } else {
+                DDLogReport(@"TVDB Token HTTP Response Error %ld: %@, %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL );
+                [self cancelSession];
+            }
+        }
+        inProgress = NO;
+    }];
+    DDLogDetail(@"requesting token: %@", tokenURL);
+    [task resume];
+    return NO; //no token available right now
 }
+
 
 -(void) seriesIDForShow: (NSString *) series
       completionHandler: (void(^) (NSArray <NSString *> *seriesIDs)) completionBlock
@@ -599,7 +602,7 @@ __DDLOGHERE__
                 } else {
                     DDLogReport(@"TVDB Episode JSON parsing Error: %@  (%@) for %@",  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], jsonError.localizedDescription, seriesID );
                 }
-            } else if (httpResponse.statusCode == 404){
+            } else if (httpResponse.statusCode == 404 || httpResponse.statusCode == 500){
                 DDLogDetail(@"TVDB %@ images not found for show %@ in series %@ at %@", artType, show, seriesID, imageURL);
                 if ([artType isEqualToString:@"fanart"]) {
                     //well, if at first you don't ...
@@ -820,6 +823,7 @@ __DDLOGHERE__
 
 -(NSDictionary *) cacheArtWork: (NSString *) newArtwork forKey: (NSString *) key forShow: (MTTiVoShow *) show {
     if ( show.episodeID.length== 0) return nil;  //protective only
+    if (!key) return nil;
     NSDictionary * returnDict = nil;
     @synchronized (self.tvdbCache) {
        NSMutableDictionary * oldEntry = [[self.tvdbCache objectForKey:show.episodeID] mutableCopy];
@@ -925,7 +929,19 @@ __DDLOGHERE__
     NSString * seriesID = [self getCacheForShow:show][kTVDBSeriesKey];
     if (!seriesID) {
         NSArray <NSString *> * ids = [self cachedTVDBSeriesID:show.seriesTitle];
-        if (ids.count > 0) seriesID = ids[0];
+        if (ids.count > 0) {
+            seriesID = ids[0];
+        } else {
+            NSArray * splitNameArray = [show.seriesTitle componentsSeparatedByString:@":"];
+            NSString * splitName = (splitNameArray.count > 1) ? splitNameArray[0] : nil;
+
+            if (splitName) {
+                ids = [self cachedTVDBSeriesID:splitName];
+                if (ids.count > 0) {
+                    seriesID = ids[0];
+                }
+            }
+        }
     }
     return seriesID;
 }
@@ -980,14 +996,7 @@ __DDLOGHERE__
                     [self cacheTVDBSeriesID:@[seriesID] forSeries:show.seriesTitle];
 
                     DDLogVerbose(@"Got TVDB episodeInfo for %@: %@", show.showTitle, episodeInfo);
-                    MTImageSource source = [[NSUserDefaults standardUserDefaults] integerForKey:KMTPreferredImageSource];
-                    if (source == MTTVDBSeason) {
-                        [self addSeasonArtwork:show];
-                    } else if (source == MTTVDBSeries) {
-                        [self addSeriesArtwork:show];
-                    } else {
-                        [strongSelf finishTVDBProcessing:show ];
-                    }
+                    [strongSelf finishTVDBProcessing:show ];
               } else {
                   DDLogReport(@"TVDB Failure for %@; missing Season, Episode or id: %@", [self urlsForReporting:@[seriesID]],episodeInfo);
               }
@@ -997,6 +1006,8 @@ __DDLOGHERE__
                 [strongSelf cache:@{
                               kTVDBSeriesKey:      kMTVDBMissing,  //mark as "TVDB doesn't have this episode"
                               kTVDBEpisodeArtworkKey:     @"",
+                              kTVDBSeasonArtworkKey:     @"",
+                              kTVDBSeriesArtworkKey:     @"",
                               kTVDBPossibleIDsKey: seriesIDs,  //the ones we checked
                               kTVDBDateKey:        [NSDate date]
                               } forShow: show];
@@ -1078,7 +1089,7 @@ __DDLOGHERE__
             }];
 }
 
--(void) callSeriesIDForShow: (MTTiVoShow *) show withSeriesName: (NSString *) seriesName andSecondCall: (NSString *) secondName  {
+-(void) callSeriesIDForShow: (MTTiVoShow *) show withSeriesName: (NSString *) seriesName andSecondCall: (BOOL) secondCall  {
     //helper routine to allow secondary call to seriesID without having to duplicateCode
     //secondary call necessary to check both seriesName and seriesName w/o a subtitle (e.g. 24: The Lost Weekend)
     __weak typeof(self) weakSelf = self;
@@ -1097,14 +1108,21 @@ __DDLOGHERE__
 
        failureHandler:^{
            typeof(self) strongSelf = weakSelf;
-           if (secondName) {
+           NSString * splitName = nil;
+           if (secondCall) {
+               NSArray * splitNameArray = [show.seriesTitle componentsSeparatedByString:@":"];
+               splitName = (splitNameArray.count > 1) ? splitNameArray[0] : nil;
+           }
+           if (splitName) {
                [strongSelf callSeriesIDForShow:show
-                           withSeriesName:secondName
-                           andSecondCall:nil];
+                           withSeriesName:splitName
+                           andSecondCall:NO];
            } else {
                [strongSelf cache:@{
                            kTVDBSeriesKey: kMTVDBMissing,  //mark as "TVDB doesn't have this series"
-                           kTVDBSeriesArtworkKey: @"",
+                           kTVDBEpisodeArtworkKey:     @"",
+                           kTVDBSeasonArtworkKey:     @"",
+                           kTVDBSeriesArtworkKey:     @"",
                            kTVDBDateKey:[NSDate date]
                            } forShow: show ];
                NSString *URL = [NSString stringWithFormat:@"http://thetvdb.com/?string=%@&tab=listseries&function=Search", [show.seriesTitle escapedQueryString]];
@@ -1162,12 +1180,6 @@ __DDLOGHERE__
         DDLogDetail(@"Need to get %@", show.showTitle);
         NSArray <NSString *> *seriesIDTVDBs = [self cachedTVDBSeriesID:show.seriesTitle ];
 
-        NSArray * splitNameArray = [show.seriesTitle componentsSeparatedByString:@":"];
-        NSString * splitName = (splitNameArray.count > 1) ? splitNameArray[0] : nil;
-
-        if (!seriesIDTVDBs.count && splitName) {
-            seriesIDTVDBs = [self cachedTVDBSeriesID:splitName];
-        }
         if (seriesIDTVDBs.count) {
             // already have series ID, but not this episode info
             if (show.isEpisodicShow) {
@@ -1178,7 +1190,7 @@ __DDLOGHERE__
             }
         } else {
             //first get seriesIDs, then Episode Info
-            [self callSeriesIDForShow: show withSeriesName:show.seriesTitle andSecondCall:splitName];
+            [self callSeriesIDForShow: show withSeriesName:show.seriesTitle andSecondCall:YES];
         }
     }
 }

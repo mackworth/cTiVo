@@ -315,16 +315,16 @@
                 <popUpButton toolTip="Where should cTiVo first look for show artwork? (For UI and for embedding in dowloading files)" verticalHuggingPriority="750" misplaced="YES" id="PBe-uJ-vSv" userLabel="Preferred Artwork">
                     <rect key="frame" x="391" y="58" width="120" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <popUpButtonCell key="cell" type="push" title="TVDB Episode" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="2" imageScaling="proportionallyDown" inset="2" selectedItem="NFN-Kw-F85" id="VNJ-Kg-ae7" userLabel="Artwork menu">
+                    <popUpButtonCell key="cell" type="push" title="TiVo" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="1" imageScaling="proportionallyDown" inset="2" selectedItem="50q-Bl-dWC" id="VNJ-Kg-ae7" userLabel="Artwork menu">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="menu"/>
                         <menu key="menu" title="OtherViews" id="Ntd-3G-dnB">
                             <items>
-                                <menuItem title="None" id="EyR-L9-4C6"/>
-                                <menuItem title="TiVo" tag="1" id="50q-Bl-dWC"/>
-                                <menuItem title="TVDB Episode" state="on" tag="2" id="NFN-Kw-F85"/>
+                                <menuItem title="TiVo" state="on" tag="1" id="50q-Bl-dWC"/>
+                                <menuItem title="TVDB Episode" tag="2" id="NFN-Kw-F85"/>
                                 <menuItem title="TVDB Season" tag="3" id="lMp-CG-MnP"/>
                                 <menuItem title="TVDB Series" tag="4" id="aFN-1i-Jjl"/>
+                                <menuItem title="None" tag="5" id="EyR-L9-4C6"/>
                             </items>
                         </menu>
                     </popUpButtonCell>

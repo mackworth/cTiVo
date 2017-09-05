@@ -19,6 +19,16 @@
 #import "NSString+Helpers.h"
 #import "NSURL+MTURLExtensions.h"
 
+typedef NS_ENUM(NSUInteger, MTImageSource) {
+    //note this enum is referred to in Preference XIB and AppDelegate defaults
+    MTSearchingSource = 0, //When we haven't found one yet, or waiting for rpc or tvdb
+    MTTiVoSource,  //must be before all TVDB ones
+    MTTVDBEpisode, //but if this fails, we delete old info and try for TVDBSeries instead
+    MTTVDBSeason,  //ditto
+    MTTVDBSeries,  //also movieDB
+    MTNoSource, // no source is possible
+};
+
 @interface MTTiVoShow () {
 	
 	NSMutableString *elementString;
@@ -47,35 +57,9 @@
 
 @property (nonatomic, assign) BOOL ignoreSection; //are we skipping this section in XML (esp vActualShowing)
 
-//Art is complicated. It can come from
-//   A) TVDB/TMDB (cached in temp directory in either thumb or regular format),
-//   B) TiVo
-//   C) Searching in the download directory, or
-//   D) The user interface (cached in download directory)
+@property (atomic, assign) BOOL imageInProgress;  //true if we're downloading info OR artwork.
 
-typedef NS_ENUM(NSUInteger, MTArtStatus) {
-    MTArtNew,
-    MTArtSearchingInfo,
-    MTArtFoundInfo,
-    MTArtRetrievingArt,
-    MTArtDownloaded,
-    MTArtSearchingInfoSeries, //backup if main art not available.
-    MTArtFoundInfoSeries,
-    MTArtRetrievingArtSeries,
-    MTArtDownloadedSeries,
-    MTArtNotAvailable
-};
-
-@property (atomic, assign) MTArtStatus tvdbThumbnailStatus, tivoThumbnailStatus;
-
-//transitions are
-//   New --> ArtOnDisk if found, or SearchingInfo if not
-//   SearchingInfo --> FoundInfo, or ArtNotAvailable if fail
-//   FoundInfo --> RetrievingArt when image needed
-//   RetrievingArt --> ArtOnDisk, or ArtNotAvailable if fail
-//   Any -->ArtNew (User says reset TVDB info)
-
-
+@property (nonatomic, assign) MTImageSource lastImageSource;
 @end
 
 @implementation MTTiVoShow
@@ -103,8 +87,8 @@ __DDLOGHERE__
 		_episodeTitle = @"";
 		_seriesTitle = @"";
 //		_originalAirDate = @"";
-        _tvdbThumbnailStatus = MTArtNew;
-        _tivoThumbnailStatus = MTArtNew;
+        _imageInProgress = NO;
+        _lastImageSource = MTSearchingSource;
 
 		self.protectedShow = @(NO); //This is the default
 		parseTermMapping = @{
@@ -311,7 +295,6 @@ __DDLOGHERE__
         }
     }
     if (!self.tvdbData) {
-        self.tvdbThumbnailStatus = MTArtSearchingInfo;
         if (self.isMovie) {
             [tiVoManager.tvdb getTheMovieDBDetails:self ];
         } else {
@@ -322,68 +305,32 @@ __DDLOGHERE__
     self.rpcData = [tiVoManager registerRPCforShow: self];
     if (!self.rpcData) {
         [self checkAllInfoSources];
-    } else {
-        //setRPCData sends detailsLoaded notification
+    }  else {
+        //setRPCData will send detailsLoaded notification
     }
 }
 
 -(void) setRpcData:(MTRPCData *)rpcData {
-    NSString * oldArtwork = _rpcData.imageURL;
-
     if (rpcData == _rpcData) return;
 
     if (rpcData ) { //resetting existing info
         _rpcData = rpcData;
         self.episodeGenre = self.rpcData.genre;  //no conflict with TVDB
-        if ([rpcData.imageURL isEqualToString:@""]) {
-            self.tivoThumbnailStatus = MTArtNotAvailable;
-        } else if (rpcData.imageURL && ![rpcData.imageURL isEqualToString:oldArtwork]){
-            self.tivoThumbnailStatus = MTArtFoundInfo;
-        } //else we already had this one, or no info yet (nil)
     } else {
         _rpcData = nil;
-        self.tivoThumbnailStatus = MTArtNew;
     }
     [self checkAllInfoSources];
 }
 
 -(void) setTvdbData:(NSDictionary<NSString *,id> *) tvdbData {
     if (tvdbData == _tvdbData ) return;
-    NSString * artKey = kTVDBSeriesArtworkKey;
-    MTImageSource prefSource = [[NSUserDefaults standardUserDefaults] integerForKey:KMTPreferredImageSource];
-
-    if (self.isEpisodicShow) {
-        if (prefSource == MTTVDBSeason && self.season > 0){
-            artKey = kTVDBSeasonArtworkKey;
-        } else if (prefSource == MTTVDBEpisode) {
-            artKey = kTVDBEpisodeArtworkKey;
-        }
-    }
-    NSString * oldArtwork = _tvdbData[artKey];
-
     _tvdbData = tvdbData;
-    NSString * newArtwork = tvdbData[artKey];
-    if (newArtwork) {
-        if ([newArtwork isEqualToString:@""]) {
-            self.tvdbThumbnailStatus = MTArtNotAvailable;
-        } else if (!(self.tvdbThumbnailStatus == MTArtNotAvailable && [newArtwork isEqualToString:oldArtwork])) {
-            if (self.tvdbThumbnailStatus == MTArtSearchingInfoSeries) {
-                self.tvdbThumbnailStatus = MTArtFoundInfoSeries;
-            } else {
-                self.tvdbThumbnailStatus = MTArtFoundInfo;
-            }
-            //else we already had this one, or no info yet (nil)
-        }
-    } else if ([kMTVDBMissing isEqualToString:tvdbData[kTVDBSeriesKey]]) {
-        self.tvdbThumbnailStatus = MTArtNotAvailable;
-    }
+    self.imageInProgress = NO;
     [self checkAllInfoSources];
 }
 
 -(void) checkAllInfoSources {
     //assuming one of our info sources (Tivo XML, Tivo RPC, Manual, or TVDB) has changed, update our variables appropriately.
-    int oldSeason = self.season;
-
     if (self.isEpisodicShow) {
         // Doesn't even bother checking Tivo XML for episodes as it's not there anymore.
 
@@ -440,12 +387,7 @@ __DDLOGHERE__
     //now handle artwork
     self.thumbnailFile = nil;
     self.thumbnailImage = nil;
-    //handle special case of season changed
-    if (oldSeason != self.season && [[NSUserDefaults standardUserDefaults] integerForKey:KMTPreferredImageSource] == MTTVDBSeason) {
-        [tiVoManager.tvdb addSeasonArtwork:self];
-    } else {
-        [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
-    }
+    [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
 }
 
 #pragma  mark - parser methods
@@ -1787,47 +1729,34 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 #pragma mark - Artwork
--(void) resetSourceInfo {
+-(void) resetSourceInfo:(BOOL) all {
     _userSpecifiedArtworkFile = nil;
     _artworkFile = nil;
     _thumbnailFile = nil;
     _thumbnailImage = nil;
     _tvdbData = nil;
     _rpcData = nil;
+    _imageInProgress = NO;
+    _lastImageSource = MTSearchingSource;
+    if (all) {
+        if ([[tiVoManager tvdbTempDirectory] directoryContainsURL: self.thumbnailFile]) {
+            [[NSFileManager defaultManager] removeItemAtURL: self.thumbnailFile error:nil];
+        }
+        if ([[tiVoManager tvdbTempDirectory] directoryContainsURL: self.artworkFile]) {
+            [[NSFileManager defaultManager] removeItemAtURL: self.artworkFile error:nil];
+        }
+        if ([[tiVoManager tivoTempDirectory] directoryContainsURL: self.thumbnailFile]) {
+            [[NSFileManager defaultManager] removeItemAtURL: self.thumbnailFile error:nil];
+        }
+        [self.tiVo reloadShowInfoForID:self.idString];
+        [tiVoManager.tvdb resetTVDBInfo:self];
+    }
     if (self.isMovie) {
         [tiVoManager.tvdb getTheMovieDBDetails:self ];
     } else {
         [tiVoManager.tvdb getTheTVDBDetails:self ];
     }
     self.rpcData = [tiVoManager registerRPCforShow:self];
-}
-
--(void) resetAllSourceInfo {
-    _userSpecifiedArtworkFile = nil;
-    _artworkFile = nil;
-    _thumbnailFile = nil;
-    _thumbnailImage = nil;
-    _rpcData = nil;
-    _tvdbData = nil;
-    if ([[tiVoManager tvdbTempDirectory] directoryContainsURL: self.thumbnailFile]) {
-        [[NSFileManager defaultManager] removeItemAtURL: self.thumbnailFile error:nil];
-    }
-    if ([[tiVoManager tvdbTempDirectory] directoryContainsURL: self.artworkFile]) {
-        [[NSFileManager defaultManager] removeItemAtURL: self.artworkFile error:nil];
-    }
-    if ([[tiVoManager tivoTempDirectory] directoryContainsURL: self.thumbnailFile]) {
-        [[NSFileManager defaultManager] removeItemAtURL: self.thumbnailFile error:nil];
-    }
-    _tvdbThumbnailStatus = MTArtSearchingInfo;
-    _tivoThumbnailStatus = MTArtSearchingInfo;
-    [self.tiVo reloadShowInfoForID:self.idString];
-    [tiVoManager.tvdb resetTVDBInfo:self];
-
-    if (self.isMovie) {
-        [tiVoManager.tvdb getTheMovieDBDetails:self ];
-    } else {
-        [tiVoManager.tvdb getTheTVDBDetails:self ];
-    }
 }
 
 - (NSString *) artworkFileWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
@@ -1902,13 +1831,11 @@ NSString * fourChar(long n, BOOL allowZero) {
             if ([[tiVoManager tvdbTempDirectory] directoryContainsURL:fileName]) {
                 //tvdb cache file, so remember the deletion
                 DDLogDetail(@"Removing TVDB image %@", fileName);
-                NSString * tvdbKey = [self mapTVDBKeyFromSource: [self artworkSource]];
-                [tiVoManager.tvdb cacheArtWork:@"" forKey:tvdbKey forShow:self];
-                self.tvdbThumbnailStatus = MTArtNotAvailable;
-          } else if ([[tiVoManager tivoTempDirectory] directoryContainsURL:fileName]) {
+                NSString * tvdbKey = [self mapTVDBKeyFromSource: self.lastImageSource];
+                self.tvdbData = [tiVoManager.tvdb cacheArtWork:@"" forKey:tvdbKey forShow:self];
+            } else if ([[tiVoManager tivoTempDirectory] directoryContainsURL:fileName]) {
                 //tivo cache file, so remember the deletion
                 DDLogDetail(@"Removing TiVo image %@", fileName);
-                self.tivoThumbnailStatus = MTArtNotAvailable;
                 self.rpcData.imageURL = @"";
             } else {
                 //user specified file, so allow TVDB to update
@@ -2033,18 +1960,17 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 - (void) failureHandlerForSource: (MTImageSource) source thumbnail: (BOOL) thumbnail {
-    if (source == MTTiVoSource) {
-        self.tivoThumbnailStatus = MTArtNotAvailable;
-        self.thumbnailFile = nil;
+    self.thumbnailFile = nil;
+   if (source == MTTiVoSource) {
         self.artworkFile = nil;
         self.rpcData.imageURL = @"";
+       [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
     } else  {
-        self.tvdbThumbnailStatus = MTArtNotAvailable;
-        self.thumbnailFile = nil;
         NSString * tvdbkey = [self mapTVDBKeyFromSource:source];
-        [tiVoManager.tvdb cacheArtWork:@"" forKey:tvdbkey forShow:self];
+        if (tvdbkey) {
+            self.tvdbData = [tiVoManager.tvdb cacheArtWork:@"" forKey:tvdbkey forShow:self];
+        }
     }
-    [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
 }
 
 -(void) getArtworkFromSource: (MTImageSource) source thumbVersion: (BOOL) thumbnail {
@@ -2059,11 +1985,11 @@ NSString * fourChar(long n, BOOL allowZero) {
         int episode = self.episode;
         if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDBEpisodes]) {
             //then we need to use tvdb episodes anyways for filenames
-            NSNumber * tvdbEpNum = self.tvdbData[kTVDBEpisodeKey];
+            NSNumber * tvdbEpsNum = self.tvdbData[kTVDBEpisodeKey];
             NSNumber * tvdbSeaNum = self.tvdbData[kTVDBSeasonKey];
-            if (tvdbEpNum && tvdbSeaNum) {
+            if (tvdbEpsNum && tvdbSeaNum) {
                 season = (int)tvdbSeaNum.integerValue;
-                episode = (int)tvdbSeaNum.integerValue;
+                episode = (int)tvdbEpsNum.integerValue;
                 seasonEp = [NSString stringWithFormat:@"S%0.2dE%0.2d",season, episode ];
             }
         }
@@ -2083,11 +2009,9 @@ NSString * fourChar(long n, BOOL allowZero) {
     if ([filename fileExists]) {
         DDLogDetail (@"Cached artwork found for %@ at %@", self, filename);
         if (source == MTTiVoSource) {
-            self.tivoThumbnailStatus = MTArtDownloaded;
             self.thumbnailFile = filename;
             self.artworkFile = filename;
         } else {
-            self.tvdbThumbnailStatus = (source == MTTVDBSeries) ? MTArtDownloadedSeries : MTArtDownloaded;
             if (thumbnail) {
                 self.thumbnailFile = filename;
             } else {
@@ -2096,45 +2020,36 @@ NSString * fourChar(long n, BOOL allowZero) {
         }
         return;
     }
+    if (self.imageInProgress) return;
+    self.imageInProgress = YES;
     NSString *urlString = nil;
     if (source == MTTiVoSource) {
         if (!self.rpcData.imageURL) {
-            if (self.tivoThumbnailStatus == MTArtSearchingInfo ) return;
             DDLogReport(@"Warning: TiVo imageURL not available");
+            return;
         }
         urlString = self.rpcData.imageURL;
-        self.tivoThumbnailStatus = MTArtRetrievingArt;
     } else {
         NSString *baseUrlString;
-        NSString *artURLString;
         if (self.isMovie) {
             if (thumbnail) {
                 baseUrlString = @"http://image.tmdb.org/t/p/w92%@";
             } else {
                 baseUrlString = @"http://image.tmdb.org/t/p/w780%@";
             }
-            artURLString = self.tvdbData[kTVDBSeriesArtworkKey];
         } else {
             if (thumbnail) {
                 baseUrlString = @"http://thetvdb.com/banners/_cache/%@";
             } else {
                 baseUrlString = @"http://thetvdb.com/banners/%@";
             }
-            if (!self.isEpisodicShow) {
-                artURLString = self.tvdbData[kTVDBSeriesArtworkKey];
-            } else {
-                NSString * artKey = [self mapTVDBKeyFromSource:source];
-                artURLString =  self.tvdbData[artKey];
-            }
-            if (!artURLString) {
-                if (!self.isEpisodicShow ||
-            }
         }
-        //mark as downloading
-        if (thumbnail) {
-            self.tvdbThumbnailStatus = MTArtRetrievingArt;
+        NSString * tvdbKey = [self mapTVDBKeyFromSource:source];
+        if (!tvdbKey) {
+            DDLogReport(@"Warning: Tvdb Key not available");
+            return;
         }
-        urlString = [NSString stringWithFormat: baseUrlString, ];
+        urlString = [NSString stringWithFormat: baseUrlString, self.tvdbData[tvdbKey]];
     }
     DDLogDetail(@"downloading artwork at %@ to %@",urlString, filename);
     NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
@@ -2142,38 +2057,22 @@ NSString * fourChar(long n, BOOL allowZero) {
                 queue:[NSOperationQueue mainQueue]
         completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^(void){
+            self.imageInProgress = NO;
             if (!data || error ) {
                 DDLogReport(@"Couldn't get artwork for %@ from %@ , Error: %@", self.seriesTitle, urlString, error.localizedDescription);
                 [self failureHandlerForSource:source thumbnail:thumbnail ];
             } else {
                 NSInteger statusCode = ((NSHTTPURLResponse *) response).statusCode;
                 if ( statusCode == 404 || statusCode == 500 || data.length < 100) {
-                    if (source == MTTVDBEpisode || source == MTTVDBSeason) {
-                        DDLogDetail(@"No episode artwork for %@ from TVDB at %@; trying series", self.seriesTitle, urlString);
-                        //try and get artwork for Series instead
-                        self.tvdbThumbnailStatus = MTArtSearchingInfoSeries;
-                        [tiVoManager.tvdb addSeriesArtwork:self];
-                    } else { //source = tivo or movie or series
-                        [self failureHandlerForSource:source thumbnail:thumbnail];
-                        //check if there is a secondSource
-                        MTImageSource secondSource = [self artworkSource] ;
-                        if (secondSource != MTNoSource) {
-                            [self getArtworkFromSource:secondSource thumbVersion:YES];
-                        }
-                   }
+                    [self failureHandlerForSource:source thumbnail:thumbnail];
                 } else {
                     [[NSFileManager defaultManager] createDirectoryAtPath:[filename directory] withIntermediateDirectories:YES attributes:nil error:nil];
                     if ([data writeToURL:filename atomically:YES]) {
-                        DDLogDetail(@"Saved artwork file for %@ at %@",self.showTitle, filename);
+                        DDLogDetail(@"Saved %d artwork file for %@ at %@", (int)source, self.showTitle, filename);
                         if (thumbnail) {
                             self.thumbnailFile = filename;
                             if (source == MTTiVoSource) {
-                                self.tivoThumbnailStatus = MTArtDownloaded;
                                 self.artworkFile = filename;
-                            } else if (source == MTTVDBSeries) {
-                                self.tvdbThumbnailStatus = MTArtDownloadedSeries;
-                            } else {
-                                self.tvdbThumbnailStatus = MTArtDownloaded;
                             }
                         } else {
                             self.artworkFile = filename;
@@ -2201,35 +2100,144 @@ NSString * fourChar(long n, BOOL allowZero) {
             return kTVDBEpisodeArtworkKey;
             break;
         default:
-            NSAssert (false, @"problem with tvdb keys");
             return nil;
             break;
     }
 }
 
--(MTImageSource) artworkSource {
-    MTImageSource source = MTNoSource;
+-(MTImageSource) nextSourceTo:(MTImageSource) oldSource {
+    //given that oldSource has failed, mark as such, and return next source, if any
+    //this is a state machine that implements the "business" rule of what order to check for images.
+    if (oldSource == MTNoSource) return MTNoSource;
+    MTImageSource nextSource = MTSearchingSource;
     MTImageSource prefSource = [[NSUserDefaults standardUserDefaults] integerForKey:KMTPreferredImageSource];
-    MTArtStatus tivoStatus = self.tivoThumbnailStatus; //just shorthand
-    MTArtStatus tvdbStatus = self.tvdbThumbnailStatus;
-
-    if ((prefSource > MTTiVoSource || tivoStatus == MTArtNotAvailable) && tvdbStatus != MTArtNotAvailable ) {
-        if (tvdbStatus == MTArtFoundInfoSeries || tvdbStatus == MTArtDownloadedSeries) {
-            source = MTTVDBSeries;
-        } else if (!self.isEpisodicShow || prefSource == MTTVDBSeries || self.season == 0) {
-                if (self.tvdbData[kTVDBSeriesArtworkKey]) {
-                    source = MTTVDBSeries;
-                } else if (tvdbStatus != MTArtSearchingInfo || tvdbStatus != MTArtSearchingInfoSeries) {
-            } else if (prefSource == MTTVDBSeason ) {
-                source = MTTVDBSeason;
-            } else {
-                source = MTTVDBEpisode;
-            }
+    if (oldSource == MTSearchingSource) {
+        nextSource = prefSource;
+        if (!self.isEpisodicShow && (oldSource == MTTVDBEpisode || oldSource == MTTVDBSeason)) {
+            nextSource = MTTVDBSeries;
         }
-    } else if (tivoStatus == MTArtFoundInfo || tivoStatus == MTArtDownloaded) {
-        source = MTTiVoSource;
+    } else {
+        switch (prefSource) {
+            case MTTiVoSource:
+                if (oldSource == MTTiVoSource) {
+                    nextSource = MTTVDBSeries;
+                } else {
+                    nextSource = MTNoSource;
+                }
+                break;
+            case MTTVDBSeries:
+                if (oldSource == MTTVDBSeries) {
+                    nextSource = MTTiVoSource;
+                } else {
+                    nextSource = MTNoSource;
+                }
+                break;
+            case MTTVDBSeason:
+            case MTTVDBEpisode:
+                if (self.isEpisodicShow) {
+                    if (oldSource == prefSource) {
+                        nextSource = MTTiVoSource;
+                    } else if (oldSource == MTTiVoSource) {
+                        nextSource = MTTVDBSeries;
+                    } else {
+                        nextSource = MTNoSource;
+                    }
+                } else {
+                    if (oldSource == prefSource) {
+                        nextSource = MTTVDBSeries;
+                    } else if (oldSource == MTTVDBSeries) {
+                        nextSource = MTTiVoSource;
+                    } else {
+                        nextSource = MTNoSource;
+                    }
+                }
+                break;
+            case MTNoSource:
+            default:
+                nextSource = MTNoSource;
+                break;
+        }
     }
-    return source;
+    //check if we have the data yet.
+    if (nextSource == MTTiVoSource) {
+        if (!self.rpcData.imageURL && self.tiVo.rpcActive) {
+            nextSource = MTSearchingSource; // haven't gotten data yet
+        }
+    } else if (nextSource == MTTVDBEpisode ||
+               nextSource == MTTVDBSeries ||
+               nextSource == MTTVDBSeason ) {
+        if (!self.tvdbData) {
+            nextSource = MTSearchingSource;
+        }
+    }
+    return nextSource;
+}
+
+-(NSString *) sourceURL: (MTImageSource) source {
+    switch (source) {
+        case MTTiVoSource:
+            return self.rpcData.imageURL;
+            break;
+        case MTTVDBSeries:
+            return self.tvdbData [kTVDBSeriesArtworkKey];
+            break;
+        case MTTVDBSeason:
+            return self.tvdbData [kTVDBSeasonArtworkKey];
+            break;
+        case MTTVDBEpisode:
+            return self.tvdbData [kTVDBEpisodeArtworkKey];
+            break;
+        case MTNoSource:
+        case MTSearchingSource:
+        default:
+            return nil;
+            break;
+    }
+
+}
+
+-(BOOL) sourceUnavailable: (MTImageSource) source {
+    if (source == MTSearchingSource || source == MTNoSource) return YES;
+    if (!self.isEpisodicShow && (source == MTTVDBSeason || source == MTTVDBEpisode)) {
+        return YES; //can't get s/e info
+    }
+    if (source == MTTiVoSource && ![self.tiVo rpcActive]) return NO;
+    NSString * sourceURL = [self sourceURL:source];
+    if (!sourceURL) return NO;  //don't know if possible yet
+    return ([sourceURL isEqualToString:@""]); //we've tried and failed
+}
+
+-(void) getInfoFromSource: (MTImageSource) source {
+    if (source == MTTVDBSeason) {
+        if (self.imageInProgress) return;
+        self.imageInProgress = YES;
+        [tiVoManager.tvdb addSeasonArtwork:self];
+    } else if (source == MTTVDBSeries) {
+        if (self.imageInProgress) return;
+        self.imageInProgress = YES;
+        [tiVoManager.tvdb addSeriesArtwork:self];
+    }
+}
+
+-(BOOL) noImageAvailable {
+    return self.lastImageSource == MTNoSource;
+}
+
+-(void) getOnlineArtwork:(BOOL) thumbnail {
+    //based on current state, advances progress towards getting image
+    MTImageSource source = self.lastImageSource;
+    while (source != MTNoSource && [self sourceUnavailable:source]){
+            source = [self nextSourceTo:source];
+        if (source == MTSearchingSource) return; //source not available yet..., but is expected to be.
+    }
+    self.lastImageSource = source;
+    if (source == MTNoSource) return;
+
+    if ([self sourceURL:source]) {
+        [self getArtworkFromSource:source thumbVersion:YES];
+    } else {
+        [self getInfoFromSource:source];
+    }
 }
 
 -(NSImage *) thumbnailImage {
@@ -2251,22 +2259,16 @@ NSString * fourChar(long n, BOOL allowZero) {
             }
         }
         if (!_thumbnailImage) {
-            MTImageSource source = [self artworkSource] ;
-             if (source != MTNoSource) {
-                 [self getArtworkFromSource:source thumbVersion:YES]; //may set thumbnailFile or will in future
-            }
+            [self getOnlineArtwork:YES];
             if (self.thumbnailFile ) {
                 _thumbnailImage = [[NSImage alloc] initWithContentsOfURL:self.thumbnailFile];
                 if (!_thumbnailImage) self.thumbnailFile = nil;
+                //XXX what if bad file?  Need to mark as failure
             }
         }
 
     }
     return _thumbnailImage;
-}
-
--(BOOL) noImageAvailable {
-    return (self.tvdbThumbnailStatus == MTArtNotAvailable  && (self.tivoThumbnailStatus == MTArtNotAvailable || !self.tiVo.rpcActive));
 }
 
 -(NSImage *) artWorkImage {
@@ -2286,14 +2288,11 @@ NSString * fourChar(long n, BOOL allowZero) {
             }
         }
         if (!_artWorkImage) {
-            MTImageSource source = [self artworkSource] ;
-             if (source != MTNoSource) {
-                [self getArtworkFromSource:source thumbVersion:NO];
-                 if (_artworkFile ) {
-                     _artWorkImage = [[NSImage alloc] initWithContentsOfURL:self.artworkFile];
-                     if (!_artWorkImage) self.artworkFile = nil;
-                 }
-            }
+            [self getOnlineArtwork:NO];
+             if (_artworkFile ) {
+                 _artWorkImage = [[NSImage alloc] initWithContentsOfURL:self.artworkFile];
+                 if (!_artWorkImage) self.artworkFile = nil;
+             }
         }
     }
     return _artWorkImage;

@@ -819,11 +819,14 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     } else if ( [keyPath isEqualToString:KMTPreferredImageSource] ){
         DDLogMajor(@"Changed User TVDB preference to imageSource: %@", [defs objectForKey:KMTPreferredImageSource]);
         for (MTTiVoShow * show in self.tiVoShows) {
-            [show resetSourceInfo];
+            [show resetSourceInfo:NO];
         }
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
     } else if ([keyPath isEqualToString:kMTTrustTVDBEpisodes]) {
         DDLogMajor(@"Changed User TVDB preference to episodes: %@", [defs objectForKey:kMTTrustTVDBEpisodes] ? @"YES": @"NO" );
+        for (MTTiVoShow * show in self.tiVoShows) {
+            [show checkAllInfoSources];
+        }
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

@@ -394,7 +394,7 @@ __DDLOGHERE__
         [self openDrawer:tiVoShowTable.sortedShows[menuTableRow]];
     } else if ([menu.title caseInsensitiveCompare:@"Reload TVDB Info"] == NSOrderedSame) {
         for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {
-            [show resetAllSourceInfo];
+            [show resetSourceInfo:YES];
         }
         NSIndexSet * columns = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.tiVoShowTable.numberOfColumns)];
         [self.tiVoShowTable reloadDataForRowIndexes:[tiVoShowTable selectedRowIndexes] columnIndexes:columns];

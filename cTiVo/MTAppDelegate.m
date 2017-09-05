@@ -221,7 +221,7 @@ __DDLOGHERE__
 										  @"",kMTFileNameFormat,
 										  @NO, kMTiTunesContentIDExperiment,
 										  @NO, kMTTrustTVDBEpisodes,
-                                          @(MTTiVoSource), KMTPreferredImageSource,
+                                          @(1), KMTPreferredImageSource,  //TiVoSource; see MTTiVoShow for MTImageSource enum
                                           @2, kMTMaxNumEncoders,
                                           @240, kMTMaxProgressDelay,
                                           @"tivodecode-ng", kMTDecodeBinary,
