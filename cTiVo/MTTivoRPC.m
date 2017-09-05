@@ -219,6 +219,9 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
      }
 //     [self performSelector:@selector(checkStreamStatus) withObject:nil afterDelay:3];
  }
+-(BOOL) isActive {
+    return self.iStream.streamStatus == NSStreamStatusOpen;
+}
 
 -(void) checkStreamStatus {
     if (self.iStream.streamStatus == NSStreamStatusNotOpen ||
@@ -583,7 +586,6 @@ static NSRegularExpression * isFinalRegex = nil;
                            [deletedShowSet removeObject:objectID];
                            if (monitorThisLaunch && !self.showMap[objectID].imageURL) {
                                //saved last time without having finished checking the art
-                               //xxx Could handle this without getting show details first
                                [newIDs addObject:objectID];
                                //XXX Deal with shows being recorded/changes to done
                            }

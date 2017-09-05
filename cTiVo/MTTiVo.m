@@ -314,7 +314,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(BOOL) rpcActive {
     //XXX Need to see if validation failed etc
-    return self.myRPC != nil;
+    return self.myRPC != nil && self.myRPC.isActive;
 }
 
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {

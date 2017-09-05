@@ -14,6 +14,8 @@
 -(instancetype) initServer: (NSString *)serverAddress onPort: (int32_t) port andMAK: (NSString *) mediaAccessKey;
 -(instancetype) initServer: (NSString *)serverAddress forUser:(NSString *) user withPassword: (NSString *) password;
 
+-(BOOL) isActive;
+
 -(MTRPCData *) rpcDataForID: (NSString *) idString;
 -(void) emptyCaches;
 -(void) reloadShowInfoForID: (NSString *) showID;
