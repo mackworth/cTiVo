@@ -21,7 +21,7 @@
 
 @class MTTiVoManager, MTTiVoShow;
 
-@interface MTTiVo : NSObject <NSXMLParserDelegate>
+@interface MTTiVo : NSObject <NSXMLParserDelegate, MTRPCDelegate>
 
 @property (nonatomic, strong) NSDate *lastDownloadEnded;
 @property (strong) NSArray *shows;
@@ -53,6 +53,8 @@
 -(NSDictionary *)defaultsDictionary;
 -(MTRPCData *) rpcDataForID: (NSString *) idString;
 -(void) reloadShowInfoForID: (NSString *) showID;
+-(MTRPCData *)registerRPCforShow: (MTTiVoShow *) show;
+
 -(BOOL) rpcActive;
 
 @end

@@ -302,7 +302,7 @@ __DDLOGHERE__
         }
     }
     DDLogDetail(@"GetDetails parsing Finished: %@", self.showTitle);
-    self.rpcData = [tiVoManager registerRPCforShow: self];
+    self.rpcData = [self.tiVo registerRPCforShow: self];
     if (!self.rpcData) {
         [self checkAllInfoSources];
     }  else {
@@ -1756,7 +1756,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     } else {
         [tiVoManager.tvdb getTheTVDBDetails:self ];
     }
-    self.rpcData = [tiVoManager registerRPCforShow:self];
+    self.rpcData = [self.tiVo registerRPCforShow:self];
 }
 
 - (NSString *) artworkFileWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {

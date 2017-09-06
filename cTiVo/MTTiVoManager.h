@@ -16,7 +16,7 @@
 #import "MTFormat.h"
 #import "MTTVDB.h"
 
-@interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate, MTRPCDelegate>  {
+@interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
 }
 
 //Shared Data
@@ -103,7 +103,6 @@
 -(BOOL)anyTivoActive;
 -(int) nextManualTiVoID;
 -(void)updateTiVoDefaults:(MTTiVo *)tiVo;
--(MTRPCData *)registerRPCforShow: (MTTiVoShow *) show;
 
 //----------------Channel Management Methods --------
 -(void) updateChannel: (NSDictionary *) newChannel;

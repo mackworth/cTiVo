@@ -34,7 +34,6 @@
 @property (atomic, strong)     NSOperationQueue *opsQueue;
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSDictionary  *> * manualEpisodeData;
 @property (nonatomic, strong) NSDictionary *showsOnDisk;
-@property (atomic, strong) NSMutableDictionary <NSString *, MTTiVoShow *> * rpcIDs;
 @property (nonatomic, strong) NSURL *cacheDirectory;
 @property (nonatomic, strong) NSURL *tivoTempDirectory;
 @property (nonatomic, strong) NSURL *tvdbTempDirectory;
@@ -95,7 +94,6 @@ __DDLOGHERE__
 		self.opsQueue.maxConcurrentOperationCount = 4;
 
 		_processingPaused = @(NO);
-        self.rpcIDs = [NSMutableDictionary dictionary];
 		[self loadUserNotifications];
         [self setupMetadataQuery];
  		loadingManualTiVos = NO;
@@ -1656,19 +1654,6 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing {
     DDLogReport(@"Removing Service: %@",aNetService.name);
 
-}
-#pragma mark - RPC switchboard
-
--(void) receivedRPCData:(MTRPCData *)rpcData {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.rpcIDs[rpcData.rpcID].rpcData = rpcData;
-    });
-}
-
--(MTRPCData *) registerRPCforShow: (MTTiVoShow *) show  {
-    NSString * rpcKey = [NSString stringWithFormat:@"%@|%@",show.tiVo.tiVo.hostName, show.idString];
-    [self.rpcIDs setObject:show forKey:rpcKey ];
-    return [show.tiVo rpcDataForID:show.idString];
 }
 
 #pragma mark - NetService delegate methods

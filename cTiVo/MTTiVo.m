@@ -29,7 +29,7 @@
 
 @interface MTTiVo ()
 {
-    BOOL volatile isConnecting, managingDownloads, firstUpdate, canPing;
+    BOOL volatile isConnecting, managingDownloads, firstUpdate, oneBatch, canPing;
     NSURLConnection *showURLConnection;
     NSMutableData *urlData;
     NSMutableArray *newShows;
@@ -57,6 +57,7 @@
 @property SCNetworkReachabilityRef reachability;
 @property (nonatomic, readonly) NSArray *downloadQueue;
 @property (nonatomic, strong) MTTivoRPC * myRPC;
+@property (atomic, strong) NSMutableDictionary <NSString *, MTTiVoShow *> * rpcIDs;
 
 @end
 
@@ -147,6 +148,7 @@ __DDLOGHERE__
 		_currentNPLStarted = nil;
 		_lastDownloadEnded = [NSDate dateWithTimeIntervalSince1970:0];
 		_manualTiVoID = -1;
+        self.rpcIDs = [NSMutableDictionary dictionary];
 	}
 	return self;
 	
@@ -296,13 +298,63 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     if (foundMediaKey) {
         if (self.supportsTransportStream) {
             self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName onPort:1413 andMAK:self.mediaKey];
-            self.myRPC.delegate = tiVoManager;
+            self.myRPC.delegate = self;
         }
     } else {
         //Need to update defaults
         [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:YES];
     }
 }
+
+#pragma mark - RPC switchboard
+
+-(void) receivedRPCData:(MTRPCData *)rpcData {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.rpcIDs[rpcData.rpcID].rpcData = rpcData;
+    });
+}
+
+-(MTRPCData *) registerRPCforShow: (MTTiVoShow *) show  {
+    NSString * rpcKey = [NSString stringWithFormat:@"%@|%@",self.tiVo.hostName, show.idString];
+    [self.rpcIDs setObject:show forKey:rpcKey ];
+    return [show.tiVo rpcDataForID:show.idString];
+}
+
+-(void) tivoReportsNewShows:(NSArray<NSString *> *)addedShows andDeletedShows:(NSSet<NSString *> *)deletedShows {
+//
+//    DDLogDetail(@"Updating Tivo %@ from RPC", self);
+//    DDLogVerbose(@"Adding %@ and deleting %@", addedShows, deletedShows);
+//    if (isConnecting || !self.enabled) {
+//        DDLogDetail(@"But was %@", isConnecting? @"Connecting": @"Disabled");
+//        return;
+//    }
+//    if (showURLConnection) {
+//        [showURLConnection cancel];
+//        self.showURLConnection = nil;
+//    }
+//    isConnecting = YES;
+//    previousShowList = [NSMutableDictionary dictionary];
+//    for (MTTiVoShow * show in _shows) {
+//        NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
+//        //		NSLog(@"prevID: %@ %@",idString,show.showTitle);
+//        if(!show.inProgress.boolValue){
+//            [previousShowList setValue:show forKey:idString];
+//        }
+//    }
+//    DDLogVerbose(@"Previous shows were: %@:",previousShowList);
+//    [newShows removeAllObjects];
+//    //	[_shows removeAllObjects];
+//    [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationTiVoUpdating object:self];
+//    if (self.currentNPLStarted) {
+//        [self saveLastLoadTime:self.currentNPLStarted];
+//    }
+//    self.currentNPLStarted = [NSDate date];
+//    oneBatch = YES; //only get first batch
+//    NSInteger numToGet = MAX(kMTNumberShowToGetFirst, addedShows.count
+//    [self updateShowsStartingAt:0 withCount: ];
+//
+}
+
 -(void) reloadShowInfoForID: (NSString *) showID {
     [self.myRPC reloadShowInfoForID:showID];
 
@@ -361,7 +413,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[self saveLastLoadTime:self.currentNPLStarted];
 	}
 	self.currentNPLStarted = [NSDate date];
-	[self updateShowsStartingAt:0 withCount:kMTNumberShowToGetFirst];
+    oneBatch = NO; //get all the shows
+    [self updateShowsStartingAt:0 withCount:kMTNumberShowToGetFirst ];
 }
 
 -(NSInteger)isProcessing
@@ -383,8 +436,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
--(void)updateShowsStartingAt:(int)anchor withCount:(int)count
-{
+-(void)updateShowsStartingAt:(int)anchor withCount:(int)count {
     NSString *portString = @"";
     if ([_tiVo isKindOfClass:[MTNetService class]]) {
         portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];

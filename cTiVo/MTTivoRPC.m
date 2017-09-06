@@ -587,7 +587,6 @@ static NSRegularExpression * isFinalRegex = nil;
                            if (monitorThisLaunch && !self.showMap[objectID].imageURL) {
                                //saved last time without having finished checking the art
                                [newIDs addObject:objectID];
-                               //XXX Deal with shows being recorded/changes to done
                            }
                        }
                    }
@@ -596,7 +595,8 @@ static NSRegularExpression * isFinalRegex = nil;
                    }
                    [self getShowInfoForShows: newIDs];
                    if (!monitorThisLaunch) {
-                       //XXX Use delta information to update show list
+                       [self.delegate tivoReportsNewShows: [newIDs copy]
+                                          andDeletedShows: [deletedShowSet allObjects]];
                    }
                }
            }
