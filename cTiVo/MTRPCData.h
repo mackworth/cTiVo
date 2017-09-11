@@ -32,7 +32,7 @@
 @protocol MTRPCDelegate <NSObject>
 
 -(void) receivedRPCData:(MTRPCData *) data;
--(void) tivoReportsNewShows: (NSArray <NSString *> *) newShows andDeletedShows: (NSArray <NSString *> *) deletedShows;
+-(void) tivoReportsNewShows: (NSArray <NSString *> *) newShows andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows;
 
 @end
 

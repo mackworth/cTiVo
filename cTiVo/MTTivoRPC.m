@@ -24,7 +24,7 @@
 @property (nonatomic, assign) int rpcID, sessionID;
 @property (nonatomic, strong) NSString * bodyID;
 @property (nonatomic, assign) BOOL authenticationLaunched;
-@property (nonatomic, assign) BOOL launchedInitialGetShows;
+@property (nonatomic, assign) BOOL firstLaunch;
 
 @property (nonatomic, strong) NSMutableData * remainingData; //data left over from last write
 @property (nonatomic, strong) NSMutableData * incomingData;
@@ -138,7 +138,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
     self.showMap = [NSKeyedUnarchiver unarchiveObjectWithData: archiveMap] ?: [NSMutableDictionary dictionary];
 
     self.authenticationLaunched = NO;
-    self.launchedInitialGetShows = NO;
+    self.firstLaunch = YES;
     [self launchStreams];
     self.deadmanTimer = [NSTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
@@ -248,7 +248,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
     self.incomingData.length = 0;
     self.remainingData.length = 0;
     self.authenticationLaunched = NO;
-    self.launchedInitialGetShows = NO;
+    self.firstLaunch = YES;
 }
 
 static NSRegularExpression * rpcRegex = nil;
@@ -562,42 +562,40 @@ static NSRegularExpression * isFinalRegex = nil;
                             @"format": @"idSequence",
                             @"bodyId": self.bodyID
                             };
-    BOOL monitorThisLaunch = ! self.launchedInitialGetShows;
-    self.launchedInitialGetShows = YES;
     [self sendRpcRequest:@"recordingFolderItemSearch"
-                 monitor:monitorThisLaunch   //in other words, we monitor this only from the first time per session
+                 monitor: YES
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
            DDLogVerbose(@"Got All Shows from TiVo RPC: %@", jsonResponse);
            NSArray * shows = jsonResponse[@"objectIdAndType"];
-           if (shows.count > 0) {
-               DDLogDetail (@"Got %lu shows from TiVo", shows.count);
-               if (!self.showMap) {
-                   self.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
-                   [self getShowInfoForShows: shows];
-               } else {
-                   NSMutableArray * newIDs = [NSMutableArray arrayWithCapacity:shows.count];
-                   NSMutableSet <NSString *> *deletedShowSet = [NSMutableSet setWithArray: shows];
-                   for (NSString * objectID in shows) {
-                       if (!self.showMap[objectID]) {
+           BOOL isFirstLaunch = self.firstLaunch;
+           self.firstLaunch = NO;
+           DDLogDetail (@"Got %lu shows from TiVo", shows.count);
+           if (!self.showMap) {
+               self.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
+               [self getShowInfoForShows: shows];
+           } else {
+               NSMutableArray * newIDs = [NSMutableArray arrayWithCapacity:shows.count];
+               NSMutableDictionary < NSString *, MTRPCData *> *deletedShows = [self.showMap mutableCopy];
+               for (NSString * objectID in shows) {
+                   if (!self.showMap[objectID]) {
+                       [newIDs addObject:objectID];
+                   } else {
+                       //have seen before, so don't lookup, but also don't delete
+                       [deletedShows removeObjectForKey:objectID];
+                       if (isFirstLaunch && !self.showMap[objectID].imageURL) {
+                           //saved last time without having finished checking the art
                            [newIDs addObject:objectID];
-                       } else {
-                           //have seen before, so don't lookup, but also don't delete
-                           [deletedShowSet removeObject:objectID];
-                           if (monitorThisLaunch && !self.showMap[objectID].imageURL) {
-                               //saved last time without having finished checking the art
-                               [newIDs addObject:objectID];
-                           }
                        }
                    }
-                   for (NSString * objectID in deletedShowSet) {
-                       [self.showMap removeObjectForKey:objectID];
-                   }
-                   [self getShowInfoForShows: newIDs];
-                   if (!monitorThisLaunch) {
-                       [self.delegate tivoReportsNewShows: [newIDs copy]
-                                          andDeletedShows: [deletedShowSet allObjects]];
-                   }
+               }
+               for (NSString * objectID in deletedShows) {
+                   [self.showMap removeObjectForKey:objectID];
+               }
+               [self getShowInfoForShows: newIDs];
+               if (!isFirstLaunch) {
+                   [self.delegate tivoReportsNewShows: [newIDs copy]
+                                      andDeletedShows: [deletedShows copy]];
                }
            }
        } ];

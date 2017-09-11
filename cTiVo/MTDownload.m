@@ -2165,13 +2165,15 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    DDLogMajor(@"Download URL Connection Failed with error %@",[error maskMediaKeys]);
+    DDLogReport(@"Download URL Connection Failed with error %@",[error maskMediaKeys]);
     
     NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
     DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
-    if (error.code == -1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
+    if ([streamError isKindOfClass:[NSNumber class]] &&
+        ((error.code == -1004  && streamError.intValue == 49) ||
+         (error.code == -1001  && streamError.intValue == -2102))) {
         [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
-                         subTitle: @"Antivirus program may be blocking connection"
+                         subTitle: @"Antivirus program may be blocking connection, or you may need to reboot TiVo"
                   ];
     }
    if (self.activeURLConnection) {
