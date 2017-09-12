@@ -9,6 +9,7 @@
 #import "MTRPCData.h"
 
 @implementation MTRPCData
+static NSString * kRecordingID = @"recordingID";
 static NSString * kEpisodeNum  = @"episodeNum";
 static NSString * kSeasonNum  = @"seasonNum";
 static NSString * kGenre  = @"genre";
@@ -28,12 +29,13 @@ static NSString * kTitle = @"title";
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [self init];
     if (self) {
-        _episodeNum = [coder decodeIntegerForKey: kEpisodeNum];
-        _seasonNum =  [coder decodeIntegerForKey: kSeasonNum];
-        _genre =      [coder decodeObjectForKey: kGenre];
-//        _format =     [coder decodeIntegerForKey: kFormat];
-        _imageURL =   [coder decodeObjectForKey: kImageURL];
-        _series =      [coder decodeObjectForKey: kTitle];
+        _recordingID = [coder decodeObjectForKey:  kRecordingID];
+        _episodeNum =  [coder decodeIntegerForKey: kEpisodeNum];
+        _seasonNum =   [coder decodeIntegerForKey: kSeasonNum];
+        _genre =       [coder decodeObjectForKey:  kGenre];
+//      _format =      [coder decodeIntegerForKey: kFormat];
+        _imageURL =    [coder decodeObjectForKey:  kImageURL];
+        _series =      [coder decodeObjectForKey:  kTitle];
 
     }
     return self;
@@ -41,6 +43,7 @@ static NSString * kTitle = @"title";
 
 
 - (void)encodeWithCoder:(NSCoder *)coder {
+     [coder encodeObject: _recordingID forKey:kRecordingID];
      [coder encodeInteger:_episodeNum forKey:kEpisodeNum];
      [coder encodeInteger:_seasonNum forKey:kSeasonNum];
      [coder encodeObject:_genre forKey:kGenre];
@@ -50,7 +53,7 @@ static NSString * kTitle = @"title";
 }
 
 -(NSString *)description {
-    return [NSString stringWithFormat:@"%@: S%0.2dE%0.2d (%@); @ %@", self.series, (int)self.seasonNum, (int)self.episodeNum, self.genre, self.imageURL];
+    return [NSString stringWithFormat:@"%@: S%0.2dE%0.2d (%@); %@; @ %@", self.series, (int)self.seasonNum, (int)self.episodeNum, self.genre, self.recordingID, self.imageURL];
 }
 
 

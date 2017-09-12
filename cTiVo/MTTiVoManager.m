@@ -13,6 +13,7 @@
 #import "MTNetService.h"
 #import "NSURL+MTURLExtensions.h"
 #import "NSNotificationCenter+Threads.h"
+#import "NSArray+Map.h"
 
 #import "NSString+Helpers.h"
 
@@ -92,6 +93,12 @@ __DDLOGHERE__
 		numEncoders = 0;
 		_signalError = 0;
 		self.opsQueue.maxConcurrentOperationCount = 4;
+
+        if ([[NSUserDefaults standardUserDefaults] integerForKey:kMTUserDefaultVersion] < 3) {
+            _resetRPCMap = YES;
+        } else {
+            _resetRPCMap = NO;
+        }
 
 		_processingPaused = @(NO);
 		[self loadUserNotifications];
@@ -250,7 +257,6 @@ __DDLOGHERE__
             [self notifyWithTitle: [NSString stringWithFormat: @"Formats like %@ are not recommended!", warnUserDeprecated ]
                          subTitle: @"Switch to Default or another Format" ];
         }
-        [[NSUserDefaults standardUserDefaults] setInteger:2 forKey:kMTUserDefaultVersion];
     }
 
 }
@@ -895,6 +901,30 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         [tiVo resetAllDetails];
 	}
 	[self refreshAllTiVos];
+}
+
+-(NSSet <MTTiVo *> *) tiVosForShows: (NSArray<MTTiVoShow *> *)shows {
+    NSSet <MTTiVo *> * tiVos = [NSSet setWithArray:[shows mapObjectsUsingBlock:^MTTiVo *(MTTiVoShow * show, NSUInteger idx) {
+        return show.tiVo;
+    }]];
+    return tiVos;
+}
+
+-(void) deleteTivoShows:(NSArray<MTTiVoShow *> *)shows {
+    NSSet * tiVos = [self tiVosForShows:shows];
+    for (MTTiVo * tiVo in tiVos) {
+        [tiVo deleteTiVoShows:shows];
+    }
+}
+
+-(void) stopRecordingShows:(NSArray<MTTiVoShow *> *)shows {
+    NSArray * filteredShows = [shows mapObjectsUsingBlock:^id(MTTiVoShow * show, NSUInteger idx) {
+        return (show.inProgress.boolValue) ? show : nil;
+    }];
+    NSSet * tiVos = [self tiVosForShows:filteredShows];
+    for (MTTiVo * tiVo in tiVos) {
+        [tiVo stopRecordingTiVoShows:filteredShows];
+    }
 }
 
 -(NSMutableArray *) subscribedShows {

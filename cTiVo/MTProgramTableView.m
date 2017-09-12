@@ -581,7 +581,24 @@ __DDLOGHERE__
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
     if ([menuItem action]==@selector(copy:)) {
         return (self.numberOfSelectedRows >0);
-    } 
+    }
+    if ([menuItem action]==@selector(delete:) ) {
+        menuItem.title = @"Delete from TiVo";
+        NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+        NSArray	*selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
+        for (MTTiVoShow * show in selectedShows) {
+            if (show.rpcData && show.tiVo.rpcActive) return YES;
+        }
+        return NO;
+    }
+    if ([menuItem action]==@selector(stopRecording:)) {
+        NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+        NSArray	*selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
+        for (MTTiVoShow * show in selectedShows) {
+            if (show.inProgress.boolValue && show.rpcData && show.tiVo.rpcActive) return YES;
+        }
+        return NO;
+    }
     return YES;
 }
 
@@ -599,5 +616,38 @@ __DDLOGHERE__
    }
 }
 
+-(BOOL) confirmBehavior: (NSString *) behavior preposition:(NSString *) prep forShows:(NSArray <MTTiVoShow *> *) shows {
+    NSString * msg = nil;
+    if (shows.count == 1) {
+        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' %@ TiVo %@?", behavior, shows[0].showTitle, prep, shows[0].tiVoName ];
+    } else if (shows.count == 2) {
+        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and '%@' %@ your TiVo?",behavior, shows[0].showTitle, shows[1].showTitle, prep ];
+    } else {
+        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and %d others %@ your TiVo?", behavior, shows[0].showTitle, (int)shows.count -1, prep ];
+    }
+
+    NSAlert *myAlert = [NSAlert alertWithMessageText:msg defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@"This cannot be undone."];
+    myAlert.alertStyle = NSCriticalAlertStyle;
+    NSInteger result = [myAlert runModal];
+    return (result == NSAlertAlternateReturn);
+}
+
+-(IBAction)delete:(id)sender {
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+    if (selectedRowIndexes.count == 0) return;
+    NSArray	<MTTiVoShow *> *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
+    if ([self confirmBehavior:@"delete" preposition: @"from" forShows:selectedShows]) {
+        [tiVoManager deleteTivoShows:selectedShows];
+    }
+}
+
+-(IBAction)stopRecording:(id)sender {
+    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+    if (selectedRowIndexes.count ==0) return;
+   NSArray <MTTiVoShow *>	*selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
+    if ([self confirmBehavior:@"stop recording" preposition:@"on" forShows:selectedShows]) {
+        [tiVoManager stopRecordingShows:selectedShows];
+    }
+}
 
 @end

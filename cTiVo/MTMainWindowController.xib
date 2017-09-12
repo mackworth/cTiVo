@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment version="1090" identifier="macosx"/>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -1437,11 +1437,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView misplaced="YES" id="774">
-                                                                    <rect key="frame" x="1" y="1" width="52" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="776">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="52" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="777">
                                                                                 <font key="font" metaFont="system"/>
@@ -2412,10 +2412,22 @@
                         <action selector="programMenuHandler:" target="-2" id="589"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Show Details" toolTip="Reveal more information about this show" id="1zO-Hi-mg8">
+                <menuItem title="Delete from TiVo" tag="3" toolTip="Remove this show from TiVo" id="1zO-Hi-mg8">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="programMenuHandler:" target="-2" id="RgB-We-OiU"/>
+                        <action selector="programMenuHandler:" target="-2" id="JNY-GG-Gc4"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Stop Recording" tag="4" toolTip="Tell TiVo to stop recording this show" id="Oqj-yw-abC">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="programMenuHandler:" target="-2" id="qle-81-n4P"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Show Details" toolTip="Reveal more information about this show" id="FwI-wW-1Do">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="programMenuHandler:" target="-2" id="Qex-Or-8oU"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Show in Finder" tag="2" toolTip="Show video file in Finder" id="888">
@@ -2457,7 +2469,7 @@
         </menu>
         <menu title="DownloadTableMenu" id="404">
             <items>
-                <menuItem title="Delete" toolTip="Remove download(s) from queue" id="409">
+                <menuItem title="Remove Download" toolTip="Remove download(s) from queue" id="409">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="downloadMenuHandler:" target="-2" id="427"/>

@@ -56,5 +56,7 @@
 -(MTRPCData *)registerRPCforShow: (MTTiVoShow *) show;
 
 -(BOOL) rpcActive;
+-(void) deleteTiVoShows: (NSArray <MTTiVoShow *> *) shows;
+-(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows;
 
 @end

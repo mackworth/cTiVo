@@ -39,6 +39,8 @@
 @property (readonly) NSArray *savedBonjourTiVos;
 @property int volatile signalError;
 
+@property (nonatomic, readonly) BOOL resetRPCMap; //remove after 3.0 beta
+
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic, strong) MTTVDB *tvdb;
@@ -103,6 +105,8 @@
 -(BOOL)anyTivoActive;
 -(int) nextManualTiVoID;
 -(void)updateTiVoDefaults:(MTTiVo *)tiVo;
+-(void) deleteTivoShows: (NSArray <MTTiVoShow *> *) shows;
+-(void) stopRecordingShows: (NSArray <MTTiVoShow *> *) shows;
 
 //----------------Channel Management Methods --------
 -(void) updateChannel: (NSDictionary *) newChannel;

@@ -134,7 +134,12 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
 #else
             [NSMutableDictionary dictionary];
 #endif
-  NSData * archiveMap = [[NSUserDefaults standardUserDefaults] objectForKey:self.defaultsKey];
+    if (tiVoManager.resetRPCMap) {
+        //xxx remove after 3.0 beta
+        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:self.defaultsKey];
+    }
+
+      NSData * archiveMap = [[NSUserDefaults standardUserDefaults] objectForKey:self.defaultsKey];
     self.showMap = [NSKeyedUnarchiver unarchiveObjectWithData: archiveMap] ?: [NSMutableDictionary dictionary];
 
     self.authenticationLaunched = NO;
@@ -686,6 +691,7 @@ static NSRegularExpression * isFinalRegex = nil;
            rpcData.episodeNum = episodeNum.integerValue;
            rpcData.seasonNum = ((NSNumber *)showInfo[@"seasonNumber"] ?: @(0)).integerValue;
            rpcData.genre = genre;
+           rpcData.recordingID = (NSString *) showInfo[@"recordingId"];
            rpcData.series = (NSString *)showInfo[@"title"];
 //           NSString * mimeType = (NSString *)showInfo[@"mimeType"];  doesn't work!
 //           if ([@"video/mpg2" isEqualToString:mimeType] ){
@@ -785,6 +791,42 @@ static NSArray * imageResponseTemplate = nil;
            }
        }
     }];
+}
+
+-(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds {
+    if (recordingIds.count ==0) return;
+
+    DDLogVerbose(@"launching %@", recordingIds);
+    NSDictionary * data = @{
+                            @"bodyId": self.bodyID,
+                            @"state": @"deleted",
+                            @"recordingId": recordingIds
+                            };
+
+    [self sendRpcRequest:@"recordingUpdate"
+                 monitor:NO
+                withData:data
+       completionHandler:nil];
+}
+
+-(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds {
+    if (recordingIds.count ==0) return;
+
+    DDLogVerbose(@"launching %@", recordingIds);
+    NSDictionary * data = @{
+                            @"bodyId": self.bodyID,
+                            @"state": @"complete",
+                            @"recordingId": recordingIds
+                            };
+
+    [self sendRpcRequest:@"recordingUpdate"
+                 monitor:NO
+                withData:data
+       completionHandler:nil];
+}
+
+-(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds {
+    [self undeleteShowsWithRecordIds:recordingIds]; //coincidentally the same command
 }
 
 -(void) receiveWakeNotification: (id) sender {

@@ -153,7 +153,7 @@
 
 //USER DEFAULTS
 
-#define kMTUserDefaultVersion @"UserDefaultVersion"  //have we updated this users defaults (0 = original 2= mencoder transition
+#define kMTUserDefaultVersion @"UserDefaultVersion"  //have we updated this users defaults (0 = original 2= mencoder transition; 3= 3.0alpha (RPC info)
 #define kMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information
 #define kMTTrustTVDB @"TrustTVDB"          //Should we override TiVo with TVDB season/episode; obsolete
 #define kMTTrustTVDBEpisodes @"TrustTVDBEpisodes"     //Should we override TiVo with TVDB season/episode

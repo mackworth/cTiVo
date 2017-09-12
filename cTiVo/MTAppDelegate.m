@@ -298,6 +298,7 @@ __DDLOGHERE__
 	
     self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: 61 target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
     DDLogDetail(@"Finished appDidFinishLaunch");
+    [[NSUserDefaults standardUserDefaults] setInteger:3 forKey:kMTUserDefaultVersion];
  }
 
 -(void) launchPseudoEvent {

@@ -13,6 +13,7 @@
 #import "NSString+HTML.h"
 #import "MTTiVoManager.h"
 #import "NSNotificationCenter+Threads.h"
+#import "NSArray+Map.h"
 
 #define kMTStringType 0
 #define kMTBoolType 1
@@ -391,6 +392,26 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(BOOL) rpcActive {
     //XXX Need to see if validation failed etc
     return self.myRPC != nil && self.myRPC.isActive;
+}
+
+-(NSArray < NSString *> *) recordingIDsForShows: (NSArray <MTTiVoShow *> *) shows {
+    NSArray * recordingIds = [shows mapObjectsUsingBlock:^id(MTTiVoShow * show, NSUInteger idx) {
+        if (show.tiVo != self) {
+            return nil;
+        } else {
+            return show.rpcData.recordingID;
+        }
+    }];
+    return recordingIds;
+}
+
+-(void) deleteTiVoShows: (NSArray <MTTiVoShow *> *) shows {
+    [self.myRPC deleteShowsWithRecordIds:[self recordingIDsForShows:shows]];
+}
+
+-(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows {
+    [self.myRPC stopRecordingShowsWithRecordIds:[self recordingIDsForShows:shows]];
+
 }
 
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {

@@ -20,6 +20,10 @@
 -(void) emptyCaches;
 -(void) reloadShowInfoForID: (NSString *) showID;
 
+-(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
+-(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
+-(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
+
 @property (nonatomic, weak) id <MTRPCDelegate> delegate;
 
 @end

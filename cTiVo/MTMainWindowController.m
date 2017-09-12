@@ -354,6 +354,23 @@ __DDLOGHERE__
 						}
 					}
 				}
+                if (! thisShow.tiVo.rpcActive || !thisShow.rpcData) {
+                    //RPC tags = 3 or 4
+                    for (NSMenuItem *mi in [menu itemArray]) {
+                        if (mi.tag == 3 || mi.tag == 4) {
+                            [mi setAction:NULL];
+                        }
+                    }
+                }
+                if (!thisShow.inProgress.boolValue ) {
+                    for (NSMenuItem *mi in [menu itemArray]) {
+                        //In progress required = 4 (stop recording)
+                        if (mi.tag == 4 ) {
+                            [mi setAction:NULL];
+                        }
+                    }
+                }
+
 			}
 		}
 		if ([workingTable selectedRowIndexes].count == 0) { //No selection so disable group functions
@@ -410,7 +427,35 @@ __DDLOGHERE__
         if (thisShow.isOnDisk) {
             [thisShow revealInFinder:[thisShow copiesOnDisk]];
         }
-	}
+    } else if ([menu.title caseInsensitiveCompare:@"Delete From TiVo"] == NSOrderedSame) {
+        NSArray	<MTTiVoShow *> *selectedShows = @[tiVoShowTable.sortedShows[menuTableRow]];
+        if ([self confirmBehavior:@"delete" preposition: @"from" forShows:selectedShows]) {
+            [tiVoManager deleteTivoShows:selectedShows];
+        }
+
+    } else if ([menu.title caseInsensitiveCompare:@"Stop Recording"] == NSOrderedSame) {
+        NSArray	<MTTiVoShow *> *selectedShows = @[tiVoShowTable.sortedShows[menuTableRow]];
+        if ([self confirmBehavior:@"stop recording" preposition:@"on" forShows:selectedShows]) {
+            [tiVoManager stopRecordingShows:selectedShows];
+        }
+
+    }
+}
+
+-(BOOL) confirmBehavior: (NSString *) behavior preposition:(NSString *) prep forShows:(NSArray <MTTiVoShow *> *) shows {
+    NSString * msg = nil;
+    if (shows.count == 1) {
+        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' %@ TiVo %@?", behavior, shows[0].showTitle, prep, shows[0].tiVoName ];
+    } else if (shows.count == 2) {
+        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and '%@' %@ your TiVo?",behavior, shows[0].showTitle, shows[1].showTitle, prep ];
+    } else {
+        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and %d others %@ your TiVo?", behavior, shows[0].showTitle, (int)shows.count -1, prep ];
+    }
+
+    NSAlert *myAlert = [NSAlert alertWithMessageText:msg defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@"This cannot be undone."];
+    myAlert.alertStyle = NSCriticalAlertStyle;
+    NSInteger result = [myAlert runModal];
+    return (result == NSAlertAlternateReturn);
 }
 
 

@@ -20,6 +20,7 @@
 
 @property (nonatomic, strong) NSString * rpcID; //format: @"TiVo|objectID"
 
+@property (nonatomic, strong) NSString * recordingID;
 @property (nonatomic, assign) NSInteger episodeNum;
 @property (nonatomic, assign) NSInteger seasonNum;
 @property (nonatomic, strong) NSString * genre;
