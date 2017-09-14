@@ -39,8 +39,6 @@
 @property (readonly) NSArray *savedBonjourTiVos;
 @property int volatile signalError;
 
-@property (nonatomic, readonly) BOOL resetRPCMap; //remove after 3.0 beta
-
 //Other Properties
 @property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic, strong) MTTVDB *tvdb;

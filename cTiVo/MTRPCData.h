@@ -32,6 +32,7 @@
 
 @protocol MTRPCDelegate <NSObject>
 
+-(void) setTiVoSerialNumber:(NSString *) tsn;
 -(void) receivedRPCData:(MTRPCData *) data;
 -(void) tivoReportsNewShows: (NSArray <NSString *> *) newShows andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows;
 

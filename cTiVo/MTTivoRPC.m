@@ -15,6 +15,8 @@
 @property (nonatomic, strong) NSOutputStream *oStream;
 
 @property (nonatomic, strong) NSString * hostName;
+@property (nonatomic, strong) NSString * tiVoSerialNumber;
+
 @property (nonatomic, strong) NSString * mediaAccessKey;
 @property (nonatomic, assign) int32_t  hostPort;
 
@@ -112,13 +114,16 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
 
 }
 
--(instancetype) initServer: (NSString *)serverAddress onPort: (int32_t) port andMAK:(NSString *) mediaAccessKey{
+-(instancetype) initServer: (NSString *)serverAddress tsn: (NSString *) tsn onPort: (int32_t) port andMAK:(NSString *) mediaAccessKey{
     if (!serverAddress.length) return nil;
     if ((self = [super init])){
         self.hostName = serverAddress;
+        self.tiVoSerialNumber = tsn;
         self.hostPort = port;
         self.mediaAccessKey = mediaAccessKey;
         [self commonInit];
+        //xxx remove after 3.0 beta
+        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:[NSString stringWithFormat:@"%@ - %@", kMTRPCMap, self.hostName ?:@"unknown"]];
     }
     return self;
 }
@@ -134,13 +139,6 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
 #else
             [NSMutableDictionary dictionary];
 #endif
-    if (tiVoManager.resetRPCMap) {
-        //xxx remove after 3.0 beta
-        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:self.defaultsKey];
-    }
-
-      NSData * archiveMap = [[NSUserDefaults standardUserDefaults] objectForKey:self.defaultsKey];
-    self.showMap = [NSKeyedUnarchiver unarchiveObjectWithData: archiveMap] ?: [NSMutableDictionary dictionary];
 
     self.authenticationLaunched = NO;
     self.firstLaunch = YES;
@@ -149,10 +147,24 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receiveWakeNotification:)
                                                                name: NSWorkspaceDidWakeNotification object: NULL];
-[[NSNotificationCenter defaultCenter] addObserver:self
+    [[NSNotificationCenter defaultCenter] addObserver:self
         selector:@selector(appWillTerminate:) 
             name:NSApplicationWillTerminateNotification 
           object:nil];
+}
+
+-(void) setTiVoSerialNumber:(NSString *)TSN {
+    if (TSN.length == 0) return;
+    if ([TSN isEqualToString:_tiVoSerialNumber]) return;
+    if ([TSN hasPrefix:@"tsn:"]) {
+        TSN = [TSN substringWithRange:NSMakeRange(4, TSN.length-4)];
+    }
+
+    _tiVoSerialNumber = TSN;
+    if (!self.showMap.count) {
+        NSData * archiveMap = [[NSUserDefaults standardUserDefaults] objectForKey:self.defaultsKey];
+        self.showMap = [NSKeyedUnarchiver unarchiveObjectWithData: archiveMap] ?: [NSMutableDictionary dictionary];
+    }
 }
 
 -(void) emptyCaches {
@@ -182,7 +194,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
 }
 
 -(NSString *) defaultsKey {
-    return [NSString stringWithFormat:@"%@ - %@", kMTRPCMap, self.hostName ?:@"unknown"];
+    return [NSString stringWithFormat:@"%@ - %@", kMTRPCMap, self.tiVoSerialNumber ?:@"unknown"];
 }
 
  -(void) launchStreams {
@@ -553,6 +565,8 @@ static NSRegularExpression * isFinalRegex = nil;
                if (bodyId) {
                    self.bodyID =bodyId;
                    DDLogVerbose(@"Got BodyID: %@", self.bodyID);
+                   self.tiVoSerialNumber = bodyId;
+                   [self.delegate setTiVoSerialNumber:bodyId];
                    [self getAllShows];
                }
            }

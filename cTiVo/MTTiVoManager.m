@@ -94,12 +94,6 @@ __DDLOGHERE__
 		_signalError = 0;
 		self.opsQueue.maxConcurrentOperationCount = 4;
 
-        if ([[NSUserDefaults standardUserDefaults] integerForKey:kMTUserDefaultVersion] < 3) {
-            _resetRPCMap = YES;
-        } else {
-            _resetRPCMap = NO;
-        }
-
 		_processingPaused = @(NO);
 		[self loadUserNotifications];
         [self setupMetadataQuery];
@@ -257,6 +251,7 @@ __DDLOGHERE__
             [self notifyWithTitle: [NSString stringWithFormat: @"Formats like %@ are not recommended!", warnUserDeprecated ]
                          subTitle: @"Switch to Default or another Format" ];
         }
+        [[NSUserDefaults standardUserDefaults] setInteger:2 forKey:kMTUserDefaultVersion];
     }
 
 }
@@ -354,16 +349,19 @@ __DDLOGHERE__
 				}
 				if (targetMTTiVo) {
 					if ([targetMTTiVo.tiVo.iPAddress caseInsensitiveCompare:mTiVo[kMTTiVoIPAddress]] != NSOrderedSame ||  //Update if required, incl. a new MTTiVo
-							   [targetMTTiVo.tiVo.userName compare:mTiVo[kMTTiVoUserName]] != NSOrderedSame ||
-							   targetMTTiVo.tiVo.userPort != [mTiVo[kMTTiVoUserPort] intValue] ||
-							   targetMTTiVo.tiVo.userPortSSL != [mTiVo[kMTTiVoUserPortSSL] intValue] ||
-							   ![targetMTTiVo.mediaKey isEqualToString:mTiVo[kMTTiVoMediaKey]]
+                        [targetMTTiVo.tiVo.userName compare:mTiVo[kMTTiVoUserName]] != NSOrderedSame ||
+                        targetMTTiVo.tiVo.userPort != [mTiVo[kMTTiVoUserPort] intValue] ||
+                        targetMTTiVo.tiVo.userPortSSL != [mTiVo[kMTTiVoUserPortSSL] intValue] ||
+                        targetMTTiVo.tiVo.userPortRPC != [mTiVo[kMTTiVoUserPortRPC] intValue] ||
+                        (targetMTTiVo.tiVoSerialNumber &&![targetMTTiVo.tiVoSerialNumber isEqualToString: mTiVo[kMTTiVoTSN]]) ||
+                        (targetMTTiVo.mediaKey &&![targetMTTiVo.mediaKey isEqualToString: mTiVo[kMTTiVoMediaKey]])
 							   ) { // If there's a change then edit it and update
 						targetMTTiVo.tiVo.iPAddress = mTiVo[kMTTiVoIPAddress];
 						targetMTTiVo.tiVo.userName = mTiVo[kMTTiVoUserName];
 						targetMTTiVo.tiVo.userPort = (short)[mTiVo[kMTTiVoUserPort] intValue];
-						targetMTTiVo.tiVo.userPortSSL = (short)[mTiVo[kMTTiVoUserPortSSL] intValue];
-						targetMTTiVo.enabled = [mTiVo[kMTTiVoEnabled] boolValue];
+                        targetMTTiVo.tiVo.userPortSSL = (short)[mTiVo[kMTTiVoUserPortSSL] intValue];
+                        targetMTTiVo.tiVo.userPortRPC = (short)[mTiVo[kMTTiVoUserPortRPC] intValue];
+                        targetMTTiVo.tiVoSerialNumber = mTiVo[kMTTiVoTSN];
 						targetMTTiVo.mediaKey = mTiVo[kMTTiVoMediaKey];
 						DDLogDetail(@"Updated manual TiVo %@",targetMTTiVo);
 						shouldUpdateTiVo = YES;
@@ -411,26 +409,26 @@ __DDLOGHERE__
 }
 
 
-//Found issues with corrupt, or manually edited entries in the manual array so use this to remove them
--(NSArray *)getManualTiVoDescriptions
-{
-	NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
-	NSMutableArray *itemsToRemove = [NSMutableArray array];
-    for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
-		if (manualTiVoDescription.count != 6 ||
-			((NSString *)manualTiVoDescription[kMTTiVoUserName]).length == 0 ||
-			((NSString *)manualTiVoDescription[kMTTiVoIPAddress]).length == 0) {
-			[itemsToRemove addObject:manualTiVoDescription];
-			continue;
-		}
-	}
-	if (itemsToRemove.count) {
-		DDLogMajor(@"Removing manual Tivos %@", itemsToRemove);
-		[manualTiVoDescriptions removeObjectsInArray:itemsToRemove];
-		[[NSUserDefaults standardUserDefaults] setObject:manualTiVoDescriptions forKey:kMTManualTiVos];
-	}
-	return [NSArray arrayWithArray:manualTiVoDescriptions];
-}
+////Found issues with corrupt, or manually edited entries in the manual array so use this to remove them
+//-(NSArray *)getManualTiVoDescriptions
+//{
+//	NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
+//	NSMutableArray *itemsToRemove = [NSMutableArray array];
+//    for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
+//		if (manualTiVoDescription.count != 7 ||
+//			((NSString *)manualTiVoDescription[kMTTiVoUserName]).length == 0 ||
+//			((NSString *)manualTiVoDescription[kMTTiVoIPAddress]).length == 0) {
+//			[itemsToRemove addObject:manualTiVoDescription];
+//			continue;
+//		}
+//	}
+//	if (itemsToRemove.count) {
+//		DDLogMajor(@"Removing manual Tivos %@", itemsToRemove);
+//		[manualTiVoDescriptions removeObjectsInArray:itemsToRemove];
+//		[[NSUserDefaults standardUserDefaults] setObject:manualTiVoDescriptions forKey:kMTManualTiVos];
+//	}
+//	return [NSArray arrayWithArray:manualTiVoDescriptions];
+//}
 
 -(NSArray *)savedTiVos
 {
@@ -487,17 +485,6 @@ __DDLOGHERE__
     [tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
 }
 
-//-(NSArray *)hostAddresses
-//{
-//    NSArray *ret = _hostAddresses;
-//    if (!_hostAddresses) {
-//        self.hostAddresses = [[NSHost currentHost] addresses];
-//		DDLogDetail(@"Host Addresses:  %@",self.hostAddresses);
-//        ret = _hostAddresses;
-//    }
-//    return ret;
-//}
-
 -(NSArray *)tiVoAddresses
 {
     NSMutableArray *addresses = [NSMutableArray array];
@@ -507,7 +494,7 @@ __DDLOGHERE__
             [addresses addObject:ipAddress];
         }
     }
-	DDLogVerbose(@"Tivo Addresses:  %@",addresses);
+    DDLogVerbose(@"Tivo Addresses:  %@",addresses);
     return addresses;
 }
 
@@ -848,7 +835,9 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 				if ([savedTiVo[kMTTiVoID] intValue] == tiVo.manualTiVoID) {
 					tiVo.tiVo.userName = savedTiVo[kMTTiVoUserName];
 					tiVo.tiVo.userPort = (short)[savedTiVo[kMTTiVoUserPort] intValue];
-					tiVo.tiVo.userPortSSL = (short)[savedTiVo[kMTTiVoUserPortSSL] intValue];
+                    tiVo.tiVo.userPortSSL = (short)[savedTiVo[kMTTiVoUserPortSSL] intValue];
+                    tiVo.tiVo.userPortRPC = (short)[savedTiVo[kMTTiVoUserPortRPC] intValue];
+                    tiVo.tiVoSerialNumber = savedTiVo[kMTTiVoTSN];
 					tiVo.mediaKey = savedTiVo[kMTTiVoMediaKey];
 					tiVo.tiVo.iPAddress = savedTiVo[kMTTiVoIPAddress];
 					tiVo.enabled = [savedTiVo[kMTTiVoEnabled] boolValue];
@@ -859,6 +848,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 				if ([savedTiVo[kMTTiVoUserName] isEqualToString:tiVo.tiVo.name]) {
 					tiVo.mediaKey = savedTiVo[kMTTiVoMediaKey];
 					tiVo.enabled = [savedTiVo[kMTTiVoEnabled] boolValue];
+                    tiVo.tiVoSerialNumber = savedTiVo[kMTTiVoTSN];
 				}
 			}
 		}
@@ -1749,16 +1739,17 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 		return;
 	}
     
-	for (NSString *tiVoAddress in [self tiVoAddresses]) {
-		DDLogVerbose(@"Comparing new TiVo %@ address %@ to existing %@",sender.name, ipAddress, tiVoAddress);
-		if ([tiVoAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
-			DDLogDetail(@"Rejecting duplicate TiVo at %@",ipAddress);
-			return;  // This filters out tivos that have already been found from a manual entry
-		}
-	}
-    
-	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:self.opsQueue];
-    newTiVo.supportsTransportStream = [TSN characterAtIndex:0] > '6' || [TSN hasPrefix:@"663"];
+
+    MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:self.opsQueue];
+    newTiVo.tiVoSerialNumber = TSN;
+    for (NSString *tiVoAddress in [self tiVoAddresses]) {
+        DDLogVerbose(@"Comparing new TiVo %@ address %@ to existing %@",sender.name, ipAddress, tiVoAddress);
+        if ([tiVoAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
+            DDLogDetail(@"Rejecting duplicate TiVo at %@",ipAddress);
+            newTiVo.enabled = NO;  // This filters out tivos that have already been found from a manual entry
+        }
+    }
+
 	self.tiVoList = [_tiVoList arrayByAddingObject: newTiVo];
 	if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];

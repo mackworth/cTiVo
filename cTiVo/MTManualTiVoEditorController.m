@@ -118,16 +118,16 @@ __DDLOGHERE__
     if ([[NSUserDefaults standardUserDefaults] objectForKey:kMTTiVos]) {
         tiVos = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTiVos]];
     }
-	if (((NSArray *)manualTiVoArrayController.arrangedObjects).count == 0) { //No template to check
-		[tiVos addObject:@{@"enabled" : [NSNumber numberWithBool:NO], kMTTiVoUserName : @"TiVo Name", kMTTiVoIPAddress : @"0.0.0.0", kMTTiVoUserPort : @"80", kMTTiVoUserPortSSL : @"443", kMTTiVoID : @1, kMTTiVoManualTiVo : @YES, kMTTiVoMediaKey : @""} ];
+    NSNumber *newID = @1;
+    if (((NSArray *)manualTiVoArrayController.arrangedObjects).count > 1) { //check templates
 	} else {
         NSMutableArray *manualTiVos = manualTiVoArrayController.arrangedObjects;
 		NSSortDescriptor *idDescriptor = [NSSortDescriptor sortDescriptorWithKey:kMTTiVoID ascending:NO];
 		NSArray *sortedByID = [manualTiVos sortedArrayUsingDescriptors:@[idDescriptor]];
-		NSNumber *newID = [NSNumber numberWithInt:[[sortedByID[0] objectForKey:kMTTiVoID] intValue]+1];
-        [tiVos addObject:@{@"enabled" : [NSNumber numberWithBool:NO], kMTTiVoUserName : @"TiVo Name", kMTTiVoIPAddress : @"0.0.0.0", kMTTiVoUserPort : @"80", kMTTiVoUserPortSSL : @"443", kMTTiVoID : newID, kMTTiVoManualTiVo : @YES, kMTTiVoMediaKey : @""}];
+		newID = @([[sortedByID[0] objectForKey:kMTTiVoID] intValue]+1);
     }
-    [[NSUserDefaults standardUserDefaults] setValue:tiVos forKeyPath:kMTTiVos];
+    [tiVos addObject:@{@"enabled" : @NO, kMTTiVoUserName : @"TiVo Name", kMTTiVoIPAddress : @"0.0.0.0", kMTTiVoUserPort : @"80", kMTTiVoUserPortSSL : @"443", kMTTiVoUserPortRPC: @"1413", kMTTiVoID : newID, kMTTiVoTSN : @"", kMTTiVoManualTiVo : @YES, kMTTiVoMediaKey : @""}];
+   [[NSUserDefaults standardUserDefaults] setValue:tiVos forKeyPath:kMTTiVos];
 }
 
 

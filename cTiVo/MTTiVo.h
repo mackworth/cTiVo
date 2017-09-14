@@ -26,6 +26,7 @@
 @property (nonatomic, strong) NSDate *lastDownloadEnded;
 @property (strong) NSArray *shows;
 @property (nonatomic, strong) MTNetService *tiVo;
+@property (nonatomic, strong) NSString * tiVoSerialNumber;
 @property BOOL  manualTiVo, enabled;
 @property BOOL mediaKeyIsGood,storeMediaKeyInKeychain;
 @property BOOL isReachable;
@@ -34,7 +35,6 @@
 @property (nonatomic) BOOL supportsTransportStream;
 
 +(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
-+(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;
 +(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue;
 
 -(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;

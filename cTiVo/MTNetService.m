@@ -15,7 +15,8 @@
     self = [super init];
     if (self) {
         self.userPort = 80;
-		self.userPortSSL = 443;
+        self.userPortSSL = 443;
+        self.userPortRPC = 1413;
         self.userName = nil;
         self.iPAddress = nil;
     }
@@ -63,7 +64,7 @@
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat:@"%@, host:%@:%ld/%d",self.name,self.hostName,self.port, self.userPortSSL ];
+	return [NSString stringWithFormat:@"%@, host:%@:%ld/%d/%d",self.name,self.hostName,self.port, self.userPortSSL , self.userPortRPC];
 }
 
 @end
