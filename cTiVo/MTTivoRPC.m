@@ -847,6 +847,10 @@ static NSArray * imageResponseTemplate = nil;
     [self checkStreamStatus];
 }
 
+-(void) stopServer {
+    [self sharedShutdown];
+}
+
 -(void) sharedShutdown {
     [self.deadmanTimer invalidate];
     [self tearDownStreams];

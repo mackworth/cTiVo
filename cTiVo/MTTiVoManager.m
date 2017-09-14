@@ -385,6 +385,7 @@ __DDLOGHERE__
 						[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoUpdated object:targetTiVo];
 						targetTiVo.enabled = YES;
 						targetTiVo.mediaKey = mTiVo[kMTTiVoMediaKey];
+                        targetTiVo.tiVoSerialNumber = (NSString *)mTiVo[kMTTiVoTSN];  //must be after enabled
 						[targetTiVo scheduleNextUpdateAfterDelay:0];
 						break;
 					}
@@ -837,10 +838,10 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 					tiVo.tiVo.userPort = (short)[savedTiVo[kMTTiVoUserPort] intValue];
                     tiVo.tiVo.userPortSSL = (short)[savedTiVo[kMTTiVoUserPortSSL] intValue];
                     tiVo.tiVo.userPortRPC = (short)[savedTiVo[kMTTiVoUserPortRPC] intValue];
-                    tiVo.tiVoSerialNumber = savedTiVo[kMTTiVoTSN];
 					tiVo.mediaKey = savedTiVo[kMTTiVoMediaKey];
 					tiVo.tiVo.iPAddress = savedTiVo[kMTTiVoIPAddress];
 					tiVo.enabled = [savedTiVo[kMTTiVoEnabled] boolValue];
+                    tiVo.tiVoSerialNumber = savedTiVo[kMTTiVoTSN];
 				}
 			}
         } else {

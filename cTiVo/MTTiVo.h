@@ -27,9 +27,9 @@
 @property (strong) NSArray *shows;
 @property (nonatomic, strong) MTNetService *tiVo;
 @property (nonatomic, strong) NSString * tiVoSerialNumber;
-@property BOOL  manualTiVo, enabled;
-@property BOOL mediaKeyIsGood,storeMediaKeyInKeychain;
-@property BOOL isReachable;
+@property (atomic, assign)  BOOL  manualTiVo, enabled;
+@property (nonatomic, assign)BOOL mediaKeyIsGood,storeMediaKeyInKeychain;
+@property (atomic, assign) BOOL isReachable;
 @property (nonatomic, strong) NSString *mediaKey;
 @property int manualTiVoID;
 @property (nonatomic) BOOL supportsTransportStream;
