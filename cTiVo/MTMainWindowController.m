@@ -41,6 +41,8 @@
 @interface MTMainWindowController ()
 
 @property (nonatomic, strong) NSSound *trashSound;
+@property (nonatomic, strong) NSCountedSet *loadingTiVos;
+
 @end
 
 @implementation MTMainWindowController
@@ -54,7 +56,7 @@ __DDLOGHERE__
 	DDLogDetail(@"creating Main Window");
 	self = [super initWithWindowNibName:windowNibName];
 	if (self) {
-		loadingTiVos = [NSMutableArray new];
+		_loadingTiVos = [NSCountedSet new];
         self.selectedTiVo = nil;
         _myTiVoManager = tiVoManager;
 	}
@@ -142,17 +144,14 @@ __DDLOGHERE__
     MTTiVo * tivo = (MTTiVo *) notification.object;
 	DDLogDetail(@"LoadingIndicator: %@ for %@",notification.name, tivo.tiVo.name);
     if ([notification.name  compare:kMTNotificationTiVoUpdating] == NSOrderedSame) {
-		if ([loadingTiVos indexOfObject:tivo] == NSNotFound) {
-			[loadingTiVos addObject:tivo];
-		}
+        [self.loadingTiVos addObject:tivo];
 	} else if ([notification.name compare:kMTNotificationTiVoUpdated] == NSOrderedSame) {
-		[loadingTiVos removeObject:tivo];
+        [self.loadingTiVos removeObject:tivo];
 	}
     
-	if (loadingTiVos.count) {
+	if (self.loadingTiVos.count) {
         [loadingProgramListIndicator startAnimation:nil];
-        NSString *message =[NSString stringWithFormat: @"Updating %@",[[loadingTiVos valueForKeyPath:@"tiVo.name" ] componentsJoinedByString:@", "]];
-
+        NSString *message =[NSString stringWithFormat: @"Updating %@",[[[[self.loadingTiVos valueForKeyPath:@"tiVo.name" ] allObjects] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)] componentsJoinedByString:@", "]];
         loadingProgramListLabel.stringValue = message;
     } else {
         [loadingProgramListIndicator stopAnimation:nil];

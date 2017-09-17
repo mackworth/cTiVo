@@ -1968,7 +1968,8 @@ NSString * fourChar(long n, BOOL allowZero) {
    if (source == MTTiVoSource) {
         self.artworkFile = nil;
         self.rpcData.imageURL = @"";
-    } else  {
+       [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
+   } else  {
         NSString * tvdbkey = [self mapTVDBKeyFromSource:source];
         if (tvdbkey) {
             self.tvdbData = [tiVoManager.tvdb cacheArtWork:@"" forKey:tvdbkey forShow:self];

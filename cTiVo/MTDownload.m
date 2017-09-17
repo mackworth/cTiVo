@@ -2221,7 +2221,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 				DDLogReport(@"Deleted TiVo show; marking %@",self);
 				self.downloadStatus = [NSNumber numberWithInt: kMTStatusDeleted];
                 [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
-                [self.show.tiVo scheduleNextUpdateAfterDelay:0];
 				return;
             } else {
                 NSRange serverBusy = [dataReceived rangeOfString:@"Server Busy" options:NSCaseInsensitiveSearch];

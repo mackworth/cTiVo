@@ -27,7 +27,6 @@
 	IBOutlet NSDrawer *showDetailDrawer;
 	NSPoint menuCursorPosition;
 	NSInteger menuTableRow;
-	NSMutableArray *loadingTiVos;
 }
 
 @property (nonatomic, weak) MTDownloadTableView *downloadQueueTable;

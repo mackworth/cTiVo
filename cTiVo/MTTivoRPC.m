@@ -9,6 +9,7 @@
 #import "MTTivoRPC.h"
 #import "DDLog.h"
 #import "MTTiVoManager.h" //just for maskMediaKeys
+#import "NSNotificationCenter+Threads.h"
 
 @interface MTTivoRPC () <NSStreamDelegate>
 @property (nonatomic, strong) NSInputStream *iStream;
@@ -353,6 +354,9 @@ static NSRegularExpression * isFinalRegex = nil;
                             DDLogDetail(@"Not final for %@", @(rpcID));
                         }
                     }
+                    if (isFinal) {
+                        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate];
+                    }
                     if ([jsonData[@"type"] isEqualToString:@"error"]) {
                         DDLogReport(@"Error: error JSON response. %@\n%@\n%@", headers, readPacket, jsonData);
                         return -packetLength;
@@ -524,6 +528,9 @@ static NSRegularExpression * isFinalRegex = nil;
     }
     @synchronized (self.readBlocks) {
         self.readBlocks[@(self.rpcID)] = [completionHandler copy];
+    }
+    if (!monitor) {
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdating  object:self.delegate];
     }
     [self reallyWriteData];
 }
