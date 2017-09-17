@@ -536,7 +536,7 @@ static NSRegularExpression * isFinalRegex = nil;
 }
 
 -(void) authenticate {
-    DDLogVerbose(@"Calling Authenticate");
+    DDLogDetail(@"Calling Authenticate");
     if (self.authenticationLaunched) return;
     self.authenticationLaunched = YES;
     NSDictionary * data = nil;
@@ -560,17 +560,23 @@ static NSRegularExpression * isFinalRegex = nil;
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
            DDLogVerbose(@"Authenticate from TiVo RPC: %@",jsonResponse);
-           if (self.mediaAccessKey && !self.bodyID) {
-               [self getBodyID];
+           if ([jsonResponse[@"status"] isEqualToString:@"success"]) {
+               DDLogDetail(@"Authenticated");
+               if (self.mediaAccessKey && !self.bodyID) {
+                   [self getBodyID];
+               } else {
+                   [self getAllShows];
+               }
            } else {
-               [self getAllShows];
+               DDLogReport(@"RPC Authentication failure!");
+               [self sharedShutdown];
            }
     }];
 }
 
 -(void) getBodyID {
     NSDictionary * data =  @{@"bodyId": @"-" };
-    DDLogVerbose(@"Calling BodyID");
+    DDLogDetail(@"Calling BodyID");
 
     [self sendRpcRequest:@"bodyConfigSearch"
                  monitor:NO
@@ -595,7 +601,7 @@ static NSRegularExpression * isFinalRegex = nil;
 
 
 -(void) getAllShows {
-    DDLogVerbose(@"Calling GetAllShows");
+    DDLogDetail(@"Calling GetAllShows");
 
     NSDictionary * data = @{@"flatten": @"true",
                             @"format": @"idSequence",
@@ -780,7 +786,7 @@ static NSArray * imageResponseTemplate = nil;
 -(void) getImageFor: (NSArray <NSString *> *) contentIds withObjectIds: (NSArray <NSString *> *) objectIds {
     if (contentIds.count ==0) return;
     NSAssert(contentIds.count == objectIds.count,@"Invalid ObjectIds");
-    DDLogVerbose(@"launching %@", objectIds);
+    DDLogDetail(@"Getting Images for %@", objectIds);
     if (!imageResponseTemplate) {
         imageResponseTemplate =
         @[@{
@@ -835,7 +841,7 @@ static NSArray * imageResponseTemplate = nil;
 -(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds {
     if (recordingIds.count ==0) return;
 
-    DDLogVerbose(@"launching %@", recordingIds);
+    DDLogDetail(@"Deleting shows %@", recordingIds);
     NSDictionary * data = @{
                             @"bodyId": self.bodyID,
                             @"state": @"deleted",
@@ -851,7 +857,7 @@ static NSArray * imageResponseTemplate = nil;
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds {
     if (recordingIds.count ==0) return;
 
-    DDLogVerbose(@"launching %@", recordingIds);
+    DDLogDetail(@"Stopping Recording (or Undeleting) shows %@", recordingIds);
     NSDictionary * data = @{
                             @"bodyId": self.bodyID,
                             @"state": @"complete",

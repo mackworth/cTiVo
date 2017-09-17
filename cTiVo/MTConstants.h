@@ -67,7 +67,7 @@
 
 //Contants
 
-#define kMTUpdateIntervalMinDefault 15 //Default Update interval for re-checking current TiVo
+#define kMTUpdateIntervalMinDefault 240 //Default Update interval for re-checking current TiVo
 #define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show; default, overriden by userPref
 #define kMTMaxDownloadStartupRetries 20		// Only allow 20 retries due to a download startup failuer
 //#define kMTProgressCheckDelay (2 * 60.0)	//Check progress every 60 seconds to make sure its not stalled

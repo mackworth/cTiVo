@@ -232,7 +232,10 @@ __DDLOGHERE__
     
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSaveMPGFile];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
-
+    if ([[NSUserDefaults standardUserDefaults] integerForKey: kMTUpdateIntervalMinutes] == 15) {
+        //xxx Should do one time only
+        [[NSUserDefaults standardUserDefaults] setInteger:kMTUpdateIntervalMinDefault forKey: kMTUpdateIntervalMinutes];
+    }
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelUserQuit) name:kMTNotificationUserCanceledQuit object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
@@ -398,7 +401,7 @@ BOOL tempDirectory = NO;
             [[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesDirectory];
             [self validateTmpDirectory];
         } else {
-            //XXX
+            //XXX handle download directory here
         }
    }];
     [myOpenPanel makeKeyAndOrderFront:nil];

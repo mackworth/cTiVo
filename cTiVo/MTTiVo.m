@@ -403,7 +403,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         }
     }];
     if (showsAfterDeletions) self.shows = showsAfterDeletions;
-    DDLogVerbose(@"Previous shows after deletions were: %@:",showsAfterDeletions); //xxx demote to verbose
+    DDLogVerbose(@"Previous shows after deletions were: %@:",showsAfterDeletions); 
 
     if (addedShows.count > 0) {
         self.addedShows =addedShows;
@@ -460,7 +460,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(BOOL) rpcActive {
-    //XXX Need to see if validation failed etc
     return self.myRPC != nil && self.myRPC.isActive;
 }
 
@@ -852,7 +851,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         [self updateShowsForRange :NSMakeRange( itemStart + itemCount,kMTNumberShowToGet)];
     } else {
         isConnecting = NO;
-        //XXX lengthen default full update cycle
         DDLogMajor(@"TiVo %@ completed full update", self);
         self.shows = [NSArray arrayWithArray:newShows];
         if (firstUpdate) {
