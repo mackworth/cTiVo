@@ -24,7 +24,7 @@
 @interface MTTiVo : NSObject <NSXMLParserDelegate, MTRPCDelegate>
 
 @property (nonatomic, strong) NSDate *lastDownloadEnded;
-@property (strong) NSArray *shows;
+@property (strong) NSArray < MTTiVoShow *> *shows;
 @property (nonatomic, strong) MTNetService *tiVo;
 @property (nonatomic, strong) NSString * tiVoSerialNumber;
 @property (atomic, assign)  BOOL  manualTiVo, enabled;

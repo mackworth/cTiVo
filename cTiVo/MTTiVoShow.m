@@ -714,7 +714,11 @@ __DDLOGHERE__
 }
 
 -(NSString*) idString {
-	return[NSString stringWithFormat:@"%d", _showID ];
+    return[NSString stringWithFormat:@"%d", _showID ];
+}
+
+-(NSNumber*) idNumber {
+    return @(_showID);
 }
 
 #pragma clang diagnostic push
@@ -1964,7 +1968,6 @@ NSString * fourChar(long n, BOOL allowZero) {
    if (source == MTTiVoSource) {
         self.artworkFile = nil;
         self.rpcData.imageURL = @"";
-       [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
     } else  {
         NSString * tvdbkey = [self mapTVDBKeyFromSource:source];
         if (tvdbkey) {
@@ -1982,14 +1985,13 @@ NSString * fourChar(long n, BOOL allowZero) {
     } else if (self.isEpisodicShow && (source == MTTVDBEpisode  || source == MTTVDBSeason)) {
         NSString * seasonEp = self.seasonEpisode;
         int season = self.season;
-        int episode = self.episode;
         if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTTrustTVDBEpisodes]) {
             //then we need to use tvdb episodes anyways for filenames
             NSNumber * tvdbEpsNum = self.tvdbData[kTVDBEpisodeKey];
             NSNumber * tvdbSeaNum = self.tvdbData[kTVDBSeasonKey];
             if (tvdbEpsNum && tvdbSeaNum) {
-                season = (int)tvdbSeaNum.integerValue;
-                episode = (int)tvdbEpsNum.integerValue;
+                season =      tvdbSeaNum.intValue;
+                int episode = tvdbEpsNum.intValue;
                 seasonEp = [NSString stringWithFormat:@"S%0.2dE%0.2d",season, episode ];
             }
         }
@@ -2024,7 +2026,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     self.imageInProgress = YES;
     NSString *urlString = nil;
     if (source == MTTiVoSource) {
-        if (!self.rpcData.imageURL) {
+        if (!self.rpcData.imageURL.length) {
             DDLogReport(@"Warning: TiVo imageURL not available");
             return;
         }

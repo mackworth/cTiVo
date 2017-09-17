@@ -120,6 +120,8 @@
 @property (nonatomic, readonly) BOOL    isSuggestion;
 
 @property (nonatomic, readonly) NSNumber *channelNumber;  //numeric version of channel. Used only for sorting; NA => big number
+@property (nonatomic, readonly) NSNumber *idNumber;  //numeric version of showID
+
 @property (weak, nonatomic, readonly) NSString *idString,
 										*combinedChannelString,
 										*lengthString,

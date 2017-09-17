@@ -48,6 +48,7 @@ typedef void (^ReadBlock)(NSDictionary *, BOOL);
 __DDLOGHERE__
 
 static NSArray * _myCerts = nil;        //across all TiVos; never deallocated
+SecKeychainRef keychain = NULL;  //
 
 +(void) setMyCerts:(NSArray *)myCerts {
     if (myCerts != _myCerts) {
@@ -56,6 +57,7 @@ static NSArray * _myCerts = nil;        //across all TiVos; never deallocated
 }
 
 +(NSArray *) myCerts {
+    NSString * password = @"LwrbLEFYvG";
     static dispatch_once_t onceToken = 0;
     dispatch_once(&onceToken, ^{
         DDLogDetail(@"Importing cert");
@@ -63,16 +65,15 @@ static NSArray * _myCerts = nil;        //across all TiVos; never deallocated
         if (!p12Data.length) {
             DDLogReport(@"Error getting certificate");
         }
-        NSString * password = @"LwrbLEFYvG";
 
         //SecPKCS12Import will automatically add the items to the system keychain
         //so we create our own keychain
         //make sure we create a unique keychain name:
-        SecKeychainRef keychain = NULL;  //
         NSString *temporaryDirectory = NSTemporaryDirectory();
         NSString *keychainPath = [[temporaryDirectory stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]] stringByAppendingPathExtension:@"keychain"];
+
         OSStatus status = SecKeychainCreate(keychainPath.UTF8String,
-                                            (UInt32)(0),
+                                            (UInt32)(password.length),
                                             password.UTF8String,
                                             FALSE,
                                             NULL,
@@ -83,8 +84,7 @@ static NSArray * _myCerts = nil;        //across all TiVos; never deallocated
 
         NSDictionary * optionsDictionary = @{(id)kSecImportExportPassphrase: password,
                                              (id)kSecImportExportKeychain:   (__bridge id)keychain};
-        CFArrayRef p12Items;
-
+        CFArrayRef p12Items = NULL;
         OSStatus result = SecPKCS12Import((__bridge CFDataRef)p12Data, (__bridge CFDictionaryRef)optionsDictionary, &p12Items);
         if(result != noErr) {
             DDLogReport(@"Error on pkcs12 import: %d", result);
@@ -96,13 +96,23 @@ static NSArray * _myCerts = nil;        //across all TiVos; never deallocated
             NSMutableArray * chain =  CFDictionaryGetValue(identityDict, @"chain");
             _myCerts = @[(__bridge_transfer id)identityApp, chain[1], chain[2]];
         }
-        //clean up after ourselves; note: we could keep around and reuse if stream fails, but it locks automatically and asks user to unlock
-        [[NSFileManager defaultManager] removeItemAtPath:keychainPath error:nil];
+// We should do the following,but it seems to fail the opening of the stream.
+//Instead we keep keychain around and unlock it before using certs
+//        if (keychain) {
+//            SecKeychainDelete(keychain);
+//            CFRelease(keychain);
+//        }
     });
+    SecKeychainStatus keyStatus = 0;
+    SecKeychainGetStatus(keychain, &keyStatus);
+    UInt32 mask = (kSecUnlockStateStatus | kSecReadPermStatus);
+    if (!((keyStatus & mask) == mask)) {
+        SecKeychainUnlock(keychain, (UInt32)password.length, password.UTF8String, TRUE);
+    }
     return _myCerts;
 }
 
-NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSString *)SecCopyErrorMessageString(status, NULL); }
+NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfer NSString *)SecCopyErrorMessageString(status, NULL); }
 
 -(instancetype) initServer: (NSString *)serverAddress forUser:(NSString *) user withPassword: (NSString *) password {
     if ((self = [super init])){
@@ -123,7 +133,8 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge NSStrin
         self.mediaAccessKey = mediaAccessKey;
         [self commonInit];
         //xxx remove after 3.0 beta
-        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:[NSString stringWithFormat:@"%@ - %@", kMTRPCMap, self.hostName ?:@"unknown"]];
+        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:[NSString stringWithFormat:@"%@ - %@", kMTRPCMap, self.hostName]];
+        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:[NSString stringWithFormat:@"%@ - %@", kMTRPCMap, @"unknown"]];
     }
     return self;
 }
@@ -544,6 +555,8 @@ static NSRegularExpression * isFinalRegex = nil;
            DDLogVerbose(@"Authenticate from TiVo RPC: %@",jsonResponse);
            if (self.mediaAccessKey && !self.bodyID) {
                [self getBodyID];
+           } else {
+               [self getAllShows];
            }
     }];
 }
@@ -585,8 +598,9 @@ static NSRegularExpression * isFinalRegex = nil;
                  monitor: YES
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+           //This will be called every time the TiVo List changes, so first Launch differentiates the very first time.
            DDLogVerbose(@"Got All Shows from TiVo RPC: %@", jsonResponse);
-           NSArray * shows = jsonResponse[@"objectIdAndType"];
+           NSArray <NSString *> * shows = jsonResponse[@"objectIdAndType"];
            BOOL isFirstLaunch = self.firstLaunch;
            self.firstLaunch = NO;
            DDLogDetail (@"Got %lu shows from TiVo", shows.count);
@@ -594,27 +608,31 @@ static NSRegularExpression * isFinalRegex = nil;
                self.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
                [self getShowInfoForShows: shows];
            } else {
-               NSMutableArray * newIDs = [NSMutableArray arrayWithCapacity:shows.count];
+               NSMutableArray <NSString *> *lookupDetails = [NSMutableArray array];
+               NSMutableArray <NSString *> * newIDs = [NSMutableArray array];
+               NSMutableArray <NSNumber *> * indices = [NSMutableArray array];
                NSMutableDictionary < NSString *, MTRPCData *> *deletedShows = [self.showMap mutableCopy];
-               for (NSString * objectID in shows) {
+               [shows enumerateObjectsUsingBlock:^(NSString *  _Nonnull objectID, NSUInteger idx, BOOL * _Nonnull stop) {
                    if (!self.showMap[objectID]) {
                        [newIDs addObject:objectID];
+                       [lookupDetails addObject:objectID];
+                       [indices addObject:@(idx)];
                    } else {
                        //have seen before, so don't lookup, but also don't delete
                        [deletedShows removeObjectForKey:objectID];
                        if (isFirstLaunch && !self.showMap[objectID].imageURL) {
                            //saved last time without having finished checking the art
-                           [newIDs addObject:objectID];
+                           [lookupDetails addObject:objectID];
                        }
                    }
                }
+                ];
                for (NSString * objectID in deletedShows) {
                    [self.showMap removeObjectForKey:objectID];
                }
-               [self getShowInfoForShows: newIDs];
+               [self getShowInfoForShows: lookupDetails];
                if (!isFirstLaunch) {
-                   [self.delegate tivoReportsNewShows: [newIDs copy]
-                                      andDeletedShows: [deletedShows copy]];
+                   [self.delegate tivoReportsNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
                }
            }
        } ];
@@ -863,6 +881,8 @@ static NSArray * imageResponseTemplate = nil;
 
 -(void) appWillTerminate: (id) notification {
     [self sharedShutdown];
+    SecKeychainDelete(keychain);
+    keychain = NULL;
 }
 
 @end

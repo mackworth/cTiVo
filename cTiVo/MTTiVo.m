@@ -49,7 +49,8 @@
 }
 
 @property (atomic, assign) BOOL oneBatch;
-@property (nonatomic, strong) NSArray<NSString *> * addedShows;
+@property (nonatomic, strong) NSMutableArray<NSString *> * addedShows;
+@property (nonatomic, strong) NSMutableArray<NSNumber *> * addedShowIndices;
 
 @property (nonatomic, strong) NSDate *networkAvailability;
 @property (nonatomic, strong) NSOperationQueue *opsQueue;
@@ -78,6 +79,7 @@ __DDLOGHERE__
     }
     for (NSDictionary *savedTiVo in savedTiVos) {
         if ([savedTiVo[kMTTiVoUserName] isEqualTo:thisTiVo.tiVo.name]) {
+            thisTiVo.tiVoSerialNumber = savedTiVo[kMTTiVoTSN];
             thisTiVo.enabled = [savedTiVo[kMTTiVoEnabled] boolValue];
             DDLogDetail(@"%@ is%@ Enabled", self,thisTiVo.enabled ? @"": @" not");
             return thisTiVo;
@@ -367,46 +369,60 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     return [show.tiVo rpcDataForID:show.idString];
 }
 
--(void) tivoReportsNewShows:(NSArray<NSString *> *)addedShows andDeletedShows:(NSMutableDictionary < NSString *, MTRPCData *> *)deletedIds {
-
+-(void) tivoReportsNewShows:(NSMutableArray<NSString *> *)addedShows
+              atTiVoIndices: (NSMutableArray <NSNumber *> *) addedShowIndices
+            andDeletedShows:(NSMutableDictionary < NSString *, MTRPCData *> *)deletedIds {
+    NSAssert(addedShowIndices.count == addedShows.count, @"Added RPC show problem");
+    if (isConnecting && !self.oneBatch) {
+        //change during a Tivo XML refresh; need to restart after termination
+    }
     DDLogMajor(@"Updating Tivo %@ from RPC", self);  //xxx demote to detail
     DDLogMajor(@"Adding %@ and deleting %@", addedShows, deletedIds); //xxx demote to verbose
-    if (addedShows.count + deletedIds.count >= kMTNumberShowToGetFirst) {
+    if (addedShows.count + deletedIds.count >= 5 ) {
         [self updateShows:self];  //too many changes, just reload the whole thing
         return;
     }
-    if (deletedIds.count > 0) {
-        NSMutableArray * showsAfterDeletions = [NSMutableArray arrayWithCapacity:self.shows.count];
-        for (MTTiVoShow * show in _shows) {
-            NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
-            if (deletedIds[idString ] ){
-                [self markDeletedDownloadShow:show];
-            } else {
-                [showsAfterDeletions addObject:show];
-            }
+    NSMutableArray * showsAfterDeletions = [NSMutableArray arrayWithCapacity:self.shows.count];
+    [self.shows enumerateObjectsUsingBlock:^(MTTiVoShow * _Nonnull show, NSUInteger showsIndex, BOOL * _Nonnull stop) {
+        if (deletedIds[show.idString ] ){
+            [self markDeletedDownloadShow:show];
+        } else if (show.inProgress.boolValue) {
+            //pretend inProgress have been deleted and then added
+            NSUInteger addedIndex = [addedShowIndices indexOfObjectPassingTest:^BOOL(NSNumber * _Nonnull obj, NSUInteger indicesIdx, BOOL * _Nonnull stop2) {
+                return obj.unsignedIntegerValue > showsIndex;
+            }];
+            if (addedIndex == NSNotFound) addedIndex = addedShows.count;
+            [addedShows insertObject:show.idString atIndex:addedIndex];
+            [addedShowIndices insertObject:@(showsIndex) atIndex:addedIndex];
+        } else {
+            [showsAfterDeletions addObject:show];
         }
-        self.shows = showsAfterDeletions;
-        DDLogVerbose(@"Previous shows after deletions were: %@:",showsAfterDeletions); //xxx demote to verbose
-    }
-    if (deletedIds.count == 0 || addedShows.count > 0) {  //0,0 probably means inProgress has changed
-        previousShowList = [NSMutableDictionary dictionary];
-        for (MTTiVoShow * show in self.shows) {
-            NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
-            [previousShowList setValue:show forKey:idString];
-            if (previousShowList.count > kMTNumberShowToGetFirst) break; //just need first ones
-        }
+    }];
+    if (showsAfterDeletions) self.shows = showsAfterDeletions;
+    DDLogVerbose(@"Previous shows after deletions were: %@:",showsAfterDeletions); //xxx demote to verbose
 
-        [newShows removeAllObjects];
-        self.addedShows = addedShows;
-
-        [self startNPLDownload:kMTNumberShowToGetFirst];
+    if (addedShows.count > 0) {
+        self.addedShows =addedShows;
+        self.addedShowIndices = addedShowIndices;
+        [self startNPLDownload:NO];
     } else {
         [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:nil];
         [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationTiVoShowsUpdated object:nil];
     }
 }
 
--(void) startNPLDownload:(uint) numToGet {
+-(NSRange) getFirstRange:(NSMutableArray <NSNumber *> *)indices {
+    if (indices.count == 0) return NSMakeRange(0, 0);;
+    NSUInteger end = 0;
+    while (indices.count < end && indices[end].unsignedIntegerValue+1 == indices[end].unsignedIntegerValue+1) end++;
+    NSUInteger startValue = indices[0].unsignedIntegerValue;
+    NSUInteger endValue = indices[end].unsignedIntegerValue;
+    return NSMakeRange(startValue,
+                       endValue-startValue+1);
+}
+
+-(void) startNPLDownload:(BOOL) getAll {
+    
     if (isConnecting || !self.enabled) {
         DDLogDetail(@"But was %@", isConnecting? @"Connecting!": @"Disabled!");
         return;
@@ -416,13 +432,20 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         self.showURLConnection = nil;
     }
     isConnecting = YES;
+    [newShows removeAllObjects];
+
     [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationTiVoUpdating object:self];
     if (self.currentNPLStarted) {
         [self saveLastLoadTime:self.currentNPLStarted];
     }
     self.currentNPLStarted = [NSDate date];
-    self.oneBatch = (numToGet > 0); //only get first batch
-    [self updateShowsStartingAt:0 withCount: numToGet ?: kMTNumberShowToGetFirst];
+    self.oneBatch = !getAll;
+    if (getAll) {
+        [self updateShowsForRange:NSMakeRange(0, kMTNumberShowToGetFirst)];
+    } else {
+        [self updateShowsForRange:[self getFirstRange: self.addedShowIndices]];
+
+    }
 
 }
 
@@ -479,14 +502,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     if (!self.enabled) return;
     previousShowList = [NSMutableDictionary dictionary];
 	for (MTTiVoShow * show in _shows) {
-		NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
 		if(!show.inProgress.boolValue){
-			[previousShowList setValue:show forKey:idString];
+			[previousShowList setValue:show forKey:show.idString];
 		}
 	}
     DDLogVerbose(@"Previous shows were: %@:",previousShowList);
-	[newShows removeAllObjects];
-    [self startNPLDownload:0];
+    [self startNPLDownload:YES];
 }
 
 -(NSInteger)isProcessing
@@ -508,18 +529,20 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
--(void)updateShowsStartingAt:(int)anchor withCount:(int)count {
+-(void) updateShowsForRange:(NSRange) range {
     NSString *portString = @"";
     if ([_tiVo isKindOfClass:[MTNetService class]]) {
         portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];
     }
 
-    NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,anchor,count] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    if (previousShowList.count ==0 && anchor ==0) {
+    NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,(int)range.location,(int)range.length] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    if (self.oneBatch) {
+        DDLogMajor(@"Loading RPC info from TiVo %@ shows from %d to %d at URL %@",self, (int)range.location, (int)NSMaxRange(range)-1, tivoURLString);
+    } else if (previousShowList.count ==0 && range.location ==0) {
         //first time for this tivo:
         DDLogReport(@"Initial loading from TiVo %@ at URL %@",self, tivoURLString);
     } else {
-        DDLogMajor(@"Loading from TiVo %@ shows from %d to %d at URL %@",self, anchor, anchor+count, tivoURLString);
+        DDLogMajor(@"Loading from TiVo %@ shows from %d to %d at URL %@",self, (int)range.location, (int)NSMaxRange(range)-1, tivoURLString);
     }
     NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
     NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
@@ -682,41 +705,36 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                     self.currentNPLStarted = backUpToTime;
                 }
             }
-            //XXX review log entries here
-            NSString * newShowID = [NSString stringWithFormat:@"%d",currentShow.showID];
-            MTTiVoShow *thisShow = [previousShowList valueForKey:newShowID];
-            if (self.oneBatch) {
-                if ([self.addedShows indexOfObject:newShowID] != NSNotFound) {
-                    if (thisShow) {
-                        DDLogMajor(@"RPC Already had show %@ at %@!!!", thisShow, newShowID);
-                    } else {
-                        DDLogMajor(@"RPC Adding %@ at %@", currentShow, newShowID);
-                        thisShow = currentShow;
-                    }
+            NSString * newShowID = currentShow.idString;
+            MTTiVoShow *thisShow = nil;
+           if (self.oneBatch) {
+               thisShow = currentShow;
+                if ([newShowID isEqualToString:[self.addedShows firstObject]]) {
+                    DDLogMajor(@"RPC Adding %@ at %@", currentShow, newShowID);
+                    [self.addedShows removeObjectAtIndex:0];
                 } else {
-                    if (!thisShow) {
-                        DDLogMajor(@"RPC Neither in added list, nor already existing: %@ at %@!!!", currentShow, newShowID);
-                    } else {
-                        DDLogMajor(@"RPC Skipping %@ for %@", thisShow, newShowID);
-                    }
+                    DDLogReport(@"RPC out of sync: %@ v %@", newShowID, self.addedShows );
+                    //xxx RELOAD SHOWS HERE
+                }
+            } else {
+                thisShow = [previousShowList valueForKey:newShowID];
+                if (thisShow) {
+                    DDLogDetail(@"Updated show %@", currentShow.showTitle);
+                    [previousShowList removeObjectForKey:newShowID];
+                    if (thisShow.inProgress.boolValue) thisShow = currentShow;
+                } else {
+                    thisShow = currentShow;
+                    DDLogDetail(@"Added new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested " : @"", currentShow.showTitle, currentShow.showDateString);
+                    //Now check and see if this was in the oldQueue (from last ctivo execution)
+                    if (firstUpdate) [tiVoManager replaceProxyInQueue:currentShow];
                 }
             }
-            numAddedThisBatch++;
-            if (thisShow) {
-                DDLogDetail(@"Updated show %@", currentShow.showTitle);
-                [previousShowList removeObjectForKey:newShowID];
-                if (thisShow.inProgress.boolValue) thisShow = currentShow;
-            } else {
-                DDLogDetail(@"Added new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested ":@"", currentShow.showTitle, currentShow.showDateString);
-				//Now check and see if this was in the oldQueue (from last ctivo execution)
-				if (firstUpdate) [tiVoManager replaceProxyInQueue:currentShow];
-                thisShow = currentShow;
-			}
             if (!thisShow.gotDetails) {
                 NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil];
                 [self.opsQueue addOperation:nextDetail];
                 
             }
+            numAddedThisBatch++;
             [newShows addObject:thisShow];
 			currentShow = nil;
         }
@@ -783,7 +801,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	//Check if we're done yet
     int numDuplicates =itemCount-numAddedThisBatch;
     if (itemCount == 0) {
-        DDLogReport(@"TiVo returned ZERO requested shows! Ignoring shows from %d to %d", itemStart, totalItemsOnTivo);
+        if (self.oneBatch) {
+            DDLogReport(@"TiVo returned ZERO of %d requested shows for RPC!", (int)[self getFirstRange:self.addedShowIndices].length);
+        } else {
+            DDLogReport(@"TiVo returned ZERO requested shows! Ignoring shows from %d to %d", itemStart, totalItemsOnTivo);
+        }
     } else if (numDuplicates == 0) {
         DDLogMajor(@"Finished batch for %@. Added %d shows.", self, numAddedThisBatch);
     } else if (numAddedThisBatch == 0) {  //Streaming Movies reported as shows bug
@@ -797,36 +819,28 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         if (newShows.count > _shows.count) {
             self.shows = [NSArray arrayWithArray:newShows];
         }
-        [self updateShowsStartingAt:itemStart + itemCount withCount:kMTNumberShowToGet];
+        [self updateShowsForRange :NSMakeRange( itemStart + itemCount,kMTNumberShowToGet)];
     } else {
-        isConnecting = NO;
         if (self.oneBatch) {
-            NSMutableArray * firstArray = [[self.
-                                            shows subarrayWithRange:NSMakeRange(0, MIN(self.shows.count,(unsigned long)kMTNumberShowToGetFirst))] mutableCopy];
-            NSMutableArray * added = [self.addedShows mutableCopy];
-            for (MTTiVoShow * newShow  in newShows) {
-                NSString * newID = [NSString stringWithFormat:@"%d", newShow.showID];
-                NSInteger addedIndex = [added indexOfObject:newID];
-                if (addedIndex != NSNotFound) {
-                    [added removeObjectAtIndex:addedIndex];
+            NSRange currentBatch = [self getFirstRange:self.addedShowIndices];
+            if (currentBatch.length != newShows.count) {
+                DDLogReport(@"tivo out of sync!");
+                isConnecting = NO;
+                [self scheduleNextUpdateAfterDelay:0];
+            } else {
+                NSMutableArray * updatedShows = [self.shows mutableCopy];
+                [updatedShows insertObjects:newShows atIndexes:[NSIndexSet indexSetWithIndexesInRange:currentBatch]];
+                self.shows = updatedShows;
+                [newShows removeAllObjects];
+                [self.addedShowIndices removeObjectsInRange:NSMakeRange(0, currentBatch.length)];
+                if (self.addedShowIndices.count > 0) {
+                    [self updateShowsForRange :[self getFirstRange:self.addedShowIndices]];
                 } else {
-                    NSInteger firstIndex = [firstArray indexOfObject:newShow];
-                    if (firstIndex != NSNotFound) {
-                        [firstArray removeObjectAtIndex:firstIndex];
-                    } else {
-                      DDLogMajor(@"Show %@ not found in either update %@ or first group %@", newShow, added, firstArray);
-                        [self updateShows:self];
-                        return;
-                    }
+                    isConnecting = NO;
                 }
             }
-            DDLogMajor(@"TiVo %@ updated by RPC", self);
-            DDLogMajor(@"Assembling new show list: (%d) + (%d) + (%d)", (int)newShows.count, (int)firstArray.count, (int)(self.shows.count - kMTNumberShowToGetFirst));
-            //stitch together: shows added during batch processing, then other shows in first 15
-            [newShows addObjectsFromArray:firstArray];
-            [newShows addObjectsFromArray:[self.shows subarrayWithRange:NSMakeRange(kMTNumberShowToGetFirst, self.shows.count - kMTNumberShowToGetFirst)]];
-             self.shows = [NSArray arrayWithArray:newShows];
         } else {
+            isConnecting = NO;
             //XXX lengthen default full update cycle
             DDLogMajor(@"TiVo %@ completed full update", self);
             self.shows = [NSArray arrayWithArray:newShows];
@@ -986,13 +1000,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 - (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-	NSString *password = self.mediaKey;
 	if (challenge.previousFailureCount == 0) {
 		DDLogDetail(@"%@ password ask",self);
         if (challenge.proposedCredential) {
             DDLogDetail(@"Got mediaKey from keyChain");
-            self.mediaKey = challenge.proposedCredential.password;
-            [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:NO];
+            NSString * newPassword = challenge.proposedCredential.password;
+            if (newPassword && ![newPassword isEqualToString:self.mediaKey]) {
+                self.mediaKey = newPassword;
+                [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:NO];
+            }
 
             [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
         } else {
@@ -1001,7 +1017,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             if (self.storeMediaKeyInKeychain) {
                 persistance = NSURLCredentialPersistencePermanent;
             }
-            NSURLCredential *myCredential = [NSURLCredential credentialWithUser:@"tivo" password:password persistence:persistance];
+            NSURLCredential *myCredential = [NSURLCredential credentialWithUser:@"tivo" password:self.mediaKey persistence:persistance];
             [challenge.sender useCredential:myCredential forAuthenticationChallenge:challenge];
         }
 	} else {
