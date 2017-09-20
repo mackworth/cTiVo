@@ -255,11 +255,8 @@ __DDLOGHERE__
          [column.identifier isEqualToString:kMTArtColumn ]  ) {
         if ( [column.identifier isEqualToString:kMTArtColumn ] && self.imageRowHeight > 0) {
             self.imageRowHeight = -self.imageRowHeight;  //use as trigger to recalculate, but remember old size in case it hasn't changed.
-        } else {
-            NSInteger columnNum = [self columnWithIdentifier:column.identifier];
-            [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.sortedShows.count)]
-                            columnIndexes:[NSIndexSet indexSetWithIndex:columnNum]];
         }
+        [self reloadData];
    }
 }
 
@@ -422,8 +419,7 @@ __DDLOGHERE__
         }
     } else if ([identifier isEqualToString:@"icon"]) {
         NSString * imageName = thisShow.imageString;
-        result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
-        result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
+        result.imageView.imageScaling = NSImageScaleProportionallyUpOrDown;
         result.imageView.image = [NSImage imageNamed: imageName];
         result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
     } else {
@@ -447,10 +443,20 @@ __DDLOGHERE__
 
 
 -(void) didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row {
+    //anybody can tell me why I need to do this after adding; I would be happy
     NSInteger column = [self columnWithIdentifier: kMTArtColumn];
     MTProgressCell * cell = [rowView  viewAtColumn:column];
     cell.imageView.frame = cell.bounds;
     cell.progressIndicator.frame = cell.bounds;
+
+    column = [self columnWithIdentifier: @"icon"];
+    NSTableCellView *view = [rowView viewAtColumn:column];
+    view.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
+    CGFloat width = self.tableColumns[column].width;
+    CGFloat height = MIN(width, MIN(self.rowHeight, 24));
+    CGFloat leftMargin = (width -height)/2;
+    CGFloat topMargin = (self.rowHeight-height)/2;
+    view.imageView.frame = CGRectMake(leftMargin, topMargin, height, height);
 }
 
 #pragma mark Drag N Drop support

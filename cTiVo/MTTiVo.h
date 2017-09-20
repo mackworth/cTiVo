@@ -28,11 +28,11 @@
 @property (nonatomic, strong) MTNetService *tiVo;
 @property (nonatomic, strong) NSString * tiVoSerialNumber;
 @property (atomic, assign)  BOOL  manualTiVo, enabled;
-@property (nonatomic, assign)BOOL mediaKeyIsGood,storeMediaKeyInKeychain;
+@property (nonatomic, assign)BOOL storeMediaKeyInKeychain;
 @property (atomic, assign) BOOL isReachable;
 @property (nonatomic, strong) NSString *mediaKey;
 @property int manualTiVoID;
-@property (nonatomic) BOOL supportsTransportStream;
+@property (nonatomic, readonly) BOOL supportsTransportStream, supportsRPC;
 
 +(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
 +(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue;

@@ -126,9 +126,7 @@ __DDLOGHERE__
 		self.showURLConnection = nil;
 		_mediaKey = @"";
 		isConnecting = NO;
-		_mediaKeyIsGood = NO;
         managingDownloads = NO;
-        _supportsTransportStream = YES;
         _manualTiVo = NO;
 		firstUpdate = YES;
 		_enabled = YES;
@@ -253,7 +251,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void) setEnabled:(BOOL)enabled {
     if (enabled && !self.myRPC) {
-        if (self.supportsTransportStream) {
+        if (self.supportsRPC) {
             int port = self.manualTiVo ? self.tiVo.userPortRPC : 1413;
             self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName tsn:self.tiVoSerialNumber onPort: port andMAK:self.mediaKey];
             self.myRPC.delegate = self;
@@ -281,7 +279,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         TSN = [TSN substringWithRange:NSMakeRange(4, TSN.length-4)];
     }
     _tiVoSerialNumber = TSN;
-    self.supportsTransportStream = [TSN characterAtIndex:0] > '6' || [TSN hasPrefix:@"663"];
 
     if (!self.enabled) return;
     for (MTTiVo * otherTiVo in [tiVoManager tiVoList]) {
@@ -457,6 +454,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(MTRPCData *) rpcDataForID: (NSString *) idString {
     return [self.myRPC rpcDataForID:idString];
+}
+
+-(BOOL) supportsTransportStream {
+    NSString * TSN = self.tiVoSerialNumber;
+    return TSN.length == 0 || [TSN characterAtIndex:0] > '6' || [TSN hasPrefix:@"663"] || [TSN hasPrefix:@"658"] || [TSN hasPrefix:@"652"];
+}
+
+-(BOOL) supportsRPC {
+    return self.tiVoSerialNumber.length == 0 || [self.tiVoSerialNumber characterAtIndex:0] > '6' ;
+
 }
 
 -(BOOL) rpcActive {

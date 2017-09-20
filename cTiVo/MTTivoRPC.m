@@ -119,6 +119,8 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     if ((self = [super init])){
         self.userName = user;
         self.userPassword = password;
+        self.hostName = serverAddress;
+        self.hostPort = 443;
         [self commonInit];
     }
     return self;
@@ -133,9 +135,6 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
         self.hostPort = port;
         self.mediaAccessKey = mediaAccessKey;
         [self commonInit];
-        //xxx remove after 3.0 beta
-        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:[NSString stringWithFormat:@"%@ - %@", kMTRPCMap, self.hostName]];
-        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:[NSString stringWithFormat:@"%@ - %@", kMTRPCMap, @"unknown"]];
     }
     return self;
 }
@@ -562,7 +561,17 @@ static NSRegularExpression * isFinalRegex = nil;
            DDLogVerbose(@"Authenticate from TiVo RPC: %@",jsonResponse);
            if ([jsonResponse[@"status"] isEqualToString:@"success"]) {
                DDLogDetail(@"Authenticated");
-               if (self.mediaAccessKey && !self.bodyID) {
+//               if (jsonResponse[@"deviceId"]) {  //for tivo middlemind in future
+//                   for (NSDictionary * device in jsonResponse[@"deviceId"]) {
+//                       if ([device[@"friendlyName"] isEqualToString:self.hostname]) { //wrong name
+//                           self.bodyID = device[@"id"];
+//                           self.tiVoSerialNumber = self.bodyID;
+//                           [self.delegate setTiVoSerialNumber:self.bodyID];
+//                           break;
+//                       }
+//                   }
+//               }
+               if (!self.bodyID) {
                    [self getBodyID];
                } else {
                    [self getAllShows];

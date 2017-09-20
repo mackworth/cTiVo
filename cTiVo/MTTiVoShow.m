@@ -1734,6 +1734,14 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 #pragma mark - Artwork
 -(void) resetSourceInfo:(BOOL) all {
+    //all means go all the way back to source
+    //not all means just reload images, maybe based on new prefernces
+    if (all) {
+        NSURL * localURL = [self localURLForSource: self.lastImageSource thumbVersion:YES];
+        NSURL * artURL = [self localURLForSource: self.lastImageSource thumbVersion:NO];
+        if (localURL) [[NSFileManager defaultManager] removeItemAtURL: localURL error:nil];
+        if (artURL) [[NSFileManager defaultManager] removeItemAtURL: artURL error:nil];
+    }
     _userSpecifiedArtworkFile = nil;
     _artworkFile = nil;
     _thumbnailFile = nil;
@@ -1742,16 +1750,8 @@ NSString * fourChar(long n, BOOL allowZero) {
     _rpcData = nil;
     _imageInProgress = NO;
     _lastImageSource = MTSearchingSource;
+
     if (all) {
-        if ([[tiVoManager tvdbTempDirectory] directoryContainsURL: self.thumbnailFile]) {
-            [[NSFileManager defaultManager] removeItemAtURL: self.thumbnailFile error:nil];
-        }
-        if ([[tiVoManager tvdbTempDirectory] directoryContainsURL: self.artworkFile]) {
-            [[NSFileManager defaultManager] removeItemAtURL: self.artworkFile error:nil];
-        }
-        if ([[tiVoManager tivoTempDirectory] directoryContainsURL: self.thumbnailFile]) {
-            [[NSFileManager defaultManager] removeItemAtURL: self.thumbnailFile error:nil];
-        }
         [self.tiVo reloadShowInfoForID:self.idString];
         [tiVoManager.tvdb resetTVDBInfo:self];
     }
@@ -1824,28 +1824,8 @@ NSString * fourChar(long n, BOOL allowZero) {
     self.thumbnailImage = nil;
     self.artWorkImage = nil;
     if (!artwork) {
-        NSURL * fileName = self.thumbnailFile;
-        if (fileName) {
-            self.thumbnailFile = nil;
-            DDLogDetail(@"Deleting image for show %@ at %@", self, fileName);
-            NSError * error = nil;
-            if (![[NSFileManager defaultManager] trashItemAtURL:fileName resultingItemURL:nil error:&error]) {
-                DDLogDetail(@"Could not delete image file %@. Error: %@", fileName, error.localizedDescription);
-            }
-            if ([[tiVoManager tvdbTempDirectory] directoryContainsURL:fileName]) {
-                //tvdb cache file, so remember the deletion
-                DDLogDetail(@"Removing TVDB image %@", fileName);
-                NSString * tvdbKey = [self mapTVDBKeyFromSource: self.lastImageSource];
-                self.tvdbData = [tiVoManager.tvdb cacheArtWork:@"" forKey:tvdbKey forShow:self];
-            } else if ([[tiVoManager tivoTempDirectory] directoryContainsURL:fileName]) {
-                //tivo cache file, so remember the deletion
-                DDLogDetail(@"Removing TiVo image %@", fileName);
-                self.rpcData.imageURL = @"";
-            } else {
-                //user specified file, so allow TVDB to update
-                DDLogDetail(@"Removing user specified file %@", fileName);
-                self.userSpecifiedArtworkFile = nil;
-            }
+        if (self.thumbnailFile) {
+            [self invalidateCurrentThumbnail:nil];
         }
         if (self.artworkFile) {
             NSError * error = nil;
@@ -1976,9 +1956,8 @@ NSString * fourChar(long n, BOOL allowZero) {
         }
     }
 }
-
--(void) getArtworkFromSource: (MTImageSource) source thumbVersion: (BOOL) thumbnail {
-    if (source == MTNoSource) return;
+-(NSURL *) localURLForSource: (MTImageSource) source thumbVersion: (BOOL) thumbnail {
+    if (source == MTNoSource) return nil;
     NSString * baseName = [self cleanBaseFileName: self.seriesTitle];
     NSURL * directory =  (source == MTTiVoSource) ? [tiVoManager tivoTempDirectory] : [tiVoManager tvdbTempDirectory];
     if (self.isMovie) {
@@ -2006,8 +1985,13 @@ NSString * fourChar(long n, BOOL allowZero) {
         baseName = [baseName stringByAppendingString:@"_Large"];
     }
     baseName = [baseName stringByAppendingPathExtension:@"jpg"];
-    NSURL * filename = [NSURL fileURLWithPath:baseName isDirectory:NO relativeToURL:directory];
+    return [NSURL fileURLWithPath:baseName isDirectory:NO relativeToURL:directory];
 
+}
+-(void) getArtworkFromSource: (MTImageSource) source thumbVersion: (BOOL) thumbnail {
+    if (source == MTNoSource) return;
+
+    NSURL * filename = [self localURLForSource:source thumbVersion:thumbnail];
     //download only if we don't have it already
     if ([filename fileExists]) {
         DDLogDetail (@"Cached artwork found for %@ at %@", self, filename);
@@ -2066,7 +2050,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 [self failureHandlerForSource:source thumbnail:thumbnail ];
             } else {
                 NSInteger statusCode = ((NSHTTPURLResponse *) response).statusCode;
-                if ( statusCode == 404 || statusCode == 500 || data.length < 100) {
+                if ( statusCode == 404 || statusCode == 500 || statusCode == 503 ||data.length < 500) {
                     [self failureHandlerForSource:source thumbnail:thumbnail];
                 } else {
                     [[NSFileManager defaultManager] createDirectoryAtPath:[filename directory] withIntermediateDirectories:YES attributes:nil error:nil];
@@ -2114,6 +2098,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (oldSource == MTNoSource) return MTNoSource;
     MTImageSource nextSource = MTSearchingSource;
     MTImageSource prefSource = [[NSUserDefaults standardUserDefaults] integerForKey:KMTPreferredImageSource];
+    if (prefSource == MTTiVoSource && !self.tiVo.supportsRPC) prefSource = MTTVDBSeries;
     if (oldSource == MTSearchingSource) {
         nextSource = prefSource;
         if (!self.isEpisodicShow && (oldSource == MTTVDBEpisode || oldSource == MTTVDBSeason)) {
@@ -2129,7 +2114,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 }
                 break;
             case MTTVDBSeries:
-                if (oldSource == MTTVDBSeries) {
+                if (oldSource == MTTVDBSeries && self.tiVo.supportsRPC) {
                     nextSource = MTTiVoSource;
                 } else {
                     nextSource = MTNoSource;
@@ -2138,7 +2123,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             case MTTVDBSeason:
             case MTTVDBEpisode:
                 if (self.isEpisodicShow) {
-                    if (oldSource == prefSource) {
+                    if (oldSource == prefSource  && self.tiVo.supportsRPC) {
                         nextSource = MTTiVoSource;
                     } else if (oldSource == MTTiVoSource) {
                         nextSource = MTTVDBSeries;
@@ -2148,7 +2133,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 } else {
                     if (oldSource == prefSource) {
                         nextSource = MTTVDBSeries;
-                    } else if (oldSource == MTTVDBSeries) {
+                    } else if (oldSource == MTTVDBSeries && self.tiVo.supportsRPC) {
                         nextSource = MTTiVoSource;
                     } else {
                         nextSource = MTNoSource;
@@ -2163,7 +2148,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
     //check if we have the data yet.
     if (nextSource == MTTiVoSource) {
-        if (!self.rpcData.imageURL && self.tiVo.rpcActive) {
+        if (!self.rpcData.imageURL && self.tiVo.supportsRPC) {
             nextSource = MTSearchingSource; // haven't gotten data yet
         }
     } else if (nextSource == MTTVDBEpisode ||
@@ -2243,13 +2228,44 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
 }
 
+-(void) invalidateCurrentThumbnail:(NSURL *) fileName {
+    if (!fileName) {
+        fileName = self.thumbnailFile;
+    }
+    if (!fileName) return;
+    if ([[tiVoManager tvdbTempDirectory] directoryContainsURL:fileName]) {
+        //tvdb cache file, so remember the deletion
+        DDLogDetail(@"Removing TVDB image %@", fileName);
+        NSString * tvdbKey = [self mapTVDBKeyFromSource: self.lastImageSource];
+        if (tvdbKey) self.tvdbData = [tiVoManager.tvdb cacheArtWork:@"" forKey:tvdbKey forShow:self];
+    } else if ([[tiVoManager tivoTempDirectory] directoryContainsURL:fileName]) {
+        //tivo cache file, so remember the deletion
+        DDLogDetail(@"Removing TiVo image %@", fileName);
+        self.rpcData.imageURL = @"";
+    } else if (self.lastImageSource != MTNoSource) {
+        //user specified file, so allow TVDB to update
+        DDLogDetail(@"Removing user specified file %@", fileName);
+        self.userSpecifiedArtworkFile = nil;
+    }
+    if ([fileName isEqual: self.thumbnailFile]) {
+        self.thumbnailFile = nil;
+    }
+    DDLogDetail(@"Deleting image for show %@ at %@", self, fileName);
+    NSError * error = nil;
+    if (![[NSFileManager defaultManager] trashItemAtURL:fileName resultingItemURL:nil error:&error]) {
+        DDLogDetail(@"Could not delete image file %@. Error: %@", fileName, error.localizedDescription);
+    }
+}
+
 -(NSImage *) thumbnailImage {
     //we automatically ask for artworkLocation from services, and when that arrives, there will be a notification to update the show in the window, which wil call us again.
     //Then we request image, and get the same notification when that arrives
     if (!_thumbnailImage){
         if (self.thumbnailFile) {
             _thumbnailImage = [[NSImage alloc] initWithContentsOfURL:self.thumbnailFile];
-            if (!_thumbnailImage) self.thumbnailFile = nil;
+            if (!_thumbnailImage) {
+                [self invalidateCurrentThumbnail:nil];
+            }
         }
         if (!_thumbnailImage) {
             if (self.userSpecifiedArtworkFile.length > 0) {
@@ -2257,7 +2273,8 @@ NSString * fourChar(long n, BOOL allowZero) {
                 if (_thumbnailImage) {
                     self.thumbnailFile = [NSURL fileURLWithPath:self.userSpecifiedArtworkFile isDirectory:NO];
                 } else {
-                    self.userSpecifiedArtworkFile = @"";//mark as bad
+                    [self invalidateCurrentThumbnail:[NSURL URLWithString:self.userSpecifiedArtworkFile]];
+                    self.userSpecifiedArtworkFile = nil;
                 }
             }
         }
@@ -2265,11 +2282,11 @@ NSString * fourChar(long n, BOOL allowZero) {
             [self getOnlineArtwork:YES];
             if (self.thumbnailFile ) {
                 _thumbnailImage = [[NSImage alloc] initWithContentsOfURL:self.thumbnailFile];
-                if (!_thumbnailImage) self.thumbnailFile = nil;
-                //XXX what if bad file?  Need to mark as failure
+                if (!_thumbnailImage) {
+                    [self invalidateCurrentThumbnail:nil];
+                }
             }
         }
-
     }
     return _thumbnailImage;
 }
