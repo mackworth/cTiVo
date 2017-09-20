@@ -19,4 +19,14 @@
 	[DDLog setAllClassesLogLevelFromUserDefaults: kMTDebugLevel];
 }
 
+-(BOOL) validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem.title isEqualToString: @"TiVo"]) {
+        for (MTTiVo *tiVo in tiVoManager.tiVoList) {
+            if (tiVo.supportsRPC) return YES;
+        }
+        return NO;
+    }
+    return YES;
+}
+
 @end

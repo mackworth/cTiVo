@@ -369,6 +369,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void) tivoReportsNewShows:(NSMutableArray<NSString *> *)addedShows
               atTiVoIndices: (NSMutableArray <NSNumber *> *) addedShowIndices
             andDeletedShows:(NSMutableDictionary < NSString *, MTRPCData *> *)deletedIds {
+    //In future, addedShowIndices could become NSIndexSet
     NSAssert(addedShowIndices.count == addedShows.count, @"Added RPC show problem");
     if (isConnecting) {
         //change during a Tivo XML refresh; need to restart after termination
@@ -489,18 +490,42 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     [self.myRPC stopRecordingShowsWithRecordIds:[self recordingIDsForShows:shows]];
 
 }
+- (NSTimeInterval) roundTime: (NSTimeInterval) time {
+    //rounds a timeinterval to wait up or down to nearest half hour (plus a minute) if not more than 10 minutes change
+    //goal is to refresh Tivos shortly after they start/finish a recording rather than waiting too long
+    NSDate * inDate =  [NSDate dateWithTimeIntervalSinceNow:time];
+
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSInteger minutes = [calendar components: NSMinuteCalendarUnit fromDate: inDate].minute ;
+    //round to updating at a minute after the half hour if reasonable
+   if (minutes > 30) minutes -=30;
+    NSInteger deltaTime = 0;
+    if (minutes == 0) {
+        deltaTime = 1;
+    } if (minutes >= 2 && minutes <= 10) {
+        deltaTime = 1-minutes;
+    } else if (minutes >= 20) {
+        deltaTime = 31-minutes;
+    }
+
+    return time + deltaTime*60;
+}
 
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {
     [MTTiVo cancelPreviousPerformRequestsWithTarget:self
                                            selector:@selector(updateShows:)
                                              object:nil ];
-    NSInteger updateTime = [[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0;
-    if (updateTime > 0) {
-        if (delay < 0) delay = updateTime;
-        DDLogDetail(@"Scheduling Update with delay of %lu seconds", (long)delay);
-    }
-    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay ];
+    if (delay < 0) {
+        delay =  [[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutesNew] ;
+        if (delay == 0) {
+            delay = (self.rpcActive ?  kMTUpdateIntervalMinDefault : kMTUpdateIntervalMinDefaultNonRPC) ;
+        }
+        delay = [self roundTime:delay*60]/60;
+    } else {
 
+    }
+    DDLogDetail(@"Scheduling Update with delay of %lu minutes", (long)delay);
+    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay*60 ];
 }
 
 -(void)updateShows:(id)sender

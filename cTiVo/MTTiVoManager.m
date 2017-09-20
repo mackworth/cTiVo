@@ -535,7 +535,7 @@ __DDLOGHERE__
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-    [defaults addObserver:self forKeyPath:kMTUpdateIntervalMinutes options:NSKeyValueObservingOptionNew context:nil];
+    [defaults addObserver:self forKeyPath:kMTUpdateIntervalMinutesNew options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
@@ -803,8 +803,8 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	} else if ([keyPath isEqualToString:kMTTiVos]){
         DDLogMajor(@"Changed TiVo list to %@",[[defs objectForKey:  kMTTiVos] maskMediaKeys]);
         [self updateTiVos];
-    } else if ([keyPath isEqualToString:kMTUpdateIntervalMinutes]){
-        DDLogMajor(@"Changed Update Time to %ld",(long)[defs integerForKey:kMTUpdateIntervalMinutes]);
+    } else if ([keyPath isEqualToString:kMTUpdateIntervalMinutesNew]){
+        DDLogMajor(@"Changed Update Time to %ld",(long)[defs integerForKey:kMTUpdateIntervalMinutesNew]);
         for (MTTiVo *tiVo in _tiVoList) {
             [tiVo scheduleNextUpdateAfterDelay:-1];
         }

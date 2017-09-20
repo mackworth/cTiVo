@@ -67,7 +67,8 @@
 
 //Contants
 
-#define kMTUpdateIntervalMinDefault 240 //Default Update interval for re-checking current TiVo
+#define kMTUpdateIntervalMinDefault 240 //Default Update interval for re-checking current TiVo for RPC TiVos
+#define kMTUpdateIntervalMinDefaultNonRPC 15 //Default Update interval for re-checking current TiVo for 3 Series
 #define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show; default, overriden by userPref
 #define kMTMaxDownloadStartupRetries 20		// Only allow 20 retries due to a download startup failuer
 //#define kMTProgressCheckDelay (2 * 60.0)	//Check progress every 60 seconds to make sure its not stalled
@@ -191,7 +192,9 @@
 #define kMTTmpFilesDirectory @"TmpFilesDirectory"   //Where are temporary files saved
 
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
-#define kMTUpdateIntervalMinutes @"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes (No GUI)
+#define kMTUpdateIntervalMinutesOld @"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes
+#define kMTUpdateIntervalMinutesNew @"UpdateIntervalMinutesNew" //How many minutes to wait between tivo refreshes
+
 #define kMTSubscriptionExpiration @"SubscriptionExpirationDays" //How many days to wait before deleting previous recording info (potentially leading to duplicates) (No GUI)
 
 #define kMTMaxNumEncoders @"MaxNumberEncoders"	//Limit number of encoders to limit cpu usage (No GUI) //

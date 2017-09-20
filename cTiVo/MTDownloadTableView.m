@@ -850,6 +850,7 @@ __DDLOGHERE__
     if ([menuItem action]==@selector(copy:) ||
         [menuItem action]==@selector(cut:)  ||
         [menuItem action]==@selector(delete:)) {
+        if ([menuItem action] == @selector(delete:)) menuItem.title= @"Remove from Queue";
         return (self.numberOfSelectedRows >0);
     } else  if ([menuItem action]==@selector(paste:)) {
         NSPasteboard * pboard = [NSPasteboard generalPasteboard];

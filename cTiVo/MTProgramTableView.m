@@ -588,20 +588,20 @@ __DDLOGHERE__
     if ([menuItem action]==@selector(copy:)) {
         return (self.numberOfSelectedRows >0);
     }
-    if ([menuItem action]==@selector(delete:) ) {
-        menuItem.title = @"Delete from TiVo";
+    BOOL deleteItem = [menuItem action]==@selector(delete:);
+    BOOL stopItem =   [menuItem action]==@selector(stopRecording:);
+    if (deleteItem || stopItem ) {
+        if (deleteItem) menuItem.title = @"Delete from TiVo"; //alternates with remove from Queue
         NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
         NSArray	*selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
         for (MTTiVoShow * show in selectedShows) {
-            if (show.rpcData && show.tiVo.rpcActive) return YES;
-        }
-        return NO;
-    }
-    if ([menuItem action]==@selector(stopRecording:)) {
-        NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-        NSArray	*selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
-        for (MTTiVoShow * show in selectedShows) {
-            if (show.inProgress.boolValue && show.rpcData && show.tiVo.rpcActive) return YES;
+            if (show.rpcData && show.tiVo.rpcActive) {
+                if (stopItem) {
+                    if (show.inProgress.boolValue) return YES;
+                } else {
+                    return YES;
+                }
+            }
         }
         return NO;
     }

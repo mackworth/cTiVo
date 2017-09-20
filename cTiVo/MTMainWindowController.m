@@ -283,7 +283,7 @@ __DDLOGHERE__
 {
 	BOOL returnValue = YES;
 	if (menuItem == _showInFinderMenuItem || menuItem == _playVideoMenuItem) {
-		BOOL itemsToProcess = [self selectionContainsCompletedShows];
+            BOOL itemsToProcess = [self selectionContainsCompletedShows];
 		if (!itemsToProcess) {
 			returnValue = NO;
 		}
@@ -396,14 +396,6 @@ __DDLOGHERE__
 {
 	if ([menu.title caseInsensitiveCompare:@"Download"] == NSOrderedSame) {
 		[self downloadSelectedShows:menu];
-	} else if ([menu.title rangeOfString:@"Refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
-		NSMutableSet * tiVos = [NSMutableSet set];
-		for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {
-			[tiVos addObject: show.tiVo];
-		}
-		for (MTTiVo* tiVo in tiVos) {
-			[tiVo  updateShows:nil];
-		}
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		[self subscribe:menu];
     } else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
@@ -521,7 +513,9 @@ __DDLOGHERE__
 }
 
 -(BOOL) selectionContainsCompletedShows {
-	BOOL itemsToProcess = [self.downloadQueueTable selectionContainsCompletedShows ] ;
+    BOOL itemsToProcess = NO;
+// xxx   if (        if ([self.window firstResponder] == self.tiVoShowTable) {
+//    } else if ([self.downloadQueueTable selectionContainsCompletedShows ] ;
 	return itemsToProcess;
 }
 

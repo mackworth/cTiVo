@@ -208,7 +208,7 @@ __DDLOGHERE__
 										  @YES, kMTShowSuggestions,
 										  @NO, kMTPreventSleep,
 										  @kMTMaxDownloadRetries, kMTNumDownloadRetries,
-										  @kMTUpdateIntervalMinDefault, kMTUpdateIntervalMinutes,
+										  @0, kMTUpdateIntervalMinutesNew,
 										  @NO, kMTiTunesDelete,
 										  @NO, kMTHasMultipleTivos,
 										  @NO, kMTMarkCommercials,
@@ -232,10 +232,7 @@ __DDLOGHERE__
     
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSaveMPGFile];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
-    if ([[NSUserDefaults standardUserDefaults] integerForKey: kMTUpdateIntervalMinutes] == 15) {
-        //xxx Should do one time only
-        [[NSUserDefaults standardUserDefaults] setInteger:kMTUpdateIntervalMinDefault forKey: kMTUpdateIntervalMinutes];
-    }
+    [[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTUpdateIntervalMinutesOld];  //can remove in future
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelUserQuit) name:kMTNotificationUserCanceledQuit object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
@@ -942,15 +939,16 @@ BOOL tempDirectory = NO;
 
 -(IBAction)showMainWindow:(id)sender
 {
-	if (!_mainWindowController) {
-		_mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+ 		_mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
 		showInFinderMenuItem.target = _mainWindowController;
 		showInFinderMenuItem.action = @selector(revealInFinder:);
 		playVideoMenuItem.target = _mainWindowController;
 		playVideoMenuItem.action = @selector(playVideo:);
 		_mainWindowController.showInFinderMenuItem = showInFinderMenuItem;
 		_mainWindowController.playVideoMenuItem = playVideoMenuItem;
-	}
+   });
 	[_mainWindowController showWindow:nil];
 	
 }

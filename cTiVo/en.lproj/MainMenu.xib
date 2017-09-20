@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13196" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13196"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -363,7 +363,6 @@ CA
         </customObject>
         <customObject id="420" customClass="NSFontManager"/>
         <customObject id="873" customClass="SUUpdater"/>
-        <menuItem title="Close Window" keyEquivalent="w" id="875"/>
         <customView id="919">
             <rect key="frame" x="0.0" y="0.0" width="528" height="246"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -422,7 +421,7 @@ CA
                                                 <rect key="frame" x="44" y="1" width="186" height="17"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
-                                                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="915">
+                                                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="915">
                                                         <rect key="frame" x="0.0" y="0.0" width="186" height="17"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="916">
@@ -455,7 +454,7 @@ CA
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="921">
+                <textField verticalHuggingPriority="750" id="921">
                     <rect key="frame" x="185" y="215" width="159" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select Formats to Export" id="922">
@@ -467,6 +466,5 @@ CA
             </subviews>
         </customView>
         <userDefaultsController representsSharedInstance="YES" id="926"/>
-        <menuItem title="Preferences" keyEquivalent="," id="1067"/>
     </objects>
 </document>

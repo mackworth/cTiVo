@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13196" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13196"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -52,7 +52,7 @@
                                         <rect key="frame" x="78" y="326" width="16" height="16"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     </progressIndicator>
-                                    <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="12">
+                                    <textField verticalHuggingPriority="750" id="12">
                                         <rect key="frame" x="100" y="326" width="366" height="17"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="34">
@@ -150,7 +150,7 @@
                                                                     <rect key="frame" x="94" y="1" width="42" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="308">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="308">
                                                                             <rect key="frame" x="0.0" y="0.0" width="42" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="✔" allowsEditingTextAttributes="YES" id="309" customClass="RSVerticallyCenteredTextFieldCell">
@@ -214,7 +214,7 @@
                                                                     <rect key="frame" x="175" y="1" width="81" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="198">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="198">
                                                                             <rect key="frame" x="0.0" y="0.0" width="81" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="TivoName" allowsEditingTextAttributes="YES" id="199" customClass="RSVerticallyCenteredTextFieldCell">
@@ -248,7 +248,7 @@
                                                                     <rect key="frame" x="259" y="1" width="455" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="45">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="45">
                                                                             <rect key="frame" x="0.0" y="0.0" width="455" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" title="Table View Cell" id="46" customClass="RSVerticallyCenteredTextFieldCell">
@@ -282,7 +282,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="723">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="723">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="724" customClass="RSVerticallyCenteredTextFieldCell">
@@ -316,7 +316,7 @@
                                                                     <rect key="frame" x="717" y="1" width="80" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="191">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="191">
                                                                             <rect key="frame" x="0.0" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="192" customClass="RSVerticallyCenteredTextFieldCell">
@@ -350,7 +350,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="729">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="729">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="730" customClass="RSVerticallyCenteredTextFieldCell">
@@ -384,7 +384,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="836">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="836">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="837" customClass="RSVerticallyCenteredTextFieldCell">
@@ -418,7 +418,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="674">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="674">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="675" customClass="RSVerticallyCenteredTextFieldCell">
@@ -452,7 +452,7 @@
                                                                     <rect key="frame" x="800" y="1" width="42" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="668">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="668">
                                                                             <rect key="frame" x="0.0" y="0.0" width="42" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="✔" allowsEditingTextAttributes="YES" id="669" customClass="RSVerticallyCenteredTextFieldCell">
@@ -486,7 +486,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="MqE-OC-qPp">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="MqE-OC-qPp">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="✔" allowsEditingTextAttributes="YES" id="Xeb-RF-j9I" customClass="RSVerticallyCenteredTextFieldCell">
@@ -520,7 +520,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="1ez-M1-jIP">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1ez-M1-jIP">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="✔" allowsEditingTextAttributes="YES" id="IS7-ov-SYR" customClass="RSVerticallyCenteredTextFieldCell">
@@ -554,7 +554,7 @@
                                                                     <rect key="frame" x="845" y="1" width="88" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="830">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="830">
                                                                             <rect key="frame" x="0.0" y="0.0" width="88" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="831" customClass="RSVerticallyCenteredTextFieldCell">
@@ -588,7 +588,7 @@
                                                                     <rect key="frame" x="936" y="1" width="63" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="185">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="185">
                                                                             <rect key="frame" x="0.0" y="0.0" width="63" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="186" customClass="RSVerticallyCenteredTextFieldCell">
@@ -622,7 +622,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="U9n-7i-4zi">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="U9n-7i-4zi">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="fFR-lU-jpV" customClass="RSVerticallyCenteredTextFieldCell">
@@ -656,7 +656,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="YLQ-Us-TNB">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="YLQ-Us-TNB">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="h1N-Fa-KvR" customClass="RSVerticallyCenteredTextFieldCell">
@@ -690,7 +690,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="680">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="680">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="681" customClass="RSVerticallyCenteredTextFieldCell">
@@ -724,7 +724,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="735">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="735">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="736" customClass="RSVerticallyCenteredTextFieldCell">
@@ -758,7 +758,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="717">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="717">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="718" customClass="RSVerticallyCenteredTextFieldCell">
@@ -792,7 +792,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="1339">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1339">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="1340" customClass="RSVerticallyCenteredTextFieldCell">
@@ -826,7 +826,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="741">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="741">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="742" customClass="RSVerticallyCenteredTextFieldCell">
@@ -904,7 +904,7 @@
                                                                     <rect key="frame" x="1" y="1" width="18" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="57">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="57">
                                                                             <rect key="frame" x="1" y="1" width="17" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="1" id="58">
@@ -968,7 +968,7 @@
                                                                     <rect key="frame" x="43" y="1" width="367" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="z7y-2w-uIB" userLabel="leftText">
+                                                                        <textField verticalHuggingPriority="750" id="z7y-2w-uIB" userLabel="leftText">
                                                                             <rect key="frame" x="0.0" y="0.0" width="287" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="kqs-BA-Sw6">
@@ -977,7 +977,7 @@
                                                                                 <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
                                                                             </textFieldCell>
                                                                         </textField>
-                                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="KRR-0A-sUq" userLabel="rightText">
+                                                                        <textField verticalHuggingPriority="750" id="KRR-0A-sUq" userLabel="rightText">
                                                                             <rect key="frame" x="287" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="icx-VM-9gi">
@@ -1012,7 +1012,7 @@
                                                                     <rect key="frame" x="413" y="1" width="200" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="qQB-l8-FUr" userLabel="leftText">
+                                                                        <textField verticalHuggingPriority="750" id="qQB-l8-FUr" userLabel="leftText">
                                                                             <rect key="frame" x="0.0" y="0.0" width="120" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="nX6-ru-GCz">
@@ -1021,7 +1021,7 @@
                                                                                 <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
                                                                             </textFieldCell>
                                                                         </textField>
-                                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="FEf-Ia-wX9" userLabel="rightText">
+                                                                        <textField verticalHuggingPriority="750" id="FEf-Ia-wX9" userLabel="rightText">
                                                                             <rect key="frame" x="120" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="a0F-vx-fpu">
@@ -1056,7 +1056,7 @@
                                                                     <rect key="frame" x="616" y="1" width="48" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="jKf-Ch-dzY" userLabel="leftText">
+                                                                        <textField verticalHuggingPriority="750" id="jKf-Ch-dzY" userLabel="leftText">
                                                                             <rect key="frame" x="0.0" y="0.0" width="0.0" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="VsL-mZ-KVX">
@@ -1065,7 +1065,7 @@
                                                                                 <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
                                                                             </textFieldCell>
                                                                         </textField>
-                                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="nzl-2Y-QR2" userLabel="rightText">
+                                                                        <textField verticalHuggingPriority="750" id="nzl-2Y-QR2" userLabel="rightText">
                                                                             <rect key="frame" x="0.0" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="AQg-n8-IeC">
@@ -1100,7 +1100,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="780">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="780">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="781">
@@ -1134,7 +1134,7 @@
                                                                     <rect key="frame" x="667" y="1" width="48" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="61">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="61">
                                                                             <rect key="frame" x="0.0" y="0.0" width="48" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="62">
@@ -1168,7 +1168,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="wB8-PI-o8z">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="wB8-PI-o8z">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="✔" allowsEditingTextAttributes="YES" id="xKV-a7-J7a">
@@ -1202,7 +1202,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="788">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="788">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="✔" allowsEditingTextAttributes="YES" id="789">
@@ -1236,7 +1236,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="Sz5-GO-d0R">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="Sz5-GO-d0R">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="✔" allowsEditingTextAttributes="YES" id="WgL-7q-bY6">
@@ -1270,7 +1270,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="784">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="784">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="785">
@@ -1304,7 +1304,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="807">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="807">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="808">
@@ -1338,7 +1338,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="Ool-kZ-axu">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="Ool-kZ-axu">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="DrY-zt-1IB">
@@ -1372,7 +1372,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="F7K-TN-jac">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="F7K-TN-jac">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="Os6-3v-HJ2">
@@ -1406,7 +1406,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="792">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="792">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="793">
@@ -1440,7 +1440,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="776">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" id="776">
                                                                             <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="777">
@@ -1474,7 +1474,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="772">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="772">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="773">
@@ -1508,7 +1508,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="1032">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1032">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="left" title="Table View Cell" id="1033">
@@ -1542,7 +1542,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="768">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="768">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="769">
@@ -1576,7 +1576,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="760">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="760">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="761">
@@ -1610,7 +1610,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="756">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="756">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="757">
@@ -1644,7 +1644,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="1333">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1333">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="1334">
@@ -1718,7 +1718,7 @@
                                                                     <rect key="frame" x="817" y="1" width="30" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="948">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="948">
                                                                             <rect key="frame" x="0.0" y="0.0" width="33" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="949">
@@ -1752,7 +1752,7 @@
                                                                     <rect key="frame" x="850" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="1321">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1321">
                                                                             <rect key="frame" x="0.0" y="0.0" width="35" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="1322">
@@ -1786,7 +1786,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="905">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="905">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="906">
@@ -1820,7 +1820,7 @@
                                                                     <rect key="frame" x="885" y="1" width="30" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="920">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="920">
                                                                             <rect key="frame" x="0.0" y="0.0" width="30" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="921">
@@ -1859,7 +1859,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableHeaderView>
                                     </scrollView>
-                                    <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="874">
+                                    <textField verticalHuggingPriority="750" id="874">
                                         <rect key="frame" x="286" y="66" width="269" height="82"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" alignment="center" title="Paused" id="875">
@@ -1886,7 +1886,7 @@
                                             <action selector="removeFromDownloadQueue:" target="-2" id="144"/>
                                         </connections>
                                     </button>
-                                    <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="dzt-jz-eJI" userLabel="Performance">
+                                    <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="dzt-jz-eJI" userLabel="Performance">
                                         <rect key="frame" x="18" y="150" width="290" height="17"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" alignment="right" title="Performance" id="jNJ-o5-48f">
@@ -1944,7 +1944,7 @@
                                                                     <rect key="frame" x="1" y="1" width="372" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="268">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="268">
                                                                             <rect key="frame" x="0.0" y="0.0" width="371" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="269">
@@ -1978,7 +1978,7 @@
                                                                     <rect key="frame" x="375" y="1" width="150" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="264">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="264">
                                                                             <rect key="frame" x="0.0" y="0.0" width="150" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="265">
@@ -2032,7 +2032,7 @@
                                                                     <rect key="frame" x="1" y="1" width="0.0" height="20"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="1352">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1352">
                                                                             <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="1353">
@@ -2255,7 +2255,7 @@
                             <action selector="selectTivo:" target="38" id="339"/>
                         </connections>
                     </popUpButton>
-                    <textField toolTip="Which TiVos are available on local network (and how many shows)" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="19">
+                    <textField toolTip="Which TiVos are available on local network (and how many shows)" verticalHuggingPriority="750" id="19">
                         <rect key="frame" x="97" y="727" width="178" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Searching For TiVos..." id="20">
@@ -2264,7 +2264,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField toolTip="Which video-file formats are available to convert the downloaded TiVo programs?" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="14">
+                    <textField toolTip="Which video-file formats are available to convert the downloaded TiVo programs?" verticalHuggingPriority="750" id="14">
                         <rect key="frame" x="456" y="700" width="115" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Video Format:" id="33">
@@ -2291,7 +2291,7 @@
                             <action selector="selectFormat:" target="-2" id="145"/>
                         </connections>
                     </popUpButton>
-                    <textField toolTip="Where to store downloaded programs" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="9">
+                    <textField toolTip="Where to store downloaded programs" verticalHuggingPriority="750" id="9">
                         <rect key="frame" x="456" y="727" width="115" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Download Folder:" id="68">
@@ -2315,7 +2315,7 @@
                         <rect key="frame" x="257" y="727" width="16" height="16"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </progressIndicator>
-                    <searchField hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="1376">
+                    <searchField hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" id="1376">
                         <rect key="frame" x="292" y="697" width="155" height="22"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <searchFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" borderStyle="bezel" usesSingleLineMode="YES" bezelStyle="round" sendsSearchStringImmediately="YES" maximumRecents="5" recentsAutosaveName="RecentSearches" id="1377">
@@ -2352,7 +2352,7 @@
                                     <action selector="dontQuit:" target="-2" id="899"/>
                                 </connections>
                             </button>
-                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="900" userLabel="Static Text - cancel quit">
+                            <textField verticalHuggingPriority="750" id="900" userLabel="Static Text - cancel quit">
                                 <rect key="frame" x="132" y="481" width="532" height="33"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="cTiVo will quit upon completion of current processing" id="901">
@@ -2394,24 +2394,13 @@
                         <action selector="programMenuHandler:" target="-2" id="421"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Refresh this TiVo" tag="1" toolTip="Reload program information from TiVo" id="390">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="programMenuHandler:" target="-2" id="423"/>
-                    </connections>
-                </menuItem>
                 <menuItem title="Subscribe to series" toolTip="Create subscription for this series, starting with this one" id="395">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="programMenuHandler:" target="-2" id="424"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Reload TVDB Info" toolTip="Reveal more information about this show" id="588">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="programMenuHandler:" target="-2" id="589"/>
-                    </connections>
-                </menuItem>
+                <menuItem isSeparatorItem="YES" id="ymX-Ff-XEt"/>
                 <menuItem title="Delete from TiVo" tag="3" toolTip="Remove this show from TiVo" id="1zO-Hi-mg8">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
@@ -2424,6 +2413,7 @@
                         <action selector="programMenuHandler:" target="-2" id="qle-81-n4P"/>
                     </connections>
                 </menuItem>
+                <menuItem isSeparatorItem="YES" id="OTC-dc-u34"/>
                 <menuItem title="Show Details" toolTip="Reveal more information about this show" id="FwI-wW-1Do">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
@@ -2442,12 +2432,19 @@
                         <action selector="programMenuHandler:" target="-2" id="892"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Reload TVDB Info" toolTip="Reveal more information about this show" id="588">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="programMenuHandler:" target="-2" id="589"/>
+                    </connections>
+                </menuItem>
             </items>
             <connections>
                 <outlet property="delegate" destination="-2" id="402"/>
             </connections>
+            <point key="canvasLocation" x="133" y="705"/>
         </menu>
-        <menu title="SubscriptionTableMenu" id="416">
+        <menu title="SubscriptionTableMenu" id="416" userLabel="Menu - SubscriptionTableMenu">
             <items>
                 <menuItem title="Unsubscribe" toolTip="Delete subscription(s)" id="417">
                     <modifierMask key="keyEquivalentModifierMask"/>
@@ -2467,7 +2464,7 @@
                 <outlet property="delegate" destination="-2" id="420"/>
             </connections>
         </menu>
-        <menu title="DownloadTableMenu" id="404">
+        <menu title="DownloadTableMenu" id="404" userLabel="Menu - DownloadTableMenu">
             <items>
                 <menuItem title="Remove Download" toolTip="Remove download(s) from queue" id="409">
                     <modifierMask key="keyEquivalentModifierMask"/>
@@ -2487,6 +2484,7 @@
                         <action selector="downloadMenuHandler:" target="-2" id="428"/>
                     </connections>
                 </menuItem>
+                <menuItem isSeparatorItem="YES" id="QaJ-jc-7mX"/>
                 <menuItem title="Show Details" tag="1" toolTip="Reveal more information about this show" id="621">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
@@ -2509,6 +2507,7 @@
             <connections>
                 <outlet property="delegate" destination="-2" id="415"/>
             </connections>
+            <point key="canvasLocation" x="392" y="666"/>
         </menu>
     </objects>
     <resources>
