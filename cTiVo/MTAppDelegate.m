@@ -639,11 +639,7 @@ BOOL tempDirectory = NO;
     if (!controller.window) return;
     NSWindow * mainWindow =  _mainWindowController.window ?: [NSApp keyWindow];
     if (mainWindow) {
-        if ([mainWindow respondsToSelector:@selector(beginSheet:completionHandler:)]) {
-            [mainWindow beginSheet:controller.window completionHandler:nil];
-        } else {
-            [NSApp beginSheet:controller.window modalForWindow:mainWindow modalDelegate:nil didEndSelector:NULL contextInfo:nil];
-        }
+        [mainWindow beginSheet:controller.window completionHandler:nil];
     } else {
         [controller showWindow:nil];
     }

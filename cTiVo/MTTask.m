@@ -42,7 +42,7 @@ __DDLOGHERE__
 //    mTTask.task  = [NSTask new];
     mTTask.download = download;
     mTTask.taskName = name;
-    if ([mTTask.task respondsToSelector:@selector(setQualityOfService:)]) {  //os10.0 and later
+    if ([mTTask.task respondsToSelector:@selector(setQualityOfService:)]) {  //os10.10 and later
         mTTask.task.qualityOfService = NSQualityOfServiceUtility;
     }
     NSString * tmpDir = [tiVoManager tmpFilesDirectory];

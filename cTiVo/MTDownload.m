@@ -2073,11 +2073,10 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 }
 
 -(void) connection:(NSURLConnection *) connection didReceiveResponse:(nonnull NSURLResponse *)response {
-    if (![self.activeURLConnection respondsToSelector:@selector(currentRequest)] ) return;
     DDLogVerbose(@"MainURL: %@", [self.activeURLConnection.currentRequest URL]);
     DDLogVerbose(@"Headers for Request: %@", [self.activeURLConnection.currentRequest allHTTPHeaderFields]);
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
-    if ([response respondsToSelector:@selector(allHeaderFields)]) {
+    if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
         DDLogVerbose(@"Response: %@ - %@",@([httpResponse statusCode]), [NSHTTPURLResponse localizedStringForStatusCode:[httpResponse statusCode]]);
         DDLogVerbose(@"Response Headers: %@", [httpResponse allHeaderFields]);
     }

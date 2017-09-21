@@ -1855,7 +1855,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         [self addArtwork:self.artWorkImage toMP4File:fileOnDisk];
     }
 
-    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self ];
+    [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationPictureLoaded object:self ];
     //now update other shows in same series (only if nonEpisodic OR deleting artwork from episodes, which could be series-wide)
     if (!self.isMovie  && (!artwork || !self.isEpisodicShow)) {
         for (MTTiVoShow * show in [tiVoManager tiVoShows ]) {
@@ -1948,7 +1948,7 @@ NSString * fourChar(long n, BOOL allowZero) {
    if (source == MTTiVoSource) {
         self.artworkFile = nil;
         self.rpcData.imageURL = @"";
-       [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
+       [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationPictureLoaded object:self];
    } else  {
         NSString * tvdbkey = [self mapTVDBKeyFromSource:source];
         if (tvdbkey) {
@@ -2064,7 +2064,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                         } else {
                             self.artworkFile = filename;
                         }
-                        [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
+                        [[ NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationPictureLoaded object:self];
                     } else {
                         DDLogReport(@"Couldn't write to artwork file %@!", filename);
                         [self failureHandlerForSource:source thumbnail:thumbnail ];

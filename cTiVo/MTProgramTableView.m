@@ -50,7 +50,8 @@ __DDLOGHERE__
 -(void)setNotifications
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationShowDownloadDidFinish object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDetailsLoaded object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDetailsLoaded object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadPicture:) name:kMTNotificationPictureLoaded object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoShowsUpdated  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationTiVoListUpdated object:nil];
  	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTiVoColumn:) name:kMTNotificationFoundMultipleTiVos object:nil];
@@ -104,8 +105,17 @@ __DDLOGHERE__
     MTTiVoShow *thisShow = notification.object;
 	NSInteger row = [self.sortedShows indexOfObject:thisShow];
     if (row != NSNotFound) {
-        NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
+        NSRange columns = NSMakeRange(0,self.numberOfColumns);
         [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
+    }
+}
+
+-(void)reloadPicture:(NSNotification *)notification
+{
+    MTTiVoShow *thisShow = notification.object;
+    NSInteger row = [self.sortedShows indexOfObject:thisShow];
+    if (row != NSNotFound) {
+        [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:[self columnWithIdentifier:kMTArtColumn] ]];
     }
 }
 

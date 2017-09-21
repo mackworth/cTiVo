@@ -74,9 +74,7 @@ __DDLOGHERE__
     
     [self.window.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
  
-    if ([[NSBundle mainBundle] respondsToSelector:@selector(loadNibNamed:owner:topLevelObjects:)]) {
-        [[NSBundle mainBundle] loadNibNamed:@"MTMainWindowDrawer" owner:self topLevelObjects:nil];
-    }
+    [[NSBundle mainBundle] loadNibNamed:@"MTMainWindowDrawer" owner:self topLevelObjects:nil];
 	showDetailDrawer.parentWindow = self.window;
 	
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
