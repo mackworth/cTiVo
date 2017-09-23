@@ -1716,12 +1716,13 @@ NSString * fourChar(long n, BOOL allowZero) {
                 } else {
                     MP4TagsSetArtwork(tags, 0, &artwork);
                 }
-            } else {
+           } else {
                 MP4TagsRemoveArtwork(tags, 0);
             }
             if (!MP4TagsStore(tags, fileOnDisk )) {
                 DDLogReport (@"could not write MP4 tags tp file %@", fileName);
             }
+            [[NSWorkspace sharedWorkspace] setIcon:image forFile:fileName options:NSExcludeQuickDrawElementsIconCreationOption];
         } else {
             DDLogReport (@"could not read MP4 tags from file %@", fileName);
         }

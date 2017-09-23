@@ -418,8 +418,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     while (indices.count < end && indices[end].unsignedIntegerValue+1 == indices[end].unsignedIntegerValue+1) end++;
     NSUInteger startValue = indices[0].unsignedIntegerValue;
     NSUInteger endValue = indices[end].unsignedIntegerValue;
-    return NSMakeRange(startValue,
+    NSRange result = NSMakeRange(startValue,
                        endValue-startValue+1);
+    DDLogDetail(@"First range is %@ for %@", NSStringFromRange(result), indices);
+    return result;
 }
 
 -(void) startNPLDownload:(BOOL) getAll {
@@ -746,7 +748,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                   DDLogMajor(@"RPC Adding %@ at %@", currentShow, newShowID);
                     [self.addedShows removeObjectAtIndex:0];
                 } else {
-                    DDLogReport(@"RPC out of sync: %@ v %@", newShowID, self.addedShows );
+                    DDLogReport(@"RPC out of sync: %@ v %@ Indices: %@", newShowID, self.addedShows, self.addedShowIndices );
                     cancelRefresh = YES;
                 }
             } else {
@@ -863,6 +865,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
             [self scheduleNextUpdateAfterDelay:0];
         } else {
+            DDLogReport(@"TiVo %@ out of sync!", self);
             NSMutableArray * updatedShows = [self.shows mutableCopy];
             [updatedShows insertObjects:newShows atIndexes:[NSIndexSet indexSetWithIndexesInRange:currentBatch]];
             self.shows = updatedShows;
