@@ -491,6 +491,18 @@ static NSRegularExpression * isFinalRegex = nil;
         return NO;
     }
 }
+-(NSString *) maskTSN:(NSObject *) data {
+
+    if (self.tiVoSerialNumber.length > 0) {
+        NSString * outString = data.description;
+        NSString * maskedKey = [NSString stringWithFormat: @"<<%@ SerialNumber>", self.delegate.description];
+        return [outString stringByReplacingOccurrencesOfString: self.tiVoSerialNumber
+                                               withString: maskedKey];
+    } else {
+        return @"";
+    }
+
+}
 
 -(void) sendRpcRequest:(NSString *) type monitor:(BOOL) monitor withData: (NSDictionary *) data completionHandler: (void (^)(NSDictionary * jsonResponse, BOOL isFinal)) completionHandler {
     NSString * responseCount = monitor ? @"multiple" : @"single";
@@ -521,7 +533,7 @@ static NSRegularExpression * isFinalRegex = nil;
     [request appendData:body];
     [request appendData:[@"\n" dataUsingEncoding:NSUTF8StringEncoding]];
     [self.requests setObject:finalData forKey:@(self.rpcID)];
-    DDLogVerbose(@"RPC Packet: %@\n%@\n", headers, [data  maskMediaKeys]);
+    DDLogVerbose(@"RPC Packet: %@\n%@\n", headers, [self maskTSN:[data  maskMediaKeys]]);
     @synchronized (self.remainingData) {
         [self.remainingData appendData:request];
     }
@@ -558,7 +570,7 @@ static NSRegularExpression * isFinalRegex = nil;
                  monitor:NO
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
-           DDLogVerbose(@"Authenticate from TiVo RPC: %@",jsonResponse);
+           DDLogVerbose(@"Authenticate from TiVo RPC: %@", [self maskTSN:jsonResponse]);
            if ([jsonResponse[@"status"] isEqualToString:@"success"]) {
                DDLogDetail(@"Authenticated");
 //               if (jsonResponse[@"deviceId"]) {  //for tivo middlemind in future
@@ -591,7 +603,7 @@ static NSRegularExpression * isFinalRegex = nil;
                  monitor:NO
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
-           DDLogVerbose(@"BodyID from TiVo RPC: %@",jsonResponse);
+           DDLogVerbose(@"BodyID from TiVo RPC: %@",[self maskTSN: jsonResponse]);
            NSArray * bodyConfigs = jsonResponse[@"bodyConfig"];
            if (bodyConfigs.count > 0) {
                NSDictionary * bodyConfig = (NSDictionary *)bodyConfigs[0];
@@ -599,7 +611,7 @@ static NSRegularExpression * isFinalRegex = nil;
                NSString * bodyId = bodyConfig[@"bodyId"];
                if (bodyId) {
                    self.bodyID =bodyId;
-                   DDLogVerbose(@"Got BodyID: %@", self.bodyID);
+                   DDLogVerbose(@"Got BodyID");
                    self.tiVoSerialNumber = bodyId;
                    [self.delegate setTiVoSerialNumber:bodyId];
                    [self getAllShows];
@@ -621,7 +633,7 @@ static NSRegularExpression * isFinalRegex = nil;
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
            //This will be called every time the TiVo List changes, so first Launch differentiates the very first time.
-           DDLogVerbose(@"Got All Shows from TiVo RPC: %@", jsonResponse);
+           DDLogVerbose(@"Got All Shows from TiVo RPC: %@", [self maskTSN:jsonResponse]);
            NSArray <NSString *> * shows = jsonResponse[@"objectIdAndType"];
            BOOL isFirstLaunch = self.firstLaunch;
            self.firstLaunch = NO;
@@ -719,7 +731,7 @@ static NSRegularExpression * isFinalRegex = nil;
             withData:data
    completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
        NSArray * responseShows = jsonResponse[@"recording"];
-       DDLogVerbose(@"Got ShowInfo from TiVo RPC: %@", jsonResponse);
+       DDLogVerbose(@"Got ShowInfo from TiVo RPC: %@", [self maskTSN:jsonResponse]);
        if (responseShows.count == 0) return;
        if (responseShows.count != subArray.count) {
            DDLogMajor(@"Invalid # of TivoRPC shows: /n%@ /n%@", responseShows, subArray);

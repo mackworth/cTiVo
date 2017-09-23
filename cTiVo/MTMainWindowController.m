@@ -511,9 +511,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) selectionContainsCompletedShows {
-    BOOL itemsToProcess = NO;
-// xxx   if (        if ([self.window firstResponder] == self.tiVoShowTable) {
-//    } else if ([self.downloadQueueTable selectionContainsCompletedShows ] ;
+    BOOL itemsToProcess = [self.downloadQueueTable selectionContainsCompletedShows ] ;
 	return itemsToProcess;
 }
 

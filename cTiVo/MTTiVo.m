@@ -377,8 +377,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         cancelRefresh = YES;
         return;
     }
-    DDLogMajor(@"Updating Tivo %@ from RPC", self);  //xxx demote to detail
-    DDLogMajor(@"Adding %@ and deleting %@", addedShows, deletedIds); //xxx demote to verbose
+    DDLogDetail(@"Updating Tivo %@ from RPC", self);
+    DDLogVerbose(@"Adding %@ and deleting %@", addedShows, deletedIds);
     if (addedShows.count + deletedIds.count >= 10 ) {
         [self updateShows:self];  //too many changes, just reload the whole thing
         return;
@@ -388,14 +388,19 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         if (deletedIds[show.idString ] ){
             [self markDeletedDownloadShow:show];
         } else if (show.inProgress.boolValue) {
-            //pretend inProgress have been deleted and then added
+            //this is tricky.
+            //pretend inProgress have been deleted and then added back in
+            //so insert them into addedShows.
+            //matching addedShowIndex is where it should end up.
+            //everyone before this show is either in showsAfterDeletion OR in
+            //addedShows with an index less than ours.
             NSUInteger addedIndex = [addedShowIndices indexOfObjectPassingTest:^BOOL(NSNumber * _Nonnull obj, NSUInteger indicesIdx, BOOL * _Nonnull stop2) {
-                return obj.unsignedIntegerValue > showsAfterDeletions.count;
+                return obj.unsignedIntegerValue > showsAfterDeletions.count+indicesIdx;
             }];
            if (addedIndex == NSNotFound) addedIndex = addedShows.count;
-            DDLogDetail(@"adding In Progress show %@ to RPC added list at %d", show, (int)addedIndex);
+            DDLogDetail(@"adding In Progress show %@(%@) to RPC added list at %d", show, show.idString, (int)addedIndex);
             [addedShows insertObject:show.idString atIndex:addedIndex];
-            [addedShowIndices insertObject:@(showsAfterDeletions.count) atIndex:addedIndex];
+            [addedShowIndices insertObject:@(showsAfterDeletions.count + addedIndex) atIndex:addedIndex];
         } else {
             [showsAfterDeletions addObject:show];
         }
@@ -415,7 +420,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(NSRange) getFirstRange:(NSMutableArray <NSNumber *> *)indices {
     if (indices.count == 0) return NSMakeRange(0, 0);;
     NSUInteger end = 0;
-    while (indices.count < end && indices[end].unsignedIntegerValue+1 == indices[end].unsignedIntegerValue+1) end++;
+    //look for sequence
+    while (end+1 < indices.count && indices[end].unsignedIntegerValue +1 == indices[end+1].unsignedIntegerValue) end++;
     NSUInteger startValue = indices[0].unsignedIntegerValue;
     NSUInteger endValue = indices[end].unsignedIntegerValue;
     NSRange result = NSMakeRange(startValue,
@@ -743,11 +749,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             NSString * newShowID = currentShow.idString;
             MTTiVoShow *thisShow = nil;
            if (self.oneBatch) {
-                if ([newShowID isEqualToString:[self.addedShows firstObject]]) {
-                thisShow = currentShow;
-                  DDLogMajor(@"RPC Adding %@ at %@", currentShow, newShowID);
-                    [self.addedShows removeObjectAtIndex:0];
-                } else {
+               for (NSString * showID in self.addedShows) {
+                    if ([newShowID isEqualToString:showID]) {
+                        thisShow = currentShow;
+                        DDLogMajor(@"RPC Adding %@ at %@", currentShow, newShowID);
+                        [self.addedShows removeObject:showID];
+                       break;
+                    }
+               }
+               if (!thisShow) {
                     DDLogReport(@"RPC out of sync: %@ v %@ Indices: %@", newShowID, self.addedShows, self.addedShowIndices );
                     cancelRefresh = YES;
                 }
@@ -764,15 +774,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                     if (firstUpdate) [tiVoManager replaceProxyInQueue:currentShow];
                 }
             }
-            if (!thisShow.gotDetails) {
-                NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil];
-                [self.opsQueue addOperation:nextDetail];
-                
-            }
             if (thisShow) {
                 [newShows addObject:thisShow];
                 numAddedThisBatch++;
-            }
+                if (!thisShow.gotDetails) {
+                    NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil];
+                    [self.opsQueue addOperation:nextDetail];
+
+                }
+           }
 			currentShow = nil;
         }
     } else {
@@ -860,12 +870,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     } else if (self.oneBatch) {
         NSRange currentBatch = [self getFirstRange:self.addedShowIndices];
         if (currentBatch.length != newShows.count) {
-            DDLogReport(@"TiVo %@ out of sync!", self);
+            DDLogReport(@"TiVo %@ out of RPC sync!", self);
             isConnecting = NO;
             [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
             [self scheduleNextUpdateAfterDelay:0];
         } else {
-            DDLogReport(@"TiVo %@ out of sync!", self);
+            DDLogDetail(@"got nex batch %@ of RPC: %@", NSStringFromRange(currentBatch), newShows);
             NSMutableArray * updatedShows = [self.shows mutableCopy];
             [updatedShows insertObjects:newShows atIndexes:[NSIndexSet indexSetWithIndexesInRange:currentBatch]];
             self.shows = updatedShows;
