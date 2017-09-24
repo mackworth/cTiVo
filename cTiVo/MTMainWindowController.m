@@ -149,7 +149,7 @@ __DDLOGHERE__
     
 	if (self.loadingTiVos.count) {
         [loadingProgramListIndicator startAnimation:nil];
-        NSString *message =[NSString stringWithFormat: @"Updating %@",[[[[self.loadingTiVos valueForKeyPath:@"tiVo.name" ] allObjects] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)] componentsJoinedByString:@", "]];
+        NSString *message =[NSString stringWithFormat: @"Updating %@",[[[[self.loadingTiVos allObjects] valueForKeyPath:@"tiVo.name" ] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)] componentsJoinedByString:@", "]];
         loadingProgramListLabel.stringValue = message;
     } else {
         [loadingProgramListIndicator stopAnimation:nil];

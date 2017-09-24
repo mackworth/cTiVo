@@ -240,8 +240,6 @@ __DDLOGHERE__
     quitWhenCurrentDownloadsComplete = NO;
 	mediaKeyQueue = [NSMutableArray new];
 	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
-    [_tiVoGlobalManager loadManualTiVos];
-    [_tiVoGlobalManager searchForBonjourTiVos];
 
     [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueObservingOptionInitial context:nil];

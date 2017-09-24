@@ -95,13 +95,12 @@
 
 //---------------TiVo Management methods ----------
 -(BOOL)foundTiVoNamed:(NSString *)tiVoName;
--(void)loadManualTiVos;
--(void)searchForBonjourTiVos;
 -(void)refreshAllTiVos;
 -(void)resetAllDetails;
 -(NSArray *)allTiVos;
 -(BOOL)anyTivoActive;
 -(int) nextManualTiVoID;
+-(BOOL) duplicateTiVoFor: (MTTiVo *)tiVo;
 -(void)updateTiVoDefaults:(MTTiVo *)tiVo;
 -(void) deleteTivoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) stopRecordingShows: (NSArray <MTTiVoShow *> *) shows;

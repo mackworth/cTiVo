@@ -229,7 +229,7 @@ __DDLOGHERE__
 #pragma mark - GetDetails from Tivo and parse
 
 -(NSURL *) detailFileURL {
-    NSString *detailFilePath = [NSString stringWithFormat:@"%@_%d_Details.xml",self.tiVo.tiVo.name,self.showID]; //keep in sync with parseDetails
+    NSString *detailFilePath = [NSString stringWithFormat:@"%@_%d_Details.xml",self.tiVoName,self.showID]; //keep in sync with parseDetails
     return [NSURL fileURLWithPath:detailFilePath isDirectory:NO relativeToURL:[tiVoManager detailsTempDirectory]];
 }
 

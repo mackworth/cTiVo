@@ -401,7 +401,7 @@ static NSRegularExpression * isFinalRegex = nil;
         }
         case NSStreamEventOpenCompleted: {
             DDLogDetail(@"Stream opened for %@", streamName);
-            [self authenticate];
+            if (theStream == self.oStream) [self authenticate];
             break;
         }
         case NSStreamEventHasBytesAvailable: {

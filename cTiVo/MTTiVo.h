@@ -27,17 +27,20 @@
 @property (strong) NSArray < MTTiVoShow *> *shows;
 @property (nonatomic, strong) MTNetService *tiVo;
 @property (nonatomic, strong) NSString * tiVoSerialNumber;
-@property (atomic, assign)  BOOL  manualTiVo, enabled;
+@property (readonly)  BOOL  manualTiVo;
+@property (atomic, assign) BOOL enabled;
 @property (nonatomic, assign)BOOL storeMediaKeyInKeychain;
 @property (atomic, assign) BOOL isReachable;
 @property (nonatomic, strong) NSString *mediaKey;
 @property int manualTiVoID;
 @property (nonatomic, readonly) BOOL supportsTransportStream, supportsRPC;
 
-+(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue;
-+(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue;
++(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo
+     withOperationQueue:(NSOperationQueue *)queue
+       withSerialNumber:(NSString *) TSN;
++(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description
+                  withOperationQueue:(NSOperationQueue *)queue;
 
--(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;
 -(void)scheduleNextUpdateAfterDelay:(NSInteger) delay;
 -(void)updateShows:(id)sender;
 -(void)manageDownloads:(id)info;
@@ -50,11 +53,13 @@
 -(void) saveLastLoadTime:(NSDate *) newDate;
 -(void)resetAllDetails;
 -(void)getMediaKey;
--(NSDictionary *)defaultsDictionary;
+
+-(NSDictionary *)descriptionDictionary;
+-(void) updateWithDescription:(NSDictionary *) newTiVo;
+
 -(MTRPCData *) rpcDataForID: (NSString *) idString;
 -(void) reloadShowInfoForID: (NSString *) showID;
 -(MTRPCData *)registerRPCforShow: (MTTiVoShow *) show;
-
 -(BOOL) rpcActive;
 -(void) deleteTiVoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows;

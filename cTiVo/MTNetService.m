@@ -23,35 +23,19 @@
     return self;
 }
 
--(NSInteger)port
-{
-    NSInteger p = super.port;
-    if (_userPort) {
-        p = _userPort;
-    }
-    return p;
+-(NSInteger)port{
+    return _userPort ?: super.port;
 }
 
--(NSString *)hostName
-{
-    NSString *returnString = super.hostName;
-    if (self.iPAddress) {
-        returnString = self.iPAddress;
-    }
-    return returnString;
+-(NSString *)hostName {
+    return self.iPAddress ?: super.hostName;
 }
 
--(NSString *)name
-{
-    NSString *returnString = super.name;
-    if (self.userName) {
-        returnString = self.userName;
-    }
-    return returnString;
+-(NSString *)name {
+    return self.userName ?: super.name;
 }
 
--(NSArray *)addresses
-{
+-(NSArray *)addresses {
     NSArray *returnArray = [super addresses];
     if (_iPAddress) {
         struct sockaddr_in socketAddress;
