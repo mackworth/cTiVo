@@ -82,12 +82,12 @@ __DDLOGHERE__
             if ((description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqualTo:kMTTiVoNullKey]) {
                 thisTiVo.mediaKey = description[kMTTiVoMediaKey];
             }
-            DDLogDetail(@"%@ is%@ Enabled", self,thisTiVo.enabled ? @"": @" not");
+            DDLogDetail(@"%@ is%@ Enabled", thisTiVo.tiVo.name,thisTiVo.enabled ? @"": @" not");
             return thisTiVo;
         }
     }
     thisTiVo.enabled = YES;
-    DDLogMajor(@"Warning: didn't find %@ in %@", self, [tiVoManager.savedTiVos maskMediaKeys]);
+    DDLogMajor(@"First time seeing %@ (previous: %@)",thisTiVo, [tiVoManager.savedTiVos maskMediaKeys]);
     return thisTiVo;
 }
 
@@ -132,7 +132,7 @@ __DDLOGHERE__
         managingDownloads = NO;
         _manualTiVo = NO;
 		firstUpdate = YES;
-        _enabled = YES;
+        _enabled = NO;
         _storeMediaKeyInKeychain = NO;
         itemStart = 0;
         itemCount = 50;

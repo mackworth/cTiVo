@@ -1691,22 +1691,17 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender
                         withOperationQueue:self.opsQueue
                           withSerialNumber:TSN];
-    for (NSString *tiVoAddress in [self tiVoAddresses]) {
-        DDLogVerbose(@"Comparing new TiVo %@ address %@ to existing %@",sender.name, ipAddress, tiVoAddress);
-        if ([tiVoAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
-            DDLogDetail(@"Rejecting duplicate TiVo at %@",ipAddress);
-            newTiVo.enabled = NO;  // This filters out tivos that have already been found from a manual entry
-        }
-    }
 
 	self.tiVoList = [_tiVoList arrayByAddingObject: newTiVo];
-	if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
-		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
-	}
-	DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
-    [newTiVo updateShows:self];
+    if (newTiVo.enabled){
+        if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
+            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
+        }
+        DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+        [newTiVo updateShows:self];
+    }
 
 }
 

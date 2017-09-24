@@ -420,6 +420,16 @@ __DDLOGHERE__
     }
     if (shouldLaunch) {
         DDLogVerbose(@"Launching: %@",self);
+        NSFileManager * fm = [NSFileManager defaultManager];
+        NSString * errorString = nil;
+        if ([fm fileExistsAtPath:_task.currentDirectoryPath]) {
+            errorString = [NSString stringWithFormat: @"tmp folder %@ exists", _task.currentDirectoryPath];
+        } else {
+            DDLogReport(@"Error on launch: No temp directory");
+            NSError * error = nil;
+           [fm createDirectoryAtPath:_task.currentDirectoryPath withIntermediateDirectories:YES  attributes: nil error: &error];
+            errorString = error.localizedDescription;
+        }
         @try {
             [_task launch];
             launched = YES;
@@ -436,6 +446,7 @@ __DDLOGHERE__
             [info setValue:exception.callStackReturnAddresses forKey:@"MTExceptionCallStackReturnAddresses"];
             [info setValue:exception.callStackSymbols forKey:@"MTExceptionCallStackSymbols"];
             [info setValue:exception.userInfo forKey:@"MtExceptionUserInfo"];
+            [info setValue:errorString forKey:@"MtExceptionTmpError"];
             [info setValue:desc forKey:@"MTExceptionTaskInfo"];
 
             NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:1 userInfo:info];

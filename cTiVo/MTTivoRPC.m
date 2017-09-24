@@ -14,6 +14,7 @@
 @interface MTTivoRPC () <NSStreamDelegate>
 @property (nonatomic, strong) NSInputStream *iStream;
 @property (nonatomic, strong) NSOutputStream *oStream;
+@property (nonatomic, assign) NSInteger retries;
 
 @property (nonatomic, strong) NSString * hostName;
 @property (nonatomic, strong) NSString * tiVoSerialNumber;
@@ -141,6 +142,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 
 -(void) commonInit {
     self.rpcID = 0;
+    self.retries = 0;
     self.remainingData = [NSMutableData data];
     self.incomingData = [NSMutableData dataWithCapacity:50000];
     self.readBlocks = [NSMutableDictionary dictionary];
@@ -154,7 +156,6 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     self.authenticationLaunched = NO;
     self.firstLaunch = YES;
     [self launchStreams];
-    self.deadmanTimer = [NSTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receiveWakeNotification:)
                                                                name: NSWorkspaceDidWakeNotification object: NULL];
@@ -242,7 +243,8 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
          _iStreamAnchor = NO; _oStreamAnchor = NO;
          self.iStream = iStream;
          self.oStream = oStream;
-         [iStream open];
+         self.deadmanTimer = [NSTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
+        [iStream open];
          [oStream open];
      }
 //     [self performSelector:@selector(checkStreamStatus) withObject:nil afterDelay:3];
@@ -260,9 +262,19 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
         self.oStream.streamStatus == NSStreamStatusAtEnd ||
         self.oStream.streamStatus == NSStreamStatusClosed ||
         self.oStream.streamStatus == NSStreamStatusError ) {
-        DDLogMajor(@"Stream failed : %@; Trying again in 10 seconds",self.oStream.streamError.description);
+        [self.deadmanTimer invalidate]; self.deadmanTimer = nil;
+        NSInteger seconds;
+        switch (self.retries) {
+            case 0: seconds = 10; break;
+            case 1: seconds = 30; break;
+            case 2: seconds = 60; break;
+            case 3: seconds = 300; break;
+            default: seconds = 900; break;
+        }
+        DDLogMajor(@"Stream failed : %@ (failure #%@); Trying again in %@ seconds",self.oStream.streamError.description, @(self.retries), @(seconds));
         [self tearDownStreams];
-        [self performSelector:@selector(launchStreams) withObject:nil afterDelay:10];
+        [self performSelector:@selector(launchStreams) withObject:nil afterDelay:seconds];
+        self.retries ++;
     }
 }
 
@@ -401,6 +413,7 @@ static NSRegularExpression * isFinalRegex = nil;
         }
         case NSStreamEventOpenCompleted: {
             DDLogDetail(@"Stream opened for %@", streamName);
+            self.retries = 0;
             if (theStream == self.oStream) [self authenticate];
             break;
         }
@@ -623,7 +636,10 @@ static NSRegularExpression * isFinalRegex = nil;
 
 -(void) getAllShows {
     DDLogDetail(@"Calling GetAllShows");
-
+    if (!self.bodyID) {
+        [self getBodyID];
+        return;
+    }
     NSDictionary * data = @{@"flatten": @"true",
                             @"format": @"idSequence",
                             @"bodyId": self.bodyID

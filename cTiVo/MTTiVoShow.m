@@ -2099,12 +2099,12 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (oldSource == MTNoSource) return MTNoSource;
     MTImageSource nextSource = MTSearchingSource;
     MTImageSource prefSource = [[NSUserDefaults standardUserDefaults] integerForKey:KMTPreferredImageSource];
-    if (prefSource == MTTiVoSource && !self.tiVo.supportsRPC) prefSource = MTTVDBSeries;
+    if (prefSource == MTTiVoSource && !self.tiVo.rpcActive) prefSource = MTTVDBSeries;
     if (oldSource == MTSearchingSource) {
         nextSource = prefSource;
         if (!self.isEpisodicShow && (oldSource == MTTVDBEpisode || oldSource == MTTVDBSeason)) {
             nextSource = MTTVDBSeries;
-        }
+        } 
     } else {
         switch (prefSource) {
             case MTTiVoSource:
@@ -2115,7 +2115,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 }
                 break;
             case MTTVDBSeries:
-                if (oldSource == MTTVDBSeries && self.tiVo.supportsRPC) {
+                if (oldSource == MTTVDBSeries && self.tiVo.rpcActive) {
                     nextSource = MTTiVoSource;
                 } else {
                     nextSource = MTNoSource;
@@ -2124,7 +2124,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             case MTTVDBSeason:
             case MTTVDBEpisode:
                 if (self.isEpisodicShow) {
-                    if (oldSource == prefSource  && self.tiVo.supportsRPC) {
+                    if (oldSource == prefSource  && self.tiVo.rpcActive) {
                         nextSource = MTTiVoSource;
                     } else if (oldSource == MTTiVoSource) {
                         nextSource = MTTVDBSeries;
@@ -2134,7 +2134,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 } else {
                     if (oldSource == prefSource) {
                         nextSource = MTTVDBSeries;
-                    } else if (oldSource == MTTVDBSeries && self.tiVo.supportsRPC) {
+                    } else if (oldSource == MTTVDBSeries && self.tiVo.rpcActive) {
                         nextSource = MTTiVoSource;
                     } else {
                         nextSource = MTNoSource;
@@ -2190,7 +2190,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (!self.isEpisodicShow && (source == MTTVDBSeason || source == MTTVDBEpisode)) {
         return YES; //can't get s/e info
     }
-    if (source == MTTiVoSource && ![self.tiVo rpcActive]) return NO;
+    if (source == MTTiVoSource && ![self.tiVo rpcActive]) return YES;
     NSString * sourceURL = [self sourceURL:source];
     if (!sourceURL) return NO;  //don't know if possible yet
     return ([sourceURL isEqualToString:@""]); //we've tried and failed
