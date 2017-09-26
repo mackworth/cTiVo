@@ -874,8 +874,9 @@ static BOOL inProgress = NO;
         DDLogDetail(@"Missing series info in TVDB data for %@: %@",show.showTitle, value);
         seriesIDs = [self cachedTVDBSeriesID:show.seriesTitle];
     }
-    newValue[kTVDBURLsKey] = [self urlsForReporting:seriesIDs];
-
+    if (![seriesIDTVDB isEqualToString:kMTVDBMissing ]) {
+        newValue[kTVDBURLsKey] = [self urlsForReporting:seriesIDs];
+    }
 
     @synchronized (self.tvdbCache) {
        [self.tvdbCache setObject:[newValue copy] forKey:show.episodeID];
@@ -1081,7 +1082,7 @@ static BOOL inProgress = NO;
 
             } failureHandler:^{
                 typeof(self) strongSelf = weakSelf;
-                DDLogDetail(@"No season artwork for %@", show);
+                DDLogDetail(@"No series artwork for %@", show);
                 [strongSelf cacheArtWork:@""
                                   forKey:kTVDBSeriesArtworkKey
                                  forShow:show];

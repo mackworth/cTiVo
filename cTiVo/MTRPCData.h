@@ -16,7 +16,7 @@
 //
 //};
 //
-@interface MTRPCData : NSObject
+@interface MTRPCData : NSObject <NSSecureCoding, NSCoding>
 
 @property (nonatomic, strong) NSString * rpcID; //format: @"TiVo|objectID"
 

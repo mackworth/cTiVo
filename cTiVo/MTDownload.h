@@ -16,7 +16,7 @@
 #import "MTTask.h"
 #import "MTTaskChain.h"
 
-@interface MTDownload : NSObject  <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding>
+@interface MTDownload : NSObject  <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSSecureCoding>
 
 
 #pragma mark - Properties for download/conversion configuration

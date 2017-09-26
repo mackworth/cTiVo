@@ -29,18 +29,21 @@ static NSString * kTitle = @"title";
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [self init];
     if (self) {
-        _recordingID = [coder decodeObjectForKey:  kRecordingID];
+        _recordingID = [coder decodeObjectOfClass:[NSString class] forKey:  kRecordingID];
         _episodeNum =  [coder decodeIntegerForKey: kEpisodeNum];
         _seasonNum =   [coder decodeIntegerForKey: kSeasonNum];
-        _genre =       [coder decodeObjectForKey:  kGenre];
+        _genre =       [coder decodeObjectOfClass:[NSString class] forKey:  kGenre];
 //      _format =      [coder decodeIntegerForKey: kFormat];
-        _imageURL =    [coder decodeObjectForKey:  kImageURL];
-        _series =      [coder decodeObjectForKey:  kTitle];
+        _imageURL =    [coder decodeObjectOfClass:[NSString class] forKey:  kImageURL];
+        _series =      [coder decodeObjectOfClass:[NSString class] forKey:  kTitle];
 
     }
     return self;
 }
 
++(BOOL) supportsSecureCoding {
+    return YES;
+}
 
 - (void)encodeWithCoder:(NSCoder *)coder {
      [coder encodeObject: _recordingID forKey:kRecordingID];

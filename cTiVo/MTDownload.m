@@ -372,27 +372,31 @@ __DDLOGHERE__
 - (id)initWithCoder:(NSCoder *)decoder {
 	//keep parallel with updateFromDecodedShow
 	if ((self = [self init])) {
-		//NSString *title = [decoder decodeObjectForKey:kTitleKey];
+		//NSString *title = [decoder decodeObjectOfClass:[NSString class] forKey:kTitleKey];
 		//float rating = [decoder decodeFloatForKey:kRatingKey];
 		self.show = [[MTTiVoShow alloc] initWithCoder:decoder ];
-		self.addToiTunesWhenEncoded= [[decoder decodeObjectForKey: kMTSubscribediTunes] boolValue];
-//		self.simultaneousEncode	 =   [[decoder decodeObjectForKey: kMTSubscribedSimulEncode] boolValue];
-		self.skipCommercials   =     [[decoder decodeObjectForKey: kMTSubscribedSkipCommercials] boolValue];
-		self.markCommercials   =     [[decoder decodeObjectForKey: kMTSubscribedMarkCommercials] boolValue];
-		NSString * encodeName	 = [decoder decodeObjectForKey:kMTQueueFormat];
+		self.addToiTunesWhenEncoded= [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribediTunes] boolValue];
+//		self.simultaneousEncode	 =   [decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedSimulEncode];
+		self.skipCommercials   =     [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedSkipCommercials] boolValue];
+		self.markCommercials   =    [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedMarkCommercials] boolValue];
+		NSString * encodeName	 = [decoder decodeObjectOfClass:[NSString class] forKey:kMTQueueFormat];
 		self.encodeFormat =	[tiVoManager findFormat: encodeName]; //minor bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is then wrong for completed/failed entries
-		self.downloadStatus		 = [decoder decodeObjectForKey: kMTQueueStatus];
-		self.encodeFilePath = [decoder decodeObjectForKey:kMTQueueFinalFile];
-		self.genTextMetaData = [decoder decodeObjectForKey:kMTQueueGenTextMetaData]; if (!self.genTextMetaData) self.genTextMetaData= @(NO);
+		self.downloadStatus		 = [decoder decodeObjectOfClass:[NSNumber class] forKey: kMTQueueStatus];
+		self.encodeFilePath = [decoder decodeObjectOfClass:[NSString class] forKey:kMTQueueFinalFile];
+		self.genTextMetaData = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueGenTextMetaData]; if (!self.genTextMetaData) self.genTextMetaData= @(NO);
 #ifndef deleteXML
-		self.genXMLMetaData = [decoder decodeObjectForKey:kMTQueueGenXMLMetaData]; if (!self.genXMLMetaData) self.genXMLMetaData= @(NO);
-		self.includeAPMMetaData = [decoder decodeObjectForKey:kMTQueueIncludeAPMMetaData]; if (!self.includeAPMMetaData) self.includeAPMMetaData= @(NO);
+		self.genXMLMetaData = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueGenXMLMetaData]; if (!self.genXMLMetaData) self.genXMLMetaData= @(NO);
+		self.includeAPMMetaData = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueIncludeAPMMetaData]; if (!self.includeAPMMetaData) self.includeAPMMetaData= @(NO);
 #endif
-		self.exportSubtitles = [decoder decodeObjectForKey:kMTQueueExportSubtitles]; if (!self.exportSubtitles) self.exportSubtitles= @(NO);
+		self.exportSubtitles = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueExportSubtitles]; if (!self.exportSubtitles) self.exportSubtitles= @(NO);
         [self setupNotifications];
 	}
 	DDLogDetail(@"initWithCoder for %@",self);
 	return self;
+}
+
++(BOOL) supportsSecureCoding {
+    return YES;
 }
 
 -(void) convertProxyToRealForShow:(MTTiVoShow *) show {

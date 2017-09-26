@@ -161,11 +161,11 @@ __DDLOGHERE__
 - (id)initWithCoder:(NSCoder *)decoder {
 	//keep parallel with updateFromDecodedShow
 	if ((self = [self init])) {
-		//NSString *title = [decoder decodeObjectForKey:kTitleKey];
+		//NSString *title = [decoder decodeObjectOfClass:[NSString class] forKey:kTitleKey];
 		//float rating = [decoder decodeFloatForKey:kRatingKey];
-		self.showID   = [[decoder decodeObjectForKey: kMTQueueID] intValue];
-		[self setShowSeriesAndEpisodeFrom:[decoder decodeObjectForKey: kMTQueueTitle] ] ;
-		NSString * tivoName = [decoder decodeObjectForKey: kMTQueueTivo] ;
+        self.showID   =                  [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTQueueID] intValue];
+		[self setShowSeriesAndEpisodeFrom:[decoder decodeObjectOfClass:[NSString class] forKey: kMTQueueTitle] ] ;
+		NSString * tivoName =             [decoder decodeObjectOfClass:[NSString class] forKey: kMTQueueTivo] ;
 		for (MTTiVo * tiVo in [tiVoManager tiVoList]) {
 			if ([tiVo.tiVo.name compare: tivoName] == NSOrderedSame) {
 				_tiVo = tiVo;
@@ -178,6 +178,10 @@ __DDLOGHERE__
 	}
 	DDLogDetail(@"initWithCoder for %@",self);
 	return self;
+}
+
++(BOOL) supportsSecureCoding {
+    return YES;
 }
 
 - (id)pasteboardPropertyListForType:(NSString *)type {

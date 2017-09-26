@@ -16,7 +16,7 @@
 
 @class MTProgramTableView;
 
-@interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding, NSURLDownloadDelegate, DragDropImageViewDelegate> {
+@interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSSecureCoding, NSURLDownloadDelegate, DragDropImageViewDelegate> {
  }
 
 
