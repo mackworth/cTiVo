@@ -764,6 +764,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
         } else if ([elementName compare:@"Item"] == NSOrderedSame) {
             parsingShow = NO;
+            DDLogVerbose(@"Done loading XML for %@",currentShow);
             for (MTTiVoShow * oldShow in newShows) {
                 if ([oldShow isEqualTo:currentShow]) {
                     DDLogDetail(@"Skipping duplicate new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested ":@"", currentShow.showTitle, currentShow.showDateString);
@@ -805,12 +806,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                     //Now check and see if this was in the oldQueue (from last ctivo execution)
                     if (firstUpdate) [tiVoManager replaceProxyInQueue:currentShow];
                 }
-            }
+           }
             if (thisShow) {
                 [newShows addObject:thisShow];
                 numAddedThisBatch++;
                 if (!thisShow.gotDetails) {
-                    NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil];
+                   NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil];
                     [self.opsQueue addOperation:nextDetail];
 
                 }

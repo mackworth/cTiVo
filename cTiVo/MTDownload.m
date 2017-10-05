@@ -200,10 +200,10 @@ __DDLOGHERE__
             }
         }
     } else if ([keyPath isEqualToString:@"processProgress"]) {
-        DDLogVerbose(@"%@ at %0.1f%%", self.show, self.processProgress*100);
         double progressChange = self.processProgress - self.displayedProcessProgress;
         if (progressChange > 0.02 || progressChange < -0.02) { //only update if enough change.
-            self.displayedProcessProgress = self.processProgress;
+            DDLogVerbose(@"%@ at %0.1f%%", self.show, self.processProgress*100);
+           self.displayedProcessProgress = self.processProgress;
             [self progressUpdated];
         }
     }
@@ -2174,7 +2174,8 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
     if ([streamError isKindOfClass:[NSNumber class]] &&
         ((error.code == -1004  && streamError.intValue == 49) ||
-         (error.code == -1001  && streamError.intValue == -2102))) {
+         (error.code == -1001  && streamError.intValue == -2102) ||
+         (error.code == -1005  && streamError.intValue == 57))) {
         [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
                          subTitle: @"Antivirus program may be blocking connection, or you may need to reboot TiVo"
                   ];

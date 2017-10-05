@@ -71,14 +71,14 @@ __DDLOGHERE__
 
 -(void) reloadData {
     //Configure Table Columns depending on how many TiVos
-	DDLogVerbose(@"Reload Program Table");
+    DDLogVerbose(@"Reload Program Table");
 	//save selection to preserve after reloadData
 	NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
     NSArray * selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
     
 	self.sortedShows = nil;
     [super reloadData];
-    
+
 	//now restore selection
 	NSIndexSet * showIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
 		return [selectedShows indexOfObject:obj] !=NSNotFound;
@@ -185,7 +185,6 @@ __DDLOGHERE__
         self.selectedTiVo = ((MTTiVo *)[(NSPopUpButton *)sender selectedItem].representedObject).tiVo.name;
         [[NSUserDefaults standardUserDefaults] setObject:self.selectedTiVo forKey:kMTSelectedTiVo];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:_selectedTiVo];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
     }
 }
 
@@ -256,18 +255,24 @@ __DDLOGHERE__
         [myController setValue:selectedRows[0] forKey:@"showForDetail"];
     }
 }
-
 -(void) tableViewColumnDidResize:(NSNotification *) notification {
 
 	NSTableColumn * column = notification.userInfo[@"NSTableColumn"];
+    CGFloat oldWidth = ((NSNumber *)notification.userInfo[@"NSOldWidth"]).floatValue;
     if ([column.identifier isEqualToString:@"Date" ]  ||
         [column.identifier isEqualToString:@"icon" ]  ||
          [column.identifier isEqualToString:kMTArtColumn ]  ) {
-        if ( [column.identifier isEqualToString:kMTArtColumn ] && self.imageRowHeight > 0) {
+        DDLogVerbose(@"changed column width for %@ from %0.1f to %0.1f", column.identifier, oldWidth, column.width );
+        if (ABS(column.width - oldWidth) < 3.0) return; //patch to prevent height/width looping in High Sierra
+        NSIndexSet * allRows = [NSIndexSet indexSetWithIndexesInRange: NSMakeRange(0, self.sortedShows.count) ];
+       if ( [column.identifier isEqualToString:kMTArtColumn ] && self.imageRowHeight > 0) {
             self.imageRowHeight = -self.imageRowHeight;  //use as trigger to recalculate, but remember old size in case it hasn't changed.
+            [self noteHeightOfRowsWithIndexesChanged: allRows ];
+        } else {
+            [self reloadDataForRowIndexes: allRows
+                            columnIndexes:[NSIndexSet indexSetWithIndex: [[self tableColumns] indexOfObject:column]]];
         }
-        [self reloadData];
-   }
+    }
 }
 
 -(void) columnChanged: (NSTableColumn *) column {
@@ -282,9 +287,10 @@ __DDLOGHERE__
         }
         if (self.imageRowHeight > 0) {
             self.imageRowHeight = -self.imageRowHeight;  //use as trigger to recalculate, but remember old size in case it hasn't changed.
+        } else {
+            self.imageRowHeight = -1;
         }
-        [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.sortedShows.count)]
-                        columnIndexes:[NSIndexSet indexSetWithIndex: [[self tableColumns] indexOfObject:column]]];
+        [self reloadData];
    }
 }
 
@@ -305,19 +311,17 @@ __DDLOGHERE__
     //Yes, it's ugly.
     if (self.imageRowHeight < 0) {
         NSTableColumn *imageColumn = [self tableColumnWithIdentifier:kMTArtColumn];
-        CGFloat newRowHeight;
-        if  ( imageColumn.hidden ) {
-           newRowHeight = [super rowHeight];
-        } else {
-           newRowHeight =  MAX([super rowHeight], 9.0/16.0*imageColumn.width);
+        CGFloat newRowHeight = [super rowHeight];
+        if  (!imageColumn.hidden ) {
+           newRowHeight =  MAX(newRowHeight, 9.0/16.0*imageColumn.width);
         }
-        if (newRowHeight != self.imageRowHeight) {
+        DDLogVerbose(@"rowHeight calculation: %0.1f => %0.1f .", -self.imageRowHeight, newRowHeight);
+        if (newRowHeight != -self.imageRowHeight) {
             //now preserve the current first row.
             CGPoint scroll = self.enclosingScrollView.contentView.bounds.origin;
             NSInteger spacing = [self intercellSpacing].height;
             scroll.y = scroll.y/(-self.imageRowHeight+spacing) * (newRowHeight+spacing);
             self.imageRowHeight = newRowHeight;
-            [self reloadData];
             [self scrollPoint:scroll];
         }
     }
@@ -406,11 +410,13 @@ __DDLOGHERE__
         result.textField.alignment = NSCenterTextAlignment;
         result.toolTip =@"Does this channel use H.264 compression?";
     } else if ([identifier isEqualToString: kMTArtColumn]) {
-        MTProgressCell * cell = (MTProgressCell *) result;
+        DDLogVerbose(@"looking for image for %@",thisShow);
+       MTProgressCell * cell = (MTProgressCell *) result;
         DragDropImageView * imageView = (DragDropImageView *) result.imageView;
         imageView.delegate = thisShow;
         NSImage * image = thisShow.thumbnailImage;
         if (image) {
+            DDLogVerbose(@"got image for %@",thisShow);
             imageView.image = image ;
             imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
             result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
@@ -418,11 +424,13 @@ __DDLOGHERE__
             [cell.progressIndicator stopAnimation:self];
         } else if (thisShow.noImageAvailable) {
             //no image, and it's never coming
-            imageView.image = nil ;
+            DDLogVerbose(@"No image  for %@",thisShow);
+           imageView.image = nil ;
             cell.progressIndicator.hidden = YES;
             [cell.progressIndicator stopAnimation:self];
        } else {
             //no image, but it may be coming
+           DDLogVerbose(@"Waiting for image for %@",thisShow); 
            imageView.image = nil ;
             cell.progressIndicator.hidden = NO;
             [cell.progressIndicator startAnimation:self];

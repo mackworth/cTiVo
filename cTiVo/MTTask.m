@@ -337,7 +337,7 @@ __DDLOGHERE__
         }
         return argument;
     }];
-    desc = [desc stringByAppendingFormat:@"\nLaunchPath: %@ %@", _task.launchPath, [arguments componentsJoinedByString:@" "]];
+    desc = [desc stringByAppendingFormat:@"\nLaunchPath: %@ %@", _task.launchPath, [[arguments componentsJoinedByString:@" "] maskMediaKeys]] ;
     desc = [desc stringByAppendingFormat:@"\n%@ output pipe",_requiresOutputPipe ? @"Requires" : @"Does not require"];
     desc = [desc stringByAppendingFormat:@"\nStandard Input: %@",_task.standardInput];
     desc = [desc stringByAppendingFormat:@"\nStandard Output: %@",_task.standardOutput];

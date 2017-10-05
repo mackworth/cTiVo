@@ -53,7 +53,7 @@ __DDLOGHERE__
 
 -(id)initWithWindowNibName:(NSString *)windowNibName
 {
-	DDLogDetail(@"creating Main Window");
+    DDLogDetail(@"creating Main Window");
 	self = [super initWithWindowNibName:windowNibName];
 	if (self) {
 		_loadingTiVos = [NSCountedSet new];
@@ -471,7 +471,7 @@ __DDLOGHERE__
 -(IBAction)downloadMenuHandler:(NSMenuItem *)menu
 {
 	DDLogMajor(@"User specified to %@",menu.title);
-	if ([menu.title caseInsensitiveCompare:@"Delete"] == NSOrderedSame) {
+	if ([menu.title caseInsensitiveCompare:@"Remove from Queue"] == NSOrderedSame) {
 		[self removeFromDownloadQueue:menu];
 	} else if ([menu.title caseInsensitiveCompare:@"Reschedule"] == NSOrderedSame) {
 		NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];

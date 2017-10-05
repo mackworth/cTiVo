@@ -76,7 +76,7 @@ __DDLOGHERE__
 {
 	self = [super init];
 	if (self) {
-		DDLogDetail(@"setting up TivoManager");
+        DDLogDetail(@"setting up TivoManager");
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		_tivoServices = [NSMutableArray new];
 		_tiVoList = [NSMutableArray new];
@@ -87,10 +87,10 @@ __DDLOGHERE__
 		if (!_lastLoadedTivoTimes) {
 			_lastLoadedTivoTimes = [NSMutableDictionary new];
 		}
-        [self initialFormatSetup];
+       [self initialFormatSetup];
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
-		DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
-        [self restoreManualEpisodeInfo];
+        DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
+       [self restoreManualEpisodeInfo];
 
 		numEncoders = 0;
 		_signalError = 0;
@@ -440,8 +440,8 @@ __DDLOGHERE__
 		DDLogReport(@"Warning: didn't find tivo %@",tiVo);
         [updatedSavedTiVos addObject:tiVoDict];
 	}
-    DDLogVerbose(@"Saving new tivos %@",[updatedSavedTiVos maskMediaKeys]);
     [[NSUserDefaults standardUserDefaults] setValue:updatedSavedTiVos forKeyPath:kMTTiVos];
+    DDLogVerbose(@"Saving new tivos %@",[updatedSavedTiVos maskMediaKeys]);
 }
 
 -(int) nextManualTiVoID{
@@ -768,6 +768,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
+    DDLogReport(@"TivoManager keyPath: %@", keyPath);
     NSUserDefaults * defs = [NSUserDefaults standardUserDefaults];
     if ([keyPath compare:kMTScheduledOperations] == NSOrderedSame) {
         DDLogMajor(@"Turned %@ scheduled Operations",[defs boolForKey:kMTScheduledOperations]? @"on" : @"off" );

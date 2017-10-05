@@ -170,15 +170,15 @@ __DDLOGHERE__
         [[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTDebugLevelDetail];
 		[[NSUserDefaults standardUserDefaults] setObject:@15 forKey:kMTDebugLevel];
 		[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
-	} else {
-		[[NSUserDefaults standardUserDefaults]  registerDefaults:@{kMTDebugLevel: @1}];
-		[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
-		
-	}
+    } else if ( [[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel] == 15){
+        [[NSUserDefaults standardUserDefaults] setObject:@3 forKey:kMTDebugLevel];
+        [DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
+   } else {
+        [[NSUserDefaults standardUserDefaults]  registerDefaults:@{kMTDebugLevel: @1}];
+        [DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
+        
+    }
 
-	// Insert code here to initialize your application
-	
-	//	[[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTMediaKeys];  //Test code for starting from scratch
 	MTLogFormatter * logFormat = [MTLogFormatter new];
 
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
@@ -201,7 +201,7 @@ __DDLOGHERE__
 	[fileLogger setLogFormatter:logFormat];
     [DDLog addLogger:fileLogger];
 
-     DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
+    DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
 
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
 										  @NO, kMTShowCopyProtected,
@@ -227,21 +227,20 @@ __DDLOGHERE__
                                           @"tivodecode-ng", kMTDecodeBinary,
                                           @NO, kMTDownloadTSFormat,
                                           @NO, kMTExportTextMetaData,
+                                          @NO, kMTSaveMPGFile,
                                           @[], kMTChannelInfo,
                                           nil];
-    
-    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSaveMPGFile];
-	[[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
-    [[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTUpdateIntervalMinutesOld];  //can remove in future
+
+    [[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelUserQuit) name:kMTNotificationUserCanceledQuit object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
 
     quitWhenCurrentDownloadsComplete = NO;
-	mediaKeyQueue = [NSMutableArray new];
-	_tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
+    mediaKeyQueue = [NSMutableArray new];
+    _tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
 
-    [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
+   [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
     [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueObservingOptionInitial context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTRunComSkip options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
@@ -293,7 +292,13 @@ __DDLOGHERE__
 	
     self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: 61 target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
     DDLogDetail(@"Finished appDidFinishLaunch");
-    [[NSUserDefaults standardUserDefaults] setInteger:3 forKey:kMTUserDefaultVersion];
+
+    if (    [[NSUserDefaults standardUserDefaults] integerForKey:kMTUserDefaultVersion] == 3) {
+        [[NSUserDefaults standardUserDefaults] setInteger:2 forKey:kMTUserDefaultVersion];
+        //revert step forward in versions. No need to change yet.
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTUpdateIntervalMinutesOld];  //can remove in future after 3.0 ships
+
  }
 
 -(void) launchPseudoEvent {
@@ -303,7 +308,9 @@ __DDLOGHERE__
 
 }
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
-    [self showMainWindow:notification];
+    if (_tiVoGlobalManager) { //in case system calls this before applicationDidLaunch (High Sierra)
+        [self showMainWindow:notification];
+    }
 }
 
 NSOpenPanel* myOpenPanel = nil;  //weird bug where sometimes we're called twice for directory change.

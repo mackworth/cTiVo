@@ -1813,7 +1813,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     NSString *currentDir   = [[self downloadFileNameWithFormat:nil createIfNecessary:YES] stringByDeletingLastPathComponent];
     currentDir = [currentDir pathForParentDirectoryWithName:legalSeriesName];
     directory = [currentDir stringByAppendingPathComponent:@"thumbnails"];
-    
+
     NSError * error = nil;
     [[NSFileManager defaultManager] createDirectoryAtPath:directory
                               withIntermediateDirectories:YES
@@ -1897,7 +1897,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         parentDir = [parentDir pathForParentDirectoryWithName:legalSeriesName];
 
         NSString * userThumbnailDir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
-        if (userThumbnailDir) {
+       if (userThumbnailDir) {
             [directories addObject:userThumbnailDir];
         } else if (currentDir) {
             [directories addObject: currentDir];
@@ -1905,7 +1905,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             [directories addObject: parentDir];
             [directories addObject:  [parentDir stringByAppendingPathComponent:@"thumbnails"]];
         }
-        [directories addObject: topDirectory];
+        if (topDirectory) [directories addObject: topDirectory]; //should always be!
 
         if (self.isMovie) {
             for (NSString * dir in directories) {
@@ -2267,7 +2267,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     //Then we request image, and get the same notification when that arrives
     if (!_thumbnailImage){
         if (self.thumbnailFile) {
-            _thumbnailImage = [[NSImage alloc] initWithContentsOfURL:self.thumbnailFile];
+          _thumbnailImage = [[NSImage alloc] initWithContentsOfURL:self.thumbnailFile];
             if (!_thumbnailImage) {
                 [self invalidateCurrentThumbnail:nil];
             }
