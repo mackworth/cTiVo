@@ -78,7 +78,7 @@
 +(NSString *) stringWithEndofFileHandle:(NSFileHandle *) logHandle numBytes:(NSUInteger) numBytes {
     unsigned long long logFileSize = [logHandle seekToEndOfFile];
     if (logFileSize == 0)  return @"";
-    if (logFileSize <  numBytes) numBytes = (NSUInteger)logFileSize;
+    if (logFileSize <  (unsigned long long) numBytes) numBytes = (NSUInteger)logFileSize;
     [logHandle seekToFileOffset:(logFileSize-numBytes)];
     NSData *tailOfFile = [logHandle readDataOfLength:numBytes];
     if (tailOfFile.length == 0) return @"";

@@ -861,6 +861,7 @@ static BOOL inProgress = NO;
 }
 
 -(void) cache: (NSDictionary <NSString *, id> *) value forShow: (MTTiVoShow *) show {
+    if (!show.episodeID) return;
     NSMutableDictionary * newValue = [value mutableCopy];
 
     newValue[kTVDBDateKey ] = [NSDate date];

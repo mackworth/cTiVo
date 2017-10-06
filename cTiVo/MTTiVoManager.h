@@ -69,6 +69,7 @@
 -(MTDownload *) findInDownloadQueue: (MTTiVoShow *) show;
 -(BOOL) anyShowsWaiting;
 -(NSInteger)numberOfShowsToDownload;
+-(long long)sizeOfShowsToDownload;
 -(void) clearDownloadHistory;
 
 //---------------Download Queue userDefaults writing/reading  ----------

@@ -920,7 +920,7 @@ static NSArray * imageResponseTemplate = nil;
 }
 
 -(void) sharedShutdown {
-    [self.deadmanTimer invalidate];
+    [self.deadmanTimer invalidate]; self.deadmanTimer = nil;
     [self tearDownStreams];
     [self saveDefaults];
 }

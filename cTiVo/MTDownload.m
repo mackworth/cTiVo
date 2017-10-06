@@ -589,6 +589,11 @@ __DDLOGHERE__
 	
 }
 
+-(long long) spaceAvailable:(NSString *) path {
+    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfFileSystemForPath:path error:nil];
+    return  ( (NSNumber *)[attributes objectForKey:NSFileSystemFreeSize]).longLongValue;
+}
+
 -(BOOL)configureFiles
 {
     DDLogDetail(@"configuring files for %@",self);
@@ -600,6 +605,24 @@ __DDLOGHERE__
     NSFileManager *fm = [NSFileManager defaultManager];
     if (! [self configureBaseFileNameAndDirectory]) {
         return NO;
+    }
+    long long tmpSpace = [self spaceAvailable: tiVoManager.tmpFilesDirectory];
+    long long fileSpace = [self spaceAvailable: self.downloadDirectory];
+
+    if ((tmpSpace == fileSpace  && tmpSpace < 1.5 * self.show.fileSize) ||  //check if both on same drive
+        tmpSpace < self.show.fileSize ||
+        fileSpace < self.show.fileSize) {
+        [tiVoManager pauseQueue:nil];
+        [self notifyUserWithTitle:@"Cancelling downloads: Your disk is low on space" subTitle:@"Delete some files?"];
+        return NO;
+    }
+    long long maxSize = tiVoManager.sizeOfShowsToDownload;
+    if (tmpSpace < maxSize || fileSpace < maxSize) {
+        [tiVoManager notifyForName: self.show.showTitle
+                         withTitle: @"Warning: you may be getting low on disk space"
+                          subTitle: @"Delete some files?"
+                          isSticky: NO
+         ];
     }
     if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {  //We need to download from the TiVo
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
@@ -2085,6 +2108,8 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         DDLogVerbose(@"Response Headers: %@", [httpResponse allHeaderFields]);
     }
 }
+NSString * cTiVoDomain = @"com.ctivo.ctivo";
+NSInteger diskWriteFailure = 123;
 
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
@@ -2120,7 +2145,16 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 			}
 		};
 	} else {
-		[self.bufferFileWriteHandle writeData:data];
+        @try {
+            [self.bufferFileWriteHandle writeData:data];
+        } @catch (NSException *exception) {
+            NSDictionary * info = @{ NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Disk write failure: %@",exception.reason],
+                                     NSLocalizedRecoverySuggestionErrorKey: @"Delete some files and try again?",
+                                     };
+            NSError * error = [NSError errorWithDomain: cTiVoDomain code: diskWriteFailure userInfo:info];
+            [self connection:connection didFailWithError:error];
+            return;
+        }
 	}
         
     @synchronized (self) {
@@ -2170,15 +2204,19 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 {
     DDLogReport(@"Download URL Connection Failed with error %@",[error maskMediaKeys]);
     
-    NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
-    DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
-    if ([streamError isKindOfClass:[NSNumber class]] &&
-        ((error.code == -1004  && streamError.intValue == 49) ||
-         (error.code == -1001  && streamError.intValue == -2102) ||
-         (error.code == -1005  && streamError.intValue == 57))) {
-        [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
-                         subTitle: @"Antivirus program may be blocking connection, or you may need to reboot TiVo"
-                  ];
+    if ([error.domain isEqualToString:@"com.ctivo.ctivo"] && error.code == diskWriteFailure) {
+        [self notifyUserWithTitle: error.userInfo[NSLocalizedDescriptionKey] subTitle: error.userInfo[NSLocalizedRecoverySuggestionErrorKey]];
+    } else {
+        NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
+        DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
+        if ([streamError isKindOfClass:[NSNumber class]] &&
+            ((error.code == -1004  && streamError.intValue == 49) ||
+             (error.code == -1001  && streamError.intValue == -2102) ||
+             (error.code == -1005  && streamError.intValue == 57))) {
+            [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
+                             subTitle: @"Antivirus program may be blocking connection, or you may need to reboot TiVo"
+                      ];
+        }
     }
    if (self.activeURLConnection) {
         [self.activeURLConnection cancel];

@@ -601,6 +601,9 @@ __DDLOGHERE__
 }
 
 -(void)pauseQueue:(NSNumber *)askUser
+//@YES: ask user to cancel, reschedule or complete
+//@NO: don't ask user, reschedule all
+//nil means don't ask user or reschedule
 {
     if ([askUser boolValue] && [self anyTivoActive] ) {
 		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current show(s)" informativeTextWithFormat:@""];
@@ -635,8 +638,10 @@ __DDLOGHERE__
         }
     } else {
         self.processingPaused = @(YES);
-        for (MTTiVo *tiVo in _tiVoList) {
-            [tiVo rescheduleAllShows];
+        if (askUser != nil) {
+            for (MTTiVo *tiVo in _tiVoList) {
+                [tiVo rescheduleAllShows];
+            }
         }
 
     }
@@ -1345,6 +1350,16 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	}
 	return n;
 }
+-(long long)sizeOfShowsToDownload
+{
+    long long size = 0;
+    for (MTDownload *download in _downloadQueue) {
+        if (!download.isDone) {
+            size +=download.show.fileSize;
+        }
+    }
+    return size;
+}
 
 -(BOOL) checkForExit {
     return [(MTAppDelegate *) [NSApp delegate] checkForExit];
@@ -1360,6 +1375,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
      shouldPresentNotification:(NSUserNotification *)notification {
     return YES;
 }
+
 -(void) notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle {
     [self notifyForName: nil withTitle:title subTitle:subTitle isSticky:YES ];
 }
@@ -1372,7 +1388,22 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     userNot.subtitle = objName;
     userNot.informativeText = subTitle;
     userNot.soundName = NSUserNotificationDefaultSoundName;
+    userNot.userInfo = @{@"Sticky": @(sticky)};
     [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:userNot];
+}
+
+- (void)userNotificationCenter:(NSUserNotificationCenter *)center didDeliverNotification:(NSUserNotification *)notification{
+    // If we're not sticky, let's wait about 60 seconds and then remove the notification.
+    if (![[[notification userInfo] objectForKey:@"Sticky"] boolValue]) {
+        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:notification,@"notification",center,@"center",nil];
+        [self performSelector:@selector(expireNotification:) withObject:dict afterDelay:60];
+    }
+}
+
+- (void)expireNotification:(NSDictionary *)dict {
+    NSUserNotification *notification = [dict objectForKey:@"notification"];
+    NSUserNotificationCenter *center = [dict objectForKey:@"center"];
+    [center removeDeliveredNotification:notification];
 }
 
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget {
