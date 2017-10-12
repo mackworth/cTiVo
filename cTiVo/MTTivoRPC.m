@@ -10,6 +10,7 @@
 #import "DDLog.h"
 #import "MTTiVoManager.h" //just for maskMediaKeys
 #import "NSNotificationCenter+Threads.h"
+#import "Crashlytics/Crashlytics.h"
 
 @interface MTTivoRPC () <NSStreamDelegate>
 @property (nonatomic, strong) NSInputStream *iStream;
@@ -262,16 +263,35 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
         self.oStream.streamStatus == NSStreamStatusAtEnd ||
         self.oStream.streamStatus == NSStreamStatusClosed ||
         self.oStream.streamStatus == NSStreamStatusError ) {
-        [self.deadmanTimer invalidate]; self.deadmanTimer = nil;
+        NSUInteger i  = 0;
+
+        CLS_LOG(@"Stream failure: %@",@(self.iStream.streamStatus));
+        i++;
+        i++;
+        CLS_LOG(@"Stream error: %@",self.oStream.streamError.description);
+        i++;
+        i++;
+        [self.deadmanTimer invalidate];
+        i++;
+        i++;
+        self.deadmanTimer = nil;
         NSInteger seconds;
-        switch (self.retries) {
+        i++;
+        i++;
+      CLS_LOG(@"Trying again in %@ seconds ; ",@(self.retries));
+
+        i++;
+        i++;
+      switch (self.retries) {
             case 0: seconds = 10; break;
             case 1: seconds = 30; break;
             case 2: seconds = 60; break;
             case 3: seconds = 300; break;
             default: seconds = 900; break;
         }
-        DDLogMajor(@"Stream failed : %@ (failure #%@); Trying again in %@ seconds",self.oStream.streamError.description, @(self.retries), @(seconds));
+        i++;
+        i++;
+       DDLogMajor(@"Stream failed : %@ (failure #%@); Trying again in %@ seconds",self.oStream.streamError.description, @(self.retries), @(seconds));
         [self tearDownStreams];
         [self performSelector:@selector(launchStreams) withObject:nil afterDelay:seconds];
         self.retries ++;
@@ -449,6 +469,7 @@ static NSRegularExpression * isFinalRegex = nil;
                 }
             } else {
                 DDLogMajor(@"%@ Failed read==> closed connection? %@: %@", streamName, @(len), [theStream streamError]);
+                CLS_LOG(@"%@ Failed read==> closed connection? %@: %@", streamName, @(len), [theStream streamError]);
                 [self checkStreamStatus];
             }
             break;
@@ -459,11 +480,13 @@ static NSRegularExpression * isFinalRegex = nil;
         }
         case NSStreamEventErrorOccurred: {
             DDLogMajor(@"StreamError on %@: %@", streamName, [theStream streamError]);
+            CLS_LOG(@"StreamError on %@: %@", streamName, [theStream streamError]);
             [self checkStreamStatus];
             break;
         }
         case NSStreamEventEndEncountered: {
             DDLogMajor(@"%@ Stream End", streamName);
+            CLS_LOG(@"%@ Stream End", streamName);
             [self checkStreamStatus];
             break;
         }
