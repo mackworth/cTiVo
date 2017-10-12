@@ -11,7 +11,9 @@
 #import "MTTiVoManager.h" //just for maskMediaKeys
 #import "NSNotificationCenter+Threads.h"
 #import "Crashlytics/Crashlytics.h"
-
+#ifdef DEBUG
+#define CLSLog NSLog
+#endif
 @interface MTTivoRPC () <NSStreamDelegate>
 @property (nonatomic, strong) NSInputStream *iStream;
 @property (nonatomic, strong) NSOutputStream *oStream;
@@ -265,10 +267,10 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
         self.oStream.streamStatus == NSStreamStatusError ) {
         NSUInteger i  = 0;
 
-        CLS_LOG(@"Stream failure: %@",@(self.iStream.streamStatus));
+        CLSLog(@"Stream failure: %@",@(self.iStream.streamStatus));
         i++;
         i++;
-        CLS_LOG(@"Stream error: %@",self.oStream.streamError.description);
+        CLSLog(@"Stream error: %@",self.oStream.streamError.description);
         i++;
         i++;
         [self.deadmanTimer invalidate];
@@ -278,7 +280,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
         NSInteger seconds;
         i++;
         i++;
-      CLS_LOG(@"Trying again in %@ seconds ; ",@(self.retries));
+        CLSLog(@"Trying again in %@ seconds ; ",@(self.retries));
 
         i++;
         i++;
@@ -469,7 +471,7 @@ static NSRegularExpression * isFinalRegex = nil;
                 }
             } else {
                 DDLogMajor(@"%@ Failed read==> closed connection? %@: %@", streamName, @(len), [theStream streamError]);
-                CLS_LOG(@"%@ Failed read==> closed connection? %@: %@", streamName, @(len), [theStream streamError]);
+                CLSLog(@"%@ Failed read==> closed connection? %@: %@", streamName, @(len), [theStream streamError]);
                 [self checkStreamStatus];
             }
             break;
@@ -480,13 +482,13 @@ static NSRegularExpression * isFinalRegex = nil;
         }
         case NSStreamEventErrorOccurred: {
             DDLogMajor(@"StreamError on %@: %@", streamName, [theStream streamError]);
-            CLS_LOG(@"StreamError on %@: %@", streamName, [theStream streamError]);
+            CLSLog(@"StreamError on %@: %@", streamName, [theStream streamError]);
             [self checkStreamStatus];
             break;
         }
         case NSStreamEventEndEncountered: {
             DDLogMajor(@"%@ Stream End", streamName);
-            CLS_LOG(@"%@ Stream End", streamName);
+            CLSLog(@"%@ Stream End", streamName);
             [self checkStreamStatus];
             break;
         }
