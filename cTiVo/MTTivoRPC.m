@@ -158,7 +158,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 
     self.authenticationLaunched = NO;
     self.firstLaunch = YES;
-    [self launchStreams];
+    [self launchServer];
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receiveWakeNotification:)
                                                                name: NSWorkspaceDidWakeNotification object: NULL];
@@ -212,8 +212,13 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     return [NSString stringWithFormat:@"%@ - %@", kMTRPCMap, self.tiVoSerialNumber ?:@"unknown"];
 }
 
- -(void) launchStreams {
-     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(launchStreams) object:nil  ];
+ -(void) launchServer {
+     if (!self.delegate.isReachable) {
+         DDLogMajor(@"Can't launch RPC; TiVo %@ offline",self.delegate);
+         return;
+     }
+     if (!([self streamClosed: self.iStream] || [self streamClosed: self.oStream] )) return;
+     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(launchServer) object:nil  ];
      self.sessionID = arc4random_uniform(0x27dc20);
      CFReadStreamRef readStream;
      CFWriteStreamRef writeStream;
@@ -247,6 +252,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
          self.iStream = iStream;
          self.oStream = oStream;
          self.deadmanTimer = [NSTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
+         DDLogMajor(@"Launching RPC streams for %@", self.delegate);
         [iStream open];
          [oStream open];
      }
@@ -255,16 +261,16 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 -(BOOL) isActive {
     return self.iStream.streamStatus == NSStreamStatusOpen;
 }
+-(BOOL) streamClosed: (NSStream *) stream {
+    return  stream.streamStatus == NSStreamStatusNotOpen ||
+            stream.streamStatus == NSStreamStatusAtEnd ||
+            stream.streamStatus == NSStreamStatusClosed ||
+            stream.streamStatus == NSStreamStatusError  ;
 
+}
 -(void) checkStreamStatus {
-    if (self.iStream.streamStatus == NSStreamStatusNotOpen ||
-        self.iStream.streamStatus == NSStreamStatusAtEnd ||
-        self.iStream.streamStatus == NSStreamStatusClosed ||
-        self.iStream.streamStatus == NSStreamStatusError ||
-        self.oStream.streamStatus == NSStreamStatusNotOpen ||
-        self.oStream.streamStatus == NSStreamStatusAtEnd ||
-        self.oStream.streamStatus == NSStreamStatusClosed ||
-        self.oStream.streamStatus == NSStreamStatusError ) {
+    if ([self streamClosed: self.iStream] ||
+        [self streamClosed: self.oStream]) {
         NSUInteger i  = 0;
 
         CLSLog(@"Stream failure: %@",@(self.iStream.streamStatus));
@@ -280,23 +286,29 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
         NSInteger seconds;
         i++;
         i++;
-        CLSLog(@"Trying again in %@ seconds ; ",@(self.retries));
 
         i++;
         i++;
-      switch (self.retries) {
-            case 0: seconds = 10; break;
-            case 1: seconds = 30; break;
-            case 2: seconds = 60; break;
-            case 3: seconds = 300; break;
-            default: seconds = 900; break;
-        }
         i++;
         i++;
-       DDLogMajor(@"Stream failed : %@ (failure #%@); Trying again in %@ seconds",self.oStream.streamError.description, @(self.retries), @(seconds));
         [self tearDownStreams];
-        [self performSelector:@selector(launchStreams) withObject:nil afterDelay:seconds];
-        self.retries ++;
+        if (self.delegate.isReachable) {
+            CLSLog(@"Trying again; retry #%@ ; ",@(self.retries));
+            switch (self.retries) {
+                case 0: seconds = 10; break;
+                case 1: seconds = 30; break;
+                case 2: seconds = 60; break;
+                case 3: seconds = 300; break;
+                default: seconds = 900; break;
+            }
+            CLSLog(@"Stream failed, but reachable: %@ (failure #%@); Trying again in %@ seconds",self.oStream.streamError.description, @(self.retries), @(seconds));
+            DDLogMajor(@"Stream failed, but reachable: %@ (failure #%@); Trying again in %@ seconds",self.oStream.streamError.description, @(self.retries), @(seconds));
+            [self performSelector:@selector(launchServer) withObject:nil afterDelay:seconds];
+            self.retries ++;
+       } else {
+           CLSLog(@"Stream failed, and unreachable: %@ (failure #%@); Awaiting reachability",self.oStream.streamError.description, @(self.retries) );
+           DDLogMajor(@"Stream failed, and unreachable: %@ (failure #%@); Awaiting reachability",self.oStream.streamError.description, @(self.retries) );
+        }
     }
 }
 

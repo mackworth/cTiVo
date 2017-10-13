@@ -13,6 +13,8 @@
 
 -(instancetype) initServer: (NSString *)serverAddress tsn: (NSString *) tsn onPort: (int32_t) port andMAK: (NSString *) mediaAccessKey;
 -(instancetype) initServer: (NSString *)serverAddress forUser:(NSString *) user withPassword: (NSString *) password;
+
+-(void) launchServer;
 -(void) stopServer;
 
 -(BOOL) isActive;

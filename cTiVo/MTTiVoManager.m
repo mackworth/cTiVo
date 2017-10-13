@@ -68,6 +68,7 @@ __DDLOGHERE__
         myManager.tvdb = [MTTVDB sharedManager];
         [myManager setupNotifications];
         [myManager searchForBonjourTiVos];
+        [myManager updateTiVosFromDefaults ];
     }
     return myManager;
 }
@@ -373,7 +374,6 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	loadingManualTiVos = NO;
 }
-
 
 ////Found issues with corrupt, or manually edited entries in the manual array so use this to remove them
 //-(NSArray *)getManualTiVoDescriptions

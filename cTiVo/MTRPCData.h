@@ -37,6 +37,7 @@
 -(void) tivoReportsNewShows: (NSMutableArray <NSString *> *) newShows
                 atTiVoIndices: (NSMutableArray <NSNumber *> *) newShowIndices
             andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows;
+-(BOOL) isReachable;
 
 @end
 

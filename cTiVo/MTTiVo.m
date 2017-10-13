@@ -206,14 +206,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     BOOL needsConnection = ((flags & kSCNetworkFlagsConnectionRequired) != 0);
 
     thisTivo.isReachable = isReachable && !needsConnection ;
+    DDLogCReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
     if (thisTivo.isReachable) {
 		thisTivo.networkAvailability = [NSDate date];
 		[NSObject cancelPreviousPerformRequestsWithTarget:thisTivo selector:@selector(manageDownloads:) object:thisTivo];
 		[thisTivo performSelector:@selector(manageDownloads:) withObject:thisTivo afterDelay:kMTTiVoAccessDelay+2];
         [thisTivo scheduleNextUpdateAfterDelay: kMTTiVoAccessDelay];
+        [thisTivo.myRPC launchServer];
 	} 
     [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationNetworkChanged object:nil];
-    DDLogCReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
 }
 
 -(void)setupNotifications
@@ -556,16 +557,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                                            selector:@selector(updateShows:)
                                              object:nil ];
     if (delay < 0) {
-        delay =  [[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutesNew] ;
-        if (delay == 0) {
-            delay = (self.rpcActive ?  kMTUpdateIntervalMinDefault : kMTUpdateIntervalMinDefaultNonRPC) ;
+        NSInteger minDelay =  [[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutesNew];
+        if (minDelay == 0) {
+            minDelay = (self.rpcActive ?  kMTUpdateIntervalMinDefault : kMTUpdateIntervalMinDefaultNonRPC);
         }
-        delay = [self roundTime:delay*60]/60;
-    } else {
-
+        delay = [self roundTime:minDelay*60];
     }
-    DDLogDetail(@"Scheduling Update with delay of %lu minutes", (long)delay);
-    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay*60 ];
+    DDLogDetail(@"Scheduling Update with delay of %lu seconds", (long)delay);
+    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay ];
 }
 
 -(void)updateShows:(id)sender
