@@ -318,7 +318,7 @@ __DDLOGHERE__
 -(CGFloat) rowHeight {
     //use negative numbers to indicate we need to recalculate, but save old one as negative to see if we need to reload or not.
     //Yes, it's ugly.
-    //even worse, sometimes imageColumn.hidden is incorrectly NO first time after relaunch;
+    //even worse, sometimes imageColumn.hidden is incorrectly NO the first time after relaunch;
     //and then sometimes hidden correctly changes back to YES but without notifying columndidChange,
     //so we have to add a special observer on the hidden keypath!
 
