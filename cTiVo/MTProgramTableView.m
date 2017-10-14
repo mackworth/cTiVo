@@ -321,9 +321,9 @@ __DDLOGHERE__
             CGPoint scroll = self.enclosingScrollView.contentView.bounds.origin;
             NSInteger spacing = [self intercellSpacing].height;
             scroll.y = scroll.y/(-self.imageRowHeight+spacing) * (newRowHeight+spacing);
-            self.imageRowHeight = newRowHeight;
             [self scrollPoint:scroll];
         }
+        self.imageRowHeight = newRowHeight;
     }
     return self.imageRowHeight;
 }

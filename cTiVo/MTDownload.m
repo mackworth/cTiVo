@@ -590,7 +590,9 @@ __DDLOGHERE__
 }
 
 -(long long) spaceAvailable:(NSString *) path {
-    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfFileSystemForPath:path error:nil];
+    NSError * error = nil;
+    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfFileSystemForPath:path error:&error];
+    if (error || !attributes) return LLONG_MAX;
     return  ( (NSNumber *)[attributes objectForKey:NSFileSystemFreeSize]).longLongValue;
 }
 
@@ -608,6 +610,7 @@ __DDLOGHERE__
     }
     long long tmpSpace = [self spaceAvailable: tiVoManager.tmpFilesDirectory];
     long long fileSpace = [self spaceAvailable: self.downloadDirectory];
+    DDLogVerbose(@"Checking Space Available: %lld tmp and %lld file", tmpSpace, fileSpace);
 
     if ((tmpSpace == fileSpace  && tmpSpace < 1.5 * self.show.fileSize) ||  //check if both on same drive
         tmpSpace < self.show.fileSize ||

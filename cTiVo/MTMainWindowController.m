@@ -277,13 +277,11 @@ __DDLOGHERE__
 
 #pragma mark - Menu Delegate
 
--(BOOL)validateMenuItem:(NSMenuItem *)menuItem
-{
-	BOOL returnValue = YES;
+-(BOOL)validateMenuItem:(NSMenuItem *)menuItem {
 	if (menuItem == _showInFinderMenuItem || menuItem == _playVideoMenuItem) {
             BOOL itemsToProcess = [self selectionContainsCompletedShows];
 		if (!itemsToProcess) {
-			returnValue = NO;
+			return NO;
 		}
 	}
 	if ([menuItem.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
@@ -293,9 +291,8 @@ __DDLOGHERE__
 			menuItem.title = @"Refresh TiVo";
 		}
 	}
-	return returnValue;
+    return YES;
 }
-
 
 -(void)menuWillOpen:(NSMenu *)menu
 {

@@ -131,13 +131,14 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 
 }
 
--(instancetype) initServer: (NSString *)serverAddress tsn: (NSString *) tsn onPort: (int32_t) port andMAK:(NSString *) mediaAccessKey{
+-(instancetype) initServer: (NSString *)serverAddress tsn: (NSString *) tsn onPort: (int32_t) port andMAK:(NSString *) mediaAccessKey forDelegate:(id<MTRPCDelegate>)delegate {
     if (!serverAddress.length) return nil;
     if ((self = [super init])){
         self.hostName = serverAddress;
         self.tiVoSerialNumber = tsn;
         self.hostPort = port;
         self.mediaAccessKey = mediaAccessKey;
+        self.delegate = delegate;
         [self commonInit];
     }
     return self;

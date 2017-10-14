@@ -261,8 +261,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     if (enabled && !self.myRPC) {
         if (self.supportsRPC) {
             int port = self.manualTiVo ? self.tiVo.userPortRPC : 1413;
-            self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName tsn:self.tiVoSerialNumber onPort: port andMAK:self.mediaKey];
-            self.myRPC.delegate = self;
+            self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName tsn:self.tiVoSerialNumber onPort: port andMAK:self.mediaKey forDelegate:self];
         }
     } else if (!enabled && self.myRPC){
         [self.myRPC stopServer];
