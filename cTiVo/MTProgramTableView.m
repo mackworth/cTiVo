@@ -58,7 +58,7 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshAddToQueueButton:) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowCopyProtected options:NSKeyValueObservingOptionInitial context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowSuggestions options:NSKeyValueObservingOptionInitial context:nil];
-	
+    [[self tableColumnWithIdentifier:kMTArtColumn] addObserver:self forKeyPath:@"hidden" options:0 context:nil];
 	[self  setDraggingSourceOperationMask:NSDragOperationMove forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
 
@@ -95,6 +95,8 @@ __DDLOGHERE__
 	} else 	if ([keyPath isEqualToString:kMTShowSuggestions]) {
 		DDLogDetail(@"User changed ShowSuggestions menu item");
  		[self reloadData];
+    } else if ([keyPath isEqualToString:@"hidden"]){
+        if (self.imageRowHeight > 0) [self columnChanged:object ];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
@@ -123,7 +125,9 @@ __DDLOGHERE__
 {
     tiVoColumnHolder = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[self tableColumnWithIdentifier:kMTArtColumn] removeObserver:self forKeyPath:@"hidden" ];
 }
+
 #pragma mark find/filter support
 
 -(void) showFindField: (BOOL) show {
@@ -287,7 +291,7 @@ __DDLOGHERE__
         }
         if (self.imageRowHeight > 0) {
             self.imageRowHeight = -self.imageRowHeight;  //use as trigger to recalculate, but remember old size in case it hasn't changed.
-        } else {
+        } else if (self.imageRowHeight == 0){
             self.imageRowHeight = -1;
         }
         [self reloadData];
@@ -305,10 +309,19 @@ __DDLOGHERE__
 {
     return self.sortedShows.count;
 }
+-(void) setImageRowHeight:(CGFloat)imageRowHeight {
+    NSLog(@"ImageRowHeight %0.2f => %0.2f",_imageRowHeight, imageRowHeight);
+    _imageRowHeight = imageRowHeight;
+}
+
 
 -(CGFloat) rowHeight {
     //use negative numbers to indicate we need to recalculate, but save old one as negative to see if we need to reload or not.
     //Yes, it's ugly.
+    //even worse, sometimes imageColumn.hidden is incorrectly NO first time after relaunch;
+    //and then sometimes hidden correctly changes back to YES but without notifying columndidChange,
+    //so we have to add a special observer on the hidden keypath!
+
     if (self.imageRowHeight < 0) {
         NSTableColumn *imageColumn = [self tableColumnWithIdentifier:kMTArtColumn];
         CGFloat newRowHeight = [super rowHeight];
