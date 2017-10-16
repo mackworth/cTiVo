@@ -309,11 +309,6 @@ __DDLOGHERE__
 {
     return self.sortedShows.count;
 }
--(void) setImageRowHeight:(CGFloat)imageRowHeight {
-    NSLog(@"ImageRowHeight %0.2f => %0.2f",_imageRowHeight, imageRowHeight);
-    _imageRowHeight = imageRowHeight;
-}
-
 
 -(CGFloat) rowHeight {
     //use negative numbers to indicate we need to recalculate, but save old one as negative to see if we need to reload or not.

@@ -126,7 +126,7 @@ __DDLOGHERE__
 	if ([thisButton.owner class] == [MTSubscription class]) {
 		MTSubscription * subscription = (MTSubscription *) thisButton.owner;
 		
-		subscription.preferredTiVo = [thisButton selectedItem].representedObject;
+        subscription.preferredTiVo = [thisButton selectedItem].representedObject ?: @"";
 	}
 }
 

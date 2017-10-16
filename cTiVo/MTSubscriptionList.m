@@ -326,26 +326,22 @@
         }
 
         NSString * pattern = [sub.subscriptionRegex pattern];
+        ///defaults here should not happen, but just to avoid silent nils
         NSDictionary * tempSub = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  sub.displayTitle, kMTSubscribedSeries,
-                                  pattern, kMTSubscribedRegExPattern,
-                                  sub.encodeFormat.name, kMTSubscribedFormat,
-                                  sub.createdTime, kMTCreatedDate,
-                                  sub.addToiTunes, kMTSubscribediTunes,
-                                  sub.includeSuggestions, kMTSubscribedIncludeSuggestions,
-                                  sub.skipCommercials, kMTSubscribedSkipCommercials,
-                                  sub.markCommercials, kMTSubscribedMarkCommercials,
-                                  sub.genTextMetaData , kMTSubscribedGenTextMetaData,
-#ifndef deleteXML
-                                  sub.genXMLMetaData, kMTSubscribedGenXMLMetaData,
-                                  sub.includeAPMMetaData, kMTSubscribedIncludeAPMMetaData,
-#endif
-                                  sub.exportSubtitles, kMTSubscribedExportSubtitles,
-                                  sub.preferredTiVo, kMTSubscribedPreferredTiVo,
-                                  sub.HDOnly,kMTSubscribedHDOnly,
-                                  sub.SDOnly,kMTSubscribedSDOnly,
-                                  sub.prevRecorded,
-                                  kMTSubscribedPrevRecorded,
+                                  sub.displayTitle      ?: @"??",   kMTSubscribedSeries,
+                                  pattern               ?: @"",     kMTSubscribedRegExPattern,
+                                  sub.encodeFormat.name ?: @"",     kMTSubscribedFormat,
+                                  sub.createdTime       ?: [NSDate date], kMTCreatedDate,
+                                  sub.addToiTunes       ?: @YES,    kMTSubscribediTunes,
+                                  sub.includeSuggestions?: @NO,     kMTSubscribedIncludeSuggestions,
+                                  sub.skipCommercials   ?: @NO,     kMTSubscribedSkipCommercials,
+                                  sub.markCommercials   ?: @YES,    kMTSubscribedMarkCommercials,
+                                  sub.genTextMetaData   ?: @NO ,    kMTSubscribedGenTextMetaData,
+                                  sub.exportSubtitles   ?: @NO,     kMTSubscribedExportSubtitles,
+                                  sub.preferredTiVo     ?: @"",     kMTSubscribedPreferredTiVo,
+                                  sub.HDOnly            ?: @NO,     kMTSubscribedHDOnly,
+                                  sub.SDOnly            ?: @NO,     kMTSubscribedSDOnly,
+                                  sub.prevRecorded      ?: @[],     kMTSubscribedPrevRecorded,
                                   nil];
         DDLogVerbose(@"Saving Sub: %@ ",tempSub);
         [tempArray addObject:tempSub];

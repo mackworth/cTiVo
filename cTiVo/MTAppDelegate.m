@@ -17,9 +17,15 @@
 #import "MTTiVo.h"
 #import "MTSubscriptionList.h"
 
-#import "DDTTYLogger.h"
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
+#ifdef DEBUG
+#import "DDTTYLogger.h"
+#else
+#import "CrashlyticsLogger.h"
+#import "Crashlytics/crashlytics.h"
+#endif
+
 #import "NSNotificationCenter+Threads.h"
 #ifndef DEBUG
 #import "Fabric/Fabric.h"
@@ -179,10 +185,10 @@ __DDLOGHERE__
         
     }
 
-	MTLogFormatter * logFormat = [MTLogFormatter new];
+    MTLogFormatter * logFormat = [MTLogFormatter new];
 
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
-	[[DDTTYLogger sharedInstance] setLogFormatter:logFormat];
+    [[DDTTYLogger sharedInstance] setLogFormatter:logFormat];
 	
 	[[DDTTYLogger sharedInstance] setColorsEnabled:YES];
 #define MakeColor(r, g, b) [NSColor colorWithCalibratedRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f]
@@ -198,7 +204,7 @@ __DDLOGHERE__
     [fileLogger.logFileManager setLogFilesDiskQuota:0]; //only delete max files
     [fileLogger setRollingFrequency:(3600.0 * 24.0)];
     [[fileLogger logFileManager] setMaximumNumberOfLogFiles:4];
-	[fileLogger setLogFormatter:logFormat];
+    [fileLogger setLogFormatter:logFormat];
     [DDLog addLogger:fileLogger];
 
     DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
@@ -227,6 +233,7 @@ __DDLOGHERE__
                                           @"tivodecode-ng", kMTDecodeBinary,
                                           @NO, kMTDownloadTSFormat,
                                           @NO, kMTExportTextMetaData,
+                                          @NO, kMTExportSubtitles,
                                           @NO, kMTSaveMPGFile,
                                           @[], kMTChannelInfo,
                                           nil];
@@ -1002,7 +1009,6 @@ BOOL tempDirectory = NO;
 	[saveQueueTimer invalidate];
 	[tiVoManager cancelAllDownloads];
 	[tiVoManager saveState];
-    [tiVoManager.tvdb saveDefaults];
 	 mediaKeyQueue = nil;
     DDLogReport(@"cTiVo exiting");
 }

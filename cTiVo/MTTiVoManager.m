@@ -307,6 +307,7 @@ __DDLOGHERE__
     DDLogVerbose(@"writing DL queue: %@", downloadArray);
 	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];
 
+    [tiVoManager.tvdb saveDefaults];
     [self saveManualEpisodeInfo];
 	[self.subscribedShows saveSubscriptions];
 	[[NSUserDefaults standardUserDefaults] synchronize];
