@@ -28,6 +28,7 @@
 		1E5603911F45206100454157 /* cdata.p12 in Resources */ = {isa = PBXBuildFile; fileRef = 1E5603901F45206100454157 /* cdata.p12 */; };
 		1E59368919648C860008780B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
 		1E59368C19648CFF0008780B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
+		1E5BEC611F9532320082FA6B /* CrashlyticsLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */; };
 		1E61CDB91BB89E6A006D6DBE /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB81BB89E6A006D6DBE /* libc++.tbd */; };
 		1E61CDBD1BB89E91006D6DBE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDBC1BB89E91006D6DBE /* libz.tbd */; };
 		1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7516E2C50B000F5C6E /* copyright.png */; };
@@ -328,6 +329,8 @@
 		1E59368819648C860008780B /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		1E59368B19648CFF0008780B /* MTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLog.m; sourceTree = "<group>"; };
 		1E5AB5FC1E047A5E00429667 /* sparklecast107.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = sparklecast107.xml; sourceTree = "<group>"; };
+		1E5BEC5F1F9532320082FA6B /* CrashlyticsLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CrashlyticsLogger.h; sourceTree = "<group>"; };
+		1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CrashlyticsLogger.m; sourceTree = "<group>"; };
 		1E5C5C1A17FDF0B80056E794 /* readme.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme.md; sourceTree = "<group>"; };
 		1E5C5C1B17FE18BB0056E794 /* wiki */ = {isa = PBXFileReference; lastKnownFileType = folder; path = wiki; sourceTree = "<group>"; };
 		1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = cTiVo/Crashlytics.framework; sourceTree = "<group>"; };
@@ -752,6 +755,8 @@
 				1E59368B19648CFF0008780B /* MTLog.m */,
 				1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */,
 				1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */,
+				1E5BEC5F1F9532320082FA6B /* CrashlyticsLogger.h */,
+				1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */,
 				1E9959C6173DC7D100B47539 /* DDTTYLogger.h */,
 				1E9959C7173DC7D100B47539 /* DDTTYLogger.m */,
 			);
@@ -1277,6 +1282,7 @@
 				D291436E1713467A00CE3202 /* NSString+HTML.m in Sources */,
 				D291436F1713467F00CE3202 /* GTMNSString+HTML.m in Sources */,
 				D2C6BB5A1714681C00289751 /* MTTask.m in Sources */,
+				1E5BEC611F9532320082FA6B /* CrashlyticsLogger.m in Sources */,
 				D2ED1BBB1715C3BF00742F18 /* MTTaskChain.m in Sources */,
 				1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */,
 				1E9959CA173DC7D100B47539 /* DDTTYLogger.m in Sources */,

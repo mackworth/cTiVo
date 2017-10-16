@@ -185,10 +185,10 @@ __DDLOGHERE__
         
     }
 
-    MTLogFormatter * logFormat = [MTLogFormatter new];
-
+#ifdef DEBUG
+    MTLogFormatter * ttyLogFormat = [MTLogFormatter new];
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
-    [[DDTTYLogger sharedInstance] setLogFormatter:logFormat];
+	[[DDTTYLogger sharedInstance] setLogFormatter:ttyLogFormat];
 	
 	[[DDTTYLogger sharedInstance] setColorsEnabled:YES];
 #define MakeColor(r, g, b) [NSColor colorWithCalibratedRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f]
@@ -196,6 +196,11 @@ __DDLOGHERE__
 	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(160,0,0) backgroundColor:nil forFlag:LOG_FLAG_MAJOR];
 	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(0,128,0)  backgroundColor:nil forFlag:LOG_FLAG_DETAIL];
 	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(160,160,160)  backgroundColor:nil forFlag:LOG_FLAG_VERBOSE];
+#else
+    MTLogFormatter * crashLyticsLogFormat = [MTLogFormatter new];
+    [[CrashlyticsLogger sharedInstance] setLogFormatter: crashLyticsLogFormat];
+    [DDLog addLogger:[CrashlyticsLogger sharedInstance]];
+#endif
 	// Initialize File Logger
     DDLogFileManagerDefault *ddlogFileManager = [[DDLogFileManagerDefault alloc] initWithLogsDirectory:[cTiVoLogDirectory stringByExpandingTildeInPath]];
     DDFileLogger *fileLogger = [[DDFileLogger alloc] initWithLogFileManager:ddlogFileManager];
@@ -204,7 +209,8 @@ __DDLOGHERE__
     [fileLogger.logFileManager setLogFilesDiskQuota:0]; //only delete max files
     [fileLogger setRollingFrequency:(3600.0 * 24.0)];
     [[fileLogger logFileManager] setMaximumNumberOfLogFiles:4];
-    [fileLogger setLogFormatter:logFormat];
+    MTLogFormatter * fileLogFormat = [MTLogFormatter new];
+	[fileLogger setLogFormatter:fileLogFormat];
     [DDLog addLogger:fileLogger];
 
     DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
