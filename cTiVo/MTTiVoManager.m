@@ -787,8 +787,8 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
        DDLogMajor(@"Set operations start time to %@",[defs objectForKey: kMTScheduledStartTime]);
         [self setQueueStartTime];
 	} else if ([keyPath isEqualToString:kMTTiVos]){
-        DDLogMajor(@"Changed TiVo list to %@",[self.savedTiVos maskMediaKeys]);
         [self updateTiVosFromDefaults];
+        DDLogMajor(@"Changed TiVo list to %@",[self.tiVoList maskMediaKeys]);
     } else if ([keyPath isEqualToString:kMTUpdateIntervalMinutesNew]){
         DDLogMajor(@"Changed Update Time to %ld",(long)[defs integerForKey:kMTUpdateIntervalMinutesNew]);
         for (MTTiVo *tiVo in _tiVoList) {
@@ -1766,10 +1766,10 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(NSString *) maskMediaKeys {
     NSString * outString =[self description];
-    for (MTTiVo * tiVo in tiVoManager.tiVoList) {
-        NSString * mediaKey = tiVo.mediaKey;
+    for (NSDictionary * tiVo in tiVoManager.savedTiVos) {
+        NSString * mediaKey = tiVo[kMTTiVoMediaKey];
         if (mediaKey.length > 0) {
-            NSString * maskedKey = [NSString stringWithFormat:@"<<%@ MediaKey>>",tiVo.tiVo.name];
+            NSString * maskedKey = [NSString stringWithFormat:@"<<%@ MediaKey>>",tiVo[kMTTiVoUserName]];
             outString = [outString stringByReplacingOccurrencesOfString:mediaKey withString:maskedKey];
         }
     }
