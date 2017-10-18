@@ -412,7 +412,8 @@ __DDLOGHERE__
 	}
 	return ([self.show isEqual:testDownload.show] &&
 			[self.encodeFormat isEqual: testDownload.encodeFormat] &&
-			[self.encodeFilePath isEqualToString:testDownload.encodeFilePath]);
+            (self.encodeFilePath == testDownload.encodeFilePath ||
+			 [self.encodeFilePath isEqualToString:testDownload.encodeFilePath]));
 }
 
 -(NSUInteger) hash {

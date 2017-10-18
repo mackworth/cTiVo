@@ -293,6 +293,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
         i++;
         i++;
         [self tearDownStreams];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate]; //turn off spinner. May be extra, but better than leaving it run.
         if (self.delegate.isReachable) {
             CLSLog(@"Trying again; retry #%@ ; ",@(self.retries));
             switch (self.retries) {
