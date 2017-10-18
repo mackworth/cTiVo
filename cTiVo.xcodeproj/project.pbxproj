@@ -518,7 +518,6 @@
 		D2A09C7916C77E9D00F2B86F /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		D2A648F016991CD300C7DA01 /* MTTiVo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTiVo.h; sourceTree = "<group>"; };
 		D2A648F116991CD300C7DA01 /* MTTiVo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVo.m; sourceTree = "<group>"; };
-		D2A7269416A2005400C58C5F /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		D2A7269616A23E3D00C58C5F /* MTFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = MTFormat.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		D2A7269716A23E3D00C58C5F /* MTFormat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTFormat.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D2A7269916A25DEB00C58C5F /* MTFormatEditorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTFormatEditorController.h; sourceTree = "<group>"; };
@@ -677,15 +676,6 @@
 				1E8E035C1F75DCEE0050D727 /* libz.1.dylib */,
 			);
 			path = lib;
-			sourceTree = "<group>";
-		};
-		1E684A8C16E40EA8000F5C6E /* Wiki */ = {
-			isa = PBXGroup;
-			children = (
-				D2A7269416A2005400C58C5F /* README */,
-			);
-			name = Wiki;
-			path = cTiVo;
 			sourceTree = "<group>";
 		};
 		1E791BD01697ACAA00E47E84 /* Custom NSViews */ = {
@@ -866,7 +856,6 @@
 			children = (
 				1E5C5C1A17FDF0B80056E794 /* readme.md */,
 				D2C0380F17131F9A0001BA52 /* Update */,
-				1E684A8C16E40EA8000F5C6E /* Wiki */,
 				D2D60BA716766EFD00CE32DE /* cTiVo */,
 				D2D60BA016766EFD00CE32DE /* Frameworks */,
 				D2D60B9E16766EFD00CE32DE /* Products */,

@@ -1,4 +1,4 @@
-#Overview
+# Overview
 ## An overview of cTiVo operation and controls
 
 In this document, we describe the following parts of cTiVo operation:
@@ -20,8 +20,8 @@ Shows will start downloading immediately; although as the shows are quite large,
 ![](Images/cTiVoScreen.png)
 ## Controls and Buttons
 
-- **!TiVo Name/Filter TiVo**: In the upper left corner is the name of your TiVo, or if you have more than one, a list of them. The default is to display all shows from all TiVos, but if you wish to see only one at a time, you can select it here. This control shows the number of shows available on this TiVo.
-- **Video Format**: which lets you choose which video format you'd like cTiVo to use to save the download show. Unfortunately, video files are quite large and complicated, and many different formats for video files have evolved over the years. Notably, the resolution (number of pixels) can vary dramatically from one use to another. More information available here in [Formats](AdvancedTopics#Edit_Formats).
+- **TiVo Name**: In the upper left corner is the name of your TiVo, or if you have more than one, a list of them. The default is to display all shows from all TiVos, but if you wish to see only one at a time, you can select it here. This control shows the number of shows available on this TiVo.
+- **Video Format**: which lets you choose which video format you'd like cTiVo to use to save the download show. Unfortunately, video files are quite large and complicated, and many different formats for video files have evolved over the years. Notably, the resolution (number of pixels) can vary dramatically from one use to another. More information available here in [Formats](Video-Formats.md).
 - **Find**: If you hit Cmd-F (or menu item Edit>Find...), then a "Find" box will appear in the middle of the top bar to let you quickly display a subset of the TiVo show list.
 - **Download Folder**: lets you can choose where the shows will be stored after being downloaded.
 - **Subscribe** and **Download** (or **Add to Queue**) buttons: do the same as dragging the shows to the respective table. Just select one or more shows and click the button.
@@ -47,9 +47,12 @@ Shows will start downloading immediately; although as the shows are quite large,
 - **File>Import/Export Formats** lets you create a small text file describing your custom format. This can be used to share formats with others.
 
 ![](Images/cTiVoEditMenu.png)
+- **Edit>Delete From TiVo** will remove currently selected show from your TiVo (usually used after you've downloaded it successfully).
+- **Edit>Stop Recording** will stop TiVo recording a show. Only avallable when selecting a currently recording show.
 - **Edit>Clear Completed History** (Cmd-E) will remove the records for all completed downloads from your download table, successful or not.
+- **Edit>Edit TiVos** lets you add/edit TiVos manually. Normally, cTiVo discovers TiVos on the local network automatically using a network technology called [Bonjour](http://www.apple.com/support/bonjour/). If you need to enter a TiVo address manually or wish to access TiVo's remotely, you'll need to enter their information here.
+- **Edit>Edit Channels** shows which channels have converted to Transport Stream. See [Advanced Topics](Advanced-Topics.md#Edit_Channels) for more information.
 - **Edit>Edit Formats** is for advanced users who wish to use new encoders or tune the parameters for encoders. You can also show/hide any of the factory-provided formats.
-- **Edit>Edit Manual TiVos** lets you add/edit TiVos manually. Normally, cTiVo discovers TiVos on the local network automatically using a network technology called [Bonjour](http://www.apple.com/support/bonjour/). If you need to enter a TiVo address manually or wish to access TiVo's remotely, you'll need to enter their information here.
 - **Edit>New Manual Subscription** (Cmd-N) lets you create a subscription by just typing the show's name. Note that it will record any show whose name contains the text you provide here. For example, House would match House, House Hunting, and Warehouse 13. (Regular subscriptions created from an existing show have to match the entire name.) In particular, you can type ALL here to download every show your TiVo subscribes to. See [Advanced Topics](Advanced-Topics.md) for more information.
 - **Edit>Find** shows/hides a Find box that lets you search the list of shows for a particular text.
 

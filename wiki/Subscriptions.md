@@ -1,4 +1,4 @@
-#Subscriptions
+# Subscriptions
 ## How to set up and configure subscriptions in cTiVo
 
 One of the main features of cTiVo is the ability to subscribe to a series. Subscribing means that all episode of that series will be automatically downloaded for your convenience, even copied onto your phone for later viewing.

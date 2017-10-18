@@ -1,4 +1,4 @@
-#iTiVo Users
+# iTiVo Users
 ## Quick overview of cTiVo for iTiVo users
 
 cTiVo is inspired by the great work done on iTiVo, but completely rewritten in Cocoa/Objective-C for better performance and compatability. 

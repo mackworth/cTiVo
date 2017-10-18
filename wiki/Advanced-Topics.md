@@ -1,5 +1,5 @@
-#Advanced Topics
-##Configuration options designed for advanced users
+# Advanced Topics
+## Configuration options designed for advanced users
 
 This document is to cover some interesting topics, but really for advanced users only  
 
@@ -15,19 +15,22 @@ This document is to cover some interesting topics, but really for advanced users
 
 # Artwork
 
-For MPEG files (.MPG, .MP4, .MOV, or .M4V), cTiVo can embed a still picture inside the file to represent it in iTunes, iOS devices, or other players that understand this standard. By default, this picture is one of the first frames of the video, but you have many choices available. First, in Preferences, you can specify that all videos should have the same cTiVo icon, representing that it came from your TiVo. Secondly, in Preferences, you can enable cTiVo automatically retrieving fan-generated, episode-specific artwork from theTVDB.com or theMovieDB.com (although this is dependent on the series/episode/movie being in the database). Third, you can put artwork into your download folder containing artwork that is added to episodes as they are generated. These files can be in almost any format supported by the OS, but the filename has to be in a specific syntax.
+For MPEG files (.MPG, .MP4, .MOV, or .M4V), cTiVo can embed a still picture inside the file to represent it in Finder, iTunes, iOS devices, or other players that understand this standard. First (default case), you can choose the same image used by your TiVo to represent the show; this will be a series-wide image downloaded directly  from your TiVo. Secondly, you can choose fan-generated art from theTVDB.com website (although this is dependent on the series/episode/movie being in the database). With this option, you can then choose either episode-specific, season-specific, or series-wide artwork.
+
+Third, you can manually add artwork directly to an episode. With the "Art" column enabled in the Now Playing Table, just drag your preferred artwork on top of any existing (or blank) artwork. This will then be embedded in any downloads of that show. cTiVo will even update any pre-existing downloads with that image. You can similarly remove any artwork (manually added or automatic) by dragging the image to the Trash. If manual, this will delete the matching image file from disk and from any existing downloads.
+
+Finally, you can store artwork in your download folder, but the filename has to be in a very specific syntax. Note that this is the mechanism that the drag/drop ability uses; it simply creates a file in the appropriate location.
 
 The filename must start with the series title (e.g. "The Daily Show with Jon Stewart") with any slashes or colons replaced with dashes. Then you can create a series-generic file (no suffix), a season-specific file (suffix of Snn, or an episode-specific file (suffix of SnnEnn). Movies start with their title and optionally the movie year XXXX as a suffix (e.g. "Fight Club_1999")
 
-These local files can be stored in the download directory itself or in a "thumbnails" subdirectory of the download directory. If you have enabled series-specific subdirectories within the download directory, they can also be in that directory, or in a "thumbnails" subdirectory of that subdirectory. 
+These files can be in almost any format supported by the OS, and can be stored in the download directory itself or in a "thumbnails" subdirectory of the download directory. If you have enabled series-specific subdirectories within the download directory, they can also be in that directory, or in a "thumbnails" subdirectory of that subdirectory.  Finally, if you want to specify an image directory, use the secret command  `defaults write ThumbnailsDirectory <path>`  in Terminal. If there is more than one image, it will choose episode-specific, then season-specific, then series-wide in that order.
 
-To give as much control to you as possible, if more than one of these artwork types are available, it will use the first one it finds in the following order:
-
-- Local episode-specific (SnnEnn) 
-- theTVDB artwork (if enabled and available)
+To increase the chances of finding appropriate artwork, it will use the first one it finds in the following order:
+- Local episode-specific (SnnEnn)
 - Local season-specific (S00)
-- Local series-generic 
-- cTiVo icon (if enabled)
+- Local series-wide
+- Whichever online source (TiVo or TVDB) you specify
+- The other online source
 - Initial frame from video
 
 For movies, the order is:
@@ -35,22 +38,21 @@ For movies, the order is:
 - Movie title with matching year suffix
 - Movie title without year suffix
 - theMovieDB artwork (if enabled and available)
-- cTiVo icon (if enabled)
 - Initial frame from video
 
-Especiallly if you use these facilities, consider giving back to theTVDB and theMovieDB by entering
+Especiallly if you use these facilities, consider giving back to theTVDB and theMovieDB by entering any missing information into their systems, including appropriate artwork!
 
 # Manual TiVos
 
-Normally, cTiVo discovers TiVos on the local network automatically using a network technology called BonJour. Normally this will work fine, but if you need to enter a TiVo address manually or wish to access your TiVos remotely, you'll need to enter their information here. Simply use the Edit>Edit Manual TiVos menu item. This will show any TiVos you've previously entered. Use the + button to add a new one, or the - button to delete one. If you'd like to temporarily delete one, just uncheck the "Enabled" button. You can get the TiVo's current local IP address from its Networks and Settings screen, although this may change over time, especially when your TiVo is restarted. For the local network, you should always use the ports provided (80/443)
+Normally, cTiVo discovers TiVos on the local network automatically using a network technology called BonJour. Normally this will work fine, but if you need to enter a TiVo address manually or wish to access your TiVos remotely, you'll need to enter their information with the Edit>Edit Manual TiVos menu item. This will show any TiVos you've previously seen or entered. Use the + button to add a new one, or the - button to delete one. If you'd like to temporarily delete one, just uncheck the "Enabled" button. You can get the TiVo's current local IP address from its Networks and Settings screen, although this may change over time, especially when your TiVo is restarted. For the local network, you should always use the ports provided (80/443/1413)
 
 ![](Images/cTiVoManualTivosScreen.png)
 
-Interestingly, you may also be able to use cTiVo remotely, although this can take considerable network ability and patience.  Patience both in the sense of trial and error as well as in the upload bandwidth available on your connection to the Internet. You will need to set your router to pass external accesses to your main IP address through to your TiVo. As you may be doing this for other devices as well, we also let you adjust the ports cTiVo uses to match whatever port mapping you're doing in your router.  If you didn't understand this paragraph so far, then you probably shouldn't be doing this. Note that whether this violates your terms of service with your cable company, TiVo Inc, your internet provider, any random film studio in Hollywood, or anybody else is entirely up to you. 
+Interestingly, you may also be able to use cTiVo remotely, although this can take some network ability and patience.  Patience both in the sense of trial and error as well as in the upload bandwidth available on your connection to the Internet. You will need to set your router to pass external accesses to your main IP address through to your TiVo. As you may be doing this for other devices as well, we also let you adjust the ports cTiVo uses to match whatever port mapping you're doing in your router.  If you didn't understand this paragraph so far, then you probably shouldn't be doing this. You'll need to map the three ports (80/443/1413) to make this work. Note that whether this violates your terms of service with your cable company, TiVo Inc, your internet provider, any random film studio in Hollywood, or anybody else is entirely up to you.
 
 # Edit Channels
 
-With the transition to H.264 by many cable companies, TiVo requires the use of Transport Stream to download an H.264 video. While Transport Stream can also be used for MPEG2 videos, this seems to be less reliable. Thus cTiVo tracks which channels seem to require H.264. While this process is automatic, this screen allows you to see what's happening and control it if desired.  These channels will get filled in as you download shows in Progressive Stream (PS) mode, depending on whether or we see the characteristic failure of no video, just audio in the downloaded file.
+With the transition to H.264 by many cable companies, TiVo requires the use of Transport Stream to download an H.264 video. While Transport Stream can also be used for MPEG2 videos, this seems to be less reliable. Thus cTiVo tracks which channels seem to require H.264. While this process is automatic, this screen allows you to see what's happening and control it if desired.  These channels will get filled in as you download shows, based on whether or we see the characteristic failure of H.264 over Progressive Stream of no video, just audio in the downloaded file.
 ![](Images/cTiVoChannelsScreen.png)
 
 First, you can simply turn on Transport Stream for all downloads with the control at the top.
@@ -61,7 +63,7 @@ First, you can simply turn on Transport Stream for all downloads with the contro
 
 You can manually remove channels from this list by selecting them and hitting the Minus sign at the bottom, or add one by hitting the Plus sign.  
 
-If you'd like us to check all your channels, then click on Test All Channels. This will add a show from every channel your TiVo has recorded (including Suggestions)with a special TestPS Format. This Format only downloads a short segment from each show to quickly test every channel. You can then remove all such Tests with the final button.
+If you'd like us to check all your channels, then click on Test All Channels. This will add a show from every channel your TiVo has recorded (including Suggestions) with a special TestPS Format. This Format only downloads a short segment from each show to quickly test every channel. You can then remove all such Tests with the final Remove All Tests button. This is not required as each channel will simply retry the first time we see a PS failure, but it can be interesting to see what channels have converted.
 
 # Edit Formats
 
@@ -139,7 +141,7 @@ There are a few preferences that are intended for debugging purposes or for very
 
 ### Debug Levels
 
-This will increase the level of detail written to the Console log from Major events to Verbose for all modules. As "verbose" is indeed very verbose, you can also set the debug level separately for each of the major modules in the program at the bottom of this screen. This would mainly be of use while reading the source code or under the direction of someone helping you debug a problem. See (Logging)[Troubleshooting.md#Logging] for more information. Note if you have a problem during startup, you can hold down Control and Option during launch to change all modules to Verbose. Be sure to set it back when you're all finished as Verbose is very verbose.
+This will increase the level of detail written to the Console log from tracking None to Verbose for all modules. As "verbose" is indeed very verbose, you can also set the debug level separately for each of the major modules in the program at the bottom of this screen. This would mainly be of use while reading the source code or under the direction of someone helping you debug a problem. See (Logging)[Troubleshooting.md#Logging] for more information. Note if you have a problem during startup, you can hold down Control and Option during launch to change all modules to Verbose. As operating in Verbose mode all the time is not recommended, cTiVo will automatically switch from Verbose to Major unless you hold down Control-Option during startup.
 
 ### Disable Drag to Select in UI
 
@@ -151,7 +153,7 @@ During its processing, cTiVo creates several intermediate files, which are delet
 
 ### Download Retries
 
-If cTiVo encounters a failure (network not available, encoder problem, etc), it will retry automatically. This option lets you change the number of times it retries before giving up entirely; default is 3.
+If cTiVo encounters a failure (network not available, encoder problem, etc), it will retry automatically. This option lets you change the number of times it retries before giving up entirely; default is 3. Note that zero retries means try the main time then give up, so 1 attempt.
 
 ### Don't use memory buffer for downloads
 
@@ -159,7 +161,7 @@ For performance reasons, cTiVo will normally download the TiVo file into memory 
 
 ### TiVo Refresh Rate
 
-How often (in minutes) should cTiVo check the Now Playing list of your TiVos
+How often (in minutes) should cTiVo check the Now Playing list of your TiVos. Default is 0, which means 4 hours for TiVos capable of RPC and 15 minutes for older TiVos (Premiere, HD or older).
 
 ### Opt-out of Crashlytics reporting
 
@@ -179,19 +181,17 @@ Displays the results of theTVDB lookups since cTiVo has started, or since an Emp
 
 ### Empty Caches
 
-Empty Caches erases the caches stored in the program and reloads the information contained. The two caches are theTVDB information and the detailed XML loaded from the TiVo for each show. Be warned that if you have hundreds of shows on your TiVos, this will generate a lot of network traffic. If you think something is wrong with the information being displayed this might be useful, but more important reason for this command is to reset theTVDB statistics to go directly to the source rather than using the cache. See [theTVDB](theTVDB) below for more information.
+Empty Caches erases the caches stored in the program and reloads the information contained. The two caches are theTVDB information, the RPC information, and the detailed XML loaded from the TiVo for each show. Be warned that if you have hundreds of shows on your TiVos, this will generate a lot of network traffic. If you think something is wrong with the information being displayed this might be useful, but more important reason for this command is to reset theTVDB statistics to go directly to the source rather than using the cache. See [theTVDB](theTVDB) below for more information.
 
 ## TheTVDB
 
-For some reason, TiVo has recently not been filling in the season/episode information on many shows. Oddly, this information may be available in the user interface, but not delivered to cTiVo. We attempt to work around this by accessing theTVDB.com and looking up an episode to fill in the season/episode information or to get access to the fan-generated artwork available there. Fair warning: the following paragraphs on how this all works may be more information that you want!
+For some reason, TiVo stopped filling in the season/episode information on many shows, but does provide it through the RPC mechanism. Sometimes this information is inaccurate, and if you prefer theTVDB's season/episode information, you can check the box in Preferences.and we will look up an episode to fill in. Fair warning: the following paragraphs on how this all works may be more information that you want!
 
-There are several steps involved here, and as theTVDB is fan-maintained, the process is not always successful. TiVo licenses show information from the Chicago Tribune Media Services company Zap2It. This information is organized by Episode IDs, which look like EPnnnnnnnnmmmm, where the N's are 8 digits representing a series ID, and the 4 M's specify the episode within that series. theTVDB.com provides a way to find a show using these Zap2It IDs, which are entered by users of the database. 
+There are several steps involved here, and as theTVDB is fan-maintained, the process is not always successful. TiVo used to license show information from the Chicago Tribune Media Services company Zap2It. This information is organized by Episode IDs, which look like EPnnnnnnnnmmmm, where the N's are 8 digits representing a series ID, and the 4 M's specify the episode within that series. However with the transition to Rovi data, this EpisodeID has changed and is no longer compatible with theTVDB.
 
-First, we use the EP<8 digits> to find the series, which is how they're supposed to be entered into theTVDB. If that fails, due to historical reasons, we also look it up under EP<6 digits>, SH<8 digits>, and SH<6 digits>. If all those fail, we look it up by name, which is not going to be as accurate in general. 
+First we have to match the series, which is done by title name, which can lead to multiple matches (and we have to handle season subtitles, such as  24: The Lost Weekend). Then to find an episode, we match on "Original Air Date" as listed in both databases. This works well overall, but there is one major problem. If a show is first shown in one country and then shown again in another (e.g. Doctor Who, or most shows on BBC America), theTVDB considers them the same series and uses an Original Air Date from the first country. On the other hand, TiVo considers them separate series and uses the second country's Original Air Date. With the new TVDB database, we then look for the episode by SxxExx number and then by name, so we get much better coverage.
 
-Second, we look for the episode using the "Original Air Date" as listed in both databases. This works well overall, but there is one major conflict area. If a show is first shown in one country and then shown again in another (e.g. Doctor Who, or most shows on BBC America), theTVDB considers them the same series and uses an Original Air Date from the first country. On the other hand, Zap2It considers them separate series and uses the second country's Original Air Date. Unfortunately, theTVDB does not provide a way to look up episodes by name, so we cannot match in this case. Also, many recurring shows (e.g. news) do not track episodes.
-
-Finally, if we do find the episode, then we can then use the fan artwork, if any exists for that show (usually a particularly appropriate frame from the show). And if TiVo does not have that season/episode info, we can use theTVDB's instead. Note that there are frequent cases of season/episode mismatch, where theTVDB has a different information than TiVo provides, we've chosen to follow TiVo's lead. 
+Finally, if we do find the episode, then we can then use the fan artwork, if any exists for that show. And if TiVo does not happen to have that season/episode info (especially on older TiVos), we can use theTVDB's instead. Note that there are frequent cases of season/episode mismatch, where theTVDB has a different information than TiVo provides, we've chosen to follow TiVo's lead, but you can change then in Adv Preferences.
 
 There are two buttons relevant to this process in the Advance Preferences window. The first is View TVDB stats, which shows you the result of this process summarized since the program began. Note that for performance reasons, we cache the TVDB results, so if you want a true picture of the results for the current list of shows, you will need to use the other button Empty Caches. After a few seconds (or even a minute or two), View TVDB stats will show you how many series were found (and by which method), which episodes were then found, and how many episodes matched, and which ones didn't match.
 ````
@@ -235,7 +235,7 @@ There are two buttons relevant to this process in the Advance Preferences window
         };
     }
 ````
-For those series, episodes that weren't found or mismatched, a URL is provided to go to theTVDB and update their information if appropriate. Note that remarkably huge controversies have erupted about how to number seasons and episodes, so just because TiVo is providing one set of information doesn't necessarily mean that theTVDB is incorrect or will take kindly to being changed. See their forums for more context. On the other hand, series that are "Found by Name" that are missing EP IDs, or "Not Found" at all are probably good candidates to fix in the central database for the benefit of all.
+For those series, episodes that weren't found or mismatched, a URL is provided to go to theTVDB and update their information if appropriate. Note that  huge controversies have erupted about how to number seasons and episodes, so just because TiVo is providing one set of information doesn't necessarily mean that theTVDB is incorrect or will take kindly to being changed. See their forums for more context. On the other hand, series that are missing episodes or lacking information at all are probably good candidates to fix in the central database for the benefit of all.
 
 ### Module Debug Levels
 The remaining controls let you set debug levels for each individual module.  See [Logging](Troubleshooting.md#logging) for more information.
@@ -342,4 +342,4 @@ There are a few options that are not presented in the user interface. This choic
 * ThumbnailsDirectory* - Where to look for artwork thumbnails; default is either `<download directory>` or `<download directory>/thumbnails`; delete entirely to restore to default
 * iTunesContentID* - If set to 1, cTiVo will mark shows' "ContentID" in iTunes using the episode number. This has the benefit of merging HD/SD versions of a single show into one entry in iTunes. One warning is that there is a small statistical chance of two shows mapping onto the same contentID, which means that only one will appear in iTunes. The other video will still exist, but will be masked by the first one in iTunes UI.
 * ThumbnailsDirectory* - Where to look for artwork thumbnails; default is either `<download directory>` or `<download directory>/thumbnails`; delete entirely to restore to default
-* AllowDups* - If set to YES, cTiVo will allow multiple Downloads for the same Show. For example, if you wanted to use a high-res Format for your TV and a low-res Format for your phone.
+* AllowDups* - If set to YES, cTiVo will allow multiple Downloads for the same Show. For example, if you wanted to use a high-res Format for your TV and a low-res Format for your phone. Not a vast amount of testing has been done on this, but let us know if you run into any problems.
