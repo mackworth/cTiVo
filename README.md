@@ -1,8 +1,8 @@
-**cTiVo** is a free Mac application to download shows from your TiVo and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, taking full advantage of the MacOS, but very flexible. 
+**cTiVo** is a free Mac application to download shows from your TiVo and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, taking full advantage of MacOS, but very flexible. 
 
 cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
 
-cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance and  compatibility.
+cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance and compatibility.
 
 ## Automatic Download and Conversions
   * Auto-discovery of all your TiVos (using Bonjour).
@@ -44,27 +44,29 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 
 ## 3.0 features
 #### Artwork enhancements:
-New Artwork column in Now Playing List.
-Your choice of artwork from TiVo* or theTVDB (Series, Season, Episode, or Movie from theMovieDB).
-Manual updates of artwork by drag/drop onto table.
-Manual artwork updates apply to files already recorded as well.
-Finder Icons now reflect artwork of file.
+
+  * New Artwork column in Now Playing List.
+  * Your choice of artwork from TiVo* or theTVDB (Series, Season, Episode, or Movie from theMovieDB).
+  * Manual updates of artwork by drag/drop onto table.
+  * Manual artwork updates apply to files already recorded as well.
+  * Finder Icons now reflect artwork of file.
 
 #### Real-time features:
-TiVo now notifies cTiVo as the Now Playing list changes, so new shows are updated instantaneously.*
-Ability to "Delete Show from TiVo" (in Edit menu and contextual menu).*
-Ability to "Stop Recording show from TiVo" (in Edit menu and contextual menu).*
 
-*Starred items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)
+  * TiVo now notifies cTiVo as the Now Playing list changes, so new shows are updated instantaneously.*
+  * Ability to "Delete Show from TiVo" (in Edit menu and contextual menu).*
+  * Ability to "Stop Recording show from TiVo" (in Edit menu and contextual menu).*
+
+Starred* items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)
 
 ## 2.5.0 features
 
-* H.264 compatibility (new format for cable companies)
-* Autodetects H.264 transition by channel
-* Redesigned Formats (simpler, more compatible)
-* New Channels preference screen
-* Better handling for AC3 5.1 audio
-* Many bug fixes
+  * H.264 compatibility (new format for cable companies)
+  * Autodetects H.264 transition by channel
+  * Redesigned Formats (simpler, more compatible)
+  * New Channels preference screen
+  * Better handling for AC3 5.1 audio
+  * Many bug fixes
 
 ## To install:
 
@@ -72,17 +74,17 @@ Download the [cTiVo application](https://github.com/dscottbuch/cTiVo/releases), 
 
 ## Documentation:
 
-[How to get cTiVo running quickly](Quick-Start)
-[Quick overview of cTiVo for iTiVo users](iTiVo-Users)
-[Overview of Using cTivo](Overview)
-[How to install cTiVo](Installation)
-[How to configure cTiVo ](Configuration)
-[How to set up and configure subscriptions in cTiVo](Subscriptions)
-[Frequently Asked Questions](FAQ)
-[User-contributed alternative video formats](Alternative-Formats)
-[Q and A on different video formats](Video-Formats)
-[Other Advanced Topics](Advanced-Topics)
+  * [How to get cTiVo running quickly](Quick-Start)
+  * [Quick overview of cTiVo for iTiVo users](iTiVo-Users)
+  * [Overview of Using cTivo](Overview)
+  * [How to install cTiVo](Installation)
+  * [How to configure cTiVo ](Configuration)
+  * [How to set up and configure subscriptions in cTiVo](Subscriptions)
+  * [Frequently Asked Questions](FAQ)
+  * [User-contributed alternative video formats](Alternative-Formats)
+  * [Q and A on different video formats](Video-Formats)
+  * [Other Advanced Topics](Advanced-Topics)
 
-cTiVo is fully compatible with OS X High Sierra (10.13) back through Mavericks (10.9); not compatible with Snow Leopard (10.6) or earlier. In addition, we provide a special version (cTiVo-10.7) for use with 10.7 and 10.8, but support is limited.
+cTiVo is fully compatible with MacOS High Sierra (10.13) back through Mavericks (10.9); not compatible with Snow Leopard (10.6) or earlier. In addition, we provide a special version (cTiVo-10.7) for use with 10.7 and 10.8, but support is limited.
 
-*cTiVo* is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/dscottbuch/cTiVo/issues).
+**cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/dscottbuch/cTiVo/issues).
