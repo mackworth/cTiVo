@@ -317,9 +317,9 @@ __DDLOGHERE__
 		for (NSMenuItem *mi in [menu itemArray]) {
 			[mi setAction:selector];
 		}
-		if (menuTableRow < 0) { //disable row functions  Row based functions have tag=1 or 2;
+		if (menuTableRow < 0) { //disable row/RPC functions  Row based functions have tag=1 or 2; ROC 3 or 4
 			for (NSMenuItem *mi in [menu itemArray]) {
-				if (mi.tag == 1 || mi.tag == 2) {
+				if (mi.tag >= 1 && mi.tag <= 4) {
 					[mi setAction:NULL];
 				}
 			}
@@ -329,7 +329,7 @@ __DDLOGHERE__
 			}
 			if (workingTable == downloadQueueTable) {
 				MTDownload *thisDownload = downloadQueueTable.sortedDownloads[menuTableRow];
-				//diable menu items that depend on having a completed show tag = 2
+				//disable menu items that depend on having a completed show tag = 2
 				if (!thisDownload.canPlayVideo) {
 					for (NSMenuItem *mi in [menu itemArray]) {
 						if (mi.tag == 2 ) {
@@ -340,7 +340,7 @@ __DDLOGHERE__
 			}
 			if (workingTable == tiVoShowTable) {
 				MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
-				//diable menu items that depend on having a completed show tag = 2
+				//diasble menu items that depend on having a completed show tag = 2
 				if (!thisShow.isOnDisk) {
 					for (NSMenuItem *mi in [menu itemArray]) {
 						if (mi.tag == 2 ) {
@@ -393,38 +393,36 @@ __DDLOGHERE__
 		[self downloadSelectedShows:menu];
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		[self subscribe:menu];
-    } else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
-        [self openDrawer:tiVoShowTable.sortedShows[menuTableRow]];
     } else if ([menu.title caseInsensitiveCompare:@"Reload TVDB Info"] == NSOrderedSame) {
         for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {
             [show resetSourceInfo:YES];
         }
         NSIndexSet * columns = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.tiVoShowTable.numberOfColumns)];
         [self.tiVoShowTable reloadDataForRowIndexes:[tiVoShowTable selectedRowIndexes] columnIndexes:columns];
-	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
-		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
-        //Eventually if more than 1 download present will open up choice alert (or extend menu with a right pull)
-        //For now just play the first
-        if (thisShow.isOnDisk) {
+    } else if (menuTableRow >= 0 && //somehow happens
+               (NSUInteger)menuTableRow < tiVoShowTable.sortedShows.count) {
+        MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
+       if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
+            [self openDrawer:thisShow];
+        } else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
+            //Eventually if more than 1 download present will open up choice alert (or extend menu with a right pull)
+            //For now just play the first
+            if (thisShow.isOnDisk) {
                 [thisShow playVideo:[thisShow copiesOnDisk][0]];
+            }
+        } else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
+            if (thisShow.isOnDisk) {
+                [thisShow revealInFinder:[thisShow copiesOnDisk]];
+            }
+        } else if ([menu.title caseInsensitiveCompare:@"Delete From TiVo"] == NSOrderedSame) {
+            if ([self confirmBehavior:@"delete" preposition: @"from" forShows:@[thisShow]]) {
+                [tiVoManager deleteTivoShows:@[thisShow]];
+            }
+        } else if ([menu.title caseInsensitiveCompare:@"Stop Recording"] == NSOrderedSame) {
+            if ([self confirmBehavior:@"stop recording" preposition:@"on" forShows:@[thisShow]]) {
+                [tiVoManager stopRecordingShows:@[thisShow]];
+            }
         }
-    } else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
-		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
-        if (thisShow.isOnDisk) {
-            [thisShow revealInFinder:[thisShow copiesOnDisk]];
-        }
-    } else if ([menu.title caseInsensitiveCompare:@"Delete From TiVo"] == NSOrderedSame) {
-        NSArray	<MTTiVoShow *> *selectedShows = @[tiVoShowTable.sortedShows[menuTableRow]];
-        if ([self confirmBehavior:@"delete" preposition: @"from" forShows:selectedShows]) {
-            [tiVoManager deleteTivoShows:selectedShows];
-        }
-
-    } else if ([menu.title caseInsensitiveCompare:@"Stop Recording"] == NSOrderedSame) {
-        NSArray	<MTTiVoShow *> *selectedShows = @[tiVoShowTable.sortedShows[menuTableRow]];
-        if ([self confirmBehavior:@"stop recording" preposition:@"on" forShows:selectedShows]) {
-            [tiVoManager stopRecordingShows:selectedShows];
-        }
-
     }
 }
 

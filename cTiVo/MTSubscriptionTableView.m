@@ -223,7 +223,12 @@ static NSDateFormatter *dateFormatter;
             [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
             
         }
-		result.textField.stringValue = [dateFormatter stringFromDate: thisSubscription.displayDate ];
+        NSDate * displayDate = thisSubscription.displayDate;
+        if (!displayDate || [displayDate isEqualToDate: [NSDate dateWithTimeIntervalSince1970:0]]) {
+            result.textField.stringValue = @"Never";
+        } else {
+            result.textField.stringValue = [dateFormatter stringFromDate: displayDate ];
+        }
 		[result.textField setAlignment:NSRightTextAlignment];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"FormatPopUp"] == NSOrderedSame) {

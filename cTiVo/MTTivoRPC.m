@@ -10,10 +10,7 @@
 #import "DDLog.h"
 #import "MTTiVoManager.h" //just for maskMediaKeys
 #import "NSNotificationCenter+Threads.h"
-#import "Crashlytics/Crashlytics.h"
-#ifdef DEBUG
-#define CLSLog NSLog
-#endif
+
 @interface MTTivoRPC () <NSStreamDelegate>
 @property (nonatomic, strong) NSInputStream *iStream;
 @property (nonatomic, strong) NSOutputStream *oStream;
@@ -259,43 +256,28 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
      }
 //     [self performSelector:@selector(checkStreamStatus) withObject:nil afterDelay:3];
  }
+
 -(BOOL) isActive {
     return self.iStream.streamStatus == NSStreamStatusOpen;
 }
+
 -(BOOL) streamClosed: (NSStream *) stream {
     return  stream.streamStatus == NSStreamStatusNotOpen ||
             stream.streamStatus == NSStreamStatusAtEnd ||
             stream.streamStatus == NSStreamStatusClosed ||
             stream.streamStatus == NSStreamStatusError  ;
-
 }
+
 -(void) checkStreamStatus {
     if ([self streamClosed: self.iStream] ||
         [self streamClosed: self.oStream]) {
-        NSUInteger i  = 0;
 
-        CLSLog(@"Stream failure: %@",@(self.iStream.streamStatus));
-        i++;
-        i++;
-        CLSLog(@"Stream error: %@",self.oStream.streamError.description);
-        i++;
-        i++;
         [self.deadmanTimer invalidate];
-        i++;
-        i++;
         self.deadmanTimer = nil;
-        NSInteger seconds;
-        i++;
-        i++;
-
-        i++;
-        i++;
-        i++;
-        i++;
         [self tearDownStreams];
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate]; //turn off spinner. May be extra, but better than leaving it run.
         if (self.delegate.isReachable) {
-            CLSLog(@"Trying again; retry #%@ ; ",@(self.retries));
+            NSInteger seconds;
             switch (self.retries) {
                 case 0: seconds = 10; break;
                 case 1: seconds = 30; break;
@@ -303,12 +285,10 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
                 case 3: seconds = 300; break;
                 default: seconds = 900; break;
             }
-            CLSLog(@"Stream failed, but reachable: %@ (failure #%@); Trying again in %@ seconds",self.oStream.streamError.description, @(self.retries), @(seconds));
             DDLogMajor(@"Stream failed, but reachable: %@ (failure #%@); Trying again in %@ seconds",self.oStream.streamError.description, @(self.retries), @(seconds));
             [self performSelector:@selector(launchServer) withObject:nil afterDelay:seconds];
             self.retries ++;
        } else {
-           CLSLog(@"Stream failed, and unreachable: %@ (failure #%@); Awaiting reachability",self.oStream.streamError.description, @(self.retries) );
            DDLogMajor(@"Stream failed, and unreachable: %@ (failure #%@); Awaiting reachability",self.oStream.streamError.description, @(self.retries) );
         }
     }
@@ -356,8 +336,11 @@ static NSRegularExpression * isFinalRegex = nil;
     @synchronized (dataIn) {
         incoming = [[NSString alloc] initWithData:dataIn encoding:NSUTF8StringEncoding];
         dataLength = dataIn.length;
+        if (!incoming) { //garbage in input stream, not UTF8 compatible
+            DDLogReport(@"Warning: skipping invalid data received from TiVo: %@", dataIn);
+            return dataLength;
+        }
     }
-
     NSTextCheckingResult * lenResult = [rpcRegex firstMatchInString:incoming options:0 range:NSMakeRange(0, incoming.length)];
     if (lenResult) {
         NSRange headerLenRange = [lenResult rangeAtIndex:1];
@@ -485,7 +468,6 @@ static NSRegularExpression * isFinalRegex = nil;
                 }
             } else {
                 DDLogMajor(@"%@ Failed read==> closed connection? %@: %@", streamName, @(len), [theStream streamError]);
-                CLSLog(@"%@ Failed read==> closed connection? %@: %@", streamName, @(len), [theStream streamError]);
                 [self checkStreamStatus];
             }
             break;
@@ -496,13 +478,11 @@ static NSRegularExpression * isFinalRegex = nil;
         }
         case NSStreamEventErrorOccurred: {
             DDLogMajor(@"StreamError on %@: %@", streamName, [theStream streamError]);
-            CLSLog(@"StreamError on %@: %@", streamName, [theStream streamError]);
             [self checkStreamStatus];
             break;
         }
         case NSStreamEventEndEncountered: {
             DDLogMajor(@"%@ Stream End", streamName);
-            CLSLog(@"%@ Stream End", streamName);
             [self checkStreamStatus];
             break;
         }
