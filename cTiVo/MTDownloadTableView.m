@@ -32,11 +32,6 @@ __DDLOGHERE__
         self.delegate    = self;
         self.allowsMultipleSelection = YES;
         self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-        if (!tiVoColumnHolder) tiVoColumnHolder = [self tableColumnWithIdentifier:@"TiVo"];
-        NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
-        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
-            [tiVoColumn setHidden:YES];
-        }
 	}
 	return self;
 }
@@ -57,30 +52,20 @@ __DDLOGHERE__
     [self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
-
-
 }
 
-
--(void)showTiVoColumn:(NSNotification *)notification
-{
-    NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
-	[tiVoColumn setHidden:NO];
-	
+-(void)showTiVoColumn:(NSNotification *)notification {
+    [self tableColumnWithIdentifier:@"TiVo"].hidden = NO;
 }
-
 
 -(void) reloadDataTiVos {
 	DDLogDetail(@"Reloading DL table from TivoListUpdated");
 	[self reloadData];
-	
 }
-
 
 -(void) reloadDataFormat{
 	DDLogDetail(@"Reloading DL table from FormatStatusChanged");
 	[self reloadData];
-	
 }
 
 -(void)reloadEpisodeShow:(NSNotification *)notification
@@ -209,7 +194,6 @@ __DDLOGHERE__
 -(void)dealloc
 {
 	[self  unregisterDraggedTypes];
-	 tiVoColumnHolder=nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     if (self.updateTimer) {
         [self.updateTimer invalidate];

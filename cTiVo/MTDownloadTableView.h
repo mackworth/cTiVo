@@ -15,7 +15,6 @@
 @interface MTDownloadTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource, MTTableViewProtocol> {
     IBOutlet MTMainWindowController *myController;
 	IBOutlet NSButton *removeFromQueueButton;
-    NSTableColumn *tiVoColumnHolder;
 }
 
 @property (nonatomic, strong) NSArray *sortedDownloads;

@@ -37,11 +37,6 @@ __DDLOGHERE__
         self.allowsMultipleSelection = YES;
         self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
         self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
-        if (!tiVoColumnHolder) tiVoColumnHolder = [self tableColumnWithIdentifier:@"TiVo"];
-        NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
-        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
-            [tiVoColumn setHidden:YES];
-        }
         self.imageRowHeight = -1;
 	}
 	return self;
@@ -65,8 +60,7 @@ __DDLOGHERE__
 }
 
 -(void)showTiVoColumn:(NSNotification *)notification {
-    NSTableColumn *tiVoColumn = [self tableColumnWithIdentifier:@"TiVo"];
-	[tiVoColumn setHidden:NO];
+    [self tableColumnWithIdentifier:@"TiVo"].hidden = NO;
 }
 
 -(void) reloadData {
@@ -123,7 +117,6 @@ __DDLOGHERE__
 
 -(void)dealloc
 {
-    tiVoColumnHolder = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[self tableColumnWithIdentifier:kMTArtColumn] removeObserver:self forKeyPath:@"hidden" ];
 }

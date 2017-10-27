@@ -1727,9 +1727,11 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 	self.tiVoList = [_tiVoList arrayByAddingObject: newTiVo];
     if (newTiVo.enabled){
-        if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
-            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
+        if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
+            //Haven't seen multiple TiVos before, so enable the TiVo column this one time.
+            //In future, if user hides, we don't mess with it.
             [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
+            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
         }
         DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
