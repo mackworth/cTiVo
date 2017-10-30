@@ -607,7 +607,7 @@ __DDLOGHERE__
 //nil means don't ask user or reschedule
 {
     if ([askUser boolValue] && [self anyTivoActive] ) {
-		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current show(s)" informativeTextWithFormat:@""];
+		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current show(s)" informativeTextWithFormat:@" "];
 		NSInteger returnValue = [scheduleAlert runModal];
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
 		if (returnValue == NSAlertDefaultReturn) {
@@ -774,7 +774,6 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    DDLogReport(@"TivoManager keyPath: %@", keyPath);
     NSUserDefaults * defs = [NSUserDefaults standardUserDefaults];
     if ([keyPath compare:kMTScheduledOperations] == NSOrderedSame) {
         DDLogMajor(@"Turned %@ scheduled Operations",[defs boolForKey:kMTScheduledOperations]? @"on" : @"off" );
