@@ -22,18 +22,17 @@
 
 @implementation NSView (HS)
 
--(NSView *)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode
-{
-    Class vibrantClass=NSClassFromString(@"NSVisualEffectView");
-    if (vibrantClass) { //supported
-        NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
-        [vibrant setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-        [vibrant setBlendingMode:mode];
+-(NSView *)insertVibrancyView {
+    if (@available(macOS 10.10, *)) {
+        if (NSClassFromString(@"NSVisualEffectView") ) { //should always be supported
+            NSVisualEffectView *vibrant=[[NSVisualEffectView alloc] initWithFrame:self.bounds];
+            [vibrant setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+            [vibrant setBlendingMode:NSVisualEffectBlendingModeBehindWindow];
             [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
-        return vibrant;
-    } else {
-        return self;
+            return vibrant;
+        }
     }
+    return self;
 }
 
 @end
@@ -72,7 +71,7 @@ __DDLOGHERE__
 	DDLogDetail(@"MainWindow windowDidLoad");
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     
-    [self.window.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+    [self.window.contentView insertVibrancyView];
  
     [[NSBundle mainBundle] loadNibNamed:@"MTMainWindowDrawer" owner:self topLevelObjects:nil];
 	showDetailDrawer.parentWindow = self.window;

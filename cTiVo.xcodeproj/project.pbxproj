@@ -1369,6 +1369,7 @@
 					"-Wshadow",
 					"-Wundef",
 					"-Wdeprecated-implementations",
+					"-Wunguarded-availability",
 				);
 				SDKROOT = macosx;
 			};
@@ -1422,6 +1423,7 @@
 					"-Wshadow",
 					"-Wundef",
 					"-Wdeprecated-implementations",
+					"-Wunguarded-availability",
 				);
 				SDKROOT = macosx;
 			};

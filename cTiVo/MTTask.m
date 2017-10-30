@@ -42,8 +42,10 @@ __DDLOGHERE__
 //    mTTask.task  = [NSTask new];
     mTTask.download = download;
     mTTask.taskName = name;
-    if ([mTTask.task respondsToSelector:@selector(setQualityOfService:)]) {  //os10.10 and later
-        mTTask.task.qualityOfService = NSQualityOfServiceUtility;
+    if (@available (macOS 10.10, *)) {
+        if ([mTTask.task respondsToSelector:@selector(setQualityOfService:)]) {  //os10.10 and later
+            mTTask.task.qualityOfService = NSQualityOfServiceUtility;
+        }
     }
     NSString * tmpDir = [tiVoManager tmpFilesDirectory];
     if (tmpDir) {
@@ -163,11 +165,8 @@ __DDLOGHERE__
         title = [title stringByAppendingString: @" for "];
         title = [title stringByAppendingString: [_task.launchPath lastPathComponent]];
     }
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-    NSString * subtitle = @"Please let us know Mac model at cTiVo's help site";
-#else
+
     NSString * subtitle = @"You may need '10.7' version of cTiVo";
-#endif
     [tiVoManager notifyWithTitle: title
                       subTitle: subtitle ];
     [self.download cancel];

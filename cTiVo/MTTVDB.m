@@ -90,13 +90,9 @@ __DDLOGHERE__
 
 -(void) cancelSession {
     if (self.tvdbURLSession) DDLogReport(@"canceling TVDB Session");
-    [self.tvdbURLSession getAllTasksWithCompletionHandler:^(NSArray<__kindof NSURLSessionTask *> * _Nonnull tasks) {
-        for (NSURLSessionTask * task in tasks) {
-            [task cancel];
-        }
-        [self checkToken];
-    }];
-   self.tvdbURLSession = nil;
+    [self.tvdbURLSession invalidateAndCancel];
+    self.tvdbURLSession = nil;
+    [self checkToken];
 }
 
 -(NSURLSession *) tvdbURLSession {
@@ -109,7 +105,7 @@ __DDLOGHERE__
     NSInteger numTries = 10;
     while (![self checkToken]  && numTries > 0) {
         DDLogMajor(@"Still checking for TVDB token");
-        usleep(250000);   //FIX: pausing for a quarter-second up to 2.5 seconds on main queue is not good
+        usleep(250000);   //XXX FIX: pausing for a quarter-second up to 2.5 seconds on main queue is not good
         numTries--;
     }
     if (self.tvdbToken) {
