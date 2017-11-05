@@ -84,16 +84,17 @@ __DDLOGHERE__
 	}
 	[self cleanUp];
 	_taskName = taskName;
+    NSError * error = nil;
     if (self.download) {
         self.logFilePath = [NSString stringWithFormat:@"%@/%@%@.txt",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
-        if (![[NSFileManager defaultManager] createFileAtPath:_logFilePath contents:[NSData data] attributes:nil]) {
-            DDLogReport(@"Could not create logfile at %@",_logFilePath);
+        if (![[NSData data] writeToFile:self.logFilePath options:0 error:&error]) {
+            DDLogReport(@"Could not create logfile at %@: %@",_logFilePath, error);
         }
         self.logFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_logFilePath];
         self.logFileReadHandle	= [NSFileHandle fileHandleForReadingAtPath:_logFilePath];
         self.errorFilePath = [NSString stringWithFormat:@"%@/%@%@.err",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
-        if (![[NSFileManager defaultManager] createFileAtPath:_errorFilePath contents:[NSData data] attributes:nil]) {
-            DDLogReport(@"Could not create errfile at %@",_logFilePath);
+        if (![[NSData data] writeToFile:self.errorFilePath options:0 error:&error]) {
+            DDLogReport(@"Could not create errfile at %@:%@",_errorFilePath, error);
         }
         self.errorFileHandle = [NSFileHandle fileHandleForWritingAtPath:_errorFilePath];
         
@@ -110,7 +111,7 @@ __DDLOGHERE__
         if (self.errorFileHandle) {
             [self setStandardError:self.errorFileHandle];
         } else {
-            DDLogReport(@"%@ Could not read error file at %@",taskName, _errorFilePath);
+            DDLogReport(@"%@ Could not write error file at %@",taskName, _errorFilePath);
         }
     }
 }
@@ -422,9 +423,9 @@ __DDLOGHERE__
         NSFileManager * fm = [NSFileManager defaultManager];
         NSString * errorString = nil;
         if ([fm fileExistsAtPath:_task.currentDirectoryPath]) {
-            errorString = [NSString stringWithFormat: @"tmp folder %@ exists", _task.currentDirectoryPath];
+            errorString = [NSString stringWithFormat: @"current folder %@ exists", _task.currentDirectoryPath];
         } else {
-            DDLogReport(@"Error on launch: No temp directory");
+            DDLogReport(@"Error on launch: No current directory %@", _task.currentDirectoryPath);
             NSError * error = nil;
            [fm createDirectoryAtPath:_task.currentDirectoryPath withIntermediateDirectories:YES  attributes: nil error: &error];
             errorString = error.localizedDescription;

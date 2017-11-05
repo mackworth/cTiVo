@@ -438,7 +438,7 @@ __DDLOGHERE__
 		[updatedSavedTiVos addObject:dictToAdd];
     }
 	if (!foundTiVo) {
-		DDLogReport(@"Warning: didn't find tivo %@",tiVo);
+		DDLogReport(@"First time finding  %@",tiVo);
         [updatedSavedTiVos addObject:tiVoDict];
 	}
     [[NSUserDefaults standardUserDefaults] setValue:updatedSavedTiVos forKeyPath:kMTTiVos];

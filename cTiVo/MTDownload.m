@@ -2325,7 +2325,7 @@ NSInteger diskWriteFailure = 123;
                [self handleNewTSChannel];
            } else {
                 //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
-                DDLogMajor(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self.show,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
+                DDLogReport(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self.show,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
                 [self notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
                              subTitle:@"Transfer is too short" ];
                 if (self.shouldSimulEncode) {

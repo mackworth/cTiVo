@@ -445,8 +445,10 @@ BOOL tempDirectory = NO;
                 return;
             }
         }
-        if (![fm createDirectoryAtPath:tmpdir withIntermediateDirectories:YES attributes:nil error:&error]) {
-            DDLogReport(@"Error %@ creating new tmp directory",error);
+        if ([fm createDirectoryAtPath:tmpdir withIntermediateDirectories:YES attributes:nil error:&error]) {
+            DDLogReport(@"Creating new temp directory at %@",tmpdir);
+        } else {
+            DDLogReport(@"Error %@ creating new temp directory at %@",error, tmpdir);
             [self promptForNewDirectory:tmpdir withMessage:@"Unable to create directory %@; maybe need to fix permissions?" tempDir:YES];
             return;
         }
