@@ -139,6 +139,7 @@ __DDLOGHERE__
 		return;  
 	}
     MTTiVo * tivo = (MTTiVo *) notification.object;
+    if (!tivo) return;
 	DDLogDetail(@"LoadingIndicator: %@ for %@",notification.name, tivo.tiVo.name);
     if ([notification.name  compare:kMTNotificationTiVoUpdating] == NSOrderedSame) {
         [self.loadingTiVos addObject:tivo];

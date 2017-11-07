@@ -274,8 +274,8 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 
         [self.deadmanTimer invalidate];
         self.deadmanTimer = nil;
+        if (self.delegate) [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate]; //turn off spinner. May be extra, but better than leaving it run.
         [self tearDownStreams];
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate]; //turn off spinner. May be extra, but better than leaving it run.
         if (self.delegate.isReachable) {
             NSInteger seconds;
             switch (self.retries) {
