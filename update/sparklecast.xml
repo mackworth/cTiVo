@@ -24,10 +24,10 @@
                 <li>TiVo now notifies cTiVo as the Now Playing list changes, so new shows are updated instantaneously.*</li>
                 <li>Ability to "Delete Show from TiVo" (in Edit menu and contextual menu).*</li>
                 <li>Ability to "Stop Recording show from TiVo" (in Edit menu and contextual menu).*</li>
-                <li>*Starred* items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)</li>
                 </ul>
+                <p>*Starred* items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)</p>
 
-                See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
+                <p>See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.</p>
             ]]>
             </description>
             <pubDate>Thu., November 9, 2017 20:00:00 -0800</pubDate>
