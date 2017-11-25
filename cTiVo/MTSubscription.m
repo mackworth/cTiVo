@@ -166,26 +166,25 @@ __DDLOGHERE__
 #endif
     DDLogDetail(@"Adding %@: ID: %@, Sub: %@, date: %@, Tivo: %@", thisShow, thisShow.episodeID, thisShow.uniqueID, thisShow.showDate, thisShow.tiVoName );
 
-    NSDictionary *thisRecording = @{
-		 @"showTitle": thisShow.showTitle ,
-		 @"episodeID": thisShow.uniqueID,
-		 @"startTime": thisShow.showDate,
-		 @"tiVoName":  thisShow.tiVoName
-	};
-	NSUInteger index = 0;
-	//keep sorted by startTime
-	for (NSDictionary * prevRecording in self.prevRecorded) {
-		if ([prevRecording[@"startTime"] isGreaterThan: thisShow.showDate]) {
-			index++;
-		}
-	}
-    if (index ==0) { //later than previous latest, so update table
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:self];
-    }
-	DDLogVerbose(@"remembering Recording %ld: %@", index, thisRecording);
-	[self.prevRecorded insertObject:thisRecording atIndex:index];
-    if (index ==0) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:self];
+    if ( thisShow.showTitle &&  thisShow.uniqueID && thisShow.showDate && thisShow.tiVoName ) { //protective only; should always be non-nil
+            NSDictionary *thisRecording = @{
+             @"showTitle": thisShow.showTitle ,
+             @"episodeID": thisShow.uniqueID,
+             @"startTime": thisShow.showDate,
+             @"tiVoName":  thisShow.tiVoName
+        };
+        NSUInteger index = 0;
+        //keep sorted by startTime
+        for (NSDictionary * prevRecording in self.prevRecorded) {
+            if ([prevRecording[@"startTime"] isGreaterThan: thisShow.showDate]) {
+                index++;
+            }
+        }
+        DDLogVerbose(@"remembering Recording %ld: %@", index, thisRecording);
+        [self.prevRecorded insertObject:thisRecording atIndex:index];
+        if (index ==0) { //later than previous latest, so update table
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:self];
+        }
     }
 	return newDownload;
 }

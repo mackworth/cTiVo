@@ -610,24 +610,32 @@ __DDLOGHERE__
         return NO;
     }
     long long tmpSpace = [self spaceAvailable: tiVoManager.tmpFilesDirectory];
-    long long fileSpace = [self spaceAvailable: self.downloadDirectory];
-    DDLogVerbose(@"Checking Space Available: %lld tmp and %lld file", tmpSpace, fileSpace);
+    long long downloadSpace = [self spaceAvailable: self.downloadDirectory];
+    long long fileSize = self.show.fileSize;
+    DDLogVerbose(@"Checking Space Available: %lld tmp and %lld file", tmpSpace, downloadSpace);
 
-    if ((tmpSpace == fileSpace  && tmpSpace < 1.5 * self.show.fileSize) ||  //check if both on same drive
-        tmpSpace < self.show.fileSize ||
-        fileSpace < self.show.fileSize) {
+    if ((tmpSpace == downloadSpace  && downloadSpace < 1.5 * fileSize) ||
+        // both on same drive
+        (downloadSpace < fileSize))  {
         [tiVoManager pauseQueue:nil];
-        [self notifyUserWithTitle:@"Cancelling downloads: Your disk is low on space" subTitle:@"Delete some files?"];
-        return NO;
+        [self notifyUserWithTitle:@"Pausing downloads: Your download disk is low on space" subTitle:@"Probably need to delete some files."];
+        DDLogReport(@"Disk space problem: %lld tmp and %lld download vs %lld fileSize", tmpSpace, downloadSpace, fileSize);
+       return NO;
+    } else if (tmpSpace < fileSize)  {
+        [tiVoManager pauseQueue:nil];
+        [self notifyUserWithTitle:@"Pausing downloads: Your temporary or boot drive is low on space" subTitle:@"Probably need to delete some files."];
+        DDLogReport(@"Disk space problem: %lld tmp and %lld download vs %lld fileSize", tmpSpace, downloadSpace, fileSize);
+       return NO;
     }
-    long long maxSize = tiVoManager.sizeOfShowsToDownload;
-    if (tmpSpace < maxSize || fileSpace < maxSize) {
+    if (downloadSpace < tiVoManager.sizeOfShowsToDownload ||
+        tmpSpace < tiVoManager.biggestShowToDownload ) {
         [tiVoManager notifyForName: self.show.showTitle
                          withTitle: @"Warning: you may be getting low on disk space"
-                          subTitle: @"Delete some files?"
+                          subTitle: @"Should you delete some files?"
                           isSticky: NO
          ];
-    }
+        DDLogMajor(@"Disk space warning: %lld tmp and %lld download vs %lld biggest show and %lld total shows", tmpSpace, downloadSpace, tiVoManager.biggestShowToDownload, tiVoManager.sizeOfShowsToDownload);
+   }
     if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {  //We need to download from the TiVo
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
             self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",tiVoManager.tmpFilesDirectory,self.baseFileName];

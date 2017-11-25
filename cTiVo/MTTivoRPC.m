@@ -50,7 +50,7 @@ typedef void (^ReadBlock)(NSDictionary *, BOOL);
 __DDLOGHERE__
 
 static NSArray * _myCerts = nil;        //across all TiVos; never deallocated
-SecKeychainRef keychain = NULL;  //
+static SecKeychainRef keychain = NULL;  //
 
 +(void) setMyCerts:(NSArray *)myCerts {
     if (myCerts != _myCerts) {
@@ -945,13 +945,16 @@ static NSArray * imageResponseTemplate = nil;
 }
 
 -(void) dealloc {
-    [self sharedShutdown];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self appWillTerminate:nil];
 }
 
 -(void) appWillTerminate: (id) notification {
     [self sharedShutdown];
-    SecKeychainDelete(keychain);
-    keychain = NULL;
+    if (keychain != NULL) {
+        SecKeychainDelete(keychain);
+        keychain = NULL;
+    }
 }
 
 @end

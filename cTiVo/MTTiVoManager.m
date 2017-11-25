@@ -1361,6 +1361,19 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     return size;
 }
 
+-(long long)biggestShowToDownload
+{
+    long long size = 0;
+    for (MTDownload *download in _downloadQueue) {
+        if (!download.isDone &&
+            size < download.show.fileSize) {
+            size =download.show.fileSize;
+        }
+    }
+    return size;
+}
+
+
 -(BOOL) checkForExit {
     return [(MTAppDelegate *) [NSApp delegate] checkForExit];
 }

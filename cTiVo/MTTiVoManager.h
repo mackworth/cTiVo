@@ -70,6 +70,7 @@
 -(BOOL) anyShowsWaiting;
 -(NSInteger)numberOfShowsToDownload;
 -(long long)sizeOfShowsToDownload;
+-(long long)biggestShowToDownload;
 -(void) clearDownloadHistory;
 
 //---------------Download Queue userDefaults writing/reading  ----------
