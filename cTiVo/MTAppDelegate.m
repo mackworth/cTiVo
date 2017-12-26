@@ -240,6 +240,7 @@ __DDLOGHERE__
                                           @NO, kMTExportSubtitles,
                                           @NO, kMTSaveMPGFile,
                                           @[], kMTChannelInfo,
+										  @NO, kMTPlexFormat,
                                           nil];
 
     [[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
