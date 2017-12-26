@@ -56,6 +56,7 @@
 
 -(void)awakeFromNib
 {
+	[super awakeFromNib];
     popoverDetachWindow.contentView = popoverDetachController.view;
     [self launchReadPreset];
     formatPopUpButton.showHidden = YES;

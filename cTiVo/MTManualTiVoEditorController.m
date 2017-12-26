@@ -35,6 +35,7 @@ __DDLOGHERE__
 
 - (void)awakeFromNib
 {
+	[super awakeFromNib];
     [manualTiVoArrayController setFilterPredicate:[NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary *bindings){
         NSDictionary *tiVo = (NSDictionary *)item;
         return [tiVo[kMTTiVoManualTiVo] boolValue];

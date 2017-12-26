@@ -25,6 +25,7 @@
     return self;
 }
 -(void) awakeFromNib {
+	[super awakeFromNib];
     [self setItemPropertiesToDefault:self];
 }
 

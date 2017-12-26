@@ -39,20 +39,7 @@
 		[thisController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
 		[tabViewItem.view addSubview:thisController.view];
 	}
-	
-//	NSTabViewItem *tabViewItem = [tabView tabViewItemAtIndex:[tabView indexOfTabViewItemWithIdentifier:@"TiVos"]];
-//	NSRect tabViewFrame = ((NSView *)tabViewItem.view).frame;
-//	NSRect editorViewFrame = manualTiVoEditorController.view.frame;
-//	[manualTiVoEditorController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
-//	[tabViewItem.view addSubview:manualTiVoEditorController.view];
-//
-//	tabViewItem = [tabView tabViewItemAtIndex:[tabView indexOfTabViewItemWithIdentifier:@"Formats"]];
-//	tabViewFrame = ((NSView *)tabViewItem.view).frame;
-//	editorViewFrame = formatEditorController.view.frame;
-//	[formatEditorController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
-//
-//	[tabViewItem.view addSubview:formatEditorController.view];
-	
+
 	if (_startingTabIdentifier && _startingTabIdentifier.length) {
 		NSTabViewItem *itemToSelect = [_myTabView tabViewItemAtIndex:[_myTabView indexOfTabViewItemWithIdentifier:_startingTabIdentifier]];
 		if (itemToSelect) {
@@ -78,10 +65,6 @@
 	}
 }
 
--(void)awakeFromNib
-{
-}
-
 -(IBAction)shouldCloseSheet:(id)sender
 {
 	MTTabViewItem *selectedItem = (MTTabViewItem *)[_myTabView selectedTabViewItem];
@@ -94,8 +77,6 @@
 		[self.window orderOut:nil];
 	}
 }
-
-
 
 -(IBAction)closeSheet:(id)sender
 {
