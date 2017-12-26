@@ -11,7 +11,6 @@
 
 @interface MTPreferencesViewController ()
 @property (weak, nonatomic) IBOutlet NSPopUpButton *directoryFormatPopup;
-@property (weak, nonatomic) IBOutlet NSButton * helpButton;
 
 @end
 

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1090" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTManualTiVoEditorController">
             <connections>
+                <outlet property="helpButton" destination="no1-DG-QRb" id="qdB-Wc-y5l"/>
                 <outlet property="manualTiVoArrayController" destination="121" id="qCS-a0-503"/>
                 <outlet property="networkTiVoArrayController" destination="hNz-Uc-bTd" id="RWw-bt-0QT"/>
                 <outlet property="view" destination="416" id="456"/>
@@ -52,7 +53,7 @@
             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <scrollView misplaced="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="417">
-                    <rect key="frame" x="17" y="298" width="509" height="170"/>
+                    <rect key="frame" x="17" y="296" width="509" height="170"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <clipView key="contentView" id="CYN-kZ-RDO">
                         <rect key="frame" x="1" y="0.0" width="507" height="169"/>
@@ -315,19 +316,30 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </tableHeaderView>
                 </scrollView>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="bVW-Un-nKO">
-                    <rect key="frame" x="168" y="237" width="136" height="17"/>
+                <textField verticalHuggingPriority="750" misplaced="YES" id="Yir-vE-I7L">
+                    <rect key="frame" x="197" y="474" width="152" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Local Network TiVo's" id="Dl6-xL-MDw">
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Remote (Manual) TiVos" id="hse-sh-1ft">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="Yir-vE-I7L">
-                    <rect key="frame" x="160" y="476" width="152" height="17"/>
+                <button verticalHuggingPriority="750" misplaced="YES" id="no1-DG-QRb">
+                    <rect key="frame" x="464" y="465" width="68" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Remote (Manual) TiVo's" id="hse-sh-1ft">
+                    <buttonCell key="cell" type="push" title="Help" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rbi-oV-6p6">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="help:" target="-2" id="46d-db-Qwl"/>
+                    </connections>
+                </button>
+                <textField verticalHuggingPriority="750" misplaced="YES" id="bVW-Un-nKO">
+                    <rect key="frame" x="165" y="237" width="136" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Local Network TiVo's" id="Dl6-xL-MDw">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>

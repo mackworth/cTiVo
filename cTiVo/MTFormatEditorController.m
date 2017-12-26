@@ -31,6 +31,7 @@
 @property (nonatomic, strong) IBOutlet NSPopUpButton *presetPopup;
 @property (nonatomic, assign) NSInteger customPresetStart;
 @property (nonatomic, strong) NSDictionary *alertResponseInfo;
+@property (weak, nonatomic) IBOutlet NSButton * helpButton;
 //@property (nonatomic, strong) NSArray * ;
 @end
 
@@ -490,7 +491,7 @@
     [formatPopUpButton selectFormat:_currentFormat];
 }
 
--(IBAction)help:(id)sender
+-(IBAction)encodeHelp:(id)sender
 {
 	//Get help text for encoder
 	NSString *helpFilePath = nil;;
@@ -512,6 +513,10 @@
 	//	[self.helpController.displayMessage insertText:helpText];
 	[popoverDetachController.displayMessage.textStorage setAttributedString:attrHelpText];
 	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+}
+
+-(IBAction) help:(id)sender {
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Advanced-Topics#edit-formats"]];
 }
 
 

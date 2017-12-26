@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13156.6" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1090" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13156.6"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -168,17 +168,6 @@ Yes = force Transport Stream</string>
                         <autoresizingMask key="autoresizingMask"/>
                     </tableHeaderView>
                 </scrollView>
-                <button toolTip="Forces TS for all channels. Overrides TS values below." id="qVI-hc-NaG" userLabel="Transport Stream">
-                    <rect key="frame" x="15" y="469" width="439" height="18"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Always Use TiVo's Transport Stream Format" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="iDB-7u-Dde">
-                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <binding destination="48" name="value" keyPath="values.DownloadTSFormat" id="zBD-YX-VAK"/>
-                    </connections>
-                </button>
                 <button toolTip="Runs a test download for all untested channels in Program Table " verticalHuggingPriority="750" misplaced="YES" id="STy-iF-kCG">
                     <rect key="frame" x="122" y="13" width="183" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
@@ -199,6 +188,28 @@ Yes = force Transport Stream</string>
                     </buttonCell>
                     <connections>
                         <action selector="removeAllTests:" target="-2" id="do5-Ud-6ea"/>
+                    </connections>
+                </button>
+                <button verticalHuggingPriority="750" misplaced="YES" id="6Oq-n5-Q7h">
+                    <rect key="frame" x="390" y="457" width="68" height="32"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="push" title="Help" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ngF-1w-sIq">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="help:" target="-2" id="h20-dM-dfK"/>
+                    </connections>
+                </button>
+                <button toolTip="Forces TS for all channels. Overrides TS values below." misplaced="YES" id="qVI-hc-NaG" userLabel="Transport Stream">
+                    <rect key="frame" x="15" y="466" width="439" height="18"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="check" title="Always Use TiVo's Transport Stream Format" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="iDB-7u-Dde">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="48" name="value" keyPath="values.DownloadTSFormat" id="zBD-YX-VAK"/>
                     </connections>
                 </button>
             </subviews>

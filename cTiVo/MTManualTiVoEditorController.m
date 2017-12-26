@@ -83,6 +83,11 @@ __DDLOGHERE__
    [[NSUserDefaults standardUserDefaults] setValue:tiVos forKeyPath:kMTTiVos];
 }
 
+-(IBAction) help:(id)sender {
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Advanced-Topics#manual-tivos"]];
+}
+
+
 
 -(void)dealloc
 {

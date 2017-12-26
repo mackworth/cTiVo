@@ -349,6 +349,10 @@
     return ![grepOutput hasPrefix:@"Unable"];
 }
 
+-(IBAction) help:(id)sender {
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Configuration#settings-in-preferences-screen"]];
+}
+
 -(IBAction)emptyCaches:(id)sender
 {
     NSAlert *cacheAlert = [NSAlert alertWithMessageText:@"Emptying the caches will then reload all information from the TiVos and from TheTVDB.\nDo you want to continue?" defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];

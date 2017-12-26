@@ -55,4 +55,10 @@
     [tiVoManager removeAllPSTests];
 
 }
+
+-(IBAction) help:(id)sender {
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Advanced-Topics#edit-channels"]];
+}
+
+
 @end
