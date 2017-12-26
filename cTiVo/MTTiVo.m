@@ -530,26 +530,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     [self.myRPC stopRecordingShowsWithRecordIds:[self recordingIDsForShows:shows]];
 
 }
-- (NSTimeInterval) roundTime: (NSTimeInterval) time {
-    //rounds a timeinterval to wait up or down to nearest half hour (plus a minute) if not more than 10 minutes change
-    //goal is to refresh Tivos shortly after they start/finish a recording rather than waiting too long
-    NSDate * inDate =  [NSDate dateWithTimeIntervalSinceNow:time];
-
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSInteger minutes = [calendar components: NSMinuteCalendarUnit fromDate: inDate].minute ;
-    //round to updating at a minute after the half hour if reasonable
-   if (minutes > 30) minutes -=30;
-    NSInteger deltaTime = 0;
-    if (minutes == 0) {
-        deltaTime = 1;
-    } if (minutes >= 2 && minutes <= 10) {
-        deltaTime = 1-minutes;
-    } else if (minutes >= 20) {
-        deltaTime = 31-minutes;
-    }
-
-    return time + deltaTime*60;
-}
 
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {
     [MTTiVo cancelPreviousPerformRequestsWithTarget:self
@@ -560,7 +540,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         if (minDelay == 0) {
             minDelay = (self.rpcActive ?  kMTUpdateIntervalMinDefault : kMTUpdateIntervalMinDefaultNonRPC);
         }
-        delay = [self roundTime:minDelay*60];
+        delay = minDelay*60;
     }
     DDLogDetail(@"Scheduling Update with delay of %lu seconds", (long)delay);
     [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay ];
@@ -1160,6 +1140,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     _reachability = nil;
     [self.myRPC stopServer];
     self.tiVo = nil;
+    self.myRPC.delegate = nil;
     self.myRPC = nil;
 }
 

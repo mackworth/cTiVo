@@ -627,10 +627,15 @@ __DDLOGHERE__
         DDLogReport(@"Disk space problem: %lld tmp and %lld download vs %lld fileSize", tmpSpace, downloadSpace, fileSize);
        return NO;
     }
-    if (downloadSpace < tiVoManager.sizeOfShowsToDownload ||
-        tmpSpace < tiVoManager.biggestShowToDownload ) {
+    NSString * warning = nil;
+    if (downloadSpace < tiVoManager.sizeOfShowsToDownload) {
+        warning =  @"Warning: you may be getting low on disk space";
+    } else if (tmpSpace < tiVoManager.biggestShowToDownload ) {
+        warning =  @"Warning: you may be getting low on temporary space";
+    }
+    if (warning) {
         [tiVoManager notifyForName: self.show.showTitle
-                         withTitle: @"Warning: you may be getting low on disk space"
+                         withTitle: warning
                           subTitle: @"Should you delete some files?"
                           isSticky: NO
          ];

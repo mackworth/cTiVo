@@ -850,8 +850,8 @@ static BOOL inProgress = NO;
 -(void) resetTVDBInfo:(MTTiVoShow *) show {
     show.tvdbData = nil;
     @synchronized (self.tvdbCache) {
-        [self.tvdbCache removeObjectForKey:show.episodeID];
-        [self.tvdbCache removeObjectForKey:show.seriesTitle];
+        if (show.episodeID) [self.tvdbCache removeObjectForKey:show.episodeID];
+        if (show.seriesTitle) [self.tvdbCache removeObjectForKey:show.seriesTitle];
         [self cacheTVDBSeriesID:nil forSeries:show.seriesTitle];
     }
 }

@@ -115,12 +115,6 @@ __DDLOGHERE__
     }
 }
 
--(void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [[self tableColumnWithIdentifier:kMTArtColumn] removeObserver:self forKeyPath:@"hidden" ];
-}
-
 #pragma mark find/filter support
 
 -(void) showFindField: (BOOL) show {
@@ -264,11 +258,12 @@ __DDLOGHERE__
         NSIndexSet * allRows = [NSIndexSet indexSetWithIndexesInRange: NSMakeRange(0, self.sortedShows.count) ];
        if ( [column.identifier isEqualToString:kMTArtColumn ] && self.imageRowHeight > 0) {
             self.imageRowHeight = -self.imageRowHeight;  //use as trigger to recalculate, but remember old size in case it hasn't changed.
-            [self noteHeightOfRowsWithIndexesChanged: allRows ];
-        } else {
-            [self reloadDataForRowIndexes: allRows
+           [self noteHeightOfRowsWithIndexesChanged: allRows ];
+           [self reloadDataForRowIndexes: allRows
+                           columnIndexes:[NSIndexSet indexSetWithIndex: [self columnWithIdentifier:@"icon"]]];
+       }
+        [self reloadDataForRowIndexes: allRows
                             columnIndexes:[NSIndexSet indexSetWithIndex: [[self tableColumns] indexOfObject:column]]];
-        }
     }
 }
 
@@ -303,7 +298,7 @@ __DDLOGHERE__
     return self.sortedShows.count;
 }
 
--(CGFloat) rowHeight {
+-(CGFloat) tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row {
     //use negative numbers to indicate we need to recalculate, but save old one as negative to see if we need to reload or not.
     //Yes, it's ugly.
     //even worse, sometimes imageColumn.hidden is incorrectly NO the first time after relaunch;
@@ -411,21 +406,26 @@ __DDLOGHERE__
         result.textField.alignment = NSCenterTextAlignment;
         result.toolTip =@"Does this channel use H.264 compression?";
     } else if ([identifier isEqualToString: kMTArtColumn]) {
-        DDLogVerbose(@"looking for image for %@",thisShow);
+//        DDLogVerbose(@"looking for image for %@",thisShow);
        MTProgressCell * cell = (MTProgressCell *) result;
         DragDropImageView * imageView = (DragDropImageView *) result.imageView;
-        imageView.delegate = thisShow;
+        imageView.delegate = thisShow; //drag drop support
+		CGRect rect = CGRectMake(0, 0, tableColumn.width, fabs(self.imageRowHeight));
+		cell.frame = rect;
+		cell.imageView.frame = rect;
+		cell.progressIndicator.frame = rect;
         NSImage * image = thisShow.thumbnailImage;
         if (image) {
-            DDLogVerbose(@"got image for %@",thisShow);
+			DDLogVerbose(@"got image for %@: %@",thisShow, NSStringFromRect(cell.bounds));
             imageView.image = image ;
-            imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
-            result.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
+            imageView.imageScaling = NSImageScaleProportionallyUpOrDown;
+            imageView.animates = NO;
+
             cell.progressIndicator.hidden = YES;
             [cell.progressIndicator stopAnimation:self];
         } else if (thisShow.noImageAvailable) {
             //no image, and it's never coming
-            DDLogVerbose(@"No image  for %@",thisShow);
+            DDLogVerbose(@"No image for %@",thisShow);
            imageView.image = nil ;
             cell.progressIndicator.hidden = YES;
             [cell.progressIndicator stopAnimation:self];
@@ -436,10 +436,20 @@ __DDLOGHERE__
             cell.progressIndicator.hidden = NO;
             [cell.progressIndicator startAnimation:self];
         }
+
     } else if ([identifier isEqualToString:@"icon"]) {
+        MTProgressCell * cell = (MTProgressCell *) result;
+        NSImageView * imageView = cell.imageView;
         NSString * imageName = thisShow.imageString;
-        result.imageView.imageScaling = NSImageScaleProportionallyUpOrDown;
-        result.imageView.image = [NSImage imageNamed: imageName];
+        imageView.imageScaling = NSImageScaleProportionallyUpOrDown;
+        imageView.image = [NSImage imageNamed: imageName];
+        CGFloat width = tableColumn.width;
+        CGFloat height = MIN(width, MIN(self.imageRowHeight, 24));
+        CGFloat leftMargin = (width -height)/2;
+        CGFloat topMargin = (self.imageRowHeight-height)/2;
+		cell.frame =CGRectMake(0,0, width, self.imageRowHeight);
+		imageView.frame = CGRectMake(leftMargin, topMargin, height, height);
+        imageView.animates = YES;
         result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
     } else {
         DDLogReport(@"Invalid Column: %@", identifier);
@@ -455,29 +465,14 @@ __DDLOGHERE__
     } else {
         result.textField.textColor = [NSColor blackColor];
     }
-    
+	if (result.frame.origin.y != 1) {
+		CGRect frame = result.frame;
+		frame.origin.y = 1.0;
+		result.frame = frame;
+	}
     // return the result.
     return result;
 }
-
-
--(void) didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row {
-    //anybody can tell me why I need to do this after adding; I would be happy
-    NSInteger column = [self columnWithIdentifier: kMTArtColumn];
-    MTProgressCell * cell = [rowView  viewAtColumn:column];
-    cell.imageView.frame = cell.bounds;
-    cell.progressIndicator.frame = cell.bounds;
-
-    column = [self columnWithIdentifier: @"icon"];
-    NSTableCellView *view = [rowView viewAtColumn:column];
-    view.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
-    CGFloat width = self.tableColumns[column].width;
-    CGFloat height = MIN(width, MIN(self.rowHeight, 24));
-    CGFloat leftMargin = (width -height)/2;
-    CGFloat topMargin = (self.rowHeight-height)/2;
-    view.imageView.frame = CGRectMake(leftMargin, topMargin, height, height);
-}
-
 #pragma mark Drag N Drop support
 
 /*// What kind of drag operation should I perform?
@@ -674,5 +669,13 @@ __DDLOGHERE__
         [tiVoManager stopRecordingShows:selectedShows];
     }
 }
+
+-(void)dealloc {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[[self tableColumnWithIdentifier:kMTArtColumn] removeObserver:self forKeyPath:@"hidden" ];
+	[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:kMTShowCopyProtected ];
+	[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:kMTShowSuggestions ];
+}
+
 
 @end

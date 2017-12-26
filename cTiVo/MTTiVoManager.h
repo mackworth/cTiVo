@@ -21,26 +21,23 @@
 
 //Shared Data
 
-@property (nonatomic, strong) NSArray *tiVoList;
-@property (nonatomic, readonly) NSArray *tiVoShows;
-@property (nonatomic, strong) NSMutableArray  *formatList;
-@property (nonatomic, strong) NSMutableDictionary *lastLoadedTivoTimes;
-@property (atomic, strong) NSMutableArray *downloadQueue;
-@property (nonatomic, strong) NSMutableArray *subscribedShows;
+@property (nonatomic, strong) NSArray <MTTiVo *> *tiVoList;
+@property (nonatomic, readonly) NSArray <MTTiVoShow *> *tiVoShows;
+@property (nonatomic, strong) NSMutableArray <MTFormat *> *formatList;
+@property (nonatomic, strong) NSMutableDictionary <NSString *, NSDate *> *lastLoadedTivoTimes;
+@property (atomic, strong) NSMutableArray <MTDownload *> *downloadQueue;
+@property (nonatomic, strong) NSMutableArray <MTSubscription *> *subscribedShows;
 
-@property (nonatomic, strong) NSString *downloadDirectory;
-@property (nonatomic, weak, readonly) NSString *tmpFilesDirectory;
+@property (nonatomic, strong)  NSString *downloadDirectory;
+@property (nonatomic,readonly) NSString *tmpFilesDirectory;
 @property (nonatomic,readonly) NSString *defaultDownloadDirectory;
 @property (nonatomic,readonly) NSURL *tivoTempDirectory;
 @property (nonatomic,readonly) NSURL *tvdbTempDirectory;
 @property (nonatomic,readonly) NSURL *detailsTempDirectory;
-@property (readonly) NSArray *savedTiVos;
-@property (readonly) NSArray *savedManualTiVos;
-@property (readonly) NSArray *savedBonjourTiVos;
+@property (readonly) NSArray <NSDictionary <NSString * , NSString *> *> *savedTiVos;
 @property int volatile signalError;
 
 //Other Properties
-@property (nonatomic,readonly) NSMutableArray *tivoServices;
 @property (nonatomic, strong) MTTVDB *tvdb;
 
 @property (nonatomic, strong) MTFormat *selectedFormat;
@@ -48,7 +45,6 @@
 @property (nonatomic,readonly) int totalShows; // numCommercials, numCaptions;//Want to limit launches to two encoders.
 @property (nonatomic, strong) NSNumber *processingPaused;
 @property (nonatomic, readonly) BOOL anyShowsCompleted;
-@property (nonatomic, strong) NSArray *currentMediaKeys;
 @property (nonatomic, readonly) double aggregateSpeed; //sum of the speed of all downloads .
 @property (nonatomic, readonly)  NSTimeInterval aggregateTimeLeft; 
 

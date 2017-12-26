@@ -884,7 +884,7 @@ static NSArray * imageResponseTemplate = nil;
                    episodeInfo = self.showMap[objectIds[index]];
                    episodeInfo.imageURL  = imageURL;  //if none available, still mark as ""
                    NSString * title= episodeInfo.series;
-                   if (!_seriesImages[title]) {
+                   if (title && !_seriesImages[title]) {
                        _seriesImages[title] = imageURL;
                    }
                 }
@@ -946,6 +946,8 @@ static NSArray * imageResponseTemplate = nil;
 
 -(void) dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver: self];
+    [self sharedShutdown];
     [self appWillTerminate:nil];
 }
 

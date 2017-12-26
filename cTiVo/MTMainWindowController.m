@@ -819,6 +819,8 @@ __DDLOGHERE__
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [tiVoManager removeObserver:self forKeyPath:@"selectedFormat"];
+    [tiVoManager removeObserver:self forKeyPath:@"downloadDirectory"];
 }
 
 

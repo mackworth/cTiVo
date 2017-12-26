@@ -40,6 +40,8 @@
 @property (nonatomic, strong) NSURL *tvdbTempDirectory;
 @property (nonatomic, strong) NSURL *detailsTempDirectory;
 
+@property (nonatomic,readonly) NSMutableArray <NSNetService *> *tivoServices;
+
 @end
 
 
@@ -1394,7 +1396,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 }
 
 - (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky {
-    DDLogReport(@"Notify: %@/n%@", title, subTitle ?: @"");
+    DDLogReport(@"Notify: %@\n%@", title, subTitle ?: @"");
 
     NSUserNotification *userNot = [[NSUserNotification alloc] init ];
     userNot.title = title;
