@@ -12,7 +12,6 @@
 #import "MTMainWindowController.h"
 #import "MTSubscriptionTableView.h"
 #import "MTPreferencesWindowController.h"
-#import "MTAdvPreferencesViewController.h"
 #import "MTHelpViewController.h"
 #import "MTTiVo.h"
 #import "MTSubscriptionList.h"
@@ -140,7 +139,6 @@ void signalHandler(int signal)
 }
 
 @property (nonatomic, strong) MTPreferencesWindowController *preferencesController;
-@property (nonatomic, strong) MTPreferencesWindowController *advPreferencesController;
 @property (nonatomic, strong) MTMainWindowController  *mainWindowController;
 @property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
@@ -669,41 +667,12 @@ BOOL tempDirectory = NO;
     [self showWindowController: self.preferencesController];
 }
 
--(IBAction)showAdvPreferences:(id)sender {
-    self.advPreferencesController.startingTabIdentifier = @"AdvPrefs";
-    [self showWindowController: self.advPreferencesController];
-}
-
 -(MTPreferencesWindowController *)preferencesController
 {
 	if (!_preferencesController) {
 		_preferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
 	}
 	return _preferencesController;
-}
-
--(MTPreferencesWindowController *)advPreferencesController
-{
-	if (!_advPreferencesController) {
-		_advPreferencesController = [[MTPreferencesWindowController alloc] initWithWindowNibName:@"MTPreferencesWindowController"];
-		[_advPreferencesController window];
-		MTTabViewItem *advTabViewItem = [[MTTabViewItem alloc] initWithIdentifier:@"AdvPrefs"];
-		advTabViewItem.label = @"Advanced Preferences";
-		MTAdvPreferencesViewController *thisController = [[MTAdvPreferencesViewController alloc] initWithNibName:@"MTAdvPreferencesViewController" bundle:nil];
-        [thisController loadView];
-		advTabViewItem.windowController = (id)thisController;
-		[_advPreferencesController.myTabView insertTabViewItem:advTabViewItem atIndex:0];
-		NSRect tabViewFrame = ((NSView *)advTabViewItem.view).frame;
-		NSRect editorViewFrame = thisController.view.frame;
-		[thisController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
-		[advTabViewItem.view addSubview:thisController.view];
-        [_advPreferencesController.window setFrame:[_advPreferencesController getNewWindowRect:advTabViewItem] display:NO];
-		_advPreferencesController.ignoreTabItemSelection = YES;
-		[_advPreferencesController.myTabView selectTabViewItem:advTabViewItem];
-		_advPreferencesController.ignoreTabItemSelection = NO;;
-        _advPreferencesController.advPreferencesViewController = thisController;
-	}
-	return _advPreferencesController;
 }
 
 -(IBAction)showLogs:(id)sender {

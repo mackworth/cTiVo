@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13156.6" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1090" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13156.6"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -31,7 +31,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
                         <font key="font" metaFont="system"/>
                         <tabViewItems>
-                            <tabViewItem label="Preferences" identifier="Settings" id="42" customClass="MTTabViewItem">
+                            <tabViewItem label="General" identifier="Settings" id="42" userLabel="General" customClass="MTTabViewItem">
                                 <view key="view" id="43">
                                     <rect key="frame" x="10" y="33" width="478" height="262"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -58,13 +58,22 @@
                                     <outlet property="windowController" destination="TTa-df-0fT" id="Ucv-uN-otk"/>
                                 </connections>
                             </tabViewItem>
-                            <tabViewItem label="Formats" identifier="Formats" id="7" customClass="MTTabViewItem">
+                            <tabViewItem label="Formats" identifier="Formats" id="d6b-Q1-eUr" customClass="MTTabViewItem">
+                                <view key="view" id="TQD-bs-ehY">
+                                    <rect key="frame" x="10" y="33" width="478" height="262"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                </view>
+                                <connections>
+                                    <outlet property="windowController" destination="31" id="BiD-a0-yhQ"/>
+                                </connections>
+                            </tabViewItem>
+                            <tabViewItem label="Advanced" identifier="Formats" id="7" userLabel="Advanced" customClass="MTTabViewItem">
                                 <view key="view" id="8">
                                     <rect key="frame" x="10" y="33" width="478" height="262"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 </view>
                                 <connections>
-                                    <outlet property="windowController" destination="31" id="39"/>
+                                    <outlet property="windowController" destination="HH6-cL-mky" id="KhC-dN-xsa"/>
                                 </connections>
                             </tabViewItem>
                         </tabViewItems>
@@ -96,6 +105,7 @@ Gw
         <viewController title="Formats" nibName="MTFormatEditorController" id="31" customClass="MTFormatEditorController"/>
         <viewController title="Manual TiVo" nibName="MTManualTiVoEditorController" id="32" customClass="MTManualTiVoEditorController"/>
         <viewController title="Manual TiVo" nibName="MTChannelEditorController" id="TTa-df-0fT" customClass="MTChannelEditorController"/>
-        <viewController title="Settings" nibName="MTPreferencesViewController" id="44" customClass="MTPreferencesViewController"/>
+        <viewController title="Settings" nibName="MTPreferencesViewController" id="44" userLabel="Preferences Controller" customClass="MTPreferencesViewController"/>
+        <viewController title="Settings" nibName="MTAdvPreferencesViewController" id="HH6-cL-mky" userLabel="Adv Preferences Controller" customClass="MTAdvPreferencesViewController"/>
     </objects>
 </document>
