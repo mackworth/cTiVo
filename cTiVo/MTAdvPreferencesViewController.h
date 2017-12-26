@@ -6,10 +6,9 @@
 //  Copyright (c) 2013 Scott Buchanan. All rights reserved.
 //
 
-#import "MTPreferencesViewController.h"
 #import "MTHelpViewController.h"
 
-@interface MTAdvPreferencesViewController : MTPreferencesViewController <NSPopoverDelegate>{
+@interface MTAdvPreferencesViewController : NSViewController <MTTabViewItemControllerDelegate, NSPopoverDelegate>{
 	IBOutlet NSPopover *myPopover;
 	IBOutlet NSTextView *myTextView;
 	IBOutlet NSWindow *popoverDetachWindow;

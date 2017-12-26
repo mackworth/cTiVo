@@ -100,26 +100,6 @@
 }
 
 #define kMTPlexSimple @"[MainTitle] - [SeriesEpNumber | OriginalAirDate] [\"- \" EpisodeTitle]"
-#define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | OriginalAirDate [\"-\" ExtraEpisode][\" - \" EpisodeTitle | Guests]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
-
--(void) updatePlexPattern {
-
-    //update plex strings from previous standard format
-    //only needs to be done once,
-    //if someone really wants old format, just add a space
-    NSString * oldPlexSimple = @"[MainTitle] - [SeriesEpNumber] - [EpisodeTitle]";
-
-    NSString * oldPlexFolder =     @"[MainTitle / \"Season \" Season / MainTitle \" - \" SeriesEpNumber \" - \" EpisodeTitle][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]";
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString * currentPattern = [defaults objectForKey:kMTFileNameFormat];
-    NSString * newPattern = nil;
-    if ([currentPattern isEqualToString:oldPlexSimple]) {
-        newPattern = kMTPlexSimple;
-    } else if ([currentPattern isEqualToString:oldPlexFolder]) {
-        newPattern = kMTPlexFolder;
-    }
-    if (newPattern) [defaults setObject:newPattern forKey:kMTFileNameFormat];
-}
 
 #define kMTTestCommand @"Test on Selected Shows"
 
@@ -149,9 +129,9 @@
 						   @"TiVoName",
 						   @"TVDBseriesID",
 						   @"• Plex Simple",  //• means replace whole field;
-						   @"• Plex Folders",
-						   @"• Complex Example",//these must match below
-						   @"• cTiVo Default"
+						   @"• Plex Folders", //these must match below
+						   @"• cTiVo Default",
+						   @"• cTiVo Folders"
    						   ];
 	[cell addItemsWithTitles: keyWords];
 
@@ -169,12 +149,11 @@
 	NSMenuItem * plex2 = [cell itemWithTitle:@"• Plex Folders"];
     plex2.representedObject = 	kMTPlexFolder;
 	
-	NSMenuItem * complex = [cell itemWithTitle:@"• Complex Example"];
-	complex.representedObject =
-	@"[MainTitle / SeriesEpNumber [\" - \" EpisodeTitle]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]";
-
 	NSMenuItem * example = [cell itemWithTitle:@"• cTiVo Default"];
-	example.representedObject = @"";
+	example.representedObject = kMTcTiVoDefault;
+	
+	NSMenuItem * folders = [cell itemWithTitle:@"• cTiVo Folders"];
+	folders.representedObject = kMTcTiVoFolder;
 }
 
 -(IBAction)testFileNames: (id) sender {

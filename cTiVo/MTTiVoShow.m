@@ -1325,21 +1325,18 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(NSString *) directoryForShowInDirectory:(NSString*) tryDirectory createIfMissing:(BOOL) create {
     //Check that download directory (including show directory) exists.  If create it.  If unsuccessful return nil
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs]) {
-        NSString *whichFolder = ([self isMovie])  ? @"Movies"  : self.seriesTitle;
-        if ( ! [tryDirectory.lastPathComponent isEqualToString:whichFolder]){
-            tryDirectory = [tryDirectory stringByAppendingPathComponent:whichFolder];
-            DDLogVerbose(@"Using sub folder %@",tryDirectory);
-        }
+    if (![[NSFileManager defaultManager] fileExistsAtPath: tryDirectory]) {
+		if (create) { 		// try to create it
+			DDLogDetail(@"Creating folder %@",tryDirectory);
+        	if (![[NSFileManager defaultManager] createDirectoryAtPath:tryDirectory withIntermediateDirectories:YES attributes:nil error:nil]) {
+            	DDLogDetail(@"Couldn't create folder %@",tryDirectory);
+            	return nil;
+        	}
+		} else {
+			return nil;
+		}
     }
-    if (create && ![[NSFileManager defaultManager] fileExistsAtPath: tryDirectory]) { // try to create it
-        DDLogDetail(@"Creating folder %@",tryDirectory);
-        if (![[NSFileManager defaultManager] createDirectoryAtPath:tryDirectory withIntermediateDirectories:YES attributes:nil error:nil]) {
-            DDLogDetail(@"Couldn't create folder %@",tryDirectory);
-            return nil;
-        }
-    }
-    return tryDirectory;
+	return tryDirectory;
 }
 
 -(NSString *) downloadFileNameWithFormat:(NSString *)formatName createIfNecessary:(BOOL) create {
@@ -1347,21 +1344,18 @@ NSString * fourChar(long n, BOOL allowZero) {
     NSString *keyPathPart = nil;
 
     NSString *filenamePattern = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormat];
-    if (filenamePattern.length >0) {
+	if (filenamePattern.length == 0) filenamePattern = kMTcTiVoDefault; //shouldn't happen.
+	
+	//we should always have a pattern, so generate a name that way
+	NSString *keyBaseTitle = [self swapKeywordsInString:filenamePattern withFormat:formatName];
+	DDLogVerbose(@"With file pattern %@ for show %@, got %@", filenamePattern, self, keyBaseTitle);
+	NSString * candidateBaseTitle = [keyBaseTitle lastPathComponent];
+	if (candidateBaseTitle.length > 0) {
+		baseTitle = candidateBaseTitle;
+		keyPathPart = [keyBaseTitle stringByDeletingLastPathComponent];
+	}
 
-        //we have a pattern, so generate a name that way
-        NSString *keyBaseTitle = [self swapKeywordsInString:filenamePattern withFormat:formatName];
-        DDLogVerbose(@"With file pattern %@ for show %@, got %@", filenamePattern, self, keyBaseTitle);
-        NSString * candidateBaseTitle = [keyBaseTitle lastPathComponent];
-        if (candidateBaseTitle.length > 0) {
-            baseTitle = candidateBaseTitle;
-            keyPathPart = [keyBaseTitle stringByDeletingLastPathComponent];
-        }
-    }
-    if (!baseTitle) {
-        baseTitle = self.showTitle;
-    }
-    if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
+	if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
     baseTitle = [self cleanBaseFileName: baseTitle];
     if ([baseTitle compare: self.showTitle ]  != NSOrderedSame) {
         DDLogVerbose(@"changed filename %@ to %@",self.showTitle, baseTitle);

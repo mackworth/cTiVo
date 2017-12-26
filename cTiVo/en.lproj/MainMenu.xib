@@ -207,6 +207,21 @@ CA
                 <menuItem title="Options" id="971">
                     <menu key="submenu" title="Options" id="972">
                         <items>
+                            <menuItem title="Show Protected Shows" toolTip="Include copy-protected shows in list, even though they can't be processed." id="962">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <binding destination="926" name="value" keyPath="values.ShowCopyProtected" id="965"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Show TiVo Suggestions" toolTip="Show TiVo's suggestions in list" id="1120">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <binding destination="926" name="value" keyPath="values.ShowSuggestions" id="1123"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="wz5-lr-PXJ">
+                                <attributedString key="attributedTitle"/>
+                            </menuItem>
                             <menuItem title="Mark Commercials" toolTip="Create chapter markers to easily skip commercials while viewing. Mutually exclusive with Skip Commercials." id="1109">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
@@ -217,12 +232,6 @@ CA
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.RunComSkip" id="qQj-dE-L8i"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Add to iTunes when complete" toolTip="Adds video file and metadata to iTunes when processing is complete (per show)" id="1108">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.iTunesSubmit" id="HHC-dP-tGv"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="1107">
@@ -247,34 +256,25 @@ CA
                             <menuItem isSeparatorItem="YES" id="989">
                                 <attributedString key="attributedTitle"/>
                             </menuItem>
-                            <menuItem title="Disable Sleep" toolTip="Disables sleep while queue is processing" id="934">
+                            <menuItem title="Add to iTunes when complete" toolTip="Adds video file and metadata to iTunes when processing is complete (per show)" id="1108">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <binding destination="926" name="value" keyPath="values.PreventSleep" id="961"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Show Protected Shows" toolTip="Include copy-protected shows in list, even though they can't be processed." id="962">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.ShowCopyProtected" id="965"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Show TiVo Suggestions" toolTip="Show TiVo's suggestions in list" id="1120">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.ShowSuggestions" id="1123"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Create Sub-Folder per Series" toolTip="Create a separate sub-folder in download folder for each series" id="968">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.MakeSubDirs" id="970"/>
+                                    <binding destination="926" name="value" keyPath="values.iTunesSubmit" id="HHC-dP-tGv"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Sync iTunes devices" toolTip="After adding to iTunes, have it sync devices to ensure video files available" id="1012">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.iTunesSync" id="1015"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="UaI-1C-1X6">
+                                <attributedString key="attributedTitle"/>
+                            </menuItem>
+                            <menuItem title="Disable Sleep" toolTip="Disables sleep while queue is processing" id="934">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <binding destination="926" name="value" keyPath="values.PreventSleep" id="961"/>
                                 </connections>
                             </menuItem>
                         </items>

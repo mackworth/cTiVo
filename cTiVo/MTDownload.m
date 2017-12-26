@@ -45,8 +45,6 @@
 
 @property (atomic, assign) double displayedProcessProgress;
 
-@property (strong, nonatomic) NSString *keywordPathPart; // any extra layers of directories due to keyword template
-
 @property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
 
 @property (nonatomic, strong) NSDate *startTimeForPerformance;

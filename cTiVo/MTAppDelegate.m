@@ -228,7 +228,7 @@ __DDLOGHERE__
 										  [NSString pathWithComponents:@[NSHomeDirectory(),kMTDefaultDownloadDir]],kMTDownloadDirectory,
                                           kMTTmpDir,kMTTmpFilesDirectory,
                                           @{},kMTTheTVDBCache,
-										  @"",kMTFileNameFormat,
+										  kMTcTiVoDefault,kMTFileNameFormat,
 										  @NO, kMTiTunesContentIDExperiment,
 										  @NO, kMTTrustTVDBEpisodes,
                                           @(1), KMTPreferredImageSource,  //TiVoSource; see MTTiVoShow for MTImageSource enum
@@ -264,6 +264,15 @@ __DDLOGHERE__
 	signal(SIGPIPE, &signalHandler);
 	signal(SIGABRT, &signalHandler );
 	
+	if ([[NSUserDefaults standardUserDefaults] stringForKey:kMTFileNameFormat].length == 0) {
+		NSString * newDefaultFileFormat = kMTcTiVoDefault;
+		if ([[NSUserDefaults standardUserDefaults] boolForKey: kMTMakeSubDirs]) {
+			newDefaultFileFormat = kMTcTiVoFolder;
+		}
+		[[NSUserDefaults standardUserDefaults] setObject:newDefaultFileFormat forKey: kMTFileNameFormat];
+
+	}
+	[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTMakeSubDirs];
 
 	//Turn off check mark on Pause/Resume queue menu item
 	[pauseMenuItem setOnStateImage:nil];
@@ -304,12 +313,6 @@ __DDLOGHERE__
 	
     self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: 61 target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
     DDLogDetail(@"Finished appDidFinishLaunch");
-
-    if (    [[NSUserDefaults standardUserDefaults] integerForKey:kMTUserDefaultVersion] == 3) {
-        [[NSUserDefaults standardUserDefaults] setInteger:2 forKey:kMTUserDefaultVersion];
-        //revert step forward in versions. No need to change yet.
-    }
-    [[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTUpdateIntervalMinutesOld];  //can remove in future after 3.0 ships
 
  }
 
