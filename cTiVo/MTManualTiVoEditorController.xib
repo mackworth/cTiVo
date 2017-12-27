@@ -8,7 +8,6 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTManualTiVoEditorController">
             <connections>
-                <outlet property="helpButton" destination="no1-DG-QRb" id="qdB-Wc-y5l"/>
                 <outlet property="manualTiVoArrayController" destination="121" id="qCS-a0-503"/>
                 <outlet property="networkTiVoArrayController" destination="hNz-Uc-bTd" id="RWw-bt-0QT"/>
                 <outlet property="view" destination="416" id="456"/>

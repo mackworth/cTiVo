@@ -9,7 +9,6 @@
         <customObject id="-2" userLabel="File's Owner" customClass="MTPreferencesViewController">
             <connections>
                 <outlet property="directoryFormatPopup" destination="uQc-vR-o8J" id="BxO-XS-8Ia"/>
-                <outlet property="helpButton" destination="VVX-XZ-vDT" id="Dqp-VO-4Yn"/>
                 <outlet property="view" destination="1" id="2"/>
             </connections>
         </customObject>

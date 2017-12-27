@@ -202,7 +202,7 @@ Yes = force Transport Stream</string>
                     </connections>
                 </button>
                 <button toolTip="Forces TS for all channels. Overrides TS values below." misplaced="YES" id="qVI-hc-NaG" userLabel="Transport Stream">
-                    <rect key="frame" x="15" y="466" width="439" height="18"/>
+                    <rect key="frame" x="15" y="466" width="298" height="18"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Always Use TiVo's Transport Stream Format" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="iDB-7u-Dde">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>

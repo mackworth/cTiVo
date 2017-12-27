@@ -72,7 +72,7 @@
 }
 
 -(IBAction) help:(id)sender {
-	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Configuration#settings-in-preferences-screen"]];
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Configuration#options"]];
 }
 
 -(void) dealloc {
