@@ -48,12 +48,10 @@ io_connect_t  root_port; // a reference to the Root Power Domain IOService
 
 #define cTiVoLogDirectory @"~/Library/Logs/cTiVo"
 
+static int ddLogLevel = LOG_LEVEL_REPORT;
+
 void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType, void * messageArgument )
 {
-    printf( "messageType %08lx, arg %08lx\n",
-		   (long unsigned int)messageType,
-		   (long unsigned int)messageArgument );
-	
     switch ( messageType )
     {
 			
@@ -71,8 +69,7 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
             //Uncomment to cancel idle sleep
             //IOCancelPowerChange( root_port, (long)messageArgument );
             // we will allow idle sleep
-			//			NSLog(@"ZZZReceived Soft Sleep Notice");
-			
+			DDLogCMajor(@"cTiVo Received Soft Sleep Notice");
 			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTPreventSleep]) { //We want to prevent sleep if still downloading
 				if ([tiVoManager numberOfShowsToDownload]) {
 					//					NSLog(@"ZZZReceived Soft Sleep Notice and cancelling");
@@ -96,23 +93,27 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
 			 kIOReturnSuccess, however the system WILL still go to sleep.
 			 */
 			
-			//			NSLog(@"ZZZReceived Forced Sleep Notice and shutting down downloads");
+			DDLogCMajor(@"cTiVo received Forced Sleep Notice, shutting down downloads");
 			[tiVoManager cancelAllDownloads];
             IOAllowPowerChange( root_port, (long)messageArgument );
             break;
 			
         case kIOMessageSystemWillPowerOn:
             //System has started the wake up process...
-			//			NSLog(@"ZZZReceived Wake Notice");
+			DDLogCMajor(@"cTiVo received Wake notice");
             break;
 			
         case kIOMessageSystemHasPoweredOn:
             //System has finished waking up...
+			DDLogCMajor(@"cTiVo finished Waking notice");
 			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:nil];
 			break;
 			
         default:
-            break;
+			DDLogCMajor( @"cTiVo received messageType %08lx, arg %08lx\n",
+				   (long unsigned int)messageType,
+				   (long unsigned int)messageArgument );
+			break;
 			
     }
 }
@@ -149,8 +150,8 @@ void signalHandler(int signal)
 
 @implementation MTAppDelegate
 
++ (int)ddLogLevel { return ddLogLevel; }+ (void)ddSetLogLevel:(int)logLevel {ddLogLevel = logLevel;}
 
-__DDLOGHERE__
 
 - (void)dealloc
 {
@@ -240,7 +241,6 @@ __DDLOGHERE__
                                           @NO, kMTExportSubtitles,
                                           @NO, kMTSaveMPGFile,
                                           @[], kMTChannelInfo,
-										  @NO, kMTPlexFormat,
                                           nil];
 
     [[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
