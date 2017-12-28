@@ -258,11 +258,11 @@ __DDLOGHERE__
        if ( [column.identifier isEqualToString:kMTArtColumn ] && self.imageRowHeight > 0) {
             self.imageRowHeight = -self.imageRowHeight;  //use as trigger to recalculate, but remember old size in case it hasn't changed.
            [self noteHeightOfRowsWithIndexesChanged: allRows ];
-           [self reloadDataForRowIndexes: allRows
-                           columnIndexes:[NSIndexSet indexSetWithIndex: [self columnWithIdentifier:@"icon"]]];
-       }
-        [self reloadDataForRowIndexes: allRows
+		   [self reloadData];
+	   } else {
+        	[self reloadDataForRowIndexes: allRows
                             columnIndexes:[NSIndexSet indexSetWithIndex: [[self tableColumns] indexOfObject:column]]];
+	   }
     }
 }
 
@@ -418,9 +418,8 @@ __DDLOGHERE__
         if (image) {
 			DDLogVerbose(@"got image for %@: %@",thisShow, NSStringFromRect(cell.bounds));
             imageView.image = image ;
+			imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
             imageView.imageScaling = NSImageScaleProportionallyUpOrDown;
-            imageView.animates = NO;
-
             cell.progressIndicator.hidden = YES;
             [cell.progressIndicator stopAnimation:self];
         } else if (thisShow.noImageAvailable) {
