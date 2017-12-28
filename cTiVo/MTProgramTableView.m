@@ -250,8 +250,7 @@ __DDLOGHERE__
 
 	NSTableColumn * column = notification.userInfo[@"NSTableColumn"];
     CGFloat oldWidth = ((NSNumber *)notification.userInfo[@"NSOldWidth"]).floatValue;
-    if ([column.identifier isEqualToString:@"Date" ]  ||
-        [column.identifier isEqualToString:@"icon" ]  ||
+    if ([column.identifier isEqualToString:@"icon" ]  ||
          [column.identifier isEqualToString:kMTArtColumn ]  ) {
         DDLogVerbose(@"changed column width for %@ from %0.1f to %0.1f", column.identifier, oldWidth, column.width );
         if (ABS(column.width - oldWidth) < 3.0) return; //patch to prevent height/width looping in High Sierra
@@ -344,6 +343,7 @@ __DDLOGHERE__
     result.toolTip = @"";
     result.imageView.image = nil;
     NSString* identifier = tableColumn.identifier;
+	result.frame =CGRectMake(0,0, tableColumn.width, self.imageRowHeight);
     if ([tableColumn.identifier isEqualToString:@"Programs"]) {
        textVal = thisShow.showTitle?: @"" ;
         result.toolTip = textVal;
@@ -447,7 +447,6 @@ __DDLOGHERE__
         CGFloat height = MIN(width, MIN(self.imageRowHeight, 24));
         CGFloat leftMargin = (width -height)/2;
         CGFloat topMargin = (self.imageRowHeight-height)/2;
-		cell.frame =CGRectMake(0,0, width, self.imageRowHeight);
 		imageView.frame = CGRectMake(leftMargin, topMargin, height, height);
         imageView.animates = YES;
         result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
@@ -455,21 +454,21 @@ __DDLOGHERE__
         DDLogReport(@"Invalid Column: %@", identifier);
     }
     result.textField.stringValue = textVal ?: @"";
-    result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
     if ([thisShow.protectedShow boolValue]) {
+		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
         result.textField.textColor = [NSColor grayColor];
     } else if ([thisShow isOnDisk]){
-        //        result.textField.textColor = [NSColor blueColor];
         result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];
         result.textField.textColor = [NSColor blackColor];
     } else {
-        result.textField.textColor = [NSColor blackColor];
+		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
+       result.textField.textColor = [NSColor blackColor];
     }
-	if (result.frame.origin.y != 1) {
-		CGRect frame = result.frame;
-		frame.origin.y = 1.0;
-		result.frame = frame;
-	}
+	CGFloat rowHeight = ABS(self.imageRowHeight);
+	CGFloat textSize = MIN(result.textField.font.pointSize + 4, rowHeight);
+	result.textField.frame = CGRectMake(0, round((rowHeight-textSize)/2), tableColumn.width, textSize );
+	result.textField.autoresizingMask = NSViewWidthSizable | NSViewMinYMargin | NSViewMaxYMargin;
+	result.textField.translatesAutoresizingMaskIntoConstraints = YES;
     // return the result.
     return result;
 }
