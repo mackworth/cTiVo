@@ -19,7 +19,7 @@
                 <outlet property="subscriptionTable" destination="249" id="291"/>
                 <outlet property="tiVoListPopUp" destination="18" id="150"/>
                 <outlet property="tiVoListPopUpLabel" destination="19" id="342"/>
-                <outlet property="tiVoShowTable" destination="38" id="194"/>
+                <outlet property="tiVoShowTable" destination="OfG-aC-zKW" id="QrZ-j5-3lv"/>
                 <outlet property="window" destination="5" id="134"/>
             </connections>
         </customObject>
@@ -83,15 +83,15 @@
                                             <action selector="subscribe:" target="-2" id="295"/>
                                         </connections>
                                     </button>
-                                    <scrollView focusRingType="exterior" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="37" userLabel="MAIN Scroll View - Program Table View">
+                                    <scrollView misplaced="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="0pJ-0q-lIV">
                                         <rect key="frame" x="0.0" y="0.0" width="845" height="323"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES"/>
-                                        <clipView key="contentView" id="7XD-lV-R8z">
+                                        <clipView key="contentView" id="3He-Lv-qOU">
                                             <rect key="frame" x="1" y="0.0" width="843" height="322"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
-                                                <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveName="ProgramTable" rowSizeStyle="automatic" headerView="40" viewBased="YES" id="38" customClass="MTProgramTableView">
-                                                    <rect key="frame" x="0.0" y="0.0" width="843" height="305"/>
+                                                <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" autosaveName="ProgramTable2" rowSizeStyle="automatic" headerView="LNB-j6-453" viewBased="YES" indentationPerLevel="16" autosaveExpandedItems="YES" outlineTableColumn="42" id="OfG-aC-zKW" customClass="MTProgramTableView">
+                                                    <rect key="frame" x="0.0" y="0.0" width="843" height="299"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -111,15 +111,15 @@
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="localizedCaseInsensitiveCompare:" sortKey="showTitlePlusAirDate"/>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView misplaced="YES" id="HFS-Zq-cHx" customClass="MTProgressCell">
+                                                                <tableCellView id="HFS-Zq-cHx" customClass="MTProgressCell">
                                                                     <rect key="frame" x="1" y="1" width="105" height="50"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" maxValue="100" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" id="rFf-DZ-L4F">
+                                                                        <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" id="rFf-DZ-L4F">
                                                                             <rect key="frame" x="44" y="17" width="16" height="16"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                         </progressIndicator>
-                                                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" id="rAV-K7-JVu" customClass="DragDropImageView">
+                                                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="rAV-K7-JVu" customClass="DragDropImageView">
                                                                             <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                             <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" id="y4H-iS-s49"/>
@@ -570,7 +570,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Length" editable="NO" width="77" minWidth="52" maxWidth="80" headerToolTip="Length of program" id="182">
+                                                        <tableColumn identifier="Length" editable="NO" width="80" minWidth="52" maxWidth="80" headerToolTip="Length of program" id="182">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Length">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -585,11 +585,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="184">
-                                                                    <rect key="frame" x="752" y="1" width="77" height="17"/>
+                                                                    <rect key="frame" x="752" y="1" width="80" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="185">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="77" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="186">
                                                                                 <font key="font" metaFont="system"/>
@@ -844,25 +844,25 @@
                                                         </tableColumn>
                                                     </tableColumns>
                                                     <connections>
-                                                        <outlet property="addToQueueButton" destination="7" id="1398"/>
-                                                        <outlet property="findText" destination="1376" id="1380"/>
-                                                        <outlet property="menu" destination="387" id="394"/>
-                                                        <outlet property="myController" destination="-2" id="201"/>
-                                                        <outlet property="subscribeButton" destination="284" id="1399"/>
+                                                        <outlet property="addToQueueButton" destination="7" id="clQ-8f-X9D"/>
+                                                        <outlet property="findText" destination="1376" id="czq-L1-kOV"/>
+                                                        <outlet property="menu" destination="387" id="wOr-Pg-dxm"/>
+                                                        <outlet property="myController" destination="-2" id="spA-0i-ouY"/>
+                                                        <outlet property="subscribeButton" destination="284" id="oMW-8U-FOl"/>
                                                     </connections>
-                                                </tableView>
+                                                </outlineView>
                                             </subviews>
                                         </clipView>
-                                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="39">
-                                            <rect key="frame" x="1" y="306" width="843" height="16"/>
+                                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="nW8-aR-GV2">
+                                            <rect key="frame" x="1" y="283" width="790" height="16"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
-                                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="41">
+                                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="aE6-1g-XOC">
                                             <rect key="frame" x="224" y="17" width="15" height="102"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
-                                        <tableHeaderView key="headerView" id="40">
-                                            <rect key="frame" x="0.0" y="0.0" width="843" height="17"/>
+                                        <tableHeaderView key="headerView" id="LNB-j6-453">
+                                            <rect key="frame" x="0.0" y="0.0" width="843" height="23"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableHeaderView>
                                     </scrollView>
@@ -1941,11 +1941,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="267">
-                                                                    <rect key="frame" x="1" y="1" width="372" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="371" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="268">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="371" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="369" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="269">
                                                                                 <font key="font" metaFont="system"/>
@@ -1975,11 +1975,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="263">
-                                                                    <rect key="frame" x="375" y="1" width="150" height="17"/>
+                                                                    <rect key="frame" x="375" y="1" width="151" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="264">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="150" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="151" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="265">
                                                                                 <font key="font" metaFont="system"/>
@@ -2252,7 +2252,7 @@
                             </menu>
                         </popUpButtonCell>
                         <connections>
-                            <action selector="selectTivo:" target="38" id="339"/>
+                            <action selector="selectTivo:" target="OfG-aC-zKW" id="NHh-PT-uUF"/>
                         </connections>
                     </popUpButton>
                     <textField toolTip="Which TiVos are available on local network (and how many shows)" verticalHuggingPriority="750" id="19">
@@ -2324,8 +2324,8 @@
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </searchFieldCell>
                         <connections>
-                            <action selector="changedSearchText:" target="38" id="1388"/>
-                            <outlet property="delegate" destination="38" id="1379"/>
+                            <action selector="changedSearchText:" target="OfG-aC-zKW" id="81y-2Z-HgF"/>
+                            <outlet property="delegate" destination="OfG-aC-zKW" id="275-bs-btO"/>
                             <outlet property="searchMenuTemplate" destination="1381" id="1385"/>
                         </connections>
                     </searchField>

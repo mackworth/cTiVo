@@ -297,7 +297,7 @@ __DDLOGHERE__
 -(void)menuWillOpen:(NSMenu *)menu
 {
 	menuCursorPosition = [self.window mouseLocationOutsideOfEventStream];
-	NSTableView<MTTableViewProtocol> *workingTable = nil;
+	NSTableView *workingTable = nil;
 	SEL selector = NULL;
 	if ([menu.title compare:@"ProgramTableMenu"] == NSOrderedSame) {
 		workingTable = tiVoShowTable;
@@ -339,7 +339,10 @@ __DDLOGHERE__
 				}
 			}
 			if (workingTable == tiVoShowTable) {
-				MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
+				MTTiVoShow *thisShow = [tiVoShowTable itemAtRow:menuTableRow];
+				if ([thisShow isKindOfClass:[NSArray class]]) {
+					thisShow = ((NSArray *)thisShow)[0];
+				}
 				//diasble menu items that depend on having a completed show tag = 2
 				if (!thisShow.isOnDisk) {
 					for (NSMenuItem *mi in [menu itemArray]) {
@@ -394,14 +397,17 @@ __DDLOGHERE__
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		[self subscribe:menu];
     } else if ([menu.title caseInsensitiveCompare:@"Reload TVDB Info"] == NSOrderedSame) {
-        for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {
+        for (MTTiVoShow * show in [tiVoShowTable selectedShows]) {
             [show resetSourceInfo:YES];
         }
         NSIndexSet * columns = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.tiVoShowTable.numberOfColumns)];
         [self.tiVoShowTable reloadDataForRowIndexes:[tiVoShowTable selectedRowIndexes] columnIndexes:columns];
     } else if (menuTableRow >= 0 && //somehow happens
-               (NSUInteger)menuTableRow < tiVoShowTable.sortedShows.count) {
-        MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
+               menuTableRow < tiVoShowTable.numberOfRows) {
+		MTTiVoShow *thisShow = [tiVoShowTable itemAtRow:menuTableRow];
+		if ([thisShow isKindOfClass:[NSArray class]]) {
+			thisShow = ((NSArray *)thisShow)[0];
+		}
        if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
             [self openDrawer:thisShow];
         } else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
@@ -447,7 +453,11 @@ __DDLOGHERE__
 	if (input==tiVoShowTable) {
 		NSInteger rowNumber = [tiVoShowTable clickedRow];
 		if (rowNumber != -1) {
-			[self openDrawer:tiVoShowTable.sortedShows[rowNumber]];
+			MTTiVoShow *thisShow = [tiVoShowTable itemAtRow:rowNumber];
+			if ([thisShow isKindOfClass:[NSArray class]]) {
+				thisShow = ((NSArray *)thisShow)[0];
+			}
+			[self openDrawer:thisShow];
 		}
 	}else if (input==downloadQueueTable) {
 		NSInteger rowNumber = [downloadQueueTable clickedRow];
@@ -540,17 +550,14 @@ __DDLOGHERE__
 }
 
 -(IBAction)subscribe:(id) sender {
-	NSArray * selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:tiVoShowTable.selectedRowIndexes];
-	[tiVoManager.subscribedShows addSubscriptionsShows:selectedShows];
+	[tiVoManager.subscribedShows addSubscriptionsShows:[tiVoShowTable selectedShows]];
 }
 
 #pragma mark - Download Buttons
 
 -(IBAction)downloadSelectedShows:(id)sender
 {
-	NSIndexSet *selectedRows = [tiVoShowTable selectedRowIndexes];
-	NSArray *selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:selectedRows];
-	[tiVoManager downloadShowsWithCurrentOptions:selectedShows beforeDownload:nil];
+	[tiVoManager downloadShowsWithCurrentOptions:[tiVoShowTable selectedShows] beforeDownload:nil];
     
 	[downloadQueueTable deselectAll:nil];
 }

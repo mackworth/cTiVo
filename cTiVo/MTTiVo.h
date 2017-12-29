@@ -11,14 +11,6 @@
 #import "MTNetService.h"
 #import "MTRPCData.h"
 
-@protocol MTTableViewProtocol
-
-@optional
--(NSArray *)sortedShows;
-
-@end
-
-
 @class MTTiVoManager, MTTiVoShow;
 
 @interface MTTiVo : NSObject <NSXMLParserDelegate, MTRPCDelegate>

@@ -11,7 +11,7 @@
 
 @class MTMainWindowController;
 
-@interface MTSubscriptionTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource, MTTableViewProtocol> {
+@interface MTSubscriptionTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource> {
     IBOutlet MTMainWindowController *myController;
 
 }

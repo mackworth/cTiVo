@@ -12,7 +12,7 @@
 #import "MTDownloadCheckTableCell.h"
 #import "MTProgressindicator.h"
 
-@interface MTDownloadTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource, MTTableViewProtocol> {
+@interface MTDownloadTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource> {
     IBOutlet MTMainWindowController *myController;
 	IBOutlet NSButton *removeFromQueueButton;
 }

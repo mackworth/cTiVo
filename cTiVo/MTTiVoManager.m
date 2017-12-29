@@ -1109,10 +1109,6 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     }
 }
 
--(BOOL) allShowsSelected {
-    return ((MTAppDelegate *) [NSApp delegate]).allShowsSelected;
-}
-
 -(void) testAllChannelsForPS {
     NSMutableSet * channelsTested = [NSMutableSet new];
     NSMutableArray * testsToRun = [NSMutableArray new];

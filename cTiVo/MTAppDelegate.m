@@ -217,6 +217,7 @@ void signalHandler(int signal)
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
 										  @NO, kMTShowCopyProtected,
 										  @YES, kMTShowSuggestions,
+										  @YES, kMTShowFolders,
 										  @NO, kMTPreventSleep,
 										  @kMTMaxDownloadRetries, kMTNumDownloadRetries,
 										  @0, kMTUpdateIntervalMinutesNew,
@@ -689,23 +690,10 @@ BOOL tempDirectory = NO;
     }
 }
 
--(BOOL) allShowsSelected {
-    MTProgramTableView * programs = self.mainWindowController. tiVoShowTable;
-    NSInteger numShows = programs.sortedShows.count;
-    NSInteger numSelected = [programs selectedRowIndexes].count;
-    return (numSelected == 0 || numSelected == numShows);
-}
-
 -(NSArray <MTTiVoShow *> *) currentSelectedShows {
-    MTProgramTableView * programs = self.mainWindowController. tiVoShowTable;
-    NSArray * shows = programs.sortedShows;
-    NSIndexSet *selectedRowIndexes = [programs selectedRowIndexes];
-    if (selectedRowIndexes.count > 0) {
-        shows = [shows objectsAtIndexes:selectedRowIndexes ];
-    }
-    return shows;
+    MTProgramTableView * programs = self.mainWindowController.tiVoShowTable;
+	return [programs selectedShows];
 }
-
 
 #pragma mark - Export Formats Methods
 

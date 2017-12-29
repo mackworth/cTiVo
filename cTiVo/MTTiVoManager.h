@@ -113,7 +113,6 @@
 -(void) setFailedPS:(BOOL) psFailed forChannelNamed: (NSString *) channelName;
 -(NSCellStateValue) failedPSForChannel:(NSString *) channelName;
 -(NSCellStateValue) commercialsForChannel:(NSString *) channelName;
--(BOOL) allShowsSelected;
 -(void) testAllChannelsForPS;
 -(void) removeAllPSTests;
 

@@ -219,6 +219,12 @@ CA
                                     <binding destination="926" name="value" keyPath="values.ShowSuggestions" id="1123"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Show In Folders" toolTip="Show TiVo's suggestions in list" id="H99-YS-cr3">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <binding destination="926" name="value" keyPath="values.ShowFolders" id="H5p-ku-3Pp"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="wz5-lr-PXJ">
                                 <attributedString key="attributedTitle"/>
                             </menuItem>

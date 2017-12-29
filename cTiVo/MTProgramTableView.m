@@ -18,10 +18,18 @@
 @interface MTProgramTableView  ()
 
 @property (nonatomic, assign) CGFloat imageRowHeight;
+@property (weak) IBOutlet MTMainWindowController *myController;
+@property (weak) IBOutlet NSButton *addToQueueButton;
+@property (weak) IBOutlet NSButton *subscribeButton;
+
+@property (nonatomic, strong) NSArray <id> *sortedShows; //entries are either MTTiVoShows or, when hierarchical, folders
+@property (nonatomic, strong) NSString *selectedTiVo;
+@property (weak) IBOutlet NSSearchField *findText; //filter for displaying found subset of programs
+@property (nonatomic, assign) BOOL viewAsFolders;
 
 @end
 @implementation MTProgramTableView
-@synthesize  sortedShows= _sortedShows;
+
 
 __DDLOGHERE__
 
@@ -53,6 +61,7 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshAddToQueueButton:) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowCopyProtected options:NSKeyValueObservingOptionInitial context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowSuggestions options:NSKeyValueObservingOptionInitial context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTShowFolders options:NSKeyValueObservingOptionInitial context:nil];
     [[self tableColumnWithIdentifier:kMTArtColumn] addObserver:self forKeyPath:@"hidden" options:0 context:nil];
 	[self  setDraggingSourceOperationMask:NSDragOperationMove forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
@@ -88,7 +97,10 @@ __DDLOGHERE__
  		[self reloadData];
 	} else 	if ([keyPath isEqualToString:kMTShowSuggestions]) {
 		DDLogDetail(@"User changed ShowSuggestions menu item");
- 		[self reloadData];
+		[self reloadData];
+	} else 	if ([keyPath isEqualToString:kMTShowFolders]) {
+		DDLogDetail(@"User changed showFolders menu item");
+		[self reloadData];
     } else if ([keyPath isEqualToString:@"hidden"]){
         if (self.imageRowHeight > 0) [self columnChanged:object ];
     } else {
@@ -120,7 +132,6 @@ __DDLOGHERE__
 -(void) showFindField: (BOOL) show {
 	[self.findText setHidden:!show];
 	[self.findText setEnabled:show];
-	[self.findLabel setHidden:!show];
 	if (!show) {
 		self.findText.stringValue = @"";
 		[self reloadData];
@@ -170,7 +181,6 @@ __DDLOGHERE__
 
 #pragma mark - Table Delegate Protocol
 
-
 -(IBAction)selectTivo:(id)sender {
     if (tiVoManager.tiVoList.count > 1) { //Nothing to change otherwise
         self.selectedTiVo = ((MTTiVo *)[(NSPopUpButton *)sender selectedItem].representedObject).tiVo.name;
@@ -182,18 +192,42 @@ __DDLOGHERE__
 -(NSInteger)numberOfSelectedRows {
     NSIndexSet *currentSelectedRows = [self selectedRowIndexes];
     __block NSInteger numSelected = 0;
-    NSArray *showsToCheck = self.sortedShows;
     [currentSelectedRows enumerateIndexesUsingBlock:^(NSUInteger row, BOOL *stop){
-        MTTiVoShow *thisShow = [showsToCheck objectAtIndex:row];
-       if (![thisShow.protectedShow boolValue]) {
+		id item = [self itemAtRow:row];
+		if ([item isKindOfClass:[NSArray class]]) {
+			for (MTTiVoShow * show in (NSArray *) item) {
+				if (![show.protectedShow boolValue]) {
+					numSelected++;
+				}
+			}
+		}  else if (![((MTTiVoShow *) item).protectedShow boolValue]) {
             numSelected++;
         }
     }];
     return numSelected;
 }
+-(NSArray <MTTiVoShow *> *) flattenShows: (NSArray *) shows {
+	NSMutableArray *result = [[NSMutableArray alloc] init];
+	for (id item in shows) {
+		if ([item isKindOfClass:[NSArray class]]) {
+			[result addObjectsFromArray:item];
+		} else {
+			[result addObject:item];
+		}
+	}
+	return [result copy];
+}
 
--(NSArray *)sortedShows
-{
+-(NSArray <MTTiVoShow *> *) selectedShows {
+	NSArray * shows = self.sortedShows;
+	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	if (selectedRowIndexes.count > 0) {
+		shows = [shows objectsAtIndexes:selectedRowIndexes ];
+	}
+	return [self flattenShows:shows];
+}
+  
+-(NSArray *)sortedShows {
 	if (!_sortedShows) {
 		DDLogVerbose(@"Re-sorting Program table");
 		NSPredicate *yesPredicate =	[NSPredicate predicateWithValue:YES];
@@ -218,36 +252,60 @@ __DDLOGHERE__
 			tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",self.selectedTiVo];
 		}
 		NSArray * whichShows = [[[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate]
-					 filteredArrayUsingPredicate:findPredicate]
-					filteredArrayUsingPredicate:protectedPredicate]
-				   filteredArrayUsingPredicate:suggestedPredicate];
-		self.sortedShows = [whichShows
-				sortedArrayUsingDescriptors:self.sortDescriptors];
+								   filteredArrayUsingPredicate:findPredicate]
+								  filteredArrayUsingPredicate:protectedPredicate]
+								 filteredArrayUsingPredicate:suggestedPredicate];
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTShowFolders]) {
+			NSMutableDictionary * showsDict = [NSMutableDictionary new];
+			for (MTTiVoShow * show in whichShows) {
+				NSMutableArray * series = showsDict[show.seriesTitle];
+				if (series) {
+					[series addObject:show];
+				} else {
+					series = [NSMutableArray arrayWithObject:show];
+					showsDict[show.seriesTitle] = series;
+				}
+			}
+			NSMutableArray * folderArray = [NSMutableArray new];
+			//XXX implement sort Descriptors here?  Sub-sorts?
+			//why are two columns marked as sorts?
+			for (NSString * key in [showsDict.allKeys sortedArrayUsingSelector: @selector(localizedCaseInsensitiveCompare:)]) {
+				NSArray * seriesShows = showsDict[key];
+				if (seriesShows.count == 1) {
+					[folderArray addObject:seriesShows[0]];
+				} else {
+					[folderArray addObject:seriesShows];
+				}
+			}
+			self.sortedShows = [folderArray copy];
+		} else {
+			self.sortedShows = [whichShows
+								sortedArrayUsingDescriptors:self.sortDescriptors];
+		}
 	}
 	return _sortedShows;
 }
 
 - (void) refreshAddToQueueButton: (NSNotification *) notification {
 	if (tiVoManager.processingPaused.boolValue || [tiVoManager anyShowsWaiting]) {
-		addToQueueButton.title =@"Add to Queue";
+		self.addToQueueButton.title =@"Add to Queue";
 	} else {
-		addToQueueButton.title = @"Download";
+		self.addToQueueButton.title = @"Download";
 	}
 }
 
--(void)tableViewSelectionDidChange:(NSNotification *)notification
+-(void)outlineViewSelectionDidChange:(NSNotification *)notification
 {
 	NSInteger numRows = [self numberOfSelectedRows];
-	[addToQueueButton setEnabled:numRows != 0];
-	[subscribeButton setEnabled: numRows != 0];
+	[self.addToQueueButton setEnabled:numRows != 0];
+	[self.subscribeButton setEnabled: numRows != 0];
     if (numRows == 1) {
-		NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-		NSArray *selectedRows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-        [myController setValue:selectedRows[0] forKey:@"showForDetail"];
+		NSArray *selectedRows = [self selectedShows];
+        [self.myController setValue:selectedRows[0] forKey:@"showForDetail"];
     }
 }
--(void) tableViewColumnDidResize:(NSNotification *) notification {
 
+-(void) outlineViewColumnDidResize:(NSNotification *)notification {
 	NSTableColumn * column = notification.userInfo[@"NSTableColumn"];
     CGFloat oldWidth = ((NSNumber *)notification.userInfo[@"NSOldWidth"]).floatValue;
     if ([column.identifier isEqualToString:@"icon" ]  ||
@@ -266,8 +324,14 @@ __DDLOGHERE__
     }
 }
 
--(void) columnChanged: (NSTableColumn *) column {
+-(void) outlineViewColumnDidMove:(NSNotification *)notification {
     //called when column added or deleted
+	NSTableColumn * column = notification.userInfo[@"NSTableColumn"];
+	[self columnChanged:column];
+}
+
+-(void) columnChanged: (NSTableColumn *) column {
+	//XXX handle Program column hidden, and allow Series instead with
     if ([column.identifier isEqualToString: kMTArtColumn]) {
         //have to confirm height changed
         if (column.isHidden) {
@@ -287,17 +351,19 @@ __DDLOGHERE__
 
 #pragma mark - Table Data Source Protocol
 
--(void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors
-{
-    [self reloadData];
+-(void)outlineView:(NSOutlineView *)outlineView sortDescriptorsDidChange:(NSArray<NSSortDescriptor *> *)oldDescriptors {
+	[self reloadData];
 }
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
-{
-    return self.sortedShows.count;
-}
+//- (id)outlineView:(NSOutlineView *)outlineView persistentObjectForItem:(id)item {
+//	//XXX implement persistence
+//}
+//
+//-(id) outlineView:(NSOutlineView *)outlineView itemForPersistentObject:(id)object {
+//	
+//}
 
--(CGFloat) tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row {
+- (CGFloat)outlineView:(NSOutlineView *)outlineView heightOfRowByItem:(id)item {
     //use negative numbers to indicate we need to recalculate, but save old one as negative to see if we need to reload or not.
     //Yes, it's ugly.
     //even worse, sometimes imageColumn.hidden is incorrectly NO the first time after relaunch;
@@ -320,30 +386,90 @@ __DDLOGHERE__
         }
         self.imageRowHeight = newRowHeight;
     }
-    return self.imageRowHeight;
+	return self.imageRowHeight;
 }
 
-- (void)tableView:(NSTableView *)tableView didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row
-{
-    MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
-    if ([thisShow.protectedShow boolValue]) {
+-(void) outlineView:(NSOutlineView *)outlineView didAddRowView:(nonnull NSTableRowView *)rowView forRow:(NSInteger)row {
+	id item = [self itemAtRow:row];
+	MTTiVoShow * thisShow = nil;
+	if ([item isKindOfClass:[NSArray class]]) {
+		thisShow = ((NSArray *) item)[0];
+	} else {
+		thisShow = item;
+	}
+	if ([thisShow.protectedShow boolValue]) {
         rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleNone;
     } else {
         rowView.selectionHighlightStyle = NSTableViewSelectionHighlightStyleRegular;
     }
 }
 
-- (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
-{
-    // get an existing cell with the MyView identifier if it exists
-   NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
-	MTTiVoShow *thisShow = [self.sortedShows objectAtIndex:row];
+-(NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item {
+	if (item) {
+		if ([item isKindOfClass:[NSArray class]]) {
+			NSArray * items = (NSArray *)item;
+			return items.count;
+		} else {
+			return 0;
+		}
+	} else {
+		return self.sortedShows.count;
+	}
+}
 
+- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(NSArray *)items {
+	if (items) {
+		if ([items isKindOfClass:[NSArray class]]) {
+			if ((NSUInteger)index < items.count) {
+				return  items[index];
+			} else {
+				return nil;
+			}
+		} else {
+			return items;
+		}
+	} else {
+		return self.sortedShows[index];
+	}
+}
+
+-(BOOL) outlineView:(NSOutlineView *) outlineView isItemExpandable:(nonnull id)item {
+	if ([item isKindOfClass:[NSArray class]]) {
+		return YES;
+	} else {
+		return NO;
+	}
+}
+
+- (NSView *)outlineView:(NSOutlineView *)outlineView viewForTableColumn:(NSTableColumn *)tableColumn item:(id)item {
+	
+    // get an existing cell with the MyView identifier if it exists
+    NSTableCellView *result = [outlineView makeViewWithIdentifier:tableColumn.identifier owner:self];
+	
     NSString * textVal = @"";
     result.toolTip = @"";
     result.imageView.image = nil;
     NSString* identifier = tableColumn.identifier;
 	result.frame =CGRectMake(0,0, tableColumn.width, self.imageRowHeight);
+	if ([item isKindOfClass:[NSArray class]]) {
+		NSArray <MTTiVoShow *> *  shows = (NSArray *) item;
+		//XXX implement aggregate values
+		//Create text version for "a show" and then a merging routine for normal "if all the same, return it; else "--"?
+		if ([tableColumn.identifier isEqualToString:@"Programs"]) {
+			textVal = [NSString stringWithFormat:@"%@ (%d)", shows[0].seriesTitle, (int)shows.count];
+			result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
+			result.textField.textColor = [NSColor blackColor];
+		} else if ([identifier isEqualToString: kMTArtColumn]) {
+			MTProgressCell * cell = (MTProgressCell *) result;
+			cell.imageView.image = nil ;
+			cell.progressIndicator.hidden = YES;
+			[cell.progressIndicator stopAnimation:self];
+		} else if ([identifier isEqualToString: @"icon"]) {
+			result.imageView.image = nil ;
+		}
+	} else {
+		MTTiVoShow *thisShow = (MTTiVoShow *) item;
+	
     if ([tableColumn.identifier isEqualToString:@"Programs"]) {
        textVal = thisShow.showTitle?: @"" ;
         result.toolTip = textVal;
@@ -452,17 +578,18 @@ __DDLOGHERE__
     } else {
         DDLogReport(@"Invalid Column: %@", identifier);
     }
+		if ([thisShow.protectedShow boolValue]) {
+			result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
+			result.textField.textColor = [NSColor grayColor];
+		} else if ([thisShow isOnDisk]){
+			result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];
+			result.textField.textColor = [NSColor blackColor];
+		} else {
+			result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
+			result.textField.textColor = [NSColor blackColor];
+		}
+	}
     result.textField.stringValue = textVal ?: @"";
-    if ([thisShow.protectedShow boolValue]) {
-		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
-        result.textField.textColor = [NSColor grayColor];
-    } else if ([thisShow isOnDisk]){
-        result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];
-        result.textField.textColor = [NSColor blackColor];
-    } else {
-		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
-       result.textField.textColor = [NSColor blackColor];
-    }
 	CGFloat rowHeight = ABS(self.imageRowHeight);
 	CGFloat textSize = MIN(result.textField.font.pointSize + 4, rowHeight);
 	result.textField.frame = CGRectMake(0, round((rowHeight-textSize)/2), tableColumn.width, textSize );
@@ -538,23 +665,25 @@ __DDLOGHERE__
     }
 
 }
+
 -(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender {
     return NSDragOperationCopy;
 }
 
-- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
+-(BOOL)outlineView:(NSOutlineView *)outlineView writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
+	
 	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
         //if user wants drag-to-select, then check if we're selecting new rows or not
         //drag/drop if current row is  already selected OR we're over name of show
         //this is parallel to Finder behavior.
 		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
-		NSPoint p = [tv convertPoint:windowPoint fromView:nil];
-		NSInteger r = [tv rowAtPoint:p];
-		NSInteger c = [tv columnAtPoint:p];
+		NSPoint p = [outlineView convertPoint:windowPoint fromView:nil];
+		NSInteger r = [outlineView rowAtPoint:p];
+		NSInteger c = [outlineView columnAtPoint:p];
 		if (c >= 0 && r >=0 ) {
-            BOOL isSelectedRow = [tv isRowSelected:r];
+            BOOL isSelectedRow = [outlineView isRowSelected:r];
             BOOL isOverText = NO;
-            NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+            NSTableCellView *showCellView = [outlineView viewAtColumn:c row:r makeIfNecessary:NO];
             NSTextAlignment alignment = showCellView.textField.alignment;
             NSTextField *showField = showCellView.textField;
             if (showField) {
@@ -578,7 +707,6 @@ __DDLOGHERE__
                             isOverText = YES;
                         }
                         break;
-                        
                     default:
                         break;
                 }
@@ -589,8 +717,7 @@ __DDLOGHERE__
         }
 	}
 	// Drag and drop support
-	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
-	NSArray	*selectedObjects = [self.sortedShows objectsAtIndexes:rowIndexes ] ;
+	NSArray	*selectedObjects = [self flattenShows:items]; ;
 	DDLogVerbose(@"Dragging Objects: %@", selectedObjects);
 	[pboard writeObjects:selectedObjects];
    return (selectedObjects.count > 0);
