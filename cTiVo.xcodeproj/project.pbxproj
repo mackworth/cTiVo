@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */; };
 		1E0C5DD9170236B30015C55D /* recent-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E0C5DD8170236B30015C55D /* recent-recording.png */; };
+		1E17E1191FF7ED8900AF0F7C /* MTShowFolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E17E1181FF7ED8900AF0F7C /* MTShowFolder.m */; };
 		1E18145E1708AC1500166E5F /* cTiVo.help in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145D1708AC1500166E5F /* cTiVo.help */; };
 		1E1814601708AF7000166E5F /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145F1708AF7000166E5F /* cTiVo.icns */; };
 		1E2724EF16C9A8B500A21940 /* elgatoScript.pl in Resources */ = {isa = PBXBuildFile; fileRef = 1E2724EE16C9A8B500A21940 /* elgatoScript.pl */; };
@@ -298,6 +299,8 @@
 		1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowDrawer.xib; sourceTree = "<group>"; };
 		1E0C5DD8170236B30015C55D /* recent-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "recent-recording.png"; sourceTree = "<group>"; };
 		1E1395941F5928E800FFA4E7 /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
+		1E17E1171FF7ED8900AF0F7C /* MTShowFolder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTShowFolder.h; sourceTree = "<group>"; };
+		1E17E1181FF7ED8900AF0F7C /* MTShowFolder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTShowFolder.m; sourceTree = "<group>"; };
 		1E18145D1708AC1500166E5F /* cTiVo.help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cTiVo.help; sourceTree = "<group>"; };
 		1E18145F1708AF7000166E5F /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cTiVo.icns; sourceTree = "<group>"; };
 		1E2724EE16C9A8B500A21940 /* elgatoScript.pl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.perl; name = elgatoScript.pl; path = ../elgatoScript.pl; sourceTree = "<group>"; };
@@ -1006,6 +1009,8 @@
 				D22BC41D1680DB5E007D699C /* MTTiVoShow.h */,
 				D22BC41E1680DB5E007D699C /* MTTiVoShow.m */,
 				1EC44B2D1F06F12100B73DE1 /* MTTVDB.h */,
+				1E17E1171FF7ED8900AF0F7C /* MTShowFolder.h */,
+				1E17E1181FF7ED8900AF0F7C /* MTShowFolder.m */,
 				1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */,
 				1E791BD21697C59300E47E84 /* MTSubscription.h */,
 				1E791BD31697C59300E47E84 /* MTSubscription.m */,
@@ -1257,6 +1262,7 @@
 				D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */,
 				1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */,
 				1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */,
+				1E17E1191FF7ED8900AF0F7C /* MTShowFolder.m in Sources */,
 				1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */,
 				1E3D27E01A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m in Sources */,
 				1E7BED701F565AD500AB8E5F /* NSURL+MTURLExtensions.m in Sources */,

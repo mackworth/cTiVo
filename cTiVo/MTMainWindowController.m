@@ -12,6 +12,7 @@
 #import "MTSubscriptionTableView.h"
 #import "MTSubscriptionList.h"
 #import "MTHelpViewController.h"
+#import "MTShowFolder.h"
 
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"
@@ -340,8 +341,8 @@ __DDLOGHERE__
 			}
 			if (workingTable == tiVoShowTable) {
 				MTTiVoShow *thisShow = [tiVoShowTable itemAtRow:menuTableRow];
-				if ([thisShow isKindOfClass:[NSArray class]]) {
-					thisShow = ((NSArray *)thisShow)[0];
+				if ([thisShow isKindOfClass:[MTShowFolder class]]) {
+					thisShow = ((MTShowFolder *)thisShow).folder[0];
 				}
 				//diasble menu items that depend on having a completed show tag = 2
 				if (!thisShow.isOnDisk) {
@@ -405,8 +406,8 @@ __DDLOGHERE__
     } else if (menuTableRow >= 0 && //somehow happens
                menuTableRow < tiVoShowTable.numberOfRows) {
 		MTTiVoShow *thisShow = [tiVoShowTable itemAtRow:menuTableRow];
-		if ([thisShow isKindOfClass:[NSArray class]]) {
-			thisShow = ((NSArray *)thisShow)[0];
+		if ([thisShow isKindOfClass:[MTShowFolder class]]) {
+			thisShow = ((MTShowFolder *)thisShow).folder[0];
 		}
        if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
             [self openDrawer:thisShow];
@@ -454,8 +455,8 @@ __DDLOGHERE__
 		NSInteger rowNumber = [tiVoShowTable clickedRow];
 		if (rowNumber != -1) {
 			MTTiVoShow *thisShow = [tiVoShowTable itemAtRow:rowNumber];
-			if ([thisShow isKindOfClass:[NSArray class]]) {
-				thisShow = ((NSArray *)thisShow)[0];
+			if ([thisShow isKindOfClass:[MTShowFolder class]]) {
+				thisShow = ((MTShowFolder *)thisShow).folder[0];
 			}
 			[self openDrawer:thisShow];
 		}
@@ -799,7 +800,7 @@ __DDLOGHERE__
             NSString *title = [[column headerCell] title];
             NSMenuItem *item = [tableHeaderContextMenu addItemWithTitle:title action:@selector(contextMenuSelected:) keyEquivalent:@""];
             [item setTarget:self];
-            [item setRepresentedObject:@{@"Column" : column, @"Table" : table}];
+            [item setRepresentedObject:column];
             [item setState:column.isHidden?NSOffState: NSOnState];
         }
 	}
@@ -808,8 +809,29 @@ __DDLOGHERE__
 
 - (void)contextMenuSelected:(id)sender {
 	NSMenuItem * menuItem = (NSMenuItem *) sender;
-    NSTableColumn *column = [menuItem representedObject][@"Column"];
+    NSTableColumn *column = [menuItem representedObject];
 	BOOL wasOn = ([menuItem state] == NSOnState);
+	if (wasOn &&
+		column == self.tiVoShowTable.outlineTableColumn &&
+		[[NSUserDefaults standardUserDefaults] boolForKey:kMTShowFolders]) {
+		//apparently user wants to switch outline columns
+
+		NSTableColumn * combo = [self.tiVoShowTable tableColumnWithIdentifier: @"Programs"];
+		NSTableColumn * series = [self.tiVoShowTable tableColumnWithIdentifier: @"Series"];
+		if (column == series) {
+			combo.hidden = NO;
+			self.tiVoShowTable.outlineTableColumn = combo;
+		} else {
+			series.hidden = NO;
+			self.tiVoShowTable.outlineTableColumn = series;
+		}
+		NSMenu * thisMenu = [menuItem menu];
+		NSInteger outlineIndex = [thisMenu indexOfItemWithRepresentedObject:self.tiVoShowTable.outlineTableColumn];
+	    if (outlineIndex != NSNotFound) {
+			NSMenuItem * outlineMenuItem = [thisMenu itemAtIndex:outlineIndex];
+			[outlineMenuItem setState:NSOnState];
+		}
+	}
 	[column setHidden:wasOn];
 	if(wasOn) {
 		[menuItem setState: NSOffState ];

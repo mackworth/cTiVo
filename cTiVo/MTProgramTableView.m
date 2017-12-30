@@ -14,6 +14,7 @@
 #import "MTDownloadCheckTableCell.h"
 #import "MTProgressCell.h"
 #import "DragDropImageView.h"
+#import "MTShowFolder.h"
 
 @interface MTProgramTableView  ()
 
@@ -22,6 +23,7 @@
 @property (weak) IBOutlet NSButton *addToQueueButton;
 @property (weak) IBOutlet NSButton *subscribeButton;
 
+@property (nonatomic, strong) NSMutableDictionary <NSString *, MTShowFolder *> * oldFolders; //reuse from last reload (to avoid accidentally closing existing folders.)
 @property (nonatomic, strong) NSArray <id> *sortedShows; //entries are either MTTiVoShows or, when hierarchical, folders
 @property (nonatomic, strong) NSString *selectedTiVo;
 @property (weak) IBOutlet NSSearchField *findText; //filter for displaying found subset of programs
@@ -46,6 +48,7 @@ __DDLOGHERE__
         self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
         self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
         self.imageRowHeight = -1;
+		self.oldFolders = [NSMutableDictionary dictionary];
 	}
 	return self;
 }
@@ -73,21 +76,32 @@ __DDLOGHERE__
 }
 
 -(void) reloadData {
-    //Configure Table Columns depending on how many TiVos
     DDLogVerbose(@"Reload Program Table");
 	//save selection to preserve after reloadData
-	NSIndexSet * selectedRowIndexes = [self selectedRowIndexes];
-    NSArray * selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes];
-    
+	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	NSMutableArray <id> * oldSelection = [NSMutableArray arrayWithCapacity:selectedRowIndexes.count];
+	[selectedRowIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+		[oldSelection addObject: [self itemAtRow:idx]];
+	}];
+
 	self.sortedShows = nil;
-    [super reloadData];
+	[self confirmColumns];
+
+	[super reloadData];
 
 	//now restore selection
-	NSIndexSet * showIndexes = [self.sortedShows indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-		return [selectedShows indexOfObject:obj] !=NSNotFound;
-	}];
+	NSMutableIndexSet * showIndexes = [NSMutableIndexSet indexSet];
+	for (id item in oldSelection) {
+		NSUInteger row = [self rowForItem:item];
+		if (row != NSNotFound) {
+			MTShowFolder * parent = [self parentForItem:item];
+			if (!parent || [self isItemExpanded:parent]) {
+				//avoid formerly selected children that are no longer visible
+				[showIndexes addIndex:row];
+			}
+		}
+	}
     [self selectRowIndexes:showIndexes byExtendingSelection:NO];
-    
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -194,8 +208,9 @@ __DDLOGHERE__
     __block NSInteger numSelected = 0;
     [currentSelectedRows enumerateIndexesUsingBlock:^(NSUInteger row, BOOL *stop){
 		id item = [self itemAtRow:row];
-		if ([item isKindOfClass:[NSArray class]]) {
-			for (MTTiVoShow * show in (NSArray *) item) {
+		if ([item isKindOfClass:[MTShowFolder class]]) {
+			NSArray <MTTiVoShow *> *  shows = ((MTShowFolder *) item).folder;
+			for (MTTiVoShow * show in shows) {
 				if (![show.protectedShow boolValue]) {
 					numSelected++;
 				}
@@ -206,11 +221,12 @@ __DDLOGHERE__
     }];
     return numSelected;
 }
+
 -(NSArray <MTTiVoShow *> *) flattenShows: (NSArray *) shows {
 	NSMutableArray *result = [[NSMutableArray alloc] init];
 	for (id item in shows) {
-		if ([item isKindOfClass:[NSArray class]]) {
-			[result addObjectsFromArray:item];
+		if ([item isKindOfClass:[MTShowFolder class]]) {
+			[result addObjectsFromArray:((MTShowFolder *) item).folder];
 		} else {
 			[result addObject:item];
 		}
@@ -219,12 +235,17 @@ __DDLOGHERE__
 }
 
 -(NSArray <MTTiVoShow *> *) selectedShows {
-	NSArray * shows = self.sortedShows;
 	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	if (selectedRowIndexes.count > 0) {
-		shows = [shows objectsAtIndexes:selectedRowIndexes ];
-	}
-	return [self flattenShows:shows];
+	NSMutableArray <MTTiVoShow *> * result = [NSMutableArray array];
+	[selectedRowIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+		id item = [self itemAtRow:idx];
+		if ([item isKindOfClass:[MTShowFolder class]]) {
+			[result addObjectsFromArray:((MTShowFolder *) item).folder];
+		} else {
+			[result addObject:item];
+		}
+	}];
+	return [result copy];
 }
   
 -(NSArray *)sortedShows {
@@ -262,25 +283,31 @@ __DDLOGHERE__
 				if (series) {
 					[series addObject:show];
 				} else {
-					series = [NSMutableArray arrayWithObject:show];
-					showsDict[show.seriesTitle] = series;
+					showsDict[show.seriesTitle] = [NSMutableArray arrayWithObject:show];
 				}
 			}
 			NSMutableArray * folderArray = [NSMutableArray new];
-			//XXX implement sort Descriptors here?  Sub-sorts?
-			//why are two columns marked as sorts?
-			for (NSString * key in [showsDict.allKeys sortedArrayUsingSelector: @selector(localizedCaseInsensitiveCompare:)]) {
+			for (NSString * key in showsDict.allKeys ) {
 				NSArray * seriesShows = showsDict[key];
 				if (seriesShows.count == 1) {
 					[folderArray addObject:seriesShows[0]];
 				} else {
-					[folderArray addObject:seriesShows];
+					MTShowFolder * folderHolder = self.oldFolders[key];
+					if (!folderHolder){
+						folderHolder = [MTShowFolder new];
+						self.oldFolders[key] = folderHolder;
+					}
+					folderHolder.folder = seriesShows;
+					[folderArray addObject:folderHolder];
 				}
 			}
-			self.sortedShows = [folderArray copy];
+			self.sortedShows = [folderArray sortedArrayUsingDescriptors:self.sortDescriptors];
 		} else {
-			self.sortedShows = [whichShows
-								sortedArrayUsingDescriptors:self.sortDescriptors];
+			NSMutableArray * newArray = [NSMutableArray arrayWithCapacity:whichShows.count];
+			for (MTTiVoShow * show in whichShows) {
+				[newArray addObject:show];
+			}
+			self.sortedShows = [newArray sortedArrayUsingDescriptors:self.sortDescriptors];
 		}
 	}
 	return _sortedShows;
@@ -294,8 +321,8 @@ __DDLOGHERE__
 	}
 }
 
--(void)outlineViewSelectionDidChange:(NSNotification *)notification
-{
+-(void)outlineViewSelectionDidChange:(NSNotification *)notification {
+	DDLogVerbose(@"selection did change");
 	NSInteger numRows = [self numberOfSelectedRows];
 	[self.addToQueueButton setEnabled:numRows != 0];
 	[self.subscribeButton setEnabled: numRows != 0];
@@ -303,6 +330,17 @@ __DDLOGHERE__
 		NSArray *selectedRows = [self selectedShows];
         [self.myController setValue:selectedRows[0] forKey:@"showForDetail"];
     }
+}
+
+-(void) outlineViewItemDidExpand:(NSNotification *)notification {
+	[self outlineViewItemDidCollapse:notification];
+}
+
+-(void) outlineViewItemDidCollapse:(NSNotification *)notification {
+	MTShowFolder * folder = (MTShowFolder *) notification.userInfo[@"NSObject"];
+	[self noteHeightOfRowsWithIndexesChanged:
+	 [NSIndexSet indexSetWithIndex:[self rowForItem:folder]]];
+	[self reloadItem:folder];
 }
 
 -(void) outlineViewColumnDidResize:(NSNotification *)notification {
@@ -330,8 +368,28 @@ __DDLOGHERE__
 	[self columnChanged:column];
 }
 
+-(void) confirmColumns {
+	NSTableColumn * oldOutline = self.outlineTableColumn;
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTShowFolders] &&
+		oldOutline.isHidden) {
+		NSTableColumn * combo = [self tableColumnWithIdentifier: @"Programs"];
+		NSTableColumn * series = [self tableColumnWithIdentifier: @"Series"];
+		NSTableColumn * episode = [self tableColumnWithIdentifier: @"Title"];
+		if (oldOutline == combo && !series.isHidden) {
+			self.outlineTableColumn = series;
+		} else if (oldOutline == series && !combo.isHidden) {
+			self.outlineTableColumn = combo;
+		} else if (episode.isHidden) {
+			combo.hidden = NO;
+			self.outlineTableColumn = combo;
+		} else {
+			series.hidden = NO;
+			self.outlineTableColumn = series;
+		}
+	}
+}
+
 -(void) columnChanged: (NSTableColumn *) column {
-	//XXX handle Program column hidden, and allow Series instead with
     if ([column.identifier isEqualToString: kMTArtColumn]) {
         //have to confirm height changed
         if (column.isHidden) {
@@ -346,7 +404,9 @@ __DDLOGHERE__
             self.imageRowHeight = -1;
         }
         [self reloadData];
-   }
+	} else {
+		[self confirmColumns];
+	}
 }
 
 #pragma mark - Table Data Source Protocol
@@ -354,14 +414,6 @@ __DDLOGHERE__
 -(void)outlineView:(NSOutlineView *)outlineView sortDescriptorsDidChange:(NSArray<NSSortDescriptor *> *)oldDescriptors {
 	[self reloadData];
 }
-
-//- (id)outlineView:(NSOutlineView *)outlineView persistentObjectForItem:(id)item {
-//	//XXX implement persistence
-//}
-//
-//-(id) outlineView:(NSOutlineView *)outlineView itemForPersistentObject:(id)object {
-//	
-//}
 
 - (CGFloat)outlineView:(NSOutlineView *)outlineView heightOfRowByItem:(id)item {
     //use negative numbers to indicate we need to recalculate, but save old one as negative to see if we need to reload or not.
@@ -392,8 +444,8 @@ __DDLOGHERE__
 -(void) outlineView:(NSOutlineView *)outlineView didAddRowView:(nonnull NSTableRowView *)rowView forRow:(NSInteger)row {
 	id item = [self itemAtRow:row];
 	MTTiVoShow * thisShow = nil;
-	if ([item isKindOfClass:[NSArray class]]) {
-		thisShow = ((NSArray *) item)[0];
+	if ([item isKindOfClass:[MTShowFolder class]]) {
+		thisShow = ((MTShowFolder *) item).folder[0];
 	} else {
 		thisShow = item;
 	}
@@ -406,9 +458,9 @@ __DDLOGHERE__
 
 -(NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item {
 	if (item) {
-		if ([item isKindOfClass:[NSArray class]]) {
-			NSArray * items = (NSArray *)item;
-			return items.count;
+		if ([item isKindOfClass:[MTShowFolder class]]) {
+			NSArray <MTTiVoShow *> *  shows = ((MTShowFolder *) item).folder;
+			return shows.count;
 		} else {
 			return 0;
 		}
@@ -417,16 +469,17 @@ __DDLOGHERE__
 	}
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(NSArray *)items {
-	if (items) {
-		if ([items isKindOfClass:[NSArray class]]) {
-			if ((NSUInteger)index < items.count) {
-				return  items[index];
+- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id) item {
+	if (item) {
+		if ([item isKindOfClass:[MTShowFolder class]]) {
+			NSArray <MTTiVoShow *> *  shows = ((MTShowFolder *) item).folder;
+			if ((NSUInteger)index < shows.count) {
+				return  shows[index];
 			} else {
 				return nil;
 			}
 		} else {
-			return items;
+			return item;
 		}
 	} else {
 		return self.sortedShows[index];
@@ -434,168 +487,249 @@ __DDLOGHERE__
 }
 
 -(BOOL) outlineView:(NSOutlineView *) outlineView isItemExpandable:(nonnull id)item {
-	if ([item isKindOfClass:[NSArray class]]) {
+	if ([item isKindOfClass:[MTShowFolder class]]) {
 		return YES;
 	} else {
 		return NO;
 	}
 }
+-(NSString *) textForShow:(MTTiVoShow *) thisShow atColumn: (NSTableColumn *) column {
+	NSString * identifier = column.identifier;
+	if ([identifier isEqualToString:@"Programs"]) {
+		return thisShow.showTitle?: @"" ;
+	} else if ([identifier isEqualToString:@"TiVo"]) {
+		return thisShow.tiVoName?: @"";
+	} else if ([identifier isEqualToString:@"Date"]) {
+		if ([column width] > 135) {
+			return thisShow.showMediumDateString?: @"";
+		} else {
+			return thisShow.showDateString?: @"";
+		}
+	} else if ([identifier isEqualToString:@"Length"]) {
+		return thisShow.lengthString?: @"";
+	} else if ([identifier isEqualToString:@"Series"]) {
+		return thisShow.seriesTitle?: @"";
+	} else if ([identifier isEqualToString:@"Episode"]) {
+		return thisShow.seasonEpisode?: @"";
+	} else if ([identifier isEqualToString:@"Queued"]) {
+		return thisShow.isQueuedString?: @"";
+	} else if ([identifier isEqualToString:@"OnDisk"]) {
+		return thisShow.isOnDiskString?: @"";
+	} else if ([identifier isEqualToString:@"HD"]) {
+		return thisShow.isHDString?: @"";
+	} else if ([identifier isEqualToString:@"Channel"]) {
+		return thisShow.channelString?: @"";
+	} else if ([identifier isEqualToString:@"Size"]) {
+		return thisShow.sizeString?: @"";
+	} else if ([identifier isEqualToString:@"TiVoID"]) {
+		return thisShow.idString?: @"";
+	} else if ([identifier isEqualToString:@"EpisodeID"]) {
+		return thisShow.episodeID?: @"";
+	} else if ([identifier isEqualToString:@"Title"]) {
+		return thisShow.episodeTitle?: @"";
+	} else if ([identifier isEqualToString:@"Station"]) {
+		return thisShow.stationCallsign?: @"";
+	} else if ([identifier isEqualToString:@"Genre"]) {
+		return thisShow.episodeGenre?: @"";
+	} else if ([identifier isEqualToString:@"AgeRating"]) {
+		return thisShow.ageRatingString?: @"";
+	} else if ([identifier isEqualToString:@"StarRating"]) {
+		return thisShow.starRatingString?: @"";
+	} else if ([identifier isEqualToString:@"FirstAirDate"]) {
+		return thisShow.originalAirDateNoTime?: @"";
+	} else if ([identifier isEqualToString:@"H.264"]) {
+		return thisShow.h264String?: @"";
+	} else {
+		DDLogReport(@"Invalid Column: %@", identifier);
+		return @"";
+	}
+}
+
+-(MTProgressCell *) configureArtCell: (MTProgressCell *) cell forShow: (MTTiVoShow *) thisShow withWidth:(CGFloat) width {
+	DragDropImageView * imageView = (DragDropImageView *) cell.imageView;
+	imageView.delegate = thisShow; //drag drop support
+	CGRect rect = CGRectMake(0, 0, width, fabs(self.imageRowHeight));
+	cell.frame = rect;
+	cell.imageView.frame = rect;
+	cell.progressIndicator.frame = rect;
+	NSImage * image = thisShow.thumbnailImage;
+	if (image) {
+		DDLogVerbose(@"got image for %@: %@",thisShow, NSStringFromRect(cell.bounds));
+		imageView.image = image ;
+		imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
+		imageView.imageScaling = NSImageScaleProportionallyUpOrDown;
+		cell.progressIndicator.hidden = YES;
+		[cell.progressIndicator stopAnimation:self];
+	} else if (thisShow.noImageAvailable) {
+		//no image, and it's never coming
+		DDLogVerbose(@"No image for %@",thisShow);
+		imageView.image = nil ;
+		cell.progressIndicator.hidden = YES;
+		[cell.progressIndicator stopAnimation:self];
+	} else {
+		//no image, but it may be coming
+		DDLogVerbose(@"Waiting for image for %@",thisShow);
+		imageView.image = nil ;
+		cell.progressIndicator.hidden = NO;
+		[cell.progressIndicator startAnimation:self];
+	}
+	return cell;
+}
+
+-(NSTableCellView *) configureIconCell: (NSTableCellView *) cell forShow: (MTTiVoShow *) thisShow withWidth:(CGFloat) width {
+	NSImageView * imageView = cell.imageView;
+	NSString * imageName = thisShow.imageString;
+	imageView.imageScaling = NSImageScaleProportionallyUpOrDown;
+	imageView.image = [NSImage imageNamed: imageName];
+	CGFloat height = MIN(width, MIN(self.imageRowHeight, 24));
+	CGFloat leftMargin = (width -height)/2;
+	CGFloat topMargin = (self.imageRowHeight-height)/2;
+	imageView.frame = CGRectMake(leftMargin, topMargin, height, height);
+	imageView.animates = YES;
+	cell.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
+	return cell;
+}
 
 - (NSView *)outlineView:(NSOutlineView *)outlineView viewForTableColumn:(NSTableColumn *)tableColumn item:(id)item {
-	
     // get an existing cell with the MyView identifier if it exists
     NSTableCellView *result = [outlineView makeViewWithIdentifier:tableColumn.identifier owner:self];
 	
-    NSString * textVal = @"";
-    result.toolTip = @"";
-    result.imageView.image = nil;
-    NSString* identifier = tableColumn.identifier;
-	result.frame =CGRectMake(0,0, tableColumn.width, self.imageRowHeight);
-	if ([item isKindOfClass:[NSArray class]]) {
-		NSArray <MTTiVoShow *> *  shows = (NSArray *) item;
-		//XXX implement aggregate values
-		//Create text version for "a show" and then a merging routine for normal "if all the same, return it; else "--"?
-		if ([tableColumn.identifier isEqualToString:@"Programs"]) {
-			textVal = [NSString stringWithFormat:@"%@ (%d)", shows[0].seriesTitle, (int)shows.count];
-			result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
-			result.textField.textColor = [NSColor blackColor];
-		} else if ([identifier isEqualToString: kMTArtColumn]) {
-			MTProgressCell * cell = (MTProgressCell *) result;
-			cell.imageView.image = nil ;
-			cell.progressIndicator.hidden = YES;
-			[cell.progressIndicator stopAnimation:self];
-		} else if ([identifier isEqualToString: @"icon"]) {
-			result.imageView.image = nil ;
-		}
-	} else {
-		MTTiVoShow *thisShow = (MTTiVoShow *) item;
-	
-    if ([tableColumn.identifier isEqualToString:@"Programs"]) {
-       textVal = thisShow.showTitle?: @"" ;
-        result.toolTip = textVal;
-    } else if ([identifier isEqualToString:@"TiVo"]) {
-        textVal = thisShow.tiVoName;
-        result.textField.textColor = [NSColor blackColor];
-        if (!thisShow.tiVo.isReachable) {
-            result.textField.textColor = [NSColor redColor];
-        }
-        result.toolTip = thisShow.tiVoName;
-    } else if ([identifier isEqualToString:@"Date"]) {
-        if ([tableColumn width] > 135) {
-            textVal = thisShow.showMediumDateString;
-        } else {
-            textVal = thisShow.showDateString;
-        }
-        result.toolTip = textVal;
-    } else if ([identifier isEqualToString:@"Length"]) {
-        textVal = thisShow.lengthString;
-        result.toolTip = textVal;
-    } else if ([identifier isEqualToString:@"Series"]) {
-        textVal = thisShow.seriesTitle;
-        result.toolTip = textVal;
-    } else if ([identifier isEqualToString:@"Episode"]) {
-        textVal = thisShow.seasonEpisode;
-        result.toolTip = textVal;
-    } else if ([identifier isEqualToString:@"Queued"]) {
-        textVal = thisShow.isQueuedString;
-    } else if ([identifier isEqualToString:@"OnDisk"]) {
-        textVal = thisShow.isOnDiskString;
-        result.toolTip =@"Is program already downloaded and still on disk?";
-   } else if ([identifier isEqualToString:@"HD"]) {
-        textVal = thisShow.isHDString;
-        result.textField.alignment = NSCenterTextAlignment;
-    } else if ([identifier isEqualToString:@"Channel"]) {
-        textVal = thisShow.channelString;
-    } else if ([identifier isEqualToString:@"Size"]) {
-        textVal = thisShow.sizeString;
-    } else if ([identifier isEqualToString:@"TiVoID"]) {
-        textVal = thisShow.idString;
-    } else if ([identifier isEqualToString:@"EpisodeID"]) {
-        textVal = thisShow.episodeID;
-    } else if ([identifier isEqualToString:@"Title"]) {
-        textVal = thisShow.episodeTitle;
-        result.toolTip = textVal;
-    } else if ([identifier isEqualToString:@"Station"]) {
-        textVal = thisShow.stationCallsign;
-    } else if ([identifier isEqualToString:@"Genre"]) {
-        textVal = thisShow.episodeGenre;
-        result.toolTip = textVal;
-    } else if ([identifier isEqualToString:@"AgeRating"]) {
-        textVal = thisShow.ageRatingString;
-        result.toolTip = textVal;
-    } else if ([identifier isEqualToString:@"StarRating"]) {
-        textVal = thisShow.starRatingString;
-    } else if ([identifier isEqualToString:@"FirstAirDate"]) {
-        textVal = thisShow.originalAirDateNoTime ?: @"";
-    } else if ([identifier isEqualToString:@"H.264"]) {
-        textVal = thisShow.h264String;
-        result.textField.alignment = NSCenterTextAlignment;
-        result.toolTip =@"Does this channel use H.264 compression?";
-    } else if ([identifier isEqualToString: kMTArtColumn]) {
-//        DDLogVerbose(@"looking for image for %@",thisShow);
-       MTProgressCell * cell = (MTProgressCell *) result;
-        DragDropImageView * imageView = (DragDropImageView *) result.imageView;
-        imageView.delegate = thisShow; //drag drop support
-		CGRect rect = CGRectMake(0, 0, tableColumn.width, fabs(self.imageRowHeight));
-		cell.frame = rect;
-		cell.imageView.frame = rect;
-		cell.progressIndicator.frame = rect;
-        NSImage * image = thisShow.thumbnailImage;
-        if (image) {
-			DDLogVerbose(@"got image for %@: %@",thisShow, NSStringFromRect(cell.bounds));
-            imageView.image = image ;
-			imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin| NSViewMinYMargin |NSViewMaxYMargin;
-            imageView.imageScaling = NSImageScaleProportionallyUpOrDown;
-            cell.progressIndicator.hidden = YES;
-            [cell.progressIndicator stopAnimation:self];
-        } else if (thisShow.noImageAvailable) {
-            //no image, and it's never coming
-            DDLogVerbose(@"No image for %@",thisShow);
-           imageView.image = nil ;
-            cell.progressIndicator.hidden = YES;
-            [cell.progressIndicator stopAnimation:self];
-       } else {
-            //no image, but it may be coming
-           DDLogVerbose(@"Waiting for image for %@",thisShow); 
-           imageView.image = nil ;
-            cell.progressIndicator.hidden = NO;
-            [cell.progressIndicator startAnimation:self];
-        }
+	NSString* identifier = tableColumn.identifier;
+	CGFloat rowHeight = ABS(self.imageRowHeight);
+	if ([self isItemExpanded:item]) {
+		rowHeight = [super rowHeight];
+	}
+	result.frame =CGRectMake(0,0, tableColumn.width, rowHeight);
 
-    } else if ([identifier isEqualToString:@"icon"]) {
-        MTProgressCell * cell = (MTProgressCell *) result;
-        NSImageView * imageView = cell.imageView;
-        NSString * imageName = thisShow.imageString;
-        imageView.imageScaling = NSImageScaleProportionallyUpOrDown;
-        imageView.image = [NSImage imageNamed: imageName];
-        CGFloat width = tableColumn.width;
-        CGFloat height = MIN(width, MIN(self.imageRowHeight, 24));
-        CGFloat leftMargin = (width -height)/2;
-        CGFloat topMargin = (self.imageRowHeight-height)/2;
-		imageView.frame = CGRectMake(leftMargin, topMargin, height, height);
-        imageView.animates = YES;
-        result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
-    } else {
-        DDLogReport(@"Invalid Column: %@", identifier);
-    }
-		if ([thisShow.protectedShow boolValue]) {
-			result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
-			result.textField.textColor = [NSColor grayColor];
-		} else if ([thisShow isOnDisk]){
-			result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];
-			result.textField.textColor = [NSColor blackColor];
+    NSString * textVal = nil;
+    result.toolTip = @"";
+	MTTiVoShow *thisShow = nil;
+	result.imageView.image = nil ;
+
+	if ([identifier isEqualToString: kMTArtColumn]) {
+		MTProgressCell * cell = (MTProgressCell *) result;
+		if ([item isKindOfClass:[MTShowFolder class]]) {
+			if ([self isItemExpanded:item]) {
+				cell.progressIndicator.hidden = YES;
+				[cell.progressIndicator stopAnimation:self];
+				return cell;
+			} else {
+				thisShow = ((MTShowFolder *) item).folder[0];
+			}
 		} else {
-			result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
-			result.textField.textColor = [NSColor blackColor];
+			thisShow = (MTTiVoShow *) item;
+		}
+		return [self configureArtCell: cell forShow: thisShow withWidth: tableColumn.width];
+	} else if ( [identifier isEqualToString: @"icon"])  {
+		if ([item isKindOfClass:[MTShowFolder class]]) {
+			if ( [self isItemExpanded:item]) {
+				return result; //no icon when expanded
+			} else {
+				NSString * commonName =  nil;
+				MTShowFolder * folderHolder = item;
+				for (MTTiVoShow * show in folderHolder.folder) {
+					NSString * imageName = show.imageString;
+					if (!commonName) {
+						commonName = imageName ; //remember first one
+					} else if (!imageName || ![imageName isEqualToString:commonName]){
+						//not all the show are the same.
+						commonName = nil;
+						break;
+					}
+				}
+				if (commonName) {
+					return [self configureIconCell: result forShow: folderHolder.folder[0] withWidth: tableColumn.width];
+				} else {
+					return result;
+				}
+			}
+		} else {
+			return [self configureIconCell: result forShow: (MTTiVoShow *) item withWidth: tableColumn.width];
 		}
 	}
-    result.textField.stringValue = textVal ?: @"";
-	CGFloat rowHeight = ABS(self.imageRowHeight);
+	
+	//Otherwise text box
+	if ([item isKindOfClass:[MTShowFolder class]]) {
+		//do any special handling here for folders
+		//if generic text result, set textVal (e.g. cumulative folder size)
+		//else if relying on a subshow for content, set thisShow
+		//else return
+		MTShowFolder * folderHolder = (MTShowFolder *) item;
+		if (tableColumn == [self outlineTableColumn]) {
+			textVal = [NSString stringWithFormat:@"%@ (%d)", folderHolder.folder[0].seriesTitle, (int)folderHolder.folder.count];
+		} else if ([self isItemExpanded:item]) {
+			//for most fields, don't show when expanded
+			textVal = @"";
+		} else if ([identifier isEqualToString:@"Size"]) {
+			textVal = folderHolder.sizeString;   //cumulative
+		} else if ([identifier isEqualToString:@"Length"]) {
+			textVal = folderHolder.lengthString;  //cumulative
+		} else if ([identifier isEqualToString:@"Programs"] ||
+				   [identifier isEqualToString:@"Series"] ||
+				   [identifier isEqualToString:@"Date"]) {
+			//for date, always show latest
+			thisShow = folderHolder.folder[0];
+		} else {
+			//check if all the same, if so, display common else "various"
+			NSString * commonString =  nil;
+			for (MTTiVoShow * show in folderHolder.folder) {
+				NSString * showText = [self textForShow:show atColumn:tableColumn] ?: @"";
+				if (!commonString) {
+					commonString = showText ; //remember first one
+				} else if (![commonString isEqualToString:showText]){
+					//not all the show are the same.
+					commonString = nil;
+					break;
+				}
+			}
+			textVal = commonString ?: @"~~";
+		}
+	} else {
+		thisShow = (MTTiVoShow *) item;
+	}
+	if (!textVal) textVal = [self textForShow:thisShow atColumn:tableColumn];
+
+	if ([identifier isEqualToString:@"Programs" ] ||
+		[identifier isEqualToString:@"TiVo"     ] ||
+		[identifier isEqualToString:@"Date"     ] ||
+		[identifier isEqualToString:@"Length"   ] ||
+		[identifier isEqualToString:@"Series"   ] ||
+		[identifier isEqualToString:@"Episode"  ] ||
+		[identifier isEqualToString:@"Title"    ] ||
+		[identifier isEqualToString:@"Genre"    ] ||
+		[identifier isEqualToString:@"AgeRating"]) {
+		result.toolTip = textVal;
+	}
+
+	if ([identifier isEqualToString:@"HD"]) {
+		result.textField.alignment = NSCenterTextAlignment;
+	} else if ([identifier isEqualToString:@"H.264"]) {
+		result.textField.alignment = NSCenterTextAlignment;
+		result.toolTip =@"Does this channel use H.264 compression?";
+	} else if ([identifier isEqualToString:@"OnDisk"]) {
+		result.toolTip =@"Is program already downloaded and still on disk?";
+	}
+
+	if ([thisShow isOnDisk]){
+		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];
+	} else {
+		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
+	}
+	
+	result.textField.textColor = [NSColor blackColor];
+	if ([thisShow.protectedShow boolValue]) {
+		result.textField.textColor = [NSColor grayColor];
+	} else if (thisShow && [identifier isEqualToString:@"TiVo"] && !thisShow.tiVo.isReachable) {
+		result.textField.textColor = [NSColor redColor];
+	}
+	
+	//make sure textfield is properly centered
+	result.textField.stringValue = textVal ?: @"";
 	CGFloat textSize = MIN(result.textField.font.pointSize + 4, rowHeight);
 	result.textField.frame = CGRectMake(0, round((rowHeight-textSize)/2), tableColumn.width, textSize );
 	result.textField.autoresizingMask = NSViewWidthSizable | NSViewMinYMargin | NSViewMaxYMargin;
 	result.textField.translatesAutoresizingMaskIntoConstraints = YES;
-    // return the result.
+	
     return result;
 }
 #pragma mark Drag N Drop support
