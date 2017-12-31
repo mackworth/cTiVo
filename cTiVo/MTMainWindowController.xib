@@ -90,7 +90,7 @@
                                             <rect key="frame" x="1" y="0.0" width="843" height="322"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
-                                                <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" autosaveName="ProgramTable2" rowSizeStyle="automatic" headerView="LNB-j6-453" viewBased="YES" indentationPerLevel="16" autosaveExpandedItems="YES" outlineTableColumn="42" id="OfG-aC-zKW" customClass="MTProgramTableView">
+                                                <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" autosaveName="ProgramTable2" rowSizeStyle="automatic" headerView="LNB-j6-453" viewBased="YES" indentationPerLevel="16" autoresizesOutlineColumn="YES" outlineTableColumn="42" id="OfG-aC-zKW" customClass="MTProgramTableView">
                                                     <rect key="frame" x="0.0" y="0.0" width="843" height="299"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
