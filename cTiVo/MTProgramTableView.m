@@ -125,7 +125,7 @@ __DDLOGHERE__
 -(void)reloadEpisode:(NSNotification *)notification
 {
     MTTiVoShow *thisShow = notification.object;
-	NSInteger row = [self.sortedShows indexOfObject:thisShow];
+	NSInteger row = [self rowForItem:thisShow];
     if (row != NSNotFound) {
         NSRange columns = NSMakeRange(0,self.numberOfColumns);
         [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
@@ -135,7 +135,7 @@ __DDLOGHERE__
 -(void)reloadPicture:(NSNotification *)notification
 {
     MTTiVoShow *thisShow = notification.object;
-    NSInteger row = [self.sortedShows indexOfObject:thisShow];
+    NSInteger row = [self rowForItem:thisShow];
     if (row != NSNotFound) {
         [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:[self columnWithIdentifier:kMTArtColumn] ]];
     }
@@ -866,8 +866,7 @@ __DDLOGHERE__
     BOOL stopItem =   [menuItem action]==@selector(stopRecording:);
     if (deleteItem || stopItem ) {
         if (deleteItem) menuItem.title = @"Delete from TiVo"; //alternates with remove from Queue
-        NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-        NSArray	*selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
+        NSArray	*selectedShows = [self selectedShows ];
         for (MTTiVoShow * show in selectedShows) {
             if (show.rpcData && show.tiVo.rpcActive) {
                 if (stopItem) {
@@ -883,9 +882,8 @@ __DDLOGHERE__
 }
 
 -(IBAction)copy: (id) sender {
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
 
-    NSArray	*selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
+    NSArray	*selectedShows = [self selectedShows ];
 
     if (selectedShows.count > 0) {
         MTTiVoShow * firstShow = selectedShows[0];
@@ -913,21 +911,19 @@ __DDLOGHERE__
 }
 
 -(IBAction)delete:(id)sender {
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    if (selectedRowIndexes.count == 0) return;
-    NSArray	<MTTiVoShow *> *selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
-    if ([self confirmBehavior:@"delete" preposition: @"from" forShows:selectedShows]) {
-        [tiVoManager deleteTivoShows:selectedShows];
-    }
+    NSArray	<MTTiVoShow *> *selectedShows = [self selectedShows ];
+	if (selectedShows.count > 0)
+		if ([self confirmBehavior:@"delete" preposition: @"from" forShows:selectedShows]) {
+			[tiVoManager deleteTivoShows:selectedShows];
+		}
 }
 
 -(IBAction)stopRecording:(id)sender {
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    if (selectedRowIndexes.count ==0) return;
-   NSArray <MTTiVoShow *>	*selectedShows = [self.sortedShows objectsAtIndexes:selectedRowIndexes ];
-    if ([self confirmBehavior:@"stop recording" preposition:@"on" forShows:selectedShows]) {
-        [tiVoManager stopRecordingShows:selectedShows];
-    }
+	NSArray	<MTTiVoShow *> *selectedShows = [self selectedShows ];
+	if (selectedShows.count > 0)
+    	if ([self confirmBehavior:@"stop recording" preposition:@"on" forShows:selectedShows]) {
+        	[tiVoManager stopRecordingShows:selectedShows];
+    	}
 }
 
 -(void)dealloc {
