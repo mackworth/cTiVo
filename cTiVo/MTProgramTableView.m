@@ -438,6 +438,7 @@ __DDLOGHERE__
         }
         self.imageRowHeight = newRowHeight;
     }
+//	if ([self isItemExpanded:item]) return [super rowHeight];
 	return self.imageRowHeight;
 }
 
@@ -473,11 +474,7 @@ __DDLOGHERE__
 	if (item) {
 		if ([item isKindOfClass:[MTShowFolder class]]) {
 			NSArray <MTTiVoShow *> *  shows = ((MTShowFolder *) item).folder;
-			if ((NSUInteger)index < shows.count) {
-				return  shows[index];
-			} else {
-				return nil;
-			}
+			return  shows[(NSUInteger)index < shows.count ? index : shows.count-1];;
 		} else {
 			return item;
 		}
@@ -596,9 +593,9 @@ __DDLOGHERE__
 	
 	NSString* identifier = tableColumn.identifier;
 	CGFloat rowHeight = ABS(self.imageRowHeight);
-	if ([self isItemExpanded:item]) {
-		rowHeight = [super rowHeight];
-	}
+//	if ([self isItemExpanded:item]) {
+//		rowHeight = [super rowHeight];
+//	}
 	result.frame =CGRectMake(0,0, tableColumn.width, rowHeight);
 
     NSString * textVal = nil;
