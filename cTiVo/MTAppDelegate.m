@@ -15,6 +15,7 @@
 #import "MTHelpViewController.h"
 #import "MTTiVo.h"
 #import "MTSubscriptionList.h"
+#import "PFMoveApplication.h"
 
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
@@ -166,6 +167,7 @@ void signalHandler(int signal)
         [Fabric with:@[[Crashlytics class]]];
     }
 #endif
+	PFMoveToApplicationsFolderIfNecessary();
     CGEventRef event = CGEventCreate(NULL);
     CGEventFlags modifiers = CGEventGetFlags(event);
     CFRelease(event);

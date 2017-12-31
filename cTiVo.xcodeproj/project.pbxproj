@@ -21,6 +21,7 @@
 		1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */; };
 		1E4A38481A37C0F4001D84A7 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */; };
 		1E52C5261F2420A700389E93 /* DragDropImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E52C5251F2420A700389E93 /* DragDropImageView.m */; };
+		1E5486731FF898A800412D7B /* PFMoveApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E5486711FF898A800412D7B /* PFMoveApplication.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1E557BCB1CD801350014D85B /* comskip in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B891CD127E90014D85B /* comskip */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E557BCC1CD801350014D85B /* ffmpeg in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B8A1CD127E90014D85B /* ffmpeg */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E557BCD1CD801350014D85B /* mencoder in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B8B1CD127E90014D85B /* mencoder */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -123,7 +124,6 @@
 		1E9959CA173DC7D100B47539 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C7173DC7D100B47539 /* DDTTYLogger.m */; };
 		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1E9EA3FD1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */; };
-		1E9EA4011F1D439800F0A2C9 /* RSVerticallyCenteredTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA4001F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.m */; };
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9C1C505D3000887240 /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EB49BA01C50A4B100887240 /* tivo-libre.jar in Resources */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -319,6 +319,8 @@
 		1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionList.m; sourceTree = "<group>"; };
 		1E52C5241F2420A700389E93 /* DragDropImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DragDropImageView.h; sourceTree = "<group>"; };
 		1E52C5251F2420A700389E93 /* DragDropImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DragDropImageView.m; sourceTree = "<group>"; };
+		1E5486711FF898A800412D7B /* PFMoveApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PFMoveApplication.m; sourceTree = "<group>"; };
+		1E5486721FF898A800412D7B /* PFMoveApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PFMoveApplication.h; sourceTree = "<group>"; };
 		1E557B891CD127E90014D85B /* comskip */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = comskip; sourceTree = "<group>"; };
 		1E557B8A1CD127E90014D85B /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ffmpeg; sourceTree = "<group>"; };
 		1E557B8B1CD127E90014D85B /* mencoder */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = mencoder; sourceTree = "<group>"; };
@@ -438,8 +440,6 @@
 		1E9A10EE1757200000863C44 /* cTiVo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cTiVo.png; sourceTree = "<group>"; };
 		1E9EA3FB1F1AD91C00F0A2C9 /* MTProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressCell.h; sourceTree = "<group>"; };
 		1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressCell.m; sourceTree = "<group>"; };
-		1E9EA3FF1F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSVerticallyCenteredTextFieldCell.h; sourceTree = "<group>"; };
-		1E9EA4001F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSVerticallyCenteredTextFieldCell.m; sourceTree = "<group>"; };
 		1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLogFormatter.h; sourceTree = "<group>"; };
 		1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLogFormatter.m; sourceTree = "<group>"; };
 		1EB49B9C1C505D3000887240 /* tivodecode-ng */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "tivodecode-ng"; path = "../../tivodecode-ng"; sourceTree = "<group>"; };
@@ -975,14 +975,14 @@
 				D2D60BD116766FA600CE32DE /* NSString+HTML.m */,
 				D295CE81175A6AE500D010B8 /* NSString+Helpers.h */,
 				D295CE82175A6AE500D010B8 /* NSString+Helpers.m */,
-				D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */,
 				1E7BED6E1F565AD500AB8E5F /* NSURL+MTURLExtensions.h */,
 				1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */,
+				D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */,
 				D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */,
 				1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */,
 				1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */,
-				1E9EA3FF1F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.h */,
-				1E9EA4001F1D439700F0A2C9 /* RSVerticallyCenteredTextFieldCell.m */,
+				1E5486721FF898A800412D7B /* PFMoveApplication.h */,
+				1E5486711FF898A800412D7B /* PFMoveApplication.m */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -1269,7 +1269,7 @@
 				1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */,
 				1E3C43C01D79EA1100367866 /* NSArray+Map.m in Sources */,
 				D2001C261704F93F00B75D9C /* MTSrt.m in Sources */,
-				1E9EA4011F1D439800F0A2C9 /* RSVerticallyCenteredTextFieldCell.m in Sources */,
+				1E5486731FF898A800412D7B /* PFMoveApplication.m in Sources */,
 				1ECD9D411C8265D600FBC78D /* MTChannelEditorController.m in Sources */,
 				D2001C281704F93F00B75D9C /* MTEdl.m in Sources */,
 				D291436E1713467A00CE3202 /* NSString+HTML.m in Sources */,
