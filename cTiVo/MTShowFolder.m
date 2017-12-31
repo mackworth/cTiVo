@@ -32,6 +32,10 @@
 	return length;
 }
 
+-(BOOL)isFolder {
+	return YES;
+}
+
 //lengthString and sizeString formatting copied from MTTiVoShow
 -(NSString *) sizeString {
 	double size = self.fileSize;

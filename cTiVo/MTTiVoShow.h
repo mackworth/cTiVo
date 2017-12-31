@@ -133,6 +133,7 @@
 
 @property BOOL isQueued;
 @property (nonatomic, readonly) BOOL isOnDisk;
+@property (nonatomic, readonly) BOOL isFolder;
 @property (nonatomic, readonly) NSArray <NSString *> *copiesOnDisk;
 
 @property (atomic, assign) BOOL	gotDetails;

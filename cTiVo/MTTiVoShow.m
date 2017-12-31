@@ -665,6 +665,10 @@ __DDLOGHERE__
     return [tiVoManager copiesOnDiskForShow: self] != nil;
 }
 
+-(BOOL) isFolder {
+	return NO;
+}
+
 -(NSArray <NSString *> *) copiesOnDisk {
     return [tiVoManager copiesOnDiskForShow: self];
 }

@@ -17,7 +17,7 @@
 @property (nonatomic, readonly) NSString * sizeString, *lengthString;
 @property (nonatomic, readonly) double fileSize;  //Cumulative size on TiVo;
 @property (nonatomic, readonly)  time_t showLength;  //cumulative length of shows in seconds
-
+@property (nonatomic, readonly) BOOL isFolder;
 
 
 @end

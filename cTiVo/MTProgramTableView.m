@@ -514,6 +514,8 @@ __DDLOGHERE__
 		return thisShow.isOnDiskString?: @"";
 	} else if ([identifier isEqualToString:@"HD"]) {
 		return thisShow.isHDString?: @"";
+	} else if ([identifier isEqualToString:@"Folder"]) {
+		return @""; //shows aren't folders
 	} else if ([identifier isEqualToString:@"Channel"]) {
 		return thisShow.channelString?: @"";
 	} else if ([identifier isEqualToString:@"Size"]) {
@@ -654,6 +656,8 @@ __DDLOGHERE__
 		MTShowFolder * folderHolder = (MTShowFolder *) item;
 		if (tableColumn == [self outlineTableColumn]) {
 			textVal = [NSString stringWithFormat:@"%@ (%d)", folderHolder.folder[0].seriesTitle, (int)folderHolder.folder.count];
+		} else if ([identifier isEqualToString:@"Folder"]) {
+			textVal = @"✔"; //we know this is a folder
 		} else if ([self isItemExpanded:item]) {
 			//for most fields, don't show when expanded
 			textVal = @"";
