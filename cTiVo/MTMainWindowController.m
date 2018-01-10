@@ -569,7 +569,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) confirmCancel:(NSString *) title {
-    NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",title] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@""];
+    NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",title] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@" "];
     myAlert.alertStyle = NSCriticalAlertStyle;
     NSInteger result = [myAlert runModal];
     return (result == NSAlertAlternateReturn);

@@ -574,7 +574,7 @@ __DDLOGHERE__
 
 - (IBAction)clearHistory:(id)sender {
 	NSString *message = @"Are you sure you want to delete history of completed downloads?";
-	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Delete" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@""];
+	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Delete" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@" "];
 	NSInteger returnValue = [insertDownloadAlert runModal];
 	if (returnValue == 1) {
 		DDLogDetail(@"User did clear history");
@@ -622,7 +622,7 @@ __DDLOGHERE__
 -(BOOL) askReschedule: (MTDownload *) download {
 	//ask user if they'd like to reschedule a show that's being demoted
 	NSString *message = [NSString stringWithFormat:@"Do you want to reschedule %@?",download.show.showTitle];
-	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
+	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@" "];
 	NSInteger returnValue = [insertDownloadAlert runModal];
 	if (returnValue == 1) {
 		DDLogMajor(@"User did reschedule active show %@",download);
@@ -643,7 +643,7 @@ __DDLOGHERE__
 	} else {
 		message = [NSString stringWithFormat:@"Do you want to re-download %@ and other completed shows?",exampleShow];
 	}
-	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Re-download" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
+	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Re-download" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@" "];
 	NSInteger returnValue = [insertDownloadAlert runModal];
 	if (returnValue == 1) {
 		return YES;

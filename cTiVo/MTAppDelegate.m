@@ -836,7 +836,7 @@ BOOL tempDirectory = NO;
 		message = [NSString stringWithFormat:@"Incorrect Media Key for %@",tiVo.tiVo.name];
 	}
     if (message) {
-        NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"Save Key" alternateButton:@"Ignore TiVo" otherButton:nil informativeTextWithFormat:@""];
+        NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"Save Key" alternateButton:@"Ignore TiVo" otherButton:nil informativeTextWithFormat:@" "];
         NSView *accView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 100)];
         NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(10, 60, 200, 24)];
         [accView addSubview:input];
@@ -940,7 +940,7 @@ BOOL tempDirectory = NO;
 
 -(void) confirmUserQuit {
 	NSString *message = [NSString stringWithFormat:@"Shows are in process, and would need to be restarted next time. Do you wish them to finish now, or quit immediately?"];
-	NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Finish current show" alternateButton:@"Cancel" otherButton:@"Quit Immediately" informativeTextWithFormat:@" "];
+	NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Finish current show" alternateButton:@"Cancel" otherButton:@"Quit Immediately" informativeTextWithFormat:@" "]; //space necessary to avoid constraint error msg
 	NSInteger returnValue = [quitAlert runModal];
 	switch (returnValue) {
 		case NSAlertDefaultReturn:

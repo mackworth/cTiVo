@@ -355,7 +355,7 @@
 
 -(IBAction)emptyCaches:(id)sender
 {
-    NSAlert *cacheAlert = [NSAlert alertWithMessageText:@"Emptying the caches will then reload all information from the TiVos and from TheTVDB.\nDo you want to continue?" defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
+    NSAlert *cacheAlert = [NSAlert alertWithMessageText:@"Emptying the caches will then reload all information from the TiVos and from TheTVDB.\nDo you want to continue?" defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@" "];
     NSInteger returnButton = [cacheAlert runModal];
     if (returnButton != 1) {
         return;
