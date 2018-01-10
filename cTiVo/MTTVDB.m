@@ -1246,7 +1246,7 @@ static BOOL inProgress = NO;
             DDLogMajor(@"theMovieDB returned invalid JSON format: poster_path is invalid : %@", movie);
             return kFormatError;
         }
-        DDLogMajor(@"theMovieDB success : %@ = %@", movie, artwork);
+        DDLogDetail(@"theMovieDB success : %@ = %@", movie, artwork);
 
         return artwork;
     } else {

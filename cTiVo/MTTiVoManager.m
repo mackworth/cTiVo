@@ -1647,7 +1647,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	DDLogMajor(@"Found Service %@",netService);
     for (NSNetService * prevService in _tivoServices) {
         if ([prevService.name compare:netService.name] == NSOrderedSame) {
-			DDLogDetail(@"Already had %@",netService);
+			DDLogMajor(@"Already had %@",netService);
             return; //already got this one
         }
     }

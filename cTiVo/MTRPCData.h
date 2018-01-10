@@ -34,9 +34,10 @@
 
 -(void) setTiVoSerialNumber:(NSString *) tsn;
 -(void) receivedRPCData:(MTRPCData *) data;
--(void) tivoReportsNewShows: (NSMutableArray <NSString *> *) newShows
+-(void) tivoReports: (NSInteger) numShows
+			     withNewShows: (NSMutableArray <NSString *> *) newShows
                 atTiVoIndices: (NSMutableArray <NSNumber *> *) newShowIndices
-            andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows;
+              andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows;
 -(BOOL) isReachable;
 
 @end

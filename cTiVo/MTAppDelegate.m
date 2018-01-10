@@ -940,7 +940,7 @@ BOOL tempDirectory = NO;
 
 -(void) confirmUserQuit {
 	NSString *message = [NSString stringWithFormat:@"Shows are in process, and would need to be restarted next time. Do you wish them to finish now, or quit immediately?"];
-	NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Finish current show" alternateButton:@"Cancel" otherButton:@"Quit Immediately" informativeTextWithFormat:@""];
+	NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Finish current show" alternateButton:@"Cancel" otherButton:@"Quit Immediately" informativeTextWithFormat:@" "];
 	NSInteger returnValue = [quitAlert runModal];
 	switch (returnValue) {
 		case NSAlertDefaultReturn:

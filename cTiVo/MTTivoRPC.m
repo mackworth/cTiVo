@@ -34,6 +34,7 @@
 @property (nonatomic, strong) NSMutableData * incomingData;
 @property (nonatomic, assign) BOOL iStreamAnchor, oStreamAnchor;
 @property (class, nonatomic, strong) NSArray * myCerts;
+@property (nonatomic, assign) BOOL updating;
 
 @property (nonatomic, strong) NSMutableDictionary < NSString *, MTRPCData *> *showMap;
 @property (nonatomic, strong) NSMutableDictionary < NSString *, NSString *>  *seriesImages;
@@ -156,11 +157,15 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 
     self.authenticationLaunched = NO;
     self.firstLaunch = YES;
+	self.updating = NO;
     [self launchServer];
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receiveWakeNotification:)
                                                                name: NSWorkspaceDidWakeNotification object: NULL];
-    [[NSNotificationCenter defaultCenter] addObserver:self
+	[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
+														   selector: @selector(receiveSleepNotification:)
+															   name: NSWorkspaceWillSleepNotification object: NULL];
+   [[NSNotificationCenter defaultCenter] addObserver:self
         selector:@selector(appWillTerminate:) 
             name:NSApplicationWillTerminateNotification 
           object:nil];
@@ -272,9 +277,6 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     if ([self streamClosed: self.iStream] ||
         [self streamClosed: self.oStream]) {
 
-        [self.deadmanTimer invalidate];
-        self.deadmanTimer = nil;
-        if (self.delegate) [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate]; //turn off spinner. May be extra, but better than leaving it run.
         [self tearDownStreams];
         if (self.delegate.isReachable) {
             NSInteger seconds;
@@ -295,6 +297,9 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 }
 
 -(void) tearDownStreams {
+	DDLogMajor(@"Tearing down streams for %@", self.delegate);
+	[self.deadmanTimer invalidate];
+	self.deadmanTimer = nil;
     [self.iStream setDelegate: nil];
     [self.iStream close];
     [self.oStream setDelegate: nil];
@@ -304,7 +309,11 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     self.incomingData.length = 0;
     self.remainingData.length = 0;
     self.authenticationLaunched = NO;
-    self.firstLaunch = YES;
+	if (self.delegate && self.updating) {
+		//turn off spinner.
+		self.updating = NO;
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate];
+	}
 }
 
 static NSRegularExpression * rpcRegex = nil;
@@ -379,13 +388,15 @@ static NSRegularExpression * isFinalRegex = nil;
                         [self.requests removeObjectForKey:@(rpcID)];
                         if (isFinal && readBlock) {
                             [self.readBlocks removeObjectForKey:@(rpcID)];
-                            DDLogDetail(@"Final for %@; %d remaining", @(rpcID), (int)self.readBlocks.count-1);
+                            DDLogDetail(@"Final for %@; %d still active", @(rpcID), (int)self.readBlocks.count);
                         } else {
                             DDLogDetail(@"Not final for %@", @(rpcID));
                         }
                     }
-                    if (isFinal) {
-                        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate];
+                    if (isFinal && self.updating) {
+						self.updating = NO;
+						//turn off inprogress spinner, but leave on for two seconds to avoid flickering on /off
+                        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate afterDelay: 2] ;
                     }
                     if ([jsonData[@"type"] isEqualToString:@"error"]) {
                         DDLogReport(@"Error: error JSON response. %@\n%@\n%@", headers, readPacket, jsonData);
@@ -572,7 +583,8 @@ static NSRegularExpression * isFinalRegex = nil;
     @synchronized (self.readBlocks) {
         self.readBlocks[@(self.rpcID)] = [completionHandler copy];
     }
-    if (!monitor) {
+    if (!monitor && !self.updating) {
+		self.updating = YES;
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdating  object:self.delegate];
     }
     [self reallyWriteData];
@@ -701,7 +713,7 @@ static NSRegularExpression * isFinalRegex = nil;
                }
                [self getShowInfoForShows: lookupDetails];
                if (!isFirstLaunch) {
-                   [self.delegate tivoReportsNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
+				   [self.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
                }
            }
        } ];
@@ -930,8 +942,17 @@ static NSArray * imageResponseTemplate = nil;
     [self undeleteShowsWithRecordIds:recordingIds]; //coincidentally the same command
 }
 
+-(void) receiveSleepNotification: (id) sender {
+	DDLogMajor(@"RPC sleeping; terminating connection");
+	[self tearDownStreams];
+}
+
 -(void) receiveWakeNotification: (id) sender {
-    [self checkStreamStatus];
+	DDLogMajor(@"System waking");
+	if ([self streamClosed: self.iStream ] ) {
+		//should be closed normally; let things settle and re-open
+		[self performSelector:@selector(launchServer) withObject:nil afterDelay:1];
+	}
 }
 
 -(void) stopServer {
@@ -939,7 +960,6 @@ static NSArray * imageResponseTemplate = nil;
 }
 
 -(void) sharedShutdown {
-    [self.deadmanTimer invalidate]; self.deadmanTimer = nil;
     [self tearDownStreams];
     [self saveDefaults];
 }
@@ -947,7 +967,6 @@ static NSArray * imageResponseTemplate = nil;
 -(void) dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver: self];
-    [self sharedShutdown];
     [self appWillTerminate:nil];
 }
 
