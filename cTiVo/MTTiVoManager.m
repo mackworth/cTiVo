@@ -1535,25 +1535,17 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(void) setDownloadDirectory: (NSString *) newDir {
  	if (newDir != _downloadDirectory) {
-        if ([newDir isEquivalentToPath:kMTTmpDir] ||
-            [newDir isEquivalentToPath:[[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory]]) {
-            DDLogReport(@"Can't set download directory to temp directory%@; trying default", newDir);
+        if (newDir.length > 0 && [newDir isEquivalentToPath:[[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath]]) {
+            DDLogReport(@"Can't set download directory to temp directory %@; trying default", newDir);
             newDir = nil;
         }
-		if (newDir.length > 0) {
-			if (![self checkDirectory:newDir]) {
-				DDLogReport(@"Can't open user's download directory %@; trying default", newDir);
-				newDir = nil;
-			}
-		}
-		if (!newDir) {
+		if (newDir.length == 0) {
 			// nil, or it was bad
 			newDir = [self defaultDownloadDirectory];
-			
-			if (![self checkDirectory:newDir]) {
-				DDLogReport(@"Can't open default download directory:  %@ ", newDir); //whoa. very bad things in user directory land
-				newDir = nil;
-			}
+		}
+		if (![self checkDirectory:newDir]) {
+			DDLogReport(@"Can't open user's download directory %@, even default one! ", newDir);
+			newDir = nil;
 		}
 		if (newDir) {
  			[[NSUserDefaults standardUserDefaults] setValue:newDir forKey:kMTDownloadDirectory];
@@ -1576,14 +1568,16 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(NSString *)tmpFilesDirectory {
 
-    NSString * tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:tmpPath]) {
-            [[NSUserDefaults standardUserDefaults] setObject:tmpPath forKey: kMTTmpFilesDirectory]; //trigger validation process
-            tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
-        }
-//    }
+    NSString * tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath];
+	if (tmpPath.length > 0) {
+		if (![[NSFileManager defaultManager] fileExistsAtPath:tmpPath]) {
+			[[NSUserDefaults standardUserDefaults] setObject:tmpPath forKey: kMTTmpFilesPath]; //trigger validation process
+			tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath];
+		}
+	} else {
+		tmpPath = [NSTemporaryDirectory() stringByAppendingString:@"/ctivo"];
+	}
     return tmpPath;
- 
 }
 
 
@@ -1694,12 +1688,16 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 //        return;
 //    }
 	NSDictionary * TXTRecord = [NSNetService dictionaryFromTXTRecordData:sender.TXTRecordData ];
+	NSString * TSN = [self dataToString:TXTRecord[@"tsn"]];
 	for (NSString * key in [TXTRecord allKeys]) {
-		DDLogDetail(@"TXTKey: %@ = %@", key, [self dataToString:TXTRecord[key]]);
+		if ([key isEqualToString:@"TSN"] && TSN.length > 4) {
+			DDLogDetail(@"TXTKey: tsn = %@", [TSN maskSerialNumber: TSN]);
+		}  else {
+			DDLogDetail(@"TXTKey: %@ = %@", key, [self dataToString:TXTRecord[key]]);
+		}
 	}
 
 	NSString * platform = [self dataToString:TXTRecord[@"platform"]];
-	NSString * TSN = [self dataToString:TXTRecord[@"tsn"]];
 	NSString * identity = [self dataToString:TXTRecord[@"identity"]];
     NSString * version= [self dataToString:TXTRecord[@"swversion"]];
     
@@ -1778,11 +1776,14 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(NSString *) maskMediaKeys {
     NSString * outString =[self description];
+	NSString * lastMediaKey = @"";
     for (NSDictionary * tiVo in tiVoManager.savedTiVos) {
         NSString * mediaKey = tiVo[kMTTiVoMediaKey];
+		if ([lastMediaKey isEqualToString:mediaKey]) continue;
         if (mediaKey.length > 0) {
             NSString * maskedKey = [NSString stringWithFormat:@"<<%@ MediaKey>>",tiVo[kMTTiVoUserName]];
             outString = [outString stringByReplacingOccurrencesOfString:mediaKey withString:maskedKey];
+			lastMediaKey = mediaKey;
         }
     }
     return outString;

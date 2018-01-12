@@ -72,7 +72,7 @@ static SecKeychainRef keychain = NULL;  //
         //SecPKCS12Import will automatically add the items to the system keychain
         //so we create our own keychain
         //make sure we create a unique keychain name:
-        NSString *temporaryDirectory = NSTemporaryDirectory();
+        NSString *temporaryDirectory = tiVoManager.tmpFilesDirectory;
         NSString *keychainPath = [[temporaryDirectory stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]] stringByAppendingPathExtension:@"keychain"];
 
         OSStatus status = SecKeychainCreate(keychainPath.UTF8String,
@@ -110,6 +110,7 @@ static SecKeychainRef keychain = NULL;  //
     SecKeychainGetStatus(keychain, &keyStatus);
     UInt32 mask = (kSecUnlockStateStatus | kSecReadPermStatus);
     if (!((keyStatus & mask) == mask)) {
+		DDLogMajor(@"Unlocking RPC keychain again");
         SecKeychainUnlock(keychain, (UInt32)password.length, password.UTF8String, TRUE);
     }
     return _myCerts;

@@ -82,7 +82,7 @@
                         <binding destination="15" name="value" keyPath="values.CrashlyticsOptOut" id="piT-sf-UVU"/>
                     </connections>
                 </button>
-                <textField toolTip="Where cTiVo stores temporary files (default is /tmp/ctivo/)" verticalHuggingPriority="750" misplaced="YES" id="67">
+                <textField toolTip="Where cTiVo stores large, temporary files (normally blank for default)" verticalHuggingPriority="750" misplaced="YES" id="67">
                     <rect key="frame" x="18" y="462" width="171" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Temporary Files Directory:" id="70">
@@ -91,7 +91,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Where cTiVo stores temporary files (default is /tmp/ctivo/)" verticalHuggingPriority="750" misplaced="YES" id="66" userLabel="Text Field - Temporary Files">
+                <textField toolTip="Where cTiVo stores large, temporary files (normally blank for default)" verticalHuggingPriority="750" misplaced="YES" id="66" userLabel="Text Field - Temporary Files">
                     <rect key="frame" x="190" y="457" width="287" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" continuous="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="" drawsBackground="YES" id="71">
@@ -100,7 +100,7 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
-                        <binding destination="15" name="value" keyPath="values.TmpFilesDirectory" id="6wL-t6-PKg"/>
+                        <binding destination="15" name="value" keyPath="values.TmpFilesPath" id="6wL-t6-PKg"/>
                     </connections>
                 </textField>
                 <textField toolTip="Not used yet." verticalHuggingPriority="750" misplaced="YES" id="48">

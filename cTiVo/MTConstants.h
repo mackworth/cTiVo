@@ -143,7 +143,6 @@
 #define kMTTivoShowPasteBoardType @"com.cTiVo.TivoShow"
 #define kMTDownloadPasteBoardType @"com.cTiVo.Download"
 #define kMTInputLocationToken @"<<<INPUT>>>"
-#define kMTTmpDir @"/tmp/ctivo/"
 
 //XATTRs
 
@@ -190,8 +189,11 @@
 #define kMTUseMemoryBufferForDownload @"UseMemoryBufferForDownload" //Default is YES.  Turn off to make sure downloaded file is complete. Principally for debugging use and checkpointing.
 #define kMTSaveMPGFile @"SaveMPGFile"               //Don't delete decrypted MPG file after processing (also puts in download v tmp folder and disables simultaneous encoding)
 
+#define kMTTmpFilesDirectoryObsolete @"TmpFilesDirectory"   //Where are temporary files saved
+#define kMTTmpDirObsolete @"/tmp/ctivo/"
+#define kMTTmpFilesPath @"TmpFilesPath"   //Where are temporary files saved
+
 #define kMTFileNameFormat @"FileNameFormat"			//keyword pattern for filenames
-#define kMTTmpFilesDirectory @"TmpFilesDirectory"   //Where are temporary files saved
 #define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | OriginalAirDate [\"-\" ExtraEpisode][\" - \" EpisodeTitle | Guests]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
 #define kMTcTiVoFolder @"[[MainTitle / MainTitle \" - \" EpisodeTitle | Guests | OriginalAirDate]|[\"Movies\"  / MainTitle \" (\" MovieYear \")\"]]"
 #define kMTcTiVoDefault @"[Title]"
