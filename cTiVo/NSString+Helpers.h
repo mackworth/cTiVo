@@ -34,4 +34,6 @@
 
 -(void) setXAttr:(NSString *) key toValue:(NSString *) value;
 
+-(NSString *) maskSerialNumber: (NSString *) TSN;
+
 @end

@@ -444,7 +444,13 @@ __DDLOGHERE__
         [updatedSavedTiVos addObject:tiVoDict];
 	}
     [[NSUserDefaults standardUserDefaults] setValue:updatedSavedTiVos forKeyPath:kMTTiVos];
-    DDLogVerbose(@"Saving new tivos %@",[updatedSavedTiVos maskMediaKeys]);
+	if (LOG_VERBOSE) {
+		NSString * tivos = [updatedSavedTiVos maskMediaKeys];
+		for (NSDictionary * tivo in updatedSavedTiVos) {
+			tivos = [tivos maskSerialNumber:tivo[@"tiVoTSN"]];
+		}
+		DDLogVerbose(@"Saving new TiVos: %@", tivos);
+	}
 }
 
 -(int) nextManualTiVoID{

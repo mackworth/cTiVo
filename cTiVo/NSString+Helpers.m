@@ -160,5 +160,13 @@
              0, 0);
 }
 
+-(NSString *) maskSerialNumber: (NSString *) TSN  {
+	if (TSN.length > 4 && [self contains:TSN]) {
+		NSString * maskedTSN = [NSString  stringWithFormat: @"%@XXXXXXXXX%@", [TSN substringToIndex:2], [TSN substringFromIndex:(TSN.length-4)]];
+		return [self stringByReplacingOccurrencesOfString:TSN withString:maskedTSN ];
+	} else {
+		return self;
+	}
+}
 
 @end

@@ -10,6 +10,7 @@
 #import "DDLog.h"
 #import "MTTiVoManager.h" //just for maskMediaKeys
 #import "NSNotificationCenter+Threads.h"
+#import "NSString+Helpers.h"
 
 @interface MTTivoRPC () <NSStreamDelegate>
 @property (nonatomic, strong) NSInputStream *iStream;
@@ -536,16 +537,7 @@ static NSRegularExpression * isFinalRegex = nil;
     }
 }
 -(NSString *) maskTSN:(NSObject *) data {
-
-    if (self.tiVoSerialNumber.length > 0) {
-        NSString * outString = data.description;
-        NSString * maskedKey = [NSString stringWithFormat: @"<<%@ SerialNumber>", self.delegate.description];
-        return [outString stringByReplacingOccurrencesOfString: self.tiVoSerialNumber
-                                               withString: maskedKey];
-    } else {
-        return @"";
-    }
-
+	return [[data description] maskSerialNumber:self.tiVoSerialNumber];
 }
 
 -(void) sendRpcRequest:(NSString *) type monitor:(BOOL) monitor withData: (NSDictionary *) data completionHandler: (void (^)(NSDictionary * jsonResponse, BOOL isFinal)) completionHandler {
