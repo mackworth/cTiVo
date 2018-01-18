@@ -91,18 +91,6 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Where cTiVo stores large, temporary files (normally blank for default)" verticalHuggingPriority="750" misplaced="YES" id="66" userLabel="Text Field - Temporary Files">
-                    <rect key="frame" x="190" y="457" width="287" height="22"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" continuous="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="" drawsBackground="YES" id="71">
-                        <font key="font" metaFont="system"/>
-                        <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                    <connections>
-                        <binding destination="15" name="value" keyPath="values.TmpFilesPath" id="6wL-t6-PKg"/>
-                    </connections>
-                </textField>
                 <textField toolTip="Not used yet." verticalHuggingPriority="750" misplaced="YES" id="48">
                     <rect key="frame" x="18" y="432" width="135" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -125,9 +113,9 @@
                     </connections>
                 </textField>
                 <button toolTip="Displays statistics from theTVDB.com lookup process. Need to Empty Caches first to get most complete information." verticalHuggingPriority="750" misplaced="YES" id="98" userLabel="TVDB Stats Button">
-                    <rect key="frame" x="14" y="391" width="166" height="32"/>
+                    <rect key="frame" x="13" y="391" width="168" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="push" title="View TVDB statistics" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="99">
+                    <buttonCell key="cell" type="push" title="View TVDB Statistics" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="99">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -213,17 +201,6 @@
                     <rect key="frame" x="0.0" y="21" width="567" height="359"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                 </customView>
-                <button toolTip="Opens dialog to select Temporary Files Directory" verticalHuggingPriority="750" misplaced="YES" id="68" userLabel="Browse tmp Dir Square Textured Button">
-                    <rect key="frame" x="485" y="455" width="79" height="25"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="squareTextured" title="Browse" bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="69">
-                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <action selector="selectTmpDir:" target="-2" id="72"/>
-                    </connections>
-                </button>
                 <popUpButton toolTip="Choose program with which to decode TiVo files " verticalHuggingPriority="750" misplaced="YES" id="7qa-Kj-zsO" userLabel="Decode Popup Button">
                     <rect key="frame" x="441" y="496" width="125" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
@@ -269,7 +246,7 @@
                     </connections>
                 </popUpButton>
                 <textField toolTip="Specifies the number of times cTiVo will try to download before giving up." verticalHuggingPriority="750" misplaced="YES" id="52" userLabel="Text Field Retries">
-                    <rect key="frame" x="510" y="558" width="53" height="22"/>
+                    <rect key="frame" x="511" y="559" width="53" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" continuous="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="55">
                         <font key="font" metaFont="system"/>
@@ -284,6 +261,22 @@
                         </binding>
                     </connections>
                 </textField>
+                <button verticalHuggingPriority="750" misplaced="YES" id="RwK-px-nqd" userLabel="Temporary Directory Button">
+                    <rect key="frame" x="184" y="452" width="386" height="32"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="push" bezelStyle="rounded" alignment="left" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="vVY-gW-YIa">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="selectTmpDir:" target="-2" id="2EN-TR-qJo"/>
+                        <binding destination="15" name="title" keyPath="values.TmpFilesPath" id="O2r-dj-gLS">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">MTHideTempFolder</string>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </button>
             </subviews>
             <point key="canvasLocation" x="425.5" y="375"/>
         </customView>

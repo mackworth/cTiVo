@@ -1532,60 +1532,29 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     return _detailsTempDirectory;
 }
 
--(BOOL) checkDirectory: (NSString *) directory {
-	return ([[NSFileManager defaultManager]	createDirectoryAtPath:[directory stringByExpandingTildeInPath]
-										  withIntermediateDirectories:YES
-														   attributes:nil
-																error:nil]);
-}
-
 -(void) setDownloadDirectory: (NSString *) newDir {
- 	if (newDir != _downloadDirectory) {
-        if (newDir.length > 0 && [newDir isEquivalentToPath:[[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath]]) {
-            DDLogReport(@"Can't set download directory to temp directory %@; trying default", newDir);
-            newDir = nil;
-        }
-		if (newDir.length == 0) {
-			// nil, or it was bad
-			newDir = [self defaultDownloadDirectory];
-		}
-		if (![self checkDirectory:newDir]) {
-			DDLogReport(@"Can't open user's download directory %@, even default one! ", newDir);
-			newDir = nil;
-		}
-		if (newDir) {
- 			[[NSUserDefaults standardUserDefaults] setValue:newDir forKey:kMTDownloadDirectory];
-			_downloadDirectory = newDir;
-		}
-	}
+	[[NSUserDefaults standardUserDefaults] setObject:newDir forKey: kMTDownloadDirectory];
 }
 
--(NSString *) defaultDownloadDirectory {
-	return [NSString stringWithFormat:@"%@/%@/",NSHomeDirectory(),kMTDefaultDownloadDir];
-//note this will fail in sandboxing. Need something like...
+-(NSString *)downloadDirectory {
+	NSString * downloadPath =  [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory];
+	if (![[NSFileManager defaultManager] fileExistsAtPath:downloadPath]) {
+		self.downloadDirectory = downloadPath; // trigger validation process
+	}
+	return downloadPath;
+}
 
-//		NSArray * movieDirs = [[NSFileManager defaultManager] URLsForDirectory:NSMoviesDirectory inDomains:NSUserDomainMask];
-//		if (movieDirs.count >0) {
-//			NSURL *movieURL = (NSURL *) movieDirs[0];
-//			return [movieURL URLByAppendingPathComponent:@"TiVoShows"].path;
-//      }
-
+-(void) setTmpFilesDirectory: (NSString *) newDir {
+	[[NSUserDefaults standardUserDefaults] setObject:newDir forKey: kMTTmpFilesPath];
 }
 
 -(NSString *)tmpFilesDirectory {
-
-    NSString * tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath];
-	if (tmpPath.length > 0) {
-		if (![[NSFileManager defaultManager] fileExistsAtPath:tmpPath]) {
-			[[NSUserDefaults standardUserDefaults] setObject:tmpPath forKey: kMTTmpFilesPath]; //trigger validation process
-			tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath];
-		}
-	} else {
-		tmpPath = [NSTemporaryDirectory() stringByAppendingString:@"/ctivo"];
+	NSString * tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath];
+	if (![[NSFileManager defaultManager] fileExistsAtPath:tmpPath]) {
+		self.tmpFilesDirectory = tmpPath; // trigger validation process
 	}
-    return tmpPath;
+	return tmpPath;
 }
-
 
 -(NSMutableArray *)tiVoShows
 {

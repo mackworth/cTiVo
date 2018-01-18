@@ -156,7 +156,6 @@
 
 #define kMTUserDefaultVersion @"UserDefaultVersion"  //have we updated this users defaults (0 = original 2= mencoder transition
 #define kMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information
-#define kMTTrustTVDB @"TrustTVDB"          //Should we override TiVo with TVDB season/episode; obsolete
 #define kMTTrustTVDBEpisodes @"TrustTVDBEpisodes"     //Should we override TiVo with TVDB season/episode
 #define KMTPreferredImageSource @"PrefImageSource"   //which source does user prefer (see tivoshow.m for MTImageSource enum)
 
@@ -181,7 +180,6 @@
 //#define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
 #define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
 #define kMTAllowDups @"AllowDups"			//Whether to allow duplicate entries in downloads/subscriptions (e.g. for different formats)
-#define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir) (obsolete)
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
 #define kMTShowSuggestions @"ShowSuggestions"		// Whether to display Tivo Suggestions (and to subscribe thereto)
 #define kMTShowFolders @"ShowFolders"		// Whether to display shows grouped in Folders or not
@@ -189,8 +187,6 @@
 #define kMTUseMemoryBufferForDownload @"UseMemoryBufferForDownload" //Default is YES.  Turn off to make sure downloaded file is complete. Principally for debugging use and checkpointing.
 #define kMTSaveMPGFile @"SaveMPGFile"               //Don't delete decrypted MPG file after processing (also puts in download v tmp folder and disables simultaneous encoding)
 
-#define kMTTmpFilesDirectoryObsolete @"TmpFilesDirectory"   //Where are temporary files saved
-#define kMTTmpDirObsolete @"/tmp/ctivo/"
 #define kMTTmpFilesPath @"TmpFilesPath"   //Where are temporary files saved
 
 #define kMTFileNameFormat @"FileNameFormat"			//keyword pattern for filenames
@@ -236,8 +232,12 @@
 #define kMTChannelInfoUseTS @"useTS"
 
 //Obsolete keys, but kept for upgrade path
-#define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address. -replaced by MTTiVos
-#define kMTMediaKeys @"MediaKeys"                   //MAK dictionary, indexed by TiVo Name  --replaced by MTTiVos
+#define kMTMakeSubDirsObsolete @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir) (obsolete)
+#define kMTTrustTVDBObsolete @"TrustTVDB"          //Should we override TiVo with TVDB season/episode; obsolete
+#define kMTManualTiVosObsolete @"ManualTiVos"           //Array of manually defined tiVo address. -replaced by MTTiVos
+#define kMTMediaKeysObsolete @"MediaKeys"                   //MAK dictionary, indexed by TiVo Name  --replaced by MTTiVos
+#define kMTTmpFilesDirectoryObsolete @"TmpFilesDirectory"   //Where are temporary files saved
+#define kMTTmpDirObsolete @"/tmp/ctivo/"
 
 //List of keys in TiVo Preference Dictionary
 #define kMTTiVoEnabled @"enabled"

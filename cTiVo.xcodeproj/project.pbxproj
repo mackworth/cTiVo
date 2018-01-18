@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */; };
 		1E0C5DD9170236B30015C55D /* recent-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E0C5DD8170236B30015C55D /* recent-recording.png */; };
+		1E152981201006B0000D1705 /* MTOpenPanelDefaultView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E152980201006B0000D1705 /* MTOpenPanelDefaultView.xib */; };
+		1E15298420102C3D000D1705 /* MTHideTempFolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E15298320102C3D000D1705 /* MTHideTempFolder.m */; };
 		1E17E1191FF7ED8900AF0F7C /* MTShowFolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E17E1181FF7ED8900AF0F7C /* MTShowFolder.m */; };
 		1E18145E1708AC1500166E5F /* cTiVo.help in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145D1708AC1500166E5F /* cTiVo.help */; };
 		1E1814601708AF7000166E5F /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145F1708AF7000166E5F /* cTiVo.icns */; };
@@ -299,6 +301,9 @@
 		1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowDrawer.xib; sourceTree = "<group>"; };
 		1E0C5DD8170236B30015C55D /* recent-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "recent-recording.png"; sourceTree = "<group>"; };
 		1E1395941F5928E800FFA4E7 /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
+		1E152980201006B0000D1705 /* MTOpenPanelDefaultView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MTOpenPanelDefaultView.xib; sourceTree = "<group>"; };
+		1E15298220102C3D000D1705 /* MTHideTempFolder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTHideTempFolder.h; sourceTree = "<group>"; };
+		1E15298320102C3D000D1705 /* MTHideTempFolder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTHideTempFolder.m; sourceTree = "<group>"; };
 		1E17E1171FF7ED8900AF0F7C /* MTShowFolder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTShowFolder.h; sourceTree = "<group>"; };
 		1E17E1181FF7ED8900AF0F7C /* MTShowFolder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTShowFolder.m; sourceTree = "<group>"; };
 		1E18145D1708AC1500166E5F /* cTiVo.help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cTiVo.help; sourceTree = "<group>"; };
@@ -979,6 +984,8 @@
 				1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */,
 				D2D60BD216766FA600CE32DE /* GTMNSString+HTML.h */,
 				D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */,
+				1E15298220102C3D000D1705 /* MTHideTempFolder.h */,
+				1E15298320102C3D000D1705 /* MTHideTempFolder.m */,
 				1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */,
 				1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */,
 				1E5486721FF898A800412D7B /* PFMoveApplication.h */,
@@ -1029,6 +1036,7 @@
 		D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */ = {
 			isa = PBXGroup;
 			children = (
+				1E152980201006B0000D1705 /* MTOpenPanelDefaultView.xib */,
 				D2D60BCD16766FA600CE32DE /* MTDownloadTableView.h */,
 				D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */,
 				D279D3E8167A32FA007F0677 /* MTMainWindowController.h */,
@@ -1132,6 +1140,7 @@
 				1E964CA31882768A00C19046 /* save-until-i-delete-recording@2x.png in Resources */,
 				D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */,
 				D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */,
+				1E152981201006B0000D1705 /* MTOpenPanelDefaultView.xib in Resources */,
 				D2A7269D16A25DEB00C58C5F /* MTFormatEditorController.xib in Resources */,
 				D219D5E916A4F88D00C79962 /* MTHelpViewController.xib in Resources */,
 				D219D5F416A503C100C79962 /* EncoderHelpText.rtf in Resources */,
@@ -1241,6 +1250,7 @@
 				D2D60BD916766FA600CE32DE /* MTProgramTableView.m in Sources */,
 				D20BA5531678F7BD007BADB9 /* MTProgressindicator.m in Sources */,
 				D279D3EB167A32FA007F0677 /* MTMainWindowController.m in Sources */,
+				1E15298420102C3D000D1705 /* MTHideTempFolder.m in Sources */,
 				1E56038C1F44DFA400454157 /* MTTivoRPC.m in Sources */,
 				D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */,
 				D2DFA68F1683C27600CD6CE0 /* MTDownloadCheckTableCell.m in Sources */,

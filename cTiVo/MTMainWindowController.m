@@ -13,6 +13,7 @@
 #import "MTSubscriptionList.h"
 #import "MTHelpViewController.h"
 #import "MTShowFolder.h"
+#import "MTAppDelegate.h"
 
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"
@@ -90,7 +91,6 @@ __DDLOGHERE__
 	
     [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidMoveNotification object:nil];
     [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
-	[tiVoManager addObserver:self forKeyPath:@"downloadDirectory" options:NSKeyValueObservingOptionInitial context:nil];
 	
 	[self buildColumnMenuForTables ];
 	[pausedLabel setNextResponder:downloadQueueTable];  //Pass through mouse events to the downloadQueueTable.
@@ -113,13 +113,7 @@ __DDLOGHERE__
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-	if ([keyPath compare:@"downloadDirectory"] == NSOrderedSame) {
-		DDLogDetail(@"changing downloadDirectory");
-		NSString *dir = tiVoManager.downloadDirectory;
-		if (!dir) dir = @"Directory not available!";
-		downloadDirectory.title   = dir;
-		downloadDirectory.toolTip = dir;
-    } else 	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
+	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
         [formatListPopUp selectFormat:[tiVoManager selectedFormat]];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -406,8 +400,14 @@ __DDLOGHERE__
     } else if (menuTableRow >= 0 && //somehow happens
                menuTableRow < tiVoShowTable.numberOfRows) {
 		MTTiVoShow *thisShow = [tiVoShowTable itemAtRow:menuTableRow];
+		NSArray <MTTiVoShow *> * theseShows = @[thisShow];
 		if ([thisShow isKindOfClass:[MTShowFolder class]]) {
-			thisShow = ((MTShowFolder *)thisShow).folder[0];
+			theseShows = ((MTShowFolder *)thisShow).folder;
+			if (theseShows.count) {
+				thisShow = theseShows[0];
+			} else {
+				return;
+			}
 		}
        if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
             [self openDrawer:thisShow];
@@ -422,12 +422,12 @@ __DDLOGHERE__
                 [thisShow revealInFinder:[thisShow copiesOnDisk]];
             }
         } else if ([menu.title caseInsensitiveCompare:@"Delete From TiVo"] == NSOrderedSame) {
-            if ([self confirmBehavior:@"delete" preposition: @"from" forShows:@[thisShow]]) {
-                [tiVoManager deleteTivoShows:@[thisShow]];
+            if ([self confirmBehavior:@"delete" preposition: @"from" forShows:theseShows]) {
+                [tiVoManager deleteTivoShows:theseShows];
             }
         } else if ([menu.title caseInsensitiveCompare:@"Stop Recording"] == NSOrderedSame) {
-            if ([self confirmBehavior:@"stop recording" preposition:@"on" forShows:@[thisShow]]) {
-                [tiVoManager stopRecordingShows:@[thisShow]];
+            if ([self confirmBehavior:@"stop recording" preposition:@"on" forShows:theseShows]) {
+                [tiVoManager stopRecordingShows:theseShows];
             }
         }
     }
@@ -600,19 +600,11 @@ __DDLOGHERE__
  	[downloadQueueTable deselectAll:nil];
 }
 
--(IBAction)getDownloadDirectory:(id)sender
-{
-	NSOpenPanel *myOpenPanel = [NSOpenPanel openPanel];
-	[myOpenPanel setCanChooseDirectories:YES];
-	[myOpenPanel setCanChooseFiles:NO];
-	[myOpenPanel setAllowsMultipleSelection:NO];
-    [myOpenPanel setCanCreateDirectories:YES];
-    [myOpenPanel setTitle:@"Choose Directory for Download of Videos"];
-    [myOpenPanel setPrompt:@"Choose"];
-	NSInteger ret = [myOpenPanel runModal];
-	if (ret == NSFileHandlingPanelOKButton) {
-		tiVoManager.downloadDirectory = myOpenPanel.URL.path;
-	}
+-(IBAction)getDownloadDirectory:(id)sender {
+	[(MTAppDelegate *)[NSApplication sharedApplication].delegate promptForNewDirectory:tiVoManager.downloadDirectory
+																		   withMessage:@"Choose Directory for Download of Videos"
+																			 isProblem:NO
+																			 isTempDir:NO];
 }
 
 #pragma mark - Download Options
@@ -849,7 +841,6 @@ __DDLOGHERE__
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [tiVoManager removeObserver:self forKeyPath:@"selectedFormat"];
-    [tiVoManager removeObserver:self forKeyPath:@"downloadDirectory"];
 }
 
 

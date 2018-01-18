@@ -61,7 +61,7 @@ static SecKeychainRef keychain = NULL;  //
 }
 
 +(NSArray *) myCerts {
-    NSString * password = @"LwrbLEFYvG";
+	NSString * keychainPassword = @"password";
     static dispatch_once_t onceToken = 0;
     dispatch_once(&onceToken, ^{
         DDLogDetail(@"Importing cert");
@@ -73,20 +73,21 @@ static SecKeychainRef keychain = NULL;  //
         //SecPKCS12Import will automatically add the items to the system keychain
         //so we create our own keychain
         //make sure we create a unique keychain name:
-        NSString *temporaryDirectory = tiVoManager.tmpFilesDirectory;
+		NSString *temporaryDirectory = NSTemporaryDirectory();
         NSString *keychainPath = [[temporaryDirectory stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]] stringByAppendingPathExtension:@"keychain"];
 
         OSStatus status = SecKeychainCreate(keychainPath.UTF8String,
-                                            (UInt32)(password.length),
-                                            password.UTF8String,
+                                            (UInt32)(keychainPassword.length),
+                                            keychainPassword.UTF8String,
                                             FALSE,
                                             NULL,
                                             &keychain);
         if (status != errSecSuccess) {
             DDLogReport(@"Could not create temporary keychain \"%@\": [%d] %@", keychainPath, (int)status, securityErrorMessageString(status));
         }
+		NSString * tivoPassword = @"LwrbLEFYvG";
 
-        NSDictionary * optionsDictionary = @{(id)kSecImportExportPassphrase: password,
+        NSDictionary * optionsDictionary = @{(id)kSecImportExportPassphrase: tivoPassword,
                                              (id)kSecImportExportKeychain:   (__bridge id)keychain};
         CFArrayRef p12Items = NULL;
         OSStatus result = SecPKCS12Import((__bridge CFDataRef)p12Data, (__bridge CFDictionaryRef)optionsDictionary, &p12Items);
@@ -112,7 +113,7 @@ static SecKeychainRef keychain = NULL;  //
     UInt32 mask = (kSecUnlockStateStatus | kSecReadPermStatus);
     if (!((keyStatus & mask) == mask)) {
 		DDLogMajor(@"Unlocking RPC keychain again");
-        SecKeychainUnlock(keychain, (UInt32)password.length, password.UTF8String, TRUE);
+        SecKeychainUnlock(keychain, (UInt32)keychainPassword.length, keychainPassword.UTF8String, TRUE);
     }
     return _myCerts;
 }

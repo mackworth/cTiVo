@@ -145,7 +145,7 @@ void signalHandler(int signal)
 @property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
 @property (nonatomic, strong) NSTimer * pseudoTimer;
-
+@property (nonatomic, strong) NSOpenPanel* myOpenPanel;
 
 @end
 
@@ -216,14 +216,30 @@ void signalHandler(int signal)
 
     DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
 
+	//Upgrade old defaults
 	NSString * oldtmp = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectoryObsolete];
 	if (oldtmp) {
 		if (![oldtmp isEqualToString:kMTTmpDirObsolete]) {
 			[[NSUserDefaults standardUserDefaults] setObject:oldtmp forKey: kMTTmpFilesPath];
 		}
 		[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTTmpFilesDirectoryObsolete];
+		NSString * oldDownload = [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory];
+		if ([oldDownload isEqualToString:[NSString pathWithComponents:@[NSHomeDirectory(),kMTDefaultDownloadDir]]]) {
+			[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTDownloadDirectory];
+		}
+		[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTTmpFilesDirectoryObsolete];
+		
 	}
-	
+	if ([[NSUserDefaults standardUserDefaults] stringForKey:kMTFileNameFormat].length == 0) {
+		NSString * newDefaultFileFormat = kMTcTiVoDefault;
+		if ([[NSUserDefaults standardUserDefaults] boolForKey: kMTMakeSubDirsObsolete]) {
+			newDefaultFileFormat = kMTcTiVoFolder;
+			[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTMakeSubDirsObsolete];
+		}
+		[[NSUserDefaults standardUserDefaults] setObject:newDefaultFileFormat forKey: kMTFileNameFormat];
+		
+	}
+
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
 										  @NO, kMTShowCopyProtected,
 										  @YES, kMTShowSuggestions,
@@ -237,8 +253,8 @@ void signalHandler(int signal)
                                           @YES, kMTiTunesIcon,
 										  @YES, kMTUseMemoryBufferForDownload,
 										  // @NO, kMTAllowDups, future
-										  [NSString pathWithComponents:@[NSHomeDirectory(),kMTDefaultDownloadDir]],kMTDownloadDirectory,
-                                          @"",kMTTmpFilesPath,
+										  [self defaultDownloadDirectory],kMTDownloadDirectory,
+                                          [self defaultTmpDirectory],kMTTmpFilesPath,
                                           @{},kMTTheTVDBCache,
 										  kMTcTiVoDefault,kMTFileNameFormat,
 										  @NO, kMTiTunesContentIDExperiment,
@@ -255,6 +271,7 @@ void signalHandler(int signal)
                                           nil];
 
     [[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
+	
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelUserQuit) name:kMTNotificationUserCanceledQuit object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getMediaKeyFromUserOnMainThread:) name:kMTNotificationMediaKeyNeeded object:nil];
@@ -263,11 +280,6 @@ void signalHandler(int signal)
     mediaKeyQueue = [NSMutableArray new];
     _tiVoGlobalManager = [MTTiVoManager sharedTiVoManager];
 
-   [_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
-    [_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueObservingOptionInitial context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTRunComSkip options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTmpFilesPath options:NSKeyValueObservingOptionInitial context:nil];
 	_mainWindowController = nil;
 	//	_formatEditorController = nil;
 	[self showMainWindow:nil];
@@ -275,22 +287,23 @@ void signalHandler(int signal)
 	signal(SIGPIPE, &signalHandler);
 	signal(SIGABRT, &signalHandler );
 	
-	if ([[NSUserDefaults standardUserDefaults] stringForKey:kMTFileNameFormat].length == 0) {
-		NSString * newDefaultFileFormat = kMTcTiVoDefault;
-		if ([[NSUserDefaults standardUserDefaults] boolForKey: kMTMakeSubDirs]) {
-			newDefaultFileFormat = kMTcTiVoFolder;
-		}
-		[[NSUserDefaults standardUserDefaults] setObject:newDefaultFileFormat forKey: kMTFileNameFormat];
-
-	}
-	[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTMakeSubDirs];
-
 	//Turn off check mark on Pause/Resume queue menu item
 	[pauseMenuItem setOnStateImage:nil];
-	[self.tiVoGlobalManager determineCurrentProcessingState];
 
-    //Initialize tmp directory
-    [self clearTmpDirectory];
+	[_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
+	[_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueObservingOptionInitial context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTRunComSkip options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTmpFilesPath options:NSKeyValueObservingOptionInitial context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDownloadDirectory options:NSKeyValueObservingOptionInitial context:nil];
+	
+	[[[NSWorkspace sharedWorkspace] notificationCenter]   addObserver: self selector: @selector(checkVolumes:) name: NSWorkspaceDidWakeNotification object: NULL];
+	[[[NSWorkspace sharedWorkspace] notificationCenter  ] addObserver:self selector:@selector(mountVolume:) name:NSWorkspaceDidMountNotification object:nil];
+	[[[NSWorkspace sharedWorkspace] notificationCenter  ] addObserver:self selector: @selector(unmountVolume:) name:NSWorkspaceDidUnmountNotification object:nil];
+	
+	//Initialize tmp directory
+	[self clearTmpDirectory];
+	
 
 	//Set up callback for sleep notification (this is 10.5 method and is still valid.  There is newer UI in 10.6 on.
 	
@@ -323,8 +336,9 @@ void signalHandler(int signal)
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(saveState) userInfo:nil repeats:YES];
 	
     self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: 61 target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
+	
+	[self.tiVoGlobalManager determineCurrentProcessingState];
     DDLogDetail(@"Finished appDidFinishLaunch");
-
  }
 
 -(void) launchPseudoEvent {
@@ -339,25 +353,32 @@ void signalHandler(int signal)
     }
 }
 
-NSOpenPanel* myOpenPanel = nil;  //weird bug where sometimes we're called twice for directory change.
-                          //from [NSUserDefaultsController _setSingleValue:forKey:]
-BOOL wasPaused = NO;
-BOOL tempDirectory = NO;
 
--(void) closeDirectoryPanel {
-    [myOpenPanel close];
-    myOpenPanel = nil;
-    [[[NSWorkspace sharedWorkspace] notificationCenter  ] removeObserver:self];
-
-    [[NSUserDefaults standardUserDefaults] setBool:wasPaused forKey:kMTQueuePaused];
-    [tiVoManager determineCurrentProcessingState];
+-(void)mountVolume: (NSNotification *) notification {
+	if (self.myOpenPanel) {
+		NSString *devicePath = notification.userInfo[ @"NSDevicePath"];
+		if ([[[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory] contains:devicePath] ||
+			[[[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath] contains:devicePath]) {
+			if (self.myOpenPanel) {
+				//new volume came online during openPanel for tempDir or downloadDir, so let's try it
+				[self.myOpenPanel.sheetParent endSheet:self.myOpenPanel returnCode: NSModalResponseCancel ];
+			}
+			[self checkVolumes:notification];
+		}
+	}
 }
 
--(void)newVolume: (NSNotification *) notification {
-    if (!myOpenPanel) return;
-    //new volume came online during openPanel for tempDir, so let's try it for tmpDir
-    [self closeDirectoryPanel];
-    [self validateTmpDirectory];
+-(void)unmountVolume: (NSNotification *) notification {
+	NSString *devicePath = notification.userInfo[ @"NSDevicePath"];
+	if ([[[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory] contains:devicePath] ||
+		[[[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath] contains:devicePath]) {
+		[self checkVolumes:notification];
+	}
+}
+
+-(void)checkVolumes: (NSNotification *) notification {
+	[self validateDownloadDirectory];
+	[self validateTmpDirectory];
 }
 
 -(void) checkDirectoryAndPurge: (NSURL *) directory  {
@@ -396,42 +417,109 @@ BOOL tempDirectory = NO;
     }
 }
 
--(void) promptForNewDirectory:(NSString *) oldTmpDir withMessage: (NSString *) message tempDir:(BOOL) temp {
-    NSString * dirType = temp ? @"temp" : @"downloading";
-    if (myOpenPanel) return;
-    //need to pause until directory is resolved
-    myOpenPanel = [[NSOpenPanel alloc] init];
-    wasPaused =     [[NSUserDefaults standardUserDefaults] boolForKey:kMTQueuePaused];
-    if (!wasPaused) [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTQueuePaused];
-    if (![tiVoManager.processingPaused boolValue]) [tiVoManager pauseQueue:@(NO)];
-    NSString *fullMessage = [NSString stringWithFormat:message,oldTmpDir];
-    DDLogReport(@"Warning \"%@\" while checking %@ directory.",fullMessage, dirType);
-	fullMessage = [fullMessage stringByAppendingString:[NSString stringWithFormat: @"\nPlease choose a new location, or press 'Cancel' to use default %@ directory.", dirType ]] ;
-	
-    myOpenPanel.canChooseFiles = NO;
-    myOpenPanel.canChooseDirectories = YES;
-    myOpenPanel.canCreateDirectories = YES;
-    myOpenPanel.directoryURL = [NSURL fileURLWithPath:oldTmpDir];
-    myOpenPanel.message = fullMessage;
-    myOpenPanel.prompt = @"Choose";
-    [myOpenPanel setTitle:[NSString stringWithFormat:@"Select Directory for %@ cTiVo Files", dirType]];
-
-    [[[NSWorkspace sharedWorkspace] notificationCenter  ] addObserver:self selector:@selector(newVolume:) name:NSWorkspaceDidMountNotification object:nil];
-    NSWindow * window = [NSApp keyWindow] ?: _mainWindowController.window;
-    [myOpenPanel beginSheetModalForWindow:window completionHandler:^(NSInteger ret){
-        NSString *directoryName = (ret == NSFileHandlingPanelOKButton) ? myOpenPanel.URL.path : @"";
-        [self closeDirectoryPanel];
-        if (temp) {
-            [[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesPath];
-            [self validateTmpDirectory];
-        } else {
-            //XXX handle download directory here
-        }
-		[[[NSWorkspace sharedWorkspace] notificationCenter  ] removeObserver:self name:NSWorkspaceDidMountNotification object:nil];
-   }];
-    [myOpenPanel makeKeyAndOrderFront:nil];
+-(NSString *) defaultDownloadDirectory {
+	return [NSString pathWithComponents:@[NSHomeDirectory(),kMTDefaultDownloadDir]];
+	//note this will fail in sandboxing. Need something like...
+	//		NSArray * movieDirs = [[NSFileManager defaultManager] URLsForDirectory:NSMoviesDirectory inDomains:NSUserDomainMask];
+	//		if (movieDirs.count >0) {
+	//			NSURL *movieURL = (NSURL *) movieDirs[0];
+	//			return [movieURL URLByAppendingPathComponent:@"TiVoShows"].path;
+	//      }
 }
 
+-(NSString *) defaultTmpDirectory {
+	return [NSTemporaryDirectory() stringByAppendingString:@"ctivo"];
+}
+
+#define MTOpenPanelDefault 2873 //random; just different from OK v Cancel
+
+-(IBAction)defaultButton:(id)sender {
+	if (self.myOpenPanel) {
+		//new volume came online during openPanel for tempDir or downloadDir, so let's try it
+		[self.myOpenPanel.sheetParent endSheet:self.myOpenPanel returnCode:MTOpenPanelDefault];
+	}
+}
+
+-(void) promptForNewDirectory:(NSString *) oldDir withMessage: (NSString *) message isProblem: (BOOL) isProblem isTempDir:(BOOL) isTemp {
+	//user directory prompt for both temp directory and downloading directory
+	//used both if there's a problem or if user requests a new directory
+	if (self.myOpenPanel) {
+		DDLogReport(@"panel already open: %@", self.myOpenPanel);
+		return;
+	}
+	NSOpenPanel * openPanel = [NSOpenPanel openPanel];
+	BOOL wasPaused =     [[NSUserDefaults standardUserDefaults] boolForKey:kMTQueuePaused];
+
+	if (isProblem) {
+		//if problem, we need to pause processing until directory is resolved
+		if (!wasPaused) [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTQueuePaused];
+		if (![tiVoManager.processingPaused boolValue]) [tiVoManager pauseQueue:@(NO)];
+	}
+	NSString *fullMessage = [NSString stringWithFormat:message,oldDir];
+	NSString * dirType = isTemp ? @"temp" : @"downloading";
+	if (isProblem) {
+		DDLogReport(@"Warning \"%@\" while checking %@ directory.",fullMessage, dirType);
+	} else {
+		DDLogMajor(@"User choosing new %@ directory.", dirType);
+	}
+	fullMessage = [fullMessage stringByAppendingString:[NSString stringWithFormat: @"\nPlease Choose a new %@ directory, or press 'Use Default Directory' button, or Cancel.", dirType ]] ;
+	openPanel.canChooseFiles = NO;
+	openPanel.canChooseDirectories = YES;
+	openPanel.canCreateDirectories = YES;
+	openPanel.releasedWhenClosed = YES;
+	openPanel.directoryURL = [NSURL fileURLWithPath:oldDir];
+	openPanel.message = fullMessage;
+	openPanel.prompt = @"Choose";
+	[openPanel setTitle:[NSString stringWithFormat:@"Select Directory for %@ cTiVo Files", dirType]];
+
+	NSArray * views; //get default button from XIB.
+	if ([[NSBundle mainBundle] loadNibNamed:@"MTOpenPanelDefaultView" owner:self topLevelObjects:&views]) {
+		NSView * accessoryView = nil;
+		for (NSView * possView in views) {
+			if ([possView isKindOfClass:[NSView class] ]) {  //seems random v application
+				accessoryView = possView;
+			}
+		}
+		if (accessoryView) {
+			[openPanel setAccessoryView:accessoryView];
+			if (@available(macOS 10.11, *)) {
+				openPanel.accessoryViewDisclosed = YES;
+			}
+		}
+	};
+
+	self.myOpenPanel = openPanel;
+	DDLogReport(@"Setting panel: %@", self.myOpenPanel);
+
+	
+	NSWindow * window = [NSApp keyWindow] ?: _mainWindowController.window;
+	if (window.sheets.count) DDLogReport(@"XXX Sheets for %@: %@", window, window.sheets);
+	[self.myOpenPanel beginSheetModalForWindow:window completionHandler:^(NSInteger returnCode){
+		NSString *directoryName = (returnCode == NSModalResponseOK) ? self.myOpenPanel.URL.path : nil;
+		self.myOpenPanel = nil;
+		
+		if (isProblem) {
+			[[NSUserDefaults standardUserDefaults] setBool:wasPaused forKey:kMTQueuePaused];
+		}
+		[tiVoManager determineCurrentProcessingState];
+		if (returnCode != NSModalResponseCancel) {
+			DDLogMajor(@"User chose %@ directory: %@.", dirType, directoryName ?: @"default");
+			if (isTemp) {
+				[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesPath];
+			} else {
+				[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTDownloadDirectory];
+			}
+		} else {
+			DDLogMajor(@" %@ directory selection cancelled", dirType);
+		}
+	}];
+	DDLogReport(@"returned from %@", window.sheets);
+	if (!window) {
+		[openPanel makeKeyAndOrderFront:self];
+	}
+}
+
+//for future sandboxing
 //-(NSURL*) urlForBookmark:(NSData*)bookmark {
 //	if (!bookmark) return nil;
 //	BOOL bookmarkIsStale = NO;
@@ -457,61 +545,78 @@ BOOL tempDirectory = NO;
 //						 create:YES
 //						  error:&error ];
 
--(void)validateTmpDirectory {
-    //Validate users choice for tmpFilesDirectory
-    NSString *tmpdir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath];
-	if (tmpdir.length == 0) tmpdir = [NSTemporaryDirectory() stringByAppendingString:@"/ctivo"];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    BOOL isDir = YES;
-    if (![fm fileExistsAtPath:tmpdir isDirectory:&isDir]) {
-        NSError *error = nil;
+-(void)validateDownloadDirectory {
+	NSString *downloadDir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory];
+	if ([downloadDir isEquivalentToPath: [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath]] ) {
+			//Oops; user confused temp dir with download dir
+			[self promptForNewDirectory:downloadDir withMessage:@"Your temp directory %@ needs to be separate from your download directory." isProblem: YES isTempDir:NO];
+	} else {
+		[self validateDirectoryShared:downloadDir isTempDir:NO];
+	}
+}
 
-        if ([tmpdir hasPrefix:@"/Volumes"]) {
-            NSArray <NSString *> * pathComponents = [tmpdir pathComponents];
-            if (pathComponents.count > 1) {
-                NSString * volume = [pathComponents[0] stringByAppendingPathComponent:pathComponents[1]];
+-(void)validateTmpDirectory {
+	//Validate users choice for tmpFilesDirectory
+	NSString *tmpdir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath];
+	if ([tmpdir isEquivalentToPath: [tiVoManager defaultDownloadDirectory]] ||
+	    [tmpdir isEquivalentToPath: [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory]] ) {
+			//Oops; user confused temp dir with download dir
+			[self promptForNewDirectory:tmpdir withMessage:@"Your temp directory %@ needs to be separate from your download directory." isProblem: YES isTempDir:YES];
+	} else {
+		[self validateDirectoryShared:tmpdir isTempDir:YES];
+	}
+}
+
+-(void)validateDirectoryShared: (NSString *) dirPath isTempDir:(BOOL) isTempDir {
+	if (self.myOpenPanel) return; // already looking for one
+	NSString * dirType = isTempDir ? @"temp" : @"downloading";
+
+	NSFileManager *fm = [NSFileManager defaultManager];
+	BOOL isDir = YES;
+	if (![fm fileExistsAtPath:dirPath isDirectory:&isDir]) {
+		NSError *error = nil;
+		
+		if ([dirPath hasPrefix:@"/Volumes"]) {
+			NSArray <NSString *> * pathComponents = [dirPath pathComponents];
+			if (pathComponents.count > 1) {
+				NSString * volume = [[pathComponents[0] stringByAppendingPathComponent:pathComponents[1]] stringByAppendingPathComponent:pathComponents[2]];  //  "/", "Volumes", "volname"
 				if (![fm fileExistsAtPath:volume isDirectory:&isDir]) {
-                    DDLogReport(@"Volume %@ not online", volume);
-                	[self promptForNewDirectory:tmpdir withMessage:@"Unable to find volume for %@; maybe need to plug in?" tempDir:YES];
-                	return;
+					DDLogReport(@"Volume %@ not online for %@", volume, dirType);
+					[self promptForNewDirectory:dirPath withMessage:@"Unable to find volume for %@; maybe need to plug in?" isProblem: YES isTempDir:isTempDir];
+					return;
 				}
-            }
-        }
-        if ([fm createDirectoryAtPath:tmpdir withIntermediateDirectories:YES attributes:nil error:&error]) {
-            DDLogReport(@"Creating new temp directory at %@",tmpdir);
-        } else {
-            DDLogReport(@"Error %@ creating new temp directory at %@",error, tmpdir);
-            [self promptForNewDirectory:tmpdir withMessage:@"Unable to create directory %@; maybe need to fix permissions?" tempDir:YES];
-            return;
-        }
-        isDir = YES;
-    }
-    if ( !isDir) {
-        [self promptForNewDirectory:tmpdir withMessage:@"%@ is a file, not a directory" tempDir:YES];
-        return;
-    }
-    if ([tmpdir isEquivalentToPath: [tiVoManager defaultDownloadDirectory]  ] ) {
-        //Oops; user confused temp dir with download dir
-        [self promptForNewDirectory:tmpdir withMessage:@"Your temp directory %@ needs to be separate from your download directory." tempDir:YES];
-         return;
-    }
-    //Now check for write permission
-    NSString *testPath = [NSString stringWithFormat:@"%@/.junk",tmpdir];
-    BOOL canWrite = [fm createFileAtPath:testPath contents:[NSData data] attributes:nil];
-    if (!canWrite) {
-         [self promptForNewDirectory:tmpdir withMessage:@"You don't have write permission on %@." tempDir:YES];
-    } else {
-        //Clean up
-        [fm removeItemAtPath:testPath error:nil];
-    }
+			}
+		}
+		if ([fm createDirectoryAtPath:dirPath withIntermediateDirectories:YES attributes:nil error:&error]) {
+			DDLogReport(@"Creating new %@ directory at %@",dirType, dirPath);
+		} else {
+			DDLogReport(@"Error %@ creating new %@ directory at %@",error, dirType, dirPath);
+			[self promptForNewDirectory:dirPath withMessage:@"Unable to create directory %@; maybe need to fix permissions?" isProblem: YES isTempDir:isTempDir];
+			return;
+		}
+		isDir = YES;
+	}
+	if ( !isDir) {
+		[self promptForNewDirectory:dirPath withMessage:@"%@ is a file, not a directory" isProblem: YES isTempDir:YES];
+		return;
+	}
+	//Now check for write permission
+	NSString *testPath = [NSString stringWithFormat:@"%@/.junk",dirPath];
+	BOOL canWrite = [fm createFileAtPath:testPath contents:[NSData data] attributes:nil];
+	if (!canWrite) {
+		[self promptForNewDirectory:dirPath withMessage:@"You don't have write permission on %@." isProblem: YES isTempDir:isTempDir];
+	} else {
+		//Clean up
+		[fm removeItemAtPath:testPath error:nil];
+	}
 }
 
 -(void)clearTmpDirectory
 {
-	//Make sure the tmp directory exists
+	//Make sure the tmp directory exists and delete
     NSString * tmpPath = tiVoManager.tmpFilesDirectory;
     if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-      if ([[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath].length == 0) {
+      if ([tmpPath contains: NSTemporaryDirectory()]) {
         //only erase all files if we're in default temp dir. Too risky elsewise;
 		//Clear it if not saving intermediate files
 			NSFileManager *fm = [NSFileManager defaultManager];
@@ -561,6 +666,8 @@ BOOL tempDirectory = NO;
 		pauseMenuItem.title = [self.tiVoGlobalManager.processingPaused boolValue] ? @"Resume Queue" : @"Pause Queue";
 	} else if ([keyPath compare:kMTTmpFilesPath] == NSOrderedSame) {
 		[self validateTmpDirectory];
+	} else if ([keyPath compare:kMTDownloadDirectory] == NSOrderedSame) {
+		[self validateDownloadDirectory];
 	}
 }
 

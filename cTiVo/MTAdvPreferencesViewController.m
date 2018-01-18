@@ -28,27 +28,8 @@
     return self;
 }
 
--(IBAction)selectTmpDir:(id)sender
-{
-	NSOpenPanel *myOpenPanel = [[NSOpenPanel alloc] init];
-	myOpenPanel.canChooseFiles = NO;
-	myOpenPanel.canChooseDirectories = YES;
-	myOpenPanel.canCreateDirectories = YES;
-	myOpenPanel.prompt = @"Choose";
-	myOpenPanel.directoryURL = [NSURL fileURLWithPath:[[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath]];
-	[myOpenPanel setTitle:@"Select Temp Directory for Files"];
- 	[myOpenPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSInteger ret){
-        [myOpenPanel orderOut:nil];
-		if (ret == NSFileHandlingPanelOKButton) {
-			NSString *directoryName = [myOpenPanel.URL.path stringByStandardizingPath];
-            if (![directoryName  isEqualToString:[[tiVoManager downloadDirectory] stringByStandardizingPath] ] ||
-                [directoryName  isEqualToString:[[tiVoManager defaultDownloadDirectory] stringByStandardizingPath] ]) {
-                [[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesPath];
-            } 
-		} else {
-			[[NSUserDefaults standardUserDefaults] setObject:nil forKey:kMTTmpFilesPath];
-		}
-	}];
+-(IBAction)selectTmpDir:(id)sender {
+	[((MTAppDelegate *) [NSApp delegate]) promptForNewDirectory: tiVoManager.tmpFilesDirectory withMessage:@"Select Temp Directory for Files" isProblem:NO isTempDir:YES];
 }
 
 -(NSTextField *) newTextField: (NSRect) frame {

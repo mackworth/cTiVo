@@ -73,15 +73,18 @@
 		shouldClose = [selectedItem.windowController windowShouldClose:@{@"Target" : self , @"Argument" : @"", @"Selector" : @"closeSheet:"}];
 	}
 	if (shouldClose) {
-		[NSApp endSheet:self.window];
-		[self.window orderOut:nil];
+		[self closeSheet:sender];
 	}
 }
 
 -(IBAction)closeSheet:(id)sender
 {
-	[NSApp endSheet:self.window];
-	[self.window orderOut:nil];
+	if (self.window.sheetParent) {
+		[self.window.sheetParent endSheet:self.window returnCode:NSModalResponseOK ];
+	} else {
+		[NSApp endSheet:self.window];
+		[self.window orderOut:nil];
+	}
 }
 
 -(NSRect)getNewWindowRect:(MTTabViewItem *)tabViewItem

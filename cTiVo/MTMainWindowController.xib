@@ -1975,11 +1975,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="267">
-                                                                    <rect key="frame" x="1" y="1" width="371" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="372" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="268">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="369" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="370" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="269">
                                                                                 <font key="font" metaFont="system"/>
@@ -2043,7 +2043,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Format of video file to create" id="OWl-YT-bUe" customClass="MTPopUpTableCellView">
-                                                                    <rect key="frame" x="528" y="1" width="137" height="17"/>
+                                                                    <rect key="frame" x="528" y="1" width="136" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -2342,7 +2342,8 @@
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="getDownloadDirectory:" target="-2" id="143"/>
+                            <action selector="getDownloadDirectory:" target="-2" id="nga-Jt-kXw"/>
+                            <binding destination="203" name="title" keyPath="values.DownloadDirectory" id="tOP-gS-jbH"/>
                         </connections>
                     </button>
                     <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" id="839">
