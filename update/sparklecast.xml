@@ -8,7 +8,7 @@
         <item>
             <title>Version 3.1.0; Folders!</title>
             <description><![CDATA[
-                <h2 id="release-3.1">Release 3.1/h1>
+				<h2 id="release-3.1">Release 3.1: Folders!</h1>
                 <h2>3.1 features</h2>
 				
                 <ul>
@@ -18,7 +18,7 @@
                 <li>Auto-relocation to Applications directory.</li>
                 </ul>
 				
-                <h3>Minor Improvements:/<h3>
+                <h3>Minor Improvements:</h3>
                 <ul>
                 <li>File template string now reflects directory options.</li>
                 <li>Help button on each Preference screen.</li>
