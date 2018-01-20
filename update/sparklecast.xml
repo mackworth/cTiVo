@@ -3,12 +3,31 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.0.1; Artwork, Real-Time updates and other improvements</description>
+        <description>Version 3.1.0; Folders!</description>
         <language>en</language>
         <item>
-            <title>Version 3.0.1; Artwork, Real-Time updates and other improvements</title>
+            <title>Version 3.1.0; Folders!</title>
             <description><![CDATA[
-                <h2 id="release-3.0">Release 3.0.1</h1>
+				<h2 id="release-3.1">Release 3.1: Folders!</h1>
+                <h2>3.1 features</h2>
+				
+                <ul>
+                <li>Shows can now be grouped in series folders.</li>
+                <li>Advanced Preferences is no longer hidden behind Option key.</li>
+                <li>Preferences has simpler directory structure choices (e.g. Plex support)</li>
+                <li>Auto-relocation to Applications directory.</li>
+                </ul>
+				
+                <h3>Minor Improvements:</h3>
+                <ul>
+                <li>File template string now reflects directory options.</li>
+                <li>Help button on each Preference screen.</li>
+                <li>Better warning and diagnostics on disk space (versus tmp space).</li>
+                <li>Improved Sleep log notices.</li>
+                <li>Allows longer TiVo names.</li>
+                <li>Support TiVo's ShowingStartTime (if after Capture date in XML).</li>
+                </ul>
+				
                 <h2>3.0 features</h2>
 
                 <h3>Artwork enhancements:</h3>
@@ -30,9 +49,9 @@
                 <p>See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.</p>
             ]]>
             </description>
-            <pubDate>Thu., November 9, 2017 20:00:00 -0800</pubDate>
+            <pubDate>Fri., January 19, 2018 20:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/3.0.1Release/cTiVo.zip" sparkle:version="800" sparkle:shortVersionString="3.0.1" length="50131903" type="application/octet-stream" sparkle:dsaSignature="MC0CFGQ0+lRDAUQvMTY9LKIFCl8cQ9jGAhUA5MlcoDKHmHv2iDiGM6CyLddU+pE="/>
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/3.1.0/cTiVo.zip" sparkle:version="830" sparkle:shortVersionString="3.1.0" length="50501994" type="application/octet-stream" sparkle:dsaSignature="MC4CFQDXCBENvk/wDygK1DQlMdPIW7nesAIVAM/vtaWI2Ep3oC+zTCpuGZPBTcgP"/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>
