@@ -30,7 +30,6 @@
 
 @property (nonatomic, strong)  NSString *downloadDirectory;
 @property (nonatomic,readonly) NSString *tmpFilesDirectory;
-@property (nonatomic,readonly) NSString *defaultDownloadDirectory;
 @property (nonatomic,readonly) NSURL *tivoTempDirectory;
 @property (nonatomic,readonly) NSURL *tvdbTempDirectory;
 @property (nonatomic,readonly) NSURL *detailsTempDirectory;

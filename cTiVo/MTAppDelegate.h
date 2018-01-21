@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
 
-@interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSPopoverDelegate> 
+@interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSPopoverDelegate, NSOpenSavePanelDelegate> 
 
 
 -(BOOL)checkForExit;

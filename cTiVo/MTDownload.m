@@ -514,7 +514,7 @@ __DDLOGHERE__
 	if (!self.baseFileName) {
         // generate only once
         NSString * downloadName = [self.show downloadFileNameWithFormat:self.encodeFormat.name createIfNecessary:YES];
-
+		if (!downloadName) return NO;
         self.downloadDirectory = [downloadName stringByDeletingLastPathComponent];
 
         NSString * baseTitle = [downloadName lastPathComponent];

@@ -70,17 +70,16 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
             //Uncomment to cancel idle sleep
             //IOCancelPowerChange( root_port, (long)messageArgument );
             // we will allow idle sleep
-			DDLogCMajor(@"cTiVo Received Soft Sleep Notice");
 			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTPreventSleep]) { //We want to prevent sleep if still downloading
 				if ([tiVoManager numberOfShowsToDownload]) {
-					//					NSLog(@"ZZZReceived Soft Sleep Notice and cancelling");
+					DDLogCMajor(@"Received notice: Soft Sleep, and rejecting");
 					IOCancelPowerChange(root_port, (long)messageArgument);
 				} else { //THere are no shows pending so sleeep
-						 //					NSLog(@"ZZZReceived Soft Sleep Notice but no shows downloading so allowing");
+					DDLogCMajor(@"Received notice: Soft Sleep; no shows downloading so allowing");
 					IOAllowPowerChange( root_port, (long)messageArgument );
 				}
 			} else { //Cancel things and get on with it.
-					 //				NSLog(@"ZZZReceived Soft Sleep Notice and allowing");
+				DDLogCMajor(@"Received notice: Soft Sleep; user allows");
 				IOAllowPowerChange( root_port, (long)messageArgument );
 			}
             break;
@@ -94,19 +93,23 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
 			 kIOReturnSuccess, however the system WILL still go to sleep.
 			 */
 			
-			DDLogCMajor(@"cTiVo received Forced Sleep Notice, shutting down downloads");
+			DDLogCMajor(@"Received notice: Will Sleep; shutting down downloads");
 			[tiVoManager cancelAllDownloads];
             IOAllowPowerChange( root_port, (long)messageArgument );
             break;
 			
-        case kIOMessageSystemWillPowerOn:
+		case kIOMessageSystemWillNotSleep:
+			DDLogCMajor(@"Received notice: Will Not Sleep ");
+			break;
+
+		case kIOMessageSystemWillPowerOn:
             //System has started the wake up process...
-			DDLogCMajor(@"cTiVo received Wake notice");
+			DDLogCMajor(@"Received notice: PowerOn ");
             break;
 			
         case kIOMessageSystemHasPoweredOn:
             //System has finished waking up...
-			DDLogCMajor(@"cTiVo finished Waking notice");
+			DDLogCMajor(@"Received notice: PowerOn finished");
 			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:nil];
 			break;
 			
@@ -146,6 +149,7 @@ void signalHandler(int signal)
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
 @property (nonatomic, strong) NSTimer * pseudoTimer;
 @property (nonatomic, strong) NSOpenPanel* myOpenPanel;
+@property (nonatomic, assign) BOOL myOpenPanelIsTemp;
 
 @end
 
@@ -153,11 +157,6 @@ void signalHandler(int signal)
 
 + (int)ddLogLevel { return ddLogLevel; }+ (void)ddSetLogLevel:(int)logLevel {ddLogLevel = logLevel;}
 
-
-- (void)dealloc
-{
-	DDLogDetail(@"deallocing AppDelegate");
-}
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
@@ -224,11 +223,10 @@ void signalHandler(int signal)
 		}
 		[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTTmpFilesDirectoryObsolete];
 		NSString * oldDownload = [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory];
-		if ([oldDownload isEqualToString:[NSString pathWithComponents:@[NSHomeDirectory(),kMTDefaultDownloadDir]]]) {
+		if ([oldDownload isEqualToString:[self defaultDownloadDirectory]]) {
 			[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTDownloadDirectory];
 		}
 		[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTTmpFilesDirectoryObsolete];
-		
 	}
 	if ([[NSUserDefaults standardUserDefaults] stringForKey:kMTFileNameFormat].length == 0) {
 		NSString * newDefaultFileFormat = kMTcTiVoDefault;
@@ -353,6 +351,8 @@ void signalHandler(int signal)
     }
 }
 
+#pragma mark -
+#pragma mark Directory Management
 
 -(void)mountVolume: (NSNotification *) notification {
 	if (self.myOpenPanel) {
@@ -440,6 +440,28 @@ void signalHandler(int signal)
 	}
 }
 
+- (BOOL)panel:(id)sender
+  validateURL:(NSURL *)url
+        error:(NSError * _Nullable *)outError {
+	//Don't let user pick download directory for temp, nor vice-versa
+	NSString *dirPath = url.path;
+	if (self.myOpenPanelIsTemp) {
+		if ([dirPath isEquivalentToPath: [self defaultDownloadDirectory]] ||
+			[dirPath isEquivalentToPath: [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory]] ) {
+				//Oops; user confused temp dir with download dir
+			return NO;
+		} else {
+			return YES;
+		}
+	} else {
+		if ([dirPath isEquivalentToPath: [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath]] ) {
+			return NO;
+		} else {
+			return YES;
+		}
+	}
+}
+
 -(void) promptForNewDirectory:(NSString *) oldDir withMessage: (NSString *) message isProblem: (BOOL) isProblem isTempDir:(BOOL) isTemp {
 	//user directory prompt for both temp directory and downloading directory
 	//used both if there's a problem or if user requests a new directory
@@ -456,13 +478,13 @@ void signalHandler(int signal)
 		if (![tiVoManager.processingPaused boolValue]) [tiVoManager pauseQueue:@(NO)];
 	}
 	NSString *fullMessage = [NSString stringWithFormat:message,oldDir];
-	NSString * dirType = isTemp ? @"temp" : @"downloading";
+	NSString * dirType = isTemp ? @"temporary" : @"downloading";
 	if (isProblem) {
 		DDLogReport(@"Warning \"%@\" while checking %@ directory.",fullMessage, dirType);
 	} else {
 		DDLogMajor(@"User choosing new %@ directory.", dirType);
 	}
-	fullMessage = [fullMessage stringByAppendingString:[NSString stringWithFormat: @"\nPlease Choose a new %@ directory, or press 'Use Default Directory' button, or Cancel.", dirType ]] ;
+	fullMessage = [fullMessage stringByAppendingString:[NSString stringWithFormat: @"\nPlease choose a new %@ directory, or 'Use Default Directory' , or Cancel.", dirType ]] ;
 	openPanel.canChooseFiles = NO;
 	openPanel.canChooseDirectories = YES;
 	openPanel.canCreateDirectories = YES;
@@ -470,6 +492,8 @@ void signalHandler(int signal)
 	openPanel.directoryURL = [NSURL fileURLWithPath:oldDir];
 	openPanel.message = fullMessage;
 	openPanel.prompt = @"Choose";
+	openPanel.delegate = self;
+	self.myOpenPanelIsTemp = isTemp;
 	[openPanel setTitle:[NSString stringWithFormat:@"Select Directory for %@ cTiVo Files", dirType]];
 
 	NSArray * views; //get default button from XIB.
@@ -489,21 +513,28 @@ void signalHandler(int signal)
 	};
 
 	self.myOpenPanel = openPanel;
-	DDLogReport(@"Setting panel: %@", self.myOpenPanel);
 
-	
 	NSWindow * window = [NSApp keyWindow] ?: _mainWindowController.window;
-	if (window.sheets.count) DDLogReport(@"XXX Sheets for %@: %@", window, window.sheets);
 	[self.myOpenPanel beginSheetModalForWindow:window completionHandler:^(NSInteger returnCode){
-		NSString *directoryName = (returnCode == NSModalResponseOK) ? self.myOpenPanel.URL.path : nil;
-		self.myOpenPanel = nil;
-		
-		if (isProblem) {
-			[[NSUserDefaults standardUserDefaults] setBool:wasPaused forKey:kMTQueuePaused];
+		NSString *directoryName  = nil;
+		switch (returnCode) {
+			case NSModalResponseOK:
+				directoryName = self.myOpenPanel.URL.path;
+				DDLogMajor(@"User chose %@ directory: %@.", dirType, directoryName);
+				break;
+			case NSModalResponseCancel:
+				directoryName = oldDir;
+				DDLogMajor(@"%@ directory selection cancelled", dirType);
+				break;
+			case MTOpenPanelDefault:
+			default:
+				directoryName = nil;
+				DDLogMajor(@"User chose default %@ directory.", dirType);
+				break;
 		}
-		[tiVoManager determineCurrentProcessingState];
-		if (returnCode != NSModalResponseCancel) {
-			DDLogMajor(@"User chose %@ directory: %@.", dirType, directoryName ?: @"default");
+		[self.myOpenPanel orderOut:nil];
+		self.myOpenPanel = nil;
+		if (returnCode != NSModalResponseCancel || isProblem) {
 			if (isTemp) {
 				[[NSUserDefaults standardUserDefaults] setObject:directoryName forKey:kMTTmpFilesPath];
 			} else {
@@ -512,8 +543,11 @@ void signalHandler(int signal)
 		} else {
 			DDLogMajor(@" %@ directory selection cancelled", dirType);
 		}
+		if (isProblem) {
+			[[NSUserDefaults standardUserDefaults] setBool:wasPaused forKey:kMTQueuePaused];
+		}
+		[tiVoManager determineCurrentProcessingState];
 	}];
-	DDLogReport(@"returned from %@", window.sheets);
 	if (!window) {
 		[openPanel makeKeyAndOrderFront:self];
 	}
@@ -558,7 +592,7 @@ void signalHandler(int signal)
 -(void)validateTmpDirectory {
 	//Validate users choice for tmpFilesDirectory
 	NSString *tmpdir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath];
-	if ([tmpdir isEquivalentToPath: [tiVoManager defaultDownloadDirectory]] ||
+	if ([tmpdir isEquivalentToPath: [self defaultDownloadDirectory]] ||
 	    [tmpdir isEquivalentToPath: [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory]] ) {
 			//Oops; user confused temp dir with download dir
 			[self promptForNewDirectory:tmpdir withMessage:@"Your temp directory %@ needs to be separate from your download directory." isProblem: YES isTempDir:YES];
@@ -640,6 +674,8 @@ void signalHandler(int signal)
 	}
 }
 
+#pragma mark - UI support
+//particularly for Menu management
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
@@ -671,8 +707,6 @@ void signalHandler(int signal)
 	}
 }
 
-#pragma mark - UI support
-
 -(IBAction)togglePause:(id)sender
 {
 	DDLogMajor(@"User toggled Pause %@", self.tiVoGlobalManager.processingPaused);
@@ -683,7 +717,6 @@ void signalHandler(int signal)
 		[self.tiVoGlobalManager unPauseQueue];
 	}
     [[NSUserDefaults standardUserDefaults] setBool:[self.tiVoGlobalManager.processingPaused boolValue] forKey:kMTQueuePaused];
-
 }
 
 -(void)updateTivoRefreshMenu
@@ -737,7 +770,6 @@ void signalHandler(int signal)
 		[refreshTiVoMenuItem setEnabled:YES];
 	}
 	return;
-	
 }
 -(IBAction)findShows:(id)sender {
 	[[_mainWindowController tiVoShowTable] findShows:sender];

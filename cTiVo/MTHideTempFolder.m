@@ -19,7 +19,6 @@
 	if (!value || ([value isKindOfClass:[NSString class]] && ((NSString *)value).length == 0)) {
 		retValue = [NSTemporaryDirectory() stringByAppendingPathComponent:@"ctivo"];
 	}
-//	NSLog(@"Reverseform: %@ -> %@", value, retValue);
 	return retValue;
 }
 - (id)transformedValue:(id)value {
@@ -29,7 +28,6 @@
 	if ([value isKindOfClass:[NSString class]] && [(NSString *)value  isEqualToString:defDir]) {
 		retValue = @"";
 	}
-	NSLog(@"Transform: %@ -> %@ (vs %@)", value, retValue, defDir);
 	return retValue;
 }
 

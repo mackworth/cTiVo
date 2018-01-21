@@ -1333,7 +1333,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 		if (create) { 		// try to create it
 			DDLogDetail(@"Creating folder %@",tryDirectory);
         	if (![[NSFileManager defaultManager] createDirectoryAtPath:tryDirectory withIntermediateDirectories:YES attributes:nil error:nil]) {
-            	DDLogDetail(@"Couldn't create folder %@",tryDirectory);
+            	DDLogReport(@"Couldn't create folder %@",tryDirectory);
             	return nil;
         	}
 		} else {
@@ -1366,13 +1366,9 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
 
     NSString *ddir = [self directoryForShowInDirectory: [[tiVoManager downloadDirectory] stringByAppendingPathComponent:keyPathPart ] createIfMissing:create];
+	if (!ddir) return nil;
 
-    //OR, go to default if not successful
-    if (!ddir) {
-        ddir = [self directoryForShowInDirectory: [[tiVoManager defaultDownloadDirectory] stringByAppendingPathComponent:keyPathPart ] createIfMissing:create];
-    }
     return [ddir stringByAppendingPathComponent:baseTitle];
-
 }
 
 -(NSString *) downloadDirCreateIfNecessary: (BOOL) create {
