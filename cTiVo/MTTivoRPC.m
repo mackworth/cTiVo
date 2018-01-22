@@ -11,6 +11,7 @@
 #import "MTTiVoManager.h" //just for maskMediaKeys
 #import "NSNotificationCenter+Threads.h"
 #import "NSString+Helpers.h"
+#import "MTWeakTimer.h"
 
 @interface MTTivoRPC () <NSStreamDelegate>
 @property (nonatomic, strong) NSInputStream *iStream;
@@ -257,7 +258,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
          _iStreamAnchor = NO; _oStreamAnchor = NO;
          self.iStream = iStream;
          self.oStream = oStream;
-         self.deadmanTimer = [NSTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
+         self.deadmanTimer = [MTWeakTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
          DDLogMajor(@"Launching RPC streams for %@", self.delegate);
         [iStream open];
          [oStream open];
@@ -959,9 +960,10 @@ static NSArray * imageResponseTemplate = nil;
 }
 
 -(void) dealloc {
+	self.delegate = nil;
+	[self sharedShutdown];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver: self];
-    [self appWillTerminate:nil];
 }
 
 -(void) appWillTerminate: (id) notification {

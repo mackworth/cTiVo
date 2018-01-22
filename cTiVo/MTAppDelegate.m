@@ -104,12 +104,12 @@ void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType
 
 		case kIOMessageSystemWillPowerOn:
             //System has started the wake up process...
-			DDLogCMajor(@"Received notice: PowerOn ");
+			DDLogCMajor(@"Received notice: Waking ");
             break;
 			
         case kIOMessageSystemHasPoweredOn:
             //System has finished waking up...
-			DDLogCMajor(@"Received notice: PowerOn finished");
+			DDLogCMajor(@"Received notice: Waking finished");
 			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:nil];
 			break;
 			
@@ -138,7 +138,6 @@ void signalHandler(int signal)
 
 	NSMutableArray *mediaKeyQueue;
 	BOOL gettingMediaKey;
-	NSTimer * checkingDone;
 	NSTimer * saveQueueTimer;
     BOOL quitWhenCurrentDownloadsComplete;
 }

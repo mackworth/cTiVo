@@ -32,7 +32,7 @@
 @implementation NSDrawerWindow (avoidWarning)
 
 -(void) _setFirstResponder:(NSView *) view {
-	if (![view isKindOfClass:[MTProgramTableView class]]) {
+	if (![view isKindOfClass:[NSTableView class]]) {
 		[super _setFirstResponder:view];
 	}
 }

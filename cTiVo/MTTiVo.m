@@ -1116,9 +1116,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     DDLogReport(@"TiVo URL Connection Failed with error %@",[error maskMediaKeys]);
     NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
     DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
-    if (error.code == -1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
-        [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
-                          subTitle:@"Antivirus program may be blocking connection"];
+	if ([streamError isKindOfClass:[NSNumber class]] &&
+			((error.code == -1004  && streamError.intValue == 49) ||
+			 (error.code == -1001  && streamError.intValue == -2102) ||
+			 (error.code == -1005  && streamError.intValue == 57))) {
+     	[self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
+						 subTitle: @"Antivirus program may be blocking connection"];
     }
 
     [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationTiVoUpdated object:self];
@@ -1136,9 +1139,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	DDLogDetail(@"%@ URL Connection completed ",self);
     DDLogVerbose(@"Data received is %@",[[NSString alloc] initWithData:urlData encoding:NSUTF8StringEncoding]);
 
-    NSXMLParser *parser = [[NSXMLParser alloc] initWithData:urlData];
-	parser.delegate = self;
-	[parser parse];
+	if (urlData.length == 0) {
+		DDLogReport(@"No data received from %@ on %@", self, connection);
+		isConnecting = NO;
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
+		[self scheduleNextUpdateAfterDelay:-1];
+	} else {
+		NSXMLParser *parser = [[NSXMLParser alloc] initWithData:urlData];
+		parser.delegate = self;
+		[parser parse];
+	}
     self.showURLConnection = nil;
 }
 
