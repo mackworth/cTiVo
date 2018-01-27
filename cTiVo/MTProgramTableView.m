@@ -881,6 +881,41 @@ __DDLOGHERE__
     return YES;
 }
 
+-(BOOL)playVideo {
+	for (MTTiVoShow *show in self.selectedShows) {
+		if (show.isOnDisk) {
+			[show playVideo:[show copiesOnDisk][0]];
+			return YES;
+		}
+	}
+	return NO;
+}
+
+-(BOOL)revealInFinder {
+	NSMutableArray <NSURL *> * showURLs = [NSMutableArray array];
+	for (MTTiVoShow *show in self.selectedShows) {
+		if (show.isOnDisk) {
+			for (NSString * path in show.copiesOnDisk) {
+				[showURLs addObject:[NSURL fileURLWithPath:path]];
+			}
+		}
+	}
+	if (showURLs.count > 0) {
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
+		return YES;
+	} else{
+		return NO;
+	}
+}
+
+-(BOOL)selectionContainsCompletedShows {
+	for (MTTiVoShow * show in self.selectedShows) {
+		if (show.isOnDisk) return YES;
+	}
+	return NO;
+}
+
+
 -(IBAction)copy: (id) sender {
 
     NSArray	*selectedShows = [self selectedShows ];

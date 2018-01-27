@@ -290,12 +290,8 @@ __DDLOGHERE__
 
 -(BOOL)validateMenuItem:(NSMenuItem *)menuItem {
 	if (menuItem == _showInFinderMenuItem || menuItem == _playVideoMenuItem) {
-            BOOL itemsToProcess = [self selectionContainsCompletedShows];
-		if (!itemsToProcess) {
-			return NO;
-		}
-	}
-	if ([menuItem.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        return [self selectionContainsCompletedShows];
+	} else if ([menuItem.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
 		if (tiVoManager.tiVoList.count > 1) {
 			menuItem.title = @"Refresh this TiVo";
 		} else {
@@ -533,26 +529,36 @@ __DDLOGHERE__
 }
 
 -(BOOL) selectionContainsCompletedShows {
-    BOOL itemsToProcess = [self.downloadQueueTable selectionContainsCompletedShows ] ;
-	return itemsToProcess;
+	if (self.window.firstResponder == self.tiVoShowTable) {
+		return [self.tiVoShowTable selectionContainsCompletedShows ] ;
+	} else if (self.window.firstResponder == self.downloadQueueTable) {
+    	return [self.downloadQueueTable selectionContainsCompletedShows ] ;
+	} else {
+		return NO;
+	}
 }
 
--(IBAction)revealInFinder: (id) sender
-{
-	[self.downloadQueueTable revealInFinder];
+-(IBAction)revealInFinder: (id) sender {
+	if (self.window.firstResponder == self.tiVoShowTable) {
+		[self.tiVoShowTable revealInFinder];
+	} else {
+		[self.downloadQueueTable revealInFinder];
+	}
 }
 
--(IBAction)playVideo: (id) sender
-{
-	[self.downloadQueueTable playVideo];
-	
+-(IBAction)playVideo: (id) sender {
+	if (self.window.firstResponder == self.tiVoShowTable) {
+		[self.tiVoShowTable playVideo];
+	} else {
+		[self.downloadQueueTable playVideo];
+	}
 }
 
 -(void) playTrashSound {
-	self.trashSound = [[NSSound alloc] initWithContentsOfFile:@"/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/dock/drag to trash.aif" byReference:YES];
-	if (_trashSound) {
-		[self.trashSound play];
+	if (!self.trashSound) {
+		self.trashSound = [[NSSound alloc] initWithContentsOfFile:@"/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/dock/drag to trash.aif" byReference:YES];
 	}
+	[self.trashSound play];
 }
 
 #pragma mark - Subscription Buttons

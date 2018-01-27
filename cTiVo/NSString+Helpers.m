@@ -153,11 +153,13 @@
 
 -(void) setXAttr:(NSString *) key toValue:(NSString *) value  {
     NSData * data = [value dataUsingEncoding:NSUTF8StringEncoding];
-    setxattr([self cStringUsingEncoding:NSASCIIStringEncoding],
+    if ( setxattr([self cStringUsingEncoding:NSASCIIStringEncoding],
              [key UTF8String],
              [data bytes],
              data.length,
-             0, 0);
+				   0, 0)) {
+		NSLog(@"Error %d for setting %@ to %@",errno, key, value);
+	}
 }
 
 -(NSString *) maskSerialNumber: (NSString *) TSN  {

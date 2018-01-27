@@ -14,9 +14,14 @@
 
 @interface MTProgramTableView : NSOutlineView <NSOutlineViewDelegate, NSOutlineViewDataSource, NSDraggingSource, NSControlTextEditingDelegate>
 
-@property (nonatomic, readonly) NSArray *selectedShows;
+@property (nonatomic, readonly) NSArray <MTTiVoShow *> *selectedShows;
 
 -(IBAction)selectTivo:(id)sender;
 -(IBAction)findShows:(id)sender;
 -(IBAction)changedSearchText:(id) sender;
+
+-(BOOL)playVideo;
+-(BOOL)revealInFinder;
+-(BOOL)selectionContainsCompletedShows;
+
 @end

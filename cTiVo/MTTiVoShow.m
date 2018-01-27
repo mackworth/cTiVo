@@ -886,7 +886,8 @@ static void * originalAirDateContext = &originalAirDateContext;
 
 -(void)playVideo:(NSString *)path
 {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL fileURLWithPath:path]];
+	DDLogMajor(@"Playing video %@ ", path);
+   [[NSWorkspace sharedWorkspace] openURL:[NSURL fileURLWithPath:path]];
 
 }
 
