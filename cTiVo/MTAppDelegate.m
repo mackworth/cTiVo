@@ -434,7 +434,7 @@ void signalHandler(int signal)
 
 -(IBAction)defaultButton:(id)sender {
 	if (self.myOpenPanel) {
-		//new volume came online during openPanel for tempDir or downloadDir, so let's try it
+		//user tapped "Use Default Button"
 		[self.myOpenPanel.sheetParent endSheet:self.myOpenPanel returnCode:MTOpenPanelDefault];
 	}
 }
@@ -546,6 +546,7 @@ void signalHandler(int signal)
 			[[NSUserDefaults standardUserDefaults] setBool:wasPaused forKey:kMTQueuePaused];
 		}
 		[tiVoManager determineCurrentProcessingState];
+		[self checkVolumes:nil];
 	}];
 	if (!window) {
 		[openPanel makeKeyAndOrderFront:self];

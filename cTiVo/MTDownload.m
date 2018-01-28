@@ -495,14 +495,14 @@ __DDLOGHERE__
     NSString *tmpDir = tiVoManager.tmpFilesDirectory;
 	if (deleteFiles && tmpDir && self.baseFileName) {
 		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:tmpDir error:nil];
-		[fm changeCurrentDirectoryPath:tmpDir];
-		for(NSString *file in tmpFiles){
+		for (NSString *file in tmpFiles) {
 			NSRange tmpRange = [file rangeOfString:self.baseFileName];
-			if(tmpRange.location != NSNotFound) {
+			if (tmpRange.location != NSNotFound) {
 				DDLogVerbose(@"Deleting tmp file %@", file);
                 NSError * error = nil;
-                if ( ![fm removeItemAtPath:file error:&error]) {
-                    DDLogMajor(@"Could not delete tmp file: %@/%@ because %@", tmpDir, file, error.localizedDescription ?:@"No reason found");
+				NSString * tmpPath = [tmpDir stringByAppendingPathComponent:file];
+                if ( ![fm removeItemAtPath:tmpPath error:&error]) {
+                    DDLogMajor(@"Could not delete tmp file: %@ because %@", tmpPath, error.localizedDescription ?:@"No reason found");
                 }
 			}
 		}
