@@ -1365,10 +1365,16 @@ NSString * fourChar(long n, BOOL allowZero) {
     if ([baseTitle compare: self.showTitle ]  != NSOrderedSame) {
         DDLogVerbose(@"changed filename %@ to %@",self.showTitle, baseTitle);
     }
+	if (baseTitle.length == 0) {
+		DDLogReport(@"No base name; with file pattern %@ for show %@, got %@", filenamePattern, self, keyBaseTitle);
+		baseTitle = self.showTitle;
+	}
 
     NSString *ddir = [self directoryForShowInDirectory: [[tiVoManager downloadDirectory] stringByAppendingPathComponent:keyPathPart ] createIfMissing:create];
-	if (!ddir) return nil;
-
+	if (ddir.length == 0) {
+		DDLogReport(@"No directory for show %@. Invalid filename pattern %@? (=> %@)", self, filenamePattern, keyBaseTitle);
+		ddir = tiVoManager.downloadDirectory;
+	}
     return [ddir stringByAppendingPathComponent:baseTitle];
 }
 

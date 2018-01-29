@@ -518,6 +518,7 @@ __DDLOGHERE__
         self.downloadDirectory = [downloadName stringByDeletingLastPathComponent];
 
         NSString * baseTitle = [downloadName lastPathComponent];
+		if (!baseTitle) return NO;
 		self.baseFileName = [self createUniqueBaseFileName:baseTitle ];
 
 	}
@@ -543,9 +544,16 @@ __DDLOGHERE__
 }
 
 -(NSString *)createUniqueBaseFileName:(NSString *)baseName {
+	if (!baseName) {
+		DDLogReport(@"No basename for %@!",self);
+		return nil;
+	}
 	NSFileManager *fm = [NSFileManager defaultManager];
     NSString * tmpDir = tiVoManager.tmpFilesDirectory;
-    if (!tmpDir) return nil;
+	if (!tmpDir) {
+		DDLogReport(@"No temporary directory for %@!",self);
+		return nil;
+	}
     NSString * downloadDir = [self downloadDirectory];
     NSString * extension = self.useTransportStream ? self.encodeFormat.transportStreamExtension :
                                                      self.encodeFormat.filenameExtension;
