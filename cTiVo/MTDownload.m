@@ -1707,6 +1707,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                                           @"Retries" : retryString }];
 #endif
         [self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil ];
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTIfSuccessDeleteFromTiVo]) {
+			[self.show.tiVo deleteTiVoShows:@[self.show] ];
+		}
     }
 	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  //Currently Free up an encoder/ notify subscription module / update UI

@@ -176,6 +176,7 @@
 #define kMTiTunesSubmit @"iTunesSubmit"             //Whether to submit to iTunes after encoding
 #define kMTiTunesSync @"iTunesSync"                 // Whether to sync iDevices after iTunes submital
 #define kMTiTunesDelete @"iTunesDelete"				//Whether to delete original file after submitting to iTunes
+#define kMTIfSuccessDeleteFromTiVo @"IfSuccessDeleteFromTiVo" //Whether to delete show from TiVo after successful download
 #define kMTiTunesContentIDExperiment @"iTunesContentID"  //Whether to add episodeID as contentID for iTunes; doesn't seem to work
 //#define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
 #define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
