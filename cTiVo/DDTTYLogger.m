@@ -2,6 +2,7 @@
 
 #import <unistd.h>
 #import <sys/uio.h>
+#pragma clang diagnostic ignored "-Wimplicit-retain-self"
 
 /**
  * Welcome to Cocoa Lumberjack!

@@ -9,7 +9,7 @@
 #if TARGET_OS_IPHONE
     #import <UIKit/UIDevice.h>
 #endif
-
+#pragma clang diagnostic ignored "-Wimplicit-retain-self"
 /**
  * Welcome to Cocoa Lumberjack!
  * 

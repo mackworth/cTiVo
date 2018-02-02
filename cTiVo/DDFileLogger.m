@@ -4,6 +4,7 @@
 #import <sys/attr.h>
 #import <sys/xattr.h>
 #import <libkern/OSAtomic.h>
+#pragma clang diagnostic ignored "-Wimplicit-retain-self"
 
 /**
  * Welcome to Cocoa Lumberjack!

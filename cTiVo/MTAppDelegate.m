@@ -5,6 +5,7 @@
 //  Created by Scott Buchanan on 12/6/12.
 //  Copyright (c) 2012 Scott Buchanan. All rights reserved.
 //
+#pragma clang diagnostic ignored "-Wimplicit-retain-self"
 
 #import "MTAppDelegate.h"
 #import "MTProgramTableView.h"
