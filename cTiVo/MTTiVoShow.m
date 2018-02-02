@@ -1372,8 +1372,10 @@ NSString * fourChar(long n, BOOL allowZero) {
 
     NSString *ddir = [self directoryForShowInDirectory: [[tiVoManager downloadDirectory] stringByAppendingPathComponent:keyPathPart ] createIfMissing:create];
 	if (ddir.length == 0) {
-		DDLogReport(@"No directory for show %@. Invalid filename pattern %@? (=> %@)", self, filenamePattern, keyBaseTitle);
-		ddir = tiVoManager.downloadDirectory;
+		if (create) {
+			DDLogReport(@"No directory for show %@. Invalid filename pattern %@? (=> %@)", self, filenamePattern, keyBaseTitle);
+			ddir = tiVoManager.downloadDirectory;
+		}
 	}
     return [ddir stringByAppendingPathComponent:baseTitle];
 }

@@ -1745,6 +1745,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 #endif
         [self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil ];
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTIfSuccessDeleteFromTiVo]) {
+			DDLogReport(@"Deleting %@ after successful download",self.show);
 			[self.show.tiVo deleteTiVoShows:@[self.show] ];
 		}
     }
