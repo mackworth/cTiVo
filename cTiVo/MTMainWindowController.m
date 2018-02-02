@@ -616,6 +616,9 @@ __DDLOGHERE__
             }
         }
     }
+	for (MTDownload * download in itemsToRemove) {
+		if (download.isInProgress) [download cancel];
+	}
 	[tiVoManager deleteFromDownloadQueue:itemsToRemove];
 	if (itemsToRemove.count)[self playTrashSound];
 

@@ -800,9 +800,10 @@ __DDLOGHERE__
         catTask.requiresInputPipe = NO;
     }
     if ([outputFile isKindOfClass:[NSString class]]) {
+		__weak __typeof__(self) weakSelf = self;
         catTask.completionHandler = ^BOOL(){
             if (! [[NSFileManager defaultManager] fileExistsAtPath:outputFile] ) {
-                DDLogReport(@"Warning: %@: File %@ not found after cat completion",self, outputFile );
+                DDLogReport(@"Warning: %@: File %@ not found after cat completion", weakSelf, outputFile );
             }
             return YES;
         };
@@ -846,28 +847,32 @@ __DDLOGHERE__
     }
     [decryptTask setLaunchPath:decryptPath] ;
     decryptTask.successfulExitCodes = @[@0,@6];
+	__weak __typeof__(self) weakSelf = self;
 
     decryptTask.completionHandler = ^BOOL(){
-        if (!self.shouldSimulEncode) {
-            if (self.downloadStatus.intValue < kMTStatusDownloaded ) {
-                [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
+		__typeof__(self) strongSelf = weakSelf;
+		if (!strongSelf) return NO;
+        if (!strongSelf.shouldSimulEncode) {
+            if (strongSelf.downloadStatus.intValue < kMTStatusDownloaded ) {
+                [strongSelf setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
             }
             [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationDecryptDidFinish object:nil];
-            if (self.decryptedFilePath) {
-                [self markCompleteCTiVoFile: self.decryptedFilePath ];
+            if (strongSelf.decryptedFilePath) {
+                [strongSelf markCompleteCTiVoFile: self.decryptedFilePath ];
             }
         }
 
-        [self checkDecodeLog];
+        [strongSelf checkDecodeLog];
 		return YES;
     };
 	
 	decryptTask.terminationHandler = ^(){
-        [self checkDecodeLog];
+        [weakSelf checkDecodeLog];
 	};
     
     if (self.downloadingShowFromTiVoFile) {
         [decryptTask setStandardError:decryptTask.logFileWriteHandle];
+		NSUInteger fileSize = self.show.fileSize ?: 1000000000; //defensive
         decryptTask.progressCalc = ^(NSString *data){
             NSArray *lines = [data componentsSeparatedByString:@"\n"];
             double position = 0.0;
@@ -876,7 +881,7 @@ __DDLOGHERE__
                 NSArray * words = [line componentsSeparatedByString:@":"]; //always 1
                 position= [[words objectAtIndex:0] doubleValue];
                 if (position  > 0) {
-                    return (position/self.show.fileSize);
+                    return (position/fileSize);
                 }
             };
             return 0.0;
@@ -943,39 +948,45 @@ __DDLOGHERE__
         return _encodeTask;
     }
     MTTask *encodeTask = [MTTask taskWithName:@"encode" download:self];
+	__weak __typeof__(MTTask *) weakEncode = encodeTask;
+	
     NSString * encoderPath = [self encoderPath];
     if (!encoderPath) return nil;
     [encodeTask setLaunchPath:encoderPath];
     encodeTask.requiresOutputPipe = NO;
+	__weak __typeof__(self) weakSelf = self;
 
     encodeTask.completionHandler = ^BOOL(){
-        if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
-            DDLogReport(@" %@ encoding complete, but the video file not found: %@ ",self, self.encodeFilePath );
+		__typeof__(self) strongSelf = weakSelf;
+        if (! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.encodeFilePath] ) {
+            DDLogReport(@" %@ encoding complete, but the video file not found: %@ ",strongSelf, strongSelf.encodeFilePath );
             return NO;
         }
-        unsigned long long fileSize = [[[NSFileManager defaultManager] attributesOfItemAtPath:self.encodeFilePath error:nil] fileSize];
+        unsigned long long fileSize = [[[NSFileManager defaultManager] attributesOfItemAtPath:strongSelf.encodeFilePath error:nil] fileSize];
         if (fileSize == 0) {
-            DDLogReport(@" %@ encoding complete, but empty file found: %@",self, self.encodeFilePath );
+            DDLogReport(@" %@ encoding complete, but empty file found: %@",strongSelf, strongSelf.encodeFilePath );
             return NO;
         }
-        [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
-        self.processProgress = 1.0;
-       if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
-            [self writeMetaDataFiles];
-            [self finishUpPostEncodeProcessing];
+        [strongSelf setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
+        strongSelf.processProgress = 1.0;
+       if (strongSelf.taskFlowType != kMTTaskFlowSimuMarkcom && strongSelf.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
+            [strongSelf writeMetaDataFiles];
+            [strongSelf finishUpPostEncodeProcessing];
         }
         return YES;
     };
 
     encodeTask.cleanupHandler = ^(){
-        if (self.activeURLConnection || ! self.shouldSimulEncode) {  //else we've already checked
-            if ([self checkLogForAudio: _encodeTask.errorFilePath] ) {
-                [self handleNewTSChannel];
+		__typeof__(self) strongSelf = weakSelf;
+		if (!strongSelf) return;
+       if (strongSelf.activeURLConnection || ! strongSelf.shouldSimulEncode) {  //else we've already checked
+            if ([strongSelf checkLogForAudio: weakEncode.errorFilePath] ) {
+                [strongSelf handleNewTSChannel];
             }
-            self.processProgress = 1.0;
+            strongSelf.processProgress = 1.0;
         }
-       if (self.isCanceled) {
-           [self deleteVideoFile];
+       if (strongSelf.isCanceled) {
+           [strongSelf deleteVideoFile];
        }
     };
 
@@ -991,21 +1002,22 @@ __DDLOGHERE__
             __block NSPipe *encodePipe = [NSPipe new];
             [encodeTask setStandardInput:encodePipe];
             encodeTask.startupHandler = ^BOOL(){
-                if ([self isCompleteCTiVoFile:self.encodeFilePath forFileType:@"Encoded"]){
+				__typeof__(self) strongSelf = weakSelf;
+                if ([strongSelf isCompleteCTiVoFile:self.encodeFilePath forFileType:@"Encoded"]){
                     return NO;
                 }
 
-                if (self.bufferFileReadHandle) {
-                    [self.bufferFileReadHandle closeFile];
+                if (strongSelf.bufferFileReadHandle) {
+                    [strongSelf.bufferFileReadHandle closeFile];
                 }
-                self.bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:self.decryptedFilePath];
-                self.urlBuffer = nil;
-                self.taskChainInputHandle = [encodePipe fileHandleForWriting];
-                self.processProgress = 0.0;
-                self.previousProcessProgress = 0.0;
-                self.totalDataRead = 0.0;
-                [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-                [self performSelectorInBackground:@selector(writeData) withObject:nil];
+                strongSelf.bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:self.decryptedFilePath];
+                strongSelf.urlBuffer = nil;
+                strongSelf.taskChainInputHandle = [encodePipe fileHandleForWriting];
+                strongSelf.processProgress = 0.0;
+                strongSelf.previousProcessProgress = 0.0;
+                strongSelf.totalDataRead = 0.0;
+                [strongSelf setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                [strongSelf performSelectorInBackground:@selector(writeData) withObject:nil];
                 return YES;
             };
 
@@ -1033,15 +1045,15 @@ __DDLOGHERE__
 
                     }
                     if (returnValue == -1.0) {
-                        DDLogMajor(@"Encode progress with RX %@ failed for task encoder for show %@\nEncoder report: %@",percents, self.show.showTitle, data);
+                        DDLogMajor(@"Encode progress with RX %@ failed for task encoder for show %@\nEncoder report: %@",percents, weakSelf.show.showTitle, data);
 
                     }
                     return returnValue;
                 };
             };
             encodeTask.startupHandler = ^BOOL(){
-                self.processProgress = 0.0;
-                [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                weakSelf.processProgress = 0.0;
+                [weakSelf setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
                 return YES;
             };
         }
@@ -1080,8 +1092,10 @@ __DDLOGHERE__
     [captionTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ccextractor" ]];
     captionTask.requiresOutputPipe = NO;
     captionTask.shouldReschedule  = NO;  //If captioning fails continue, just without captioning
+	__weak __typeof__(self) weakSelf = self;
 
     if (self.downloadingShowFromMPGFile) {
+		NSUInteger showLength = self.show.showLength ?: 120*60;
         captionTask.progressCalc = ^double(NSString *data){
             NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\d+:\\d\\d" options:NSRegularExpressionCaseInsensitive error:nil];
             NSArray *values = nil;
@@ -1097,7 +1111,7 @@ __DDLOGHERE__
 					NSString *timeString = [data substringWithRange:valueRange];
 					NSArray *components = [timeString componentsSeparatedByString:@":"];
 					double currentTimeOffset = [components[0] doubleValue] * 60.0 + [components[1] doubleValue];
-					returnValue = (currentTimeOffset/self.show.showLength);
+					returnValue = (currentTimeOffset/showLength);
 				}
                 
             }
@@ -1108,33 +1122,37 @@ __DDLOGHERE__
         };
         if (!self.encodeFormat.canSimulEncode) {
             captionTask.startupHandler = ^BOOL(){
-                self.processProgress = 0.0;
-                [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
+                weakSelf.processProgress = 0.0;
+                [weakSelf setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
                 return YES;
             };
         }
     }
 
-    
+	__weak __typeof__(MTTask *) weakCommercial = _commercialTask;
+	__weak __typeof__(MTTask *) weakCaption = captionTask;
+
     captionTask.completionHandler = ^BOOL(){
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
-        if ( self.skipCommercials && _commercialTask.successfulExit) {
-            [self fixupSRTsDueToCommercialSkipping];
+		__typeof__(self) strongSelf = weakSelf;
+        if ( strongSelf.skipCommercials && weakCommercial.successfulExit) {
+            [strongSelf fixupSRTsDueToCommercialSkipping];
         }
-        [self markCompleteCTiVoFile:self.captionFilePath];
+        [strongSelf markCompleteCTiVoFile:strongSelf.captionFilePath];
 		return YES;
     };
     
     captionTask.cleanupHandler = ^(){
-        if (_captionTask.taskFailed) {
-            [self notifyUserWithTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" ];
+		__typeof__(self) strongSelf = weakSelf;
+       if (weakCaption.taskFailed) {
+            [strongSelf notifyUserWithTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" ];
         }
         if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] &&
-            (self.isCanceled)) {
-            if ([[NSFileManager defaultManager] fileExistsAtPath:self.captionFilePath]) {
-                [[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
+            (strongSelf.isCanceled)) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.captionFilePath]) {
+                [[NSFileManager defaultManager] removeItemAtPath:strongSelf.captionFilePath error:nil];
             }
-            self.captionFilePath = nil;
+            strongSelf.captionFilePath = nil;
         }
     };
     
@@ -1171,20 +1189,25 @@ __DDLOGHERE__
     commercialTask.shouldReschedule  = NO;  //If comskip fails continue just without commercial inputs
     [commercialTask setStandardError:commercialTask.logFileWriteHandle];  //progress data is in err output
     
-    
-    commercialTask.cleanupHandler = ^(){
-        if (_commercialTask.taskFailed) {
-            if ([self checkLogForAudio: self.commercialTask.logFilePath]) {
-                [self handleNewTSChannel];
-            } else {
-                [self notifyUserWithTitle:@"Detecting Commercials Failed" subTitle:@"Not processing commercials" ];
+	__weak __typeof__(self) weakSelf = self;
+	__weak __typeof__(MTTask *) weakCommercial = commercialTask;
 
-                if ([[NSFileManager defaultManager] fileExistsAtPath:self.commercialFilePath]) {
-                    [[NSFileManager defaultManager] removeItemAtPath:self.commercialFilePath error:nil];
+    commercialTask.cleanupHandler = ^(){
+		__typeof__(self) strongSelf = weakSelf;
+		__typeof__(MTTask *) strongCommercial = weakCommercial;
+		if (!strongSelf || !strongCommercial) return;
+        if (weakCommercial.taskFailed) {
+            if ([strongSelf checkLogForAudio: strongCommercial.logFilePath]) {
+                [strongSelf handleNewTSChannel];
+            } else {
+                [strongSelf notifyUserWithTitle:@"Detecting Commercials Failed" subTitle:@"Not processing commercials" ];
+
+                if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.commercialFilePath]) {
+                    [[NSFileManager defaultManager] removeItemAtPath:strongSelf.commercialFilePath error:nil];
                 }
                 NSData *zeroData = [NSData data];
-                [zeroData writeToFile:self.commercialFilePath atomically:YES];
-                if (_commercialTask.completionHandler) _commercialTask.completionHandler();
+                [zeroData writeToFile:strongSelf.commercialFilePath atomically:YES];
+                if (strongCommercial.completionHandler) strongCommercial.completionHandler();
             }
         }
     };
@@ -1192,8 +1215,8 @@ __DDLOGHERE__
     if (self.taskFlowType != kMTTaskFlowNonSimuMarkcom && self.taskFlowType != kMTTaskFlowNonSimuMarkcomSubtitles) {
         // For these cases the encoding tasks is the driver
         commercialTask.startupHandler = ^BOOL(){
-            self.processProgress = 0.0;
-            [self setValue:[NSNumber numberWithInt:kMTStatusCommercialing] forKeyPath:@"downloadStatus"];
+            weakSelf.processProgress = 0.0;
+            [weakSelf setValue:[NSNumber numberWithInt:kMTStatusCommercialing] forKeyPath:@"downloadStatus"];
             return YES;
         };
 
@@ -1206,29 +1229,32 @@ __DDLOGHERE__
             return [[data substringWithRange:valueRange] doubleValue]/100.0;
         };
 
-    
+		__weak __typeof__(MTTask *) weakCaption = _captionTask;
+
         commercialTask.completionHandler = ^BOOL{
-            DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
-             if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
-				 if (!self.shouldSimulEncode) {
-					self.processProgress = 1.0;
+			__typeof__(self) strongSelf = weakSelf;
+
+            DDLogMajor(@"Finished detecting commercials in %@",strongSelf.show.showTitle);
+             if (strongSelf.taskFlowType != kMTTaskFlowSimuMarkcom && strongSelf.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
+				 if (!strongSelf.shouldSimulEncode) {
+					strongSelf.processProgress = 1.0;
 				 }
-				[self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
-				if (self.exportSubtitles.boolValue && self.skipCommercials && self.captionFilePath && _captionTask.successfulExit) {
-                    [self fixupSRTsDueToCommercialSkipping];
+				[strongSelf setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
+				if (strongSelf.exportSubtitles.boolValue && strongSelf.skipCommercials && strongSelf.captionFilePath && weakCaption.successfulExit) {
+                    [strongSelf fixupSRTsDueToCommercialSkipping];
 				}
              } else {
-                 self.processProgress = 1.0;
-                 [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
-                 [self writeMetaDataFiles];
-                 [self finishUpPostEncodeProcessing];
+                 strongSelf.processProgress = 1.0;
+                 [strongSelf setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
+                 [strongSelf writeMetaDataFiles];
+                 [strongSelf finishUpPostEncodeProcessing];
              }
-            [self markCompleteCTiVoFile:self.commercialFilePath];
+            [strongSelf markCompleteCTiVoFile:strongSelf.commercialFilePath];
             return YES;
         };
     } else {
         commercialTask.completionHandler = ^BOOL{
-            DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
+            DDLogMajor(@"Finished detecting commercials in %@",weakSelf.show.showTitle);
 			return YES;
         };
     }
@@ -1359,7 +1385,10 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		return;
 	}
 
-    self.decryptTask = self.encodeTask = self.commercialTask = self.captionTask = nil; //make sure we're not reusing an old task from previous run.
+	self.decryptTask = nil;
+	self.encodeTask = nil;
+	self.commercialTask = nil;
+	self.captionTask = nil; //make sure we're not reusing an old task from previous run.
     self.activeTaskChain = [MTTaskChain new];
     self.activeTaskChain.download = self;
     if (!self.downloadingShowFromMPGFile && !self.downloadingShowFromTiVoFile) {
@@ -1726,7 +1755,10 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
     [self cleanupFiles];
     //Reset tasks
-    self.decryptTask = self.captionTask = self.commercialTask = self.encodeTask  = nil;
+	self.decryptTask = nil;
+	self.captionTask = nil;
+	self.commercialTask = nil;
+	self.encodeTask  = nil;
 }
 
 
@@ -1829,12 +1861,16 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     if(self.activeTaskChain.isRunning) {
         [self.activeTaskChain cancel];
     }
+	[self cancelPerformanceTimer];
     self.activeTaskChain = nil;
 //    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:bufferFileReadHandle];
     if (!self.isNew && !self.isDone ) { //tests are already marked for success/failure
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];
     }
-    self.decryptTask = self.captionTask = self.commercialTask = self.encodeTask  = nil;
+	self.decryptTask = nil;
+	self.captionTask = nil;
+	self.commercialTask = nil;
+	self.encodeTask  = nil;
     
 	NSDate *now = [NSDate date];
     while (self.writingData && (-1.0 * [now timeIntervalSinceNow]) < 5.0){ //Wait for no more than 5 seconds.
@@ -2074,6 +2110,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 #pragma mark - NSURL Delegate Methods
 
 -(BOOL) checkLogForAudio: (NSString *) filePath {
+	if (!filePath) return NO;
     //if we find audio required, then mark channel as TS.
     //If not, then IF it was a successfulencode, then mark as not needing TS
     if ( ! self.useTransportStream) {
@@ -2322,7 +2359,7 @@ NSInteger diskWriteFailure = 123;
                  //hmm, doesn't look like it's big enough  (80% for PS; 70% for TS
             BOOL foundAudioOnly = NO;
             if (!self.useTransportStream ) {
-                if ([self checkLogForAudio: self.encodeTask.errorFilePath]) {
+                if ([self checkLogForAudio: _encodeTask.errorFilePath]) {
                     foundAudioOnly = YES;
                 }
                 if (!self.encodeFormat.testsForAudioOnly && filePercent > 2.0 && filePercent < 25.0) {

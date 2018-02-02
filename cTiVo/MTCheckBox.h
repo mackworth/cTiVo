@@ -10,7 +10,7 @@
 
 @interface MTCheckBox : NSButton
 
-@property (nonatomic, unsafe_unretained) id owner;
+@property (nonatomic, weak) id owner;
 
 -(void)setOn: (BOOL) shouldTurnOn;
 @end
