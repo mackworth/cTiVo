@@ -201,17 +201,17 @@
 
 #define kMTSubscriptionExpiration @"SubscriptionExpirationDays" //How many days to wait before deleting previous recording info (potentially leading to duplicates) (No GUI)
 
-#define kMTMaxNumEncoders @"MaxNumberEncoders"	//Limit number of encoders to limit cpu usage (No GUI) //
+#define kMTMaxNumEncoders @"MaxNumberEncoders"	     //Limit number of encoders to limit cpu usage//
 #define kMTMaxProgressDelay @"MaxProgressDelay"      //Maximum time of no encoder progress before giving up (No GUI)  //
 
-#define kMTRunComSkip @"RunComSkip"                 // Whether to run comSkip program after conversion
+#define kMTRunComSkip @"RunComSkip"                  // Whether to run comSkip program after conversion
 #define kMTMarkCommercials @"MarkCommercials"        // Whether insert chapters for commercials when possible
-#define kMTExportSubtitles @"ExportSubtitles"       // Whether to export subtitles with ts2ami
-#define kMTExportTextMetaData @"ExportTextMetaData" // Whether to export text metadata for PyTivo
+#define kMTExportSubtitles @"ExportSubtitles"        // Whether to export subtitles with ts2ami
+#define kMTExportTextMetaData @"ExportTextMetaData"  // Whether to export text metadata for PyTivo
 
 #ifndef deleteXML
-#define kMTExportTivoMetaData @"ExportTivoMetaData" // Whether to export XML metadata
-#define kMTExportMetaData @"ExportMetaData" // Whether to export metadata with Atomic Parsley
+#define kMTExportTivoMetaData @"ExportTivoMetaData"  // Whether to export XML metadata
+#define kMTExportMetaData @"ExportMetaData"          // Whether to export metadata with Atomic Parsley
 #endif
 
 #define kMTScheduledOperations @"ScheduledOperations"// Whether to run queue at a scheduled time;

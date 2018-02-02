@@ -202,10 +202,10 @@
 		const int vertMargin = 5;
 		const int horizMargin = 10;
 		const CGFloat columnWidth = horizBase/2;
-		int columNum = (itemNum < numItems/2)? 0:1;
-		int rowNum = (itemNum < numItems/2) ? itemNum: itemNum-numItems/2;
+		int columnNum = (itemNum < (numItems+1)/2)? 0:1;
+		int rowNum = itemNum - columnNum * (numItems+1)/2;
 		
-		NSRect labelFrame = NSMakeRect(columNum*columnWidth,vertBase-rowNum*(popupHeight+vertMargin)-4,labelWidth,popupHeight);
+		NSRect labelFrame = NSMakeRect(columnNum*columnWidth,vertBase-rowNum*(popupHeight+vertMargin)-4,labelWidth,popupHeight);
 		NSTextField * label = [self newTextField:labelFrame];
 		NSString * displayName = [NSString stringWithFormat:@"%@:",className];
 		if ([displayName hasPrefix:@"MT"]) {
@@ -213,7 +213,7 @@
 		}
 		[label setStringValue:displayName];
 		
-		NSRect frame = NSMakeRect(columNum*columnWidth+labelWidth+horizMargin,vertBase-rowNum*(popupHeight+vertMargin),popupWidth,popupHeight);
+		NSRect frame = NSMakeRect(columnNum*columnWidth+labelWidth+horizMargin,vertBase-rowNum*(popupHeight+vertMargin),popupWidth,popupHeight);
 		NSPopUpButton * cell = [[NSPopUpButton alloc] initWithFrame:frame pullsDown:NO];
 		
 		cell.title = className;
