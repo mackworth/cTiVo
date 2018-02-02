@@ -273,7 +273,7 @@
                 <button toolTip="WARNING: automatically deletes show from TiVo after successful download." misplaced="YES" id="U5h-eK-s9d">
                     <rect key="frame" x="18" y="630" width="233" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Delete from TiVo after download" bezelStyle="regularSquare" imagePosition="left" state="on" toolTip="WARNING: Automatically deletes shows from your TiVo after a successful download." inset="2" id="XaB-bo-1Af">
+                    <buttonCell key="cell" type="check" title="Delete from TiVo after download" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="XaB-bo-1Af">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
