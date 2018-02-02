@@ -92,16 +92,19 @@ static SecKeychainRef keychain = NULL;  //
                                              (id)kSecImportExportKeychain:   (__bridge id)keychain};
         CFArrayRef p12Items = NULL;
         OSStatus result = SecPKCS12Import((__bridge CFDataRef)p12Data, (__bridge CFDictionaryRef)optionsDictionary, &p12Items);
-        if(result != noErr) {
+        if (result != noErr) {
             DDLogReport(@"Error on pkcs12 import: %d", result);
         } else {
             CFDictionaryRef identityDict = CFArrayGetValueAtIndex(p12Items, 0);
-            SecIdentityRef identityApp =(SecIdentityRef)CFDictionaryGetValue(identityDict,kSecImportItemIdentity);
+			if (identityDict) {
+				SecIdentityRef identityApp =(SecIdentityRef)CFDictionaryGetValue(identityDict,kSecImportItemIdentity);
 
-            // the certificates array, containing the identity then the root certificate
-            NSMutableArray * chain =  CFDictionaryGetValue(identityDict, @"chain");
-            _myCerts = @[(__bridge_transfer id)identityApp, chain[1], chain[2]];
+            	// the certificates array, containing the identity then the root certificate
+            	NSMutableArray * chain =  CFDictionaryGetValue(identityDict, @"chain");
+            	_myCerts = @[(__bridge id)identityApp, chain[1], chain[2]];
+			}
         }
+		if (p12Items) CFRelease(p12Items);
 // We should do the following,but it seems to fail the opening of the stream.
 //Instead we keep keychain around and unlock it before using certs
 //        if (keychain) {
@@ -605,11 +608,14 @@ static NSRegularExpression * isFinalRegex = nil;
                        }
                  };
     }
+	__weak __typeof__(self) weakSelf = self;
     [self sendRpcRequest:@"bodyAuthenticate"
                  monitor:NO
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
-           DDLogVerbose(@"Authenticate from TiVo RPC: %@", [self maskTSN:jsonResponse]);
+		   __typeof__(self) strongSelf = weakSelf;
+		   if (!strongSelf ) return;
+          DDLogVerbose(@"Authenticate from TiVo RPC: %@", [self maskTSN:jsonResponse]);
            if ([jsonResponse[@"status"] isEqualToString:@"success"]) {
                DDLogDetail(@"Authenticated");
 //               if (jsonResponse[@"deviceId"]) {  //for tivo middlemind in future
@@ -622,14 +628,14 @@ static NSRegularExpression * isFinalRegex = nil;
 //                       }
 //                   }
 //               }
-               if (!self.bodyID) {
-                   [self getBodyID];
+               if (!strongSelf.bodyID) {
+                   [strongSelf getBodyID];
                } else {
-                   [self getAllShows];
+                   [strongSelf getAllShows];
                }
            } else {
                DDLogReport(@"RPC Authentication failure!");
-               [self sharedShutdown];
+               [strongSelf sharedShutdown];
            }
     }];
 }
@@ -637,23 +643,25 @@ static NSRegularExpression * isFinalRegex = nil;
 -(void) getBodyID {
     NSDictionary * data =  @{@"bodyId": @"-" };
     DDLogDetail(@"Calling BodyID");
+	__weak __typeof__(self) weakSelf = self;
 
     [self sendRpcRequest:@"bodyConfigSearch"
                  monitor:NO
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
            DDLogVerbose(@"BodyID from TiVo RPC: %@",[self maskTSN: jsonResponse]);
+		   __typeof__(self) strongSelf = weakSelf;
            NSArray * bodyConfigs = jsonResponse[@"bodyConfig"];
            if (bodyConfigs.count > 0) {
                NSDictionary * bodyConfig = (NSDictionary *)bodyConfigs[0];
                //could also get userDiskSize and userDiskUsed here
                NSString * bodyId = bodyConfig[@"bodyId"];
                if (bodyId) {
-                   self.bodyID =bodyId;
+                   strongSelf.bodyID =bodyId;
                    DDLogVerbose(@"Got BodyID");
-                   self.tiVoSerialNumber = bodyId;
-                   [self.delegate setTiVoSerialNumber:bodyId];
-                   [self getAllShows];
+                   strongSelf.tiVoSerialNumber = bodyId;
+                   [strongSelf.delegate setTiVoSerialNumber:bodyId];
+                   [strongSelf getAllShows];
                }
            }
        }];
@@ -670,33 +678,36 @@ static NSRegularExpression * isFinalRegex = nil;
                             @"format": @"idSequence",
                             @"bodyId": self.bodyID
                             };
-    [self sendRpcRequest:@"recordingFolderItemSearch"
+	__weak __typeof__(self) weakSelf = self;
+	[self sendRpcRequest:@"recordingFolderItemSearch"
                  monitor: YES
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
            //This will be called every time the TiVo List changes, so first Launch differentiates the very first time.
-           DDLogVerbose(@"Got All Shows from TiVo RPC: %@", [self maskTSN:jsonResponse]);
+		   __typeof__(self) strongSelf = weakSelf;
+		   if (!strongSelf) return;
+		   DDLogVerbose(@"Got All Shows from TiVo RPC: %@", [strongSelf maskTSN:jsonResponse]);
            NSArray <NSString *> * shows = jsonResponse[@"objectIdAndType"];
-           BOOL isFirstLaunch = self.firstLaunch;
-           self.firstLaunch = NO;
+           BOOL isFirstLaunch = strongSelf.firstLaunch;
+           strongSelf.firstLaunch = NO;
            DDLogDetail (@"Got %lu shows from TiVo", shows.count);
-           if (!self.showMap) {
-               self.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
-               [self getShowInfoForShows: shows];
+           if (!strongSelf.showMap) {
+               strongSelf.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
+               [strongSelf getShowInfoForShows: shows];
            } else {
                NSMutableArray <NSString *> *lookupDetails = [NSMutableArray array];
                NSMutableArray <NSString *> * newIDs = [NSMutableArray array];
                NSMutableArray <NSNumber *> * indices = [NSMutableArray array];
-               NSMutableDictionary < NSString *, MTRPCData *> *deletedShows = [self.showMap mutableCopy];
+               NSMutableDictionary < NSString *, MTRPCData *> *deletedShows = [strongSelf.showMap mutableCopy];
                [shows enumerateObjectsUsingBlock:^(NSString *  _Nonnull objectID, NSUInteger idx, BOOL * _Nonnull stop) {
-                   if (!self.showMap[objectID]) {
+                   if (!strongSelf.showMap[objectID]) {
                        [newIDs addObject:objectID];
                        [lookupDetails addObject:objectID];
                        [indices addObject:@(idx)];
                    } else {
                        //have seen before, so don't lookup, but also don't delete
                        [deletedShows removeObjectForKey:objectID];
-                       if (isFirstLaunch && !self.showMap[objectID].imageURL) {
+                       if (isFirstLaunch && !strongSelf.showMap[objectID].imageURL) {
                            //saved last time without having finished checking the art
                            [lookupDetails addObject:objectID];
                        }
@@ -704,11 +715,11 @@ static NSRegularExpression * isFinalRegex = nil;
                }
                 ];
                for (NSString * objectID in deletedShows) {
-                   [self.showMap removeObjectForKey:objectID];
+                   [strongSelf.showMap removeObjectForKey:objectID];
                }
-               [self getShowInfoForShows: lookupDetails];
+               [strongSelf getShowInfoForShows: lookupDetails];
                if (!isFirstLaunch) {
-				   [self.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
+				   [strongSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
                }
            }
        } ];
@@ -768,12 +779,16 @@ static NSRegularExpression * isFinalRegex = nil;
                             @"objectIdAndType": subArray,
 //                          @"responseTemplate": showInfoResponseTemplate
                             };
+	__weak __typeof__(self) weakSelf = self;
+
     [self sendRpcRequest:@"recordingSearch"
              monitor:NO
             withData:data
    completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+	   __typeof__(self) strongSelf = weakSelf;
+	   if (!strongSelf) return;
        NSArray * responseShows = jsonResponse[@"recording"];
-       DDLogVerbose(@"Got ShowInfo from TiVo RPC: %@", [self maskTSN:jsonResponse]);
+       DDLogVerbose(@"Got ShowInfo from TiVo RPC: %@", [strongSelf maskTSN:jsonResponse]);
        if (responseShows.count == 0) return;
        if (responseShows.count != subArray.count) {
            DDLogMajor(@"Invalid # of TivoRPC shows: /n%@ /n%@", responseShows, subArray);
@@ -810,15 +825,15 @@ static NSRegularExpression * isFinalRegex = nil;
 //               rpcData.format = MPEGFormatOther;
 //           }
 
-           rpcData.rpcID = [NSString stringWithFormat: @"%@|%@", self.hostName, objectId];
-           @synchronized (self.showMap) {
-               [self.showMap setObject:rpcData forKey:objectId];
+           rpcData.rpcID = [NSString stringWithFormat: @"%@|%@", strongSelf.hostName, objectId];
+           @synchronized (strongSelf.showMap) {
+               [strongSelf.showMap setObject:rpcData forKey:objectId];
            }
            //very annoying that TiVo won't send over image information with the rest of the show info.
-           NSString * imageURL = self.seriesImages[rpcData.series]; //tivo only has series images
+           NSString * imageURL = strongSelf.seriesImages[rpcData.series]; //tivo only has series images
            if (imageURL) {
                rpcData.imageURL = imageURL;
-               [self.delegate receivedRPCData:rpcData];
+               [strongSelf.delegate receivedRPCData:rpcData];
            } else {
                NSString * contentId = showInfo[@"contentId"];
                if (contentId.length) {
@@ -828,11 +843,11 @@ static NSRegularExpression * isFinalRegex = nil;
            }
            objectIDIndex++;
        }
-       [self getImageFor:showsWithoutImage withObjectIds: showsObjectIDs];
+       [strongSelf getImageFor:showsWithoutImage withObjectIds: showsObjectIDs];
            //leave some time for imageURLS, then save defaults.
        if (lastBatch) {
            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-               [self saveDefaults];
+               [strongSelf saveDefaults];
            });
        }
    } ];
@@ -864,11 +879,14 @@ static NSArray * imageResponseTemplate = nil;
                         @"responseTemplate": imageResponseTemplate,
                         @"contentId": contentIds
                         };
+	__weak __typeof__(self) weakSelf = self;
 
     [self sendRpcRequest:@"contentSearch"
                  monitor:NO
                 withData:data
        completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+		__typeof__(self) strongSelf = weakSelf;
+		if (!strongSelf) return;
         NSArray * shows = jsonResponse[@"content"];
         DDLogVerbose(@"Got ImageInfo from TiVo RPC: %@", shows);
         for (NSDictionary * showInfo in shows) {
@@ -887,15 +905,15 @@ static NSArray * imageResponseTemplate = nil;
                 }
                 MTRPCData * episodeInfo = nil;
                 DDLogDetail(@"For %@, found TiVo imageInfo %@",objectIds[index], imageURL);
-                @synchronized (self.showMap) {
-                   episodeInfo = self.showMap[objectIds[index]];
+                @synchronized (strongSelf.showMap) {
+                   episodeInfo = strongSelf.showMap[objectIds[index]];
                    episodeInfo.imageURL  = imageURL;  //if none available, still mark as ""
                    NSString * title= episodeInfo.series;
-                   if (title && !_seriesImages[title]) {
-                       _seriesImages[title] = imageURL;
+                   if (title && !strongSelf.seriesImages[title]) {
+                       strongSelf.seriesImages[title] = imageURL;
                    }
                 }
-                [self.delegate receivedRPCData:episodeInfo];
+                [strongSelf.delegate receivedRPCData:episodeInfo];
            }
        }
     }];
