@@ -85,26 +85,27 @@ static SecKeychainRef keychain = NULL;  //
                                             &keychain);
         if (status != errSecSuccess) {
             DDLogReport(@"Could not create temporary keychain \"%@\": [%d] %@", keychainPath, (int)status, securityErrorMessageString(status));
-        }
-		NSString * tivoPassword = @"LwrbLEFYvG";
+        } else if (keychain) {
+			NSString * tivoPassword = @"LwrbLEFYvG";
 
-        NSDictionary * optionsDictionary = @{(id)kSecImportExportPassphrase: tivoPassword,
-                                             (id)kSecImportExportKeychain:   (__bridge id)keychain};
-        CFArrayRef p12Items = NULL;
-        OSStatus result = SecPKCS12Import((__bridge CFDataRef)p12Data, (__bridge CFDictionaryRef)optionsDictionary, &p12Items);
-        if (result != noErr) {
-            DDLogReport(@"Error on pkcs12 import: %d", result);
-        } else {
-            CFDictionaryRef identityDict = CFArrayGetValueAtIndex(p12Items, 0);
-			if (identityDict) {
-				SecIdentityRef identityApp =(SecIdentityRef)CFDictionaryGetValue(identityDict,kSecImportItemIdentity);
+			NSDictionary * optionsDictionary = @{(id)kSecImportExportPassphrase: tivoPassword,
+												 (id)kSecImportExportKeychain:   (__bridge id)keychain};
+			CFArrayRef p12Items = NULL;
+			OSStatus result = SecPKCS12Import((__bridge CFDataRef)p12Data, (__bridge CFDictionaryRef)optionsDictionary, &p12Items);
+			if (result != noErr) {
+				DDLogReport(@"Error on pkcs12 import: %d", result);
+			} else {
+				CFDictionaryRef identityDict = CFArrayGetValueAtIndex(p12Items, 0);
+				if (identityDict) {
+					SecIdentityRef identityApp =(SecIdentityRef)CFDictionaryGetValue(identityDict,kSecImportItemIdentity);
 
-            	// the certificates array, containing the identity then the root certificate
-            	NSMutableArray * chain =  CFDictionaryGetValue(identityDict, @"chain");
-            	_myCerts = @[(__bridge id)identityApp, chain[1], chain[2]];
+					// the certificates array, containing the identity then the root certificate
+					NSMutableArray * chain =  CFDictionaryGetValue(identityDict, @"chain");
+					_myCerts = @[(__bridge id)identityApp, chain[1], chain[2]];
+				}
 			}
-        }
-		if (p12Items) CFRelease(p12Items);
+			if (p12Items) CFRelease(p12Items);
+		}
 // We should do the following,but it seems to fail the opening of the stream.
 //Instead we keep keychain around and unlock it before using certs
 //        if (keychain) {
