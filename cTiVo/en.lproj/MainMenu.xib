@@ -240,47 +240,16 @@ CA
                                     <binding destination="926" name="value" keyPath="values.RunComSkip" id="qQj-dE-L8i"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="1107">
-                                <attributedString key="attributedTitle"/>
-                            </menuItem>
-                            <menuItem title="Export Subtitles" toolTip="Export text of subtitles to &lt;file&gt;.srt" id="1073">
+                            <menuItem title="Export Captions" toolTip="Export text of subtitles to &lt;file&gt;.srt" id="1073">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.ExportSubtitles" id="1116"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Export pyTivo Metadata" toolTip="Exports information about this video to file.ext.txt; useful for pyTivo server (e.g. to &quot;go back&quot; to Tivo)" id="986">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.ExportTextMetaData" id="1128">
-                                        <dictionary key="options">
-                                            <bool key="NSConditionallySetsEnabled" value="NO"/>
-                                        </dictionary>
-                                    </binding>
-                                </connections>
-                            </menuItem>
-                            <menuItem isSeparatorItem="YES" id="989">
-                                <attributedString key="attributedTitle"/>
-                            </menuItem>
                             <menuItem title="Add to iTunes when complete" toolTip="Adds video file and metadata to iTunes when processing is complete (per show)" id="1108">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.iTunesSubmit" id="HHC-dP-tGv"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Sync iTunes devices" toolTip="After adding to iTunes, have it sync devices to ensure video files available" id="1012">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.iTunesSync" id="1015"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem isSeparatorItem="YES" id="UaI-1C-1X6">
-                                <attributedString key="attributedTitle"/>
-                            </menuItem>
-                            <menuItem title="Disable Sleep" toolTip="Disables sleep while queue is processing" id="934">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.PreventSleep" id="961"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -372,7 +341,7 @@ CA
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <clipView key="contentView" id="Boc-wY-qHB">
                         <rect key="frame" x="1" y="1" width="232" height="205"/>
-                        <autoresizingMask key="autoresizingMask"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="27" rowSizeStyle="automatic" viewBased="YES" id="904">
                                 <rect key="frame" x="0.0" y="0.0" width="232" height="205"/>

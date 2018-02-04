@@ -1,3 +1,50 @@
+# Release 3.1.1 (beta)
+#### New features:
+* Option for automatic deletion of show on TiVo after a successful download. (For those of you just using your TiVo as a collection device). In Adv Prefs.
+* Option to control number of simultaneous encoders (prev available as Terminal option, now in Adv Prefs)
+
+For those of you using non-default download directories or temporary folders, this release makes a number of cleanups/improvements. Please experiment with these and try to break it!
+* If either Download or Temporary drive is not available (when cTiVo launches or while running), cTiVo will pause and ask for a new directory (rather than assuming default).
+* However, if external drive then comes online (e.g. a slow-to-connect NAS, or mistakenly ejected external drive), cTiVo will recognize it and automatically continue on.
+* Similarly, if there's an error in download directory, say write-protection, then it will ask for new directory (or correct existing problem), not assume default.
+* Changed confusing behavior: Download directory is now fixed at start of download process, not creation of download entry. So if you change download directories, all future downloads go to that directory, not just for newly created downloads.
+* Default is to now use system-provided user temporary folder rather than /tmp/ctivo to avoid problems with High Sierra
+
+#### Bug Fixes:
+Contextual menu `Delete from TiVo` for a folder will now delete all shows in that folder (upon confirmation).
+File menu commands `Play Video` and `Show in Finder` now work for Now Playing table (main one), not just for Download table.
+More accurate information about sleep prevention (when AppDelegate at Major or above).
+Avoids spurious error about Drawer first responder in logs.
+Antivirus warning during download as well as NowPlaying access.
+Warning if no data received during NowPlaying access.
+Avoids RPC crash if manual TiVo created with invalid IP address.
+Plugged Memory leak on Downloads
+
+# Release 3.1
+### Finally!  Folders in cTiVo.
+
+#### Major changes:
+* Shows can now be grouped in series folders.
+* Advanced Preferences is no longer hidden behind Option key.
+* Preferences has simpler directory structure choices (e.g. Plex support)
+* Auto-relocation to Applications directory.
+
+#### Minor Improvements:
+* File template string now reflects directory options.
+* Help button on each Preference screen.
+* Better warning and diagnostics on disk space (versus tmp space).
+* Improved Sleep log notices.
+* Allows longer TiVo names.
+* Support TiVo's ShowingStartTime (if after Capture date in XML).
+
+#### Bug Fixes:
+* Significantly better handling of network failures/sleep for RPC.
+* Columns resizing believed to be finally fixed.
+* Avoid rounding time when scheduling next TiVo checkin.
+* Fix \n typo in logs.
+* Avoid obscure crashes if missing episode information during RPC reference or resetting TVDB info or subscription.
+* Use one keychain reference across all TiVos.
+
 # Release 3.0
 3.0 is a major new release of cTiVo with comprehensive artwork support and much more accurate information due to use of real-time features from TiVo. After extensive beta testing, it is also the most reliable release yet (especially with High Sierra). Note that 3.0 requires Mac OS 10.9 or later.  Earlier systems should continue to use [2.5.1's 10.7 version](https://github.com/dscottbuch/cTiVo/releases/tag/2.5.1).
 (3.0.1 fixes some table formatting issues, and a crash in an obscure RPC scenario)
