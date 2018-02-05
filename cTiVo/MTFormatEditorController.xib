@@ -12,9 +12,6 @@
                 <outlet property="encodeHelpButton" destination="2454" id="2704"/>
                 <outlet property="executableTextField" destination="2465" id="Kqd-JY-IRJ"/>
                 <outlet property="formatPopUpButton" destination="2479" id="2677"/>
-                <outlet property="helpContoller" destination="1973" id="1974"/>
-                <outlet property="popoverDetachController" destination="1968" id="1971"/>
-                <outlet property="popoverDetachWindow" destination="1969" id="1972"/>
                 <outlet property="presetPopup" destination="VhS-V4-kCa" id="djb-a9-U1J"/>
                 <outlet property="saveButton" destination="2453" id="tYB-64-Wo5"/>
                 <outlet property="view" destination="2448" id="2676"/>
@@ -718,17 +715,5 @@
             <point key="canvasLocation" x="139.5" y="190"/>
         </view>
         <userDefaultsController representsSharedInstance="YES" id="562"/>
-        <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="1969" userLabel="Popover Detach Windo">
-            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="131" y="159" width="480" height="380"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1178"/>
-            <view key="contentView" id="1970">
-                <rect key="frame" x="0.0" y="0.0" width="480" height="380"/>
-                <autoresizingMask key="autoresizingMask"/>
-            </view>
-        </window>
-        <viewController nibName="MTHelpViewController" id="1968" userLabel="Popover Detach Controller" customClass="MTHelpViewController"/>
-        <viewController nibName="MTHelpViewController" id="1973" userLabel="Popover Controller" customClass="MTHelpViewController"/>
     </objects>
 </document>

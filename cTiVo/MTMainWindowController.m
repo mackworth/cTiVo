@@ -246,21 +246,11 @@ __DDLOGHERE__
     }
 }
 
--(void)popupHelpIfNotTiVosAfterInterval
-{
-   	//Get help text for encoder
-	NSString *helpFilePath = [[NSBundle mainBundle] pathForResource:@"FindTiVoHelpFile" ofType:@"rtf"];
-	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
-    NSPopover *myPopover = [[NSPopover alloc] init];
-    myPopover.delegate = self;
-    myPopover.behavior = NSPopoverBehaviorTransient;
-    MTHelpViewController *helpContoller = [[MTHelpViewController alloc] initWithNibName:@"MTHelpViewController" bundle:nil];
-    myPopover.contentViewController = helpContoller;
-    [helpContoller loadView];
-    [helpContoller.displayMessage.textStorage setAttributedString:attrHelpText];
-    //	[self.helpController.displayMessage insertText:helpText];
-	[myPopover showRelativeToRect:searchingTiVosIndicator.bounds ofView:searchingTiVosIndicator preferredEdge:NSMaxXEdge];
- 
+-(void)popupHelpIfNotTiVosAfterInterval {
+	//Get help text for Finding TiVos
+	MTHelpViewController *helpController = [[MTHelpViewController alloc] init];
+	[helpController loadResource:@"FindTiVoHelpFile"];
+	[helpController pointToView:searchingTiVosIndicator preferredEdge: NSMaxXEdge];
 }
 
 #pragma mark - UI Actions

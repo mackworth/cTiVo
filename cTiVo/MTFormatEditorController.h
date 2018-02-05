@@ -6,12 +6,7 @@
 //  Copyright (c) 2013 Scott Buchanan. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
-#import "MTFormat.h"
-#import "MTHelpViewController.h"
 #import "MTTabViewItem.h"
-
-@class MTFormatPopUpButton;
 
 @interface MTFormatEditorController : NSViewController <NSPopoverDelegate, MTTabViewItemControllerDelegate> 
 

@@ -1048,26 +1048,12 @@ void signalHandler(int signal)
 }
 
 
--(void)help:(id)sender
-{
-	//Get help text for encoder
-	NSString *helpFilePath = [[NSBundle mainBundle] pathForResource:@"MAKHelpFile" ofType:@"rtf"];
-	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
-	//	NSString *helpText = [NSString stringWithContentsOfFile:helpFilePath encoding:NSUTF8StringEncoding error:nil];
-	NSButton *thisButton = (NSButton *)sender;
-    NSPopover *myPopover = [[NSPopover alloc] init];
-    myPopover.delegate = self;
-    myPopover.behavior = NSPopoverBehaviorTransient;
-    MTHelpViewController *helpContoller = [[MTHelpViewController alloc] initWithNibName:@"MTHelpViewController" bundle:nil];
-    myPopover.contentViewController = helpContoller;
-    [helpContoller loadView];
-    [helpContoller.displayMessage.textStorage setAttributedString:attrHelpText];
-//	[self.helpController.displayMessage insertText:helpText];
-	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+-(void)help:(id)sender {
+	//Get help text for MAK
+	MTHelpViewController *helpController = [[MTHelpViewController alloc] init];
+	[helpController loadResource:@"MAKHelpFile"];
+	[helpController pointToView:sender preferredEdge:NSMaxXEdge];
 }
-
-
-
 
 #pragma mark - Application Support
 

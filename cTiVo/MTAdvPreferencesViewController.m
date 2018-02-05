@@ -10,10 +10,25 @@
 #import "MTTiVoManager.h"
 #import "MTAppDelegate.h"
 #import "NSString+Helpers.h"
+#import "MTHelpViewController.h"
 
 @interface MTAdvPreferencesViewController ()
+
 @property (nonatomic, strong) NSArray <NSPopUpButton *> * popups;
 @property (nonatomic, strong) NSArray <NSString *> * classNames;
+
+@property (weak) IBOutlet NSPopUpButton *keywordPopup;
+@property (weak) IBOutlet NSView *debugLevelView;
+@property (weak) IBOutlet NSPopUpButton *masterDebugLevel;
+@property (weak) IBOutlet NSPopUpButton *decodePopup;
+@property (weak) IBOutlet NSTextField *fileNameField;
+
+-(IBAction) keywordSelected:(id) sender;
+-(IBAction) newMasterValue:(id) sender;
+-(IBAction)newDecodeValue:(id)sender;
+-(IBAction)selectTmpDir:(id)sender;
+-(IBAction)TVDBStatistics:(id)sender;
+
 @end
 
 @implementation MTAdvPreferencesViewController
@@ -164,12 +179,10 @@
         [fileNames appendFormat:@"%@ >>>> %@\n",show.showTitle, [testDownload.show swapKeywordsInString:pattern withFormat: [tiVoManager selectedFormat].name]];
     }
 
-    NSAttributedString * results = [[NSAttributedString alloc] initWithString:fileNames];
-    NSPopUpButton *thisButton = (NSPopUpButton *)sender;
-    [myTextView setString:fileNames];
-
-    [popoverDetachController.displayMessage.textStorage setAttributedString:results];
-    [myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+	MTHelpViewController * helpController = [[MTHelpViewController alloc] init];
+	helpController.text = fileNames;
+	helpController.preferredContentSize = CGSizeMake(1000, 400);
+	[helpController pointToView:sender preferredEdge:NSMaxYEdge];
 }
 
 
@@ -234,13 +247,13 @@
 
 -(IBAction)TVDBStatistics:(id)sender {
     NSString * statsString = [tiVoManager.tvdb stats];
-    NSAttributedString * attrHelpText = [[NSAttributedString alloc] initWithString:statsString];
-	NSButton *thisButton = (NSButton *)sender;
-	[myTextView setAutomaticLinkDetectionEnabled:YES];
-	[myTextView setString:statsString];
-	[myTextView checkTextInDocument:nil];
-	[popoverDetachController.displayMessage.textStorage setAttributedString:attrHelpText];
-	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+
+	MTHelpViewController * helpController = [[MTHelpViewController alloc] init];
+	helpController.text = statsString;
+	helpController.preferredContentSize = CGSizeMake(1100, 400);
+	[helpController checkLinks];
+	
+	[helpController pointToView:sender preferredEdge:NSMaxYEdge];
 }
 
 -(IBAction) keywordSelected:(id)sender {

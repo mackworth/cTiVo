@@ -13,8 +13,6 @@
                 <outlet property="fileNameField" destination="46" id="jAh-vB-kwp"/>
                 <outlet property="keywordPopup" destination="In7-Wa-ifU" id="Vva-Mt-XFC"/>
                 <outlet property="masterDebugLevel" destination="32" id="40"/>
-                <outlet property="myPopover" destination="113" id="115"/>
-                <outlet property="myTextView" destination="133" id="136"/>
                 <outlet property="view" destination="1" id="2"/>
             </connections>
         </customObject>
@@ -294,44 +292,5 @@
             <point key="canvasLocation" x="425.5" y="399.5"/>
         </customView>
         <userDefaultsController representsSharedInstance="YES" id="15"/>
-        <viewController id="112" userLabel="Popover View Controller">
-            <connections>
-                <outlet property="view" destination="132" id="142"/>
-            </connections>
-        </viewController>
-        <popover behavior="semitransient" id="113">
-            <connections>
-                <outlet property="contentViewController" destination="112" id="114"/>
-                <outlet property="delegate" destination="-2" id="116"/>
-            </connections>
-        </popover>
-        <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="132">
-            <rect key="frame" x="0.0" y="0.0" width="1000" height="400"/>
-            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-            <clipView key="contentView" id="Mn3-xt-Okk">
-                <rect key="frame" x="1" y="1" width="998" height="398"/>
-                <autoresizingMask key="autoresizingMask"/>
-                <subviews>
-                    <textView importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" smartInsertDelete="YES" id="133">
-                        <rect key="frame" x="0.0" y="0.0" width="998" height="398"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <size key="minSize" width="998" height="398"/>
-                        <size key="maxSize" width="1000" height="10000000"/>
-                        <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                    </textView>
-                </subviews>
-                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-            </clipView>
-            <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="134">
-                <rect key="frame" x="-100" y="-100" width="87" height="18"/>
-                <autoresizingMask key="autoresizingMask"/>
-            </scroller>
-            <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="135">
-                <rect key="frame" x="983" y="1" width="16" height="398"/>
-                <autoresizingMask key="autoresizingMask"/>
-            </scroller>
-            <point key="canvasLocation" x="268" y="947"/>
-        </scrollView>
     </objects>
 </document>

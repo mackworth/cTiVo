@@ -10,15 +10,14 @@
 #import "MTTiVoManager.h"
 #import "MTFormatPopUpButton.h"
 #import "NSString+Helpers.h"
+#import "MTFormat.h"
+#import "MTHelpViewController.h"
 
 @interface MTFormatEditorController ()
 {
     IBOutlet MTFormatPopUpButton *formatPopUpButton;
     NSAlert *deleteAlert, *saveOrCancelAlert, *cancelAlert;
-    IBOutlet NSButton *cancelButton, *saveButton, *encodeHelpButton, *comSkipHelpButton;
-    NSPopover *myPopover;
-    IBOutlet NSWindow *popoverDetachWindow;
-    IBOutlet MTHelpViewController *popoverDetachController, *helpContoller;
+    IBOutlet NSButton *saveButton, *encodeHelpButton, *comSkipHelpButton;
 }
 
 @property (nonatomic, strong) MTFormat *currentFormat;
@@ -44,7 +43,6 @@
     self = [super initWithCoder:aDecoder];
     if (self) {
         // Initialization code here.
-		myPopover = nil;
 		self.validExecutableColor = [NSColor blackColor];
 		self.validExecutable = [NSNumber numberWithBool:YES];
 		self.validExecutableString = @"No valid executable found.";
@@ -58,7 +56,6 @@
 -(void)awakeFromNib
 {
 	[super awakeFromNib];
-    popoverDetachWindow.contentView = popoverDetachController.view;
     [self launchReadPreset];
     formatPopUpButton.showHidden = YES;
     self.shouldSave = @NO;
@@ -494,49 +491,22 @@
 -(IBAction)encodeHelp:(id)sender
 {
 	//Get help text for encoder
-	NSString *helpFilePath = nil;;
+	MTHelpViewController *helpController = [[MTHelpViewController alloc] init];
 	if (sender == encodeHelpButton) {
-		helpFilePath = [[NSBundle mainBundle] pathForResource:@"EncoderHelpText" ofType:@"rtf"];
+		[helpController loadResource:@"EncoderHelpText"];
 	} else if (sender == comSkipHelpButton) {
-		helpFilePath = [[NSBundle mainBundle] pathForResource:@"ComSkipHelpText" ofType:@"rtf"];
+		[helpController loadResource:@"ComSkipHelpText"];
 	}
-	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
-	NSButton *thisButton = (NSButton *)sender;
-	if (!myPopover) {
-		myPopover = [[NSPopover alloc] init];
-		myPopover.delegate = self;
-		myPopover.behavior = NSPopoverBehaviorTransient;
-		myPopover.contentViewController = helpContoller;
-		[helpContoller loadView];
-		[helpContoller.displayMessage.textStorage setAttributedString:attrHelpText];
-	}
-	//	[self.helpController.displayMessage insertText:helpText];
-	[popoverDetachController.displayMessage.textStorage setAttributedString:attrHelpText];
-	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+	[helpController pointToView:sender preferredEdge:NSMaxXEdge];
 }
 
 -(IBAction) help:(id)sender {
 	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Advanced-Topics#edit-formats"]];
 }
 
-
-#pragma mark - Popover Delegate Methods
-
--(NSWindow *)detachableWindowForPopover:(NSPopover *)popover
-{
-	return popoverDetachWindow;
-}
-
--(void)popoverDidClose:(NSNotification *)notification
-{
-	myPopover = nil;
-}
-
-
 #pragma mark - Memory Management
 
 -(void) dealloc {
-    myPopover.delegate = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
