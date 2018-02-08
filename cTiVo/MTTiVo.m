@@ -522,6 +522,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 }
 
+-(void) connectionChanged {
+	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoListUpdated object:nil];
+}
+
 -(BOOL) rpcActive {
     return self.myRPC != nil && self.myRPC.isActive;
 }
@@ -544,6 +548,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows {
     [self.myRPC stopRecordingShowsWithRecordIds:[self recordingIDsForShows:shows]];
 
+}
+
+-(void) sendKeyEvents: (NSArray <NSString *> *) keyEvents {
+	[self.myRPC sendKeyEvents:keyEvents];
 }
 
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {
@@ -1118,7 +1126,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
 	if ([streamError isKindOfClass:[NSNumber class]] &&
 			((error.code == -1004  && streamError.intValue == 49) ||
-			 (error.code == -1001  && streamError.intValue == -2102) ||
 			 (error.code == -1005  && streamError.intValue == 57))) {
      	[self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
 						 subTitle: @"Antivirus program may be blocking connection"];

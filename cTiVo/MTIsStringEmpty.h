@@ -16,3 +16,5 @@
 
 @end
 
+@interface MTPlural: NSValueTransformer
+@end

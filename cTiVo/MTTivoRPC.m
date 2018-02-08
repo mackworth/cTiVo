@@ -301,6 +301,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
        } else {
            DDLogMajor(@"Stream failed, and unreachable: %@ (failure #%@); Awaiting reachability",self.oStream.streamError.description, @(self.retries) );
         }
+		[self.delegate connectionChanged];
     }
 }
 
@@ -453,6 +454,7 @@ static NSRegularExpression * isFinalRegex = nil;
             DDLogDetail(@"Stream opened for %@", streamName);
             self.retries = 0;
             if (theStream == self.oStream) [self authenticate];
+			[self.delegate connectionChanged];
             break;
         }
         case NSStreamEventHasBytesAvailable: {
@@ -954,6 +956,26 @@ static NSArray * imageResponseTemplate = nil;
 
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds {
     [self undeleteShowsWithRecordIds:recordingIds]; //coincidentally the same command
+}
+
+-(void) sendKeyEvents: (NSArray <NSString *> *) keyEvents {
+	if (keyEvents.count ==0) return;
+	if (!self.bodyID) return;
+	
+	DDLogDetail(@"Sending KeyEvents: %@", keyEvents);
+	for (NSString * key in keyEvents) {
+		NSDictionary * data = @{
+								@"bodyId": self.bodyID,
+								@"event": keyEvents,
+								};
+		
+		[self sendRpcRequest:@"keyEventSend"
+					 monitor:NO
+					withData:data
+		   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+			   DDLogVerbose(@"sent keyStroke %@; got %@", key, jsonResponse);
+		   }];
+	}
 }
 
 -(void) receiveSleepNotification: (id) sender {

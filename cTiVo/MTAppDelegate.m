@@ -11,6 +11,7 @@
 #import "MTProgramTableView.h"
 #import "MTDownloadTableView.h"
 #import "MTMainWindowController.h"
+#import "MTRemoteWindowController.h"
 #import "MTSubscriptionTableView.h"
 #import "MTPreferencesWindowController.h"
 #import "MTHelpViewController.h"
@@ -281,6 +282,8 @@ void signalHandler(int signal)
 	_mainWindowController = nil;
 	//	_formatEditorController = nil;
 	[self showMainWindow:nil];
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"RemoteVisible"]) [self showRemoteControlWindow:self];
+
 	gettingMediaKey = NO;
 	signal(SIGPIPE, &signalHandler);
 	signal(SIGABRT, &signalHandler );
@@ -1080,6 +1083,19 @@ void signalHandler(int signal)
 	[_mainWindowController showWindow:nil];
 	
 }
+-(MTRemoteWindowController *) remoteControlWindowController {
+	if (!_remoteControlWindowController) {
+		self.remoteControlWindowController = [[MTRemoteWindowController alloc] init];
+	}
+	return _remoteControlWindowController;
+}
+
+-(IBAction) showRemoteControlWindow: (id) sender {
+	
+	[self.remoteControlWindowController showWindow:nil];
+
+}
+
 -(void) cancelUserQuit {
 	quitWhenCurrentDownloadsComplete = NO;
     [tiVoManager determineCurrentProcessingState];
@@ -1129,6 +1145,7 @@ void signalHandler(int signal)
 	[saveQueueTimer invalidate];
 	[tiVoManager cancelAllDownloads];
 	[tiVoManager saveState];
+	[[NSUserDefaults standardUserDefaults] setBool: _remoteControlWindowController.window.isVisible forKey:@"RemoteVisible"];
 	 mediaKeyQueue = nil;
     DDLogReport(@"cTiVo exiting");
 }

@@ -27,6 +27,8 @@
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 
+-(void) sendKeyEvents: (NSArray <NSString *> *) keyEvents;
+
 @property (nonatomic, weak) id <MTRPCDelegate> delegate;
 
 @end

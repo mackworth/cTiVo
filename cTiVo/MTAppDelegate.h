@@ -8,9 +8,11 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
+@class MTRemoteWindowController;
 
 @interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSPopoverDelegate, NSOpenSavePanelDelegate> 
 
+@property (nonatomic, strong) MTRemoteWindowController  *remoteControlWindowController;
 
 -(BOOL)checkForExit;
 

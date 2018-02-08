@@ -43,12 +43,15 @@
 		1E684A8716E3A010000F5C6E /* status-unknown.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A8616E3A010000F5C6E /* status-unknown.png */; };
 		1E684A8B16E3A338000F5C6E /* deleted.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A8A16E3A338000F5C6E /* deleted.png */; };
 		1E6907871DA5A29900C429C2 /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC1A1730296C0036125A /* libmp4v2.a */; };
+		1E6AB108202A0BDB008A0F32 /* MTRemoteWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6AB106202A0BDB008A0F32 /* MTRemoteWindowController.m */; };
+		1E6AB109202A0BDB008A0F32 /* MTRemoteWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E6AB107202A0BDB008A0F32 /* MTRemoteWindowController.xib */; };
 		1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
 		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
 		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
 		1E7BED701F565AD500AB8E5F /* NSURL+MTURLExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */; };
 		1E7F5ADB1701877A003AA96C /* in-progress-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7F5ADA1701877A003AA96C /* in-progress-recording.png */; };
 		1E81D3171BE9477200321370 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
+		1E8296CF202A0E8600AA4C10 /* PeanutRemote@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */; };
 		1E8E03601F75DD310050D727 /* libargtable2.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E8E032C1F75DCE50050D727 /* libargtable2.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E8E03611F75DD310050D727 /* libass.9.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E8E034E1F75DCEB0050D727 /* libass.9.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E8E03621F75DD310050D727 /* libavcodec.57.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E8E03351F75DCE60050D727 /* libavcodec.57.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -356,6 +359,9 @@
 		1E684A8616E3A010000F5C6E /* status-unknown.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "status-unknown.png"; sourceTree = "<group>"; };
 		1E684A8A16E3A338000F5C6E /* deleted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = deleted.png; sourceTree = "<group>"; };
 		1E6907891DA5A2FF00C429C2 /* libstdc++.6.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libstdc++.6.tbd"; path = "usr/lib/libstdc++.6.tbd"; sourceTree = SDKROOT; };
+		1E6AB105202A0BDB008A0F32 /* MTRemoteWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTRemoteWindowController.h; sourceTree = "<group>"; };
+		1E6AB106202A0BDB008A0F32 /* MTRemoteWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTRemoteWindowController.m; sourceTree = "<group>"; };
+		1E6AB107202A0BDB008A0F32 /* MTRemoteWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MTRemoteWindowController.xib; sourceTree = "<group>"; };
 		1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = pytivo_txt.xslt; path = ../pytivo_txt.xslt; sourceTree = "<group>"; };
 		1E6F22D416DD1F4C0071D291 /* MTDownload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTDownload.h; sourceTree = "<group>"; };
 		1E6F22D516DD1F4C0071D291 /* MTDownload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTDownload.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
@@ -367,6 +373,7 @@
 		1E7BED6E1F565AD500AB8E5F /* NSURL+MTURLExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+MTURLExtensions.h"; sourceTree = "<group>"; };
 		1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+MTURLExtensions.m"; sourceTree = "<group>"; };
 		1E7F5ADA1701877A003AA96C /* in-progress-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "in-progress-recording.png"; sourceTree = "<group>"; };
+		1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PeanutRemote@2x.png"; sourceTree = "<group>"; };
 		1E8E03241F75DCE40050D727 /* liblzma.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = liblzma.5.dylib; path = cTiVo/cTivoBinaries/lib/liblzma.5.dylib; sourceTree = SOURCE_ROOT; };
 		1E8E03251F75DCE40050D727 /* libiconv.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.2.dylib; path = cTiVo/cTivoBinaries/lib/libiconv.2.dylib; sourceTree = SOURCE_ROOT; };
 		1E8E03261F75DCE40050D727 /* libavutil.55.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavutil.55.dylib; path = cTiVo/cTivoBinaries/lib/libavutil.55.dylib; sourceTree = SOURCE_ROOT; };
@@ -688,6 +695,17 @@
 			path = lib;
 			sourceTree = "<group>";
 		};
+		1E6AB104202A0BAD008A0F32 /* Remote Control */ = {
+			isa = PBXGroup;
+			children = (
+				1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */,
+				1E6AB105202A0BDB008A0F32 /* MTRemoteWindowController.h */,
+				1E6AB106202A0BDB008A0F32 /* MTRemoteWindowController.m */,
+				1E6AB107202A0BDB008A0F32 /* MTRemoteWindowController.xib */,
+			);
+			path = "Remote Control";
+			sourceTree = "<group>";
+		};
 		1E791BD01697ACAA00E47E84 /* Custom NSViews */ = {
 			isa = PBXGroup;
 			children = (
@@ -921,6 +939,7 @@
 				D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */,
 				D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */,
 				D2D60BCB16766FA600CE32DE /* MTConstants.h */,
+				1E6AB104202A0BAD008A0F32 /* Remote Control */,
 				D2DA8FBA169CDAAD0053B7CB /* Data Model */,
 				D2DA8FBB169CDACC0053B7CB /* UI Classes- Main Window */,
 				D278CCDA16B49A8500711FFD /* UI Classes - Preferences  */,
@@ -1179,6 +1198,7 @@
 				1E684A7F16E2C50B000F5C6E /* save-until-i-delete-recording.png in Resources */,
 				1E964CA11882768A00C19046 /* status-unknown@2x.png in Resources */,
 				1E684A8016E2C50B000F5C6E /* suggestion-recording.png in Resources */,
+				1E6AB109202A0BDB008A0F32 /* MTRemoteWindowController.xib in Resources */,
 				1E684A8716E3A010000F5C6E /* status-unknown.png in Resources */,
 				1E964CA01882768A00C19046 /* in-progress-recording@2x.png in Resources */,
 				1E684A8B16E3A338000F5C6E /* deleted.png in Resources */,
@@ -1189,6 +1209,7 @@
 				1E1814601708AF7000166E5F /* cTiVo.icns in Resources */,
 				1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */,
 				D2B4B4F41732D69C005B97F1 /* elgatoQuit.scpt in Resources */,
+				1E8296CF202A0E8600AA4C10 /* PeanutRemote@2x.png in Resources */,
 				1E9A10EF1757200000863C44 /* cTiVo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1248,6 +1269,7 @@
 				1E59368919648C860008780B /* DDLog.m in Sources */,
 				1E9EA3FD1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */,
 				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
+				1E6AB108202A0BDB008A0F32 /* MTRemoteWindowController.m in Sources */,
 				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
 				1EC44B2F1F06F12100B73DE1 /* MTTVDB.m in Sources */,
 				D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */,

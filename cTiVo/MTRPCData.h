@@ -39,6 +39,6 @@
                 atTiVoIndices: (NSMutableArray <NSNumber *> *) newShowIndices
               andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows;
 -(BOOL) isReachable;
-
+-(void) connectionChanged;
 @end
 

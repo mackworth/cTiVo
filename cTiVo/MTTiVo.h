@@ -55,5 +55,6 @@
 -(BOOL) rpcActive;
 -(void) deleteTiVoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows;
+-(void) sendKeyEvents: (NSArray <NSString *> *) keyEvents;
 
 @end

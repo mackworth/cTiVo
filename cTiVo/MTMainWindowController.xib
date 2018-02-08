@@ -2009,7 +2009,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="263">
-                                                                    <rect key="frame" x="375" y="1" width="150" height="17"/>
+                                                                    <rect key="frame" x="375.5" y="1" width="150" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="264">
@@ -2043,7 +2043,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Format of video file to create" id="OWl-YT-bUe" customClass="MTPopUpTableCellView">
-                                                                    <rect key="frame" x="528" y="1" width="136" height="17"/>
+                                                                    <rect key="frame" x="528.5" y="1" width="136" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -2097,7 +2097,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Will be added to iTunes" id="gsv-xW-ehC" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="667" y="1" width="40" height="17"/>
+                                                                    <rect key="frame" x="667.5" y="1" width="40" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -2117,7 +2117,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Will be added to iTunes" id="JZK-Uz-DYP" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="710" y="1" width="32" height="17"/>
+                                                                    <rect key="frame" x="710.5" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -2137,7 +2137,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Will be added to iTunes" id="CTU-yP-LYD" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="745" y="1" width="32" height="17"/>
+                                                                    <rect key="frame" x="745.5" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
