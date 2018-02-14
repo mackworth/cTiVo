@@ -547,11 +547,18 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows {
     [self.myRPC stopRecordingShowsWithRecordIds:[self recordingIDsForShows:shows]];
-
 }
 
--(void) sendKeyEvents: (NSArray <NSString *> *) keyEvents {
-	[self.myRPC sendKeyEvents:keyEvents];
+-(void) sendKeyEvent: (NSString *) keyEvent {
+	[self.myRPC sendKeyEvent: keyEvent];
+}
+
+-(void) sendURL: (NSString *) URL {
+	[self.myRPC sendURL:URL];
+}
+
+-(void) retrieveClipDataFor: (MTTiVoShow *) show withCompletionHandler: (void (^)(NSArray *)) completionHandler {
+//	[self.myRPC retrieveClipData:show.rpcData.contentID withCompletionHandler:completionHandler];
 }
 
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {
@@ -567,6 +574,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
     DDLogDetail(@"Scheduling Update with delay of %lu seconds", (long)delay);
     [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay ];
+}
+
+-(void) findCommercials: (MTTiVoShow *) show {
+	
 }
 
 -(void)updateShows:(id)sender
@@ -1126,6 +1137,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
 	if ([streamError isKindOfClass:[NSNumber class]] &&
 			((error.code == -1004  && streamError.intValue == 49) ||
+			 (error.code == -1200  && streamError.intValue == 49) ||
 			 (error.code == -1005  && streamError.intValue == 57))) {
      	[self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
 						 subTitle: @"Antivirus program may be blocking connection"];

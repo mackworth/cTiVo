@@ -2275,7 +2275,7 @@ NSInteger diskWriteFailure = 123;
         DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
         if ([streamError isKindOfClass:[NSNumber class]] &&
             ((error.code == -1004  && streamError.intValue == 49) ||
-             (error.code == -1001  && streamError.intValue == -2102) ||
+			 (error.code == -1200  && streamError.intValue == 49) ||
              (error.code == -1005  && streamError.intValue == 57))) {
             [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
                              subTitle: @"Antivirus program may be blocking connection, or you may need to reboot TiVo"

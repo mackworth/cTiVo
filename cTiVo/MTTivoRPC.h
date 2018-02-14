@@ -27,7 +27,10 @@
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 
--(void) sendKeyEvents: (NSArray <NSString *> *) keyEvents;
+-(void) sendKeyEvent: (NSString *) keyEvent;
+-(void) sendURL: (NSString *) URL;
+-(void) retrieveClipData: (NSString *) contentId withCompletionHandler: (void (^)(NSArray *)) completionHandler; 
+-(void) playOnTiVo: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL)) completionHandler;
 
 @property (nonatomic, weak) id <MTRPCDelegate> delegate;
 

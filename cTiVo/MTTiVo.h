@@ -53,8 +53,12 @@
 -(void) reloadShowInfoForID: (NSString *) showID;
 -(MTRPCData *)registerRPCforShow: (MTTiVoShow *) show;
 -(BOOL) rpcActive;
+
+//RPC pass throughs
 -(void) deleteTiVoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows;
--(void) sendKeyEvents: (NSArray <NSString *> *) keyEvents;
+-(void) sendKeyEvent: (NSString *) keyEvent;
+-(void) sendURL: (NSString *) URL;
+-(void) retrieveClipDataFor: (MTTiVoShow *) show withCompletionHandler: (void (^)(NSArray *)) completionHandler;
 
 @end

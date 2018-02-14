@@ -13,7 +13,7 @@
 @interface MTRemoteWindowController ()
 @property (nonatomic, weak) IBOutlet NSPopUpButton * tivoListPopup;
 @property (nonatomic, strong) NSArray <MTTiVo *> * tiVoList;
-
+@property (nonatomic, readonly) MTTiVo * selectedTiVo;
 @end
 
 @implementation MTRemoteWindowController
@@ -25,6 +25,14 @@
 	return self;
 }
 
+-(MTTiVo *) selectedTiVo {
+	MTTiVo* tivo = nil;
+	if (self.tiVoList.count > 0) {
+		NSInteger index = MIN(MAX(self.tivoListPopup.indexOfSelectedItem,0), ((NSInteger) self.tiVoList.count)-1);
+		tivo = self.tiVoList[index];
+	}
+	return tivo;
+}
 -(void) updateTiVoList {
 	NSMutableArray * newList = [NSMutableArray array];
 	for (MTTiVo * tivo in [tiVoManager tiVoList]) {
@@ -35,17 +43,14 @@
 	self.tiVoList = [newList copy];
 }
 
+-(IBAction)netflixButton:(NSButton *) sender {
+	[self.selectedTiVo sendURL: @"x-tivo:netflix:netflix"];
+}
+
 
 -(IBAction)buttonPressed:(NSButton *)sender {
-	MTTiVo* tivo = nil;
-	if (self.tiVoList.count == 0) {
-		return;
-	} else {
-		NSInteger index = MIN(MAX(self.tivoListPopup.indexOfSelectedItem,0), ((NSInteger) self.tiVoList.count)-1);
-		tivo = self.tiVoList[index];
-	}
 	if (!sender.title) return;
-	[tivo sendKeyEvents:@[sender.title]];
+	[self.selectedTiVo sendKeyEvent: sender.title];
 }
 
 -(void) dealloc {

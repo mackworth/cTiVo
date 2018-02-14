@@ -13,5 +13,6 @@
 @property (nonatomic, readonly) NSArray <MTTiVo *> * tiVoList;
 
 -(IBAction)buttonPressed:(NSButton *)sender;
+-(IBAction)netflixButton:(NSButton *) sender;
 
 @end

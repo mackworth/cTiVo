@@ -24,14 +24,14 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="283" y="305" width="309" height="880"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1418"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
             <view key="contentView" id="vq2-xz-oxl">
                 <rect key="frame" x="0.0" y="0.0" width="309" height="880"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YLU-ny-jW3" userLabel="TiVoList">
-                        <rect key="frame" x="67" y="848" width="197" height="26"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <rect key="frame" x="18" y="848" width="274" height="26"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                         <popUpButtonCell key="cell" type="push" title="TiVo" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingMiddle" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="aRA-69-m6v" id="Dox-iV-9FR">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" size="16" name=".AppleSystemUIFont"/>
@@ -56,7 +56,7 @@
                         </connections>
                     </popUpButton>
                     <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zRz-zj-OeZ">
-                        <rect key="frame" x="0.0" y="0.0" width="309" height="880"/>
+                        <rect key="frame" x="0.0" y="0.0" width="309" height="843"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" image="PeanutRemote" id="qDq-d7-vb5"/>
                     </imageView>
@@ -421,7 +421,7 @@ CQ
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="buttonPressed:" target="-2" id="cLk-Il-gJw"/>
+                            <action selector="netflixButton:" target="-2" id="HFe-P3-KQW"/>
                         </connections>
                     </button>
                     <button toolTip="-" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tp6-9v-uqX" userLabel="ThumbsDown">
