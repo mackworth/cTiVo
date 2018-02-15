@@ -200,6 +200,7 @@
 #define kMTUpdateIntervalMinutesNew @"UpdateIntervalMinutesNew" //How many minutes to wait between tivo refreshes
 
 #define kMTSubscriptionExpiration @"SubscriptionExpirationDays" //How many days to wait before deleting previous recording info (potentially leading to duplicates) (No GUI)
+#define kMTSubscriptionRelyOnDiskOnly @"SubscriptionRelyOnDiskOnly" //Don't take into account previous recording info at all (relying on existence on disk only) No GUI
 
 #define kMTMaxNumEncoders @"MaxNumberEncoders"	     //Limit number of encoders to limit cpu usage//
 #define kMTMaxProgressDelay @"MaxProgressDelay"      //Maximum time of no encoder progress before giving up (No GUI)  //
