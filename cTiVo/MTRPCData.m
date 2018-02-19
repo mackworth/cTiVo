@@ -10,32 +10,35 @@
 
 @implementation MTRPCData
 static NSString * kRecordingID = @"recordingID";
+static NSString * kContentId = @"contentID";
 static NSString * kEpisodeNum  = @"episodeNum";
 static NSString * kSeasonNum  = @"seasonNum";
 static NSString * kGenre  = @"genre";
-//static NSString * kFormat  = @"format";
+static NSString * kClipMetaData  = @"clipMetaDataId";
 static NSString * kImageURL  = @"imageURL";
-static NSString * kTitle = @"title";
+static NSString * kSeries = @"title";
+static NSString * kSegments = @"segments";
+static NSString * kEDL = @"EDLList";
 
 
 - (instancetype)init {
     self = [super init];
-//    if (self) {
-//        self.format = MPEGFormatUnknown;
-//    }
     return self;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [self init];
     if (self) {
-        _recordingID = [coder decodeObjectOfClass:[NSString class] forKey:  kRecordingID];
+		_recordingID = [coder decodeObjectOfClass:[NSString class] forKey:  kRecordingID];
+		_contentID = [coder decodeObjectOfClass:[NSString class] forKey:  kContentId];
         _episodeNum =  [coder decodeIntegerForKey: kEpisodeNum];
         _seasonNum =   [coder decodeIntegerForKey: kSeasonNum];
         _genre =       [coder decodeObjectOfClass:[NSString class] forKey:  kGenre];
-//      _format =      [coder decodeIntegerForKey: kFormat];
+		_clipMetaDataId = [coder decodeObjectOfClass:[NSString class] forKey:  kClipMetaData];
         _imageURL =    [coder decodeObjectOfClass:[NSString class] forKey:  kImageURL];
-        _series =      [coder decodeObjectOfClass:[NSString class] forKey:  kTitle];
+		_series =      [coder decodeObjectOfClass:[NSString class] forKey:  kSeries];
+		_programSegments =      [coder decodeObjectOfClass:[NSArray class] forKey:  kSegments];
+		_edlList =      [coder decodeObjectOfClass:[NSArray class] forKey:  kEDL];
 
     }
     return self;
@@ -47,12 +50,15 @@ static NSString * kTitle = @"title";
 
 - (void)encodeWithCoder:(NSCoder *)coder {
      [coder encodeObject: _recordingID forKey:kRecordingID];
+	 [coder encodeObject: _contentID forKey:kContentId];
      [coder encodeInteger:_episodeNum forKey:kEpisodeNum];
      [coder encodeInteger:_seasonNum forKey:kSeasonNum];
      [coder encodeObject:_genre forKey:kGenre];
-//     [coder encodeInteger:_format forKey:kFormat];
+	 [coder encodeObject: _clipMetaDataId forKey:kClipMetaData];
      [coder encodeObject:_imageURL forKey:kImageURL];
-     [coder encodeObject:_series forKey:kTitle];
+	 [coder encodeObject:_series forKey:kSeries];
+	 [coder encodeObject:_programSegments forKey:kSegments];
+	 [coder encodeObject:_edlList forKey:kEDL];
 }
 
 -(NSString *)description {

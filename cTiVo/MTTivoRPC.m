@@ -36,7 +36,7 @@
 @property (nonatomic, strong) NSMutableData * incomingData;
 @property (nonatomic, assign) BOOL iStreamAnchor, oStreamAnchor;
 @property (class, nonatomic, strong) NSArray * myCerts;
-@property (nonatomic, assign) BOOL updating;
+@property (atomic, assign) NSInteger updating;
 
 @property (nonatomic, strong) NSMutableDictionary < NSString *, MTRPCData *> *showMap;
 @property (nonatomic, strong) NSMutableDictionary < NSString *, NSString *>  *seriesImages;
@@ -46,6 +46,20 @@
 typedef void (^ReadBlock)(NSDictionary *, BOOL);
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, ReadBlock > * readBlocks;
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, NSDictionary* > * requests; //debug only
+@end
+
+@interface NSObject (Threads)
+//prettier syntax
+-(void) afterDelay: (NSTimeInterval )time launchBlock: (void (^)(void)) block;
+@end
+
+@implementation NSObject (Threads)
+
+-(void) afterDelay: (NSTimeInterval) time launchBlock: (void (^)(void)) block {
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, time * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+		if (block) block();
+	});
+}
 @end
 
 @implementation MTTivoRPC
@@ -165,7 +179,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 
     self.authenticationLaunched = NO;
     self.firstLaunch = YES;
-	self.updating = NO;
+	self.updating = 0;
     [self launchServer];
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receiveWakeNotification:)
@@ -306,8 +320,39 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     }
 }
 
+-(void) startUpdating {
+	BOOL needToNotify = NO;
+	@synchronized(self) {
+		if  (self.delegate && self.updating == 0) {
+			needToNotify = YES;
+		}
+		self.updating ++;
+	}
+	if (needToNotify)[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdating  object:self.delegate];
+}
+
+-(void) endUpdatingIfNecessary {
+	BOOL needToNotify = NO;
+	@synchronized(self) {
+		self.updating --;
+		if (self.delegate && self.updating == 0) {
+			//turn off spinner.
+			needToNotify = YES;
+		}
+	}
+	if (needToNotify) {
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate userInfo:nil afterDelay:2.0];
+	}
+}
+-(void) forceEndUpdating {
+	@synchronized(self) {
+	}
+	[self endUpdatingIfNecessary];
+}
+
 -(void) tearDownStreams {
 	DDLogMajor(@"Tearing down streams for %@", self.delegate);
+	
 	[self.deadmanTimer invalidate];
 	self.deadmanTimer = nil;
     [self.iStream setDelegate: nil];
@@ -315,15 +360,18 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     [self.oStream setDelegate: nil];
     [self.oStream close];
 
-    [self.readBlocks removeAllObjects];
-    self.incomingData.length = 0;
-    self.remainingData.length = 0;
-    self.authenticationLaunched = NO;
-	if (self.delegate && self.updating) {
-		//turn off spinner.
-		self.updating = NO;
-		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate];
+	@synchronized(self.readBlocks) {
+		[self.readBlocks removeAllObjects];
 	}
+	@synchronized(self.remainingData) {
+		self.remainingData.length = 0;
+	}
+	@synchronized(self) {
+		self.incomingData.length = 0;
+		self.authenticationLaunched = NO;
+		if (self.updating > 1) self.updating = 1;
+	}
+	[self endUpdatingIfNecessary];
 }
 
 static NSRegularExpression * rpcRegex = nil;
@@ -402,12 +450,8 @@ static NSRegularExpression * isFinalRegex = nil;
                         } else {
                             DDLogDetail(@"Not final for %@", @(rpcID));
                         }
-                    }
-                    if (isFinal && self.updating) {
-						self.updating = NO;
-						//turn off inprogress spinner, but leave on for two seconds to avoid flickering on /off
-                        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated  object:self.delegate afterDelay: 2] ;
-                    }
+					}
+					if (isFinal) [self endUpdatingIfNecessary];
                     if ([jsonData[@"type"] isEqualToString:@"error"]) {
                         DDLogReport(@"Error: error JSON response. %@\n%@\n%@", headers, readPacket, jsonData);
                         return -packetLength;
@@ -577,18 +621,17 @@ static NSRegularExpression * isFinalRegex = nil;
     [request appendData:headerData];
     [request appendData:body];
     [request appendData:[@"\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    [self.requests setObject:finalData forKey:@(self.rpcID)];
+	DDLogDetail(@"Sending RPC #%d, %@", self.rpcID, type);
     DDLogVerbose(@"RPC Packet: %@\n%@\n", headers, [self maskTSN:[data  maskMediaKeys]]);
     @synchronized (self.remainingData) {
         [self.remainingData appendData:request];
     }
     @synchronized (self.readBlocks) {
-        self.readBlocks[@(self.rpcID)] = [completionHandler copy];
+		[self.requests setObject:finalData forKey:@(self.rpcID)];
+       	self.readBlocks[@(self.rpcID)] = [completionHandler copy];
     }
-    if (!monitor && !self.updating) {
-		self.updating = YES;
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdating  object:self.delegate];
-    }
+	if (!monitor) [self endUpdatingIfNecessary];
+
     [self reallyWriteData];
 }
 
@@ -740,11 +783,6 @@ static NSRegularExpression * isFinalRegex = nil;
         [self.showMap removeObjectForKey:showID];
     }
     [self getShowInfoForShows:@[showID]];
-	//XXX remove this test
-	[self findCommercialsForContentId:@"tivo:ct.383984401"
-						atRecordingId:@"tivo:rc.1919739"
-					   withBookmarkAt:901684
-						andEndPointAt:1799147];
 }
 
 -(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows  {
@@ -823,7 +861,17 @@ static NSRegularExpression * isFinalRegex = nil;
            rpcData.seasonNum = ((NSNumber *)showInfo[@"seasonNumber"] ?: @(0)).integerValue;
            rpcData.genre = genre;
            rpcData.recordingID = (NSString *) showInfo[@"recordingId"];
-		   DDLogReport(@"XXX show: %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, showInfo[@"contentId"]);
+		   rpcData.contentID = (NSString *) showInfo[@"contentId"];
+		   NSArray * clipDataArray = showInfo[@"clipMetadata"];
+		   if ([clipDataArray isKindOfClass:[NSArray class]] && clipDataArray.count > 0) {
+			   rpcData.clipMetaDataId = clipDataArray[0][@"clipMetadataId"];
+			   if (rpcData.clipMetaDataId) {
+				   DDLogMajor(@"Commercial info found for %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, showInfo[@"contentId"]);
+				   [strongSelf retrieveSegments:rpcData.clipMetaDataId withCompletionHandler:^(NSArray * segments) {
+					   rpcData.programSegments = segments;
+				   }];
+			   }
+		   }
            rpcData.series = (NSString *)showInfo[@"title"];
 //           NSString * mimeType = (NSString *)showInfo[@"mimeType"];  doesn't work!
 //           if ([@"video/mpg2" isEqualToString:mimeType] ){
@@ -844,18 +892,12 @@ static NSRegularExpression * isFinalRegex = nil;
                rpcData.imageURL = imageURL;
                [strongSelf.delegate receivedRPCData:rpcData];
            } else {
-               NSString * contentId = showInfo[@"contentId"];
+               NSString * contentId = rpcData.contentID;
                if (contentId.length) {
                     [showsWithoutImage addObject:contentId];
                     [showsObjectIDs addObject:objectId];
                 }
            }
-		   //XXX testing, but should we auto-retrieve?
-		   [self retrieveClipData:showInfo[@"contentId"] withCompletionHandler:^(NSArray * clipData) {
-			   __typeof__(self) strongSelf2 = weakSelf;
-
-			   DDLogReport(@"XXX For %@, clipData: %@", showInfo[@"title"], clipData);
-		   }];
            objectIDIndex++;
        }
        [strongSelf getImageFor:showsWithoutImage withObjectIds: showsObjectIDs];
@@ -970,12 +1012,7 @@ static NSArray * imageResponseTemplate = nil;
     [self undeleteShowsWithRecordIds:recordingIds]; //coincidentally the same command
 }
 
--(void) sendKeyEvent: (NSString *) keyEvent andPause: (NSTimeInterval) pause {
-	[self sendKeyEvent: keyEvent];
-	if (pause > 0) [NSThread sleepForTimeInterval:pause];
-}
-
--(void) sendKeyEvent: (NSString *) keyEvent {
+-(void) sendKeyEvent: (NSString *) keyEvent withCompletion: (void (^)(void)) completionHandler  {
 	if (keyEvent.length ==0) return;
 	if (!self.bodyID) return;
 	
@@ -990,6 +1027,7 @@ static NSArray * imageResponseTemplate = nil;
 				withData:data
 	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
 		   DDLogVerbose(@"sent keyStroke %@; got %@", keyEvent, jsonResponse);
+		   if (completionHandler) completionHandler();
 	   }];
 }
 
@@ -1010,7 +1048,7 @@ static NSArray * imageResponseTemplate = nil;
 	   }];
 }
 
--(void) retrievePositionWithCompletionHandler: (void (^)(NSInteger)) completionHandler {
+-(void) retrievePositionWithCompletionHandler: (void (^)(long long position, long long length)) completionHandler {
 	if (!self.bodyID) return;
 	
 	DDLogDetail(@"Getting current Position");
@@ -1024,17 +1062,15 @@ static NSArray * imageResponseTemplate = nil;
 	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
 		   DDLogVerbose(@"got positionResponse: %@", jsonResponse);
 		   NSString * positionString = jsonResponse[@"position"];
-		   NSInteger position = positionString.integerValue;
-		   if (positionString.length) {
-			   DDLogDetail(@"Position = %@",@(position));
-		   } else {
-			   position = -1;
-		   }
-		   if (completionHandler) completionHandler(position);
+		   long long position = positionString.length ? positionString.longLongValue : -1;
+		   DDLogDetail(@"Position = %@",@(position));
+		   NSString * lengthString = jsonResponse[@"end"];
+		   long long length = lengthString.length ? lengthString.longLongValue : -1;
+		   if (completionHandler) completionHandler(position, length);
 	   }];
 }
 
--(void) jumpToPosition: (NSInteger) location withCompletionHandler: (void (^)(NSInteger)) completionHandler {
+-(void) jumpToPosition: (NSInteger) location withCompletionHandler: (void (^)(BOOL success)) completionHandler {
 	if (location < 0) return;
 	if (!self.bodyID) return;
 	
@@ -1053,7 +1089,7 @@ static NSArray * imageResponseTemplate = nil;
 	   }];
 }
 
--(void) setBookmarkPosition: (NSInteger) location forRecordingId: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL)) completionHandler {
+-(void) setBookmarkPosition: (NSInteger) location forRecordingId: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL success)) completionHandler {
 	if (recordingId.length == 0) return;
 	if (!self.bodyID) return;
 	
@@ -1074,7 +1110,7 @@ static NSArray * imageResponseTemplate = nil;
 	   }];
 }
 
--(void) playOnTiVo: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL)) completionHandler {
+-(void) playOnTiVo: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL success)) completionHandler {
 	if (!recordingId.length) return;
 	if (!self.bodyID) return;
 	
@@ -1102,7 +1138,7 @@ static NSArray * imageResponseTemplate = nil;
 
 #pragma mark Commercial extraction
 
--(void) retrieveClipData: (NSString *) contentId withCompletionHandler: (void (^)(NSArray *)) completionHandler{
+-(void) retrieveClipDataFor: (NSString *) contentId withCompletionHandler: (void (^)(NSString *, NSArray <NSNumber *> *)) completionHandler {
 	if (contentId.length ==0) return;
 	
 	DDLogDetail(@"Getting clip data for %@", contentId);
@@ -1116,107 +1152,158 @@ static NSArray * imageResponseTemplate = nil;
 				withData:data
 	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
 		   NSArray * clipDatas = jsonResponse[@"clipMetadata"];
-		   NSString * clipMetadataId = clipDatas[0][@"clipMetadataId"];
+		   NSString * clipMetadataId = nil;
+		   if ([clipDatas isKindOfClass:[NSArray class]] && clipDatas.count > 0) {
+				   clipMetadataId = clipDatas[0][@"clipMetadataId"];
+		   }
 		   if (!clipMetadataId) {
 			   DDLogDetail(@"No clip data for %@", contentId);
-			   if (completionHandler) completionHandler(nil);
+			   if (completionHandler) completionHandler(nil,nil);
 			   return;
+		   } else {
+			   DDLogVerbose(@"Got clip data for %@ (%@): %@", contentId, clipMetadataId, clipDatas);
+			   [weakSelf retrieveSegments:clipMetadataId  withCompletionHandler:^(NSArray * segments) {
+				   DDLogDetail(@"Got segment data for %@ (%@): %@", contentId, clipMetadataId, segments);
+				   completionHandler(clipMetadataId, segments);
+			   }   ];
+			   
 		   }
-		   DDLogDetail(@"Got clip data for %@ (%@): %@", contentId, clipMetadataId, clipDatas);
-		   NSDictionary * data2 = @{
-									@"clipMetadataId": @[clipMetadataId]
-									};
-		   [weakSelf sendRpcRequest:@"clipMetadataSearch"
-							monitor:NO
-						   withData:data2
-				  completionHandler:^(NSDictionary *jsonResponse2, BOOL isFinal2) {
-					  NSArray * clipDatas2 = jsonResponse2[@"clipMetadata"];
-					  DDLogDetail(@"Got clip data2 for %@: %@", contentId, jsonResponse2);
-					  for (NSDictionary * clipdata in clipDatas2) {
-						  if ([clipdata isKindOfClass:[NSDictionary class]]) {
-							  if ([clipMetadataId isEqual:clipdata[@"clipMetadataId"]]) {
-								  NSArray * origSegments = clipdata[@"segment"];
-								  NSMutableArray * segments = [NSMutableArray arrayWithCapacity:origSegments.count];
-								  for (NSDictionary * segment in origSegments) {
-									  NSString * endOffset = segment[@"endOffset"];
-									  NSString * beginOffset = segment[@"startOffset"];
-									  if (endOffset && beginOffset) {
-										  [segments addObject: @[beginOffset, endOffset, @(endOffset.longLongValue - beginOffset.longLongValue )]];
-									  }
-								  }
-								  if (completionHandler) completionHandler(segments);
-							  }
-						  }
-					  }
-				} ];
-	   	} ];
+	   }];
 }
 
-#define shortSleep() 	[NSThread sleepForTimeInterval:0.9]
+-(void) retrieveSegments: (NSString *) clipMetaId withCompletionHandler: (void (^)(NSArray *)) completionHandler {
+	NSDictionary * data = @{
+							@"clipMetadataId": @[clipMetaId]
+							};
+	[self sendRpcRequest:@"clipMetadataSearch"
+				 monitor:NO
+				withData:data
+	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+			  NSArray * clipDatas = jsonResponse[@"clipMetadata"];
+			  for (NSDictionary * clipdata in clipDatas) {
+				  if ([clipdata isKindOfClass:[NSDictionary class]] &&
+					  [clipMetaId isEqual:clipdata[@"clipMetadataId"]]) {
+					  NSArray * origSegments = clipdata[@"segment"];
+					  if ([origSegments isKindOfClass:[NSArray class]]) {
+						  NSMutableArray * segments = [NSMutableArray arrayWithCapacity:origSegments.count];
+						  for (NSDictionary * segment in origSegments) {
+							  NSString * endOffset = segment[@"endOffset"];
+							  NSString * beginOffset = segment[@"startOffset"];
+							  if (endOffset && beginOffset ) {
+								  [segments addObject: @(endOffset.longLongValue - beginOffset.longLongValue )];
+							  }
+						  }
+						  if (completionHandler) completionHandler(segments);
+						  break;
+					  }
+				  }
+			  }
+		} ];
+}
 
 -(void) getRemainingPositionsInto: 	(NSMutableArray <NSNumber *> *) positions
-		   withCompletionHandler: (void (^)(NSArray *)) completionHandler{
-	[self sendKeyEvent: @"play" ];
-	[self sendKeyEvent: @"channelDown" ];
-	[self sendKeyEvent: @"pause" ];
-	shortSleep();
-	__weak __typeof__(self) weakSelf = self;
-	if (!positions) positions = [NSMutableArray array];
+		   withCompletionHandler: (void (^)(NSArray *)) completionHandler {
 
-	[self retrievePositionWithCompletionHandler:^(NSInteger position) {
-		__typeof__(self) strongSelf = weakSelf;
-		DDLogDetail(@"XXX Next Position: %@", @(position));
-		NSInteger prevPosition = positions.lastObject.integerValue; //maybe nil => 0
+	__weak __typeof__(self) weakSelf = self;
+	[self sendKeyEvent: @"play" withCompletion:^{
+		//note: indenting change to avoid tower effect, each line break is a new event-driven block
+
+		[weakSelf sendKeyEvent: @"channelDown" withCompletion:^{
+			
+		[weakSelf sendKeyEvent: @"pause" withCompletion:^{
+		
+		[weakSelf afterDelay:1.5 launchBlock:^{
+			
+		[weakSelf retrievePositionWithCompletionHandler:^(long long position, long long end) {
+			
+		NSInteger prevPosition = positions.firstObject.integerValue;
+		DDLogDetail(@"XXX Next Position: %@ versus %@", @(position), @(prevPosition));
 		if (position > 0 && ABS(prevPosition - position) > 5000) {
 			//we have moved a significant amount, so record and try again
-			
-			[positions addObject:@(position)];
-			[strongSelf jumpToPosition:position-3000 withCompletionHandler:nil];
-
-			[strongSelf getRemainingPositionsInto:positions
-							withCompletionHandler:completionHandler];
+			[positions insertObject:@(position) atIndex:0]; //reverse in file
+			[weakSelf jumpToPosition:position-3000 withCompletionHandler:^(BOOL success) {
+			[weakSelf afterDelay:1.0 launchBlock:^{
+				[weakSelf getRemainingPositionsInto:positions
+							 withCompletionHandler:completionHandler];
+				} ];
+			} ];
 		} else {
 			//haven't moved much, so all done
 			if (completionHandler) completionHandler(positions);
 		}
+		}];
+		}];
+		}];
+		}];
 	}];
-	
 }
 
--(void) findCommercialsForContentId: (NSString *) contentId
-					  atRecordingId: (NSString *) recordingId
-					 withBookmarkAt: (NSInteger) startingPoint
-					  andEndPointAt: (NSInteger) endPoint {
+BOOL isFinding = NO;
+
+-(void) findCommercialsForShow:(MTRPCData *) rpcData withCompletionHandler: (void (^)(void)) completionHandler {
 	
 //XXX restore these at tivo level
 //	[self sendKeyEvent: @"nowShowing" andPause :4.0];
 //	[self sendKeyEvent: @"tivo" 	  andPause :4.0];
 //	[self sendKeyEvent: @"nowShowing" andPause :4.0];
-
-	__block NSArray * segmentLengths = nil;
-	[self retrieveClipData:contentId
-		 withCompletionHandler:^(NSArray * lengths)  {
-			 segmentLengths = lengths;
-		 }];
-	
-	[self playOnTiVo:recordingId withCompletionHandler:nil];
-	shortSleep();
-	[self jumpToPosition:endPoint - 6000 withCompletionHandler:nil];
-	[self sendKeyEvent: @"reverse" andPause: 0.9];
-	[self sendKeyEvent: @"play"   andPause: 0.9];
+	if (!rpcData.programSegments) {
+		[self retrieveClipDataFor:rpcData.contentID withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
+			rpcData.clipMetaDataId = metaDataID;
+			rpcData.programSegments = lengths;
+			if (lengths.count > 0) {
+				[self findCommercialsForShow:rpcData withCompletionHandler: completionHandler] ;
+			}
+		}];
+		return;
+	}
+	if (isFinding) return;
+	isFinding = YES;
+//
 	__weak __typeof__(self) weakSelf = self;
+	[self playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
+		
+		//note: indenting change to avoid tower effect, each line break is a new block
+		[weakSelf afterDelay:1.0 launchBlock:^{
+			
+		[weakSelf retrievePositionWithCompletionHandler:^(long long startingPoint, long long end) {
+			
+		DDLogVerbose(@"found initial Point of %@ / %@", @(startingPoint), @(end));
+		if (end <= 0) end = 12*3600*1000;
+		[weakSelf jumpToPosition:end-5000 withCompletionHandler:^(BOOL success) {
+			
+		[weakSelf afterDelay:1.0 launchBlock:^{
 
-	[self getRemainingPositionsInto: nil
-			  withCompletionHandler:^(NSArray * positions) {
-				  __typeof__(self) strongSelf = weakSelf;
-				  DDLogDetail(@"Got positions of %@", positions);
-				  [strongSelf sendKeyEvent: @"pause"   andPause: 0.9];
-				  [strongSelf jumpToPosition:startingPoint withCompletionHandler:nil];
-				  [strongSelf sendKeyEvent: @"liveTv" andPause:0.0];
-				  [strongSelf setBookmarkPosition:startingPoint
-								   forRecordingId:recordingId
-							withCompletionHandler:nil];
-			  } ];
+		[weakSelf sendKeyEvent: @"reverse" withCompletion:^{
+			
+		[weakSelf afterDelay:1.0 launchBlock:^{
+			
+		[weakSelf getRemainingPositionsInto: [NSMutableArray arrayWithObject:@(end)]  withCompletionHandler:^(NSArray * positions) {
+
+		DDLogDetail(@"Got positions of %@", positions);
+		rpcData.edlList = [NSArray edlListFromSegments:rpcData.programSegments andStartPoints:positions];
+	    [weakSelf sendKeyEvent: @"pause"  withCompletion:^{
+			
+		[weakSelf afterDelay:1.0 launchBlock:^{
+		[weakSelf jumpToPosition:startingPoint withCompletionHandler:^(BOOL success2){
+		[weakSelf sendKeyEvent: @"liveTv" withCompletion:^{
+		[weakSelf setBookmarkPosition:startingPoint
+					 forRecordingId:rpcData.recordingID
+			  withCompletionHandler:^(BOOL success3){
+				  isFinding = NO;
+				  if (completionHandler) (completionHandler());
+		}];
+		}];
+		}];
+		}];
+		}];
+		}];
+	  	}];
+		}];
+		}];
+		}];
+		}];
+		}];
+	}];
 }
 
 	

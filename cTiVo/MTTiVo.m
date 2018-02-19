@@ -550,15 +550,36 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void) sendKeyEvent: (NSString *) keyEvent {
-	[self.myRPC sendKeyEvent: keyEvent];
+	[self.myRPC sendKeyEvent: keyEvent withCompletion:nil];
 }
 
 -(void) sendURL: (NSString *) URL {
 	[self.myRPC sendURL:URL];
 }
 
--(void) retrieveClipDataFor: (MTTiVoShow *) show withCompletionHandler: (void (^)(NSArray *)) completionHandler {
-//	[self.myRPC retrieveClipData:show.rpcData.contentID withCompletionHandler:completionHandler];
+-(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows withCompletion: (void (^)(void)) completionHandler {
+	NSMutableArray < MTTiVoShow *> * skipShows = [NSMutableArray arrayWithCapacity:self.shows.count];
+	for (MTTiVoShow * show in shows) {
+		if ([show.tiVo isEqual:self] && show.rpcData.clipMetaDataId) {
+			show.rpcData.edlList = nil;
+			[skipShows addObject:show];
+		}
+	}
+	[self findAllCommericalsRecursive:skipShows withCompletion:completionHandler ];
+}
+
+-(void) findAllCommericalsRecursive:(NSMutableArray <MTTiVoShow *> *) skipShows withCompletion: (void (^)(void)) completionHandler {
+	if (skipShows.count == 0) {
+		DDLogMajor(@"Finished checking for commercials");
+		if (completionHandler) completionHandler();
+		return;
+	}
+	DDLogMajor(@"XXX Checking for commercials for %@", skipShows[0]);
+	[self.myRPC findCommercialsForShow:skipShows[0].rpcData withCompletionHandler:^{
+		DDLogMajor(@"XXX got EDL for %@: %@", skipShows[0], skipShows[0].rpcData.edlList);
+		[skipShows removeObjectAtIndex:0];
+		[self findAllCommericalsRecursive:skipShows withCompletion:completionHandler];
+	}];
 }
 
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {

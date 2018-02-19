@@ -7,14 +7,48 @@
 //
 
 #import "MTEdl.h"
+static NSString * kStartTime  = @"imageURL";
+static NSString * kEndTime  = @"endTime";
+static NSString * kEDLType  = @"edlType";
+static NSString * kOffset  = @"offset";
 
 @implementation MTEdl
 
 __DDLOGHERE__
 
--(NSString *)description
-{
-    return [NSString stringWithFormat:@"Start = %lf, End  = %lf, type=%d, offset = %lf",self.startTime, self.endTime, self.edlType,self.offset];
+- (instancetype)initWithCoder:(NSCoder *)coder {
+	self = [self init];
+	if (self) {
+		_startTime = [coder decodeDoubleForKey: kStartTime];
+		_endTime =   [coder decodeDoubleForKey: kEndTime];
+		_edlType =   [coder decodeIntForKey:kEDLType];
+		_offset =    [coder decodeDoubleForKey: kOffset];
+	}
+	return self;
+}
+
++(BOOL) supportsSecureCoding {
+	return YES;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+	[coder encodeDouble:  _startTime forKey:kStartTime];
+	[coder encodeDouble:  _endTime forKey:kEndTime];
+	[coder encodeInteger: _edlType forKey:kEDLType];
+	[coder encodeDouble:  _offset  forKey:kOffset];
+}
+
+-(NSString *)description {
+	int startMinutes = (int)self.startTime / 60;
+	int endMinutes = (int)self.endTime / 60;
+	int offsetMinutes = (int)self.offset / 60;
+	double startSeconds = self.startTime - startMinutes *60;
+	double endSeconds = self.endTime - endMinutes * 60;
+	double offsetSeconds = self.offset - offsetMinutes * 60;
+	return [NSString stringWithFormat:@"Start = %2d:%05.2f, End = %2d:%05.2f, type=%d, offset = %2d:%05.2f; length = %0.2f",
+			startMinutes , startSeconds,
+			endMinutes, endSeconds, self.edlType,
+			offsetMinutes, offsetSeconds, self.endTime-self.startTime];
 }
 
 +(MTEdl *)edlFromString:edlString {
@@ -68,6 +102,52 @@ __DDLOGHERE__
     DDLogVerbose(@"edls = %@",edls);
     return [NSArray arrayWithArray:edls];
 	
+}
+
++(NSArray <MTEdl *> *)edlListFromSegments:(NSArray <NSNumber *> *) lengthPoints andStartPoints:(NSArray <NSNumber *> *) startPoints {
+	//last startPoint should be end of show, so should be one less length than startPoint
+	double showLength = startPoints.lastObject.doubleValue/1000;
+	lengthPoints = [lengthPoints arrayByAddingObject:@0];
+	NSMutableArray <MTEdl *> * edls = [NSMutableArray arrayWithCapacity:lengthPoints.count];
+	NSUInteger startIndex = 0;
+	double cutPartStart = 0.0;
+	double cumulativeOffset = 0.0;
+	for (NSNumber * lengthPoint in lengthPoints) {
+		double segmentLength = lengthPoint.doubleValue/1000.0;
+		if (startIndex >= startPoints.count) {
+			if (cutPartStart <= showLength || segmentLength != 0.0) {
+				DDLogReport (@"Not enough Start points found: %@ v Lengths: %@ ==> EDL so far %@", startPoints, lengthPoints, edls);
+				return nil;
+			} else {
+				//we're beyond end and this is the fake 0.0 length segment.
+				break;
+			}
+		}
+		double segmentStart  = startPoints[startIndex].doubleValue/1000.0;
+		//now create the cut that goes BEFORE the segment
+		double cutPartLength = segmentStart - cutPartStart;
+		if (cutPartLength <= 0) {
+			//problem, unless we're at the end of file
+			if (cutPartStart < showLength-5.0) {
+				DDLogReport (@"In building EDL list, invalid segment: segments: %@ startPoints: %@ ==> edl %@", lengthPoints, startPoints, edls);
+				return nil;
+			}
+			break;
+		} else if (cutPartLength > 1.0){ //don't cut less than 1 second
+			MTEdl * edl = [[MTEdl alloc] init];
+			edl.startTime = cutPartStart;
+			edl.endTime = segmentStart;
+			edl.edlType = 0;
+			cumulativeOffset += segmentStart-cutPartStart;
+			edl.offset = cumulativeOffset;
+			[edls addObject:edl];
+			cutPartStart = segmentStart + segmentLength;
+		}
+		startIndex++;
+	}
+	DDLogReport (@"XXX segments: %@ startPoints: %@ ==> edl %@", lengthPoints, startPoints, edls);
+
+	return [edls copy];
 }
 
 -(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length {

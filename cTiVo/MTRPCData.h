@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "MTEdl.h"
 //typedef NS_ENUM(NSUInteger, MPEGFormat) {
 //    MPEGFormatUnknown,
 //    MPEGFormatMP2,
@@ -21,13 +21,17 @@
 @property (nonatomic, strong) NSString * rpcID; //format: @"TiVo|objectID"
 
 @property (nonatomic, strong) NSString * recordingID;
+@property (nonatomic, strong) NSString * contentID;
 @property (nonatomic, assign) NSInteger episodeNum;
 @property (nonatomic, assign) NSInteger seasonNum;
 @property (nonatomic, strong) NSString * genre;
+@property (nonatomic, strong) NSString * clipMetaDataId;
 //@property (nonatomic, assign) MPEGFormat format;
 @property (nonatomic, strong) NSString * imageURL;
 @property (nonatomic, strong) NSString * series;
 
+@property (nonatomic, strong) NSArray <NSNumber *> * programSegments; //program segment lengths as provided by TiVo
+@property (nonatomic, strong) NSArray <MTEdl *> * edlList;
 @end
 
 @protocol MTRPCDelegate <NSObject>

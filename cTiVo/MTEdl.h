@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #include "mp4v2.h"
 
-@interface MTEdl : NSObject
+@interface MTEdl : NSObject <NSSecureCoding>
 
 #define kMinEdlLength 5
 
@@ -26,6 +26,8 @@
 +(NSArray *)getFromEDLFile:(NSString *)edlFile;
 
 -(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length;
+
++(NSArray *)edlListFromSegments:(NSArray <NSNumber *> *) segments andStartPoints:(NSArray <NSNumber *> *) startPoints;
 
 @end
 

@@ -59,6 +59,7 @@
 -(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) sendKeyEvent: (NSString *) keyEvent;
 -(void) sendURL: (NSString *) URL;
--(void) retrieveClipDataFor: (MTTiVoShow *) show withCompletionHandler: (void (^)(NSArray *)) completionHandler;
+
+-(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows withCompletion: (void (^)(void)) completionHandler;
 
 @end

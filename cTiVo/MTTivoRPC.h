@@ -27,10 +27,11 @@
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 
--(void) sendKeyEvent: (NSString *) keyEvent;
+-(void) sendKeyEvent: (NSString *) keyEvent withCompletion: (void (^) (void)) completionHandler;
 -(void) sendURL: (NSString *) URL;
--(void) retrieveClipData: (NSString *) contentId withCompletionHandler: (void (^)(NSArray *)) completionHandler; 
--(void) playOnTiVo: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL)) completionHandler;
+-(void) playOnTiVo: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL success)) completionHandler;
+
+-(void) findCommercialsForShow:(MTRPCData *) rpcData withCompletionHandler: (void (^)(void)) completionHandler;
 
 @property (nonatomic, weak) id <MTRPCDelegate> delegate;
 
