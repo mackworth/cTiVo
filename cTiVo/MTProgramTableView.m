@@ -25,6 +25,7 @@
 
 @property (nonatomic, strong) NSMutableDictionary <NSString *, MTShowFolder *> * oldFolders; //reuse from last reload (to avoid accidentally closing existing folders.)
 @property (nonatomic, strong) NSArray <id> *sortedShows; //entries are either MTTiVoShows or, when hierarchical, folders
+@property (nonatomic, strong) NSMapTable <MTTiVoShow *, MTShowFolder *> * parentMap; //parents[show] = containing showFolder
 @property (nonatomic, strong) NSString *selectedTiVo;
 @property (weak) IBOutlet NSSearchField *findText; //filter for displaying found subset of programs
 @property (nonatomic, assign) BOOL viewAsFolders;
@@ -126,7 +127,13 @@ __DDLOGHERE__
 {
     MTTiVoShow *thisShow = notification.object;
 	NSInteger row = [self rowForItem:thisShow];
-    if (row != NSNotFound) {
+	if (row == -1) {
+		MTShowFolder * folder = [self.parentMap objectForKey:thisShow];
+		if (folder) {
+			row = [self rowForItem:folder];
+		}
+	}
+    if (row != -1 && row != NSNotFound) {
         NSRange columns = NSMakeRange(0,self.numberOfColumns);
         [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
     }
@@ -277,7 +284,9 @@ __DDLOGHERE__
 								  filteredArrayUsingPredicate:protectedPredicate]
 								 filteredArrayUsingPredicate:suggestedPredicate];
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTShowFolders]) {
-			NSMutableDictionary * showsDict = [NSMutableDictionary new];
+			NSMutableDictionary <NSString *, NSMutableArray <MTTiVoShow *> *> * showsDict = [NSMutableDictionary new];
+			self.parentMap = [NSMapTable mapTableWithKeyOptions:NSMapTableWeakMemory
+												   valueOptions:NSMapTableWeakMemory];
 			for (MTTiVoShow * show in whichShows) {
 				NSMutableArray * series = showsDict[show.seriesTitle];
 				if (series) {
@@ -298,6 +307,9 @@ __DDLOGHERE__
 						self.oldFolders[key] = folderHolder;
 					}
 					folderHolder.folder = seriesShows;
+					for (MTTiVoShow * show in seriesShows) {
+						[self.parentMap setObject:folderHolder forKey:show ];
+					}
 					[folderArray addObject:folderHolder];
 				}
 			}
