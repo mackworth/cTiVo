@@ -37,6 +37,7 @@
     int totalItemsOnTivo;
     int lastChangeDate;
     int itemStart;
+    int tivoDuplicateBugPossibleStart;
     int itemCount;
     int numAddedThisBatch; //should be itemCount minus duplicates
     int authenticationTries;
@@ -136,6 +137,7 @@ __DDLOGHERE__
         _storeMediaKeyInKeychain = NO;
         itemStart = 0;
         itemCount = 50;
+        tivoDuplicateBugPossibleStart = -1;
         reachabilityContext.version = 0;
         reachabilityContext.info = (__bridge void *)(self);
         reachabilityContext.retain = NULL;
@@ -393,15 +395,19 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 #pragma mark - RPC switchboard
 
 -(void) receivedRPCData:(MTRPCData *)rpcData {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    if ([NSThread isMainThread]) {
+        self.rpcIDs[rpcData.rpcID].rpcData = rpcData;
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
         self.rpcIDs[rpcData.rpcID].rpcData = rpcData;
     });
+    }
 }
 
 -(MTRPCData *) registerRPCforShow: (MTTiVoShow *) show  {
     NSString * rpcKey = [NSString stringWithFormat:@"%@|%@",self.tiVo.hostName, show.idString];
     [self.rpcIDs setObject:show forKey:rpcKey ];
-    return [show.tiVo rpcDataForID:show.idString];
+    return [show.tiVo.myRPC rpcDataForID:show.idString];
 }
 
 -(void) tivoReports: (NSInteger) numShows
@@ -428,9 +434,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		[self updateShows:self];
         return;
     }
-    NSMutableArray * showsAfterDeletions = [NSMutableArray arrayWithCapacity:self.shows.count];
-	NSMutableArray * showsToLookFor = [addedShows mutableCopy];
-	NSMutableArray * indicesToLookFor = [addedShowIndices mutableCopy];
+    NSMutableArray <MTTiVoShow *> * showsAfterDeletions = [NSMutableArray arrayWithCapacity:self.shows.count];
+	NSMutableArray <NSString *> * showsToLookFor = [addedShows mutableCopy];
+	NSMutableArray <NSNumber *> * indicesToLookFor = [addedShowIndices mutableCopy];
     [self.shows enumerateObjectsUsingBlock:^(MTTiVoShow * _Nonnull show, NSUInteger showsIndex, BOOL * _Nonnull stop) {
         if (deletedIds[show.idString ] ){
             [self markDeletedDownloadShow:show];
@@ -452,7 +458,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             [showsAfterDeletions addObject:show];
         }
     }];
-    if (showsAfterDeletions) self.shows = showsAfterDeletions;
+    self.shows = showsAfterDeletions;
     DDLogVerbose(@"Previous shows after deletions were: %@:",showsAfterDeletions); 
 
     if (showsToLookFor.count > 0) {
@@ -464,7 +470,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
--(NSRange) getFirstRange:(NSMutableArray <NSNumber *> *)indices {
+-(NSRange) getFirstRange:(NSArray <NSNumber *> *)indices {
     if (indices.count == 0) return NSMakeRange(0, 0);;
     NSUInteger end = 0;
     //look for sequence
@@ -473,7 +479,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     NSUInteger endValue = indices[end].unsignedIntegerValue;
     NSRange result = NSMakeRange(startValue,
                        endValue-startValue+1);
-    DDLogDetail(@"First range is %@ for %@", NSStringFromRange(result), indices);
     return result;
 }
 
@@ -504,12 +509,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
--(void) reloadShowInfoForID: (NSString *) showID {
-    [self.myRPC reloadShowInfoForID:showID];
-}
-
--(MTRPCData *) rpcDataForID: (NSString *) idString {
-    return [self.myRPC rpcDataForID:idString];
+-(void) reloadShowInfoForShows: (NSArray <MTTiVoShow *> *) shows {
+    NSMutableArray * showIDs = [NSMutableArray arrayWithCapacity:shows.count];
+    for (MTTiVoShow * eachShow in shows) {
+        [showIDs addObject:eachShow.idString];
+    }
+    [self.myRPC reloadShowInfoForIDs:showIDs];
 }
 
 -(BOOL) supportsTransportStream {
@@ -557,29 +562,20 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[self.myRPC sendURL:URL];
 }
 
--(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows withCompletion: (void (^)(void)) completionHandler {
-	NSMutableArray < MTTiVoShow *> * skipShows = [NSMutableArray arrayWithCapacity:self.shows.count];
-	for (MTTiVoShow * show in shows) {
-		if ([show.tiVo isEqual:self] && show.rpcData.clipMetaDataId) {
-			show.rpcData.edlList = nil;
-			[skipShows addObject:show];
-		}
-	}
-	[self findAllCommericalsRecursive:skipShows withCompletion:completionHandler ];
+-(void) playShow:(MTTiVoShow *)show {
+    if ([show.tiVo isEqual:self]) {
+        [self.myRPC playOnTiVo:show.idString withCompletionHandler:nil];
+    }
 }
 
--(void) findAllCommericalsRecursive:(NSMutableArray <MTTiVoShow *> *) skipShows withCompletion: (void (^)(void)) completionHandler {
-	if (skipShows.count == 0) {
-		DDLogMajor(@"Finished checking for commercials");
-		if (completionHandler) completionHandler();
-		return;
+-(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows withCompletion: (void (^)(void)) completionHandler {
+	for (MTTiVoShow * show in shows) {
+        //xx remove this
+        show.rpcData.edlList = nil;
+        if ([show.tiVo isEqual:self]) {
+            [self.myRPC findSkipModeForShow:show.rpcData];
+		}
 	}
-	DDLogMajor(@"XXX Checking for commercials for %@", skipShows[0]);
-	[self.myRPC findCommercialsForShow:skipShows[0].rpcData withCompletionHandler:^{
-		DDLogMajor(@"XXX got EDL for %@: %@", skipShows[0], skipShows[0].rpcData.edlList);
-		[skipShows removeObjectAtIndex:0];
-		[self findAllCommericalsRecursive:skipShows withCompletion:completionHandler];
-	}];
 }
 
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {
@@ -595,10 +591,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
     DDLogDetail(@"Scheduling Update with delay of %lu seconds", (long)delay);
     [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay ];
-}
-
--(void) findCommercials: (MTTiVoShow *) show {
-	
 }
 
 -(void)updateShows:(id)sender
@@ -639,6 +631,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     NSString *portString = @"";
     if ([_tiVo isKindOfClass:[MTNetService class]]) {
         portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];
+    }
+    if (self.oneBatch && tivoDuplicateBugPossibleStart > 0 && range.location >= (NSUInteger) tivoDuplicateBugPossibleStart) {
+        //Tivo bug: for a requested show range above a certain number, TiVo will return shows "slipped" down by one.
+        //e.g. if number is 30, then range accesses  31 - 35 will actually returns 30-34
+        //You'll see this when we pull the whole show list, one show will be thrown away as a duplicate
+        //That's sufficent for NPL, but if we are told there's a new show at #75 (e.g. a Tivo Suggestion), then
+        //when we pull the XML, we get the wrong one.
+        //To work around, we remember the range prior to that one, and when looking for a single show, we ask for two instead of one, and ignore the extra one.
+        range.length++;
+       DDLogDetail(@"Increasing length by 1 to %@ due to possible TiVo Range bug",NSStringFromRange(range));
     }
 
     NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,(int)range.location,(int)range.length] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -704,11 +706,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     [element appendString:string];
 }
 
--(void)parserElement:(NSString*) elementName {
-	//just gives a shorter method name for DDLog
-	DDLogVerbose(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
-}
-
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
 	[self endElement:elementName];
@@ -717,7 +714,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void) endElement:(NSString *) elementName {
 	//just gives a shorter method name for DDLog
 
-	[self parserElement: elementName];
+    DDLogVerbose(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
     if (parsingShow) {
         //extract show parameters here
 //        [currentShow setValue:element forKey:elementToPropertyMap[elementName]];
@@ -801,6 +798,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             for (MTTiVoShow * oldShow in newShows) {
                 if ([oldShow isEqualTo:currentShow]) {
                     DDLogDetail(@"Skipping duplicate new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested ":@"", currentShow.showTitle, currentShow.showDateString);
+                    if (tivoDuplicateBugPossibleStart < 0) {
+                        tivoDuplicateBugPossibleStart = itemStart - itemCount;
+                    }
                     currentShow = nil;
                     return;
                 }
@@ -815,7 +815,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             NSString * newShowID = currentShow.idString;
             MTTiVoShow *thisShow = nil;
            if (self.oneBatch) {
-               for (NSString * showID in self.addedShows) {
+               for (NSString * showID in [self.addedShows copy]) {
                     if ([newShowID isEqualToString:showID]) {
                         thisShow = currentShow;
                         DDLogMajor(@"RPC Adding %@ at %@", currentShow, newShowID);
@@ -824,15 +824,19 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                     }
                }
                if (!thisShow) {
-                    DDLogMajor(@"RPC out of sync: %@ v %@ Indices: %@", newShowID, self.addedShows, self.addedShowIndices );
-                    cancelRefresh = YES;
+                   DDLogDetail(@"Ignoring show %@", newShowID);
                 }
             } else {
                 thisShow = [previousShowList valueForKey:newShowID];
                 if (thisShow) {
                     DDLogDetail(@"Updated show %@", currentShow.showTitle);
                     [previousShowList removeObjectForKey:newShowID];
-                    if (thisShow.inProgress.boolValue) thisShow = currentShow;
+					if (thisShow.inProgress.boolValue) {
+						thisShow = currentShow;
+					} else {
+						//need to update from latest version. (Only thing in tivo xml that may change)
+						thisShow.imageString = currentShow.imageString;
+					}
                 } else {
                     thisShow = currentShow;
                     DDLogDetail(@"Added new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested " : @"", currentShow.showTitle, currentShow.showDateString);
@@ -908,6 +912,47 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         deletedShow.imageString = @"deleted";
     }
 }
+//-(void) checkRecentShows {
+//	if (self.recentShows.count > 0) {
+//		NSMutableArray <NSString *> * recentIDs = [NSMutableArray array];
+//		for (MTTiVoShow * show in [self.recentShows copy ]) {
+//			if (show.rpcData.clipMetaDataId) {
+//				DDLogMajor(@"Found Metadata for %@ after %0.1lf minutes", show, (-[show.showDate timeIntervalSinceNow]-show.showLength)/60);
+//				[self.recentShows removeObject:show];
+//			} else if (-[show.showDate timeIntervalSinceNow] > (show.showLength+4*60*60)) {
+//				DDLogMajor(@"Giving up on %@ metadata after 4 hours", show);
+//				[self.recentShows removeObject:show];
+//			} else {
+//				show.rpcData = nil;
+//				[recentIDs addObject:show.idString];
+//			}
+//		}
+//		[self.myRPC reloadShowInfoForIDs:[recentIDs copy]];
+//	} else {
+//		[self.recentShowsTimer invalidate];
+//		self.recentShowsTimer = nil;
+//	}
+//}
+//
+
+-(void) reloadRecentShows {
+    //so when we get an RPC, it might signal a metadata change, so reload recent ones.
+	NSMutableArray <NSString *> * recentIDs = [NSMutableArray array];
+	NSMutableArray <MTTiVoShow *> * recentShows = [NSMutableArray array];
+	for (MTTiVoShow * show in self.shows) {
+		if (-[show.showDate timeIntervalSinceNow] < (show.showLength+4*60*60)) {
+			if (!show.protectedShow.boolValue && !show.rpcData.clipMetaDataId) {
+				[recentIDs addObject:show.idString];
+				[recentShows addObject:show];
+				//show.rpcData = nil;  //Necessary?
+			}
+		}
+	}
+	if (recentIDs.count > 0) {
+		DDLogMajor (@"reloading shows for metadata: %@", recentShows);
+		[self.myRPC reloadShowInfoForIDs:[recentIDs copy]];
+	}
+}
 
 -(void)parserDidEndDocument:(NSXMLParser *)parser
 {
@@ -916,17 +961,17 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     if (itemCount == 0) {
         if (self.oneBatch) {
             DDLogReport(@"TiVo returned ZERO of %d requested shows for RPC!", (int)[self getFirstRange:self.addedShowIndices].length);
+            cancelRefresh = YES;
         } else {
             DDLogReport(@"TiVo returned ZERO requested shows! Ignoring shows from %d to %d", itemStart, totalItemsOnTivo);
         }
     } else if (numDuplicates == 0) {
-        DDLogMajor(@"Finished batch for %@. Added %d shows.", self, numAddedThisBatch);
+        DDLogMajor(@"Finished batch for %@. Found %d shows.", self, numAddedThisBatch);
     } else if (numAddedThisBatch == 0) {  //Streaming Movies reported as shows bug
         DDLogMajor(@"Finished batch for %@. Only duplicated shows.", self);
     } else {
-        DDLogMajor(@"Finished batch for %@. Added %d shows, but %d duplicate%@.", self, numAddedThisBatch, numDuplicates, numDuplicates == 1 ? @"": @"s" );
+        DDLogMajor(@"Finished batch for %@. Found %d shows, but %d duplicate%@.", self, numAddedThisBatch, numDuplicates, numDuplicates == 1 ? @"": @"s" );
     }
-
     if (cancelRefresh) {
         //had some kind of sync problem, so start all over.
         DDLogReport(@"Resynching TiVo %@!", self);
@@ -955,6 +1000,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                 [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
             }
         }
+		[self reloadRecentShows];
     } else if (self.enabled  && (itemCount > 0 && itemStart+itemCount < totalItemsOnTivo)) { // && numAddedThisBatch > 0) {
         DDLogDetail(@"More shows to load from %@", self);
         if (newShows.count > _shows.count) {
@@ -975,7 +1021,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             [self markDeletedDownloadShow:deletedShow];
         };
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
-
+		[self reloadRecentShows];
         previousShowList = nil;
         //allows reporting when all other ops completed
         NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(detailsComplete) object:nil];

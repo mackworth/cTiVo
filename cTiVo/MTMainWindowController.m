@@ -379,12 +379,75 @@ __DDLOGHERE__
 	}
 }
 
+/*//XXX remove test variables.
+NSTimer * testTimer = nil;
+NSMutableSet <MTTiVoShow *> * testShows = nil;
+//XXX remove test.
+if (!testShows) testShows = [NSMutableSet set];
+if ([testShows containsObject:show]) {
+    [testShows removeObject:show];
+} else {
+    [testShows addObject:show];
+}
+if (testShows.count == 0) return;
+if (@available(macOS 10.12, *)) {
+    if (!testTimer) testTimer = [NSTimer scheduledTimerWithTimeInterval:3 repeats:YES block:^(NSTimer * _Nonnull timer) {
+        [testShows.anyObject.tiVo reloadShowInfoForShows:[testShows allObjects]]; //note: only works for one tivo; and does not wait for response,
+    }];
+}
+}
+*/
+
 - (void) openDrawer:(MTTiVoShow *) show {
 	if (show) {		
 		self.showForDetail = show;
 		[showDetailDrawer open];
-		//[self.drawerVariableFields setAutoresizingMask:self.drawerVariableFields.autoresizingMask |NSViewHeightSizable]; //workaround bug in IB?
-	}
+    }
+}
+
+-(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows {
+    NSMutableArray <MTTiVoShow *> * tivoShows = [shows mutableCopy];
+    while (tivoShows.count > 0) {
+        NSMutableArray * thisTiVoShows = [NSMutableArray array];
+        MTTiVo * tivo = tivoShows[0].tiVo;
+        for (MTTiVoShow * show in [tivoShows copy]) {
+            if (show.tiVo == tivo) {
+                [thisTiVoShows addObject:show];
+                [tivoShows removeObject:show];
+            }
+        }
+        [tivo findCommercialsForShows:thisTiVoShows withCompletion:nil];
+    }
+}
+
+-(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads {
+    NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
+    for (MTDownload * download in downloads) {
+        [shows addObject:download.show];
+    }
+    return [shows copy];
+}
+
+-(void) confirmSkipModeRetrieval: (BOOL) programTable {
+    NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Warning: pulling SkipMode information from TiVo will temporarily interrupt current viewing on your TiVo!"] defaultButton:@"Selected" alternateButton:@"Cancel" otherButton:@"All" informativeTextWithFormat:@"Press Selected to continue with Selected shows, All to continue for ALL shows, or Cancel to cancel request."];
+    myAlert.alertStyle = NSCriticalAlertStyle;
+    NSInteger result = [myAlert runModal];
+    NSArray <MTTiVoShow *> * shows = nil;
+    if (result == NSAlertAlternateReturn) return;
+    if (result == NSAlertDefaultReturn) {
+        if (programTable) {
+            shows = [self.tiVoShowTable selectedShows];
+        } else {
+            shows = [self showsForDownloads: [self.downloadQueueTable.sortedDownloads objectsAtIndexes: self.downloadQueueTable.selectedRowIndexes]] ;
+        }
+    } else if (result == NSAlertOtherReturn) {
+        if (programTable) {
+            shows = [tiVoManager tiVoShows];
+        } else {
+           shows =  [self showsForDownloads: self.downloadQueueTable.sortedDownloads];
+        }
+    }
+    if (shows) [self skipModeRetrieval:shows];
 }
 
 -(IBAction)programMenuHandler:(NSMenuItem *)menu
@@ -399,6 +462,8 @@ __DDLOGHERE__
         }
         NSIndexSet * columns = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.tiVoShowTable.numberOfColumns)];
         [self.tiVoShowTable reloadDataForRowIndexes:[tiVoShowTable selectedRowIndexes] columnIndexes:columns];
+	} else if ([menu.title caseInsensitiveCompare:@"Find SkipMode Points"] == NSOrderedSame) {
+		[self confirmSkipModeRetrieval:YES];
     } else if (menuTableRow >= 0 && //somehow happens
                menuTableRow < tiVoShowTable.numberOfRows) {
 		MTTiVoShow *thisShow = [tiVoShowTable itemAtRow:menuTableRow];
@@ -506,6 +571,8 @@ __DDLOGHERE__
 	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
 		NSArray * selectedDownloads = [downloadQueueTable.sortedDownloads objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
 		[tiVoManager.subscribedShows addSubscriptionsDL:selectedDownloads];
+    } else if ([menu.title caseInsensitiveCompare:@"Find SkipMode Points"] == NSOrderedSame) {
+        [self confirmSkipModeRetrieval:NO];
 	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
 		MTDownload * download = downloadQueueTable.sortedDownloads[menuTableRow];
 		[self openDrawer:download.show];

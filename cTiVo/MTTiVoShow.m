@@ -1764,7 +1764,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     _lastImageSource = MTSearchingSource;
 
     if (all) {
-        [self.tiVo reloadShowInfoForID:self.idString];
+        [self.tiVo reloadShowInfoForShows:@[self]];
         [tiVoManager.tvdb resetTVDBInfo:self];
     }
     if (self.isMovie) {

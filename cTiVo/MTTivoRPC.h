@@ -21,7 +21,7 @@
 
 -(MTRPCData *) rpcDataForID: (NSString *) idString;
 -(void) emptyCaches;
--(void) reloadShowInfoForID: (NSString *) showID;
+-(void) reloadShowInfoForIDs: (NSArray <NSString *> *) showIDs;
 
 -(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
@@ -31,7 +31,7 @@
 -(void) sendURL: (NSString *) URL;
 -(void) playOnTiVo: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL success)) completionHandler;
 
--(void) findCommercialsForShow:(MTRPCData *) rpcData withCompletionHandler: (void (^)(void)) completionHandler;
+-(void) findSkipModeForShow:(MTRPCData *) rpcData;
 
 @property (nonatomic, weak) id <MTRPCDelegate> delegate;
 

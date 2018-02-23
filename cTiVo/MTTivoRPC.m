@@ -46,6 +46,9 @@
 typedef void (^ReadBlock)(NSDictionary *, BOOL);
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, ReadBlock > * readBlocks;
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, NSDictionary* > * requests; //debug only
+
+@property (nonatomic, strong) NSMutableArray < MTRPCData *> *skipModeQueue;
+
 @end
 
 @interface NSObject (Threads)
@@ -180,6 +183,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     self.authenticationLaunched = NO;
     self.firstLaunch = YES;
 	self.updating = 0;
+    self.skipModeQueue = [NSMutableArray array];
     [self launchServer];
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receiveWakeNotification:)
@@ -773,16 +777,18 @@ static NSRegularExpression * isFinalRegex = nil;
        } ];
 }
 
--(void) reloadShowInfoForID: (NSString *) showID {
-    if (!showID) return;
-    MTRPCData * rpcData = self.showMap[showID];
-    if (rpcData) {
-        if (rpcData.series){
-            [self.seriesImages removeObjectForKey:rpcData.series];
-        }
-        [self.showMap removeObjectForKey:showID];
+-(void) reloadShowInfoForIDs: (NSArray <NSString *> *) showIDs {
+    if (!showIDs.count) return;
+	for (NSString * showID in showIDs) {
+		MTRPCData * rpcData = self.showMap[showID];
+		if (rpcData) {
+			if (rpcData.series){
+				[self.seriesImages removeObjectForKey:rpcData.series];
+			}
+			[self.showMap removeObjectForKey:showID];
+		}
     }
-    [self getShowInfoForShows:@[showID]];
+    [self getShowInfoForShows:showIDs];
 }
 
 -(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows  {
@@ -1238,27 +1244,50 @@ static NSArray * imageResponseTemplate = nil;
 	}];
 }
 
-BOOL isFinding = NO;
+-(void) findSkipModeForShow:(MTRPCData *) rpcData {
+    if (rpcData.edlList) return; //already got it.
+    __weak __typeof__(self) weakSelf = self;
+
+    if (rpcData.programSegments.count == 0) {
+        //need metadata info first
+        [self retrieveClipDataFor:rpcData.contentID withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
+            rpcData.clipMetaDataId = metaDataID;
+            rpcData.programSegments = lengths;
+            if (lengths.count > 0) {
+                [weakSelf findSkipModeForShow:rpcData] ;
+            }
+        }];
+        return;
+    }
+
+    [self.skipModeQueue addObject:rpcData];
+    if (self.skipModeQueue.count == 1 ) {
+        //XXX restore these at tivo level?
+        //    [self sendKeyEvent: @"nowShowing" andPause :4.0];
+        //    [self sendKeyEvent: @"tivo"       andPause :4.0];
+        //    [self sendKeyEvent: @"nowShowing" andPause :4.0];
+        [self findSkipModeRecursive];
+    } else {
+        //wait for previous ones to complete.
+    }
+}
+
+-(void) findSkipModeRecursive {
+    if (self.skipModeQueue.count == 0) {
+        DDLogMajor(@"Finished checking for commercials");
+        return;
+    }
+    DDLogMajor(@"XXX Checking for commercials for %@", self.skipModeQueue[0]);
+    [self findCommercialsForShow:self.skipModeQueue[0] withCompletionHandler:^{
+        DDLogMajor(@"XXX got EDL for %@: %@", self.skipModeQueue[0], self.skipModeQueue[0].edlList);
+        [self.skipModeQueue removeObjectAtIndex:0];
+        [self findSkipModeRecursive ];
+    }];
+}
+
 
 -(void) findCommercialsForShow:(MTRPCData *) rpcData withCompletionHandler: (void (^)(void)) completionHandler {
 	
-//XXX restore these at tivo level
-//	[self sendKeyEvent: @"nowShowing" andPause :4.0];
-//	[self sendKeyEvent: @"tivo" 	  andPause :4.0];
-//	[self sendKeyEvent: @"nowShowing" andPause :4.0];
-	if (!rpcData.programSegments) {
-		[self retrieveClipDataFor:rpcData.contentID withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
-			rpcData.clipMetaDataId = metaDataID;
-			rpcData.programSegments = lengths;
-			if (lengths.count > 0) {
-				[self findCommercialsForShow:rpcData withCompletionHandler: completionHandler] ;
-			}
-		}];
-		return;
-	}
-	if (isFinding) return;
-	isFinding = YES;
-//
 	__weak __typeof__(self) weakSelf = self;
 	[self playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
 		
@@ -1289,7 +1318,6 @@ BOOL isFinding = NO;
 		[weakSelf setBookmarkPosition:startingPoint
 					 forRecordingId:rpcData.recordingID
 			  withCompletionHandler:^(BOOL success3){
-				  isFinding = NO;
 				  if (completionHandler) (completionHandler());
 		}];
 		}];

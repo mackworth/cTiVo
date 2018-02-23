@@ -2468,10 +2468,17 @@
                         <action selector="programMenuHandler:" target="-2" id="892"/>
                     </connections>
                 </menuItem>
+                <menuItem isSeparatorItem="YES" id="gX8-79-wA8"/>
                 <menuItem title="Reload TVDB Info" toolTip="Reveal more information about this show" id="588">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="programMenuHandler:" target="-2" id="589"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Find SkipMode Points" toolTip="Reveal more information about this show" id="USg-jW-2wB">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="programMenuHandler:" target="-2" id="Oam-Yz-xMv"/>
                     </connections>
                 </menuItem>
             </items>
@@ -2533,10 +2540,17 @@
                         <action selector="downloadMenuHandler:" target="-2" id="885"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Play Video" tag="2" toolTip="Play this video with system player" id="886">
+                <menuItem title="Play Video" tag="2" toolTip="Play this video with system player" id="Vjm-Db-6JP">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="downloadMenuHandler:" target="-2" id="887"/>
+                        <action selector="downloadMenuHandler:" target="-2" id="neC-rq-ixJ"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="p1k-Ih-3rk"/>
+                <menuItem title="Find SkipMode Points" toolTip="Reveal more information about this show" id="DJO-g7-DGD">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="downloadMenuHandler:" target="-2" id="uDs-8r-utW"/>
                     </connections>
                 </menuItem>
             </items>

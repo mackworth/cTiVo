@@ -49,13 +49,13 @@
 -(NSDictionary *)descriptionDictionary;
 -(void) updateWithDescription:(NSDictionary *) newTiVo;
 
--(MTRPCData *) rpcDataForID: (NSString *) idString;
--(void) reloadShowInfoForID: (NSString *) showID;
+//RPC pass throughs
+-(void) reloadShowInfoForShows: (NSArray <MTTiVoShow *> *) shows;
 -(MTRPCData *)registerRPCforShow: (MTTiVoShow *) show;
 -(BOOL) rpcActive;
 
-//RPC pass throughs
 -(void) deleteTiVoShows: (NSArray <MTTiVoShow *> *) shows;
+-(void) playShow: (MTTiVoShow *) show;
 -(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) sendKeyEvent: (NSString *) keyEvent;
 -(void) sendURL: (NSString *) URL;

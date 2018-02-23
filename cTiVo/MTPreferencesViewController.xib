@@ -334,9 +334,6 @@
                     <buttonCell key="cell" type="check" title="Delete file after copying into iTunes" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="375">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
-                        <connections>
-                            <binding destination="248" name="value" keyPath="values.iTunesDelete" id="379"/>
-                        </connections>
                     </buttonCell>
                     <connections>
                         <binding destination="248" name="value" keyPath="values.iTunesDelete" id="381"/>
