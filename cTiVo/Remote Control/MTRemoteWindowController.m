@@ -14,6 +14,7 @@
 @property (nonatomic, weak) IBOutlet NSPopUpButton * tivoListPopup;
 @property (nonatomic, strong) NSArray <MTTiVo *> * tiVoList;
 @property (nonatomic, readonly) MTTiVo * selectedTiVo;
+@property (nonatomic, weak) IBOutlet NSImageView * tivoRemote;
 @end
 
 @implementation MTRemoteWindowController
@@ -21,7 +22,8 @@
 -(instancetype) init {
 	if ((self = [self initWithWindowNibName:@"MTRemoteWindowController"])) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTiVoList) name:kMTNotificationTiVoListUpdated object:nil];
-			};
+        self.window.contentAspectRatio = self.tivoRemote.image.size;
+    };
 	return self;
 }
 
