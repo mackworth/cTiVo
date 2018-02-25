@@ -24,7 +24,7 @@
 +(NSArray *)getFromEDLFile:(NSString *)edlFile;
 -(BOOL) writeToEDLFile:(NSString *) edlFile;
 
--(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length;
+-(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length keepingCommercials: (BOOL) keepCommercials; 
 
 +(NSArray *)edlListFromSegments:(NSArray <NSNumber *> *) segments andStartPoints:(NSArray <NSNumber *> *) startPoints;
 

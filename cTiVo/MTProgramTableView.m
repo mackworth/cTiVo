@@ -612,30 +612,33 @@ __DDLOGHERE__
 
     NSString * textVal = nil;
     result.toolTip = @"";
-	MTTiVoShow *thisShow = nil;
 	result.imageView.image = nil ;
+	MTTiVoShow *thisShow = nil;
+	MTShowFolder * folderHolder = nil;
+	if ([item isKindOfClass: [MTShowFolder class]]) {
+		folderHolder = (MTShowFolder *) item;
+	} else {
+		thisShow = item;
+	}
 
 	if ([identifier isEqualToString: kMTArtColumn]) {
 		MTProgressCell * cell = (MTProgressCell *) result;
-		if ([item isKindOfClass:[MTShowFolder class]]) {
+		if (folderHolder) {
 			if ([self isItemExpanded:item]) {
 				cell.progressIndicator.hidden = YES;
 				[cell.progressIndicator stopAnimation:self];
 				return cell;
 			} else {
-				thisShow = ((MTShowFolder *) item).folder[0];
+				thisShow = folderHolder.folder[0];
 			}
-		} else {
-			thisShow = (MTTiVoShow *) item;
 		}
 		return [self configureArtCell: cell forShow: thisShow withWidth: tableColumn.width];
 	} else if ( [identifier isEqualToString: @"icon"])  {
-		if ([item isKindOfClass:[MTShowFolder class]]) {
-			if ( [self isItemExpanded:item]) {
+		if (folderHolder) {
+			if ( [self isItemExpanded:folderHolder]) {
 				return result; //no icon when expanded
 			} else {
 				NSString * commonName =  nil;
-				MTShowFolder * folderHolder = item;
 				for (MTTiVoShow * show in folderHolder.folder) {
 					NSString * imageName = show.imageString;
 					if (!commonName) {
@@ -655,15 +658,36 @@ __DDLOGHERE__
 		} else {
 			return [self configureIconCell: result forShow: (MTTiVoShow *) item withWidth: tableColumn.width];
 		}
+	} else if ([identifier isEqualToString:@"SkipMode"]) {
+		if (folderHolder) {
+			if (! [self isItemExpanded:folderHolder]) {
+				if (folderHolder.hasAnyRPCSkipMode) {
+					result.imageView.image = [NSImage imageNamed:@"skipMode"];
+				} else if (folderHolder.canAnyRPCSkipMode) {
+					result.imageView.image = [NSImage imageNamed:@"skipModeInverted"];
+				}
+			}
+		} else {
+			if (thisShow.hasRPCSkipMode) {
+				result.imageView.image = [NSImage imageNamed:@"skipMode"];
+			} else if (thisShow.canRPCSkipMode){
+				result.imageView.image = [NSImage imageNamed:@"skipModeInverted"];
+			}
+		}
+		CGFloat width = tableColumn.width;
+		CGFloat height = MIN(width, MIN(self.imageRowHeight, 24));
+		CGFloat leftMargin = (width -height)/2;
+		CGFloat topMargin = (self.imageRowHeight-height)/2;
+		result.imageView.frame = CGRectMake(leftMargin, topMargin, height, height);
+		return result;
 	}
 	
 	//Otherwise text box
-	if ([item isKindOfClass:[MTShowFolder class]]) {
+	if (folderHolder) {
 		//do any special handling here for folders
 		//if generic text result, set textVal (e.g. cumulative folder size)
 		//else if relying on a subshow for content, set thisShow
 		//else return
-		MTShowFolder * folderHolder = (MTShowFolder *) item;
 		if (tableColumn == [self outlineTableColumn]) {
 			textVal = [NSString stringWithFormat:@"%@ (%d)", folderHolder.folder[0].seriesTitle, (int)folderHolder.folder.count];
 		} else if ([identifier isEqualToString:@"Folder"]) {

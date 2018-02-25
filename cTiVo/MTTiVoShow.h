@@ -134,6 +134,10 @@
 @property BOOL isQueued;
 @property (nonatomic, readonly) BOOL isOnDisk;
 @property (nonatomic, readonly) BOOL isFolder;
+@property (nonatomic, readonly) BOOL hasRPCSkipMode;
+@property (nonatomic, readonly) BOOL canRPCSkipMode;
+@property (nonatomic, readonly) int rpcSkipMode; //only for sorting in tables
+
 @property (nonatomic, readonly) NSArray <NSString *> *copiesOnDisk;
 
 @property (nonatomic, strong) NSArray <MTEdl *> *edlList;

@@ -166,14 +166,14 @@ __DDLOGHERE__
 	return [edls copy];
 }
 
--(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length {
+-(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length keepingCommercials: (BOOL) keepCommercials {
 	if (self.count == 0) return NO;
     //Convert edls to MP4Chapter
     MP4Chapter_t *chapterList = malloc((self.count * 2 + 1) * sizeof(MP4Chapter_t)); //This is the most there could be
     int edlOffset = 0;
     int showOffset = 0;
     int chapterOffset = 0;
-    MTEdl *currentEDL = self[edlOffset];
+	MTEdl *currentEDL = self[edlOffset];
     if (currentEDL.startTime > 0.0) { //We need a first chapter which is the show
         chapterList[chapterOffset].duration = (MP4Duration)((currentEDL.startTime) * 1000.0);
         sprintf(chapterList[chapterOffset].title,"%s %d",[showName cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
@@ -182,30 +182,36 @@ __DDLOGHERE__
     }
     for (edlOffset = 0; edlOffset < (int)self.count; edlOffset++) {
         currentEDL = self[edlOffset];
-        double endTime = currentEDL.endTime;
-        if (endTime > length) {
-            endTime = length;
-        }
         double startTime = currentEDL.startTime;
         if (startTime > length) {
-            startTime = length;
+			continue;
         }
-        if (startTime >= endTime) continue; //badly formed
-        chapterList[chapterOffset].duration = (MP4Duration)((endTime - startTime) * 1000.0);
-        sprintf(chapterList[chapterOffset].title,"%s %d","Commercial", edlOffset+1);
-        chapterOffset++;
-        if (currentEDL.endTime < length && (edlOffset + 1) < (int) self.count) { //Continuing
-            MTEdl *nextEDL = self[edlOffset + 1];
-            chapterList[chapterOffset].duration = (MP4Duration)((nextEDL.startTime - currentEDL.endTime) * 1000.0);
-            sprintf(chapterList[chapterOffset].title,"%s %d",[showName cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
-            chapterOffset++;
-            showOffset++;
-        } else if (currentEDL.endTime < length) { // There's show left but no more commercials so just complete the show chapter
-            chapterList[chapterOffset].duration = (MP4Duration)((length - currentEDL.endTime) * 1000.0);
-            sprintf(chapterList[chapterOffset].title,"%s %d",[showName cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
-            chapterOffset++;
-            showOffset++;
-            
+		double endTime = currentEDL.endTime;
+		if (startTime >= endTime) continue; //badly formed
+		if (endTime > length) {
+			endTime = length;
+		}
+		double commercialDuration = endTime-startTime;
+		if (keepCommercials) {
+			chapterList[chapterOffset].duration = (MP4Duration)(commercialDuration * 1000.0);
+        	sprintf(chapterList[chapterOffset].title,"%s %d","Commercial", edlOffset+1);
+        	chapterOffset++;
+		}
+		if (currentEDL.endTime < length) {
+			//more show available
+			double nextStart;
+			if ((edlOffset + 1) < (int) self.count) { //More EDLs
+				MTEdl *nextEDL = self[edlOffset + 1];
+				nextStart = nextEDL.startTime;
+			} else { // There's show left but no more commercials so just complete the show chapter
+				nextStart = length;
+			}
+			if (nextStart > currentEDL.endTime) {
+				chapterList[chapterOffset].duration = (MP4Duration)((nextStart - currentEDL.endTime) * 1000.0);
+				sprintf(chapterList[chapterOffset].title,"%s %d",[showName cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
+				chapterOffset++;
+				showOffset++;
+			}
         }
     }
     //Loging fuction for testing

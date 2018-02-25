@@ -819,6 +819,20 @@ __DDLOGHERE__
     }
 }
 
+- (BOOL) hasRPCSkipMode {
+	return self.rpcData.edlList.count > 0;
+}
+
+- (BOOL) canRPCSkipMode {
+	return self.rpcData.clipMetaDataId != nil;
+}
+
+-(int) rpcSkipMode { //only for sorting in tables
+	if ([self hasRPCSkipMode]) return 2;
+	if ([self canRPCSkipMode]) return 1;
+	return 0;
+}
+
 #pragma mark - Custom Setters; many for parsing
 
 -(NSString *)nameString:(NSDictionary *)nameDictionary

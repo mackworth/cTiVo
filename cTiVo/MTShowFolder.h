@@ -18,6 +18,9 @@
 @property (nonatomic, readonly) double fileSize;  //Cumulative size on TiVo;
 @property (nonatomic, readonly)  time_t showLength;  //cumulative length of shows in seconds
 @property (nonatomic, readonly) BOOL isFolder;
+@property (nonatomic, readonly) BOOL hasAnyRPCSkipMode;
+@property (nonatomic, readonly) BOOL canAnyRPCSkipMode;
+@property (nonatomic, readonly) int rpcSkipMode; //only for sorting in tables
 
 
 @end

@@ -1405,7 +1405,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         DDLogMajor(@"Downloading from file MPG file %@",self.mpgFilePath);
         self.activeTaskChain.dataSource = self.mpgFilePath;
     }
-	if (self.hasRPCEDL && self.shouldMarkCommercials  ){
+	if (self.show.hasRPCSkipMode && self.shouldSkipCommercials  ){
 		if (![self.show.rpcData.edlList writeToEDLFile:self.commercialFilePath] ) {
 			DDLogReport(@"Could not write EDLFile to disk at %@", self.commercialFilePath);
 		}
@@ -1688,10 +1688,10 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         }
         if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
             MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
-            NSArray *edls = self.show.edlList;
-            if ( edls.count > 0) {
-                [edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength ];
-            }
+			NSArray <MTEdl *> *edls = self.show.edlList;
+			if ( edls.count > 0) {
+				[edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength keepingCommercials: !self.shouldSkipCommercials ];
+			}
             if (self.shouldEmbedSubtitles && self.captionFilePath) {
                 NSArray * srtEntries = [NSArray getFromSRTFile:self.captionFilePath];
                 if (srtEntries.count > 0) {
@@ -2452,15 +2452,11 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(BOOL) runComskip {
-	return !self.hasRPCEDL && (self.shouldSkipCommercials || self.shouldMarkCommercials);
+	return !self.show.hasRPCSkipMode && (self.shouldSkipCommercials || self.shouldMarkCommercials);
 }
 
 -(BOOL) hasEDL { //from either source
     return self.show.edlList.count > 0;
-}
-
--(BOOL) hasRPCEDL {
-	return self.show.rpcData.edlList.count > 0;
 }
 
 -(BOOL) shouldEmbedSubtitles
