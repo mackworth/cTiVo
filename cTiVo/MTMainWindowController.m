@@ -429,20 +429,23 @@ if (@available(macOS 10.12, *)) {
 }
 
 -(void) confirmSkipModeRetrieval: (BOOL) programTable {
-    NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Warning: pulling SkipMode information from TiVo will temporarily interrupt current viewing on your TiVo!"] defaultButton:@"Selected" alternateButton:@"Cancel" otherButton:@"All" informativeTextWithFormat:@"Press Selected to continue with Selected shows, All to continue for ALL shows, or Cancel to cancel request."];
+    NSString * object = programTable ? @"show" : @"download";
+    NSArray * selectedObjects = programTable ? [self.tiVoShowTable selectedShows] : [self.downloadQueueTable.sortedDownloads objectsAtIndexes: self.downloadQueueTable.selectedRowIndexes];
+    NSString * plural = selectedObjects.count > 1 ? @"s" : @"";
+    NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Warning: pulling SkipMode information from TiVo will temporarily interrupt current viewing on your TiVo!"] defaultButton:@"Selected" alternateButton:@"Cancel" otherButton:@"All" informativeTextWithFormat:@"Press Selected to continue with Selected %@%@, All to continue for ALL %@s, or Cancel to cancel request.", object, plural, object];
     myAlert.alertStyle = NSCriticalAlertStyle;
     NSInteger result = [myAlert runModal];
     NSArray <MTTiVoShow *> * shows = nil;
     if (result == NSAlertAlternateReturn) return;
     if (result == NSAlertDefaultReturn) {
         if (programTable) {
-            shows = [self.tiVoShowTable selectedShows];
+            shows = selectedObjects;
         } else {
-            shows = [self showsForDownloads: [self.downloadQueueTable.sortedDownloads objectsAtIndexes: self.downloadQueueTable.selectedRowIndexes]] ;
+            shows = [self showsForDownloads: selectedObjects] ;
         }
     } else if (result == NSAlertOtherReturn) {
         if (programTable) {
-            shows = [tiVoManager tiVoShows];
+            shows = self.tiVoShowTable.displayedShows;
         } else {
            shows =  [self showsForDownloads: self.downloadQueueTable.sortedDownloads];
         }

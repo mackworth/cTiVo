@@ -25,6 +25,7 @@
 
 @property (nonatomic, strong) NSMutableDictionary <NSString *, MTShowFolder *> * oldFolders; //reuse from last reload (to avoid accidentally closing existing folders.)
 @property (nonatomic, strong) NSArray <id> *sortedShows; //entries are either MTTiVoShows or, when hierarchical, folders
+@property (nonatomic, strong) NSArray <MTTiVoShow *> *displayedShows; //entries are either MTTiVoShows or, when hierarchical, folders
 @property (nonatomic, strong) NSMapTable <MTTiVoShow *, MTShowFolder *> * parentMap; //parents[show] = containing showFolder
 @property (nonatomic, strong) NSString *selectedTiVo;
 @property (weak) IBOutlet NSSearchField *findText; //filter for displaying found subset of programs
@@ -283,6 +284,7 @@ __DDLOGHERE__
 								   filteredArrayUsingPredicate:findPredicate]
 								  filteredArrayUsingPredicate:protectedPredicate]
 								 filteredArrayUsingPredicate:suggestedPredicate];
+		self.displayedShows = whichShows;
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTShowFolders]) {
 			NSMutableDictionary <NSString *, NSMutableArray <MTTiVoShow *> *> * showsDict = [NSMutableDictionary new];
 			self.parentMap = [NSMapTable mapTableWithKeyOptions:NSMapTableWeakMemory
@@ -315,11 +317,7 @@ __DDLOGHERE__
 			}
 			self.sortedShows = [folderArray sortedArrayUsingDescriptors:self.sortDescriptors];
 		} else {
-			NSMutableArray * newArray = [NSMutableArray arrayWithCapacity:whichShows.count];
-			for (MTTiVoShow * show in whichShows) {
-				[newArray addObject:show];
-			}
-			self.sortedShows = [newArray sortedArrayUsingDescriptors:self.sortDescriptors];
+			self.sortedShows = [whichShows sortedArrayUsingDescriptors:self.sortDescriptors];
 		}
 	}
 	return _sortedShows;

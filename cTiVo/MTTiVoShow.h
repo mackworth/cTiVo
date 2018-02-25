@@ -136,6 +136,8 @@
 @property (nonatomic, readonly) BOOL isFolder;
 @property (nonatomic, readonly) NSArray <NSString *> *copiesOnDisk;
 
+@property (nonatomic, strong) NSArray <MTEdl *> *edlList;
+
 @property (atomic, assign) BOOL	gotDetails;
 
 -(void) getShowDetail;

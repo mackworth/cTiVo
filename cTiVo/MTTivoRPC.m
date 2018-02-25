@@ -918,7 +918,11 @@ static NSRegularExpression * isFinalRegex = nil;
 
 -(MTRPCData *) rpcDataForID: (NSString *) idString {
     @synchronized (self.showMap) {
-        return self.showMap[idString];
+        MTRPCData * rpcData = self.showMap[idString];
+        if (!rpcData.rpcID) {
+        	rpcData.rpcID = [NSString stringWithFormat:@"%@|%@",self.hostName, idString];
+		}
+		return rpcData;
     }
 }
 
@@ -1072,6 +1076,9 @@ static NSArray * imageResponseTemplate = nil;
 		   DDLogDetail(@"Position = %@",@(position));
 		   NSString * lengthString = jsonResponse[@"end"];
 		   long long length = lengthString.length ? lengthString.longLongValue : -1;
+           if (length == -1) {
+               DDLogReport(@"xxx PositionResponse: %@", jsonResponse);
+           }
 		   if (completionHandler) completionHandler(position, length);
 	   }];
 }
@@ -1259,7 +1266,6 @@ static NSArray * imageResponseTemplate = nil;
         }];
         return;
     }
-
     [self.skipModeQueue addObject:rpcData];
     if (self.skipModeQueue.count == 1 ) {
         //XXX restore these at tivo level?
@@ -1278,7 +1284,7 @@ static NSArray * imageResponseTemplate = nil;
         return;
     }
     DDLogMajor(@"XXX Checking for commercials for %@", self.skipModeQueue[0]);
-    [self findCommercialsForShow:self.skipModeQueue[0] withCompletionHandler:^{
+    [self findSkipModePointsForShow:self.skipModeQueue[0] withCompletionHandler:^{
         DDLogMajor(@"XXX got EDL for %@: %@", self.skipModeQueue[0], self.skipModeQueue[0].edlList);
         [self.skipModeQueue removeObjectAtIndex:0];
         [self findSkipModeRecursive ];
@@ -1286,7 +1292,7 @@ static NSArray * imageResponseTemplate = nil;
 }
 
 
--(void) findCommercialsForShow:(MTRPCData *) rpcData withCompletionHandler: (void (^)(void)) completionHandler {
+-(void) findSkipModePointsForShow:(MTRPCData *) rpcData withCompletionHandler: (void (^)(void)) completionHandler {
 	
 	__weak __typeof__(self) weakSelf = self;
 	[self playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
@@ -1297,7 +1303,10 @@ static NSArray * imageResponseTemplate = nil;
 		[weakSelf retrievePositionWithCompletionHandler:^(long long startingPoint, long long end) {
 			
 		DDLogVerbose(@"found initial Point of %@ / %@", @(startingPoint), @(end));
-		if (end <= 0) end = 12*3600*1000;
+        if (end <= 0) {
+            DDLogMajor(@"End is missing!");
+            end = 24*3600*1000;
+        }
 		[weakSelf jumpToPosition:end-5000 withCompletionHandler:^(BOOL success) {
 			
 		[weakSelf afterDelay:1.0 launchBlock:^{
@@ -1310,6 +1319,8 @@ static NSArray * imageResponseTemplate = nil;
 
 		DDLogDetail(@"Got positions of %@", positions);
 		rpcData.edlList = [NSArray edlListFromSegments:rpcData.programSegments andStartPoints:positions];
+		[self.delegate receivedRPCData:rpcData];
+		
 	    [weakSelf sendKeyEvent: @"pause"  withCompletion:^{
 			
 		[weakSelf afterDelay:1.0 launchBlock:^{

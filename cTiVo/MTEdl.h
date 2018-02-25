@@ -17,13 +17,12 @@
 @property (nonatomic) int edlType;
 @property (nonatomic) double offset;
 
-+(MTEdl *)edlFromString:edlString;
-
 @end
 
 @interface NSArray (MTEDLList)
 
 +(NSArray *)getFromEDLFile:(NSString *)edlFile;
+-(BOOL) writeToEDLFile:(NSString *) edlFile;
 
 -(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length;
 

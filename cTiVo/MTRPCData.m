@@ -9,6 +9,7 @@
 #import "MTRPCData.h"
 
 @implementation MTRPCData
+static NSString * kRPCID = @"RPCID";
 static NSString * kRecordingID = @"recordingID";
 static NSString * kContentId = @"contentID";
 static NSString * kEpisodeNum  = @"episodeNum";
@@ -29,6 +30,7 @@ static NSString * kEDL = @"EDLList";
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [self init];
     if (self) {
+		_rpcID = [coder decodeObjectOfClass:[NSString class] forKey:  kRPCID];
 		_recordingID = [coder decodeObjectOfClass:[NSString class] forKey:  kRecordingID];
 		_contentID = [coder decodeObjectOfClass:[NSString class] forKey:  kContentId];
         _episodeNum =  [coder decodeIntegerForKey: kEpisodeNum];
@@ -49,6 +51,7 @@ static NSString * kEDL = @"EDLList";
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
+     [coder encodeObject: _rpcID forKey:kRPCID];
      [coder encodeObject: _recordingID forKey:kRecordingID];
 	 [coder encodeObject: _contentID forKey:kContentId];
      [coder encodeInteger:_episodeNum forKey:kEpisodeNum];

@@ -570,11 +570,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows withCompletion: (void (^)(void)) completionHandler {
 	for (MTTiVoShow * show in shows) {
-        //xx remove this
+        //xxx remove this test erasure of edlList:
         show.rpcData.edlList = nil;
-        if ([show.tiVo isEqual:self]) {
+        if ([show.tiVo isEqual:self] && !show.isSuggestion && !show.inProgress.boolValue) {
+            DDLogMajor(@"Finding SkipMode points for %@ on %@", show, self);
             [self.myRPC findSkipModeForShow:show.rpcData];
-		}
+        } else {
+            DDLogDetail(@"Skipping SkipMode points for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : @"" );
+
+        }
 	}
 }
 

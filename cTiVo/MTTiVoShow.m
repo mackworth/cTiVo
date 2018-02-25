@@ -319,11 +319,14 @@ __DDLOGHERE__
 }
 
 -(void) setRpcData:(MTRPCData *)rpcData {
-    if (rpcData == _rpcData) return;
-
     if (rpcData ) { //resetting existing info
         _rpcData = rpcData;
-        self.episodeGenre = self.rpcData.genre;  //no conflict with TVDB
+        self.episodeGenre = rpcData.genre;  //no conflict with TVDB
+        if ([rpcData.edlList lastObject].endTime > self.showLength*1000) {
+			//patch because sometimes RPC tivo doesn't have an accurate endtime
+			[rpcData.edlList lastObject].endTime = self.showLength*1000;
+		}
+        self.edlList = rpcData.edlList;
     } else {
         _rpcData = nil;
     }

@@ -928,7 +928,7 @@ __DDLOGHERE__
         }
         decryptTask.requiresOutputPipe = YES;
         //Not using the filebuffer so remove so it can act as a flag upon completion.
-        if (!self.skipCommercials && !self.exportSubtitles.boolValue && !self.markCommercials) {
+        if (!self.runComskip && !self.exportSubtitles.boolValue) {
             if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
                 [[NSFileManager defaultManager] removeItemAtPath:self.decryptedFilePath error:nil];
             };
@@ -1068,7 +1068,7 @@ __DDLOGHERE__
 
 -(void) fixupSRTsDueToCommercialSkipping {
     NSArray *srtEntries = [NSArray getFromSRTFile:self.captionFilePath];
-    NSArray *edlEntries = [NSArray getFromEDLFile:self.commercialFilePath];
+    NSArray *edlEntries = self.show.edlList;
     if (srtEntries.count && edlEntries.count) {
         NSArray *correctedSrts = [srtEntries processWithEDLs:edlEntries];
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
@@ -1129,13 +1129,13 @@ __DDLOGHERE__
         }
     }
 
-	__weak __typeof__(MTTask *) weakCommercial = _commercialTask;
 	__weak __typeof__(MTTask *) weakCaption = captionTask;
 
     captionTask.completionHandler = ^BOOL(){
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
 		__typeof__(self) strongSelf = weakSelf;
-        if ( strongSelf.skipCommercials && weakCommercial.successfulExit) {
+        //commercial or caption might finish first.
+        if ( strongSelf.skipCommercials && strongSelf.hasEDL) {
             [strongSelf fixupSRTsDueToCommercialSkipping];
         }
         [strongSelf markCompleteCTiVoFile:strongSelf.captionFilePath];
@@ -1176,11 +1176,12 @@ __DDLOGHERE__
 
 -(MTTask *)commercialTask
 {
-    NSAssert(self.skipCommercials || self.markCommercials ,@"Commercial Task not requested?");
+    NSAssert(self.runComskip ,@"Commercial Task not requested?");
 
     if (_commercialTask) {
         return _commercialTask;
     }
+    self.show.edlList = nil; //don't reuse old comskip EDL (may be different .ini etc).
     MTTask *commercialTask = [MTTask taskWithName:@"commercial" download:self completionHandler:nil];
   	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"comskip" ]];
     commercialTask.successfulExitCodes = @[@0, @1];
@@ -1235,6 +1236,7 @@ __DDLOGHERE__
 			__typeof__(self) strongSelf = weakSelf;
 
             DDLogMajor(@"Finished detecting commercials in %@",strongSelf.show.showTitle);
+            strongSelf.show.edlList = [NSArray getFromEDLFile:strongSelf.commercialFilePath];
              if (strongSelf.taskFlowType != kMTTaskFlowSimuMarkcom && strongSelf.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
 				 if (!strongSelf.shouldSimulEncode) {
 					strongSelf.processProgress = 1.0;
@@ -1308,8 +1310,8 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
   return (MTTaskFlowType)
           1 * (int) self.exportSubtitles.boolValue +
           2 * (int) self.encodeFormat.canSimulEncode +
-          4 * (int) self.skipCommercials +
-          8 * (int) self.markCommercials;
+          4 * (int) (self.skipCommercials && self.runComskip) +
+          8 * (int) (self.markCommercials && self.runComskip);
 }
 
 -(void)launchDownload
@@ -1338,7 +1340,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         self.skipCommercials = NO;
         self.markCommercials = NO;
     }
-	DDLogReport(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@; %@",
+	DDLogReport(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@%@; %@",
 				(int)self.taskFlowType,
 				self,
 				self.encodeFormat.name ,
@@ -1346,11 +1348,12 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                     @"simul encode" :
                     @"",
 				self.skipCommercials ?
-					@" Skip commercials;" :
+					@" Skip commercials" :
                     @"",
                 self.markCommercials ?
-					 @" Mark commercials;" :
+					 @" Mark commercials" :
 					 @"",
+				self.runComskip ? @" with Comskip;" : @";",
 				self.addToiTunesWhenEncoded ?
 					@" Add to iTunes;" :
 					@"",
@@ -1402,6 +1405,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         DDLogMajor(@"Downloading from file MPG file %@",self.mpgFilePath);
         self.activeTaskChain.dataSource = self.mpgFilePath;
     }
+	if (self.hasRPCEDL && self.shouldMarkCommercials  ){
+		if (![self.show.rpcData.edlList writeToEDLFile:self.commercialFilePath] ) {
+			DDLogReport(@"Could not write EDLFile to disk at %@", self.commercialFilePath);
+		}
+	}
 	
     NSMutableArray *taskArray = [NSMutableArray array];
 	
@@ -1680,13 +1688,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         }
         if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
             MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
-            if (self.shouldMarkCommercials) {
-                if ([[NSFileManager defaultManager] fileExistsAtPath:self.commercialFilePath]) {
-                    NSArray *edls = [NSArray getFromEDLFile:self.commercialFilePath];
-                    if ( edls.count > 0) {
-                        [edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength ];
-                    }
-                }
+            NSArray *edls = self.show.edlList;
+            if ( edls.count > 0) {
+                [edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength ];
             }
             if (self.shouldEmbedSubtitles && self.captionFilePath) {
                 NSArray * srtEntries = [NSArray getFromSRTFile:self.captionFilePath];
@@ -2424,7 +2428,7 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(BOOL) shouldSimulEncode {
-    return (self.encodeFormat.canSimulEncode && !self.shouldSkipCommercials);// && !self.downloadingShowFromMPGFile);
+    return self.encodeFormat.canSimulEncode && !(self.shouldSkipCommercials && self.runComskip);// && !self.downloadingShowFromMPGFile);
 }
 
 -(BOOL) canSkipCommercials {
@@ -2432,19 +2436,31 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(BOOL) shouldSkipCommercials {
-    return self.skipCommercials &&
-    ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState);
+    return self.canSkipCommercials &&
+    	   self.skipCommercials &&
+           ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState);
 }
 
 -(BOOL) canMarkCommercials {
     return self.encodeFormat.canMarkCommercials;
 }
 
--(BOOL) shouldMarkCommercials
-{
-    return  self.encodeFormat.canMarkCommercials &&
+-(BOOL) shouldMarkCommercials {
+    return  self.canMarkCommercials &&
             self.markCommercials &&
             ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState);
+}
+
+-(BOOL) runComskip {
+	return !self.hasRPCEDL && (self.shouldSkipCommercials || self.shouldMarkCommercials);
+}
+
+-(BOOL) hasEDL { //from either source
+    return self.show.edlList.count > 0;
+}
+
+-(BOOL) hasRPCEDL {
+	return self.show.rpcData.edlList.count > 0;
 }
 
 -(BOOL) shouldEmbedSubtitles

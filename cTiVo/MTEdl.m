@@ -12,6 +12,11 @@ static NSString * kEndTime  = @"endTime";
 static NSString * kEDLType  = @"edlType";
 static NSString * kOffset  = @"offset";
 
+@interface MTEdl (formattedString)
+	+(MTEdl *)edlFromString:edlString;
+	-(NSString *) formattedString;
+@end
+
 @implementation MTEdl
 
 __DDLOGHERE__
@@ -66,8 +71,11 @@ __DDLOGHERE__
 	}
 	newEdl.edlType = [items[2] intValue];
    return newEdl;
-	}
+}
 
+-(NSString *) formattedString {
+	return [NSString stringWithFormat:@"%0.2f\t%0.2f\t0\n",self.startTime, self.endTime];
+}
 
 @end
 
@@ -102,6 +110,14 @@ __DDLOGHERE__
     DDLogVerbose(@"edls = %@",edls);
     return [NSArray arrayWithArray:edls];
 	
+}
+
+-(BOOL) writeToEDLFile:(NSString *)edlFile {
+	NSString * output = [NSMutableString string];
+	for (MTEdl * edl in self) {
+        output = [output stringByAppendingString:[edl formattedString]];
+    }
+	return [[NSFileManager defaultManager] createFileAtPath:edlFile contents: [output dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES] attributes:nil];
 }
 
 +(NSArray <MTEdl *> *)edlListFromSegments:(NSArray <NSNumber *> *) lengthPoints andStartPoints:(NSArray <NSNumber *> *) startPoints {
@@ -170,7 +186,12 @@ __DDLOGHERE__
         if (endTime > length) {
             endTime = length;
         }
-        chapterList[chapterOffset].duration = (MP4Duration)((endTime - currentEDL.startTime) * 1000.0);
+        double startTime = currentEDL.startTime;
+        if (startTime > length) {
+            startTime = length;
+        }
+        if (startTime >= endTime) continue; //badly formed
+        chapterList[chapterOffset].duration = (MP4Duration)((endTime - startTime) * 1000.0);
         sprintf(chapterList[chapterOffset].title,"%s %d","Commercial", edlOffset+1);
         chapterOffset++;
         if (currentEDL.endTime < length && (edlOffset + 1) < (int) self.count) { //Continuing
