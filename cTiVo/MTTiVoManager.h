@@ -101,6 +101,7 @@
 -(void)updateTiVoDefaults:(MTTiVo *)tiVo;
 -(void) deleteTivoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) stopRecordingShows: (NSArray <MTTiVoShow *> *) shows;
+-(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows;
 
 //----------------Channel Management Methods --------
 -(void) updateChannel: (NSDictionary *) newChannel;

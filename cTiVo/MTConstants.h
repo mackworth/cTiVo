@@ -219,6 +219,9 @@
 #define kMTScheduledStartTime  @"ScheduledStartTime" // NSDate when to start queue
 #define kMTScheduledEndTime    @"ScheduledEndTime"   // NSDate when to end queue
 #define kMTScheduledSleep      @"ScheduledSleep"     // Whether to start queue to sleep after scheduled downloads
+#define kMTScheduledSkipModeTime @"ScheduledSkipModeTime" // NSDate when to start skipMode process
+#define kMTScheduledSkipMode    @"ScheduleSkipMode"        //Whether to automatically run SkipMode
+
 #define kMKTQueuePaused        @"QueuePaused"        //Restore state of whether queue was manually paused last time?
 
 #define kMTDebugLevel       @"DebugLevel"

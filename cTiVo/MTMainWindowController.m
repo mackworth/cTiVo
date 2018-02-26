@@ -405,25 +405,12 @@ if (@available(macOS 10.12, *)) {
     }
 }
 
--(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows {
-    NSMutableArray <MTTiVoShow *> * tivoShows = [shows mutableCopy];
-    while (tivoShows.count > 0) {
-        NSMutableArray * thisTiVoShows = [NSMutableArray array];
-        MTTiVo * tivo = tivoShows[0].tiVo;
-        for (MTTiVoShow * show in [tivoShows copy]) {
-            if (show.tiVo == tivo) {
-                [thisTiVoShows addObject:show];
-                [tivoShows removeObject:show];
-            }
-        }
-        [tivo findCommercialsForShows:thisTiVoShows withCompletion:nil];
-    }
-}
-
 -(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads {
     NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
     for (MTDownload * download in downloads) {
-        [shows addObject:download.show];
+		if (download.isNew) {
+			[shows addObject:download.show];
+		}
     }
     return [shows copy];
 }
@@ -450,7 +437,7 @@ if (@available(macOS 10.12, *)) {
            shows =  [self showsForDownloads: self.downloadQueueTable.sortedDownloads];
         }
     }
-    if (shows) [self skipModeRetrieval:shows];
+    if (shows) [tiVoManager skipModeRetrieval:shows];
 }
 
 -(IBAction)programMenuHandler:(NSMenuItem *)menu

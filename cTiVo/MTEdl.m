@@ -208,7 +208,8 @@ __DDLOGHERE__
 			}
 			if (nextStart > currentEDL.endTime) {
 				chapterList[chapterOffset].duration = (MP4Duration)((nextStart - currentEDL.endTime) * 1000.0);
-				sprintf(chapterList[chapterOffset].title,"%s %d",[showName cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
+				NSString * chapterName = keepCommercials ? showName : @"Chapter";
+				sprintf(chapterList[chapterOffset].title,"%s %d",[chapterName cStringUsingEncoding:NSUTF8StringEncoding], showOffset+1);
 				chapterOffset++;
 				showOffset++;
 			}

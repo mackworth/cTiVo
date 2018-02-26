@@ -350,7 +350,19 @@ __DDLOGHERE__
 //        checkBox.owner = download;
 //        [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSimulEncode];
 //        
- 	} else if ([tableColumn.identifier isEqualToString:@"Skip"]) {
+	} else if ([tableColumn.identifier isEqualToString:@"SkipMode"]) {
+		if (download.show.hasRPCSkipMode) {
+			result.imageView.image = [NSImage imageNamed:@"skipMode"];
+		} else if (download.show.canRPCSkipMode){
+			result.imageView.image = [NSImage imageNamed:@"skipModeInverted"];
+		}
+		CGFloat width = tableColumn.width;
+		CGFloat height = MIN(width, MIN(self.rowHeight, 24));
+		CGFloat leftMargin = (width -height)/2;
+		CGFloat topMargin = (self.rowHeight-height)/2;
+		result.imageView.frame = CGRectMake(leftMargin, topMargin, height, height);
+		return result;
+	} else if ([tableColumn.identifier isEqualToString:@"Skip"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.skipCommercials];
         checkBox.owner = download;

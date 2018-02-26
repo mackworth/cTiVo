@@ -528,6 +528,8 @@ __DDLOGHERE__
 	[defaults addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
+	[defaults addObserver:self forKeyPath:kMTScheduledSkipModeTime options:NSKeyValueObservingOptionNew context:nil];
+	[defaults addObserver:self forKeyPath:kMTScheduledSkipMode options:NSKeyValueObservingOptionNew context:nil];
     [defaults addObserver:self forKeyPath:kMTTrustTVDBEpisodes options:NSKeyValueObservingOptionNew context:nil];
     [defaults addObserver:self forKeyPath:KMTPreferredImageSource options:NSKeyValueObservingOptionNew context:nil];
     [defaults addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
@@ -669,6 +671,7 @@ __DDLOGHERE__
 {
 	[self setQueueStartTime];
 	[self setQueueEndTime];
+	[self setSkipModeTime];
 }
 
 -(double) secondsUntilNextTimeOfDay:(NSDate *) date {
@@ -683,24 +686,29 @@ __DDLOGHERE__
 	return targetSeconds - currentSeconds;
 }
 
--(NSDate *) tomorrowAtTime: (NSInteger) hour {
+-(NSDate *) tomorrowAtTime: (NSInteger) minutes {
     //may be called at launch, so don't assume anything is setup
     NSUInteger units = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond  ;
     NSDateComponents *comps = [[NSCalendar currentCalendar] components:units fromDate:[NSDate date]];
     comps.day = comps.day + 1;    // Add one day
-    comps.hour = hour;
-    comps.minute = 0;
+    comps.hour = minutes / 60;
+    comps.minute = minutes % 60;
     comps.second = 0;
     NSDate *tomorrowTime = [[NSCalendar currentCalendar] dateFromComponents:comps];
     return tomorrowTime;
 }
 
+-(NSDate *) defaultSkipModeTime {
+	return [self tomorrowAtTime:30];  //start at 12:30AM tomorrow]
+}
+
+
 -(NSDate *) defaultQueueStartTime {
-return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
+return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 }
 
 -(NSDate *) defaultQueueEndTime {
-    return [self tomorrowAtTime:6];  //end at 6AM tomorrow]
+    return [self tomorrowAtTime:1*60];  //end at 6AM tomorrow]
 }
 
 -(void)setQueueStartTime
@@ -735,6 +743,23 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     double targetSeconds = [self secondsUntilNextTimeOfDay:endDate];
 	DDLogDetail(@"Will pause queue in %f seconds (%f hours), due to endDate of %@",targetSeconds, (targetSeconds/3600.0), endDate);
 	[self performSelector:@selector(pauseQueue:) withObject:@(NO) afterDelay:targetSeconds];
+}
+
+-(void)setSkipModeTime {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(skipModeForAllActiveDownloads) object:@(NO)];
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipMode]) {
+		DDLogDetail(@"No scheduled operations auto-pause ");
+		return;
+	}
+	NSDate * skipDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeTime];
+	if (!skipDate) {
+		[[NSUserDefaults standardUserDefaults] setObject:[self defaultSkipModeTime] forKey:kMTScheduledSkipModeTime];//recursive
+		return;
+	}
+	double targetSeconds = [self secondsUntilNextTimeOfDay:skipDate];
+	DDLogDetail(@"Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",targetSeconds, (targetSeconds/3600.0), skipDate);
+	[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:@(NO) afterDelay:targetSeconds];
+
 }
 
 -(void)startAllTiVoQueues
@@ -791,8 +816,14 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         DDLogMajor(@"Set operations end time to %@",[defs objectForKey: kMTScheduledEndTime]);
 		[self setQueueEndTime];
 	} else if ([keyPath compare:kMTScheduledStartTime] == NSOrderedSame) {
-       DDLogMajor(@"Set operations start time to %@",[defs objectForKey: kMTScheduledStartTime]);
-        [self setQueueStartTime];
+		DDLogMajor(@"Set operations start time to %@",[defs objectForKey: kMTScheduledStartTime]);
+		[self setQueueStartTime];
+	} else if ([keyPath compare:kMTScheduledSkipMode] == NSOrderedSame) {
+		DDLogMajor(@"Set SkipMode start time to %@",[defs boolForKey: kMTScheduledSkipMode] ? @"On" : @"Off");
+		[self setSkipModeTime];
+	} else if ([keyPath compare:kMTScheduledSkipModeTime] == NSOrderedSame) {
+		DDLogMajor(@"Set SkipMode start time to %@",[defs objectForKey: kMTScheduledSkipModeTime]);
+		[self setSkipModeTime];
 	} else if ([keyPath isEqualToString:kMTTiVos]){
         [self updateTiVosFromDefaults];
         DDLogMajor(@"Changed TiVo list to %@",[self.tiVoList maskMediaKeys]);
@@ -878,6 +909,32 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         [tiVo stopRecordingTiVoShows:filteredShows];
     }
 }
+
+-(void) skipModeForAllActiveDownloads {
+	NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
+	for (MTDownload * download in self.downloadQueue) {
+		if (download.isNew) {
+			[shows addObject:download.show];
+		}
+	}
+	[self skipModeRetrieval:[shows copy]];
+}
+
+-(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows {
+	NSMutableArray <MTTiVoShow *> * tivoShows = [shows mutableCopy];
+	while (tivoShows.count > 0) {
+		NSMutableArray * thisTiVoShows = [NSMutableArray array];
+		MTTiVo * tivo = tivoShows[0].tiVo;
+		for (MTTiVoShow * show in [tivoShows copy]) {
+			if (show.tiVo == tivo) {
+				[thisTiVoShows addObject:show];
+				[tivoShows removeObject:show];
+			}
+		}
+		[tivo findCommercialsForShows:thisTiVoShows withCompletion:nil];
+	}
+}
+
 
 -(NSMutableArray *) subscribedShows {
     
@@ -1505,7 +1562,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
                                 error:&error]) {
             return tempURL;
         } else {
-            DDLogReport(@"Could not open  cache directory: %@", error.localizedDescription);
+            DDLogReport(@"Could not open cache directory: %@", error.localizedDescription);
         }
     }
     return nil;
