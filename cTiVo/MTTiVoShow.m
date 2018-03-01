@@ -60,6 +60,9 @@ typedef NS_ENUM(NSUInteger, MTImageSource) {
 @property (atomic, assign) BOOL imageInProgress;  //true if we're downloading info OR artwork.
 
 @property (nonatomic, assign) MTImageSource lastImageSource;
+#ifdef DEBUG
+@property (nonatomic, strong) NSArray < MTEdl *> * previousEDL;
+#endif
 @end
 
 @implementation MTTiVoShow
@@ -322,11 +325,35 @@ __DDLOGHERE__
     if (rpcData ) { //resetting existing info
         _rpcData = rpcData;
         self.episodeGenre = rpcData.genre;  //no conflict with TVDB
-        if ([rpcData.edlList lastObject].endTime > self.showLength*1000) {
-			//patch because sometimes RPC tivo doesn't have an accurate endtime
-			[rpcData.edlList lastObject].endTime = self.showLength*1000;
+		if (rpcData.edlList.count > 0) {
+			MTEdl * lastCut = [rpcData.edlList lastObject];
+			double overTime = lastCut.endTime - self.showLength;
+			if (overTime > 0.0) {
+				//patch because sometimes RPC tivo doesn't have an accurate endtime
+				if (self.showLength <= lastCut.startTime) {
+					NSMutableArray * temp = [rpcData.edlList mutableCopy];
+					[temp removeObject:lastCut];
+					rpcData.edlList = [temp copy];
+				} else {
+					[rpcData.edlList lastObject].endTime = self.showLength;
+					[rpcData.edlList lastObject].offset -= overTime;
+				}
+			}
+#ifdef DEBUG
+			if (self.previousEDL && rpcData.edlList && ![self.previousEDL compareToEDL:rpcData.edlList]) {
+				DDLogReport(@"EDL FAILURE for %@: %@ became %@", self, self.previousEDL, rpcData.edlList);
+			} else {
+#endif
+				if (self.edlList != rpcData.edlList) {
+					DDLogMajor(@"Got EDL for %@: %@", self, rpcData.edlList);
+					self.edlList = rpcData.edlList;
+				}
+#ifdef DEBUG
+			}
+			self.previousEDL = rpcData.edlList;
+#endif
+			
 		}
-        self.edlList = rpcData.edlList;
     } else {
         _rpcData = nil;
     }

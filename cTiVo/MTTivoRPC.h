@@ -31,7 +31,7 @@
 -(void) sendURL: (NSString *) URL;
 -(void) playOnTiVo: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL success)) completionHandler;
 
--(void) findSkipModeForShow:(MTRPCData *) rpcData;
+-(void) findSkipModeForShow:(NSString *) objectID;
 
 @property (nonatomic, weak) id <MTRPCDelegate> delegate;
 

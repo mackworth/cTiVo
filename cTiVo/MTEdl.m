@@ -130,25 +130,22 @@ __DDLOGHERE__
 	double cumulativeOffset = 0.0;
 	for (NSNumber * lengthPoint in lengthPoints) {
 		double segmentLength = lengthPoint.doubleValue/1000.0;
-		if (startIndex >= startPoints.count) {
-			if (cutPartStart <= showLength || segmentLength != 0.0) {
-				DDLogReport (@"Not enough Start points found: %@ v Lengths: %@ ==> EDL so far %@", startPoints, lengthPoints, edls);
+		double segmentStart;
+		if (startIndex < startPoints.count) {
+			segmentStart = startPoints[startIndex].doubleValue/1000.0;
+		} else if (cutPartStart >= showLength && segmentLength == 0.0) {
+			segmentStart = showLength;
+		} else {
+			DDLogReport (@"In building EDL list, not enough Start points found: %@ v Lengths: %@ ==> failed EDL so far %@", startPoints, lengthPoints, edls);
 				return nil;
-			} else {
-				//we're beyond end and this is the fake 0.0 length segment.
-				break;
-			}
 		}
-		double segmentStart  = startPoints[startIndex].doubleValue/1000.0;
 		//now create the cut that goes BEFORE the segment
+		
 		double cutPartLength = segmentStart - cutPartStart;
-		if (cutPartLength <= 0) {
+		if (cutPartLength <= 0 && cutPartStart < showLength-5.0) {
 			//problem, unless we're at the end of file
-			if (cutPartStart < showLength-5.0) {
-				DDLogReport (@"In building EDL list, invalid segment: segments: %@ startPoints: %@ ==> edl %@", lengthPoints, startPoints, edls);
-				return nil;
-			}
-			break;
+			DDLogReport (@"In building EDL list, startPoint #%@: %@ with length %@ starts before previous segment ends at %@. StartPoints: %@Segments: %@  ==> failed edl so far %@", @(startIndex), startPoints[startIndex], lengthPoint, @(cutPartStart), startPoints, lengthPoints, edls);
+			return nil;
 		} else if (cutPartLength > 1.0){ //don't cut less than 1 second
 			MTEdl * edl = [[MTEdl alloc] init];
 			edl.startTime = cutPartStart;
@@ -157,11 +154,15 @@ __DDLOGHERE__
 			cumulativeOffset += segmentStart-cutPartStart;
 			edl.offset = cumulativeOffset;
 			[edls addObject:edl];
-			cutPartStart = segmentStart + segmentLength;
 		}
+		cutPartStart = segmentStart + segmentLength;
 		startIndex++;
 	}
-	DDLogReport (@"XXX segments: %@ startPoints: %@ ==> edl %@", lengthPoints, startPoints, edls);
+	if (startIndex < startPoints.count) {
+		DDLogReport (@"In Building EDL List, not enough Segments found: Starts: %@ v Lengths: %@ ==> failed EDL so far %@", startPoints, lengthPoints, edls);
+		return nil;
+	}
+	DDLogVerbose (@"EDL segments: %@ startPoints: %@ ==> edl %@", lengthPoints, startPoints, edls);
 
 	return [edls copy];
 }
@@ -215,7 +216,7 @@ __DDLOGHERE__
 			}
         }
     }
-    //Loging fuction for testing
+    //Loging function for testing
     
     for (int i = 0; i < chapterOffset ; i++) {
         DDLogDetail(@"Chapter %d: duration %llu, title: %s",i+1,chapterList[i].duration, chapterList[i].title);
@@ -230,7 +231,19 @@ __DDLOGHERE__
 	}
     
 }
-
+-(BOOL) compareToEDL: (NSArray <MTEdl *> *) edlList {
+	if (self == edlList) return YES;
+	if (self.count != edlList.count) return NO;
+	NSUInteger index = 0;
+	for (MTEdl * myEdl in self) {
+		MTEdl * otherEdl = edlList[index];
+		if (ABS(myEdl.startTime - otherEdl.startTime) > 0.5 || ABS(myEdl.endTime - otherEdl.endTime) > 0.5) {
+			return NO;
+		}
+		index++;
+	}
+	return YES;
+}
 
 
 @end

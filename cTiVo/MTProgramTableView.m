@@ -248,7 +248,9 @@ __DDLOGHERE__
 	[selectedRowIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
 		id item = [self itemAtRow:idx];
 		if ([item isKindOfClass:[MTShowFolder class]]) {
-			[result addObjectsFromArray:((MTShowFolder *) item).folder];
+			if (![self isItemExpanded:item]) {
+				[result addObjectsFromArray:((MTShowFolder *) item).folder];
+			}
 		} else {
 			[result addObject:item];
 		}

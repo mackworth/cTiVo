@@ -379,25 +379,6 @@ __DDLOGHERE__
 	}
 }
 
-/*//XXX remove test variables.
-NSTimer * testTimer = nil;
-NSMutableSet <MTTiVoShow *> * testShows = nil;
-//XXX remove test.
-if (!testShows) testShows = [NSMutableSet set];
-if ([testShows containsObject:show]) {
-    [testShows removeObject:show];
-} else {
-    [testShows addObject:show];
-}
-if (testShows.count == 0) return;
-if (@available(macOS 10.12, *)) {
-    if (!testTimer) testTimer = [NSTimer scheduledTimerWithTimeInterval:3 repeats:YES block:^(NSTimer * _Nonnull timer) {
-        [testShows.anyObject.tiVo reloadShowInfoForShows:[testShows allObjects]]; //note: only works for one tivo; and does not wait for response,
-    }];
-}
-}
-*/
-
 - (void) openDrawer:(MTTiVoShow *) show {
 	if (show) {		
 		self.showForDetail = show;
