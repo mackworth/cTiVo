@@ -104,15 +104,14 @@
 -(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows;
 
 //----------------Channel Management Methods --------
--(void) updateChannel: (NSDictionary *) newChannel;
--(void) createChannel: (NSDictionary *) newChannel;
--(NSDictionary *)channelNamed:(NSString *) channel;
+-(void) createChannel;
 -(void) sortChannelsAndMakeUnique;
 -(void) removeAllChannelsStartingWith: (NSString*) prefix;
 -(NSCellStateValue) useTSForChannel:(NSString *) channelName;
 -(void) setFailedPS:(BOOL) psFailed forChannelNamed: (NSString *) channelName;
 -(NSCellStateValue) failedPSForChannel:(NSString *) channelName;
 -(NSCellStateValue) commercialsForChannel:(NSString *) channelName;
+-(NSCellStateValue) skipModeFoChannel:(NSString *) channelName;
 -(void) testAllChannelsForPS;
 -(void) removeAllPSTests;
 

@@ -102,6 +102,7 @@ __DDLOGHERE__
 		_processingPaused = @(NO);
 		[self loadUserNotifications];
         [self setupMetadataQuery];
+		[self updateSkipModeToChannels]; //update older skipmodes
  		loadingManualTiVos = NO;
 	}
 	return self;
@@ -513,8 +514,8 @@ __DDLOGHERE__
 
     DDLogVerbose(@"setting tivoManager notifications");
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-    
-    [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadDidFinish object:nil];
+
+	[defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadDidFinish object:nil];
     [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadWasCanceled object:nil];
 //    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
 //    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
@@ -523,7 +524,9 @@ __DDLOGHERE__
 //    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
-    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+	[defaultCenter addObserver:self selector:@selector(skipModeChannelFound:) name:kMTNotificationFoundSkipModeChannel object:nil];
+
+	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
     [defaults addObserver:self forKeyPath:kMTUpdateIntervalMinutesNew options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
@@ -935,7 +938,6 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 	}
 }
 
-
 -(NSMutableArray *) subscribedShows {
     
 	if (_subscribedShows ==  nil) {
@@ -1057,6 +1059,13 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 
 #pragma mark - Channel management
 
+#define kMTChannelInfo @"ChannelInfo"
+#define kMTChannelInfoName @"name"
+#define kMTChannelInfoCommercials @"commercials"
+#define kMTChannelInfoSkipMode @"SkipMode"
+#define kMTChannelInfoPSFailed @"PSFailed"
+#define kMTChannelInfoUseTS @"useTS"
+
 -(void) updateChannel: (NSDictionary *) newChannel {
     if (!newChannel) return;
     NSMutableArray *channels = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo] mutableCopy];
@@ -1070,6 +1079,15 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
     }
     [channels addObject:newChannel];
     [[NSUserDefaults standardUserDefaults] setValue:channels forKeyPath:kMTChannelInfo];
+}
+
+-(void) createChannel {
+	NSDictionary * newChannel = @{kMTChannelInfoName: @"???",
+								  kMTChannelInfoCommercials: @(NSOnState),
+								  kMTChannelInfoPSFailed: @(NSMixedState),
+								  kMTChannelInfoSkipMode: @(NSMixedState),
+								  kMTChannelInfoUseTS: @(NSMixedState)};
+	[self createChannel: newChannel];
 }
 
 -(void) createChannel: (NSDictionary *) newChannel  {
@@ -1100,8 +1118,9 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
         newChannel = [NSDictionary dictionaryWithDictionary: mutChannel ];
     } else {
         newChannel = @{kMTChannelInfoName: channelName,
-                      kMTChannelInfoCommercials: @(NSOnState),
-                      kMTChannelInfoPSFailed: @(psFailed),
+					   kMTChannelInfoCommercials: @(NSOnState),
+					   kMTChannelInfoSkipMode: @(NSMixedState),
+                       kMTChannelInfoPSFailed: @(psFailed),
                        kMTChannelInfoUseTS: @(psFailed ? NSOnState : NSMixedState)};
     }
     [self updateChannel:newChannel];
@@ -1163,13 +1182,74 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
     }
 }
 
+-(NSCellStateValue ) defaultSkipModeForChannel:(NSString *) channel {
+	NSArray <NSString *> * skipChannels = @[@"amc", @"bravo", @"comedy", @"food", @"freeform", @"fx", @"hg", @"history", @"life", @"syfy", @"tbs", @"tdc", @"the discovery", @"tlc", @"tnt", @"usa"];
+	NSString * lowerChannel = channel.lowercaseString;
+	for (NSString * skipChannel in skipChannels) {
+		if ([lowerChannel hasPrefix:skipChannel]) {
+			return NSOnState;
+		}
+	}
+	return NSMixedState;
+}
+
+-(void) updateSkipModeToChannels { //updates old defaults to have maybe on skipmode
+	NSArray <NSDictionary *> * oldChannels = [[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo];
+	if (oldChannels.count > 0  && !oldChannels[0] [kMTChannelInfoSkipMode]) {
+		NSMutableArray *newChannels = [NSMutableArray arrayWithCapacity:oldChannels.count ];
+		for (NSDictionary * channel in oldChannels) {
+			NSMutableDictionary * newChannel = [channel mutableCopy];
+			newChannel [kMTChannelInfoSkipMode] = @([self defaultSkipModeForChannel: channel[kMTChannelInfoName]]);
+			[newChannels addObject:newChannel];
+		}
+		[[NSUserDefaults standardUserDefaults] setValue:newChannels forKey:kMTChannelInfo];
+	}
+}
+
+-(void) skipModeChannelFound: (NSNotification *) notification {
+	NSString * channelName = (NSString *) notification.object;
+	NSMutableDictionary * channelInfo = [[tiVoManager channelNamed:channelName] mutableCopy];
+	if (channelInfo) {
+		if (((NSNumber *)channelInfo[kMTChannelInfoSkipMode]).intValue != NSOffState) {
+			channelInfo[kMTChannelInfoSkipMode] = @(NSOnState);
+			[self updateChannel:channelInfo];
+		}
+	} else {
+		channelInfo = [@{kMTChannelInfoName: channelName,
+						  kMTChannelInfoCommercials: @(NSOnState),
+						  kMTChannelInfoPSFailed: @(NSMixedState),
+						  kMTChannelInfoSkipMode: @(NSOnState),
+						  kMTChannelInfoUseTS: @(NSMixedState)} mutableCopy];
+		[self createChannel:channelInfo];
+	}
+}
+
+-(NSCellStateValue) skipModeFoChannel:(NSString *) channelName {
+	NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
+	if (channelInfo) {
+		return ((NSNumber*) channelInfo[kMTChannelInfoSkipMode ]).intValue;
+	} else {
+		//haven't seen this one before, so if it's a Default one, add it
+		NSCellStateValue state = [self defaultSkipModeForChannel:channelName];
+		if (state == NSOnState) {
+			NSDictionary * newChannel = @{kMTChannelInfoName: channelName,
+										  kMTChannelInfoCommercials: @(NSOnState),
+										  kMTChannelInfoPSFailed: @(NSMixedState),
+										  kMTChannelInfoSkipMode: @(NSOnState),
+										  kMTChannelInfoUseTS: @(NSMixedState)};
+			[self createChannel:newChannel];
+		}
+		return state;
+	}
+}
+
 -(NSCellStateValue) commercialsForChannel:(NSString *) channelName {
-    NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
-    if (channelInfo) {
-        return ((NSNumber*) channelInfo[kMTChannelInfoCommercials ]).intValue;
-    } else {
-        return NSOnState;
-    }
+	NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
+	if (channelInfo) {
+		return ((NSNumber*) channelInfo[kMTChannelInfoCommercials ]).intValue;
+	} else {
+		return NSOnState;
+	}
 }
 
 -(void) testAllChannelsForPS {

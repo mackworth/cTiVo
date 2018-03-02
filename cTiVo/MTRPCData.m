@@ -65,7 +65,7 @@ static NSString * kEDL = @"EDLList";
 }
 
 -(NSString *)description {
-    return [NSString stringWithFormat:@"%@: S%0.2dE%0.2d (%@); %@; @ %@", self.series, (int)self.seasonNum, (int)self.episodeNum, self.genre, self.recordingID, self.imageURL];
+	return [NSString stringWithFormat:@"%@: S%0.2dE%0.2d (%@); %@; clip:%@", self.series, (int)self.seasonNum, (int)self.episodeNum, self.genre, self.recordingID, self.clipMetaDataId];
 }
 
 

@@ -29,12 +29,7 @@
 }
 
 -(IBAction) addChannel:(id)sender {
-    NSDictionary * newChannel = @{kMTChannelInfoName: @"???",
-                                  kMTChannelInfoCommercials: @(NSOnState),
-                                  kMTChannelInfoPSFailed: @(NSMixedState),
-                                   kMTChannelInfoUseTS: @(NSMixedState)};
-
-    [tiVoManager createChannel:newChannel];
+    [tiVoManager createChannel];
 }
 
 -(void) testAllChannels:(id)sender {

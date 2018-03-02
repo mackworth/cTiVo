@@ -266,7 +266,6 @@ void signalHandler(int signal)
                                           @NO, kMTExportTextMetaData,
                                           @NO, kMTExportSubtitles,
                                           @NO, kMTSaveMPGFile,
-                                          @[], kMTChannelInfo,
                                           nil];
 
     [[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];

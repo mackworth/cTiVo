@@ -325,6 +325,9 @@ __DDLOGHERE__
     if (rpcData ) { //resetting existing info
         _rpcData = rpcData;
         self.episodeGenre = rpcData.genre;  //no conflict with TVDB
+		if (rpcData.clipMetaDataId) {
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeChannel object:self.stationCallsign];
+		}
 		if (rpcData.edlList.count > 0) {
 			MTEdl * lastCut = [rpcData.edlList lastObject];
 			double overTime = lastCut.endTime - self.showLength;
@@ -345,7 +348,7 @@ __DDLOGHERE__
 			} else {
 #endif
 				if (self.edlList != rpcData.edlList) {
-					DDLogMajor(@"Got EDL for %@: %@", self, rpcData.edlList);
+					DDLogDetail(@"Got EDL for %@: %@", self, rpcData.edlList);
 					self.edlList = rpcData.edlList;
 				}
 #ifdef DEBUG

@@ -38,6 +38,7 @@
 #define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"  //object: which MTTiVo needs a key
 #define kMTNotificationFormatChanged @"MTNotificationFormatChanged"     //object: which MTFormat changed
 #define kMTNotificationFoundMultipleTiVos @"MTNotificationFoundMultipleTiVo"
+#define kMTNotificationFoundSkipModeChannel @"MTNotificationFoundSkipMode" //object: name of channel
 
 //Tivo busy indicator
 #define kMTNotificationTiVoUpdating @"MTNotificationTiVoUpdating"  //object: which MTTivo has started updating
@@ -221,7 +222,6 @@
 #define kMTScheduledSleep      @"ScheduledSleep"     // Whether to start queue to sleep after scheduled downloads
 #define kMTScheduledSkipModeTime @"ScheduledSkipModeTime" // NSDate when to start skipMode process
 #define kMTScheduledSkipMode    @"ScheduleSkipMode"        //Whether to automatically run SkipMode
-
 #define kMKTQueuePaused        @"QueuePaused"        //Restore state of whether queue was manually paused last time?
 
 #define kMTDebugLevel       @"DebugLevel"
@@ -229,12 +229,6 @@
 #define kMTCrashlyticsOptOut @"CrashlyticsOptOut"
 #define kMTDecodeBinary  @"DecodeBinary"
 #define kMTDownloadTSFormat @"DownloadTSFormat"
-
-#define kMTChannelInfo @"ChannelInfo"
-#define kMTChannelInfoName @"name"
-#define kMTChannelInfoCommercials @"commercials"
-#define kMTChannelInfoPSFailed @"PSFailed"
-#define kMTChannelInfoUseTS @"useTS"
 
 //Obsolete keys, but kept for upgrade path
 #define kMTMakeSubDirsObsolete @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir) (obsolete)
