@@ -90,6 +90,7 @@
 @property (nonatomic, strong) NSImage   * artWorkImage, //image after loading (triggers download when loaded )
                                         * thumbnailImage;
 @property (nonatomic, readonly) BOOL noImageAvailable; //and it'll never arrive
+@property (nonatomic, readonly) BOOL mightHaveSkipModeData;   //whether it's worth waiting for download in Skip scenario
 
 @property (nonatomic, strong) NSDictionary <NSString *, id> * tvdbData;
 @property (nonatomic, strong) MTRPCData * rpcData;

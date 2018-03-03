@@ -1224,7 +1224,7 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 	}
 }
 
--(NSCellStateValue) skipModeFoChannel:(NSString *) channelName {
+-(NSCellStateValue) skipModeForChannel:(NSString *) channelName {
 	NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
 	if (channelInfo) {
 		return ((NSNumber*) channelInfo[kMTChannelInfoSkipMode ]).intValue;

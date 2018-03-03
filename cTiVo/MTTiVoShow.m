@@ -370,6 +370,17 @@ __DDLOGHERE__
     [self checkAllInfoSources];
 }
 
+-(BOOL) mightHaveSkipModeData {
+//	NSInteger hour = 6;  //doesn't seem to be an actual limiation.
+//	NSInteger minute = 45;
+//	[[NSCalendar currentCalendar] getHour:&hour minute:NULL second:NULL nanosecond:NULL fromDate: self.showDate];
+//	if (hour < 16 && !(hour == 0 && minute <=30)) return NO;
+	NSString * genre = self.episodeGenre.lowercaseString;
+	if ([genre contains:@"news"] ) return NO;
+	if ([genre contains:@"sports"] ) return NO;
+	return ([tiVoManager skipModeForChannel:self.stationCallsign] == NSOnState);
+}
+
 -(void) checkAllInfoSources {
     //assuming one of our info sources (Tivo XML, Tivo RPC, Manual, or TVDB) has changed, update our variables appropriately.
     if (self.isEpisodicShow) {

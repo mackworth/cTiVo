@@ -111,7 +111,7 @@
 -(void) setFailedPS:(BOOL) psFailed forChannelNamed: (NSString *) channelName;
 -(NSCellStateValue) failedPSForChannel:(NSString *) channelName;
 -(NSCellStateValue) commercialsForChannel:(NSString *) channelName;
--(NSCellStateValue) skipModeFoChannel:(NSString *) channelName;
+-(NSCellStateValue) skipModeForChannel:(NSString *) channelName;
 -(void) testAllChannelsForPS;
 -(void) removeAllPSTests;
 
