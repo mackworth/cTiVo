@@ -3,33 +3,35 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.1.0; Folders!</description>
+        <description>Version 3.1.1; Directories</description>
         <language>en</language>
         <item>
-            <title>Version 3.1.0; Folders!</title>
+            <title>Version 3.1.1; Directories</title>
             <description><![CDATA[
-				<h2 id="release-3.1">Release 3.1: Folders!</h1>
-                <h2>3.1 features</h2>
-				
+				<h2 id="release-3.1">Release 3.1.1: Folders!</h1>
+                <h2>3.1.1 features</h2>
                 <ul>
-                <li>Shows can now be grouped in series folders.</li>
-                <li>Advanced Preferences is no longer hidden behind Option key.</li>
-                <li>Preferences has simpler directory structure choices (e.g. Plex support)</li>
-                <li>Auto-relocation to Applications directory.</li>
+				<li>If Download or Temporary directories have a problem, cTiVo will pause and ask.</li>
+                <li>Download directory now fixed when download job starts, not when first created.</li>
+                <li>Uses user-specific temp folder, rather than /tmp/ctivo.</li>
+				<li>(Note: this release is exactly same as 3.1.1beta4)</li>
                 </ul>
 				
                 <h3>Minor Improvements:</h3>
                 <ul>
-                <li>File template string now reflects directory options.</li>
-                <li>Help button on each Preference screen.</li>
-                <li>Better warning and diagnostics on disk space (versus tmp space).</li>
-                <li>Improved Sleep log notices.</li>
-                <li>Allows longer TiVo names.</li>
-                <li>Support TiVo's ShowingStartTime (if after Capture date in XML).</li>
+                <li>Option for automatic deletion on TiVo after download (Adv Prefs).</li>
+				<li>Option for number of simultaneous encoders.</li>
                 </ul>
 				
-                <h2>3.0 features</h2>
+				<h2>3.1 features: Folders!</h2>
+				<ul>
+				<li>Shows can now be grouped in series folders.</li>
+				<li>Advanced Preferences is no longer hidden behind Option key.</li>
+				<li>Preferences has simpler directory structure choices (e.g. Plex support)</li>
+				<li>Auto-relocation to Applications directory.</li>
+				</ul>
 
+				<h2>3.0 features</h2>
                 <h3>Artwork enhancements:</h3>
                 <ul>
                 <li>New Artwork column in Now Playing List.</li>
@@ -49,9 +51,9 @@
                 <p>See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.</p>
             ]]>
             </description>
-            <pubDate>Fri., January 19, 2018 20:00:00 -0800</pubDate>
+            <pubDate>Sat., March 3, 2018 22:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/3.1.0/cTiVo.zip" sparkle:version="830" sparkle:shortVersionString="3.1.0" length="50501994" type="application/octet-stream" sparkle:dsaSignature="MC4CFQDXCBENvk/wDygK1DQlMdPIW7nesAIVAM/vtaWI2Ep3oC+zTCpuGZPBTcgP"/>
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/3.1.1/cTiVo.zip" sparkle:version="853" sparkle:shortVersionString="3.1.1" length="50554434" type="application/octet-stream" sparkle:dsaSignature="MC0CFCG3j2QRwg2tirbSKZmDuqbNog19AhUAt2pGoQV/C+qkNoXgdJ5rSlcWaKU="/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>
