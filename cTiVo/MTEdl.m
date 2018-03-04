@@ -169,8 +169,16 @@ __DDLOGHERE__
 
 -(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length keepingCommercials: (BOOL) keepCommercials {
 	if (self.count == 0) return NO;
-    //Convert edls to MP4Chapter
-    MP4Chapter_t *chapterList = malloc((self.count * 2 + 1) * sizeof(MP4Chapter_t)); //This is the most there could be
+	
+	//check if it already has a chapter List
+	MP4Chapter_t* chapterList= NULL;
+	uint32_t chapterCount = 0;
+	MP4GetChapters(encodedFile, &chapterList, &chapterCount, MP4ChapterTypeQt);
+	if (chapterList) free(chapterList);
+	if (chapterCount > 0) return(NO);
+	
+	//Convert edls to MP4Chapter
+	chapterList = malloc((self.count * 2 + 1) * sizeof(MP4Chapter_t)); //This is the most there could be
     int edlOffset = 0;
     int showOffset = 0;
     int chapterOffset = 0;

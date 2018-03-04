@@ -875,7 +875,15 @@ static NSRegularExpression * isFinalRegex = nil;
 		   if ([clipDataArray isKindOfClass:[NSArray class]] && clipDataArray.count > 0) {
 			   rpcData.clipMetaDataId = clipDataArray[0][@"clipMetadataId"];
 			   if (rpcData.clipMetaDataId) {
-				   DDLogMajor(@"Commercial info found for %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, showInfo[@"contentId"]);
+				   MTRPCData * oldRPCData = nil;
+				   @synchronized (strongSelf.showMap) {
+					   oldRPCData = strongSelf.showMap [objectId];
+				   }
+				   if (!oldRPCData.clipMetaDataId) {
+					   DDLogMajor(@"Metadata just arrived for %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId);
+				   } else {
+					   DDLogMajor(@"Revised commercial info found for %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, showInfo[@"contentId"]);
+				   }
 				   [strongSelf retrieveSegments:rpcData.clipMetaDataId withCompletionHandler:^(NSArray * segments) {
 					   rpcData.programSegments = segments;
 				   }];

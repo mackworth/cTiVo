@@ -1210,7 +1210,7 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 	NSString * channelName = (NSString *) notification.object;
 	NSMutableDictionary * channelInfo = [[tiVoManager channelNamed:channelName] mutableCopy];
 	if (channelInfo) {
-		if (((NSNumber *)channelInfo[kMTChannelInfoSkipMode]).intValue != NSOffState) {
+		if (((NSNumber *)channelInfo[kMTChannelInfoSkipMode]).intValue == NSMixedState) {
 			channelInfo[kMTChannelInfoSkipMode] = @(NSOnState);
 			[self updateChannel:channelInfo];
 		}

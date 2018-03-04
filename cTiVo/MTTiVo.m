@@ -942,12 +942,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //
 
 -(void) reloadRecentShows {
+//	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(reloadRecentShows) object:nil];
     //so when we get an RPC, it might signal a metadata change, so reload recent ones.
 	NSMutableArray <NSString *> * recentIDs = [NSMutableArray array];
 	NSMutableArray <MTTiVoShow *> * recentShows = [NSMutableArray array];
 	for (MTTiVoShow * show in self.shows) {
 		if (-[show.showDate timeIntervalSinceNow] < (show.showLength+4*60*60)) {
-			if (!show.protectedShow.boolValue && !show.rpcData.clipMetaDataId) {
+			if (!show.protectedShow.boolValue && !show.rpcData.clipMetaDataId && show.mightHaveSkipModeData) {
 				[recentIDs addObject:show.idString];
 				[recentShows addObject:show];
 				//show.rpcData = nil;  //Necessary?
@@ -955,9 +956,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		}
 	}
 	if (recentIDs.count > 0) {
-		DDLogMajor (@"reloading shows for metadata: %@", recentShows);
-		[self.myRPC reloadShowInfoForIDs:[recentIDs copy]];
+		DDLogMajor(@"reloading shows for metadata: %@", recentShows);
+		[self.myRPC getShowInfoForShows:[recentIDs copy]];
+//		[self performSelector:@selector(reloadRecentShows) withObject:nil afterDelay:60];
 	}
+
 }
 
 -(void)parserDidEndDocument:(NSXMLParser *)parser

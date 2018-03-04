@@ -22,7 +22,7 @@
 -(MTRPCData *) rpcDataForID: (NSString *) idString;
 -(void) emptyCaches;
 -(void) reloadShowInfoForIDs: (NSArray <NSString *> *) showIDs;
-
+-(void) getShowInfoForShows: (NSArray <NSString *> *) showIDs;
 -(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;

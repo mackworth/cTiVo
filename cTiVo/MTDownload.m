@@ -1705,7 +1705,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 [self.show addExtendedMetaDataToFile:encodedFile withImage:artwork];
             }
             
-            MP4Close(encodedFile, 0);
+            MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
         }
         if (self.addToiTunesWhenEncoded) {
             DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
@@ -2452,7 +2452,7 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(BOOL) runComskip {
-	return !self.show.hasRPCSkipMode && (self.shouldSkipCommercials || self.shouldMarkCommercials);
+	return !self.show.canRPCSkipMode && (self.shouldSkipCommercials || self.shouldMarkCommercials);
 }
 
 -(BOOL) hasEDL { //from either source

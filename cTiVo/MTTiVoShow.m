@@ -350,6 +350,7 @@ __DDLOGHERE__
 				if (self.edlList != rpcData.edlList) {
 					DDLogDetail(@"Got EDL for %@: %@", self, rpcData.edlList);
 					self.edlList = rpcData.edlList;
+					[self addEDLtoFilesOnDisk];
 				}
 #ifdef DEBUG
 			}
@@ -375,6 +376,7 @@ __DDLOGHERE__
 //	NSInteger minute = 45;
 //	[[NSCalendar currentCalendar] getHour:&hour minute:NULL second:NULL nanosecond:NULL fromDate: self.showDate];
 //	if (hour < 16 && !(hour == 0 && minute <=30)) return NO;
+	if (self.isSuggestion) return NO;
 	NSString * genre = self.episodeGenre.lowercaseString;
 	if ([genre contains:@"news"] ) return NO;
 	if ([genre contains:@"sports"] ) return NO;
@@ -1545,6 +1547,16 @@ NSString * fourChar(long n, BOOL allowZero) {
         MP4TagsSetHDVideo(tags, &myHDType);
     }
     return tags;
+}
+
+-(void) addEDLtoFilesOnDisk {
+	if (self.edlList.count == 0) return;
+	for (NSString * filename in self.copiesOnDisk) {
+		MP4FileHandle *encodedFile = MP4Modify([filename cStringUsingEncoding:NSUTF8StringEncoding],0);
+		BOOL added = [self.edlList addAsChaptersToMP4File: encodedFile forShow: self.showTitle withLength: self.showLength keepingCommercials: YES ];
+		if (added) DDLogMajor(@"Retroactively added commercial info to show %@ in file %@", self, filename);
+		MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
+	}
 }
 
 -(HDTypes) hdTypeForMP4File:(MP4FileHandle *) fileHandle {
