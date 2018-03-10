@@ -60,6 +60,6 @@
 -(void) sendKeyEvent: (NSString *) keyEvent;
 -(void) sendURL: (NSString *) URL;
 
--(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows withCompletion: (void (^)(void)) completionHandler;
+-(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows ;
 
 @end

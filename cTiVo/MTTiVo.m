@@ -164,7 +164,7 @@ __DDLOGHERE__
             @"IdGuideSource" :  @{kMTValue : @"idGuidSource",     kMTType : @(kMTStringType)}};
 		elementToPropertyMap = [[NSDictionary alloc] initWithDictionary:elementToPropertyMap];
 		_currentNPLStarted = nil;
-		_lastDownloadEnded = [NSDate dateWithTimeIntervalSince1970:0];
+		_lastDownloadEnded = [NSDate date];
 		_manualTiVoID = -1;
         self.rpcIDs = [NSMutableDictionary dictionary];
 	}
@@ -568,18 +568,19 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
--(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows withCompletion: (void (^)(void)) completionHandler {
+-(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows {
 	for (MTTiVoShow * show in shows) {
 //		test erasure of edlList:
 //      show.rpcData.edlList = nil;
 //		show.rpcData.clipMetaDataId = nil;
 //		show.rpcData.programSegments = nil;
-        if ([show.tiVo isEqual:self] && !show.isSuggestion && !show.inProgress.boolValue) {
-            DDLogMajor(@"Finding SkipMode points for %@ on %@", show, self);
-            [self.myRPC findSkipModeForShow:show.idString];
-        } else {
-            DDLogDetail(@"Skipping SkipMode points for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : @"" );
-
+		if ([show.tiVo isEqual:self]) {
+			if ( !show.inProgress.boolValue && show.mightHaveSkipModeInfo) {
+            	DDLogMajor(@"Finding SkipMode points for %@ on %@", show, self);
+            	[self.myRPC findSkipModeForShow:show.idString];
+        	} else {
+				DDLogVerbose(@"Skipping SkipMode points for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : @"" );
+			}
         }
 	}
 }
@@ -948,7 +949,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	NSMutableArray <MTTiVoShow *> * recentShows = [NSMutableArray array];
 	for (MTTiVoShow * show in self.shows) {
 		if (-[show.showDate timeIntervalSinceNow] < (show.showLength+4*60*60)) {
-			if (!show.protectedShow.boolValue && !show.rpcData.clipMetaDataId && show.mightHaveSkipModeData) {
+			if (!show.protectedShow.boolValue && !show.rpcData.clipMetaDataId && show.mightHaveSkipModeInfo) {
 				[recentIDs addObject:show.idString];
 				[recentShows addObject:show];
 				//show.rpcData = nil;  //Necessary?
@@ -1109,7 +1110,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	if (managingDownloads) {
         return;
     }
-    managingDownloads = YES;
+	managingDownloads = YES;
+	if (!self.isReachable ||
+		tiVoManager.numEncoders >= [[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxNumEncoders]) {
+		managingDownloads = NO;
+		return;
+	}
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
 //	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
     BOOL isDownloading = NO;
@@ -1121,18 +1127,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
     if (!isDownloading) {
 		DDLogDetail(@"%@ Checking for new download", self);
-		for (MTDownload *s in self.downloadQueue) {
-			if ([s.show.protectedShow boolValue]) {
-				managingDownloads = NO;
-				return;
+		for (MTDownload *download in self.downloadQueue) {
+			if ([download.show.protectedShow boolValue]) {
+				//protectedShow is used in downloadQueue during startup to indicate not loaded yet.
+				break;
 			}
-            if (s.isNew && (tiVoManager.numEncoders < [[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxNumEncoders])) {
-                if(s.show.tiVo.isReachable) {  //isn't this self.isReachable?
-					tiVoManager.numEncoders++;
-					DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,s.show.showTitle, tiVoManager.numEncoders);
-					[s launchDownload];
-                }
-                break;
+            if (download.isNew && !download.waitForSkipModeData) {
+				tiVoManager.numEncoders++;
+				DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,download.show.showTitle, tiVoManager.numEncoders);
+				[download launchDownload];
+				break;
             }
         }
     }

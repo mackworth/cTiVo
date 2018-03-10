@@ -265,6 +265,13 @@ static NSDateFormatter *dateFormatter;
         [checkBox setEnabled: [thisSubscription canMarkCommercials]] ;
         [checkBox setOn:[[ thisSubscription markCommercials]boolValue]];
         checkBox.owner = thisSubscription;
+	} else if ([tableColumn.identifier compare:@"UseSkipMode"] == NSOrderedSame) {
+		MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+		checkBox.target = myController;
+		checkBox.action = @selector(changeUseSkipMode:);
+		[checkBox setEnabled: thisSubscription.useSkipMode.boolValue] ;
+		[checkBox setOn: thisSubscription.useSkipMode.boolValue];
+		checkBox.owner = thisSubscription;
 #ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;

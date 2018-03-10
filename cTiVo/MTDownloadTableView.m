@@ -267,6 +267,8 @@ __DDLOGHERE__
     // nameArray value at row
 	NSString *textVal = nil;
 	result.toolTip = nil;
+	result.imageView.image = nil;
+	
     BOOL programColumn = [tableColumn.identifier isEqualToString:@"Programs"];
     BOOL seriesColumn = [tableColumn.identifier isEqualToString:@"Series"];
     BOOL stageColumn = [tableColumn.identifier isEqualToString:@"DL Stage"];
@@ -351,10 +353,15 @@ __DDLOGHERE__
 //        [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSimulEncode];
 //        
 	} else if ([tableColumn.identifier isEqualToString:@"SkipMode"]) {
-		if (download.show.hasRPCSkipMode) {
-			result.imageView.image = [NSImage imageNamed:@"skipMode"];
-		} else if (download.show.canRPCSkipMode){
-			result.imageView.image = [NSImage imageNamed:@"skipModeInverted"];
+		switch (download.show.rpcSkipMode.intValue) {
+			case 3:  result.imageView.image = [NSImage imageNamed:@"skipMode"];
+				break;
+			case 2:  result.imageView.image = [NSImage imageNamed:@"skipModeSlash"];
+				break;
+			case 1:  result.imageView.image = [NSImage imageNamed:@"skipModeInverted"];
+				break;
+			default: result.imageView.image = nil;
+				break;
 		}
 		CGFloat width = tableColumn.width;
 		CGFloat height = MIN(width, MIN(self.rowHeight, 24));
@@ -387,6 +394,14 @@ __DDLOGHERE__
         checkBox.action = @selector(changeXML:);
 		checkBox.enabled = !download.isDone && !protected;
 #endif
+	} else if ([tableColumn.identifier isEqualToString:@"UseSkipMode"]) {
+		MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+		[checkBox setOn: download.useSkipMode];
+		checkBox.owner = download;
+		checkBox.target = myController;
+		checkBox.action = @selector(changeUseSkipMode:);
+		[checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSkip];
+		
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.genTextMetaData.boolValue];

@@ -90,7 +90,7 @@
 @property (nonatomic, strong) NSImage   * artWorkImage, //image after loading (triggers download when loaded )
                                         * thumbnailImage;
 @property (nonatomic, readonly) BOOL noImageAvailable; //and it'll never arrive
-@property (nonatomic, readonly) BOOL mightHaveSkipModeData;   //whether it's worth waiting for download in Skip scenario
+@property (nonatomic, readonly) BOOL mightHaveSkipModeInfo;   //whether it's worth waiting for download in Skip scenario
 
 @property (nonatomic, strong) NSDictionary <NSString *, id> * tvdbData;
 @property (nonatomic, strong) MTRPCData * rpcData;
@@ -135,9 +135,10 @@
 @property BOOL isQueued;
 @property (nonatomic, readonly) BOOL isOnDisk;
 @property (nonatomic, readonly) BOOL isFolder;
-@property (nonatomic, readonly) BOOL hasRPCSkipMode;
-@property (nonatomic, readonly) BOOL canRPCSkipMode;
-@property (nonatomic, readonly) int rpcSkipMode; //only for sorting in tables
+@property (nonatomic, readonly) BOOL hasSkipModeList;
+@property (nonatomic, readonly) BOOL hasSkipModeInfo;
+@property (nonatomic, readonly) BOOL skipModeFailed;
+@property (nonatomic, readonly) NSNumber * rpcSkipMode; //only for sorting in tables
 
 @property (nonatomic, readonly) NSArray <NSString *> *copiesOnDisk;
 

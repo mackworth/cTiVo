@@ -38,7 +38,7 @@
 #define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"  //object: which MTTiVo needs a key
 #define kMTNotificationFormatChanged @"MTNotificationFormatChanged"     //object: which MTFormat changed
 #define kMTNotificationFoundMultipleTiVos @"MTNotificationFoundMultipleTiVo"
-#define kMTNotificationFoundSkipModeChannel @"MTNotificationFoundSkipMode" //object: name of channel
+#define kMTNotificationFoundSkipModeInfo @"MTNotificationFoundSkipModeInfo" //object: show
 
 //Tivo busy indicator
 #define kMTNotificationTiVoUpdating @"MTNotificationTiVoUpdating"  //object: which MTTivo has started updating
@@ -71,6 +71,7 @@
 
 #define kMTUpdateIntervalMinDefault 240 //Default Update interval for re-checking current TiVo for RPC TiVos
 #define kMTUpdateIntervalMinDefaultNonRPC 15 //Default Update interval for re-checking current TiVo for 3 Series
+#define kMTDefaultDelayForSkipModeInfo 240 //Default time to wait for RPC skipMode to arrive
 #define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show; default, overriden by userPref
 #define kMTMaxDownloadStartupRetries 20		// Only allow 20 retries due to a download startup failuer
 //#define kMTProgressCheckDelay (2 * 60.0)	//Check progress every 60 seconds to make sure its not stalled
@@ -88,6 +89,7 @@
 #define kMTSubscribediTunes @"addToiTunes"
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
 #define kMTSubscribedSkipCommercials @"skipCommercials"
+#define kMTSubscribedUseSkipMode @"useSkipMode"
 #define kMTSubscribedMarkCommercials @"markCommercials"
 #define kMTSubscribedIncludeSuggestions @"includeSuggestions"
 #define kMTSubscribedGenTextMetaData     @"GenTextMetadata"
@@ -199,6 +201,7 @@
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
 #define kMTUpdateIntervalMinutesOld @"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes
 #define kMTUpdateIntervalMinutesNew @"UpdateIntervalMinutesNew" //How many minutes to wait between tivo refreshes
+#define kMTWaitForSkipModeInfoTime @"WaitForSkipModeInfoTime" //How many minutes to wait for RPC skipMode info
 
 #define kMTSubscriptionExpiration @"SubscriptionExpirationDays" //How many days to wait before deleting previous recording info (potentially leading to duplicates) (No GUI)
 #define kMTSubscriptionRelyOnDiskOnly @"SubscriptionRelyOnDiskOnly" //Don't take into account previous recording info at all (relying on existence on disk only) No GUI
@@ -220,8 +223,9 @@
 #define kMTScheduledStartTime  @"ScheduledStartTime" // NSDate when to start queue
 #define kMTScheduledEndTime    @"ScheduledEndTime"   // NSDate when to end queue
 #define kMTScheduledSleep      @"ScheduledSleep"     // Whether to start queue to sleep after scheduled downloads
-#define kMTScheduledSkipModeTime @"ScheduledSkipModeTime" // NSDate when to start skipMode process
-#define kMTScheduledSkipMode    @"ScheduleSkipMode"        //Whether to automatically run SkipMode
+#define kMTScheduledSkipModeScan    @"ScheduleSkipMode"        //Whether to automatically run SkipMode
+#define kMTScheduledSkipModeScanStartTime @"ScheduledSkipModeStartTime" // NSDate when to start skipMode process
+#define kMTScheduledSkipModeScanEndTime @"ScheduledSkipModeEndTime" // NSDate when to end skipMode process
 #define kMKTQueuePaused        @"QueuePaused"        //Restore state of whether queue was manually paused last time?
 
 #define kMTDebugLevel       @"DebugLevel"

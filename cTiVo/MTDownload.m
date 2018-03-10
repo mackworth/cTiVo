@@ -14,6 +14,7 @@
 #include "mp4v2.h"
 #include "NSNotificationCenter+Threads.h"
 #include "NSURL+MTURLExtensions.h"
+#include "NSDate+Tomorrow.h"
 
 #ifndef DEBUG
 #import "Crashlytics/Crashlytics.h"
@@ -109,6 +110,7 @@ __DDLOGHERE__
     [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
     [self addObserver:self forKeyPath:@"processProgress" options:NSKeyValueObservingOptionOld context:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showUpdated:) name:kMTNotificationFoundSkipModeInfo object:nil];
 }
 
 -(id) copyWithZone:(NSZone *)zone {
@@ -118,7 +120,8 @@ __DDLOGHERE__
         download.encodeFormat = _encodeFormat;
         download.downloadStatus= @(kMTStatusNew);
         download.exportSubtitles = _exportSubtitles;
-        download.skipCommercials = _skipCommercials;
+		download.useSkipMode = _useSkipMode;
+		download.skipCommercials = _skipCommercials;
         download.markCommercials = _markCommercials;
         download.genTextMetaData = _genTextMetaData;
         [download prepareForDownload:NO];
@@ -142,7 +145,8 @@ __DDLOGHERE__
     MTDownload * download = [self downloadForShow:show withFormat: testFormat withQueueStatus: kMTStatusNew];
     download.exportSubtitles = @NO;
     download.skipCommercials = NO;
-    download.markCommercials = NO;
+	download.useSkipMode = NO;
+	download.markCommercials = NO;
     download.genTextMetaData = @NO;
     download.numRetriesRemaining = 0;
     return download;
@@ -176,6 +180,13 @@ __DDLOGHERE__
 
 -(void)progressUpdated {
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:self];
+}
+
+-(void) showUpdated: (NSNotification *) notification {
+	MTTiVoShow * show = notification.object;
+	if (show && show == self.show) {
+		[self waitForSkipModeData ]; //checks if possible to pull now
+	}
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -283,6 +294,7 @@ __DDLOGHERE__
 	[self.show encodeWithCoder:encoder];
 	[encoder encodeObject:[NSNumber numberWithBool:self.addToiTunesWhenEncoded] forKey: kMTSubscribediTunes];
 	[encoder encodeObject:@(self.skipCommercials) forKey: kMTSubscribedSkipCommercials];
+	[encoder encodeObject:@(self.useSkipMode) forKey: kMTSubscribedUseSkipMode];
 	[encoder encodeObject:@(self.markCommercials) forKey: kMTSubscribedMarkCommercials];
 	[encoder encodeObject:self.encodeFormat.name forKey:kMTQueueFormat];
 	[encoder encodeObject:self.downloadStatus forKey: kMTQueueStatus];
@@ -304,6 +316,7 @@ __DDLOGHERE__
 								   @(self.show.showID), kMTQueueID,
 								   @(self.addToiTunesWhenEncoded), kMTSubscribediTunes,
 								   @(self.skipCommercials), kMTSubscribedSkipCommercials,
+								   @(self.useSkipMode), kMTSubscribedUseSkipMode,
 								   @(self.markCommercials), kMTSubscribedMarkCommercials,
 								   self.show.showTitle, kMTQueueTitle,
 								   self.show.tiVoName, kMTQueueTivo,
@@ -352,6 +365,7 @@ __DDLOGHERE__
     }
 	download.addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
 	download.skipCommercials = [queueEntry[kMTSubscribedSkipCommercials ]  boolValue];
+	download.useSkipMode = [queueEntry[kMTSubscribedUseSkipMode ]  boolValue]; //could be nil, but that works.
 	download.markCommercials = [queueEntry[kMTSubscribedMarkCommercials ]  boolValue];
 
 	if (download.isInProgress) download.downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
@@ -376,6 +390,7 @@ __DDLOGHERE__
 		self.addToiTunesWhenEncoded= [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribediTunes] boolValue];
 //		self.simultaneousEncode	 =   [decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedSimulEncode];
 		self.skipCommercials   =     [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedSkipCommercials] boolValue];
+		self.useSkipMode   =    [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedUseSkipMode] boolValue];
 		self.markCommercials   =    [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedMarkCommercials] boolValue];
 		NSString * encodeName	 = [decoder decodeObjectOfClass:[NSString class] forKey:kMTQueueFormat];
 		self.encodeFormat =	[tiVoManager findFormat: encodeName]; //minor bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is then wrong for completed/failed entries
@@ -1405,7 +1420,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         DDLogMajor(@"Downloading from file MPG file %@",self.mpgFilePath);
         self.activeTaskChain.dataSource = self.mpgFilePath;
     }
-	if (self.show.hasRPCSkipMode && self.shouldSkipCommercials  ){
+	if (self.show.hasSkipModeList && self.shouldSkipCommercials  ){
 		if (![self.show.rpcData.edlList writeToEDLFile:self.commercialFilePath] ) {
 			DDLogReport(@"Could not write EDLFile to disk at %@", self.commercialFilePath);
 		}
@@ -1860,9 +1875,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (self.activeURLConnection) {
         [self.activeURLConnection cancel];
-		self.show.tiVo.lastDownloadEnded = [NSDate date];
         self.activeURLConnection = nil;
 	}
+	self.show.tiVo.lastDownloadEnded = [NSDate date];
     if(self.activeTaskChain.isRunning) {
         [self.activeTaskChain cancel];
     }
@@ -2452,7 +2467,29 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(BOOL) runComskip {
-	return !self.show.canRPCSkipMode && (self.shouldSkipCommercials || self.shouldMarkCommercials);
+	//we're launching now, so should we use comskip or not
+	return (self.shouldSkipCommercials || self.shouldMarkCommercials) &&
+		   (!self.useSkipMode || !self.show.hasSkipModeList);
+}
+
+-(BOOL) waitForSkipModeData {
+	//returns true if we should delay download until skipMode Data arrives
+	if (self.show.hasSkipModeList) return NO; //ready to go!
+	if (!self.useSkipMode) return NO;
+	if ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOffState) return NO;
+	if (!self.shouldSkipCommercials  && !self.shouldMarkCommercials) return NO;
+	if (!self.show.mightHaveSkipModeInfo) return NO; //never coming
+	//now we want the skipmode EDL, but it hasn't been pulled over yet
+	if (self.show.hasSkipModeInfo) {
+		if (tiVoManager.autoSkipModeScanAllowedNow) {
+			[self.show.tiVo findCommercialsForShows:@[self.show]  ];
+		 } else {
+			 [tiVoManager warnNeedSkipModeList:self];
+		 }
+	} else {
+		//SkipMode data not here yet, but still expected, so just wait
+	}
+	return YES;
 }
 
 -(BOOL) hasEDL { //from either source

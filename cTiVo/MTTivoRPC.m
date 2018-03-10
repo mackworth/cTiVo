@@ -1380,9 +1380,10 @@ static NSArray * imageResponseTemplate = nil;
 	}
 	if (!rpcData) return;
     if (rpcData.edlList) return; //already got it.
+	if (rpcData.skipModeFailed) return;
     __weak __typeof__(self) weakSelf = self;
 
-    if (rpcData.programSegments.count == 0) {
+    if (rpcData.clipMetaDataId == nil || rpcData.programSegments == nil) {
         //need metadata info first
 		[self retrieveClipMetaDataFor:objectID withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
             rpcData.clipMetaDataId = metaDataID;
@@ -1395,38 +1396,43 @@ static NSArray * imageResponseTemplate = nil;
     }
 	if (![self.skipModeQueue containsObject:objectID]) {
 		[self.skipModeQueue addObject:objectID];
+		if (self.skipModeQueue.count == 1 ) {
+			// restore these?
+			//    [self sendKeyEvent: @"nowShowing" andPause :4.0];
+			//    [self sendKeyEvent: @"tivo"       andPause :4.0];
+			//    [self sendKeyEvent: @"nowShowing" andPause :4.0];
+			[self findSkipModeRecursive:YES];
+		} else {
+			//wait for previous ones to complete.
+		}
 	}
-	
-    if (self.skipModeQueue.count == 1 ) {
-        // restore these?
-        //    [self sendKeyEvent: @"nowShowing" andPause :4.0];
-        //    [self sendKeyEvent: @"tivo"       andPause :4.0];
-        //    [self sendKeyEvent: @"nowShowing" andPause :4.0];
-		[self findSkipModeRecursive:@YES];
-    } else {
-        //wait for previous ones to complete.
-    }
 }
 
--(void) findSkipModeRecursive: (NSNumber *) firstTry {
+-(void) findSkipModeRecursive: (BOOL) firstTry {
     if (self.skipModeQueue.count == 0) {
         DDLogMajor(@"Finished checking for commercials");
         return;
     }
-	DDLogMajor(@"%@Checking for commercials for %@", firstTry.boolValue ? @"" : @"Re-", self.skipModeQueue[0]);
+	DDLogMajor(@"%@Checking for commercials for %@", firstTry ? @"" : @"Re-", self.skipModeQueue[0]);
 	MTRPCData * rpcData = nil;
 	NSString * objectID = self.skipModeQueue[0];
 	@synchronized (self.showMap) {
 		rpcData = self.showMap[objectID];
 	}
 	[self findSkipModePointsForShow:rpcData withCompletionHandler:^{
-		if (!rpcData.edlList && firstTry.boolValue) {
+		if (rpcData.edlList || !firstTry) {
+			if (!rpcData.edlList) {
+				DDLogReport(@"EDL failure for %@", rpcData);
+				rpcData.skipModeFailed = YES;
+			}
+			if (self.skipModeQueue.count > 0) {
+				[self.skipModeQueue removeObjectAtIndex:0];
+				[self findSkipModeRecursive:YES ];
+			}
+		} else {
 			//try again if we have a problem creating an EDL
 			DDLogReport(@"Retrying EDL list for %@", rpcData);
-			[self findSkipModeRecursive:@NO ];
-		} else {
-			[self.skipModeQueue removeObjectAtIndex:0];
-			[self findSkipModeRecursive:@YES ];
+			[self findSkipModeRecursive:NO ];
 		}
     }];
 }

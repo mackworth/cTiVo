@@ -53,24 +53,12 @@
 	return [NSString stringWithFormat:@"%ld:%0.2ld",length/60,length % 60];
 }
 
-- (BOOL) hasAnyRPCSkipMode {
+-(NSNumber *) rpcSkipMode { //only for sorting in tables
+	int skipMode = 0;
 	for (MTTiVoShow * show in self.folder) {
-		if (show.hasRPCSkipMode) return YES;
+		skipMode = MAX(skipMode, show.rpcSkipMode.intValue);
 	}
-	return NO;
-}
-
-- (BOOL) canAnyRPCSkipMode {
-	for (MTTiVoShow * show in self.folder) {
-		if (!show.hasRPCSkipMode && show.canRPCSkipMode) return YES;
-	}
-	return NO;
-}
-
--(int) rpcSkipMode { //only for sorting in tables
-	if (self.canAnyRPCSkipMode) return 1;
-	if (self.hasAnyRPCSkipMode) return 2;
-	return 0;
+	return @(skipMode);
 }
 
 

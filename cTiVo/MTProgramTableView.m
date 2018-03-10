@@ -661,20 +661,23 @@ __DDLOGHERE__
 			return [self configureIconCell: result forShow: (MTTiVoShow *) item withWidth: tableColumn.width];
 		}
 	} else if ([identifier isEqualToString:@"SkipMode"]) {
+		NSInteger whichImage = 0;
 		if (folderHolder) {
 			if (! [self isItemExpanded:folderHolder]) {
-				if (folderHolder.hasAnyRPCSkipMode) {
-					result.imageView.image = [NSImage imageNamed:@"skipMode"];
-				} else if (folderHolder.canAnyRPCSkipMode) {
-					result.imageView.image = [NSImage imageNamed:@"skipModeInverted"];
-				}
+				whichImage = folderHolder.rpcSkipMode.intValue;
 			}
 		} else {
-			if (thisShow.hasRPCSkipMode) {
-				result.imageView.image = [NSImage imageNamed:@"skipMode"];
-			} else if (thisShow.canRPCSkipMode){
-				result.imageView.image = [NSImage imageNamed:@"skipModeInverted"];
-			}
+			whichImage = thisShow.rpcSkipMode.intValue;
+		}
+		switch (whichImage) {
+			case 3:  result.imageView.image = [NSImage imageNamed:@"skipMode"];
+				break;
+			case 2:  result.imageView.image = [NSImage imageNamed:@"skipModeSlash"];
+				break;
+			case 1:  result.imageView.image = [NSImage imageNamed:@"skipModeInverted"];
+				break;
+			default: result.imageView.image = nil;
+				break;
 		}
 		CGFloat width = tableColumn.width;
 		CGFloat height = MIN(width, MIN(self.imageRowHeight, 24));

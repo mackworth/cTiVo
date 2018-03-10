@@ -249,6 +249,7 @@
         newSub.encodeFormat = tiVoManager.selectedFormat;
         newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
         //		newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
+		newSub.useSkipMode = [NSNumber numberWithBool: tivoShow.mightHaveSkipModeInfo];
         newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip.boolValue)];
         newSub.markCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"MarkCommercials"] && newSub.encodeFormat.canMarkCommercials)];
         newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
@@ -276,7 +277,8 @@
         newSub.addToiTunes = [NSNumber numberWithBool: download.addToiTunesWhenEncoded ];
         //		newSub.simultaneousEncode = [NSNumber numberWithBool: download.simultaneousEncode];
         newSub.skipCommercials = [NSNumber numberWithBool: download.skipCommercials];
-        newSub.markCommercials = [NSNumber numberWithBool: download.markCommercials];
+		newSub.markCommercials = [NSNumber numberWithBool: download.markCommercials];
+		newSub.useSkipMode = [NSNumber numberWithBool: download.useSkipMode];
         newSub.genTextMetaData = download.genTextMetaData;
 #ifndef deleteXML
         newSub.genXMLMetaData = [NSNumber numberWithBool: download.genXMLMetaData];
@@ -335,7 +337,8 @@
                                   sub.addToiTunes       ?: @YES,    kMTSubscribediTunes,
                                   sub.includeSuggestions?: @NO,     kMTSubscribedIncludeSuggestions,
                                   sub.skipCommercials   ?: @NO,     kMTSubscribedSkipCommercials,
-                                  sub.markCommercials   ?: @YES,    kMTSubscribedMarkCommercials,
+								  sub.markCommercials   ?: @YES,    kMTSubscribedMarkCommercials,
+								  sub.useSkipMode       ?: @YES,    kMTSubscribedMarkCommercials,
                                   sub.genTextMetaData   ?: @NO ,    kMTSubscribedGenTextMetaData,
                                   sub.exportSubtitles   ?: @NO,     kMTSubscribedExportSubtitles,
                                   sub.preferredTiVo     ?: @"",     kMTSubscribedPreferredTiVo,

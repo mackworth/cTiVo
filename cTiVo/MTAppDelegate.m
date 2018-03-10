@@ -18,6 +18,7 @@
 #import "MTTiVo.h"
 #import "MTSubscriptionList.h"
 #import "PFMoveApplication.h"
+#import "NSDate+Tomorrow.h"
 
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
@@ -266,7 +267,12 @@ void signalHandler(int signal)
                                           @NO, kMTExportTextMetaData,
                                           @NO, kMTExportSubtitles,
                                           @NO, kMTSaveMPGFile,
-                                          nil];
+										  @(kMTDefaultDelayForSkipModeInfo), kMTWaitForSkipModeInfoTime,
+										  [NSDate tomorrowAtTime:1*60], kMTScheduledStartTime,  //start at 1AM tomorrow]
+                                          [NSDate tomorrowAtTime:6*60], kMTScheduledEndTime,  //end at 6AM tomorrow],
+										  [NSDate tomorrowAtTime:30], kMTScheduledSkipModeScanStartTime, //start SkipMode scan at 12:30AM tomorrow]
+										  [NSDate tomorrowAtTime:5*60+45], kMTScheduledSkipModeScanEndTime, //end SkipMode scan at 5:45AM tomorrow]
+										  nil];
 
     [[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
 	

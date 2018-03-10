@@ -668,9 +668,6 @@ __DDLOGHERE__
 	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
 		MTDownload *download = (MTDownload *)(checkbox.owner);
         download.skipCommercials = ! download.skipCommercials;
-		//		if (download.skipCommercials) {  //Need to make sure that simul encode is not checked
-		//				download.simultaneousEncode = NO;
-		//		}
 		if (download.skipCommercials) {
 			download.markCommercials = NO;
 		}
@@ -682,9 +679,6 @@ __DDLOGHERE__
 		if ([sub.skipCommercials boolValue]) {
 			sub.markCommercials = @NO;
 		}
-		//		if ([sub.skipCommercials boolValue]) { //Need to make sure simultaneous encode is off
-		//			sub.simultaneousEncode = @(NO);
-		//		}
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
                 
     }
@@ -696,9 +690,6 @@ __DDLOGHERE__
 	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
 		MTDownload *download = (MTDownload *)(checkbox.owner);
         download.markCommercials = ! download.markCommercials;
-		//		if (download.skipCommercials) {  //Need to make sure that simul encode is not checked
-		//				download.simultaneousEncode = NO;
-		//		}
 		if (download.markCommercials) {
 			download.skipCommercials = NO;
 		}
@@ -711,33 +702,22 @@ __DDLOGHERE__
 			sub.skipCommercials = @NO;
 		}
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
-		//		if ([sub.skipCommercials boolValue]) { //Need to make sure simultaneous encode is off
-		//			sub.simultaneousEncode = @(NO);
-		//		}
-                
+		
     }
 }
-
-//-(IBAction)changeSimultaneous:(id)sender
-//{
-//    MTCheckBox *checkbox = sender;
-//	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
-//		MTDownload *download = (MTDownload *)(checkbox.owner);
-//        download.simultaneousEncode = ! download.simultaneousEncode;
-//		if (download.simultaneousEncode) {  //Need to make sure that simul encode is not checked
-//				download.skipCommercials = NO;
-//		}
-//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:download];
-//    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
-//		
-//        MTSubscription *sub = (MTSubscription *)(checkbox.owner);
-//		sub.simultaneousEncode = [NSNumber numberWithBool: ! [sub.simultaneousEncode boolValue]];
-//		if ([sub.simultaneousEncode boolValue]) { //Need to make sure simultaneous encode is off
-//			sub.skipCommercials = @(NO);
-//		}
-//        //        
-//    }
-//}
+-(IBAction)changeUseSkipMode:(id)sender
+{
+	MTCheckBox *checkbox = sender;
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
+		MTDownload *download = (MTDownload *)(checkbox.owner);
+		download.useSkipMode = ! download.useSkipMode;
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:download];
+	} else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
+		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		sub.useSkipMode = @(! sub.useSkipMode.boolValue);
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
+	}
+}
 
 -(IBAction)changeiTunes:(id)sender
 {

@@ -14,8 +14,8 @@
 #import "NSURL+MTURLExtensions.h"
 #import "NSNotificationCenter+Threads.h"
 #import "NSArray+Map.h"
-
 #import "NSString+Helpers.h"
+#import "NSDate+Tomorrow.h"
 
 #include <arpa/inet.h>
 
@@ -41,6 +41,8 @@
 @property (nonatomic, strong) NSURL *detailsTempDirectory;
 
 @property (nonatomic,readonly) NSMutableArray <NSNetService *> *tivoServices;
+
+@property (nonatomic, strong) NSMutableSet * downloadsWaitingSkipModeList; //for warnings
 
 @end
 
@@ -524,15 +526,16 @@ __DDLOGHERE__
 //    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
-	[defaultCenter addObserver:self selector:@selector(skipModeChannelFound:) name:kMTNotificationFoundSkipModeChannel object:nil];
-
+	[defaultCenter addObserver:self selector:@selector(skipModeChannelFound:) name:kMTNotificationFoundSkipModeInfo object:nil];
+	
 	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
     [defaults addObserver:self forKeyPath:kMTUpdateIntervalMinutesNew options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
-	[defaults addObserver:self forKeyPath:kMTScheduledSkipModeTime options:NSKeyValueObservingOptionNew context:nil];
-	[defaults addObserver:self forKeyPath:kMTScheduledSkipMode options:NSKeyValueObservingOptionNew context:nil];
+	[defaults addObserver:self forKeyPath:kMTScheduledSkipModeScanStartTime options:NSKeyValueObservingOptionNew context:nil];
+	[defaults addObserver:self forKeyPath:kMTScheduledSkipModeScanEndTime options:NSKeyValueObservingOptionNew context:nil];
+	[defaults addObserver:self forKeyPath:kMTScheduledSkipModeScan options:NSKeyValueObservingOptionNew context:nil];
     [defaults addObserver:self forKeyPath:kMTTrustTVDBEpisodes options:NSKeyValueObservingOptionNew context:nil];
     [defaults addObserver:self forKeyPath:KMTPreferredImageSource options:NSKeyValueObservingOptionNew context:nil];
     [defaults addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
@@ -677,43 +680,6 @@ __DDLOGHERE__
 	[self setSkipModeTime];
 }
 
--(double) secondsUntilNextTimeOfDay:(NSDate *) date {
-	NSCalendar *myCalendar = [NSCalendar currentCalendar];
-	NSDateComponents *currentComponents = [myCalendar components:(NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit) fromDate:[NSDate date]];
-	NSDateComponents *targetComponents = [myCalendar components:(NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit) fromDate:date];
-	double currentSeconds = (double)currentComponents.hour * 3600.0 +(double) currentComponents.minute * 60.0 + (double) currentComponents.second;
-	double targetSeconds = (double)targetComponents.hour * 3600.0 + (double)targetComponents.minute * 60.0 + (double) targetComponents.second;
-	if (targetSeconds <= currentSeconds) {
-		targetSeconds += 3600 * 24;
-	}
-	return targetSeconds - currentSeconds;
-}
-
--(NSDate *) tomorrowAtTime: (NSInteger) minutes {
-    //may be called at launch, so don't assume anything is setup
-    NSUInteger units = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond  ;
-    NSDateComponents *comps = [[NSCalendar currentCalendar] components:units fromDate:[NSDate date]];
-    comps.day = comps.day + 1;    // Add one day
-    comps.hour = minutes / 60;
-    comps.minute = minutes % 60;
-    comps.second = 0;
-    NSDate *tomorrowTime = [[NSCalendar currentCalendar] dateFromComponents:comps];
-    return tomorrowTime;
-}
-
--(NSDate *) defaultSkipModeTime {
-	return [self tomorrowAtTime:30];  //start at 12:30AM tomorrow]
-}
-
-
--(NSDate *) defaultQueueStartTime {
-return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
-}
-
--(NSDate *) defaultQueueEndTime {
-    return [self tomorrowAtTime:1*60];  //end at 6AM tomorrow]
-}
-
 -(void)setQueueStartTime
 {
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(unPauseQueue) object:nil];
@@ -722,11 +688,7 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 		return;
 	}
 	NSDate* startDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
-    if (!startDate) {
-        [[NSUserDefaults standardUserDefaults] setObject:[self defaultQueueStartTime] forKey:kMTScheduledStartTime]; //recursive
-        return;
-    }
-    double targetSeconds = [self secondsUntilNextTimeOfDay:startDate];
+    double targetSeconds = [startDate secondsUntilNextTimeOfDay];
 	DDLogDetail(@"Will start queue in %f seconds (%f hours), due to beginDate of %@",targetSeconds, (targetSeconds/3600.0), startDate);
 	[self performSelector:@selector(unPauseQueue) withObject:nil afterDelay:targetSeconds];
 }
@@ -739,30 +701,37 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 		return;
 	}
 	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
-    if (!endDate) {
-         [[NSUserDefaults standardUserDefaults] setObject:[self defaultQueueEndTime] forKey:kMTScheduledEndTime];//recursive
-        return;
-    }
-    double targetSeconds = [self secondsUntilNextTimeOfDay:endDate];
+    double targetSeconds = [endDate secondsUntilNextTimeOfDay];
 	DDLogDetail(@"Will pause queue in %f seconds (%f hours), due to endDate of %@",targetSeconds, (targetSeconds/3600.0), endDate);
 	[self performSelector:@selector(pauseQueue:) withObject:@(NO) afterDelay:targetSeconds];
 }
 
+-(BOOL) autoSkipModeScanAllowedNow {
+	NSDate * skipDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
+	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanEndTime ];
+	double startSeconds = [skipDate secondsUntilNextTimeOfDay];
+	double endSeconds =   [endDate secondsUntilNextTimeOfDay];
+	return endSeconds < startSeconds;  //if distance to nextEnd < to nextStart, we must be in middle of allowed time.
+}
+
 -(void)setSkipModeTime {
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(skipModeForAllActiveDownloads) object:@(NO)];
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipMode]) {
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
 		DDLogDetail(@"No scheduled operations auto-pause ");
 		return;
 	}
-	NSDate * skipDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeTime];
-	if (!skipDate) {
-		[[NSUserDefaults standardUserDefaults] setObject:[self defaultSkipModeTime] forKey:kMTScheduledSkipModeTime];//recursive
-		return;
+	NSDate * skipDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
+	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanEndTime ];
+	double startSeconds = [skipDate secondsUntilNextTimeOfDay];
+	double endSeconds =   [endDate secondsUntilNextTimeOfDay];
+	if (startSeconds < endSeconds) {
+		DDLogReport(@"Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",startSeconds, (startSeconds/3600.0), skipDate); ///xxx make detail instead
+		[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:@(NO) afterDelay:startSeconds];
+	} else {
+		//we're in active period, but delay a few seconds due to typing a new time.
+		DDLogReport(@"Will run SkipMode Scan in 15 seconds"); ///xxx make detail instead
+		[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:@(NO) afterDelay:15];
 	}
-	double targetSeconds = [self secondsUntilNextTimeOfDay:skipDate];
-	DDLogDetail(@"Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",targetSeconds, (targetSeconds/3600.0), skipDate);
-	[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:@(NO) afterDelay:targetSeconds];
-
 }
 
 -(void)startAllTiVoQueues
@@ -821,11 +790,14 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 	} else if ([keyPath compare:kMTScheduledStartTime] == NSOrderedSame) {
 		DDLogMajor(@"Set operations start time to %@",[defs objectForKey: kMTScheduledStartTime]);
 		[self setQueueStartTime];
-	} else if ([keyPath compare:kMTScheduledSkipMode] == NSOrderedSame) {
-		DDLogMajor(@"Set SkipMode start time to %@",[defs boolForKey: kMTScheduledSkipMode] ? @"On" : @"Off");
+	} else if ([keyPath compare:kMTScheduledSkipModeScan] == NSOrderedSame) {
+		DDLogMajor(@"Turning SkipModeTime %@",[defs boolForKey: kMTScheduledSkipModeScan] ? @"On" : @"Off");
 		[self setSkipModeTime];
-	} else if ([keyPath compare:kMTScheduledSkipModeTime] == NSOrderedSame) {
-		DDLogMajor(@"Set SkipMode start time to %@",[defs objectForKey: kMTScheduledSkipModeTime]);
+	} else if ([keyPath compare:kMTScheduledSkipModeScanStartTime] == NSOrderedSame) {
+		DDLogMajor(@"Setting SkipMode start time to %@",[defs objectForKey: kMTScheduledSkipModeScanStartTime]);
+		[self setSkipModeTime];
+	} else if ([keyPath compare:kMTScheduledSkipModeScanEndTime] == NSOrderedSame) {
+		DDLogMajor(@"Setting SkipMode end time to %@",[defs objectForKey: kMTScheduledSkipModeScanEndTime]);
 		[self setSkipModeTime];
 	} else if ([keyPath isEqualToString:kMTTiVos]){
         [self updateTiVosFromDefaults];
@@ -934,7 +906,7 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 				[tivoShows removeObject:show];
 			}
 		}
-		[tivo findCommercialsForShows:thisTiVoShows withCompletion:nil];
+		[tivo findCommercialsForShows:thisTiVoShows ];
 	}
 }
 
@@ -1207,7 +1179,8 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 }
 
 -(void) skipModeChannelFound: (NSNotification *) notification {
-	NSString * channelName = (NSString *) notification.object;
+	MTTiVoShow * show = notification.object;
+	NSString * channelName = show.stationCallsign;
 	NSMutableDictionary * channelInfo = [[tiVoManager channelNamed:channelName] mutableCopy];
 	if (channelInfo) {
 		if (((NSNumber *)channelInfo[kMTChannelInfoSkipMode]).intValue == NSMixedState) {
@@ -1465,6 +1438,7 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
             [oldDownload cancel];
 			oldDownload.show.isQueued = NO;
 			[itemsToRemove addIndex:index];
+			[self removeDownloadFromWaitingSkipModeList:oldDownload];
 		}
 	}
 	
@@ -1535,7 +1509,7 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 }
 
 - (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky {
-    DDLogReport(@"Notify: %@\n%@", title, subTitle ?: @"");
+	DDLogReport(@"Notify: %@: %@\n%@", objName, title, subTitle ?: @"");
 
     NSUserNotification *userNot = [[NSUserNotification alloc] init ];
     userNot.title = title;
@@ -1614,6 +1588,47 @@ return [self tomorrowAtTime:1*60];  //start at 1AM tomorrow]
 
     NSNotification *restartNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
     [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:restartNotification afterDelay:2];
+}
+
+-(void)removeDownloadFromWaitingSkipModeList:(MTDownload *) download {
+	if ([self.downloadsWaitingSkipModeList containsObject:download]) {
+		[self.downloadsWaitingSkipModeList removeObject:download];
+	}
+}
+
+-(void)warnNeedSkipModeList:(MTDownload *) download {
+	//Skip mode data is here, so maybe warn user that we need EDL to continue
+	MTTiVoShow * show = download.show;
+	if (!show.hasSkipModeInfo) return; //don't do anything before metadata arrives
+	if (show.hasSkipModeList) return;  //if we already have EDL, no warning needed
+	if ([self.downloadsWaitingSkipModeList containsObject:download]) {
+		//already warned, so nothing to do
+		return;
+	}
+	if (!self.downloadsWaitingSkipModeList) self.downloadsWaitingSkipModeList = [NSMutableSet set];
+	[self.downloadsWaitingSkipModeList addObject:download];
+	[self performSelector:@selector(removeDownloadFromWaitingSkipModeList:) withObject:download afterDelay:24*60*60];
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
+		//scheduled, so if it's soon enough, just wait, otherwise warn.
+		if (self.autoSkipModeScanAllowedNow) {
+			return; //We can do scan now, so no warning needed.
+		} else {
+			NSDate * scheduled = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
+			NSTimeInterval nextEDLTime = [scheduled secondsUntilNextTimeOfDay];
+			if (nextEDLTime > 12*60*60) {
+				[self notifyForName:show.showTitle
+						  withTitle:@"Warning: Missed SkipMode time"
+						   subTitle:[NSString stringWithFormat:@"You can manually load, or cTiVo will try again in %d hrs", (int)floor(nextEDLTime/3600)]
+						   isSticky:YES];
+			}
+		}
+	} else {
+		//not scheduled so warn
+		[self notifyForName:show.showTitle
+				  withTitle:@"Warning: No SkipMode Available"
+				   subTitle:@"You can manually load, or set up Recurring time"
+				   isSticky:YES];
+	}
 }
 
 #pragma mark - Handle directory

@@ -14,6 +14,8 @@
 		1E17E1191FF7ED8900AF0F7C /* MTShowFolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E17E1181FF7ED8900AF0F7C /* MTShowFolder.m */; };
 		1E18145E1708AC1500166E5F /* cTiVo.help in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145D1708AC1500166E5F /* cTiVo.help */; };
 		1E1814601708AF7000166E5F /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145F1708AF7000166E5F /* cTiVo.icns */; };
+		1E20061B2051E70C003FA2D9 /* NSDate+Tomorrow.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E20061A2051E70C003FA2D9 /* NSDate+Tomorrow.m */; };
+		1E20061D205441D7003FA2D9 /* skipModeSlash@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E20061C205441D6003FA2D9 /* skipModeSlash@2x.png */; };
 		1E2724EF16C9A8B500A21940 /* elgatoScript.pl in Resources */ = {isa = PBXBuildFile; fileRef = 1E2724EE16C9A8B500A21940 /* elgatoScript.pl */; };
 		1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */; };
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
@@ -314,6 +316,9 @@
 		1E17E1181FF7ED8900AF0F7C /* MTShowFolder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTShowFolder.m; sourceTree = "<group>"; };
 		1E18145D1708AC1500166E5F /* cTiVo.help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cTiVo.help; sourceTree = "<group>"; };
 		1E18145F1708AF7000166E5F /* cTiVo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cTiVo.icns; sourceTree = "<group>"; };
+		1E2006192051E70C003FA2D9 /* NSDate+Tomorrow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSDate+Tomorrow.h"; sourceTree = "<group>"; };
+		1E20061A2051E70C003FA2D9 /* NSDate+Tomorrow.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSDate+Tomorrow.m"; sourceTree = "<group>"; };
+		1E20061C205441D6003FA2D9 /* skipModeSlash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skipModeSlash@2x.png"; sourceTree = "<group>"; };
 		1E2724EE16C9A8B500A21940 /* elgatoScript.pl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.perl; name = elgatoScript.pl; path = ../elgatoScript.pl; sourceTree = "<group>"; };
 		1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; lineEnding = 1; name = elgatoLaunch.scpt; path = ../elgatoLaunch.scpt; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.simpleColoring; };
 		1E2725C316CB63D500A21940 /* elgatoProgress.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; lineEnding = 1; name = elgatoProgress.scpt; path = ../elgatoProgress.scpt; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.simpleColoring; };
@@ -760,6 +765,7 @@
 				1E964C9A1882768A00C19046 /* save-until-i-delete-recording@2x.png */,
 				1E7A4CE520422E340081884D /* skipMode@2x.png */,
 				1E7A4CE620422E350081884D /* skipModeInverted@2x.png */,
+				1E20061C205441D6003FA2D9 /* skipModeSlash@2x.png */,
 				1E684A7A16E2C50B000F5C6E /* suggestion-recording.png */,
 				1E964C9B1882768A00C19046 /* suggestion-recording@2x.png */,
 				1EDE323819C502980052E6C6 /* tivo.png */,
@@ -1006,6 +1012,8 @@
 				1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */,
 				1E6F22D816DD3D9E0071D291 /* NSString+RFC3339Date.h */,
 				1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */,
+				1E2006192051E70C003FA2D9 /* NSDate+Tomorrow.h */,
+				1E20061A2051E70C003FA2D9 /* NSDate+Tomorrow.m */,
 				D2D60BD016766FA600CE32DE /* NSString+HTML.h */,
 				D2D60BD116766FA600CE32DE /* NSString+HTML.m */,
 				D295CE81175A6AE500D010B8 /* NSString+Helpers.h */,
@@ -1164,6 +1172,7 @@
 				94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */,
 				D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */,
 				1E964CA41882768A00C19046 /* suggestion-recording@2x.png in Resources */,
+				1E20061D205441D7003FA2D9 /* skipModeSlash@2x.png in Resources */,
 				D2D60BB216766EFD00CE32DE /* Credits.rtf in Resources */,
 				D2D60BB816766EFD00CE32DE /* MainMenu.xib in Resources */,
 				D2D60BC516766F3200CE32DE /* formats.plist in Resources */,
@@ -1290,6 +1299,7 @@
 				D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */,
 				D2DFA68F1683C27600CD6CE0 /* MTDownloadCheckTableCell.m in Sources */,
 				D2C390761687FFA600D2062E /* MTiTunes.m in Sources */,
+				1E20061B2051E70C003FA2D9 /* NSDate+Tomorrow.m in Sources */,
 				D2995CA6168B8BB200B960B9 /* MTCheckBox.m in Sources */,
 				D235BF01168F52DE00320FA5 /* MTSubscriptionTableView.m in Sources */,
 				D257C6E41697400700EBE30B /* MTFormatPopUpButton.m in Sources */,

@@ -314,20 +314,13 @@ __DDLOGHERE__
     }
     DDLogDetail(@"GetDetails parsing Finished: %@", self.showTitle);
     self.rpcData = [self.tiVo registerRPCforShow: self];
-    if (!self.rpcData) {
-        [self checkAllInfoSources];
-    }  else {
-        //setRPCData will send detailsLoaded notification
-    }
 }
 
 -(void) setRpcData:(MTRPCData *)rpcData {
+	BOOL gotNewMetaData = (rpcData.clipMetaDataId != nil) && (rpcData.clipMetaDataId != self.rpcData.clipMetaDataId);
     if (rpcData ) { //resetting existing info
         _rpcData = rpcData;
         self.episodeGenre = rpcData.genre;  //no conflict with TVDB
-		if (rpcData.clipMetaDataId) {
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeChannel object:self.stationCallsign];
-		}
 		if (rpcData.edlList.count > 0) {
 			MTEdl * lastCut = [rpcData.edlList lastObject];
 			double overTime = lastCut.endTime - self.showLength;
@@ -351,16 +344,19 @@ __DDLOGHERE__
 					DDLogDetail(@"Got EDL for %@: %@", self, rpcData.edlList);
 					self.edlList = rpcData.edlList;
 					[self addEDLtoFilesOnDisk];
+					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil]; //maybe launch download.
 				}
 #ifdef DEBUG
 			}
 			self.previousEDL = rpcData.edlList;
 #endif
-			
 		}
     } else {
         _rpcData = nil;
     }
+	if (gotNewMetaData) {
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+	}
     [self checkAllInfoSources];
 }
 
@@ -371,15 +367,25 @@ __DDLOGHERE__
     [self checkAllInfoSources];
 }
 
--(BOOL) mightHaveSkipModeData {
+-(BOOL) mightHaveSkipModeInfo {
 //	NSInteger hour = 6;  //doesn't seem to be an actual limiation.
 //	NSInteger minute = 45;
 //	[[NSCalendar currentCalendar] getHour:&hour minute:NULL second:NULL nanosecond:NULL fromDate: self.showDate];
 //	if (hour < 16 && !(hour == 0 && minute <=30)) return NO;
+	if (self.skipModeFailed) return NO;
+	if (self.hasSkipModeInfo || self.hasSkipModeList) return YES;
 	if (self.isSuggestion) return NO;
+	if (!self.tiVo.supportsRPC) return NO;
 	NSString * genre = self.episodeGenre.lowercaseString;
-	if ([genre contains:@"news"] ) return NO;
+	if ([genre isEqualToString:@"news"] ) return NO; //allow news magazine
 	if ([genre contains:@"sports"] ) return NO;
+	if (!self.inProgress.boolValue) {
+		NSInteger minutesToWait = [[NSUserDefaults standardUserDefaults ] integerForKey:kMTWaitForSkipModeInfoTime];
+		if (minutesToWait ==0) minutesToWait = kMTDefaultDelayForSkipModeInfo;
+		if (-[self.showDate timeIntervalSinceNow] > (self.showLength+minutesToWait*60)) {
+			return NO;
+		}
+	}
 	return ([tiVoManager skipModeForChannel:self.stationCallsign] == NSOnState);
 }
 
@@ -862,18 +868,23 @@ __DDLOGHERE__
     }
 }
 
-- (BOOL) hasRPCSkipMode {
+- (BOOL) hasSkipModeList {
 	return self.rpcData.edlList.count > 0;
 }
 
-- (BOOL) canRPCSkipMode {
-	return self.rpcData.clipMetaDataId != nil;
+- (BOOL) hasSkipModeInfo {
+	return self.rpcData.clipMetaDataId != nil && !self.rpcData.skipModeFailed;
 }
 
--(int) rpcSkipMode { //only for sorting in tables
-	if ([self hasRPCSkipMode]) return 2;
-	if ([self canRPCSkipMode]) return 1;
-	return 0;
+- (BOOL) skipModeFailed {
+	return self.rpcData.skipModeFailed;
+}
+
+-(NSNumber *) rpcSkipMode { //only for sorting in tables
+	if ([self hasSkipModeList]) return @3;
+	if ([self skipModeFailed]) return @2;
+	if ([self hasSkipModeInfo]) return @1;
+	return @0;
 }
 
 #pragma mark - Custom Setters; many for parsing
