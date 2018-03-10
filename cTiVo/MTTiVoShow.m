@@ -378,7 +378,7 @@ __DDLOGHERE__
 	if (!self.tiVo.supportsRPC) return NO;
 	NSString * genre = self.episodeGenre.lowercaseString;
 	if ([genre isEqualToString:@"news"] ) return NO; //allow news magazine
-	if ([genre contains:@"sports"] ) return NO;
+	if ([genre isEqualToString:@"sports"] ) return NO;
 	if (!self.inProgress.boolValue) {
 		NSInteger minutesToWait = [[NSUserDefaults standardUserDefaults ] integerForKey:kMTWaitForSkipModeInfoTime];
 		if (minutesToWait ==0) minutesToWait = kMTDefaultDelayForSkipModeInfo;

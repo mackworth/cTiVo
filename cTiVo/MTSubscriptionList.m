@@ -242,7 +242,7 @@
 }
 
 -(MTSubscription *) subscribeShow:(MTTiVoShow *) tivoShow {
-    if ([self findShow:tivoShow] == nil) {      //future: || [[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups] ||
+	if ([self findShow:tivoShow] == nil || [[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups]) {
         MTSubscription * newSub = [MTSubscription subscriptionFromShow:tivoShow];
         //use default properties
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -250,8 +250,8 @@
         newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
         //		newSub.simultaneousEncode = [NSNumber numberWithBool:([defaults boolForKey:kMTSimultaneousEncode] && newSub.encodeFormat.canSimulEncode)];
 		newSub.useSkipMode = [NSNumber numberWithBool: tivoShow.mightHaveSkipModeInfo];
-        newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"RunComSkip"] && newSub.encodeFormat.comSkip.boolValue)];
-        newSub.markCommercials = [NSNumber numberWithBool:([defaults boolForKey:@"MarkCommercials"] && newSub.encodeFormat.canMarkCommercials)];
+        newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:kMTSkipCommercials] && newSub.encodeFormat.comSkip.boolValue)];
+        newSub.markCommercials = [NSNumber numberWithBool:([defaults boolForKey:kMTMarkCommercials] && newSub.encodeFormat.canMarkCommercials)];
         newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
 #ifndef deleteXML
         newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
@@ -270,7 +270,7 @@
 -(MTSubscription *) subscribeDownload:(MTDownload *) download {
     //set the "lastrecording" time for one second before this show, to include this show.
     MTTiVoShow * tivoShow = download.show;
-    if ([self findShow:tivoShow] == nil) {//future: || [[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups] ||
+	if ([self findShow:tivoShow] == nil || [[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups]) {
         MTSubscription * newSub = [MTSubscription subscriptionFromShow: download.show];
         // use queued properties
         newSub.encodeFormat = download.encodeFormat;

@@ -1405,9 +1405,12 @@ __DDLOGHERE__
 //		newDownload.simultaneousEncode = newDownload.encodeFormat.canSimulEncode &&
 //											[defaults boolForKey:kMTSimultaneousEncode];
 		newDownload.skipCommercials = [newDownload.encodeFormat.comSkip boolValue] &&
-											[defaults boolForKey:@"RunComSkip"];
+											[defaults boolForKey:kMTSkipCommercials];
 		newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials &&
-											[defaults boolForKey:@"MarkCommercials"];
+											[defaults boolForKey:kMTMarkCommercials];
+		newDownload.useSkipMode = (newDownload.encodeFormat.canMarkCommercials || newDownload.encodeFormat.comSkip) &&
+		[defaults boolForKey:kMTUseSkipMode];
+		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 #ifndef deleteXML
 		newDownload.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
@@ -1626,7 +1629,7 @@ __DDLOGHERE__
 		//not scheduled so warn
 		[self notifyForName:show.showTitle
 				  withTitle:@"Warning: No SkipMode Available"
-				   subTitle:@"You can manually load, or set up Recurring time"
+				   subTitle:@"You can manually load SkipMode, or set up automatic schedule in Preferences."
 				   isSticky:YES];
 	}
 }

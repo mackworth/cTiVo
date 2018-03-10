@@ -269,7 +269,7 @@ static NSDateFormatter *dateFormatter;
 		MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
 		checkBox.target = myController;
 		checkBox.action = @selector(changeUseSkipMode:);
-		[checkBox setEnabled: thisSubscription.useSkipMode.boolValue] ;
+		[checkBox setEnabled:  [thisSubscription canMarkCommercials] ||  [thisSubscription canSkipCommercials]] ;
 		[checkBox setOn: thisSubscription.useSkipMode.boolValue];
 		checkBox.owner = thisSubscription;
 #ifndef deleteXML

@@ -209,8 +209,9 @@
 #define kMTMaxNumEncoders @"MaxNumberEncoders"	     //Limit number of encoders to limit cpu usage//
 #define kMTMaxProgressDelay @"MaxProgressDelay"      //Maximum time of no encoder progress before giving up (No GUI)  //
 
-#define kMTRunComSkip @"RunComSkip"                  // Whether to run comSkip program after conversion
+#define kMTSkipCommercials @"RunComSkip"                  // Whether to run comSkip program after conversion (historic reasons for code)
 #define kMTMarkCommercials @"MarkCommercials"        // Whether insert chapters for commercials when possible
+#define kMTUseSkipMode @"UseSkipMode"        // Default for whether to use SkipMode when available
 #define kMTExportSubtitles @"ExportSubtitles"        // Whether to export subtitles with ts2ami
 #define kMTExportTextMetaData @"ExportTextMetaData"  // Whether to export text metadata for PyTivo
 

@@ -2583,14 +2583,14 @@ NSInteger diskWriteFailure = 123;
             self.skipCommercials = NO;
         } else if (skipWasDisabled && [self canSkipCommercials]) {
             //newly possible, so take user default
-            self.skipCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
+            self.skipCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSkipCommercials];
         }
         if (!self.canMarkCommercials && self.markCommercials) {
             //no longer possible
             self.markCommercials = NO;
         } else if (markWasDisabled && [self canMarkCommercials]) {
             //newly possible, so take user default
-            self.markCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:@"MarkCommercials"];
+            self.markCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:kMTMarkCommercials];
         }
     }
 }

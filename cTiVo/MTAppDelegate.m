@@ -272,6 +272,7 @@ void signalHandler(int signal)
                                           [NSDate tomorrowAtTime:6*60], kMTScheduledEndTime,  //end at 6AM tomorrow],
 										  [NSDate tomorrowAtTime:30], kMTScheduledSkipModeScanStartTime, //start SkipMode scan at 12:30AM tomorrow]
 										  [NSDate tomorrowAtTime:5*60+45], kMTScheduledSkipModeScanEndTime, //end SkipMode scan at 5:45AM tomorrow]
+										 @YES, kMTUseSkipMode,
 										  nil];
 
     [[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
@@ -298,7 +299,7 @@ void signalHandler(int signal)
 
 	[_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
 	[_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueObservingOptionInitial context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTRunComSkip options:NSKeyValueObservingOptionNew context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTSkipCommercials options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTmpFilesPath options:NSKeyValueObservingOptionInitial context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDownloadDirectory options:NSKeyValueObservingOptionInitial context:nil];
@@ -697,14 +698,14 @@ void signalHandler(int signal)
 		[markCommercialsItem setHidden:!canMark];
 	} else if ([keyPath compare:kMTMarkCommercials] == NSOrderedSame) {
 		BOOL markCom = [[NSUserDefaults standardUserDefaults] boolForKey:kMTMarkCommercials];
-		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
-		if (markCom && runComSkip) {
-			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTRunComSkip];
+		BOOL skipComm = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSkipCommercials];
+		if (markCom && skipComm) {
+			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTSkipCommercials];
 		}
-	} else if ([keyPath compare:kMTRunComSkip] == NSOrderedSame) {
+	} else if ([keyPath compare:kMTSkipCommercials] == NSOrderedSame) {
 		BOOL markCom = [[NSUserDefaults standardUserDefaults] boolForKey:kMTMarkCommercials];
-		BOOL runComSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTRunComSkip];
-		if (markCom && runComSkip) {
+		BOOL skipComm = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSkipCommercials];
+		if (markCom && skipComm) {
 			[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTMarkCommercials];
 		}
 	} else if ([keyPath compare:@"processingPaused"] == NSOrderedSame) {

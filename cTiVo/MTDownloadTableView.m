@@ -400,7 +400,7 @@ __DDLOGHERE__
 		checkBox.owner = download;
 		checkBox.target = myController;
 		checkBox.action = @selector(changeUseSkipMode:);
-		[checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSkip];
+		[checkBox setEnabled: download.isNew && !protected && (download.encodeFormat.canMarkCommercials || download.encodeFormat.canSkip)];
 		
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;

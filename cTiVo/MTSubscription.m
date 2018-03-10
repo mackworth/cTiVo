@@ -80,14 +80,14 @@ __DDLOGHERE__
             self.skipCommercials = [NSNumber numberWithBool:NO];
         } else if (skipWasDisabled && [self canSkipCommercials]) {
             //newly possible, so take user default
-            self.skipCommercials = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"] && self.encodeFormat.comSkip)];
+            self.skipCommercials = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTSkipCommercials] && self.encodeFormat.comSkip)];
         }
         if (!self.canMarkCommercials && self.shouldMarkCommercials) {
             //no longer possible
             self.markCommercials = @NO;
         } else if (markWasDisabled && [self canMarkCommercials]) {
             //newly possible, so take user default
-            self.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:@"MarkCommercials"];
+            self.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMarkCommercials];
         }
     }
 }
@@ -328,8 +328,8 @@ __DDLOGHERE__
     tempSub.includeSuggestions = sub[kMTSubscribedIncludeSuggestions];
     if (tempSub.includeSuggestions ==nil) tempSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
     tempSub.skipCommercials = sub[kMTSubscribedSkipCommercials];
-    if (tempSub.skipCommercials ==nil) tempSub.skipCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTRunComSkip];
-	tempSub.useSkipMode = sub[kMTSubscribedUseSkipMode] ?: @YES;
+    if (tempSub.skipCommercials ==nil) tempSub.skipCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSkipCommercials];
+	tempSub.useSkipMode = sub[kMTSubscribedUseSkipMode] ?:  [[NSUserDefaults standardUserDefaults] objectForKey:kMTUseSkipMode];;
 
     tempSub.markCommercials = sub[kMTSubscribedMarkCommercials];
     if (tempSub.markCommercials ==nil) tempSub.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMarkCommercials];
