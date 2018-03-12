@@ -8,6 +8,7 @@
 
 #import "MTPreferencesViewController.h"
 #import "MTTiVoManager.h"
+#import "MTHelpViewController.h"
 
 @interface MTPreferencesViewController ()
 @property (weak, nonatomic) IBOutlet NSPopUpButton *directoryFormatPopup;
@@ -42,6 +43,12 @@
         return NO;
     }
     return YES;
+}
+
+-(IBAction)commercialHelp:(id)sender {
+	MTHelpViewController *helpController = [[MTHelpViewController alloc] init];
+	[helpController loadResource:@"CommercialHelpFile"];
+	[helpController pointToView:sender preferredEdge:NSMaxXEdge];
 }
 
 -(void) selectDirectoryFormat {

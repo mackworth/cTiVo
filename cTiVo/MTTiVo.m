@@ -577,7 +577,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		if ([show.tiVo isEqual:self]) {
 			if ( !show.inProgress.boolValue && show.mightHaveSkipModeInfo) {
             	DDLogMajor(@"Finding SkipMode points for %@ on %@", show, self);
-            	[self.myRPC findSkipModeForShow:show.idString];
+				show.rpcData.tempLength = show.showLength; //hint in case tivo isn't reporting this
+            	[self.myRPC findSkipModeForShow:show.rpcData];
         	} else {
 				DDLogVerbose(@"Skipping SkipMode points for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : @"" );
 			}

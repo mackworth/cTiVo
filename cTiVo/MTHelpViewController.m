@@ -70,8 +70,18 @@
 }
 
 -(void) loadResource:(NSString *)rtfFile {
+	NSAttributedString *attrHelpText = nil;
 	NSURL *helpFile = [[NSBundle mainBundle] URLForResource:rtfFile withExtension:@"rtf"];
-	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfURL:helpFile] documentAttributes:NULL];
+	if (helpFile) {
+		 attrHelpText= [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfURL:helpFile] documentAttributes:NULL];
+	} else {
+		helpFile = [[NSBundle mainBundle] URLForResource:rtfFile withExtension:@"rtfd"];
+		NSError * error = nil;
+		NSFileWrapper * rtfdDirectory = [[NSFileWrapper alloc] initWithURL:helpFile options:0 error:&error];
+		if (rtfdDirectory && !error){
+			attrHelpText = [[NSAttributedString alloc] initWithRTFDFileWrapper:rtfdDirectory  documentAttributes:NULL];
+		}
+	}
 	if (!attrHelpText) {
 		attrHelpText = [[NSAttributedString alloc] initWithString:
 					[NSString stringWithFormat:@"Can't find help text for %@ at path %@", rtfFile, helpFile]];

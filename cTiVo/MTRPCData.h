@@ -28,6 +28,8 @@
 @property (nonatomic, strong) NSString * clipMetaDataId;
 @property (nonatomic, assign) BOOL skipModeFailed;
 //@property (nonatomic, assign) MPEGFormat format;
+@property (nonatomic, assign) NSTimeInterval tempLength; //hint from TiVoShow, as sometimes TiVo doesn't report
+
 @property (nonatomic, strong) NSString * imageURL;
 @property (nonatomic, strong) NSString * series;
 

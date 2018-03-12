@@ -1,0 +1,40 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+{\fonttbl\f0\fnil\fcharset0 LucidaGrande;}
+{\colortbl;\red255\green255\blue255;\red38\green38\blue38;\red38\green38\blue38;\red10\green77\blue204;
+}
+{\*\expandedcolortbl;;\csgenericrgb\c14902\c14902\c14902;\csgenericrgb\c14902\c14902\c14902;\cssrgb\c1176\c40000\c83922;
+}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\margl1440\margr1440\vieww9000\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa360\partightenfactor0
+
+\f0\fs24 \cf2 cTiVo can automatically remove or mark commercials from your downloaded shows. Unfortunately, it's not a simple process, and you have some decisions to make. \
+\pard\pardeftab720\sa360\partightenfactor0
+\cf3 cTiVo can either "Cut" the commercials out of a show or "Mark" them. Cutting deletes the commercial entirely, while Marking means to add chapter markers, so \cf2 you can easily skip over commercials in your video player\cf3 . The advantage of Marking them is that if there is a mistake, you can just backup to see the whole show, whereas Cutting deletes the commercial content entirely. \cf2 Also, only certain encoders (ffmpeg and the obsolete mencoder) or "Formats" are capable of Cutting  On the other hand, regardless of encoder, only MP4 output files are capable of handling chapter markers. If you choose a Format that is incompatible with one or the other, cTiVo will remove the matching Cut or Mark options from the menus.\cf3  Similarly, choosing Cut will disable Mark and vice-versa.\
+To find out where these commercials are, cTiVo has two mechanisms available.\
+The first is "comskip", which does sophisticated analysis on the entire show and determines where commercials start and stop. As this uses heuristics, sometimes it guesses wrong, but it's pretty accurate most of the time. It takes a large amount of CPU processing, almost as much as re-encoding the entire show. \cf2 This process is dependent on a wide variety of parameters, so some find this a great feature, some find it frustrating as it may miss some commercials or even delete some program material accidentally. Note that comskip can also fail entirely on certain recordings; when this happens, cTiVo will provide an alert, but continue other processing of the download. More information available at {\field{\*\fldinst{HYPERLINK "http://www.kaashoek.com/comskip"}}{\fldrslt \cf4 \expnd0\expndtw0\kerning0
+comskip's website}}\cf4 \expnd0\expndtw0\kerning0
+.\cf3 \kerning1\expnd0\expndtw0 \
+The second is SkipMode where TiVo marks the commercials in certain shows. You'll see this on your TiVo's Now Playing list with the \cf0 SKIP icon, which we use in cTiVo as well. As TiVo's SkipMode analysis is done by humans, it's pretty accurate, but it has some complications as well. Most obviously, TiVo only makes available some information about it, so we literally have to play the video and jump to each segment to see where it starts, which would disrupt your viewing. Assuming you want to use this process, you can either do this manually, selecting certain shows and using the right-click menu item "Find SkipMode Points", or you can have us do it automatically, giving us a range of times that's acceptable for us to take over your TiVo and TV. So when you see the white "SKIP available" icon, that means we have the basic information, but need to run SkipMode to fill in the rest. Finally, sometimes this process will fail, especially if you have a partial recording. Then you'll see the "SKIP failed" icon with a slash through it.\
+\pard\tx1082\pardeftab720\sa360\partightenfactor0
+\cf0 {{\NeXTGraphic skipMode@2x.png \width680 \height440 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}	SkipMode information is fully loaded\
+\pard\tx1083\pardeftab720\sa360\partightenfactor0
+\cf0 {{\NeXTGraphic skipModeInverted@2x.png \width680 \height440 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}	SkipMode information is available, but has to be loaded from TiVo (manually or automatically)\
+\pard\tx1109\pardeftab720\sa360\partightenfactor0
+\cf0 {{\NeXTGraphic skipModeSlash@2x.png \width680 \height440 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}	Failed while loading SkipMode information, most likely due to an incomplete recording.\
+\pard\pardeftab720\sa360\partightenfactor0
+\cf0 Other complications include that TiVo provides SkipMode only on top 20 channels, only on certain types of shows (not live news or sports), and only on certain shows. Furthermore, SkipMode information is only available arrives later than the show and sometimes not at all. You can change which channels might have SkipMode in Preferences>Channels Finally, SkipMode is not available on TiVo's Suggestions, at least until you save the show for later viewing.\
+We've tried to make this as easy as possible to take advantage of SkipMode, while falling back to comskip as needed.  By default, SkipMode is off, as it can interfere with your viewing. Your easiest path to use SkipMode is:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa360\partightenfactor0
+\ls1\ilvl0\cf0 {\listtext	\uc0\u8226 	}Enable "Prefer SkipMode to comskip" in Preferences>General.\
+{\listtext	\uc0\u8226 	}Enable "Auto SkipMode Active from" and give it a range of time each day you're not going to be watching TV.\
+{\listtext	\uc0\u8226 	}Choose Cut or Mark Commercials.\
+{\listtext	\uc0\u8226 	}For each subscription and existing download, enable SkipMode.\
+\pard\tx560\pardeftab720\sa360\partightenfactor0
+\cf0 Then for each show that might have SkipMode data (top 20 channels, not news, etc), we will wait up to four hours to finish processing until the SkipMode information is available (or not).  So if you don't need the shows downloaded as soon as possible, then you should be all set. Note there is another difference between Cut and Mark here. As we can Mark a show after it's been downloaded and encoded, we can process the show and then add the chapter-commercial information once it is received. If it is not eventually received, cTiVo will rerun the process with comskip. \
+}

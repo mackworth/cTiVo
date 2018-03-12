@@ -47,7 +47,7 @@ typedef void (^ReadBlock)(NSDictionary *, BOOL);
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, ReadBlock > * readBlocks;
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, NSDictionary* > * requests; //debug only
 
-@property (nonatomic, strong) NSMutableArray < NSString *> *skipModeQueue;
+@property (nonatomic, strong) NSMutableArray < MTRPCData *> *skipModeQueue;
 
 @end
 
@@ -1334,6 +1334,9 @@ static NSArray * imageResponseTemplate = nil;
 			
 		long long prevPosition = positions.firstObject.longLongValue;
 		DDLogDetail(@"Next Position: %@ versus %@", @(position), @(prevPosition));
+		if (end != 0 && end != positions.lastObject.longLongValue) {
+			 DDLogReport(@"XXX End info: %@ versus %@", @(end), @(positions.lastObject.longLongValue));
+		}
 		long long jumpSize = prevPosition - position;
 		if (jumpSize > 10000 + shortJump * 3000 ||
 			(position > 60000 && jumpSize > 0)) {
@@ -1373,29 +1376,26 @@ static NSArray * imageResponseTemplate = nil;
 	}];
 }
 
--(void) findSkipModeForShow:(NSString *) objectID {
-	MTRPCData * rpcData = nil;
-	@synchronized (self.showMap) {
-		rpcData = self.showMap[objectID];
-	}
+-(void) findSkipModeForShow:(MTRPCData *) rpcData {
 	if (!rpcData) return;
     if (rpcData.edlList) return; //already got it.
 	if (rpcData.skipModeFailed) return;
+	if (!rpcData.contentID) return;
     __weak __typeof__(self) weakSelf = self;
 
     if (rpcData.clipMetaDataId == nil || rpcData.programSegments == nil) {
         //need metadata info first
-		[self retrieveClipMetaDataFor:objectID withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
+		[self retrieveClipMetaDataFor:rpcData.contentID withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
             rpcData.clipMetaDataId = metaDataID;
             rpcData.programSegments = lengths;
             if (lengths.count > 0) {
-                [weakSelf findSkipModeForShow:objectID] ;
+                [weakSelf findSkipModeForShow:rpcData] ;
             }
         }];
         return;
     }
-	if (![self.skipModeQueue containsObject:objectID]) {
-		[self.skipModeQueue addObject:objectID];
+	if (![self.skipModeQueue containsObject:rpcData]) {
+		[self.skipModeQueue addObject:rpcData];
 		if (self.skipModeQueue.count == 1 ) {
 			// restore these?
 			//    [self sendKeyEvent: @"nowShowing" andPause :4.0];
@@ -1414,11 +1414,7 @@ static NSArray * imageResponseTemplate = nil;
         return;
     }
 	DDLogMajor(@"%@Checking for commercials for %@", firstTry ? @"" : @"Re-", self.skipModeQueue[0]);
-	MTRPCData * rpcData = nil;
-	NSString * objectID = self.skipModeQueue[0];
-	@synchronized (self.showMap) {
-		rpcData = self.showMap[objectID];
-	}
+	MTRPCData * rpcData = self.skipModeQueue[0];
 	[self findSkipModePointsForShow:rpcData withCompletionHandler:^{
 		if (rpcData.edlList || !firstTry) {
 			if (!rpcData.edlList) {
@@ -1448,11 +1444,18 @@ static NSArray * imageResponseTemplate = nil;
 			
 		[weakSelf retrievePositionWithCompletionHandler:^(long long startingPoint, long long end) {
 			
-		DDLogVerbose(@"found initial Point of %@ / %@", @(startingPoint), @(end));
+		DDLogDetail(@"found initial Point of %@ / %@", @(startingPoint), @(end));
         if (end <= 0) {
-            DDLogDetail(@"Retrieve Position has no end data");
-            end = 24*3600*1000;
-        }
+			if (rpcData.tempLength <= 0) {
+				DDLogReport(@"XXX Neither show nor RPC has correct length");
+            	end = 24*3600*1000;
+			} else {
+				DDLogReport(@"XXX Correcting RPC length to %lld", (long long) rpcData.tempLength*1000);
+				end = rpcData.tempLength*1000;
+			}
+		} else {
+			if (ABS(rpcData.tempLength*1000 - end) > 1) DDLogReport(@"XXX RPC shows length as  %lld vs showLength as %lld",end, (long long) rpcData.tempLength*1000);
+		}
 		[weakSelf jumpToPosition:end-5000 withCompletionHandler:^(BOOL success) {
 			
 		[weakSelf afterDelay:1.0 launchBlock:^{

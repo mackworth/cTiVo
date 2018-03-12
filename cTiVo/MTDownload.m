@@ -2468,8 +2468,9 @@ NSInteger diskWriteFailure = 123;
 
 -(BOOL) runComskip {
 	//we're launching now, so should we use comskip or not
-	return (self.shouldSkipCommercials || self.shouldMarkCommercials) &&
-		   (!self.useSkipMode || !self.show.hasSkipModeList);
+	//Either  we want commercials but won't/can't use SkipMode, OR we want to skip but we don't have list yet. (Can add mark later)
+	return  ((self.shouldSkipCommercials || self.shouldMarkCommercials) && (!self.useSkipMode || !self.show.mightHaveSkipModeInfo) ) ||
+		    (self.shouldSkipCommercials && !self.show.hasSkipModeList);
 }
 
 -(BOOL) waitForSkipModeData {
@@ -2477,7 +2478,8 @@ NSInteger diskWriteFailure = 123;
 	if (self.show.hasSkipModeList) return NO; //ready to go!
 	if (!self.useSkipMode) return NO;
 	if ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOffState) return NO;
-	if (!self.shouldSkipCommercials  && !self.shouldMarkCommercials) return NO;
+	if (self.shouldMarkCommercials) return NO; //we can add commercial info later
+	if (!self.shouldSkipCommercials) return NO; //we don't need commercial info
 	if (!self.show.mightHaveSkipModeInfo) return NO; //never coming
 	//now we want the skipmode EDL, but it hasn't been pulled over yet
 	if (self.show.hasSkipModeInfo) {

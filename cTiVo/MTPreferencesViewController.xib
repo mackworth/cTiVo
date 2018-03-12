@@ -18,7 +18,7 @@
             <rect key="frame" x="0.0" y="0.0" width="541" height="525"/>
             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <button toolTip="Display copy-protected shows on TiVo,  (still not accessible)" misplaced="YES" id="3Eg-fa-fKg">
+                <button toolTip="Display copy-protected shows on TiVo,  (still not downloadable)" misplaced="YES" id="3Eg-fa-fKg">
                     <rect key="frame" x="20" y="447" width="163" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Show Protected Shows" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Owa-XB-Onm">
@@ -145,15 +145,16 @@
                         <binding destination="248" name="value" keyPath="values.PreventSleep" id="5DA-8o-eHM"/>
                     </connections>
                 </button>
-                <button toolTip="Disables sleep while queue is processing" misplaced="YES" id="fAJ-i5-FOz">
+                <button misplaced="YES" id="fAJ-i5-FOz">
                     <rect key="frame" x="275" y="244" width="225" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <string key="toolTip">Use TiVo's SkipMode rather than comskip. This may delay downloads until SkipMode info is received, and requires either AutoSkipMode or manual SkipMode processing.</string>
                     <buttonCell key="cell" type="check" title="Prefer TiVo SkipMode to comSkip" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="jG9-lG-bBo">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
-                        <binding destination="248" name="value" keyPath="values.PreventSleep" id="VK1-kh-gIy"/>
+                        <binding destination="248" name="value" keyPath="values.UseSkipMode" id="qCi-Aa-ZpB"/>
                     </connections>
                 </button>
                 <textField verticalHuggingPriority="750" misplaced="YES" id="LGi-kg-9rl">
@@ -375,9 +376,10 @@
                         </binding>
                     </connections>
                 </button>
-                <button toolTip="Schedule Automatic retrieval of commercial SkipMode Info from your TiVos. This WILL disrupt viewing for a brief period." misplaced="YES" id="R2c-RO-LcA">
+                <button misplaced="YES" id="R2c-RO-LcA">
                     <rect key="frame" x="275" y="209" width="194" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <string key="toolTip">Schedule Automatic retrieval of commercial SkipMode Info from your TiVos. This WILL disrupt viewing (but not recordings) for a brief period.</string>
                     <buttonCell key="cell" type="check" title="Auto SkipMode Active From:" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="962-Wg-pi0">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
@@ -399,8 +401,8 @@
                         <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
                     </datePickerCell>
                     <connections>
-                        <binding destination="248" name="value" keyPath="values.ScheduledSkipModeStartTime" id="0lj-f9-Dfd"/>
                         <binding destination="248" name="enabled" keyPath="values.ScheduleSkipMode" id="GQM-Q0-048"/>
+                        <binding destination="248" name="value" keyPath="values.ScheduledSkipModeStartTime" id="0lj-f9-Dfd"/>
                     </connections>
                 </datePicker>
                 <datePicker verticalHuggingPriority="750" misplaced="YES" id="Udg-U4-ecr">
@@ -459,6 +461,17 @@
                     </buttonCell>
                     <connections>
                         <binding destination="248" name="value" keyPath="values.iTunesSync" id="Gm2-bo-VNC"/>
+                    </connections>
+                </button>
+                <button horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" id="m0f-VZ-Chb">
+                    <rect key="frame" x="409" y="335" width="25" height="25"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="help" bezelStyle="helpButton" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="A3g-UQ-Fbx">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="commercialHelp:" target="-2" id="g7q-7R-7qY"/>
                     </connections>
                 </button>
             </subviews>
