@@ -1102,7 +1102,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" id="qQB-l8-FUr" userLabel="leftText">
-                                                                            <rect key="frame" x="3" y="0.0" width="0.0" height="17"/>
+                                                                            <rect key="frame" x="5" y="0.0" width="0.0" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="nX6-ru-GCz">
                                                                                 <font key="font" metaFont="system"/>
@@ -1111,7 +1111,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="FEf-Ia-wX9" userLabel="rightText">
-                                                                            <rect key="frame" x="-83" y="0.0" width="80" height="17"/>
+                                                                            <rect key="frame" x="-87" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="a0F-vx-fpu">
                                                                                 <font key="font" size="10" name="Helvetica"/>
@@ -1789,8 +1789,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Skip" width="30" minWidth="32" maxWidth="30" headerToolTip="Use comskip to find and delete commercials.   Mutually exclusive with Skip commercials" id="945">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Skip">
+                                                        <tableColumn identifier="Skip" width="30" minWidth="32" maxWidth="30" headerToolTip="Find and delete commercials.   Mutually exclusive with Mark commercials" id="945">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Cut">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1823,7 +1823,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="32" headerToolTip="Use comskip to find and mark commercials as chapters.  Mutually exclusive with Skip commercials" id="1318">
+                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="32" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Cut commercials" id="1318">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Mark">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -2192,8 +2192,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Skip" width="32" minWidth="32" maxWidth="32" headerToolTip="Attempt to delete commercials.   Mutually exclusive with Skip commercials" id="853">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Skip">
+                                                        <tableColumn identifier="Skip" width="32" minWidth="32" maxWidth="32" headerToolTip="Attempt to delete commercials.   Mutually exclusive with Mark commercials" id="853">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Cut">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2212,7 +2212,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="32" headerToolTip="Use comskip to find and mark commercials as chapters.  Mutually exclusive with Skip commercials" id="1324">
+                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="32" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Cut commercials" id="1324">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Mark">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -2252,7 +2252,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="SDOnly" width="50" minWidth="32" maxWidth="50" hidden="YES" headerToolTip="Use comskip to find and mark commercials as chapters.  Mutually exclusive with Skip commercials" id="1366">
+                                                        <tableColumn identifier="SDOnly" width="50" minWidth="32" maxWidth="50" hidden="YES" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Cut commercials" id="1366">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SD Only">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>

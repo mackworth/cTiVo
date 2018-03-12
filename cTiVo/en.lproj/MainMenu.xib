@@ -228,13 +228,13 @@ CA
                             <menuItem isSeparatorItem="YES" id="wz5-lr-PXJ">
                                 <attributedString key="attributedTitle"/>
                             </menuItem>
-                            <menuItem title="Mark Commercials" toolTip="Create chapter markers to easily skip commercials while viewing. Mutually exclusive with Skip Commercials." id="1109">
+                            <menuItem title="Mark Commercials" toolTip="Create chapter markers to easily skip over commercials while viewing. Mutually exclusive with Cut Commercials." id="1109">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.MarkCommercials" id="mAh-YP-JUC"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Skip Commercials" toolTip="Will attempt to remove commercials.  Mutually exclusive with Mark Commercials." id="1106">
+                            <menuItem title="Cut Commercials" toolTip="Remove commercials during processing.  Mutually exclusive with Mark Commercials." id="1106">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.RunComSkip" id="qQj-dE-L8i"/>
