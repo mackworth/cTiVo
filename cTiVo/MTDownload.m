@@ -171,7 +171,7 @@ __DDLOGHERE__
     self.downloadDirectory = nil;
 
     if (!self.isNew){
-        [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+        self.downloadStatus = @(kMTStatusNew);
     }
     if (notifyTiVo) {
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
@@ -368,8 +368,9 @@ __DDLOGHERE__
 	download.useSkipMode = [queueEntry[kMTSubscribedUseSkipMode ]  boolValue]; //could be nil, but that works.
 	download.markCommercials = [queueEntry[kMTSubscribedMarkCommercials ]  boolValue];
 
-	if (download.isInProgress) download.downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
-	
+	if (download.isInProgress) {
+		download.downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
+	}
 	download.encodeFilePath = queueEntry[kMTQueueFinalFile];
 	download.show.protectedShow = @YES; //until we matchup with show or not.
 	download.genTextMetaData = queueEntry[kMTQueueGenTextMetaData]; if (!download.genTextMetaData) download.genTextMetaData= @(NO);
@@ -869,7 +870,7 @@ __DDLOGHERE__
 		if (!strongSelf) return NO;
         if (!strongSelf.shouldSimulEncode) {
             if (strongSelf.downloadStatus.intValue < kMTStatusDownloaded ) {
-                [strongSelf setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
+                strongSelf.downloadStatus = @(kMTStatusDownloaded);
             }
             [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationDecryptDidFinish object:nil];
             if (strongSelf.decryptedFilePath) {
@@ -982,7 +983,7 @@ __DDLOGHERE__
             DDLogReport(@" %@ encoding complete, but empty file found: %@",strongSelf, strongSelf.encodeFilePath );
             return NO;
         }
-        [strongSelf setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
+        strongSelf.downloadStatus = @(kMTStatusEncoded);
         strongSelf.processProgress = 1.0;
        if (strongSelf.taskFlowType != kMTTaskFlowSimuMarkcom && strongSelf.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
             [strongSelf writeMetaDataFiles];
@@ -1031,7 +1032,7 @@ __DDLOGHERE__
                 strongSelf.processProgress = 0.0;
                 strongSelf.previousProcessProgress = 0.0;
                 strongSelf.totalDataRead = 0.0;
-                [strongSelf setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                strongSelf.downloadStatus = @(kMTStatusEncoding);
                 [strongSelf performSelectorInBackground:@selector(writeData) withObject:nil];
                 return YES;
             };
@@ -1068,7 +1069,7 @@ __DDLOGHERE__
             };
             encodeTask.startupHandler = ^BOOL(){
                 weakSelf.processProgress = 0.0;
-                [weakSelf setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                weakSelf.downloadStatus = @(kMTStatusEncoding);
                 return YES;
             };
         }
@@ -1138,7 +1139,7 @@ __DDLOGHERE__
         if (!self.encodeFormat.canSimulEncode) {
             captionTask.startupHandler = ^BOOL(){
                 weakSelf.processProgress = 0.0;
-                [weakSelf setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
+                weakSelf.downloadStatus = @(kMTStatusCaptioning);
                 return YES;
             };
         }
@@ -1232,7 +1233,7 @@ __DDLOGHERE__
         // For these cases the encoding tasks is the driver
         commercialTask.startupHandler = ^BOOL(){
             weakSelf.processProgress = 0.0;
-            [weakSelf setValue:[NSNumber numberWithInt:kMTStatusCommercialing] forKeyPath:@"downloadStatus"];
+            weakSelf.downloadStatus = @(kMTStatusCommercialing);
             return YES;
         };
 
@@ -1256,13 +1257,13 @@ __DDLOGHERE__
 				 if (!strongSelf.shouldSimulEncode) {
 					strongSelf.processProgress = 1.0;
 				 }
-				[strongSelf setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
+				strongSelf.downloadStatus = @(kMTStatusCommercialed);
 				if (strongSelf.exportSubtitles.boolValue && strongSelf.skipCommercials && strongSelf.captionFilePath && weakCaption.successfulExit) {
                     [strongSelf fixupSRTsDueToCommercialSkipping];
 				}
              } else {
                  strongSelf.processProgress = 1.0;
-                 [strongSelf setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
+                 strongSelf.downloadStatus = @(kMTStatusCommercialed);
                  [strongSelf writeMetaDataFiles];
                  [strongSelf finishUpPostEncodeProcessing];
              }
@@ -1396,7 +1397,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     //Before starting make sure we can launch.
 	if (![self encoderPath] || ! [self configureFiles]) {
         DDLogReport(@"Cancelling launch");
-        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+        self.downloadStatus = @(kMTStatusFailed);
         self.processProgress = 1.0;
         [self progressUpdated];
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
@@ -1434,14 +1435,14 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             [taskArray addObject:@[decryptTask]];
         } else {
             [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
-            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+            self.downloadStatus = @(kMTStatusFailed);
             return;
         }
     }
     MTTask * encodeTask = self.encodeTask;
     if (!encodeTask) {
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
-        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+        self.downloadStatus = @(kMTStatusFailed);
         return;
     }
     switch (self.taskFlowType) {
@@ -1685,7 +1686,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         if (!(_decryptTask.successfulExit && _encodeTask.successfulExit)) {
             DDLogReport(@"Strange: thought we were finished, but later %@ failure", _decryptTask.successfulExit ? @"encode" : @"decrypt");
             [self cancel]; //just in case
-            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+            self.downloadStatus = @(kMTStatusFailed);
             return;
         }
         NSImage * artwork = nil;
@@ -1725,7 +1726,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         if (self.addToiTunesWhenEncoded) {
             DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
             self.processProgress = 1.0;
-            [self setValue:[NSNumber numberWithInt:kMTStatusAddingToItunes] forKeyPath:@"downloadStatus"];
+            self.downloadStatus = @(kMTStatusAddingToItunes);
             MTiTunes *iTunes = [[MTiTunes alloc] init];
             NSString * iTunesPath = [iTunes importIntoiTunes:self withArt:artwork] ;
             
@@ -1768,7 +1769,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 			[self.show.tiVo deleteTiVoShows:@[self.show] ];
 		}
     }
-	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
+	self.downloadStatus = @(kMTStatusDone);
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  //Currently Free up an encoder/ notify subscription module / update UI
     self.processProgress = 1.0;
     [self progressUpdated];
@@ -1817,7 +1818,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             //test failed without triggering a audiocheck!
             DDLogReport(@"Failure during PS Test for %@", self.show.showTitle );
             [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];
-            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+            self.downloadStatus = @(kMTStatusFailed);
         }
         self.processProgress = 1.0;
     } else {
@@ -1833,7 +1834,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                              subTitle:@"Download cancelled"];
         } else if (([decrementRetries boolValue] && self.numRetriesRemaining <= 0) ||
                    (![decrementRetries boolValue] && self.numStartupRetriesRemaining <=0)) {
-            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+            self.downloadStatus = @(kMTStatusFailed);
             self.processProgress = 1.0;
 #ifndef DEBUG
            [Answers logCustomEventWithName:@"Failure"
@@ -1857,7 +1858,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                self.numStartupRetriesRemaining--;
                 DDLogDetail(@"Decrementing startup retries to %@",@(self.numStartupRetriesRemaining));
             }
-            [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+            self.downloadStatus = @(kMTStatusNew);
         }
     }
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
@@ -1913,7 +1914,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 //    if ([self.downloadStatus intValue] == kMTStatusCommercialing) {
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
 //    }
-//    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+//    self.downloadStatus = @(kMTStatusNew);
     self.processProgress = 0.0;
 
 }
@@ -2344,7 +2345,7 @@ NSInteger diskWriteFailure = 123;
 			NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
 			if (noRecording.location != NSNotFound) { //This is a missing recording
 				DDLogReport(@"Deleted TiVo show; marking %@",self);
-				self.downloadStatus = [NSNumber numberWithInt: kMTStatusDeleted];
+				self.downloadStatus = @(kMTStatusDeleted);
                 [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
 				return;
             } else {
@@ -2393,9 +2394,9 @@ NSInteger diskWriteFailure = 123;
                 if (!self.isDone) {
                     [self cancel];
                     if (foundAudioOnly) {
-                       [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+                       self.downloadStatus = @(kMTStatusFailed);
                     } else {
-                        [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
+                        self.downloadStatus = @(kMTStatusDone);
                     }
                     self.processProgress = 1.0;
                 }
@@ -2408,16 +2409,16 @@ NSInteger diskWriteFailure = 123;
                 [self notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
                              subTitle:@"Transfer is too short" ];
                 if (self.shouldSimulEncode) {
-                    [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                    self.downloadStatus = @(kMTStatusEncoding);
                 } else if ( self.exportSubtitles.boolValue ){
-                    [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
+                    self.downloadStatus = @(kMTStatusCaptioning);
                 }
             }
 		} else {
             if (self.shouldSimulEncode ) {
-                [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                self.downloadStatus = @(kMTStatusEncoding);
             } else if (self.exportSubtitles.boolValue) {
-                [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
+                self.downloadStatus = @(kMTStatusCaptioning);
             }
 			self.show.fileSize = downloadedFileSize;  //More accurate file size
             if ([self.bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
