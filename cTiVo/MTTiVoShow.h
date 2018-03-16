@@ -139,6 +139,7 @@
 @property (nonatomic, readonly) BOOL hasSkipModeInfo;
 @property (nonatomic, readonly) BOOL skipModeFailed;
 @property (nonatomic, readonly) NSNumber * rpcSkipMode; //only for sorting in tables
+@property (nonatomic, readonly) NSTimeInterval timeLeftTillRPCInfoWontCome;
 
 @property (nonatomic, readonly) NSArray <NSString *> *copiesOnDisk;
 

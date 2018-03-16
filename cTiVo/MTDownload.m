@@ -70,6 +70,7 @@
 *nameLockFilePath, //.lck to ensure we don't save to same file name twice
 *captionFilePath; //.srt after caption processing
 
+@property (nonatomic, strong) NSTimer * waitForSkipModeInfoTimer;
 
 @end
 
@@ -110,7 +111,8 @@ __DDLOGHERE__
     [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
     [self addObserver:self forKeyPath:@"processProgress" options:NSKeyValueObservingOptionOld context:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showUpdated:) name:kMTNotificationFoundSkipModeInfo object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeInfo object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeList object:nil];
 }
 
 -(id) copyWithZone:(NSZone *)zone {
@@ -174,18 +176,56 @@ __DDLOGHERE__
         self.downloadStatus = @(kMTStatusNew);
     }
     if (notifyTiVo) {
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
-    }
+		[self checkQueue];
+	}
 }
 
 -(void)progressUpdated {
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationProgressUpdated object:self];
 }
 
--(void) showUpdated: (NSNotification *) notification {
+-(void) addEDLtoFilesOnDisk {
+	if (self.show.edlList.count == 0) return;
+	MTTiVoShow * show = self.show;
+	for (NSString * filename in show.copiesOnDisk) {
+		MP4FileHandle *encodedFile = MP4Modify([filename cStringUsingEncoding:NSUTF8StringEncoding],0);
+		BOOL added = [show.edlList addAsChaptersToMP4File: encodedFile forShow: show.showTitle withLength: show.showLength keepingCommercials: YES ];
+		if (added) DDLogMajor(@"Retroactively added commercial info to download %@ in file %@", self, filename);
+		MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
+	}
+}
+
+-(void) skipModeUpdated: (NSNotification *) notification {
 	MTTiVoShow * show = notification.object;
 	if (show && show == self.show) {
-		[self waitForSkipModeData ]; //checks if possible to pull now
+		if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
+			if (show.hasSkipModeList) {
+				DDLogMajor(@"Got SkipMode EDL for %@: %@", self, self.show.edlList);
+				[self stopWaitSkipModeTimer];
+				[self addEDLtoFilesOnDisk];
+				[self finalFinalProcessing];
+			} else if (show.skipModeFailed) {
+				DDLogMajor(@"Got Invalid EDL for %@; canceling wait", self);
+				[self stopWaitSkipModeTimer];
+				[self cancel];
+			} else if (show.hasSkipModeInfo) {
+				DDLogMajor(@"Got Skip Mode Info for %@; canceling timer", self);
+				[self stopWaitSkipModeTimer];
+				if (tiVoManager.autoSkipModeScanAllowedNow) {
+					[self.show.tiVo findCommercialsForShows:@[self.show]  ];
+				} else {
+					[tiVoManager warnNeedSkipModeList:self];
+				}
+			}
+		} else if ([self waitForSkipModeData ]) {
+			if (self.downloadStatus.intValue == kMTStatusNew) {
+				self.downloadStatus = @(kMTStatusSkipModeWaitInitial);
+			}
+		} else {
+			if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
+				self.downloadStatus = @(kMTStatusNew);
+			}
+		};
 	}
 }
 
@@ -985,10 +1025,27 @@ __DDLOGHERE__
         }
         strongSelf.downloadStatus = @(kMTStatusEncoded);
         strongSelf.processProgress = 1.0;
-       if (strongSelf.taskFlowType != kMTTaskFlowSimuMarkcom && strongSelf.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
-            [strongSelf writeMetaDataFiles];
-            [strongSelf finishUpPostEncodeProcessing];
-        }
+		//normally when encode finished, we're all done, except when we have parallel tasks still running, or follow-on tasks to come.
+		BOOL notDone = NO;
+		switch (strongSelf.taskFlowType) {
+			case kMTTaskFlowSimuSubtitles:
+				notDone = strongSelf.captionTask.isRunning;
+				break;
+			case kMTTaskFlowNonSimuMarkcom:
+			case kMTTaskFlowNonSimuMarkcomSubtitles:
+				notDone = !strongSelf.commercialTask.isRunning;
+				break;
+			case kMTTaskFlowSimuMarkcom :
+			case kMTTaskFlowSimuMarkcomSubtitles :
+				notDone = YES; //always run commercial after encoder
+				break;
+			default:
+				break;
+		}
+		if (!notDone) {
+			[strongSelf finishUpPostEncodeProcessing];
+		}
+
         return YES;
     };
 
@@ -1155,6 +1212,9 @@ __DDLOGHERE__
             [strongSelf fixupSRTsDueToCommercialSkipping];
         }
         [strongSelf markCompleteCTiVoFile:strongSelf.captionFilePath];
+		if (strongSelf.encodeTask.successfulExit) {
+			[strongSelf finishUpPostEncodeProcessing];
+		}
 		return YES;
     };
     
@@ -1253,19 +1313,21 @@ __DDLOGHERE__
 
             DDLogMajor(@"Finished detecting commercials in %@",strongSelf.show.showTitle);
             strongSelf.show.edlList = [NSArray getFromEDLFile:strongSelf.commercialFilePath];
+			strongSelf.downloadStatus = @(kMTStatusCommercialed);
              if (strongSelf.taskFlowType != kMTTaskFlowSimuMarkcom && strongSelf.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
 				 if (!strongSelf.shouldSimulEncode) {
 					strongSelf.processProgress = 1.0;
 				 }
-				strongSelf.downloadStatus = @(kMTStatusCommercialed);
 				if (strongSelf.exportSubtitles.boolValue && strongSelf.skipCommercials && strongSelf.captionFilePath && weakCaption.successfulExit) {
                     [strongSelf fixupSRTsDueToCommercialSkipping];
 				}
              } else {
-                 strongSelf.processProgress = 1.0;
-                 strongSelf.downloadStatus = @(kMTStatusCommercialed);
-                 [strongSelf writeMetaDataFiles];
-                 [strongSelf finishUpPostEncodeProcessing];
+				 if (strongSelf.encodeTask.successfulExit) {
+					 strongSelf.processProgress = 1.0;
+                 	[strongSelf finishUpPostEncodeProcessing];
+				 } else {
+					 strongSelf.downloadStatus = @(kMTStatusEncoding);
+				 }
              }
             [strongSelf markCompleteCTiVoFile:strongSelf.commercialFilePath];
             return YES;
@@ -1582,11 +1644,10 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     if (downloadDelay < 0) {
         downloadDelay = 0;
     }
-    [self setValue:@(kMTStatusWaiting) forKeyPath:@"downloadStatus"];
+	self.downloadStatus = @(kMTStatusWaiting);
     [self performSelector:@selector(setDownloadStatus:) withObject:@(kMTStatusDownloading) afterDelay:downloadDelay];
 
-	if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile)
-	{
+	if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {
         DDLogReport(@"Starting URL %@ for show %@ in %0.1lf seconds", downloadURL,self.show.showTitle, downloadDelay);
 		[self.activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[self.activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
@@ -1669,6 +1730,79 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     }
 }
 
+-(void) finalFinalProcessing {
+	//allows for delayed Marking of commercials
+	if (self.addToiTunesWhenEncoded) {
+		DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
+		self.processProgress = 1.0;
+		self.downloadStatus = @(kMTStatusAddingToItunes);
+		MTiTunes *iTunes = [[MTiTunes alloc] init];
+		NSString * iTunesPath = [iTunes importIntoiTunes:self withArt:self.show.artWorkImage] ;
+		
+		if (iTunesPath && ![iTunesPath isEqualToString: self.encodeFilePath]) {
+			//apparently iTunes created new file
+			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
+				[self deleteVideoFile];
+				//move caption, commercial, and pytivo metadata files along with video
+				NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
+				if (self.shouldEmbedSubtitles && self.captionFilePath) {
+					self.captionFilePath = [self moveFile:self.captionFilePath toITunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: self.captionFilePath;
+				}
+				if (self.genTextMetaData.boolValue) {
+					NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
+					NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
+					[self moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
+				}
+				//but remember new file for future processing
+				self.encodeFilePath= iTunesPath;
+			} else {
+				//two copies now, so add xattrs to iTunes copy as well; leave captions/metadata/commercials with original
+				[tiVoManager addShow: self.show onDiskAtPath: iTunesPath];
+			}
+		}
+	}
+#ifndef DEBUG
+	NSInteger retries = ([[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries] - self.numRetriesRemaining) ;
+	NSString * retryString = [NSString stringWithFormat:@"%d",(int) retries];
+	[Answers logCustomEventWithName:@"Success"
+				   customAttributes:@{@"Format" : self.encodeFormat.name,
+									  @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
+									  @"Retries" : retryString }];
+#endif
+	[self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil ];
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTIfSuccessDeleteFromTiVo]) {
+		DDLogReport(@"Deleting %@ after successful download",self.show);
+		[self.show.tiVo deleteTiVoShows:@[self.show] ];
+	}
+	self.downloadStatus = @(kMTStatusDone);
+}
+
+-(void) skipModeExpired {
+	//called if timer expires on downloading show info
+	DDLogMajor(@"Never got SkipMode Info for %@. Retrying with comskip",self.show);
+	[self stopWaitSkipModeTimer];
+	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) return; //shouldn't be here
+	if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial ) {
+		self.useSkipMode = NO; //have to try comskip now
+		self.downloadStatus = @(kMTStatusNew);
+	} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd ) {
+		self.useSkipMode = NO; //have to try comskip now
+		[self deleteVideoFile]; //this hurts; maybe whole new comskip only path?
+		[self cancel];
+	}
+}
+
+-(void) startWaitSkipModeTimer {
+	if (!self.waitForSkipModeInfoTimer) {
+		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome;
+		self. waitForSkipModeInfoTimer = [NSTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
+	}
+}
+
+-(void) stopWaitSkipModeTimer {
+	[self.waitForSkipModeInfoTimer invalidate]; self.waitForSkipModeInfoTimer = nil;
+}
+
 -(void) finishUpPostEncodeProcessing {
     if (_decryptTask.isRunning ||
         _encodeTask.isRunning ||
@@ -1679,20 +1813,18 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         [self performSelector:@selector(finishUpPostEncodeProcessing) withObject:nil afterDelay:0.5];
         return;
     }
-    NSDate *startTime = [NSDate date];
+	NSDate *startTime = [NSDate date];
     DDLogMajor(@"Starting finishing @ %@",startTime);
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-    if (!self.encodeFormat.isTestPS) {
+	[self writeMetaDataFiles];
+    if (self.encodeFormat.isTestPS) {
+		self.downloadStatus = @(kMTStatusDone);
+	} else {
         if (!(_decryptTask.successfulExit && _encodeTask.successfulExit)) {
             DDLogReport(@"Strange: thought we were finished, but later %@ failure", _decryptTask.successfulExit ? @"encode" : @"decrypt");
             [self cancel]; //just in case
             self.downloadStatus = @(kMTStatusFailed);
             return;
-        }
-        NSImage * artwork = nil;
-        if (self.encodeFormat.canAcceptMetaData || self.addToiTunesWhenEncoded) {
-            //see if we can find artwork already downloaded for this show
-            artwork = self.show.artWorkImage;
         }
         //dispose of 3-character (BOM) subtitle files
         unsigned long long fileSize =  [[NSFileManager defaultManager] attributesOfItemAtPath:self.captionFilePath error:nil].fileSize;
@@ -1718,58 +1850,23 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 }
             }
             if (self.encodeFormat.canAcceptMetaData) {
-                [self.show addExtendedMetaDataToFile:encodedFile withImage:artwork];
+                [self.show addExtendedMetaDataToFile:encodedFile withImage:self.show.artWorkImage];
             }
             
             MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
         }
-        if (self.addToiTunesWhenEncoded) {
-            DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
-            self.processProgress = 1.0;
-            self.downloadStatus = @(kMTStatusAddingToItunes);
-            MTiTunes *iTunes = [[MTiTunes alloc] init];
-            NSString * iTunesPath = [iTunes importIntoiTunes:self withArt:artwork] ;
-            
-            if (iTunesPath && ![iTunesPath isEqualToString: self.encodeFilePath]) {
-                //apparently iTunes created new file
-                if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
-                    [self deleteVideoFile];
-                    //move caption, commercial, and pytivo metadata files along with video
-                    NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
-                    if (self.shouldEmbedSubtitles && self.captionFilePath) {
-                         self.captionFilePath = [self moveFile:self.captionFilePath toITunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: self.captionFilePath;
-                    }
-                    if (self.genTextMetaData.boolValue) {
-                        NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
-                        NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
-                        [self moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
-                    }
-                    //but remember new file for future processing
-                    self.encodeFilePath= iTunesPath;
-                } else {
-                    //two copies now, so add xattrs to iTunes copy as well; leave captions/metadata/commercials with original
-                    [tiVoManager addShow: self.show onDiskAtPath: iTunesPath];
-                }
-            }
-        }
         [tiVoManager addShow: self.show onDiskAtPath:self.encodeFilePath];
     //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
         DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], self.show.showTitle);
-#ifndef DEBUG
-        NSInteger retries = ([[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries] - self.numRetriesRemaining) ;
-        NSString * retryString = [NSString stringWithFormat:@"%d",(int) retries];
-        [Answers logCustomEventWithName:@"Success"
-                       customAttributes:@{@"Format" : self.encodeFormat.name,
-                                          @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
-                                          @"Retries" : retryString }];
-#endif
-        [self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil ];
-		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTIfSuccessDeleteFromTiVo]) {
-			DDLogReport(@"Deleting %@ after successful download",self.show);
-			[self.show.tiVo deleteTiVoShows:@[self.show] ];
-		}
     }
-	self.downloadStatus = @(kMTStatusDone);
+	if (self.useSkipMode && self.markCommercials && !self.show.edlList) {
+		self.downloadStatus = @(kMTStatusSkipModeWaitEnd);
+		if (!self.show.hasSkipModeInfo) {
+			[self startWaitSkipModeTimer];
+		}
+	} else {
+		[self finalFinalProcessing];
+	}
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  //Currently Free up an encoder/ notify subscription module / update UI
     self.processProgress = 1.0;
     [self progressUpdated];
@@ -1861,8 +1958,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             self.downloadStatus = @(kMTStatusNew);
         }
     }
-    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
-    
+	[self checkQueue];
 }
 
 -(void)cancel
@@ -1905,16 +2001,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     if (self.downloadStatus.intValue == kMTStatusDone) {
         self.baseFileName = nil;  //Force new file for rescheduled, complete show.
     }
-//    if ([self.downloadStatus intValue] == kMTStatusEncoding || (self.simultaneousEncode && self.isDownloading)) {
-//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
-//    }
-//    if ([self.downloadStatus intValue] == kMTStatusCaptioning) {
-//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionWasCanceled object:self];
-//    }
-//    if ([self.downloadStatus intValue] == kMTStatusCommercialing) {
-//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
-//    }
-//    self.downloadStatus = @(kMTStatusNew);
     self.processProgress = 0.0;
 
 }
@@ -1967,12 +2053,13 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(BOOL) isDone {
 	int status = [self.downloadStatus intValue];
 	return (status == kMTStatusDone) ||
+	(status == kMTStatusSkipModeWaitEnd ) ||
 	(status == kMTStatusFailed) ||
 	(status == kMTStatusDeleted);
 }
 
 -(BOOL) isNew {
-	return ([self.downloadStatus intValue] == kMTStatusNew);
+	return (self.downloadStatus.intValue == kMTStatusNew || self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial);
 }
 
 #pragma mark - Video manipulation methods
@@ -2342,11 +2429,11 @@ NSInteger diskWriteFailure = 123;
             dataReceived = [NSString stringWithEndOfFile:self.bufferFilePath ];
         }
 		if (dataReceived) {
-			NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
+			NSRange noRecording = [dataReceived rangeOfString:@"not found" options:NSCaseInsensitiveSearch];
 			if (noRecording.location != NSNotFound) { //This is a missing recording
 				DDLogReport(@"Deleted TiVo show; marking %@",self);
 				self.downloadStatus = @(kMTStatusDeleted);
-                [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
+                [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self.show.tiVo afterDelay:0];
 				return;
             } else {
                 NSRange serverBusy = [dataReceived rangeOfString:@"Server Busy" options:NSCaseInsensitiveSearch];
@@ -2400,7 +2487,7 @@ NSInteger diskWriteFailure = 123;
                     }
                     self.processProgress = 1.0;
                 }
-                [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
+				[self checkQueue];
            } else if (foundAudioOnly) {
                [self handleNewTSChannel];
            } else {
@@ -2439,10 +2526,6 @@ NSInteger diskWriteFailure = 123;
 
 #pragma mark - Convenience methods
 
--(BOOL) canSimulEncode {
-    return self.encodeFormat.canSimulEncode;
-}
-
 -(BOOL) shouldSimulEncode {
     return self.encodeFormat.canSimulEncode && !(self.shouldSkipCommercials && self.runComskip);// && !self.downloadingShowFromMPGFile);
 }
@@ -2478,10 +2561,12 @@ NSInteger diskWriteFailure = 123;
 	//returns true if we should delay download until skipMode Data arrives
 	if (self.show.hasSkipModeList) return NO; //ready to go!
 	if (!self.useSkipMode) return NO;
-	if ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOffState) return NO;
 	if (self.shouldMarkCommercials) return NO; //we can add commercial info later
 	if (!self.shouldSkipCommercials) return NO; //we don't need commercial info
-	if (!self.show.mightHaveSkipModeInfo) return NO; //never coming
+	if (!self.show.mightHaveSkipModeInfo) {
+		self.useSkipMode = NO;
+		return NO; //never coming
+	}
 	//now we want the skipmode EDL, but it hasn't been pulled over yet
 	if (self.show.hasSkipModeInfo) {
 		if (tiVoManager.autoSkipModeScanAllowedNow) {
@@ -2491,6 +2576,7 @@ NSInteger diskWriteFailure = 123;
 		 }
 	} else {
 		//SkipMode data not here yet, but still expected, so just wait
+		[self startWaitSkipModeTimer];
 	}
 	return YES;
 }
@@ -2529,8 +2615,9 @@ NSInteger diskWriteFailure = 123;
 
 -(NSString *) showStatus {
 	switch (self.downloadStatus.intValue) {
-		case  kMTStatusNew :				return @"";
-        case  kMTStatusWaiting :            return @"Waiting";
+		case  kMTStatusNew :				return @"Ready";
+		case  kMTStatusSkipModeWaitInitial: return @"Waiting for SkipMode";
+		case  kMTStatusWaiting :            return @"Waiting for TiVo";
         case  kMTStatusDownloading :		return @"Downloading";
 		case  kMTStatusDownloaded :			return @"Downloaded";
 		case  kMTStatusDecrypting :			return @"Decrypting";
@@ -2543,6 +2630,7 @@ NSInteger diskWriteFailure = 123;
 		case  kMTStatusCaptioned:			return @"Subtitled";
 		case  kMTStatusCaptioning:			return @"Subtitling";
         case  kMTStatusMetaDataProcessing:	return @"Adding MetaData";
+		case  kMTStatusSkipModeWaitEnd :    return @"Wait SkipMode (Mark)";
         case  kMTStatusDone :				return @"Complete";
 		case  kMTStatusDeleted :			return @"TiVo Deleted";
 		case  kMTStatusFailed :				return @"Failed";
@@ -2551,11 +2639,16 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(NSInteger) downloadStatusSorter {
-//used to put column in right order; sorts Done/Failed together
-
+//used to put column in right order; sorts Done/Failed/waitEnd and Ready/Waiting together
+//temporary before updating queue.
     NSInteger status = self.downloadStatus.integerValue;
-    if (status > kMTStatusDone) {
-        status = kMTStatusDone;
+	if (status == kMTStatusSkipModeWaitInitial) status = kMTStatusNew;
+    if (status >= kMTStatusDone ) {
+		if (status == kMTStatusSkipModeWaitEnd) {
+			status = kMTStatusDone; //sort just below other Done ones
+		} else {
+			status = kMTStatusDone+1;
+		}
     }
     return status;
 }
@@ -2565,6 +2658,57 @@ NSInteger diskWriteFailure = 123;
 		return @"deleted";
 	} else {
 		return self.show.imageString;
+	}
+}
+-(void) userChangedDownload: (NSNotification *) notification {
+	MTDownload * download = (MTDownload *) notification.object;
+	if ([download isKindOfClass:[MTDownload class]]) {
+		if (download.downloadStatus.intValue  == kMTStatusSkipModeWaitEnd) {
+			if (!download.markCommercials) {
+				//user turned off mark, so skip to finish
+			} else if (!download.useSkipMode) {
+				//user turned off skipMode, so restart as comskip
+			}
+		} else if (download.downloadStatus.intValue == kMTStatusNew && download.waitForSkipModeData) {
+			download.downloadStatus = @(kMTStatusSkipModeWaitInitial);
+		} else if (download.downloadStatus.intValue == kMTStatusSkipModeWaitInitial  && !download.waitForSkipModeData) {
+			download.downloadStatus = @(kMTStatusNew);
+		}
+	}
+}
+
+-(void) checkQueue {
+	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:2.0];
+}
+
+-(void) setUseSkipMode:(BOOL)useSkipMode {
+	_useSkipMode = useSkipMode;
+	if (useSkipMode) {
+		[self checkQueue];
+	} else {
+		if  (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
+			self.downloadStatus = @(kMTStatusNew);
+			[self checkQueue];
+		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
+			[self finalFinalProcessing];
+			[self checkQueue];
+		}
+	}
+}
+
+-(void) setMarkCommercials:(BOOL)markCommercials {
+	_markCommercials = markCommercials;
+	if (!markCommercials  && self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
+		[self finalFinalProcessing];
+		[self checkQueue];
+	}
+}
+
+-(void)setSkipCommercials:(BOOL)skipCommercials {
+	_skipCommercials = skipCommercials;
+	if ((!skipCommercials && self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) ||
+		(skipCommercials && self.downloadStatus.intValue == kMTStatusNew)) {
+		[self checkQueue];
 	}
 }
 
@@ -2603,7 +2747,8 @@ NSInteger diskWriteFailure = 123;
 
 -(void)dealloc
 {
-    self.encodeFormat = nil;
+	[self stopWaitSkipModeTimer];
+	self.encodeFormat = nil;
     if (_performanceTimer) {
         [_performanceTimer invalidate];
         _performanceTimer = nil;

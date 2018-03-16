@@ -21,10 +21,6 @@ __DDLOGHERE__
 	return self;
 }
 
--(BOOL) canSimulEncode {
-    return self.encodeFormat.canSimulEncode;
-}
-
 -(BOOL) canSkipCommercials {
     return self.encodeFormat.comSkip.boolValue;
 }
@@ -35,10 +31,6 @@ __DDLOGHERE__
 	return [allowedExtensions containsObject: extension];
 }
 
-//-(BOOL) shouldSimulEncode {
-//    return [_simultaneousEncode boolValue];
-//}
-//
 -(BOOL) shouldSkipCommercials {
     return [_skipCommercials boolValue];
 }
@@ -61,14 +53,8 @@ __DDLOGHERE__
         BOOL skipWasDisabled = ![self canSkipCommercials];
         BOOL markWasDisabled = ![self canMarkCommercials];
         _encodeFormat = encodeFormat;
-//        if (!self.canSimulEncode && self.shouldSimulEncode) {
-//            //no longer possible
-//            self.simultaneousEncode = [NSNumber numberWithBool:NO];
-//        } else if (simulWasDisabled && [self canSimulEncode]) {
-//            //newly possible, so take user default
-//            self.simultaneousEncode = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode] && self.encodeFormat.canSimulEncode)];
-//        }
-        if (!self.canAddToiTunes && self.shouldAddToiTunes) {
+
+		if (!self.canAddToiTunes && self.shouldAddToiTunes) {
             //no longer possible
             self.addToiTunes = [NSNumber numberWithBool:NO];
         } else if (iTunesWasDisabled && [self canAddToiTunes]) {
@@ -161,8 +147,6 @@ __DDLOGHERE__
 
     //should we have a directory per subscription? UI?
 	newDownload.addToiTunesWhenEncoded = ([self canAddToiTunes] && [self shouldAddToiTunes]);
-	//			newDownload.simultaneousEncode = ([subscription canSimulEncode] && [subscription shouldSimulEncode]);
-
 	newDownload.exportSubtitles = self.exportSubtitles;
 	newDownload.skipCommercials = self.shouldSkipCommercials && self.canSkipCommercials;
 	newDownload.useSkipMode =     self.useSkipMode.boolValue;
@@ -323,8 +307,6 @@ __DDLOGHERE__
     tempSub.addToiTunes = sub[kMTSubscribediTunes];
     if (tempSub.addToiTunes ==nil) tempSub.addToiTunes = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit] && tempSub.encodeFormat.canAddToiTunes)];
 
-    //        tempSub.simultaneousEncode = sub[kMTSubscribedSimulEncode];
-    //        if (tempSub.simultaneousEncode ==nil) tempSub.simultaneousEncode = [NSNumber numberWithBool: ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSimultaneousEncode] && tempSub.encodeFormat.canSimulEncode)];
     tempSub.includeSuggestions = sub[kMTSubscribedIncludeSuggestions];
     if (tempSub.includeSuggestions ==nil) tempSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
     tempSub.skipCommercials = sub[kMTSubscribedSkipCommercials];

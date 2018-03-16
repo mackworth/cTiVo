@@ -1102,7 +1102,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" id="qQB-l8-FUr" userLabel="leftText">
-                                                                            <rect key="frame" x="5" y="0.0" width="0.0" height="17"/>
+                                                                            <rect key="frame" x="6" y="0.0" width="0.0" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="nX6-ru-GCz">
                                                                                 <font key="font" metaFont="system"/>
@@ -1111,7 +1111,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="FEf-Ia-wX9" userLabel="rightText">
-                                                                            <rect key="frame" x="-87" y="0.0" width="80" height="17"/>
+                                                                            <rect key="frame" x="-89" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="a0F-vx-fpu">
                                                                                 <font key="font" size="10" name="Helvetica"/>
@@ -1127,7 +1127,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="DL Stage" editable="NO" width="101" minWidth="48" maxWidth="120" headerToolTip="Stage of download process" id="V6k-sx-7Uz">
+                                                        <tableColumn identifier="DL Stage" editable="NO" width="101" minWidth="48" maxWidth="140" headerToolTip="Stage of download process" id="V6k-sx-7Uz">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="DL Stage">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1145,8 +1145,8 @@
                                                                     <rect key="frame" x="496.5" y="1" width="101" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" id="jKf-Ch-dzY" userLabel="leftText">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="53" height="17"/>
+                                                                        <textField verticalHuggingPriority="750" misplaced="YES" id="jKf-Ch-dzY" userLabel="leftText">
+                                                                            <rect key="frame" x="0.0" y="0.0" width="0.0" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="VsL-mZ-KVX">
                                                                                 <font key="font" metaFont="system"/>
@@ -1530,7 +1530,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" id="776">
-                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="56" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="777">
                                                                                 <font key="font" metaFont="system"/>

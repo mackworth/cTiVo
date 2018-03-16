@@ -888,7 +888,8 @@ __DDLOGHERE__
 -(void) skipModeForAllActiveDownloads {
 	NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
 	for (MTDownload * download in self.downloadQueue) {
-		if (download.isNew) {
+		int status = download.downloadStatus.intValue;
+		if (status == kMTStatusSkipModeWaitEnd || status == kMTStatusSkipModeWaitEnd) {
 			[shows addObject:download.show];
 		}
 	}
@@ -1402,8 +1403,6 @@ __DDLOGHERE__
 		newDownload.exportSubtitles = [defaults objectForKey:kMTExportSubtitles];
 		newDownload.addToiTunesWhenEncoded = newDownload.encodeFormat.canAddToiTunes &&
 											[defaults boolForKey:kMTiTunesSubmit];
-//		newDownload.simultaneousEncode = newDownload.encodeFormat.canSimulEncode &&
-//											[defaults boolForKey:kMTSimultaneousEncode];
 		newDownload.skipCommercials = [newDownload.encodeFormat.comSkip boolValue] &&
 											[defaults boolForKey:kMTSkipCommercials];
 		newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials &&

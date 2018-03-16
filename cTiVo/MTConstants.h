@@ -39,6 +39,7 @@
 #define kMTNotificationFormatChanged @"MTNotificationFormatChanged"     //object: which MTFormat changed
 #define kMTNotificationFoundMultipleTiVos @"MTNotificationFoundMultipleTiVo"
 #define kMTNotificationFoundSkipModeInfo @"MTNotificationFoundSkipModeInfo" //object: show
+#define kMTNotificationFoundSkipModeList @"MTNotificationFoundSkipModeList" //object: show
 
 //Tivo busy indicator
 #define kMTNotificationTiVoUpdating @"MTNotificationTiVoUpdating"  //object: which MTTivo has started updating
@@ -50,6 +51,7 @@
 
 //Download Status
 #define kMTStatusNew 0
+#define kMTStatusSkipModeWaitInitial 17  //Waiting before download
 #define kMTStatusWaiting 1
 #define kMTStatusDownloading 2
 #define kMTStatusDownloaded 3
@@ -62,6 +64,7 @@
 #define kMTStatusCaptioned 10
 #define kMTStatusMetaDataProcessing 11
 #define kMTStatusEncoded 12
+#define kMTStatusSkipModeWaitEnd 18  //waiting after download (for marking)
 #define kMTStatusAddingToItunes 13
 #define kMTStatusDone 14
 #define kMTStatusDeleted 15

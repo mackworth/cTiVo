@@ -84,10 +84,13 @@
 
 
 -(void) setDisplayProgress: (BOOL) displayProgress {
-    const int widthStatusField  = 70;
     if (displayProgress != _displayProgress) {
         _displayProgress = displayProgress;
         if (displayProgress) {
+			 int widthStatusField  = 70;
+			if (_leftText.stringValue.length == 0) {
+				widthStatusField = self.frame.size.width;
+			}
             _leftText.frame = CGRectMake(0, 0, self.frame.size.width - widthStatusField, self.frame.size.height);
             _rightText.frame = CGRectMake(self.frame.size.width - widthStatusField, 0, widthStatusField, self.frame.size.height);
             _rightText.hidden = NO;

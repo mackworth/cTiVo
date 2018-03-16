@@ -276,10 +276,10 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <button toolTip="Run comSkip to try to remove commercial.   Prevents Simultaneous Encoding." misplaced="YES" id="3My-8b-sEw">
+                <button toolTip="Remove commercials" misplaced="YES" id="3My-8b-sEw">
                     <rect key="frame" x="275" y="314" width="135" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Skip Commercials" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="XlX-F7-Usq">
+                    <buttonCell key="cell" type="check" title="Cut Commercials" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="XlX-F7-Usq">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -287,7 +287,7 @@
                         <binding destination="248" name="value" keyPath="values.RunComSkip" id="FVF-on-KaY"/>
                     </connections>
                 </button>
-                <button toolTip="Run comSkip to mark commercials as chapters in video.  Prevents Simultaneous Encoding." misplaced="YES" id="Krb-xh-81K">
+                <button toolTip="Marks commercials as chapters in video." misplaced="YES" id="Krb-xh-81K">
                     <rect key="frame" x="275" y="279" width="140" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Mark Commercials" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Mhl-z1-biN">

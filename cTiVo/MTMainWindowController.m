@@ -389,7 +389,7 @@ __DDLOGHERE__
 -(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads {
     NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
     for (MTDownload * download in downloads) {
-		if (download.isNew) {
+		if (!download.isDone || download.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
 			[shows addObject:download.show];
 		}
     }
@@ -418,7 +418,7 @@ __DDLOGHERE__
            shows =  [self showsForDownloads: self.downloadQueueTable.sortedDownloads];
         }
     }
-    if (shows) [tiVoManager skipModeRetrieval:shows];
+    if (shows.count) [tiVoManager skipModeRetrieval:shows];
 }
 
 -(IBAction)programMenuHandler:(NSMenuItem *)menu
@@ -636,7 +636,7 @@ __DDLOGHERE__
 		itemsToRemove = [downloadQueueTable.sortedDownloads objectsAtIndexes:selectedRows];
 	}
  	for (MTDownload * download in itemsToRemove) {
-        if (download.isInProgress && download.downloadStatus.intValue != kMTStatusWaiting) {
+        if ((download.isInProgress || download.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) && download.downloadStatus.intValue != kMTStatusWaiting) {
             //if just waiting on TiVo, go ahead w/o confirmation
             if( ![self confirmCancel:download.show.showTitle]) {
                 //if any cancelled, cancel the whole group

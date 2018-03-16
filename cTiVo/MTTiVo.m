@@ -231,7 +231,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationTransferDidFinish object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDecryptDidFinish object:nil];
-
+	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationFoundSkipModeInfo object:nil];
+	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationFoundSkipModeList object:nil];
 }
 
 -(void) saveLastLoadTime:(NSDate *) newDate{
@@ -512,6 +513,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void) reloadShowInfoForShows: (NSArray <MTTiVoShow *> *) shows {
     NSMutableArray * showIDs = [NSMutableArray arrayWithCapacity:shows.count];
     for (MTTiVoShow * eachShow in shows) {
+		eachShow.edlList = nil;
         [showIDs addObject:eachShow.idString];
     }
     [self.myRPC reloadShowInfoForIDs:showIDs];
@@ -570,7 +572,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows {
 	for (MTTiVoShow * show in shows) {
-//		test erasure of edlList:
+//		xxx test erasure of edlList:
 //      show.rpcData.edlList = nil;
 //		show.rpcData.clipMetaDataId = nil;
 //		show.rpcData.programSegments = nil;
@@ -1087,11 +1089,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //		return;
 //    }
 	if ([tiVoManager checkForExit]) return;
-	if (tiVoManager.processingPaused.boolValue) return;
 
 	if ([info isKindOfClass:[NSNotification class]]) {
 		NSNotification *notification = (NSNotification *)info;
-		if (!notification.object || notification.object == self) {
+		id object = notification.object;
+		if (!object ||
+			object == self ||
+			([object isKindOfClass:[MTTiVoShow class]] && ((MTTiVoShow *)object).tiVo == self)) {
 			DDLogDetail(@"%@ got manageDownload notification %@",self, notification.name);
 			[self manageDownloads];
 		} else {
@@ -1102,7 +1106,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	} else {
 		DDLogMajor(@"Unrecognized info to launch manageDownloads %@",info);
 	}
-
 }
 
 -(void)manageDownloads
@@ -1120,20 +1123,29 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
 //	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
     BOOL isDownloading = NO;
-    for (MTDownload *s in self.downloadQueue) {
-        if (s.isDownloading) {
+    for (MTDownload *download in self.downloadQueue) {
+        if (download.isDownloading) {
             isDownloading = YES;
-            break;
-        }
+		} else if (download.isNew && ![download.show.protectedShow boolValue]) {
+			if (download.waitForSkipModeData) {
+				if (download.downloadStatus.intValue == kMTStatusNew) {
+					download.downloadStatus = @(kMTStatusSkipModeWaitInitial);
+				}
+			} else {
+				if (download.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
+					download.downloadStatus = @(kMTStatusNew);
+				}
+			}
+		}
     }
-    if (!isDownloading) {
+	if (!tiVoManager.processingPaused.boolValue && !isDownloading) {
 		DDLogDetail(@"%@ Checking for new download", self);
 		for (MTDownload *download in self.downloadQueue) {
 			if ([download.show.protectedShow boolValue]) {
 				//protectedShow is used in downloadQueue during startup to indicate not loaded yet.
 				break;
 			}
-            if (download.isNew && !download.waitForSkipModeData) {
+			if (download.downloadStatus.intValue == kMTStatusNew) {
 				tiVoManager.numEncoders++;
 				DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,download.show.showTitle, tiVoManager.numEncoders);
 				[download launchDownload];

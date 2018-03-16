@@ -237,7 +237,7 @@ __DDLOGHERE__
     }
     if (!taskRunning) {
         //We need to move on
-        DDLogVerbose(@"Finished task chain: moving on to %@", _nextTaskChain ?: @"finish up");
+        DDLogDetail(@"Finished task chain: moving on to %@", _nextTaskChain ?: @"finish up");
         self.isRunning = NO;
         if (_nextTaskChain && !_beingRescheduled && !self.download.isCanceled) {
             self.download.activeTaskChain = _nextTaskChain;

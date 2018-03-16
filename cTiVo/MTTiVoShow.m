@@ -317,15 +317,16 @@ __DDLOGHERE__
 }
 
 -(void) setRpcData:(MTRPCData *)rpcData {
-	BOOL gotNewMetaData = (rpcData.clipMetaDataId != nil) && (rpcData.clipMetaDataId != self.rpcData.clipMetaDataId);
+	BOOL gotNewMetaData = (rpcData.clipMetaDataId) && (![rpcData.clipMetaDataId isEqual: self.rpcData.clipMetaDataId]);
     if (rpcData ) { //resetting existing info
         _rpcData = rpcData;
         self.episodeGenre = rpcData.genre;  //no conflict with TVDB
 		if (rpcData.edlList.count > 0) {
 			MTEdl * lastCut = [rpcData.edlList lastObject];
 			double overTime = lastCut.endTime - self.showLength;
-			if (overTime > 0.0) {
+			if (overTime > 1.0) {
 				//patch because sometimes RPC tivo doesn't have an accurate endtime
+				DDLogReport(@"XXX Fixing EDL for %@ by %0.1f: %@",self, overTime, rpcData.edlList);
 				if (self.showLength <= lastCut.startTime) {
 					NSMutableArray * temp = [rpcData.edlList mutableCopy];
 					[temp removeObject:lastCut];
@@ -343,7 +344,7 @@ __DDLOGHERE__
 				if (self.edlList != rpcData.edlList) {
 					DDLogDetail(@"Got EDL for %@: %@", self, rpcData.edlList);
 					self.edlList = rpcData.edlList;
-					[self addEDLtoFilesOnDisk];
+					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeList object:self]; //maybe launch download.
 					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil]; //maybe launch download.
 				}
 #ifdef DEBUG
@@ -356,7 +357,10 @@ __DDLOGHERE__
     }
 	if (gotNewMetaData) {
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
-	}
+		if (self.timeLeftTillRPCInfoWontCome < 60*60 && self.timeLeftTillRPCInfoWontCome > -24*60*60) {
+			DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- self.timeLeftTillRPCInfoWontCome*60);
+		}
+}
     [self checkAllInfoSources];
 }
 
@@ -367,6 +371,13 @@ __DDLOGHERE__
     [self checkAllInfoSources];
 }
 
+-(NSTimeInterval) timeLeftTillRPCInfoWontCome {
+	NSTimeInterval longestAfterShow = [[NSUserDefaults standardUserDefaults ] integerForKey:kMTWaitForSkipModeInfoTime]*60;
+	if (longestAfterShow ==0) longestAfterShow = kMTDefaultDelayForSkipModeInfo*60;
+	
+	return longestAfterShow + [self.showDate timeIntervalSinceNow] + self.showLength*60;
+}
+
 -(BOOL) mightHaveSkipModeInfo {
 //	NSInteger hour = 6;  //doesn't seem to be an actual limiation.
 //	NSInteger minute = 45;
@@ -375,14 +386,13 @@ __DDLOGHERE__
 	if (self.skipModeFailed) return NO;
 	if (self.hasSkipModeInfo || self.hasSkipModeList) return YES;
 	if (self.isSuggestion) return NO;
+	if ([tiVoManager commercialsForChannel:self.stationCallsign] != NSOnState) return NO;
 	if (!self.tiVo.supportsRPC) return NO;
 	NSString * genre = self.episodeGenre.lowercaseString;
 	if ([genre isEqualToString:@"news"] ) return NO; //allow news magazine
 	if ([genre isEqualToString:@"sports"] ) return NO;
 	if (!self.inProgress.boolValue) {
-		NSInteger minutesToWait = [[NSUserDefaults standardUserDefaults ] integerForKey:kMTWaitForSkipModeInfoTime];
-		if (minutesToWait ==0) minutesToWait = kMTDefaultDelayForSkipModeInfo;
-		if (-[self.showDate timeIntervalSinceNow] > (self.showLength+minutesToWait*60)) {
+		if ([self timeLeftTillRPCInfoWontCome] < 0) {
 			return NO;
 		}
 	}
@@ -1558,16 +1568,6 @@ NSString * fourChar(long n, BOOL allowZero) {
         MP4TagsSetHDVideo(tags, &myHDType);
     }
     return tags;
-}
-
--(void) addEDLtoFilesOnDisk {
-	if (self.edlList.count == 0) return;
-	for (NSString * filename in self.copiesOnDisk) {
-		MP4FileHandle *encodedFile = MP4Modify([filename cStringUsingEncoding:NSUTF8StringEncoding],0);
-		BOOL added = [self.edlList addAsChaptersToMP4File: encodedFile forShow: self.showTitle withLength: self.showLength keepingCommercials: YES ];
-		if (added) DDLogMajor(@"Retroactively added commercial info to show %@ in file %@", self, filename);
-		MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
-	}
 }
 
 -(HDTypes) hdTypeForMP4File:(MP4FileHandle *) fileHandle {

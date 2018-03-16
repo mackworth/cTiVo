@@ -291,8 +291,8 @@ __DDLOGHERE__
                 (programColumn ||
                  (!self.showingProgramsColumn && seriesColumn )
             ))) {
-            cell.displayProgress = YES;
             [self updateProgressInCell:cell forDL:download];
+			cell.displayProgress = YES;
         } else {
             cell.displayProgress = NO;
             cell.rightText.stringValue = @"";
@@ -346,12 +346,6 @@ __DDLOGHERE__
         //  result.imageView.autoresizingMask = NSViewMinXMargin | NSViewMaxXMargin;
 		result.imageView.image = [NSImage imageNamed: imageName];
 		result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
-//	} else if ([tableColumn.identifier isEqualToString:@"Simu"]) {
-//        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-//        [checkBox setOn: download.simultaneousEncode];
-//        checkBox.owner = download;
-//        [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSimulEncode];
-//        
 	} else if ([tableColumn.identifier isEqualToString:@"SkipMode"]) {
 		switch (download.show.rpcSkipMode.intValue) {
 			case 3:  result.imageView.image = [NSImage imageNamed:@"skipMode"];
@@ -383,7 +377,8 @@ __DDLOGHERE__
         checkBox.owner = download;
         checkBox.target = myController;
         checkBox.action = @selector(changeMark:);
-        [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canMarkCommercials];
+        [checkBox setEnabled: (download.isNew || download.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) &&
+		 						!protected && download.encodeFormat.canMarkCommercials];
         
 #ifndef deleteXML
  	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
@@ -400,7 +395,11 @@ __DDLOGHERE__
 		checkBox.owner = download;
 		checkBox.target = myController;
 		checkBox.action = @selector(changeUseSkipMode:);
-		[checkBox setEnabled: download.isNew && !protected && (download.encodeFormat.canMarkCommercials || download.encodeFormat.canSkip)];
+		[checkBox setEnabled:
+		 	(download.isNew || download.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) &&
+			!protected &&
+		 	[download.show.tiVo supportsRPC] &&
+		 	(download.encodeFormat.canMarkCommercials || download.encodeFormat.canSkip)];
 		
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
@@ -435,8 +434,6 @@ __DDLOGHERE__
 		textVal = thisShow.lengthString;
     } else if ([tableColumn.identifier isEqualToString:@"Episode"]) {
         textVal = thisShow.seasonEpisode;
-    } else if ([tableColumn.identifier isEqualToString:@"DL Stage"]) {
-        textVal = download.showStatus;
 	} else if ([tableColumn.identifier isEqualToString:@"Queued"]) {
 		textVal = thisShow.isQueuedString;
 		result.toolTip =@"Is program in queue to download?";
