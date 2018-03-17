@@ -389,7 +389,7 @@ __DDLOGHERE__
 -(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads {
     NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
     for (MTDownload * download in downloads) {
-		if (!download.isDone || download.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
+		if (!download.isCompletelyDone) {
 			[shows addObject:download.show];
 		}
     }
