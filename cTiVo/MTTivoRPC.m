@@ -755,15 +755,17 @@ static NSRegularExpression * isFinalRegex = nil;
                NSMutableArray <NSNumber *> * indices = [NSMutableArray array];
                NSMutableDictionary < NSString *, MTRPCData *> *deletedShows = [strongSelf.showMap mutableCopy];
                [shows enumerateObjectsUsingBlock:^(NSString *  _Nonnull objectID, NSUInteger idx, BOOL * _Nonnull stop) {
-                   if (!strongSelf.showMap[objectID]) {
+				   MTRPCData * thisRPC = strongSelf.showMap[objectID];
+                   if (!thisRPC) {
                        [newIDs addObject:objectID];
                        [lookupDetails addObject:objectID];
                        [indices addObject:@(idx)];
                    } else {
                        //have seen before, so don't lookup, but also don't delete
                        [deletedShows removeObjectForKey:objectID];
-                       if (isFirstLaunch && !strongSelf.showMap[objectID].imageURL) {
-                           //saved last time without having finished checking the art
+                       if (isFirstLaunch &&
+						   (!thisRPC.imageURL || (thisRPC.clipMetaDataId && ! thisRPC.programSegments.count))) {
+                           //saved last time without having finished checking the art or getting segment info
                            [lookupDetails addObject:objectID];
                        }
                    }
@@ -780,8 +782,8 @@ static NSRegularExpression * isFinalRegex = nil;
        } ];
 }
 
--(void) reloadShowInfoForIDs: (NSArray <NSString *> *) showIDs {
-    if (!showIDs.count) return;
+-(void) purgeShows: (NSArray <NSString *> *) showIDs {
+	if (!showIDs.count) return;
 	for (NSString * showID in showIDs) {
 		MTRPCData * rpcData = self.showMap[showID];
 		if (rpcData) {
@@ -790,7 +792,11 @@ static NSRegularExpression * isFinalRegex = nil;
 			}
 			[self.showMap removeObjectForKey:showID];
 		}
-    }
+	}
+}
+
+-(void) reloadShowInfoForIDs: (NSArray <NSString *> *) showIDs {
+	[self purgeShows:showIDs];
     [self getShowInfoForShows:showIDs];
 }
 
@@ -1390,7 +1396,12 @@ static NSArray * imageResponseTemplate = nil;
 
     if (rpcData.clipMetaDataId == nil || rpcData.programSegments == nil) {
         //need metadata info first
-		[self retrieveClipMetaDataFor:rpcData.contentID withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
+		//really should have saved objectID
+		NSRange separator = [rpcData.rpcID rangeOfString:@"|" options:0];
+		if (separator.location == NSNotFound) return;
+		NSString * objectId = [rpcData.rpcID substringFromIndex:NSMaxRange(separator)];
+
+		[self retrieveClipMetaDataFor:objectId withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
             rpcData.clipMetaDataId = metaDataID;
             rpcData.programSegments = lengths;
             if (lengths.count > 0) {
@@ -1427,6 +1438,7 @@ static NSArray * imageResponseTemplate = nil;
 				DDLogReport(@"EDL failure for %@", rpcData);
 				rpcData.skipModeFailed = YES;
 			}
+			[self.delegate receivedRPCData:rpcData];
 			if (self.skipModeQueue.count > 0) {
 				[self.skipModeQueue removeObjectAtIndex:0];
 				[self findSkipModeRecursive:@YES ];
@@ -1460,7 +1472,7 @@ static NSArray * imageResponseTemplate = nil;
 				end = rpcData.tempLength*1000;
 			}
 		} else {
-			if (ABS(rpcData.tempLength*1000 - end) > 1) DDLogReport(@"XXX RPC shows length as  %lld vs showLength as %lld",end, (long long) rpcData.tempLength*1000);
+			if (ABS(rpcData.tempLength*1000 - end) > 2000) DDLogReport(@"XXX RPC shows length as  %0.1f vs showLength as %0.1f",end/1000.0, rpcData.tempLength);
 		}
 		[weakSelf jumpToPosition:end-5000 withCompletionHandler:^(BOOL success) {
 			
@@ -1477,7 +1489,6 @@ static NSArray * imageResponseTemplate = nil;
 		DDLogDetail(@"Got positions of %@", positions);
 		rpcData.edlList = [NSArray edlListFromSegments:rpcData.programSegments andStartPoints:positions];
 		DDLogDetail(@"Got EDL %@", rpcData.edlList);
-		[self.delegate receivedRPCData:rpcData];
 		
 	    [weakSelf sendKeyEvent: @"pause"  withCompletion:^{
 			

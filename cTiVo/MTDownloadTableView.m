@@ -334,7 +334,7 @@ __DDLOGHERE__
     } else if ([tableColumn.identifier isEqualToString:@"iTunes"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.addToiTunesWhenEncoded];
-        [checkBox setEnabled: !download.isDone && !protected &&
+        [checkBox setEnabled: !download.isCompletelyDone && !protected &&
                               download.encodeFormat.canAddToiTunes ];
         checkBox.target = myController;
         checkBox.action = @selector(changeiTunes:);

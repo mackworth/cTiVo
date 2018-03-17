@@ -252,6 +252,22 @@ __DDLOGHERE__
 	}
 	return YES;
 }
-
+/*
+ Fixup last line of edl to match showlength.
+ //patch because sometimes RPC tivo doesn't have an accurate endtime
+ MTEdl * lastCut = [rpcData.edlList lastObject];
+ double overTime = lastCut.endTime - self.showLength;
+ if (overTime > 1.0) {
+ DDLogReport(@"XXX Fixing EDL for %@ by %0.1f: %@",self, overTime, rpcData.edlList);
+ if (self.showLength <= lastCut.startTime) {
+ NSMutableArray * temp = [rpcData.edlList mutableCopy];
+ [temp removeObject:lastCut];
+ rpcData.edlList = [temp copy];
+ } else {
+ [rpcData.edlList lastObject].endTime = self.showLength;
+ [rpcData.edlList lastObject].offset -= overTime;
+ }
+ }
+*/
 
 @end

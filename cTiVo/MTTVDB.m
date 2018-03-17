@@ -249,9 +249,13 @@ static BOOL inProgress = NO;
                 } else {
                     DDLogReport(@"TVDB Series JSON parsing Error: %@ for %@",  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], series);
                 }
-            } else if (httpResponse.statusCode == 404){
+            } else if (httpResponse.statusCode == 404) {
                 DDLogVerbose(@"TVDB Series %@ not found at %@" , series, seriesURL );
-            } else {
+			} else if (httpResponse.statusCode == 522) {
+				DDLogReport(@"TVDB Connection Timed out at %@!" , seriesURL );
+			} else if (httpResponse.statusCode == 520) {
+				DDLogReport(@"TVDB Connection had a Bad Gateway error at %@!" , seriesURL );
+			} else {
                 DDLogReport(@"TVDB Series HTTP Response Error %ld: %@, %@ for %@", (long)httpResponse.statusCode, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL, series );
                 [self cancelSession];
             }

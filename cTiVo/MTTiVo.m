@@ -233,6 +233,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDecryptDidFinish object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationFoundSkipModeInfo object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationFoundSkipModeList object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(appWillTerminate:)
+												 name:NSApplicationWillTerminateNotification
+											   object:nil];
 }
 
 -(void) saveLastLoadTime:(NSDate *) newDate{
@@ -1126,15 +1130,20 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     for (MTDownload *download in self.downloadQueue) {
         if (download.isDownloading) {
             isDownloading = YES;
-		} else if (download.isNew && ![download.show.protectedShow boolValue]) {
-			if (download.waitForSkipModeData) {
-				if (download.downloadStatus.intValue == kMTStatusNew) {
-					download.downloadStatus = @(kMTStatusSkipModeWaitInitial);
+		} else if (![download.show.protectedShow boolValue]) {
+			int status = download.downloadStatus.intValue;
+			if (download.isNew) {
+				if (download.waitForSkipModeData) {
+					if (status == kMTStatusNew) {
+						download.downloadStatus = @(kMTStatusSkipModeWaitInitial);
+					}
+				} else {
+					if (status == kMTStatusSkipModeWaitInitial) {
+						download.downloadStatus = @(kMTStatusNew);
+					}
 				}
-			} else {
-				if (download.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
-					download.downloadStatus = @(kMTStatusNew);
-				}
+			} else if (status == kMTStatusSkipModeWaitEnd) {
+				//n
 			}
 		}
     }
@@ -1266,10 +1275,26 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 #pragma mark - Memory Management
 
+-(void) appWillTerminate: (id) notification {
+	NSArray <MTTiVoShow *> * shows = self.shows;
+	NSMutableArray <NSString *> * showIDs = [NSMutableArray arrayWithCapacity:shows.count];
+	for (MTTiVoShow * show in shows) {
+		//get rid of shows that might be updated by the next time we run
+		if (!show.isSuggestion &&
+			!show.rpcData.clipMetaDataId &&
+			show.timeLeftTillRPCInfoWontCome > -13*60*60) {
+			DDLogReport(@"xxx purging show %@",show);
+			[showIDs addObject:show.idString];
+		}
+	}
+	[self.myRPC purgeShows:showIDs];
+}
+
 -(void)dealloc
 {
     DDLogDetail(@"Deallocing TiVo %@",self);
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver: self];
 	SCNetworkReachabilityUnscheduleFromRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
 	if (_reachability) {
 		CFRelease(_reachability);

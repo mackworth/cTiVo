@@ -56,7 +56,7 @@
 @property (atomic, strong) NSNumber *downloadStatus;
 @property (readonly) NSInteger downloadStatusSorter;
 
-@property (readonly) BOOL isNew, isDownloading, isInProgress, isDone;
+@property (readonly) BOOL isNew, isDownloading, isInProgress, isDone, isCompletelyDone;
 //convenience versions of downloadStatus
 @property (atomic, assign) BOOL isCanceled;
 @property (atomic, assign) double processProgress; //Should be between 0 and 1

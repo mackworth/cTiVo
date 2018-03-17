@@ -42,7 +42,7 @@
 
 @property (nonatomic,readonly) NSMutableArray <NSNetService *> *tivoServices;
 
-@property (nonatomic, strong) NSMutableSet * downloadsWaitingSkipModeList; //for warnings
+@property (nonatomic, strong) NSMutableSet <MTTiVoShow *> * showsWaitingSkipModeList; //for warnings
 
 @end
 
@@ -279,12 +279,6 @@ __DDLOGHERE__
 		MTDownload * proxyDL = [tiVoManager downloadQueue][dlIndex];
 		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, dlIndex, proxyDL.show.tiVoName);
         [proxyDL convertProxyToRealForShow: newShow];
-		//this is a back door entry into queue, so need to check for uniqueness again in current environment
-//		[self checkShowTitleUniqueness:newShow];
-		if (proxyDL.downloadStatus.integerValue == kMTStatusDeleted) {
-			DDLogDetail(@"Tivo restored previously deleted show %@",newShow);
-			[proxyDL prepareForDownload:YES];
-		}
 	}
 }
 
@@ -293,7 +287,7 @@ __DDLOGHERE__
 	for (MTDownload * download in self.downloadQueue) {
 		if(download.show.protectedShow.boolValue &&
 		   [targetTivoName isEqualToString:download.show.tiVoName]) {
-			if (! download.isDone) {
+			if ( ! download.isCompletelyDone ) {
 				DDLogDetail(@"Marking %@ as deleted", download.show.showTitle);
 				download.downloadStatus =@kMTStatusDeleted;
 			}
@@ -599,7 +593,7 @@ __DDLOGHERE__
 	NSMutableIndexSet * itemsToRemove= [NSMutableIndexSet indexSet];
 	for (unsigned int index = 0;index< tiVoManager.downloadQueue.count; index++) {
 		MTDownload * download = tiVoManager.downloadQueue[index];
-		if (download.isDone) {
+		if (download.isCompletelyDone ) {
 			[itemsToRemove addIndex:index];
 			download.show.isQueued = NO;
 		}
@@ -889,7 +883,7 @@ __DDLOGHERE__
 	NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
 	for (MTDownload * download in self.downloadQueue) {
 		int status = download.downloadStatus.intValue;
-		if (status == kMTStatusSkipModeWaitEnd || status == kMTStatusSkipModeWaitEnd) {
+		if (status == kMTStatusSkipModeWaitInitial || status == kMTStatusSkipModeWaitEnd) {
 			[shows addObject:download.show];
 		}
 	}
@@ -1365,9 +1359,7 @@ __DDLOGHERE__
                 }
             }
             if (!showFound) {
-                //Make sure the title isn't the same and if it is add a -1 modifier
                 submittedAny = YES;
-//                [self checkShowTitleUniqueness:newShow];
 				[newDownload prepareForDownload:NO];
 				if (nextDownload) {
                     NSUInteger index = [_downloadQueue indexOfObject:nextDownload];
@@ -1440,7 +1432,7 @@ __DDLOGHERE__
             [oldDownload cancel];
 			oldDownload.show.isQueued = NO;
 			[itemsToRemove addIndex:index];
-			[self removeDownloadFromWaitingSkipModeList:oldDownload];
+			[self removeShowFromWaitingSkipModeList:oldDownload.show];
 		}
 	}
 	
@@ -1592,9 +1584,9 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:restartNotification afterDelay:2];
 }
 
--(void)removeDownloadFromWaitingSkipModeList:(MTDownload *) download {
-	if ([self.downloadsWaitingSkipModeList containsObject:download]) {
-		[self.downloadsWaitingSkipModeList removeObject:download];
+-(void)removeShowFromWaitingSkipModeList:(MTTiVoShow *) show {
+	if ([self.showsWaitingSkipModeList containsObject:show]) {
+		[self.showsWaitingSkipModeList removeObject:show];
 	}
 }
 
@@ -1603,12 +1595,12 @@ __DDLOGHERE__
 	MTTiVoShow * show = download.show;
 	if (!show.hasSkipModeInfo) return; //don't do anything before metadata arrives
 	if (show.hasSkipModeList) return;  //if we already have EDL, no warning needed
-	if ([self.downloadsWaitingSkipModeList containsObject:download]) {
+	if ([self.showsWaitingSkipModeList containsObject:show]) {
 		//already warned, so nothing to do
 		return;
 	}
-	if (!self.downloadsWaitingSkipModeList) self.downloadsWaitingSkipModeList = [NSMutableSet set];
-	[self.downloadsWaitingSkipModeList addObject:download];
+	if (!self.showsWaitingSkipModeList) self.showsWaitingSkipModeList = [NSMutableSet set];
+	[self.showsWaitingSkipModeList addObject:download.show];
 	[self performSelector:@selector(removeDownloadFromWaitingSkipModeList:) withObject:download afterDelay:24*60*60];
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
 		//scheduled, so if it's soon enough, just wait, otherwise warn.
@@ -1617,7 +1609,7 @@ __DDLOGHERE__
 		} else {
 			NSDate * scheduled = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
 			NSTimeInterval nextEDLTime = [scheduled secondsUntilNextTimeOfDay];
-			if (nextEDLTime > 12*60*60) {
+			if (nextEDLTime > 18*60*60) {
 				[self notifyForName:show.showTitle
 						  withTitle:@"Warning: Missed SkipMode time"
 						   subTitle:[NSString stringWithFormat:@"You can manually load, or cTiVo will try again in %d hrs", (int)floor(nextEDLTime/3600)]

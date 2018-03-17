@@ -317,25 +317,10 @@ __DDLOGHERE__
 }
 
 -(void) setRpcData:(MTRPCData *)rpcData {
-	BOOL gotNewMetaData = (rpcData.clipMetaDataId) && (![rpcData.clipMetaDataId isEqual: self.rpcData.clipMetaDataId]);
-    if (rpcData ) { //resetting existing info
-        _rpcData = rpcData;
+	_rpcData = rpcData;
+   if (rpcData ) { //resetting existing info
         self.episodeGenre = rpcData.genre;  //no conflict with TVDB
 		if (rpcData.edlList.count > 0) {
-			MTEdl * lastCut = [rpcData.edlList lastObject];
-			double overTime = lastCut.endTime - self.showLength;
-			if (overTime > 1.0) {
-				//patch because sometimes RPC tivo doesn't have an accurate endtime
-				DDLogReport(@"XXX Fixing EDL for %@ by %0.1f: %@",self, overTime, rpcData.edlList);
-				if (self.showLength <= lastCut.startTime) {
-					NSMutableArray * temp = [rpcData.edlList mutableCopy];
-					[temp removeObject:lastCut];
-					rpcData.edlList = [temp copy];
-				} else {
-					[rpcData.edlList lastObject].endTime = self.showLength;
-					[rpcData.edlList lastObject].offset -= overTime;
-				}
-			}
 #ifdef DEBUG
 			if (self.previousEDL && rpcData.edlList && ![self.previousEDL compareToEDL:rpcData.edlList]) {
 				DDLogReport(@"EDL FAILURE for %@: %@ became %@", self, self.previousEDL, rpcData.edlList);
@@ -344,7 +329,7 @@ __DDLOGHERE__
 				if (self.edlList != rpcData.edlList) {
 					DDLogDetail(@"Got EDL for %@: %@", self, rpcData.edlList);
 					self.edlList = rpcData.edlList;
-					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeList object:self]; //maybe launch download.
+					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeList object:self];
 					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil]; //maybe launch download.
 				}
 #ifdef DEBUG
@@ -352,15 +337,11 @@ __DDLOGHERE__
 			self.previousEDL = rpcData.edlList;
 #endif
 		}
-    } else {
-        _rpcData = nil;
     }
-	if (gotNewMetaData) {
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
-		if (self.timeLeftTillRPCInfoWontCome < 60*60 && self.timeLeftTillRPCInfoWontCome > -24*60*60) {
-			DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- self.timeLeftTillRPCInfoWontCome*60);
-		}
-}
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+	if (self.timeLeftTillRPCInfoWontCome < 60*60 && self.timeLeftTillRPCInfoWontCome > -24*60*60) {
+		DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- self.timeLeftTillRPCInfoWontCome*60);
+	}
     [self checkAllInfoSources];
 }
 
@@ -375,7 +356,7 @@ __DDLOGHERE__
 	NSTimeInterval longestAfterShow = [[NSUserDefaults standardUserDefaults ] integerForKey:kMTWaitForSkipModeInfoTime]*60;
 	if (longestAfterShow ==0) longestAfterShow = kMTDefaultDelayForSkipModeInfo*60;
 	
-	return longestAfterShow + [self.showDate timeIntervalSinceNow] + self.showLength*60;
+	return longestAfterShow + [self.showDate timeIntervalSinceNow] + self.showLength;
 }
 
 -(BOOL) mightHaveSkipModeInfo {
