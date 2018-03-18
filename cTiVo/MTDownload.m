@@ -1174,7 +1174,7 @@ __DDLOGHERE__
             [strongSelf fixupSRTsDueToCommercialSkipping];
         }
         [strongSelf markCompleteCTiVoFile:strongSelf.captionFilePath];
-		if (strongSelf.encodeTask.successfulExit) {
+		if (strongSelf.taskFlowType == kMTTaskFlowSimuSubtitles && strongSelf.encodeTask.successfulExit) {
 			[strongSelf finishUpPostEncodeProcessing];
 		}
 		return YES;
@@ -1803,7 +1803,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		}
 	} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
 		if (![self waitForSkipModeData]) {
-			DDLogMajor(@"Got SkipMode EDL for %@: %@", self, self.show.edlList);
+			DDLogMajor(@"Got EDL for %@: %@", self, self.show.edlList);
 			[self stopWaitSkipModeTimer];
 			[self addEDLtoFilesOnDisk];
 			[self finalFinalProcessing];
@@ -1823,7 +1823,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 			}
 		} else {
 			//SkipMode data not here yet, but still expected, so just wait
-			DDLogMajor(@"Got Skip Mode Info for %@", self);
+			DDLogDetail(@"Skip Mode Info not here yet for %@", self);
 			[self startWaitSkipModeTimer];
 		}
 	}
@@ -1864,7 +1864,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         _commercialTask.isRunning ||
         _captionTask.isRunning)  {
         //if any of the tasks exist and are still running, then let them finish; checkStillActive will eventually fail them if no progress
-        DDLogDetail(@"Finishing up, but processes still running");
+        DDLogReport(@"XXX Finishing up, but processes still running for %@", self);
         [self performSelector:@selector(finishUpPostEncodeProcessing) withObject:nil afterDelay:0.5];
         return;
     }
@@ -1875,7 +1875,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     if (self.encodeFormat.isTestPS) {
 		self.downloadStatus = @(kMTStatusDone);
 	} else {
-        if (!(_decryptTask.successfulExit && _encodeTask.successfulExit)) {
+        if (!(_decryptTask && !_decryptTask.successfulExit) || (_encodeTask && !_encodeTask.successfulExit)) {
             DDLogReport(@"Strange: thought we were finished, but later %@ failure", _decryptTask.successfulExit ? @"encode" : @"decrypt");
             [self cancel]; //just in case
             self.downloadStatus = @(kMTStatusFailed);
