@@ -267,9 +267,15 @@ __DDLOGHERE__
 	NSString * targetTivoName = showTarget.tiVo.tiVo.name;
 	return [self.downloadQueue indexOfObjectPassingTest:^BOOL(MTDownload * download, NSUInteger idx, BOOL *stop) {
 		MTTiVoShow * possShow = download.show;
-		return [targetTivoName isEqualToString:[possShow tempTiVoName]] &&
-		showTarget.showID == possShow.showID &&
-        possShow.protectedShow.boolValue;
+		if (showTarget.showID != possShow.showID) return NO;
+		if ([possShow.imageString isEqualToString:@"deleted"] ||
+			download.downloadStatus.intValue == kMTStatusDeleted ){
+			if (showTarget.tiVo == possShow.tiVo) return YES;
+		}
+		if (possShow.protectedShow.boolValue) {
+			return [targetTivoName isEqualToString:[possShow tempTiVoName]];
+		}
+		return NO;
 	}];
 }
 
@@ -296,7 +302,6 @@ __DDLOGHERE__
 		}
 	}
 }
-
 
 -(void)saveState {
 	NSMutableArray * downloadArray = [NSMutableArray arrayWithCapacity:_downloadQueue.count];
@@ -709,22 +714,22 @@ __DDLOGHERE__
 }
 
 -(void)setSkipModeTime {
+	//launchNow if being manually set, so user may expect it to go.
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(skipModeForAllActiveDownloads) object:@(NO)];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
-		DDLogDetail(@"No scheduled operations auto-pause ");
+		DDLogDetail(@"No skipMode Auto Scan ");
 		return;
 	}
 	NSDate * skipDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
 	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanEndTime ];
 	double startSeconds = [skipDate secondsUntilNextTimeOfDay];
 	double endSeconds =   [endDate secondsUntilNextTimeOfDay];
-	if (startSeconds < endSeconds) {
-		DDLogReport(@"Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",startSeconds, (startSeconds/3600.0), skipDate); ///xxx make detail instead
-		[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:@(NO) afterDelay:startSeconds];
-	} else {
-		//we're in active period, but delay a few seconds due to typing a new time.
+	DDLogReport(@"xxx Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",startSeconds, (startSeconds/3600.0), skipDate); ///xxx make detail instead
+	[self performSelector:@selector(skipModeForAllActiveDownloads:) withObject:@(YES) afterDelay:startSeconds];
+	if (startSeconds >= endSeconds) {
+		//we're in active period, but delay a few seconds e.g. to typing a new time.
 		DDLogReport(@"Will run SkipMode Scan in 15 seconds"); ///xxx make detail instead
-		[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:@(NO) afterDelay:15];
+		[self performSelector:@selector(skipModeForAllActiveDownloads:) withObject:@(NO) afterDelay:15];
 	}
 }
 
@@ -879,15 +884,21 @@ __DDLOGHERE__
     }
 }
 
--(void) skipModeForAllActiveDownloads {
+-(void) skipModeForAllActiveDownloads: (NSNumber *) repeat {
 	NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
+	DDLogMajor(@"Scanning all active downloads for SkipMode");
 	for (MTDownload * download in self.downloadQueue) {
 		int status = download.downloadStatus.intValue;
-		if (status == kMTStatusSkipModeWaitInitial || status == kMTStatusSkipModeWaitEnd) {
+		if (status == kMTStatusSkipModeWaitInitial ||
+			status == kMTStatusSkipModeWaitEnd ||
+			(!download.isCompletelyDone && download.useSkipMode && download.markCommercials)) {
 			[shows addObject:download.show];
 		}
 	}
 	[self skipModeRetrieval:[shows copy]];
+	if (repeat.boolValue) {
+		[self setSkipModeTime];
+	}
 }
 
 -(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows {

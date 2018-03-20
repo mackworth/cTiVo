@@ -317,7 +317,6 @@ __DDLOGHERE__
 }
 
 -(void) setRpcData:(MTRPCData *)rpcData {
-	BOOL gotNewMetaData = (rpcData.clipMetaDataId) && (![rpcData.clipMetaDataId isEqual: self.rpcData.clipMetaDataId]);
 	_rpcData = rpcData;
    if (rpcData ) { //resetting existing info
         self.episodeGenre = rpcData.genre;  //no conflict with TVDB
@@ -339,11 +338,9 @@ __DDLOGHERE__
 #endif
 		}
     }
-	if (gotNewMetaData) {
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
-		if (self.timeLeftTillRPCInfoWontCome < 60*60 && self.timeLeftTillRPCInfoWontCome > -24*60*60) {
-			DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- self.timeLeftTillRPCInfoWontCome/60);
-		}
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+	if (self.timeLeftTillRPCInfoWontCome < 60*60 && self.timeLeftTillRPCInfoWontCome > -24*60*60) {
+		DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- self.timeLeftTillRPCInfoWontCome/60);
 	}
     [self checkAllInfoSources];
 }

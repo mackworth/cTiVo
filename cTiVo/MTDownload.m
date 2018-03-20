@@ -411,11 +411,19 @@ __DDLOGHERE__
 }
 
 -(void) convertProxyToRealForShow:(MTTiVoShow *) show {
+	MTTiVoShow * formerShow = self.show;
     self.show = show;
-    self.show.isQueued = YES;
-	if (self.downloadStatus.integerValue == kMTStatusDeleted) {
+    show.isQueued = YES;
+	if (self.downloadStatus.integerValue == kMTStatusDeleted || [formerShow.imageString isEqualToString:@"deleted"]) {
 		DDLogDetail(@"Tivo restored previously deleted show %@",show);
-		[self prepareForDownload:YES];
+		if (self.downloadStatus.integerValue == kMTStatusDeleted && !show.isOnDisk) {
+			self.downloadStatus = @(kMTStatusNew);
+			[self prepareForDownload:YES];
+		} else if (self.markCommercials && self.useSkipMode){
+			self.downloadStatus = @(kMTStatusSkipModeWaitEnd);
+		} else {
+			self.downloadStatus = @(kMTStatusDone);
+		}
 	}
 	[self skipModeCheck];
 }
@@ -1752,9 +1760,12 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(BOOL) waitForSkipModeData {
 	//returns true if we should delay download until skipMode Data arrives
-	// if initial, we're at beginning of download, else we're ready for final processing (i.e. Marking)
 	if (self.show.hasSkipModeList) return NO; //ready to go!
 	if (!self.useSkipMode) return NO;
+	if (!self.show.mightHaveSkipModeInfo) {
+		_useSkipMode = NO; //recursion is ok, but not necessary
+		return NO; //never coming
+	}
 	if (self.isNew) {
 		if (self.shouldMarkCommercials) return NO; //we can add commercial info later
 		if (!self.shouldSkipCommercials) return NO; //we don't need commercial info
@@ -1763,10 +1774,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	} else {
 		DDLogReport(@"XXX Checking Status %@ when we shouldn't be!! %@", self.downloadStatus, self);
 		return NO;
-	}
-	if (!self.show.mightHaveSkipModeInfo) {
-		self.useSkipMode = NO;
-		return NO; //never coming
 	}
 	return YES;
 }
@@ -1795,6 +1802,10 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 					[self startWaitSkipModeTimer];
 				}
 			}
+		} else if (self.show.skipModeFailed) {
+			[self stopWaitSkipModeTimer];
+			if (self.useSkipMode) self.useSkipMode = NO;
+			[self checkQueue];
 		} else {
 			if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
 				self.downloadStatus = @(kMTStatusNew);
@@ -1831,12 +1842,18 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void) skipModeExpired {
 	//called if timer expires on downloading show info
-	DDLogMajor(@"Never got SkipMode Info for %@. Retrying with comskip",self.show);
 	[self stopWaitSkipModeTimer];
+	if (!self.useSkipMode) return;
 	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
 		[self skipModeCheck];
 		return; //shouldn't be here
 	}
+	[self.show.tiVo loadSkipModeInfoForShow: self.show];  //one last shot
+	[self performSelector:@selector(changeToComskip) withObject:nil afterDelay:15 ];
+}
+
+-(void) changeToComskip {
+	DDLogMajor(@"Never got SkipMode Info for %@. Retrying with comskip",self.show);
 	if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial ) {
 		self.useSkipMode = NO; //have to try comskip now
 		self.downloadStatus = @(kMTStatusNew);
@@ -1859,6 +1876,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 }
 
 -(void) finishUpPostEncodeProcessing {
+	//This is called from Completion routines of tasks. Let them finish up before final pass
+	[self performSelector:@selector(finishUpPostencodeProcessingDelayed) withObject:nil afterDelay:0.1];
+}
+
+-(void) finishUpPostencodeProcessingDelayed {
     if (_decryptTask.isRunning ||
         _encodeTask.isRunning ||
         _commercialTask.isRunning ||
@@ -1875,7 +1897,8 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     if (self.encodeFormat.isTestPS) {
 		self.downloadStatus = @(kMTStatusDone);
 	} else {
-        if (!(_decryptTask && !_decryptTask.successfulExit) || (_encodeTask && !_encodeTask.successfulExit)) {
+        if ((_decryptTask && !_decryptTask.successfulExit) ||
+			(_encodeTask && !_encodeTask.successfulExit)) {
             DDLogReport(@"Strange: thought we were finished, but later %@ failure", _decryptTask.successfulExit ? @"encode" : @"decrypt");
             [self cancel]; //just in case
             self.downloadStatus = @(kMTStatusFailed);

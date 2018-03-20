@@ -231,8 +231,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationTransferDidFinish object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDecryptDidFinish object:nil];
-	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationFoundSkipModeInfo object:nil];
-	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationFoundSkipModeList object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(appWillTerminate:)
 												 name:NSApplicationWillTerminateNotification
@@ -832,6 +830,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                for (NSString * showID in [self.addedShows copy]) {
                     if ([newShowID isEqualToString:showID]) {
                         thisShow = currentShow;
+						[tiVoManager replaceProxyInQueue:currentShow]; //check for undeleted
                         DDLogMajor(@"RPC Adding %@ at %@", currentShow, newShowID);
                         [self.addedShows removeObject:showID];
                        break;
@@ -854,8 +853,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                 } else {
                     thisShow = currentShow;
                     DDLogDetail(@"Added new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested " : @"", currentShow.showTitle, currentShow.showDateString);
-                    //Now check and see if this was in the oldQueue (from last ctivo execution)
-                    if (firstUpdate) [tiVoManager replaceProxyInQueue:currentShow];
+                    //Now check and see if this was in the oldQueue (from last ctivo execution) OR an undeletedShow
+					[tiVoManager replaceProxyInQueue:currentShow];
                 }
            }
             if (thisShow) {
@@ -949,13 +948,18 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //}
 //
 
+-(void) loadSkipModeInfoForShow:(MTTiVoShow *) show {
+	[self.myRPC getShowInfoForShows:@[show.idString]];
+}
+
 -(void) reloadRecentShows {
 //	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(reloadRecentShows) object:nil];
     //so when we get an RPC, it might signal a metadata change, so reload recent ones.
 	NSMutableArray <NSString *> * recentIDs = [NSMutableArray array];
 	NSMutableArray <MTTiVoShow *> * recentShows = [NSMutableArray array];
+	NSTimeInterval recentTime = 60 * ( [[NSUserDefaults standardUserDefaults] integerForKey: kMTWaitForSkipModeInfoTime] + 60); //round up an hour
 	for (MTTiVoShow * show in self.shows) {
-		if (-[show.showDate timeIntervalSinceNow] < (show.showLength+4*60*60)) {
+		if (-[show.showDate timeIntervalSinceNow] < (show.showLength+recentTime)) {
 			if (!show.protectedShow.boolValue && !show.rpcData.clipMetaDataId && show.mightHaveSkipModeInfo) {
 				[recentIDs addObject:show.idString];
 				[recentShows addObject:show];
@@ -1130,23 +1134,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     for (MTDownload *download in self.downloadQueue) {
         if (download.isDownloading) {
             isDownloading = YES;
-		} else if (![download.show.protectedShow boolValue]) {
-			int status = download.downloadStatus.intValue;
-			if (download.isNew) {
-				if (download.waitForSkipModeData) {
-					if (status == kMTStatusNew) {
-						download.downloadStatus = @(kMTStatusSkipModeWaitInitial);
-					}
-				} else {
-					if (status == kMTStatusSkipModeWaitInitial) {
-						download.downloadStatus = @(kMTStatusNew);
-					}
-				}
-			} else if (status == kMTStatusSkipModeWaitEnd) {
-				//n
-			}
+			break;
 		}
-    }
+	}
 	if (!tiVoManager.processingPaused.boolValue && !isDownloading) {
 		DDLogDetail(@"%@ Checking for new download", self);
 		for (MTDownload *download in self.downloadQueue) {
