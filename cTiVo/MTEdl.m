@@ -239,7 +239,7 @@ __DDLOGHERE__
 	}
     
 }
--(BOOL) compareToEDL: (NSArray <MTEdl *> *) edlList {
+-(BOOL) equivalentToEDL: (NSArray <MTEdl *> *) edlList {
 	if (self == edlList) return YES;
 	if (self.count != edlList.count) return NO;
 	NSUInteger index = 0;
@@ -252,6 +252,35 @@ __DDLOGHERE__
 	}
 	return YES;
 }
+
+-(NSString *) compareEDL: (NSArray <MTEdl *> *) edlList {
+	if (self == edlList) return @"Same";
+	NSMutableString * result = [NSMutableString stringWithString:@"SM Start\tSM End\tCS Start\tCS End\tStart Delta\tEnd Delta\t"];
+	for (NSUInteger index = 0; index < MAX(self.count, edlList.count); index++) {
+		double myStart, myEnd, otherStart, otherEnd;
+		myStart = myEnd = otherStart = otherEnd = NAN;
+
+		MTEdl * myEdl = nil;
+		if (index < self.count) {
+			myEdl = self[index];
+			myStart = myEdl.startTime;
+			myEnd = myEdl.endTime;
+		}
+		if (index < edlList.count) {
+			MTEdl * otherEdl = edlList[index];
+			otherStart = otherEdl.startTime;
+			otherEnd = otherEdl.endTime;
+		}
+
+		NSString * nextLine = [NSString stringWithFormat: @"%01.f\t%0.1f\t%0.1f\t%0.1f\t%0.1f\t%0.1f\t\n",
+							   myStart, myEnd,
+							   otherStart,  otherEnd,
+							   myStart - otherStart, myEnd - otherEnd];
+		[result appendString:nextLine];
+	}
+	return result;
+}
+
 /*
  Fixup last line of edl to match showlength.
  //patch because sometimes RPC tivo doesn't have an accurate endtime

@@ -36,7 +36,6 @@
 										useSkipMode,
 										skipCommercials,
                                         markCommercials;
-@property (readonly) BOOL 				waitForSkipModeData;
 
 #pragma mark - Methods for download/conversion work
 +(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format withQueueStatus: (NSInteger) status;

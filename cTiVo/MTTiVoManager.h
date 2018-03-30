@@ -76,7 +76,6 @@
 -(void) checkDownloadQueueForDeletedEntries: (MTTiVo *) tiVo;
 
 -(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo;
--(void)warnNeedSkipModeList:(MTDownload *) download;
 
 //---------------Download Queue starting/stopping ----------
 -(void)pauseQueue:(NSNumber *)askUser;
@@ -99,11 +98,13 @@
 -(BOOL)anyTivoActive;
 -(int) nextManualTiVoID;
 -(BOOL) duplicateTiVoFor: (MTTiVo *)tiVo;
--(void)updateTiVoDefaults:(MTTiVo *)tiVo;
+-(void) updateTiVoDefaults:(MTTiVo *)tiVo;
+
+//---------------TiVo Management methods ----------
 -(void) deleteTivoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) stopRecordingShows: (NSArray <MTTiVoShow *> *) shows;
+-(void) getSkipModeEDLWhenPossible: (MTDownload *) download;
 -(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows;
--(BOOL) autoSkipModeScanAllowedNow;
 
 //----------------Channel Management Methods --------
 -(void) createChannel;

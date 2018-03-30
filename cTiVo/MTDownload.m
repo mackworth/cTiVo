@@ -425,7 +425,6 @@ __DDLOGHERE__
 			self.downloadStatus = @(kMTStatusDone);
 		}
 	}
-	[self skipModeCheck];
 }
 
 -(BOOL) isSimilarTo:(MTDownload *) testDownload {
@@ -1003,7 +1002,7 @@ __DDLOGHERE__
 				break;
 			case kMTTaskFlowNonSimuMarkcom:
 			case kMTTaskFlowNonSimuMarkcomSubtitles:
-				notDone = !strongSelf.commercialTask.isRunning;
+				notDone = strongSelf.commercialTask.isRunning;
 				break;
 			case kMTTaskFlowSimuMarkcom :
 			case kMTTaskFlowSimuMarkcomSubtitles :
@@ -1220,6 +1219,31 @@ __DDLOGHERE__
     return captionTask;
 }
 
+#ifdef DEBUG
+- (void)writeAndAppendString:(NSString *)str toFile:(NSString *)fileName {
+	
+	NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
+	
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	if (0 < [paths count]) {
+		NSString *documentsDirPath = [paths objectAtIndex:0];
+		NSString *filePath = [documentsDirPath stringByAppendingPathComponent:fileName];
+		
+		NSFileManager *fileManager = [NSFileManager defaultManager];
+		if ([fileManager fileExistsAtPath:filePath]) {
+			// Add the text at the end of the file.
+			NSFileHandle *fileHandler = [NSFileHandle fileHandleForUpdatingAtPath:filePath];
+			[fileHandler seekToEndOfFile];
+			[fileHandler writeData:data];
+			[fileHandler closeFile];
+		} else {
+			// Create the file and write text to it.
+			[data writeToFile:filePath atomically:YES];
+		}
+	}
+}
+#endif
+
 -(MTTask *)commercialTask
 {
     NSAssert(self.runComskip ,@"Commercial Task not requested?");
@@ -1283,6 +1307,13 @@ __DDLOGHERE__
 
             DDLogMajor(@"Finished detecting commercials in %@",strongSelf.show.showTitle);
             strongSelf.show.edlList = [NSArray getFromEDLFile:strongSelf.commercialFilePath];
+#ifdef DEBUG
+			if (strongSelf.show.edlList && strongSelf.show.rpcData.edlList.count > 0) {
+				NSString * compareEDLs = [strongSelf.show.rpcData.edlList compareEDL: strongSelf.show.edlList];
+				NSString * output = [NSString stringWithFormat:@"%@\n%@",strongSelf.show.showTitle,compareEDLs];
+				[strongSelf writeAndAppendString:output toFile:@"CompareEDLs"];
+			}
+#endif
 			strongSelf.downloadStatus = @(kMTStatusCommercialed);
              if (strongSelf.taskFlowType != kMTTaskFlowSimuMarkcom && strongSelf.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
 				 if (!strongSelf.shouldSimulEncode) {
@@ -1758,26 +1789,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	}
 }
 
--(BOOL) waitForSkipModeData {
-	//returns true if we should delay download until skipMode Data arrives
-	if (self.show.hasSkipModeList) return NO; //ready to go!
-	if (!self.useSkipMode) return NO;
-	if (!self.show.mightHaveSkipModeInfo) {
-		_useSkipMode = NO; //recursion is ok, but not necessary
-		return NO; //never coming
-	}
-	if (self.isNew) {
-		if (self.shouldMarkCommercials) return NO; //we can add commercial info later
-		if (!self.shouldSkipCommercials) return NO; //we don't need commercial info
-	} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
-		if (!self.shouldMarkCommercials) return NO; //not going to mark
-	} else {
-		DDLogReport(@"XXX Checking Status %@ when we shouldn't be!! %@", self.downloadStatus, self);
-		return NO;
-	}
-	return YES;
-}
-
 -(void) skipModeUpdated: (NSNotification *) notification {
 	if (notification.object == self || notification.object == self.show ) {
 		[self skipModeCheck];
@@ -1786,55 +1797,56 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void) skipModeCheck {
 	if ([self.show.protectedShow boolValue]) return;
-	if (self.isNew) {
-		if ([self waitForSkipModeData]) {
-			if (self.downloadStatus.intValue == kMTStatusNew) {
-				self.downloadStatus = @(kMTStatusSkipModeWaitInitial);
-				//now we want the skipmode EDL, but it hasn't been pulled over yet
-				if (self.show.hasSkipModeInfo) {
-					if (tiVoManager.autoSkipModeScanAllowedNow) {
-						[self.show.tiVo findCommercialsForShows:@[self.show]  ];
-					} else {
-						[tiVoManager warnNeedSkipModeList:self];
-					}
-				} else {
-					//SkipMode data not here yet, but still expected, so just wait
-					[self startWaitSkipModeTimer];
-				}
-			}
-		} else if (self.show.skipModeFailed) {
-			[self stopWaitSkipModeTimer];
-			if (self.useSkipMode) self.useSkipMode = NO;
-			[self checkQueue];
-		} else {
-			if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
+	BOOL needEDLNow = ( self.isNew && self.shouldSkipCommercials) ||
+					  ( self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd && self.shouldMarkCommercials);
+	if (self.show.hasSkipModeList || ! self.useSkipMode || ! needEDLNow) {
+		//ready to go to next step
+		[self stopWaitSkipModeTimer];
+		switch (self.downloadStatus.intValue) {
+			case kMTStatusNew:
+				[self checkQueue];
+				break;
+			case kMTStatusSkipModeWaitInitial:
 				self.downloadStatus = @(kMTStatusNew);
 				[self checkQueue];
-			}
+				break;
+			case kMTStatusSkipModeWaitEnd:
+				if (self.show.hasSkipModeList) {
+					DDLogMajor(@"Got EDL for %@: %@", self, self.show.edlList);
+					[self addEDLtoFilesOnDisk];
+				} else {
+					DDLogReport(@"Was waiting for SkipMode, but not supposed to be for %@", self);
+				}
+				[self finalFinalProcessing];
+				break;
+			default:
+				break;
 		}
-	} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
-		if (![self waitForSkipModeData]) {
-			DDLogMajor(@"Got EDL for %@: %@", self, self.show.edlList);
-			[self stopWaitSkipModeTimer];
-			[self addEDLtoFilesOnDisk];
-			[self finalFinalProcessing];
-		} else if (self.show.skipModeFailed) {
-			DDLogMajor(@"Got Invalid EDL for %@; canceling wait", self);
-			[self stopWaitSkipModeTimer];
-			[self cancel];
-			[self checkQueue];
-		} else if (self.show.hasSkipModeInfo) {
-			DDLogMajor(@"Got Skip Mode Info for %@", self);
-			[self stopWaitSkipModeTimer];
-			//now we want the skipmode EDL, but it hasn't been pulled over yet
-			if (tiVoManager.autoSkipModeScanAllowedNow) {
-				[self.show.tiVo findCommercialsForShows:@[self.show]  ];
-			} else {
-				[tiVoManager warnNeedSkipModeList:self];
-			}
+	} else if (!self.show.mightHaveSkipModeInfo) {
+		//skip mode never coming
+		[self stopWaitSkipModeTimer];
+		if (self.show.skipModeFailed) {
+			DDLogReport(@"Got Invalid EDL for %@", self);
 		} else {
-			//SkipMode data not here yet, but still expected, so just wait
-			DDLogDetail(@"Skip Mode Info not here yet for %@", self);
+			DDLogMajor(@"Not waiting any more for SkipMode for %@", self);
+		}
+		_useSkipMode = NO;  //avoid recursion
+		if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
+			self.downloadStatus = @(kMTStatusNew);
+		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
+			[self cancel];
+		}
+		[self checkQueue];
+	} else {
+		//SkipMode list not here yet, but still expected, so need to wait
+		if (self.downloadStatus.intValue == kMTStatusNew) {
+			self.downloadStatus = @(kMTStatusSkipModeWaitInitial);
+		}
+		if (self.show.hasSkipModeInfo) {
+			//now we want the skipmode EDL, but it hasn't been pulled over yet
+			[self stopWaitSkipModeTimer];
+			[tiVoManager getSkipModeEDLWhenPossible:self];
+		} else {
 			[self startWaitSkipModeTimer];
 		}
 	}
@@ -1843,8 +1855,10 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(void) skipModeExpired {
 	//called if timer expires on downloading show info
 	[self stopWaitSkipModeTimer];
+	DDLogDetail(@"SkipMode Timer went off for %@, which ended at %@",self, self.show.stopTime);
 	if (!self.useSkipMode) return;
 	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
+		DDLogReport(@"SkipMode Timer went off, but we have SkipMode info? %@",self);
 		[self skipModeCheck];
 		return; //shouldn't be here
 	}
@@ -1853,6 +1867,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 }
 
 -(void) changeToComskip {
+	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
+		DDLogReport(@"SkipMode Timer went off, but we got SkipMode at last second. %@",self);
+		[self skipModeCheck];
+		return; //shouldn't be here
+	}
 	DDLogMajor(@"Never got SkipMode Info for %@. Retrying with comskip",self.show);
 	if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial ) {
 		self.useSkipMode = NO; //have to try comskip now
@@ -1867,7 +1886,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(void) startWaitSkipModeTimer {
 	if (!self.waitForSkipModeInfoTimer) {
 		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome;
-		self. waitForSkipModeInfoTimer = [NSTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
+		if (waitTime > 0) {
+			self. waitForSkipModeInfoTimer = [NSTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
+		}
 	}
 }
 
@@ -1939,6 +1960,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     }
 	if (self.markCommercials && self.useSkipMode) {
 		self.downloadStatus = @(kMTStatusSkipModeWaitEnd);
+		[self skipModeCheck];
 	} else {
 		[self finalFinalProcessing];
 	}
@@ -2725,6 +2747,7 @@ NSInteger diskWriteFailure = 123;
 
 -(void) setEncodeFormat:(MTFormat *) encodeFormat {
     if (_encodeFormat != encodeFormat ) {
+		BOOL wasNil = _encodeFormat == nil;
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];
         BOOL markWasDisabled = ![self canMarkCommercials];
@@ -2751,7 +2774,9 @@ NSInteger diskWriteFailure = 123;
             //newly possible, so take user default
             self.markCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:kMTMarkCommercials];
         }
-		[self skipModeCheck];
+		if (!wasNil) { //no need at launch
+			[self skipModeCheck];
+		}
     }
 }
 
@@ -2761,7 +2786,6 @@ NSInteger diskWriteFailure = 123;
 -(void)dealloc
 {
 	[self stopWaitSkipModeTimer];
-	self.encodeFormat = nil;
     if (_performanceTimer) {
         [_performanceTimer invalidate];
         _performanceTimer = nil;

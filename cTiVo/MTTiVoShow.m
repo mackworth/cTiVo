@@ -322,12 +322,16 @@ __DDLOGHERE__
         self.episodeGenre = rpcData.genre;  //no conflict with TVDB
 		if (rpcData.edlList.count > 0) {
 #ifdef DEBUG
-			if (self.previousEDL && rpcData.edlList && ![self.previousEDL compareToEDL:rpcData.edlList]) {
+			if (self.previousEDL && rpcData.edlList && ![self.previousEDL equivalentToEDL:rpcData.edlList]) {
 				DDLogReport(@"EDL FAILURE for %@: %@ became %@", self, self.previousEDL, rpcData.edlList);
 			} else {
 #endif
-				if (self.edlList != rpcData.edlList) {
-					DDLogDetail(@"Got EDL for %@: %@", self, rpcData.edlList);
+				if (self.edlList != rpcData.edlList || rpcData.skipModeFailed) {
+					if (rpcData.edlList.count > 0) {
+						DDLogDetail(@"Got EDL for %@: %@", self, rpcData.edlList);
+					} else if (rpcData.skipModeFailed) {
+						DDLogMajor(@"EDL Failure for  %@", self);
+					}
 					self.edlList = rpcData.edlList;
 					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeList object:self];
 					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil]; //maybe launch download.
@@ -338,9 +342,12 @@ __DDLOGHERE__
 #endif
 		}
     }
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
-	if (self.timeLeftTillRPCInfoWontCome < 60*60 && self.timeLeftTillRPCInfoWontCome > -24*60*60) {
-		DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- self.timeLeftTillRPCInfoWontCome/60);
+	if (rpcData.clipMetaDataId) {
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+		NSTimeInterval timeLeft = self.timeLeftTillRPCInfoWontCome;
+		if (timeLeft < 60*60 && timeLeft > -24*60*60) {
+			DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- timeLeft/60);
+		}
 	}
     [self checkAllInfoSources];
 }
@@ -355,8 +362,10 @@ __DDLOGHERE__
 -(NSTimeInterval) timeLeftTillRPCInfoWontCome {
 	NSTimeInterval longestAfterShow = [[NSUserDefaults standardUserDefaults ] integerForKey:kMTWaitForSkipModeInfoTime]*60;
 	if (longestAfterShow ==0) longestAfterShow = kMTDefaultDelayForSkipModeInfo*60;
-	
-	return longestAfterShow + [self.showDate timeIntervalSinceNow] + self.showLength;
+
+	NSTimeInterval timeToWait = longestAfterShow + [self.showDate timeIntervalSinceNow] + self.showLength;
+	DDLogReport (@"XXX TimetoWait for %@ is %0.1f", self, timeToWait);
+	return timeToWait;
 }
 
 -(BOOL) mightHaveSkipModeInfo {
@@ -364,20 +373,25 @@ __DDLOGHERE__
 //	NSInteger minute = 45;
 //	[[NSCalendar currentCalendar] getHour:&hour minute:NULL second:NULL nanosecond:NULL fromDate: self.showDate];
 //	if (hour < 16 && !(hour == 0 && minute <=30)) return NO;
-	if (self.skipModeFailed) return NO;
 	if (self.hasSkipModeInfo || self.hasSkipModeList) return YES;
+	if (self.skipModeFailed) return NO;
 	if (self.isSuggestion) return NO;
 	if ([tiVoManager commercialsForChannel:self.stationCallsign] != NSOnState) return NO;
+	if ([tiVoManager skipModeForChannel:self.stationCallsign] != NSOnState) {
+		return NO;
+	}
 	if (!self.tiVo.supportsRPC) return NO;
 	NSString * genre = self.episodeGenre.lowercaseString;
 	if ([genre isEqualToString:@"news"] ) return NO; //allow news magazine
 	if ([genre isEqualToString:@"sports"] ) return NO;
 	if (!self.inProgress.boolValue) {
-		if ([self timeLeftTillRPCInfoWontCome] < 0) {
+		NSTimeInterval timeLeft = [self timeLeftTillRPCInfoWontCome];
+		if ( timeLeft < 0) {
+			DDLogDetail(@"failed SkipMode for %@; Past deadline for SkipInfo to arrive by %0.1f", self, -timeLeft);
 			return NO;
 		}
 	}
-	return ([tiVoManager skipModeForChannel:self.stationCallsign] == NSOnState);
+	return YES;
 }
 
 -(void) checkAllInfoSources {

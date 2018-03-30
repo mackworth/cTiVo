@@ -23,7 +23,8 @@
 
 +(NSArray *)getFromEDLFile:(NSString *)edlFile;
 -(BOOL) writeToEDLFile:(NSString *) edlFile;
--(BOOL) compareToEDL: (NSArray <MTEdl *> *) edlList; // returns true if almost identical to other EDL
+-(BOOL) equivalentToEDL: (NSArray <MTEdl *> *) edlList; // returns true if almost identical to other EDL
+-(NSString *) compareEDL: (NSArray <MTEdl *> *) edlList;
 
 -(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length keepingCommercials: (BOOL) keepCommercials; 
 

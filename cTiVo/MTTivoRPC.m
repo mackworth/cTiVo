@@ -1387,7 +1387,11 @@ static NSArray * imageResponseTemplate = nil;
 	}];
 }
 
--(void) findSkipModeForShow:(MTRPCData *) rpcData {
+-(BOOL) skipModeEDLInProgressForShow:(MTRPCData *) rpcData {
+	return [self.skipModeQueue containsObject:rpcData];
+}
+
+-(void) findSkipModeEDLForShow:(MTRPCData *) rpcData {
 	if (!rpcData) return;
     if (rpcData.edlList) return; //already got it.
 	if (rpcData.skipModeFailed) return;
@@ -1404,8 +1408,8 @@ static NSArray * imageResponseTemplate = nil;
 		[self retrieveClipMetaDataFor:objectId withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
             rpcData.clipMetaDataId = metaDataID;
             rpcData.programSegments = lengths;
-            if (lengths.count > 0) {
-                [weakSelf findSkipModeForShow:rpcData] ;
+            if (metaDataID != nil && lengths.count > 0) {
+                [weakSelf findSkipModeEDLForShow:rpcData] ;
             }
         }];
         return;
@@ -1432,21 +1436,24 @@ static NSArray * imageResponseTemplate = nil;
     }
 	DDLogMajor(@"%@Checking for commercials for %@", firstTry ? @"" : @"Re-", self.skipModeQueue[0]);
 	MTRPCData * rpcData = self.skipModeQueue[0];
+	__weak __typeof__(self) weakSelf = self;
+
 	[self findSkipModePointsForShow:rpcData withCompletionHandler:^{
+		__typeof__(self) strongSelf = weakSelf;
 		if (rpcData.edlList || !firstTry) {
 			if (!rpcData.edlList) {
 				DDLogReport(@"EDL failure for %@", rpcData);
 				rpcData.skipModeFailed = YES;
 			}
-			[self.delegate receivedRPCData:rpcData];
-			if (self.skipModeQueue.count > 0) {
-				[self.skipModeQueue removeObjectAtIndex:0];
-				[self findSkipModeRecursive:@YES ];
+			[strongSelf.delegate receivedRPCData:rpcData];
+			if (strongSelf.skipModeQueue.count > 0) {
+				[strongSelf.skipModeQueue removeObjectAtIndex:0];
+				[strongSelf findSkipModeRecursive:@YES ];
 			}
 		} else {
 			//try again if we have a problem creating an EDL
 			DDLogReport(@"Retrying EDL list for %@", rpcData);
-			[self findSkipModeRecursive:@NO ];
+			[strongSelf findSkipModeRecursive:@NO ];
 		}
     }];
 }

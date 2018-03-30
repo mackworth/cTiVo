@@ -716,6 +716,7 @@ __DDLOGHERE__
 -(void)setSkipModeTime {
 	//launchNow if being manually set, so user may expect it to go.
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(skipModeForAllActiveDownloads) object:@(NO)];
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(skipModeForAllActiveDownloads) object:@(YES)];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
 		DDLogDetail(@"No skipMode Auto Scan ");
 		return;
@@ -1601,38 +1602,42 @@ __DDLOGHERE__
 	}
 }
 
--(void)warnNeedSkipModeList:(MTDownload *) download {
-	//Skip mode data is here, so maybe warn user that we need EDL to continue
+-(void) getSkipModeEDLWhenPossible: (MTDownload *) download {
 	MTTiVoShow * show = download.show;
-	if (!show.hasSkipModeInfo) return; //don't do anything before metadata arrives
-	if (show.hasSkipModeList) return;  //if we already have EDL, no warning needed
-	if ([self.showsWaitingSkipModeList containsObject:show]) {
-		//already warned, so nothing to do
-		return;
-	}
-	if (!self.showsWaitingSkipModeList) self.showsWaitingSkipModeList = [NSMutableSet set];
-	[self.showsWaitingSkipModeList addObject:download.show];
-	[self performSelector:@selector(removeDownloadFromWaitingSkipModeList:) withObject:download afterDelay:24*60*60];
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
-		//scheduled, so if it's soon enough, just wait, otherwise warn.
-		if (self.autoSkipModeScanAllowedNow) {
-			return; //We can do scan now, so no warning needed.
-		} else {
-			NSDate * scheduled = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
-			NSTimeInterval nextEDLTime = [scheduled secondsUntilNextTimeOfDay];
-			if (nextEDLTime > 18*60*60) {
-				[self notifyForName:show.showTitle
-						  withTitle:@"Warning: Missed SkipMode time"
-						   subTitle:[NSString stringWithFormat:@"You can manually load, or cTiVo will try again in %d hrs", (int)floor(nextEDLTime/3600)]
-						   isSticky:YES];
-			}
-		}
+	if (self.autoSkipModeScanAllowedNow) {
+		[download.show.tiVo findCommercialsForShows:@[show] ];
 	} else {
-		//not scheduled so warn
-		[self notifyForName:show.showTitle
-				  withTitle:@"Warning: No SkipMode Available"
-				   subTitle:@"You can manually load SkipMode, or set up automatic schedule in Preferences."
-				   isSticky:YES];
+		if (!show.hasSkipModeInfo) return; //don't do anything before metadata arrives
+		if (show.hasSkipModeList) return;  //if we already have EDL, no warning needed
+		//Skip mode Info is here, so maybe warn user that we need EDL to continue
+		if ([self.showsWaitingSkipModeList containsObject:show]) {
+			//already warned, so nothing to do
+			return;
+		}
+		if (!self.showsWaitingSkipModeList) self.showsWaitingSkipModeList = [NSMutableSet set];
+		[self.showsWaitingSkipModeList addObject:download.show];
+		[self performSelector:@selector(removeDownloadFromWaitingSkipModeList:) withObject:download afterDelay:24*60*60];
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
+			//scheduled, so if it's soon enough, just wait, otherwise warn.
+			if (self.autoSkipModeScanAllowedNow) {
+				return; //We can do scan now, so no warning needed.
+			} else {
+				NSDate * scheduled = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
+				NSTimeInterval nextEDLTime = [scheduled secondsUntilNextTimeOfDay];
+				if (nextEDLTime > 18*60*60) {
+					[self notifyForName:show.showTitle
+							  withTitle:@"Warning: Missed SkipMode time"
+							   subTitle:[NSString stringWithFormat:@"You can manually load, or cTiVo will try again in %d hrs", (int)floor(nextEDLTime/3600)]
+							   isSticky:YES];
+				}
+			}
+		} else {
+			//not scheduled so warn
+			[self notifyForName:show.showTitle
+					  withTitle:@"Warning: No SkipMode Available"
+					   subTitle:@"You can manually load SkipMode, or set up automatic schedule in Preferences."
+					   isSticky:YES];
+		}
 	}
 }
 

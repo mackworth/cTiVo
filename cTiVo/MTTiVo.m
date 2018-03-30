@@ -421,8 +421,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     NSAssert(addedShowIndices.count == addedShows.count, @"Added RPC show problem");
     if (isConnecting) {
         //change during a Tivo XML refresh; need to restart after termination
-        DDLogMajor(@"Show list change during Tivo %@ XML refresh", self);
-        cancelRefresh = YES;
+		if (!cancelRefresh) {
+			DDLogMajor(@"Show list change during Tivo %@ XML refresh", self);
+        	cancelRefresh = YES;
+		}
         return;
     }
     DDLogDetail(@"Updating Tivo %@ from RPC", self);
@@ -579,10 +581,13 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //		show.rpcData.clipMetaDataId = nil;
 //		show.rpcData.programSegments = nil;
 		if ([show.tiVo isEqual:self]) {
-			if ( !show.inProgress.boolValue && show.mightHaveSkipModeInfo) {
+			if ([self.myRPC skipModeEDLInProgressForShow:show.rpcData]) {
+				continue;
+			}
+			if ( !show.inProgress.boolValue && show.mightHaveSkipModeInfo && !show.edlList.count) {
             	DDLogMajor(@"Finding SkipMode points for %@ on %@", show, self);
 				show.rpcData.tempLength = show.showLength; //hint in case tivo isn't reporting this
-            	[self.myRPC findSkipModeForShow:show.rpcData];
+            	[self.myRPC findSkipModeEDLForShow:show.rpcData];
         	} else {
 				DDLogVerbose(@"Skipping SkipMode points for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : @"" );
 			}
@@ -1118,12 +1123,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)manageDownloads
 {
-	DDLogMajor(@"Checking %@ queue", self);
 	if (managingDownloads) {
         return;
     }
 	managingDownloads = YES;
-	if (!self.isReachable ||
+	if (!self.isReachable || !self.enabled ||
 		tiVoManager.numEncoders >= [[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxNumEncoders]) {
 		managingDownloads = NO;
 		return;
@@ -1137,6 +1141,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			break;
 		}
 	}
+	DDLogMajor(@"Checking %@ queue", self);
 	if (!tiVoManager.processingPaused.boolValue && !isDownloading) {
 		DDLogDetail(@"%@ Checking for new download", self);
 		for (MTDownload *download in self.downloadQueue) {
