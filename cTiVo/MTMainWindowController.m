@@ -59,6 +59,7 @@
 
 @property (nonatomic, strong) NSSound *trashSound;
 @property (nonatomic, strong) NSCountedSet *loadingTiVos;
+@property (nonatomic, strong) NSCountedSet *commercialingTiVos;
 
 @end
 
@@ -74,6 +75,7 @@ __DDLOGHERE__
 	self = [super initWithWindowNibName:windowNibName];
 	if (self) {
 		_loadingTiVos = [NSCountedSet new];
+		_commercialingTiVos = [NSCountedSet new];
         self.selectedTiVo = nil;
         _myTiVoManager = tiVoManager;
 	}
@@ -103,6 +105,8 @@ __DDLOGHERE__
 	//Spinner Progress Handling 
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationTiVoUpdating object:nil];
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationTiVoUpdated object:nil];
+	[defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationTiVoCommercialing object:nil];
+	[defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationTiVoCommercialed object:nil];
     [defaultCenter addObserver:self selector:@selector(networkChanged:) name:kMTNotificationNetworkChanged object:nil];
 	
     [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidMoveNotification object:nil];
@@ -143,6 +147,11 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	
 }
+-(NSMutableAttributedString *) stringForDisplay: (NSSet <MTTiVo *> *) set withAttributes: (nullable NSDictionary<NSAttributedStringKey,id> *) attribs {
+	NSString * list = [[[[set allObjects] valueForKeyPath:@"tiVo.name" ] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)] componentsJoinedByString:@", "];
+ return [[NSMutableAttributedString alloc] initWithString: list
+attributes:attribs];
+}
 
 -(void)manageLoadingIndicator:(NSNotification *)notification
 {
@@ -155,13 +164,28 @@ __DDLOGHERE__
     if ([notification.name  compare:kMTNotificationTiVoUpdating] == NSOrderedSame) {
         [self.loadingTiVos addObject:tivo];
 	} else if ([notification.name compare:kMTNotificationTiVoUpdated] == NSOrderedSame) {
-        [self.loadingTiVos removeObject:tivo];
+		[self.loadingTiVos removeObject:tivo];
+	} else if ([notification.name compare:kMTNotificationTiVoCommercialing] == NSOrderedSame) {
+		[self.commercialingTiVos addObject:tivo];
+	} else if ([notification.name compare:kMTNotificationTiVoCommercialed] == NSOrderedSame) {
+		[self.commercialingTiVos removeObject:tivo];
 	}
-    
-	if (self.loadingTiVos.count) {
+	if (self.loadingTiVos.count + self.commercialingTiVos.count > 0) {
         [loadingProgramListIndicator startAnimation:nil];
-        NSString *message =[NSString stringWithFormat: @"Updating %@",[[[[self.loadingTiVos allObjects] valueForKeyPath:@"tiVo.name" ] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)] componentsJoinedByString:@", "]];
-        loadingProgramListLabel.stringValue = message;
+		NSMutableAttributedString *message =  [[NSMutableAttributedString alloc] init];
+		if (self.loadingTiVos.count > 0) {
+			[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@"Updating "]];
+			[message appendAttributedString:[self stringForDisplay:self.loadingTiVos withAttributes:@{}]];
+			if (self.commercialingTiVos.count > 0) {
+				[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@", "]];
+			}
+		}
+		if (self.commercialingTiVos.count > 0) {
+			NSDictionary *redAttrs    = @{NSForegroundColorAttributeName:[NSColor redColor]};
+			[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@"Getting SkipMode for " attributes:redAttrs ]];
+			 [message appendAttributedString:[self stringForDisplay:self.commercialingTiVos withAttributes:redAttrs]];
+		}
+		[loadingProgramListLabel setAttributedStringValue: message];
     } else {
         [loadingProgramListIndicator stopAnimation:nil];
         loadingProgramListLabel.stringValue = @"";

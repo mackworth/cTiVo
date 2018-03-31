@@ -937,7 +937,7 @@ static NSRegularExpression * isFinalRegex = nil;
 -(MTRPCData *) rpcDataForID: (NSString *) idString {
     @synchronized (self.showMap) {
         MTRPCData * rpcData = self.showMap[idString];
-        if (!rpcData.rpcID) {
+        if (rpcData && !rpcData.rpcID) {
         	rpcData.rpcID = [NSString stringWithFormat:@"%@|%@",self.hostName, idString];
 		}
 		return rpcData;
@@ -1416,6 +1416,7 @@ static NSArray * imageResponseTemplate = nil;
     }
 	if (![self.skipModeQueue containsObject:rpcData]) {
 		[self.skipModeQueue addObject:rpcData];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialing object: self.delegate  ];
 		if (self.skipModeQueue.count == 1 ) {
 			// restore these?
 			//    [self sendKeyEvent: @"nowShowing" andPause :4.0];
@@ -1445,6 +1446,7 @@ static NSArray * imageResponseTemplate = nil;
 				DDLogReport(@"EDL failure for %@", rpcData);
 				rpcData.skipModeFailed = YES;
 			}
+			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ];
 			[strongSelf.delegate receivedRPCData:rpcData];
 			if (strongSelf.skipModeQueue.count > 0) {
 				[strongSelf.skipModeQueue removeObjectAtIndex:0];

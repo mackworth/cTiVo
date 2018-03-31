@@ -39,10 +39,11 @@
 #define kMTNotificationFormatChanged @"MTNotificationFormatChanged"     //object: which MTFormat changed
 #define kMTNotificationFoundMultipleTiVos @"MTNotificationFoundMultipleTiVo"
 #define kMTNotificationFoundSkipModeInfo @"MTNotificationFoundSkipModeInfo" //object: show
-#define kMTNotificationFoundSkipModeList @"MTNotificationFoundSkipModeList" //object: show
 
 //Tivo busy indicator
 #define kMTNotificationTiVoUpdating @"MTNotificationTiVoUpdating"  //object: which MTTivo has started updating
+#define kMTNotificationTiVoCommercialed @"MTNotificationTiVoCommercialed"  //object: which MTTivo has finished getting commercials
+#define kMTNotificationTiVoCommercialing @"MTNotificationTiVoCommercialing"  //object: which MTTivo has started getting commercials
 #define kMTNotificationTiVoUpdated  @"MTNotificationTiVoUpdated" //object: which MTTivo is updated
 
 #define kMTNotificationUserCanceledQuit @"kMTNotificationUserCanceledQuit" 

@@ -113,7 +113,6 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationDownloadRowChanged object:nil];
    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeInfo object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeList object:nil];
 }
 
 -(id) copyWithZone:(NSZone *)zone {
@@ -173,10 +172,7 @@ __DDLOGHERE__
     }
     self.downloadDirectory = nil;
 
-    if (!self.isNew){
-        self.downloadStatus = @(kMTStatusNew);
-    }
-	[self skipModeCheck];
+	self.downloadStatus = @(kMTStatusNew);
     if (notifyTiVo) {
 		[self checkQueue];
 	}
@@ -1855,7 +1851,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(void) skipModeExpired {
 	//called if timer expires on downloading show info
 	[self stopWaitSkipModeTimer];
-	DDLogDetail(@"SkipMode Timer went off for %@, which ended at %@",self, self.show.stopTime);
+	DDLogMajor(@"XXX SkipMode Timer went off for %@, which ended at %@",self, self.show.stopTime);
 	if (!self.useSkipMode) return;
 	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
 		DDLogReport(@"SkipMode Timer went off, but we have SkipMode info? %@",self);

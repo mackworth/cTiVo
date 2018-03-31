@@ -527,17 +527,19 @@ __DDLOGHERE__
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(skipModeChannelFound:) name:kMTNotificationFoundSkipModeInfo object:nil];
 	
-	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-    [defaults addObserver:self forKeyPath:kMTUpdateIntervalMinutesNew options:NSKeyValueObservingOptionNew context:nil];
-	[defaults addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
-	[defaults addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
-	[defaults addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
-	[defaults addObserver:self forKeyPath:kMTScheduledSkipModeScanStartTime options:NSKeyValueObservingOptionNew context:nil];
-	[defaults addObserver:self forKeyPath:kMTScheduledSkipModeScanEndTime options:NSKeyValueObservingOptionNew context:nil];
-	[defaults addObserver:self forKeyPath:kMTScheduledSkipModeScan options:NSKeyValueObservingOptionNew context:nil];
-    [defaults addObserver:self forKeyPath:kMTTrustTVDBEpisodes options:NSKeyValueObservingOptionNew context:nil];
-    [defaults addObserver:self forKeyPath:KMTPreferredImageSource options:NSKeyValueObservingOptionNew context:nil];
-    [defaults addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
+	for (NSString * path in @[ kMTUpdateIntervalMinutesNew,
+							   kMTScheduledOperations,
+							   kMTScheduledEndTime,
+							   kMTScheduledStartTime,
+							   kMTScheduledSkipModeScanStartTime,
+							   kMTScheduledSkipModeScanEndTime,
+							   kMTScheduledSkipModeScan,
+							   kMTTrustTVDBEpisodes,
+							   KMTPreferredImageSource,
+							   kMTTiVos
+							 ]) {
+		 [[NSUserDefaults standardUserDefaults]  addObserver:self forKeyPath:path options:0 context:nil];
+	}
 }
 
 #pragma mark - Scheduling routine
@@ -715,8 +717,11 @@ __DDLOGHERE__
 
 -(void)setSkipModeTime {
 	//launchNow if being manually set, so user may expect it to go.
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(skipModeForAllActiveDownloads) object:@(NO)];
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(skipModeForAllActiveDownloads) object:@(YES)];
+	[self scheduleNextSkipModeIncludingNow:YES];
+}
+
+-(void) scheduleNextSkipModeIncludingNow:(BOOL) now {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(skipModeForAllActiveDownloads) object:nil];
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
 		DDLogDetail(@"No skipMode Auto Scan ");
 		return;
@@ -725,14 +730,16 @@ __DDLOGHERE__
 	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanEndTime ];
 	double startSeconds = [skipDate secondsUntilNextTimeOfDay];
 	double endSeconds =   [endDate secondsUntilNextTimeOfDay];
-	DDLogReport(@"xxx Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",startSeconds, (startSeconds/3600.0), skipDate); ///xxx make detail instead
-	[self performSelector:@selector(skipModeForAllActiveDownloads:) withObject:@(YES) afterDelay:startSeconds];
-	if (startSeconds >= endSeconds) {
-		//we're in active period, but delay a few seconds e.g. to typing a new time.
+	if (now && startSeconds >= endSeconds) {
+		//we're already in active period, but delay a few seconds e.g. startup setting defaults, or user typing a new time.
 		DDLogReport(@"Will run SkipMode Scan in 15 seconds"); ///xxx make detail instead
-		[self performSelector:@selector(skipModeForAllActiveDownloads:) withObject:@(NO) afterDelay:15];
+		[self performSelector:@selector(skipModeForAllActiveDownloads:) withObject:nil afterDelay:15];
+	} else {
+		DDLogReport(@"xxx Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",startSeconds, (startSeconds/3600.0), skipDate); ///xxx make detail instead
+		[self performSelector:@selector(skipModeForAllActiveDownloads:) withObject:nil afterDelay:startSeconds];
 	}
 }
+
 
 -(void)startAllTiVoQueues
 {
@@ -885,7 +892,7 @@ __DDLOGHERE__
     }
 }
 
--(void) skipModeForAllActiveDownloads: (NSNumber *) repeat {
+-(void) skipModeForAllActiveDownloads  {
 	NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
 	DDLogMajor(@"Scanning all active downloads for SkipMode");
 	for (MTDownload * download in self.downloadQueue) {
@@ -897,9 +904,7 @@ __DDLOGHERE__
 		}
 	}
 	[self skipModeRetrieval:[shows copy]];
-	if (repeat.boolValue) {
-		[self setSkipModeTime];
-	}
+	[self scheduleNextSkipModeIncludingNow: NO];
 }
 
 -(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows {
@@ -1187,6 +1192,7 @@ __DDLOGHERE__
 
 -(void) skipModeChannelFound: (NSNotification *) notification {
 	MTTiVoShow * show = notification.object;
+	if (!show.rpcData.clipMetaDataId) return;
 	NSString * channelName = show.stationCallsign;
 	NSMutableDictionary * channelInfo = [[tiVoManager channelNamed:channelName] mutableCopy];
 	if (channelInfo) {

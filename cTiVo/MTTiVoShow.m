@@ -318,36 +318,30 @@ __DDLOGHERE__
 
 -(void) setRpcData:(MTRPCData *)rpcData {
 	_rpcData = rpcData;
-   if (rpcData ) { //resetting existing info
-        self.episodeGenre = rpcData.genre;  //no conflict with TVDB
-		if (rpcData.edlList.count > 0) {
+	self.episodeGenre = rpcData.genre;  //no conflict with TVDB
+	if (rpcData.edlList.count > 0) {
 #ifdef DEBUG
-			if (self.previousEDL && rpcData.edlList && ![self.previousEDL equivalentToEDL:rpcData.edlList]) {
-				DDLogReport(@"EDL FAILURE for %@: %@ became %@", self, self.previousEDL, rpcData.edlList);
-			} else {
+		if (self.previousEDL && rpcData.edlList && ![self.previousEDL equivalentToEDL:rpcData.edlList]) {
+			DDLogReport(@"EDL FAILURE for %@: %@ became %@", self, self.previousEDL, rpcData.edlList);
+		} else {
 #endif
-				if (self.edlList != rpcData.edlList || rpcData.skipModeFailed) {
-					if (rpcData.edlList.count > 0) {
-						DDLogDetail(@"Got EDL for %@: %@", self, rpcData.edlList);
-					} else if (rpcData.skipModeFailed) {
-						DDLogMajor(@"EDL Failure for  %@", self);
-					}
-					self.edlList = rpcData.edlList;
-					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeList object:self];
-					[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadQueueUpdated object:nil]; //maybe launch download.
-				}
-#ifdef DEBUG
+		if (self.edlList != rpcData.edlList || rpcData.skipModeFailed) {
+			if (rpcData.edlList.count > 0) {
+				DDLogDetail(@"Got EDL for %@: %@", self, rpcData.edlList);
+			} else if (rpcData.skipModeFailed) {
+				DDLogMajor(@"EDL Failure for  %@", self);
 			}
-			self.previousEDL = rpcData.edlList;
+			self.edlList = rpcData.edlList;
+		}
+#ifdef DEBUG
+		}
+		self.previousEDL = rpcData.edlList;
 #endif
-		}
-    }
-	if (rpcData.clipMetaDataId) {
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
-		NSTimeInterval timeLeft = self.timeLeftTillRPCInfoWontCome;
-		if (timeLeft < 60*60 && timeLeft > -24*60*60) {
-			DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- timeLeft/60);
-		}
+	}
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+	NSTimeInterval timeLeft = self.timeLeftTillRPCInfoWontCome;
+	if (timeLeft < 60*60 && timeLeft > -24*60*60) {
+		DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- timeLeft/60);
 	}
     [self checkAllInfoSources];
 }
@@ -373,6 +367,8 @@ __DDLOGHERE__
 //	NSInteger minute = 45;
 //	[[NSCalendar currentCalendar] getHour:&hour minute:NULL second:NULL nanosecond:NULL fromDate: self.showDate];
 //	if (hour < 16 && !(hour == 0 && minute <=30)) return NO;
+	if (!self.tiVo.supportsRPC) return NO;
+	if (!self.rpcData) return YES;
 	if (self.hasSkipModeInfo || self.hasSkipModeList) return YES;
 	if (self.skipModeFailed) return NO;
 	if (self.isSuggestion) return NO;
