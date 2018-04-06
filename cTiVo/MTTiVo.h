@@ -59,7 +59,7 @@
 -(void) sendKeyEvent: (NSString *) keyEvent;
 -(void) sendURL: (NSString *) URL;
 
--(void) loadSkipModeInfoForShow:(MTTiVoShow *) show;
+-(void) loadSkipModeInfoForShow:(MTTiVoShow *) show withCompletion: (void (^)(void)) completionHandler;
 -(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows ;
 
 @end

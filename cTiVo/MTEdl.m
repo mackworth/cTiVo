@@ -142,7 +142,7 @@ __DDLOGHERE__
 		//now create the cut that goes BEFORE the segment
 		
 		double cutPartLength = segmentStart - cutPartStart;
-		if (cutPartLength <= 0 && cutPartStart < showLength-5.0) {
+		if (cutPartLength < 0 && cutPartStart < showLength-5.0) {
 			//problem, unless we're at the end of file
 			DDLogReport (@"In building EDL list, startPoint #%@: %@ with length %@ starts before previous segment ends at %@. StartPoints: %@Segments: %@  ==> failed edl so far %@", @(startIndex), startPoints[startIndex], lengthPoint, @(cutPartStart), startPoints, lengthPoints, edls);
 			return nil;

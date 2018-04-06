@@ -24,7 +24,7 @@
 -(void) purgeShows: (NSArray <NSString *> *) showIDs;
 
 -(void) reloadShowInfoForIDs: (NSArray <NSString *> *) showIDs;
--(void) getShowInfoForShows: (NSArray <NSString *> *) showIDs;
+-(void) getShowInfoForShows: (NSArray <NSString *> *) showIDs withCompletion: (void (^)(void)) completionHandler;
 -(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;

@@ -340,7 +340,7 @@ __DDLOGHERE__
 	}
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
 	NSTimeInterval timeLeft = self.timeLeftTillRPCInfoWontCome;
-	if (timeLeft < 60*60 && timeLeft > -24*60*60) {
+	if (rpcData.clipMetaDataId && timeLeft < 60*60 && timeLeft > -24*60*60) {
 		DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- timeLeft/60);
 	}
     [self checkAllInfoSources];

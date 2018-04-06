@@ -164,8 +164,11 @@ static BOOL inProgress = NO;
     NSString * body = @"{\"apikey\": \"" kMTTheTVDBAPIKey "\"}";
     request.HTTPBody = [body dataUsingEncoding:NSUTF8StringEncoding];
     NSDate * tokenExpiration = [NSDate dateWithTimeIntervalSinceNow:24*60*60];
+	__weak __typeof__(self) weakSelf = self;
+
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        if (!error) {
+		__typeof__(self) strongSelf = weakSelf;
+        if (strongSelf && !error) {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
             if (httpResponse.statusCode == 200){
                 NSError * jsonError;
@@ -173,8 +176,8 @@ static BOOL inProgress = NO;
                 if (!jsonError || ![jsonData isKindOfClass:[NSDictionary class]]) {
                     NSString * token = jsonData[@"token"];
                     if (token.length) {
-                        self.tvdbToken = token;
-                        self.tvdbTokenExpireTime = tokenExpiration;
+                        strongSelf.tvdbToken = token;
+                        strongSelf.tvdbTokenExpireTime = tokenExpiration;
                         DDLogDetail(@"Got TVDB token: %@", token);
                     } else {
                         DDLogReport(@"NO Token?? %@", jsonData);
@@ -184,10 +187,12 @@ static BOOL inProgress = NO;
                 }
             } else {
                 DDLogReport(@"TVDB Token HTTP Response Error %ld: %@, %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL );
-                [self cancelSession];
+                [strongSelf cancelSession];
             }
         }
-        inProgress = NO;
+		@synchronized (strongSelf) {
+			inProgress = NO;
+		}
     }];
     DDLogDetail(@"requesting token: %@", tokenURL);
     [task resume];
@@ -202,7 +207,8 @@ static BOOL inProgress = NO;
 
     NSURL *seriesURL = [NSURL URLWithString: [NSString stringWithFormat:@"https://api.thetvdb.com/search/series?name=%@",[series escapedQueryString]] ];
     DDLogDetail(@"search for seriesID for %@ at %@",series, seriesURL);
-    NSURLSessionDataTask *task = [self.tvdbURLSession  dataTaskWithURL: seriesURL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+	__weak __typeof__(self) weakSelf = self;
+   	NSURLSessionDataTask *task = [self.tvdbURLSession  dataTaskWithURL: seriesURL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (!error) {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
             if (httpResponse.statusCode == 200){
@@ -257,7 +263,7 @@ static BOOL inProgress = NO;
 				DDLogReport(@"TVDB Connection had a Bad Gateway error at %@!" , seriesURL );
 			} else {
                 DDLogReport(@"TVDB Series HTTP Response Error %ld: %@, %@ for %@", (long)httpResponse.statusCode, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL, series );
-                [self cancelSession];
+                [weakSelf cancelSession];
             }
         }
         if (failureBlock) {
@@ -292,6 +298,7 @@ static BOOL inProgress = NO;
     if (pageNumber ==0 ) {
         DDLogDetail(@"Looking for episode %@ at: %@", episodeName, episodeURL);
     }
+	__weak __typeof__(self) weakSelf = self;
     NSURLSessionDataTask *task = [self.tvdbURLSession dataTaskWithURL:episodeURL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         NSNumber *nextPage = @(-1);
         if (!error) {
@@ -350,7 +357,7 @@ static BOOL inProgress = NO;
                 DDLogVerbose(@"TVDB episode %@ in series %@ not found on page %@", episodeName, seriesID, @(pageNumber));
             } else {
                 DDLogReport(@"TVDB Episode HTTP Response Error %ld: %@, %@ fr %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL, seriesID );
-                [self cancelSession];
+                [weakSelf cancelSession];
            }
         } else {
             DDLogReport(@"TVDB Episode Call Error %@: for %@", error.localizedFailureReason, episodeURL );
@@ -358,7 +365,7 @@ static BOOL inProgress = NO;
 
         //so this one didn't work; let's try the next one, either next page or next seriesID
         if ([nextPage isKindOfClass: NSNumber.class] && nextPage.integerValue > 0) {
-            [self searchForEpisodeNamed: episodeName
+            [weakSelf searchForEpisodeNamed: episodeName
                                orSeason: season
                              andEpisode: episode
                                inSeries: seriesIDs
@@ -370,7 +377,7 @@ static BOOL inProgress = NO;
             if (failureBlock) dispatch_async(dispatch_get_main_queue(),failureBlock);
         } else {
             NSArray * restSeriesIDs =    [seriesIDs subarrayWithRange:NSMakeRange(1, seriesIDs.count - 1)];
-            [self searchForEpisodeNamed: episodeName
+            [weakSelf searchForEpisodeNamed: episodeName
                                orSeason: season
                              andEpisode: episode
                                inSeries: restSeriesIDs
@@ -408,6 +415,7 @@ static BOOL inProgress = NO;
      }
      NSURL *episodeURL = [NSURL URLWithString: episodeURLString];
      DDLogVerbose(@"looking for episode %@ at %@",episodeName, episodeURL);
+	 __weak __typeof__(self) weakSelf = self;
      NSURLSessionDataTask *task = [self.tvdbURLSession dataTaskWithURL:episodeURL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (!error) {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
@@ -474,7 +482,7 @@ static BOOL inProgress = NO;
                 DDLogVerbose(@"TVDB episode %@ in series %@ not found on %@", episodeName, seriesID, originalAirDate);
             } else {
                 DDLogReport(@"TVDB Episode HTTP Response Error %ld: %@, %@ fr %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL, seriesID );
-                [self cancelSession];
+                [weakSelf cancelSession];
            }
         } else {
             DDLogReport(@"TVDB Episode Call Error %@: for %@", error.localizedFailureReason, episodeURL );
@@ -494,7 +502,7 @@ static BOOL inProgress = NO;
         } else {
             //so this one didn't work; let's try the next one.
             NSArray * restSeriesIDs = [seriesIDs subarrayWithRange:NSMakeRange(1, seriesIDs.count - 1)];
-            [self infoForEpisodeNamed:episodeName
+            [weakSelf infoForEpisodeNamed:episodeName
                              orSeason: season
                            andEpisode: episode
                              inSeries:restSeriesIDs
@@ -522,6 +530,7 @@ static BOOL inProgress = NO;
     //if none, then use first episode with original airdate
     //then call completionBlock to hand values back to original caller.
     //use recursion to index across seriesIDs
+	__weak __typeof__(self) weakSelf = self;
     [self infoForEpisodeNamed:episodeName
                      orSeason: season
                    andEpisode: episode
@@ -531,7 +540,7 @@ static BOOL inProgress = NO;
                failureHandler:^{
                    //so no episodes with exact air date, let's find one with exact name match instead
                    if (episodeName.length) {
-                       [self searchForEpisodeNamed: episodeName
+                       [weakSelf searchForEpisodeNamed: episodeName
                                           orSeason: season
                                         andEpisode: episode
                                       inSeries: seriesIDs
@@ -563,7 +572,8 @@ static BOOL inProgress = NO;
         return;
     }
     NSURL *imageURL = [NSURL URLWithString: [NSString stringWithFormat:@"https://api.thetvdb.com/series/%@/images/query?keyType=%@",seriesID, artType]];
-    NSURLSessionDataTask *task = [self.tvdbURLSession dataTaskWithURL:imageURL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+	__weak __typeof__(self) weakSelf = self;
+  	NSURLSessionDataTask *task = [self.tvdbURLSession dataTaskWithURL:imageURL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         float bestRating = 0.0;
         float bestTextRating = 0.0;
         NSString * bestFile = nil;
@@ -615,7 +625,7 @@ static BOOL inProgress = NO;
                 DDLogDetail(@"TVDB %@ images not found for show %@ in series %@ at %@", artType, show, seriesID, imageURL);
                 if ([artType isEqualToString:@"fanart"]) {
                     //well, if at first you don't ...
-                    [self searchSeriesArtwork:show
+                    [weakSelf searchSeriesArtwork:show
                                       artType:@"poster"
                             completionHandler:completionBlock
                                failureHandler:failureBlock];
@@ -623,7 +633,7 @@ static BOOL inProgress = NO;
                 }
             } else {
                 DDLogReport(@"TVDB Episode HTTP Response Error %ld: %@, %@ from %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL, seriesID );
-                [self cancelSession];
+                [weakSelf cancelSession];
             }
         } else {
             DDLogReport(@"TVDB Episode Call Error %@: for %@", error.localizedFailureReason, imageURL );

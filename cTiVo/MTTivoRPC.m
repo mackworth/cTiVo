@@ -287,7 +287,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
          [oStream open];
      }
 	 if (self.skipModeQueue.count > 0 ) { //recover commercialing under way (e.g. after sleep)
-		 [self performSelector:@selector(findSkipModeRecursive:) withObject:@YES afterDelay:20];
+		 [self performSelector:@selector(findSkipModeRecursive:) withObject:@0 afterDelay:20];
 	 }
 
  }
@@ -748,7 +748,7 @@ static NSRegularExpression * isFinalRegex = nil;
            DDLogDetail (@"Got %lu shows from TiVo", shows.count);
            if (!strongSelf.showMap) {
                strongSelf.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
-               [strongSelf getShowInfoForShows: shows];
+               [strongSelf getShowInfoForShows: shows withCompletion:nil];
            } else {
                NSMutableArray <NSString *> *lookupDetails = [NSMutableArray array];
                NSMutableArray <NSString *> * newIDs = [NSMutableArray array];
@@ -774,10 +774,11 @@ static NSRegularExpression * isFinalRegex = nil;
                for (NSString * objectID in deletedShows) {
                    [strongSelf.showMap removeObjectForKey:objectID];
                }
-               [strongSelf getShowInfoForShows: lookupDetails];
-               if (!isFirstLaunch) {
-				   [strongSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
-               }
+			   [strongSelf getShowInfoForShows: lookupDetails withCompletion:^{
+				   if (!isFirstLaunch) {
+					   [weakSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
+				   }
+			   }];
            }
        } ];
 }
@@ -797,22 +798,21 @@ static NSRegularExpression * isFinalRegex = nil;
 
 -(void) reloadShowInfoForIDs: (NSArray <NSString *> *) showIDs {
 	[self purgeShows:showIDs];
-    [self getShowInfoForShows:showIDs];
+    [self getShowInfoForShows:showIDs withCompletion:nil];
 }
 
--(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows  {
+-(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows withCompletion: (void (^)(void)) completionHandler {
     if (requestShows.count == 0) return;
     if (!self.bodyID) return;
     const int idsPerCall = 10;
-    const float minTimePerCall = 1.0;
     NSArray <NSString *> *  subArray = nil;
     BOOL lastBatch = idsPerCall >= requestShows.count;
+	NSArray <NSString *> * restArray = nil;
     if ( lastBatch) {
         subArray = requestShows;
     } else {
         subArray = [requestShows subarrayWithRange:NSMakeRange(0, idsPerCall)];
-        NSArray <NSString *> * restArray = [requestShows subarrayWithRange:NSMakeRange(idsPerCall, requestShows.count -idsPerCall)];
-        [self performSelector:@selector(getShowInfoForShows:) withObject:restArray afterDelay:minTimePerCall];
+        restArray = [requestShows subarrayWithRange:NSMakeRange(idsPerCall, requestShows.count -idsPerCall)];
     }
     DDLogDetail(@"Getting showInfo for %@", subArray);
     //    if (!showInfoResponseTemplate) {    //DOESN"T WORK for episodeNum??
@@ -849,10 +849,13 @@ static NSRegularExpression * isFinalRegex = nil;
 	   __typeof__(self) strongSelf = weakSelf;
 	   if (!strongSelf) return;
        NSArray * responseShows = jsonResponse[@"recording"];
-       DDLogVerbose(@"Got ShowInfo from TiVo RPC: %@", [strongSelf maskTSN:jsonResponse]);
+	   if (!lastBatch) {
+		   [strongSelf getShowInfoForShows:subArray withCompletion:completionHandler];
+	   }
+	   DDLogVerbose(@"Got ShowInfo from TiVo RPC: %@", [strongSelf maskTSN:jsonResponse]);
        if (responseShows.count == 0) return;
        if (responseShows.count != subArray.count) {
-           DDLogMajor(@"Invalid # of TivoRPC shows: /n%@ /n%@", responseShows, subArray);
+           DDLogMajor(@"Invalid # of TivoRPC shows: \n%@ \n%@", responseShows, subArray);
            return;
        }
        NSMutableArray * showsWithoutImage = [NSMutableArray arrayWithCapacity:responseShows.count];
@@ -895,6 +898,8 @@ static NSRegularExpression * isFinalRegex = nil;
 					   rpcData.programSegments = segments;
 				   }];
 			   }
+		   } else {
+			   DDLogMajor(@"No Metadata for %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId);
 		   }
            rpcData.series = (NSString *)showInfo[@"title"];
 //           NSString * mimeType = (NSString *)showInfo[@"mimeType"];  doesn't work!
@@ -930,6 +935,7 @@ static NSRegularExpression * isFinalRegex = nil;
            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                [strongSelf saveDefaults];
            });
+		  if (completionHandler) completionHandler();
        }
    } ];
 }
@@ -1080,6 +1086,23 @@ static NSArray * imageResponseTemplate = nil;
 	   }];
 }
 
+-(void) whatsOnSearchWithCompletion: (void (^)(void)) completionHandler{
+	DDLogDetail(@"Asking What's on:");
+	[self sendRpcRequest:@"whatsOnSearch"
+				 monitor:NO
+				withData:@{}
+	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+		   DDLogReport(@"sent what'sOnSearch; got %@", jsonResponse);
+		   if (completionHandler) completionHandler();
+//		   jsonResponse{@"WhatsOn][@playBackType"}  = liveCache,
+//		   playbackType = liveCache;
+//		   playbackType = recording;
+//		   playbackType = idle;
+
+
+	   }];
+}
+
 -(void) retrievePositionWithCompletionHandler: (void (^)(long long position, long long length)) completionHandler {
 	if (!self.bodyID) {
 		DDLogMajor (@"can't Retrieve Position");
@@ -1189,7 +1212,7 @@ static NSArray * imageResponseTemplate = nil;
 		if (completionHandler) completionHandler(nil, nil);
 		return;
 	};
-	DDLogDetail(@"Getting clip data for %@", contentId);
+	DDLogMajor(@"Getting clip data for %@", contentId);
 	NSArray <NSString *> *  subArray = @[contentId];
 	NSArray * showInfoResponseTemplate =
 		@[@{
@@ -1229,7 +1252,7 @@ static NSArray * imageResponseTemplate = nil;
 			   clipMetaDataId = clipDataArray[0][@"clipMetadataId"];
 		   }
 		   if (!clipMetaDataId) {
-			   DDLogDetail(@"No clip data for %@", contentId);
+			   DDLogMajor(@"No clip data for %@", contentId);
 			   if (completionHandler) completionHandler(nil,nil);
 			   return;
 		   } else {
@@ -1284,7 +1307,7 @@ static NSArray * imageResponseTemplate = nil;
 //
 -(void) retrieveSegments: (NSString *) clipMetaId withCompletionHandler: (void (^)(NSArray *)) completionHandler {
 	if (clipMetaId.length == 0 ) {
-		DDLogMajor (@"can't retrieve segments for nil show");
+		DDLogMajor (@"can't retrieve segments for nil metadata");
 		if (completionHandler) completionHandler(nil);
 		return;
 	};
@@ -1422,7 +1445,7 @@ static NSArray * imageResponseTemplate = nil;
 			//    [self sendKeyEvent: @"nowShowing" andPause :4.0];
 			//    [self sendKeyEvent: @"tivo"       andPause :4.0];
 			//    [self sendKeyEvent: @"nowShowing" andPause :4.0];
-			[self findSkipModeRecursive:@YES];
+			[self findSkipModeRecursive:@0];
 		} else {
 			//wait for previous ones to complete.
 		}
@@ -1430,18 +1453,18 @@ static NSArray * imageResponseTemplate = nil;
 }
 
 -(void) findSkipModeRecursive: (NSNumber *) firstTryNumber {
-	BOOL firstTry = firstTryNumber.boolValue;
+	BOOL lastTry = firstTryNumber.intValue >= 2 ; //try up to three times (due to interference)
     if (self.skipModeQueue.count == 0) {
         DDLogMajor(@"Finished checking for commercials");
         return;
     }
-	DDLogMajor(@"%@Checking for commercials for %@", firstTry ? @"" : @"Re-", self.skipModeQueue[0]);
+	DDLogMajor(@"%@Checking for commercials for %@", lastTry ? @"" : @"Re-", self.skipModeQueue[0]);
 	MTRPCData * rpcData = self.skipModeQueue[0];
 	__weak __typeof__(self) weakSelf = self;
 
 	[self findSkipModePointsForShow:rpcData withCompletionHandler:^{
 		__typeof__(self) strongSelf = weakSelf;
-		if (rpcData.edlList || !firstTry) {
+		if (rpcData.edlList || lastTry) {
 			if (!rpcData.edlList) {
 				DDLogReport(@"EDL failure for %@", rpcData);
 				rpcData.skipModeFailed = YES;
@@ -1450,12 +1473,12 @@ static NSArray * imageResponseTemplate = nil;
 			[strongSelf.delegate receivedRPCData:rpcData];
 			if (strongSelf.skipModeQueue.count > 0) {
 				[strongSelf.skipModeQueue removeObjectAtIndex:0];
-				[strongSelf findSkipModeRecursive:@YES ];
+				[strongSelf findSkipModeRecursive:@0 ];
 			}
 		} else {
 			//try again if we have a problem creating an EDL
 			DDLogReport(@"Retrying EDL list for %@", rpcData);
-			[strongSelf findSkipModeRecursive:@NO ];
+			[strongSelf findSkipModeRecursive:@(firstTryNumber.intValue + 1) ];
 		}
     }];
 }
@@ -1464,11 +1487,13 @@ static NSArray * imageResponseTemplate = nil;
 	
 	__weak __typeof__(self) weakSelf = self;
 	if (!rpcData) return;
-	[self playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
+	[weakSelf whatsOnSearchWithCompletion: ^{
+
+	[weakSelf playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
 		
 		//note: indenting change to avoid tower effect, each line break is a new block
 		[weakSelf afterDelay:1.0 launchBlock:^{
-			
+
 		[weakSelf retrievePositionWithCompletionHandler:^(long long startingPoint, long long end) {
 			
 		DDLogDetail(@"found initial Point of %@ / %@", @(startingPoint), @(end));
@@ -1521,6 +1546,7 @@ static NSArray * imageResponseTemplate = nil;
 		}];
 		}];
 	}];
+			}];
 }
 
 	

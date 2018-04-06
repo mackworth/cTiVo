@@ -575,7 +575,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows {
-	for (MTTiVoShow * show in shows) {
+	//if they already have metadata, try them first
+	//More than one show happens when SkipMode timeblock happens, so we want to try possible ones first.
+	NSArray <MTTiVoShow *> * hasInfoFirst = [shows sortedArrayUsingComparator:^NSComparisonResult(MTTiVoShow *  _Nonnull show1, MTTiVoShow *    _Nonnull show2) {
+		BOOL show1Has = show1.rpcData.clipMetaDataId != nil;
+		BOOL show2Has = show2.rpcData.clipMetaDataId != nil;
+		if (show1Has == show2Has) return NSOrderedSame;
+		if (show1Has) return NSOrderedAscending;
+		return NSOrderedDescending;
+	}];
+	for (MTTiVoShow * show in hasInfoFirst) {
 //		xxx test erasure of edlList:
 //      show.rpcData.edlList = nil;
 //		show.rpcData.clipMetaDataId = nil;
@@ -953,8 +962,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //}
 //
 
--(void) loadSkipModeInfoForShow:(MTTiVoShow *) show {
-	[self.myRPC getShowInfoForShows:@[show.idString]];
+-(void) loadSkipModeInfoForShow:(MTTiVoShow *) show withCompletion: (void (^)(void)) completionHandler {
+	[self.myRPC getShowInfoForShows:@[show.idString] withCompletion:  completionHandler];
 }
 
 -(void) reloadRecentShows {
@@ -968,16 +977,20 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			if (!show.protectedShow.boolValue && !show.rpcData.clipMetaDataId && show.mightHaveSkipModeInfo) {
 				[recentIDs addObject:show.idString];
 				[recentShows addObject:show];
-				//show.rpcData = nil;  //Necessary?
 			}
 		}
 	}
 	if (recentIDs.count > 0) {
 		DDLogMajor(@"reloading shows for metadata: %@", recentShows);
-		[self.myRPC getShowInfoForShows:[recentIDs copy]];
-//		[self performSelector:@selector(reloadRecentShows) withObject:nil afterDelay:60];
+		[self.myRPC getShowInfoForShows:[recentIDs copy] withCompletion:^{
+			for (MTTiVoShow * show in recentShows) {
+				if (show.hasSkipModeInfo || show.hasSkipModeList) {
+					DDLogReport(@"XXX Looks like we got SkipMode Info/List for %@",self);
+					[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationFoundSkipModeInfo object: show ];
+				}
+			}
+		} ];
 	}
-
 }
 
 -(void)parserDidEndDocument:(NSXMLParser *)parser

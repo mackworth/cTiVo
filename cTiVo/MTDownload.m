@@ -412,13 +412,11 @@ __DDLOGHERE__
     show.isQueued = YES;
 	if (self.downloadStatus.integerValue == kMTStatusDeleted || [formerShow.imageString isEqualToString:@"deleted"]) {
 		DDLogDetail(@"Tivo restored previously deleted show %@",show);
-		if (self.downloadStatus.integerValue == kMTStatusDeleted && !show.isOnDisk) {
-			self.downloadStatus = @(kMTStatusNew);
+		NSInteger status = self.downloadStatus.integerValue;
+		if (!show.isOnDisk || self.isNew || status == kMTStatusDeleted) {
 			[self prepareForDownload:YES];
-		} else if (self.markCommercials && self.useSkipMode){
-			self.downloadStatus = @(kMTStatusSkipModeWaitEnd);
-		} else {
-			self.downloadStatus = @(kMTStatusDone);
+		} else if (status == kMTStatusSkipModeWaitEnd) {
+			[self skipModeCheck];
 		}
 	}
 }
@@ -1787,6 +1785,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void) skipModeUpdated: (NSNotification *) notification {
 	if (notification.object == self || notification.object == self.show ) {
+		DDLogMajor(@"Notified of SkipMode Info change for %@", self);
 		[self skipModeCheck];
 	}
 }
@@ -1803,7 +1802,8 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 				[self checkQueue];
 				break;
 			case kMTStatusSkipModeWaitInitial:
-				self.downloadStatus = @(kMTStatusNew);
+				DDLogReport(@"XXX Was waiting for SkipMode, but now launching %@", self);
+			self.downloadStatus = @(kMTStatusNew);
 				[self checkQueue];
 				break;
 			case kMTStatusSkipModeWaitEnd:
@@ -1811,7 +1811,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 					DDLogMajor(@"Got EDL for %@: %@", self, self.show.edlList);
 					[self addEDLtoFilesOnDisk];
 				} else {
-					DDLogReport(@"Was waiting for SkipMode, but not supposed to be for %@", self);
+					DDLogReport(@"Was waiting for SkipMode, but not supposed to be for %@: %@", self, self.show.edlList);
 				}
 				[self finalFinalProcessing];
 				break;
@@ -1830,7 +1830,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
 			self.downloadStatus = @(kMTStatusNew);
 		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
-			[self cancel];
+			[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
 		}
 		[self checkQueue];
 	} else {
@@ -1841,6 +1841,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		if (self.show.hasSkipModeInfo) {
 			//now we want the skipmode EDL, but it hasn't been pulled over yet
 			[self stopWaitSkipModeTimer];
+			DDLogReport(@"xx Now Waiting for SkipMode EDL %@", self);
 			[tiVoManager getSkipModeEDLWhenPossible:self];
 		} else {
 			[self startWaitSkipModeTimer];
@@ -1858,16 +1859,20 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		[self skipModeCheck];
 		return; //shouldn't be here
 	}
-	[self.show.tiVo loadSkipModeInfoForShow: self.show];  //one last shot
-	[self performSelector:@selector(changeToComskip) withObject:nil afterDelay:15 ];
+	__weak __typeof__(self) weakSelf = self;
+
+	[self.show.tiVo loadSkipModeInfoForShow: self.show withCompletion:^{
+		 //one last shot
+		if (weakSelf.show.hasSkipModeInfo || weakSelf.show.hasSkipModeList) {
+			DDLogReport(@"XXX SkipMode Timer went off, but we got SkipMode at last second. %@",self);
+			[weakSelf skipModeCheck];
+		} else {
+			[weakSelf changeToComskip];
+		}
+	}];
 }
 
 -(void) changeToComskip {
-	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
-		DDLogReport(@"SkipMode Timer went off, but we got SkipMode at last second. %@",self);
-		[self skipModeCheck];
-		return; //shouldn't be here
-	}
 	DDLogMajor(@"Never got SkipMode Info for %@. Retrying with comskip",self.show);
 	if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial ) {
 		self.useSkipMode = NO; //have to try comskip now
@@ -1883,12 +1888,14 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	if (!self.waitForSkipModeInfoTimer) {
 		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome;
 		if (waitTime > 0) {
+			DDLogReport (@"XXX setting skipModeTimer at %0.1f minutes for %@", waitTime/60.0, self );
 			self. waitForSkipModeInfoTimer = [NSTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
 		}
 	}
 }
 
 -(void) stopWaitSkipModeTimer {
+	if (self.waitForSkipModeInfoTimer) DDLogReport (@"XXX cancelling skipModeTimer  for %@", self );
 	[self.waitForSkipModeInfoTimer invalidate]; self.waitForSkipModeInfoTimer = nil;
 }
 
@@ -2056,7 +2063,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void)cancel
 {
-    if (self.isCanceled || !self.isInProgress) {
+    if (self.isCanceled || self.isNew || self.isCompletelyDone) {
         return;
     }
     self.isCanceled = YES;
@@ -2454,7 +2461,7 @@ NSInteger diskWriteFailure = 123;
         [challenge.sender cancelAuthenticationChallenge:challenge];
         BOOL noMAK = self.show.tiVo.mediaKey.length == 0;
         DDLogMajor(@"%@ MAK, so failing URL Authentication %@",noMAK ? @"No" : @"Invalid", self.show.tiVoName);
-        [self cancel];
+        [self rescheduleOnMain];
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self.show.tiVo, @"reason" : @"incorrect"}];
     }
     
@@ -2650,6 +2657,10 @@ NSInteger diskWriteFailure = 123;
             ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState);
 }
 
+-(BOOL) canSkipModeCommercials {
+	return self.show.tiVo.supportsRPC && (self.canMarkCommercials || self.canSkipCommercials);
+}
+
 -(BOOL) runComskip {
 	//we're launching now, so should we use comskip or not
 	//Either  we want commercials but won't/can't use SkipMode, OR we want to skip but we don't have list yet. (Can add mark later)
@@ -2747,6 +2758,8 @@ NSInteger diskWriteFailure = 123;
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];
         BOOL markWasDisabled = ![self canMarkCommercials];
+		BOOL skipModeWasDisabled = ![self canSkipModeCommercials];
+		
         _encodeFormat = encodeFormat;
         if (!self.canAddToiTunes && self.shouldAddToiTunes) {
             //no longer possible
@@ -2770,6 +2783,13 @@ NSInteger diskWriteFailure = 123;
             //newly possible, so take user default
             self.markCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:kMTMarkCommercials];
         }
+		if (self.useSkipMode && ![self canSkipModeCommercials]) {
+			self.useSkipMode = NO;
+		} else if (skipModeWasDisabled && [self canSkipModeCommercials]) {
+			//newly possible, so take user default
+			self.useSkipMode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTUseSkipMode];
+		}
+		
 		if (!wasNil) { //no need at launch
 			[self skipModeCheck];
 		}

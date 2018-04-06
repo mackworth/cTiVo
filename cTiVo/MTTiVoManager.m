@@ -733,10 +733,10 @@ __DDLOGHERE__
 	if (now && startSeconds >= endSeconds) {
 		//we're already in active period, but delay a few seconds e.g. startup setting defaults, or user typing a new time.
 		DDLogReport(@"Will run SkipMode Scan in 15 seconds"); ///xxx make detail instead
-		[self performSelector:@selector(skipModeForAllActiveDownloads:) withObject:nil afterDelay:15];
+		[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:nil afterDelay:15];
 	} else {
 		DDLogReport(@"xxx Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",startSeconds, (startSeconds/3600.0), skipDate); ///xxx make detail instead
-		[self performSelector:@selector(skipModeForAllActiveDownloads:) withObject:nil afterDelay:startSeconds];
+		[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:nil afterDelay:startSeconds];
 	}
 }
 
@@ -1622,7 +1622,7 @@ __DDLOGHERE__
 		}
 		if (!self.showsWaitingSkipModeList) self.showsWaitingSkipModeList = [NSMutableSet set];
 		[self.showsWaitingSkipModeList addObject:download.show];
-		[self performSelector:@selector(removeDownloadFromWaitingSkipModeList:) withObject:download afterDelay:24*60*60];
+		[self performSelector:@selector(removeShowFromWaitingSkipModeList:) withObject:download afterDelay:24*60*60];
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
 			//scheduled, so if it's soon enough, just wait, otherwise warn.
 			if (self.autoSkipModeScanAllowedNow) {

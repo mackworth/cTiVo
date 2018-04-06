@@ -206,13 +206,19 @@ file_info=$("$ffmpeg_path" -i "$input" 2>&1 >/dev/null)
 
 original_duration=$(echo "$file_info" | grep Duration: | awk '{print $2}')
 if [ -z "$original_duration" ]; then
-  echo "Unable to determine duration from input file $input:"
+  echo "WARNING: Unable to determine duration from input file $input:"
   echo "$file_info"
   exit 1
 fi
 
 # figure out the duration after cutting, for the progress indicator
 original_duration=$(timestamp_to_seconds $original_duration)
+if [ -z "$original_duration" ]; then
+  echo "WARNING: Unable to determine duration from input file $input:" >&2
+  echo "$file_info"  >&2
+  exit 1
+fi
+
 cut_duration=$(awk "BEGIN {total=0} {total += ($original_duration < \$2 ? $original_duration : \$2)-\$1} END {print total}" "$edl_file")
 duration=$(echo "$original_duration-$cut_duration" | bc -l)
 
