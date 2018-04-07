@@ -86,7 +86,7 @@ static SecKeychainRef keychain = NULL;  //
         if (status != errSecSuccess) {
             DDLogReport(@"Could not create temporary keychain \"%@\": [%d] %@", keychainPath, (int)status, securityErrorMessageString(status));
         } else if (keychain) {
-			NSString * tivoPassword = @"LwrbLEFYvG";
+			NSString * tivoPassword = @"5vPNhg6sV4tD";
 
 			NSDictionary * optionsDictionary = @{(id)kSecImportExportPassphrase: tivoPassword,
 												 (id)kSecImportExportKeychain:   (__bridge id)keychain};
@@ -211,7 +211,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
         for (NSString * key in self.showMap.allKeys){
             MTRPCData * rpcInfo = self.showMap[key];
             NSString * title= rpcInfo.series;
-            if (!_seriesImages[title]) {
+            if (title && !_seriesImages[title]) {
                 _seriesImages[title] = rpcInfo.imageURL;
             }
         }

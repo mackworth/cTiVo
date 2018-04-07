@@ -30,7 +30,7 @@
     @property (atomic, strong) NSDate * movieDBRateLimitEnd;
     @property (atomic, strong) NSNumber * movieDBRateLimitLock; //just used to lock other calls
     @property (atomic, assign) NSInteger movieDBRateLimitCalls;
-
+	@property (atomic, strong) NSDate * failWaitUntilTime;
 @end
 
 @implementation MTTVDB
@@ -96,30 +96,39 @@ __DDLOGHERE__
 }
 
 -(NSURLSession *) tvdbURLSession {
-    @synchronized (self) {
-         if (_tvdbURLSession) return _tvdbURLSession;
-    }
-    NSURLSession * session = nil;
-    DDLogReport(@"Establishing Session");
-
-    NSInteger numTries = 10;
-    while (![self checkToken]  && numTries > 0) {
-        DDLogMajor(@"Still checking for TVDB token");
-        usleep(250000);   //XXX FIX: pausing for a quarter-second up to 2.5 seconds on main queue is not good
-        numTries--;
-    }
-    if (self.tvdbToken) {
-        NSURLSessionConfiguration * config = [NSURLSessionConfiguration defaultSessionConfiguration];
-        config.HTTPAdditionalHeaders = @{@"Accept": @"application/json",
-                                         @"Content-Type": @"application/json",
-                                         @"Authorization": [NSString stringWithFormat:@"Bearer %@",self.tvdbToken]};
-        session = [NSURLSession sessionWithConfiguration:config];
-        self.tvdbURLSession = session;
-    } else {
-        DDLogReport(@"Cannot establish session with TVDB");
-    }
-
-    return session;
+	@synchronized (self) {
+		if (_tvdbURLSession) return _tvdbURLSession;
+		self.tvdbToken = nil;
+		if ([self.failWaitUntilTime timeIntervalSinceNow] >  0) {
+			DDLogDetail(@"Still waiting for to try TVDB again");
+			return nil;
+		}
+	}
+	NSURLSession * session = nil;
+	DDLogReport(@"Establishing Session");
+	
+	if (![self checkToken]) {
+		DDLogMajor(@"Still checking for TVDB token");
+		usleep(250000);   //XXX FIX: pausing for a quarter-second on main queue is not good
+		[self checkToken];
+	}
+	if (self.tvdbToken) {
+		NSURLSessionConfiguration * config = [NSURLSessionConfiguration defaultSessionConfiguration];
+		config.HTTPAdditionalHeaders = @{@"Accept": @"application/json",
+										 @"Content-Type": @"application/json",
+										 @"Authorization": [NSString stringWithFormat:@"Bearer %@",self.tvdbToken]};
+		session = [NSURLSession sessionWithConfiguration:config];
+		self.tvdbURLSession = session;
+	} else {
+		DDLogReport(@"Cannot establish session with TVDB");
+		if (self.failWaitUntilTime) {
+			self.failWaitUntilTime = [NSDate dateWithTimeIntervalSinceNow:60*10]; //try in 10 minutes
+		} else {
+			self.failWaitUntilTime = [NSDate dateWithTimeIntervalSinceNow:30]; //retry in 30 seconds
+		}
+	}
+	
+	return session;
 }
 
 -(void) setTvdbURLSession:(NSURLSession *)tvdbURLSession {
