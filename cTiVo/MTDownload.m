@@ -195,12 +195,17 @@ __DDLOGHERE__
              self.performanceTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
              [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
          }
-        if (self.downloadStatus.intValue == kMTStatusEncoding) {
-            //if done downloading, then maybe taskchain needs to update progress
-            if (!(_encodeTask.progressCalc || _encodeTask.trackingRegEx)) {
-                self.activeTaskChain.providesProgress = YES;
-            }
-        }
+		if (self.downloadStatus.intValue == kMTStatusEncoding) {
+			//if done downloading, then maybe taskchain needs to update progress
+			if (!(_encodeTask.progressCalc || _encodeTask.trackingRegEx)) {
+				self.activeTaskChain.providesProgress = YES;
+			}
+		} else if (self.downloadStatus.intValue == kMTStatusCaptioning) {
+			//if done downloading, then maybe taskchain needs to update progress
+			if (!(_captionTask.progressCalc || _captionTask.trackingRegEx)) {
+				self.activeTaskChain.providesProgress = YES;
+			}
+		}
     } else if ([keyPath isEqualToString:@"processProgress"]) {
         double progressChange = self.processProgress - self.displayedProcessProgress;
         if (progressChange > 0.02 || progressChange < -0.02) { //only update if enough change.
@@ -993,14 +998,17 @@ __DDLOGHERE__
 		switch (strongSelf.taskFlowType) {
 			case kMTTaskFlowSimuSubtitles:
 				notDone = strongSelf.captionTask.isRunning;
+				if (notDone) strongSelf.downloadStatus = @(kMTStatusCaptioning);
 				break;
-			case kMTTaskFlowNonSimuMarkcom:
-			case kMTTaskFlowNonSimuMarkcomSubtitles:
+			case kMTTaskFlowMarkcom:
+			case kMTTaskFlowMarkcomSubtitles:
 				notDone = strongSelf.commercialTask.isRunning;
-				break;
+				if (notDone) strongSelf.downloadStatus = @(kMTStatusCommercialing);
+			break;
 			case kMTTaskFlowSimuMarkcom :
 			case kMTTaskFlowSimuMarkcomSubtitles :
 				notDone = YES; //always run commercial after encoder
+				if (notDone) strongSelf.downloadStatus = @(kMTStatusCommercialing);
 				break;
 			default:
 				break;
@@ -1089,7 +1097,7 @@ __DDLOGHERE__
             };
             encodeTask.startupHandler = ^BOOL(){
                 weakSelf.processProgress = 0.0;
-                weakSelf.downloadStatus = @(kMTStatusEncoding);
+                if (!weakSelf.isDownloading) weakSelf.downloadStatus = @(kMTStatusEncoding);
                 return YES;
             };
         }
@@ -1149,7 +1157,7 @@ __DDLOGHERE__
 					double currentTimeOffset = [components[0] doubleValue] * 60.0 + [components[1] doubleValue];
 					returnValue = (currentTimeOffset/showLength);
 				}
-                
+				
             }
 			if (returnValue == -1.0){
                 DDLogMajor(@"Track progress with Rx failed for task caption for show %@: %@",self.show.showTitle, data);
@@ -1175,9 +1183,6 @@ __DDLOGHERE__
             [strongSelf fixupSRTsDueToCommercialSkipping];
         }
         [strongSelf markCompleteCTiVoFile:strongSelf.captionFilePath];
-		if (strongSelf.taskFlowType == kMTTaskFlowSimuSubtitles && strongSelf.encodeTask.successfulExit) {
-			[strongSelf finishUpPostEncodeProcessing];
-		}
 		return YES;
     };
     
@@ -1186,6 +1191,17 @@ __DDLOGHERE__
        if (weakCaption.taskFailed) {
             [strongSelf notifyUserWithTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" ];
         }
+		if (strongSelf.taskFlowType == kMTTaskFlowSimuSubtitles &&strongSelf.encodeTask.successfulExit) {
+				[strongSelf finishUpPostEncodeProcessing];
+		} else if (strongSelf.downloadStatus.intValue == kMTStatusCaptioning) {
+			if ((strongSelf.taskFlowType == kMTTaskFlowSkipcomSubtitles) ||
+			    (strongSelf.taskFlowType == kMTTaskFlowSimuSkipcomSubtitles)) {
+				strongSelf.downloadStatus = @(kMTStatusCommercialing);
+			} else if (strongSelf.taskFlowType == kMTTaskFlowMarkcomSubtitles) {
+				strongSelf.downloadStatus = @(kMTStatusEncoding);
+			}
+
+		}
         if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] &&
             (strongSelf.isCanceled)) {
             if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.captionFilePath]) {
@@ -1277,7 +1293,7 @@ __DDLOGHERE__
         }
     };
 
-    if (self.taskFlowType != kMTTaskFlowNonSimuMarkcom && self.taskFlowType != kMTTaskFlowNonSimuMarkcomSubtitles) {
+    if (self.taskFlowType != kMTTaskFlowMarkcom && self.taskFlowType != kMTTaskFlowMarkcomSubtitles) {
         // For these cases the encoding tasks is the driver
         commercialTask.startupHandler = ^BOOL(){
             weakSelf.processProgress = 0.0;
@@ -1365,15 +1381,15 @@ __DDLOGHERE__
 
 typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     kMTTaskFlowNonSimu = 0,
-    kMTTaskFlowNonSimuSubtitles = 1,
+    kMTTaskFlowSubtitles = 1,
     kMTTaskFlowSimu = 2,
     kMTTaskFlowSimuSubtitles = 3,
-    kMTTaskFlowNonSimuSkipcom = 4,
-    kMTTaskFlowNonSimuSkipcomSubtitles = 5,
+    kMTTaskFlowSkipcom = 4,
+    kMTTaskFlowSkipcomSubtitles = 5,
     kMTTaskFlowSimuSkipcom = 6,
     kMTTaskFlowSimuSkipcomSubtitles = 7,
-    kMTTaskFlowNonSimuMarkcom = 8,
-    kMTTaskFlowNonSimuMarkcomSubtitles = 9,
+    kMTTaskFlowMarkcom = 8,
+    kMTTaskFlowMarkcomSubtitles = 9,
     kMTTaskFlowSimuMarkcom = 10,
     kMTTaskFlowSimuMarkcomSubtitles = 11
 };
@@ -1508,7 +1524,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
            [taskArray addObject:@[encodeTask]];
             break;
             
-        case kMTTaskFlowNonSimuSubtitles:  //Encode with non-simul encoder and subtitles
+        case kMTTaskFlowSubtitles:  //Encode with non-simul encoder and subtitles
             if(self.downloadingShowFromMPGFile) {
                 [taskArray addObject:@[self.captionTask]];
             } else {
@@ -1521,24 +1537,24 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 			[taskArray addObject:@[encodeTask,self.captionTask]];
             break;
             
-        case kMTTaskFlowNonSimuSkipcom:  //Encode with non-simul encoder skipping commercials
+        case kMTTaskFlowSkipcom:  //Encode with non-simul encoder skipping commercials
         case kMTTaskFlowSimuSkipcom:  //Encode with simul encoder skipping commercials
             [taskArray addObject:@[self.commercialTask]]; //must be complete before encode to skip
             [taskArray addObject:@[encodeTask]];
             break;
             
-        case kMTTaskFlowNonSimuSkipcomSubtitles:  //Encode with non-simul encoder skipping commercials and subtitles
+        case kMTTaskFlowSkipcomSubtitles:  //Encode with non-simul encoder skipping commercials and subtitles
         case kMTTaskFlowSimuSkipcomSubtitles:  //Encode with simul encoder skipping commercials and subtitles
 			[taskArray addObject:@[self.captionTask,[self catTask:self.decryptedFilePath]]];
 			[taskArray addObject:@[self.commercialTask]];
 			[taskArray addObject:@[encodeTask]];
             break;
             
-        case kMTTaskFlowNonSimuMarkcom:  //Encode with non-simul encoder marking commercials
+        case kMTTaskFlowMarkcom:  //Encode with non-simul encoder marking commercials
             [taskArray addObject:@[encodeTask, self.commercialTask]];
             break;
             
-        case kMTTaskFlowNonSimuMarkcomSubtitles:  //Encode with non-simul encoder marking commercials and subtitles
+        case kMTTaskFlowMarkcomSubtitles:  //Encode with non-simul encoder marking commercials and subtitles
             if(self.downloadingShowFromMPGFile) {
                 assert(self.captionTask);
                 [taskArray addObject:@[self.captionTask]];
@@ -2602,18 +2618,10 @@ NSInteger diskWriteFailure = 123;
                 DDLogReport(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self.show,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
                 [self notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
                              subTitle:@"Transfer is too short" ];
-                if (self.shouldSimulEncode) {
-                    self.downloadStatus = @(kMTStatusEncoding);
-                } else if ( self.exportSubtitles.boolValue ){
-                    self.downloadStatus = @(kMTStatusCaptioning);
-                }
-            }
+			   self.downloadStatus = [self postDownloadState];
+		   }
 		} else {
-            if (self.shouldSimulEncode ) {
-                self.downloadStatus = @(kMTStatusEncoding);
-            } else if (self.exportSubtitles.boolValue) {
-                self.downloadStatus = @(kMTStatusCaptioning);
-            }
+			self.downloadStatus = [self postDownloadState];
 			self.show.fileSize = downloadedFileSize;  //More accurate file size
             if ([self.bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
                 if ([[self.bufferFilePath substringFromIndex:self.bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame  && !self.isCanceled) { //We finished a complete download so mark it so
@@ -2630,6 +2638,31 @@ NSInteger diskWriteFailure = 123;
 	}
 }
 
+-(NSNumber *) postDownloadState {
+	switch (self.taskFlowType) {
+		case kMTTaskFlowNonSimu:  //Just encode with non-simul encoder
+		case kMTTaskFlowSimu:  //Just encode with simul encoder
+		case kMTTaskFlowSimuSubtitles:  //Encode with simul encoder and subtitles
+		case kMTTaskFlowMarkcom:  //Encode with non-simul encoder marking commercials
+		case kMTTaskFlowSimuMarkcom:  //Encode with simul encoder marking commercials
+		case kMTTaskFlowSimuMarkcomSubtitles:  //Encode with simul encoder marking commercials and subtitles
+		return @(kMTStatusEncoding);
+		
+		case kMTTaskFlowSubtitles:  //Encode with non-simul encoder and subtitles
+		case kMTTaskFlowSkipcomSubtitles:  //Encode with non-simul encoder skipping commercials and subtitles
+		case kMTTaskFlowSimuSkipcomSubtitles:  //Encode with simul encoder skipping commercials and subtitles
+		case kMTTaskFlowMarkcomSubtitles:  //Encode with non-simul encoder marking commercials and subtitles
+		return @(kMTStatusCaptioning);
+		
+		case kMTTaskFlowSkipcom:  //Encode with non-simul encoder skipping commercials
+		case kMTTaskFlowSimuSkipcom:  //Encode with simul encoder skipping commercials
+		return @(kMTStatusCommercialing);
+			
+		default:
+			return @(kMTStatusEncoding); //never happens
+	}
+
+}
 
 #pragma mark - Convenience methods
 

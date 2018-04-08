@@ -376,7 +376,6 @@ __DDLOGHERE__
 	if ([tiVoManager skipModeForChannel:self.stationCallsign] != NSOnState) {
 		return NO;
 	}
-	if (!self.tiVo.supportsRPC) return NO;
 	NSString * genre = self.episodeGenre.lowercaseString;
 	if ([genre isEqualToString:@"news"] ) return NO; //allow news magazine
 	if ([genre isEqualToString:@"sports"] ) return NO;
