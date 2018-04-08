@@ -417,10 +417,12 @@ __DDLOGHERE__
     show.isQueued = YES;
 	if (self.downloadStatus.integerValue == kMTStatusDeleted || [formerShow.imageString isEqualToString:@"deleted"]) {
 		DDLogDetail(@"Tivo restored previously deleted show %@",show);
-		NSInteger status = self.downloadStatus.integerValue;
-		if (!show.isOnDisk || self.isNew || status == kMTStatusDeleted) {
+		if (self.downloadStatus.intValue == kMTStatusDeleted){
+			self.downloadStatus = @(kMTStatusNew);
+		}
+		if (!show.isOnDisk || self.isNew ) {
 			[self prepareForDownload:YES];
-		} else if (status == kMTStatusSkipModeWaitEnd) {
+		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
 			[self skipModeCheck];
 		}
 	}
