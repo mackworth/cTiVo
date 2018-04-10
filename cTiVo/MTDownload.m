@@ -15,6 +15,7 @@
 #include "NSNotificationCenter+Threads.h"
 #include "NSURL+MTURLExtensions.h"
 #include "NSDate+Tomorrow.h"
+#include "MTWeakTimer.h"
 
 #ifndef DEBUG
 #import "Crashlytics/Crashlytics.h"
@@ -192,7 +193,7 @@ __DDLOGHERE__
             [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
         }
          if (self.isInProgress) {
-             self.performanceTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
+             self.performanceTimer = [MTWeakTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
              [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
          }
 		if (self.downloadStatus.intValue == kMTStatusEncoding) {
@@ -226,7 +227,7 @@ __DDLOGHERE__
 #pragma mark Performance timer for UI
 -(void) launchPerformanceTimer:(NSTimer *) timer {
     //start Timer after 5 seconds
-    self.performanceTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updatePerformance:) userInfo:nil repeats:YES];
+    self.performanceTimer = [MTWeakTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updatePerformance:) userInfo:nil repeats:YES];
     self.startTimeForPerformance = [NSDate date];
     self.startProgressForPerformance = self.processProgress;
     DDLogVerbose(@"creating performance timer");
@@ -415,6 +416,7 @@ __DDLOGHERE__
 	MTTiVoShow * formerShow = self.show;
     self.show = show;
     show.isQueued = YES;
+	if (formerShow.rpcData && !show.rpcData) show.rpcData = formerShow.rpcData;
 	if (self.downloadStatus.integerValue == kMTStatusDeleted || [formerShow.imageString isEqualToString:@"deleted"]) {
 		DDLogDetail(@"Tivo restored previously deleted show %@",show);
 		if (self.downloadStatus.intValue == kMTStatusDeleted){
@@ -1198,9 +1200,9 @@ __DDLOGHERE__
 		} else if (strongSelf.downloadStatus.intValue == kMTStatusCaptioning) {
 			if ((strongSelf.taskFlowType == kMTTaskFlowSkipcomSubtitles) ||
 			    (strongSelf.taskFlowType == kMTTaskFlowSimuSkipcomSubtitles)) {
-				strongSelf.downloadStatus = @(kMTStatusCommercialing);
+				//strongSelf.downloadStatus = @(kMTStatusCommercialing); commercial startup sets this
 			} else if (strongSelf.taskFlowType == kMTTaskFlowMarkcomSubtitles) {
-				strongSelf.downloadStatus = @(kMTStatusEncoding);
+				//strongSelf.downloadStatus = @(kMTStatusEncoding); //encode startup sets this
 			}
 
 		}
@@ -1907,7 +1909,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome;
 		if (waitTime > 0) {
 			DDLogReport (@"XXX setting skipModeTimer at %0.1f minutes for %@", waitTime/60.0, self );
-			self. waitForSkipModeInfoTimer = [NSTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
+			self. waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
 		}
 	}
 }

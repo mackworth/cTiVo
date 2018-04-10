@@ -9,6 +9,7 @@
 #import "MTDownloadTableView.h"
 #import "MTPopUpTableCellView.h"
 #import "NSString+Helpers.h"
+#import "MTWeakTimer.h"
 
 @interface MTDownloadTableView ()
 
@@ -113,7 +114,7 @@ __DDLOGHERE__
 	[self selectRowIndexes:showIndexes byExtendingSelection:NO];
     if (tiVoManager.anyTivoActive) {
         if (!self.updateTimer) {
-            self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(updateProgress:) userInfo:nil repeats:YES];
+            self.updateTimer = [MTWeakTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(updateProgress:) userInfo:nil repeats:YES];
         }
     } else {
         if (self.updateTimer) {

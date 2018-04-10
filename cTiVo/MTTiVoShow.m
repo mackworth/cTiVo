@@ -358,7 +358,6 @@ __DDLOGHERE__
 	if (longestAfterShow ==0) longestAfterShow = kMTDefaultDelayForSkipModeInfo*60;
 
 	NSTimeInterval timeToWait = longestAfterShow + [self.showDate timeIntervalSinceNow] + self.showLength;
-	DDLogReport (@"XXX TimetoWait for %@ is %0.1f", self, timeToWait);
 	return timeToWait;
 }
 
