@@ -1463,7 +1463,7 @@ static NSArray * imageResponseTemplate = nil;
 		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ];
         return;
     }
-	DDLogMajor(@"%@Checking for commercials for %@", lastTry ? @"" : @"Re-", self.skipModeQueue[0]);
+	DDLogMajor(@"%@Checking for commercials for %@", firstTryNumber.intValue == 0 ? @"" : @"Re-", self.skipModeQueue[0]);
 	MTRPCData * rpcData = self.skipModeQueue[0];
 	__weak __typeof__(self) weakSelf = self;
 
