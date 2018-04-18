@@ -3,13 +3,19 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.1.1; Directories</description>
+        <description>Version 3.1.2; Certificate Update</description>
         <language>en</language>
         <item>
-            <title>Version 3.1.1; Directories</title>
+            <title>Version 3.1.2; Certificate Update</title>
             <description><![CDATA[
+				<h2 id="release-3.1">Release 3.1.2: Certificate Update!</h2>
+                <h3>3.1.2 features</h2>
+                <ul>
+                <li>A small release to update the certificate used to communicate with TiVo's RPC mechanism, which otherwise would expire at the end of April.</li>
+                <li>Also, TVDB has frequently been unresponsive recently, causing cTiVo to be unstable. This fixes the latter part.</li>
+                </ul>
 				<h2 id="release-3.1">Release 3.1.1: Directories!</h2>
-                <h2>3.1.1 features</h2>
+                <h3>3.1.1 features</h2>
                 <ul>
 				<li>If Download or Temporary directories have a problem, cTiVo will pause and ask.</li>
                 <li>Download directory now fixed when download job starts, not when first created.</li>
@@ -53,7 +59,7 @@
             </description>
             <pubDate>Sat., March 3, 2018 22:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/3.1.1/cTiVo.zip" sparkle:version="853" sparkle:shortVersionString="3.1.1" length="50554434" type="application/octet-stream" sparkle:dsaSignature="MC0CFCG3j2QRwg2tirbSKZmDuqbNog19AhUAt2pGoQV/C+qkNoXgdJ5rSlcWaKU="/>
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/3.1.2/cTiVo.zip" sparkle:version="857" sparkle:shortVersionString="3.1.2" length="50552671" type="application/octet-stream" sparkle:dsaSignature="MCwCFA1HNQMlJtGDksc5pb8ghb6J1c27AhQnyDxCLxJ0W3OJtb9zJ0rnsNrfpw=="/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>

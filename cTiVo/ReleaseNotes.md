@@ -1,4 +1,8 @@
-# Release 3.1.1 (beta)
+# Release 3.1.2
+* A small release to update the certificate used to communicate with TiVo's RPC mechanism, which otherwise would expire at the end of April.
+Also, TVDB has frequently been unresponsive recently, causing cTiVo to be unstable. This fixes the latter part.
+
+# Release 3.1.1
 #### New features:
 * Option for automatic deletion of show on TiVo after a successful download. (For those of you just using your TiVo as a collection device). In Adv Prefs.
 * Option to control number of simultaneous encoders (prev available as Terminal option, now in Adv Prefs)
