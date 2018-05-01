@@ -518,6 +518,7 @@ __DDLOGHERE__
 
 	[defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadDidFinish object:nil];
     [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadWasCanceled object:nil];
+    [defaultCenter addObserver:self selector:@selector(checkSleep:) name:kMTNotificationDownloadQueueUpdated object:nil];
 //    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
 //    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
 //    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialWasCanceled object:nil];
@@ -535,6 +536,7 @@ __DDLOGHERE__
 							   kMTScheduledSkipModeScanEndTime,
 							   kMTScheduledSkipModeScan,
 							   kMTTrustTVDBEpisodes,
+							   kMTPreventSleep,
 							   KMTPreferredImageSource,
 							   kMTTiVos
 							 ]) {
@@ -565,7 +567,15 @@ __DDLOGHERE__
 	} else {
         [self unPauseQueue];
 	}
-	
+}
+
+-(void) checkSleep: (id) notification {
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTPreventSleep] &&
+	   [tiVoManager anyShowsWaiting]) {
+		[(MTAppDelegate *) [NSApp delegate]  preventSleep];
+	} else {
+		[(MTAppDelegate *) [NSApp delegate]  allowSleep];
+	}
 }
 
 -(BOOL) anyTivoActive {
@@ -576,7 +586,6 @@ __DDLOGHERE__
 	}
 	return NO;
 }
-
 
 -(BOOL) anyShowsWaiting {
 	for (MTDownload * show in tiVoManager.downloadQueue) {
@@ -828,6 +837,9 @@ __DDLOGHERE__
             [show checkAllInfoSources];
         }
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+    } else if ([keyPath isEqualToString:kMTPreventSleep]) {
+        DDLogMajor(@"Changed User Prevent Sleep preference to: %@", [defs objectForKey:kMTPreventSleep] ? @"YES": @"NO" );
+		[self checkSleep:nil];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }

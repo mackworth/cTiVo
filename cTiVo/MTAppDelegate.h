@@ -19,4 +19,7 @@
 -(NSArray <MTTiVoShow*> *)currentSelectedShows; //used for test purposes
 -(void) promptForNewDirectory:(NSString *) oldDir withMessage: (NSString *) message isProblem: (BOOL) problem isTempDir:(BOOL) temp; //used by Preferences
 
+-(void) preventSleep;
+-(void)allowSleep;
+
 @end

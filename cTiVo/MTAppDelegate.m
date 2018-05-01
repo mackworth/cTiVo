@@ -36,93 +36,11 @@
 #import "NSString+Helpers.h"
 
 #import <IOKit/pwr_mgt/IOPMLib.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <mach/mach_port.h>
-#include <mach/mach_interface.h>
-#include <mach/mach_init.h>
-
-#include <IOKit/pwr_mgt/IOPMLib.h>
-#include <IOKit/IOMessage.h>
-
-io_connect_t  root_port; // a reference to the Root Power Domain IOService
 
 #define cTiVoLogDirectory @"~/Library/Logs/cTiVo"
 
 static int ddLogLevel = LOG_LEVEL_REPORT;
 
-void MySleepCallBack( void * refCon, io_service_t service, natural_t messageType, void * messageArgument )
-{
-    switch ( messageType )
-    {
-			
-        case kIOMessageCanSystemSleep:
-            /* Idle sleep is about to kick in. This message will not be sent for forced sleep.
-			 Applications have a chance to prevent sleep by calling IOCancelPowerChange.
-			 Most applications should not prevent idle sleep.
-			 
-			 Power Management waits up to 30 seconds for you to either allow or deny idle
-			 sleep. If you don't acknowledge this power change by calling either
-			 IOAllowPowerChange or IOCancelPowerChange, the system will wait 30
-			 seconds then go to sleep.
-			 */
-			
-            //Uncomment to cancel idle sleep
-            //IOCancelPowerChange( root_port, (long)messageArgument );
-            // we will allow idle sleep
-			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTPreventSleep]) { //We want to prevent sleep if still downloading
-				if ([tiVoManager numberOfShowsToDownload]) {
-					DDLogCMajor(@"Received notice: Soft Sleep, and rejecting");
-					IOCancelPowerChange(root_port, (long)messageArgument);
-				} else { //THere are no shows pending so sleeep
-					DDLogCMajor(@"Received notice: Soft Sleep; no shows downloading so allowing");
-					IOAllowPowerChange( root_port, (long)messageArgument );
-				}
-			} else { //Cancel things and get on with it.
-				DDLogCMajor(@"Received notice: Soft Sleep; user allows");
-				IOAllowPowerChange( root_port, (long)messageArgument );
-			}
-            break;
-			
-        case kIOMessageSystemWillSleep:
-            /* The system WILL go to sleep. If you do not call IOAllowPowerChange or
-			 IOCancelPowerChange to acknowledge this message, sleep will be
-			 delayed by 30 seconds.
-			 
-			 NOTE: If you call IOCancelPowerChange to deny sleep it returns
-			 kIOReturnSuccess, however the system WILL still go to sleep.
-			 */
-			
-			DDLogCMajor(@"Received notice: Will Sleep; shutting down downloads");
-			[tiVoManager cancelAllDownloads];
-            IOAllowPowerChange( root_port, (long)messageArgument );
-            break;
-			
-		case kIOMessageSystemWillNotSleep:
-			DDLogCMajor(@"Received notice: Will Not Sleep ");
-			break;
-
-		case kIOMessageSystemWillPowerOn:
-            //System has started the wake up process...
-			DDLogCMajor(@"Received notice: Waking ");
-            break;
-			
-        case kIOMessageSystemHasPoweredOn:
-            //System has finished waking up...
-			DDLogCMajor(@"Received notice: Waking finished");
-			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:nil];
-			break;
-			
-        default:
-			DDLogCMajor( @"cTiVo received messageType %08lx, arg %08lx\n",
-				   (long unsigned int)messageType,
-				   (long unsigned int)messageArgument );
-			break;
-			
-    }
-}
 
 void signalHandler(int signal)
 {
@@ -306,37 +224,21 @@ void signalHandler(int signal)
 	[[[NSWorkspace sharedWorkspace] notificationCenter]   addObserver: self selector: @selector(checkVolumes:) name: NSWorkspaceDidWakeNotification object: NULL];
 	[[[NSWorkspace sharedWorkspace] notificationCenter  ] addObserver:self selector:@selector(mountVolume:) name:NSWorkspaceDidMountNotification object:nil];
 	[[[NSWorkspace sharedWorkspace] notificationCenter  ] addObserver:self selector: @selector(unmountVolume:) name:NSWorkspaceDidUnmountNotification object:nil];
+	[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
+            selector: @selector(systemSleep:)
+            name: NSWorkspaceWillSleepNotification object: NULL];
 	
+    [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
+            selector: @selector(systemWake:)
+            name: NSWorkspaceDidWakeNotification object: NULL];
+
 	//Initialize tmp directory
 	[self clearTmpDirectory];
-	
-
-	//Set up callback for sleep notification (this is 10.5 method and is still valid.  There is newer UI in 10.6 on.
-	
-	// notification port allocated by IORegisterForSystemPower
-    IONotificationPortRef  notifyPortRef;
-	
-    // notifier object, used to deregister later
-    io_object_t            notifierObject;
-	// this parameter is passed to the callback
-    void*                  refCon  = NULL;
-	
-    // register to receive system sleep notifications
-	
-    root_port = IORegisterForSystemPower( refCon, &notifyPortRef, MySleepCallBack, &notifierObject );
-    if ( root_port == 0 ) {
-        DDLogReport(@"IORegisterForSystemPower failed");
-    }
-	
-    // add the notification port to the application runloop
-    CFRunLoopAddSource( CFRunLoopGetCurrent(),
-					   IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes );
 	
     //Make sure details and thumbnails directories are available
     [self checkDirectoryAndPurge:[tiVoManager tivoTempDirectory]];
     [self checkDirectoryAndPurge:[tiVoManager tvdbTempDirectory]];
     [self checkDirectoryAndPurge:[tiVoManager detailsTempDirectory]];
-
 
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(saveState) userInfo:nil repeats:YES];
 	
@@ -345,6 +247,43 @@ void signalHandler(int signal)
 	[self.tiVoGlobalManager determineCurrentProcessingState];
     DDLogDetail(@"Finished appDidFinishLaunch");
  }
+
+-(void) systemSleep: (NSNotification *) notification {
+	DDLogReport(@"System Sleeping!");
+	[tiVoManager cancelAllDownloads];
+}
+
+-(void) systemWake: (NSNotification *) notification {
+	DDLogReport(@"System Waking!");
+	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:nil];
+}
+
+IOPMAssertionID assertionID;
+BOOL preventSleepActive = NO;
+
+-(void) preventSleep {
+	if (preventSleepActive) return;
+	CFStringRef reasonForActivity= CFSTR("Downloading Shows");
+	IOReturn success = IOPMAssertionCreateWithName(kIOPMAssertPreventUserIdleSystemSleep,
+                                    kIOPMAssertionLevelOn, reasonForActivity, &assertionID);
+	if (success == kIOReturnSuccess) {
+		DDLogMajor(@"Idle Sleep prevented");
+		preventSleepActive = YES;
+	} else {
+		DDLogReport(@"Idle Sleep prevention failed");
+	}
+}
+
+-(void)allowSleep {
+	if (!preventSleepActive) return;
+   IOReturn success = IOPMAssertionRelease(assertionID);
+	if (success == kIOReturnSuccess) {
+		DDLogMajor(@"Idle Sleep allowed");
+		preventSleepActive = NO;
+	} else {
+		DDLogReport(@"Idle Sleep allowance failed");
+	}
+}
 
 -(void) launchPseudoEvent {
     DDLogVerbose(@"PseudoEvent");
