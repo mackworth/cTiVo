@@ -756,7 +756,7 @@ __DDLOGHERE__
 {
     for (MTTiVo *tiVo in _tiVoList) {
         DDLogDetail(@"Starting download on tiVo %@",tiVo.tiVo.name);
-		[tiVo manageDownloads:tiVo];
+		[tiVo manageDownloads];
     }
 }
 

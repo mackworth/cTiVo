@@ -134,12 +134,13 @@ __DDLOGHERE__
 
 -(void) setShow:(MTTiVoShow *)show {
 	if (show != _show) {
-		BOOL newTiVo = (show.tiVo != _show.tiVo);
-		if (_show)                 [[NSNotificationCenter defaultCenter] removeObserver:self name:kMTNotificationFoundSkipModeInfo object: _show ];
-		if (newTiVo && _show.tiVo) [[NSNotificationCenter defaultCenter] removeObserver:self name:kMTNotificationFoundSkipModeInfo object: _show.tiVo ];
+		if (_show) {
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:kMTNotificationFoundSkipModeInfo object: _show ];
+		}
 		_show = show;
-		if (show)                  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeInfo object: show];
-	    if (newTiVo && show.tiVo)  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeInfo object: show.tiVo ];
+		if (show) {
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeInfo object: show];
+		}
 	}
 }
 
@@ -2850,6 +2851,7 @@ NSInteger diskWriteFailure = 123;
 
 -(void)dealloc
 {
+	DDLogReport(@"deallocing Download %@", self);
 	[self stopWaitSkipModeTimer];
     if (_performanceTimer) {
         [_performanceTimer invalidate];
@@ -2864,7 +2866,7 @@ NSInteger diskWriteFailure = 123;
 
 -(NSString *)description {
 #pragma clang diagnostic ignored "-Wdeprecated-objc-pointer-introspection"
-    return [NSString stringWithFormat:@"%@-%@(@%x)%@",self.show.showTitle, self.show.tiVoName, ((int)self) & 0xFFFF,[self.show.protectedShow boolValue]?@"-Protected":@""];
+    return [NSString stringWithFormat:@"%@-%@(%x)%@",self.show.showTitle, self.show.tiVoName, ((int)self) & 0xFFFFF,[self.show.protectedShow boolValue]?@"-Protected":@""];
 }
 
 @end

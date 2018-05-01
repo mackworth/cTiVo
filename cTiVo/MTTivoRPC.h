@@ -23,7 +23,7 @@
 -(void) emptyCaches;
 -(void) purgeShows: (NSArray <NSString *> *) showIDs;
 
--(void) getShowInfoForShows: (NSArray <NSString *> *) showIDs perShow: (void (^)(NSString *showID)) perShowCall withCompletion: (void (^) (void)) completion;
+-(void) getShowInfoForShows: (NSArray <NSString *> *) showIDs;
 -(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;

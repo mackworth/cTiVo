@@ -60,6 +60,9 @@ typedef NS_ENUM(NSUInteger, MTImageSource) {
 @property (atomic, assign) BOOL imageInProgress;  //true if we're downloading info OR artwork.
 
 @property (nonatomic, assign) MTImageSource lastImageSource;
+
+@property (nonatomic, strong) NSString * clipMetaDataId;
+
 #ifdef DEBUG
 @property (nonatomic, strong) NSArray < MTEdl *> * previousEDL;
 #endif
@@ -316,37 +319,32 @@ __DDLOGHERE__
     self.rpcData = [self.tiVo registerRPCforShow: self];
 }
 
--(void) setRpcData:(MTRPCData *)rpcData {
-	BOOL skipModeChange = _rpcData.clipMetaDataId != self.rpcData.clipMetaDataId || _rpcData.edlList != self.rpcData.edlList;
-	_rpcData = rpcData;
-	self.episodeGenre = rpcData.genre;  //no conflict with TVDB
-	if (skipModeChange && rpcData.edlList.count > 0) {
-#ifdef DEBUG
-		if (self.previousEDL && rpcData.edlList && ![self.previousEDL equivalentToEDL:rpcData.edlList]) {
-			DDLogReport(@"EDL FAILURE for %@: %@ became %@", self, self.previousEDL, rpcData.edlList);
-		} else {
-#endif
-		if (self.edlList != rpcData.edlList || rpcData.skipModeFailed) {
-			if (rpcData.edlList.count > 0) {
-				DDLogDetail(@"Got EDL for %@: %@", self, rpcData.edlList);
-			} else if (rpcData.skipModeFailed) {
-				DDLogMajor(@"EDL Failure for  %@", self);
-			}
-			self.edlList = rpcData.edlList;
-		}
-#ifdef DEBUG
-		}
-		self.previousEDL = rpcData.edlList;
-#endif
-	}
-	if (skipModeChange) {
-		DDLogReport(@"XXX sending skipModNotification for %@",self);
+-(void) setClipMetaDataId:(NSString *)clipMetaDataId {
+	if (clipMetaDataId != _clipMetaDataId) {
+		DDLogReport(@"XXX Got SkipMode MetaData for %@",self);
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
 		NSTimeInterval timeLeft = self.timeLeftTillRPCInfoWontCome;
-		if (rpcData.clipMetaDataId && timeLeft < 60*60 && timeLeft > -24*60*60) {
+		if (clipMetaDataId && timeLeft < 60*60 && timeLeft > -24*60*60) {
 			DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- timeLeft/60);
 		}
 	}
+}
+
+-(void) setEdlList:(NSArray<MTEdl *> *)edlList {
+	if (_edlList != edlList) {
+		if (edlList.count > 0) {
+			DDLogDetail(@"Got SkipMode EDL for %@: %@", self, edlList);
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+		}
+		_edlList = edlList;
+	}
+}
+
+-(void) setRpcData:(MTRPCData *)rpcData {
+	_rpcData = rpcData;
+	self.episodeGenre = rpcData.genre;  //no conflict with TVDB
+	self.clipMetaDataId = rpcData.clipMetaDataId;
+	self.edlList = rpcData.edlList;
     [self checkAllInfoSources];
 }
 
@@ -1852,7 +1850,9 @@ NSString * fourChar(long n, BOOL allowZero) {
     _rpcData = nil;
     _imageInProgress = NO;
     _lastImageSource = MTSearchingSource;
-
+	_clipMetaDataId = nil;
+	_edlList = nil;
+	
     if (all) {
         [self.tiVo reloadShowInfoForShows:@[self]];
         [tiVoManager.tvdb resetTVDBInfo:self];

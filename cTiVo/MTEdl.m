@@ -137,7 +137,7 @@ __DDLOGHERE__
 			segmentStart = showLength;
 		} else {
 			DDLogReport (@"In building EDL list, not enough Start points found: %@ v Lengths: %@ ==> failed EDL so far %@", startPoints, lengthPoints, edls);
-				return nil;
+				return @[];
 		}
 		//now create the cut that goes BEFORE the segment
 		
@@ -145,7 +145,7 @@ __DDLOGHERE__
 		if (cutPartLength < 0 && cutPartStart < showLength-5.0) {
 			//problem, unless we're at the end of file
 			DDLogReport (@"In building EDL list, startPoint #%@: %@ with length %@ starts before previous segment ends at %@. StartPoints: %@Segments: %@  ==> failed edl so far %@", @(startIndex), startPoints[startIndex], lengthPoint, @(cutPartStart), startPoints, lengthPoints, edls);
-			return nil;
+			return @[];
 		} else if (cutPartLength > 1.0){ //don't cut less than 1 second
 			MTEdl * edl = [[MTEdl alloc] init];
 			edl.startTime = cutPartStart;
@@ -160,7 +160,7 @@ __DDLOGHERE__
 	}
 	if (startIndex < startPoints.count) {
 		DDLogReport (@"In Building EDL List, not enough Segments found: Starts: %@ v Lengths: %@ ==> failed EDL so far %@", startPoints, lengthPoints, edls);
-		return nil;
+		return @[];
 	}
 	DDLogVerbose (@"EDL segments: %@ startPoints: %@ ==> edl %@", lengthPoints, startPoints, edls);
 

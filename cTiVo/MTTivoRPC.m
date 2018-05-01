@@ -751,7 +751,7 @@ static NSRegularExpression * isFinalRegex = nil;
            DDLogDetail (@"Got %lu shows from TiVo", shows.count);
            if (!strongSelf.showMap) {
                strongSelf.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
-               [strongSelf getShowInfoForShows: shows perShow:nil withCompletion:nil];
+               [strongSelf getShowInfoForShows: shows ];
            } else {
                NSMutableArray <NSString *> *lookupDetails = [NSMutableArray array];
                NSMutableArray <NSString *> * newIDs = [NSMutableArray array];
@@ -777,11 +777,10 @@ static NSRegularExpression * isFinalRegex = nil;
                for (NSString * objectID in deletedShows) {
                    [strongSelf.showMap removeObjectForKey:objectID];
                }
-			   [strongSelf getShowInfoForShows: lookupDetails perShow:nil withCompletion:^{
-				   if (!isFirstLaunch) {
-					   [weakSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
-				   }
-			   }];
+			   [strongSelf getShowInfoForShows: lookupDetails];
+			   if (!isFirstLaunch) {
+				   [weakSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
+			   }
            }
        } ];
 }
@@ -799,9 +798,8 @@ static NSRegularExpression * isFinalRegex = nil;
 	}
 }
 
--(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows  perShow: (void (^)(NSString * showID)) perShowCall withCompletion:(void (^) (void)) completion {
+-(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows  {
 	if (requestShows.count == 0 || !self.bodyID) {
-		if (completion) completion();
 		return;
 	}
     const int idsPerCall = 10;
@@ -851,7 +849,7 @@ static NSRegularExpression * isFinalRegex = nil;
        NSArray * responseShows = jsonResponse[@"recording"];
 	   DDLogVerbose(@"Got ShowInfo from TiVo RPC: %@", [strongSelf maskTSN:jsonResponse]);
 	   if (!lastBatch) {
-		   [strongSelf getShowInfoForShows:restArray perShow:perShowCall withCompletion:completion ];
+		   [strongSelf getShowInfoForShows:restArray ];
 	   }
        if (responseShows.count == 0 || responseShows.count != subArray.count) {
            DDLogReport(@"Warning: Invalid # of TivoRPC shows: \n%@ \n%@", responseShows, subArray);
@@ -893,9 +891,7 @@ static NSRegularExpression * isFinalRegex = nil;
                [strongSelf.showMap setObject:rpcData forKey:objectId];
            }
 
-           [strongSelf parseMetadataID:showInfo forShow:rpcData withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> *segments) {
-				if (perShowCall) perShowCall(objectId);
-			}];
+           [strongSelf parseMetadataID:showInfo forShow:rpcData withCompletionHandler:nil ];
 
            //very annoying that TiVo won't send over image information with the rest of the show info.
            NSString * imageURL = strongSelf.seriesImages[rpcData.series]; //tivo only has series images
@@ -917,7 +913,6 @@ static NSRegularExpression * isFinalRegex = nil;
            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                [strongSelf saveDefaults];
            });
-		  if (completion) completion();
        }
    } ];
 }
@@ -1188,7 +1183,7 @@ static NSArray * imageResponseTemplate = nil;
 }
 
 #pragma mark Commercial extraction
--(void) retrieveClipMetaDataFor: (NSString *) contentId withCompletionHandler: (void (^)(NSString * metaDataId, NSArray <NSNumber *> * segments)) completionHandler {
+-(void) retrieveClipMetaDataFor: (NSString *) contentId withCompletionHandler: (void (^)(NSString * metaDataId, NSArray <NSNumber *> *segments)) completionHandler {
 	if (contentId.length ==0 || !self.bodyID) {
 		DDLogMajor (@"can't retrieve metaData for show: %@",contentId);
 		if (completionHandler) completionHandler(nil, nil);
@@ -1262,9 +1257,11 @@ static NSArray * imageResponseTemplate = nil;
 		} else {
 		   DDLogMajor(@"Revised commercial info found for %@", rpcData);
 		}
+		__weak __typeof__(self) weakSelf = self;
 		[self retrieveSegments:rpcData.clipMetaDataId withCompletionHandler:^(NSArray * segments) {
 		   	DDLogDetail(@"Segments just arrived for %@ #: %@ contentId: %@; %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId,segments);
 		   	rpcData.programSegments = segments;
+		   	[weakSelf.delegate receivedRPCData:rpcData];
 		   	if (segments.count == 0) rpcData.skipModeFailed = YES;
 			if (completionHandler) completionHandler(clipMetaDataId, segments);
 		}];
@@ -1378,14 +1375,14 @@ static NSArray * imageResponseTemplate = nil;
 
 -(void) findSkipModeEDLForShow:(MTRPCData *) rpcData {
 	if (!rpcData) return;
-    if (rpcData.edlList) {
-    	DDLogReport(@"XXX Not getting EDL for %@; Already have it", rpcData);
-    	return;
-    	}
 	if (rpcData.skipModeFailed) {
 		DDLogReport(@"XXX Not getting EDL for %@; Previous failure", rpcData);
-    	return;
-	};
+		return;
+	}
+	if (rpcData.edlList) {
+		DDLogReport(@"XXX Not getting EDL for %@; Already have it", rpcData);
+		return;
+	}
 	if (!rpcData.contentID) {
 		DDLogReport(@"XXX Not getting EDL for %@; No content ID", rpcData);
     	return;
@@ -1408,6 +1405,7 @@ static NSArray * imageResponseTemplate = nil;
 			[self retrieveClipMetaDataFor:objectId withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
 				rpcData.clipMetaDataId = metaDataID;
 				rpcData.programSegments = lengths;
+				[weakSelf.delegate receivedRPCData:rpcData];
 				[weakSelf.skipModeQueueMetaData removeObject:rpcData];
 				if (metaDataID != nil && lengths.count > 0) {
 					DDLogReport(@"XXX SkipMode Queue got metadata; re-launching: %@", rpcData);
@@ -1447,10 +1445,9 @@ static NSArray * imageResponseTemplate = nil;
 
 	[self findSkipModePointsForShow:rpcData withCompletionHandler:^{
 		__typeof__(self) strongSelf = weakSelf;
-		if (rpcData.edlList || lastTry) {
-			if (!rpcData.edlList) {
+		if (rpcData.edlList.count > 0 || lastTry) {
+			if (rpcData.edlList.count == 0) {
 				DDLogReport(@"SkipMode EDL failure for %@", rpcData);
-				rpcData.skipModeFailed = YES;
 			}
 			[strongSelf.delegate receivedRPCData:rpcData];
 			if (strongSelf.skipModeQueueEDL.count > 0) {
@@ -1506,9 +1503,11 @@ static NSArray * imageResponseTemplate = nil;
 					  withCompletionHandler:^(NSArray * positions) {
 
 		DDLogDetail(@"Got positions of %@", positions);
+		
 		rpcData.edlList = [NSArray edlListFromSegments:rpcData.programSegments andStartPoints:positions];
 		DDLogDetail(@"Got EDL %@", rpcData.edlList);
-		
+		[weakSelf.delegate receivedRPCData:rpcData];
+
 	    [weakSelf sendKeyEvent: @"pause"  withCompletion:^{
 			
 		[weakSelf afterDelay:1.0 launchBlock:^{

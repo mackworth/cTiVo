@@ -35,7 +35,7 @@
 
 -(void)scheduleNextUpdateAfterDelay:(NSInteger) delay;
 -(void)updateShows:(id)sender;
--(void)manageDownloads:(id)info;
+-(void)manageDownloads;
 //-(void) reportNetworkFailure;
 -(NSInteger)isProcessing;
 -(void)rescheduleAllShows;

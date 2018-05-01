@@ -16,7 +16,6 @@ static NSString * kEpisodeNum  = @"episodeNum";
 static NSString * kSeasonNum  = @"seasonNum";
 static NSString * kGenre  = @"genre";
 static NSString * kClipMetaData  = @"clipMetaDataId";
-static NSString * kSkipModeFailed = @"SkipModeFailed";
 static NSString * kImageURL  = @"imageURL";
 static NSString * kSeries = @"title";
 static NSString * kSegments = @"segments";
@@ -38,7 +37,6 @@ static NSString * kEDL = @"EDLList";
         _seasonNum =   [coder decodeIntegerForKey: kSeasonNum];
         _genre =       [coder decodeObjectOfClass:[NSString class] forKey:  kGenre];
 		_clipMetaDataId = [coder decodeObjectOfClass:[NSString class] forKey:  kClipMetaData];
-		_skipModeFailed =    [coder decodeBoolForKey: kSkipModeFailed];
         _imageURL =    [coder decodeObjectOfClass:[NSString class] forKey:  kImageURL];
 		_series =      [coder decodeObjectOfClass:[NSString class] forKey:  kSeries];
 		_programSegments =      [coder decodeObjectOfClass:[NSArray class] forKey:  kSegments];
@@ -52,6 +50,14 @@ static NSString * kEDL = @"EDLList";
     return YES;
 }
 
+-(BOOL) skipModeFailed {
+	return self.edlList != nil && self.edlList.count == 0;
+}
+
+-(void) setSkipModeFailed:(BOOL)skipModeFailed {
+	self.edlList = @[];
+}
+
 - (void)encodeWithCoder:(NSCoder *)coder {
      [coder encodeObject: _rpcID forKey:kRPCID];
      [coder encodeObject: _recordingID forKey:kRecordingID];
@@ -60,7 +66,6 @@ static NSString * kEDL = @"EDLList";
      [coder encodeInteger:_seasonNum forKey:kSeasonNum];
      [coder encodeObject:_genre forKey:kGenre];
 	 [coder encodeObject: _clipMetaDataId forKey:kClipMetaData];
-	 [coder encodeBool: _skipModeFailed forKey:kSkipModeFailed];
      [coder encodeObject:_imageURL forKey:kImageURL];
 	 [coder encodeObject:_series forKey:kSeries];
 	 [coder encodeObject:_programSegments forKey:kSegments];
@@ -68,7 +73,7 @@ static NSString * kEDL = @"EDLList";
 }
 
 -(NSString *)description {
-	return [NSString stringWithFormat:@"%@: S%0.2dE%0.2d (%@); %@; clip:%@ %@", self.series, (int)self.seasonNum, (int)self.episodeNum, self.genre, self.recordingID, self.clipMetaDataId, self.skipModeFailed ? @"Failed" : @""];
+	return [NSString stringWithFormat:@"%@: S%0.2dE%0.2d (%@); %@; clip:%@ %@", self.series, (int)self.seasonNum, (int)self.episodeNum, self.genre, self.recordingID, self.clipMetaDataId, self.edlList != nil && self.edlList.count == 0 ? @"Failed" : @""];
 }
 
 

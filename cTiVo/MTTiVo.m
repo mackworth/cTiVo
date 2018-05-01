@@ -218,7 +218,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 		} else {
         	[thisTivo scheduleNextUpdateAfterDelay: kMTTiVoAccessDelay];
 		}
-		[thisTivo performSelector:@selector(manageDownloads:) withObject:thisTivo afterDelay:kMTTiVoAccessDelay+2];
+		[thisTivo performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTTiVoAccessDelay+2];
 	} else {
 		[thisTivo.myRPC stopServer];
 	}
@@ -518,20 +518,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void) reloadShowInfoForShows: (NSArray <MTTiVoShow *> *) shows {
     NSMutableArray <NSString *> * showIDs = [NSMutableArray arrayWithCapacity:shows.count];
     for (MTTiVoShow * eachShow in shows) {
-		eachShow.edlList = nil;
         [showIDs addObject:eachShow.idString];
     }
     [self.myRPC purgeShows:showIDs ];
-    [self.myRPC getShowInfoForShows:showIDs perShow:^(NSString *showID)  {
-		NSInteger index = [showIDs indexOfObject:showID];
-		if (index != NSNotFound && (NSUInteger)index < showIDs.count) {
-			MTTiVoShow * show = shows[index];
-			if (show.rpcData.clipMetaDataId) {
-				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:show];
-			}
-		}
-
-	} withCompletion:nil];  //rely on setting rpcData for each show
+    [self.myRPC getShowInfoForShows:showIDs];  //rely on setting rpcData for each show
 }
 
 -(BOOL) supportsTransportStream {
@@ -951,7 +941,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void) loadSkipModeInfoForShow:(MTTiVoShow *) show withCompletion: (void (^)(void)) completionHandler {
-	[self.myRPC getShowInfoForShows:@[show.idString] perShow:nil withCompletion: completionHandler];
+	[self.myRPC getShowInfoForShows:@[show.idString] ];
 }
 
 -(void) reloadRecentShows {
@@ -970,19 +960,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	}
 	if (recentIDs.count > 0) {
 		DDLogMajor(@"reloading shows for metadata: %@", recentShows);
-		[self.myRPC getShowInfoForShows:[recentIDs copy] perShow:^(NSString *showID) {
- 			NSInteger index = [recentIDs indexOfObject:showID];
-			if (index != NSNotFound && (NSUInteger)index < recentShows.count) {
-			MTTiVoShow * show = recentShows[index];
-			if (show.hasSkipModeInfo || show.hasSkipModeList) {
-				DDLogReport(@"XXX Looks like we got SkipMode Info/List for %@",show);
-				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:show];
-			} else {
-				DDLogReport(@"XXX No such SkipMode Info/List for %@",show);
-
-			}
-		}
-		} withCompletion:nil];
+		[self.myRPC getShowInfoForShows:[recentIDs copy] ];
 	}
 }
 
@@ -1101,29 +1079,20 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     return [tiVoManager downloadQueueForTiVo:self];
 }
 
--(void)manageDownloads:(id)info
+-(void)manageDownloads:(NSNotification *)notification
 {
 //    if ([tiVoManager.hasScheduledQueueStart boolValue]  && [tiVoManager.queueStartTime compare:[NSDate date]] == NSOrderedDescending) { //Don't start unless we're after the scheduled time if we're supposed to be scheduled.
 //        DDLogMajor(@"%@ Delaying download until %@",self,tiVoManager.queueStartTime);
 //		return;
 //    }
 	if ([tiVoManager checkForExit]) return;
-
-	if ([info isKindOfClass:[NSNotification class]]) {
-		NSNotification *notification = (NSNotification *)info;
-		id object = notification.object;
-		if (!object ||
-			object == self ||
-			([object isKindOfClass:[MTTiVoShow class]] && ((MTTiVoShow *)object).tiVo == self)) {
-			DDLogDetail(@"%@ got manageDownload notification %@",self, notification.name);
-			[self manageDownloads];
-		} else {
-			DDLogDetail(@"%@ ignoring notification %@ for %@",self,notification.name, notification.object);
-		}
-	} else if ([info isKindOfClass:[self class]] && info == self ) {
-			[self manageDownloads];
+	id object = notification.object;
+	if (!object || object == self ||
+		([object isKindOfClass:[MTTiVoShow class]] && ((MTTiVoShow *)object).tiVo == self)) {
+		DDLogDetail(@"%@ got manageDownload notification %@",self, notification.name);
+		[self manageDownloads];
 	} else {
-		DDLogMajor(@"Unrecognized info to launch manageDownloads %@",info);
+		DDLogDetail(@"%@ ignoring notification %@ for %@",self,notification.name, notification.object);
 	}
 }
 
