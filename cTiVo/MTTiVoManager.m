@@ -634,7 +634,14 @@ __DDLOGHERE__
 //nil means don't ask user or reschedule
 {
     if ([askUser boolValue] && [self anyTivoActive] ) {
-		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current show(s)" informativeTextWithFormat:@" "];
+    	BOOL plural = [self numberOfShowsToDownload] > 1;
+		
+		NSAlert *scheduleAlert = nil;
+		if (plural) {
+			scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current shows" informativeTextWithFormat:@" "];
+		} else {
+			scheduleAlert = [NSAlert alertWithMessageText:@"There are a show in process, and you are pausing the queue.  Should the current in-process show  be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current show" informativeTextWithFormat:@" "];
+		}
 		NSInteger returnValue = [scheduleAlert runModal];
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
 		if (returnValue == NSAlertDefaultReturn) {

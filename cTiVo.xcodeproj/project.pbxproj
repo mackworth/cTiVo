@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */; };
 		1E02BDE12056E9BB000B9F56 /* CommercialHelpFile.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 1E02BDE02056E9BB000B9F56 /* CommercialHelpFile.rtfd */; };
+		1E09DD422099449D0010CAB4 /* MTTextFieldNoInteraction.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E09DD412099449D0010CAB4 /* MTTextFieldNoInteraction.m */; };
 		1E0C5DD9170236B30015C55D /* recent-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E0C5DD8170236B30015C55D /* recent-recording.png */; };
 		1E152981201006B0000D1705 /* MTOpenPanelDefaultView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E152980201006B0000D1705 /* MTOpenPanelDefaultView.xib */; };
 		1E15298420102C3D000D1705 /* MTHideTempFolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E15298320102C3D000D1705 /* MTHideTempFolder.m */; };
@@ -309,6 +310,8 @@
 /* Begin PBXFileReference section */
 		1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowDrawer.xib; sourceTree = "<group>"; };
 		1E02BDE02056E9BB000B9F56 /* CommercialHelpFile.rtfd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.rtfd; path = CommercialHelpFile.rtfd; sourceTree = "<group>"; };
+		1E09DD402099449D0010CAB4 /* MTTextFieldNoInteraction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTTextFieldNoInteraction.h; sourceTree = "<group>"; };
+		1E09DD412099449D0010CAB4 /* MTTextFieldNoInteraction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTTextFieldNoInteraction.m; sourceTree = "<group>"; };
 		1E0C5DD8170236B30015C55D /* recent-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "recent-recording.png"; sourceTree = "<group>"; };
 		1E1395941F5928E800FFA4E7 /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
 		1E152980201006B0000D1705 /* MTOpenPanelDefaultView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MTOpenPanelDefaultView.xib; sourceTree = "<group>"; };
@@ -737,6 +740,8 @@
 				D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */,
 				D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */,
 				1E9EA3FB1F1AD91C00F0A2C9 /* MTProgressCell.h */,
+				1E09DD402099449D0010CAB4 /* MTTextFieldNoInteraction.h */,
+				1E09DD412099449D0010CAB4 /* MTTextFieldNoInteraction.m */,
 				1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */,
 			);
 			name = "Custom NSViews";
@@ -1327,6 +1332,7 @@
 				1E7BED701F565AD500AB8E5F /* NSURL+MTURLExtensions.m in Sources */,
 				1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */,
 				1E3C43C01D79EA1100367866 /* NSArray+Map.m in Sources */,
+				1E09DD422099449D0010CAB4 /* MTTextFieldNoInteraction.m in Sources */,
 				D2001C261704F93F00B75D9C /* MTSrt.m in Sources */,
 				1E5486731FF898A800412D7B /* PFMoveApplication.m in Sources */,
 				1ECD9D411C8265D600FBC78D /* MTChannelEditorController.m in Sources */,
