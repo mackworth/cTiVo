@@ -2328,7 +2328,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (source == MTNoSource) return;
 
     if ([self sourceURL:source]) {
-        [self getArtworkFromSource:source thumbVersion:YES];
+        [self getArtworkFromSource:source thumbVersion:thumbnail];
     } else {
         [self getInfoFromSource:source];
     }

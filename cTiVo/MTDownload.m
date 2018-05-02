@@ -657,21 +657,23 @@ __DDLOGHERE__
     long long tmpSpace = [self spaceAvailable: tiVoManager.tmpFilesDirectory];
     long long downloadSpace = [self spaceAvailable: self.downloadDirectory];
     long long fileSize = self.show.fileSize;
-    DDLogVerbose(@"Checking Space Available: %lld tmp and %lld file", tmpSpace, downloadSpace);
+    if (self.encodeFormat.isTestPS) {
+		DDLogVerbose(@"Checking Space Available: %lld tmp and %lld file", tmpSpace, downloadSpace);
 
-    if ((tmpSpace == downloadSpace  && downloadSpace < 1.5 * fileSize) ||
-        // both on same drive
-        (downloadSpace < fileSize))  {
-        [tiVoManager pauseQueue:nil];
-        [self notifyUserWithTitle:@"Pausing downloads: Your download disk is low on space" subTitle:@"Probably need to delete some files."];
-        DDLogReport(@"Disk space problem: %lld tmp and %lld download vs %lld fileSize", tmpSpace, downloadSpace, fileSize);
-       return NO;
-    } else if (tmpSpace < fileSize)  {
-        [tiVoManager pauseQueue:nil];
-        [self notifyUserWithTitle:@"Pausing downloads: Your temporary or boot drive is low on space" subTitle:@"Probably need to delete some files."];
-        DDLogReport(@"Disk space problem: %lld tmp and %lld download vs %lld fileSize", tmpSpace, downloadSpace, fileSize);
-       return NO;
-    }
+		if ((tmpSpace == downloadSpace  && downloadSpace < 1.5 * fileSize) ||
+			// both on same drive
+			(downloadSpace < fileSize))  {
+			[tiVoManager pauseQueue:nil];
+			[self notifyUserWithTitle:@"Pausing downloads: Your download disk is low on space" subTitle:@"Probably need to delete some files."];
+			DDLogReport(@"Disk space problem: %lld tmp and %lld download vs %lld fileSize", tmpSpace, downloadSpace, fileSize);
+		   return NO;
+		} else if (tmpSpace < fileSize)  {
+			[tiVoManager pauseQueue:nil];
+			[self notifyUserWithTitle:@"Pausing downloads: Your temporary or boot drive is low on space" subTitle:@"Probably need to delete some files."];
+			DDLogReport(@"Disk space problem: %lld tmp and %lld download vs %lld fileSize", tmpSpace, downloadSpace, fileSize);
+		   return NO;
+		}
+	}
     NSString * warning = nil;
     if (downloadSpace < tiVoManager.sizeOfShowsToDownload) {
         warning =  @"Warning: you may be getting low on disk space";

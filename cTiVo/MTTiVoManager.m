@@ -537,6 +537,7 @@ __DDLOGHERE__
 							   kMTScheduledSkipModeScan,
 							   kMTTrustTVDBEpisodes,
 							   kMTPreventSleep,
+							   kMTMaxNumEncoders,
 							   KMTPreferredImageSource,
 							   kMTTiVos
 							 ]) {
@@ -840,6 +841,9 @@ __DDLOGHERE__
     } else if ([keyPath isEqualToString:kMTPreventSleep]) {
         DDLogMajor(@"Changed User Prevent Sleep preference to: %@", [defs objectForKey:kMTPreventSleep] ? @"YES": @"NO" );
 		[self checkSleep:nil];
+    } else if ([keyPath isEqualToString:kMTMaxNumEncoders]) {
+        DDLogMajor(@"Changed Max Number Encoders to: %@", @([defs integerForKey:kMTMaxNumEncoders]) );
+		[self performSelector:@selector(startAllTiVoQueues) withObject:nil afterDelay:10];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
@@ -1496,7 +1500,7 @@ __DDLOGHERE__
 {
     long long size = 0;
     for (MTDownload *download in _downloadQueue) {
-        if (!download.isDone) {
+        if (!download.isDone && !download.encodeFormat.isTestPS) {
             size +=download.show.fileSize;
         }
     }

@@ -708,7 +708,7 @@ static BOOL inProgress = NO;
         statsCopy = self.theTVDBStatistics.copy;
     }
     NSString * statisticsReport =
-    @"\nAs TiVo doesn't provide us season/episode information or artwork, cTiVo looks up the TiVo's shows on theTVDB and the movies on theMovieDB.\n"
+    @"\ncTiVo looks up the TiVo's shows on theTVDB and the movies on theMovieDB.\n"
     "You can click on the individual URLs to see what information is available for shows where the lookup failed.\n\n"
     "Total number of shows is %lu\n"
     "%lu shows are marked as Movies\n"
