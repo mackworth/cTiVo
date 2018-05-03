@@ -1859,13 +1859,13 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		} else {
 			DDLogMajor(@"Not waiting any more for SkipMode for %@", self);
 		}
-		_useSkipMode = NO;  //avoid recursion
+		_useSkipMode = NO;  //switch to comskip, but avoid recursion
 		if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
 			self.downloadStatus = @(kMTStatusNew);
 			[self checkQueue];
 		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
-			self.downloadStatus = @(kMTStatusNew);
 			DDLogMajor(@"xxx Not waiting any more for SkipMode for %@", self);
+			[self deleteVideoFile]; //this hurts; maybe create a whole new comskip only path?
 			[self rescheduleShowWithDecrementRetries: @(NO)];
 		}
 	} else {
@@ -1894,29 +1894,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		[self skipModeCheck];
 		return; //shouldn't be here
 	}
-	__weak __typeof__(self) weakSelf = self;
-
-	[self.show.tiVo loadSkipModeInfoForShow: self.show withCompletion:^{
-		 //one last shot
-		if (weakSelf.show.hasSkipModeInfo || weakSelf.show.hasSkipModeList) {
-			DDLogReport(@"XXX SkipMode Timer went off, but we got SkipMode at last second. %@",self);
-			[weakSelf skipModeCheck];
-		} else {
-			[weakSelf changeToComskip];
-		}
-	}];
-}
-
--(void) changeToComskip {
-	DDLogMajor(@"Never got SkipMode Info for %@. Retrying with comskip",self.show);
-	if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial ) {
-		_useSkipMode = NO; //have to try comskip now
-		self.downloadStatus = @(kMTStatusNew);
-	} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd ) {
-		_useSkipMode = NO; //have to try comskip now
-		[self deleteVideoFile]; //this hurts; maybe whole new comskip only path?
-		[self rescheduleShowWithDecrementRetries:@NO ];
-	}
+	[self.show.tiVo loadSkipModeInfoForShow: self.show ];
 }
 
 -(void) startWaitSkipModeTimer {

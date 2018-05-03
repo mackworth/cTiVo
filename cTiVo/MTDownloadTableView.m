@@ -899,7 +899,7 @@ __DDLOGHERE__
 }
 
 -(IBAction) delete:(id)sender {
-    DDLogMajor(@"user request to delete shows");
+    DDLogMajor(@"user request to delete downloads");
     [myController removeFromDownloadQueue:sender];
 }
 

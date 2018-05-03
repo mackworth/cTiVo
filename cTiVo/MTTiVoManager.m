@@ -1458,7 +1458,7 @@ __DDLOGHERE__
 
 -(void) deleteFromDownloadQueue:(NSArray *) downloads {
     NSMutableIndexSet * itemsToRemove= [NSMutableIndexSet indexSet];
-	DDLogDetail(@"Delete shows: %@", downloads);
+	DDLogDetail(@"Delete downloads: %@", downloads);
 	for (MTDownload * download in downloads) {
 
 		NSUInteger index = [_downloadQueue indexOfObject:download];

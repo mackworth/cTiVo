@@ -940,7 +940,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	deletedShow.imageString = @"deleted";
 }
 
--(void) loadSkipModeInfoForShow:(MTTiVoShow *) show withCompletion: (void (^)(void)) completionHandler {
+-(void) loadSkipModeInfoForShow:(MTTiVoShow *) show {
 	[self.myRPC getShowInfoForShows:@[show.idString] ];
 }
 

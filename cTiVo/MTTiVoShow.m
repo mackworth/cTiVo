@@ -320,13 +320,27 @@ __DDLOGHERE__
 }
 
 -(void) setClipMetaDataId:(NSString *)clipMetaDataId {
-	if (clipMetaDataId != _clipMetaDataId) {
-		DDLogReport(@"XXX Got SkipMode MetaData for %@",self);
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+	BOOL notify = _clipMetaDataId != clipMetaDataId;
+	if ((_clipMetaDataId == nil) && (clipMetaDataId != nil)) {
+		//newly arrived (although maybe from cache at startup)
 		NSTimeInterval timeLeft = self.timeLeftTillRPCInfoWontCome;
-		if (clipMetaDataId && timeLeft < 60*60 && timeLeft > -24*60*60) {
-			DDLogReport(@"XXX RPC for %@ Arrived late: %0.1f minutes after show ended",self, 60*4- timeLeft/60);
+		if (timeLeft > -24*60*60) {
+			//don't report beyond a day
+			NSTimeInterval timeSinceShow = [self.showDate timeIntervalSinceNow] + self.showLength;
+			int hrs = (timeSinceShow) / 60;
+			CGFloat min = (timeSinceShow / 60.0) - hrs * 60.0;
+			DDLogReport(@"XXX SkipMode MetaData arrived %@for %@; %d:%0.1f after show ended", (timeLeft < 0) ? @" late" : @"", self, hrs, min);
 		}
+	}
+	_clipMetaDataId = clipMetaDataId;
+	if (self.isQueued) {
+		notify = YES;
+	}
+	if (notify) {
+		DDLogReport(@"Notifying skipMode from %@", self);
+ 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+	} else {
+		DDLogReport(@"Not Notifying skipMode from %@", self);
 	}
 }
 
@@ -2096,6 +2110,10 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 -(void) getArtworkFromSource: (MTImageSource) source thumbVersion: (BOOL) thumbnail {
     if (source == MTNoSource) return;
+    DDLogReport (@"XXX Checking for artwork %@", self);
+    if (self.imageInProgress) return;
+    self.imageInProgress = YES;
+    DDLogReport (@"xxx set the progress flag %@", self);
 
     NSURL * filename = [self localURLForSource:source thumbVersion:thumbnail];
     //download only if we don't have it already
@@ -2111,10 +2129,9 @@ NSString * fourChar(long n, BOOL allowZero) {
                 self.artworkFile = filename;
             }
         }
+        self.imageInProgress = NO;
         return;
     }
-    if (self.imageInProgress) return;
-    self.imageInProgress = YES;
     NSString *urlString = nil;
     if (source == MTTiVoSource) {
         if (!self.rpcData.imageURL.length) {
@@ -2149,8 +2166,11 @@ NSString * fourChar(long n, BOOL allowZero) {
     [NSURLConnection sendAsynchronousRequest:req
                 queue:[NSOperationQueue mainQueue]
         completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+        DDLogReport(@"XXX Got the URL %@",self);
         dispatch_async(dispatch_get_main_queue(), ^(void){
+        DDLogReport(@"XXX URL Main thread. %@",self);
             self.imageInProgress = NO;
+    		DDLogReport (@"xxx cleared the progress flag %@", self);
             if (!data || error ) {
                 DDLogReport(@"Couldn't get artwork for %@ from %@ , Error: %@", self.seriesTitle, urlString, error.localizedDescription);
                 [self failureHandlerForSource:source thumbnail:thumbnail ];
@@ -2447,7 +2467,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(NSString *)description
 {
-    return [NSString stringWithFormat:@"%@ (%@)%@",_showTitle,self.tiVoName,[_protectedShow boolValue]?@"-Protected":@""];
+    return [NSString stringWithFormat:@"%@ (%@)%@ %p",_showTitle,self.tiVoName,[_protectedShow boolValue]?@"-Protected":@"", self];
 }
 
 
