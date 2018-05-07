@@ -125,8 +125,14 @@ __DDLOGHERE__
 	}
 	[self terminate];
 
+	usleep (100);
+	[self saveLogFile];
 	//following line has important side effect that it lets the task do whatever it needs to do to terminate before killing it dead in dealloc
-	[self performSelector:@selector(saveLogFile) withObject:self afterDelay:2.0];
+	[self performSelector:@selector(doNothing) withObject:self afterDelay:2.0];
+}
+
+-(void) doNothing {
+	
 }
 
 -(void)cleanUp

@@ -22,7 +22,7 @@
 -(MTRPCData *) rpcDataForID: (NSString *) idString;
 -(void) emptyCaches;
 -(void) purgeShows: (NSArray <NSString *> *) showIDs;
-
+-(void) whatsOnSearchWithCompletion: (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler;
 -(void) getShowInfoForShows: (NSArray <NSString *> *) showIDs;
 -(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;

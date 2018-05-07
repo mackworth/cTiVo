@@ -326,10 +326,10 @@ __DDLOGHERE__
 		NSTimeInterval timeLeft = self.timeLeftTillRPCInfoWontCome;
 		if (timeLeft > -24*60*60) {
 			//don't report beyond a day
-			NSTimeInterval timeSinceShow = [self.showDate timeIntervalSinceNow] + self.showLength;
-			int hrs = (timeSinceShow) / 60;
+			NSTimeInterval timeSinceShow = -[self.showDate timeIntervalSinceNow] - self.showLength;
+			int hrs = (timeSinceShow) / 60 / 60;
 			CGFloat min = (timeSinceShow / 60.0) - hrs * 60.0;
-			DDLogReport(@"XXX SkipMode MetaData arrived %@for %@; %d:%0.1f after show ended", (timeLeft < 0) ? @" late" : @"", self, hrs, min);
+			DDLogReport(@"XXX SkipMode MetaData arrived %@for %@; %d:%0.1f after show ended", (timeLeft < 0) ? @"late " : @"", self, hrs, min);
 		}
 	}
 	_clipMetaDataId = clipMetaDataId;

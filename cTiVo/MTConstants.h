@@ -20,7 +20,7 @@
 //#define kMTNotificationCommercialWasCanceled @"MTNotificationCommercialWasCanceled"
 //#define kMTNotificationCaptionDidFinish @"MTNotificationCaptionDidFinish"
 //#define kMTNotificationCaptionWasCanceled @"MTNotificationCaptionWasCanceled"
-#define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"
+#define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"  //object= download that changed its download status
 #define kMTNotificationShowDownloadDidFinish @"MTNotificationShowDownloadDidFinish"     //object = MTDownload that just finished its entire process
 #define kMTNotificationShowDownloadWasCanceled @"MTNotificationShowDownloadWasCanceled"
 
@@ -70,6 +70,7 @@
 #define kMTStatusDone 14
 #define kMTStatusDeleted 15
 #define kMTStatusFailed 16
+#define kMTStatusRemovedFromQueue 17
 
 //Contants
 

@@ -442,7 +442,7 @@ attributes:attribs];
            shows =  [self showsForDownloads: self.downloadQueueTable.sortedDownloads];
         }
     }
-    if (shows.count) [tiVoManager skipModeRetrieval:shows];
+    if (shows.count) [tiVoManager skipModeRetrieval:shows interrupting:YES];
 }
 
 -(IBAction)programMenuHandler:(NSMenuItem *)menu

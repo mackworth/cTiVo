@@ -69,14 +69,21 @@ __DDLOGHERE__
 	[self reloadData];
 }
 
+-(void) reallyReloadDownload:(MTDownload *) download {
+	NSUInteger row = [self.sortedDownloads indexOfObject:download];
+	if (row != NSNotFound) {
+		NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
+		[self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
+	}
+}
+
 -(void)reloadEpisodeShow:(NSNotification *)notification
 {
 	MTTiVoShow *thisShow = (MTTiVoShow *)notification.object;
 	NSArray *downloads = [NSArray arrayWithArray:self.sortedDownloads];
 	for (MTDownload *download in downloads) {
 		if ([download.show isEqual:thisShow]) {
-			NSNotification *tmpNotification = [NSNotification notificationWithName:kMTNotificationDownloadRowChanged object:download];
-			[self reloadEpisode:tmpNotification];
+			[self reallyReloadDownload:download];
 		}
 	}
 }
@@ -88,11 +95,7 @@ __DDLOGHERE__
         DDLogDetail(@"Reloading DL table from DownloadStatusChanged");
         [self reloadData];
     } else {
-        NSUInteger row = [self.sortedDownloads indexOfObject:thisDownload];
-        if (row != NSNotFound) {
-            NSRange columns = NSMakeRange(0,self.numberOfColumns);//[self columnWithIdentifier:@"Episode"];
-            [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndexesInRange:columns]];
-        }
+		[self reallyReloadDownload:thisDownload];
     }
 }
 

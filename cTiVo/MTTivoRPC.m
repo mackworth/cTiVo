@@ -1063,20 +1063,30 @@ static NSArray * imageResponseTemplate = nil;
 	   }];
 }
 
--(void) whatsOnSearchWithCompletion: (void (^)(void)) completionHandler{
+-(void) whatsOnSearchWithCompletion: (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler {
 	DDLogDetail(@"Asking What's on:");
 	[self sendRpcRequest:@"whatsOnSearch"
 				 monitor:NO
 				withData:@{}
 	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
-		   DDLogReport(@"sent what'sOnSearch; got %@", jsonResponse);
-		   if (completionHandler) completionHandler();
-//		   jsonResponse{@"WhatsOn][@playBackType"}  = liveCache,
-//		   playbackType = liveCache;
-//		   playbackType = recording;
-//		   playbackType = idle;
-
-
+		   DDLogDetail(@"sent what'sOnSearch; got %@", jsonResponse);
+		   NSDictionary * whatsOn = jsonResponse[@"whatsOn"][0];
+		   NSString * playback = whatsOn[@"playbackType"];
+		   NSString * recordingId = whatsOn[@"recordingId"];
+		   MTWhatsOnType result = MTWhatsOnUnknown;
+		   if (!playback) {
+				DDLogReport(@"No playbackType?? got %@", jsonResponse);
+		   } else {
+			   NSArray * map = @[@"unknown", @"liveCache", @"recording", @"idle"];
+			   NSInteger location = [map indexOfObject:playback];
+			   if (location == NSNotFound) {
+				   DDLogReport(@"Unknown playbackType: %@ in %@",playback, jsonResponse );
+			   } else {
+				   DDLogDetail(@"Found playbackType: %@ with %@",playback, recordingId );
+				   result = (MTWhatsOnType) location;
+			   }
+		   }
+		   if (completionHandler) completionHandler(result,recordingId);
 	   }];
 }
 
@@ -1245,7 +1255,7 @@ static NSArray * imageResponseTemplate = nil;
 	NSString * oldMetadataID = rpcData.clipMetaDataId;
 	rpcData.clipMetaDataId = clipMetaDataId;
 
-	if (!clipMetaDataId) {
+	if (clipMetaDataId.length == 0) {
 		DDLogMajor(@"No skipmode metaData for %@", rpcData);
 		if (completionHandler) completionHandler(nil,nil);
 	} else if ([oldMetadataID isEqualToString:clipMetaDataId] && rpcData.programSegments.count > 0){
@@ -1259,10 +1269,14 @@ static NSArray * imageResponseTemplate = nil;
 		}
 		__weak __typeof__(self) weakSelf = self;
 		[self retrieveSegments:rpcData.clipMetaDataId withCompletionHandler:^(NSArray * segments) {
-		   	DDLogDetail(@"Segments just arrived for %@ #: %@ contentId: %@; %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId,segments);
-		   	rpcData.programSegments = segments;
+			if (segments.count == 0) {
+				DDLogReport(@"Segments failed %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId);
+				rpcData.skipModeFailed = YES;
+			} else {
+		   		DDLogDetail(@"Segments just arrived for %@ #: %@ contentId: %@; %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId,segments);
+			}
+			rpcData.programSegments = segments;
 		   	[weakSelf.delegate receivedRPCData:rpcData];
-		   	if (segments.count == 0) rpcData.skipModeFailed = YES;
 			if (completionHandler) completionHandler(clipMetaDataId, segments);
 		}];
 	}
@@ -1403,9 +1417,6 @@ static NSArray * imageResponseTemplate = nil;
 			[self.skipModeQueueMetaData addObject:rpcData];
 
 			[self retrieveClipMetaDataFor:objectId withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
-				rpcData.clipMetaDataId = metaDataID;
-				rpcData.programSegments = lengths;
-				[weakSelf.delegate receivedRPCData:rpcData];
 				[weakSelf.skipModeQueueMetaData removeObject:rpcData];
 				if (metaDataID != nil && lengths.count > 0) {
 					DDLogReport(@"XXX SkipMode Queue got metadata; re-launching: %@", rpcData);
@@ -1469,7 +1480,6 @@ static NSArray * imageResponseTemplate = nil;
 	
 	__weak __typeof__(self) weakSelf = self;
 	if (!rpcData) return;
-//	[weakSelf whatsOnSearchWithCompletion: ^{
 
 	[weakSelf playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
 		
@@ -1530,7 +1540,6 @@ static NSArray * imageResponseTemplate = nil;
 		}];
 		}];
 	}];
-//			}];
 }
 
 	

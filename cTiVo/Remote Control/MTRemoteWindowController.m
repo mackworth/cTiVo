@@ -19,14 +19,39 @@
 
 @implementation MTRemoteWindowController
 
+__DDLOGHERE__
+
 -(instancetype) init {
 	if ((self = [self initWithWindowNibName:@"MTRemoteWindowController"])) {
+		[self updateTiVoList];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTiVoList) name:kMTNotificationTiVoListUpdated object:nil];
+		
         self.window.contentAspectRatio = self.tivoRemote.image.size;
     };
 	return self;
 }
 
+-(void) whatsOn {
+	[self.selectedTiVo whatsOnWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
+		switch (whatsOn) {
+			case MTWhatsOnUnknown:
+				DDLogReport(@"Tivo is showing unknown %@", recordingID);
+				break;
+			case MTWhatsOnLiveTV:
+				DDLogReport(@"Tivo is showing live TV %@", recordingID);
+				break;
+			case MTWhatsOnRecording:
+				DDLogReport(@"Tivo is showing a recording %@", recordingID);
+				break;
+			case MTWhatsOnStreamingOrMenus:
+				DDLogReport(@"Tivo is in menus or streaming %@", recordingID);
+				break;
+			default:
+				break;
+		}
+	}];
+}
+	 
 -(MTTiVo *) selectedTiVo {
 	MTTiVo* tivo = nil;
 	if (self.tiVoList.count > 0) {

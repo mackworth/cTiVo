@@ -60,6 +60,7 @@
 								 toIndex:(NSUInteger)insertIndex;
 -(void) sortDownloadQueue;
 -(NSArray *) currentDownloadQueueSortedBy: (NSArray*) sortDescripters;
+-(BOOL) sharedShowWith:(MTDownload *) download; //true if another download shares this download's show
 
 -(NSArray <MTDownload *> *) downloadsForShow: (MTTiVoShow *) show;
 -(BOOL) anyShowsWaiting;
@@ -104,7 +105,7 @@
 -(void) deleteTivoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) stopRecordingShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) getSkipModeEDLWhenPossible: (MTDownload *) download;
--(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows;
+-(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows interrupting: (BOOL) interrupt;
 
 //----------------Channel Management Methods --------
 -(void) createChannel;

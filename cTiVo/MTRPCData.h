@@ -16,6 +16,13 @@
 //
 //};
 //
+typedef NS_ENUM(NSUInteger, MTWhatsOnType) {
+    MTWhatsOnUnknown = 0,
+    MTWhatsOnLiveTV,
+    MTWhatsOnRecording,
+    MTWhatsOnStreamingOrMenus
+};
+
 @interface MTRPCData : NSObject <NSSecureCoding, NSCoding>
 
 @property (nonatomic, strong) NSString * rpcID; //format: @"TiVo|objectID"

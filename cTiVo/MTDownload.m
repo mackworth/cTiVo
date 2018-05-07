@@ -136,10 +136,12 @@ __DDLOGHERE__
 	if (show != _show) {
 		if (_show) {
 			[[NSNotificationCenter defaultCenter] removeObserver:self name:kMTNotificationFoundSkipModeInfo object: _show ];
+			if (![tiVoManager sharedShowWith:self]) _show.isQueued = NO;
 		}
 		_show = show;
 		if (show) {
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeInfo object: show];
+			show.isQueued = YES;
 		}
 	}
 }
@@ -169,7 +171,6 @@ __DDLOGHERE__
 -(void)prepareForDownload: (BOOL) notifyTiVo {
     //set up initial parameters for download before submittal; can also be used to resubmit while still in DL queue
     if (self.downloadStatus.intValue == kMTStatusDeleted) return;
-    self.show.isQueued = YES;
     if (self.isInProgress) {
         [self cancel];
     }
@@ -197,7 +198,8 @@ __DDLOGHERE__
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
 		DDLogMajor(@"Changing DL status of %@ to %@ (%@)", object, [(MTDownload *)object showStatus], [(MTDownload *)object downloadStatus]);
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadRowChanged object:object];
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadStatusChanged object:object];
+		[self skipModeCheck];
         if (self.performanceTimer) {
             //if previous scheduled either cancel or cancel/restart
             [self cancelPerformanceTimer];
@@ -1820,11 +1822,15 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	if (notification.object == self || notification.object == self.show ) {
 		DDLogMajor(@"Possible SkipMode Info change for %@", self);
 		[self skipModeCheck];
+	} else {
+		DDLogMajor(@"XXX This should NOT happen %@, %@", self, notification);
+
 	}
 }
 
 -(void) skipModeCheck {
 	if ([self.show.protectedShow boolValue]) return;
+	if (self.downloadStatus.intValue == kMTStatusRemovedFromQueue) return; //we've been deleted
 	BOOL needEDLNow = ( self.isNew && self.shouldSkipCommercials) ||
 					  ( self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd && self.shouldMarkCommercials);
 	if (self.show.hasSkipModeList || ! self.useSkipMode || ! needEDLNow) {
@@ -2167,15 +2173,12 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	int status = [self.downloadStatus intValue];
 	return (status == kMTStatusDone) ||
 	(status == kMTStatusFailed) ||
-	(status == kMTStatusDeleted);
+	(status == kMTStatusDeleted) ||
+	(status == kMTStatusRemovedFromQueue);
 }
 
 -(BOOL) isDone {
-	int status = [self.downloadStatus intValue];
-	return (status == kMTStatusDone) ||
-	(status == kMTStatusSkipModeWaitEnd ) ||
-	(status == kMTStatusFailed) ||
-	(status == kMTStatusDeleted);
+	return self.isCompletelyDone || self.downloadStatus.intValue ==kMTStatusSkipModeWaitEnd;
 }
 
 -(BOOL) isNew {
@@ -2572,7 +2575,6 @@ NSInteger diskWriteFailure = 123;
                         [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
                         return;
                     }
-
                 }
             }
 		}

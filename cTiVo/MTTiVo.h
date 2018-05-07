@@ -52,6 +52,7 @@
 -(void) reloadShowInfoForShows: (NSArray <MTTiVoShow *> *) shows;
 -(MTRPCData *)registerRPCforShow: (MTTiVoShow *) show;
 -(BOOL) rpcActive;
+-(void) whatsOnWithCompletion:  (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler;
 
 -(void) deleteTiVoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) playShow: (MTTiVoShow *) show;
@@ -60,6 +61,6 @@
 -(void) sendURL: (NSString *) URL;
 
 -(void) loadSkipModeInfoForShow:(MTTiVoShow *) show;
--(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows ;
+-(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows interrupting:(BOOL) interrupt;
 
 @end

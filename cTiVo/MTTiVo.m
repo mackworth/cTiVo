@@ -575,9 +575,32 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
--(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows {
+-(void) whatsOnWithCompletion:  (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler {
+	[self.myRPC whatsOnSearchWithCompletion:completionHandler];
+}
+
+-(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows interrupting:(BOOL) interrupt {
 	//if they already have metadata, try them first
 	//More than one show happens when SkipMode timeblock happens, so we want to try possible ones first.
+	if (interrupt) {
+		[self reallyFindCommercialsForShows:shows];
+	} else {
+		[self findCommercialsNoInterrupt:shows];
+	}
+}
+
+-(void) findCommercialsNoInterrupt:( NSArray <MTTiVoShow *> *) shows {
+	[self.myRPC whatsOnSearchWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
+		if (whatsOn == MTWhatsOnLiveTV) {
+			[self reallyFindCommercialsForShows:shows];
+		} else {
+			DDLogDetail(@"Waiting for TiVo UI to be available");
+			[self performSelector:@selector(findCommercialsNoInterrupt:) withObject:shows afterDelay:60];
+		}
+	}];
+}
+
+-(void) reallyFindCommercialsForShows:(NSArray <MTTiVoShow *> *) shows  {
 	NSArray <MTTiVoShow *> * hasInfoFirst = [shows sortedArrayUsingComparator:^NSComparisonResult(MTTiVoShow *  _Nonnull show1, MTTiVoShow *    _Nonnull show2) {
 		BOOL show1Has = [show1 hasSkipModeInfo];
 		BOOL show2Has = [show2 hasSkipModeInfo];

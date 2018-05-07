@@ -606,13 +606,21 @@ __DDLOGHERE__
 	return NO;
 }
 
+-(BOOL) sharedShowWith:(MTDownload *) download {
+	for (MTDownload * otherDownload in [self downloadQueue]) {
+		if (otherDownload == download) continue;
+		if (otherDownload.show == download.show) return YES;
+	}
+	return NO;
+}
+
 -(void) clearDownloadHistory {
 	NSMutableIndexSet * itemsToRemove= [NSMutableIndexSet indexSet];
 	for (unsigned int index = 0;index< tiVoManager.downloadQueue.count; index++) {
 		MTDownload * download = tiVoManager.downloadQueue[index];
 		if (download.isCompletelyDone ) {
 			[itemsToRemove addIndex:index];
-			download.show.isQueued = NO;
+			if (![self sharedShowWith:download]) download.show.isQueued = NO;
 		}
 	}
 
@@ -623,9 +631,7 @@ __DDLOGHERE__
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	} else {
 		DDLogDetail(@"No history to delete?");
-		
 	}
-
 }
 
 -(void)pauseQueue:(NSNumber *)askUser
@@ -928,11 +934,11 @@ __DDLOGHERE__
 			[shows addObject:download.show];
 		}
 	}
-	[self skipModeRetrieval:[shows copy]];
+	[self skipModeRetrieval:[shows copy] interrupting: NO];
 	[self scheduleNextSkipModeIncludingNow: NO];
 }
 
--(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows {
+-(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows interrupting: (BOOL) interrupt {
 	NSMutableArray <MTTiVoShow *> * tivoShows = [shows mutableCopy];
 	while (tivoShows.count > 0) {
 		NSMutableArray * thisTiVoShows = [NSMutableArray array];
@@ -943,7 +949,7 @@ __DDLOGHERE__
 				[tivoShows removeObject:show];
 			}
 		}
-		[tivo findCommercialsForShows:thisTiVoShows ];
+		[tivo findCommercialsForShows:thisTiVoShows interrupting:interrupt ];
 	}
 }
 
@@ -1473,10 +1479,13 @@ __DDLOGHERE__
 		}
 		if (index != NSNotFound) {
 			MTDownload *oldDownload = _downloadQueue[index];
-            [oldDownload cancel];
-			oldDownload.show.isQueued = NO;
 			[itemsToRemove addIndex:index];
-			[self removeShowFromWaitingSkipModeList:oldDownload.show];
+            [oldDownload cancel];
+			if (![self sharedShowWith:oldDownload]) {
+				oldDownload.show.isQueued = NO;
+				[self removeShowFromWaitingSkipModeList:oldDownload.show];
+			}
+			oldDownload.downloadStatus = @kMTStatusRemovedFromQueue;
 		}
 	}
 	
@@ -1637,7 +1646,7 @@ __DDLOGHERE__
 -(void) getSkipModeEDLWhenPossible: (MTDownload *) download {
 	MTTiVoShow * show = download.show;
 	if (self.autoSkipModeScanAllowedNow) {
-		[download.show.tiVo findCommercialsForShows:@[show] ];
+		[download.show.tiVo findCommercialsForShows:@[show] interrupting:NO];
 	} else {
 		if (!show.hasSkipModeInfo) return; //don't do anything before metadata arrives
 		if (show.hasSkipModeList) return;  //if we already have EDL, no warning needed
@@ -1651,17 +1660,13 @@ __DDLOGHERE__
 		[self performSelector:@selector(removeShowFromWaitingSkipModeList:) withObject:download afterDelay:24*60*60];
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
 			//scheduled, so if it's soon enough, just wait, otherwise warn.
-			if (self.autoSkipModeScanAllowedNow) {
-				return; //We can do scan now, so no warning needed.
-			} else {
-				NSDate * scheduled = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
-				NSTimeInterval nextEDLTime = [scheduled secondsUntilNextTimeOfDay];
-				if (nextEDLTime > 18*60*60) {
-					[self notifyForName:show.showTitle
-							  withTitle:@"Warning: Missed SkipMode time"
-							   subTitle:[NSString stringWithFormat:@"You can manually load, or cTiVo will try again in %d hrs", (int)floor(nextEDLTime/3600)]
-							   isSticky:YES];
-				}
+			NSDate * scheduled = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
+			NSTimeInterval nextEDLTime = [scheduled secondsUntilNextTimeOfDay];
+			if (nextEDLTime > 18*60*60) {
+				[self notifyForName:show.showTitle
+						  withTitle:@"Warning: Missed SkipMode time"
+						   subTitle:[NSString stringWithFormat:@"You can manually load, or cTiVo will try again in %d hrs", (int)floor(nextEDLTime/3600)]
+						   isSticky:YES];
 			}
 		} else {
 			//not scheduled so warn
