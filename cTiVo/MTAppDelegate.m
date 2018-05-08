@@ -233,6 +233,7 @@ void signalHandler(int signal)
             name: NSWorkspaceDidWakeNotification object: NULL];
 
 	//Initialize tmp directory
+	[self checkVolumes:nil];
 	[self clearTmpDirectory];
 	
     //Make sure details and thumbnails directories are available

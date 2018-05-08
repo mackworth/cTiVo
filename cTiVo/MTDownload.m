@@ -26,6 +26,7 @@
 
 @property (nonatomic, strong) MTTiVoShow * show;
 @property (nonatomic, strong) NSString *downloadDirectory;
+@property (nonatomic, strong) NSString *tmpDirectory;
 
 @property (nonatomic, strong) NSFileHandle  *bufferFileWriteHandle;
 //we read from EITHER bufferFileReadHandle or urlBuffer (if memory-based and encoder keeping up with Tivo)
@@ -533,13 +534,20 @@ __DDLOGHERE__
         [self deleteVideoFile];
     }
 	//Clean up files in TmpFilesDirectory
-    NSString *tmpDir = tiVoManager.tmpFilesDirectory;
+    NSString *tmpDir = self.tmpDirectory;
 	if (deleteFiles && tmpDir && self.baseFileName) {
 		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:tmpDir error:nil];
 		for (NSString *file in tmpFiles) {
 			NSRange tmpRange = [file rangeOfString:self.baseFileName];
 			if (tmpRange.location != NSNotFound) {
-				DDLogVerbose(@"Deleting tmp file %@", file);
+				//check if we're looking at a "episodename" file versus a "episodename-n" file
+				NSUInteger nextChar = NSMaxRange(tmpRange);
+				if (file.length > nextChar &&
+					(char)[file characterAtIndex:nextChar] == '-') {
+					DDLogDetail(@"For baseFileName %@, ignoring another download's tmp file %@", self.baseFileName, file);
+					continue;
+				}
+				DDLogDetail(@"For basename %@, deleting temp file %@", self.baseFileName, file);
                 NSError * error = nil;
 				NSString * tmpPath = [tmpDir stringByAppendingPathComponent:file];
                 if ( ![fm removeItemAtPath:tmpPath error:&error]) {
@@ -557,7 +565,7 @@ __DDLOGHERE__
         NSString * downloadName = [self.show downloadFileNameWithFormat:self.encodeFormat.name createIfNecessary:YES];
 		if (!downloadName) return NO;
         self.downloadDirectory = [downloadName stringByDeletingLastPathComponent];
-
+		self.tmpDirectory = tiVoManager.tmpFilesDirectory;
         NSString * baseTitle = [downloadName lastPathComponent];
 		if (!baseTitle) return NO;
 		self.baseFileName = [self createUniqueBaseFileName:baseTitle ];
@@ -590,7 +598,7 @@ __DDLOGHERE__
 		return nil;
 	}
 	NSFileManager *fm = [NSFileManager defaultManager];
-    NSString * tmpDir = tiVoManager.tmpFilesDirectory;
+    NSString * tmpDir = self.tmpDirectory;
 	if (!tmpDir) {
 		DDLogReport(@"No temporary directory for %@!",self);
 		return nil;
@@ -656,7 +664,7 @@ __DDLOGHERE__
     if (! [self configureBaseFileNameAndDirectory]) {
         return NO;
     }
-    long long tmpSpace = [self spaceAvailable: tiVoManager.tmpFilesDirectory];
+    long long tmpSpace = [self spaceAvailable: self.tmpDirectory];
     long long downloadSpace = [self spaceAvailable: self.downloadDirectory];
     long long fileSize = self.show.fileSize;
     if (self.encodeFormat.isTestPS) {
@@ -692,13 +700,13 @@ __DDLOGHERE__
    }
     if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {  //We need to download from the TiVo
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
-            self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",tiVoManager.tmpFilesDirectory,self.baseFileName];
+            self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",self.tmpDirectory,self.baseFileName];
             DDLogVerbose(@"downloading to memory; buffer: %@", self.bufferFilePath);
             self.urlBuffer = [NSMutableData new];
             self.urlReadPointer = 0;
             self.bufferFileReadHandle = nil;
         } else {
-            self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,self.baseFileName];
+            self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",self.tmpDirectory,self.baseFileName];
             DDLogVerbose(@"downloading to file: %@", self.bufferFilePath);
             [fm createFileAtPath:self.bufferFilePath contents:[NSData data] attributes:nil];
             self.bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:self.bufferFilePath];
@@ -707,7 +715,7 @@ __DDLOGHERE__
         }
     }
     if (!self.downloadingShowFromMPGFile) {
-        self.decryptedFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,self.baseFileName];
+        self.decryptedFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",self.tmpDirectory,self.baseFileName];
         DDLogVerbose(@"setting decrypt path: %@", self.decryptedFilePath);
         [[NSFileManager defaultManager] createFileAtPath:self.decryptedFilePath contents:[NSData data] attributes:nil];
     }
@@ -718,7 +726,7 @@ __DDLOGHERE__
     self.captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDirectory ,self.baseFileName];
     DDLogVerbose(@"setting self.captionFilePath: %@", self.captionFilePath);
     
-    self.commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version
+    self.commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,self.tmpDirectory, self.baseFileName];  //0.92 version
     DDLogVerbose(@"setting self.commercialFilePath: %@", self.commercialFilePath);
     
 	if (!self.encodeFormat.isTestPS) {
@@ -1379,7 +1387,7 @@ __DDLOGHERE__
     
     if ((self.taskFlowType == kMTTaskFlowSimuMarkcom || self.taskFlowType == kMTTaskFlowSimuMarkcomSubtitles) && [self canPostDetectCommercials]) {
         [arguments addObject:self.encodeFilePath]; //Run on the final file for these conditions
-        self.commercialFilePath = [NSString stringWithFormat:@"%@/%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version  (probably wrong, but not currently used)
+        self.commercialFilePath = [NSString stringWithFormat:@"%@/%@.edl" ,self.tmpDirectory, self.baseFileName];  //0.92 version  (probably wrong, but not currently used)
     } else {
         [arguments addObject:self.decryptedFilePath];// Run this on the output of tivodecode
     }

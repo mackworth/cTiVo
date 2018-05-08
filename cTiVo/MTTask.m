@@ -47,7 +47,7 @@ __DDLOGHERE__
             mTTask.task.qualityOfService = NSQualityOfServiceUtility;
         }
     }
-    NSString * tmpDir = [tiVoManager tmpFilesDirectory];
+    NSString * tmpDir = download.tmpDirectory;
     if (tmpDir) {
         mTTask.task.currentDirectoryPath = tmpDir;  //just protective
     } else {
@@ -86,13 +86,13 @@ __DDLOGHERE__
 	_taskName = taskName;
     NSError * error = nil;
     if (self.download) {
-        self.logFilePath = [NSString stringWithFormat:@"%@/%@%@.txt",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
+        self.logFilePath = [NSString stringWithFormat:@"%@/%@%@.txt",self.download.tmpDirectory,taskName,self.download.baseFileName];
         if (![[NSData data] writeToFile:self.logFilePath options:0 error:&error]) {
             DDLogReport(@"Could not create logfile at %@: %@",_logFilePath, error);
         }
         self.logFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_logFilePath];
         self.logFileReadHandle	= [NSFileHandle fileHandleForReadingAtPath:_logFilePath];
-        self.errorFilePath = [NSString stringWithFormat:@"%@/%@%@.err",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
+        self.errorFilePath = [NSString stringWithFormat:@"%@/%@%@.err",self.download.tmpDirectory,taskName,self.download.baseFileName];
         if (![[NSData data] writeToFile:self.errorFilePath options:0 error:&error]) {
             DDLogReport(@"Could not create errfile at %@:%@",_errorFilePath, error);
         }

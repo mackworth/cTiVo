@@ -2110,10 +2110,8 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 -(void) getArtworkFromSource: (MTImageSource) source thumbVersion: (BOOL) thumbnail {
     if (source == MTNoSource) return;
-    DDLogReport (@"XXX Checking for artwork %@", self);
     if (self.imageInProgress) return;
     self.imageInProgress = YES;
-    DDLogReport (@"xxx set the progress flag %@", self);
 
     NSURL * filename = [self localURLForSource:source thumbVersion:thumbnail];
     //download only if we don't have it already

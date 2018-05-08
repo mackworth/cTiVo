@@ -22,6 +22,7 @@
 #pragma mark - Properties for download/conversion configuration
 @property (nonatomic, readonly) MTTiVoShow *show;
 @property (nonatomic, readonly) NSString *downloadDirectory;
+@property (nonatomic, readonly) NSString *tmpDirectory;
 @property (nonatomic, readonly) NSString *baseFileName;
 @property (nonatomic, readonly) NSString *encodeFilePath;
 @property (nonatomic, strong)   MTFormat *encodeFormat;  //changeable until download starts
