@@ -70,7 +70,7 @@
 #define kMTStatusDone 14
 #define kMTStatusDeleted 15
 #define kMTStatusFailed 16
-#define kMTStatusRemovedFromQueue 17
+#define kMTStatusRemovedFromQueue 19
 
 //Contants
 

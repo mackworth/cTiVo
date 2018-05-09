@@ -106,6 +106,7 @@
 -(void) stopRecordingShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) getSkipModeEDLWhenPossible: (MTDownload *) download;
 -(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows interrupting: (BOOL) interrupt;
+-(BOOL) autoSkipModeScanAllowedNow;
 
 //----------------Channel Management Methods --------
 -(void) createChannel;

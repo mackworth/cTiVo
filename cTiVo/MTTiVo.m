@@ -58,6 +58,7 @@
 @property (nonatomic, strong) NSURLConnection *showURLConnection;
 @property (nonatomic, strong) 	NSDate *currentNPLStarted;
 
+@property (nonatomic, strong) NSMutableSet <MTTiVoShow *> * postponedCommercialShows;
 @property SCNetworkReachabilityRef reachability;
 @property (nonatomic, readonly) NSArray *downloadQueue;
 @property (nonatomic, strong) MTTivoRPC * myRPC;
@@ -579,41 +580,46 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	[self.myRPC whatsOnSearchWithCompletion:completionHandler];
 }
 
--(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows interrupting:(BOOL) interrupt {
-	//if they already have metadata, try them first
-	//More than one show happens when SkipMode timeblock happens, so we want to try possible ones first.
-	if (interrupt) {
-		[self reallyFindCommercialsForShows:shows];
+-(void) findCommercialsForShow: (MTTiVoShow *) show interrupting:(BOOL) interrupt {
+	if (!show || show.edlList.count > 0) return;
+	if (self.postponedCommercialShows) {
+		[self.postponedCommercialShows addObject:show];
 	} else {
-		[self findCommercialsNoInterrupt:shows];
+		self.postponedCommercialShows = [NSMutableSet setWithObject:show];
+	}
+	if (interrupt) {
+		[self reallyFindCommercialsForShows]; //as long as we're interrupting, send ones that were waiting as well
+	} else {
+		[self findCommercialsNoInterrupt];
 	}
 }
 
--(void) findCommercialsNoInterrupt:( NSArray <MTTiVoShow *> *) shows {
-	[self.myRPC whatsOnSearchWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
-		if (whatsOn == MTWhatsOnLiveTV) {
-			[self reallyFindCommercialsForShows:shows];
-		} else {
-			DDLogDetail(@"Waiting for TiVo UI to be available");
-			[self performSelector:@selector(findCommercialsNoInterrupt:) withObject:shows afterDelay:60];
-		}
-	}];
+-(void) cancelCommercialingForShow: (MTTiVoShow *) show {
+	[self.postponedCommercialShows removeObject:show];
 }
 
--(void) reallyFindCommercialsForShows:(NSArray <MTTiVoShow *> *) shows  {
-	NSArray <MTTiVoShow *> * hasInfoFirst = [shows sortedArrayUsingComparator:^NSComparisonResult(MTTiVoShow *  _Nonnull show1, MTTiVoShow *    _Nonnull show2) {
-		BOOL show1Has = [show1 hasSkipModeInfo];
-		BOOL show2Has = [show2 hasSkipModeInfo];
-		if (show1Has == show2Has) return NSOrderedSame;
-		if (show1Has) return NSOrderedAscending;
-		return NSOrderedDescending;
-	}];
+-(void) findCommercialsNoInterrupt {
+	if (self.postponedCommercialShows.count == 0 || !tiVoManager.autoSkipModeScanAllowedNow) {
+		self.postponedCommercialShows = nil;
+		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(findCommercialsNoInterrupt) object:nil ];
+	} else {
+		[self.myRPC whatsOnSearchWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
+			if (whatsOn == MTWhatsOnLiveTV) {
+				[self reallyFindCommercialsForShows];
+			} else {
+				DDLogDetail(@"Waiting for TiVo UI to be available");
+				[self performSelector:@selector(findCommercialsNoInterrupt) withObject:nil afterDelay:60];
+			}
+		}];
+	}
+}
+
+-(void) reallyFindCommercialsForShows {
+	NSSortDescriptor * sorter = [NSSortDescriptor sortDescriptorWithKey:@"hasSkipModeInfo" ascending:NO];
+	NSArray <MTTiVoShow *> * hasInfoFirst = [self.postponedCommercialShows sortedArrayUsingDescriptors:@[sorter]];
+	self.postponedCommercialShows = nil;
 	for (MTTiVoShow * show in hasInfoFirst) {
-//		xxx test erasure of edlList:
-//      show.rpcData.edlList = nil;
-//		show.rpcData.clipMetaDataId = nil;
-//		show.rpcData.programSegments = nil;
-		if ([show.tiVo isEqual:self]) {
+		if (show.tiVo == self) {
 			if ( !show.inProgress.boolValue && show.mightHaveSkipModeInfo && (show.rpcData.edlList.count == 0)) {
             	DDLogMajor(@"Asking for SkipMode points for %@ on %@", show, self);
 				show.rpcData.tempLength = show.showLength; //hint in case tivo isn't reporting this
@@ -960,6 +966,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         	}
 		}
     }
+	[self cancelCommercialingForShow:deletedShow];
 	deletedShow.imageString = @"deleted";
 }
 

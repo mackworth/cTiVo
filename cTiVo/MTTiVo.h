@@ -61,6 +61,7 @@
 -(void) sendURL: (NSString *) URL;
 
 -(void) loadSkipModeInfoForShow:(MTTiVoShow *) show;
--(void) findCommercialsForShows:(NSArray <MTTiVoShow *> *) shows interrupting:(BOOL) interrupt;
+-(void) findCommercialsForShow:(MTTiVoShow *) show interrupting:(BOOL) interrupt; //results when rpcData is set
+-(void) cancelCommercialingForShow: (MTTiVoShow *) show;
 
 @end

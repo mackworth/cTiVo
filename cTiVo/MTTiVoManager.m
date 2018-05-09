@@ -42,7 +42,7 @@
 
 @property (nonatomic,readonly) NSMutableArray <NSNetService *> *tivoServices;
 
-@property (nonatomic, strong) NSMutableSet <MTTiVoShow *> * showsWaitingSkipModeList; //for warnings
+@property (nonatomic, strong) NSDate * lastSkipModeWarningTime; //for warnings
 
 @end
 
@@ -941,15 +941,15 @@ __DDLOGHERE__
 -(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows interrupting: (BOOL) interrupt {
 	NSMutableArray <MTTiVoShow *> * tivoShows = [shows mutableCopy];
 	while (tivoShows.count > 0) {
-		NSMutableArray * thisTiVoShows = [NSMutableArray array];
 		MTTiVo * tivo = tivoShows[0].tiVo;
 		for (MTTiVoShow * show in [tivoShows copy]) {
 			if (show.tiVo == tivo) {
-				[thisTiVoShows addObject:show];
+				if (!show.edlList) {
+					[tivo findCommercialsForShow:show interrupting:interrupt];
+				}
 				[tivoShows removeObject:show];
 			}
 		}
-		[tivo findCommercialsForShows:thisTiVoShows interrupting:interrupt ];
 	}
 }
 
@@ -1482,8 +1482,8 @@ __DDLOGHERE__
 			[itemsToRemove addIndex:index];
             [oldDownload cancel];
 			if (![self sharedShowWith:oldDownload]) {
+				[oldDownload.show.tiVo cancelCommercialingForShow: oldDownload.show];
 				oldDownload.show.isQueued = NO;
-				[self removeShowFromWaitingSkipModeList:oldDownload.show];
 			}
 			oldDownload.downloadStatus = @kMTStatusRemovedFromQueue;
 		}
@@ -1637,27 +1637,17 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:restartNotification afterDelay:2];
 }
 
--(void)removeShowFromWaitingSkipModeList:(MTTiVoShow *) show {
-	if ([self.showsWaitingSkipModeList containsObject:show]) {
-		[self.showsWaitingSkipModeList removeObject:show];
-	}
-}
-
 -(void) getSkipModeEDLWhenPossible: (MTDownload *) download {
 	MTTiVoShow * show = download.show;
+	if (show.hasSkipModeList) return;  //if we already have EDL, no warning needed
 	if (self.autoSkipModeScanAllowedNow) {
-		[download.show.tiVo findCommercialsForShows:@[show] interrupting:NO];
+		[download.show.tiVo findCommercialsForShow:show interrupting:NO];
 	} else {
-		if (!show.hasSkipModeInfo) return; //don't do anything before metadata arrives
-		if (show.hasSkipModeList) return;  //if we already have EDL, no warning needed
 		//Skip mode Info is here, so maybe warn user that we need EDL to continue
-		if ([self.showsWaitingSkipModeList containsObject:show]) {
+		if (-[self.lastSkipModeWarningTime timeIntervalSinceNow] < 24*60*60) {
 			//already warned, so nothing to do
 			return;
 		}
-		if (!self.showsWaitingSkipModeList) self.showsWaitingSkipModeList = [NSMutableSet set];
-		[self.showsWaitingSkipModeList addObject:download.show];
-		[self performSelector:@selector(removeShowFromWaitingSkipModeList:) withObject:download afterDelay:24*60*60];
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
 			//scheduled, so if it's soon enough, just wait, otherwise warn.
 			NSDate * scheduled = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
@@ -1667,6 +1657,7 @@ __DDLOGHERE__
 						  withTitle:@"Warning: Missed SkipMode time"
 						   subTitle:[NSString stringWithFormat:@"You can manually load, or cTiVo will try again in %d hrs", (int)floor(nextEDLTime/3600)]
 						   isSticky:YES];
+				self.lastSkipModeWarningTime = [NSDate date];
 			}
 		} else {
 			//not scheduled so warn
@@ -1674,6 +1665,7 @@ __DDLOGHERE__
 					  withTitle:@"Warning: SkipMode Points Not Available"
 					   subTitle:@"You can manually load SkipMode points, or set up automatic schedule in Preferences."
 					   isSticky:YES];
+			self.lastSkipModeWarningTime = [NSDate date];
 		}
 	}
 }

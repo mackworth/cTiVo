@@ -21,4 +21,8 @@
     return result;
 }
 
+- (instancetype)arrayByRemovingObject:(id)object {
+	return [self filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF != %@", object]];
+}
+
 @end

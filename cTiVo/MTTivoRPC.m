@@ -1516,7 +1516,6 @@ static NSArray * imageResponseTemplate = nil;
 		
 		rpcData.edlList = [NSArray edlListFromSegments:rpcData.programSegments andStartPoints:positions];
 		DDLogDetail(@"Got EDL %@", rpcData.edlList);
-		[weakSelf.delegate receivedRPCData:rpcData];
 
 	    [weakSelf sendKeyEvent: @"pause"  withCompletion:^{
 			
