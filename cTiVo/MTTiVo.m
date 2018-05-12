@@ -958,6 +958,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void) markDeletedDownloadShow: (MTTiVoShow *) deletedShow {
+	[self cancelCommercialingForShow:deletedShow];
+	deletedShow.imageString = @"deleted";
     if (deletedShow.isQueued) {
         NSArray <MTDownload *> * downloads = [tiVoManager downloadsForShow:deletedShow];
         for (MTDownload * download in downloads) {
@@ -966,8 +968,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         	}
 		}
     }
-	[self cancelCommercialingForShow:deletedShow];
-	deletedShow.imageString = @"deleted";
 }
 
 -(void) loadSkipModeInfoForShow:(MTTiVoShow *) show {

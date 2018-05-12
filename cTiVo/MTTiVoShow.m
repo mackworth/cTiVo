@@ -266,7 +266,7 @@ __DDLOGHERE__
         //use fileModDate to know when to delete old detail files
         [detailFileURL setResourceValue:[NSDate date] forKey:NSFileModificationDate error:nil];
     } else {
-        DDLogDetail(@"downloading %@ details from path %@", self, self.detailURL);
+        DDLogDetail(@"downloading details %@ from path %@", self, self.detailURL);
         NSURLResponse *detailResponse = nil;
         NSURLRequest *detailRequest = [NSURLRequest requestWithURL:self.detailURL];
         xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];

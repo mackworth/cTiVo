@@ -930,6 +930,10 @@ static NSRegularExpression * isFinalRegex = nil;
 static NSArray * imageResponseTemplate = nil;
 
 -(void) getImageFor: (NSArray <NSString *> *) contentIds withObjectIds: (NSArray <NSString *> *) objectIds {
+	if (!self.bodyID) {
+		[self getBodyID];
+		return;
+	}
     if (contentIds.count ==0) return;
     NSAssert(contentIds.count == objectIds.count,@"Invalid ObjectIds");
     DDLogDetail(@"Getting Images for %@", objectIds);
@@ -989,7 +993,10 @@ static NSArray * imageResponseTemplate = nil;
 
 -(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds {
     if (recordingIds.count ==0) return;
-
+	if (!self.bodyID) {
+		[self getBodyID];
+		return;
+	}
     DDLogDetail(@"Deleting shows %@", recordingIds);
     NSDictionary * data = @{
                             @"bodyId": self.bodyID,
@@ -1005,7 +1012,10 @@ static NSArray * imageResponseTemplate = nil;
 
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds {
     if (recordingIds.count ==0) return;
-
+	if (!self.bodyID) {
+		[self getBodyID];
+		return;
+	}
     DDLogDetail(@"Stopping Recording (or Undeleting) shows %@", recordingIds);
     NSDictionary * data = @{
                             @"bodyId": self.bodyID,
