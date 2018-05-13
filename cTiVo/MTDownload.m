@@ -436,7 +436,7 @@ __DDLOGHERE__
 		if (self.downloadStatus.intValue == kMTStatusDeleted){
 			self.downloadStatus = @(kMTStatusNew);
 		}
-		if (!show.isOnDisk || self.isNew ) {
+		if ( self.isNew ) { //inProgress is fine, as is completelyDone.
 			[self prepareForDownload:YES];
 		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
 			[self skipModeCheck];
@@ -879,8 +879,15 @@ __DDLOGHERE__
     if (_decryptTask) {
         return _decryptTask;
     }
-    MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
-    NSString * decoder = [[NSUserDefaults standardUserDefaults] objectForKey:kMTDecodeBinary];
+	MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
+	if (self.encodeFormat.isEncryptedDownload) {
+		//don't use decrypt, just copy file to disk
+		[decryptTask setLaunchPath:@"/bin/cat"];
+		decryptTask.requiresOutputPipe = YES;
+		_decryptTask = decryptTask;
+		return _decryptTask;
+	}
+	NSString * decoder = [[NSUserDefaults standardUserDefaults] objectForKey:kMTDecodeBinary];
     NSString * decryptPath = nil;
     NSString * libreJar = nil;
     if ([decoder isEqualToString:@"TivoLibre"]) {
@@ -1447,7 +1454,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 channelUsesTS == NSOnState ||                   //user specified TS for this channel OR
                 (channelUsesTS == NSMixedState && channelPSFailed == NSOnState )); //user didn't care, but we've seen need
     }
-
+	if (self.encodeFormat.isEncryptedDownload) {
+		self.skipCommercials = NO;
+		self.markCommercials = NO;
+		self.exportSubtitles = @NO;
+	}
     BOOL channelCommercialsOff = [tiVoManager commercialsForChannel:channelName] == NSOffState;
     if ((channelCommercialsOff) &&
         (self.skipCommercials || self.markCommercials)) {
@@ -2048,9 +2059,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     } else {
         DDLogMajor(@"Stopping at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self.show.showTitle, self.processProgress, self.previousCheck );
         [self cancel];
-        if (self.downloadStatus.intValue == kMTStatusDone) {
-            self.baseFileName = nil;
-        }
+		self.baseFileName = nil;
         if (self.downloadStatus.intValue == kMTStatusDeleted) {
             self.numRetriesRemaining = 0;
             self.processProgress = 1.0;

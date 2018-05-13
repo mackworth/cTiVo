@@ -329,7 +329,7 @@ __DDLOGHERE__
 			NSTimeInterval timeSinceShow = -[self.showDate timeIntervalSinceNow] - self.showLength;
 			int hrs = (timeSinceShow) / 60 / 60;
 			CGFloat min = (timeSinceShow / 60.0) - hrs * 60.0;
-			DDLogReport(@"XXX SkipMode MetaData arrived %@for %@; %d:%0.1f after show ended", (timeLeft < 0) ? @"late " : @"", self, hrs, min);
+			DDLogReport(@"XXX SkipMode MetaData arrived %@for %@; %d:%04.1f (hr:min) after show ended", (timeLeft < 0) ? @"late " : @"", self, hrs, min);
 		}
 	}
 	_clipMetaDataId = clipMetaDataId;
@@ -378,6 +378,7 @@ __DDLOGHERE__
 	if (longestAfterShow ==0) longestAfterShow = kMTDefaultDelayForSkipModeInfo*60;
 	longestAfterShow *= multiplier;
 	NSTimeInterval timeToWait = longestAfterShow + [self.showDate timeIntervalSinceNow] + self.showLength;
+	DDLogReport(@"xxx TimeToWait for %@ is %0.1f minutes", self, timeToWait/60);
 	return timeToWait;
 }
 
@@ -409,15 +410,13 @@ __DDLOGHERE__
 	NSString * genre = self.episodeGenre.lowercaseString;
 	if ([genre isEqualToString:@"news"] ) return NO; //allow news magazine
 	if ([genre isEqualToString:@"sports"] ) return NO;
-	if (!self.inProgress.boolValue) {
-		if ( timeLeft < 0) {
-			DDLogDetail(@"failed SkipMode for %@; Past deadline for SkipInfo to arrive by %0.1f", self, -timeLeft);
-			return NO;
-		}
+	if (!self.inProgress.boolValue && timeLeft < 0) {
+		DDLogDetail(@"No SkipMode for %@; Past deadline for SkipInfo to arrive by %0.1f", self, -timeLeft);
+		return NO;
+	} else {
+		DDLogDetail(@"Looks like we might stil have SkipMode for %@", self);
+		return YES;
 	}
-	DDLogDetail(@"Looks like we might stil have SkipMode for %@", self);
-
-	return YES;
 }
 
 -(void) checkAllInfoSources {

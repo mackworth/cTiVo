@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14109" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1090" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14109"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -273,6 +273,7 @@
                     </buttonCell>
                     <connections>
                         <action selector="duplicateFormat:" target="-2" id="2673"/>
+                        <binding destination="-2" name="enabled" keyPath="currentFormat.canDuplicate" id="7De-2J-d6A"/>
                     </connections>
                 </button>
                 <button toolTip="Create new empty format" verticalHuggingPriority="750" misplaced="YES" id="2483">
@@ -638,14 +639,18 @@
                     </connections>
                 </textField>
                 <button toolTip="Don't display this format in the User Interface" misplaced="YES" id="2460">
-                    <rect key="frame" x="364" y="646" width="159" height="18"/>
+                    <rect key="frame" x="364" y="646" width="160" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Hide in User Interface" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="2599">
+                    <buttonCell key="cell" type="check" title="Show in User Interface" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="2599">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
-                        <binding destination="-2" name="value" keyPath="currentFormat.isHidden" id="2640"/>
+                        <binding destination="-2" name="value" keyPath="currentFormat.isHidden" id="ujq-Nk-iEN">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">NSNegateBoolean</string>
+                            </dictionary>
+                        </binding>
                     </connections>
                 </button>
                 <box verticalHuggingPriority="750" misplaced="YES" boxType="separator" id="2461">

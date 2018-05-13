@@ -418,12 +418,20 @@ __DDLOGHERE__
     return [self.name isEqualToString:@"Test PS"];
 }
 
+-(BOOL) isEncryptedDownload {
+	return [self.name isEqualToString:@"Encrypted TiVo Show"];
+}
+
 -(NSString *)transportStreamExtension {
-    if ( [self.encoderUsed isEqualToString:@"catToFile"]) {
+    if ( [self.encoderUsed isEqualToString:@"catToFile"] && !self.isEncryptedDownload) {
         return @".ts";
     } else {
         return self.filenameExtension;
     }
+}
+
+-(BOOL) canDuplicate {
+	return !self.isTestPS && !self.isEncryptedDownload;
 }
 
 -(BOOL) testsForAudioOnly {

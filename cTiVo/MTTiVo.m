@@ -582,15 +582,18 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void) findCommercialsForShow: (MTTiVoShow *) show interrupting:(BOOL) interrupt {
 	if (!show || show.edlList.count > 0) return;
-	if (self.postponedCommercialShows) {
-		[self.postponedCommercialShows addObject:show];
-	} else {
+	BOOL notAlreadyWaitingForCommercials = self.postponedCommercialShows == nil;
+	if (notAlreadyWaitingForCommercials) {
 		self.postponedCommercialShows = [NSMutableSet setWithObject:show];
+	} else {
+		[self.postponedCommercialShows addObject:show];
 	}
 	if (interrupt) {
 		[self reallyFindCommercialsForShows]; //as long as we're interrupting, send ones that were waiting as well
-	} else {
+	} else if (notAlreadyWaitingForCommercials) {
 		[self findCommercialsNoInterrupt];
+	} else {
+		//
 	}
 }
 
@@ -599,11 +602,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void) findCommercialsNoInterrupt {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(findCommercialsNoInterrupt) object:nil ];
 	if (self.postponedCommercialShows.count == 0 || !tiVoManager.autoSkipModeScanAllowedNow) {
 		self.postponedCommercialShows = nil;
-		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(findCommercialsNoInterrupt) object:nil ];
 	} else {
-		[self.myRPC whatsOnSearchWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
+		[self whatsOnWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
 			if (whatsOn == MTWhatsOnLiveTV) {
 				[self reallyFindCommercialsForShows];
 			} else {
