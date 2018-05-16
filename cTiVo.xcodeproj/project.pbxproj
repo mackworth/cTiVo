@@ -313,6 +313,8 @@
 		1E09DD402099449D0010CAB4 /* MTTextFieldNoInteraction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTTextFieldNoInteraction.h; sourceTree = "<group>"; };
 		1E09DD412099449D0010CAB4 /* MTTextFieldNoInteraction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTTextFieldNoInteraction.m; sourceTree = "<group>"; };
 		1E0C5DD8170236B30015C55D /* recent-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "recent-recording.png"; sourceTree = "<group>"; };
+		1E0D65CA20AC9D85006798CF /* DDLegacyMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DDLegacyMacros.h; sourceTree = "<group>"; };
+		1E0D65CC20ACA000006798CF /* DDLogMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DDLogMacros.h; sourceTree = "<group>"; };
 		1E1395941F5928E800FFA4E7 /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
 		1E152980201006B0000D1705 /* MTOpenPanelDefaultView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MTOpenPanelDefaultView.xib; sourceTree = "<group>"; };
 		1E15298220102C3D000D1705 /* MTHideTempFolder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTHideTempFolder.h; sourceTree = "<group>"; };
@@ -786,6 +788,8 @@
 			children = (
 				1E59368319648C180008780B /* DDLog.h */,
 				1E59368819648C860008780B /* DDLog.m */,
+				1E0D65CC20ACA000006798CF /* DDLogMacros.h */,
+				1E0D65CA20AC9D85006798CF /* DDLegacyMacros.h */,
 				1E9959C2173DC7D100B47539 /* DDFileLogger.h */,
 				1E9959C3173DC7D100B47539 /* DDFileLogger.m */,
 				1E5936821964867E0008780B /* MTLog.h */,

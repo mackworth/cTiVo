@@ -48,9 +48,9 @@
 	// Calculate timestamp.
 	// The technique below is faster than using NSDateFormatter.
 	
-	NSDateComponents *components = [calendar components:calendarUnitFlags fromDate:logMessage->timestamp];
+	NSDateComponents *components = [calendar components:calendarUnitFlags fromDate:logMessage->_timestamp];
 	
-	NSTimeInterval epoch = [logMessage->timestamp timeIntervalSinceReferenceDate];
+	NSTimeInterval epoch = [logMessage->_timestamp timeIntervalSinceReferenceDate];
 	int milliseconds = (int)((epoch - floor(epoch)) * 1000);
 	
 	char ts[24];
@@ -61,7 +61,7 @@
 				   (long)components.hour,
 				   (long)components.minute,
 				   (long)components.second, milliseconds);
-	return [NSString stringWithFormat:@"%s %@>%s@%d>%@", ts, DDExtractFileNameWithoutExtension(logMessage->file,NO),logMessage->function, logMessage->lineNumber, logMessage->logMsg];
+	return [NSString stringWithFormat:@"%s %@>%@@%lu>%@", ts, logMessage->_fileName,logMessage->_function, (unsigned long)logMessage->_line, logMessage->_message];
 }
 
 @end

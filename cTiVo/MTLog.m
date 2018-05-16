@@ -15,12 +15,12 @@
 	NSDictionary * levels = [[NSUserDefaults standardUserDefaults] objectForKey:kMTDebugLevelDetail];
 	if (levels.count > 0) {
 		for (NSString* className in [levels allKeys]) {
-			[self setLogLevel:((NSNumber *)levels[className]).intValue forClassWithName:className];
+			[self setLevel:((NSNumber *)levels[className]).intValue forClassWithName:className];
 		}
 	} else {
 		int debugLevel = (int)[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel];
 		for (Class class in [DDLog registeredClasses]) {
-			[self setLogLevel:debugLevel forClass:class];
+			[self setLevel:debugLevel forClass:class];
 		}
 	}
 }
@@ -29,14 +29,14 @@
 	NSArray * classes = [DDLog registeredClasses];
 	NSMutableDictionary * levels = [NSMutableDictionary dictionaryWithCapacity: classes.count];
 	BOOL allSame = YES;
-	int lastLevel = -1;
+	DDLogLevel lastLevel = DDLogLevelAll; //not used
 	for (Class class in classes) {
-		int level = [self logLevelForClass:class];
-        if (lastLevel != -1 && lastLevel != level) {
+		DDLogLevel level = [self levelForClass:class];
+        if (lastLevel != DDLogLevelAll && lastLevel != level) {
 			allSame = NO;
 		}
 		lastLevel =level;
-		[levels setValue:[NSNumber numberWithInt:level] forKey:NSStringFromClass(class)];
+		[levels setValue:@(level) forKey:NSStringFromClass(class)];
 	}
 	if (allSame){
 		[[NSUserDefaults standardUserDefaults] removeObjectForKey:kMTDebugLevelDetail ];
@@ -50,7 +50,7 @@
 
 +(void)setAllClassesLogLevel:(int) debugLevel {
     for (Class class in [DDLog registeredClasses]) {
-        [self setLogLevel:debugLevel forClass:class];
+        [self setLevel:debugLevel forClass:class];
     }
 
 }

@@ -232,7 +232,7 @@
 		cell.title = className;
 		cell.font= 	[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
 
-		[self addDebugMenuTo:cell withCurrentLevel: [DDLog logLevelForClass:class]];
+		[self addDebugMenuTo:cell withCurrentLevel: [DDLog levelForClass:class]];
 		cell.target = self;
 		cell.action = @selector(newValue:);
 		
@@ -314,7 +314,7 @@
 	
 	int newVal = (int) cell.selectedItem.tag;
 	
-	[DDLog setLogLevel:newVal forClassWithName :className];
+	[DDLog setLevel:newVal forClassWithName :className];
 	[DDLog writeAllClassesLogLevelToUserDefaults];
 }
 

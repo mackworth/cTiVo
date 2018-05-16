@@ -39,7 +39,7 @@
 
 #define cTiVoLogDirectory @"~/Library/Logs/cTiVo"
 
-static int ddLogLevel = LOG_LEVEL_REPORT;
+static DDLogLevel ddLogLevel = LOG_LEVEL_REPORT;
 
 
 void signalHandler(int signal)
@@ -74,7 +74,7 @@ void signalHandler(int signal)
 
 @implementation MTAppDelegate
 
-+ (int)ddLogLevel { return ddLogLevel; }+ (void)ddSetLogLevel:(int)logLevel {ddLogLevel = logLevel;}
++ (DDLogLevel)ddLogLevel { return ddLogLevel; }+ (void)ddSetLogLevel:(int)logLevel {ddLogLevel = logLevel;}
 
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification

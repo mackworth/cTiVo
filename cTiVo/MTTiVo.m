@@ -210,7 +210,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     BOOL needsConnection = ((flags & kSCNetworkFlagsConnectionRequired) != 0);
 
     thisTivo.isReachable = isReachable && !needsConnection ;
-    DDLogCReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
+    DDLogReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
     if (thisTivo.isReachable) {
 		thisTivo.networkAvailability = [NSDate date];
 		[NSObject cancelPreviousPerformRequestsWithTarget:thisTivo selector:@selector(manageDownloads:) object:thisTivo];
@@ -593,7 +593,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	} else if (notAlreadyWaitingForCommercials) {
 		[self findCommercialsNoInterrupt];
 	} else {
-		//
+		//we're already waiting, so let it continue.
 	}
 }
 

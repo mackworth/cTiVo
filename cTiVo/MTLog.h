@@ -1,4 +1,4 @@
-#import "DDLog.h"
+#import "DDLogMacros.h"
 
 // We want to use the following log levels:
 //
@@ -38,12 +38,6 @@
 #undef DDLogDebug
 #undef DDLogVerbose
 
-#undef DDLogCError
-#undef DDLogCWarn
-#undef DDLogCInfo
-#undef DDLogCDebug
-#undef DDLogCVerbose
-
 /* Now define everything how we want it
 ERROR => REPORT
 WARN ==> MAJOR
@@ -56,11 +50,13 @@ Info ==> Detail
 VERBOSE is reused
 */
 
-#define LOG_FLAG_REPORT   (1 << 0)  // 0...00001
-#define LOG_FLAG_MAJOR    (1 << 1)  // 0...00010
+#define LOG_FLAG_OFF       (0)       // 0...00000
+#define LOG_FLAG_REPORT    (1 << 0)  // 0...00001
+#define LOG_FLAG_MAJOR     (1 << 1)  // 0...00010
 #define LOG_FLAG_DETAIL    (1 << 2)  // 0...00100
 #define LOG_FLAG_VERBOSE   (1 << 3)  // 0...01000
 
+#define LOG_LEVEL_OFF      (LOG_FLAG_OFF  ) // 0...00000
 #define LOG_LEVEL_REPORT   (LOG_FLAG_REPORT  ) // 0...00001
 #define LOG_LEVEL_MAJOR    (LOG_FLAG_MAJOR   | LOG_LEVEL_REPORT ) // 0...00011
 #define LOG_LEVEL_DETAIL    (LOG_FLAG_DETAIL   | LOG_LEVEL_MAJOR) // 0...00111
@@ -71,17 +67,15 @@ VERBOSE is reused
 #define LOG_DETAIL  (ddLogLevel & LOG_FLAG_DETAIL)
 #define LOG_VERBOSE   (ddLogLevel & LOG_FLAG_VERBOSE  )
 
-#define DDLogReport(frmt, ...)    SYNC_LOG_OBJC_MAYBE(ddLogLevel, LOG_FLAG_REPORT,  0, frmt, ##__VA_ARGS__)
-#define DDLogMajor(frmt, ...)    ASYNC_LOG_OBJC_MAYBE(ddLogLevel, LOG_FLAG_MAJOR,   0, frmt, ##__VA_ARGS__)
-#define DDLogDetail(frmt, ...)  ASYNC_LOG_OBJC_MAYBE(ddLogLevel, LOG_FLAG_DETAIL, 0, frmt, ##__VA_ARGS__)
-#define DDLogVerbose(frmt, ...)  ASYNC_LOG_OBJC_MAYBE(ddLogLevel, LOG_FLAG_VERBOSE, 0, frmt, ##__VA_ARGS__)
+#define DDLogReport(frmt, ...)   LOG_MAYBE(NO,                LOG_LEVEL_DEF, DDLogFlagError,   0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
+#define DDLogMajor(frmt, ...)    LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagWarning, 0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
+#define DDLogDetail(frmt, ...)    LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagInfo,    0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
+#define DDLogDebug(frmt, ...)   LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagDebug,   0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
+#define DDLogVerbose(frmt, ...) LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagVerbose, 0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
 
-#define DDLogCReport(frmt, ...)   SYNC_LOG_C_MAYBE(ddLogLevel, LOG_FLAG_REPORT,  0, frmt, ##__VA_ARGS__)
-#define DDLogCMajor(frmt, ...)   ASYNC_LOG_C_MAYBE(ddLogLevel, LOG_FLAG_MAJOR,   0, frmt, ##__VA_ARGS__)
-#define DDLogCDetail(frmt, ...)   ASYNC_LOG_C_MAYBE(ddLogLevel, LOG_FLAG_DETAIL,   0, frmt, ##__VA_ARGS__)
-#define DDLogCVerbose(frmt, ...)  ASYNC_LOG_C_MAYBE(ddLogLevel, LOG_FLAG_VERBOSE,  0, frmt, ##__VA_ARGS__)
 
-#define __DDLOGHERE__  static int ddLogLevel = LOG_LEVEL_REPORT; + (int)ddLogLevel { return ddLogLevel; }+ (void)ddSetLogLevel:(int)logLevel {ddLogLevel = logLevel;}
+
+#define __DDLOGHERE__  static DDLogLevel ddLogLevel = LOG_LEVEL_REPORT; + (DDLogLevel)ddLogLevel { return ddLogLevel; }+ (void)ddSetLogLevel:(DDLogLevel)logLevel {ddLogLevel = logLevel;}
 
 @interface DDLog (UserDefaults)
 +(void)setAllClassesLogLevelFromUserDefaults: (NSString *)defaultsKey;
