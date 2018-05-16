@@ -57,7 +57,7 @@ typedef NS_ENUM(NSUInteger, MTImageSource) {
 
 @property (nonatomic, assign) BOOL ignoreSection; //are we skipping this section in XML (esp vActualShowing)
 
-@property (atomic, assign) BOOL imageInProgress;  //true if we're downloading info OR artwork.
+@property (atomic, assign) BOOL tvdbInProgress, imageInProgress;  //true if we're downloading info OR artwork.
 
 @property (nonatomic, assign) MTImageSource lastImageSource;
 
@@ -93,7 +93,8 @@ __DDLOGHERE__
 		_episodeTitle = @"";
 		_seriesTitle = @"";
 //		_originalAirDate = @"";
-        _imageInProgress = NO;
+		_imageInProgress = NO;
+		_tvdbInProgress = NO;
         _lastImageSource = MTSearchingSource;
 
 		self.protectedShow = @(NO); //This is the default
@@ -355,17 +356,19 @@ __DDLOGHERE__
 }
 
 -(void) setRpcData:(MTRPCData *)rpcData {
-	_rpcData = rpcData;
-	self.episodeGenre = rpcData.genre;  //no conflict with TVDB
-	self.clipMetaDataId = rpcData.clipMetaDataId;
-	self.edlList = rpcData.edlList;
-    [self checkAllInfoSources];
+	if (rpcData) {
+		_rpcData = rpcData;
+		self.episodeGenre = rpcData.genre;  //no conflict with TVDB
+		self.clipMetaDataId = rpcData.clipMetaDataId;
+		self.edlList = rpcData.edlList;
+		[self checkAllInfoSources];
+	}
 }
 
 -(void) setTvdbData:(NSDictionary<NSString *,id> *) tvdbData {
     if (tvdbData == _tvdbData ) return;
     _tvdbData = tvdbData;
-    self.imageInProgress = NO;
+    self.tvdbInProgress = NO;
     [self checkAllInfoSources];
 }
 
@@ -1861,7 +1864,8 @@ NSString * fourChar(long n, BOOL allowZero) {
     _thumbnailImage = nil;
     _tvdbData = nil;
     _rpcData = nil;
-    _imageInProgress = NO;
+	_imageInProgress = NO;
+	_tvdbInProgress = NO;
     _lastImageSource = MTSearchingSource;
 	_clipMetaDataId = nil;
 	_edlList = nil;
@@ -2109,7 +2113,10 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 -(void) getArtworkFromSource: (MTImageSource) source thumbVersion: (BOOL) thumbnail {
     if (source == MTNoSource) return;
-    if (self.imageInProgress) return;
+	if (self.imageInProgress) {
+		DDLogReport(@"XXX ImageInProgress bounce: %@", self);
+		return;
+	}
     self.imageInProgress = YES;
 
     NSURL * filename = [self localURLForSource:source thumbVersion:thumbnail];
@@ -2133,6 +2140,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (source == MTTiVoSource) {
         if (!self.rpcData.imageURL.length) {
             DDLogReport(@"Warning: TiVo imageURL not available");
+			self.imageInProgress = NO;
             return;
         }
         urlString = self.rpcData.imageURL;
@@ -2154,6 +2162,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         NSString * tvdbKey = [self mapTVDBKeyFromSource:source];
         if (!tvdbKey) {
             DDLogReport(@"Warning: Tvdb Key not available");
+			self.imageInProgress = NO;
             return;
         }
         urlString = [NSString stringWithFormat: baseUrlString, self.tvdbData[tvdbKey]];
@@ -2320,12 +2329,18 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(void) getInfoFromSource: (MTImageSource) source {
     if (source == MTTVDBSeason) {
-        if (self.imageInProgress) return;
-        self.imageInProgress = YES;
+		if (self.tvdbInProgress) {
+			DDLogReport(@"XXX tvdbInProgress Season: %@", self);
+			return;
+		}
+        self.tvdbInProgress = YES;
         [tiVoManager.tvdb addSeasonArtwork:self];
     } else if (source == MTTVDBSeries) {
-        if (self.imageInProgress) return;
-        self.imageInProgress = YES;
+		if (self.tvdbInProgress) {
+			DDLogReport(@"XXX tvdbInProgress Series: %@", self);
+			return;
+		}
+        self.tvdbInProgress = YES;
         [tiVoManager.tvdb addSeriesArtwork:self];
     }
 }

@@ -978,7 +978,7 @@ __DDLOGHERE__
         msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and %d others %@ your TiVo?", behavior, shows[0].showTitle, (int)shows.count -1, prep ];
     }
 
-    NSAlert *myAlert = [NSAlert alertWithMessageText:msg defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@"This cannot be undone."];
+    NSAlert *myAlert = [NSAlert alertWithMessageText:msg defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@"This cannot be undone in cTiVo."];
     myAlert.alertStyle = NSCriticalAlertStyle;
     NSInteger result = [myAlert runModal];
     return (result == NSAlertAlternateReturn);

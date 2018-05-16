@@ -781,7 +781,7 @@ __DDLOGHERE__
         if (activeDL.isDone) continue;
         NSUInteger activeRow = [[tiVoManager downloadQueue] indexOfObject:activeDL];
 
-        if ([draggedDLs containsObject: activeDL]) {
+        if ([realDLs containsObject: activeDL]) {
             //I'm in group being moved
             if (insertRow > activeRow+1) {   //moving downwards
                 for (NSUInteger i = activeRow+1; i<insertRow; i++) { //check shows we're skipping over
