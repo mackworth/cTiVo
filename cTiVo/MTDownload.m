@@ -24,6 +24,28 @@
 
 @interface MTDownload ()
 
+//Task Flow Types
+// bit 0 = Subtitle
+// bit 1 = Simultaneous download/encoding
+// bit 2 = Skip Com
+// bit 3 = Mark Com
+//no 12-15 because skipCom <==> ! markCom
+
+typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
+	kMTTaskFlowNonSimu = 0,
+	kMTTaskFlowSubtitles = 1,
+	kMTTaskFlowSimu = 2,
+	kMTTaskFlowSimuSubtitles = 3,
+	kMTTaskFlowSkipcom = 4,
+	kMTTaskFlowSkipcomSubtitles = 5,
+	kMTTaskFlowSimuSkipcom = 6,
+	kMTTaskFlowSimuSkipcomSubtitles = 7,
+	kMTTaskFlowMarkcom = 8,
+	kMTTaskFlowMarkcomSubtitles = 9,
+	kMTTaskFlowSimuMarkcom = 10,
+	kMTTaskFlowSimuMarkcomSubtitles = 11
+};
+
 @property (nonatomic, strong) MTTiVoShow * show;
 @property (nonatomic, strong) NSString *downloadDirectory;
 @property (nonatomic, strong) NSString *tmpDirectory;
@@ -61,6 +83,7 @@
 @property (atomic, assign) double speed;
 
 @property (atomic, assign) BOOL volatile isRescheduled, downloadingShowFromTiVoFile, downloadingShowFromMPGFile;
+@property (nonatomic, assign) MTTaskFlowType taskFlowType;
 
 @property (nonatomic, strong) NSString *baseFileName,
 *tivoFilePath,  //For reading .tivo file from a prev run (not implemented; reuse bufferFilePath?)
@@ -1437,29 +1460,7 @@ __DDLOGHERE__
   
 }
 
-//Task Flow Types
-// bit 0 = Subtitle
-// bit 1 = Simultaneous download/encoding
-// bit 2 = Skip Com
-// bit 3 = Mark Com
-//no 12-15 because skipCom <==> ! markCom
-
-typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
-    kMTTaskFlowNonSimu = 0,
-    kMTTaskFlowSubtitles = 1,
-    kMTTaskFlowSimu = 2,
-    kMTTaskFlowSimuSubtitles = 3,
-    kMTTaskFlowSkipcom = 4,
-    kMTTaskFlowSkipcomSubtitles = 5,
-    kMTTaskFlowSimuSkipcom = 6,
-    kMTTaskFlowSimuSkipcomSubtitles = 7,
-    kMTTaskFlowMarkcom = 8,
-    kMTTaskFlowMarkcomSubtitles = 9,
-    kMTTaskFlowSimuMarkcom = 10,
-    kMTTaskFlowSimuMarkcomSubtitles = 11
-};
-
--(MTTaskFlowType)taskFlowType
+-(MTTaskFlowType)calculateTaskFlowType
 {
 	BOOL runComskip = self.runComskip;
 	return (MTTaskFlowType)
@@ -1499,7 +1500,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         self.skipCommercials = NO;
         self.markCommercials = NO;
     }
-	DDLogReport(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@%@; %@",
+	[self skipModeCheck];
+	self.taskFlowType = [self calculateTaskFlowType];
+	DDLogReport(@"Starting download (type %d) for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@%@; %@",
 				(int)self.taskFlowType,
 				self,
 				self.encodeFormat.name ,
@@ -1733,11 +1736,13 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         return;
     };
     double downloadDelay = kMTTiVoAccessDelayServerFailure - [[NSDate date] timeIntervalSinceDate:self.show.tiVo.lastDownloadEnded];
-    if (downloadDelay < 0) {
+    if (downloadDelay <= 0) {
         downloadDelay = 0;
-    }
-	self.downloadStatus = @(kMTStatusWaiting);
-    [self performSelector:@selector(setDownloadStatus:) withObject:@(kMTStatusDownloading) afterDelay:downloadDelay];
+		self.downloadStatus = @(kMTStatusDownloading);
+	} else {
+		self.downloadStatus = @(kMTStatusWaiting);
+		[self performSelector:@selector(updateDownloadDelay:) withObject:@{@"start": [NSDate date], @"end": [NSDate dateWithTimeIntervalSinceNow:downloadDelay]} afterDelay:0.2];
+	}
 
 	if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {
         DDLogReport(@"Starting URL %@ for show %@ in %0.1lf seconds", downloadURL,self.show.showTitle, downloadDelay);
@@ -1745,6 +1750,22 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		[self.activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	}
     [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay] + downloadDelay];
+}
+
+-(void) updateDownloadDelay: (NSDictionary <NSString *, NSDate *> *)  times {
+	NSDate * start = times[@"start"];
+	NSDate * end = times[@"end"];
+	NSTimeInterval soFar = [[NSDate date] timeIntervalSinceDate: start];
+	NSTimeInterval length = [end timeIntervalSinceDate:start ];
+	if (soFar > length) {
+		self.downloadStatus = @(kMTStatusDownloading);
+		self.processProgress = 0.0;
+	} else {
+		self.processProgress = soFar/length;
+		[self performSelector:@selector(updateDownloadDelay:) withObject:times afterDelay:0.2];
+	}
+	[self progressUpdated];
+	
 }
 
 #pragma mark -
@@ -1912,6 +1933,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 					DDLogReport(@"Was waiting for SkipMode, but not supposed to be for %@: %@", self, self.show.edlList);
 				}
 				[self finalFinalProcessing];
+				break;
+			case kMTStatusAwaitingPostCommercial:
+				if (!self.shouldMarkCommercials) { //looks like user changed their mind
+					[self finalFinalProcessing];
+				}
 				break;
 			default:
 				break;
@@ -2794,9 +2820,6 @@ NSInteger diskWriteFailure = 123;
 -(BOOL) runComskip {
 	//we're launching now, so should we use comskip or not
 	//Either  we want commercials but won't/can't use SkipMode, OR we want to skip but we don't have list yet. (Can add mark later)
-	if (self.useSkipMode && !self.show.mightHaveSkipModeInfo) {
-		self.useSkipMode = NO;
-	}
 	return ((self.shouldSkipCommercials || self.shouldMarkCommercials) && (!self.useSkipMode) ) ||
 		   (self.shouldSkipCommercials && !self.show.hasSkipModeList);
 }

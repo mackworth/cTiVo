@@ -151,7 +151,9 @@ __DDLOGHERE__
     if (timeLeft != nil) {
         NSString * mySpeed = [NSString stringFromBytesPerSecond: download.speed];
         cell.toolTip = [NSString stringWithFormat:@"%@; %0.0f%%; Est time left: %@",mySpeed, download.processProgress* 100, timeLeft];
-    } else {
+    } else if (download.downloadStatus.intValue == kMTStatusWaiting){
+		cell.toolTip = [NSString stringWithFormat:@"%0.0f%% till launch", download.processProgress* 100];
+	} else {
         cell.toolTip = download.show.showTitle;
     }
     [cell setNeedsDisplay:YES];
@@ -381,7 +383,9 @@ __DDLOGHERE__
         checkBox.owner = download;
         checkBox.target = myController;
         checkBox.action = @selector(changeMark:);
-        [checkBox setEnabled: (download.isNew || download.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) &&
+		int status = download.downloadStatus.intValue;
+		[checkBox setEnabled: (download.isNew || status == kMTStatusSkipModeWaitEnd || status == kMTStatusAwaitingPostCommercial ||
+							   (download.isInProgress && download.useSkipMode) ) &&
 		 						!protected && download.encodeFormat.canMarkCommercials];
         
 #ifndef deleteXML
@@ -399,8 +403,11 @@ __DDLOGHERE__
 		checkBox.owner = download;
 		checkBox.target = myController;
 		checkBox.action = @selector(changeUseSkipMode:);
+		int status = download.downloadStatus.intValue;
 		[checkBox setEnabled:
-		 	(download.isNew || download.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) &&
+		 	(download.isNew ||
+			 status == kMTStatusSkipModeWaitEnd ||
+			 (download.isInProgress && download.markCommercials)) &&
 			!protected &&
 		 	[download.show.tiVo supportsRPC] &&
 		 	(download.encodeFormat.canMarkCommercials || download.encodeFormat.canSkip)];
