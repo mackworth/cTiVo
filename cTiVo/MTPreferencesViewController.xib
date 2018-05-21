@@ -65,23 +65,23 @@
                     </textFieldCell>
                 </textField>
                 <popUpButton toolTip="Used to increase log level during debugging sessions" verticalHuggingPriority="750" misplaced="YES" id="8P3-WD-hqA" userLabel="Debug level">
-                    <rect key="frame" x="140" y="269" width="100" height="26"/>
+                    <rect key="frame" x="120" y="269" width="120" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <popUpButtonCell key="cell" type="push" title="Major" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="3" imageScaling="proportionallyDown" inset="2" selectedItem="lgy-im-phV" id="e00-1S-Kru" userLabel="Debug level menu">
+                    <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="beM-Z4-R0N" id="e00-1S-Kru" userLabel="Debug level menu">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="menu"/>
                         <menu key="menu" title="OtherViews" id="QV3-Sx-UsO">
                             <items>
-                                <menuItem title="None" id="beM-Z4-R0N"/>
+                                <menuItem title="None" state="on" id="beM-Z4-R0N"/>
                                 <menuItem title="Normal" tag="1" id="Ifn-iT-y0p"/>
-                                <menuItem title="Major" state="on" tag="3" id="lgy-im-phV"/>
+                                <menuItem title="Major" tag="3" id="lgy-im-phV"/>
                                 <menuItem title="Detailed " tag="7" id="tUz-cm-puF"/>
                                 <menuItem title="Verbose" tag="15" id="Bic-n1-0u0"/>
+                                <menuItem title="&lt;Per Module&gt;" tag="-1" enabled="NO" id="Yny-hZ-MyD"/>
                             </items>
                         </menu>
                     </popUpButtonCell>
                     <connections>
-                        <action selector="setDebugLevel:" target="-2" id="LmN-Fz-mmt"/>
                         <binding destination="248" name="selectedTag" keyPath="values.DebugLevel" id="LAb-H0-Vup"/>
                     </connections>
                 </popUpButton>

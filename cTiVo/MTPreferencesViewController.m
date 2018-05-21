@@ -31,17 +31,17 @@
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTFileNameFormat options:NSKeyValueObservingOptionInitial context:nil];
 }
 
--(IBAction)setDebugLevel:(id)sender {
-	[DDLog setAllClassesLogLevelFromUserDefaults: kMTDebugLevel];
-}
-
 -(BOOL) validateMenuItem:(NSMenuItem *)menuItem {
     if ([menuItem.title isEqualToString: @"TiVo"]) {
         for (MTTiVo *tiVo in tiVoManager.tiVoList) {
             if (tiVo.supportsRPC) return YES;
         }
         return NO;
-    }
+	} else if ([menuItem.title isEqualToString:@"<Per Module>"]) {
+		if ([[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel] > 0) {
+			return NO;
+		}
+	}
     return YES;
 }
 
@@ -67,6 +67,8 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey, id> *)change context:(void *)context {
 	if ([kMTFileNameFormat isEqualToString:keyPath]) {
 		[self selectDirectoryFormat];
+	} else {
+		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 	}
 }
 

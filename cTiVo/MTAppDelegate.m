@@ -89,19 +89,15 @@ void signalHandler(int signal)
     CGEventRef event = CGEventCreate(NULL);
     CGEventFlags modifiers = CGEventGetFlags(event);
     CFRelease(event);
-	
+	[MTLogWatcher sharedInstance]; //self retained
     CGEventFlags flags = (kCGEventFlagMaskAlternate | kCGEventFlagMaskControl);
     if ((modifiers & flags) == flags) {
-        [[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTDebugLevelDetail];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:kMTDebugLevelDetail];
 		[[NSUserDefaults standardUserDefaults] setObject:@15 forKey:kMTDebugLevel];
-		[DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
     } else if ( [[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel] == 15){
         [[NSUserDefaults standardUserDefaults] setObject:@3 forKey:kMTDebugLevel];
-        [DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
    } else {
         [[NSUserDefaults standardUserDefaults]  registerDefaults:@{kMTDebugLevel: @1}];
-        [DDLog setAllClassesLogLevelFromUserDefaults:kMTDebugLevel];
-        
     }
 
 #ifdef DEBUG
@@ -652,6 +648,8 @@ BOOL preventSleepActive = NO;
 		[self validateTmpDirectory];
 	} else if ([keyPath compare:kMTDownloadDirectory] == NSOrderedSame) {
 		[self validateDownloadDirectory];
+	} else {
+		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 	}
 }
 

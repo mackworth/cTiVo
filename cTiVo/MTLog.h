@@ -69,17 +69,16 @@ VERBOSE is reused
 
 #define DDLogReport(frmt, ...)   LOG_MAYBE(NO,                LOG_LEVEL_DEF, DDLogFlagError,   0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
 #define DDLogMajor(frmt, ...)    LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagWarning, 0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
-#define DDLogDetail(frmt, ...)    LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagInfo,    0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
-#define DDLogDebug(frmt, ...)   LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagDebug,   0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
-#define DDLogVerbose(frmt, ...) LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagVerbose, 0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
+#define DDLogDetail(frmt, ...)   LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagInfo,    0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
+#define DDLogVerbose(frmt, ...)  LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagDebug,   0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
 
 
 
 #define __DDLOGHERE__  static DDLogLevel ddLogLevel = LOG_LEVEL_REPORT; + (DDLogLevel)ddLogLevel { return ddLogLevel; }+ (void)ddSetLogLevel:(DDLogLevel)logLevel {ddLogLevel = logLevel;}
 
-@interface DDLog (UserDefaults)
-+(void)setAllClassesLogLevelFromUserDefaults: (NSString *)defaultsKey;
-+ (void) writeAllClassesLogLevelToUserDefaults;
-+(void)setAllClassesLogLevel: (int) debugLevel;
+@interface MTLogWatcher : NSObject
 
++(instancetype) sharedInstance;
+
++ (void)setDebugLevel:(DDLogLevel)level forClassWithName:(NSString *)aClassName;
 @end

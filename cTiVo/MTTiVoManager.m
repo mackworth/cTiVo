@@ -25,7 +25,6 @@
 
     NSNetServiceBrowser *tivoBrowser;
 
-    int numEncoders;// numCommercials, numCaptions;//Want to limit launches to two encoders.
 	
     NSMetadataQuery *cTiVoQuery;
 	BOOL volatile loadingManualTiVos;
@@ -519,11 +518,6 @@ __DDLOGHERE__
 	[defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadDidFinish object:nil];
     [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadWasCanceled object:nil];
     [defaultCenter addObserver:self selector:@selector(checkSleep:) name:kMTNotificationDownloadQueueUpdated object:nil];
-//    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
-//    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
-//    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialWasCanceled object:nil];
-//    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionDidFinish object:nil];
-//    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(skipModeChannelFound:) name:kMTNotificationFoundSkipModeInfo object:nil];

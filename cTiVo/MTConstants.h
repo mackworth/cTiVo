@@ -50,7 +50,7 @@
 
 #define deleteXML 1   //placeholder to store deleted code in case we decide to restore XML export; need to add to downloadTable, subTable, menu and pref NIBx also
 
-//Download Status
+//Download Status  Note: at some time in future, reorder back to normal (and move to 10x to allow new numbers.
 #define kMTStatusNew 0
 #define kMTStatusSkipModeWaitInitial 17  //Waiting before download
 #define kMTStatusWaiting 1
@@ -66,11 +66,13 @@
 #define kMTStatusMetaDataProcessing 11
 #define kMTStatusEncoded 12
 #define kMTStatusSkipModeWaitEnd 18  //waiting after download (for marking)
+#define kMTStatusAwaitingPostCommercial 19
+#define kMTStatusPostCommercialing 20
 #define kMTStatusAddingToItunes 13
 #define kMTStatusDone 14
 #define kMTStatusDeleted 15
 #define kMTStatusFailed 16
-#define kMTStatusRemovedFromQueue 19
+#define kMTStatusRemovedFromQueue 99
 
 //Contants
 

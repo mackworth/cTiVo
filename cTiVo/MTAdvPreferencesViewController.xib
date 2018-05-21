@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14109" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1090" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14109"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -12,7 +12,7 @@
                 <outlet property="decodePopup" destination="7qa-Kj-zsO" id="XLX-4F-htv"/>
                 <outlet property="fileNameField" destination="46" id="jAh-vB-kwp"/>
                 <outlet property="keywordPopup" destination="In7-Wa-ifU" id="Vva-Mt-XFC"/>
-                <outlet property="masterDebugLevel" destination="32" id="40"/>
+                <outlet property="masterDebugLevel" destination="RbR-h5-eAK" id="2GW-s6-Jrf"/>
                 <outlet property="view" destination="1" id="2"/>
             </connections>
         </customObject>
@@ -208,18 +208,6 @@
                         <action selector="help:" target="-2" id="B8Q-ID-tqR"/>
                     </connections>
                 </button>
-                <popUpButton toolTip="Set all modules debugging levels simultaneously" verticalHuggingPriority="750" misplaced="YES" id="32" userLabel="Debug Popup Button">
-                    <rect key="frame" x="158" y="384" width="100" height="26"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="33">
-                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="menu"/>
-                        <menu key="menu" title="OtherViews" id="34"/>
-                    </popUpButtonCell>
-                    <connections>
-                        <action selector="newMasterValue:" target="-2" id="41"/>
-                    </connections>
-                </popUpButton>
                 <textField toolTip="Specifies the number of encoders that can be run in parallel" verticalHuggingPriority="750" misplaced="YES" id="52" userLabel="Text Field Encoders">
                     <rect key="frame" x="511" y="596" width="53" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
@@ -288,6 +276,27 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <popUpButton toolTip="Used to increase log level during debugging sessions" verticalHuggingPriority="750" misplaced="YES" id="RbR-h5-eAK" userLabel="Debug level">
+                    <rect key="frame" x="161" y="386" width="132" height="26"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="gri-e4-wvO" id="a0D-dB-sh6" userLabel="Debug level menu">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="OtherViews" id="LgX-e1-FvV">
+                            <items>
+                                <menuItem title="None" state="on" id="gri-e4-wvO"/>
+                                <menuItem title="Normal" tag="1" id="Hty-w5-pnB"/>
+                                <menuItem title="Major" tag="3" id="EfB-zC-lix"/>
+                                <menuItem title="Detailed " tag="7" id="06j-ws-kxi"/>
+                                <menuItem title="Verbose" tag="15" id="CeS-EE-puJ"/>
+                                <menuItem title="&lt;Per Module&gt;" tag="-1" enabled="NO" id="Ddx-fm-6A0"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <binding destination="15" name="selectedTag" keyPath="values.DebugLevel" id="KUT-YE-FlD"/>
+                    </connections>
+                </popUpButton>
             </subviews>
             <point key="canvasLocation" x="425.5" y="399.5"/>
         </customView>

@@ -1149,20 +1149,24 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			break;
 		}
 	}
-	DDLogMajor(@"Checking %@ queue", self);
-	if (!tiVoManager.processingPaused.boolValue && !isDownloading) {
+	if (!tiVoManager.processingPaused.boolValue) {
 		DDLogDetail(@"%@ Checking for new download", self);
 		for (MTDownload *download in self.downloadQueue) {
 			if ([download.show.protectedShow boolValue]) {
 				//protectedShow is used in downloadQueue during startup to indicate not loaded yet.
 				break;
 			}
-			if (download.downloadStatus.intValue == kMTStatusNew) {
+			if (download.downloadStatus.intValue == kMTStatusNew  && !isDownloading) {
 				tiVoManager.numEncoders++;
-				DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,download.show.showTitle, tiVoManager.numEncoders);
+				DDLogMajor(@"Number of encoders after launching show \"%@\"  is %d",download.show.showTitle, tiVoManager.numEncoders);
 				[download launchDownload];
 				break;
-            }
+			} else if (download.downloadStatus.intValue == kMTStatusAwaitingPostCommercial ) {
+				tiVoManager.numEncoders++;
+				DDLogMajor(@"Number of encoders after commercial launch for show \"%@\"  is %d",download.show.showTitle, tiVoManager.numEncoders);
+				[download launchPostCommercial];
+				break;
+				}
         }
     }
     managingDownloads = NO;

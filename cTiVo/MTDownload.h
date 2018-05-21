@@ -47,6 +47,7 @@
 -(void) rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
 -(void) cancel;
 -(void) launchDownload;  //actually launch the download process
+-(void) launchPostCommercial; //ok to launch now
 -(void) rescheduleOnMain; //convenience version for use in background threads
 -(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle ;   //download  notification
 
