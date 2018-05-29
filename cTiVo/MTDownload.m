@@ -224,11 +224,8 @@ __DDLOGHERE__
 		DDLogMajor(@"Changing DL status of %@ to %@ (%@)", object, [(MTDownload *)object showStatus], [(MTDownload *)object downloadStatus]);
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadStatusChanged object:object];
 		[self skipModeCheck];
-        if (self.performanceTimer) {
-            //if previous scheduled either cancel or cancel/restart
-            [self cancelPerformanceTimer];
-            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-        }
+		[self cancelPerformanceTimer];
+		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
          if (self.isInProgress) {
              self.performanceTimer = [MTWeakTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
              [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
@@ -335,7 +332,6 @@ __DDLOGHERE__
 		self.processProgress = soFar/length;
 		[self performSelector:@selector(updateDownloadDelay:) withObject:times afterDelay:0.2];
 	}
-	[self progressUpdated];
 }
 
 #pragma mark - Queue encoding/decoding methods for persistent queue, copy/paste, and drag/drop
@@ -1024,7 +1020,6 @@ __DDLOGHERE__
         }
         strongSelf.downloadStatus = @(kMTStatusEncoded);
         strongSelf.processProgress = 1.0;
-		[strongSelf progressUpdated ];
 		//normally when encode finished, we're all done, except when we have parallel tasks still running, or follow-on tasks to come.
 		BOOL notDone = NO;
 		switch (strongSelf.taskFlowType) {
@@ -1060,7 +1055,6 @@ __DDLOGHERE__
                 [strongSelf handleNewTSChannel];
             }
             strongSelf.processProgress = 1.0;
-		   [strongSelf progressUpdated ];
         }
        if (strongSelf.isCanceled) {
            [strongSelf deleteVideoFile];
@@ -1511,7 +1505,6 @@ __DDLOGHERE__
         DDLogReport(@"Cancelling launch");
         self.downloadStatus = @(kMTStatusFailed);
         self.processProgress = 1.0;
-        [self progressUpdated];
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
 		return;
 	}
@@ -1715,6 +1708,7 @@ __DDLOGHERE__
 		[self.activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[self.activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	}
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
     [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay] + downloadDelay];
 }
 
@@ -2023,7 +2017,6 @@ __DDLOGHERE__
 	}
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  //Currently Free up an encoder/ notify subscription module / update UI
     self.processProgress = 1.0;
-    [self progressUpdated];
 
     //Reset tasks
 	self.decryptTask = nil;
@@ -2059,7 +2052,6 @@ __DDLOGHERE__
 		self.activeTaskChain = nil;
 	}
 	self.processProgress = 0.0;
-	[self progressUpdated];
 	if (![self.activeTaskChain run]) {
 		DDLogReport(@"Could not launch post-processing comskip %@; Format: %@", self, self.encodeFormat.name);
 		[self rescheduleDownload];
@@ -2188,7 +2180,6 @@ __DDLOGHERE__
             self.downloadStatus = @(kMTStatusNew);
         }
     }
-	[self progressUpdated];
 	[self checkQueue];
 }
 
@@ -2288,15 +2279,15 @@ __DDLOGHERE__
 #pragma mark - Background routines
 
 -(void)checkStillActive {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
 	if (self.isCanceled || !self.isInProgress) {
 		return;
 	}
 	
-	if (self.previousProcessProgress == self.processProgress) { //The process is stalled so cancel and restart
+	BOOL reschedule = NO;
+	if (self.previousProcessProgress == self.processProgress) { //The process is stalled so ...
 		//Cancel and restart or delete depending on number of time we've been through this
-		BOOL reschedule = YES;
 		if (self.processProgress == 1.0) {
-			reschedule = NO;
 			if (!self.progressAt100Percent) {  //This is the first time here so record as the start of 100 % period
 				DDLogMajor(@"Starting extended wait for 100%% progress stall (Handbrake) for show %@",self);
 				self.progressAt100Percent = [NSDate date];
@@ -2307,16 +2298,16 @@ __DDLOGHERE__
 				DDLogVerbose(@"In extended wait for Handbrake");
 			}
 		} else {
+			reschedule = YES;
 			DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", self.processProgress*100.0, self);
-		}
-		if (reschedule) {
-			[self rescheduleDownload];
-		} else {
-			[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
 		}
 	} else if ([self isInProgress]){
 		DDLogVerbose (@"Progress check OK for %@; %0.2f%%", self, self.processProgress*100);
 		self.previousProcessProgress = self.processProgress;
+	}
+	if (reschedule) {
+		[self rescheduleDownload];
+	} else {
 		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
 	}
 	self.previousCheck = [NSDate date];
