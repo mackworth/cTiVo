@@ -323,6 +323,21 @@ __DDLOGHERE__
     return [NSString stringFromTimeInterval:  actualTimeLeft];
 }
 
+-(void) updateDownloadDelay: (NSDictionary <NSString *, NSDate *> *)  times {
+	NSDate * start = times[@"start"];
+	NSDate * end = times[@"end"];
+	NSTimeInterval soFar = [[NSDate date] timeIntervalSinceDate: start];
+	NSTimeInterval length = [end timeIntervalSinceDate:start ];
+	if (soFar > length) {
+		self.downloadStatus = @(kMTStatusDownloading);
+		self.processProgress = 0.0;
+	} else {
+		self.processProgress = soFar/length;
+		[self performSelector:@selector(updateDownloadDelay:) withObject:times afterDelay:0.2];
+	}
+	[self progressUpdated];
+}
+
 #pragma mark - Queue encoding/decoding methods for persistent queue, copy/paste, and drag/drop
 
 - (void) encodeWithCoder:(NSCoder *)encoder {
@@ -512,78 +527,33 @@ __DDLOGHERE__
 
 + (NSArray *)readableTypesForPasteboard:(NSPasteboard *)pasteboard {
 	return @[kMTDownloadPasteBoardType];
-	
 }
+
 + (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard {
 	if ([type compare:kMTDownloadPasteBoardType] ==NSOrderedSame)
 		return NSPasteboardReadingAsKeyedArchive;
 	return 0;
 }
 
-
-#pragma mark - Download/conversion file Methods
+#pragma mark - Configure files
 
 //Method called at the beginning of the download to configure all required files and file handles
-
--(void)deallocDownloadHandling
-{
-    self.commercialFilePath = nil;
-    self.commercialFilePath = nil;
-    self.encodeFilePath = nil;
-    self.bufferFilePath = nil;
-    self.urlBuffer = nil;
-    if (self.bufferFileReadHandle ) {
-        [self.bufferFileReadHandle closeFile];
-        self.bufferFileReadHandle = nil;
-    }
-    if (self.bufferFileWriteHandle) {
-        [self.bufferFileWriteHandle closeFile];
-        self.bufferFileWriteHandle = nil;
-    }
-	
-}
-
--(void)cleanupFiles
-{
-	BOOL deleteFiles = ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    DDLogDetail(@"%@ cleaningup files",self);
-	if (self.nameLockFilePath) {
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting Lockfile %@",self.nameLockFilePath);
-			[fm removeItemAtPath:self.nameLockFilePath error:nil];
-		}
+-(void)deallocDownloadHandling {
+	self.commercialFilePath = nil;
+	self.commercialFilePath = nil;
+	self.encodeFilePath = nil;
+	self.bufferFilePath = nil;
+	self.urlBuffer = nil;
+	if (self.bufferFileReadHandle ) {
+		[self.bufferFileReadHandle closeFile];
+		self.bufferFileReadHandle = nil;
 	}
-    if (self.encodeFormat.isTestPS) {
-        //delete final file as this was a test
-        [self deleteVideoFile];
-    }
-	//Clean up files in TmpFilesDirectory
-    NSString *tmpDir = self.tmpDirectory;
-	if (deleteFiles && tmpDir && self.baseFileName) {
-		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:tmpDir error:nil];
-		for (NSString *file in tmpFiles) {
-			NSRange tmpRange = [file rangeOfString:self.baseFileName];
-			if (tmpRange.location != NSNotFound) {
-				//check if we're looking at a "episodename" file versus a "episodename-n" file
-				NSUInteger nextChar = NSMaxRange(tmpRange);
-				if (file.length > nextChar &&
-					(char)[file characterAtIndex:nextChar] == '-') {
-					DDLogDetail(@"For baseFileName %@, ignoring another download's tmp file %@", self.baseFileName, file);
-					continue;
-				}
-				DDLogDetail(@"For basename %@, deleting temp file %@", self.baseFileName, file);
-                NSError * error = nil;
-				NSString * tmpPath = [tmpDir stringByAppendingPathComponent:file];
-                if ( ![fm removeItemAtPath:tmpPath error:&error]) {
-                    DDLogMajor(@"Could not delete tmp file: %@ because %@", tmpPath, error.localizedDescription ?:@"No reason found");
-                }
-			}
-		}
+	if (self.bufferFileWriteHandle) {
+		[self.bufferFileWriteHandle closeFile];
+		self.bufferFileWriteHandle = nil;
 	}
 }
 
-#pragma mark - Configure files
 -(BOOL)configureBaseFileNameAndDirectory {
 	if (!self.baseFileName) {
         // generate only once
@@ -594,7 +564,6 @@ __DDLOGHERE__
         NSString * baseTitle = [downloadName lastPathComponent];
 		if (!baseTitle) return NO;
 		self.baseFileName = [self createUniqueBaseFileName:baseTitle ];
-
 	}
     return self.baseFileName ? YES : NO;
 }
@@ -771,7 +740,7 @@ __DDLOGHERE__
 	}
 }
 
-#pragma mark - Download decrypt and encode Methods
+#pragma mark - Download processing Methods
 
 //should be in an NSMutableArray extension
 -(void)addArguments:(NSString *)argString toArray:(NSMutableArray *) arguments {
@@ -1749,22 +1718,6 @@ __DDLOGHERE__
     [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay] + downloadDelay];
 }
 
--(void) updateDownloadDelay: (NSDictionary <NSString *, NSDate *> *)  times {
-	NSDate * start = times[@"start"];
-	NSDate * end = times[@"end"];
-	NSTimeInterval soFar = [[NSDate date] timeIntervalSinceDate: start];
-	NSTimeInterval length = [end timeIntervalSinceDate:start ];
-	if (soFar > length) {
-		self.downloadStatus = @(kMTStatusDownloading);
-		self.processProgress = 0.0;
-	} else {
-		self.processProgress = soFar/length;
-		[self performSelector:@selector(updateDownloadDelay:) withObject:times afterDelay:0.2];
-	}
-	[self progressUpdated];
-	
-}
-
 #pragma mark -
 #pragma mark Post processing methods
 
@@ -2113,24 +2066,56 @@ __DDLOGHERE__
 	};
 }
 
+#pragma mark - Download Termination or Rescheduling
 
-#pragma mark - Download/Conversion  Progress Tracking
+// There are three a download can finish: success, failure, or canceled.
+// If successful, call finishUpPostEncodeProcessing.
+// 		If it doesn't needs SkipCom Marking, this will call finalFinalProcessing.
+// 		If it does, then eventually skipModeCheck will call finalFinalProcessing.
+// If failed download, call RescheduleDownload, which has two variants: RescheduleDownload decrements retries. RescheduleDownloadFalseStart is for non-download-specific cases (e.g. Server is Busy, or Access Forbidden or we found out this was a Transport Stream, so need to start over)., and decrements the startupRetries (which user doesn't have control over).
+// To cancel download in the middle, (e.g user specifies Reschedule), normally call preparefordownload, which resets retry count and DL status to new. PrepareForDownload is also used before adding to queue, by user or subscription. If you want to cancel and never retry, just call cancel directly, then set DL status to failure.
 
--(void)transientNotifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle  {   //download  notification
-    [tiVoManager notifyForName: self.show.showTitle
-                     withTitle: title
-                      subTitle: subTitle
-                      isSticky: NO
-     ];
-}
+// Cancel makes sure all connections/processes have ceased, called by both prepareForDownload and Reschedule. Does not update DL or retry status.
 
+// 	Note that either finishUpPostEncodeProcessing and cancel must eventually be called to notify Tivo that any show has finished (freeing up an "encoder" for another show). Cancel will only call for an In-progress show.
 
--(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle   {   //download  notification
-    [tiVoManager notifyForName: self.show.showTitle
-              withTitle: title
-               subTitle: subTitle
-               isSticky: YES
-     ];
+-(void)cleanupFiles {
+	BOOL deleteFiles = ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles];
+	NSFileManager *fm = [NSFileManager defaultManager];
+	DDLogDetail(@"%@ cleaningup files",self);
+	if (self.nameLockFilePath) {
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting Lockfile %@",self.nameLockFilePath);
+			[fm removeItemAtPath:self.nameLockFilePath error:nil];
+		}
+	}
+	if (self.encodeFormat.isTestPS) {
+		//delete final file as this was a test
+		[self deleteVideoFile];
+	}
+	//Clean up files in TmpFilesDirectory
+	NSString *tmpDir = self.tmpDirectory;
+	if (deleteFiles && tmpDir && self.baseFileName) {
+		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:tmpDir error:nil];
+		for (NSString *file in tmpFiles) {
+			NSRange tmpRange = [file rangeOfString:self.baseFileName];
+			if (tmpRange.location != NSNotFound) {
+				//check if we're looking at a "episodename" file versus a "episodename-n" file
+				NSUInteger nextChar = NSMaxRange(tmpRange);
+				if (file.length > nextChar &&
+					(char)[file characterAtIndex:nextChar] == '-') {
+					DDLogDetail(@"For baseFileName %@, ignoring another download's tmp file %@", self.baseFileName, file);
+					continue;
+				}
+				DDLogDetail(@"For basename %@, deleting temp file %@", self.baseFileName, file);
+				NSError * error = nil;
+				NSString * tmpPath = [tmpDir stringByAppendingPathComponent:file];
+				if ( ![fm removeItemAtPath:tmpPath error:&error]) {
+					DDLogMajor(@"Could not delete tmp file: %@ because %@", tmpPath, error.localizedDescription ?:@"No reason found");
+				}
+			}
+		}
+	}
 }
 
 -(void) rescheduleDownload {
@@ -2249,67 +2234,6 @@ __DDLOGHERE__
     self.processProgress = 0.0;
 }
 
--(void)checkStillActive
-{
-    if (self.isCanceled || !self.isInProgress) {
-        return;
-    }
-
-    if (self.previousProcessProgress == self.processProgress) { //The process is stalled so cancel and restart
-		//Cancel and restart or delete depending on number of time we've been through this
-        BOOL reschedule = YES;
-        if (self.processProgress == 1.0) {
-            reschedule = NO;
-			if (!self.progressAt100Percent) {  //This is the first time here so record as the start of 100 % period
-                DDLogMajor(@"Starting extended wait for 100%% progress stall (Handbrake) for show %@",self);
-                self.progressAt100Percent = [NSDate date];
-            } else if ([[NSDate date] timeIntervalSinceDate:self.progressAt100Percent] > kMTProgressFailDelayAt100Percent){
-                DDLogReport(@"Failed extended wait for 100%% progress stall (Handbrake) for show %@",self);
-                reschedule = YES;
-            } else {
-				DDLogVerbose(@"In extended wait for Handbrake");
-			}
-        } else {
-                DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", self.processProgress*100.0, self);
-        }
-		if (reschedule) {
-			[self rescheduleDownload];
-		} else {
-			[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
-		}
-	} else if ([self isInProgress]){
-        DDLogVerbose (@"Progress check OK for %@; %0.2f%%", self, self.processProgress*100);
-		self.previousProcessProgress = self.processProgress;
-		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
-	}
-    self.previousCheck = [NSDate date];
-}
-
-
--(BOOL) isInProgress {
-    return (!(self.isNew || self.isDone));
-}
-
--(BOOL) isDownloading {
-	return ([self.downloadStatus intValue] == kMTStatusDownloading ||[self.downloadStatus intValue] == kMTStatusWaiting );
-}
-
--(BOOL) isCompletelyDone {
-	int status = [self.downloadStatus intValue];
-	return (status == kMTStatusDone) ||
-	(status == kMTStatusFailed) ||
-	(status == kMTStatusDeleted) ||
-	(status == kMTStatusRemovedFromQueue);
-}
-
--(BOOL) isDone {
-	return self.isCompletelyDone || self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd || self.downloadStatus.intValue == kMTStatusAwaitingPostCommercial;
-}
-
--(BOOL) isNew {
-	return (self.downloadStatus.intValue == kMTStatusNew || self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial);
-}
-
 #pragma mark - Video manipulation methods
 
 -(NSURL *) URLExists: (NSString *) path {
@@ -2363,8 +2287,42 @@ __DDLOGHERE__
 
 #pragma mark - Background routines
 
--(void)writeData
-{
+-(void)checkStillActive {
+	if (self.isCanceled || !self.isInProgress) {
+		return;
+	}
+	
+	if (self.previousProcessProgress == self.processProgress) { //The process is stalled so cancel and restart
+		//Cancel and restart or delete depending on number of time we've been through this
+		BOOL reschedule = YES;
+		if (self.processProgress == 1.0) {
+			reschedule = NO;
+			if (!self.progressAt100Percent) {  //This is the first time here so record as the start of 100 % period
+				DDLogMajor(@"Starting extended wait for 100%% progress stall (Handbrake) for show %@",self);
+				self.progressAt100Percent = [NSDate date];
+			} else if ([[NSDate date] timeIntervalSinceDate:self.progressAt100Percent] > kMTProgressFailDelayAt100Percent){
+				DDLogReport(@"Failed extended wait for 100%% progress stall (Handbrake) for show %@",self);
+				reschedule = YES;
+			} else {
+				DDLogVerbose(@"In extended wait for Handbrake");
+			}
+		} else {
+			DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", self.processProgress*100.0, self);
+		}
+		if (reschedule) {
+			[self rescheduleDownload];
+		} else {
+			[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
+		}
+	} else if ([self isInProgress]){
+		DDLogVerbose (@"Progress check OK for %@; %0.2f%%", self, self.processProgress*100);
+		self.previousProcessProgress = self.processProgress;
+		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
+	}
+	self.previousCheck = [NSDate date];
+}
+
+-(void)writeData {
     // writeData supports getting its data from either an NSData buffer (self.urlBuffer) or a file on disk (self.bufferFilePath).  This allows cTiVo to
     // initially try to keep the dataflow off the disk, except for final products, where possible.  But, the ability to do this depends on the
     // processor being able to keep up with the data flow from the TiVo which is often not the case due to either a slow processor, fast network
@@ -2456,80 +2414,28 @@ __DDLOGHERE__
     }
 
 }
-
-#pragma mark - NSURL Delegate Methods
-
--(BOOL) checkLogForAudio: (NSString *) filePath {
-	if (!filePath) return NO;
-    //if we find audio required, then mark channel as TS.
-    //If not, then IF it was a successfulencode, then mark as not needing TS
-    if ( ! self.useTransportStream) {
-        //If we did Program Stream and encoder says "I only see Audio", then probably TS required
-        NSArray * audioOnlyStrings = @[
-                                       @"Video stream is mandatory!",       //mencoder:
-                                       @"No title found",                   //handbrake
-                                       @"no video streams",                 //ffmpeg
-                                       @"Stream #0:0: Audio",               //ffmpeg
-                                       @"Could not open video codec"        //comskip
-                                       ];
-        NSString *log = [NSString stringWithEndOfFile:filePath ];
-        if ( ! log.length) return NO;
-        for (NSString * errMsg in audioOnlyStrings) {
-            if ([log rangeOfString:errMsg].location != NSNotFound) {
-                DDLogVerbose(@"found audio %@ in log file: %@",errMsg, [log maskMediaKeys]);
-                return YES;
-            }
-        }
-    }
-    return NO;
-}
-
--(void) markMyChannelAsTSOnly {
-    NSString * channelName = self.show.stationCallsign;
-    DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self, channelName);
-    if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
-        [tiVoManager setFailedPS:YES forChannelNamed:channelName];
-        if ([tiVoManager useTSForChannel:channelName] == NSOffState && !self.encodeFormat.isTestPS) {
-            //only notify if we're not (testing, OR previously seen, OR forcing PS)
-            [self transientNotifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName] ];
-        }
-    }
-}
-
--(void) handleNewTSChannel {
-    [self markMyChannelAsTSOnly];
-    //On a regular file, throw away audio-only file and try again
-    [self deleteVideoFile];
-    if (self.show.tiVo.supportsTransportStream) {
-		[self rescheduleDownloadFalseStart];
-    } else {
-        [self cancel];
-        [self setValue:@(kMTStatusFailed) forKeyPath:@"downloadStatus"];
-        [self notifyUserWithTitle: @"Warning: This channel requires Transport Stream."
-                               subTitle:@"But this TiVo does not support TS." ];
-    }
-}
+#pragma mark - NSURLConnection delegate routines.
 
 -(void) connection:(NSURLConnection *) connection didReceiveResponse:(nonnull NSURLResponse *)response {
-    DDLogVerbose(@"MainURL: %@", [self.activeURLConnection.currentRequest URL]);
-    DDLogVerbose(@"Headers for Request: %@", [self.activeURLConnection.currentRequest allHTTPHeaderFields]);
-    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
-    if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
-        DDLogVerbose(@"Response: %@ - %@",@([httpResponse statusCode]), [NSHTTPURLResponse localizedStringForStatusCode:[httpResponse statusCode]]);
-        DDLogVerbose(@"Response Headers: %@", [httpResponse allHeaderFields]);
-    }
+	DDLogVerbose(@"MainURL: %@", [self.activeURLConnection.currentRequest URL]);
+	DDLogVerbose(@"Headers for Request: %@", [self.activeURLConnection.currentRequest allHTTPHeaderFields]);
+	NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
+	if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+		DDLogVerbose(@"Response: %@ - %@",@([httpResponse statusCode]), [NSHTTPURLResponse localizedStringForStatusCode:[httpResponse statusCode]]);
+		DDLogVerbose(@"Response Headers: %@", [httpResponse allHeaderFields]);
+	}
 }
+
 NSString * cTiVoDomain = @"com.ctivo.ctivo";
 NSInteger diskWriteFailure = 123;
 
--(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
-{
+-(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     self.totalDataDownloaded += data.length;
     if (self.totalDataDownloaded > 8000000 && self.encodeFormat.isTestPS) {
         //we've gotten 8MB on our testTS run, so looks good.  Mark it and finish up...
         [tiVoManager setFailedPS:NO forChannelNamed: self.show.stationCallsign];
         [connection cancel];
-		[self connectionDidFinishLoading:connection];  //HAVE TO TEST THIS?
+		[self connectionDidFinishLoading:connection];
         return;
     }
     if (self.urlBuffer) {
@@ -2597,19 +2503,7 @@ NSInteger diskWriteFailure = 123;
 		[self rescheduleDownload];
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self.show.tiVo, @"reason" : @"incorrect"}];
     }
-    
 }
-
-//- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
-//    return YES;
-//}
-//
-//- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-//    //    [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-//    DDLogDetail(@"Show password check");
-//    [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:self.show.tiVo.mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
-//    [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
-//}
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
@@ -2779,11 +2673,102 @@ NSInteger diskWriteFailure = 123;
 		default:
 			return @(kMTStatusEncoding); //never happens
 	}
+}
 
+#pragma mark - Transport Stream detection
+
+-(BOOL) checkLogForAudio: (NSString *) filePath {
+	if (!filePath) return NO;
+	//if we find audio required, then mark channel as TS.
+	//If not, then IF it was a successfulencode, then mark as not needing TS
+	if ( ! self.useTransportStream) {
+		//If we did Program Stream and encoder says "I only see Audio", then probably TS required
+		NSArray * audioOnlyStrings = @[
+									   @"Video stream is mandatory!",       //mencoder:
+									   @"No title found",                   //handbrake
+									   @"no video streams",                 //ffmpeg
+									   @"Stream #0:0: Audio",               //ffmpeg
+									   @"Could not open video codec"        //comskip
+									   ];
+		NSString *log = [NSString stringWithEndOfFile:filePath ];
+		if ( ! log.length) return NO;
+		for (NSString * errMsg in audioOnlyStrings) {
+			if ([log rangeOfString:errMsg].location != NSNotFound) {
+				DDLogVerbose(@"found audio %@ in log file: %@",errMsg, [log maskMediaKeys]);
+				return YES;
+			}
+		}
+	}
+	return NO;
+}
+
+-(void) markMyChannelAsTSOnly {
+	NSString * channelName = self.show.stationCallsign;
+	DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self, channelName);
+	if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
+		[tiVoManager setFailedPS:YES forChannelNamed:channelName];
+		if ([tiVoManager useTSForChannel:channelName] == NSOffState && !self.encodeFormat.isTestPS) {
+			//only notify if we're not (testing, OR previously seen, OR forcing PS)
+			[self transientNotifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName] ];
+		}
+	}
+}
+
+-(void) handleNewTSChannel {
+	[self markMyChannelAsTSOnly];
+	//On a regular file, throw away audio-only file and try again
+	[self deleteVideoFile];
+	if (self.show.tiVo.supportsTransportStream) {
+		[self rescheduleDownloadFalseStart];
+	} else {
+		[self cancel];
+		[self setValue:@(kMTStatusFailed) forKeyPath:@"downloadStatus"];
+		[self notifyUserWithTitle: @"Warning: This channel requires Transport Stream."
+						 subTitle:@"But this TiVo does not support TS." ];
+	}
 }
 
 #pragma mark - Convenience methods
 
+-(void)transientNotifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle  {   //download  notification
+	[tiVoManager notifyForName: self.show.showTitle
+					 withTitle: title
+					  subTitle: subTitle
+					  isSticky: NO
+	 ];
+}
+
+-(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle   {   //download  notification
+	[tiVoManager notifyForName: self.show.showTitle
+					 withTitle: title
+					  subTitle: subTitle
+					  isSticky: YES
+	 ];
+}
+
+-(BOOL) isInProgress {
+	return (!(self.isNew || self.isDone));
+}
+
+-(BOOL) isDownloading {
+	return ([self.downloadStatus intValue] == kMTStatusDownloading ||[self.downloadStatus intValue] == kMTStatusWaiting );
+}
+
+-(BOOL) isCompletelyDone {
+	int status = [self.downloadStatus intValue];
+	return (status == kMTStatusDone) ||
+	(status == kMTStatusFailed) ||
+	(status == kMTStatusDeleted) ||
+	(status == kMTStatusRemovedFromQueue);
+}
+
+-(BOOL) isDone {
+	return self.isCompletelyDone || self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd || self.downloadStatus.intValue == kMTStatusAwaitingPostCommercial;
+}
+
+-(BOOL) isNew {
+	return (self.downloadStatus.intValue == kMTStatusNew || self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial);
+}
 -(BOOL) shouldSimulEncode {
 	return self.encodeFormat.canSimulEncode &&
 	       !(self.shouldSkipCommercials && self.runComskip);// && !self.downloadingShowFromMPGFile);
