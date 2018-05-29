@@ -771,7 +771,7 @@ __DDLOGHERE__
 -(void) cancelAllDownloads {
 	for (MTDownload *download in tiVoManager.downloadQueue) {
 		if (download.isInProgress){
-			[download rescheduleShowWithDecrementRetries:@NO];
+			[download rescheduleDownloadFalseStart];
 		}
 	}
 }

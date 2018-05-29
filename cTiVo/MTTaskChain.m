@@ -242,7 +242,7 @@ __DDLOGHERE__
         if (_nextTaskChain && !_beingRescheduled && !self.download.isCanceled) {
             self.download.activeTaskChain = _nextTaskChain;
             if (![_nextTaskChain run]) {
-                [self.download rescheduleShowWithDecrementRetries:@YES];
+				[self.download rescheduleDownload];
             };
         }
     } else if (self.isRunning) {
@@ -307,7 +307,7 @@ __DDLOGHERE__
                         DDLogReport(@"Write Fail; tried %lu bytes; error: %d; %@ may have crashed.", bytesLeft, errno, taskName);
                     }
                     if (!currentTask || currentTask.shouldReschedule) {
-                        [_download rescheduleOnMain];
+                        [_download rescheduleDownload];
                     } else if (! currentTask.shouldReschedule) {
                         //this task not critical, proceeding without it.
                         if (pipes.count <= 1) {
@@ -335,7 +335,7 @@ __DDLOGHERE__
 			@catch (NSException *exception) {
 				DDLogDetail(@"download close pipe fileHandleForWriting fail: %@", exception.reason);
 				if (!_download.isCanceled) {
-					[_download rescheduleOnMain];
+					[_download rescheduleDownload];
 					DDLogDetail(@"Rescheduling");
 				}
 				return;

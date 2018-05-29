@@ -247,7 +247,7 @@ __DDLOGHERE__
     } else if ([keyPath isEqualToString:@"processProgress"]) {
         double progressChange = self.processProgress - self.displayedProcessProgress;
         if (progressChange > 0.02 || progressChange < -0.02) { //only update if enough change.
-            DDLogVerbose(@"%@ at %0.1f%%", self.show, self.processProgress*100);
+            DDLogVerbose(@"%@ at %0.1f%%", self, self.processProgress*100);
            self.displayedProcessProgress = self.processProgress;
             [self progressUpdated];
         }
@@ -316,7 +316,7 @@ __DDLOGHERE__
 }
 
 -(NSString *) timeLeft {
-    if (!self.isInProgress) return nil;
+    if (!self.isInProgress || self.downloadStatus.intValue == kMTStatusWaiting) return nil;
     if (self.speed == 0.0) return nil;
     NSTimeInterval actualTimeLeft = self.show.fileSize *(1-self.processProgress) /self.speed;
     if (actualTimeLeft == 0.0) return nil;
@@ -376,7 +376,7 @@ __DDLOGHERE__
 	NSInteger queueID = [queueEntry[kMTQueueID] integerValue];
 	BOOL result = (queueID == self.show.showID) && ([self.show.tiVoName compare:queueEntry[kMTQueueTivo]] == NSOrderedSame);
 	if (result && [self.show.showTitle compare:queueEntry[kMTQueueTitle]] != NSOrderedSame) {
-		DDLogReport(@"Very odd, but reloading anyways: same ID: %ld same TiVo:%@ but different titles: <<%@>> vs <<%@>>",queueID, queueEntry[kMTQueueTivo], self.show.showTitle, queueEntry[kMTQueueTitle] );
+		DDLogReport(@"Very odd, but reloading anyways: same ID: %ld same TiVo:%@ but different titles: <<%@>> vs <<%@>>",queueID, queueEntry[kMTQueueTivo], self, queueEntry[kMTQueueTitle] );
 	}
 	return result;
 	
@@ -547,7 +547,7 @@ __DDLOGHERE__
 {
 	BOOL deleteFiles = ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles];
     NSFileManager *fm = [NSFileManager defaultManager];
-    DDLogDetail(@"%@ cleaningup files",self.show.showTitle);
+    DDLogDetail(@"%@ cleaningup files",self);
 	if (self.nameLockFilePath) {
 		if (deleteFiles) {
 			DDLogVerbose(@"deleting Lockfile %@",self.nameLockFilePath);
@@ -763,7 +763,7 @@ __DDLOGHERE__
 -(NSString *) encoderPath {
 	NSString *encoderLaunchPath = [self.encodeFormat pathForExecutable];
     if (!encoderLaunchPath) {
-        DDLogReport(@"Encoding of %@ failed for %@ format, encoder %@ not found",self.show.showTitle,self.encodeFormat.name,self.encodeFormat.encoderUsed);
+        DDLogReport(@"Encoding of %@ failed for %@ format, encoder %@ not found",self,self.encodeFormat.name,self.encodeFormat.encoderUsed);
         return nil;
     } else {
         DDLogVerbose(@"using encoder: %@", encoderLaunchPath);
@@ -1151,11 +1151,9 @@ __DDLOGHERE__
                             returnValue =  [[data substringWithRange:valueRange] doubleValue]/100.0;
                             DDLogVerbose(@"Encoder progress found data %lf",returnValue);
                         }
-
                     }
                     if (returnValue == -1.0) {
-                        DDLogMajor(@"Encode progress with RX %@ failed for task encoder for show %@\nEncoder report: %@",percents, weakSelf.show.showTitle, data);
-
+                        DDLogMajor(@"Encode progress with RX %@ failed for task encoder for show %@\nEncoder report: %@",percents, weakSelf, data);
                     }
                     return returnValue;
                 };
@@ -1167,7 +1165,6 @@ __DDLOGHERE__
             };
         }
     }
-
 
     [encodeTask setArguments:encoderArgs];
     DDLogDetail(@"encoderArgs: %@",encoderArgs);
@@ -1225,7 +1222,7 @@ __DDLOGHERE__
 				
             }
 			if (returnValue == -1.0){
-                DDLogMajor(@"Track progress with Rx failed for task caption for show %@: %@",self.show.showTitle, data);
+                DDLogMajor(@"Track progress with Rx failed for task caption for show %@: %@",self, data);
             }
 			return returnValue;
         };
@@ -1385,7 +1382,7 @@ __DDLOGHERE__
         commercialTask.completionHandler = ^BOOL{
 			__typeof__(self) strongSelf = weakSelf;
 
-            DDLogMajor(@"Finished detecting commercials in %@",strongSelf.show.showTitle);
+            DDLogMajor(@"Finished detecting commercials in %@",strongSelf);
             strongSelf.show.edlList = [NSArray getFromEDLFile:strongSelf.commercialFilePath];
 #ifdef DEBUG
 			if (strongSelf.show.edlList && strongSelf.show.rpcData.edlList.count > 0) {
@@ -1427,7 +1424,7 @@ __DDLOGHERE__
         };
     } else {
         commercialTask.completionHandler = ^BOOL{
-            DDLogMajor(@"Finished detecting commercials in %@",weakSelf.show.showTitle);
+            DDLogMajor(@"Finished detecting commercials in %@",weakSelf);
 			return YES;
         };
 		commercialTask.cleanupHandler = ^{
@@ -1496,7 +1493,7 @@ __DDLOGHERE__
     if ((channelCommercialsOff) &&
         (self.skipCommercials || self.markCommercials)) {
         //this channel doesn't use commercials
-        DDLogMajor(@"Channel %@ doesn't use commercials; overriding  for %@",self.show.stationCallsign, self.show);
+        DDLogMajor(@"Channel %@ doesn't use commercials; overriding  for %@",self.show.stationCallsign, self);
         self.skipCommercials = NO;
         self.markCommercials = NO;
     }
@@ -1732,7 +1729,7 @@ __DDLOGHERE__
     self.previousProcessProgress = 0.0;
 
     if (![self.activeTaskChain run]) {
-        [self rescheduleShowWithDecrementRetries:@YES];
+        [self rescheduleDownload];
         return;
     };
     double downloadDelay = kMTTiVoAccessDelayServerFailure - [[NSDate date] timeIntervalSinceDate:self.show.tiVo.lastDownloadEnded];
@@ -1745,7 +1742,7 @@ __DDLOGHERE__
 	}
 
 	if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {
-        DDLogReport(@"Starting URL %@ for show %@ in %0.1lf seconds", downloadURL,self.show.showTitle, downloadDelay);
+        DDLogReport(@"Starting URL %@ for show %@ in %0.1lf seconds", downloadURL,self, downloadDelay);
 		[self.activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[self.activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	}
@@ -1845,7 +1842,7 @@ __DDLOGHERE__
 -(void) finalFinalProcessing {
 	//allows for delayed Marking of commercials
 	if (self.addToiTunesWhenEncoded) {
-		DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
+		DDLogMajor(@"Adding to iTunes %@", self);
 		self.processProgress = 1.0;
 		self.downloadStatus = @(kMTStatusAddingToItunes);
 		MTiTunes *iTunes = [[MTiTunes alloc] init];
@@ -1883,7 +1880,7 @@ __DDLOGHERE__
 #endif
 	[self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil ];
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTIfSuccessDeleteFromTiVo]) {
-		DDLogReport(@"Deleting %@ after successful download",self.show);
+		DDLogReport(@"Deleting %@ from TiVo after successful download",self);
 		[self.show.tiVo deleteTiVoShows:@[self.show] ];
 	}
 	[self cleanupFiles];
@@ -2021,10 +2018,10 @@ __DDLOGHERE__
 	NSDate *startTime = [NSDate date];
     DDLogMajor(@"Starting finishing @ %@",startTime);
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-	[self writeMetaDataFiles];
     if (self.encodeFormat.isTestPS) {
 		self.downloadStatus = @(kMTStatusDone);
 	} else {
+		[self writeMetaDataFiles];
         if ((_decryptTask && !_decryptTask.successfulExit) ||
 			(_encodeTask && !_encodeTask.successfulExit)) {
             DDLogReport(@"Strange: thought we were finished, but later %@ failure", _decryptTask.successfulExit ? @"encode" : @"decrypt");
@@ -2063,7 +2060,7 @@ __DDLOGHERE__
         }
         [tiVoManager addShow: self.show onDiskAtPath:self.encodeFilePath];
     //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
-        DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], self.show.showTitle);
+        DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], self);
     }
 	if (self.markCommercials && self.useSkipMode) {
 		self.downloadStatus = @(kMTStatusSkipModeWaitEnd);
@@ -2084,13 +2081,15 @@ __DDLOGHERE__
 
 -(void)launchPostCommercial {
 	//used when we are waiting for skipMode, and realize it's never coming.
+	//called from TiVoManager right after incrementing numencoders
 	if (!self.decryptedFilePath) {
+		//should never happen
 		DDLogReport(@"No decrypted file! %@", self);
-		[self rescheduleOnMain];
-		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self];  //Decrement num encoders right away
+		[self rescheduleDownload];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
 		return;
 	}
-	DDLogReport(@"Starting post-processing comskip for %@; Format: %@", self, self.encodeFormat.name);
+	DDLogMajor(@"Starting post-processing comskip for %@; Format: %@", self, self.encodeFormat.name);
 	
 	self.progressAt100Percent = nil;  //Reset end of progress failure delay
 	//Before starting make sure we can launch.
@@ -2099,7 +2098,7 @@ __DDLOGHERE__
 	
 	self.activeTaskChain = [MTTaskChain new];
 	self.activeTaskChain.download = self;
-	DDLogMajor(@"Downloading from file MPG file %@",self.decryptedFilePath);
+	DDLogMajor(@"Post-Commercialing for MPG file %@",self.decryptedFilePath);
 	MTTask * commercialTask = self.commercialTask;
 	if (commercialTask) {
 		self.activeTaskChain.taskArray = @ [@[commercialTask]] ; 
@@ -2109,8 +2108,8 @@ __DDLOGHERE__
 	self.processProgress = 0.0;
 	[self progressUpdated];
 	if (![self.activeTaskChain run]) {
-		[self rescheduleShowWithDecrementRetries:@YES];
-		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self];
+		DDLogReport(@"Could not launch post-processing comskip %@; Format: %@", self, self.encodeFormat.name);
+		[self rescheduleDownload];
 	};
 }
 
@@ -2134,9 +2133,23 @@ __DDLOGHERE__
      ];
 }
 
+-(void) rescheduleDownload {
+	if (![NSThread isMainThread]) {
+		[self performSelectorOnMainThread:@selector(rescheduleDownload) withObject:nil waitUntilDone:YES];
+	} else {
+		[self rescheduleDownload:NO];
+	}
+}
 
--(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries
-{
+-(void) rescheduleDownloadFalseStart {
+	if (![NSThread isMainThread]) {
+		[self performSelectorOnMainThread:@selector(rescheduleDownloadFalseStart) withObject:nil waitUntilDone:YES];
+	} else {
+		[self rescheduleDownload:YES];
+	}
+}
+
+-(void)rescheduleDownload:(BOOL) falseStart {
     if (self.isRescheduled) {
         return;
     }
@@ -2148,13 +2161,13 @@ __DDLOGHERE__
         //if it was a test, then we knew it would fail whether it's audio-only OR no video encoder, so everything's good
         if (!self.isDone) {
             //test failed without triggering a audiocheck!
-            DDLogReport(@"Failure during PS Test for %@", self.show.showTitle );
-            [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];
+            DDLogReport(@"Failure during PS Test for %@", self );
+			[self cancel];
             self.downloadStatus = @(kMTStatusFailed);
         }
         self.processProgress = 1.0;
     } else {
-        DDLogMajor(@"Stopping at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self.show.showTitle, self.processProgress, self.previousCheck );
+        DDLogMajor(@"Stopping at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self, self.processProgress, self.previousCheck );
         [self cancel];
 		self.baseFileName = nil;
         if (self.downloadStatus.intValue == kMTStatusDeleted) {
@@ -2162,8 +2175,8 @@ __DDLOGHERE__
             self.processProgress = 1.0;
             [self notifyUserWithTitle: @"TiVo deleted program."
                              subTitle:@"Download cancelled"];
-        } else if (([decrementRetries boolValue] && self.numRetriesRemaining <= 0) ||
-                   (![decrementRetries boolValue] && self.numStartupRetriesRemaining <=0)) {
+        } else if ((!falseStart && self.numRetriesRemaining        <= 0) ||
+                   ( falseStart && self.numStartupRetriesRemaining <= 0)) {
             self.downloadStatus = @(kMTStatusFailed);
             self.processProgress = 1.0;
 #ifndef DEBUG
@@ -2173,10 +2186,12 @@ __DDLOGHERE__
 #endif
             [self notifyUserWithTitle: @"TiVo show failed."
                              subTitle:@"Retries Cancelled"];
-
         } else {
-            if ([decrementRetries boolValue]) {
-                self.numRetriesRemaining--;
+            if (falseStart) {
+				self.numStartupRetriesRemaining--;
+				DDLogDetail(@"Decrementing startup retries to %@",@(self.numStartupRetriesRemaining));
+			} else {
+				self.numRetriesRemaining--;
                 [self notifyUserWithTitle:@"TiVo show failed" subTitle:@"Retrying" ];
 #ifndef DEBUG
                 [Answers logCustomEventWithName:@"Retry"
@@ -2184,23 +2199,20 @@ __DDLOGHERE__
                                                    @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
 #endif
                 DDLogMajor(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
-            } else {
-               self.numStartupRetriesRemaining--;
-                DDLogDetail(@"Decrementing startup retries to %@",@(self.numStartupRetriesRemaining));
             }
             self.downloadStatus = @(kMTStatusNew);
         }
     }
+	[self progressUpdated];
 	[self checkQueue];
 }
 
--(void)cancel
-{
+-(void) cancel {
     if (self.isCanceled || self.isNew || self.isCompletelyDone) {
         return;
     }
     self.isCanceled = YES;
-    DDLogMajor(@"Canceling of %@", self.show.showTitle);
+    DDLogMajor(@"Canceling of %@", self);
 //    NSFileManager *fm = [NSFileManager defaultManager];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (self.activeURLConnection) {
@@ -2208,7 +2220,7 @@ __DDLOGHERE__
         self.activeURLConnection = nil;
 		self.show.tiVo.lastDownloadEnded = [NSDate date];
 	}
-    if(self.activeTaskChain.isRunning) {
+    if (self.activeTaskChain.isRunning) {
         [self.activeTaskChain cancel];
     }
 	[self cancelPerformanceTimer];
@@ -2235,7 +2247,6 @@ __DDLOGHERE__
         self.baseFileName = nil;  //Force new file for rescheduled, complete show.
     }
     self.processProgress = 0.0;
-
 }
 
 -(void)checkStillActive
@@ -2250,24 +2261,24 @@ __DDLOGHERE__
         if (self.processProgress == 1.0) {
             reschedule = NO;
 			if (!self.progressAt100Percent) {  //This is the first time here so record as the start of 100 % period
-                DDLogMajor(@"Starting extended wait for 100%% progress stall (Handbrake) for show %@",self.show.showTitle);
+                DDLogMajor(@"Starting extended wait for 100%% progress stall (Handbrake) for show %@",self);
                 self.progressAt100Percent = [NSDate date];
             } else if ([[NSDate date] timeIntervalSinceDate:self.progressAt100Percent] > kMTProgressFailDelayAt100Percent){
-                DDLogReport(@"Failed extended wait for 100%% progress stall (Handbrake) for show %@",self.show.showTitle);
+                DDLogReport(@"Failed extended wait for 100%% progress stall (Handbrake) for show %@",self);
                 reschedule = YES;
             } else {
 				DDLogVerbose(@"In extended wait for Handbrake");
 			}
         } else {
-                DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", self.processProgress*100.0, self.show.showTitle);
+                DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", self.processProgress*100.0, self);
         }
 		if (reschedule) {
-			[self rescheduleShowWithDecrementRetries:@(YES)];
+			[self rescheduleDownload];
 		} else {
 			[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
 		}
 	} else if ([self isInProgress]){
-        DDLogVerbose (@"Progress check OK for %@; %0.2f%%", self.show, self.processProgress*100);
+        DDLogVerbose (@"Progress check OK for %@; %0.2f%%", self, self.processProgress*100);
 		self.previousProcessProgress = self.processProgress;
 		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
 	}
@@ -2352,12 +2363,6 @@ __DDLOGHERE__
 
 #pragma mark - Background routines
 
--(void)rescheduleOnMain
-{
-//	self.isCanceled = YES;
-	[self performSelectorOnMainThread:@selector(rescheduleShowWithDecrementRetries:) withObject:@YES waitUntilDone:NO];
-}
-
 -(void)writeData
 {
     // writeData supports getting its data from either an NSData buffer (self.urlBuffer) or a file on disk (self.bufferFilePath).  This allows cTiVo to
@@ -2390,10 +2395,10 @@ __DDLOGHERE__
 			}
 			@catch (NSException *exception) {
                 if (!self.isCanceled){
-                    [self rescheduleOnMain];
+                    [self rescheduleDownload];
                     DDLogDetail(@"Rescheduling");
                 };
-				DDLogMajor(@"buffer read fail:%@; %@", exception.reason, self.show.showTitle);
+				DDLogMajor(@"buffer read fail:%@; %@", exception.reason, self);
 			}
 			@finally {
 			}
@@ -2410,7 +2415,7 @@ __DDLOGHERE__
                 ssize_t amountSent= write ([self.taskChainInputHandle fileDescriptor], [data bytes]+data.length-bytesLeft, bytesLeft);
                 if (amountSent < 0) {
                     if (!self.isCanceled){
-                        DDLogReport(@"write fail1 for %@; tried %lu bytes; error: %zd",self.show, (unsigned long)[data length], amountSent);
+                        DDLogReport(@"write fail1 for %@; tried %lu bytes; error: %zd",self, (unsigned long)[data length], amountSent);
                     };
                     break;
                 } else {
@@ -2427,21 +2432,21 @@ __DDLOGHERE__
                     DDLogReport(@"Write Fail2: couldn't write to pipe after three tries");
                 }
                 if (!self.isCanceled) {
-                    [self rescheduleOnMain];
+					[self rescheduleDownload];
                 }
             }
 
             @synchronized (self) {
                 self.totalDataRead += dataRead;
                 double newProgress = self.totalDataRead/self.show.fileSize;
-                DDLogVerbose(@"For %@, read %luKB of %luKB: %0.1f%% processed", self.show, dataRead/1000, self.totalDataRead/1000, newProgress *100);
+                DDLogVerbose(@"For %@, read %luKB of %luKB: %0.1f%% processed", self, dataRead/1000, self.totalDataRead/1000, newProgress *100);
                 self.processProgress = newProgress;
             }
          }
     }
         self.writingData = NO; //we are now committed to closing this background thread, so any further data will need new thread
 	if (!self.activeURLConnection || self.isCanceled) {
-		DDLogDetail(@"Writedata all done for show %@",self.show.showTitle);
+		DDLogDetail(@"Writedata all done for show %@",self);
 		[self.taskChainInputHandle closeFile];
 		self.taskChainInputHandle = nil;
         [self.bufferFileReadHandle closeFile];
@@ -2481,7 +2486,7 @@ __DDLOGHERE__
 
 -(void) markMyChannelAsTSOnly {
     NSString * channelName = self.show.stationCallsign;
-    DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self.show, channelName);
+    DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self, channelName);
     if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
         [tiVoManager setFailedPS:YES forChannelNamed:channelName];
         if ([tiVoManager useTSForChannel:channelName] == NSOffState && !self.encodeFormat.isTestPS) {
@@ -2496,9 +2501,7 @@ __DDLOGHERE__
     //On a regular file, throw away audio-only file and try again
     [self deleteVideoFile];
     if (self.show.tiVo.supportsTransportStream) {
-        self.baseFileName = nil;  //recreate jsut in case if Decrypt channel
-        self.numRetriesRemaining++;
-        [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+		[self rescheduleDownloadFalseStart];
     } else {
         [self cancel];
         [self setValue:@(kMTStatusFailed) forKeyPath:@"downloadStatus"];
@@ -2522,11 +2525,11 @@ NSInteger diskWriteFailure = 123;
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
     self.totalDataDownloaded += data.length;
-    if (self.totalDataDownloaded > 5000000 && self.encodeFormat.isTestPS) {
-        //we've gotten 5MB on our testTS run, so looks good.  Mark it and finish up...
+    if (self.totalDataDownloaded > 8000000 && self.encodeFormat.isTestPS) {
+        //we've gotten 8MB on our testTS run, so looks good.  Mark it and finish up...
         [tiVoManager setFailedPS:NO forChannelNamed: self.show.stationCallsign];
         [connection cancel];
-        [self connectionDidFinishLoading:connection];
+		[self connectionDidFinishLoading:connection];  //HAVE TO TEST THIS?
         return;
     }
     if (self.urlBuffer) {
@@ -2591,7 +2594,7 @@ NSInteger diskWriteFailure = 123;
         [challenge.sender cancelAuthenticationChallenge:challenge];
         BOOL noMAK = self.show.tiVo.mediaKey.length == 0;
         DDLogMajor(@"%@ MAK, so failing URL Authentication %@",noMAK ? @"No" : @"Invalid", self.show.tiVoName);
-        [self rescheduleOnMain];
+		[self rescheduleDownload];
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self.show.tiVo, @"reason" : @"incorrect"}];
     }
     
@@ -2610,7 +2613,7 @@ NSInteger diskWriteFailure = 123;
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    DDLogReport(@"Download URL Connection Failed with error %@",[error maskMediaKeys]);
+    DDLogReport(@"Download URL Connection Failed for %@ with error %@", self, [error maskMediaKeys]);
     
     if ([error.domain isEqualToString:@"com.ctivo.ctivo"] && error.code == diskWriteFailure) {
         [self notifyUserWithTitle: error.userInfo[NSLocalizedDescriptionKey] subTitle: error.userInfo[NSLocalizedRecoverySuggestionErrorKey]];
@@ -2635,12 +2638,13 @@ NSInteger diskWriteFailure = 123;
 		[self.bufferFileWriteHandle closeFile];
         self.bufferFileWriteHandle = nil;
 	}
-	[self rescheduleOnMain];
+	[self rescheduleDownload];
 }
 
 #define kMTMinTiVoFileSize 100000
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
+	DDLogVerbose(@"Download URL Connection finished for %@", self);
 	if (self.bufferFileWriteHandle) {
 		[self.bufferFileWriteHandle closeFile];
         self.bufferFileWriteHandle   = nil;
@@ -2659,7 +2663,7 @@ NSInteger diskWriteFailure = 123;
     double downloadedFileSize = self.totalDataDownloaded;
     //Check to make sure a reasonable file size in case there was a problem.
 	if (downloadedFileSize < kMTMinTiVoFileSize) { //Not a good download - reschedule
-        DDLogMajor(@"For show %@, only received %0.0f bytes",self.show, downloadedFileSize);
+        DDLogMajor(@"For show %@, only received %0.0f bytes",self, downloadedFileSize);
         NSString *dataReceived = nil;
         if (self.urlBuffer) {
             dataReceived = [[NSString alloc] initWithData:self.urlBuffer encoding:NSUTF8StringEncoding];
@@ -2670,8 +2674,8 @@ NSInteger diskWriteFailure = 123;
 			NSRange noRecording = [dataReceived rangeOfString:@"not found" options:NSCaseInsensitiveSearch];
 			if (noRecording.location != NSNotFound) { //This is a missing recording
 				DDLogReport(@"Deleted TiVo show; marking %@",self);
+				[self cancel];
 				self.downloadStatus = @(kMTStatusDeleted);
-                [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self.show.tiVo afterDelay:0];
 				return;
             } else {
                 NSRange serverBusy = [dataReceived rangeOfString:@"Server Busy" options:NSCaseInsensitiveSearch];
@@ -2679,7 +2683,7 @@ NSInteger diskWriteFailure = 123;
                     [self.show.tiVo notifyUserWithTitle: @"TiVo Warning: Server Busy."
                                                subTitle: [NSString stringWithFormat:@"If this recurs, your TiVo (%@) may need to be restarted.", self.show.tiVo.tiVo.name]];
                     DDLogReport(@"Warning Server Busy %@", self);
-                    [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+					[self rescheduleDownloadFalseStart];
                     return;
                 } else {
                     NSRange accessForbidden = [dataReceived rangeOfString:@"Access Forbidden" options:NSCaseInsensitiveSearch];
@@ -2687,14 +2691,14 @@ NSInteger diskWriteFailure = 123;
                         [self.show.tiVo notifyUserWithTitle: @"TiVo Warning: Forbidden Access."
                                            subTitle: @"Enable Video Sharing at https://www.tivo.com/tivo-mma/dvrpref.do."];
                         DDLogReport(@"Warning: Forbidden Access %@", self);
-                        [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+						[self rescheduleDownloadFalseStart];
                         return;
                     }
                 }
             }
 		}
 		DDLogMajor(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
-		[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+		[self rescheduleDownloadFalseStart];
 	} else {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
         double filePercent = downloadedFileSize / self.show.fileSize*100;
@@ -2729,7 +2733,7 @@ NSInteger diskWriteFailure = 123;
                [self handleNewTSChannel];
            } else {
                 //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
-                DDLogReport(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self.show,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
+                DDLogReport(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
                 [self notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
                              subTitle:@"Transfer is too short" ];
 			   self.downloadStatus = [self postDownloadState];

@@ -147,6 +147,8 @@ __DDLOGHERE__
     if (!cell) return;
 	cell.doubleValue = download.processProgress;
 	cell.rightText.stringValue = download.showStatus;
+	cell.leftText.toolTip = nil;
+	cell.rightText.toolTip = nil;
     NSString * timeLeft = download.timeLeft;
     if (timeLeft != nil) {
         NSString * mySpeed = [NSString stringFromBytesPerSecond: download.speed];

@@ -224,7 +224,7 @@ __DDLOGHERE__
 
 	if (!_download.isCanceled && _shouldReschedule){
 		_myTaskChain.beingRescheduled = YES;
-		[_download rescheduleShowWithDecrementRetries:@YES];
+		[_download rescheduleDownload];
     } else {
         // a non-critical task; so just continue
     }
