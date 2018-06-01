@@ -74,6 +74,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 @property (nonatomic, strong) NSDate *startTimeForPerformance;
 @property (nonatomic, assign) double startProgressForPerformance;
+@property (nonatomic, assign) NSTimeInterval downloadDelay;
+@property (nonatomic, strong) NSDate *downloadDelayStart;
+
 @property (nonatomic, strong) NSTimer * performanceTimer;
 @property (nonatomic, assign) int numZeroSpeeds;
 @property (nonatomic, assign) BOOL useTransportStream;
@@ -230,16 +233,11 @@ __DDLOGHERE__
              self.performanceTimer = [MTWeakTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
              [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
          }
+		//if done downloading, then maybe taskchain needs to update progress
 		if (self.downloadStatus.intValue == kMTStatusEncoding) {
-			//if done downloading, then maybe taskchain needs to update progress
-			if (!(_encodeTask.progressCalc || _encodeTask.trackingRegEx)) {
-				self.activeTaskChain.providesProgress = YES;
-			}
+			self.activeTaskChain.providesProgress = !(_encodeTask.progressCalc || _encodeTask.trackingRegEx);
 		} else if (self.downloadStatus.intValue == kMTStatusCaptioning) {
-			//if done downloading, then maybe taskchain needs to update progress
-			if (!(_captionTask.progressCalc || _captionTask.trackingRegEx)) {
-				self.activeTaskChain.providesProgress = YES;
-			}
+			self.activeTaskChain.providesProgress = !(_captionTask.progressCalc || _captionTask.trackingRegEx);
 		}
     } else if ([keyPath isEqualToString:@"processProgress"]) {
         double progressChange = self.processProgress - self.displayedProcessProgress;
@@ -313,24 +311,27 @@ __DDLOGHERE__
 }
 
 -(NSString *) timeLeft {
-    if (!self.isInProgress || self.downloadStatus.intValue == kMTStatusWaiting) return nil;
+	if (self.downloadStatus.intValue == kMTStatusWaiting) {
+		if (!self.downloadDelayStart) return nil;
+		NSTimeInterval actualTimeLeft = self.downloadDelay - [[NSDate date] timeIntervalSinceDate: self.downloadDelayStart];
+		return [NSString stringFromTimeInterval:  actualTimeLeft];
+	}
+    if (!self.isInProgress) return nil;
     if (self.speed == 0.0) return nil;
     NSTimeInterval actualTimeLeft = self.show.fileSize *(1-self.processProgress) /self.speed;
     if (actualTimeLeft == 0.0) return nil;
     return [NSString stringFromTimeInterval:  actualTimeLeft];
 }
 
--(void) updateDownloadDelay: (NSDictionary <NSString *, NSDate *> *)  times {
-	NSDate * start = times[@"start"];
-	NSDate * end = times[@"end"];
-	NSTimeInterval soFar = [[NSDate date] timeIntervalSinceDate: start];
-	NSTimeInterval length = [end timeIntervalSinceDate:start ];
+-(void) updateDownloadDelay {
+	NSTimeInterval soFar = [[NSDate date] timeIntervalSinceDate: self.downloadDelayStart];
+	NSTimeInterval length = self.downloadDelay;
 	if (soFar > length) {
 		self.downloadStatus = @(kMTStatusDownloading);
 		self.processProgress = 0.0;
 	} else {
 		self.processProgress = soFar/length;
-		[self performSelector:@selector(updateDownloadDelay:) withObject:times afterDelay:0.2];
+		[self performSelector:@selector(updateDownloadDelay) withObject:nil afterDelay:0.2];
 	}
 }
 
@@ -1700,7 +1701,9 @@ __DDLOGHERE__
 		self.downloadStatus = @(kMTStatusDownloading);
 	} else {
 		self.downloadStatus = @(kMTStatusWaiting);
-		[self performSelector:@selector(updateDownloadDelay:) withObject:@{@"start": [NSDate date], @"end": [NSDate dateWithTimeIntervalSinceNow:downloadDelay]} afterDelay:0.2];
+		self.downloadDelayStart = [NSDate date];
+		self.downloadDelay = downloadDelay;
+		[self performSelector:@selector(updateDownloadDelay) withObject:nil afterDelay:0.2];
 	}
 
 	if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {

@@ -227,8 +227,8 @@ static BOOL inProgress = NO;
                                     if ([seriesID isKindOfClass:[NSNumber class]] &&
                                         [seriesName isKindOfClass:[NSString class]]) {
                                         NSString * seriesNameNoYear = [[seriesName removeParenthetical] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]; //tvdb adds (2011) to distinguish series
-                                        if ([series isEqualTo:seriesName] ||
-                                             [series isEqualTo:seriesNameNoYear]) {
+                                        if ([series isEqual:seriesName] ||
+                                             [series isEqual:seriesNameNoYear]) {
                                             [seriesIDs insertObject:seriesID.description atIndex:0];
                                         } else {
                                             [seriesIDs addObject:seriesID.description];

@@ -78,10 +78,10 @@ __DDLOGHERE__
     MTTiVo *thisTiVo = [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue manual:NO withID:(int)0 withSerialNumber:TSN ];
     DDLogVerbose(@"Checking Enabled for %@", self);
     for (NSDictionary *description in tiVoManager.savedTiVos) {
-        if ([description[kMTTiVoUserName] isEqualTo:thisTiVo.tiVo.name]) {
+        if ([description[kMTTiVoUserName] isEqual:thisTiVo.tiVo.name]) {
             thisTiVo.tiVoSerialNumber = description[kMTTiVoTSN];
             thisTiVo.enabled = [description[kMTTiVoEnabled] boolValue];
-            if ((description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqualTo:kMTTiVoNullKey]) {
+            if ((description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey]) {
                 thisTiVo.mediaKey = description[kMTTiVoMediaKey];
             }
             DDLogDetail(@"%@ is%@ Enabled", thisTiVo.tiVo.name,thisTiVo.enabled ? @"": @" not");
@@ -108,7 +108,7 @@ __DDLOGHERE__
     tiVo.userName = description[kMTTiVoUserName];
     tiVo.iPAddress = description[kMTTiVoIPAddress];
     MTTiVo *thisTiVo = [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:queue manual:YES withID:[description[kMTTiVoID] intValue] withSerialNumber:description[kMTTiVoTSN]];
-    if ((description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqualTo:kMTTiVoNullKey]) {
+    if ((description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey]) {
         thisTiVo.mediaKey = description[kMTTiVoMediaKey];
     }
     if ([tiVoManager duplicateTiVoFor:thisTiVo]) {
@@ -356,7 +356,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
     if ((newTiVo[kMTTiVoEnabled]  && self.enabled != newEnabled) ||
         (newTiVo[kMTTiVoTSN]      && ! [newTiVo[kMTTiVoTSN]      isEqualToString: self.tiVoSerialNumber]) ||
-        (newTiVo[kMTTiVoMediaKey] && ! [newTiVo[kMTTiVoMediaKey] isEqualToString: self.mediaKey] && ![newTiVo[kMTTiVoMediaKey] isEqualTo:kMTTiVoNullKey])) {
+        (newTiVo[kMTTiVoMediaKey] && ! [newTiVo[kMTTiVoMediaKey] isEqualToString: self.mediaKey] && ![newTiVo[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey])) {
         self.tiVoSerialNumber = (NSString *)newTiVo[kMTTiVoTSN];  //must be after enabled
         self.mediaKey = newTiVo[kMTTiVoMediaKey];
         shouldUpdate = YES;
@@ -852,7 +852,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             parsingShow = NO;
             DDLogVerbose(@"Done loading XML for %@",currentShow);
             for (MTTiVoShow * oldShow in newShows) {
-                if ([oldShow isEqualTo:currentShow]) {
+                if ([oldShow isEqual:currentShow]) {
                     DDLogDetail(@"Skipping duplicate new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested ":@"", currentShow.showTitle, currentShow.showDateString);
                     if (tivoDuplicateBugPossibleStart < 0) {
                         tivoDuplicateBugPossibleStart = itemStart - itemCount;
@@ -873,15 +873,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
            if (self.oneBatch) {
                for (NSString * showID in [self.addedShows copy]) {
                     if ([newShowID isEqualToString:showID]) {
-                        thisShow = currentShow;
-						[tiVoManager replaceProxyInQueue:currentShow]; //check for undeleted
+						thisShow = [tiVoManager replaceProxyInQueue:currentShow]; //check for undeleted
                         DDLogMajor(@"RPC Adding %@ at %@", currentShow, newShowID);
                         [self.addedShows removeObject:showID];
                        break;
                     }
                }
                if (!thisShow) {
-                   DDLogDetail(@"Ignoring show %@", newShowID);
+				   DDLogDetail(@"Ignoring show %@: %@", newShowID, currentShow);
                 }
             } else {
                 thisShow = [previousShowList valueForKey:newShowID];
@@ -898,7 +897,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                     thisShow = currentShow;
                     DDLogDetail(@"Added new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested " : @"", currentShow.showTitle, currentShow.showDateString);
                     //Now check and see if this was in the oldQueue (from last ctivo execution) OR an undeletedShow
-					[tiVoManager replaceProxyInQueue:currentShow];
+					thisShow = [tiVoManager replaceProxyInQueue:currentShow];
                 }
            }
             if (thisShow) {

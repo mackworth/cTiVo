@@ -111,7 +111,7 @@ __DDLOGHERE__
 	
 	//now restore selection
 	NSIndexSet * showIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-		return [selectedShows indexOfObject:obj] !=NSNotFound;
+		return [selectedShows indexOfObjectIdenticalTo:obj] !=NSNotFound;
 	}];
 	
 	[self selectRowIndexes:showIndexes byExtendingSelection:NO];
@@ -149,13 +149,15 @@ __DDLOGHERE__
 	cell.rightText.stringValue = download.showStatus;
 	cell.leftText.toolTip = nil;
 	cell.rightText.toolTip = nil;
-    NSString * timeLeft = download.timeLeft;
-    if (timeLeft != nil) {
-        NSString * mySpeed = [NSString stringFromBytesPerSecond: download.speed];
-        cell.toolTip = [NSString stringWithFormat:@"%@; %0.0f%%; Est time left: %@",mySpeed, download.processProgress* 100, timeLeft];
-    } else if (download.downloadStatus.intValue == kMTStatusWaiting){
-		cell.toolTip = [NSString stringWithFormat:@"%0.0f%% till launch", download.processProgress* 100];
-	} else {
+	NSString * timeLeft = download.timeLeft;  //00:00:00
+    if (timeLeft.length > 3) {
+		if (download.downloadStatus.intValue == kMTStatusWaiting){
+			cell.toolTip = [NSString stringWithFormat:@"%@ seconds till launch", [timeLeft substringFromIndex: timeLeft.length - 2]];
+		} else {
+			NSString * mySpeed = [NSString stringFromBytesPerSecond: download.speed];
+			cell.toolTip = [NSString stringWithFormat:@"%@; %0.0f%%; Est time left: %@",mySpeed, download.processProgress* 100, timeLeft];
+		}
+    } else {
         cell.toolTip = download.show.showTitle;
     }
     [cell setNeedsDisplay:YES];
@@ -738,7 +740,7 @@ __DDLOGHERE__
 
     NSIndexSet * selectionIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
         MTDownload * download = (MTDownload *) obj;
-        return [realShows indexOfObject:download.show] !=NSNotFound;
+        return [realShows indexOfObjectIdenticalTo:download.show] !=NSNotFound;
     }];
 
     //now leave new shows selected
@@ -763,7 +765,7 @@ __DDLOGHERE__
     if (draggedDLs.count == 0) return NO;
     //dragged downloads are proxies, so we need to find the real download objects
     //we use lastCopy as a cheat to better handle "similar" downloads
-    NSMutableArray * realDLs = [NSMutableArray arrayWithCapacity:draggedDLs.count ];
+    NSMutableArray <MTDownload *> * realDLs = [NSMutableArray arrayWithCapacity:draggedDLs.count ];
     NSMutableArray * completedDownloadsBeingMoved =[NSMutableArray array];
     BOOL useLastCopy = draggedDLs.count == self.lastCopy.count;
 

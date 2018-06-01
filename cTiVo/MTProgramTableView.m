@@ -165,7 +165,7 @@ __DDLOGHERE__
 	NSResponder *firstResponder = [[textField window] firstResponder];
 	BOOL inFocus = ([firstResponder isKindOfClass:[NSTextView class]]
 			   && [[textField window] fieldEditor:NO forObject:nil]!=nil
-			   && [textField isEqualTo:(id)((NSTextView *)firstResponder).delegate]
+			   && [textField isEqual:(id)((NSTextView *)firstResponder).delegate]
 					 );
 	
 	return inFocus;

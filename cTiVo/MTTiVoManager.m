@@ -259,32 +259,38 @@ __DDLOGHERE__
         }
         [[NSUserDefaults standardUserDefaults] setInteger:2 forKey:kMTUserDefaultVersion];
     }
-
 }
 
--(NSInteger) findProxyShowInDLQueue:(MTTiVoShow *) showTarget {
-	NSString * targetTivoName = showTarget.tiVo.tiVo.name;
-	return [self.downloadQueue indexOfObjectPassingTest:^BOOL(MTDownload * download, NSUInteger idx, BOOL *stop) {
-		MTTiVoShow * possShow = download.show;
-		if (showTarget.showID != possShow.showID) return NO;
-		if ([possShow.imageString isEqualToString:@"deleted"] ||
-			download.downloadStatus.intValue == kMTStatusDeleted ){
-			if (showTarget.tiVo == possShow.tiVo) return YES;
+-(MTTiVoShow *) replaceProxyInQueue: (MTTiVoShow *) newShow {
+	NSString * targetTivoName = newShow.tiVo.tiVo.name;
+	MTTiVoShow * showToUse = newShow;
+	BOOL changedPriorProxy = NO; //very unlikely case of hitting a deleted show (or proxy) before hitting a reloaded show
+	for (MTDownload * download in self.downloadQueue) {
+		MTTiVoShow * oldShow = download.show;
+		if (oldShow.showID != showToUse.showID) continue;
+		if (oldShow.tiVo != showToUse.tiVo) continue;
+		if ([oldShow.imageString isEqualToString:@"deleted"] || download.downloadStatus.intValue == kMTStatusDeleted ||
+			(oldShow.protectedShow.boolValue && [targetTivoName isEqualToString:[oldShow tempTiVoName]])) {
+			changedPriorProxy = YES;
+			[download convertProxyToRealForShow: showToUse];
+			if (oldShow.protectedShow) {
+				DDLogVerbose(@"Found proxy %@ for download %@ on tiVo %@",showToUse, download, download.show.tiVoName);
+			} else {
+				DDLogMajor(@"Restoring deleted show %@ for download %@", showToUse, download);
+			}
+		} else {
+			//must be a "reloading" of the same show, so let's use older version
+			DDLogMajor(@"Reloaded show %@, using older %@ for %@", newShow, oldShow, download);
+			if (showToUse != newShow && showToUse != oldShow) {
+				DDLogReport(@"Two old proxies for same show? Loaded %@ for %@ and %@ (in %@)", newShow, showToUse, oldShow, download);
+			}
+			showToUse = oldShow;
+			if (changedPriorProxy) {
+				return [self replaceProxyInQueue:oldShow]; //use recursion to fix prior mistake
+			}
 		}
-		if (possShow.protectedShow.boolValue) {
-			return [targetTivoName isEqualToString:[possShow tempTiVoName]];
-		}
-		return NO;
-	}];
-}
-
--(void) replaceProxyInQueue: (MTTiVoShow *) newShow {
-    NSInteger dlIndex;
-    while ((dlIndex =[tiVoManager findProxyShowInDLQueue:newShow]) != NSNotFound) {
-		MTDownload * proxyDL = [tiVoManager downloadQueue][dlIndex];
-		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, dlIndex, proxyDL.show.tiVoName);
-        [proxyDL convertProxyToRealForShow: newShow];
 	}
+	return showToUse;
 }
 
 -(void)checkDownloadQueueForDeletedEntries: (MTTiVo *) tiVo {
@@ -1322,13 +1328,13 @@ __DDLOGHERE__
 
 #pragma mark - Download Management
 
--(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) shows
+-(NSIndexSet *) moveShowsInDownloadQueue:(NSArray <MTDownload *> *) downloads
 								 toIndex:(NSUInteger)insertIndex
 {
-	DDLogDetail(@"moving shows %@ to %ld", shows,insertIndex);
+	DDLogDetail(@"moving shows %@ to %ld", downloads,insertIndex);
 	NSIndexSet * fromIndexSet = [[tiVoManager downloadQueue] indexesOfObjectsPassingTest:
-								 ^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-									return [shows indexOfObject:obj] != NSNotFound;
+								 ^BOOL(MTDownload * download, NSUInteger idx, BOOL *stop) {
+									return [downloads indexOfObjectIdenticalTo:download] != NSNotFound;
 								 }];
 
 	// If any of the removed objects come before the insertion index,
@@ -1336,14 +1342,14 @@ __DDLOGHERE__
     NSMutableArray * dlQueue = [self downloadQueue];
     NSUInteger adjustedInsertIndex = insertIndex -
     [fromIndexSet countOfIndexesInRange:(NSRange){0, insertIndex}];
-    NSRange destinationRange = NSMakeRange(adjustedInsertIndex, shows.count);
+    NSRange destinationRange = NSMakeRange(adjustedInsertIndex, downloads.count);
     NSIndexSet *destinationIndexes = [NSIndexSet indexSetWithIndexesInRange:destinationRange];
-    DDLogVerbose(@"moving shows %@ from %@ to %@", shows,fromIndexSet, destinationIndexes);
+    DDLogVerbose(@"moving shows %@ from %@ to %@", downloads,fromIndexSet, destinationIndexes);
     if (fromIndexSet.count > 0) {
         //objects may be copies, so not in queue already
         [dlQueue removeObjectsAtIndexes: fromIndexSet];
     }
-    [dlQueue insertObjects:shows atIndexes:destinationIndexes];
+    [dlQueue insertObjects:downloads atIndexes:destinationIndexes];
 
 	DDLogDetail(@"Posting DLUpdated notifications");
 	[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:nil];
@@ -1406,7 +1412,7 @@ __DDLOGHERE__
                 submittedAny = YES;
 				[newDownload prepareForDownload:NO];
 				if (nextDownload) {
-                    NSUInteger index = [_downloadQueue indexOfObject:nextDownload];
+                    NSUInteger index = [_downloadQueue indexOfObjectIdenticalTo:nextDownload];
                     if (index == NSNotFound) {
 						DDLogDetail(@"Prev show not found, adding %@ at end",newDownload);
 						[_downloadQueue addObject:newDownload];
@@ -1466,7 +1472,7 @@ __DDLOGHERE__
 			for (MTDownload *oldDownload in _downloadQueue) {  //this is probably unncessary
 				if (oldDownload.show.showID == download.show.showID	) {
 					DDLogMajor(@"Odd: two shows with same ID: %@ in queue v %@", download, oldDownload);
-					index = [_downloadQueue indexOfObject:oldDownload];
+					index = [_downloadQueue indexOfObjectIdenticalTo:oldDownload];
 					break;
 				}
 			}

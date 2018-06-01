@@ -283,7 +283,7 @@ BOOL preventSleepActive = NO;
 }
 
 -(void) launchPseudoEvent {
-    DDLogVerbose(@"PseudoEvent");
+    DDLogDetail(@"PseudoEvent");
     NSEvent *pseudoEvent = [NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:[NSDate timeIntervalSinceReferenceDate] windowNumber:0 context:nil subtype:0 data1:0 data2:0];
     [NSApp postEvent:pseudoEvent atStart:YES];
 

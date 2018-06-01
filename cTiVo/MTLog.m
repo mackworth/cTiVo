@@ -82,7 +82,7 @@
 		BOOL update = currentLevels.count != levels.count;
 		if (!update) {
 			for (NSString * key in currentLevels.allKeys) {
-				if (![currentLevels[key] isEqualTo: levels[key]]) {
+				if (![currentLevels[key] isEqual: levels[key]]) {
 					update = YES;
 					break;
 				}

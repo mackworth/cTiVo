@@ -73,7 +73,7 @@
 -(void)saveState;
 -(MTDownload *) findRealDownload: (MTDownload *) proxyDownload;
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget;
--(void) replaceProxyInQueue: (MTTiVoShow *) newShow;
+-(MTTiVoShow *) replaceProxyInQueue: (MTTiVoShow *) newShow;
 -(void) checkDownloadQueueForDeletedEntries: (MTTiVo *) tiVo;
 
 -(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo;
