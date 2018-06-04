@@ -358,6 +358,8 @@ __DDLOGHERE__
 		result.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
 	} else if ([tableColumn.identifier isEqualToString:@"SkipMode"]) {
 		switch (download.show.rpcSkipMode.intValue) {
+			case 4:  result.imageView.image = [NSImage imageNamed:@"skipModeQuestion"];
+				break;
 			case 3:  result.imageView.image = [NSImage imageNamed:@"skipMode"];
 				break;
 			case 2:  result.imageView.image = [NSImage imageNamed:@"skipModeSlash"];

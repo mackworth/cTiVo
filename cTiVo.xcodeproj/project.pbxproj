@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */; };
 		1E02BDE12056E9BB000B9F56 /* CommercialHelpFile.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 1E02BDE02056E9BB000B9F56 /* CommercialHelpFile.rtfd */; };
+		1E09D27520C5A91100A56B83 /* skipModeQuestion@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E09D27420C5A90F00A56B83 /* skipModeQuestion@2x.png */; };
 		1E09DD422099449D0010CAB4 /* MTTextFieldNoInteraction.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E09DD412099449D0010CAB4 /* MTTextFieldNoInteraction.m */; };
 		1E0C5DD9170236B30015C55D /* recent-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E0C5DD8170236B30015C55D /* recent-recording.png */; };
 		1E152981201006B0000D1705 /* MTOpenPanelDefaultView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E152980201006B0000D1705 /* MTOpenPanelDefaultView.xib */; };
@@ -310,6 +311,7 @@
 /* Begin PBXFileReference section */
 		1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowDrawer.xib; sourceTree = "<group>"; };
 		1E02BDE02056E9BB000B9F56 /* CommercialHelpFile.rtfd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.rtfd; path = CommercialHelpFile.rtfd; sourceTree = "<group>"; };
+		1E09D27420C5A90F00A56B83 /* skipModeQuestion@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skipModeQuestion@2x.png"; sourceTree = "<group>"; };
 		1E09DD402099449D0010CAB4 /* MTTextFieldNoInteraction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTTextFieldNoInteraction.h; sourceTree = "<group>"; };
 		1E09DD412099449D0010CAB4 /* MTTextFieldNoInteraction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTTextFieldNoInteraction.m; sourceTree = "<group>"; };
 		1E0C5DD8170236B30015C55D /* recent-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "recent-recording.png"; sourceTree = "<group>"; };
@@ -775,6 +777,7 @@
 				1E7A4CE520422E340081884D /* skipMode@2x.png */,
 				1E7A4CE620422E350081884D /* skipModeInverted@2x.png */,
 				1E20061C205441D6003FA2D9 /* skipModeSlash@2x.png */,
+				1E09D27420C5A90F00A56B83 /* skipModeQuestion@2x.png */,
 				1E684A7A16E2C50B000F5C6E /* suggestion-recording.png */,
 				1E964C9B1882768A00C19046 /* suggestion-recording@2x.png */,
 				1EDE323819C502980052E6C6 /* tivo.png */,
@@ -1220,6 +1223,7 @@
 				1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */,
 				D209B6AA1813305E004E733B /* FindTiVoHelpFile.rtf in Resources */,
 				1E964C9C1882768A00C19046 /* copyright@2x.png in Resources */,
+				1E09D27520C5A91100A56B83 /* skipModeQuestion@2x.png in Resources */,
 				1E964CA21882768A00C19046 /* recent-recording@2x.png in Resources */,
 				1E7A4CE720422E350081884D /* skipMode@2x.png in Resources */,
 				1E684A7D16E2C50B000F5C6E /* expired-recording.png in Resources */,

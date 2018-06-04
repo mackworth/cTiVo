@@ -285,11 +285,11 @@ __DDLOGHERE__
         if (recentSpeed < 0.0) recentSpeed = 0.0;
         if (recentSpeed == 0.0) {
             self.numZeroSpeeds ++;
-            if (self.numZeroSpeeds > 3) {
+            if (self.numZeroSpeeds > 9) {
                 //not getting much data; hide meter
-                if (self.numZeroSpeeds == 4) {
+                if (self.numZeroSpeeds == 10) {
                     self.speed = 0.0;
-                    DDLogVerbose(@"Four measurements of zero; hide speed");
+                    DDLogVerbose(@"ten measurements of zero; hide speed");
                     [self progressUpdated];
                 }
             }
@@ -773,7 +773,7 @@ __DDLOGHERE__
 {
 	NSMutableArray *arguments = [NSMutableArray array];
     MTFormat * f = self.encodeFormat;
-	BOOL includeEDL = [f.comSkip boolValue] && self.skipCommercials && !self.useSkipMode && [self isArgument:f.edlFlag ];
+	BOOL includeEDL = [f.comSkip boolValue] && self.skipCommercials && [self isArgument:f.edlFlag ];
 	[self addArguments:f.encoderEarlyVideoOptions toArray:arguments];
 	[self addArguments:f.encoderEarlyAudioOptions toArray:arguments];
 	[self addArguments:f.encoderEarlyOtherOptions toArray:arguments];
@@ -1142,7 +1142,7 @@ __DDLOGHERE__
     if (srtEntries.count && edlEntries.count) {
         NSArray *correctedSrts = [srtEntries processWithEDLs:edlEntries];
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-            NSString *oldCaptionPath = [[self.captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
+            NSString *oldCaptionPath = [[self.captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"-deleted.srt"];
             [[NSFileManager defaultManager] moveItemAtPath:self.captionFilePath toPath:oldCaptionPath error:nil];
         }
         if (correctedSrts.count) {
@@ -1909,11 +1909,11 @@ __DDLOGHERE__
 		//SkipMode list not here yet, but still expected, so need to wait
 		if (self.downloadStatus.intValue == kMTStatusNew) {
 			self.downloadStatus = @(kMTStatusSkipModeWaitInitial);
-		}
-		if (self.show.hasSkipModeInfo) {
+			//will recurse to update timers
+		} else if (self.show.hasSkipModeInfo) {
 			//now we want the skipmode EDL, but it hasn't been pulled over yet
 			[self stopWaitSkipModeTimer];
-			DDLogReport(@"xx Now Waiting for SkipMode EDL %@", self);
+			DDLogDetail(@"Now Waiting for SkipMode EDL %@", self);
 			[tiVoManager getSkipModeEDLWhenPossible:self];
 		} else {
 			[self startWaitSkipModeTimer];

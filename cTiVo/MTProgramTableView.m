@@ -670,6 +670,8 @@ __DDLOGHERE__
 			whichImage = thisShow.rpcSkipMode.intValue;
 		}
 		switch (whichImage) {
+			case 4:  result.imageView.image = [NSImage imageNamed:@"skipModeQuestion"];
+				break;
 			case 3:  result.imageView.image = [NSImage imageNamed:@"skipMode"];
 				break;
 			case 2:  result.imageView.image = [NSImage imageNamed:@"skipModeSlash"];
