@@ -12,6 +12,8 @@
 
 @interface MTPreferencesViewController ()
 @property (weak, nonatomic) IBOutlet NSPopUpButton *directoryFormatPopup;
+@property (weak, nonatomic) IBOutlet NSMenuItem *perModuleMenuItem;
+@property (weak, nonatomic) IBOutlet NSMenuItem *tiVoArtworkItem;
 
 @end
 
@@ -45,6 +47,20 @@
     return YES;
 }
 
+-(BOOL) enableTivoArtwork {
+	for (MTTiVo *tiVo in tiVoManager.tiVoList) {
+		if (tiVo.supportsRPC) return YES;
+	}
+	return NO;
+}
+
+-(BOOL) enablePerModule {
+	if ([[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel] > 0) {
+		return NO;
+	}
+	return YES;
+
+}
 -(IBAction)commercialHelp:(id)sender {
 	MTHelpViewController *helpController = [[MTHelpViewController alloc] init];
 	[helpController loadResource:@"CommercialHelpFile"];

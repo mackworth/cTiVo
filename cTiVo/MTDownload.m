@@ -1000,7 +1000,6 @@ __DDLOGHERE__
         return _encodeTask;
     }
     MTTask *encodeTask = [MTTask taskWithName:@"encode" download:self];
-	__weak __typeof__(MTTask *) weakEncode = encodeTask;
 	
     NSString * encoderPath = [self encoderPath];
     if (!encoderPath) return nil;
@@ -1047,17 +1046,46 @@ __DDLOGHERE__
 
         return YES;
     };
-
+	NSString * errFilePath = encodeTask.errorFilePath; //hang onto for cleanup.
     encodeTask.cleanupHandler = ^(){
 		__typeof__(self) strongSelf = weakSelf;
 		if (!strongSelf) return;
-       if (strongSelf.activeURLConnection || ! strongSelf.shouldSimulEncode) {  //else we've already checked
-            if ([strongSelf checkLogForAudio: weakEncode.errorFilePath] ) {
-                [strongSelf handleNewTSChannel];
-            }
-            strongSelf.processProgress = 1.0;
-        }
-       if (strongSelf.isCanceled) {
+		double downloadedSize = strongSelf.totalDataDownloaded;
+		double filePercent =  downloadedSize/ strongSelf.show.fileSize*100;
+		if (filePercent > 0 &&
+			(filePercent < 70.0 || (!strongSelf.useTransportStream && filePercent < 80.0 ))) {
+			//hmm, doesn't look like it's big enough  (80% for PS; 70% for TS
+			BOOL foundAudioOnly = NO;
+			if (!strongSelf.useTransportStream ) {
+				if ([strongSelf checkLogForAudio: errFilePath]) {
+					foundAudioOnly = YES;
+				}
+				if (!strongSelf.encodeFormat.testsForAudioOnly && filePercent > 2.0 && filePercent < 25.0) {
+					//decrypted file, so encoder won't check, so rely on size alone
+					foundAudioOnly = YES;
+				}
+			}
+			
+			if ( strongSelf.encodeFormat.isTestPS) {
+				// if a test, then we only try once.
+				[strongSelf markMyChannelAsTSOnly];
+				[strongSelf cancel];
+				if (foundAudioOnly) {
+					strongSelf.downloadStatus = @(kMTStatusFailed);
+				} else {
+					strongSelf.downloadStatus = @(kMTStatusDone);
+				}
+				strongSelf.processProgress = 1.0;
+			} else if (foundAudioOnly) {
+				[strongSelf handleNewTSChannel];
+			} else {
+				  //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
+				DDLogReport(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", strongSelf.show, strongSelf.show.fileSize/1000, downloadedSize/1000, 100.0 * downloadedSize / strongSelf.show.fileSize);
+				[strongSelf notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
+								 subTitle:@"Transfer is too short" ];
+			}
+		}
+		if (strongSelf.isCanceled) {
            [strongSelf deleteVideoFile];
        }
     };
@@ -1869,7 +1897,7 @@ __DDLOGHERE__
 				break;
 			case kMTStatusSkipModeWaitInitial:
 				DDLogReport(@"XXX Was waiting for SkipMode, but now launching %@", self);
-			self.downloadStatus = @(kMTStatusNew);
+				self.downloadStatus = @(kMTStatusNew);
 				[self checkQueue];
 				break;
 			case kMTStatusSkipModeWaitEnd:
@@ -1904,6 +1932,7 @@ __DDLOGHERE__
 		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
 			DDLogMajor(@"Launching comskip post-processing %@", self);
 			self.downloadStatus = @kMTStatusAwaitingPostCommercial ;
+			[self checkQueue];
 		}
 	} else {
 		//SkipMode list not here yet, but still expected, so need to wait
@@ -2197,7 +2226,9 @@ __DDLOGHERE__
     if (self.activeURLConnection) {
         [self.activeURLConnection cancel];
         self.activeURLConnection = nil;
-		self.show.tiVo.lastDownloadEnded = [NSDate date];
+		if (self.downloadStatus.intValue == kMTStatusDownloading) {
+			self.show.tiVo.lastDownloadEnded = [NSDate date];
+		}
 	}
     if (self.activeTaskChain.isRunning) {
         [self.activeTaskChain cancel];
@@ -2591,43 +2622,8 @@ NSInteger diskWriteFailure = 123;
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
         double filePercent = downloadedFileSize / self.show.fileSize*100;
         DDLogDetail(@"finished loading TiVo file: %0.1f of %0.1f KB expected; %0.1f%% ", downloadedFileSize/1000, self.show.fileSize/1000, filePercent);
-		if (filePercent < 70.0 ||
-             (!self.useTransportStream && filePercent < 80.0 )) {
-                 //hmm, doesn't look like it's big enough  (80% for PS; 70% for TS
-            BOOL foundAudioOnly = NO;
-            if (!self.useTransportStream ) {
-                if ([self checkLogForAudio: _encodeTask.errorFilePath]) {
-                    foundAudioOnly = YES;
-                }
-                if (!self.encodeFormat.testsForAudioOnly && filePercent > 2.0 && filePercent < 25.0) {
-                    //decrypted file, so encoder won't check, so rely on size alone
-                    foundAudioOnly = YES;
-                }
-            }
-
-            if ( self.encodeFormat.isTestPS) {
-                // if a test, then we only try once.
-                if (!self.isDone) {
-                    [self cancel];
-                    if (foundAudioOnly) {
-                       self.downloadStatus = @(kMTStatusFailed);
-                    } else {
-                        self.downloadStatus = @(kMTStatusDone);
-                    }
-                    self.processProgress = 1.0;
-                }
-				[self checkQueue];
-           } else if (foundAudioOnly) {
-               [self handleNewTSChannel];
-           } else {
-                //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
-                DDLogReport(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
-                [self notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
-                             subTitle:@"Transfer is too short" ];
-			   self.downloadStatus = [self postDownloadState];
-		   }
-		} else {
-			self.downloadStatus = [self postDownloadState];
+		if (filePercent > 80.0 || (self.useTransportStream && filePercent > 70.0 )) {
+			//hmm, looks like it's big enough  (80% for PS; 70% for TS
 			self.show.fileSize = downloadedFileSize;  //More accurate file size
             if ([self.bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
                 if ([[self.bufferFilePath substringFromIndex:self.bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame  && !self.isCanceled) { //We finished a complete download so mark it so
@@ -2635,12 +2631,9 @@ NSInteger diskWriteFailure = 123;
                 }
             }
 		}
+		self.downloadStatus = [self postDownloadState];
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self.show];
-        //        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadRowChanged object:self];
- //		NSLog(@"File size after reset %lf %lf",self.show.fileSize,downloadedFileSize);
-
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTransferDidFinish object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
-//        bufferFileReadHandle = nil;
 	}
 }
 
