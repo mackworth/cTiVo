@@ -158,7 +158,7 @@
              [data bytes],
              data.length,
 				   0, 0)) {
-		NSLog(@"Error %d for setting %@ to %@",errno, key, value);
+		DDLogAlways(@"XAttr error %d for setting %@ to %@ for file %@", errno, key, value, self);
 	}
 }
 

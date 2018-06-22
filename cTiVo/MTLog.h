@@ -71,7 +71,7 @@ VERBOSE is reused
 #define DDLogMajor(frmt, ...)    LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagWarning, 0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
 #define DDLogDetail(frmt, ...)   LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagInfo,    0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
 #define DDLogVerbose(frmt, ...)  LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagDebug,   0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
-
+#define DDLogAlways(frmt, ...)   LOG_MACRO(LOG_ASYNC_ENABLED, DDLogLevelAll, DDLogFlagWarning, 0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
 
 
 #define __DDLOGHERE__  static DDLogLevel ddLogLevel = LOG_LEVEL_REPORT; + (DDLogLevel)ddLogLevel { return ddLogLevel; }+ (void)ddSetLogLevel:(DDLogLevel)logLevel {ddLogLevel = logLevel;}

@@ -214,8 +214,12 @@ fi
 # figure out the duration after cutting, for the progress indicator
 original_duration=$(timestamp_to_seconds $original_duration)
 
-cut_duration=$(awk "BEGIN {total=0} {total += ($original_duration < \$2 ? $original_duration : \$2)-\$1} END {print total}" "$edl_file")
-duration=$(echo "$original_duration-$cut_duration" | bc -l)
+if [ -s "$edl_file" ]; then
+  cut_duration=$(awk "BEGIN {total=0} {total += ($original_duration < \$2 ? $original_duration : \$2)-\$1} END {print total}" "$edl_file")
+  duration=$(echo "$original_duration-$cut_duration" | bc -l)
+else
+  duration=$original_duration
+fi
 
 # look for first video and audio stream in input file
 audio_line=$(echo "$file_info" | /usr/bin/perl -ne 'if (/^\s*Stream #(\d:\d).*Audio:.*/) {print "$1,$_"; exit}')

@@ -18,7 +18,6 @@
 }
 
 @property (nonatomic, strong) NSArray *sortedDownloads;
-@property (nonatomic, weak) IBOutlet NSTextField *performanceLabel;
 
 
 -(BOOL)playVideo;

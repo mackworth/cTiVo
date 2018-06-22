@@ -73,7 +73,30 @@ __DDLOGHERE__
 -(IBAction)netflixButton:(NSButton *) sender {
 	[self.selectedTiVo sendURL: @"x-tivo:netflix:netflix"];
 }
-
+- (IBAction)serviceMenuSelected:(NSPopUpButton *)sender {
+	NSMenuItem * item = sender.selectedItem;
+	if (!item) return;
+	NSDictionary * commands = @{
+	  @"Netflix (html)" : @"x-tivo:netflix:netflix",
+	  @"Plex" 			: @"x-tivo:web:https://plex.tv/web/tv/tivo",
+//	  @"Spotify" 		: @"x-tivo:web:https://d27nv3bwly96dm.cloudfront.net/indexOperav2.html",
+	  @"Vewd" 			: @"x-tivo:web:tvstore",
+	  @"Vewd Apps" 	    : @"x-tivo:web:tvstore:https://tivo.tvstore.opera.com/?startwith=myapps",
+	  @"iHeart Radio" 	: @"x-tivo:web:https://tv.iheart.com/tivo/",
+//	  @"YouTube Flash" 	: @"x-tivo:flash:uuid:B8CEA236-0C3D-41DA-9711-ED220480778E",
+	  @"YouTube HTML" 	: @"x-tivo:web:https://www.youtube.com/tv",
+	  @"Amazon Prime" 	: @"x-tivo:web:https://atv-ext.amazon.com/cdp/resources/app_host/index.html?deviceTypeID=A3UXGKN0EORVOF",
+	  @"Vudu" 			: @"x-tivo:vudu:vudu",
+//	  @"Amazon"			: @"x-tivo:hbogo:hbogo"
+	  
+//	  @"Amazon" 		: @"x-tivo:hme:uuid:35FE011C-3850-2228-FBC5-1B9EDBBE5863",
+//	  @"Hulu Plus" 		: @"x-tivo:flash:uuid:802897EB-D16B-40C8-AEEF-0CCADB480559",
+//	  @"AOL On"			: @"x-tivo:flash:uuid:EA1DEF9D-D346-4284-91A0-FEA8EAF4CD39",
+//	  @"Launchpad" 		: @"x-tivo:flash:uuid:545E064D-C899-407E-9814-69A021D68DAD"
+	  };
+	[self.selectedTiVo sendURL: commands[item.title]];
+	 
+}
 
 -(IBAction)buttonPressed:(NSButton *)sender {
 	if (!sender.title) return;

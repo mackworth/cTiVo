@@ -1050,6 +1050,10 @@ __DDLOGHERE__
     encodeTask.cleanupHandler = ^(){
 		__typeof__(self) strongSelf = weakSelf;
 		if (!strongSelf) return;
+		if (strongSelf.isCanceled) {
+			[strongSelf deleteVideoFile];
+			return;
+		}
 		double downloadedSize = strongSelf.totalDataDownloaded;
 		double filePercent =  downloadedSize/ strongSelf.show.fileSize*100;
 		if (filePercent > 0 &&
@@ -1085,9 +1089,6 @@ __DDLOGHERE__
 								 subTitle:@"Transfer is too short" ];
 			}
 		}
-		if (strongSelf.isCanceled) {
-           [strongSelf deleteVideoFile];
-       }
     };
 
     encodeTask.terminationHandler = nil;
@@ -1373,6 +1374,10 @@ __DDLOGHERE__
 
         commercialTask.completionHandler = ^BOOL{
 			__typeof__(self) strongSelf = weakSelf;
+			if (! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.commercialFilePath] ) {
+				DDLogMajor(@"Warning: %@: File %@ not found after comskip completion", weakSelf, strongSelf.commercialFilePath );
+				return NO;
+			}
 
             DDLogMajor(@"Finished detecting commercials in %@",strongSelf);
             strongSelf.show.edlList = [NSArray getFromEDLFile:strongSelf.commercialFilePath];
@@ -1384,12 +1389,12 @@ __DDLOGHERE__
 			}
 #endif
 			if (postCommercialing) {
-				MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
 				NSArray <MTEdl *> *edls = self.show.edlList;
 				if ( edls.count > 0) {
+					MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
 					[edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength keepingCommercials: !self.shouldSkipCommercials ];
+					MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
 				}
-				MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
 				[strongSelf finalFinalProcessing];
 			} else {
 				strongSelf.downloadStatus = @(kMTStatusCommercialed);
@@ -1529,13 +1534,16 @@ __DDLOGHERE__
 	self.isCanceled = NO;
 	self.isRescheduled = NO;
     self.progressAt100Percent = nil;  //Reset end of progress failure delay
-    //Before starting make sure we can launch.
-	if (![self encoderPath] || ! [self configureFiles]) {
-        DDLogReport(@"Cancelling launch");
-        self.downloadStatus = @(kMTStatusFailed);
-        self.processProgress = 1.0;
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
+	//Before starting make sure we can launch.
+	if (![self encoderPath]) {
+		self.downloadStatus = @(kMTStatusFailed);
+		self.processProgress = 1.0;
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
 		return;
+	}
+	if ( ! [self configureFiles]) {
+        DDLogReport(@"Cancelling launch");
+		[self rescheduleDownloadFalseStart];
 	}
 
 	self.decryptTask = nil;

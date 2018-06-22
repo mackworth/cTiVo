@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14113" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14113"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -25,7 +25,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="283" y="305" width="309" height="880"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1418"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
             <view key="contentView" id="vq2-xz-oxl">
                 <rect key="frame" x="0.0" y="0.0" width="309" height="880"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -33,7 +33,7 @@
                     <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YLU-ny-jW3" userLabel="TiVoList">
                         <rect key="frame" x="18" y="848" width="274" height="26"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
-                        <popUpButtonCell key="cell" type="push" title="TiVo" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingMiddle" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="aRA-69-m6v" id="Dox-iV-9FR">
+                        <popUpButtonCell key="cell" type="push" title="TiVo" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingMiddle" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyUpOrDown" inset="2" selectedItem="aRA-69-m6v" id="Dox-iV-9FR">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" size="16" name=".AppleSystemUIFont"/>
                             <menu key="menu" id="Yda-nE-Gpr">
@@ -638,6 +638,35 @@ DQ
                                     <action selector="buttonPressed:" target="-2" id="sWm-eh-Qh6"/>
                                 </connections>
                             </button>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b46-Jd-3yw" userLabel="Services">
+                                <rect key="frame" x="61" y="220" width="180" height="26"/>
+								<autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="Netflix" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyUpOrDown" inset="2" selectedItem="Ona-3M-VKK" id="M3B-wH-ZD4">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="2K4-cf-PqX">
+                                        <items>
+                                            <menuItem title="Netflix" state="on" image="skipMode" id="Ona-3M-VKK"/>
+                                            <menuItem title="Plex" id="16D-Wd-WgH"/>
+                                            <menuItem title="Spotify" id="lZG-tH-4CT"/>
+                                            <menuItem title="Opera TV Store" id="kuw-ha-mJi"/>
+                                            <menuItem title="My Opera Apps" id="k33-DA-eDt"/>
+                                            <menuItem title="iHeart Radio" id="e7O-cA-hNz"/>
+                                            <menuItem title="YouTube Flash" id="T1G-Sj-PHo"/>
+                                            <menuItem title="YouTube HTML" id="lVn-pZ-VUa"/>
+                                            <menuItem title="Amazon Prime" id="lN3-8S-OHi"/>
+                                            <menuItem title="Vudu" id="m37-ZE-Ukd"/>
+                                            <menuItem title="Amazon" id="h8J-3b-7Qm"/>
+                                            <menuItem title="Hulu Plus" id="Gd2-7I-as2"/>
+                                            <menuItem title="AOL On" id="4qC-4I-kgU"/>
+                                            <menuItem title="Launchpad" id="AjM-x8-d8O"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                                <connections>
+                                    <action selector="serviceMenuSelected:" target="-2" id="g5b-Lw-T1p"/>
+                                </connections>
+                            </popUpButton>
                         </subviews>
                     </customView>
                 </subviews>
@@ -650,5 +679,6 @@ DQ
     </objects>
     <resources>
         <image name="PeanutRemote" width="309" height="880"/>
+        <image name="skipMode" width="34" height="22"/>
     </resources>
 </document>

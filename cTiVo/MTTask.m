@@ -208,6 +208,7 @@ __DDLOGHERE__
     } else {
         if (_completionHandler) {
 			if(!_completionHandler()) { //The task actually failed
+				_completionHandler = nil;
 				[self failedTaskCompletion];
 				return;
 			}

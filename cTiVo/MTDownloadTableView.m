@@ -12,7 +12,7 @@
 #import "MTWeakTimer.h"
 
 @interface MTDownloadTableView ()
-
+@property (nonatomic, weak) IBOutlet NSTextField *performanceLabel;
 @property (nonatomic, readonly) BOOL showingProgramsColumn;
 @property (nonatomic, strong) NSTimer *updateTimer;
 @property (nonatomic, strong) NSArray <MTDownload *> * lastCopy;
@@ -163,28 +163,25 @@ __DDLOGHERE__
     [cell setNeedsDisplay:YES];
 
 }
--(void)updateProgress:(id) sender
-{
-    MTDownload * download = nil;
+-(void)updateProgress:(id) sender {
     if ([sender isKindOfClass: [NSNotification class]]) {
-        MTDownload * possDownload = ((NSNotification *)sender).object;
-        if ([possDownload isKindOfClass: [MTDownload class]]) {
-            download = possDownload;
+        MTDownload * download = ((NSNotification *)sender).object;
+        if ([download isKindOfClass: [MTDownload class]]) {
+			NSString *progressColumn = @"Series";
+			if (self.showingStageColumn) {
+				progressColumn = @"DL Stage";
+			} else if (self.showingProgramsColumn) {
+				progressColumn = @"Programs";
+			}
+			NSInteger progressIndex = [self columnWithIdentifier:progressColumn];
+			NSUInteger i = [self.sortedDownloads indexOfObjectIdenticalTo:download];
+			if (i != NSNotFound) {
+				MTProgressindicator *cell = [self viewAtColumn:progressIndex row:i makeIfNecessary:NO];
+				[self updateProgressInCell: cell forDL: download];
+				cell.displayProgress = YES;
+				
+			}
         }
-    }
-    NSString *progressColumn = @"Series";
-    if (self.showingStageColumn) {
-        progressColumn = @"DL Stage";
-    } else if (self.showingProgramsColumn) {
-        progressColumn = @"Programs";
-    }
-    NSInteger progressIndex = [self columnWithIdentifier:progressColumn];
-    NSUInteger i = [self.sortedDownloads indexOfObject:download];
-    if (i != NSNotFound) {
-        MTProgressindicator *cell = [self viewAtColumn:progressIndex row:i makeIfNecessary:NO];
-        [self updateProgressInCell: cell forDL: download];
-        cell.displayProgress = YES;
-
     }
     if (!tiVoManager.anyTivoActive) {//somewhat expensive
         [self.performanceLabel setHidden:YES];
@@ -414,8 +411,8 @@ __DDLOGHERE__
 		 	(download.isNew ||
 			 status == kMTStatusSkipModeWaitEnd ||
 			 (download.isInProgress && download.markCommercials)) &&
-			!protected &&
-		 	[download.show.tiVo supportsRPC] &&
+			download.show.mightHaveSkipModeInfo &&
+		 	!protected &&
 		 	(download.encodeFormat.canMarkCommercials || download.encodeFormat.canSkip)];
 		
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {

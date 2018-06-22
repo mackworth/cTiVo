@@ -1073,6 +1073,17 @@ static NSArray * imageResponseTemplate = nil;
 	   }];
 }
 
+-(void) checkServices {
+	DDLogDetail(@"Asking What services are available:");
+	[self sendRpcRequest:@"uiDestinationInstanceSearch"
+				 monitor:NO
+				withData:@{@"noLimit":@(YES),
+						   @"uiDestinationType":@"flash"}   //classicUI, hme, web, flash
+	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+		   DDLogReport(@"sent checkService request; got %@", jsonResponse);
+	   }];
+}
+
 -(void) whatsOnSearchWithCompletion: (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler {
 	DDLogDetail(@"Asking What's on:");
 	[self sendRpcRequest:@"whatsOnSearch"
