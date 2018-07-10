@@ -22,7 +22,7 @@
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
 #ifdef DEBUG
-#import "DDTTYLogger.h"
+#import "DDOSLogger.h"
 #else
 #import "CrashlyticsLogger.h"
 #import "Crashlytics/crashlytics.h"
@@ -102,15 +102,8 @@ void signalHandler(int signal)
 
 #ifdef DEBUG
     MTLogFormatter * ttyLogFormat = [MTLogFormatter new];
-	[DDLog addLogger:[DDTTYLogger sharedInstance]];
-	[[DDTTYLogger sharedInstance] setLogFormatter:ttyLogFormat];
-	
-	[[DDTTYLogger sharedInstance] setColorsEnabled:YES];
-#define MakeColor(r, g, b) [NSColor colorWithCalibratedRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f]
-	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(80,0,0) backgroundColor:nil forFlag:LOG_FLAG_REPORT];
-	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(160,0,0) backgroundColor:nil forFlag:LOG_FLAG_MAJOR];
-	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(0,128,0)  backgroundColor:nil forFlag:LOG_FLAG_DETAIL];
-	[[DDTTYLogger sharedInstance] setForegroundColor:MakeColor(160,160,160)  backgroundColor:nil forFlag:LOG_FLAG_VERBOSE];
+	[DDLog addLogger:[DDOSLogger sharedInstance]];
+	[[DDOSLogger sharedInstance] setLogFormatter:ttyLogFormat];
 #else
     MTLogFormatter * crashLyticsLogFormat = [MTLogFormatter new];
     [[CrashlyticsLogger sharedInstance] setLogFormatter: crashLyticsLogFormat];
@@ -217,6 +210,9 @@ void signalHandler(int signal)
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTmpFilesPath options:NSKeyValueObservingOptionInitial context:nil];
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDownloadDirectory options:NSKeyValueObservingOptionInitial context:nil];
 	
+	if (@available(macOS 10.10.3, *)) {
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(thermalStateChanged:) name:NSProcessInfoThermalStateDidChangeNotification object:nil];
+	}
 	[[[NSWorkspace sharedWorkspace] notificationCenter]   addObserver: self selector: @selector(checkVolumes:) name: NSWorkspaceDidWakeNotification object: NULL];
 	[[[NSWorkspace sharedWorkspace] notificationCenter  ] addObserver:self selector:@selector(mountVolume:) name:NSWorkspaceDidMountNotification object:nil];
 	[[[NSWorkspace sharedWorkspace] notificationCenter  ] addObserver:self selector: @selector(unmountVolume:) name:NSWorkspaceDidUnmountNotification object:nil];
@@ -255,43 +251,55 @@ void signalHandler(int signal)
 	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:nil];
 }
 
-IOPMAssertionID assertionID;
-BOOL preventSleepActive = NO;
+NSObject * assertionID = nil;
 
 -(void) preventSleep {
-	if (preventSleepActive) return;
-	CFStringRef reasonForActivity= CFSTR("Downloading Shows");
-	IOReturn success = IOPMAssertionCreateWithName(kIOPMAssertPreventUserIdleSystemSleep,
-                                    kIOPMAssertionLevelOn, reasonForActivity, &assertionID);
-	if (success == kIOReturnSuccess) {
-		DDLogMajor(@"Idle Sleep prevented");
-		preventSleepActive = YES;
-	} else {
-		DDLogReport(@"Idle Sleep prevention failed");
-	}
+	if (assertionID) return;
+	assertionID = [[NSProcessInfo processInfo] beginActivityWithOptions:NSActivityLatencyCritical reason:@"Downloading Shows"];
+	DDLogMajor(@"Idle Sleep prevented");
 }
 
 -(void)allowSleep {
-	if (!preventSleepActive) return;
-   IOReturn success = IOPMAssertionRelease(assertionID);
-	if (success == kIOReturnSuccess) {
-		DDLogMajor(@"Idle Sleep allowed");
-		preventSleepActive = NO;
-	} else {
-		DDLogReport(@"Idle Sleep allowance failed");
-	}
+	if (!assertionID) return;
+	[[NSProcessInfo processInfo] endActivity:assertionID];
+	DDLogMajor(@"Idle Sleep allowed");
+	assertionID = nil;
 }
 
 -(void) launchPseudoEvent {
     DDLogDetail(@"PseudoEvent");
     NSEvent *pseudoEvent = [NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:[NSDate timeIntervalSinceReferenceDate] windowNumber:0 context:nil subtype:0 data1:0 data2:0];
     [NSApp postEvent:pseudoEvent atStart:YES];
-
 }
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
     if (_tiVoGlobalManager) { //in case system calls this before applicationDidLaunch (High Sierra)
         [self showMainWindow:notification];
     }
+}
+
+-(void) thermalStateChanged: (NSNotification *) notification {
+	NSProcessInfo * processInfo  = (NSProcessInfo *) notification.object;
+	if (@available(macOS 10.10.3, *)) {
+		NSString * state;
+		switch (processInfo.thermalState) {
+			case NSProcessInfoThermalStateNominal:
+				state = @"Nominal";
+				break;
+			case NSProcessInfoThermalStateFair:
+				state = @"Fair";
+				break;
+			case NSProcessInfoThermalStateSerious:
+				state = @"Serious";
+				break;
+			case NSProcessInfoThermalStateCritical:
+				state = @"Critical";
+				break;
+			default:
+				state = @"Unknown";
+				break;
+		}
+		DDLogDetail(@"Thermal State Changed to %@ for %@", state, processInfo);
+	}
 }
 
 #pragma mark -

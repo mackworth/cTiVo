@@ -22,7 +22,7 @@
 }
 
 -(instancetype) init {
-	if (self == [super init]) {
+	if ((self = [super init])) {
 		[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDebugLevel options:NSKeyValueObservingOptionInitial context:nil];
 	}
 	return self;
