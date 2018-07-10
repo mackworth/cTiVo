@@ -348,7 +348,7 @@ __DDLOGHERE__
 -(void) setEdlList:(NSArray<MTEdl *> *)edlList {
 	if (_edlList != edlList) {
 		if (edlList.count > 0) {
-			DDLogDetail(@"Got SkipMode EDL for %@: %@", self, edlList);
+			DDLogDetail(@"Got EDL for %@: %@", self, edlList);
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
 		}
 		_edlList = edlList;
@@ -413,7 +413,7 @@ __DDLOGHERE__
 	if ([genre isEqualToString:@"news"] ) return NO; //allow news magazine
 	if ([genre isEqualToString:@"sports"] ) return NO;
 	if (!self.inProgress.boolValue && timeLeft < 0) {
-		DDLogDetail(@"No SkipMode for %@; Past deadline for SkipInfo to arrive by %0.1f", self, -timeLeft);
+		DDLogVerbose(@"No SkipMode for %@; Past deadline for SkipInfo to arrive by %0.1f", self, -timeLeft);
 		return NO;
 	} else {
 		DDLogDetail(@"Looks like we might stil have SkipMode for %@", self);

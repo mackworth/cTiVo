@@ -168,7 +168,10 @@ static BOOL inProgress = NO;
 
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
 		__typeof__(self) strongSelf = weakSelf;
-        if (strongSelf && !error) {
+		if (!strongSelf) return;
+        if (error) {
+			DDLogReport(@"Error %@ communicating with TVDB for token", error);
+		} else {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
             if (httpResponse.statusCode == 200){
                 NSError * jsonError;
@@ -188,8 +191,8 @@ static BOOL inProgress = NO;
             } else {
                 DDLogReport(@"TVDB Token HTTP Response Error %ld: %@, %@", (long)httpResponse.statusCode,  [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], httpResponse.URL );
                 [strongSelf cancelSession];
-            }
-        }
+			}
+		}
 		@synchronized (strongSelf) {
 			inProgress = NO;
 		}

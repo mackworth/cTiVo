@@ -37,7 +37,7 @@
     int totalItemsOnTivo;
     int lastChangeDate;
     int itemStart;
-    int tivoDuplicateBugPossibleStart;
+    int tivoBugDuplicatePossibleStart, tivoBugDuplicateCount;
     int itemCount;
     int numAddedThisBatch; //should be itemCount minus duplicates
     int authenticationTries;
@@ -138,7 +138,7 @@ __DDLOGHERE__
         _storeMediaKeyInKeychain = NO;
         itemStart = 0;
         itemCount = 50;
-        tivoDuplicateBugPossibleStart = -1;
+        tivoBugDuplicatePossibleStart = -1;
         reachabilityContext.version = 0;
         reachabilityContext.info = (__bridge void *)(self);
         reachabilityContext.retain = NULL;
@@ -510,6 +510,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     self.currentNPLStarted = [NSDate date];
     self.oneBatch = !getAll;
     if (getAll) {
+		tivoBugDuplicatePossibleStart = -1; 
         [self updateShowsForRange:NSMakeRange(0, kMTNumberShowToGetFirst)];
     } else {
         [self updateShowsForRange:[self getFirstRange: self.addedShowIndices]];
@@ -688,15 +689,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     if ([_tiVo isKindOfClass:[MTNetService class]]) {
         portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];
     }
-    if (self.oneBatch && tivoDuplicateBugPossibleStart > 0 && range.location >= (NSUInteger) tivoDuplicateBugPossibleStart) {
+    if (self.oneBatch && tivoBugDuplicatePossibleStart > 0 && range.location >= (NSUInteger) tivoBugDuplicatePossibleStart) {
         //Tivo bug: for a requested show range above a certain number, TiVo will return shows "slipped" down by one.
-        //e.g. if number is 30, then range accesses  31 - 35 will actually returns 30-34
-        //You'll see this when we pull the whole show list, one show will be thrown away as a duplicate
-        //That's sufficent for NPL, but if we are told there's a new show at #75 (e.g. a Tivo Suggestion), then
-        //when we pull the XML, we get the wrong one.
-        //To work around, we remember the range prior to that one, and when looking for a single show, we ask for two instead of one, and ignore the extra one.
-        range.length++;
-       DDLogDetail(@"Increasing length by 1 to %@ due to possible TiVo Range bug",NSStringFromRange(range));
+        //e.g. if number is 30, then range accesses  31 - 35 will actually returns 30-34.
+        //You'll see this when we pull the whole show list, some shows will be thrown away as a duplicate
+        //That's sufficent for NPL, but if we are told by RPC that there's a new show at #75 (e.g. a Tivo Suggestion), then
+        //when we request only that show's XML, we get the wrong one.
+        //To work around, we remember the range prior to that one, and when looking for a single show, we ask for more instead of one, and ignore the extras. Worst case, if tivo fixes bug but leaves dups, we only pull a couple extra shows.
+        range.length = range.length + tivoBugDuplicateCount;
+       DDLogDetail(@"Increasing length by %@ to %@ due to possible TiVo Range bug",@(tivoBugDuplicateCount), NSStringFromRange(range));
     }
 
     NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,(int)range.location,(int)range.length] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -854,9 +855,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             for (MTTiVoShow * oldShow in newShows) {
                 if ([oldShow isEqual:currentShow]) {
                     DDLogDetail(@"Skipping duplicate new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested ":@"", currentShow.showTitle, currentShow.showDateString);
-                    if (tivoDuplicateBugPossibleStart < 0) {
-                        tivoDuplicateBugPossibleStart = itemStart - itemCount;
-                    }
+					if (!self.oneBatch) {
+						if (tivoBugDuplicatePossibleStart < 0) {
+                        	tivoBugDuplicatePossibleStart = itemStart - itemCount;
+							tivoBugDuplicateCount = 1;
+						} else {
+							tivoBugDuplicateCount++;
+						}
+					}
                     currentShow = nil;
                     return;
                 }
@@ -894,7 +900,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 						thisShow.imageString = currentShow.imageString;
 					}
                 } else {
-                    thisShow = currentShow;
                     DDLogDetail(@"Added new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested " : @"", currentShow.showTitle, currentShow.showDateString);
                     //Now check and see if this was in the oldQueue (from last ctivo execution) OR an undeletedShow
 					thisShow = [tiVoManager replaceProxyInQueue:currentShow];

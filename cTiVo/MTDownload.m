@@ -240,8 +240,8 @@ __DDLOGHERE__
 			self.activeTaskChain.providesProgress = !(_captionTask.progressCalc || _captionTask.trackingRegEx);
 		}
     } else if ([keyPath isEqualToString:@"processProgress"]) {
-        double progressChange = self.processProgress - self.displayedProcessProgress;
-        if (progressChange > 0.02 || progressChange < -0.02) { //only update if enough change.
+        double progressChange = ABS(self.processProgress - self.displayedProcessProgress);
+        if (progressChange > 0.02) { //only update if enough change.
             DDLogVerbose(@"%@ at %0.1f%%", self, self.processProgress*100);
            self.displayedProcessProgress = self.processProgress;
             [self progressUpdated];
@@ -637,10 +637,23 @@ __DDLOGHERE__
 }
 
 -(long long) spaceAvailable:(NSString *) path {
-    NSError * error = nil;
-    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfFileSystemForPath:path error:&error];
-    if (error || !attributes) return LLONG_MAX;
-    return  ( (NSNumber *)[attributes objectForKey:NSFileSystemFreeSize]).longLongValue;
+	NSError *error = nil;
+	if (@available(macOS 10.13, *)) {
+		NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:path];
+		NSDictionary *results = [fileURL resourceValuesForKeys:@[NSURLVolumeAvailableCapacityForImportantUsageKey] error:&error];
+		NSNumber * value = results[NSURLVolumeAvailableCapacityForImportantUsageKey];
+		if (!value) {
+			DDLogReport(@"Error retrieving resource keys for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
+			return LLONG_MAX;
+		} else {
+			DDLogReport(@"Got space for %@: %@", path, value);
+			return value.longLongValue;
+		}
+	} else {
+    	NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfFileSystemForPath:path error:&error];
+    	if (error || !attributes) return LLONG_MAX;
+    	return  ( (NSNumber *)[attributes objectForKey:NSFileSystemFreeSize]).longLongValue;
+	}
 }
 
 -(BOOL)configureFiles
@@ -659,19 +672,19 @@ __DDLOGHERE__
     long long downloadSpace = [self spaceAvailable: self.downloadDirectory];
     long long fileSize = self.show.fileSize;
     if (!self.encodeFormat.isTestPS) {
-		DDLogVerbose(@"Checking Space Available: %lld tmp and %lld file", tmpSpace, downloadSpace);
+		DDLogVerbose(@"Checking Space Available: %lldMB tmp and %lldMB file", tmpSpace/1000000, downloadSpace/1000000);
 
 		if ((tmpSpace == downloadSpace  && downloadSpace < 1.5 * fileSize) ||
 			// both on same drive
 			(downloadSpace < fileSize))  {
 			[tiVoManager pauseQueue:nil];
+			DDLogReport(@"Disk space problem: %lldMB tmp and %lldMB download vs %lldMB fileSize", tmpSpace/1000000, downloadSpace/1000000, fileSize/1000000);
 			[self notifyUserWithTitle:@"Pausing downloads: Your download disk is low on space" subTitle:@"Probably need to delete some files."];
-			DDLogReport(@"Disk space problem: %lld tmp and %lld download vs %lld fileSize", tmpSpace, downloadSpace, fileSize);
 		   return NO;
 		} else if (tmpSpace < fileSize)  {
 			[tiVoManager pauseQueue:nil];
+			DDLogReport(@"Disk space problem: %lldMB tmp and %lld download vs %lld fileSize", tmpSpace/1000000, downloadSpace/1000000, fileSize/1000000);
 			[self notifyUserWithTitle:@"Pausing downloads: Your temporary or boot drive is low on space" subTitle:@"Probably need to delete some files."];
-			DDLogReport(@"Disk space problem: %lld tmp and %lld download vs %lld fileSize", tmpSpace, downloadSpace, fileSize);
 		   return NO;
 		}
 	}
@@ -682,12 +695,12 @@ __DDLOGHERE__
         warning =  @"Warning: you may be getting low on temporary space";
     }
     if (warning) {
+		DDLogMajor(@"Disk space warning: %lldMB tmp and %lldMB download vs %lldMB biggest show and %lldMB total shows", tmpSpace/1000000, downloadSpace/1000000, tiVoManager.biggestShowToDownload/1000000, tiVoManager.sizeOfShowsToDownload/1000000);
         [tiVoManager notifyForName: self.show.showTitle
                          withTitle: warning
                           subTitle: @"Should you delete some files?"
                           isSticky: NO
          ];
-        DDLogMajor(@"Disk space warning: %lld tmp and %lld download vs %lld biggest show and %lld total shows", tmpSpace, downloadSpace, tiVoManager.biggestShowToDownload, tiVoManager.sizeOfShowsToDownload);
    }
     if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {  //We need to download from the TiVo
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
@@ -1181,12 +1194,14 @@ __DDLOGHERE__
     }
 }
 
--(MTTask *)captionTask  //Captioning is done in parallel with download so no progress indicators are needed.
-{
-    NSAssert(self.exportSubtitles.boolValue,@"captionTask not requested");
+-(MTTask *)captionTask { //Captioning is done in parallel with download so no progress indicators are needed.
+	NSAssert(self.exportSubtitles.boolValue,@"captionTask not requested");
     if (_captionTask) {
         return _captionTask;
     }
+	if (!self.captionFilePath) {
+		self.captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDirectory ,self.baseFileName];
+	}
     MTTask *captionTask = [MTTask taskWithName:@"caption" download:self completionHandler:nil];
     [captionTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ccextractor" ]];
     captionTask.requiresOutputPipe = NO;
@@ -1319,7 +1334,6 @@ __DDLOGHERE__
     if (_commercialTask) {
         return _commercialTask;
     }
-    self.show.edlList = nil; //don't reuse old comskip EDL (may be different .ini etc).
     MTTask *commercialTask = [MTTask taskWithName:@"commercial" download:self completionHandler:nil];
   	[commercialTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"comskip" ]];
     commercialTask.successfulExitCodes = @[@0, @1];
@@ -1416,7 +1430,6 @@ __DDLOGHERE__
 					}
 				 }
              }
-            [strongSelf markCompleteCTiVoFile:strongSelf.commercialFilePath];
             return YES;
         };
     } else {
@@ -1544,6 +1557,7 @@ __DDLOGHERE__
 	if ( ! [self configureFiles]) {
         DDLogReport(@"Cancelling launch");
 		[self rescheduleDownloadFalseStart];
+		return;
 	}
 
 	self.decryptTask = nil;
@@ -2798,14 +2812,17 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(BOOL) mayComskipInFuture {
-	return self.markCommercials && self.useSkipMode && !self.show.hasSkipModeInfo ;
+	return self.markCommercials && self.useSkipMode && !self.hasEDL;
 }
 
 -(BOOL) runComskip {
 	//we're launching now, so should we use comskip or not
 	//Either  we want commercials but won't/can't use SkipMode, OR we want to skip but we don't have list yet. (Can add mark later)
-	return ((self.shouldSkipCommercials || self.shouldMarkCommercials) && (!self.useSkipMode) ) ||
-		   (self.shouldSkipCommercials && !self.show.hasSkipModeList);
+	if (self.hasEDL) return NO;
+	if (self.shouldSkipCommercials) return YES;
+	if (!self.shouldMarkCommercials) return NO;
+	if (self.useSkipMode) return NO;
+	return YES;
 }
 
 -(BOOL) hasEDL { //from either source

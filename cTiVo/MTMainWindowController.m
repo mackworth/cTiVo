@@ -413,7 +413,7 @@ attributes:attribs];
 -(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads {
     NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
     for (MTDownload * download in downloads) {
-		if (!download.isCompletelyDone) {
+		if (!download.isCompletelyDone && ![shows containsObject:download.show]) {
 			[shows addObject:download.show];
 		}
     }
