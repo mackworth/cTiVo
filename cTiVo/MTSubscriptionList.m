@@ -129,6 +129,7 @@
     NSMutableArray * newSubs = [NSMutableArray arrayWithCapacity:shows.count];
     DDLogDetail(@"Subscribing to shows %@", shows);
     for (MTTiVoShow * thisShow in shows) {
+		if ([newSubs findShow:thisShow]) continue; //only one sub per series
         MTSubscription * newSub = [self subscribeShow:thisShow];
         if (newSub) {
             [newSubs addObject:newSub];
@@ -148,13 +149,14 @@
     NSMutableArray * newSubs = [NSMutableArray arrayWithCapacity:downloads.count];
     DDLogDetail(@"Subscribing to downloads %@", downloads);
     for (MTDownload * download in downloads) {
-        MTSubscription * newSub = [self subscribeDownload:download];
+		if ([newSubs findShow:download.show]) continue; //only one sub per series
+		MTSubscription * newSub = [self subscribeDownload:download];
         if (newSub) {
             [newSubs addObject:newSub];
         }
     }
     if (newSubs.count > 0) {
-        [self checkSubscriptionsNew:newSubs];
+		[self checkSubscriptionsNew:newSubs]; //minor bug: will duplicate the subscribing download.
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
         return newSubs;
     } else {

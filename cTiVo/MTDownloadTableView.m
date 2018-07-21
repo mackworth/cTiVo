@@ -10,6 +10,7 @@
 #import "MTPopUpTableCellView.h"
 #import "NSString+Helpers.h"
 #import "MTWeakTimer.h"
+#import "MTSubscriptionList.h"
 
 @interface MTDownloadTableView ()
 @property (nonatomic, weak) IBOutlet NSTextField *performanceLabel;
@@ -494,9 +495,7 @@ __DDLOGHERE__
     } else {
         result.textField.textColor = [NSColor blackColor];
     }
-
    return result;
-    
 }
   
 #pragma mark Drag N Drop support
@@ -569,7 +568,7 @@ __DDLOGHERE__
 - (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
 	//post 10.7
 	if (operation == NSDragOperationDelete) {
-		[myController removeFromDownloadQueue:nil];
+		[self removeFromDownloadQueue:nil];
 	}
 }
 
@@ -597,17 +596,22 @@ __DDLOGHERE__
 	return NO;
 }
 
--(BOOL)selectionContainsCompletedShows
-{
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedShows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
-	for (MTDownload *show in selectedShows) {
+-(NSArray <MTDownload *> *) actionItems {
+	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	if (self.clickedRow < 0 || (NSUInteger) self.clickedRow >= self.sortedDownloads.count || [selectedRowIndexes containsIndex:self.clickedRow]) {
+		return [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
+	} else {
+		return @[self.sortedDownloads[self.clickedRow]];
+	}
+}
+
+-(BOOL)selectionContainsCompletedShows {
+	for (MTDownload *show in self.actionItems) {
 		if ([show videoFileURLWithEncrypted:NO]) {
 			return  YES;
 		}
 	}
 	return NO;
-	
 }
 
 - (IBAction)clearHistory:(id)sender {
@@ -620,42 +624,49 @@ __DDLOGHERE__
 	}
 }
 
--(BOOL)playVideo
-{
-	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedDownloads = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
-    for (MTDownload *download in selectedDownloads) {
+-(IBAction)reschedule:(id) sender {
+	[tiVoManager rescheduleDownloads:self.actionItems];
+}
+
+-(IBAction)subscribe:(id)sender {
+	[tiVoManager.subscribedShows addSubscriptionsDL:self.actionItems];
+}
+
+-(BOOL) confirmCancel:(NSString *) title {
+	NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",title] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@" "];
+	myAlert.alertStyle = NSCriticalAlertStyle;
+	NSInteger result = [myAlert runModal];
+	return (result == NSAlertAlternateReturn);
+	
+}
+
+-(IBAction)removeFromDownloadQueue:(id)sender {
+	NSArray <MTDownload *> * itemsToRemove = self.actionItems;
+	for (MTDownload * download in itemsToRemove) {
+		if ((download.isInProgress || download.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) && download.downloadStatus.intValue != kMTStatusWaiting) {
+			//if just waiting on TiVo, go ahead w/o confirmation
+			if( ![self confirmCancel:download.show.showTitle]) {
+				//if any cancelled, cancel the whole group
+				return;
+			}
+		}
+	}
+	[tiVoManager deleteFromDownloadQueue:itemsToRemove];
+	if (itemsToRemove.count)[myController playTrashSound];
+	
+	[self deselectAll:nil];
+}
+
+
+-(BOOL)playVideo {
+    for (MTDownload *download in self.actionItems) {
 		if (download.isDone) {
 			if ([download playVideo])  {
 				return YES;		}
 		}
 	}
     return NO;
-//	return [tiVoManager playVideoForDownloads:selectedDownloads];
 }
-
--(BOOL)revealInFinder
-{
-	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-	NSArray *selectedDownloads = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
-	NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:selectedDownloads.count];
-	for (MTDownload *show in selectedDownloads) {
-		NSURL * showURL = [show videoFileURLWithEncrypted:YES];
-		if (showURL) {
-			[showURLs addObject:showURL];
-		}
-	}
-	if (showURLs.count > 0) {
-		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
-		return YES;
-	} else{
-		return NO;
-	}
-//	return [tiVoManager revealInFinderForDownloads:selectedDownloads];
-
-}
-
-
 
 -(BOOL) askReschedule: (MTDownload *) download {
 	//ask user if they'd like to reschedule a show that's being demoted
@@ -870,10 +881,11 @@ __DDLOGHERE__
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
     if ([menuItem action]==@selector(copy:) ||
-        [menuItem action]==@selector(cut:)  ||
+		[menuItem action]==@selector(cut:)  ||
+		[menuItem action]==@selector(reschedule:)  ||
+		[menuItem action]==@selector(subscribe:)  ||
         [menuItem action]==@selector(delete:)) {
-        if ([menuItem action] == @selector(delete:)) menuItem.title= @"Remove from Queue";
-        return (self.numberOfSelectedRows >0);
+        return (self.actionItems.count >0);
     } else  if ([menuItem action]==@selector(paste:)) {
         NSPasteboard * pboard = [NSPasteboard generalPasteboard];
         return  ([pboard.types containsObject:kMTTivoShowPasteBoardType] ||
@@ -883,8 +895,7 @@ __DDLOGHERE__
 }
 
 -(IBAction)copy: (id) sender {
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    NSArray *selectedShows = [[NSArray alloc] initWithArray: [self.sortedDownloads objectsAtIndexes:selectedRowIndexes] copyItems:YES];
+	NSArray *selectedShows = self.actionItems;
 
     if (selectedShows.count > 0) {
         MTDownload * firstDownload = selectedShows[0];
@@ -903,6 +914,7 @@ __DDLOGHERE__
 
 -(IBAction)paste: (id) sender {
     NSUInteger row = [self selectedRowIndexes].firstIndex;
+	if (self.clickedRow >=0) row = self.clickedRow;
     NSPasteboard * pboard = [NSPasteboard generalPasteboard];
     if ([pboard.types containsObject:kMTDownloadPasteBoardType]) {
         [self insertDownloadsFromPasteboard:pboard atRow:row];
@@ -913,7 +925,7 @@ __DDLOGHERE__
 
 -(IBAction) delete:(id)sender {
     DDLogMajor(@"user request to delete downloads");
-    [myController removeFromDownloadQueue:sender];
+    [self removeFromDownloadQueue:sender];
 }
 
 

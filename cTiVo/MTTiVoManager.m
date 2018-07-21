@@ -953,6 +953,38 @@ __DDLOGHERE__
 	}
 }
 
+-(void)revealInFinderDownloads:(NSArray <MTDownload *> *) downloads {
+	NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:downloads.count];
+	for (MTDownload *download in downloads) {
+		NSURL * showURL = [download videoFileURLWithEncrypted:YES];
+		if (showURL) {
+			[showURLs addObject:showURL];
+		} else if (download.show.isOnDisk) {
+			for (NSString * path in download.show.copiesOnDisk) {
+				[showURLs addObject:[NSURL fileURLWithPath:path]];
+			}
+		}
+
+	}
+	if (showURLs.count > 0) {
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
+	}
+}
+
+-(void)revealInFinderShows:(NSArray<MTTiVoShow *> *)shows {
+	NSMutableArray <NSURL *> * showURLs = [NSMutableArray array];
+	for (MTTiVoShow *show in shows) {
+		if (show.isOnDisk) {
+			for (NSString * path in show.copiesOnDisk) {
+				[showURLs addObject:[NSURL fileURLWithPath:path]];
+			}
+		}
+	}
+	if (showURLs.count > 0) {
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
+	}
+}
+
 -(NSMutableArray *) subscribedShows {
     
 	if (_subscribedShows ==  nil) {
@@ -1502,6 +1534,28 @@ __DDLOGHERE__
 	}
 }
 
+-(void) rescheduleDownloads: (NSArray <MTDownload *> *) downloads {
+	if ([self.processingPaused boolValue]) {
+		for (MTDownload *download in downloads) {
+			if (!download.show.protectedShow.boolValue && download.downloadStatus.intValue != kMTStatusDeleted) {
+				[download prepareForDownload:YES];
+			}
+		}
+	} else {
+		//Can't reschedule items that haven't loaded yet or have been deleted.
+		NSMutableArray * realItemsToReschedule = [NSMutableArray arrayWithArray:downloads];
+		for (MTDownload *download in downloads) {
+			if (download.show.protectedShow.boolValue || download.downloadStatus.intValue == kMTStatusDeleted) {
+				//A proxy DL waiting for "real" show
+				[download prepareForDownload:YES];
+				[realItemsToReschedule removeObject:download];
+			}
+		}
+		[tiVoManager deleteFromDownloadQueue:realItemsToReschedule];
+		[tiVoManager addToDownloadQueue:realItemsToReschedule beforeDownload:nil];
+	}
+}
+
 -(NSInteger)numberOfShowsToDownload
 {
 	NSInteger n= 0;
@@ -1535,6 +1589,15 @@ __DDLOGHERE__
     return size;
 }
 
+-(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads includingDone: (BOOL) includeDone {
+	NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
+	for (MTDownload * download in downloads) {
+		if ((includeDone || !download.isCompletelyDone) && ![shows containsObject:download.show]) {
+			[shows addObject:download.show];
+		}
+	}
+	return [shows copy];
+}
 
 -(BOOL) checkForExit {
     return [(MTAppDelegate *) [NSApp delegate] checkForExit];

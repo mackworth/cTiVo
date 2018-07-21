@@ -2294,16 +2294,24 @@ __DDLOGHERE__
 }
 
 -(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted {
-	if (!self.isDone) return nil;
-	NSURL *   URL =  [self URLExists: self.encodeFilePath];
-    if (!URL) {
-        URL = [self URLExists:self.decryptedFilePath];
-    }
-    if (!URL && encrypted) {
-        if ([self.bufferFilePath contains:@".tivo"]){ //not just a buffer
-            URL= [self URLExists: self.bufferFilePath];
-        }
-    }
+	NSURL *   URL = nil;
+	if (self.isDone) {
+		URL =  [self URLExists: self.encodeFilePath];
+		if (!URL) {
+			URL = [self URLExists:self.decryptedFilePath];
+		}
+		if (!URL && encrypted) {
+			if ([self.bufferFilePath contains:@".tivo"]){ //not just a buffer
+				URL= [self URLExists: self.bufferFilePath];
+			}
+		}
+	}
+	if (!URL) {
+		NSArray <NSString *> * paths = self.show.copiesOnDisk;
+		if (paths.count > 0) {
+			URL = [NSURL fileURLWithPath: paths[0]];
+		}
+	}
 	return URL;
 }
 
@@ -2319,17 +2327,7 @@ __DDLOGHERE__
 			return [[NSWorkspace sharedWorkspace] openURL:showURL];
 		}
 	}
-	return NO;
-}
-
--(BOOL) revealInFinder {
-	NSURL * showURL =[self videoFileURLWithEncrypted:YES];
-	if (showURL) {
-		DDLogMajor(@"Revealing file %@ ", showURL);
-		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ showURL ]];
-		return YES;
-	}
-	return NO;
+	return [self.show playVideo];
 }
 
 #pragma mark - Background routines

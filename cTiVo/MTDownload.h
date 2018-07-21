@@ -84,7 +84,6 @@
 -(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted;
 -(BOOL) canPlayVideo;
 -(BOOL) playVideo;
--(BOOL) revealInFinder;
 
 
 @end

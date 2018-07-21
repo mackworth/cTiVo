@@ -213,6 +213,9 @@ __DDLOGHERE__
 
 -(NSInteger)numberOfSelectedRows {
     NSIndexSet *currentSelectedRows = [self selectedRowIndexes];
+	if (self.clickedRow > 0 && (NSUInteger) self.clickedRow < self.sortedShows.count && ![currentSelectedRows containsIndex:self.clickedRow]) {
+		currentSelectedRows = [NSIndexSet indexSetWithIndex:self.clickedRow];
+	}
     __block NSInteger numSelected = 0;
     [currentSelectedRows enumerateIndexesUsingBlock:^(NSUInteger row, BOOL *stop){
 		id item = [self itemAtRow:row];
@@ -230,6 +233,42 @@ __DDLOGHERE__
     return numSelected;
 }
 
+-(void) scrollRowsToVisible: (NSIndexSet *) rows {
+	if (rows.count == 0) return;
+	NSRange visibleRange = [self rowsInRect:self.visibleRect];
+	NSInteger firstRow = rows.firstIndex;
+	NSInteger lastRow = rows.lastIndex;
+	if (lastRow - firstRow >= (NSInteger)visibleRange.length) {
+		lastRow = firstRow + (NSInteger)visibleRange.length -1;
+	}
+	if (firstRow < (NSInteger)visibleRange.location) {
+		[self scrollRowToVisible:firstRow];
+	} else if (lastRow > (NSInteger) NSMaxRange(visibleRange)) {
+		[self scrollRowToVisible:lastRow];
+	}
+}
+
+-(void) selectShows:(NSArray<MTTiVoShow *> *)shows {
+	NSMutableIndexSet * indices = [NSMutableIndexSet indexSet];
+	for (MTTiVoShow * show in shows) {
+		NSInteger row = [self rowForItem:show];
+		if (row == -1) {
+			MTShowFolder * folder = [self.parentMap objectForKey:show];
+			if (folder) {
+				[self expandItem:folder];
+				row = [self rowForItem:show];
+			}
+		}
+		if (row != -1) {
+			[indices addIndex:row];
+		}
+	}
+	if (indices.count > 0) {
+		[self selectRowIndexes:indices byExtendingSelection:NO];
+		[self scrollRowsToVisible:indices];
+	}
+}
+
 -(NSArray <MTTiVoShow *> *) flattenShows: (NSArray *) shows {
 	NSMutableArray *result = [[NSMutableArray alloc] init];
 	for (id item in shows) {
@@ -242,8 +281,11 @@ __DDLOGHERE__
 	return [result copy];
 }
 
--(NSArray <MTTiVoShow *> *) selectedShows {
+-(NSArray <MTTiVoShow *> *) actionItems {
 	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	if (self.clickedRow >= 0 && (NSUInteger) self.clickedRow < self.sortedShows.count && ![selectedRowIndexes containsIndex:self.clickedRow]) {
+		selectedRowIndexes = [NSIndexSet indexSetWithIndex:self.clickedRow];
+	}
 	NSMutableArray <MTTiVoShow *> * result = [NSMutableArray array];
 	[selectedRowIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
 		id item = [self itemAtRow:idx];
@@ -335,11 +377,11 @@ __DDLOGHERE__
 
 -(void)outlineViewSelectionDidChange:(NSNotification *)notification {
 	DDLogVerbose(@"selection did change");
-	NSInteger numRows = [self numberOfSelectedRows];
+	NSArray *selectedRows = [self actionItems];
+	NSInteger numRows = selectedRows.count;
 	[self.addToQueueButton setEnabled:numRows != 0];
 	[self.subscribeButton setEnabled: numRows != 0];
     if (numRows == 1) {
-		NSArray *selectedRows = [self selectedShows];
         [self.myController setValue:selectedRows[0] forKey:@"showForDetail"];
     }
 }
@@ -839,7 +881,6 @@ __DDLOGHERE__
     } else {
         [super mouseDown:event];
     }
-
 }
 
 -(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender {
@@ -899,107 +940,13 @@ __DDLOGHERE__
    return (selectedObjects.count > 0);
 }
 
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
-    if ([menuItem action]==@selector(copy:)) {
-        return (self.numberOfSelectedRows >0);
-    }
-    BOOL deleteItem = [menuItem action]==@selector(delete:);
-    BOOL stopItem =   [menuItem action]==@selector(stopRecording:);
-    if (deleteItem || stopItem ) {
-        if (deleteItem) menuItem.title = @"Delete from TiVo"; //alternates with remove from Queue
-        NSArray	*selectedShows = [self selectedShows ];
-        for (MTTiVoShow * show in selectedShows) {
-            if (show.rpcData && show.tiVo.rpcActive) {
-                if (stopItem) {
-                    if (show.inProgress.boolValue) return YES;
-                } else {
-                    return YES;
-                }
-            }
-        }
-        return NO;
-    }
-    return YES;
-}
-
--(BOOL)playVideo {
-	for (MTTiVoShow *show in self.selectedShows) {
-		if (show.isOnDisk) {
-			[show playVideo:[show copiesOnDisk][0]];
-			return YES;
-		}
-	}
-	return NO;
-}
-
--(BOOL)revealInFinder {
-	NSMutableArray <NSURL *> * showURLs = [NSMutableArray array];
-	for (MTTiVoShow *show in self.selectedShows) {
-		if (show.isOnDisk) {
-			for (NSString * path in show.copiesOnDisk) {
-				[showURLs addObject:[NSURL fileURLWithPath:path]];
-			}
-		}
-	}
-	if (showURLs.count > 0) {
-		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
-		return YES;
-	} else{
-		return NO;
-	}
-}
+#pragma mark - Menu Commands
 
 -(BOOL)selectionContainsCompletedShows {
-	for (MTTiVoShow * show in self.selectedShows) {
+	for (MTTiVoShow * show in self.actionItems) {
 		if (show.isOnDisk) return YES;
 	}
 	return NO;
-}
-
-
--(IBAction)copy: (id) sender {
-
-    NSArray	*selectedShows = [self selectedShows ];
-
-    if (selectedShows.count > 0) {
-        MTTiVoShow * firstShow = selectedShows[0];
-
-        NSPasteboard * pboard = [NSPasteboard generalPasteboard];
-        [pboard declareTypes:[firstShow writableTypesForPasteboard:pboard] owner:nil];
-        [[NSPasteboard generalPasteboard] writeObjects:selectedShows];
-   }
-}
-
--(BOOL) confirmBehavior: (NSString *) behavior preposition:(NSString *) prep forShows:(NSArray <MTTiVoShow *> *) shows {
-    NSString * msg = nil;
-    if (shows.count == 1) {
-        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' %@ TiVo %@?", behavior, shows[0].showTitle, prep, shows[0].tiVoName ];
-    } else if (shows.count == 2) {
-        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and '%@' %@ your TiVo?",behavior, shows[0].showTitle, shows[1].showTitle, prep ];
-    } else {
-        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and %d others %@ your TiVo?", behavior, shows[0].showTitle, (int)shows.count -1, prep ];
-    }
-
-    NSAlert *myAlert = [NSAlert alertWithMessageText:msg defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@"This cannot be undone in cTiVo."];
-    myAlert.alertStyle = NSCriticalAlertStyle;
-    NSInteger result = [myAlert runModal];
-    return (result == NSAlertAlternateReturn);
-}
-
--(IBAction)delete:(id)sender {
-    NSArray	<MTTiVoShow *> *selectedShows = [self selectedShows ];
-	if (selectedShows.count > 0)
-		if ([self confirmBehavior:@"delete" preposition: @"from" forShows:selectedShows]) {
-			[tiVoManager deleteTivoShows:selectedShows];
-		}
-}
-
--(IBAction)stopRecording:(id)sender {
-	NSArray	<MTTiVoShow *> *selectedShows = [self selectedShows ];
-	if (selectedShows.count > 0)
-    	if ([self confirmBehavior:@"stop recording" preposition:@"on" forShows:selectedShows]) {
-        	[tiVoManager stopRecordingShows:selectedShows];
-    	}
 }
 
 -(void)dealloc {

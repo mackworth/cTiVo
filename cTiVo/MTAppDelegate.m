@@ -50,8 +50,7 @@ void signalHandler(int signal)
 }
 
 @interface MTAppDelegate  () {
-	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *markCommercialsItem, *skipCommercialsItem, *pauseMenuItem, *apmMenuItem;
-	IBOutlet NSMenuItem *playVideoMenuItem, *showInFinderMenuItem;
+	IBOutlet NSMenuItem *refreshTiVoMenuItem, *iTunesMenuItem, *markCommercialsItem, *skipCommercialsItem, *pauseMenuItem;
 	IBOutlet NSMenu *optionsMenu;
     IBOutlet NSView *formatSelectionTable;
     IBOutlet NSTableView *exportTableView;
@@ -810,7 +809,7 @@ NSObject * assertionID = nil;
 
 -(NSArray <MTTiVoShow *> *) currentSelectedShows {
     MTProgramTableView * programs = self.mainWindowController.tiVoShowTable;
-	return [programs selectedShows];
+	return [programs actionItems];
 }
 
 #pragma mark - Export Formats Methods
@@ -1018,23 +1017,17 @@ NSObject * assertionID = nil;
     return [appSupportURL URLByAppendingPathComponent:@"com.cTiVo.cTivo"];
 }
 
--(IBAction)showMainWindow:(id)sender
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wimplicit-retain-self"
- 		_mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
-		showInFinderMenuItem.target = _mainWindowController;
-		showInFinderMenuItem.action = @selector(revealInFinder:);
-		playVideoMenuItem.target = _mainWindowController;
-		playVideoMenuItem.action = @selector(playVideo:);
-		_mainWindowController.showInFinderMenuItem = showInFinderMenuItem;
-		_mainWindowController.playVideoMenuItem = playVideoMenuItem;
-   });
-	[_mainWindowController showWindow:nil];
-#pragma clang diagnostic pop
+-(MTMainWindowController *) mainWindowController {
+	if (!_mainWindowController) {
+		_mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
+	}
+	return _mainWindowController;
 }
+
+-(IBAction)showMainWindow:(id)sender {
+	[self.mainWindowController showWindow:nil];
+}
+
 -(MTRemoteWindowController *) remoteControlWindowController {
 	if (!_remoteControlWindowController) {
 		self.remoteControlWindowController = [[MTRemoteWindowController alloc] init];
@@ -1043,15 +1036,13 @@ NSObject * assertionID = nil;
 }
 
 -(IBAction) showRemoteControlWindow: (id) sender {
-	
 	[self.remoteControlWindowController showWindow:nil];
-
 }
 
 -(void) cancelUserQuit {
 	quitWhenCurrentDownloadsComplete = NO;
     [tiVoManager determineCurrentProcessingState];
-    [self.mainWindowController.cancelQuitView setHidden:YES];
+	[self.mainWindowController showCancelQuitView:NO];
 
 }
 
@@ -1064,7 +1055,7 @@ NSObject * assertionID = nil;
 			DDLogMajor(@"User did ask to continue until finished");
 			tiVoManager.processingPaused = @(YES);
 			quitWhenCurrentDownloadsComplete = YES;
-			[_mainWindowController.cancelQuitView setHidden:NO];
+			[self.mainWindowController showCancelQuitView:YES];
 			[NSApp replyToApplicationShouldTerminate:NO];
             break;
 		case NSAlertOtherReturn:

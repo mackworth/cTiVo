@@ -56,6 +56,7 @@
 -(void) addToDownloadQueue:(NSArray *)downloads beforeDownload:(MTDownload *) nextShow;
 -(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeDownload:(MTDownload *) nextShow;
 -(void) deleteFromDownloadQueue:(NSArray *)downloads;
+-(void) rescheduleDownloads: (NSArray <MTDownload *> *) downloads;
 -(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) downloads
 								 toIndex:(NSUInteger)insertIndex;
 -(void) sortDownloadQueue;
@@ -132,6 +133,10 @@
 
 -(NSString *)getAMediaKey;
 -(BOOL) checkForExit;
+
+-(void)revealInFinderDownloads:(NSArray <MTDownload *> *) downloads;
+-(void)revealInFinderShows:(NSArray <MTTiVoShow *> *) shows;
+-(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads includingDone: (BOOL) includeDone;
 
 @end
 

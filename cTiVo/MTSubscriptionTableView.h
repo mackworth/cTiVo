@@ -16,10 +16,8 @@
 
 }
 
--(IBAction) unsubscribeSelectedItems:(id) sender;
--(IBAction) reapplySelectedItems:(id) sender;
-
 @property (weak) IBOutlet NSButton *unsubscribeButton;
 @property (nonatomic, strong) NSArray *sortedSubscriptions;
+-(NSArray <MTSubscription *> *) actionItems;
 
 @end

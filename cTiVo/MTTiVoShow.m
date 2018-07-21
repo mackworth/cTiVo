@@ -988,26 +988,19 @@ static void * originalAirDateContext = &originalAirDateContext;
 	}
 }
 
--(void)playVideo:(NSString *)path
-{
+-(BOOL) playVideo {
+	NSArray <NSString *> * paths = [self copiesOnDisk];
+	if (paths.count == 0) return NO;
+	NSString *path = paths[0];
 	DDLogMajor(@"Playing video %@ ", path);
-   [[NSWorkspace sharedWorkspace] openURL:[NSURL fileURLWithPath:path]];
-
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL fileURLWithPath:path]];
+	return YES;
 }
 
--(void)revealInFinder:(NSArray *)paths
-{
-   	NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:paths.count];
-	for (NSString *fileName in paths) {
-		NSURL * showURL = [NSURL fileURLWithPath:fileName];
-		if (showURL) {
-			[showURLs addObject:showURL];
-		}
-	}
-	if (showURLs.count > 0) {
-		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
-	}
+-(void) playOnTiVo {
+	[self.tiVo playShow:self];
 }
+
 -(void) setShowDate:(NSDate *)showDate {
     if (showDate != _showDate) {
         _showDate = showDate;
@@ -1627,7 +1620,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(void) createTestMP4 {
     //test routine to create dummy MP4 with all metadata stored
-    //sample call code: add to MainWindowController programMenuHandler
+    //sample call code: add to MainWindowController 
     // and add to right-click menu in mainWindowController
     //    } else if ([menu.title caseInsensitiveCompare:@"Test Metadata"] == NSOrderedSame) {
     //		for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {

@@ -21,8 +21,8 @@
 
 
 -(BOOL)playVideo;
--(BOOL)revealInFinder;
 -(BOOL)selectionContainsCompletedShows;
+-(NSArray <MTDownload *> *) actionItems;
 
 - (IBAction)clearHistory:(id)sender;
 @end

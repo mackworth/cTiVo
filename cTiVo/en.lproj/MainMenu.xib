@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14113" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14113"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -83,15 +83,23 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="1097"/>
-                            <menuItem title="Play Video" keyEquivalent=" " toolTip="Launches current show in system video player" id="1098"/>
-                            <menuItem title="Show in Finder" keyEquivalent="R" toolTip="Opens folder containing video" id="1099"/>
+                            <menuItem title="Play Video" keyEquivalent=" " toolTip="Launches current show in system video player" id="1098">
+                                <connections>
+                                    <action selector="playVideo:" target="-1" id="6uO-j4-BP2"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Reveal in Finder" keyEquivalent="R" toolTip="Opens folder containing video in Finder" id="1099">
+                                <connections>
+                                    <action selector="revealInFinder:" target="-1" id="WT7-TM-vBY"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="896"/>
                             <menuItem title="Pause Queue" keyEquivalent="u" toolTip="Stops/starts all queue processing" id="1078">
                                 <connections>
                                     <action selector="togglePause:" target="494" id="1091"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Refresh TiVo" keyEquivalent="r" toolTip="Reload Now Playing from TiVo" id="876"/>
+                            <menuItem title="Refresh TiVo" keyEquivalent="r" toolTip="Reload Now Playing list from TiVo" id="876"/>
                             <menuItem isSeparatorItem="YES" id="900"/>
                             <menuItem title="Export Formats..." toolTip="Write custom encoding formats to a file" id="898">
                                 <modifierMask key="keyEquivalentModifierMask"/>
@@ -152,14 +160,8 @@ CA
                                     <action selector="delete:" target="-1" id="890"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Stop Recording" id="bZV-ct-EbJ">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="stopRecording:" target="-1" id="YVw-PZ-HZF"/>
-                                </connections>
-                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="886"/>
-                            <menuItem title="Clear Completed History..." keyEquivalent="e" toolTip="Edit custom formats and menu" id="1131">
+                            <menuItem title="Clear Completed History..." keyEquivalent="e" toolTip="Remove all completed downloads (successful or not) from download table." id="1131">
                                 <connections>
                                     <action selector="clearHistory:" target="494" id="1135"/>
                                     <binding destination="494" name="enabled" keyPath="tiVoGlobalManager.anyShowsCompleted" id="1138"/>
@@ -190,7 +192,7 @@ CA
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="893"/>
-                            <menuItem title="Find..." keyEquivalent="f" id="1118">
+                            <menuItem title="Find..." keyEquivalent="f" toolTip="Filter Now Playing list by show name" id="1118">
                                 <connections>
                                     <action selector="findShows:" target="494" id="1119"/>
                                 </connections>
@@ -199,6 +201,45 @@ CA
                             <menuItem title="Select All" keyEquivalent="a" id="887">
                                 <connections>
                                     <action selector="selectAll:" target="-1" id="888"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
+                <menuItem title="TiVo" id="RSu-a5-P4r">
+                    <menu key="submenu" title="TiVo" id="aSG-Mr-VlP">
+                        <items>
+                            <menuItem title="Play on TiVo" toolTip="Start this show playing on your TiVo" id="bfS-2H-Q96">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="playOnTiVo:" target="-1" id="Tyw-bZ-TaK"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Delete from TiVo" toolTip="Remove this show from your TiVo" id="1hW-Q1-vap">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="deleteOnTiVo:" target="-1" id="ePd-TL-FeH"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Stop Recording" toolTip="Tell your TiVo to stop recording this show" id="T8Z-5k-Yke">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="stopRecordingOnTiVo:" target="-1" id="e17-jg-Zgp"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Get Skip Info from TiVo" toolTip="Launches SkipMode process to find commercials in this show. WILL interrupt any shows currently being watched on your TiVo." id="tYx-fe-9qd">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="skipInfoFromTiVo:" target="-1" id="2Yi-o5-gZe"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="VoV-SY-MpP">
+                                <attributedString key="attributedTitle"/>
+                            </menuItem>
+                            <menuItem title="Show Remote Control" toolTip="Bring up Remote Control window to control your TiVo" id="GSE-S9-k5L">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showRemoteControlWindow:" target="494" id="sD7-JD-LSm"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -219,7 +260,7 @@ CA
                                     <binding destination="926" name="value" keyPath="values.ShowSuggestions" id="1123"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Show In Folders" toolTip="Show TiVo's suggestions in list" id="H99-YS-cr3">
+                            <menuItem title="Show In Folders" toolTip="Group shows in outline-mode folders" id="H99-YS-cr3">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.ShowFolders" id="H5p-ku-3Pp"/>
@@ -240,7 +281,7 @@ CA
                                     <binding destination="926" name="value" keyPath="values.RunComSkip" id="qQj-dE-L8i"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Export Captions" toolTip="Export text of subtitles to &lt;file&gt;.srt" id="1073">
+                            <menuItem title="Export Captions" toolTip="Extract captions and embed in show as well as text of subtitles to &lt;file&gt;.srt" id="1073">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <binding destination="926" name="value" keyPath="values.ExportSubtitles" id="1116"/>
@@ -264,7 +305,7 @@ CA
                                     <action selector="showMainWindow:" target="494" id="858"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Remote Control" id="b7Z-cN-J9N">
+                            <menuItem title="Remote Control" toolTip="Bring up Remote Control window to control your TiVo" id="b7Z-cN-J9N">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showRemoteControlWindow:" target="494" id="tsw-zo-x8m"/>

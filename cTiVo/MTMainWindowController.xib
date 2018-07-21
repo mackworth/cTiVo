@@ -45,15 +45,15 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <customView misplaced="YES" id="1397" userLabel="Program Table section">
-                                <rect key="frame" x="14" y="325" width="934" height="345"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <rect key="frame" x="0.0" y="325" width="948" height="345"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                 <subviews>
                                     <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" id="13">
                                         <rect key="frame" x="78" y="326" width="16" height="16"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     </progressIndicator>
                                     <textField verticalHuggingPriority="750" id="12">
-                                        <rect key="frame" x="100" y="326" width="455" height="17"/>
+                                        <rect key="frame" x="100" y="326" width="469" height="17"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="34">
                                             <font key="font" metaFont="system"/>
@@ -62,7 +62,7 @@
                                         </textFieldCell>
                                     </textField>
                                     <button toolTip="Add this program to download queue" verticalHuggingPriority="750" id="7" userLabel="Add to Queue Button">
-                                        <rect key="frame" x="825" y="325" width="109" height="19"/>
+                                        <rect key="frame" x="839" y="325" width="109" height="19"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                         <buttonCell key="cell" type="roundRect" title="Add To Queue" bezelStyle="roundedRect" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="70">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -73,7 +73,7 @@
                                         </connections>
                                     </button>
                                     <button toolTip="Add this series to Subscription list" verticalHuggingPriority="750" id="284" userLabel="Subscribe Button">
-                                        <rect key="frame" x="740" y="325" width="77" height="19"/>
+                                        <rect key="frame" x="754" y="325" width="77" height="19"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                         <buttonCell key="cell" type="roundRect" title="Subscribe" bezelStyle="roundedRect" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="285">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -83,15 +83,15 @@
                                             <action selector="subscribe:" target="-2" id="295"/>
                                         </connections>
                                     </button>
-                                    <scrollView misplaced="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="0pJ-0q-lIV">
-                                        <rect key="frame" x="0.0" y="0.0" width="945" height="323"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES"/>
+                                    <scrollView misplaced="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="0pJ-0q-lIV">
+                                        <rect key="frame" x="0.0" y="0.0" width="948" height="323"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
                                         <clipView key="contentView" id="3He-Lv-qOU">
-                                            <rect key="frame" x="1" y="0.0" width="943" height="322"/>
+                                            <rect key="frame" x="1" y="0.0" width="946" height="322"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" autosaveName="ProgramTable" rowSizeStyle="automatic" headerView="LNB-j6-453" viewBased="YES" indentationPerLevel="16" autoresizesOutlineColumn="YES" outlineTableColumn="42" id="OfG-aC-zKW" customClass="MTProgramTableView">
-                                                    <rect key="frame" x="0.0" y="0.0" width="943" height="299"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="946" height="299"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -912,16 +912,16 @@
                                                 </outlineView>
                                             </subviews>
                                         </clipView>
-                                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="nW8-aR-GV2">
-                                            <rect key="frame" x="1" y="306" width="892" height="16"/>
+                                        <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="nW8-aR-GV2">
+                                            <rect key="frame" x="1" y="306" width="946" height="16"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
-                                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="aE6-1g-XOC">
-                                            <rect key="frame" x="224" y="17" width="15" height="102"/>
+                                        <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="aE6-1g-XOC">
+                                            <rect key="frame" x="931" y="23" width="16" height="299"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                         <tableHeaderView key="headerView" id="LNB-j6-453">
-                                            <rect key="frame" x="0.0" y="0.0" width="943" height="23"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="946" height="23"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableHeaderView>
                                     </scrollView>
@@ -929,12 +929,12 @@
                             </customView>
                             <customView misplaced="YES" id="1373" userLabel="Download Table Section">
                                 <rect key="frame" x="0.0" y="150" width="948" height="175"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                 <subviews>
                                     <scrollView focusRingType="exterior" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="35" userLabel="Download Table View">
                                         <rect key="frame" x="0.0" y="0.0" width="948" height="145"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
-                                        <clipView key="contentView" copiesOnScroll="NO" id="Jcn-rq-5Wo">
+                                        <clipView key="contentView" id="Jcn-rq-5Wo">
                                             <rect key="frame" x="1" y="0.0" width="946" height="144"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -1102,7 +1102,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" id="qQB-l8-FUr" userLabel="leftText">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="0.0" height="17"/>
+                                                                            <rect key="frame" x="3" y="0.0" width="0.0" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="nX6-ru-GCz">
                                                                                 <font key="font" metaFont="system"/>
@@ -1111,7 +1111,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="FEf-Ia-wX9" userLabel="rightText">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="80" height="17"/>
+                                                                            <rect key="frame" x="-3" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="a0F-vx-fpu">
                                                                                 <font key="font" size="10" name="Helvetica"/>
@@ -1530,7 +1530,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" id="776">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="32" height="17"/>
+                                                                            <rect key="frame" x="3" y="0.0" width="26" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="777">
                                                                                 <font key="font" metaFont="system"/>
@@ -2007,7 +2007,7 @@
                                             <font key="font" metaFont="cellTitle"/>
                                         </buttonCell>
                                         <connections>
-                                            <action selector="removeFromDownloadQueue:" target="-2" id="144"/>
+                                            <action selector="removeFromDownloadQueue:" target="-1" id="MR1-gH-C7e"/>
                                         </connections>
                                     </button>
                                     <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="dzt-jz-eJI" userLabel="Performance">
@@ -2023,7 +2023,7 @@
                             </customView>
                             <customView misplaced="YES" id="1374" userLabel="Subscription Table Section">
                                 <rect key="frame" x="0.0" y="0.0" width="948" height="150"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                 <subviews>
                                     <button toolTip="Remove selected items from subscription list" verticalHuggingPriority="750" id="206">
                                         <rect key="frame" x="808" y="122" width="140" height="19"/>
@@ -2552,58 +2552,58 @@
                 <menuItem title="Download" toolTip="Queue shows for downloading" id="388">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="programMenuHandler:" target="-2" id="421"/>
+                        <action selector="downloadSelectedShows:" target="-1" id="yKQ-Lp-xLv"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Subscribe to series" toolTip="Create subscription for this series, starting with this one" id="395">
+                <menuItem title="Subscribe to Series" toolTip="Create subscription for this series, starting with this one" id="395">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="programMenuHandler:" target="-2" id="424"/>
-                    </connections>
-                </menuItem>
-                <menuItem isSeparatorItem="YES" id="ymX-Ff-XEt"/>
-                <menuItem title="Delete from TiVo" tag="3" toolTip="Remove this show from TiVo" id="1zO-Hi-mg8">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="programMenuHandler:" target="-2" id="JNY-GG-Gc4"/>
-                    </connections>
-                </menuItem>
-                <menuItem title="Stop Recording" tag="4" toolTip="Tell TiVo to stop recording this show" id="Oqj-yw-abC">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="programMenuHandler:" target="-2" id="qle-81-n4P"/>
+                        <action selector="subscribe:" target="-1" id="24n-Nh-gdO"/>
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="OTC-dc-u34"/>
                 <menuItem title="Show Details" toolTip="Reveal more information about this show" id="FwI-wW-1Do">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="programMenuHandler:" target="-2" id="Qex-Or-8oU"/>
-                    </connections>
-                </menuItem>
-                <menuItem title="Show in Finder" tag="2" toolTip="Show video file in Finder" id="888">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="programMenuHandler:" target="-2" id="893"/>
+                        <action selector="showDetails:" target="-1" id="4vp-Wk-Yer"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Play Video" tag="2" toolTip="Play this video with system player" id="889">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="programMenuHandler:" target="-2" id="892"/>
+                        <action selector="playVideo:" target="-1" id="yjK-jI-JIX"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Reveal in Finder" tag="2" toolTip="Show video file in Finder" id="888">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="revealInFinder:" target="-1" id="fqm-1f-e3G"/>
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="gX8-79-wA8"/>
                 <menuItem title="Reload All Info" toolTip="Reloads latest information about this show, from TiVo, TVDB and SkipMode data." id="588">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="programMenuHandler:" target="-2" id="589"/>
+                        <action selector="reloadAllInfo:" target="-1" id="PN9-6D-fCe"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Find SkipMode Points" toolTip="Launches SkipMode process to find commercials in this show. WILL interrupt any shows currently being watched on this TiVo." id="USg-jW-2wB">
+                <menuItem title="Find Skip Points on TiVo" toolTip="Launches SkipMode process to find commercials in this show. WILL interrupt any shows currently being watched on this TiVo." id="USg-jW-2wB">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="programMenuHandler:" target="-2" id="Oam-Yz-xMv"/>
+                        <action selector="skipInfoFromTiVo:" target="-1" id="Fp4-F7-PYF"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="ymX-Ff-XEt"/>
+                <menuItem title="Stop Recording" tag="4" toolTip="Tell TiVo to stop recording this show" id="Oqj-yw-abC">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="stopRecordingOnTiVo:" target="-1" id="hM4-l6-FhJ"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Delete from TiVo" tag="3" toolTip="Remove this show from TiVo" id="1zO-Hi-mg8">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="deleteOnTiVo:" target="-1" id="uFU-uA-aZ5"/>
                     </connections>
                 </menuItem>
             </items>
@@ -2617,14 +2617,14 @@
                 <menuItem title="Unsubscribe" toolTip="Delete subscription(s)" id="417">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="subscriptionMenuHandler:" target="-2" id="429"/>
+                        <action selector="delete:" target="-1" id="wBb-On-DwE"/>
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="1391"/>
                 <menuItem title="Re-Apply to Shows" toolTip="Test all shows against subscription(s). May download previously downloaded shows again." id="1389">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="subscriptionMenuHandler:" target="-2" id="1390"/>
+                        <action selector="reapplySelectedItems:" target="-1" id="VoG-k0-hvQ"/>
                     </connections>
                 </menuItem>
             </items>
@@ -2637,52 +2637,65 @@
                 <menuItem title="Remove from Queue" toolTip="Remove download(s) from queue" id="409">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="downloadMenuHandler:" target="-2" id="427"/>
+                        <action selector="delete:" target="-1" id="1gS-Zk-GC9"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Reschedule" toolTip="Start download over again" id="882">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="downloadMenuHandler:" target="-2" id="883"/>
+                        <action selector="reschedule:" target="-1" id="YlC-xU-d8T"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Subscribe to Series" tag="1" toolTip="Create subscription for this series, starting with this episode" id="408">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="downloadMenuHandler:" target="-2" id="428"/>
+                        <action selector="subscribe:" target="-1" id="cqh-PL-uxM"/>
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="QaJ-jc-7mX"/>
                 <menuItem title="Show Details" tag="1" toolTip="Reveal more information about this show" id="621">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="downloadMenuHandler:" target="-2" id="622"/>
-                    </connections>
-                </menuItem>
-                <menuItem title="Show in Finder" tag="2" toolTip="Show video file in Finder" id="884">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="downloadMenuHandler:" target="-2" id="885"/>
+                        <action selector="showDetails:" target="-1" id="utc-Ne-j1j"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Play Video" tag="2" toolTip="Play this video with system player" id="Vjm-Db-6JP">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="downloadMenuHandler:" target="-2" id="neC-rq-ixJ"/>
+                        <action selector="playVideo:" target="-1" id="y5I-dv-XEm"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Reveal in Finder" tag="2" toolTip="Show video file in Finder" id="884">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="revealInFinder:" target="-1" id="rFy-T9-BgT"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Reveal in Now Playing" tag="2" toolTip="Select show in Now Playing table above" id="Uc7-IL-tlu">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="revealInNowPlaying:" target="-1" id="NWt-xH-4g3"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="18B-wt-vVK"/>
+                <menuItem title="Find Skip Points on TiVo" toolTip="Launches SkipMode process to find commercials in this show. WILL interrupt any shows currently being watched on this TiVo." id="DJO-g7-DGD">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="skipInfoFromTiVo:" target="-1" id="cbA-n1-JWf"/>
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="p1k-Ih-3rk"/>
-                <menuItem title="Find SkipMode Points" toolTip="Reveal more information about this show" id="DJO-g7-DGD">
+                <menuItem title="Delete from TiVo" tag="3" toolTip="Remove this show from TiVo" id="meZ-lg-2at">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="downloadMenuHandler:" target="-2" id="uDs-8r-utW"/>
+                        <action selector="deleteOnTiVo:" target="-1" id="eN3-CY-x1f"/>
                     </connections>
                 </menuItem>
             </items>
             <connections>
                 <outlet property="delegate" destination="-2" id="415"/>
             </connections>
-            <point key="canvasLocation" x="392" y="666"/>
+            <point key="canvasLocation" x="391" y="705"/>
         </menu>
     </objects>
     <resources>

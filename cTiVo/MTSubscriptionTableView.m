@@ -96,9 +96,9 @@ __DDLOGHERE__
     [self reloadData];
 }
 
--(IBAction) unsubscribeSelectedItems:(id) sender {
+-(IBAction) delete:(id) sender {
 	DDLogDetail(@"User Requested delete subscriptions");
-    NSArray * itemsToRemove = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
+    NSArray * itemsToRemove =self.actionItems;
     [self deselectAll:nil];
 
 	[tiVoManager.subscribedShows  deleteSubscriptions:itemsToRemove];
@@ -107,7 +107,7 @@ __DDLOGHERE__
 
 -(IBAction) reapplySelectedItems:(id) sender {
 	DDLogDetail(@"User Requested reapply subscriptions");
-    NSArray * itemsToApply = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
+    NSArray * itemsToApply = self.actionItems;
 	[tiVoManager.subscribedShows clearHistory:itemsToApply];
 	[tiVoManager.subscribedShows checkSubscriptionsNew:itemsToApply];
 }
@@ -341,7 +341,7 @@ static NSDateFormatter *dateFormatter;
 	
 	if (operation == NSDragOperationDelete) {
         DDLogDetail(@"User dragged subscriptions to trash");
-		[self unsubscribeSelectedItems:nil];
+		[self delete:nil];
     }
 }
 
@@ -474,6 +474,15 @@ static NSDateFormatter *dateFormatter;
     }
 }
 
+-(NSArray <MTSubscription *> *) actionItems {
+	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	if (self.clickedRow < 0 || (NSUInteger) self.clickedRow >= self.sortedSubscriptions.count || [selectedRowIndexes containsIndex:self.clickedRow]) {
+		return [self.sortedSubscriptions objectsAtIndexes:selectedRowIndexes];
+	} else {
+		return @[self.sortedSubscriptions[self.clickedRow]];
+	}
+}
+
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation {
     NSArray * newSubs = nil;
 	if ( [info draggingSource] == myController.tiVoShowTable ){
@@ -494,7 +503,7 @@ static NSDateFormatter *dateFormatter;
     if ([menuItem action]==@selector(copy:) ||
         [menuItem action]==@selector(cut:)  ||
         [menuItem action]==@selector(delete:)) {
-        return (self.numberOfSelectedRows >0);
+        return (self.actionItems > 0);
     } else  if ([menuItem action]==@selector(paste:)) {
         NSPasteboard * pboard = [NSPasteboard generalPasteboard];
         return  ([pboard.types containsObject:kMTTivoShowPasteBoardType] ||
@@ -505,11 +514,9 @@ static NSDateFormatter *dateFormatter;
 }
 
 -(IBAction)copy: (id) sender {
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    NSArray *selectedSubs = [self.sortedSubscriptions objectsAtIndexes:selectedRowIndexes];
+    NSArray *selectedSubs = self.actionItems;
     if (selectedSubs.count > 0) {
         MTSubscription * firstSub = selectedSubs[0];
-
         NSPasteboard * pboard = [NSPasteboard generalPasteboard];
         [pboard declareTypes:[firstSub writableTypesForPasteboard:pboard] owner:nil];
         [pboard writeObjects:selectedSubs];
@@ -523,6 +530,7 @@ static NSDateFormatter *dateFormatter;
 
 -(IBAction)paste: (id) sender {
     NSUInteger row = [self selectedRowIndexes].firstIndex;
+	if (self.clickedRow >= 0) row = self.clickedRow;
     NSPasteboard * pboard = [NSPasteboard generalPasteboard];
     if ([pboard.types containsObject:kMTDownloadPasteBoardType]) {
         [self insertDownloadsFromPasteboard:pboard atRow:row];
@@ -531,11 +539,6 @@ static NSDateFormatter *dateFormatter;
     } else if ([pboard.types containsObject:NSPasteboardTypeString]) {
       [self insertStringsFromPasteboard:pboard atRow:row];
         }
-}
-
--(IBAction)delete:(id)sender{
-    DDLogMajor(@"user request to delete subscriptions");
-    [self unsubscribeSelectedItems:sender];
 }
 
 -(void)dealloc
