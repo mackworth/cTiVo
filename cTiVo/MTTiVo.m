@@ -572,8 +572,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void) playShow:(MTTiVoShow *)show {
-    if ([show.tiVo isEqual:self]) {
-        [self.myRPC playOnTiVo:show.idString withCompletionHandler:nil];
+    if ([show.tiVo isEqual:self] &&
+		show.rpcData.recordingID.length > 0) {
+        [self.myRPC playOnTiVo:show.rpcData.recordingID withCompletionHandler:nil];
     }
 }
 

@@ -1510,7 +1510,8 @@ static NSArray * imageResponseTemplate = nil;
 		[weakSelf retrievePositionWithCompletionHandler:^(long long startingPoint, long long end) {
 			
 		DDLogDetail(@"found initial Point of %@ / %@", @(startingPoint), @(end));
-        if (end <= 0) {
+		if (startingPoint < 2000) startingPoint = 0; 
+		if (end <= 0) {
 			if (rpcData.tempLength <= 0) {
 				DDLogReport(@"XXX Neither show nor RPC has correct length");
             	end = 24*3600*1000;
