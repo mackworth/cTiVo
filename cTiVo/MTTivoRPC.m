@@ -1501,10 +1501,11 @@ static NSArray * imageResponseTemplate = nil;
 	
 	__weak __typeof__(self) weakSelf = self;
 	if (!rpcData) return;
+	//note: indenting change to avoid tower effect, each line break is a new block
+	[self whatsOnSearchWithCompletion:^(MTWhatsOnType previousWhatsOn, NSString *previousRecordingID) {
 
-	[weakSelf playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
+		[weakSelf playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
 		
-		//note: indenting change to avoid tower effect, each line break is a new block
 		[weakSelf afterDelay:1.0 launchBlock:^{
 
 		[weakSelf retrievePositionWithCompletionHandler:^(long long startingPoint, long long end) {
@@ -1542,19 +1543,28 @@ static NSArray * imageResponseTemplate = nil;
 	    [weakSelf sendKeyEvent: @"pause"  withCompletion:^{
 			
 		[weakSelf afterDelay:1.0 launchBlock:^{
-		[weakSelf jumpToPosition:startingPoint withCompletionHandler:^(BOOL success2){
-		[weakSelf sendKeyEvent: @"liveTv" withCompletion:^{
-		[weakSelf setBookmarkPosition:startingPoint
-					 forRecordingId:rpcData.recordingID
-			  withCompletionHandler:^(BOOL success3){
-				  if (completionHandler) (completionHandler());
-		}];
-		}];
-		}];
-		}];
-		}];
+		
+		void (^finishUp)(void) = ^void {
+			[weakSelf setBookmarkPosition:startingPoint
+						   forRecordingId:rpcData.recordingID
+					withCompletionHandler:^(BOOL success3){
+				if (completionHandler) (completionHandler());
+			}];
+		};
+		if (previousWhatsOn == MTWhatsOnRecording) {
+			[weakSelf playOnTiVo:previousRecordingID withCompletionHandler:^(BOOL restorePlaySuccess) {
+				[weakSelf sendKeyEvent: @"pause"  withCompletion: finishUp];
+			}];
+		} else {
+			[weakSelf jumpToPosition:startingPoint withCompletionHandler:^(BOOL success2){
+				[weakSelf sendKeyEvent: @"liveTv" withCompletion: finishUp];
+			}];
+		}
 		}];
 	  	}];
+		}];
+		}];
+		}];
 		}];
 		}];
 		}];
@@ -1563,7 +1573,6 @@ static NSArray * imageResponseTemplate = nil;
 	}];
 }
 
-	
 #pragma mark System Interactions
 
 -(void) receiveSleepNotification: (id) sender {

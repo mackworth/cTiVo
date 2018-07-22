@@ -352,7 +352,7 @@ __DDLOGHERE__
 						folderHolder = [MTShowFolder new];
 						self.oldFolders[key] = folderHolder;
 					}
-					folderHolder.folder = seriesShows;
+					folderHolder.folder = [seriesShows sortedArrayUsingDescriptors:self.sortDescriptors];
 					for (MTTiVoShow * show in seriesShows) {
 						[self.parentMap setObject:folderHolder forKey:show ];
 					}
