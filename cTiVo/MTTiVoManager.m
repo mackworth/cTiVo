@@ -1592,7 +1592,10 @@ __DDLOGHERE__
 -(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads includingDone: (BOOL) includeDone {
 	NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
 	for (MTDownload * download in downloads) {
-		if ((includeDone || !download.isCompletelyDone) && ![shows containsObject:download.show]) {
+		if ((includeDone || !download.isCompletelyDone) &&
+			!download.show.inProgress.boolValue &&
+			(download.downloadStatus.integerValue != kMTStatusDeleted) &&
+			![shows containsObject:download.show]) {
 			[shows addObject:download.show];
 		}
 	}

@@ -398,31 +398,6 @@ attributes:attribs];
     return [shows copy];
 }
 
--(void) confirmSkipModeRetrieval: (BOOL) programTable {
-    NSString * object = programTable ? @"show" : @"download";
-    NSArray * selectedObjects = [self selectedShows];
-    NSString * plural = selectedObjects.count > 1 ? @"s" : @"";
-    NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Warning: pulling SkipMode information from TiVo will temporarily interrupt current viewing on your TiVo!"] defaultButton:@"Selected" alternateButton:@"Cancel" otherButton:@"All" informativeTextWithFormat:@"Press Selected to continue with Selected %@%@, All to continue for ALL %@s, or Cancel to cancel request.", object, plural, object];
-    myAlert.alertStyle = NSCriticalAlertStyle;
-    NSInteger result = [myAlert runModal];
-    NSArray <MTTiVoShow *> * shows = nil;
-    if (result == NSAlertAlternateReturn) return;
-    if (result == NSAlertDefaultReturn) {
-        if (programTable) {
-            shows = selectedObjects;
-        } else {
-            shows = [self showsForDownloads: selectedObjects includingDone:NO] ;
-        }
-    } else if (result == NSAlertOtherReturn) {
-        if (programTable) {
-            shows = self.tiVoShowTable.displayedShows;
-        } else {
-           shows =  [self showsForDownloads: self.downloadQueueTable.sortedDownloads includingDone:NO];
-        }
-    }
-    if (shows.count) [tiVoManager skipModeRetrieval:shows interrupting:YES];
-}
-
 -(NSArray <MTTiVoShow *> *) selectedShows {
 	if (self.window.firstResponder == self.downloadQueueTable) {
 		return [self showsForDownloads:downloadQueueTable.actionItems includingDone:YES];
@@ -469,7 +444,26 @@ attributes:attribs];
 }
 
 -(IBAction)skipInfoFromTiVo:(id)sender {
-	[self confirmSkipModeRetrieval:self.window.firstResponder != downloadQueueTable];
+	BOOL programTable = self.window.firstResponder != downloadQueueTable;
+	NSString * object = programTable ? @"show" : @"download";
+	NSArray * selectedObjects = [self selectedShows];
+	NSString * plural = selectedObjects.count > 1 ? @"s" : @"";
+	NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Warning: pulling SkipMode information from TiVo will temporarily interrupt current viewing on your TiVo!"] defaultButton:@"Selected" alternateButton:@"Cancel" otherButton:@"All" informativeTextWithFormat:@"Press Selected to continue with Selected %@%@, All to continue for ALL %@s, or Cancel to cancel request.", object, plural, object];
+	myAlert.alertStyle = NSCriticalAlertStyle;
+	NSInteger result = [myAlert runModal];
+	
+	NSArray <MTTiVoShow *> * shows = nil;
+	if (result == NSAlertAlternateReturn) return;
+	if (result == NSAlertDefaultReturn) {
+		shows = selectedObjects;
+	} else if (result == NSAlertOtherReturn) {
+		if (programTable) {
+			shows = self.tiVoShowTable.displayedShows;
+		} else {
+			shows =  [self showsForDownloads: self.downloadQueueTable.sortedDownloads includingDone:NO];
+		}
+	}
+	if (shows.count) [tiVoManager skipModeRetrieval:shows interrupting:YES];
 }
 
 -(IBAction)expireDateOnTiVo:(id)sender {
