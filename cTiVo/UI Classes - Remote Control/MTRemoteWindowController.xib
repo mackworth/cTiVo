@@ -8,6 +8,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTRemoteWindowController">
             <connections>
+                <outlet property="serviceMenu" destination="2K4-cf-PqX" id="NtW-6E-5rJ"/>
                 <outlet property="tivoListPopup" destination="YLU-ny-jW3" id="lSy-SD-t2m"/>
                 <outlet property="tivoRemote" destination="zRz-zj-OeZ" id="KKe-RZ-Eo1"/>
                 <outlet property="window" destination="Ays-WX-T3b" id="tLz-wN-7Jh"/>
@@ -25,7 +26,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="283" y="305" width="309" height="880"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1418"/>
             <view key="contentView" id="vq2-xz-oxl">
                 <rect key="frame" x="0.0" y="0.0" width="309" height="880"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -638,28 +639,40 @@ DQ
                                     <action selector="buttonPressed:" target="-2" id="sWm-eh-Qh6"/>
                                 </connections>
                             </button>
-                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b46-Jd-3yw" userLabel="Services">
-                                <rect key="frame" x="61" y="220" width="180" height="26"/>
-								<autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
+                            <popUpButton hidden="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b46-Jd-3yw" userLabel="Services">
+                                <rect key="frame" x="43" y="189" width="180" height="26"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <popUpButtonCell key="cell" type="push" title="Netflix" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyUpOrDown" inset="2" selectedItem="Ona-3M-VKK" id="M3B-wH-ZD4">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="menu"/>
                                     <menu key="menu" id="2K4-cf-PqX">
                                         <items>
-                                            <menuItem title="Netflix" state="on" image="skipMode" id="Ona-3M-VKK"/>
-                                            <menuItem title="Plex" id="16D-Wd-WgH"/>
-                                            <menuItem title="Spotify" id="lZG-tH-4CT"/>
-                                            <menuItem title="Opera TV Store" id="kuw-ha-mJi"/>
-                                            <menuItem title="My Opera Apps" id="k33-DA-eDt"/>
-                                            <menuItem title="iHeart Radio" id="e7O-cA-hNz"/>
-                                            <menuItem title="YouTube Flash" id="T1G-Sj-PHo"/>
-                                            <menuItem title="YouTube HTML" id="lVn-pZ-VUa"/>
+                                            <menuItem title="Netflix" state="on" id="Ona-3M-VKK"/>
+                                            <menuItem title="HBO Go" id="k33-DA-eDt"/>
                                             <menuItem title="Amazon Prime" id="lN3-8S-OHi"/>
+                                            <menuItem title="Hulu" id="Gd2-7I-as2"/>
+                                            <menuItem title="Epix" id="lZG-tH-4CT"/>
+                                            <menuItem title="YouTube" id="T1G-Sj-PHo"/>
                                             <menuItem title="Vudu" id="m37-ZE-Ukd"/>
-                                            <menuItem title="Amazon" id="h8J-3b-7Qm"/>
-                                            <menuItem title="Hulu Plus" id="Gd2-7I-as2"/>
-                                            <menuItem title="AOL On" id="4qC-4I-kgU"/>
-                                            <menuItem title="Launchpad" id="AjM-x8-d8O"/>
+                                            <menuItem title="Plex" id="16D-Wd-WgH"/>
+                                            <menuItem isSeparatorItem="YES" id="0Tk-cD-NuI"/>
+                                            <menuItem title="Alt TV" id="AjM-x8-d8O"/>
+                                            <menuItem title="AOL" id="4qC-4I-kgU"/>
+                                            <menuItem title="FlixFling" id="WL3-2Q-Z3z" userLabel="HBO Go">
+                                                <modifierMask key="keyEquivalentModifierMask"/>
+                                            </menuItem>
+                                            <menuItem title="HSN" id="lVn-pZ-VUa"/>
+                                            <menuItem title="iHeart Radio" id="e7O-cA-hNz"/>
+                                            <menuItem title="MLB" id="h8J-3b-7Qm"/>
+                                            <menuItem title="Music Choice" id="qkf-k2-1pD"/>
+                                            <menuItem title="Toon Goggles" id="sMJ-a2-uGt"/>
+                                            <menuItem title="Tubi TV" id="vnm-op-nLT"/>
+                                            <menuItem title="Vevo" id="LfF-Bn-bUp"/>
+                                            <menuItem title="Vewd" id="nvf-fL-eox"/>
+                                            <menuItem title="Wurl TV" id="GGb-qR-ORv"/>
+                                            <menuItem title="WWE" id="kuw-ha-mJi"/>
+                                            <menuItem title="Yahoo" id="xnV-n2-eE4"/>
+                                            <menuItem title="YuppTV" id="zYl-Cc-pdG"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
@@ -679,6 +692,5 @@ DQ
     </objects>
     <resources>
         <image name="PeanutRemote" width="309" height="880"/>
-        <image name="skipMode" width="34" height="22"/>
     </resources>
 </document>

@@ -202,6 +202,7 @@ __DDLOGHERE__
 		}
 		double commercialDuration = endTime-startTime;
 		if (keepCommercials) {
+			//because chapters are only marked as duration, skipping commercial chapters is sufficient
 			chapterList[chapterOffset].duration = (MP4Duration)(commercialDuration * 1000.0);
         	sprintf(chapterList[chapterOffset].title,"%s %d","Commercial", edlOffset+1);
         	chapterOffset++;

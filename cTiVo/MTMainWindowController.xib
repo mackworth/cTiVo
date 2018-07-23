@@ -9,7 +9,6 @@
         <customObject id="-2" userLabel="File's Owner" customClass="MTMainWindowController">
             <connections>
                 <outlet property="cancelQuitView" destination="894" id="898"/>
-                <outlet property="downloadDirectory" destination="8" id="Y7W-BU-SGg"/>
                 <outlet property="downloadQueueTable" destination="51" id="136"/>
                 <outlet property="formatListPopUp" destination="15" id="148"/>
                 <outlet property="loadingProgramListIndicator" destination="13" id="DRW-JZ-v0C"/>
@@ -2033,7 +2032,7 @@
                                             <font key="font" metaFont="cellTitle"/>
                                         </buttonCell>
                                         <connections>
-                                            <action selector="unsubscribeSelectedItems:" target="249" id="341"/>
+                                            <action selector="delete:" target="-1" id="Ofg-PP-n4q"/>
                                         </connections>
                                     </button>
                                     <scrollView focusRingType="exterior" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="248">
@@ -2467,7 +2466,7 @@
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="getDownloadDirectory:" target="-2" id="nga-Jt-kXw"/>
+                            <action selector="getDownloadDirectory:" target="-1" id="mLD-eH-qyB"/>
                             <binding destination="203" name="title" keyPath="values.DownloadDirectory" id="tOP-gS-jbH"/>
                         </connections>
                     </button>

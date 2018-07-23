@@ -299,14 +299,12 @@ CA
                 <menuItem title="Window" id="19">
                     <menu key="submenu" title="Window" systemMenu="window" id="24">
                         <items>
-                            <menuItem title="Main Window" id="857">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Main Window" keyEquivalent="1" id="857">
                                 <connections>
                                     <action selector="showMainWindow:" target="494" id="858"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Remote Control" toolTip="Bring up Remote Control window to control your TiVo" id="b7Z-cN-J9N">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Remote Control" keyEquivalent="2" toolTip="Bring up Remote Control window to control your TiVo" id="b7Z-cN-J9N">
                                 <connections>
                                     <action selector="showRemoteControlWindow:" target="494" id="tsw-zo-x8m"/>
                                 </connections>
@@ -374,9 +372,7 @@ CA
                 <outlet property="markCommercialsItem" destination="1109" id="tQK-EL-TeA"/>
                 <outlet property="optionsMenu" destination="972" id="1021"/>
                 <outlet property="pauseMenuItem" destination="1078" id="1090"/>
-                <outlet property="playVideoMenuItem" destination="1098" id="1104"/>
                 <outlet property="refreshTiVoMenuItem" destination="876" id="882"/>
-                <outlet property="showInFinderMenuItem" destination="1099" id="1105"/>
                 <outlet property="skipCommercialsItem" destination="1106" id="qMr-xa-n71"/>
             </connections>
         </customObject>
