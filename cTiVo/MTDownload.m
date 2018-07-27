@@ -16,6 +16,7 @@
 #include "NSURL+MTURLExtensions.h"
 #include "NSDate+Tomorrow.h"
 #include "MTWeakTimer.h"
+#import <Carbon/Carbon.h>
 
 #ifndef DEBUG
 #import "Crashlytics/Crashlytics.h"
@@ -1839,6 +1840,89 @@ __DDLOGHERE__
     }
 }
 
+- (NSAppleEventDescriptor *)downloadEventDescriptor {
+	// parameters
+	//success, title, filename, episode, startTime, tivo?
+	//(where success = 1 if file is successful, 0, if a failed try, or -1 if final failure
+	NSString * success = @"0";
+	if (self.downloadStatus.intValue == kMTStatusFailed){
+		success = @"-1";
+	} else if (self.downloadStatus.intValue == kMTStatusDone ){
+		success = @"1";
+	}
+
+	NSAppleEventDescriptor *parameters = [NSAppleEventDescriptor listDescriptor];
+	// you have to love a language with indices that start at 1 instead of 0
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:success] 					atIndex:1];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.showTitle] 		atIndex:2];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.encodeFilePath] 		atIndex:3];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.episodeNumber]  atIndex:4];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.startTime] 		atIndex:5];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.tiVoName] 		atIndex:6];
+
+	// target
+	ProcessSerialNumber psn = {0, kCurrentProcess};
+	NSAppleEventDescriptor *target = [NSAppleEventDescriptor descriptorWithDescriptorType:typeProcessSerialNumber bytes:&psn length:sizeof(ProcessSerialNumber)];
+	
+	// function
+	NSAppleEventDescriptor *function = [NSAppleEventDescriptor descriptorWithString:@"downloadDone"];
+	
+	// event
+	NSAppleEventDescriptor *event = [NSAppleEventDescriptor appleEventWithEventClass:kASAppleScriptSuite eventID:kASSubroutineEvent targetDescriptor:target returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
+	[event setParamDescriptor:function forKeyword:keyASSubroutineName];
+	[event setParamDescriptor:parameters forKeyword:keyDirectObject];
+	
+	return event;
+}
+
+-(NSUserAppleScriptTask *) downloadAppleScriptTask {
+	NSUserAppleScriptTask *result = nil;
+	
+	NSError *error;
+	NSURL *directoryURL = [[NSFileManager defaultManager] URLForDirectory:NSApplicationScriptsDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:YES error:&error]; //may only be in sandboxed version
+	if (!directoryURL) directoryURL = [NSURL URLWithString:@"~/Library/Application Scripts/com.cTiVo.cTiVo"];
+	if (directoryURL) {
+			NSURL *scriptURL = [directoryURL URLByAppendingPathComponent:@"DownloadDone.scpt"];
+			result = [[NSUserAppleScriptTask alloc] initWithURL:scriptURL error:&error];
+			if (result) {
+				DDLogDetail(@"Found downloadDone AppleScript task");
+			}
+		} else {
+			DDLogDetail(@"No Application Scripts folder; error = %@", error);
+		}
+		
+		return result;
+	}
+
+- (NSString *)stringForResultEventDescriptor:(NSAppleEventDescriptor *)resultEventDescriptor {
+	NSString *result = nil;
+	if (resultEventDescriptor) {
+		if ([resultEventDescriptor descriptorType] != kAENullEvent) {
+			if ([resultEventDescriptor descriptorType] == kTXNUnicodeTextData) {
+				result = [resultEventDescriptor stringValue];
+			}
+		}
+	}
+	return result;
+}
+
+-(void) launchUserScript {
+	NSUserAppleScriptTask *downloadAppleScriptTask = [self downloadAppleScriptTask];
+	if (downloadAppleScriptTask) {
+		NSAppleEventDescriptor *event = [self downloadEventDescriptor];
+		[downloadAppleScriptTask executeWithAppleEvent:event completionHandler:^(NSAppleEventDescriptor *resultEventDescriptor, NSError *error) {
+			if (! resultEventDescriptor) {
+				DDLogReport(@"Failure on AppleScript task; error = %@", error);
+			} else {
+				NSString * result = [self stringForResultEventDescriptor:resultEventDescriptor];
+				if (result.length > 0) {
+					DDLogReport(@"For %@, User task returned: \n%@", self, result);
+				}
+			}
+		}];
+	}
+}
+
 -(void) finalFinalProcessing {
 	//allows for delayed Marking of commercials
 	if (self.addToiTunesWhenEncoded) {
@@ -1885,6 +1969,7 @@ __DDLOGHERE__
 	}
 	[self cleanupFiles];
 	self.downloadStatus = @(kMTStatusDone);
+	[self launchUserScript];
 }
 
 -(void) addEDLtoFilesOnDisk {
@@ -2217,6 +2302,7 @@ __DDLOGHERE__
 #endif
             [self notifyUserWithTitle: @"TiVo show failed."
                              subTitle:@"Retries Cancelled"];
+			[self launchUserScript];
         } else {
             if (falseStart) {
 				self.numStartupRetriesRemaining--;
@@ -2232,6 +2318,7 @@ __DDLOGHERE__
                 DDLogMajor(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
             }
             self.downloadStatus = @(kMTStatusNew);
+			[self launchUserScript];
         }
     }
 	[self checkQueue];

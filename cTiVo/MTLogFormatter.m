@@ -61,7 +61,7 @@
 				   (long)components.hour,
 				   (long)components.minute,
 				   (long)components.second, milliseconds);
-	return [NSString stringWithFormat:@"%s %@>%@@%lu>%@", ts, logMessage->_fileName,logMessage->_function, (unsigned long)logMessage->_line, logMessage->_message];
+	return [NSString stringWithFormat:@"%s %@@%lu>%@", ts, logMessage->_function, (unsigned long)logMessage->_line, logMessage->_message];
 }
 
 @end

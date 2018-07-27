@@ -458,6 +458,7 @@
 		1E9A10EE1757200000863C44 /* cTiVo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cTiVo.png; sourceTree = "<group>"; };
 		1E9EA3FB1F1AD91C00F0A2C9 /* MTProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressCell.h; sourceTree = "<group>"; };
 		1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressCell.m; sourceTree = "<group>"; };
+		1EA7EE90210BE5DB00B9C1CD /* DownloadDone.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DownloadDone.scpt; sourceTree = "<group>"; };
 		1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLogFormatter.h; sourceTree = "<group>"; };
 		1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLogFormatter.m; sourceTree = "<group>"; };
 		1EB49B9C1C505D3000887240 /* tivodecode-ng */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "tivodecode-ng"; path = "../../tivodecode-ng"; sourceTree = "<group>"; };
@@ -934,6 +935,7 @@
 				1E2725C316CB63D500A21940 /* elgatoProgress.scpt */,
 				D2B4B4F31732D69C005B97F1 /* elgatoQuit.scpt */,
 				1E2724EE16C9A8B500A21940 /* elgatoScript.pl */,
+				1EA7EE90210BE5DB00B9C1CD /* DownloadDone.scpt */,
 				94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */,
 				1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */,
 			);
