@@ -65,7 +65,9 @@ void signalHandler(int signal)
 @property (nonatomic, strong) MTMainWindowController  *mainWindowController;
 @property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
+#define psuedoEventTime 61
 @property (nonatomic, strong) NSTimer * pseudoTimer;
+@property (nonatomic, strong) NSDate * lastPseudoTime;
 @property (nonatomic, strong) NSOpenPanel* myOpenPanel;
 @property (nonatomic, assign) BOOL myOpenPanelIsTemp;
 
@@ -233,8 +235,8 @@ void signalHandler(int signal)
     [self checkDirectoryAndPurge:[tiVoManager detailsTempDirectory]];
 
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(saveState) userInfo:nil repeats:YES];
-	
-    self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: 61 target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
+	self.lastPseudoTime = [NSDate date];
+    self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: psuedoEventTime target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
 	
 	[self.tiVoGlobalManager determineCurrentProcessingState];
     DDLogDetail(@"Finished appDidFinishLaunch");
@@ -248,13 +250,14 @@ void signalHandler(int signal)
 -(void) systemWake: (NSNotification *) notification {
 	DDLogReport(@"System Waking!");
 	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:nil];
+	self.lastPseudoTime = [NSDate date]; //no problem with normal sleep
 }
 
 NSObject * assertionID = nil;
 
 -(void) preventSleep {
 	if (assertionID) return;
-	assertionID = [[NSProcessInfo processInfo] beginActivityWithOptions:NSActivityLatencyCritical reason:@"Downloading Shows"];
+	assertionID = [[NSProcessInfo processInfo] beginActivityWithOptions:NSActivityUserInitiated reason:@"Downloading Shows"];
 	DDLogMajor(@"Idle Sleep prevented");
 }
 
@@ -267,9 +270,15 @@ NSObject * assertionID = nil;
 
 -(void) launchPseudoEvent {
     DDLogDetail(@"PseudoEvent");
+	NSTimeInterval sinceLastPseudo = -[self.lastPseudoTime timeIntervalSinceNow];
+	if (sinceLastPseudo > 2* psuedoEventTime) {
+		DDLogReport(@"Looks like cTiVo was frozen out for %0.0f seconds",sinceLastPseudo-psuedoEventTime);
+	}
     NSEvent *pseudoEvent = [NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:[NSDate timeIntervalSinceReferenceDate] windowNumber:0 context:nil subtype:0 data1:0 data2:0];
     [NSApp postEvent:pseudoEvent atStart:YES];
+	self.lastPseudoTime = [NSDate date];
 }
+
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
     if (_tiVoGlobalManager) { //in case system calls this before applicationDidLaunch (High Sierra)
         [self showMainWindow:notification];
