@@ -77,6 +77,7 @@
 		1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C3173DC7D100B47539 /* DDFileLogger.m */; };
 		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1E9EA3FD1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */; };
+		1EB2D98E2110DC7B00E50C9B /* MTGCDTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB2D98D2110DC7B00E50C9B /* MTGCDTimer.m */; };
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9C1C505D3000887240 /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EB49BA01C50A4B100887240 /* tivo-libre.jar in Resources */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -459,6 +460,8 @@
 		1E9EA3FB1F1AD91C00F0A2C9 /* MTProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressCell.h; sourceTree = "<group>"; };
 		1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressCell.m; sourceTree = "<group>"; };
 		1EA7EE90210BE5DB00B9C1CD /* DownloadDone.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DownloadDone.scpt; sourceTree = "<group>"; };
+		1EB2D98C2110DC7B00E50C9B /* MTGCDTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTGCDTimer.h; sourceTree = "<group>"; };
+		1EB2D98D2110DC7B00E50C9B /* MTGCDTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTGCDTimer.m; sourceTree = "<group>"; };
 		1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLogFormatter.h; sourceTree = "<group>"; };
 		1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLogFormatter.m; sourceTree = "<group>"; };
 		1EB49B9C1C505D3000887240 /* tivodecode-ng */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "tivodecode-ng"; path = "../../tivodecode-ng"; sourceTree = "<group>"; };
@@ -1120,6 +1123,8 @@
 				1EE3AB61201589E500F36731 /* MTWeakTimer.h */,
 				1EE3AB62201589E500F36731 /* MTWeakTimer.m */,
 				1E3C43BE1D79EA1100367866 /* NSArray+Map.h */,
+				1EB2D98C2110DC7B00E50C9B /* MTGCDTimer.h */,
+				1EB2D98D2110DC7B00E50C9B /* MTGCDTimer.m */,
 				1E3C43BF1D79EA1100367866 /* NSArray+Map.m */,
 				1E3D27DE1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.h */,
 				1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */,
@@ -1445,6 +1450,7 @@
 				1ECD9D411C8265D600FBC78D /* MTChannelEditorController.m in Sources */,
 				D2001C281704F93F00B75D9C /* MTEdl.m in Sources */,
 				D291436E1713467A00CE3202 /* NSString+HTML.m in Sources */,
+				1EB2D98E2110DC7B00E50C9B /* MTGCDTimer.m in Sources */,
 				D291436F1713467F00CE3202 /* GTMNSString+HTML.m in Sources */,
 				D2C6BB5A1714681C00289751 /* MTTask.m in Sources */,
 				1E5BEC611F9532320082FA6B /* CrashlyticsLogger.m in Sources */,
@@ -1535,7 +1541,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_MULTIPLE_DEFINITION_TYPES_FOR_SELECTOR = NO;
 				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
-				GCC_WARN_UNDECLARED_SELECTOR = NO;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -1592,7 +1598,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_MULTIPLE_DEFINITION_TYPES_FOR_SELECTOR = NO;
 				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
-				GCC_WARN_UNDECLARED_SELECTOR = NO;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -1614,7 +1620,7 @@
 		D2D60BBC16766EFD00CE32DE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
@@ -1631,6 +1637,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
+				GCC_WARN_UNDECLARED_SELECTOR = NO;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
@@ -1652,7 +1659,7 @@
 		D2D60BBD16766EFD00CE32DE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
@@ -1669,6 +1676,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
+				GCC_WARN_UNDECLARED_SELECTOR = NO;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
 				LIBRARY_SEARCH_PATHS = (

@@ -1925,9 +1925,9 @@ __DDLOGHERE__
 
 -(void) finalFinalProcessing {
 	//allows for delayed Marking of commercials
+	self.processProgress = 1.0;
 	if (self.addToiTunesWhenEncoded) {
 		DDLogMajor(@"Adding to iTunes %@", self);
-		self.processProgress = 1.0;
 		self.downloadStatus = @(kMTStatusAddingToItunes);
 		MTiTunes *iTunes = [[MTiTunes alloc] init];
 		NSString * iTunesPath = [iTunes importIntoiTunes:self withArt:self.show.artWorkImage] ;
@@ -2087,11 +2087,11 @@ __DDLOGHERE__
 
 -(void) finishUpPostEncodeProcessing {
 	//This is called from Completion routines of tasks. Let them finish up before final pass
-	[self performSelector:@selector(finishUpPostencodeProcessingDelayed) withObject:nil afterDelay:0.1];
+	[self performSelector:@selector(finishUpPostEncodeProcessingDelayed) withObject:nil afterDelay:0.1];
 }
 
--(void) finishUpPostencodeProcessingDelayed {
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(finishUpPostencodeProcessingDelayed) object:nil];
+-(void) finishUpPostEncodeProcessingDelayed {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(finishUpPostEncodeProcessingDelayed) object:nil];
     if (_decryptTask.isRunning ||
         _encodeTask.isRunning ||
         _commercialTask.isRunning ||

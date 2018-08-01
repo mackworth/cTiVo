@@ -18,6 +18,7 @@
 #import "MTSubscriptionList.h"
 #import "PFMoveApplication.h"
 #import "NSDate+Tomorrow.h"
+#import "MTGCDTimer.h"
 
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
@@ -58,6 +59,7 @@ void signalHandler(int signal)
 	NSMutableArray *mediaKeyQueue;
 	BOOL gettingMediaKey;
 	NSTimer * saveQueueTimer;
+	
     BOOL quitWhenCurrentDownloadsComplete;
 }
 
@@ -65,8 +67,11 @@ void signalHandler(int signal)
 @property (nonatomic, strong) MTMainWindowController  *mainWindowController;
 @property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
-#define psuedoEventTime 61
+#define pseudoEventTime 61
+#define pseudoCheckTime 120
 @property (nonatomic, strong) NSTimer * pseudoTimer;
+@property (nonatomic, strong) MTGCDTimer * screenFrozenTimer;
+
 @property (nonatomic, strong) NSDate * lastPseudoTime;
 @property (nonatomic, strong) NSOpenPanel* myOpenPanel;
 @property (nonatomic, assign) BOOL myOpenPanelIsTemp;
@@ -236,8 +241,22 @@ void signalHandler(int signal)
 
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(saveState) userInfo:nil repeats:YES];
 	self.lastPseudoTime = [NSDate date];
-    self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: psuedoEventTime target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
+    self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: pseudoEventTime target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
 	
+	__weak __typeof__(self) weakSelf = self;
+
+	self.screenFrozenTimer = [MTGCDTimer scheduledTimerWithTimeInterval:pseudoCheckTime
+																repeats:YES
+																  queue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+																  block:^{
+																	  __typeof__(self) strongSelf = weakSelf;
+																	  NSTimeInterval timeSincePseudo = -[strongSelf.lastPseudoTime timeIntervalSinceNow];
+																	  if (timeSincePseudo > pseudoCheckTime) {
+																		  DDLogReport(@"Turning on screen due to main thread freezing for %0.1f seconds",timeSincePseudo-pseudoEventTime);
+																		  IOPMAssertionID userActivityID;
+																		  IOPMAssertionDeclareUserActivity(CFSTR("waking screen for thread contention"), kIOPMUserActiveLocal , &userActivityID);
+																	  }
+																  }];
 	[self.tiVoGlobalManager determineCurrentProcessingState];
     DDLogDetail(@"Finished appDidFinishLaunch");
  }
@@ -271,8 +290,8 @@ NSObject * assertionID = nil;
 -(void) launchPseudoEvent {
     DDLogDetail(@"PseudoEvent");
 	NSTimeInterval sinceLastPseudo = -[self.lastPseudoTime timeIntervalSinceNow];
-	if (sinceLastPseudo > 2* psuedoEventTime) {
-		DDLogReport(@"Looks like cTiVo was frozen out for %0.0f seconds",sinceLastPseudo-psuedoEventTime);
+	if (sinceLastPseudo > 1.5 * pseudoEventTime ) {
+		DDLogReport(@"Looks like cTiVo was frozen out for %0.0f seconds",sinceLastPseudo-pseudoEventTime);
 	}
     NSEvent *pseudoEvent = [NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:[NSDate timeIntervalSinceReferenceDate] windowNumber:0 context:nil subtype:0 data1:0 data2:0];
     [NSApp postEvent:pseudoEvent atStart:YES];
@@ -306,7 +325,8 @@ NSObject * assertionID = nil;
 				state = @"Unknown";
 				break;
 		}
-		DDLogDetail(@"Thermal State Changed to %@ for %@", state, processInfo);
+		
+		DDLogDetail(@"Thermal State Changed to %@ for %@; %@on main thread", state, processInfo, [NSThread mainThread] ? @"" : @"not ");
 	}
 }
 
