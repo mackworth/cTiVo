@@ -708,6 +708,8 @@ __DDLOGHERE__
 }
 
 -(BOOL) autoSkipModeScanAllowedNow {
+	BOOL autoSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan];
+	if (!autoSkip) return NO;
 	NSDate * skipDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
 	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanEndTime ];
 	double startSeconds = [skipDate secondsUntilNextTimeOfDay];
@@ -1192,7 +1194,7 @@ __DDLOGHERE__
 
 -(void) skipModeChannelFound: (NSNotification *) notification {
 	MTTiVoShow * show = notification.object;
-	if (!show.rpcData.clipMetaDataId) return;
+	if (![show hasSkipModeInfo]) return;
 	NSString * channelName = show.stationCallsign;
 	NSMutableDictionary * channelInfo = [[tiVoManager channelNamed:channelName] mutableCopy];
 	if (channelInfo) {
@@ -1335,13 +1337,14 @@ __DDLOGHERE__
 	}];
 }
 
--(MTDownload *) findInDownloadQueue: (MTTiVoShow *) show {
+-(NSArray <MTDownload *> *) downloadsForShow: (MTTiVoShow *) show {
+	NSMutableArray * downloads = [NSMutableArray array];
 	for (MTDownload * download in _downloadQueue) {
 		if (download.show == show) {
-			return download;
+			[downloads addObject:download];
 		}
 	}
-	return nil;
+	return downloads;
 }
 
 -(MTDownload *) findRealDownload: (MTDownload *) proxyDownload  {
@@ -1640,8 +1643,8 @@ __DDLOGHERE__
 		} else {
 			//not scheduled so warn
 			[self notifyForName:show.showTitle
-					  withTitle:@"Warning: No SkipMode Available"
-					   subTitle:@"You can manually load SkipMode, or set up automatic schedule in Preferences."
+					  withTitle:@"Warning: SkipMode Points Not Available"
+					   subTitle:@"You can manually load SkipMode points, or set up automatic schedule in Preferences."
 					   isSticky:YES];
 		}
 	}

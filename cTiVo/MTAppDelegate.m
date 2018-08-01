@@ -5,7 +5,6 @@
 //  Created by Scott Buchanan on 12/6/12.
 //  Copyright (c) 2012 Scott Buchanan. All rights reserved.
 //
-#pragma clang diagnostic ignored "-Wimplicit-retain-self"
 
 #import "MTAppDelegate.h"
 #import "MTProgramTableView.h"
@@ -325,15 +324,14 @@ void signalHandler(int signal)
     // register to receive system sleep notifications
 	
     root_port = IORegisterForSystemPower( refCon, &notifyPortRef, MySleepCallBack, &notifierObject );
-    if ( root_port == 0 )
-    {
-        printf("IORegisterForSystemPower failed\n");
+    if ( root_port == 0 ) {
+        DDLogReport(@"IORegisterForSystemPower failed");
     }
 	
     // add the notification port to the application runloop
     CFRunLoopAddSource( CFRunLoopGetCurrent(),
 					   IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes );
-    
+	
     //Make sure details and thumbnails directories are available
     [self checkDirectoryAndPurge:[tiVoManager tivoTempDirectory]];
     [self checkDirectoryAndPurge:[tiVoManager tvdbTempDirectory]];
@@ -1078,6 +1076,8 @@ void signalHandler(int signal)
 {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wimplicit-retain-self"
  		_mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
 		showInFinderMenuItem.target = _mainWindowController;
 		showInFinderMenuItem.action = @selector(revealInFinder:);
@@ -1087,7 +1087,7 @@ void signalHandler(int signal)
 		_mainWindowController.playVideoMenuItem = playVideoMenuItem;
    });
 	[_mainWindowController showWindow:nil];
-	
+#pragma clang diagnostic pop
 }
 -(MTRemoteWindowController *) remoteControlWindowController {
 	if (!_remoteControlWindowController) {

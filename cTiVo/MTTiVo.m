@@ -471,6 +471,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         self.addedShowIndices = indicesToLookFor;
         [self startNPLDownload:NO];
     } else {
+    	[self reloadRecentShows]; //not going to be done by NPLDownload, so do it now.
         [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationTiVoShowsUpdated object:nil];
     }
 }
@@ -515,12 +516,22 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void) reloadShowInfoForShows: (NSArray <MTTiVoShow *> *) shows {
-    NSMutableArray * showIDs = [NSMutableArray arrayWithCapacity:shows.count];
+    NSMutableArray <NSString *> * showIDs = [NSMutableArray arrayWithCapacity:shows.count];
     for (MTTiVoShow * eachShow in shows) {
 		eachShow.edlList = nil;
         [showIDs addObject:eachShow.idString];
     }
-    [self.myRPC reloadShowInfoForIDs:showIDs];
+    [self.myRPC purgeShows:showIDs ];
+    [self.myRPC getShowInfoForShows:showIDs perShow:^(NSString *showID)  {
+		NSInteger index = [showIDs indexOfObject:showID];
+		if (index != NSNotFound && (NSUInteger)index < showIDs.count) {
+			MTTiVoShow * show = shows[index];
+			if (show.rpcData.clipMetaDataId) {
+				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:show];
+			}
+		}
+
+	} withCompletion:nil];  //rely on setting rpcData for each show
 }
 
 -(BOOL) supportsTransportStream {
@@ -578,8 +589,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	//if they already have metadata, try them first
 	//More than one show happens when SkipMode timeblock happens, so we want to try possible ones first.
 	NSArray <MTTiVoShow *> * hasInfoFirst = [shows sortedArrayUsingComparator:^NSComparisonResult(MTTiVoShow *  _Nonnull show1, MTTiVoShow *    _Nonnull show2) {
-		BOOL show1Has = show1.rpcData.clipMetaDataId != nil;
-		BOOL show2Has = show2.rpcData.clipMetaDataId != nil;
+		BOOL show1Has = [show1 hasSkipModeInfo];
+		BOOL show2Has = [show2 hasSkipModeInfo];
 		if (show1Has == show2Has) return NSOrderedSame;
 		if (show1Has) return NSOrderedAscending;
 		return NSOrderedDescending;
@@ -590,15 +601,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 //		show.rpcData.clipMetaDataId = nil;
 //		show.rpcData.programSegments = nil;
 		if ([show.tiVo isEqual:self]) {
-			if ([self.myRPC skipModeEDLInProgressForShow:show.rpcData]) {
-				continue;
-			}
-			if ( !show.inProgress.boolValue && show.mightHaveSkipModeInfo && !show.edlList.count) {
-            	DDLogMajor(@"Finding SkipMode points for %@ on %@", show, self);
+			if ( !show.inProgress.boolValue && show.mightHaveSkipModeInfo && (show.rpcData.edlList.count == 0)) {
+            	DDLogMajor(@"Asking for SkipMode points for %@ on %@", show, self);
 				show.rpcData.tempLength = show.showLength; //hint in case tivo isn't reporting this
             	[self.myRPC findSkipModeEDLForShow:show.rpcData];
         	} else {
-				DDLogVerbose(@"Skipping SkipMode points for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : @"" );
+				DDLogReport(@"XXX No need for SkipMode points for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : show.edlList.count > 0 ? @"Already have" : !show.mightHaveSkipModeInfo ? @"won't have for other reason" : @"Error" );
 			}
         }
 	}
@@ -932,38 +940,18 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void) markDeletedDownloadShow: (MTTiVoShow *) deletedShow {
     if (deletedShow.isQueued) {
-        MTDownload * download = [tiVoManager findInDownloadQueue:deletedShow];
-        if (download.isNew) {
-            download.downloadStatus = @(kMTStatusDeleted);
-        }
-        deletedShow.imageString = @"deleted";
+        NSArray <MTDownload *> * downloads = [tiVoManager downloadsForShow:deletedShow];
+        for (MTDownload * download in downloads) {
+			if (download.isNew) {
+            	download.downloadStatus = @(kMTStatusDeleted);
+        	}
+		}
     }
+	deletedShow.imageString = @"deleted";
 }
-//-(void) checkRecentShows {
-//	if (self.recentShows.count > 0) {
-//		NSMutableArray <NSString *> * recentIDs = [NSMutableArray array];
-//		for (MTTiVoShow * show in [self.recentShows copy ]) {
-//			if (show.rpcData.clipMetaDataId) {
-//				DDLogMajor(@"Found Metadata for %@ after %0.1lf minutes", show, (-[show.showDate timeIntervalSinceNow]-show.showLength)/60);
-//				[self.recentShows removeObject:show];
-//			} else if (-[show.showDate timeIntervalSinceNow] > (show.showLength+4*60*60)) {
-//				DDLogMajor(@"Giving up on %@ metadata after 4 hours", show);
-//				[self.recentShows removeObject:show];
-//			} else {
-//				show.rpcData = nil;
-//				[recentIDs addObject:show.idString];
-//			}
-//		}
-//		[self.myRPC reloadShowInfoForIDs:[recentIDs copy]];
-//	} else {
-//		[self.recentShowsTimer invalidate];
-//		self.recentShowsTimer = nil;
-//	}
-//}
-//
 
 -(void) loadSkipModeInfoForShow:(MTTiVoShow *) show withCompletion: (void (^)(void)) completionHandler {
-	[self.myRPC getShowInfoForShows:@[show.idString] withCompletion:  completionHandler];
+	[self.myRPC getShowInfoForShows:@[show.idString] perShow:nil withCompletion: completionHandler];
 }
 
 -(void) reloadRecentShows {
@@ -974,7 +962,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	NSTimeInterval recentTime = 60 * ( [[NSUserDefaults standardUserDefaults] integerForKey: kMTWaitForSkipModeInfoTime] + 60); //round up an hour
 	for (MTTiVoShow * show in self.shows) {
 		if (-[show.showDate timeIntervalSinceNow] < (show.showLength+recentTime)) {
-			if (!show.protectedShow.boolValue && !show.rpcData.clipMetaDataId && show.mightHaveSkipModeInfo) {
+			if (!show.protectedShow.boolValue && ![show hasSkipModeInfo] && show.mightHaveSkipModeInfo) {
 				[recentIDs addObject:show.idString];
 				[recentShows addObject:show];
 			}
@@ -982,14 +970,19 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	}
 	if (recentIDs.count > 0) {
 		DDLogMajor(@"reloading shows for metadata: %@", recentShows);
-		[self.myRPC getShowInfoForShows:[recentIDs copy] withCompletion:^{
-			for (MTTiVoShow * show in recentShows) {
-				if (show.hasSkipModeInfo || show.hasSkipModeList) {
-					DDLogReport(@"XXX Looks like we got SkipMode Info/List for %@",self);
-					[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationFoundSkipModeInfo object: show ];
-				}
+		[self.myRPC getShowInfoForShows:[recentIDs copy] perShow:^(NSString *showID) {
+ 			NSInteger index = [recentIDs indexOfObject:showID];
+			if (index != NSNotFound && (NSUInteger)index < recentShows.count) {
+			MTTiVoShow * show = recentShows[index];
+			if (show.hasSkipModeInfo || show.hasSkipModeList) {
+				DDLogReport(@"XXX Looks like we got SkipMode Info/List for %@",show);
+				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:show];
+			} else {
+				DDLogReport(@"XXX No such SkipMode Info/List for %@",show);
+
 			}
-		} ];
+		}
+		} withCompletion:nil];
 	}
 }
 
@@ -1288,9 +1281,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	NSMutableArray <NSString *> * showIDs = [NSMutableArray arrayWithCapacity:shows.count];
 	for (MTTiVoShow * show in shows) {
 		//get rid of shows that might be updated by the next time we run
-		if (!show.isSuggestion &&
-			!show.rpcData.clipMetaDataId &&
-			show.timeLeftTillRPCInfoWontCome > -13*60*60) {
+		if (!show.rpcData.edlList && !show.rpcData.clipMetaDataId && [show mightHaveSkipModeInfoLongest]) {
 			DDLogReport(@"xxx purging show %@",show);
 			[showIDs addObject:show.idString];
 		}

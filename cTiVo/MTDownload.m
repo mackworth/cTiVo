@@ -113,7 +113,6 @@ __DDLOGHERE__
     [self addObserver:self forKeyPath:@"processProgress" options:NSKeyValueObservingOptionOld context:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationDownloadRowChanged object:nil];
    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeInfo object:nil];
 }
 
 -(id) copyWithZone:(NSZone *)zone {
@@ -131,6 +130,17 @@ __DDLOGHERE__
         [download setupNotifications];
     }
     return download;
+}
+
+-(void) setShow:(MTTiVoShow *)show {
+	if (show != _show) {
+		BOOL newTiVo = (show.tiVo != _show.tiVo);
+		if (_show)                 [[NSNotificationCenter defaultCenter] removeObserver:self name:kMTNotificationFoundSkipModeInfo object: _show ];
+		if (newTiVo && _show.tiVo) [[NSNotificationCenter defaultCenter] removeObserver:self name:kMTNotificationFoundSkipModeInfo object: _show.tiVo ];
+		_show = show;
+		if (show)                  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeInfo object: show];
+	    if (newTiVo && show.tiVo)  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeInfo object: show.tiVo ];
+	}
 }
 
 //always use this initializer; not init
@@ -1805,7 +1815,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void) skipModeUpdated: (NSNotification *) notification {
 	if (notification.object == self || notification.object == self.show ) {
-		DDLogMajor(@"Notified of SkipMode Info change for %@", self);
+		DDLogMajor(@"Possible SkipMode Info change for %@", self);
 		[self skipModeCheck];
 	}
 }
@@ -1849,10 +1859,12 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		_useSkipMode = NO;  //avoid recursion
 		if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
 			self.downloadStatus = @(kMTStatusNew);
+			[self checkQueue];
 		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
-			[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+			self.downloadStatus = @(kMTStatusNew);
+			DDLogMajor(@"xxx Not waiting any more for SkipMode for %@", self);
+			[self rescheduleShowWithDecrementRetries: @(NO)];
 		}
-		[self checkQueue];
 	} else {
 		//SkipMode list not here yet, but still expected, so need to wait
 		if (self.downloadStatus.intValue == kMTStatusNew) {
@@ -1871,11 +1883,11 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void) skipModeExpired {
 	//called if timer expires on downloading show info
+	DDLogMajor(@"XXX SkipModeTimer went off for %@, which ended at %@",self, self.show.stopTime);
 	[self stopWaitSkipModeTimer];
-	DDLogMajor(@"XXX SkipMode Timer went off for %@, which ended at %@",self, self.show.stopTime);
 	if (!self.useSkipMode) return;
 	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
-		DDLogReport(@"SkipMode Timer went off, but we have SkipMode info? %@",self);
+		DDLogReport(@"SkipModeTimer went off, but we have SkipMode info? %@",self);
 		[self skipModeCheck];
 		return; //shouldn't be here
 	}
@@ -1895,18 +1907,18 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 -(void) changeToComskip {
 	DDLogMajor(@"Never got SkipMode Info for %@. Retrying with comskip",self.show);
 	if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial ) {
-		self.useSkipMode = NO; //have to try comskip now
+		_useSkipMode = NO; //have to try comskip now
 		self.downloadStatus = @(kMTStatusNew);
 	} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd ) {
-		self.useSkipMode = NO; //have to try comskip now
+		_useSkipMode = NO; //have to try comskip now
 		[self deleteVideoFile]; //this hurts; maybe whole new comskip only path?
-		[self cancel];
+		[self rescheduleShowWithDecrementRetries:@NO ];
 	}
 }
 
 -(void) startWaitSkipModeTimer {
 	if (!self.waitForSkipModeInfoTimer) {
-		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome;
+		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome+10;
 		if (waitTime > 0) {
 			DDLogReport (@"XXX setting skipModeTimer at %0.1f minutes for %@", waitTime/60.0, self );
 			self. waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
@@ -2039,8 +2051,8 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         }
         self.processProgress = 1.0;
     } else {
-        [self cancel];
         DDLogMajor(@"Stopping at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self.show.showTitle, self.processProgress, self.previousCheck );
+        [self cancel];
         if (self.downloadStatus.intValue == kMTStatusDone) {
             self.baseFileName = nil;
         }
@@ -2850,11 +2862,10 @@ NSInteger diskWriteFailure = 123;
 	
 }
 
--(NSString *)description
-{
-    return [NSString stringWithFormat:@"%@ (%@)%@",self.show.showTitle,self.show.tiVoName,[self.show.protectedShow boolValue]?@"-Protected":@""];
+-(NSString *)description {
+#pragma clang diagnostic ignored "-Wdeprecated-objc-pointer-introspection"
+    return [NSString stringWithFormat:@"%@-%@(@%x)%@",self.show.showTitle, self.show.tiVoName, ((int)self) & 0xFFFF,[self.show.protectedShow boolValue]?@"-Protected":@""];
 }
-
 
 @end
 

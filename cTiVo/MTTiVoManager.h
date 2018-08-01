@@ -61,7 +61,7 @@
 -(void) sortDownloadQueue;
 -(NSArray *) currentDownloadQueueSortedBy: (NSArray*) sortDescripters;
 
--(MTDownload *) findInDownloadQueue: (MTTiVoShow *) show;
+-(NSArray <MTDownload *> *) downloadsForShow: (MTTiVoShow *) show;
 -(BOOL) anyShowsWaiting;
 -(NSInteger)numberOfShowsToDownload;
 -(long long)sizeOfShowsToDownload;

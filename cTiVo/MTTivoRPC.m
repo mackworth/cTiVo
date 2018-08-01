@@ -47,7 +47,7 @@ typedef void (^ReadBlock)(NSDictionary *, BOOL);
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, ReadBlock > * readBlocks;
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, NSDictionary* > * requests; //debug only
 
-@property (nonatomic, strong) NSMutableArray < MTRPCData *> *skipModeQueue;
+@property (nonatomic, strong) NSMutableArray < MTRPCData *> *skipModeQueueMetaData, * skipModeQueueEDL;
 
 @end
 
@@ -183,7 +183,8 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     self.authenticationLaunched = NO;
     self.firstLaunch = YES;
 	self.updating = 0;
-    self.skipModeQueue = [NSMutableArray array];
+    self.skipModeQueueMetaData = [NSMutableArray array];
+    self.skipModeQueueEDL = [NSMutableArray array];
     [self launchServer];
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(receiveWakeNotification:)
@@ -286,7 +287,9 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
         [iStream open];
          [oStream open];
      }
-	 if (self.skipModeQueue.count > 0 ) { //recover commercialing under way (e.g. after sleep)
+	 if (self.skipModeQueueMetaData.count > 0 || self.skipModeQueueEDL.count > 0 ) { //recover commercialing under way (e.g. after sleep)
+	 	DDLogReport(@"XXX SkipMode Queue restarting: %@ AND %@", self.skipModeQueueMetaData, self.skipModeQueueEDL);
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ];
 		 [self performSelector:@selector(findSkipModeRecursive:) withObject:@0 afterDelay:20];
 	 }
 
@@ -748,7 +751,7 @@ static NSRegularExpression * isFinalRegex = nil;
            DDLogDetail (@"Got %lu shows from TiVo", shows.count);
            if (!strongSelf.showMap) {
                strongSelf.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
-               [strongSelf getShowInfoForShows: shows withCompletion:nil];
+               [strongSelf getShowInfoForShows: shows perShow:nil withCompletion:nil];
            } else {
                NSMutableArray <NSString *> *lookupDetails = [NSMutableArray array];
                NSMutableArray <NSString *> * newIDs = [NSMutableArray array];
@@ -774,7 +777,7 @@ static NSRegularExpression * isFinalRegex = nil;
                for (NSString * objectID in deletedShows) {
                    [strongSelf.showMap removeObjectForKey:objectID];
                }
-			   [strongSelf getShowInfoForShows: lookupDetails withCompletion:^{
+			   [strongSelf getShowInfoForShows: lookupDetails perShow:nil withCompletion:^{
 				   if (!isFirstLaunch) {
 					   [weakSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
 				   }
@@ -796,14 +799,9 @@ static NSRegularExpression * isFinalRegex = nil;
 	}
 }
 
--(void) reloadShowInfoForIDs: (NSArray <NSString *> *) showIDs {
-	[self purgeShows:showIDs];
-    [self getShowInfoForShows:showIDs withCompletion:nil];
-}
-
--(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows withCompletion: (void (^)(void)) completionHandler {
+-(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows  perShow: (void (^)(NSString * showID)) perShowCall withCompletion:(void (^) (void)) completion {
 	if (requestShows.count == 0 || !self.bodyID) {
-		if (completionHandler) completionHandler();
+		if (completion) completion();
 		return;
 	}
     const int idsPerCall = 10;
@@ -851,14 +849,12 @@ static NSRegularExpression * isFinalRegex = nil;
 	   __typeof__(self) strongSelf = weakSelf;
 	   if (!strongSelf) return;
        NSArray * responseShows = jsonResponse[@"recording"];
-	   if (!lastBatch) {
-		   [strongSelf getShowInfoForShows:subArray withCompletion:completionHandler];
-	   }
 	   DDLogVerbose(@"Got ShowInfo from TiVo RPC: %@", [strongSelf maskTSN:jsonResponse]);
+	   if (!lastBatch) {
+		   [strongSelf getShowInfoForShows:restArray perShow:perShowCall withCompletion:completion ];
+	   }
        if (responseShows.count == 0 || responseShows.count != subArray.count) {
-           DDLogMajor(@"Invalid # of TivoRPC shows: \n%@ \n%@", responseShows, subArray);
-		   if (completionHandler) completionHandler();
-           return;
+           DDLogReport(@"Warning: Invalid # of TivoRPC shows: \n%@ \n%@", responseShows, subArray);
        }
        NSMutableArray * showsWithoutImage = [NSMutableArray arrayWithCapacity:responseShows.count];
        NSMutableArray * showsObjectIDs = [NSMutableArray arrayWithCapacity:responseShows.count];
@@ -882,28 +878,8 @@ static NSRegularExpression * isFinalRegex = nil;
            rpcData.genre = genre;
            rpcData.recordingID = (NSString *) showInfo[@"recordingId"];
 		   rpcData.contentID = (NSString *) showInfo[@"contentId"];
-		   NSArray * clipDataArray = showInfo[@"clipMetadata"];
-		   if ([clipDataArray isKindOfClass:[NSArray class]] && clipDataArray.count > 0) {
-			   rpcData.clipMetaDataId = clipDataArray[0][@"clipMetadataId"];
-			   if (rpcData.clipMetaDataId) {
-				   MTRPCData * oldRPCData = nil;
-				   @synchronized (strongSelf.showMap) {
-					   oldRPCData = strongSelf.showMap [objectId];
-				   }
-				   if (!oldRPCData.clipMetaDataId) {
-					   DDLogMajor(@"Metadata just arrived for %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId);
-				   } else {
-					   DDLogMajor(@"Revised commercial info found for %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, showInfo[@"contentId"]);
-				   }
-				   [strongSelf retrieveSegments:rpcData.clipMetaDataId withCompletionHandler:^(NSArray * segments) {
-					   DDLogDetail(@"Segments just arrived for %@ #: %@ contentId: %@; %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId,segments);
-					   rpcData.programSegments = segments;
-				   }];
-			   }
-		   } else {
-			   DDLogMajor(@"No Metadata for %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId);
-		   }
            rpcData.series = (NSString *)showInfo[@"title"];
+           rpcData.rpcID = [NSString stringWithFormat: @"%@|%@", strongSelf.hostName, objectId];
 //           NSString * mimeType = (NSString *)showInfo[@"mimeType"];  doesn't work!
 //           if ([@"video/mpg2" isEqualToString:mimeType] ){
 //               rpcData.format = MPEGFormatMP2;
@@ -913,10 +889,14 @@ static NSRegularExpression * isFinalRegex = nil;
 //               rpcData.format = MPEGFormatOther;
 //           }
 
-           rpcData.rpcID = [NSString stringWithFormat: @"%@|%@", strongSelf.hostName, objectId];
            @synchronized (strongSelf.showMap) {
                [strongSelf.showMap setObject:rpcData forKey:objectId];
            }
+
+           [strongSelf parseMetadataID:showInfo forShow:rpcData withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> *segments) {
+				if (perShowCall) perShowCall(objectId);
+			}];
+
            //very annoying that TiVo won't send over image information with the rest of the show info.
            NSString * imageURL = strongSelf.seriesImages[rpcData.series]; //tivo only has series images
            if (imageURL) {
@@ -937,7 +917,7 @@ static NSRegularExpression * isFinalRegex = nil;
            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                [strongSelf saveDefaults];
            });
-		  if (completionHandler) completionHandler();
+		  if (completion) completion();
        }
    } ];
 }
@@ -1208,7 +1188,7 @@ static NSArray * imageResponseTemplate = nil;
 }
 
 #pragma mark Commercial extraction
--(void) retrieveClipMetaDataFor: (NSString *) contentId withCompletionHandler: (void (^)(NSString *, NSArray <NSNumber *> *)) completionHandler {
+-(void) retrieveClipMetaDataFor: (NSString *) contentId withCompletionHandler: (void (^)(NSString * metaDataId, NSArray <NSNumber *> * segments)) completionHandler {
 	if (contentId.length ==0 || !self.bodyID) {
 		DDLogMajor (@"can't retrieve metaData for show: %@",contentId);
 		if (completionHandler) completionHandler(nil, nil);
@@ -1242,71 +1222,55 @@ static NSArray * imageResponseTemplate = nil;
 		   if (!strongSelf) return;
 		   NSArray * responseShows = jsonResponse[@"recording"];
 		   DDLogVerbose(@"Got metaData from TiVo RPC: %@", [strongSelf maskTSN:jsonResponse]);
-		   if (responseShows.count == 0) return;
+		   if (responseShows.count == 0) {
+				if (completionHandler) completionHandler(nil,nil);
+				return;
+			}
 		   if (responseShows.count != subArray.count) {
 			   DDLogMajor(@"Invalid # of TivoRPC shows: /n%@ /n%@", responseShows, subArray);
+			   if (completionHandler) completionHandler(nil,nil);
 			   return;
 		   }
 		   NSDictionary * showInfo = responseShows[0];
-		   NSArray * clipDataArray = showInfo[@"clipMetadata"];
-		   NSString * clipMetaDataId = nil;
-		   if ([clipDataArray isKindOfClass:[NSArray class]] && clipDataArray.count > 0) {
-			   clipMetaDataId = clipDataArray[0][@"clipMetadataId"];
-		   }
-		   if (!clipMetaDataId) {
-			   DDLogMajor(@"No clip data for %@", contentId);
-			   if (completionHandler) completionHandler(nil,nil);
-			   return;
-		   } else {
-			   MTRPCData * rpcData = nil;
-			   @synchronized (strongSelf.showMap) {
-				   rpcData = strongSelf.showMap[contentId];
-				   rpcData.clipMetaDataId = clipMetaDataId;
-			   }
-
-			   DDLogMajor(@"metaData info %@ found for %@, %@", clipMetaDataId, showInfo[@"title"], contentId);
-			   [strongSelf retrieveSegments:clipMetaDataId withCompletionHandler:^(NSArray * segments) {
-				   rpcData.programSegments = segments;
-				   DDLogDetail(@"Got segment data for %@ (%@): %@", contentId, clipMetaDataId, segments);
-				   completionHandler(clipMetaDataId, segments);
-			   }];
-		   }
-	   } ];
+		   MTRPCData * rpcData = nil;
+		   @synchronized (self.showMap) {
+		   	 	rpcData = self.showMap[contentId];
+	       }
+		  [strongSelf parseMetadataID:showInfo forShow:rpcData withCompletionHandler:completionHandler];
+	 }];
 }
 
-//-(void) UNUSEDretrieveClipMetaDataFor: (NSString *) contentId withCompletionHandler: (void (^)(NSString *, NSArray <NSNumber *> *)) completionHandler {
-//	if (contentId.length ==0) return;
-//	//unforunately, TiVo has a bug where some shows have metadata, but aren't marked as Skip mode compatible, so this doesn't work.
-//	DDLogDetail(@"Getting clip data for %@", contentId);
-//	NSDictionary * data = @{
-//							@"contentId": contentId
-//							};
-//	__weak __typeof__(self) weakSelf = self;
-//
-//	[self sendRpcRequest:@"clipMetadataSearch"
-//				 monitor:NO
-//				withData:data
-//	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
-//		   NSArray * clipDatas = jsonResponse[@"clipMetadata"];
-//		   NSString * clipMetadataId = nil;
-//		   if ([clipDatas isKindOfClass:[NSArray class]] && clipDatas.count > 0) {
-//				   clipMetadataId = clipDatas[0][@"clipMetadataId"];
-//		   }
-//		   if (!clipMetadataId) {
-//			   DDLogDetail(@"No clip data for %@", contentId);
-//			   if (completionHandler) completionHandler(nil,nil);
-//			   return;
-//		   } else {
-//			   DDLogVerbose(@"Got clip data for %@ (%@): %@", contentId, clipMetadataId, clipDatas);
-//			   [weakSelf retrieveSegments:clipMetadataId  withCompletionHandler:^(NSArray * segments) {
-//				   DDLogDetail(@"Got segment data for %@ (%@): %@", contentId, clipMetadataId, segments);
-//				   completionHandler(clipMetadataId, segments);
-//			   }   ];
-//
-//		   }
-//	   }];
-//}
-//
+ -(void)parseMetadataID:(NSDictionary *) showInfo forShow: (MTRPCData *) rpcData  withCompletionHandler: (void (^)(NSString *, NSArray <NSNumber *> *)) completionHandler {
+	NSArray * clipDataArray = showInfo[@"clipMetadata"];
+	NSString * clipMetaDataId = nil;
+	if ([clipDataArray isKindOfClass:[NSArray class]] && clipDataArray.count > 0) {
+	   clipMetaDataId = clipDataArray[0][@"clipMetadataId"];
+	}
+	
+	NSString * oldMetadataID = rpcData.clipMetaDataId;
+	rpcData.clipMetaDataId = clipMetaDataId;
+
+	if (!clipMetaDataId) {
+		DDLogMajor(@"No skipmode metaData for %@", rpcData);
+		if (completionHandler) completionHandler(nil,nil);
+	} else if ([oldMetadataID isEqualToString:clipMetaDataId] && rpcData.programSegments.count > 0){
+		DDLogDetail(@"No skipmode change for %@",rpcData);
+		if (completionHandler) completionHandler(clipMetaDataId, rpcData.programSegments);
+	} else {
+		if (!oldMetadataID) {
+		   DDLogMajor(@"Metadata just arrived for %@", rpcData);
+		} else {
+		   DDLogMajor(@"Revised commercial info found for %@", rpcData);
+		}
+		[self retrieveSegments:rpcData.clipMetaDataId withCompletionHandler:^(NSArray * segments) {
+		   	DDLogDetail(@"Segments just arrived for %@ #: %@ contentId: %@; %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId,segments);
+		   	rpcData.programSegments = segments;
+		   	if (segments.count == 0) rpcData.skipModeFailed = YES;
+			if (completionHandler) completionHandler(clipMetaDataId, segments);
+		}];
+	}
+}
+
 -(void) retrieveSegments: (NSString *) clipMetaId withCompletionHandler: (void (^)(NSArray *)) completionHandler {
 	if (clipMetaId.length == 0 ) {
 		DDLogMajor (@"can't retrieve segments for nil metadata");
@@ -1412,44 +1376,58 @@ static NSArray * imageResponseTemplate = nil;
 	}];
 }
 
--(BOOL) skipModeEDLInProgressForShow:(MTRPCData *) rpcData {
-	return [self.skipModeQueue containsObject:rpcData];
-}
-
 -(void) findSkipModeEDLForShow:(MTRPCData *) rpcData {
 	if (!rpcData) return;
-    if (rpcData.edlList) return; //already got it.
-	if (rpcData.skipModeFailed) return;
-	if (!rpcData.contentID) return;
+    if (rpcData.edlList) {
+    	DDLogReport(@"XXX Not getting EDL for %@; Already have it", rpcData);
+    	return;
+    	}
+	if (rpcData.skipModeFailed) {
+		DDLogReport(@"XXX Not getting EDL for %@; Previous failure", rpcData);
+    	return;
+	};
+	if (!rpcData.contentID) {
+		DDLogReport(@"XXX Not getting EDL for %@; No content ID", rpcData);
+    	return;
+	};
     __weak __typeof__(self) weakSelf = self;
 
-	if (![self.skipModeQueue containsObject:rpcData]) {
-		[self.skipModeQueue addObject:rpcData];
+	if ([self.skipModeQueueMetaData containsObject:rpcData] || [self.skipModeQueueEDL containsObject:rpcData]) {
+		DDLogReport(@"XXX SkipMode Queue already waiting for: %@", rpcData);
+	} else {
+		DDLogReport(@"XXX SkipMode Queue adding: %@", rpcData);
 		if (rpcData.clipMetaDataId == nil || rpcData.programSegments == nil) {
 			//need metadata info first
 			//really should have saved objectID
 			NSRange separator = [rpcData.rpcID rangeOfString:@"|" options:0];
 			if (separator.location == NSNotFound) return;
 			NSString * objectId = [rpcData.rpcID substringFromIndex:NSMaxRange(separator)];
+			DDLogReport(@"XXX SkipMode Queue getting metadata: %@", rpcData);
+			[self.skipModeQueueMetaData addObject:rpcData];
 
 			[self retrieveClipMetaDataFor:objectId withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
 				rpcData.clipMetaDataId = metaDataID;
 				rpcData.programSegments = lengths;
-				[weakSelf.skipModeQueue removeObject:rpcData];
+				[weakSelf.skipModeQueueMetaData removeObject:rpcData];
 				if (metaDataID != nil && lengths.count > 0) {
+					DDLogReport(@"XXX SkipMode Queue got metadata; re-launching: %@", rpcData);
 					[weakSelf findSkipModeEDLForShow:rpcData] ;
+				} else {
+					DDLogReport(@"XXX SkipMode Queue no metadata, ignoring: %@", rpcData);
 				}
 			}];
-			return;
 		} else {
-			if (self.skipModeQueue.count == 1 ) {
+			[self.skipModeQueueEDL addObject:rpcData];
+			if (self.skipModeQueueEDL.count == 1) {
 				// restore these?
 				//    [self sendKeyEvent: @"nowShowing" andPause :4.0];
 				//    [self sendKeyEvent: @"tivo"       andPause :4.0];
 				//    [self sendKeyEvent: @"nowShowing" andPause :4.0];
 				[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialing object: self.delegate  ];
+				DDLogReport(@"XXX Getting SkipMode for: %@", rpcData);
 				[self findSkipModeRecursive:@0];
 			} else {
+				DDLogReport(@"XXX Another SkipMode Already in Progress: %@", self.skipModeQueueEDL);
 				//wait for previous ones to complete.
 			}
 		}
@@ -1458,30 +1436,33 @@ static NSArray * imageResponseTemplate = nil;
 
 -(void) findSkipModeRecursive: (NSNumber *) firstTryNumber {
 	BOOL lastTry = firstTryNumber.intValue >= 2 ; //try up to three times (due to interference)
-    if (self.skipModeQueue.count == 0) {
-        DDLogMajor(@"Finished checking for commercials");
+    if (self.skipModeQueueEDL.count == 0) {
+        DDLogMajor(@"Finished SkipMode queue");
 		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ];
         return;
     }
-	DDLogMajor(@"%@Checking for commercials for %@", firstTryNumber.intValue == 0 ? @"" : @"Re-", self.skipModeQueue[0]);
-	MTRPCData * rpcData = self.skipModeQueue[0];
+	MTRPCData * rpcData = self.skipModeQueueEDL[0];
+	DDLogMajor(@"skipMode queue %@checking for commercials for %@", firstTryNumber.intValue == 0 ? @"" : @"re-", rpcData);
 	__weak __typeof__(self) weakSelf = self;
 
 	[self findSkipModePointsForShow:rpcData withCompletionHandler:^{
 		__typeof__(self) strongSelf = weakSelf;
 		if (rpcData.edlList || lastTry) {
 			if (!rpcData.edlList) {
-				DDLogReport(@"EDL failure for %@", rpcData);
+				DDLogReport(@"SkipMode EDL failure for %@", rpcData);
 				rpcData.skipModeFailed = YES;
 			}
 			[strongSelf.delegate receivedRPCData:rpcData];
-			if (strongSelf.skipModeQueue.count > 0) {
-				[strongSelf.skipModeQueue removeObject:rpcData];
+			if (strongSelf.skipModeQueueEDL.count > 0) {
+				[strongSelf.skipModeQueueEDL removeObject:rpcData];
+				DDLogReport(@"XXX SkipModeQueue moving on to %@",strongSelf.skipModeQueueEDL);
 				[strongSelf findSkipModeRecursive:@0 ];
+			} else {
+				DDLogReport(@"XXX SkipMode Queue finished");
 			}
 		} else {
 			//try again if we have a problem creating an EDL
-			DDLogReport(@"Retrying EDL list for %@", rpcData);
+			DDLogReport(@"SkipMode Queue Retrying EDL list for %@", rpcData);
 			[strongSelf findSkipModeRecursive:@(firstTryNumber.intValue + 1) ];
 		}
     }];
@@ -1491,7 +1472,7 @@ static NSArray * imageResponseTemplate = nil;
 	
 	__weak __typeof__(self) weakSelf = self;
 	if (!rpcData) return;
-	[weakSelf whatsOnSearchWithCompletion: ^{
+//	[weakSelf whatsOnSearchWithCompletion: ^{
 
 	[weakSelf playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
 		
@@ -1550,7 +1531,7 @@ static NSArray * imageResponseTemplate = nil;
 		}];
 		}];
 	}];
-			}];
+//			}];
 }
 
 	

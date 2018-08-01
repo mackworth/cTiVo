@@ -23,8 +23,7 @@
 -(void) emptyCaches;
 -(void) purgeShows: (NSArray <NSString *> *) showIDs;
 
--(void) reloadShowInfoForIDs: (NSArray <NSString *> *) showIDs;
--(void) getShowInfoForShows: (NSArray <NSString *> *) showIDs withCompletion: (void (^)(void)) completionHandler;
+-(void) getShowInfoForShows: (NSArray <NSString *> *) showIDs perShow: (void (^)(NSString *showID)) perShowCall withCompletion: (void (^) (void)) completion;
 -(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
@@ -34,7 +33,6 @@
 -(void) playOnTiVo: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL success)) completionHandler;
 
 -(void) findSkipModeEDLForShow:(MTRPCData *) rpcData;
--(BOOL) skipModeEDLInProgressForShow:(MTRPCData *) rpcData;
 
 @property (nonatomic, weak) id <MTRPCDelegate> delegate;
 

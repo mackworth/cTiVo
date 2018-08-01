@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14109" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1090" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14109"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -401,7 +401,6 @@
                         <datePickerElements key="datePickerElements" hour="YES" minute="YES"/>
                     </datePickerCell>
                     <connections>
-                        <binding destination="248" name="enabled" keyPath="values.ScheduleSkipMode" id="GQM-Q0-048"/>
                         <binding destination="248" name="value" keyPath="values.ScheduledSkipModeStartTime" id="0lj-f9-Dfd"/>
                     </connections>
                 </datePicker>
