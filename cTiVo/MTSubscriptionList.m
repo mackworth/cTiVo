@@ -248,17 +248,17 @@
         MTSubscription * newSub = [MTSubscription subscriptionFromShow:tivoShow];
         //use default properties
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        newSub.encodeFormat = tiVoManager.selectedFormat;
-        newSub.addToiTunes = [NSNumber numberWithBool:([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes)];
-		newSub.useSkipMode = [NSNumber numberWithBool: tivoShow.mightHaveSkipModeInfo];
-        newSub.skipCommercials = [NSNumber numberWithBool:([defaults boolForKey:kMTSkipCommercials] && newSub.encodeFormat.comSkip.boolValue)];
-        newSub.markCommercials = [NSNumber numberWithBool:([defaults boolForKey:kMTMarkCommercials] && newSub.encodeFormat.canMarkCommercials)];
-        newSub.genTextMetaData	  = [defaults objectForKey:kMTExportTextMetaData];
+        newSub.addToiTunes =     @([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes);
+		newSub.useSkipMode =     @([defaults boolForKey:kMTUseSkipMode] && tivoShow.mightHaveSkipModeInfo);
+        newSub.skipCommercials = @([defaults boolForKey:kMTSkipCommercials] && newSub.encodeFormat.comSkip.boolValue);
+        newSub.markCommercials = @([defaults boolForKey:kMTMarkCommercials] && newSub.encodeFormat.canMarkCommercials);
+        newSub.genTextMetaData=  [defaults objectForKey:kMTExportTextMetaData];
 #ifndef deleteXML
         newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
         newSub.includeAPMMetaData = [defaults objectForKey:kMTExportMetaData];
 #endif
         newSub.exportSubtitles	  =[defaults objectForKey:kMTExportSubtitles];
+		newSub.encodeFormat = tiVoManager.selectedFormat;
 
         DDLogVerbose(@"Subscribing show %@ as: %@ ", tivoShow, newSub);
         [self addObject:newSub];
@@ -274,7 +274,6 @@
 	if ([self findShow:tivoShow] == nil || [[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowDups]) {
         MTSubscription * newSub = [MTSubscription subscriptionFromShow: download.show];
         // use queued properties
-        newSub.encodeFormat = download.encodeFormat;
         newSub.addToiTunes = [NSNumber numberWithBool: download.addToiTunesWhenEncoded ];
         newSub.skipCommercials = [NSNumber numberWithBool: download.skipCommercials];
 		newSub.markCommercials = [NSNumber numberWithBool: download.markCommercials];
@@ -285,6 +284,7 @@
         newSub.includeAPMMetaData = [NSNumber numberWithBool: download.includeAPMMetaData];
 #endif
         newSub.exportSubtitles=  download.exportSubtitles;
+		newSub.encodeFormat = download.encodeFormat;
         DDLogVerbose(@"Subscribing download %@ as: %@ ", tivoShow, newSub);
         [self addObject:newSub];
         return newSub;

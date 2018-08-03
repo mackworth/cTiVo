@@ -47,12 +47,17 @@ __DDLOGHERE__
     return [self.addToiTunes boolValue];
 }
 
+-(BOOL) canSkipModeCommercials {
+	return (self.canMarkCommercials || self.canSkipCommercials);
+}
+
 -(void) setEncodeFormat:(MTFormat *) encodeFormat {
     if (_encodeFormat != encodeFormat ) {
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];
         BOOL markWasDisabled = ![self canMarkCommercials];
-        _encodeFormat = encodeFormat;
+		BOOL skipModeWasDisabled = ![self canSkipModeCommercials];
+       _encodeFormat = encodeFormat;
 
 		if (!self.canAddToiTunes && self.shouldAddToiTunes) {
             //no longer possible
@@ -75,6 +80,13 @@ __DDLOGHERE__
             //newly possible, so take user default
             self.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMarkCommercials];
         }
+		if (self.useSkipMode && ![self canSkipModeCommercials]) {
+			self.useSkipMode = @NO;
+		} else if (skipModeWasDisabled && [self canSkipModeCommercials]) {
+			//newly possible, so take user default
+			self.useSkipMode = @([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseSkipMode]);
+		}
+		
     }
 }
 - (void) formatMayHaveChanged{
@@ -352,6 +364,7 @@ __DDLOGHERE__
     newSub.preferredTiVo= @"";
     newSub.HDOnly= @NO;
     newSub.SDOnly= @NO;
+	newSub.useSkipMode = @([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseSkipMode]);
     return newSub;
 }
 

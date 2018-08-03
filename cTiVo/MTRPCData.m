@@ -68,8 +68,11 @@ static NSString * kEDL = @"EDLList";
 	 [coder encodeObject: _clipMetaDataId forKey:kClipMetaData];
      [coder encodeObject:_imageURL forKey:kImageURL];
 	 [coder encodeObject:_series forKey:kSeries];
-	 [coder encodeObject:_programSegments forKey:kSegments];
-	 [coder encodeObject:_edlList forKey:kEDL];
+	if (_edlList) {
+		[coder encodeObject:_edlList forKey:kEDL];
+	} else {
+		[coder encodeObject:_programSegments forKey:kSegments]; //if we have EDL, no need to save segments (which are large)
+	}
 }
 
 -(NSString *)description {

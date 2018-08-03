@@ -767,7 +767,7 @@ static NSRegularExpression * isFinalRegex = nil;
                        //have seen before, so don't lookup, but also don't delete
                        [deletedShows removeObjectForKey:objectID];
                        if (isFirstLaunch &&
-						   (!thisRPC.imageURL || (thisRPC.clipMetaDataId && ! thisRPC.programSegments.count))) {
+						   (!thisRPC.imageURL || (thisRPC.clipMetaDataId && ! (thisRPC.edlList.count || thisRPC.programSegments.count)))) {
                            //saved last time without having finished checking the art or getting segment info
                            [lookupDetails addObject:objectID];
                        }

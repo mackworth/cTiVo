@@ -1839,7 +1839,7 @@ __DDLOGHERE__
         }
     }
 }
-
+#pragma mark - AppleScript calls for user download complete
 - (NSAppleEventDescriptor *)downloadEventDescriptor {
 	// parameters
 	//success, title, filename, episode, startTime, tivo?
@@ -1853,12 +1853,13 @@ __DDLOGHERE__
 
 	NSAppleEventDescriptor *parameters = [NSAppleEventDescriptor listDescriptor];
 	// you have to love a language with indices that start at 1 instead of 0
-	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:success] 					atIndex:1];
-	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.showTitle] 		atIndex:2];
-	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.encodeFilePath] 		atIndex:3];
-	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.episodeNumber]  atIndex:4];
-	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.startTime] 		atIndex:5];
-	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.tiVoName] 		atIndex:6];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:success] 						atIndex:1];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.showTitle] 			atIndex:2];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.encodeFilePath] 			atIndex:3];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.episodeNumber]  	atIndex:4];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.startTime] 			atIndex:5];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.tiVoName] 			atIndex:6];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.thumbnailFile.path] atIndex:7];
 
 	// target
 	ProcessSerialNumber psn = {0, kCurrentProcess};
