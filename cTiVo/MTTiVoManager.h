@@ -21,7 +21,9 @@
 
 //Shared Data
 
-@property (nonatomic, strong) NSArray <MTTiVo *> *tiVoList;
+@property (nonatomic, readonly) NSArray <MTTiVo *> *tiVoList;
+@property (nonatomic, readonly) NSArray <MTTiVo *> *tiVoMinis;
+@property (nonatomic, readonly) NSArray <MTTiVo *> *allTiVos;
 @property (nonatomic, readonly) NSArray <MTTiVoShow *> *tiVoShows;
 @property (nonatomic, strong) NSMutableArray <MTFormat *> *formatList;
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSDate *> *lastLoadedTivoTimes;
@@ -53,14 +55,14 @@
 
 //---------------Download Queue Manager methods ----------
 -(void) cancelAllDownloads;
--(void) addToDownloadQueue:(NSArray *)downloads beforeDownload:(MTDownload *) nextShow;
--(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeDownload:(MTDownload *) nextShow;
--(void) deleteFromDownloadQueue:(NSArray *)downloads;
+-(void) addToDownloadQueue:(NSArray <MTDownload *> *)downloads beforeDownload:(MTDownload *) nextShow;
+-(void) downloadShowsWithCurrentOptions:(NSArray<MTTiVoShow *> *) shows beforeDownload:(MTDownload *) nextShow;
+-(void) deleteFromDownloadQueue:(NSArray <MTDownload *>*)downloads;
 -(void) rescheduleDownloads: (NSArray <MTDownload *> *) downloads;
--(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) downloads
+-(NSIndexSet *) moveShowsInDownloadQueue:(NSArray <MTDownload *> *) downloads
 								 toIndex:(NSUInteger)insertIndex;
 -(void) sortDownloadQueue;
--(NSArray *) currentDownloadQueueSortedBy: (NSArray*) sortDescripters;
+-(NSArray <MTDownload *> *) currentDownloadQueueSortedBy: (NSArray <NSSortDescriptor *> *) sortDescripters;
 -(BOOL) sharedShowWith:(MTDownload *) download; //true if another download shares this download's show
 
 -(NSArray <MTDownload *> *) downloadsForShow: (MTTiVoShow *) show;
@@ -77,7 +79,7 @@
 -(MTTiVoShow *) replaceProxyInQueue: (MTTiVoShow *) newShow;
 -(void) checkDownloadQueueForDeletedEntries: (MTTiVo *) tiVo;
 
--(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo;
+-(NSArray <MTDownload *> *)downloadQueueForTiVo:(MTTiVo *)tiVo;
 
 //---------------Download Queue starting/stopping ----------
 -(void)pauseQueue:(NSNumber *)askUser;
@@ -85,18 +87,17 @@
 -(void)determineCurrentProcessingState;
 
 //---------------Format Management methods ----------
--(NSArray *)userFormats;
--(NSArray *)userFormatDictionaries;
+-(NSArray <MTFormat *> *)userFormats;
+-(NSArray <NSDictionary *> *)userFormatDictionaries;
 -(MTFormat *) findFormat:(NSString *) formatName;
 -(MTFormat *) testPSFormat;
--(void)addFormatsToList:(NSArray *)formats withNotification:(BOOL) notify;
+-(void)addFormatsToList:(NSArray <MTFormat *> *)formats withNotification:(BOOL) notify;
 -(void)addEncFormatToList: (NSString *) filename ;
 
 //---------------TiVo Management methods ----------
 -(BOOL)foundTiVoNamed:(NSString *)tiVoName;
 -(void)refreshAllTiVos;
 -(void)resetAllDetails;
--(NSArray *)allTiVos;
 -(BOOL)anyTivoActive;
 -(int) nextManualTiVoID;
 -(BOOL) duplicateTiVoFor: (MTTiVo *)tiVo;

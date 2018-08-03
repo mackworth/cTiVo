@@ -20,6 +20,7 @@
 @property (nonatomic, strong) MTNetService *tiVo;
 @property (nonatomic, strong) NSString * tiVoSerialNumber;
 @property (readonly)  BOOL  manualTiVo;
+@property (readonly) BOOL isMini;
 @property (atomic, assign) BOOL enabled;
 @property (nonatomic, assign)BOOL storeMediaKeyInKeychain;
 @property (atomic, assign) BOOL isReachable;

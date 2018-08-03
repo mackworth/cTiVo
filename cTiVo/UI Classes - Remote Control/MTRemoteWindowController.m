@@ -61,9 +61,15 @@ __DDLOGHERE__
 	}
 	return tivo;
 }
+
 -(void) updateTiVoList {
 	NSMutableArray * newList = [NSMutableArray array];
 	for (MTTiVo * tivo in [tiVoManager tiVoList]) {
+		if (tivo.enabled && tivo.rpcActive) {
+			[newList addObject:tivo];
+		}
+	}
+	for (MTTiVo * tivo in [tiVoManager tiVoMinis]) {
 		if (tivo.enabled && tivo.rpcActive) {
 			[newList addObject:tivo];
 		}
@@ -116,7 +122,6 @@ __DDLOGHERE__
 //	  @"Launchpad" 		: @"x-tivo:flash:uuid:545E064D-C899-407E-9814-69A021D68DAD"
 	  };
 	[self.selectedTiVo sendURL: commands[item.title]];
-	 
 }
 
 -(IBAction)buttonPressed:(NSButton *)sender {

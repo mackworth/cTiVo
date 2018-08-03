@@ -177,6 +177,7 @@ __DDLOGHERE__
 	self = [self init];
 	if (self) {
 		self.tiVo = tiVo;
+		_enabled = YES;
         _manualTiVo = isManual;
         self.manualTiVoID = manualTiVoID;
 		self.opsQueue = queue;
@@ -284,6 +285,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         _enabled = enabled;
     }
     [tiVoManager updateTiVoDefaults:self];
+}
+
+-(BOOL) isMini {
+	return [self.tiVoSerialNumber hasPrefix:@"A9"] && ![self.tiVoSerialNumber hasPrefix: @"A94"]; //not streams
 }
 
 -(BOOL) enabled {
@@ -574,7 +579,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void) playShow:(MTTiVoShow *)show {
     if ([show.tiVo isEqual:self] &&
 		show.rpcData.recordingID.length > 0) {
-        [self.myRPC playOnTiVo:show.rpcData.recordingID withCompletionHandler:nil];
+		MTTiVo *mini = nil;
+		for (MTTiVo * candidate in [tiVoManager tiVoList]) {
+			if ([candidate.tiVo.name isEqualToString:@"Mini"]) {
+				mini = candidate;
+				break;
+			}
+		}
+        [mini.myRPC playOnTiVo:show.rpcData.recordingID withCompletionHandler:nil];
     }
 }
 

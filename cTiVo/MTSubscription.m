@@ -124,18 +124,11 @@ __DDLOGHERE__
 	}
 	
 	//Check if we've already recorded it
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSubscriptionRelyOnDiskOnly]) {
-		if (tivoShow.isOnDisk) {
-			DDLogVerbose(@"Found on disk: %@ ",tivoShow);
+	NSString * thisShowID = tivoShow.uniqueID;
+	for (NSDictionary * prevShow in self.prevRecorded ) {
+		if ([prevShow[@"episodeID"] isEqualToString: thisShowID]) {
+			DDLogVerbose(@"Already recorded: %@ ",prevShow);
 			return NO;
-		}
-	} else {
-		NSString * thisShowID = tivoShow.uniqueID;
-		for (NSDictionary * prevShow in self.prevRecorded ) {
-			if ([prevShow[@"episodeID"] isEqualToString: thisShowID]) {
-				DDLogVerbose(@"Already recorded: %@ ",prevShow);
-				return NO;
-			}
 		}
 	}
 	return YES;

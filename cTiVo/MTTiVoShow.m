@@ -360,7 +360,7 @@ __DDLOGHERE__
 		_rpcData = rpcData;
 		self.episodeGenre = rpcData.genre;  //no conflict with TVDB
 		self.clipMetaDataId = rpcData.clipMetaDataId;
-		self.edlList = rpcData.edlList;
+		if (rpcData.edlList.count > 0) self.edlList = rpcData.edlList;
 		[self checkAllInfoSources];
 	}
 }

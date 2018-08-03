@@ -16,19 +16,12 @@
 #import "NSArray+Map.h"
 #import "NSString+Helpers.h"
 #import "NSDate+Tomorrow.h"
-
 #include <arpa/inet.h>
 
-
-
 @interface MTTiVoManager ()    <NSUserNotificationCenterDelegate>        {
-
     NSNetServiceBrowser *tivoBrowser;
-
-	
-    NSMetadataQuery *cTiVoQuery;
+	NSMetadataQuery *cTiVoQuery;
 	BOOL volatile loadingManualTiVos;
-
 }
 
 @property (atomic, strong)     NSOperationQueue *opsQueue;
@@ -42,13 +35,11 @@
 @property (nonatomic,readonly) NSMutableArray <NSNetService *> *tivoServices;
 
 @property (nonatomic, strong) NSDate * lastSkipModeWarningTime; //for warnings
-
 @end
-
 
 @implementation MTTiVoManager
 
-@synthesize subscribedShows = _subscribedShows, numEncoders, tiVoList = _tiVoList;
+@synthesize tiVoList = _realTiVoList;
 
 __DDLOGHERE__
 
@@ -83,7 +74,8 @@ __DDLOGHERE__
         DDLogDetail(@"setting up TivoManager");
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		_tivoServices = [NSMutableArray new];
-		_tiVoList = [NSMutableArray new];
+		_realTiVoList = [NSArray new];
+		_tiVoMinis = [NSArray new];
 		self.opsQueue = [NSOperationQueue new];
         _downloadQueue = [NSMutableArray new];
 
@@ -96,7 +88,7 @@ __DDLOGHERE__
         DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
        [self restoreManualEpisodeInfo];
 
-		numEncoders = 0;
+		self.numEncoders = 0;
 		_signalError = 0;
 		self.opsQueue.maxConcurrentOperationCount = 4;
 
@@ -332,9 +324,8 @@ __DDLOGHERE__
 	}
 	loadingManualTiVos = YES;
 	DDLogDetail(@"LoadingTivos");
-	NSMutableArray *bonjourTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == NO"]]];
-	NSArray *manualTiVoList = [NSArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
-//	[_tiVoList removeObjectsInArray:manualTiVoList];
+	NSMutableArray *bonjourTiVoList = [NSMutableArray arrayWithArray:[_realTiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == NO"]]];
+	NSArray *manualTiVoList = [NSArray arrayWithArray:[_realTiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
 	DDLogVerbose(@"Manual TiVos: %@",manualTiVoList);
 	
 	//Update rebuild manualTiVoList reusing what can be reused.
@@ -447,7 +438,7 @@ __DDLOGHERE__
 		[updatedSavedTiVos addObject:dictToAdd];
     }
 	if (!foundTiVo) {
-		DDLogReport(@"First time finding  %@",tiVo);
+		DDLogReport(@"First time finding %@",tiVo);
         [updatedSavedTiVos addObject:tiVoDict];
 	}
     [[NSUserDefaults standardUserDefaults] setValue:updatedSavedTiVos forKeyPath:kMTTiVos];
@@ -473,46 +464,25 @@ __DDLOGHERE__
     return highValue + 1;
 }
 
--(void)searchForBonjourTiVos
-{
+-(void)searchForBonjourTiVos {
 	DDLogDetail(@"searching for Bonjour");
     tivoBrowser = [NSNetServiceBrowser new];
     tivoBrowser.delegate = self;
     [tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-    [tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
+    [tivoBrowser searchForServicesOfType:@"_tivo-device._tcp" inDomain:@"local"];
 }
 
--(NSArray *)tiVoAddresses
-{
-    NSMutableArray *addresses = [NSMutableArray array];
-    for (MTTiVo *tiVo in _tiVoList) {
-        if ([tiVo.tiVo addresses] && [tiVo.tiVo addresses].count) {
-            NSString *ipAddress = [self getStringFromAddressData:[tiVo.tiVo addresses][0]];
-            [addresses addObject:ipAddress];
-        }
-    }
-    DDLogVerbose(@"Tivo Addresses:  %@",addresses);
-    return addresses;
-}
-
--(NSArray *)allTiVos
-{
-    return _tiVoList;
-}
-
--(NSArray *)tiVoList {
+-(NSArray <MTTiVo *> *)tiVoList {
     NSPredicate *enabledTiVos = [NSPredicate predicateWithFormat:@"enabled == YES"];
-//    NSArray *enabledTiVoList = [_tiVoList filteredArrayUsingPredicate:enabledTiVos];
-//    NSLog(@"return %lu enabled tivos",enabledTiVoList.count);
-	return [_tiVoList filteredArrayUsingPredicate:enabledTiVos];
+	return [_realTiVoList filteredArrayUsingPredicate:enabledTiVos];
 }
 
 -(void) setTiVoList: (NSArray *) tiVoList {
-	if (_tiVoList != tiVoList) {
+	if (_realTiVoList != tiVoList) {
 		NSSortDescriptor *manualSort = [NSSortDescriptor sortDescriptorWithKey:@"manualTiVo" ascending:NO];
 		NSSortDescriptor *nameSort = [NSSortDescriptor sortDescriptorWithKey:@"tiVo.name" ascending:YES];
-		_tiVoList = [tiVoList sortedArrayUsingDescriptors:[NSArray arrayWithObjects:manualSort,nameSort, nil]];
-		DDLogVerbose(@"resorting TiVoList %@", _tiVoList);
+		_realTiVoList = [tiVoList sortedArrayUsingDescriptors:[NSArray arrayWithObjects:manualSort,nameSort, nil]];
+		DDLogVerbose(@"resorting TiVoList %@", _realTiVoList);
 	}
 }
 
@@ -580,7 +550,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) anyTivoActive {
-	for (MTTiVo *tiVo in _tiVoList) {
+	for (MTTiVo *tiVo in self.tiVoList) {
 		if ([tiVo isProcessing]) {
            return YES;
 		}
@@ -652,7 +622,7 @@ __DDLOGHERE__
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
 		if (returnValue == NSAlertDefaultReturn) {
 			//We're rescheduling shows
-            for (MTTiVo *tiVo in _tiVoList) {
+            for (MTTiVo *tiVo in self.tiVoList) {
                 [tiVo rescheduleAllShows];
             }
             NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
@@ -680,7 +650,7 @@ __DDLOGHERE__
     } else {
         self.processingPaused = @(YES);
         if (askUser != nil) {
-            for (MTTiVo *tiVo in _tiVoList) {
+            for (MTTiVo *tiVo in self.tiVoList) {
                 [tiVo rescheduleAllShows];
             }
         }
@@ -768,7 +738,7 @@ __DDLOGHERE__
 
 -(void)startAllTiVoQueues
 {
-    for (MTTiVo *tiVo in _tiVoList) {
+    for (MTTiVo *tiVo in self.tiVoList) {
         DDLogDetail(@"Starting download on tiVo %@",tiVo.tiVo.name);
 		[tiVo manageDownloads];
     }
@@ -836,7 +806,7 @@ __DDLOGHERE__
         DDLogMajor(@"Changed TiVo list to %@",[self.tiVoList maskMediaKeys]);
     } else if ([keyPath isEqualToString:kMTUpdateIntervalMinutesNew]){
         DDLogMajor(@"Changed Update Time to %ld",(long)[defs integerForKey:kMTUpdateIntervalMinutesNew]);
-        for (MTTiVo *tiVo in _tiVoList) {
+        for (MTTiVo *tiVo in self.tiVoList) {
             [tiVo scheduleNextUpdateAfterDelay:-1];
         }
     } else if ( [keyPath isEqualToString:KMTPreferredImageSource] ){
@@ -860,14 +830,12 @@ __DDLOGHERE__
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
-
 }
 
--(void)refreshAllTiVos
-{
+-(void)refreshAllTiVos {
 	DDLogMajor(@"Refreshing all Tivos");
-	for (MTTiVo *tiVo in _tiVoList) {
-		if (tiVo.isReachable && tiVo.enabled) {
+	for (MTTiVo *tiVo in self.tiVoList) {
+		if (tiVo.isReachable) {
 			[tiVo updateShows:nil];
 		}
 	}
@@ -882,8 +850,8 @@ __DDLOGHERE__
     for (NSURL *fileURL in files) {
        [fm removeItemAtURL:fileURL  error:nil];
     }
-
 }
+
 -(void)resetAllDetails{
 	DDLogMajor(@"Resetting the caches!");
     [self.tvdb resetAll];
@@ -893,7 +861,7 @@ __DDLOGHERE__
     [self emptyDirectory:[self tivoTempDirectory]];
     [self emptyDirectory:[self tvdbTempDirectory]];
 
-	for (MTTiVo *tiVo in _tiVoList) {
+	for (MTTiVo *tiVo in self.tiVoList) {
         [tiVo resetAllDetails];
 	}
 	[self refreshAllTiVos];
@@ -1348,8 +1316,7 @@ __DDLOGHERE__
 -(NSString *)getAMediaKey
 {
 	NSString *key = nil;
-	NSArray *currentTiVoList = [NSArray arrayWithArray:[self allTiVos]];
-	for (MTTiVo *tiVo in currentTiVoList) {
+	for (MTTiVo *tiVo in self.tiVoList) {
 		if (tiVo.mediaKey && tiVo.mediaKey.length) {
 			key = tiVo.mediaKey;
 			break;
@@ -1664,40 +1631,33 @@ __DDLOGHERE__
 -(int)totalShows
 {
     int total = 0;
-    for (MTTiVo *tiVo in _tiVoList) {
-       if (tiVo.enabled) total += tiVo.shows.count;
+    for (MTTiVo *tiVo in self.tiVoList) {
+       total += tiVo.shows.count;
     }
     return total;
 }
 
--(BOOL)foundTiVoNamed:(NSString *)tiVoName
-{
-	BOOL ret = NO;
-	for (MTTiVo *tiVo in _tiVoList) {
+-(BOOL)foundTiVoNamed:(NSString *)tiVoName {
+	for (MTTiVo *tiVo in self.tiVoList) {
 		if ([tiVo.tiVo.name compare:tiVoName] == NSOrderedSame) {
-			ret = YES;
-			break;
+			return YES;
 		}
 	}
-	return ret;
+	return NO;
 }
 
--(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo
-{
+-(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo {
 //    return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",tiVo.tiVo.name]];
     return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"show.tiVoName == %@",tiVo.tiVo.name]];
 }
 
-
--(void)encodeFinished:(NSNotification *)notification
-{
-    if (numEncoders == 0) {
+-(void)encodeFinished:(NSNotification *)notification {
+    if (self.numEncoders == 0) {
         [self notifyWithTitle: @"Internal Logic Error! " subTitle: @"numEncoders under 0" ];
-
     } else {
-        numEncoders--;
+        self.numEncoders--;
     }
-    DDLogMajor(@"Num encoders after decrement from notification %@ is %d ",notification.name,numEncoders);
+    DDLogMajor(@"Num encoders after decrement from notification %@ is %d ",notification.name,self.numEncoders);
 
     NSNotification *restartNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
     [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:restartNotification afterDelay:2];
@@ -1813,15 +1773,11 @@ __DDLOGHERE__
 	return tmpPath;
 }
 
--(NSMutableArray *)tiVoShows
-{
+-(NSMutableArray *)tiVoShows {
 	NSMutableArray *totalShows = [NSMutableArray array];
 	DDLogVerbose(@"reloading shows");
-	for (MTTiVo *tv in _tiVoList) {
-		if (tv.enabled) {
-			[totalShows addObjectsFromArray:tv.shows];
-
-		}
+	for (MTTiVo *tv in self.tiVoList) {
+		[totalShows addObjectsFromArray:tv.shows];
 	}
 	return totalShows;
 }
@@ -1868,8 +1824,7 @@ __DDLOGHERE__
 
 #pragma mark - Bonjour browser delegate methods
 
-- (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
-{
+- (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing {
 	DDLogMajor(@"Found Service %@",netService);
     for (NSNetService * prevService in _tivoServices) {
         if ([prevService.name compare:netService.name] == NSOrderedSame) {
@@ -1883,19 +1838,15 @@ __DDLOGHERE__
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)browser
-             didNotSearch:(NSDictionary *)errorDict
-{
+             didNotSearch:(NSDictionary *)errorDict {
     DDLogReport(@"Bonjour service not found: %@",errorDict);
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing {
     DDLogReport(@"Removing Service: %@",aNetService.name);
-
 }
 
 #pragma mark - NetService delegate methods
-
-
 
 - (NSString *)dataToString:(NSData *) data {
     // Helper for getting information from the TXT data
@@ -1906,8 +1857,7 @@ __DDLOGHERE__
     return resultString;
 }
 
-- (void)netServiceDidResolveAddress:(MTNetService *)sender
-{
+- (void)netServiceDidResolveAddress:(MTNetService *)sender {
     [sender stop];
 	NSArray * addresses = [sender addresses];
 	if (addresses.count == 0) return;
@@ -1959,30 +1909,32 @@ __DDLOGHERE__
 		DDLogDetail(@"Invalid TiVo platform %@; rejecting %@(%@) ",platform, sender.name,ipAddress);
 		return;
 	}
-    
-
+	
     MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender
                         withOperationQueue:self.opsQueue
                           withSerialNumber:TSN];
-
-	self.tiVoList = [_tiVoList arrayByAddingObject: newTiVo];
-    if (newTiVo.enabled){
-        if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
-            //Haven't seen multiple TiVos before, so enable the TiVo column this one time.
-            //In future, if user hides, we don't mess with it.
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
-            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
-        }
-        DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
-        [newTiVo updateShows:self];
-    }
-
+	if (newTiVo.isMini ) { 
+		_tiVoMinis = [_tiVoMinis arrayByAddingObject: newTiVo];
+		DDLogReport(@"Got new TiVo Mini: %@ at %@", newTiVo, ipAddress);
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+	} else {
+		self.tiVoList = [_realTiVoList arrayByAddingObject: newTiVo];
+		if (newTiVo.enabled){
+			if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
+				//Haven't seen multiple TiVos before, so enable the TiVo column this one time.
+				//In future, if user hides, we don't mess with it.
+				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
+				[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
+			}
+			DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+			[newTiVo updateShows:self];
+		}
+	}
 }
 
 
--(void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict
-{
+-(void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict {
     DDLogReport(@"Service %@ failed to resolve",sender.name);
     [sender stop];
 }
@@ -2020,6 +1972,5 @@ __DDLOGHERE__
     }
     return outString;
 }
-    
 
 @end

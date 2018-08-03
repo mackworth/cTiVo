@@ -78,6 +78,7 @@
 		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1E9EA3FD1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */; };
 		1EB2D98E2110DC7B00E50C9B /* MTGCDTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB2D98D2110DC7B00E50C9B /* MTGCDTimer.m */; };
+		1EB2D9902113D7F400E50C9B /* skipModeComskip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EB2D98F2113D7F300E50C9B /* skipModeComskip@2x.png */; };
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1EB49B9E1C505DE800887240 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EB49B9C1C505D3000887240 /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EB49BA01C50A4B100887240 /* tivo-libre.jar in Resources */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -462,6 +463,7 @@
 		1EA7EE90210BE5DB00B9C1CD /* DownloadDone.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DownloadDone.scpt; sourceTree = "<group>"; };
 		1EB2D98C2110DC7B00E50C9B /* MTGCDTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTGCDTimer.h; sourceTree = "<group>"; };
 		1EB2D98D2110DC7B00E50C9B /* MTGCDTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTGCDTimer.m; sourceTree = "<group>"; };
+		1EB2D98F2113D7F300E50C9B /* skipModeComskip@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skipModeComskip@2x.png"; sourceTree = "<group>"; };
 		1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLogFormatter.h; sourceTree = "<group>"; };
 		1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLogFormatter.m; sourceTree = "<group>"; };
 		1EB49B9C1C505D3000887240 /* tivodecode-ng */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "tivodecode-ng"; path = "../../tivodecode-ng"; sourceTree = "<group>"; };
@@ -875,6 +877,7 @@
 				1E684A7916E2C50B000F5C6E /* save-until-i-delete-recording.png */,
 				1E964C9A1882768A00C19046 /* save-until-i-delete-recording@2x.png */,
 				1E7A4CE520422E340081884D /* skipMode@2x.png */,
+				1EB2D98F2113D7F300E50C9B /* skipModeComskip@2x.png */,
 				1E7A4CE620422E350081884D /* skipModeInverted@2x.png */,
 				1E20061C205441D6003FA2D9 /* skipModeSlash@2x.png */,
 				1E09D27420C5A90F00A56B83 /* skipModeQuestion@2x.png */,
@@ -1324,6 +1327,7 @@
 				1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */,
 				1E964C9F1882768A00C19046 /* expires-soon-recording@2x.png in Resources */,
 				1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */,
+				1EB2D9902113D7F400E50C9B /* skipModeComskip@2x.png in Resources */,
 				D209B6AA1813305E004E733B /* FindTiVoHelpFile.rtf in Resources */,
 				1E964C9C1882768A00C19046 /* copyright@2x.png in Resources */,
 				1E09D27520C5A91100A56B83 /* skipModeQuestion@2x.png in Resources */,
