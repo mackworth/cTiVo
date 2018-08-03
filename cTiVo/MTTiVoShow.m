@@ -916,6 +916,7 @@ __DDLOGHERE__
 	if ([self hasSkipModeList]) return @3;
 	if ([self skipModeFailed]) return @2;
 	if ([self hasSkipModeInfo]) return @1;
+	if (self.edlList.count > 0) return @5;
 	if ([self mightHaveSkipModeInfo ]) return @4;
 	return @0;
 }

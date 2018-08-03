@@ -321,7 +321,7 @@ __DDLOGHERE__
 		}
 		
 		NSPredicate *tiVoPredicate = yesPredicate;
-		if (self.selectedTiVo && [tiVoManager foundTiVoNamed:self.selectedTiVo] && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame) { //We need a predicate for filtering
+		if (self.selectedTiVo && [self.selectedTiVo compare:kMTAllTiVos] != NSOrderedSame && [tiVoManager foundTiVoNamed:self.selectedTiVo]) { //We need a predicate for filtering
 			tiVoPredicate = [NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",self.selectedTiVo];
 		}
 		NSArray * whichShows = [[[[tiVoManager.tiVoShows filteredArrayUsingPredicate:tiVoPredicate]
@@ -712,6 +712,8 @@ __DDLOGHERE__
 			whichImage = thisShow.rpcSkipMode.intValue;
 		}
 		switch (whichImage) {
+			case 5: result.imageView.image = [NSImage imageNamed:@"skipModeComskip"];
+				break;
 			case 4:  result.imageView.image = [NSImage imageNamed:@"skipModeQuestion"];
 				break;
 			case 3:  result.imageView.image = [NSImage imageNamed:@"skipMode"];
