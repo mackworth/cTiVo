@@ -361,7 +361,7 @@ attributes:attribs];
 				if (stopItem) {
 					if (show.inProgress.boolValue) return YES;
 				} else if (getSkipItem) {
-					if (show.rpcData.clipMetaDataId != nil) return YES;
+					if (show.hasSkipModeInfo && !show.hasSkipModeList && !show.skipModeFailed) return YES;
 				} else {
 					return YES;
 				}

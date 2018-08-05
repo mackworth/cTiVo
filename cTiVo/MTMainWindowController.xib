@@ -87,7 +87,7 @@
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
                                         <clipView key="contentView" id="3He-Lv-qOU">
                                             <rect key="frame" x="1" y="0.0" width="946" height="322"/>
-                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" autosaveName="ProgramTable" rowSizeStyle="automatic" headerView="LNB-j6-453" viewBased="YES" indentationPerLevel="16" autoresizesOutlineColumn="YES" outlineTableColumn="42" id="OfG-aC-zKW" customClass="MTProgramTableView">
                                                     <rect key="frame" x="0.0" y="0.0" width="946" height="299"/>
@@ -935,7 +935,7 @@
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
                                         <clipView key="contentView" id="Jcn-rq-5Wo">
                                             <rect key="frame" x="1" y="0.0" width="946" height="144"/>
-                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveName="DownloadTable" rowSizeStyle="automatic" headerView="49" viewBased="YES" id="51" customClass="MTDownloadTableView">
                                                     <rect key="frame" x="0.0" y="0.0" width="946" height="127"/>
@@ -1110,7 +1110,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="FEf-Ia-wX9" userLabel="rightText">
-                                                                            <rect key="frame" x="-5" y="0.0" width="80" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="a0F-vx-fpu">
                                                                                 <font key="font" size="10" name="Helvetica"/>
@@ -2040,7 +2040,7 @@
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
                                         <clipView key="contentView" id="jpk-TG-yBB">
                                             <rect key="frame" x="1" y="0.0" width="946" height="119"/>
-                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveName="SubscriptionTable" rowSizeStyle="automatic" headerView="251" viewBased="YES" id="249" customClass="MTSubscriptionTableView">
                                                     <rect key="frame" x="0.0" y="0.0" width="946" height="102"/>
@@ -2592,6 +2592,12 @@
                         <action selector="skipInfoFromTiVo:" target="-1" id="Fp4-F7-PYF"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Play on TiVo" toolTip="Asks your TiVo do play this show on its TV." id="vX7-XL-MoE">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="playOnTiVo:" target="-1" id="zjn-oi-t5y"/>
+                    </connections>
+                </menuItem>
                 <menuItem isSeparatorItem="YES" id="ymX-Ff-XEt"/>
                 <menuItem title="Stop Recording" tag="4" toolTip="Tell TiVo to stop recording this show" id="Oqj-yw-abC">
                     <modifierMask key="keyEquivalentModifierMask"/>
@@ -2677,10 +2683,22 @@
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="18B-wt-vVK"/>
+                <menuItem title="Reload All Info" toolTip="Reloads latest information about this show, from TiVo, TVDB and SkipMode data." id="eAG-n4-3SL">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="reloadAllInfo:" target="-1" id="6Lf-NM-gIG"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="Find Skip Points on TiVo" toolTip="Launches SkipMode process to find commercials in this show. WILL interrupt any shows currently being watched on this TiVo." id="DJO-g7-DGD">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="skipInfoFromTiVo:" target="-1" id="cbA-n1-JWf"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Play on TiVo" toolTip="Asks your TiVo do play this show on its TV." id="YLC-a9-d6O">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="playOnTiVo:" target="-1" id="9Z4-nz-6n0"/>
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="p1k-Ih-3rk"/>
@@ -2694,7 +2712,7 @@
             <connections>
                 <outlet property="delegate" destination="-2" id="415"/>
             </connections>
-            <point key="canvasLocation" x="391" y="705"/>
+            <point key="canvasLocation" x="356" y="695"/>
         </menu>
     </objects>
     <resources>

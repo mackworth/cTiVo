@@ -579,14 +579,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void) playShow:(MTTiVoShow *)show {
     if ([show.tiVo isEqual:self] &&
 		show.rpcData.recordingID.length > 0) {
-		MTTiVo *mini = nil;
-		for (MTTiVo * candidate in [tiVoManager tiVoList]) {
-			if ([candidate.tiVo.name isEqualToString:@"Mini"]) {
-				mini = candidate;
-				break;
-			}
-		}
-        [mini.myRPC playOnTiVo:show.rpcData.recordingID withCompletionHandler:nil];
+		[self.myRPC playOnTiVo:show.rpcData.recordingID withCompletionHandler:nil];
     }
 }
 
