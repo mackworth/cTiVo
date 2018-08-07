@@ -252,7 +252,7 @@ void signalHandler(int signal)
 																	  __typeof__(self) strongSelf = weakSelf;
 																	  NSTimeInterval timeSincePseudo = -[strongSelf.lastPseudoTime timeIntervalSinceNow];
 																	  if (timeSincePseudo > pseudoCheckTime) {
-																		  DDLogReport(@"Turning on screen due to main thread freezing for %0.1f seconds",timeSincePseudo-pseudoEventTime);
+																		  DDLogReport(@"Turning on screen due to main thread frozen for %0.1f seconds",timeSincePseudo-pseudoEventTime);
 																		  IOPMAssertionID userActivityID;
 																		  IOPMAssertionDeclareUserActivity(CFSTR("waking screen for thread contention"), kIOPMUserActiveLocal , &userActivityID);
 																	  }

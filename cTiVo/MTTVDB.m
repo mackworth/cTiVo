@@ -712,7 +712,7 @@ static BOOL inProgress = NO;
     }
     NSString * statisticsReport =
     @"\ncTiVo looks up the TiVo's shows on theTVDB and the movies on theMovieDB.\n"
-    "You can click on the individual URLs to see what information is available for shows where the lookup failed.\n\n"
+    "You can click on the individual URLs to see what information is available for shows that could not be found.\n\n"
     "Total number of shows is %lu\n"
     "%lu shows are marked as Movies\n"
     "%lu shows are marked as Episodic\n"

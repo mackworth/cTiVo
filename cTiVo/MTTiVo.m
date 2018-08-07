@@ -229,6 +229,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void)setupNotifications
 {
+	if (self.isMini) return;
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationTransferDidFinish object:nil];

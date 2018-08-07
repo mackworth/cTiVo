@@ -732,6 +732,7 @@ static NSRegularExpression * isFinalRegex = nil;
         [self getBodyID];
         return;
     }
+	if (self.delegate.isMini) return;  //don't subscribe to updates from Minis
     NSDictionary * data = @{@"flatten": @"true",
                             @"format": @"idSequence",
                             @"bodyId": self.bodyID

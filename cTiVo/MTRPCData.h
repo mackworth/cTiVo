@@ -53,6 +53,7 @@ typedef NS_ENUM(NSUInteger, MTWhatsOnType) {
                 atTiVoIndices: (NSMutableArray <NSNumber *> *) newShowIndices
               andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows;
 -(BOOL) isReachable;
+-(BOOL) isMini;
 -(void) connectionChanged;
 @end
 
