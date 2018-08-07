@@ -802,9 +802,9 @@ __DDLOGHERE__
 		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
 	}
 	
-	result.textField.textColor = [NSColor blackColor];
+	result.textField.textColor = [NSColor textColor];
 	if ([thisShow.protectedShow boolValue]) {
-		result.textField.textColor = [NSColor grayColor];
+		result.textField.textColor = [NSColor disabledControlTextColor ];
 	} else if (thisShow && [identifier isEqualToString:@"TiVo"] && !thisShow.tiVo.isReachable) {
 		result.textField.textColor = [NSColor redColor];
 	}

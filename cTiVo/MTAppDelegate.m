@@ -909,7 +909,7 @@ NSObject * assertionID = nil;
 	if ([tableColumn.identifier compare:@"checkBox"] == NSOrderedSame) {
 	} else if ([tableColumn.identifier compare:@"name"] == NSOrderedSame) {
         result.textField.stringValue = thisFomat.name;
-        result.textField.textColor = [NSColor blackColor];
+        result.textField.textColor = [NSColor textColor];
     }     // return the result.
     return result;
     

@@ -34,7 +34,7 @@
 {
     self.displayProgress = YES;
 
-    _foregroundTextColor = [NSColor blackColor];
+    _foregroundTextColor = [NSColor textColor];
  
     _doubleValue = 0.0;
     _barColor = [NSColor colorWithCalibratedRed:1.0 green:.61 blue:.45 alpha:0.60];

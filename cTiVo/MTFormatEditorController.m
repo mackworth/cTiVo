@@ -43,7 +43,7 @@
     self = [super initWithCoder:aDecoder];
     if (self) {
         // Initialization code here.
-		self.validExecutableColor = [NSColor blackColor];
+		self.validExecutableColor = [NSColor textColor];
 		self.validExecutable = [NSNumber numberWithBool:YES];
 		self.validExecutableString = @"No valid executable found.";
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateForFormatChange) name:kMTNotificationFormatChanged object:nil];
@@ -317,7 +317,7 @@
 {
 	NSString *validPath = [_currentFormat pathForExecutable];
 	if (validPath) {
-        self.validExecutableColor = [NSColor blackColor];
+        self.validExecutableColor = [NSColor textColor];
 		self.validExecutableString = [NSString stringWithFormat:@"Found at %@",validPath];
         self.validExecutable = @YES;
     } else {

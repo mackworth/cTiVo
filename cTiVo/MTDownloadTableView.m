@@ -306,13 +306,13 @@ __DDLOGHERE__
             cell.rightText.stringValue = @"";
         }
 		if ([thisShow.protectedShow boolValue]) {
-			cell.foregroundTextColor = [NSColor grayColor];
+			cell.foregroundTextColor = [NSColor disabledControlTextColor ];
 		} else {
-			cell.foregroundTextColor = [NSColor blackColor];
+			cell.foregroundTextColor = [NSColor textColor];
 		}
    } else if ([tableColumn.identifier isEqualToString:@"TiVo"]) {
         textVal = thisShow.tiVoName ;
-        result.textField.textColor = [NSColor blackColor];
+        result.textField.textColor = [NSColor textColor];
         if (!thisShow.tiVo.isReachable && download.isDownloading) {
             result.textField.textColor = [NSColor redColor];
         }
@@ -493,9 +493,9 @@ __DDLOGHERE__
 	if (!result.toolTip) result.toolTip = textVal;
     // return the result.
 	if ([thisShow.protectedShow boolValue]) {
-        result.textField.textColor = [NSColor grayColor];
+        result.textField.textColor = [NSColor disabledControlTextColor];
     } else {
-        result.textField.textColor = [NSColor blackColor];
+        result.textField.textColor = [NSColor textColor];
     }
    return result;
 }
