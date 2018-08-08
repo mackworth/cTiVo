@@ -193,6 +193,8 @@ __DDLOGHERE__
 }
 
 -(void) addShow:(MTTiVoShow *) show onDiskAtPath:(NSString *)path {
+	DDLogDetail(@"Adding xattr data to show %@ at %@", show, path);
+
     //Add xattrs
     [path setXAttr:kMTXATTRTiVoName toValue:show.tiVoName ];
     [path setXAttr:kMTXATTRTiVoID toValue:show.idString ];
@@ -200,9 +202,11 @@ __DDLOGHERE__
 
     NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:self.showsOnDisk];
     NSString * key = [self keyForShow:show];
-    if ([tmpDict objectForKey:key]) {
-        NSArray *paths = [tmpDict objectForKey:key];
-        [tmpDict setObject:[paths arrayByAddingObject:path] forKey:key];
+	NSArray *paths = [tmpDict objectForKey:key];
+    if (paths) {
+		if (![paths containsObject:path]) {
+        	[tmpDict setObject:[paths arrayByAddingObject:path] forKey:key];
+		}
     } else {
         [tmpDict setObject:@[path] forKey:key];
     }

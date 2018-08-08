@@ -1949,10 +1949,9 @@ __DDLOGHERE__
 				}
 				//but remember new file for future processing
 				self.encodeFilePath= iTunesPath;
-			} else {
-				//two copies now, so add xattrs to iTunes copy as well; leave captions/metadata/commercials with original
-				[tiVoManager addShow: self.show onDiskAtPath: iTunesPath];
 			}
+			//Need to add xattrs to iTunes copy as well
+			[tiVoManager addShow: self.show onDiskAtPath: iTunesPath];
 		}
 	}
 #ifndef DEBUG

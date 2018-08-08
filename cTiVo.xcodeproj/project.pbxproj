@@ -566,6 +566,7 @@
 		1EDE323919C502980052E6C6 /* tivo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tivo@2x.png"; sourceTree = "<group>"; };
 		1EE3AB61201589E500F36731 /* MTWeakTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTWeakTimer.h; sourceTree = "<group>"; };
 		1EE3AB62201589E500F36731 /* MTWeakTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTWeakTimer.m; sourceTree = "<group>"; };
+		1EFA8D4D211A659D00B4505D /* cTiVo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = cTiVo.entitlements; sourceTree = "<group>"; };
 		1EFE66FE1BE967460083386C /* sparklecast.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sparklecast.xml; sourceTree = "<group>"; };
 		94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ffmpeg_edl_ac3.sh; sourceTree = "<group>"; };
 		D2001C211704F93F00B75D9C /* MTSrt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTSrt.h; sourceTree = "<group>"; };
@@ -1064,6 +1065,7 @@
 		D2D60BA716766EFD00CE32DE /* cTiVo */ = {
 			isa = PBXGroup;
 			children = (
+				1EFA8D4D211A659D00B4505D /* cTiVo.entitlements */,
 				D297AC121730296C0036125A /* mp4v2 */,
 				D2D60BB616766EFD00CE32DE /* MainMenu.xib */,
 				D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */,
@@ -1257,9 +1259,11 @@
 				ORGANIZATIONNAME = cTiVo;
 				TargetAttributes = {
 					D2D60B9C16766EFD00CE32DE = {
-						DevelopmentTeam = E8XXXD4S77;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.HardenedRuntime = {
+								enabled = 1;
+							};
 							com.apple.Keychain = {
 								enabled = 0;
 							};
@@ -1628,10 +1632,12 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = cTiVo/cTiVo.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = E8XXXD4S77;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/cTiVo",
@@ -1667,10 +1673,12 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = cTiVo/cTiVo.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = E8XXXD4S77;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/cTiVo",
