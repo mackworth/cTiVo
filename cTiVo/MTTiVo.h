@@ -27,6 +27,7 @@
 @property (nonatomic, strong) NSString *mediaKey;
 @property int manualTiVoID;
 @property (nonatomic, readonly) BOOL supportsTransportStream, supportsRPC;
+@property (nonatomic, strong) NSDictionary <NSString *, NSDictionary <NSString *, NSString *> *> *channelList;
 
 +(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo
      withOperationQueue:(NSOperationQueue *)queue

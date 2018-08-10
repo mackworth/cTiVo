@@ -37,6 +37,7 @@
 //#define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
 #define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"  //object: which MTTiVo needs a key
 #define kMTNotificationFormatChanged @"MTNotificationFormatChanged"     //object: which MTFormat changed
+#define kMTNotificationChannelsChanged @"MTNotificationChannelsChanged"  //object: which TiVo changed their channelList
 #define kMTNotificationFoundMultipleTiVos @"MTNotificationFoundMultipleTiVo"
 #define kMTNotificationFoundSkipModeInfo @"MTNotificationFoundSkipModeInfo" //object: show
 
@@ -110,6 +111,7 @@
 #define kMTSubscribedSDOnly  @"SDOnly"
 #define kMTSubscribedPrevRecorded @"PrevRecorded" //not used
 #define kMTSubscribedRegExPattern @"RegExPattern"
+#define kMTSubscribedCallSign @"StationCallSign"
 #define kMTTVDBToken @"TVDBToken"
 #define kMTTVDBTokenExpire @"TVDBTokenExpire"
 

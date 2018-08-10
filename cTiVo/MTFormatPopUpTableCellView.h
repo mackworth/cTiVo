@@ -1,5 +1,5 @@
 //
-//  MTPopUpTableCellView.h
+//  MTFormatPopUpTableCellView.h
 //  cTiVo
 //
 //  Created by Scott Buchanan on 1/4/13.
@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "MTFormatPopUpButton.h"
 
-@interface MTPopUpTableCellView : NSTableCellView
+@interface MTFormatPopUpTableCellView : NSTableCellView
 
 @property (strong, nonatomic, readonly) MTFormatPopUpButton *popUpButton;
 

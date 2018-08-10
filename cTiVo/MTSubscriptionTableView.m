@@ -8,8 +8,9 @@
 
 #import "MTSubscriptionTableView.h"
 #import "MTMainWindowController.h"
-#import "MTPopUpTableCellView.h"
+#import "MTFormatPopUpTableCellView.h"
 #import "MTTiVoPopUpTableCellView.h"
+#import "MTChannelPopUpTableCellView.h"
 #import "MTDownloadCheckTableCell.h"
 #import "MTSubscriptionList.h"
 
@@ -130,6 +131,15 @@ __DDLOGHERE__
 	}
 }
 
+-(IBAction)selectChannelPopUp:(id)sender
+{
+	MTChannelPopUpButton *thisButton = (MTChannelPopUpButton *)sender;
+	if ([thisButton.owner class] == [MTSubscription class]) {
+		MTSubscription * subscription = (MTSubscription *) thisButton.owner;
+		subscription.stationCallSign = [thisButton selectedItem].representedObject ?: @"";
+	}
+}
+
 -(void) changeHDOnly: (id) sender {
 	MTCheckBox *checkbox = sender;
 	MTSubscription * subscription = (MTSubscription *)checkbox.owner;
@@ -232,16 +242,22 @@ static NSDateFormatter *dateFormatter;
 		[result.textField setAlignment:NSRightTextAlignment];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"FormatPopUp"] == NSOrderedSame) {
-		MTFormatPopUpButton * popUp = ((MTPopUpTableCellView *)result).popUpButton;
+		MTFormatPopUpButton * popUp = ((MTFormatPopUpTableCellView *)result).popUpButton;
 		popUp.owner = thisSubscription;
 		thisSubscription.encodeFormat = [popUp selectFormat:thisSubscription.encodeFormat];
         popUp.formatList = tiVoManager.formatList;
         popUp.target = myController;
         popUp.action = @selector(selectFormat:);
+	} else if ([tableColumn.identifier compare:@"ChannelPopUp"] == NSOrderedSame) {
+		MTChannelPopUpButton * popUp = ((MTChannelPopUpTableCellView *)result).popUpButton;
+        popUp.target = self;
+        popUp.action = @selector(selectChannelPopUp:);
+		popUp.owner = thisSubscription;
+		[popUp selectChannel:thisSubscription.stationCallSign];
 	} else if ([tableColumn.identifier compare:@"TiVoPopUp"] == NSOrderedSame) {
 		MTTiVoPopUpButton * popUp = ((MTTiVoPopUpTableCellView *)result).popUpButton;
-        popUp.target = self;
-        popUp.action = @selector(selectTivoPopUp:);
+		popUp.target = self;
+		popUp.action = @selector(selectTivoPopUp:);
 		popUp.owner = thisSubscription;
 		popUp.currentTivo = thisSubscription.preferredTiVo;
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {

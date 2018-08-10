@@ -27,6 +27,8 @@
 @property (nonatomic, readonly) NSArray <MTTiVoShow *> *tiVoShows;
 @property (nonatomic, strong) NSMutableArray <MTFormat *> *formatList;
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSDate *> *lastLoadedTivoTimes;
+@property (nonatomic, readonly) NSDictionary <NSString *, NSDictionary <NSString *, NSString *> *> *channelList; //union of all TiVos' channelLists
+
 @property (atomic, strong) NSMutableArray <MTDownload *> *downloadQueue;
 @property (nonatomic, strong) NSMutableArray <MTSubscription *> *subscribedShows;
 

@@ -7,7 +7,7 @@
 //
 
 #import "MTDownloadTableView.h"
-#import "MTPopUpTableCellView.h"
+#import "MTFormatPopUpTableCellView.h"
 #import "NSString+Helpers.h"
 #import "MTWeakTimer.h"
 #import "MTSubscriptionList.h"
@@ -321,7 +321,7 @@ __DDLOGHERE__
         textVal = [NSString stringWithFormat:@"%@",download.downloadIndex] ;
         
     } else if ([tableColumn.identifier isEqualToString:@"Format"]) {
-		MTPopUpTableCellView * cell = (MTPopUpTableCellView *)result;
+		MTFormatPopUpTableCellView * cell = (MTFormatPopUpTableCellView *)result;
 		MTFormatPopUpButton *popUpButton = cell.popUpButton;
 		popUpButton.owner = download;
        if (download.isNew) {

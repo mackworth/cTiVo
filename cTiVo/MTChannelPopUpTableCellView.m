@@ -6,9 +6,9 @@
 //  Copyright (c) 2013 Scott Buchanan. All rights reserved.
 //
 
-#import "MTPopUpTableCellView.h"
+#import "MTChannelPopUpTableCellView.h"
 
-@implementation MTPopUpTableCellView
+@implementation MTChannelPopUpTableCellView
 
 - (id)initWithFrame:(NSRect)frame withTarget:(id)target withAction:(SEL)selector
 {
@@ -34,7 +34,7 @@
     CGRect subFrameText = NSMakeRect(4+textIndent, -2, self.frame.size.width-8-textIndent, self.frame.size.height);
     NSFont * cellFont = [NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSMiniControlSize]];
 
-    _popUpButton = [[MTFormatPopUpButton alloc] initWithFrame:subFramePopUp pullsDown:NO];
+    _popUpButton = [[MTChannelPopUpButton alloc] initWithFrame:subFramePopUp pullsDown:NO];
     [_popUpButton setFont: cellFont];
     [_popUpButton.cell setControlSize:NSMiniControlSize];
     [_popUpButton setAutoresizesSubviews:YES];

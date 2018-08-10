@@ -544,6 +544,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(void) connectionChanged {
 	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoListUpdated object:nil];
+	if (self.rpcActive && !self.channelList && !self.isMini) {
+		[self.myRPC channelListWithCompletion:^(NSDictionary <NSString *, NSDictionary <NSString *, NSString *> *> *channels) {
+			self.channelList = channels;			
+			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationChannelsChanged object:self];
+		}];
+	}
 }
 
 -(BOOL) rpcActive {

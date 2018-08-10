@@ -31,6 +31,7 @@
 @property (nonatomic, strong) NSURL *tivoTempDirectory;
 @property (nonatomic, strong) NSURL *tvdbTempDirectory;
 @property (nonatomic, strong) NSURL *detailsTempDirectory;
+@property (nonatomic, strong) NSDictionary <NSString *, NSDictionary <NSString *, NSString *> *> *channelList; //union of all TiVos' channelLists
 
 @property (nonatomic,readonly) NSMutableArray <NSNetService *> *tivoServices;
 
@@ -78,7 +79,8 @@ __DDLOGHERE__
 		_tiVoMinis = [NSArray new];
 		self.opsQueue = [NSOperationQueue new];
         _downloadQueue = [NSMutableArray new];
-
+		_channelList = [NSDictionary new];
+		
         _lastLoadedTivoTimes = [[defaults dictionaryForKey:kMTTiVoLastLoadTimes] mutableCopy];
 		if (!_lastLoadedTivoTimes) {
 			_lastLoadedTivoTimes = [NSMutableDictionary new];
@@ -501,7 +503,8 @@ __DDLOGHERE__
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(skipModeChannelFound:) name:kMTNotificationFoundSkipModeInfo object:nil];
-	
+	[defaultCenter addObserver:self selector:@selector(channelsChanged:) name:kMTNotificationChannelsChanged object:nil];
+
 	for (NSString * path in @[ kMTUpdateIntervalMinutesNew,
 							   kMTScheduledOperations,
 							   kMTScheduledEndTime,
@@ -1312,6 +1315,14 @@ __DDLOGHERE__
     }
     [self deleteFromDownloadQueue:testDownloads ];
 
+}
+
+-(void) channelsChanged: (NSNotification *) notification {
+	NSMutableDictionary * newList = [NSMutableDictionary new];
+	for (MTTiVo * tiVo in self.tiVoList) {
+		[newList addEntriesFromDictionary:tiVo.channelList];
+	}
+	self.channelList = [newList copy];
 }
 
 #pragma mark - Media Key Support

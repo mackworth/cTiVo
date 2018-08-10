@@ -345,18 +345,14 @@
                                   sub.HDOnly            ?: @NO,     kMTSubscribedHDOnly,
                                   sub.SDOnly            ?: @NO,     kMTSubscribedSDOnly,
                                   sub.prevRecorded      ?: @[],     kMTSubscribedPrevRecorded,
-                                  nil];
+								  sub.stationCallSign         ,     kMTSubscribedCallSign, // probably nil
+								  nil];
         DDLogVerbose(@"Saving Sub: %@ ",tempSub);
         [tempArray addObject:tempSub];
     }
     [[NSUserDefaults standardUserDefaults] setObject:tiVoManager.lastLoadedTivoTimes forKey:kMTTiVoLastLoadTimes];
     [[NSUserDefaults standardUserDefaults] setObject:tempArray forKey:kMTSubscriptionList];
     //May not be necessary   [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionsUpdated object:nil];
-}
-
-- (void)dealloc
-{
-    
 }
 
 @end

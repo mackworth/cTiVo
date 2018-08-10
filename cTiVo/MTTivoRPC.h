@@ -24,6 +24,7 @@
 -(void) purgeShows: (NSArray <NSString *> *) showIDs;
 -(void) whatsOnSearchWithCompletion: (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler;
 -(void) getShowInfoForShows: (NSArray <NSString *> *) showIDs;
+-(void) channelListWithCompletion: (void (^)(NSDictionary <NSString *, NSString *> *)) completionHandler;
 -(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;

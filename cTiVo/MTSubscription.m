@@ -134,6 +134,10 @@ __DDLOGHERE__
 	if (self.SDOnly.boolValue && tivoShow.isHD.boolValue) {
 		return NO;
 	}
+	//check that we're on right station if specified
+	if (self.stationCallSign.length > 0 && ![self.stationCallSign isEqualToString:tivoShow.stationCallsign]) {
+		return NO;	
+	}
 	
 	//Check if we've already recorded it
 	NSString * thisShowID = tivoShow.uniqueID;
@@ -208,7 +212,8 @@ __DDLOGHERE__
 #define kMTSubFormat 2
 #define kMTSubDate 3
 #define kMTSubTiVo 4
-#define kMTSubMin 5
+#define kMTSubChannel 5
+#define kMTSubMin 6
 
 #define kMTSubStringsArray  @[@"iTunes", @"skipAds", @"markAds",  @"suggestions",  @"pyTiVo",  @"subtitles",  @"HDOnly",  @"SDOnly", @"SkipMode"]
 #define kMTSubiTunes 0
@@ -247,6 +252,7 @@ __DDLOGHERE__
         newSub.createdTime = [NSDate dateWithString:strArray[kMTSubDate]];
         if (!newSub.createdTime) newSub.createdTime = [NSDate date];
         newSub.preferredTiVo= strArray[kMTSubTiVo];
+		newSub.stationCallSign = strArray[kMTSubChannel];
 
         newSub.addToiTunes = @NO;
         newSub.skipCommercials = @NO;
@@ -334,6 +340,10 @@ __DDLOGHERE__
     if (!tempSub.preferredTiVo || ([tempSub.preferredTiVo isEqualToString:@"Any TiVo"]) ){
         tempSub.preferredTiVo = @"";
     }
+	tempSub.stationCallSign = sub[kMTSubscribedCallSign];
+	if ([tempSub.stationCallSign isEqualToString:@""] || ([tempSub.stationCallSign isEqualToString:@"Any"]) ){
+		tempSub.stationCallSign = nil;
+	}
     tempSub.HDOnly = sub[kMTSubscribedHDOnly];
     if (!tempSub.HDOnly) tempSub.HDOnly = @NO;
     tempSub.SDOnly = sub[kMTSubscribedSDOnly ];
@@ -362,6 +372,7 @@ __DDLOGHERE__
     newSub.createdTime = earlierTime;
     newSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
     newSub.preferredTiVo= @"";
+	newSub.stationCallSign= @"";
     newSub.HDOnly= @NO;
     newSub.SDOnly= @NO;
 	newSub.useSkipMode = @([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseSkipMode]);
@@ -369,13 +380,14 @@ __DDLOGHERE__
 }
 
 -(NSString *) subscribeString  {
-    NSMutableArray * outString = [NSMutableArray arrayWithCapacity:12];
+    NSMutableArray * outString = [NSMutableArray arrayWithCapacity:15];
 
     outString[kMTSubSeries] = self.displayTitle;
     outString[kMTSubRegExPattern] = self.subscriptionRegex.pattern;
     outString[kMTSubFormat] = self.encodeFormat.name;
     outString[kMTSubDate] = [self.displayDate descriptionWithLocale:nil ];
-    outString[kMTSubTiVo] = self.preferredTiVo;
+	outString[kMTSubTiVo] = self.preferredTiVo;
+	outString[kMTSubChannel] = self.stationCallSign ?: @"";
 
     if (self.addToiTunes.boolValue )        [outString addObject: kMTSubStringsArray [kMTSubiTunes]];
     if (self.skipCommercials.boolValue )    [outString addObject: kMTSubStringsArray [kMTSubSkipAds]];
@@ -411,13 +423,13 @@ __DDLOGHERE__
     return @[kMTDownloadPasteBoardType, NSPasteboardTypeString];
 
 }
+
 + (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard {
     if ([type compare:kMTDownloadPasteBoardType] ==NSOrderedSame)
         return NSPasteboardReadingAsKeyedArchive;
     return 0;
 }
 
-	
 - (void)dealloc {
      _encodeFormat = nil;
 	[[NSNotificationCenter defaultCenter] removeObserver:self];

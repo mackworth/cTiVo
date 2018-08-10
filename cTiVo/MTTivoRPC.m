@@ -733,6 +733,7 @@ static NSRegularExpression * isFinalRegex = nil;
         return;
     }
 	if (self.delegate.isMini) return;  //don't subscribe to updates from Minis
+	[self channelListWithCompletion:nil];
     NSDictionary * data = @{@"flatten": @"true",
                             @"format": @"idSequence",
                             @"bodyId": self.bodyID
@@ -1082,6 +1083,53 @@ static NSArray * imageResponseTemplate = nil;
 						   @"uiDestinationType":@"flash"}   //classicUI, hme, web, flash
 	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
 		   DDLogReport(@"sent checkService request; got %@", jsonResponse);
+	   }];
+}
+
+-(void) channelListWithCompletion: (void (^)(NSDictionary <NSString *, NSString *> *)) completionHandler {
+	DDLogDetail(@"Asking what channels exist:");
+
+	NSArray * responseTemplate =
+	@[@{
+		  @"type":      @"responseTemplate",
+		  @"fieldName": @[@"affiliate", @"callSign", @"channelNumber"],
+		  @"typeName":  @"channel"
+		  }];;
+	/* also available:
+	affiliate = "WGN America (West)";
+	bitrate = 2861924614144;
+	callSign = "WGNAM-W";
+	channelId = "tivo:ch.6553599";
+	channelNumber = 9;
+	isBlocked = 0;
+	isDigital = 1;
+	isEntitled = 1;
+	isHdtv = 0;
+	isKidZone = 0;
+	isReceived = 1;
+	levelOfDetail = low;
+	logoIndex = 65667;
+	name = "WGNAM-W";
+	objectIdAndType = 325455979347967;
+	serviceId = 26478;
+	sourceType = cable;
+	stationId = "tivo:st.338261044";
+	type = channel
+	*/
+	[self sendRpcRequest:@"channelSearch"
+				 monitor:NO
+				withData:@{@"noLimit":@(YES),
+						   @"isReceived":@(YES),
+						   @"responseTemplate": responseTemplate
+						   }
+	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+		   DDLogDetail(@"sent channelSearch; got %@", jsonResponse);
+		   NSMutableDictionary * channels = [NSMutableDictionary dictionaryWithCapacity:jsonResponse.count];
+		   for (NSDictionary * channel in jsonResponse[@"channel"]) {
+			   channels[channel[@"callSign"]] = channel;
+			}
+
+		   if (completionHandler) completionHandler([channels copy]);
 	   }];
 }
 

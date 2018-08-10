@@ -26,6 +26,7 @@
 @property (nonatomic, strong) NSMutableArray *prevRecorded;
 //Dictionary with keys; showTitle, episodeID, startTime, TivoName
 
+@property (nonatomic, strong) NSString *stationCallSign;
 @property (nonatomic, strong) NSNumber *addToiTunes;
 @property (nonatomic, strong) NSNumber *skipCommercials, *includeSuggestions, *markCommercials, *useSkipMode;
 @property (nonatomic, strong) MTFormat *encodeFormat;
