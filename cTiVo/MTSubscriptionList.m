@@ -338,7 +338,7 @@
                                   sub.includeSuggestions?: @NO,     kMTSubscribedIncludeSuggestions,
                                   sub.skipCommercials   ?: @NO,     kMTSubscribedSkipCommercials,
 								  sub.markCommercials   ?: @YES,    kMTSubscribedMarkCommercials,
-								  sub.useSkipMode       ?: @YES,    kMTSubscribedMarkCommercials,
+								  sub.useSkipMode       ?: @YES,    kMTSubscribedUseSkipMode,
                                   sub.genTextMetaData   ?: @NO ,    kMTSubscribedGenTextMetaData,
                                   sub.exportSubtitles   ?: @NO,     kMTSubscribedExportSubtitles,
                                   sub.preferredTiVo     ?: @"",     kMTSubscribedPreferredTiVo,
