@@ -268,10 +268,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void)setEnabled:(BOOL) enabled {
-    if (enabled && [tiVoManager duplicateTiVoFor:self]) {
-        enabled = NO;
-        [tiVoManager updateTiVoDefaults:self];
-    }
+	if (enabled && [tiVoManager duplicateTiVoFor:self]) {
+		enabled = NO;
+	}
+	@synchronized (self) {
+		_enabled = enabled;
+	}
     if (enabled && !self.myRPC) {
         if (self.supportsRPC) {
             int port = self.manualTiVo ? self.tiVo.userPortRPC : 1413;
@@ -281,10 +283,9 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
         [self.myRPC stopServer];
         self.myRPC = nil;
     }
-    @synchronized (self) {
-        if (enabled == _enabled) return;
-        _enabled = enabled;
-    }
+	if (!self.isMini) {
+		[tiVoManager channelsChanged:self];
+	}
     [tiVoManager updateTiVoDefaults:self];
 }
 
@@ -539,15 +540,17 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 -(BOOL) supportsRPC {
     return self.tiVoSerialNumber.length == 0 || [self.tiVoSerialNumber characterAtIndex:0] > '6' ;
-
 }
 
+BOOL channelChecking = NO;
 -(void) connectionChanged {
 	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoListUpdated object:nil];
-	if (self.rpcActive && !self.channelList && !self.isMini) {
+	if (self.rpcActive && !self.channelList && !self.isMini && !channelChecking) {
+		channelChecking = YES;
 		[self.myRPC channelListWithCompletion:^(NSDictionary <NSString *, NSDictionary <NSString *, NSString *> *> *channels) {
-			self.channelList = channels;			
-			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationChannelsChanged object:self];
+			self.channelList = channels;
+			[tiVoManager channelsChanged:self];
+			channelChecking = NO;
 		}];
 	}
 }

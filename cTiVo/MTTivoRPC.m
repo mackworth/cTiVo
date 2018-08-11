@@ -30,6 +30,7 @@
 @property (nonatomic, assign) int rpcID, sessionID;
 @property (nonatomic, strong) NSString * bodyID;
 @property (nonatomic, assign) BOOL authenticationLaunched;
+@property (nonatomic, assign) BOOL authenticated;
 @property (nonatomic, assign) BOOL firstLaunch;
 
 @property (nonatomic, strong) NSMutableData * remainingData; //data left over from last write
@@ -509,7 +510,6 @@ static NSRegularExpression * isFinalRegex = nil;
             DDLogDetail(@"Stream opened for %@", streamName);
             self.retries = 0;
             if (theStream == self.oStream) [self authenticate];
-			[self.delegate connectionChanged];
             break;
         }
         case NSStreamEventHasBytesAvailable: {
@@ -690,6 +690,7 @@ static NSRegularExpression * isFinalRegex = nil;
                    [strongSelf getBodyID];
                } else {
                    [strongSelf getAllShows];
+				   [self.delegate connectionChanged];
                }
            } else {
                DDLogReport(@"RPC Authentication failure!");
@@ -719,6 +720,7 @@ static NSRegularExpression * isFinalRegex = nil;
                    DDLogVerbose(@"Got BodyID");
                    strongSelf.tiVoSerialNumber = bodyId;
                    [strongSelf.delegate setTiVoSerialNumber:bodyId];
+				   [self.delegate connectionChanged];
                    [strongSelf getAllShows];
                }
            }

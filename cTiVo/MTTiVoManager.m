@@ -361,6 +361,13 @@ __DDLOGHERE__
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoUpdated object:targetMTTiVo];
                 }
             }
+		} else if ([mTiVo[kMTTiVoTSN] hasPrefix:@"A9"] && ![mTiVo[kMTTiVoTSN] hasPrefix:@"A94"]) {
+			for (MTTiVo *targetTiVo in self.tiVoMinis) {
+				if ([targetTiVo.tiVo.name isEqualToString: mTiVo[kMTTiVoUserName]] ) {
+					[targetTiVo  updateWithDescription:mTiVo];
+					break;
+				}
+			}
 		} else {
 			//bonjour tivo, so just check if it needs to be refreshed
 			for (MTTiVo *targetTiVo in bonjourTiVoList) {
@@ -503,7 +510,6 @@ __DDLOGHERE__
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(skipModeChannelFound:) name:kMTNotificationFoundSkipModeInfo object:nil];
-	[defaultCenter addObserver:self selector:@selector(channelsChanged:) name:kMTNotificationChannelsChanged object:nil];
 
 	for (NSString * path in @[ kMTUpdateIntervalMinutesNew,
 							   kMTScheduledOperations,
@@ -1314,22 +1320,24 @@ __DDLOGHERE__
         }
     }
     [self deleteFromDownloadQueue:testDownloads ];
-
 }
 
--(void) channelsChanged: (NSNotification *) notification {
+-(void) channelsChanged: (MTTiVo *) newTiVo {
 	NSMutableDictionary * newList = [NSMutableDictionary new];
 	for (MTTiVo * tiVo in self.tiVoList) {
-		[newList addEntriesFromDictionary:tiVo.channelList];
+		if (tiVo.enabled) {
+			[newList addEntriesFromDictionary:tiVo.channelList];
+		}
 	}
-	self.channelList = [newList copy];
+	if (![self.channelList isEqualToDictionary:newList]) {
+		self.channelList = [newList copy];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationChannelsChanged object:self];
+	}
 }
 
 #pragma mark - Media Key Support
 
-
--(NSString *)getAMediaKey
-{
+-(NSString *)getAMediaKey {
 	NSString *key = nil;
 	for (MTTiVo *tiVo in self.tiVoList) {
 		if (tiVo.mediaKey && tiVo.mediaKey.length) {

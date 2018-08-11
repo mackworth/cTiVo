@@ -123,6 +123,8 @@
 -(NSCellStateValue) skipModeForChannel:(NSString *) channelName;
 -(void) testAllChannelsForPS;
 -(void) removeAllPSTests;
+-(void) channelsChanged:(MTTiVo *) tiVo; //notify TM to update channellist
+
 
 //---------------Other methods ----------
 -(void) notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle;
