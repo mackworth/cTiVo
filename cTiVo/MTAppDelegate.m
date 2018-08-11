@@ -68,7 +68,7 @@ void signalHandler(int signal)
 @property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
 #define pseudoEventTime 61
-#define pseudoCheckTime 120
+#define pseudoCheckTime 75
 @property (nonatomic, strong) NSTimer * pseudoTimer;
 @property (nonatomic, strong) MTGCDTimer * screenFrozenTimer;
 
@@ -252,9 +252,11 @@ void signalHandler(int signal)
 																	  __typeof__(self) strongSelf = weakSelf;
 																	  NSTimeInterval timeSincePseudo = -[strongSelf.lastPseudoTime timeIntervalSinceNow];
 																	  if (timeSincePseudo > pseudoCheckTime) {
-																		  DDLogReport(@"Turning on screen due to main thread frozen for %0.1f seconds",timeSincePseudo-pseudoEventTime);
+																		  DDLogReport(@"Turning on screen due to main thread frozen for between %0.1f to %0.1f seconds",timeSincePseudo-pseudoEventTime, timeSincePseudo);
 																		  IOPMAssertionID userActivityID;
 																		  IOPMAssertionDeclareUserActivity(CFSTR("waking screen for thread contention"), kIOPMUserActiveLocal , &userActivityID);
+																	  } else {
+																		  DDLogReport(@"Error; Frozen timer kicked in too soon after %0.1f seconds",timeSincePseudo );
 																	  }
 																  }];
 	[self.tiVoGlobalManager determineCurrentProcessingState];
@@ -296,6 +298,7 @@ NSObject * assertionID = nil;
     NSEvent *pseudoEvent = [NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:[NSDate timeIntervalSinceReferenceDate] windowNumber:0 context:nil subtype:0 data1:0 data2:0];
     [NSApp postEvent:pseudoEvent atStart:YES];
 	self.lastPseudoTime = [NSDate date];
+	[self.screenFrozenTimer nextFireTimeFromNow: pseudoCheckTime];
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {

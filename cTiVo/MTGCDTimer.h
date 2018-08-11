@@ -9,6 +9,8 @@
 - (instancetype) initScheduledTimerWithTimeInterval:(NSTimeInterval)seconds repeats:(BOOL)repeats block:(dispatch_block_t)block;
 + (instancetype) scheduledTimerWithTimeInterval:(NSTimeInterval)seconds repeats:(BOOL)repeats block:(dispatch_block_t)block;
 
+-(void) nextFireTimeFromNow: (NSTimeInterval) seconds;
+
 - (void) invalidate;
 
 @end
