@@ -183,10 +183,12 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	
 }
--(NSMutableAttributedString *) stringForDisplay: (NSSet <MTTiVo *> *) set withAttributes: (nullable NSDictionary<NSAttributedStringKey,id> *) attribs {
-	NSString * list = [[[[set allObjects] valueForKeyPath:@"tiVo.name" ] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)] componentsJoinedByString:@", "];
- return [[NSMutableAttributedString alloc] initWithString: list
-attributes:attribs];
+
+-(NSMutableAttributedString *) stringForDisplay: (NSSet <MTTiVo *> *) set forCommercials: (BOOL) commercials {
+	NSString * path = commercials ? @"skipModeStatus" : @"tiVo.name";
+	NSDictionary <NSAttributedStringKey,id> * attribs = commercials ? @{NSForegroundColorAttributeName:[NSColor redColor]}  : @{};
+	NSString * list = [[[[set allObjects] valueForKeyPath: path] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)] componentsJoinedByString:@", "];
+ return [[NSMutableAttributedString alloc] initWithString: list attributes:attribs];
 }
 
 -(void)manageLoadingIndicator:(NSNotification *)notification
@@ -195,31 +197,32 @@ attributes:attribs];
 		return;  
 	}
     MTTiVo * tivo = (MTTiVo *) notification.object;
-    if (!tivo) return;
-	DDLogDetail(@"LoadingIndicator: %@ for %@",notification.name, tivo.tiVo.name);
-    if ([notification.name  compare:kMTNotificationTiVoUpdating] == NSOrderedSame) {
-        [self.loadingTiVos addObject:tivo];
-	} else if ([notification.name compare:kMTNotificationTiVoUpdated] == NSOrderedSame) {
-		[self.loadingTiVos removeObject:tivo];
-	} else if ([notification.name compare:kMTNotificationTiVoCommercialing] == NSOrderedSame) {
-		[self.commercialingTiVos addObject:tivo];
-	} else if ([notification.name compare:kMTNotificationTiVoCommercialed] == NSOrderedSame) {
-		[self.commercialingTiVos removeObject:tivo];
-	}
+    if (tivo) {
+		DDLogDetail(@"LoadingIndicator: %@ for %@",notification.name, tivo.tiVo.name);
+		if ([notification.name  compare:kMTNotificationTiVoUpdating] == NSOrderedSame) {
+			[self.loadingTiVos addObject:tivo];
+		} else if ([notification.name compare:kMTNotificationTiVoUpdated] == NSOrderedSame) {
+			[self.loadingTiVos removeObject:tivo];
+		} else if ([notification.name compare:kMTNotificationTiVoCommercialing] == NSOrderedSame) {
+			[self.commercialingTiVos addObject:tivo];
+		} else if ([notification.name compare:kMTNotificationTiVoCommercialed] == NSOrderedSame) {
+			[self.commercialingTiVos removeObject:tivo];
+		}
+	}// else just update the current string
 	if (self.loadingTiVos.count + self.commercialingTiVos.count > 0) {
         [loadingProgramListIndicator startAnimation:nil];
 		NSMutableAttributedString *message =  [[NSMutableAttributedString alloc] init];
 		if (self.loadingTiVos.count > 0) {
 			[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@"Updating "]];
-			[message appendAttributedString:[self stringForDisplay:self.loadingTiVos withAttributes:@{}]];
+			[message appendAttributedString:[self stringForDisplay:self.loadingTiVos forCommercials:NO]];
 			if (self.commercialingTiVos.count > 0) {
 				[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@", "]];
 			}
 		}
 		if (self.commercialingTiVos.count > 0) {
-			NSDictionary *redAttrs    = @{NSForegroundColorAttributeName:[NSColor redColor]};
-			[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@"Getting SkipMode for " attributes:redAttrs ]];
-			 [message appendAttributedString:[self stringForDisplay:self.commercialingTiVos withAttributes:redAttrs]];
+			[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@"Getting SkipMode for "
+																				   attributes:@{NSForegroundColorAttributeName:[NSColor redColor]} ]];
+			[message appendAttributedString:[self stringForDisplay:self.commercialingTiVos forCommercials:YES]];
 		}
 		[loadingProgramListLabel setAttributedStringValue: message];
     } else {

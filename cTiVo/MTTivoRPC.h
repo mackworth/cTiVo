@@ -34,6 +34,7 @@
 -(void) playOnTiVo: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL success)) completionHandler;
 
 -(void) findSkipModeEDLForShow:(MTRPCData *) rpcData;
+-(NSArray <MTRPCData *> *) showsWaitingForSkipMode;
 
 @property (nonatomic, weak) id <MTRPCDelegate> delegate;
 

@@ -290,7 +290,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
      }
 	 if (self.skipModeQueueMetaData.count > 0 || self.skipModeQueueEDL.count > 0 ) { //recover commercialing under way (e.g. after sleep)
 	 	DDLogReport(@"XXX SkipMode Queue restarting: %@ AND %@", self.skipModeQueueMetaData, self.skipModeQueueEDL);
-		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ]; //remove if already there
 		 [self performSelector:@selector(findSkipModeRecursive:) withObject:@0 afterDelay:20];
 	 }
 
@@ -1459,6 +1459,10 @@ static NSArray * imageResponseTemplate = nil;
 	}];
 }
 
+-(NSArray <MTRPCData *> *) showsWaitingForSkipMode {
+	return [self.skipModeQueueEDL copy];
+}
+
 -(void) findSkipModeEDLForShow:(MTRPCData *) rpcData {
 	if (!rpcData) return;
 	if (rpcData.skipModeFailed) {
@@ -1509,7 +1513,8 @@ static NSArray * imageResponseTemplate = nil;
 				[self findSkipModeRecursive:@0];
 			} else {
 				DDLogReport(@"XXX Another SkipMode Already in Progress: %@", self.skipModeQueueEDL);
-				//wait for previous ones to complete.
+				[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialing object:  nil  ];
+			//wait for previous ones to complete.
 			}
 		}
 	}
@@ -1521,7 +1526,10 @@ static NSArray * imageResponseTemplate = nil;
         DDLogMajor(@"Finished SkipMode queue");
 		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ];
         return;
-    }
+	} else if (firstTryNumber.intValue == 0 ) {
+		//if firstOne, then start commercialling, otherwise just update
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialing object: nil  ];
+	}
 	MTRPCData * rpcData = self.skipModeQueueEDL[0];
 	DDLogMajor(@"skipMode queue %@checking for commercials for %@", firstTryNumber.intValue == 0 ? @"" : @"re-", rpcData);
 	__weak __typeof__(self) weakSelf = self;

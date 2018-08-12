@@ -645,12 +645,27 @@ BOOL channelChecking = NO;
 				show.rpcData.tempLength = show.showLength; //hint in case tivo isn't reporting this
             	[self.myRPC findSkipModeEDLForShow:show.rpcData];
         	} else {
-				DDLogReport(@"XXX No need for SkipMode points for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : show.edlList.count > 0 ? @"Already have" : !show.mightHaveSkipModeInfo ? @"won't have for other reason" : @"Error" );
+				DDLogDetail(@"No need for SkipMode points for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : show.edlList.count > 0 ? @"Already have" : !show.mightHaveSkipModeInfo ? @"won't have for other reason" : @"Error" );
 			}
         }
 	}
 }
 
+-(NSString *) skipModeStatus {
+	NSArray <MTRPCData *> * skipModeQueue = [self.myRPC showsWaitingForSkipMode];
+	if (skipModeQueue.count == 0) return @"";
+	NSString * title = skipModeQueue[0].series;
+	if (!title.length) {
+		DDLogReport(@"Missing SkipMode title: %@", skipModeQueue[0]);
+		return [NSString stringWithFormat: @"%@ (%d)", self.tiVo.name, (int)skipModeQueue.count];
+	}
+	if (skipModeQueue.count == 1) {
+		return [NSString stringWithFormat: @"%@ (%@)", self.tiVo.name, title];
+	} else {
+		return [NSString stringWithFormat: @"%@ (%@ + %d)", self.tiVo.name, title, (int)(skipModeQueue.count - 1)];
+	}
+}
+			
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {
     [MTTiVo cancelPreviousPerformRequestsWithTarget:self
                                            selector:@selector(updateShows:)
