@@ -288,7 +288,7 @@ __DDLOGHERE__
  MTEdl * lastCut = [rpcData.edlList lastObject];
  double overTime = lastCut.endTime - self.showLength;
  if (overTime > 1.0) {
- DDLogReport(@"XXX Fixing EDL for %@ by %0.1f: %@",self, overTime, rpcData.edlList);
+ DDLogReport(@"Fixing EDL for %@ by %0.1f: %@",self, overTime, rpcData.edlList);
  if (self.showLength <= lastCut.startTime) {
  NSMutableArray * temp = [rpcData.edlList mutableCopy];
  [temp removeObject:lastCut];

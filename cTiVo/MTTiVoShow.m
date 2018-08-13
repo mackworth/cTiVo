@@ -330,7 +330,7 @@ __DDLOGHERE__
 			NSTimeInterval timeSinceShow = -[self.showDate timeIntervalSinceNow] - self.showLength;
 			int hrs = (timeSinceShow) / 60 / 60;
 			CGFloat min = (timeSinceShow / 60.0) - hrs * 60.0;
-			DDLogReport(@"XXX SkipMode MetaData arrived %@for %@; %d:%04.1f (hr:min) after show ended", (timeLeft < 0) ? @"late " : @"", self, hrs, min);
+			DDLogMajor(@"SkipMode MetaData arrived %@for %@; %d:%04.1f (hr:min) after show ended", (timeLeft < 0) ? @"late " : @"", self, hrs, min);
 		}
 	}
 	_clipMetaDataId = clipMetaDataId;
@@ -404,7 +404,7 @@ __DDLOGHERE__
 		return NO;
 	}
 	if (!self.rpcData) {
-		DDLogReport(@"XXX haven't seen RPC yet, so Maybe");
+		DDLogDetail(@"Haven't seen RPC yet for %@, so Maybe", self);
 		return YES;
 	}
 	if (self.hasSkipModeInfo || self.hasSkipModeList) return YES;
@@ -2108,7 +2108,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(void) getArtworkFromSource: (MTImageSource) source thumbVersion: (BOOL) thumbnail {
     if (source == MTNoSource) return;
 	if (self.imageInProgress) {
-		DDLogReport(@"XXX ImageInProgress bounce: %@", self);
+		DDLogMajor(@"ImageInProgress bounce: %@", self);
 		return;
 	}
     self.imageInProgress = YES;
@@ -2166,11 +2166,10 @@ NSString * fourChar(long n, BOOL allowZero) {
     [NSURLConnection sendAsynchronousRequest:req
                 queue:[NSOperationQueue mainQueue]
         completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
-        DDLogReport(@"XXX Got the URL %@",self);
+        DDLogDetail(@"Got the image URL %@",self);
         dispatch_async(dispatch_get_main_queue(), ^(void){
-        DDLogReport(@"XXX URL Main thread. %@",self);
+        	DDLogDetail(@"Image URL Main thread. %@",self);
             self.imageInProgress = NO;
-    		DDLogReport (@"xxx cleared the progress flag %@", self);
             if (!data || error ) {
                 DDLogReport(@"Couldn't get artwork for %@ from %@ , Error: %@", self.seriesTitle, urlString, error.localizedDescription);
                 [self failureHandlerForSource:source thumbnail:thumbnail ];
@@ -2324,14 +2323,12 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(void) getInfoFromSource: (MTImageSource) source {
     if (source == MTTVDBSeason) {
 		if (self.tvdbInProgress) {
-			DDLogReport(@"XXX tvdbInProgress Season: %@", self);
 			return;
 		}
         self.tvdbInProgress = YES;
         [tiVoManager.tvdb addSeasonArtwork:self];
     } else if (source == MTTVDBSeries) {
 		if (self.tvdbInProgress) {
-			DDLogReport(@"XXX tvdbInProgress Series: %@", self);
 			return;
 		}
         self.tvdbInProgress = YES;

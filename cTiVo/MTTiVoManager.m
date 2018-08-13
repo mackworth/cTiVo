@@ -740,10 +740,10 @@ __DDLOGHERE__
 	double endSeconds =   [endDate secondsUntilNextTimeOfDay];
 	if (now && startSeconds >= endSeconds) {
 		//we're already in active period, but delay a few seconds e.g. startup setting defaults, or user typing a new time.
-		DDLogReport(@"Will run SkipMode Scan in 15 seconds"); ///xxx make detail instead
+		DDLogMajor(@"Will run SkipMode Scan in 15 seconds"); 
 		[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:nil afterDelay:15];
 	} else {
-		DDLogReport(@"xxx Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",startSeconds, (startSeconds/3600.0), skipDate); ///xxx make detail instead
+		DDLogMajor(@"Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",startSeconds, (startSeconds/3600.0), skipDate);
 		[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:nil afterDelay:startSeconds];
 	}
 }

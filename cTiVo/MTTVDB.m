@@ -1221,19 +1221,16 @@ static BOOL inProgress = NO;
 
 -(void) finishTVDBProcessing: (MTTiVoShow *) show {
     NSAssert ([NSThread isMainThread], @"finishTVDB running in background");
-
     NSDictionary *tvdbData = [self getCacheForShow:show];
     if (!tvdbData) {
         DDLogReport(@"Trying to process missing TVDB data for %@",show.showTitle);
         tvdbData = @{};
     }
-
     show.tvdbData = tvdbData;
-
 }
 
 -(BOOL) isActive {
-    return NO;  //FIX **** XXXXXX self.tvdbQueue.operationCount > 1;  ??
+    return NO;  //FIX **** XXX self.tvdbQueue.operationCount > 1;  ??
 }
 
 #pragma mark - theMovieDB

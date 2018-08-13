@@ -289,7 +289,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
          [oStream open];
      }
 	 if (self.skipModeQueueMetaData.count > 0 || self.skipModeQueueEDL.count > 0 ) { //recover commercialing under way (e.g. after sleep)
-	 	DDLogReport(@"XXX SkipMode Queue restarting: %@ AND %@", self.skipModeQueueMetaData, self.skipModeQueueEDL);
+	 	DDLogMajor(@"SkipMode Queue restarting: %@ AND %@", self.skipModeQueueMetaData, self.skipModeQueueEDL);
 		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ]; //remove if already there
 		 [self performSelector:@selector(findSkipModeRecursive:) withObject:@0 afterDelay:20];
 	 }
@@ -1418,7 +1418,7 @@ static NSArray * imageResponseTemplate = nil;
 		long long prevPosition = positions.firstObject.longLongValue;
 		DDLogDetail(@"Next Position: %@ versus %@", @(position), @(prevPosition));
 		if (end != 0 && end != positions.lastObject.longLongValue) {
-			 DDLogReport(@"XXX End info: %@ versus %@", @(end), @(positions.lastObject.longLongValue));
+			 DDLogDetail(@"End info: %@ versus %@", @(end), @(positions.lastObject.longLongValue));
 		}
 		long long jumpSize = prevPosition - position;
 		if (jumpSize > 10000 + shortJump * 3000 ||
@@ -1466,39 +1466,39 @@ static NSArray * imageResponseTemplate = nil;
 -(void) findSkipModeEDLForShow:(MTRPCData *) rpcData {
 	if (!rpcData) return;
 	if (rpcData.skipModeFailed) {
-		DDLogReport(@"XXX Not getting EDL for %@; Previous failure", rpcData);
+		DDLogDetail(@"Not getting EDL for %@; Previous failure", rpcData);
 		return;
 	}
 	if (rpcData.edlList) {
-		DDLogReport(@"XXX Not getting EDL for %@; Already have it", rpcData);
+		DDLogDetail(@"Not getting EDL for %@; Already have it", rpcData);
 		return;
 	}
 	if (!rpcData.contentID) {
-		DDLogReport(@"XXX Not getting EDL for %@; No content ID", rpcData);
+		DDLogDetail(@"Not getting EDL for %@; No content ID", rpcData);
     	return;
 	};
     __weak __typeof__(self) weakSelf = self;
 
 	if ([self.skipModeQueueMetaData containsObject:rpcData] || [self.skipModeQueueEDL containsObject:rpcData]) {
-		DDLogReport(@"XXX SkipMode Queue already waiting for: %@", rpcData);
+		DDLogDetail(@"SkipMode Queue already waiting for: %@", rpcData);
 	} else {
-		DDLogReport(@"XXX SkipMode Queue adding: %@", rpcData);
+		DDLogDetail(@"SkipMode Queue adding: %@", rpcData);
 		if (rpcData.clipMetaDataId == nil || rpcData.programSegments == nil) {
 			//need metadata info first
 			//really should have saved objectID
 			NSRange separator = [rpcData.rpcID rangeOfString:@"|" options:0];
 			if (separator.location == NSNotFound) return;
 			NSString * objectId = [rpcData.rpcID substringFromIndex:NSMaxRange(separator)];
-			DDLogReport(@"XXX SkipMode Queue getting metadata: %@", rpcData);
+			DDLogDetail(@"SkipMode Queue getting metadata: %@", rpcData);
 			[self.skipModeQueueMetaData addObject:rpcData];
 
 			[self retrieveClipMetaDataFor:objectId withCompletionHandler:^(NSString * metaDataID, NSArray<NSNumber *> * lengths) {
 				[weakSelf.skipModeQueueMetaData removeObject:rpcData];
 				if (metaDataID != nil && lengths.count > 0) {
-					DDLogReport(@"XXX SkipMode Queue got metadata; re-launching: %@", rpcData);
+					DDLogDetail(@"SkipMode Queue got metadata; re-launching: %@", rpcData);
 					[weakSelf findSkipModeEDLForShow:rpcData] ;
 				} else {
-					DDLogReport(@"XXX SkipMode Queue no metadata, ignoring: %@", rpcData);
+					DDLogDetail(@"SkipMode Queue no metadata, ignoring: %@", rpcData);
 				}
 			}];
 		} else {
@@ -1509,10 +1509,10 @@ static NSArray * imageResponseTemplate = nil;
 				//    [self sendKeyEvent: @"tivo"       andPause :4.0];
 				//    [self sendKeyEvent: @"nowShowing" andPause :4.0];
 				[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialing object: self.delegate  ];
-				DDLogReport(@"XXX Getting SkipMode for: %@", rpcData);
+				DDLogDetail(@"Getting SkipMode for: %@", rpcData);
 				[self findSkipModeRecursive:@0];
 			} else {
-				DDLogReport(@"XXX Another SkipMode Already in Progress: %@", self.skipModeQueueEDL);
+				DDLogDetail(@"Another SkipMode Already in Progress: %@", self.skipModeQueueEDL);
 				[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialing object:  nil  ];
 			//wait for previous ones to complete.
 			}
@@ -1543,14 +1543,14 @@ static NSArray * imageResponseTemplate = nil;
 			[strongSelf.delegate receivedRPCData:rpcData];
 			if (strongSelf.skipModeQueueEDL.count > 0) {
 				[strongSelf.skipModeQueueEDL removeObject:rpcData];
-				DDLogReport(@"XXX SkipModeQueue moving on to %@",strongSelf.skipModeQueueEDL);
+				DDLogDetail(@"SkipModeQueue moving on to %@",strongSelf.skipModeQueueEDL);
 				[strongSelf findSkipModeRecursive:@0 ];
 			} else {
-				DDLogReport(@"XXX SkipMode Queue finished");
+				DDLogMajor(@"SkipMode Queue finished");
 			}
 		} else {
 			//try again if we have a problem creating an EDL
-			DDLogReport(@"SkipMode Queue Retrying EDL list for %@", rpcData);
+			DDLogMajor(@"SkipMode Queue Retrying EDL list for %@", rpcData);
 			[strongSelf findSkipModeRecursive:@(firstTryNumber.intValue + 1) ];
 		}
     }];
@@ -1573,14 +1573,14 @@ static NSArray * imageResponseTemplate = nil;
 		if (startingPoint < 2000) startingPoint = 0; 
 		if (end <= 0) {
 			if (rpcData.tempLength <= 0) {
-				DDLogReport(@"XXX Neither show nor RPC has correct length");
+				DDLogReport(@"Neither show nor RPC has correct length");
             	end = 24*3600*1000;
 			} else {
-				DDLogReport(@"XXX Correcting RPC length to %lld", (long long) rpcData.tempLength*1000);
+				DDLogDetail(@"Correcting RPC length to %lld", (long long) rpcData.tempLength*1000);
 				end = rpcData.tempLength*1000;
 			}
 		} else {
-			if (ABS(rpcData.tempLength*1000 - end) > 2000) DDLogReport(@"XXX RPC shows length as  %0.1f vs showLength as %0.1f",end/1000.0, rpcData.tempLength);
+			if (ABS(rpcData.tempLength*1000 - end) > 2000) DDLogDetail(@"RPC shows length as  %0.1f vs showLength as %0.1f",end/1000.0, rpcData.tempLength);
 		}
 		[weakSelf jumpToPosition:end-5000 withCompletionHandler:^(BOOL success) {
 			

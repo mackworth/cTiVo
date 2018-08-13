@@ -1323,7 +1323,7 @@ BOOL channelChecking = NO;
 	for (MTTiVoShow * show in shows) {
 		//get rid of shows that might be updated by the next time we run
 		if (!show.rpcData.edlList && !show.rpcData.clipMetaDataId && [show mightHaveSkipModeInfoLongest]) {
-			DDLogReport(@"xxx purging show %@",show);
+			DDLogDetail(@"Purging RPC for show %@",show);
 			[showIDs addObject:show.idString];
 		}
 	}

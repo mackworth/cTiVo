@@ -871,7 +871,7 @@ __DDLOGHERE__
         NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
         if (badMAKRange.location != NSNotFound) {
             DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
-            DDLogVerbose(@"log file: %@",[log maskMediaKeys]);
+            DDLogDetail(@"log file: %@",[log maskMediaKeys]);
             [self notifyUserWithTitle:@"Decoding Failed" subTitle: @"Invalid Media Access Key? " ];
         }
     }
@@ -1115,7 +1115,7 @@ __DDLOGHERE__
             encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:self.encodeFilePath];
             encodeTask.requiresInputPipe = YES;
             __block NSPipe *encodePipe = [NSPipe new];
-			[encodeTask setStandardInput:encodePipe]; ///XXXX maybe delete;
+			[encodeTask setStandardInput:encodePipe]; ///XXX maybe delete;
             encodeTask.startupHandler = ^BOOL(){
 				__typeof__(self) strongSelf = weakSelf;
                 if ([strongSelf isCompleteCTiVoFile:self.encodeFilePath forFileType:@"Encoded"]){
@@ -2020,7 +2020,7 @@ __DDLOGHERE__
 				[self checkQueue];
 				break;
 			case kMTStatusSkipModeWaitInitial:
-				DDLogReport(@"XXX Was waiting for SkipMode, but now launching %@", self);
+				DDLogMajor(@"%@ was waiting for SkipMode, but now launching", self);
 				self.downloadStatus = @(kMTStatusNew);
 				[self checkQueue];
 				break;
@@ -2076,7 +2076,7 @@ __DDLOGHERE__
 
 -(void) skipModeExpired {
 	//called if timer expires on downloading show info
-	DDLogMajor(@"XXX SkipModeTimer went off for %@, which ended at %@",self, self.show.stopTime);
+	DDLogMajor(@"SkipModeTimer went off for %@, which ended at %@",self, self.show.stopTime);
 	[self stopWaitSkipModeTimer];
 	if (!self.useSkipMode) return;
 	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
@@ -2091,14 +2091,13 @@ __DDLOGHERE__
 	if (!self.waitForSkipModeInfoTimer) {
 		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome+10;
 		if (waitTime > 0) {
-			DDLogReport (@"XXX setting skipModeTimer at %0.1f minutes for %@", waitTime/60.0, self );
-			self. waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
+			DDLogDetail(@"Setting skipModeTimer at %0.1f minutes for %@", waitTime/60.0, self );
+			self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
 		}
 	}
 }
 
 -(void) stopWaitSkipModeTimer {
-	if (self.waitForSkipModeInfoTimer) DDLogReport (@"XXX cancelling skipModeTimer  for %@", self );
 	[self.waitForSkipModeInfoTimer invalidate]; self.waitForSkipModeInfoTimer = nil;
 }
 
@@ -2114,7 +2113,7 @@ __DDLOGHERE__
         _commercialTask.isRunning ||
         _captionTask.isRunning)  {
         //if any of the tasks exist and are still running, then let them finish; checkStillActive will eventually fail them if no progress
-        DDLogReport(@"XXX Finishing up, but processes still running for %@", self);
+        DDLogMajor(@"Finishing up, but processes still running for %@", self);
         [self performSelector:@selector(finishUpPostEncodeProcessingDelayed) withObject:nil afterDelay:0.5];
         return;
     }
