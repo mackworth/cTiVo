@@ -1929,31 +1929,48 @@ __DDLOGHERE__
 	self.processProgress = 1.0;
 	if (self.addToiTunesWhenEncoded) {
 		DDLogMajor(@"Adding to iTunes %@", self);
-		self.downloadStatus = @(kMTStatusAddingToItunes);
-		MTiTunes *iTunes = [[MTiTunes alloc] init];
-		NSString * iTunesPath = [iTunes importIntoiTunes:self withArt:self.show.artWorkImage] ;
-		
-		if (iTunesPath && ![iTunesPath isEqualToString: self.encodeFilePath]) {
-			//apparently iTunes created new file
-			if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
-				[self deleteVideoFile];
-				//move caption, commercial, and pytivo metadata files along with video
-				NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
-				if (self.shouldEmbedSubtitles && self.captionFilePath) {
-					self.captionFilePath = [self moveFile:self.captionFilePath toITunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: self.captionFilePath;
-				}
-				if (self.genTextMetaData.boolValue) {
-					NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
-					NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
-					[self moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
-				}
-				//but remember new file for future processing
-				self.encodeFilePath= iTunesPath;
-			}
-			//Need to add xattrs to iTunes copy as well
-			[tiVoManager addShow: self.show onDiskAtPath: iTunesPath];
+		if (self.addToiTunesWhenEncoded) {
+			self.downloadStatus = @(kMTStatusAddingToItunes);
+			DDLogMajor(@"Adding to iTunes %@", self);
+			__weak __typeof__(self) weakSelf = self;
+			dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+				MTiTunes *iTunes = [[MTiTunes alloc] init];
+				NSString * iTunesPath = [iTunes importIntoiTunes:weakSelf withArt:self.show.artWorkImage] ;
+
+				dispatch_async(dispatch_get_main_queue(), ^{
+					__typeof__(self) strongSelf = weakSelf;
+
+					if (iTunesPath && ![iTunesPath isEqualToString: strongSelf.encodeFilePath]) {
+						//apparently iTunes created new file
+						if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
+							[strongSelf deleteVideoFile];
+							//move caption, commercial, and pytivo metadata files along with video
+							NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
+							if (strongSelf.shouldEmbedSubtitles && strongSelf.captionFilePath) {
+								strongSelf.captionFilePath = [strongSelf moveFile:strongSelf.captionFilePath toITunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: strongSelf.captionFilePath;
+							}
+							if (strongSelf.genTextMetaData.boolValue) {
+								NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
+								NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
+								[strongSelf moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
+							}
+							//but remember new file for future processing
+							strongSelf.encodeFilePath= iTunesPath;
+						}
+						//Need to add xattrs to iTunes copy as well
+						[tiVoManager addShow: strongSelf.show onDiskAtPath: iTunesPath];
+					}
+					[strongSelf notifyAndCleanUp];
+				});
+			});
 		}
+	} else {
+		[self notifyAndCleanUp];
+		
 	}
+}
+
+-(void) notifyAndCleanUp {
 #ifndef DEBUG
 	NSInteger retries = ([[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries] - self.numRetriesRemaining) ;
 	NSString * retryString = [NSString stringWithFormat:@"%d",(int) retries];

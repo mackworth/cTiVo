@@ -154,9 +154,9 @@ __DDLOGHERE__
     cTiVoQuery = [[NSMetadataQuery alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidUpdateNotification object:cTiVoQuery];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidFinishGatheringNotification object:cTiVoQuery];
-    NSPredicate *mdqueryPredicate = [NSPredicate predicateWithFormat:@"kMDItemFinderComment ==[c] 'cTiVoDownload'"];
+    NSPredicate *mdqueryPredicate = [NSPredicate predicateWithFormat:@"kMDItemFinderComment ==[c] '" kMTSpotlightKeyword @"'"];
     [cTiVoQuery setPredicate:mdqueryPredicate];
-    [cTiVoQuery setSearchScopes:@[NSMetadataQueryLocalComputerScope]];
+    [cTiVoQuery setSearchScopes:@[]];
     [cTiVoQuery setNotificationBatchingInterval:2.0];
     [cTiVoQuery startQuery];
 }

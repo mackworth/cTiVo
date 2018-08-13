@@ -68,7 +68,7 @@ void signalHandler(int signal)
 @property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
 #define pseudoEventTime 61
-#define pseudoCheckTime 75
+#define pseudoCheckTime 90
 @property (nonatomic, strong) NSTimer * pseudoTimer;
 @property (nonatomic, strong) MTGCDTimer * screenFrozenTimer;
 
@@ -251,7 +251,7 @@ void signalHandler(int signal)
 																  block:^{
 																	  __typeof__(self) strongSelf = weakSelf;
 																	  NSTimeInterval timeSincePseudo = -[strongSelf.lastPseudoTime timeIntervalSinceNow];
-																	  if (timeSincePseudo > pseudoCheckTime) {
+																	  if (timeSincePseudo > pseudoEventTime) {
 																		  DDLogReport(@"Turning on screen due to main thread frozen for between %0.1f to %0.1f seconds",timeSincePseudo-pseudoEventTime, timeSincePseudo);
 																		  IOPMAssertionID userActivityID;
 																		  IOPMAssertionDeclareUserActivity(CFSTR("waking screen for thread contention"), kIOPMUserActiveLocal , &userActivityID);
