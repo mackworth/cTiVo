@@ -35,7 +35,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="988" height="772"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <userGuides>
-                    <userLayoutGuide location="656" affinity="minY"/>
+                    <userLayoutGuide location="657" affinity="minY"/>
                     <userLayoutGuide location="618" affinity="minY"/>
                 </userGuides>
                 <subviews>
@@ -96,7 +96,7 @@
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                                     <tableColumns>
-                                                        <tableColumn identifier="Art" editable="NO" width="105" minWidth="20" maxWidth="300" headerToolTip="Scheduled to be downloaded?" id="kg6-Uh-si9">
+                                                        <tableColumn identifier="Art" editable="NO" width="105" minWidth="20" maxWidth="300" headerToolTip="Image of the show" id="kg6-Uh-si9">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Art">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -190,7 +190,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="SkipMode" width="58" minWidth="22" maxWidth="70" headerToolTip="Hollow green when commercial SkipMode info available, but solid green when loaded into cTiVo." id="WAC-Dp-obF">
+                                                        <tableColumn identifier="SkipMode" width="58" minWidth="22" maxWidth="70" id="WAC-Dp-obF">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SkipData">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -202,6 +202,7 @@
                                                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="rpcSkipMode"/>
+                                                            <string key="headerToolTip">Hollow green when commercial SkipMode info available, but solid green when loaded into cTiVo. Black cSkip means found by comskip.</string>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="SYz-Oy-C7c">
@@ -220,7 +221,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="TiVo" editable="NO" width="81" minWidth="46" maxWidth="180" hidden="YES" headerToolTip="TiVo show is on" id="195">
+                                                        <tableColumn identifier="TiVo" editable="NO" width="81" minWidth="46" maxWidth="180" hidden="YES" headerToolTip="TiVo that show is on" id="195">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="TiVo">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -696,7 +697,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="StarRating" editable="NO" width="50" minWidth="30" maxWidth="70" hidden="YES" headerToolTip="Age Rating" id="vTi-4j-l7o">
+                                                        <tableColumn identifier="StarRating" editable="NO" width="50" minWidth="30" maxWidth="70" hidden="YES" headerToolTip="Star Rating" id="vTi-4j-l7o">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Star Rating">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -911,11 +912,11 @@
                                                 </outlineView>
                                             </subviews>
                                         </clipView>
-                                        <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="nW8-aR-GV2">
+                                        <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="nW8-aR-GV2">
                                             <rect key="frame" x="1" y="306" width="946" height="16"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
-                                        <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="aE6-1g-XOC">
+                                        <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="aE6-1g-XOC">
                                             <rect key="frame" x="931" y="23" width="16" height="299"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
@@ -1029,16 +1030,16 @@
                                                                         <textField verticalHuggingPriority="750" id="z7y-2w-uIB" userLabel="leftText">
                                                                             <rect key="frame" x="0.0" y="0.0" width="268" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="kqs-BA-Sw6">
+                                                                            <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" id="kqs-BA-Sw6">
                                                                                 <font key="font" metaFont="system"/>
-                                                                                <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                                                <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
+                                                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="KRR-0A-sUq" userLabel="rightText">
                                                                             <rect key="frame" x="268" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
-                                                                            <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="icx-VM-9gi">
+                                                                            <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" id="icx-VM-9gi">
                                                                                 <font key="font" size="10" name="Helvetica"/>
                                                                                 <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                                                                                 <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
@@ -1052,7 +1053,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="SkipMode" width="59" minWidth="22" maxWidth="70" headerToolTip="Hollow green when commercial SkipMode info available, but solid green when loaded into cTiVo." id="T01-au-qjU">
+                                                        <tableColumn identifier="SkipMode" width="59" minWidth="22" maxWidth="70" id="T01-au-qjU">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SkipData">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1064,6 +1065,7 @@
                                                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="show.rpcSkipMode"/>
+                                                            <string key="headerToolTip">Hollow green when commercial SkipMode info available, but solid green when loaded into cTiVo. Black cSkip means found by comskip.</string>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="VsS-3d-Q7U">
@@ -1101,7 +1103,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" id="qQB-l8-FUr" userLabel="leftText">
-                                                                            <rect key="frame" x="9" y="0.0" width="0.0" height="17"/>
+                                                                            <rect key="frame" x="11" y="0.0" width="0.0" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="nX6-ru-GCz">
                                                                                 <font key="font" metaFont="system"/>
@@ -1110,7 +1112,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="FEf-Ia-wX9" userLabel="rightText">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="80" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="a0F-vx-fpu">
                                                                                 <font key="font" size="10" name="Helvetica"/>
@@ -1238,7 +1240,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Does channel show is on use H.264 (more compressed)" id="Joh-em-Aac">
+                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Does channel that show is on use H.264 (more compressed)" id="Joh-em-Aac">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="H.264">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1306,7 +1308,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="OnDisk" editable="NO" width="56" minWidth="42" maxWidth="60" hidden="YES" headerToolTip="Is recorded show in HD" id="CMQ-fQ-p4F">
+                                                        <tableColumn identifier="OnDisk" editable="NO" width="56" minWidth="42" maxWidth="60" hidden="YES" headerToolTip="Is recorded showa vailable on Disk" id="CMQ-fQ-p4F">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="OnDisk">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1442,7 +1444,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="StarRating" editable="NO" width="50" minWidth="30" maxWidth="70" hidden="YES" headerToolTip="Age Rating" id="Ff1-r4-e20">
+                                                        <tableColumn identifier="StarRating" editable="NO" width="50" minWidth="30" maxWidth="70" hidden="YES" headerToolTip="Star Rating" id="Ff1-r4-e20">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Star Rating">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1529,7 +1531,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="776">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="0.0" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="777">
                                                                                 <font key="font" metaFont="system"/>
@@ -1563,7 +1565,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="772">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="0.0" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="773">
                                                                                 <font key="font" metaFont="system"/>
@@ -1748,7 +1750,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Format" width="107.5" minWidth="50" maxWidth="180" headerToolTip="Format of Video which to download" id="52">
+                                                        <tableColumn identifier="Format" width="107.5" minWidth="50" maxWidth="180" headerToolTip="Format of Video to use during download" id="52">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Format">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1822,7 +1824,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="32" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Cut commercials" id="1318">
+                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="32" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Skip commercials" id="1318">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Mark">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1969,11 +1971,11 @@
                                                 </tableView>
                                             </subviews>
                                         </clipView>
-                                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="50">
+                                        <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="50">
                                             <rect key="frame" x="1" y="128" width="946" height="16"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
-                                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="48">
+                                        <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="48">
                                             <rect key="frame" x="224" y="17" width="15" height="102"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
@@ -2245,7 +2247,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="32" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Cut commercials" id="1324">
+                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="32" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Skip commercials" id="1324">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Mark">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -2285,7 +2287,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="SDOnly" width="50" minWidth="32" maxWidth="50" hidden="YES" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Cut commercials" id="1366">
+                                                        <tableColumn identifier="SDOnly" width="50" minWidth="32" maxWidth="50" hidden="YES" headerToolTip="Restrict recordings to Standard Definition (low resolution) only" id="1366">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SD Only">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -2409,11 +2411,11 @@
                                                 </tableView>
                                             </subviews>
                                         </clipView>
-                                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="250">
+                                        <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="250">
                                             <rect key="frame" x="1" y="103" width="946" height="16"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
-                                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="252">
+                                        <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="252">
                                             <rect key="frame" x="224" y="17" width="15" height="102"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>

@@ -18,6 +18,7 @@
 #import "NSNotificationCenter+Threads.h"
 #import "NSString+Helpers.h"
 #import "NSURL+MTURLExtensions.h"
+#import "NSArray+Map.h"
 
 typedef NS_ENUM(NSUInteger, MTImageSource) {
     //note this enum is referred to in Preference XIB and AppDelegate defaults
@@ -416,7 +417,7 @@ __DDLOGHERE__
 		DDLogVerbose(@"No SkipMode for %@; Past deadline for SkipInfo to arrive by %0.1f", self, -timeLeft);
 		return NO;
 	} else {
-		DDLogDetail(@"Looks like we might stil have SkipMode for %@", self);
+		DDLogVerbose(@"Looks like we might stil have SkipMode for %@", self);
 		return YES;
 	}
 }
@@ -603,26 +604,25 @@ __DDLOGHERE__
     return [self.episodeID hasPrefix:@"EP"];
 }
 
--(NSAttributedString *)attrStringFromDictionaries:(id)nameList
-{
-    NSMutableString *returnString = [NSMutableString string];
-    if ([nameList isKindOfClass:[NSArray class]]) {
-        for (NSDictionary *name in nameList) {
-            [returnString appendFormat:@"%@\n",[self nameString:name]];
-        }
-       	if (returnString.length > 0)[returnString deleteCharactersInRange:NSMakeRange(returnString.length-1, 1)];
-		
-    }
-	return [[NSAttributedString alloc] initWithString:returnString attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:11]}];
-    
+-(NSAttributedString *) attributedString: (NSString *) text {
+	return [[NSAttributedString alloc] initWithString: text
+										   attributes:@{NSFontAttributeName :           [NSFont systemFontOfSize:11],
+														NSForegroundColorAttributeName: [NSColor textColor] }];
+}
+
+-(NSAttributedString *)attrStringFromDictionaries:(NSArray *)nameList {
+	NSString * returnValue = @"";
+	if ([nameList isKindOfClass:[NSArray class]]) {
+		NSArray <NSString *> * names = [nameList mapObjectsUsingBlock:^id(NSDictionary * name, NSUInteger idx) {
+			return [self nameString:name];
+		} ];
+		returnValue = [names componentsJoinedByString:@"\n"];
+	}
+	return [self attributedString:returnValue];
 }
 
 -(NSAttributedString *)attribDescription {
-	NSAttributedString *attstring = [[NSAttributedString alloc] initWithString:@""];
-	if (self.showDescription) {
-		attstring = [[NSAttributedString alloc] initWithString:self.showDescription attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:11]}];
-	}
-	return attstring;
+	return [self attributedString: self.showDescription ?: @""];
 }
 
 -(NSString *)seasonString
@@ -1090,66 +1090,38 @@ static void * originalAirDateContext = &originalAirDateContext;
     return [self attrStringFromDictionaries:newNames];
 }
 
--(void)setVActor:(NSArray *)vActor
-{
-	if ( ![vActor isKindOfClass:[NSArray class]]) {
-		return;
+-(NSAttributedString *) appendNames: (NSArray *) names to: (NSAttributedString *) stringA {
+	NSAttributedString * temp = [self parseNames:names];
+	
+	if (stringA.string.length == 0) {
+		return temp;
+	} else {
+		return [self attributedString: [NSString stringWithFormat: @"%@\n%@",stringA.string, temp.string]];
 	}
+}
+
+-(void)setVActor:(NSArray *)vActor {
     self.actors = [self parseNames: vActor ]  ;
 }
 
--(void)setVGuestStar:(NSArray *)vGuestStar
-{
-	if ( ![vGuestStar isKindOfClass:[NSArray class]]) {
-		return;
-	}
+-(void)setVGuestStar:(NSArray *)vGuestStar {
 	self.guestStars = [self parseNames: vGuestStar ];
 }
 
--(void)setVDirector:(NSArray *)vDirector
-{
-	if ( ![vDirector isKindOfClass:[NSArray class]]) {
-		return;
-	}
+-(void)setVDirector:(NSArray *)vDirector {
 	self.directors = [self parseNames: vDirector ];
 }
 
--(void)setVWriter:(NSArray*) vWriter
-{
-    if ( ![vWriter isKindOfClass:[NSArray class]]) {
-        return;
-    }
+-(void)setVWriter:(NSArray*) vWriter {
     self.writers = [self parseNames: vWriter ];
 }
 
--(NSAttributedString *) appendNames: (NSArray *) names to: (NSAttributedString *) stringA {
-    NSAttributedString * temp = [self parseNames:names];
-
-    if (stringA.string.length == 0) {
-        return temp;
-    } else {
-        return [[NSAttributedString alloc] initWithString:[NSString stringWithFormat: @"%@\n%@",stringA.string, temp.string]
-                                               attributes:@{NSFontAttributeName : [NSFont systemFontOfSize:11]} ]
-                ;
-    }
-
-}
-
--(void)setVExecProducer:(NSArray *)vExecProducer   //we just merge producers and exec producers together
-{
-    if ( ![vExecProducer isKindOfClass:[NSArray class]]) {
-        return;
-    }
+-(void)setVExecProducer:(NSArray *)vExecProducer {  //we just merge producers and exec producers together
     self.producers = [self appendNames:vExecProducer to:self.producers];
 }
 
--(void)setVProducer:(NSArray *)vProducer
-{
-    if ( ![vProducer isKindOfClass:[NSArray class]]) {
-        return;
-    }
-    self.producers = [self appendNames:vProducer to:self.producers];
-
+-(void)setVProducer:(NSArray *)vProducer {
+	[self setVExecProducer:vProducer];
 }
 
 -(void) setSeasonEpisode:(NSString *)seasonEpisode {

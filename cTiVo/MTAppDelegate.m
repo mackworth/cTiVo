@@ -733,10 +733,12 @@ NSObject * assertionID = nil;
 			}
 			lastTivoWasManual = tiVo.manualTiVo;
 			NSMenuItem *thisMenuItem = [[NSMenuItem alloc] initWithTitle:tiVo.tiVo.name action:NULL keyEquivalent:@""];
+			NSColor * red =  [NSColor redColor];
+			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
 			if (!tiVo.isReachable) {
 				NSFont *thisFont = [NSFont systemFontOfSize:13];
 				NSString *thisTitle = [NSString stringWithFormat:@"%@ offline",tiVo.tiVo.name];
-				NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]];
+				NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:red, NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]];
 				[thisMenuItem setAttributedTitle:aTitle];
 			} else {
 				[thisMenuItem setTarget:tiVo];

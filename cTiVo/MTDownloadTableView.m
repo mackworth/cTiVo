@@ -314,7 +314,11 @@ __DDLOGHERE__
         textVal = thisShow.tiVoName ;
         result.textField.textColor = [NSColor textColor];
         if (!thisShow.tiVo.isReachable && download.isDownloading) {
-            result.textField.textColor = [NSColor redColor];
+			if (@available(macOS 10.10,*)) {
+            	result.textField.textColor = [NSColor systemRedColor];
+			} else {
+				result.textField.textColor = [NSColor redColor];
+			}
         }
         
     } else if ([tableColumn.identifier isEqualToString:@"Order"]) {

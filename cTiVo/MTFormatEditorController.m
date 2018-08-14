@@ -321,7 +321,11 @@
 		self.validExecutableString = [NSString stringWithFormat:@"Found at %@",validPath];
         self.validExecutable = @YES;
     } else {
-        self.validExecutableColor = [NSColor redColor];
+		if (@available(macOS 10.10, *)) {
+			self.validExecutableColor = [NSColor systemRedColor];
+		} else {
+			self.validExecutableColor = [NSColor redColor];
+		}
         self.validExecutableString = @"File not found or not executable.";
         self.validExecutable = @NO;
 

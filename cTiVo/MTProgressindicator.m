@@ -60,28 +60,6 @@
 	[self setNeedsDisplay:YES];
 }
 
-- (void)setBackgroundStyle:(NSBackgroundStyle)style
-{
-    [super setBackgroundStyle:style];
-
-    // If the cell's text color is black, this sets it to white
-    //    [((NSCell *)self.progressIndicator.leftText.cell) setBackgroundStyle:style];
-
-    // Otherwise you need to change the color manually
-    switch (style) {
-        case NSBackgroundStyleLight:
-            [self.leftText setTextColor:self.foregroundTextColor];
-            [self.rightText setTextColor:self.foregroundTextColor];
-            break;
-
-        case NSBackgroundStyleDark:
-        default:
-            [self.leftText setTextColor:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0]];
-            [self.rightText setTextColor:[NSColor colorWithCalibratedWhite:1.0 alpha:1.0]];
-            break;
-    }
-}
-
 
 -(void) setDisplayProgress: (BOOL) displayProgress {
     if (displayProgress != _displayProgress) {

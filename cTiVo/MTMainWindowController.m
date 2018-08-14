@@ -186,7 +186,9 @@ __DDLOGHERE__
 
 -(NSMutableAttributedString *) stringForDisplay: (NSSet <MTTiVo *> *) set forCommercials: (BOOL) commercials {
 	NSString * path = commercials ? @"skipModeStatus" : @"tiVo.name";
-	NSDictionary <NSAttributedStringKey,id> * attribs = commercials ? @{NSForegroundColorAttributeName:[NSColor redColor]}  : @{};
+	NSColor * red =  [NSColor redColor];
+	if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+	NSDictionary <NSAttributedStringKey,id> * attribs = commercials ? @{NSForegroundColorAttributeName:red}  : @{};
 	NSString * list = [[[[set allObjects] valueForKeyPath: path] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)] componentsJoinedByString:@", "];
  return [[NSMutableAttributedString alloc] initWithString: list attributes:attribs];
 }
@@ -220,8 +222,10 @@ __DDLOGHERE__
 			}
 		}
 		if (self.commercialingTiVos.count > 0) {
+			NSColor * red =  [NSColor redColor];
+			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
 			[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@"Getting SkipMode for "
-																				   attributes:@{NSForegroundColorAttributeName:[NSColor redColor]} ]];
+																				   attributes:@{NSForegroundColorAttributeName:red} ]];
 			[message appendAttributedString:[self stringForDisplay:self.commercialingTiVos forCommercials:YES]];
 		}
 		[loadingProgramListLabel setAttributedStringValue: message];
@@ -266,7 +270,9 @@ __DDLOGHERE__
         if (!ts.isReachable) {
             NSFont *thisFont = [NSFont systemFontOfSize:13];
             NSString *thisTitle = [NSString stringWithFormat:@"%@ offline",ts.tiVo.name];
-            NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]];
+			NSColor * red =  [NSColor redColor];
+			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+			NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:@ { NSForegroundColorAttributeName: red, NSFontAttributeName:  thisFont}];
             [thisItem setAttributedTitle:aTitle];
 
         }
@@ -292,7 +298,9 @@ __DDLOGHERE__
         if (!ts.isReachable) {
             NSFont *thisFont = [NSFont systemFontOfSize:13];
             NSString *thisTitle = [NSString stringWithFormat:@"TiVo: %@ offline",ts.tiVo.name];
-            NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]];
+			NSColor * red =  [NSColor redColor];
+			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+			NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:@ { NSForegroundColorAttributeName: red, NSFontAttributeName:  thisFont}];
             [tiVoListPopUpLabel setAttributedStringValue:aTitle];
 			
         }

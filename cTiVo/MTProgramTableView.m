@@ -806,7 +806,11 @@ __DDLOGHERE__
 	if ([thisShow.protectedShow boolValue]) {
 		result.textField.textColor = [NSColor disabledControlTextColor ];
 	} else if (thisShow && [identifier isEqualToString:@"TiVo"] && !thisShow.tiVo.isReachable) {
-		result.textField.textColor = [NSColor redColor];
+		if (@available(macOS 10.10,*)) {
+			result.textField.textColor = [NSColor systemRedColor];
+		} else {
+			result.textField.textColor = [NSColor redColor];
+		}
 	}
 	
 	//make sure textfield is properly centered
