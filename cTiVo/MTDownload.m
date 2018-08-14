@@ -1928,42 +1928,39 @@ __DDLOGHERE__
 	//allows for delayed Marking of commercials
 	self.processProgress = 1.0;
 	if (self.addToiTunesWhenEncoded) {
+		self.downloadStatus = @(kMTStatusAddingToItunes);
 		DDLogMajor(@"Adding to iTunes %@", self);
-		if (self.addToiTunesWhenEncoded) {
-			self.downloadStatus = @(kMTStatusAddingToItunes);
-			DDLogMajor(@"Adding to iTunes %@", self);
-			__weak __typeof__(self) weakSelf = self;
-			dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-				MTiTunes *iTunes = [[MTiTunes alloc] init];
-				NSString * iTunesPath = [iTunes importIntoiTunes:weakSelf withArt:self.show.artWorkImage] ;
+		__weak __typeof__(self) weakSelf = self;
+		dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+			MTiTunes *iTunes = [[MTiTunes alloc] init];
+			NSString * iTunesPath = [iTunes importIntoiTunes:weakSelf withArt:self.show.artWorkImage] ;
 
-				dispatch_async(dispatch_get_main_queue(), ^{
-					__typeof__(self) strongSelf = weakSelf;
+			dispatch_async(dispatch_get_main_queue(), ^{
+				__typeof__(self) strongSelf = weakSelf;
 
-					if (iTunesPath && ![iTunesPath isEqualToString: strongSelf.encodeFilePath]) {
-						//apparently iTunes created new file
-						if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
-							[strongSelf deleteVideoFile];
-							//move caption, commercial, and pytivo metadata files along with video
-							NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
-							if (strongSelf.shouldEmbedSubtitles && strongSelf.captionFilePath) {
-								strongSelf.captionFilePath = [strongSelf moveFile:strongSelf.captionFilePath toITunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: strongSelf.captionFilePath;
-							}
-							if (strongSelf.genTextMetaData.boolValue) {
-								NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
-								NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
-								[strongSelf moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
-							}
-							//but remember new file for future processing
-							strongSelf.encodeFilePath= iTunesPath;
+				if (iTunesPath && ![iTunesPath isEqualToString: strongSelf.encodeFilePath]) {
+					//apparently iTunes created new file
+					if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
+						[strongSelf deleteVideoFile];
+						//move caption, commercial, and pytivo metadata files along with video
+						NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
+						if (strongSelf.shouldEmbedSubtitles && strongSelf.captionFilePath) {
+							strongSelf.captionFilePath = [strongSelf moveFile:strongSelf.captionFilePath toITunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: strongSelf.captionFilePath;
 						}
-						//Need to add xattrs to iTunes copy as well
-						[tiVoManager addShow: strongSelf.show onDiskAtPath: iTunesPath];
+						if (strongSelf.genTextMetaData.boolValue) {
+							NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
+							NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
+							[strongSelf moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
+						}
+						//but remember new file for future processing
+						strongSelf.encodeFilePath= iTunesPath;
 					}
-					[strongSelf notifyAndCleanUp];
-				});
+					//Need to add xattrs to iTunes copy as well
+					[tiVoManager addShow: strongSelf.show onDiskAtPath: iTunesPath];
+				}
+				[strongSelf notifyAndCleanUp];
 			});
-		}
+		});
 	} else {
 		[self notifyAndCleanUp];
 		

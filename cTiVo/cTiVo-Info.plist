@@ -49,6 +49,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>cTiVo needs access to iTunes to be able to add TV Shows and Movies</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2017 Scott Buchanan and Hugh Mackworth. All rights reserved.</string>
 	<key>NSMainNibFile</key>
