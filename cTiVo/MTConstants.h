@@ -186,6 +186,7 @@
 #define kMTTiVoLastLoadTimes @"TiVoLastLoadTImes"   //Array of Date each tivo last processed
 #define kMTManualEpisodeData @"ManualEpisodeData"   //Array of manually entered episode data (esp season/episode nums)
 #define kMTiTunesSubmit @"iTunesSubmit"             //Whether to submit to iTunes after encoding
+#define kMTiTunesSubmitCheck @"iTunesSubmitCheck"   //Whether we have checked for iTunes availability
 #define kMTiTunesSync @"iTunesSync"                 // Whether to sync iDevices after iTunes submital
 #define kMTiTunesDelete @"iTunesDelete"				//Whether to delete original file after submitting to iTunes
 #define kMTIfSuccessDeleteFromTiVo @"IfSuccessDeleteFromTiVo" //Whether to delete show from TiVo after successful download

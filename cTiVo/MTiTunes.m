@@ -21,17 +21,55 @@ __DDLOGHERE__
 	return _iTunes;
 }
 
+-(iTunesSource *) iTunesLibraryHelper {
+	NSPredicate * libraryKindPred = [NSPredicate predicateWithFormat:@"kind == %@",[NSAppleEventDescriptor descriptorWithTypeCode:iTunesESrcLibrary]];
+	SBElementArray *librarySources = [self.iTunes sources];
+	[librarySources filterUsingPredicate:libraryKindPred];
+	if ([librarySources count] > 0){
+		return [librarySources objectAtIndex:0];
+	} else {
+		return nil;
+	}
+}
+
++(void) warnUserPermissions {
+	if(@available(macOS 10.14, *)) {
+		//trigger check
+		[[NSUserDefaults standardUserDefaults] setObject:nil forKey:kMTiTunesSubmitCheck];
+		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTiTunesSubmit];
+	} else {
+		NSAlert *alert2 = [NSAlert alertWithMessageText: @"Warning: cTiVo cannot access iTunes. "
+										  defaultButton: @"OK"
+										alternateButton: nil
+											otherButton: nil
+							  informativeTextWithFormat: @"Please contact cTiVo help site."];
+		[alert2 runModal];
+	}
+}
+
 -(iTunesSource *) iTunesLibrary   {
 	if (!_iTunesLibrary || ![_libraryPlayList exists]) {
-		NSPredicate * libraryKindPred = [NSPredicate predicateWithFormat:@"kind == %@",[NSAppleEventDescriptor descriptorWithTypeCode:iTunesESrcLibrary]];
-		NSArray *librarySources = [[self.iTunes sources] filteredArrayUsingPredicate:libraryKindPred];
-		if ([librarySources count] > 0){
-			_iTunesLibrary = [librarySources objectAtIndex:0];
-		} else {
-			DDLogMajor(@"couldn't find iTunes Library. iTunes not responding?");
+		_iTunesLibrary = [self iTunesLibraryHelper];
+		if (!_iTunesLibrary) {
+			DDLogReport(@"couldn't find iTunes Library. Probably permissions problem; quit cTiVo and try again.");
+			dispatch_async(dispatch_get_main_queue(), ^{
+				[MTiTunes warnUserPermissions];
+			});
 		}
 	}
 	return _iTunesLibrary;
+}
+
+-(BOOL) preflightiTunesCheck {
+	if (@available (macOS 10.14.0, *)) {
+		if (self.iTunesLibraryHelper) {
+			return YES;
+		} else {
+			return NO;
+		}
+	} else {
+		return YES;
+	}
 }
 
 -(iTunesLibraryPlaylist *) libraryPlayList {
@@ -103,7 +141,6 @@ __DDLOGHERE__
 	return ([self deviceNumber:attributesA] == [self deviceNumber:attributesB]) &&
 	([self fileNumber:attributesA] == [self fileNumber:attributesB]);
 }
-
 
 -(NSString *) importIntoiTunes: (MTDownload * ) download withArt:(NSImage *) image {
 	//Caller responsible for informing user of progress

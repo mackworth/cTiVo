@@ -417,7 +417,6 @@
 		1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = cTiVo/Crashlytics.framework; sourceTree = "<group>"; };
 		1E61CDB61BB89DA5006D6DBE /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fabric.framework; path = cTiVo/Fabric.framework; sourceTree = "<group>"; };
 		1E61CDB81BB89E6A006D6DBE /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
-		1E61CDBA1BB89E7C006D6DBE /* libstdc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libstdc++.tbd"; path = "usr/lib/libstdc++.tbd"; sourceTree = SDKROOT; };
 		1E61CDBC1BB89E91006D6DBE /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		1E684A7516E2C50B000F5C6E /* copyright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = copyright.png; sourceTree = "<group>"; };
 		1E684A7716E2C50B000F5C6E /* expired-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expired-recording.png"; sourceTree = "<group>"; };
@@ -426,7 +425,6 @@
 		1E684A7A16E2C50B000F5C6E /* suggestion-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "suggestion-recording.png"; sourceTree = "<group>"; };
 		1E684A8616E3A010000F5C6E /* status-unknown.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "status-unknown.png"; sourceTree = "<group>"; };
 		1E684A8A16E3A338000F5C6E /* deleted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = deleted.png; sourceTree = "<group>"; };
-		1E6907891DA5A2FF00C429C2 /* libstdc++.6.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libstdc++.6.tbd"; path = "usr/lib/libstdc++.6.tbd"; sourceTree = SDKROOT; };
 		1E6AB105202A0BDB008A0F32 /* MTRemoteWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTRemoteWindowController.h; sourceTree = "<group>"; };
 		1E6AB106202A0BDB008A0F32 /* MTRemoteWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTRemoteWindowController.m; sourceTree = "<group>"; };
 		1E6AB107202A0BDB008A0F32 /* MTRemoteWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MTRemoteWindowController.xib; sourceTree = "<group>"; };
@@ -1042,9 +1040,7 @@
 		D2D60BA016766EFD00CE32DE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1E6907891DA5A2FF00C429C2 /* libstdc++.6.tbd */,
 				1E61CDBC1BB89E91006D6DBE /* libz.tbd */,
-				1E61CDBA1BB89E7C006D6DBE /* libstdc++.tbd */,
 				1E61CDB81BB89E6A006D6DBE /* libc++.tbd */,
 				1E61CDB61BB89DA5006D6DBE /* Fabric.framework */,
 				1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */,

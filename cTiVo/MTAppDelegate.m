@@ -19,6 +19,7 @@
 #import "PFMoveApplication.h"
 #import "NSDate+Tomorrow.h"
 #import "MTGCDTimer.h"
+#import "MTiTunes.h"
 
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
@@ -85,9 +86,10 @@ void signalHandler(int signal)
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-   [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
+	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+	[defaults registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
 #ifndef DEBUG
-    if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTCrashlyticsOptOut]) {
+    if (![defaults boolForKey:kMTCrashlyticsOptOut]) {
         [Fabric with:@[[Crashlytics class]]];
     }
 #endif
@@ -98,12 +100,12 @@ void signalHandler(int signal)
 	[MTLogWatcher sharedInstance]; //self retained
     CGEventFlags flags = (kCGEventFlagMaskAlternate | kCGEventFlagMaskControl);
     if ((modifiers & flags) == flags) {
-        [[NSUserDefaults standardUserDefaults] removeObjectForKey:kMTDebugLevelDetail];
-		[[NSUserDefaults standardUserDefaults] setObject:@15 forKey:kMTDebugLevel];
-    } else if ( [[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel] == 15){
-        [[NSUserDefaults standardUserDefaults] setObject:@3 forKey:kMTDebugLevel];
+        [defaults removeObjectForKey:kMTDebugLevelDetail];
+		[defaults setObject:@15 forKey:kMTDebugLevel];
+    } else if ( [defaults integerForKey:kMTDebugLevel] == 15){
+        [defaults setObject:@3 forKey:kMTDebugLevel];
    } else {
-        [[NSUserDefaults standardUserDefaults]  registerDefaults:@{kMTDebugLevel: @1}];
+        [defaults  registerDefaults:@{kMTDebugLevel: @1}];
     }
 
 #ifdef DEBUG
@@ -130,25 +132,25 @@ void signalHandler(int signal)
     DDLogReport(@"Starting cTiVo; version: %@", [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
 
 	//Upgrade old defaults
-	NSString * oldtmp = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectoryObsolete];
+	NSString * oldtmp = [defaults stringForKey:kMTTmpFilesDirectoryObsolete];
 	if (oldtmp) {
 		if (![oldtmp isEqualToString:kMTTmpDirObsolete]) {
-			[[NSUserDefaults standardUserDefaults] setObject:oldtmp forKey: kMTTmpFilesPath];
+			[defaults setObject:oldtmp forKey: kMTTmpFilesPath];
 		}
-		[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTTmpFilesDirectoryObsolete];
-		NSString * oldDownload = [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory];
+		[defaults setObject:nil forKey: kMTTmpFilesDirectoryObsolete];
+		NSString * oldDownload = [defaults stringForKey:kMTDownloadDirectory];
 		if ([oldDownload isEqualToString:[self defaultDownloadDirectory]]) {
-			[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTDownloadDirectory];
+			[defaults setObject:nil forKey: kMTDownloadDirectory];
 		}
-		[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTTmpFilesDirectoryObsolete];
+		[defaults setObject:nil forKey: kMTTmpFilesDirectoryObsolete];
 	}
-	if ([[NSUserDefaults standardUserDefaults] stringForKey:kMTFileNameFormat].length == 0) {
+	if ([defaults stringForKey:kMTFileNameFormat].length == 0) {
 		NSString * newDefaultFileFormat = kMTcTiVoDefault;
-		if ([[NSUserDefaults standardUserDefaults] boolForKey: kMTMakeSubDirsObsolete]) {
+		if ([defaults boolForKey: kMTMakeSubDirsObsolete]) {
 			newDefaultFileFormat = kMTcTiVoFolder;
-			[[NSUserDefaults standardUserDefaults] setObject:nil forKey: kMTMakeSubDirsObsolete];
+			[defaults setObject:nil forKey: kMTMakeSubDirsObsolete];
 		}
-		[[NSUserDefaults standardUserDefaults] setObject:newDefaultFileFormat forKey: kMTFileNameFormat];
+		[defaults setObject:newDefaultFileFormat forKey: kMTFileNameFormat];
 		
 	}
 
@@ -187,7 +189,7 @@ void signalHandler(int signal)
 										 @YES, kMTUseSkipMode,
 										  nil];
 
-    [[NSUserDefaults standardUserDefaults] registerDefaults:userDefaultsDefaults];
+    [defaults registerDefaults:userDefaultsDefaults];
 	
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelUserQuit) name:kMTNotificationUserCanceledQuit object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTivoRefreshMenu) name:kMTNotificationTiVoListUpdated object:nil];
@@ -200,7 +202,7 @@ void signalHandler(int signal)
 	_mainWindowController = nil;
 	//	_formatEditorController = nil;
 	[self showMainWindow:nil];
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"RemoteVisible"]) [self showRemoteControlWindow:self];
+	if ([defaults boolForKey:@"RemoteVisible"]) [self showRemoteControlWindow:self];
 
 	gettingMediaKey = NO;
 	signal(SIGPIPE, &signalHandler);
@@ -211,10 +213,11 @@ void signalHandler(int signal)
 
 	[_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
 	[_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueObservingOptionInitial context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTSkipCommercials options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTmpFilesPath options:NSKeyValueObservingOptionInitial context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDownloadDirectory options:NSKeyValueObservingOptionInitial context:nil];
+	[defaults addObserver:self forKeyPath:kMTSkipCommercials options:NSKeyValueObservingOptionNew context:nil];
+	[defaults addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
+	[defaults addObserver:self forKeyPath:kMTTmpFilesPath options:NSKeyValueObservingOptionInitial context:nil];
+	[defaults addObserver:self forKeyPath:kMTDownloadDirectory options:NSKeyValueObservingOptionInitial context:nil];
+	[defaults addObserver:self forKeyPath:kMTiTunesSubmit options:NSKeyValueObservingOptionInitial context:nil];
 	
 	if (@available(macOS 10.10.3, *)) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(thermalStateChanged:) name:NSProcessInfoThermalStateDidChangeNotification object:nil];
@@ -239,6 +242,7 @@ void signalHandler(int signal)
     [self checkDirectoryAndPurge:[tiVoManager tvdbTempDirectory]];
     [self checkDirectoryAndPurge:[tiVoManager detailsTempDirectory]];
 
+	
 	saveQueueTimer = [NSTimer scheduledTimerWithTimeInterval: (5 * 60.0) target:tiVoManager selector:@selector(saveState) userInfo:nil repeats:YES];
 	self.lastPseudoTime = [NSDate date];
     self.pseudoTimer = [NSTimer scheduledTimerWithTimeInterval: pseudoEventTime target:self selector:@selector(launchPseudoEvent) userInfo:nil repeats:YES];  //every minute to clear autoreleasepools when no user interaction
@@ -687,6 +691,12 @@ NSObject * assertionID = nil;
 		[self validateTmpDirectory];
 	} else if ([keyPath compare:kMTDownloadDirectory] == NSOrderedSame) {
 		[self validateDownloadDirectory];
+	} else if ([keyPath compare:kMTiTunesSubmit] == NSOrderedSame) {
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit]) {
+			[self iTunesPermissionCheck];
+		} else {
+			[[NSUserDefaults standardUserDefaults] setObject:nil forKey:kMTiTunesSubmitCheck];
+		}
 	} else {
 		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 	}
@@ -764,6 +774,191 @@ NSObject * assertionID = nil;
 
 - (IBAction)clearHistory:(id)sender {
 	[[_mainWindowController downloadQueueTable] clearHistory:sender];
+}
+
+#pragma mark - iTunes Permissions   Yuck.
+
+-(void) iTunesPermissionCheck {
+	//one-time check for iTunes permissions
+	// state driven on kMTiTunesSubmitCheck
+	//nil/0 = never run before
+	//1 = has run; everything was fine
+	//2 = Suggested turning on permissions, need to confirm
+	//3 = Wiped out permissions, need to confirm
+	//4 = something bad; we give up
+	if (@available(macOS 10.14, *)) {
+	} else {
+		return;
+	}
+	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+	if (![defaults boolForKey:kMTiTunesSubmit]) return;
+
+	NSInteger state = [defaults integerForKey:kMTiTunesSubmitCheck];
+	if (state == 1) return;
+	__weak __typeof__(self) weakSelf = self;
+
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT , 0), ^{
+		if ([[[MTiTunes alloc] init] preflightiTunesCheck]) {
+			[defaults setInteger:1 forKey:kMTiTunesSubmitCheck];
+			return;
+		}
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[weakSelf iTunesPermissionProcessFromState:state];
+		});
+	});
+}
+
+-(void) disableITunesUse {
+	[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTiTunesSubmit];
+	for (MTDownload * download in tiVoManager.downloadQueue ) {
+		if (![download isCompletelyDone] && download.addToiTunesWhenEncoded) {
+			download.addToiTunesWhenEncoded = NO;
+		}
+	}
+}
+-(void) setITunesPermissionState: (NSInteger) newstate {
+	[[NSUserDefaults standardUserDefaults] setInteger:newstate forKey:kMTiTunesSubmitCheck];
+
+}
+
+-(void) iTunesPermissionProcessFromState: (NSInteger) state {
+	switch (state) {
+		case 0:
+			if ([self askForiTunesPermissionFix]) {
+				if ([[[MTiTunes alloc] init] preflightiTunesCheck]) {
+					[self setITunesPermissionState:1];
+				} else {
+					[self setITunesPermissionState:2];
+					[self warnQuitting];
+					[NSApp terminate:nil];
+				}
+			} else {
+				[self disableITunesUse];
+			}
+			break;
+		case 2:
+			if ([self offerResetPermissions]) {
+				if ([[[MTiTunes alloc] init] preflightiTunesCheck]) {
+					[self setITunesPermissionState:1];
+				} else {
+					[self setITunesPermissionState:3];
+					[self warnQuitting];
+					[NSApp terminate:nil];
+				}
+			} else {
+				[self disableITunesUse];
+			}
+			break;
+		case 3:
+			[self warniTunesFailure];
+			[self disableITunesUse];
+			[self setITunesPermissionState:4];
+			break;
+		case 4:
+			[self disableITunesUse];
+			[self setITunesPermissionState:5];
+			break;
+		default:
+			break;
+	}
+}
+
+-(BOOL) askForiTunesPermissionFix {
+	//ask user to fix problem
+	//returns YES to try again, no if not fixed.
+	NSAlert *iTunesAlert = [NSAlert alertWithMessageText: @"cTiVo cannot access iTunes, probably due to Automation Permission problem in Mojave."
+										   defaultButton: @"Open System Preferences"
+										 alternateButton: @"Disable cTiVo's use of iTunes"
+											 otherButton: nil
+							   informativeTextWithFormat: @"Fix in System Preferences OR disable iTunes submittal"];
+	NSInteger returnValue = [iTunesAlert runModal];
+	switch (returnValue) {
+		case NSAlertDefaultReturn: {
+			DDLogMajor(@"user asked for SysPrefs");
+			NSString *urlString = @"x-apple.systempreferences:com.apple.preference.security?Privacy_Automation";
+			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:urlString]];
+			return [self confirmiTunesPermissionFixed];
+		}
+		case NSAlertAlternateReturn:
+			DDLogMajor(@"User asked to disable iTunes");
+			return NO;
+			break;
+		default:
+			return NO;
+			break;
+	}
+}
+
+-(void) warnQuitting {
+	NSAlert *alert2 = [NSAlert alertWithMessageText: @"Now cTiVo will quit."
+									  defaultButton: @"OK"
+									alternateButton: nil
+										otherButton: nil
+						  informativeTextWithFormat: @"Please restart cTiVo to check iTunes access."];
+	[alert2 runModal];
+}
+
+-(BOOL) confirmiTunesPermissionFixed {
+	NSAlert *alert = [NSAlert alertWithMessageText: @"Please click OK when you have enabled cTiVo's iTunes Automation permission in Privacy."
+									 defaultButton: @"OK"
+								   alternateButton: @"Disable cTiVo's use of iTunes"
+									   otherButton: @"No such switch?"
+						 informativeTextWithFormat: @"Or you can choose to disable iTunes submittal entirely."];
+	NSInteger returnValue = [alert runModal];
+	switch (returnValue) {
+		case NSAlertDefaultReturn: {
+			DDLogMajor(@"user said to try again");
+			return YES;
+			break;
+		}
+		case NSAlertAlternateReturn:
+			DDLogMajor(@"User asked to disable iTunes");
+			return NO;
+			break;
+		case NSAlertOtherReturn:
+			return [self offerResetPermissions];
+		default:
+			break;
+	}
+	return NO; //shouldn't get here
+}
+
+-(BOOL) offerResetPermissions {
+	NSAlert *alert = [NSAlert alertWithMessageText: @"No iTunes access; cTiVo can reset all macOS Automation permissions if you wish."
+									 defaultButton: @"Reset Automation Permissions"
+								   alternateButton: @"Disable cTiVo's use of iTunes"
+									   otherButton: nil
+						 informativeTextWithFormat: @"Or you can choose to disable iTunes submittal entirely."];
+	NSInteger returnValue = [alert runModal];
+	switch (returnValue) {
+		case NSAlertDefaultReturn: {
+			DDLogMajor(@"user said to reset permissions");
+			NSTask *task = [[NSTask alloc] init];
+			task.launchPath = @"/usr/bin/tccutil";
+			task.arguments = @[@"reset", @"AppleEvents"];
+			[task launch];
+			[task waitUntilExit];
+			return YES;
+			break;
+		}
+		case NSAlertAlternateReturn:
+			DDLogMajor(@"User asked to disable iTunes");
+			return NO;
+			break;
+		default:
+			break;
+	}
+	return NO; //shouldn't get here
+}
+
+-(BOOL) warniTunesFailure {
+	NSAlert *alert2 = [NSAlert alertWithMessageText: @"cTiVo still cannot access iTunes. "
+									  defaultButton: @"OK"
+									alternateButton: nil
+										otherButton: nil
+						  informativeTextWithFormat: @"Please check for help at cTiVo's website."];
+	[alert2 runModal];
+	return NO;
 }
 
 
@@ -914,7 +1109,7 @@ NSObject * assertionID = nil;
 	if ([tableColumn.identifier compare:@"checkBox"] == NSOrderedSame) {
 	} else if ([tableColumn.identifier compare:@"name"] == NSOrderedSame) {
         result.textField.stringValue = thisFomat.name;
-        result.textField.textColor = [NSColor textColor];
+        result.textField.textColor = [NSColor controlTextColor];
     }     // return the result.
     return result;
     
