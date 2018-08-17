@@ -45,7 +45,10 @@
 - (void)setItemPropertiesToDefault:sender {
     self.displayProgress = YES;
 
-	_foregroundTextColor = [NSColor textColor];
+	_foregroundTextColor = [NSColor controlTextColor];
+	self.leftText.textColor = [NSColor controlTextColor];
+	self.rightText.textColor = [NSColor controlTextColor];
+
 	self.leftText.backgroundColor = [NSColor clearColor];
 	self.rightText.backgroundColor = [NSColor clearColor];
 

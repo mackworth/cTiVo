@@ -48,6 +48,7 @@
 	}
 
 	MTTabViewItem *tabViewItem = (MTTabViewItem *)[_myTabView selectedTabViewItem];
+	self.window.preventsApplicationTerminationWhenModal = NO;
 	[self.window setFrame:[self getNewWindowRect:tabViewItem] display:NO];
 	_ignoreTabItemSelection = NO;
 }

@@ -872,7 +872,11 @@ __DDLOGHERE__
         if (badMAKRange.location != NSNotFound) {
             DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
             DDLogDetail(@"log file: %@",[log maskMediaKeys]);
-            [self notifyUserWithTitle:@"Decoding Failed" subTitle: @"Invalid Media Access Key? " ];
+			if (self.useTransportStream) {
+				[self notifyUserWithTitle:@"Decoding Failed" subTitle: @"Either an invalid Media Access Key or just a damaged file." ];
+			} else {
+				[self notifyUserWithTitle:@"Decoding Failed" subTitle: @"Possibly invalid Media Access Key? Or try Transport Stream, or maybe just a damaged file." ];
+			}
         }
     }
 }

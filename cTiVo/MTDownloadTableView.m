@@ -219,7 +219,7 @@ __DDLOGHERE__
     if (selectedRowIndexes.count == 1) {
         NSArray *selectedRows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
 		MTTiVoShow * show = ((MTDownload *) selectedRows[0]).show;
-		if (!show.protectedShow.boolValue) {
+		if (!show.protectedShow.boolValue && self == self.window.firstResponder ) {
 			[myController setValue:show forKey:@"showForDetail"];
 		}
     }
@@ -308,11 +308,11 @@ __DDLOGHERE__
 		if ([thisShow.protectedShow boolValue]) {
 			cell.foregroundTextColor = [NSColor disabledControlTextColor ];
 		} else {
-			cell.foregroundTextColor = [NSColor textColor];
+			cell.foregroundTextColor = [NSColor controlTextColor];
 		}
    } else if ([tableColumn.identifier isEqualToString:@"TiVo"]) {
         textVal = thisShow.tiVoName ;
-        result.textField.textColor = [NSColor textColor];
+        result.textField.textColor = [NSColor controlTextColor];
         if (!thisShow.tiVo.isReachable && download.isDownloading) {
 			if (@available(macOS 10.10,*)) {
             	result.textField.textColor = [NSColor systemRedColor];
@@ -499,7 +499,7 @@ __DDLOGHERE__
 	if ([thisShow.protectedShow boolValue]) {
         result.textField.textColor = [NSColor disabledControlTextColor];
     } else {
-        result.textField.textColor = [NSColor textColor];
+        result.textField.textColor = [NSColor controlTextColor];
     }
    return result;
 }

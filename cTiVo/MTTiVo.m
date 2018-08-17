@@ -1187,9 +1187,13 @@ BOOL channelChecking = NO;
 	if (!tiVoManager.processingPaused.boolValue) {
 		DDLogDetail(@"%@ Checking for new download", self);
 		for (MTDownload *download in self.downloadQueue) {
-			if ([download.show.protectedShow boolValue]) {
+			if ([download.show.protectedShow boolValue] ) {
 				//protectedShow is used in downloadQueue during startup to indicate not loaded yet.
-				break;
+				if( [download isDone]) {
+					continue;  //ignore completed ones
+				} else {
+					break; //but don't process if we have uncompleted, unloaded ones
+				}
 			}
 			if (download.downloadStatus.intValue == kMTStatusNew  && !isDownloading) {
 				tiVoManager.numEncoders++;

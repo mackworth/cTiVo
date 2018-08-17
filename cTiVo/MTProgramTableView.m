@@ -381,7 +381,7 @@ __DDLOGHERE__
 	NSInteger numRows = selectedRows.count;
 	[self.addToQueueButton setEnabled:numRows != 0];
 	[self.subscribeButton setEnabled: numRows != 0];
-    if (numRows == 1) {
+    if (numRows == 1 && self == self.window.firstResponder) {
         [self.myController setValue:selectedRows[0] forKey:@"showForDetail"];
     }
 }
@@ -802,7 +802,7 @@ __DDLOGHERE__
 		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
 	}
 	
-	result.textField.textColor = [NSColor textColor];
+	result.textField.textColor = [NSColor controlTextColor];
 	if ([thisShow.protectedShow boolValue]) {
 		result.textField.textColor = [NSColor disabledControlTextColor ];
 	} else if (thisShow && [identifier isEqualToString:@"TiVo"] && !thisShow.tiVo.isReachable) {

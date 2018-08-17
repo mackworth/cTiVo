@@ -242,7 +242,7 @@ __DDLOGHERE__
 
 -(NSURL *) detailFileURL {
     NSString *detailFilePath = [NSString stringWithFormat:@"%@_%d_Details.xml",self.tiVoName,self.showID]; //keep in sync with parseDetails
-    if (@available (macOS 11, *)) {
+    if (@available (macOS 10.11, *)) {
         return [NSURL fileURLWithPath:detailFilePath isDirectory:NO relativeToURL:[tiVoManager detailsTempDirectory]];
     } else {
         return [[tiVoManager detailsTempDirectory] URLByAppendingPathComponent:detailFilePath];
@@ -339,10 +339,10 @@ __DDLOGHERE__
 		notify = YES;
 	}
 	if (notify) {
-		DDLogReport(@"Notifying skipMode from %@", self);
+		DDLogDetail(@"Notifying skipMode from %@", self);
  		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
 	} else {
-		DDLogReport(@"Not Notifying skipMode from %@", self);
+		DDLogVerbose(@"Not Notifying skipMode from %@", self);
 	}
 }
 
@@ -2070,7 +2070,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         baseName = [baseName stringByAppendingString:@"_Large"];
     }
     baseName = [baseName stringByAppendingPathExtension:@"jpg"];
-    if (@available (macOS 11, *)) {
+    if (@available (macOS 10.11, *)) {
         return [NSURL fileURLWithPath:baseName isDirectory:NO relativeToURL:directory];
     } else {
         return [directory URLByAppendingPathComponent:baseName];
