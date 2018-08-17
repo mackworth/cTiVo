@@ -2029,10 +2029,12 @@ __DDLOGHERE__
 				if (self.show.hasSkipModeList) {
 					DDLogMajor(@"Got EDL for %@: %@", self, self.show.edlList);
 					[self addEDLtoFilesOnDisk];
+					[self finalFinalProcessing];
 				} else {
-					DDLogReport(@"Was waiting for SkipMode, but not supposed to be for %@: %@", self, self.show.edlList);
+					DDLogReport(@"Was waiting for SkipMode, but user disabled for %@; launching comskip", self);
+					self.downloadStatus = @kMTStatusAwaitingPostCommercial ;
+					[self checkQueue];
 				}
-				[self finalFinalProcessing];
 				break;
 			case kMTStatusAwaitingPostCommercial:
 				if (!self.shouldMarkCommercials) { //looks like user changed their mind
@@ -2183,7 +2185,7 @@ __DDLOGHERE__
 
 -(void)launchPostCommercial {
 	//used when we are waiting for skipMode, and realize it's never coming.
-	//called from TiVoManager right after incrementing numencoders
+	//called from TiVoManager right after incrementing numencoders or when user turns off comskip
 	if (!self.decryptedFilePath) {
 		//should never happen
 		DDLogReport(@"No decrypted file! %@", self);
