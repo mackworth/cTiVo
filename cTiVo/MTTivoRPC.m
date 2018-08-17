@@ -12,6 +12,7 @@
 #import "NSNotificationCenter+Threads.h"
 #import "NSString+Helpers.h"
 #import "MTWeakTimer.h"
+#import "NSArray+Map.h"
 
 @interface MTTivoRPC () <NSStreamDelegate>
 @property (nonatomic, strong) NSInputStream *iStream;
@@ -755,7 +756,7 @@ static NSRegularExpression * isFinalRegex = nil;
            DDLogDetail (@"Got %lu shows from TiVo", shows.count);
            if (!strongSelf.showMap) {
                strongSelf.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
-               [strongSelf getShowInfoForShows: shows ];
+               [strongSelf recursiveGetShowInfoForShows: shows ];
            } else {
                NSMutableArray <NSString *> *lookupDetails = [NSMutableArray array];
                NSMutableArray <NSString *> * newIDs = [NSMutableArray array];
@@ -771,7 +772,7 @@ static NSRegularExpression * isFinalRegex = nil;
                        //have seen before, so don't lookup, but also don't delete
                        [deletedShows removeObjectForKey:objectID];
                        if (isFirstLaunch &&
-						   (!thisRPC.imageURL || (thisRPC.clipMetaDataId && ! (thisRPC.edlList.count || thisRPC.programSegments.count)))) {
+						   (!thisRPC.imageURL || (thisRPC.clipMetaDataId && ! (thisRPC.edlList || thisRPC.programSegments)))) {
                            //saved last time without having finished checking the art or getting segment info
                            [lookupDetails addObject:objectID];
                        }
@@ -781,7 +782,7 @@ static NSRegularExpression * isFinalRegex = nil;
                for (NSString * objectID in deletedShows) {
                    [strongSelf.showMap removeObjectForKey:objectID];
                }
-			   [strongSelf getShowInfoForShows: lookupDetails];
+			   [strongSelf recursiveGetShowInfoForShows: lookupDetails];
 			   if (!isFirstLaunch) {
 				   [weakSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
 			   }
@@ -803,6 +804,20 @@ static NSRegularExpression * isFinalRegex = nil;
 }
 
 -(void) getShowInfoForShows: (NSArray <NSString *> *) requestShows  {
+	if (requestShows.count == 0 || !self.bodyID) {
+		return;
+	}
+	NSArray <NSString *> * neededShows = [requestShows mapObjectsUsingBlock:^id(NSString * id, NSUInteger idx) {
+		if (self.showMap[id]) {
+			return nil;
+		} else {
+			return id;
+		}
+	}];
+	[self recursiveGetShowInfoForShows: neededShows];
+}
+
+-(void) recursiveGetShowInfoForShows: (NSArray <NSString *> *) requestShows {
 	if (requestShows.count == 0 || !self.bodyID) {
 		return;
 	}
@@ -853,7 +868,7 @@ static NSRegularExpression * isFinalRegex = nil;
        NSArray * responseShows = jsonResponse[@"recording"];
 	   DDLogVerbose(@"Got ShowInfo from TiVo RPC: %@", [strongSelf maskTSN:jsonResponse]);
 	   if (!lastBatch) {
-		   [strongSelf getShowInfoForShows:restArray ];
+		   [strongSelf recursiveGetShowInfoForShows:restArray ];
 	   }
        if (responseShows.count == 0 || responseShows.count != subArray.count) {
            DDLogReport(@"Warning: Invalid # of TivoRPC shows: \n%@ \n%@", responseShows, subArray);
@@ -890,8 +905,14 @@ static NSRegularExpression * isFinalRegex = nil;
 //           } else {
 //               rpcData.format = MPEGFormatOther;
 //           }
-
+		   
            @synchronized (strongSelf.showMap) {
+			   MTRPCData * oldData = strongSelf.showMap[rpcData.rpcID];
+			   if (oldData) {
+				   rpcData.clipMetaDataId = oldData.clipMetaDataId;
+				   rpcData.programSegments = oldData.programSegments;
+				   rpcData.edlList = oldData.edlList;
+			   }
                [strongSelf.showMap setObject:rpcData forKey:objectId];
            }
 
