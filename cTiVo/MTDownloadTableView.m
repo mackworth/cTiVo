@@ -361,14 +361,19 @@ __DDLOGHERE__
 	} else if ([tableColumn.identifier isEqualToString:@"SkipMode"]) {
 		switch (download.show.rpcSkipMode.intValue) {
 			case 5: result.imageView.image = [NSImage imageNamed:@"skipModeComskip"];
+				result.toolTip = @"Commercial information loaded from comskip ";
 				break;
 			case 4:  result.imageView.image = [NSImage imageNamed:@"skipModeQuestion"];
+				result.toolTip = @"SkipMode information may still be coming";
 				break;
 			case 3:  result.imageView.image = [NSImage imageNamed:@"skipMode"];
+				result.toolTip = @"SkipMode information retrieved.";
 				break;
 			case 2:  result.imageView.image = [NSImage imageNamed:@"skipModeSlash"];
+				result.toolTip = @"SkipMode retrieval failed";
 				break;
 			case 1:  result.imageView.image = [NSImage imageNamed:@"skipModeInverted"];
+				result.toolTip = @"SkipMode available, but not retrieved yet.";
 				break;
 			default: result.imageView.image = nil;
 				break;
