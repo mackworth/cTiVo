@@ -1711,8 +1711,8 @@ __DDLOGHERE__
 		} else {
 			//not scheduled so warn
 			[self notifyForName:show.showTitle
-					  withTitle:@"Warning: SkipMode Points Not Available"
-					   subTitle:@"You can manually load SkipMode points, or set up automatic schedule in Preferences."
+					  withTitle:@"Warning: SkipMode Data Not Retrieved"
+					   subTitle:@"You can manually load SkipMode data, or set up automatic schedule in Preferences."
 					   isSticky:YES];
 			self.lastSkipModeWarningTime = [NSDate date];
 		}

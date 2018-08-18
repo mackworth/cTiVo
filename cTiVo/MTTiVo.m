@@ -641,11 +641,11 @@ BOOL channelChecking = NO;
 	for (MTTiVoShow * show in hasInfoFirst) {
 		if (show.tiVo == self) {
 			if ( !show.inProgress.boolValue && show.mightHaveSkipModeInfo && (show.rpcData.edlList.count == 0)) {
-            	DDLogMajor(@"Asking for SkipMode points for %@ on %@", show, self);
+            	DDLogMajor(@"Asking for SkipMode data for %@ on %@", show, self);
 				show.rpcData.tempLength = show.showLength; //hint in case tivo isn't reporting this
             	[self.myRPC findSkipModeEDLForShow:show.rpcData];
         	} else {
-				DDLogDetail(@"No need for SkipMode points for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : show.edlList.count > 0 ? @"Already have" : !show.mightHaveSkipModeInfo ? @"won't have for other reason" : @"Error" );
+				DDLogDetail(@"No need for SkipMode data for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : show.edlList.count > 0 ? @"Already have" : !show.mightHaveSkipModeInfo ? @"won't have for other reason" : @"Error" );
 			}
         }
 	}

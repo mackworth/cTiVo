@@ -202,7 +202,7 @@
                                                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="rpcSkipMode"/>
-                                                            <string key="headerToolTip">Hollow green when commercial SkipMode info available, but solid green when loaded into cTiVo. Black cSkip means found by comskip.</string>
+                                                            <string key="headerToolTip">Hollow green when commercial SkipMode data available, but solid green when loaded into cTiVo. Black cSkip means found by comskip.</string>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="SYz-Oy-C7c">
@@ -1065,7 +1065,7 @@
                                                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="show.rpcSkipMode"/>
-                                                            <string key="headerToolTip">Hollow green when commercial SkipMode info available, but solid green when loaded into cTiVo. Black cSkip means found by comskip.</string>
+                                                            <string key="headerToolTip">Hollow green when commercial SkipMode data available, but solid green when loaded into cTiVo. Black cSkip means found by comskip.</string>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="VsS-3d-Q7U">
@@ -1531,7 +1531,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="776">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="0.0" height="17"/>
+                                                                            <rect key="frame" x="-1" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="right" title="Table View Cell" id="777">
                                                                                 <font key="font" metaFont="system"/>
@@ -2243,7 +2243,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Will be added to iTunes" id="JZK-Uz-DYP" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="802.5" y="1" width="32" height="17"/>
+                                                                    <rect key="frame" x="803" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -2624,7 +2624,7 @@
                         <action selector="reloadAllInfo:" target="-1" id="PN9-6D-fCe"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Find Skip Points on TiVo" toolTip="Launches SkipMode process to find commercials in this show. WILL interrupt any shows currently being watched on this TiVo." id="USg-jW-2wB">
+                <menuItem title="Get SkiipMode from TiVo" toolTip="Launches SkipMode process to find commercials in this show. WILL interrupt any shows currently being watched on this TiVo." id="USg-jW-2wB">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="skipInfoFromTiVo:" target="-1" id="Fp4-F7-PYF"/>
@@ -2727,7 +2727,7 @@
                         <action selector="reloadAllInfo:" target="-1" id="6Lf-NM-gIG"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Find Skip Points on TiVo" toolTip="Launches SkipMode process to find commercials in this show. WILL interrupt any shows currently being watched on this TiVo." id="DJO-g7-DGD">
+                <menuItem title="Get SkipMode from TiVo" toolTip="Launches SkipMode process to find commercials in this show. WILL interrupt any shows currently being watched on this TiVo." id="DJO-g7-DGD">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="skipInfoFromTiVo:" target="-1" id="cbA-n1-JWf"/>
