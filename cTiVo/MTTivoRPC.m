@@ -808,7 +808,8 @@ static NSRegularExpression * isFinalRegex = nil;
 		return;
 	}
 	NSArray <NSString *> * neededShows = [requestShows mapObjectsUsingBlock:^id(NSString * id, NSUInteger idx) {
-		if (self.showMap[id]) {
+		if (self.showMap[id].clipMetaDataId) {
+			[self.delegate receivedRPCData:self.showMap[id] ];
 			return nil;
 		} else {
 			return id;

@@ -404,10 +404,6 @@ __DDLOGHERE__
 	if ([tiVoManager skipModeForChannel:self.stationCallsign] != NSOnState) {
 		return NO;
 	}
-	if (!self.rpcData) {
-		DDLogDetail(@"Haven't seen RPC yet for %@, so Maybe", self);
-		return YES;
-	}
 	if (self.hasSkipModeInfo || self.hasSkipModeList) return YES;
 	if (self.skipModeFailed) return NO;
 	NSString * genre = self.episodeGenre.lowercaseString;

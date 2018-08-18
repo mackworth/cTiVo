@@ -704,7 +704,8 @@ __DDLOGHERE__
          ];
    }
     if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {  //We need to download from the TiVo
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload] &&
+			!(self.useSkipMode && self.markCommercials)) { //else might need the whole file later for post-commercial
             self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",self.tmpDirectory,self.baseFileName];
             DDLogVerbose(@"downloading to memory; buffer: %@", self.bufferFilePath);
             self.urlBuffer = [NSMutableData new];
@@ -1353,9 +1354,6 @@ __DDLOGHERE__
     commercialTask.cleanupHandler = ^(){
 		__typeof__(self) strongSelf = weakSelf;
 		__typeof__(MTTask *) strongCommercial = weakCommercial;
-		if (postCommercialing) {
-			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  // Free up an encoder / update UI
-		}
 		if (!strongSelf || !strongCommercial) return;
         if (weakCommercial.taskFailed) {
             if ([strongSelf checkLogForAudio: strongCommercial.logFilePath]) {
@@ -1413,6 +1411,7 @@ __DDLOGHERE__
 					MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
 					[edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength keepingCommercials: !self.shouldSkipCommercials ];
 					MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
+					[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  // Free up an encoder / update UI
 				}
 				[strongSelf finalFinalProcessing];
 			} else {
@@ -1543,7 +1542,7 @@ __DDLOGHERE__
 				[defaults boolForKey:kMTSaveTmpFiles] ?
 					@" Save Temp files;" :
 					@"",
-				[defaults boolForKey:kMTUseMemoryBufferForDownload]?
+				self.urlBuffer?
 					@"" :
 					@" No Memory Buffer;",
                [defaults objectForKey:kMTDecodeBinary],
