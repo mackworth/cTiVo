@@ -423,7 +423,7 @@ __DDLOGHERE__
 		 	(download.isNew ||
 			 status == kMTStatusSkipModeWaitEnd ||
 			 (download.isInProgress && download.markCommercials)) &&
-			download.show.mightHaveSkipModeInfo &&
+			(download.show.mightHaveSkipModeInfo || download.useSkipMode) &&
 		 	!protected &&
 		 	(download.encodeFormat.canMarkCommercials || download.encodeFormat.canSkip)];
 		

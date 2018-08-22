@@ -91,7 +91,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 @property (nonatomic, strong) NSString *baseFileName,
 *tivoFilePath,  //For reading .tivo file from a prev run (not implemented; reuse bufferFilePath?)
-*mpgFilePath,   //For reading decoded .mpg from a prev run (not implemented; reuse decryptedFilePath?)
+//*mpgFilePath,   //For reading decoded .mpg from a prev run (not implemented; reuse decryptedFilePath?)
 *bufferFilePath,  //downloaded show prior to decryption; .tivo if complete, .bin if not (due to memory buffer usage)
 *decryptedFilePath, //show after decryption; .mpg
 *encodeFilePath, //show after encoding (e.g. MP4)
@@ -214,6 +214,7 @@ __DDLOGHERE__
     self.downloadDirectory = nil;
 
 	self.downloadStatus = @(kMTStatusNew);
+	[self skipModeCheck];
     if (notifyTiVo) {
 		[self checkQueue];
 	}
@@ -601,7 +602,7 @@ __DDLOGHERE__
     NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,extension];
 	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tmpDir,baseName];
 	self.tivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tmpDir,baseName];
-	self.mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tmpDir,baseName];
+//	self.mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tmpDir,baseName];
     BOOL tivoFileExists = NO; // [self isCompleteCTiVoFile:self.tivoFilePath forFileType:@"TiVo"];  Note: if tivFileExists, then stomps on file w/ current basename!
     
     self.downloadingShowFromTiVoFile = NO;
@@ -954,13 +955,6 @@ __DDLOGHERE__
         };
     }
 
-//    decryptTask.cleanupHandler = ^(){
-//        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-//            if ([[NSFileManager defaultManager] fileExistsAtPath:self.bufferFilePath]) {
-//                [[NSFileManager defaultManager] removeItemAtPath:self.bufferFilePath error:nil];
-//            }
-//        }
-//    };
 	NSArray *arguments = nil;
 	if (self.shouldPipeFromDecrypt) {
 		decryptTask.requiresOutputPipe = YES;
@@ -978,15 +972,6 @@ __DDLOGHERE__
 						 @"--",
 						 @"-"
 						 ];
-		}
-		//Not using the filebuffer so remove so it can act as a flag upon completion.
-		if (!self.runComskip &&
-			!self.exportSubtitles.boolValue &&
-			!self.encodeFormat.canSimulEncode) {
-			if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-				[[NSFileManager defaultManager] removeItemAtPath:self.decryptedFilePath error:nil];
-			};
-			self.decryptedFilePath = nil;
 		}
 	} else {
 		decryptTask.requiresOutputPipe = NO;
@@ -1577,9 +1562,9 @@ __DDLOGHERE__
     } else if (self.downloadingShowFromTiVoFile) {
         self.activeTaskChain.dataSource = self.tivoFilePath;
         DDLogMajor(@"Downloading from file tivo file %@",self.tivoFilePath);
-    } else if (self.downloadingShowFromMPGFile) {
-        DDLogMajor(@"Downloading from file MPG file %@",self.mpgFilePath);
-        self.activeTaskChain.dataSource = self.mpgFilePath;
+//    } else if (self.downloadingShowFromMPGFile) {
+//        DDLogMajor(@"Downloading from file MPG file %@",self.mpgFilePath);
+//        self.activeTaskChain.dataSource = self.mpgFilePath;
     }
 	if (self.show.hasSkipModeList && self.shouldSkipCommercials  ){
 		if (![self.show.rpcData.edlList writeToEDLFile:self.commercialFilePath] ) {
@@ -2010,6 +1995,9 @@ __DDLOGHERE__
 -(void) skipModeCheck {
 	if ([self.show.protectedShow boolValue]) return;
 	if (self.downloadStatus.intValue == kMTStatusRemovedFromQueue) return; //we've been deleted
+	if (self.useSkipMode && !self.show.mightHaveSkipModeInfo){
+		_useSkipMode = NO;
+	}
 	BOOL needEDLNow = ( self.isNew && self.shouldSkipCommercials) ||
 					  ( self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd && self.shouldMarkCommercials);
 	if (self.show.hasSkipModeList || ! self.useSkipMode || ! needEDLNow) {

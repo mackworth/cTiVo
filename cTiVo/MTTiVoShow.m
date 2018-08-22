@@ -322,7 +322,8 @@ __DDLOGHERE__
 }
 
 -(void) setClipMetaDataId:(NSString *)clipMetaDataId {
-	BOOL notify = _clipMetaDataId != clipMetaDataId;
+	//note we have to notify even if clipMetaData is nil, as this is the signal when we've completed one last check at timer expiry
+	BOOL notify = _clipMetaDataId != clipMetaDataId || self.isQueued;
 	if ((_clipMetaDataId == nil) && (clipMetaDataId != nil)) {
 		//newly arrived (although maybe from cache at startup)
 		NSTimeInterval timeLeft = self.timeLeftTillRPCInfoWontCome;
@@ -335,14 +336,11 @@ __DDLOGHERE__
 		}
 	}
 	_clipMetaDataId = clipMetaDataId;
-	if (self.isQueued) {
-		notify = YES;
-	}
 	if (notify) {
 		DDLogDetail(@"Notifying skipMode from %@", self);
- 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
 	} else {
-		DDLogVerbose(@"Not Notifying skipMode from %@", self);
+		DDLogDetail(@"Not Notifying skipMode from %@", self);
 	}
 }
 
