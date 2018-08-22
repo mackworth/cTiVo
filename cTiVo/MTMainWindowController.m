@@ -458,7 +458,7 @@ __DDLOGHERE__
 -(IBAction)skipInfoFromTiVo:(id)sender {
 	BOOL programTable = self.window.firstResponder != downloadQueueTable;
 	NSString * object = programTable ? @"show" : @"download";
-	NSArray * selectedObjects = [[self selectedShows] mapObjectsUsingBlock:^MTTiVoShow *(MTTiVoShow * show, NSUInteger idx) {
+	NSArray <MTTiVoShow *>* selectedObjects = [[self selectedShows] mapObjectsUsingBlock:^MTTiVoShow *(MTTiVoShow * show, NSUInteger idx) {
 		if (show.hasSkipModeInfo && !show.hasSkipModeList && !show.skipModeFailed) {
 			return show;
 		} else {
@@ -466,8 +466,11 @@ __DDLOGHERE__
 		}
 	}];
 	if (selectedObjects.count == 0) return;
-	NSString * plural = selectedObjects.count > 1 ? @"s" : @"";
-	NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Warning: retrieving SkipMode data will temporarily interrupt current viewing on your TiVo!"] defaultButton:@"Ok" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Ok will retrieve SkipMode data for %d %@%@, or hit Cancel to cancel request.", (int) selectedObjects.count, object, plural];
+	NSString * mainText = @"Warning: retrieving SkipMode data will temporarily interrupt current viewing on your TiVo!";
+	NSString * infoText = selectedObjects.count > 1 ?
+			[NSString stringWithFormat:@"Hit Ok to retrieve SkipMode data for %d %@s, or \nhit Cancel to cancel request.", (int) selectedObjects.count, object] :
+			[NSString stringWithFormat:@"Hit Ok to retrieve SkipMode data for %@, or \nhit Cancel to cancel request.", selectedObjects[0].seriesTitle];
+	NSAlert *myAlert = [NSAlert alertWithMessageText: mainText defaultButton:@"Ok" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"%@", infoText];
 	myAlert.alertStyle = NSCriticalAlertStyle;
 	NSInteger result = [myAlert runModal];
 	if (result == NSAlertAlternateReturn) return;

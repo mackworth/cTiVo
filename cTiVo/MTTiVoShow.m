@@ -346,11 +346,11 @@ __DDLOGHERE__
 
 -(void) setEdlList:(NSArray<MTEdl *> *)edlList {
 	if (_edlList != edlList) {
+		_edlList = edlList;
 		if (edlList.count > 0) {
 			DDLogDetail(@"Got EDL for %@: %@", self, edlList);
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
 		}
-		_edlList = edlList;
 	}
 }
 
@@ -358,8 +358,8 @@ __DDLOGHERE__
 	if (rpcData) {
 		_rpcData = rpcData;
 		self.episodeGenre = rpcData.genre;  //no conflict with TVDB
-		self.clipMetaDataId = rpcData.clipMetaDataId;
 		if (rpcData.edlList.count > 0) self.edlList = rpcData.edlList;
+		self.clipMetaDataId = rpcData.clipMetaDataId;  //notifies downloads
 		[self checkAllInfoSources];
 	}
 }

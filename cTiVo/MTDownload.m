@@ -1391,13 +1391,6 @@ __DDLOGHERE__
 			}
 #endif
 			if (postCommercialing) {
-				NSArray <MTEdl *> *edls = self.show.edlList;
-				if ( edls.count > 0) {
-					MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
-					[edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength keepingCommercials: !self.shouldSkipCommercials ];
-					MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
-					[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  // Free up an encoder / update UI
-				}
 				[strongSelf finalFinalProcessing];
 			} else {
 				strongSelf.downloadStatus = @(kMTStatusCommercialed);
@@ -1915,6 +1908,37 @@ __DDLOGHERE__
 -(void) finalFinalProcessing {
 	//allows for delayed Marking of commercials
 	self.processProgress = 1.0;
+	[self writeMetaDataFiles];
+	//dispose of 3-character (BOM) subtitle files
+	unsigned long long fileSize =  [[NSFileManager defaultManager] attributesOfItemAtPath:self.captionFilePath error:nil].fileSize;
+	if ( fileSize <= 3) {
+		if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
+			[[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
+		}
+		self.captionFilePath = nil;
+	}
+	if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
+		MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
+		NSArray <MTEdl *> *edls = self.show.edlList;
+		if ( edls.count > 0) {
+			[edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength keepingCommercials: !self.shouldSkipCommercials ];
+		}
+		if (self.shouldEmbedSubtitles && self.captionFilePath) {
+			NSArray * srtEntries = [NSArray getFromSRTFile:self.captionFilePath];
+			if (srtEntries.count > 0) {
+				[srtEntries embedSubtitlesInMP4File:encodedFile forLanguage:[MTSrt languageFromFileName:self.captionFilePath]];
+			}
+			if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
+				[[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
+			}
+		}
+		if (self.encodeFormat.canAcceptMetaData) {
+			[self.show addExtendedMetaDataToFile:encodedFile withImage:self.show.artWorkImage];
+		}
+		
+		MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
+	}
+
 	if (self.addToiTunesWhenEncoded) {
 		self.downloadStatus = @(kMTStatusAddingToItunes);
 		DDLogMajor(@"Adding to iTunes %@", self);
@@ -2113,42 +2137,12 @@ __DDLOGHERE__
     if (self.encodeFormat.isTestPS) {
 		self.downloadStatus = @(kMTStatusDone);
 	} else {
-		[self writeMetaDataFiles];
         if ((_decryptTask && !_decryptTask.successfulExit) ||
 			(_encodeTask && !_encodeTask.successfulExit)) {
             DDLogReport(@"Strange: thought we were finished, but later %@ failure", _decryptTask.successfulExit ? @"encode" : @"decrypt");
             [self cancel]; //just in case
             self.downloadStatus = @(kMTStatusFailed);
             return;
-        }
-        //dispose of 3-character (BOM) subtitle files
-        unsigned long long fileSize =  [[NSFileManager defaultManager] attributesOfItemAtPath:self.captionFilePath error:nil].fileSize;
-        if ( fileSize <= 3) {
-            if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
-                [[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
-            }
-            self.captionFilePath = nil;
-        }
-        if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
-            MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
-			NSArray <MTEdl *> *edls = self.show.edlList;
-			if ( edls.count > 0) {
-				[edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength keepingCommercials: !self.shouldSkipCommercials ];
-			}
-            if (self.shouldEmbedSubtitles && self.captionFilePath) {
-                NSArray * srtEntries = [NSArray getFromSRTFile:self.captionFilePath];
-                if (srtEntries.count > 0) {
-                    [srtEntries embedSubtitlesInMP4File:encodedFile forLanguage:[MTSrt languageFromFileName:self.captionFilePath]];
-                }
-                if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
-                    [[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
-                }
-            }
-            if (self.encodeFormat.canAcceptMetaData) {
-                [self.show addExtendedMetaDataToFile:encodedFile withImage:self.show.artWorkImage];
-            }
-            
-            MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
         }
         [tiVoManager addShow: self.show onDiskAtPath:self.encodeFilePath];
     //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
