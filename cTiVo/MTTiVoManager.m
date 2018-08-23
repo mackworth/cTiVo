@@ -1143,6 +1143,9 @@ __DDLOGHERE__
     if (newChannel) {
         NSMutableDictionary * mutChannel = [newChannel mutableCopy];
         [mutChannel setValue:@(psFailed) forKey:kMTChannelInfoPSFailed];
+        if (((NSNumber *)newChannel[kMTChannelInfoUseTS]).intValue == NSMixedState) {
+			[mutChannel setValue:@(NSOnState) forKey:kMTChannelInfoUseTS];
+        }
         newChannel = [NSDictionary dictionaryWithDictionary: mutChannel ];
     } else {
         newChannel = @{kMTChannelInfoName: channelName,

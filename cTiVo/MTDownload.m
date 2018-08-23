@@ -648,7 +648,7 @@ __DDLOGHERE__
 			DDLogReport(@"Error retrieving resource keys for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
 			return LLONG_MAX;
 		} else {
-			DDLogReport(@"Got space for %@: %@", path, value);
+			DDLogDetail(@"Got space for %@: %@", path, value);
 			return value.longLongValue;
 		}
 	} else {
@@ -1920,7 +1920,7 @@ __DDLOGHERE__
 	if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
 		MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
 		NSArray <MTEdl *> *edls = self.show.edlList;
-		if ( edls.count > 0) {
+		if (edls.count > 0 && (self.shouldMarkCommercials || self.shouldSkipCommercials)) {
 			[edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength keepingCommercials: !self.shouldSkipCommercials ];
 		}
 		if (self.shouldEmbedSubtitles && self.captionFilePath) {
