@@ -1384,13 +1384,15 @@ __DDLOGHERE__
             DDLogMajor(@"Finished detecting commercials in %@",strongSelf);
             strongSelf.show.edlList = [NSArray getFromEDLFile:strongSelf.commercialFilePath];
 #ifdef DEBUG
-			if (strongSelf.show.edlList && strongSelf.show.rpcData.edlList.count > 0) {
+			if (strongSelf.show.edlList != strongSelf.show.rpcData.edlList &&
+				strongSelf.show.edlList.count && strongSelf.show.rpcData.edlList.count) {
 				NSString * compareEDLs = [strongSelf.show.rpcData.edlList compareEDL: strongSelf.show.edlList];
 				NSString * output = [NSString stringWithFormat:@"%@\n%@",strongSelf.show.showTitle,compareEDLs];
 				[strongSelf writeAndAppendString:output toFile:@"CompareEDLs"];
 			}
 #endif
 			if (postCommercialing) {
+				[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  // Free up an encoder / update UI
 				[strongSelf finalFinalProcessing];
 			} else {
 				strongSelf.downloadStatus = @(kMTStatusCommercialed);
@@ -1414,6 +1416,9 @@ __DDLOGHERE__
              }
             return YES;
         };
+		commercialTask.terminationHandler = postCommercialing ? ^{
+			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self];  // Free up an encoder / update UI
+			} : nil ;
     } else {
         commercialTask.completionHandler = ^BOOL{
             DDLogMajor(@"Finished detecting commercials in %@",weakSelf);
