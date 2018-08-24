@@ -397,13 +397,11 @@ __DDLOGHERE__
 //	[[NSCalendar currentCalendar] getHour:&hour minute:NULL second:NULL nanosecond:NULL fromDate: self.showDate];
 //	if (hour < 16 && !(hour == 0 && minute <=30)) return NO;
 	if (!self.tiVo.supportsRPC) return NO;
-	if (self.isSuggestion) return NO;
-	if ([tiVoManager commercialsForChannel:self.stationCallsign] != NSOnState) return NO;
-	if ([tiVoManager skipModeForChannel:self.stationCallsign] != NSOnState) {
-		return NO;
-	}
 	if (self.hasSkipModeInfo || self.hasSkipModeList) return YES;
 	if (self.skipModeFailed) return NO;
+	if (self.isSuggestion) return NO;
+	if ([tiVoManager skipModeForChannel:self.stationCallsign] != NSOnState) return NO;
+	if ([tiVoManager commercialsForChannel:self.stationCallsign] != NSOnState) return NO;
 	NSString * genre = self.episodeGenre.lowercaseString;
 	if ([genre isEqualToString:@"news"] ) return NO; //allow news magazine
 	if ([genre isEqualToString:@"sports"] ) return NO;
@@ -411,7 +409,7 @@ __DDLOGHERE__
 		DDLogVerbose(@"No SkipMode for %@; Past deadline for SkipInfo to arrive by %0.1f", self, -timeLeft);
 		return NO;
 	} else {
-		DDLogVerbose(@"Looks like we might stil have SkipMode for %@", self);
+		DDLogVerbose(@"Looks like we might still have SkipMode for %@", self);
 		return YES;
 	}
 }

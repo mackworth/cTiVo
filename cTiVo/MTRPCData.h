@@ -52,6 +52,8 @@ typedef NS_ENUM(NSUInteger, MTWhatsOnType) {
 			     withNewShows: (NSMutableArray <NSString *> *) newShows
                 atTiVoIndices: (NSMutableArray <NSNumber *> *) newShowIndices
               andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows;
+-(void) rpcResync;
+-(void) rpcRecentChange;
 -(BOOL) isReachable;
 -(BOOL) isMini;
 -(void) connectionChanged;

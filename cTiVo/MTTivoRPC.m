@@ -32,7 +32,6 @@
 @property (nonatomic, strong) NSString * bodyID;
 @property (nonatomic, assign) BOOL authenticationLaunched;
 @property (nonatomic, assign) BOOL authenticated;
-@property (nonatomic, assign) BOOL firstLaunch;
 
 @property (nonatomic, strong) NSMutableData * remainingData; //data left over from last write
 @property (nonatomic, strong) NSMutableData * incomingData;
@@ -41,6 +40,8 @@
 @property (atomic, assign) NSInteger updating;
 
 @property (nonatomic, strong) NSMutableDictionary < NSString *, MTRPCData *> *showMap;
+@property (nonatomic, strong) NSArray < NSString *> *lastShowList;
+
 @property (nonatomic, strong) NSMutableDictionary < NSString *, NSString *>  *seriesImages;
 
 @property (nonatomic, strong) NSTimer * deadmanTimer; //check connection good every few minutes
@@ -183,7 +184,6 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 #endif
 
     self.authenticationLaunched = NO;
-    self.firstLaunch = YES;
 	self.updating = 0;
     self.skipModeQueueMetaData = [NSMutableArray array];
     self.skipModeQueueEDL = [NSMutableArray array];
@@ -219,6 +219,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     self.showMap = [NSMutableDictionary dictionaryWithCapacity:self.showMap.count];
     [[NSUserDefaults standardUserDefaults] setObject:nil forKey:self.defaultsKey ];
     self.seriesImages = [NSMutableDictionary dictionaryWithCapacity:self.seriesImages.count];
+    self.lastShowList = nil;
     [self getAllShows];
 }
 
@@ -751,9 +752,8 @@ static NSRegularExpression * isFinalRegex = nil;
 		   if (!strongSelf) return;
 		   DDLogVerbose(@"Got All Shows from TiVo RPC: %@", [strongSelf maskTSN:jsonResponse]);
            NSArray <NSString *> * shows = jsonResponse[@"objectIdAndType"];
-           BOOL isFirstLaunch = strongSelf.firstLaunch;
-           strongSelf.firstLaunch = NO;
-           DDLogDetail (@"Got %lu shows from TiVo", shows.count);
+           BOOL isFirstLaunch = strongSelf.lastShowList == nil;
+           DDLogDetail (@"Got %lu shows from TiVo: %@", shows.count, shows);
            if (!strongSelf.showMap) {
                strongSelf.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
                [strongSelf recursiveGetShowInfoForShows: shows ];
@@ -783,10 +783,27 @@ static NSRegularExpression * isFinalRegex = nil;
                    [strongSelf.showMap removeObjectForKey:objectID];
                }
 			   [strongSelf recursiveGetShowInfoForShows: lookupDetails];
-			   if (!isFirstLaunch) {
-				   [weakSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
+			   if (newIDs.count + deletedShows.count > 0) {
+				   [strongSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
+			   } else if (shows.count != self.lastShowList.count) {
+			   		//shouldn't be possible
+			   		[strongSelf.delegate rpcResync];
+				} else {
+					BOOL isSame = YES;
+					for (NSUInteger i = 0; i< shows.count; i++) {
+						if (![shows[i] isEqual:strongSelf.lastShowList[i]]) {
+							isSame = NO;
+							break;
+						}
+					}
+					if (isSame) {
+						[strongSelf.delegate rpcRecentChange];
+					} else {
+						[strongSelf.delegate rpcResync];
+					}
 			   }
            }
+		   strongSelf.lastShowList = shows;
        } ];
 }
 

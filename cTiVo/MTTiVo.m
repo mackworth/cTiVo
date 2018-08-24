@@ -421,6 +421,19 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     return [show.tiVo.myRPC rpcDataForID:show.idString];
 }
 
+- (void)rpcRecentChange {
+	//maybe skipMode change
+	DDLogDetail(@"Reloading recent shows due to skipMode notification");
+	[self reloadRecentShows];
+}
+
+- (void)rpcResync {
+	//maybe a show moved in list, suggesting that it was a suggestion, and now isn't
+	DDLogDetail(@"Resynching shows due to skipMode notification");
+	[self reloadRecentShows];
+	[self updateShows:self];
+}
+
 -(void) tivoReports: (NSInteger) numShows
 		       withNewShows:(NSArray<NSString *> *)addedShows
               atTiVoIndices: (NSArray <NSNumber *> *) addedShowIndices
@@ -842,7 +855,7 @@ BOOL channelChecking = NO;
 				NSString *introURL = @"urn:tivo:image:";
 				if ([element hasPrefix: introURL]){
 					currentShow.imageString = [element substringFromIndex:introURL.length];
-				} 
+				}
 				DDLogVerbose(@"Image String is %@",currentShow.imageString);
 			}
         } else if ([elementToPropertyMap objectForKey:elementName]){
@@ -885,7 +898,7 @@ BOOL channelChecking = NO;
             DDLogVerbose(@"Done loading XML for %@",currentShow);
             for (MTTiVoShow * oldShow in newShows) {
                 if ([oldShow isEqual:currentShow]) {
-                    DDLogDetail(@"Skipping duplicate new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested ":@"", currentShow.showTitle, currentShow.showDateString);
+                    DDLogDetail(@"Skipping duplicate new %@show %@ (%@) at %@",currentShow.isSuggestion ? @"suggested ":@"", currentShow.showTitle, currentShow.showDateString, @(newShows.count));
 					if (!self.oneBatch) {
 						if (tivoBugDuplicatePossibleStart < 0) {
                         	tivoBugDuplicatePossibleStart = itemStart - itemCount;
@@ -928,10 +941,14 @@ BOOL channelChecking = NO;
 						thisShow = currentShow;
 					} else {
 						//need to update from latest version. (Only thing in tivo xml that may change)
+						if (thisShow.isSuggestion && ! currentShow.isSuggestion) {
+							//set by imageString
+							[self loadSkipModeInfoForShow: currentShow];
+						}
 						thisShow.imageString = currentShow.imageString;
 					}
                 } else {
-                    DDLogDetail(@"Added new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested " : @"", currentShow.showTitle, currentShow.showDateString);
+                    DDLogDetail(@"Added new %@show %@ (%@) at %@",currentShow.isSuggestion ? @"suggested " : @"", currentShow.showTitle, currentShow.showDateString, @(newShows.count));
                     //Now check and see if this was in the oldQueue (from last ctivo execution) OR an undeletedShow
 					thisShow = [tiVoManager replaceProxyInQueue:currentShow];
                 }
@@ -953,10 +970,10 @@ BOOL channelChecking = NO;
 			DDLogDetail(@"TotalItems: %d",totalItemsOnTivo);
         } else if ([elementName compare:@"ItemStart"] == NSOrderedSame) {
             itemStart = [element intValue];
-			DDLogVerbose(@"ItemStart: %d",itemStart);
+			DDLogDetail(@"ItemStart: %d",itemStart);
         } else if ([elementName compare:@"ItemCount"] == NSOrderedSame) {
             itemCount = [element intValue];
-			DDLogVerbose(@"ItemCount: %d",itemCount);
+			DDLogDetail(@"ItemCount: %d",itemCount);
         } else if ([elementName compare:@"LastChangeDate"] == NSOrderedSame) {
             int newLastChangeDate = [element intValue];
             if (newLastChangeDate != lastChangeDate) {
