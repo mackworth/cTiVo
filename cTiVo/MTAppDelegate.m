@@ -795,17 +795,22 @@ NSObject * assertionID = nil;
 
 	NSInteger state = [defaults integerForKey:kMTiTunesSubmitCheck];
 	if (state == 1) return;
-	__weak __typeof__(self) weakSelf = self;
 
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT , 0), ^{
-		if ([[[MTiTunes alloc] init] preflightiTunesCheck]) {
-			[defaults setInteger:1 forKey:kMTiTunesSubmitCheck];
-			return;
-		}
-		dispatch_async(dispatch_get_main_queue(), ^{
-			[weakSelf iTunesPermissionProcessFromState:state];
-		});
-	});
+	//has to be sync on this thread, or else a current failing download won't get loaded into iTunes
+	if ([[[MTiTunes alloc] init] preflightiTunesCheck]) {
+		[defaults setInteger:1 forKey:kMTiTunesSubmitCheck];
+		return;
+	}
+	[self iTunesPermissionProcessFromState:state];
+}
+
+-(void) closeiTunes {
+    for ( NSRunningApplication * app in [[NSWorkspace sharedWorkspace] runningApplications] ) {
+        if ( [@"iTunes" isEqualToString:[[app executableURL] lastPathComponent]]) {
+            [app terminate];
+            break;
+        }
+    }
 }
 
 -(void) disableITunesUse {
@@ -816,14 +821,15 @@ NSObject * assertionID = nil;
 		}
 	}
 }
+
 -(void) setITunesPermissionState: (NSInteger) newstate {
 	[[NSUserDefaults standardUserDefaults] setInteger:newstate forKey:kMTiTunesSubmitCheck];
-
 }
 
 -(void) iTunesPermissionProcessFromState: (NSInteger) state {
 	switch (state) {
 		case 0:
+			[self closeiTunes];
 			if ([self askForiTunesPermissionFix]) {
 				if ([[[MTiTunes alloc] init] preflightiTunesCheck]) {
 					[self setITunesPermissionState:1];
@@ -837,6 +843,7 @@ NSObject * assertionID = nil;
 			}
 			break;
 		case 2:
+			[self closeiTunes];
 			if ([self offerResetPermissions]) {
 				if ([[[MTiTunes alloc] init] preflightiTunesCheck]) {
 					[self setITunesPermissionState:1];
@@ -870,7 +877,7 @@ NSObject * assertionID = nil;
 										   defaultButton: @"Open System Preferences"
 										 alternateButton: @"Disable cTiVo's use of iTunes"
 											 otherButton: nil
-							   informativeTextWithFormat: @"Fix in System Preferences OR disable iTunes submittal"];
+							   informativeTextWithFormat: @"You can fix in System Preferences OR disable iTunes submittal"];
 	NSInteger returnValue = [iTunesAlert runModal];
 	switch (returnValue) {
 		case NSAlertDefaultReturn: {
@@ -890,7 +897,7 @@ NSObject * assertionID = nil;
 }
 
 -(void) warnQuitting {
-	NSAlert *alert2 = [NSAlert alertWithMessageText: @"Now cTiVo will quit."
+	NSAlert *alert2 = [NSAlert alertWithMessageText: @"To connect to iTunes, cTiVo must now quit."
 									  defaultButton: @"OK"
 									alternateButton: nil
 										otherButton: nil
@@ -924,7 +931,7 @@ NSObject * assertionID = nil;
 }
 
 -(BOOL) offerResetPermissions {
-	NSAlert *alert = [NSAlert alertWithMessageText: @"No iTunes access; cTiVo can reset all macOS Automation permissions if you wish."
+	NSAlert *alert = [NSAlert alertWithMessageText: @"Still no iTunes access; cTiVo can reset all macOS Automation permissions if you wish."
 									 defaultButton: @"Reset Automation Permissions"
 								   alternateButton: @"Disable cTiVo's use of iTunes"
 									   otherButton: nil

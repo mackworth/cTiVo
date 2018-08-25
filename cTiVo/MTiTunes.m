@@ -35,7 +35,7 @@ __DDLOGHERE__
 +(void) warnUserPermissions {
 	if(@available(macOS 10.14, *)) {
 		//trigger check
-		[[NSUserDefaults standardUserDefaults] setObject:nil forKey:kMTiTunesSubmitCheck];
+		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTiTunesSubmit];
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTiTunesSubmit];
 	} else {
 		NSAlert *alert2 = [NSAlert alertWithMessageText: @"Warning: cTiVo cannot access iTunes. "
@@ -48,13 +48,15 @@ __DDLOGHERE__
 }
 
 -(iTunesSource *) iTunesLibrary   {
-	if (!_iTunesLibrary || ![_libraryPlayList exists]) {
+	if (!_iTunesLibrary) {
 		_iTunesLibrary = [self iTunesLibraryHelper];
 		if (!_iTunesLibrary) {
-			DDLogReport(@"couldn't find iTunes Library. Probably permissions problem; quit cTiVo and try again.");
-			dispatch_async(dispatch_get_main_queue(), ^{
+			DDLogReport(@"couldn't find iTunes Library. Probably permissions problem.");
+			dispatch_sync(dispatch_get_main_queue(), ^{
 				[MTiTunes warnUserPermissions];
 			});
+			_iTunesLibrary = [self iTunesLibraryHelper];
+			
 		}
 	}
 	return _iTunesLibrary;

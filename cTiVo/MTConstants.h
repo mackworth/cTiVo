@@ -43,8 +43,8 @@
 
 //Tivo busy indicator
 #define kMTNotificationTiVoUpdating @"MTNotificationTiVoUpdating"  //object: which MTTivo has started updating
-#define kMTNotificationTiVoCommercialed @"MTNotificationTiVoCommercialed"  //object: which MTTivo has finished getting commercials
-#define kMTNotificationTiVoCommercialing @"MTNotificationTiVoCommercialing"  //object: which MTTivo has started getting commercials
+#define kMTNotificationTiVoCommercialed @"MTNotificationTiVoCommercialed"  //object: which MTTivo has finished getting SkipMode
+#define kMTNotificationTiVoCommercialing @"MTNotificationTiVoCommercialing"  //object: which MTTivo has started getting SkipMode
 #define kMTNotificationTiVoUpdated  @"MTNotificationTiVoUpdated" //object: which MTTivo is updated
 
 #define kMTNotificationUserCanceledQuit @"kMTNotificationUserCanceledQuit" 
