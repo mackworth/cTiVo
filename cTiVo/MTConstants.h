@@ -40,6 +40,7 @@
 #define kMTNotificationChannelsChanged @"MTNotificationChannelsChanged"  //object: which TiVo changed their channelList
 #define kMTNotificationFoundMultipleTiVos @"MTNotificationFoundMultipleTiVo"
 #define kMTNotificationFoundSkipModeInfo @"MTNotificationFoundSkipModeInfo" //object: show
+#define kMTNotificationLogLevelsUpdated @"MTNotificationLogLevelsUpdated"
 
 //Tivo busy indicator
 #define kMTNotificationTiVoUpdating @"MTNotificationTiVoUpdating"  //object: which MTTivo has started updating
@@ -198,6 +199,7 @@
 #define kMTShowSuggestions @"ShowSuggestions"		// Whether to display Tivo Suggestions (and to subscribe thereto)
 #define kMTShowFolders @"ShowFolders"		// Whether to display shows grouped in Folders or not
 #define kMTSaveTmpFiles @"SaveTmpFiles"				// Turn off AutoDelete of intermediate files (to make debugging encoders easier)
+#define kMTReuseEDLs @"ReuseEDLs"				// Default NO; whether to use an existing EDL for a second download. (otherwise re-run comskip.)
 #define kMTUseMemoryBufferForDownload @"UseMemoryBufferForDownload" //Default is YES.  Turn off to make sure downloaded file is complete. Principally for debugging use and checkpointing.
 #define kMTSaveMPGFile @"SaveMPGFile"               //Don't delete decrypted MPG file after processing (also puts in download v tmp folder and disables simultaneous encoding)
 

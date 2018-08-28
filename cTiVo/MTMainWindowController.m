@@ -363,9 +363,10 @@ __DDLOGHERE__
 		return (table.actionItems.count > 0);
 	}
 	BOOL deleteItem =  menuItem.action == @selector(deleteOnTiVo:);
+	BOOL playItem =  menuItem.action == @selector(playOnTiVo:);
 	BOOL stopItem =    menuItem.action == @selector(stopRecordingOnTiVo:);
 	BOOL getSkipItem = menuItem.action == @selector(skipInfoFromTiVo:);
-	if (deleteItem || stopItem || getSkipItem) {
+	if (deleteItem ||playItem || stopItem || getSkipItem) {
 		if (deleteItem) menuItem.title = @"Delete from TiVo"; //alternates with remove from Queue
 		NSArray	*selectedShows = [self selectedShows ];
 		for (MTTiVoShow * show in selectedShows) {

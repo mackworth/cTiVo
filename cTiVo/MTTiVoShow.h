@@ -165,9 +165,9 @@ typedef enum {
 	HDType1080p = 2
 } HDTypes;
 
--(NSString *) downloadFileNameWithFormat:(NSString *)formatName createIfNecessary:(BOOL) create;
+-(NSString *) downloadFileNameWithFormat:(NSString *)formatName andOptions: (NSString *) options createIfNecessary:(BOOL) create;
 
--(NSString *) swapKeywordsInString: (NSString *) str withFormat:(NSString *) format;  //exposed for test only
+-(NSString *) swapKeywordsInString: (NSString *) str withFormat:(NSString *) format andOptions: (NSString *) options ;  //exposed for test only
 
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image andResolution:(HDTypes) hdType;
 

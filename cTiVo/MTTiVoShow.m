@@ -1291,7 +1291,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 #define NULLT(x) (x ?: @"")
 
--(NSString *) swapKeywordsInString: (NSString *) str withFormat:(NSString *) format{
+-(NSString *) swapKeywordsInString: (NSString *) str withFormat:(NSString *) format andOptions:(NSString *) options{
     NSDateComponents *components;
     if (self.showDate) {
         components = [[NSCalendar currentCalendar]
@@ -1327,9 +1327,9 @@ NSString * fourChar(long n, BOOL allowZero) {
                                 @"maintitle":		NULLT(self.seriesTitle),
                                 @"episodetitle":	NULLT(self.episodeTitle),
                                 @"channelnum":		NULLT(self.channelString),
-                                @"channel":		NULLT(self.stationCallsign),
+                                @"channel":		    NULLT(self.stationCallsign),
                                 @"starttime":		NULLT(self.showTime),
-                                @"min":			twoChar([components minute], YES),
+                                @"min":			    twoChar([components minute], YES),
                                 @"hour":			twoChar([components hour], YES),
                                 @"wday":			twoChar([components weekday], NO),
                                 @"mday":			twoChar([components day], NO),
@@ -1337,17 +1337,18 @@ NSString * fourChar(long n, BOOL allowZero) {
                                 @"monthnum":		twoChar([components month], NO),
                                 @"year": 			self.isMovie ? @"" : fourChar([components year], NO),
                                 @"originalairdate": originalAirDate,
-                                @"episode":		twoChar(self.episode, NO),
-                                @"extraepisode":  NULLT(extraEpisode),
+                                @"episode":		    twoChar(self.episode, NO),
+                                @"extraepisode":    NULLT(extraEpisode),
                                 @"season":			twoChar(self.season, NO),
                                 @"episodenumber":	NULLT(self.episodeNumber),
-                                @"StartTime":     NULLT(self.startTime),
-                                @"seriesepnumber": NULLT(self.seasonEpisode),
-                                @"guests":        NULLT(guests),
+                                @"StartTime":       NULLT(self.startTime),
+                                @"seriesepnumber":  NULLT(self.seasonEpisode),
+                                @"guests":          NULLT(guests),
                                 @"tivoname":		NULLT(self.tiVoName),
                                 @"movieyear":		NULLT(self.movieYear),
                                 @"tvdbseriesid":	NULLT(TVDBseriesID),
-                                @"format":         NULLT(format)
+                                @"format":          NULLT(format),
+                                @"options":         NULLT(options)
                                 //         @"plexid":        [self ifString: self.show.seasonEpisode
                                 //                                elseString: originalAirDate],
                                 //         @"plexseason":    [self ifString: twoChar(self.show.season, NO)
@@ -1370,7 +1371,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             int numBrackets = 1;
             NSMutableString *bracketedString = [NSMutableString string];
             tempString = @"";
-            while (numBrackets > 0) {
+            while (numBrackets > 0 && !scanner.atEnd ) {
                 [bracketedString appendString:tempString];  //get recursive [ if any
                 if ([scanner scanUpToCharactersFromSet:brackets intoString:&tempString]) {
                     [bracketedString appendString:tempString];
@@ -1382,6 +1383,9 @@ NSString * fourChar(long n, BOOL allowZero) {
                 }
             }
             [outStr appendString: [self replacementForKeyword:bracketedString usingDictionary:keywords]];
+            if (numBrackets > 0) {
+            	[outStr appendString:@" <<Error: Missing Bracket>>"];
+			}
         }
     }
     NSString * finalStr = [outStr stringByReplacingOccurrencesOfString:@"/" withString:@"-"]; //remove accidental directory markers
@@ -1406,7 +1410,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 	return tryDirectory;
 }
 
--(NSString *) downloadFileNameWithFormat:(NSString *)formatName createIfNecessary:(BOOL) create {
+-(NSString *) downloadFileNameWithFormat:(NSString *)formatName andOptions: (NSString *) options createIfNecessary:(BOOL) create {
     NSString *baseTitle  = nil;
     NSString *keyPathPart = nil;
 
@@ -1414,7 +1418,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 	if (filenamePattern.length == 0) filenamePattern = kMTcTiVoDefault; //shouldn't happen.
 	
 	//we should always have a pattern, so generate a name that way
-	NSString *keyBaseTitle = [self swapKeywordsInString:filenamePattern withFormat:formatName];
+	NSString *keyBaseTitle = [self swapKeywordsInString:filenamePattern withFormat:formatName andOptions:options ];
 	DDLogVerbose(@"With file pattern %@ for show %@, got %@", filenamePattern, self, keyBaseTitle);
 	NSString * candidateBaseTitle = [keyBaseTitle lastPathComponent];
 	if (candidateBaseTitle.length > 0) {
@@ -1443,7 +1447,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 }
 
 -(NSString *) downloadDirCreateIfNecessary: (BOOL) create {
-    NSString * filename = [self downloadFileNameWithFormat:nil createIfNecessary:create];
+    NSString * filename = [self downloadFileNameWithFormat:nil andOptions: nil createIfNecessary:create];
     return [filename stringByDeletingLastPathComponent];
 }
 
@@ -1882,7 +1886,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     NSString * directory = nil;
     NSString * legalSeriesName = [self cleanBaseFileName: self.seriesTitle];
 
-    NSString *currentDir   = [[self downloadFileNameWithFormat:nil createIfNecessary:YES] stringByDeletingLastPathComponent];
+    NSString *currentDir   = [[self downloadFileNameWithFormat:nil andOptions: nil createIfNecessary:YES] stringByDeletingLastPathComponent];
     currentDir = [currentDir pathForParentDirectoryWithName:legalSeriesName];
     directory = [currentDir stringByAppendingPathComponent:@"thumbnails"];
 

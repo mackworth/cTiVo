@@ -41,16 +41,11 @@
     return self;
 }
 
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-	if ([keyPath isEqualToString:kMTDebugLevel] ||
-		[keyPath isEqualToString:kMTDebugLevelDetail] ) {
-			for (NSUInteger index = 0; index < self.popups.count ; index++) {
-			NSPopUpButton * myCell = self.popups[index];
-			NSInteger newVal = [DDLog levelForClass:NSClassFromString(self.classNames[index])];
-			[myCell selectItemWithTag:newVal];
-		}
-	} else {
-		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+-(void) updateDebugCells {
+	for (NSUInteger index = 0; index < self.popups.count ; index++) {
+		NSPopUpButton * myCell = self.popups[index];
+		NSInteger newVal = [DDLog levelForClass:NSClassFromString(self.classNames[index])];
+		[myCell selectItemWithTag:newVal];
 	}
 }
 
@@ -138,6 +133,8 @@
 						   @"StartTime",
 						   @"MovieYear",
 						   @"TiVoName",
+						   @"Format",
+						   @"Options",
 						   @"TVDBseriesID",
 						   @"• Plex Simple",  //• means replace whole field;
 						   @"• Plex Folders", //these must match below
@@ -186,12 +183,12 @@
 //    [self testFileName:str];
 //
     NSString * pattern = self.fileNameField.stringValue;
-    NSMutableString * fileNames = [NSMutableString stringWithFormat: @"FOR TEST PATTERN >>> %@\n",pattern];
+    NSMutableString * fileNames = [NSMutableString stringWithFormat: @"FOR TEST PATTERN >>> %@\n\n",pattern];
 
     NSArray	*shows = [((MTAppDelegate *) [NSApp delegate]) currentSelectedShows] ;
     for (MTTiVoShow * show in shows) {
         MTDownload * testDownload = [MTDownload downloadForShow:show withFormat:[tiVoManager selectedFormat] withQueueStatus: kMTStatusNew];
-        [fileNames appendFormat:@"%@ >>>> %@\n",show.showTitle, [testDownload.show swapKeywordsInString:pattern withFormat: [tiVoManager selectedFormat].name]];
+        [fileNames appendFormat:@"%@    >>>>    %@\n",show.showTitle, [testDownload.show swapKeywordsInString:pattern withFormat: [tiVoManager selectedFormat].name andOptions:@"Skip"] ];
     }
 
 	MTHelpViewController * helpController = [[MTHelpViewController alloc] init];
@@ -254,8 +251,7 @@
 		[popups addObject: cell];
 		itemNum++;
 	}
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDebugLevel options:0 context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTDebugLevelDetail options:0 context:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateDebugCells) name:kMTNotificationLogLevelsUpdated object:nil ];
 	self.popups = [popups copy];
 	self.classNames = [classNames copy];
 }

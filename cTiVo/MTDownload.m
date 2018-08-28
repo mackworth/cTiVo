@@ -556,7 +556,21 @@ __DDLOGHERE__
 -(BOOL)configureBaseFileNameAndDirectory {
 	if (!self.baseFileName) {
         // generate only once
-        NSString * downloadName = [self.show downloadFileNameWithFormat:self.encodeFormat.name createIfNecessary:YES];
+        NSMutableArray * optionArray = [NSMutableArray array];
+        if (self.skipCommercials) {
+			[optionArray addObject:@"Cut"];
+		}
+        if (self.markCommercials) {
+			[optionArray addObject:@"Mark"];
+		}
+        if (self.useSkipMode) {
+			[optionArray addObject:@"SkipMode"];
+		}
+        if (self.exportSubtitles.boolValue) {
+			[optionArray addObject:@"Subtitle"];
+		}
+		NSString * options = optionArray.count == 0 ? @"" : [optionArray componentsJoinedByString:@","];
+        NSString * downloadName = [self.show downloadFileNameWithFormat:self.encodeFormat.name andOptions:options  createIfNecessary:YES];
 		if (!downloadName) return NO;
         self.downloadDirectory = [downloadName stringByDeletingLastPathComponent];
 		self.tmpDirectory = tiVoManager.tmpFilesDirectory;
@@ -1240,7 +1254,7 @@ __DDLOGHERE__
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
 		__typeof__(self) strongSelf = weakSelf;
         //commercial or caption might finish first.
-        if ( strongSelf.skipCommercials && strongSelf.hasEDL) {
+        if ( strongSelf.skipCommercials && strongSelf->_commercialTask.successfulExit) {
             [strongSelf fixupSRTsDueToCommercialSkipping];
         }
         [strongSelf markCompleteCTiVoFile:strongSelf.captionFilePath];
@@ -1253,7 +1267,6 @@ __DDLOGHERE__
             [strongSelf notifyUserWithTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" ];
         }
 		if (strongSelf.taskFlowType == kMTTaskFlowSimuSubtitles &&
-			!strongSelf->_encodeTask.isRunning &&
 			strongSelf->_encodeTask.successfulExit) {
 				[strongSelf finishUpPostEncodeProcessing];
 		} else if (strongSelf.downloadStatus.intValue == kMTStatusCaptioning) {
@@ -1320,7 +1333,7 @@ __DDLOGHERE__
 -(MTTask *)commercialTask
 {
 	BOOL postCommercialing = self.downloadStatus.intValue == kMTStatusAwaitingPostCommercial; //this is a stand-alone commercialing due to not eventually getting a SkipMode list
-    NSAssert(self.runComskip || (postCommercialing) ,@"Commercial Task not requested?");
+    NSAssert(self.runComskipNow || (postCommercialing) ,@"Commercial Task not requested?");
 
     if (_commercialTask) {
         return _commercialTask;
@@ -1355,8 +1368,10 @@ __DDLOGHERE__
             }
         }
     };
-
-    if (postCommercialing || ( self.taskFlowType != kMTTaskFlowMarkcom && self.taskFlowType != kMTTaskFlowMarkcomSubtitles)) {
+	
+	BOOL parallelToEncode = self.taskFlowType == kMTTaskFlowMarkcom || self.taskFlowType == kMTTaskFlowMarkcomSubtitles;
+	//if parallel to encoding, commercialing doesn't do progress or download status updates
+    if (postCommercialing || !parallelToEncode ) {
         commercialTask.startupHandler = ^BOOL(){
             weakSelf.processProgress = 0.0;
 			weakSelf.downloadStatus = postCommercialing ?  @kMTStatusPostCommercialing :  @kMTStatusCommercialing;
@@ -1371,66 +1386,53 @@ __DDLOGHERE__
             NSRange valueRange = [lastItem rangeAtIndex:1];
             return [[data substringWithRange:valueRange] doubleValue]/100.0;
         };
+	}
+	__weak __typeof__(MTTask *) weakCaption = _captionTask;
 
-		__weak __typeof__(MTTask *) weakCaption = _captionTask;
+	commercialTask.completionHandler = ^BOOL{
+		__typeof__(self) strongSelf = weakSelf;
+		if (! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.commercialFilePath] ) {
+			DDLogMajor(@"Warning: %@: File %@ not found after comskip completion", weakSelf, strongSelf.commercialFilePath );
+			return NO;
+		}
 
-        commercialTask.completionHandler = ^BOOL{
-			__typeof__(self) strongSelf = weakSelf;
-			if (! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.commercialFilePath] ) {
-				DDLogMajor(@"Warning: %@: File %@ not found after comskip completion", weakSelf, strongSelf.commercialFilePath );
-				return NO;
-			}
-
-            DDLogMajor(@"Finished detecting commercials in %@",strongSelf);
-            strongSelf.show.edlList = [NSArray getFromEDLFile:strongSelf.commercialFilePath];
+		DDLogMajor(@"Finished detecting commercials in %@",strongSelf);
+		strongSelf.show.edlList = [NSArray getFromEDLFile:strongSelf.commercialFilePath];
 #ifdef DEBUG
-			if (strongSelf.show.edlList != strongSelf.show.rpcData.edlList &&
-				strongSelf.show.edlList.count && strongSelf.show.rpcData.edlList.count) {
-				NSString * compareEDLs = [strongSelf.show.rpcData.edlList compareEDL: strongSelf.show.edlList];
-				NSString * output = [NSString stringWithFormat:@"%@\n%@",strongSelf.show.showTitle,compareEDLs];
-				[strongSelf writeAndAppendString:output toFile:@"CompareEDLs"];
-			}
+		if (strongSelf.show.edlList != strongSelf.show.rpcData.edlList &&
+			strongSelf.show.edlList.count && strongSelf.show.rpcData.edlList.count) {
+			NSString * compareEDLs = [strongSelf.show.rpcData.edlList compareEDL: strongSelf.show.edlList];
+			NSString * output = [NSString stringWithFormat:@"%@\n%@",strongSelf.show.showTitle,compareEDLs];
+			[strongSelf writeAndAppendString:output toFile:@"CompareEDLs"];
+		}
 #endif
-			if (postCommercialing) {
-				[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  // Free up an encoder / update UI
-				[strongSelf finalFinalProcessing];
-			} else {
-				strongSelf.downloadStatus = @(kMTStatusCommercialed);
-				if (strongSelf.taskFlowType == kMTTaskFlowSimuMarkcom ||
-					strongSelf.taskFlowType == kMTTaskFlowSimuMarkcomSubtitles) {
-					if (!strongSelf->_encodeTask.isRunning &&
-						 strongSelf->_encodeTask.successfulExit) {
-						 strongSelf.processProgress = 1.0;
-						 [strongSelf finishUpPostEncodeProcessing];
-					 } else {
-						 strongSelf.downloadStatus = @(kMTStatusEncoding);
-					 }
-				 } else {
-					 if (!strongSelf.shouldSimulEncode) {
-						strongSelf.processProgress = 1.0;
-					 }
-					if (strongSelf.exportSubtitles.boolValue && strongSelf.skipCommercials && strongSelf.captionFilePath && weakCaption.successfulExit) {
-						[strongSelf fixupSRTsDueToCommercialSkipping];
-					}
-				 }
-             }
-            return YES;
-        };
-		commercialTask.terminationHandler = postCommercialing ? ^{
-			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self];  // Free up an encoder / update UI
-			} : nil ;
-    } else {
-        commercialTask.completionHandler = ^BOOL{
-            DDLogMajor(@"Finished detecting commercials in %@",weakSelf);
-			return YES;
-        };
-		commercialTask.cleanupHandler = ^{
-			__typeof__(self) strongSelf = weakSelf;
-			if (!strongSelf->_encodeTask.isRunning && strongSelf->_encodeTask.successfulExit) {
+		if (postCommercialing) {
+			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  // Free up an encoder / update UI
+			[strongSelf finalFinalProcessing];
+		} else {
+			strongSelf.downloadStatus = @(kMTStatusCommercialed);
+			if (strongSelf.skipCommercials) {
+			 	//commercialing pre-encoding
+				strongSelf.processProgress = 1.0;
+				if (strongSelf.exportSubtitles.boolValue &&  strongSelf.captionFilePath && weakCaption.successfulExit) {
+					[strongSelf fixupSRTsDueToCommercialSkipping];
+				}
+			} else if (strongSelf->_encodeTask.successfulExit) {
+				//either parallel and finished, or post-encoding
+				strongSelf.processProgress = 1.0;
 				[strongSelf finishUpPostEncodeProcessing];
+			} else {
+				//parallel and not finished
+				strongSelf.downloadStatus = @(kMTStatusEncoding);
 			}
-		};
-    }
+		 }
+		return YES;
+	};
+	if (postCommercialing) {
+		commercialTask.terminationHandler = ^{
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self];  // Free up an encoder / update UI
+    	};
+	}
 
 	NSMutableArray *arguments = [NSMutableArray array];
     [self addArguments:self.encodeFormat.comSkipOptions toArray:arguments];
@@ -1456,7 +1458,7 @@ __DDLOGHERE__
 
 -(MTTaskFlowType)calculateTaskFlowType
 {
-	BOOL runComskip = self.runComskip;
+	BOOL runComskip = self.runComskipNow;
 	return (MTTaskFlowType)
           1 * (int) self.exportSubtitles.boolValue +
           2 * (int) self.encodeFormat.canSimulEncode +
@@ -1509,7 +1511,7 @@ __DDLOGHERE__
                 self.markCommercials ?
 					 @" Mark commercials" :
 					 @"",
-				self.runComskip ? @" with Comskip;" : @";",
+				self.runComskipNow ? @" with Comskip;" : @";",
 				self.addToiTunesWhenEncoded ?
 					@" Add to iTunes;" :
 					@"",
@@ -1564,8 +1566,8 @@ __DDLOGHERE__
 //        DDLogMajor(@"Downloading from file MPG file %@",self.mpgFilePath);
 //        self.activeTaskChain.dataSource = self.mpgFilePath;
     }
-	if (self.show.hasSkipModeList && self.shouldSkipCommercials  ){
-		if (![self.show.rpcData.edlList writeToEDLFile:self.commercialFilePath] ) {
+	if (self.hasEDL && self.shouldSkipCommercials  ){
+		if (![self.show.edlList writeToEDLFile:self.commercialFilePath] ) {
 			DDLogReport(@"Could not write EDLFile to disk at %@", self.commercialFilePath);
 		}
 	}
@@ -2038,6 +2040,13 @@ __DDLOGHERE__
 				break;
 			case kMTStatusSkipModeWaitInitial:
 				DDLogMajor(@"%@ was waiting for SkipMode, but now launching", self);
+				if ([[NSUserDefaults standardUserDefaults] boolForKey:@"XXXFallbackToComskipMark"] &&
+					self.skipCommercials &&
+					self.canMarkCommercials ) {
+					DDLogMajor(@"Changing to mark commercials with comskip for %@", self);
+					self.skipCommercials = NO;
+					self.markCommercials = YES;
+				}
 				self.downloadStatus = @(kMTStatusNew);
 				[self checkQueue];
 				break;
@@ -2870,7 +2879,8 @@ NSInteger diskWriteFailure = 123;
 }
 -(BOOL) shouldSimulEncode {
 	return self.encodeFormat.canSimulEncode &&
-	       !(self.shouldSkipCommercials && self.runComskip);// && !self.downloadingShowFromMPGFile);
+	       !(self.shouldSkipCommercials && self.runComskipNow);
+	       // && !self.downloadingShowFromMPGFile);
 }
 
 -(BOOL) shouldPipeFromDecrypt {
@@ -2905,7 +2915,7 @@ NSInteger diskWriteFailure = 123;
 	return self.markCommercials && self.useSkipMode && !self.hasEDL;
 }
 
--(BOOL) runComskip {
+-(BOOL) runComskipNow {
 	//we're launching now, so should we use comskip or not
 	//Either  we want commercials but won't/can't use SkipMode, OR we want to skip but we don't have list yet. (Can add mark later)
 	if (self.hasEDL) return NO;
@@ -2916,7 +2926,12 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(BOOL) hasEDL { //from either source
-    return self.show.edlList.count > 0;
+	BOOL reuse = [[NSUserDefaults standardUserDefaults] boolForKey:kMTReuseEDLs];
+    if (reuse) {
+		return self.show.edlList.count > 0;
+	} else {
+		return self.show.rpcData.edlList.count > 0;
+	}
 }
 
 -(BOOL) shouldEmbedSubtitles

@@ -31,9 +31,10 @@
  -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
 	 if ([keyPath isEqualToString:kMTDebugLevel]) {
 		 if ([ [NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel] > 0 ) {
-			 [[NSUserDefaults standardUserDefaults] removeObjectForKey:kMTDebugLevelDetail ];
+			 [[NSUserDefaults standardUserDefaults] setObject:nil forKey:kMTDebugLevelDetail ];
 		 }
 		[MTLogWatcher setAllClassesLogLevelFromUserDefaults];
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationLogLevelsUpdated object:nil];
 	 } else {
 		 [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 	 }
@@ -42,6 +43,7 @@
 + (void)setDebugLevel:(DDLogLevel)level forClassWithName:(NSString *)aClassName {
 	[DDLog setLevel:level forClassWithName: aClassName];
 	[self writeAllClassesLogLevelToUserDefaults];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationLogLevelsUpdated object:nil];
 }
 
 +(void)setAllClassesLogLevelFromUserDefaults {
@@ -52,6 +54,7 @@
 		}
 	} else {
 		int debugLevel = (int)[[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel];
+		if (debugLevel == -1) debugLevel = 1; //shouldn't happen
 		for (Class class in [DDLog registeredClasses]) {
 			[DDLog setLevel:debugLevel forClass:class];
 		}
@@ -69,12 +72,13 @@
 		NSInteger level = (NSInteger) [DDLog levelForClass:class];
         if (lastLevel != level) {
 			if (lastLevel != -1) allSame = NO;
-			lastLevel =level;
+			lastLevel = level;
 		}
 		[levels setValue:@(level) forKey:NSStringFromClass(class)];
 	}
 	if (allSame){
 		if (lastLevel != currentLevel || currentLevels.count > 0) {
+			[[NSUserDefaults standardUserDefaults] setObject:nil forKey:kMTDebugLevelDetail];
 			[[NSUserDefaults standardUserDefaults] setInteger:lastLevel forKey:kMTDebugLevel];
 		}
 	} else {
