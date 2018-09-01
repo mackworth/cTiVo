@@ -85,6 +85,8 @@ __DDLOGHERE__
 	[selectedRowIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
 		[oldSelection addObject: [self itemAtRow:idx]];
 	}];
+	CGRect frame = self.enclosingScrollView.documentVisibleRect;
+	NSInteger topRow = [self rowAtPoint:CGPointMake(CGRectGetMinX(frame), CGRectGetMaxY(frame))];
 
 	self.sortedShows = nil;
 	[self confirmColumns];
@@ -104,6 +106,7 @@ __DDLOGHERE__
 		}
 	}
     [self selectRowIndexes:showIndexes byExtendingSelection:NO];
+	[self scrollRowToVisible:topRow];
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -829,45 +832,6 @@ __DDLOGHERE__
 }
 #pragma mark Drag N Drop support
 
-/*// What kind of drag operation should I perform?
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id )info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op {
-    return op == NSTableViewDropOn ? NSDragOperationCopy : NSDragOperationNone; // Specifies that the drop should occur on the specified row.
-}
-
-// The mouse button was released over a row in the table view, should I accept the drop?
-- (BOOL)tableView:(NSTableView *) tv acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)op {
-    MTTiVoShow * show = self.sortedShows[row];
-    NSLog(@"Dragged Show: %@", show);
-    return YES;
-}
-
-- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
-{
-    if ([[[sender draggingPasteboard] types] containsObject:NSFilenamesPboardType]) {
-        return NSDragOperationCopy;
-    }
-    
-    return NSDragOperationNone;
-}
-
-- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
-    NSPasteboard *pboard;
-    pboard = [sender draggingPasteboard];
-    NSPoint windowDropPoint = [sender draggingLocation];
-    NSPoint tableDropPoint = [self convertPoint:windowDropPoint fromView:nil];
-    NSUInteger row = [self rowAtPoint:tableDropPoint];
-    if (row >= self.sortedShows.count) return NO;
-    MTTiVoShow * show = self.sortedShows[row];
-    NSImage * image = [[NSImage alloc] initWithPasteboard:pboard];
-    if (image) {
-        [show setArtworkFromImage: image];
-        return YES;
-    } else {
-        return NO;
-    }
-}
-*/
-
 - (NSDragOperation)draggingSession:(NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context {
     switch(context) {
         case NSDraggingContextOutsideApplication:
@@ -894,61 +858,50 @@ __DDLOGHERE__
     }
 }
 
--(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender {
-    return NSDragOperationCopy;
+-(id<NSPasteboardWriting>)outlineView:(NSOutlineView *)outlineView pasteboardWriterForItem:(id)item {
+	return (id<NSPasteboardWriting>) item;
 }
 
--(BOOL)outlineView:(NSOutlineView *)outlineView writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard {
-	
+- (BOOL)canDragRowsWithIndexes:(NSIndexSet *)rowIndexes
+                       atPoint:(NSPoint)mouseDownPoint {
 	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
         //if user wants drag-to-select, then check if we're selecting new rows or not
         //drag/drop if current row is  already selected OR we're over name of show
         //this is parallel to Finder behavior.
-		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
-		NSPoint p = [outlineView convertPoint:windowPoint fromView:nil];
-		NSInteger r = [outlineView rowAtPoint:p];
-		NSInteger c = [outlineView columnAtPoint:p];
-		if (c >= 0 && r >=0 ) {
-            BOOL isSelectedRow = [outlineView isRowSelected:r];
-            BOOL isOverText = NO;
-            NSTableCellView *showCellView = [outlineView viewAtColumn:c row:r makeIfNecessary:NO];
+		NSInteger r = [self rowAtPoint:mouseDownPoint];
+		NSInteger c = [self columnAtPoint:mouseDownPoint];
+		if (c >= 0 && r >=0 && ![self isRowSelected:r]) {
+            NSTableCellView *showCellView = [self viewAtColumn:c row:r makeIfNecessary:NO];
             NSTextAlignment alignment = showCellView.textField.alignment;
             NSTextField *showField = showCellView.textField;
             if (showField) {
-                NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+                NSPoint clickInText = [showField convertPoint:mouseDownPoint fromView:self];
                 NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
                 NSSize cellSize = showCellView.frame.size;
                 switch (alignment) {
                     case NSLeftTextAlignment:
                     case NSNaturalTextAlignment:
-                        if (clickInText.x < stringSize.width) {
-                            isOverText = YES;
+                        if (clickInText.x > stringSize.width) {
+                            return NO;
                         }
                         break;
                     case NSRightTextAlignment:
-                        if (clickInText.x > cellSize.width - stringSize.width) {
-                            isOverText = YES;
+                        if (clickInText.x < cellSize.width - stringSize.width) {
+                            return NO;
                         }
                         break;
                     case NSCenterTextAlignment:
-                        if (clickInText.x < (cellSize.width + stringSize.width)/2.0 && clickInText.x > (cellSize.width - stringSize.width)/2.0) {
-                            isOverText = YES;
+                        if (clickInText.x > (cellSize.width + stringSize.width)/2.0 || clickInText.x < (cellSize.width - stringSize.width)/2.0) {
+                            return NO;
                         }
                         break;
                     default:
                         break;
                 }
             }
-            if (!isSelectedRow && !isOverText) {
-                return NO;
-            }
         }
 	}
-	// Drag and drop support
-	NSArray	*selectedObjects = [self flattenShows:items]; ;
-	DDLogVerbose(@"Dragging Objects: %@", selectedObjects);
-	[pboard writeObjects:selectedObjects];
-   return (selectedObjects.count > 0);
+	return YES;
 }
 
 #pragma mark - Menu Commands

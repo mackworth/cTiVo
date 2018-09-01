@@ -185,6 +185,19 @@ __DDLOGHERE__
     }
 }
 
+- (NSArray<NSTableViewRowAction *> *)tableView:(NSTableView *)tableView
+		rowActionsForRow:(NSInteger)row
+		edge:(NSTableRowActionEdge)edge  API_AVAILABLE(macos(10.11)){
+		__weak __typeof__(self) weakSelf = self;
+ 	return @[ [NSTableViewRowAction rowActionWithStyle:NSTableViewRowActionStyleDestructive
+		  title:@"Delete"
+		handler:^(NSTableViewRowAction * _Nonnull action, NSInteger deleteRow) {
+	__typeof__(self) strongSelf = weakSelf;
+			if ((NSUInteger) deleteRow >= strongSelf.sortedSubscriptions.count) return;
+	[tiVoManager.subscribedShows  deleteSubscriptions:@[strongSelf.sortedSubscriptions[deleteRow]]];
+		}]
+	];
+}
 
 
 #pragma mark - Table Data Source Protocol
@@ -352,7 +365,6 @@ static NSDateFormatter *dateFormatter;
 
 //Drag&drop source (for now,just for delete)
 
- //should use this for 10.7 and after, but redundant with above
 - (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
 	
 	if (operation == NSDragOperationDelete) {
@@ -361,40 +373,34 @@ static NSDateFormatter *dateFormatter;
     }
 }
 
-//- (id<NSPasteboardWriting>)tableView:(NSTableView *)tableView
-//              pasteboardWriterForRow:(NSInteger)row {
-//
-//}
+- (id<NSPasteboardWriting>)tableView:(NSTableView *)tableView
+              pasteboardWriterForRow:(NSInteger)row {
+	if ((NSUInteger) row >= self.sortedSubscriptions.count) return nil;
+	return self.sortedSubscriptions[row];
+}
 
-- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
-	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
+- (BOOL)canDragRowsWithIndexes:(NSIndexSet *)rowIndexes
+                       atPoint:(NSPoint)mouseDownPoint {
+   	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
         //if user wants drag-to-select, then check if we're selecting new rows or not
         //drag/drop if current row is  already selected OR we're over name of show
         //this is parallel to Finder behavior.
-		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
-		NSPoint p = [tv convertPoint:windowPoint fromView:nil];
-		NSInteger r = [tv rowAtPoint:p];
-		NSInteger c = [tv columnAtPoint:p];
-		if (c >= 0 && r >=0 ) {
-            NSTableColumn *selectedColumn = tv.tableColumns[c];
-            BOOL isSelectedRow = [tv isRowSelected:r];
-            BOOL isOverText = NO;
+//		NSPoint p = [self convertPoint:windowPoint fromView:nil];
+		NSInteger r = [self rowAtPoint:mouseDownPoint];
+		NSInteger c = [self columnAtPoint:mouseDownPoint];
+		if (c >= 0 && r >=0 && ![self isRowSelected:r]) {
+            NSTableColumn *selectedColumn = self.tableColumns[c];
             if ([selectedColumn.identifier caseInsensitiveCompare:@"series"] == NSOrderedSame) { //Check if over text
-                NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+                NSTableCellView *showCellView = [self viewAtColumn:c row:r makeIfNecessary:NO];
                 NSTextField *showField = showCellView.textField;
-                NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+                NSPoint clickInText = [showField convertPoint:mouseDownPoint fromView:self];
                 NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
-                if (clickInText.x < stringSize.width) {
-                    isOverText = YES;
+                if (clickInText.x > stringSize.width) {
+                    return NO;
                 }
-            }
-            if (!isSelectedRow && !isOverText) {
-                return NO;
             }
         }
 	}
-	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
-    [pboard writeObjects:[self.sortedSubscriptions objectsAtIndexes:rowIndexes]];
 	return YES;
 }
 
@@ -415,13 +421,14 @@ static NSDateFormatter *dateFormatter;
 //Drag and drop receiver methods
 
 - (NSDragOperation)tableView:(NSTableView *)aTableView validateDrop:(id < NSDraggingInfo >)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)operation {
-	if ([info draggingSource] == aTableView) {
-		return NSDragOperationMove;
+	if ([info draggingSource] == self) {
+		return NSDragOperationNone;
 	} else if ([info draggingSource] == myController.tiVoShowTable ||
-			   [info draggingSource] == myController.downloadQueueTable) {
+			   [info draggingSource] == myController.downloadQueueTable ||
+			   [[info draggingPasteboard].types containsObject:NSPasteboardTypeString]) {
+		[self setDropRow: self.sortedSubscriptions.count dropOperation:NSTableViewDropAbove];
+		self.draggingDestinationFeedbackStyle = NSTableViewDraggingDestinationFeedbackStyleRegular;
 		return NSDragOperationCopy;
-	} else if ([[info draggingPasteboard].types containsObject:NSPasteboardTypeString]){
-        return NSDragOperationCopy;
     } else {
 		return NSDragOperationNone;
 	}
