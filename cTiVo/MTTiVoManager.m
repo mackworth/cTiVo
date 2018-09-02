@@ -10,6 +10,7 @@
 #import "MTAppDelegate.h"
 #import "MTSubscription.h"
 #import "MTSubscriptionList.h"
+#import "MTiTunes.h"
 #import "MTNetService.h"
 #import "NSURL+MTURLExtensions.h"
 #import "NSNotificationCenter+Threads.h"
@@ -522,10 +523,12 @@ __DDLOGHERE__
 							   kMTPreventSleep,
 							   kMTMaxNumEncoders,
 							   KMTPreferredImageSource,
-							   kMTTiVos
-							 ]) {
+							   kMTTiVos,
+							   kMTiTunesSubmit
+							]) {
 		 [[NSUserDefaults standardUserDefaults]  addObserver:self forKeyPath:path options:0 context:nil];
 	}
+	[self checkiTunesPermissions];
 }
 
 #pragma mark - Scheduling routine
@@ -840,9 +843,23 @@ __DDLOGHERE__
     } else if ([keyPath isEqualToString:kMTMaxNumEncoders]) {
         DDLogMajor(@"Changed Max Number Encoders to: %@", @([defs integerForKey:kMTMaxNumEncoders]) );
 		[self performSelector:@selector(startAllTiVoQueues) withObject:nil afterDelay:10];
-    } else {
+ 	} else if ([keyPath compare:kMTiTunesSubmit] == NSOrderedSame) {
+ 		[self checkiTunesPermissions];
+   } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
+}
+
+-(void) checkiTunesPermissions {
+    NSUserDefaults * defs = [NSUserDefaults standardUserDefaults];
+	if ([defs boolForKey:kMTiTunesSubmit]) {
+		[[[MTiTunes alloc] init] iTunesPermissionCheck];
+	} else {
+		if ([defs integerForKey:kMTiTunesSubmitCheck] == 4) {
+			[self disableiTunes];
+		}
+		[defs setObject:nil forKey:kMTiTunesSubmitCheck];
+	}
 }
 
 -(void)refreshAllTiVos {
@@ -878,6 +895,19 @@ __DDLOGHERE__
         [tiVo resetAllDetails];
 	}
 	[self refreshAllTiVos];
+}
+
+-(void) disableiTunes {
+	for (MTDownload * download in tiVoManager.downloadQueue ) {
+		if (![download isCompletelyDone] && download.addToiTunesWhenEncoded) {
+			download.addToiTunesWhenEncoded = NO;
+		}
+	}
+	for (MTSubscription * subscription in tiVoManager.subscribedShows ) {
+		if (subscription.addToiTunes.boolValue) {
+			subscription.addToiTunes = @NO;
+		}
+	}
 }
 
 -(NSSet <MTTiVo *> *) tiVosForShows: (NSArray<MTTiVoShow *> *)shows {

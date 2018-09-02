@@ -118,7 +118,7 @@ __DDLOGHERE__
 	
 	[self selectRowIndexes:showIndexes byExtendingSelection:NO];
 	[self scrollRectToVisible:frame];
-	
+
     if (tiVoManager.anyTivoActive) {
         if (!self.updateTimer) {
             self.updateTimer = [MTWeakTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(updateProgress:) userInfo:nil repeats:YES];
@@ -564,17 +564,10 @@ __DDLOGHERE__
 	return YES;
 }
 
--(void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session willBeginAtPoint:(NSPoint)screenPoint forRowIndexes:(NSIndexSet *)rowIndexes {
-		self.draggingDestinationFeedbackStyle = NSTableViewDraggingDestinationFeedbackStyleGap;
-
-}
-
 - (id<NSPasteboardWriting>)tableView:(NSTableView *)tableView pasteboardWriterForRow:(NSInteger)row {
 	if ((NSUInteger) row > self.sortedDownloads.count) return nil;
 	return self.sortedDownloads[row];
 }
-
-//Drag and drop Receiver
 
 - (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
 	//drag to trash?
@@ -629,9 +622,17 @@ __DDLOGHERE__
 //
 //}
 
+//Drag and drop destination
+
 - (NSDragOperation)tableView:(NSTableView *)aTableView validateDrop:(id < NSDraggingInfo >)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)operation {
 	if ([info draggingSource] == self) {
 		DDLogDetail(@"User dragged to Row: %@%@", @(row+1), operation == NSTableViewDropOn ? @"" : @"+");
+		if (@available(macOS 10.14,*)) {
+			//bug in Mojave
+			self.draggingDestinationFeedbackStyle = NSTableViewDraggingDestinationFeedbackStyleRegular;
+		} else {
+			self.draggingDestinationFeedbackStyle = NSTableViewDraggingDestinationFeedbackStyleGap;
+		}
 		if (operation != NSTableViewDropAbove ) {
 			[self setDropRow:row dropOperation:NSTableViewDropAbove];
 		}
@@ -690,6 +691,8 @@ __DDLOGHERE__
 	return NO;
 }
 
+#pragma mark - user commands
+
 - (IBAction)clearHistory:(id)sender {
 	NSString *message = @"Are you sure you want to delete history of completed downloads?";
 	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Delete" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@" "];
@@ -734,7 +737,6 @@ __DDLOGHERE__
 	[tiVoManager deleteFromDownloadQueue:itemsToRemove];
 	if (itemsToRemove.count)[myController playTrashSound];
 }
-
 
 -(BOOL)playVideo {
     for (MTDownload *download in self.actionItems) {
@@ -867,6 +869,10 @@ __DDLOGHERE__
         }
         if (realDownload) {
             [realDLs addObject:realDownload];
+            if (realDownload.downloadStatus.intValue == kMTStatusRemovedFromQueue) {
+            	realDownload.downloadStatus = draggedDownload.downloadStatus;
+			}
+			realDownload.show.isQueued = YES;
             if (realDownload.isDone) {
                 [completedDownloadsBeingMoved addObject:realDownload];
             }
@@ -969,7 +975,6 @@ __DDLOGHERE__
 -(IBAction)cut: (id) sender {
     [self copy:sender];
     [self delete:sender];
-
 }
 
 -(IBAction)paste: (id) sender {

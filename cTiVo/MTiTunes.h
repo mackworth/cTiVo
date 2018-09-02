@@ -19,11 +19,7 @@
 @property (nonatomic, strong) iTunesLibraryPlaylist *libraryPlayList;
 @property (nonatomic, strong) iTunesPlaylist *tivoPlayList;
 
--(BOOL) preflightiTunesCheck;
-//returns Yes if good to go for iTunes:
-//  either not on Mojave yet, or we can access iTunes
-// unfortunately has to launch iTunes if necessary to check.
-//if not accessible, walks user through fixes
+-(void) iTunesPermissionCheck;
 
 -(NSString *) importIntoiTunes: (MTDownload * ) download withArt:(NSImage *) image;
 //returns nil if can't add; location of video file if it can
