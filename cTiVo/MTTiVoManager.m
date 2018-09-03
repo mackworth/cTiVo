@@ -483,7 +483,8 @@ __DDLOGHERE__
     tivoBrowser = [NSNetServiceBrowser new];
     tivoBrowser.delegate = self;
     [tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-    [tivoBrowser searchForServicesOfType:@"_tivo-device._tcp" inDomain:@"local"];
+	[tivoBrowser stop]; //internet voodoo to make search more reliable?
+	[tivoBrowser searchForServicesOfType:@"_tivo-device._tcp" inDomain:@"local."];
 }
 
 -(NSArray <MTTiVo *> *)tiVoList {
