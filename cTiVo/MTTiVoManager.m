@@ -1505,7 +1505,7 @@ __DDLOGHERE__
 		newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials &&
 											[defaults boolForKey:kMTMarkCommercials];
 		newDownload.useSkipMode = (newDownload.encodeFormat.canMarkCommercials || newDownload.encodeFormat.comSkip) &&
-		[defaults boolForKey:kMTUseSkipMode];
+									[defaults integerForKey:kMTCommercialStrategy] > 0;
 		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 #ifndef deleteXML

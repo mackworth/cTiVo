@@ -2026,12 +2026,17 @@ __DDLOGHERE__
 -(void) skipModeCheck {
 	if ([self.show.protectedShow boolValue]) return;
 	if (self.downloadStatus.intValue == kMTStatusRemovedFromQueue) return; //we've been deleted
-	if (self.useSkipMode && !self.show.mightHaveSkipModeInfo){
-		_useSkipMode = NO;
+	NSInteger commStrategy = [[NSUserDefaults standardUserDefaults] integerForKey:@"CommercialStrategy"];
+	//check for contradiction between userDefaults and this download
+	if (self.useSkipMode) {
+		if (commStrategy == 0) commStrategy = 3;
+	} else  {
+		if (commStrategy  > 0) commStrategy = 0;
 	}
+	
 	BOOL needEDLNow = ( self.isNew && self.shouldSkipCommercials) ||
 					  ( self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd && self.shouldMarkCommercials);
-	if (self.show.hasSkipModeList || ! self.useSkipMode || ! needEDLNow) {
+	if (self.show.hasSkipModeList || commStrategy == 0 || ! needEDLNow) {
 		//ready to go to next step
 		[self stopWaitSkipModeTimer];
 		switch (self.downloadStatus.intValue) {
@@ -2040,12 +2045,25 @@ __DDLOGHERE__
 				break;
 			case kMTStatusSkipModeWaitInitial:
 				DDLogMajor(@"%@ was waiting for SkipMode, but now launching", self);
-				if ([[NSUserDefaults standardUserDefaults] boolForKey:@"XXXFallbackToComskipMark"] &&
-					self.skipCommercials &&
-					self.canMarkCommercials ) {
-					DDLogMajor(@"Changing to mark commercials with comskip for %@", self);
-					self.skipCommercials = NO;
-					self.markCommercials = YES;
+				if (self.shouldSkipCommercials && !self.show.hasSkipModeList) { //otherwise we're good to go
+					switch (commStrategy) {
+						case 0:						//comskip only, so proceed
+							break;
+						case 1: 					//SkipMode only, so give up
+							self.skipCommercials = NO;
+							self.markCommercials = NO;
+							break;
+						case 2: 					//skipMode => comskip
+							_useSkipMode = NO;
+							break;
+						case 3:						//skipMode => comskip mark only
+							_useSkipMode = NO;
+							self.skipCommercials = NO;
+							if (self.canMarkCommercials) self.markCommercials = YES;
+							break;
+						default:
+							break;
+					}
 				}
 				self.downloadStatus = @(kMTStatusNew);
 				[self checkQueue];
@@ -2055,8 +2073,14 @@ __DDLOGHERE__
 					DDLogMajor(@"Got EDL for %@: %@", self, self.show.edlList);
 					[self addEDLtoFilesOnDisk];
 					[self finalFinalProcessing];
+				} else if ( !self.shouldMarkCommercials) {
+					DDLogMajor(@"Was waiting for SkipMode Mark, but it's not coming, and user disabled mark for %@", self);
+					[self finalFinalProcessing];
+				} else if (commStrategy == 1) {
+					DDLogMajor(@"Was waiting for SkipMode Mark, but it's not coming for %@, and user requested no comskip", self);
+					[self finalFinalProcessing];
 				} else {
-					DDLogReport(@"Was waiting for SkipMode, but user disabled for %@; launching comskip", self);
+					DDLogMajor(@"Was waiting for SkipMode Mark, but user disabled for %@; launching comskip", self);
 					self.downloadStatus = @kMTStatusAwaitingPostCommercial ;
 					[self checkQueue];
 				}
@@ -2079,11 +2103,22 @@ __DDLOGHERE__
 		}
 		_useSkipMode = NO;  //switch to comskip, but avoid recursion
 		if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
+			if (commStrategy == 1) { 					//SkipMode only, so give up
+				self.skipCommercials = NO;
+				self.markCommercials = NO;
+			} else if (commStrategy == 3 && self.skipCommercials) {						//skipMode => comskip mark only
+				self.skipCommercials = NO;
+				if (self.canMarkCommercials) self.markCommercials = YES;
+			}
 			self.downloadStatus = @(kMTStatusNew);
 			[self checkQueue];
 		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
-			DDLogMajor(@"Launching comskip post-processing %@", self);
-			self.downloadStatus = @kMTStatusAwaitingPostCommercial ;
+			if (commStrategy == 1) { //skipMode only
+				[self finalFinalProcessing];
+			} else if (commStrategy == 2 || commStrategy == 3) { //already at mark; fallback to comskip Mark
+				DDLogMajor(@"Launching comskip post-processing %@", self);
+				self.downloadStatus = @kMTStatusAwaitingPostCommercial ;
+			}
 			[self checkQueue];
 		}
 	} else {
@@ -2108,11 +2143,11 @@ __DDLOGHERE__
 	[self stopWaitSkipModeTimer];
 	if (!self.useSkipMode) return;
 	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
-		DDLogReport(@"SkipModeTimer went off, but we have SkipMode info? %@",self);
+		DDLogReport(@"SkipModeTimer went off, but we have SkipMode info?? %@",self);
 		[self skipModeCheck];
 		return; //shouldn't be here
 	}
-	[self.show.tiVo loadSkipModeInfoForShow: self.show ];
+	[self.show.tiVo loadSkipModeInfoForShow: self.show ]; //last try
 }
 
 -(void) startWaitSkipModeTimer {
@@ -3052,7 +3087,7 @@ NSInteger diskWriteFailure = 123;
 			self.useSkipMode = NO;
 		} else if (skipModeWasDisabled && [self canSkipModeCommercials]) {
 			//newly possible, so take user default
-			self.useSkipMode = [[NSUserDefaults standardUserDefaults] boolForKey:kMTUseSkipMode];
+			self.useSkipMode = [[NSUserDefaults standardUserDefaults] integerForKey:kMTCommercialStrategy] > 0;
 		}
 		
 		if (!wasNil) { //no need at launch

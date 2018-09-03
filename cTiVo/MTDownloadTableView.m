@@ -372,7 +372,7 @@ __DDLOGHERE__
 	} else if ([tableColumn.identifier isEqualToString:@"SkipMode"]) {
 		switch (download.show.rpcSkipMode.intValue) {
 			case 5: result.imageView.image = [NSImage imageNamed:@"skipModeComskip"];
-				result.toolTip = @"cSkip: Commercial information loaded from comskip ";
+				result.toolTip = @"cSkip: Commercial information loaded from Comskip ";
 				break;
 			case 4:  result.imageView.image = [NSImage imageNamed:@"skipModeQuestion"];
 				result.toolTip = @"SkipMode data may still be coming";

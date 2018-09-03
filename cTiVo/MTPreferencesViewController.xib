@@ -15,7 +15,7 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView id="1">
-            <rect key="frame" x="0.0" y="0.0" width="541" height="525"/>
+            <rect key="frame" x="0.0" y="0.0" width="550" height="525"/>
             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <button toolTip="Display copy-protected shows on TiVo,  (still not downloadable)" id="3Eg-fa-fKg">
@@ -151,18 +151,6 @@
                     </buttonCell>
                     <connections>
                         <binding destination="248" name="value" keyPath="values.PreventSleep" id="5DA-8o-eHM"/>
-                    </connections>
-                </button>
-                <button id="fAJ-i5-FOz">
-                    <rect key="frame" x="275" y="244" width="225" height="18"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <string key="toolTip">Use TiVo's SkipMode rather than comskip. This may delay downloads until SkipMode info is received, and requires either AutoSkipMode or manual SkipMode processing.</string>
-                    <buttonCell key="cell" type="check" title="Prefer TiVo SkipMode to comSkip" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="jG9-lG-bBo">
-                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <binding destination="248" name="value" keyPath="values.UseSkipMode" id="qCi-Aa-ZpB"/>
                     </connections>
                 </button>
                 <textField verticalHuggingPriority="750" id="LGi-kg-9rl">
@@ -306,6 +294,15 @@
                         <binding destination="248" name="value" keyPath="values.MarkCommercials" id="3qQ-Uc-zPI"/>
                     </connections>
                 </button>
+                <textField verticalHuggingPriority="750" id="3uJ-DD-If4" userLabel="Comm Strategy">
+                    <rect key="frame" x="276" y="246" width="64" height="20"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Strategy:" id="hR6-07-zja">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
                 <textField verticalHuggingPriority="750" id="3Nq-dW-KiR">
                     <rect key="frame" x="275" y="342" width="94" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -456,8 +453,8 @@
                         <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
-                        <binding destination="248" name="enabled" keyPath="values.iTunesSubmit" id="9Bo-N6-WIH"/>
                         <binding destination="248" name="value" keyPath="values.iTunesDelete" id="381"/>
+                        <binding destination="248" name="enabled" keyPath="values.iTunesSubmit" id="9Bo-N6-WIH"/>
                     </connections>
                 </button>
                 <button toolTip="After adding to iTunes, have it sync devices to ensure video files available" id="Wx3-B9-PEZ">
@@ -483,6 +480,28 @@
                         <action selector="commercialHelp:" target="-2" id="g7q-7R-7qY"/>
                     </connections>
                 </button>
+                <popUpButton toolTip="How should cTiVo process commercials" verticalHuggingPriority="750" id="SSA-Z7-Pxz" userLabel="CommStrategy Menu">
+                    <rect key="frame" x="338" y="243" width="198" height="26"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <popUpButtonCell key="cell" type="push" title="Comskip Only" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="JQi-AU-mud" id="A5A-87-Ol2" userLabel="CommStrategy menu">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="Pref Artwork" id="veL-Th-krq">
+                            <items>
+                                <menuItem title="Comskip Only" state="on" toolTip="Use Comskip only to process commercials." id="JQi-AU-mud"/>
+                                <menuItem title="SkipMode Only" tag="1" toolTip="Use SkipMode only to process commercials." id="hpO-Zw-QJS"/>
+                                <menuItem title="SkipMode → Comskip" tag="2" toolTip="Use SkipMode; if fails or not available, use Comskip." id="siG-bs-Zoz"/>
+                                <menuItem title="SkipMode → Comskip Mark" tag="3" toolTip="Use SkipMode; if fails or not available, use Comskip, but with Mark only, not Cut." id="5ff-ZC-SqT">
+                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                </menuItem>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <action selector="directoryFormatSelected:" target="-2" id="2RM-98-vgJ"/>
+                        <binding destination="248" name="selectedTag" keyPath="values.CommercialStrategy" id="6ST-kM-kof"/>
+                    </connections>
+                </popUpButton>
             </subviews>
             <point key="canvasLocation" x="145.5" y="186.5"/>
         </customView>

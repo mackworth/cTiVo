@@ -84,7 +84,7 @@ __DDLOGHERE__
 			self.useSkipMode = @NO;
 		} else if (skipModeWasDisabled && [self canSkipModeCommercials]) {
 			//newly possible, so take user default
-			self.useSkipMode = @([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseSkipMode]);
+			self.useSkipMode = @([[NSUserDefaults standardUserDefaults] integerForKey:kMTCommercialStrategy] > 0);
 		}
 		
     }
@@ -322,7 +322,7 @@ __DDLOGHERE__
     if (tempSub.includeSuggestions ==nil) tempSub.includeSuggestions = [[NSUserDefaults standardUserDefaults] objectForKey:kMTShowSuggestions];
     tempSub.skipCommercials = sub[kMTSubscribedSkipCommercials];
     if (tempSub.skipCommercials ==nil) tempSub.skipCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSkipCommercials];
-	tempSub.useSkipMode = sub[kMTSubscribedUseSkipMode] ?:  [[NSUserDefaults standardUserDefaults] objectForKey:kMTUseSkipMode];;
+	tempSub.useSkipMode = sub[kMTSubscribedUseSkipMode] ?:  @([[NSUserDefaults standardUserDefaults] integerForKey:kMTCommercialStrategy] > 0);
 
     tempSub.markCommercials = sub[kMTSubscribedMarkCommercials];
     if (tempSub.markCommercials ==nil) tempSub.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMarkCommercials];
@@ -375,7 +375,7 @@ __DDLOGHERE__
 	newSub.stationCallSign= @"";
     newSub.HDOnly= @NO;
     newSub.SDOnly= @NO;
-	newSub.useSkipMode = @([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseSkipMode]);
+	newSub.useSkipMode = @([[NSUserDefaults standardUserDefaults] integerForKey:kMTCommercialStrategy] > 0);
     return newSub;
 }
 

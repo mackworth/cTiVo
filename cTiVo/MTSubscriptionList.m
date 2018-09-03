@@ -183,7 +183,7 @@
     for (NSString * multilineString in strings) {
         for (NSString * str in [self divideStringIntoLines:multilineString]) {
             MTSubscription * newSub = [MTSubscription subscriptionFromString:str];
-            if (newSub &&  (![self findSubscriptionNamed:newSub.displayTitle checkSuggestion:NO])) {
+            if (newSub &&  ([[NSUserDefaults standardUserDefaults]boolForKey:kMTAllowDups] || ![self findSubscriptionNamed:newSub.displayTitle checkSuggestion:NO])) {
                 [newSubs addObject:newSub];
                 [self addObject:newSub];
             }
@@ -249,7 +249,7 @@
         //use default properties
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         newSub.addToiTunes =     @([defaults boolForKey:kMTiTunesSubmit] && newSub.encodeFormat.canAddToiTunes);
-		newSub.useSkipMode =     @([defaults boolForKey:kMTUseSkipMode] && tivoShow.mightHaveSkipModeInfo);
+		newSub.useSkipMode =     @(([defaults integerForKey:kMTCommercialStrategy] > 1) && tivoShow.mightHaveSkipModeInfo);
         newSub.skipCommercials = @([defaults boolForKey:kMTSkipCommercials] && newSub.encodeFormat.comSkip.boolValue);
         newSub.markCommercials = @([defaults boolForKey:kMTMarkCommercials] && newSub.encodeFormat.canMarkCommercials);
         newSub.genTextMetaData=  [defaults objectForKey:kMTExportTextMetaData];
