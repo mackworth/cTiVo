@@ -86,7 +86,6 @@ __DDLOGHERE__
 		[oldSelection addObject: [self itemAtRow:idx]];
 	}];
 	CGRect frame = self.enclosingScrollView.documentVisibleRect;
-	NSInteger topRow = [self rowAtPoint:CGPointMake(CGRectGetMinX(frame), CGRectGetMaxY(frame))];
 
 	self.sortedShows = nil;
 	[self confirmColumns];
@@ -106,7 +105,7 @@ __DDLOGHERE__
 		}
 	}
     [self selectRowIndexes:showIndexes byExtendingSelection:NO];
-	[self scrollRowToVisible:topRow];
+	[self scrollRectToVisible:frame];
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
