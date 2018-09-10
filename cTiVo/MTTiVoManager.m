@@ -225,7 +225,7 @@ __DDLOGHERE__
 	
 	NSMutableArray * newShows = [NSMutableArray arrayWithCapacity:oldQueue.count];
 	for (NSDictionary * queueEntry in oldQueue) {
-		DDLogDetail(@"Restoring show %@",queueEntry[kMTQueueTitle]);
+		DDLogVerbose(@"Restoring show %@",queueEntry[kMTQueueTitle]);
 		MTDownload * newDownload= [MTDownload downloadFromQueue:queueEntry];
 		[newShows addObject:newDownload];
 	}
@@ -1882,10 +1882,10 @@ __DDLOGHERE__
 #pragma mark - Bonjour browser delegate methods
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing {
-	DDLogMajor(@"Found Service %@",netService);
+	DDLogReport(@"Found Service %@",netService); //XXX
     for (NSNetService * prevService in _tivoServices) {
         if ([prevService.name compare:netService.name] == NSOrderedSame) {
-			DDLogMajor(@"Already had %@",netService);
+			DDLogReport(@"Already had %@",netService); //XXX
             return; //already got this one
         }
     }
@@ -1900,7 +1900,7 @@ __DDLOGHERE__
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing {
-    DDLogReport(@"Removing Service: %@",aNetService.name);
+    DDLogReport(@"Service disappeared: %@",aNetService.name);
 }
 
 #pragma mark - NetService delegate methods
@@ -1939,7 +1939,8 @@ __DDLOGHERE__
 	NSString * platform = [self dataToString:TXTRecord[@"platform"]];
 	NSString * identity = [self dataToString:TXTRecord[@"identity"]];
     NSString * version= [self dataToString:TXTRecord[@"swversion"]];
-    
+	DDLogReport(@"resolved Address: %@", TXTRecord); //XXX
+
 	if ([TSN hasPrefix:@"A94"] || [identity hasPrefix:@"A94"]) {
 		DDLogDetail(@"Found Stream %@ - %@(%@); rejecting",TSN, sender.name, ipAddress);
 		return;
@@ -1986,6 +1987,8 @@ __DDLOGHERE__
 			DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
 			[newTiVo updateShows:self];
+		} else {
+			DDLogReport(@"Found disabled TiVo: %@ at %@", newTiVo, ipAddress); //XXX
 		}
 	}
 }

@@ -1254,7 +1254,9 @@ __DDLOGHERE__
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
 		__typeof__(self) strongSelf = weakSelf;
         //commercial or caption might finish first.
-        if ( strongSelf.skipCommercials && strongSelf->_commercialTask.successfulExit) {
+        if ( strongSelf.skipCommercials &&
+			((!self.useSkipMode && strongSelf->_commercialTask.successfulExit) ||
+			 (self.useSkipMode && self.show.edlList.count > 0))) {
             [strongSelf fixupSRTsDueToCommercialSkipping];
         }
         [strongSelf markCompleteCTiVoFile:strongSelf.captionFilePath];
@@ -2018,7 +2020,7 @@ __DDLOGHERE__
 
 -(void) skipModeUpdated: (NSNotification *) notification {
 	if (notification.object == self || notification.object == self.show ) {
-		DDLogMajor(@"Possible SkipMode Info change for %@", self);
+		DDLogDetail(@"Possible SkipMode Info change for %@", self);
 		[self skipModeCheck];
 	}
 }

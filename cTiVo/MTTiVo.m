@@ -530,7 +530,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     self.currentNPLStarted = [NSDate date];
     self.oneBatch = !getAll;
     if (getAll) {
-		tivoBugDuplicatePossibleStart = -1; 
+		previousShowList = [NSMutableDictionary dictionary];
+		for (MTTiVoShow * show in _shows) {
+			if(!show.inProgress.boolValue){
+				[previousShowList setValue:show forKey:show.idString];
+			}
+		}
+		DDLogVerbose(@"Previous shows were: %@:",previousShowList);
+		tivoBugDuplicatePossibleStart = -1;
         [self updateShowsForRange:NSMakeRange(0, kMTNumberShowToGetFirst)];
     } else {
         [self updateShowsForRange:[self getFirstRange: self.addedShowIndices]];
@@ -698,14 +705,6 @@ BOOL channelChecking = NO;
 {
 	DDLogDetail(@"Updating Tivo %@", self);
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateShows:) object:nil];
-    if (!self.enabled) return;
-    previousShowList = [NSMutableDictionary dictionary];
-	for (MTTiVoShow * show in _shows) {
-		if(!show.inProgress.boolValue){
-			[previousShowList setValue:show forKey:show.idString];
-		}
-	}
-    DDLogVerbose(@"Previous shows were: %@:",previousShowList);
     [self startNPLDownload:YES];
 }
 
