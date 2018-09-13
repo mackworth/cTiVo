@@ -1,3 +1,47 @@
+# Release 3.2.0 (SkipMode)
+### Main new features
+#### SkipMode use
+*    Use TiVo's SkipMode Info when available for Marking/Cutting commercials
+*    Hold off processing until SkipMode arrives (or doesn't)
+*    Fallback to Comskip if SkipMode unavailable or fails
+#### Remote Control Window
+*    TiVo remote emulation
+*    Keystroke alternatives
+*    Directly select streaming services
+#### New TiVo menu 
+*    Play on TiVo
+*    Delete on TiVo
+*    Stop Recording
+*    Reload Information
+*    Redesigned contextual menus
+
+###  Minor features:
+*    Dark Mode in Mojave
+*    AppleScript warnings for Mojave
+*    "Hardened" Apple-notarized binary for increased security
+*    Mark chapters when cutting commercials
+*    Duplicate downloads now fully supported (e.g. high-res/low-res Format subscriptions)
+*    Encrypted TiVo Format to download without decrypting
+*    Time before download starts now tracked with progress bar
+*    Contextual menus selection now behaves like Mail 
+*    Optional user script upon completion
+*    Applescript for Pushover integration
+*    Updated Binaries (Comskip, ffmpeg, Handbrake)
+
+### Bug fixes:
+*    Avoid images disappearing from folders on refresh
+*    Sorting shows within folders
+*    Extra check for SSL block by antivirus
+*    Detects High-Sierra OS freeze and recovers
+*    Detects invalid HTML errors from TVDB
+*    Undeleted shows matched up with pending downloads.
+*    Paused label no longer interferes with selecting downloads behind it.
+*    Change confusing Formats "Hide in User Interface" to "Show in")
+*    Fix OnDisk problem for shows with accents
+*    Better disk space testing under APFS
+*    Removed experimental SubscriptionRelyOnDiskOnly option
+*    Many process flow and status reporting fixes
+
 # Release 3.1.2
 * A small release to update the certificate used to communicate with TiVo's RPC mechanism, which otherwise would expire at the end of April.
 Also, TVDB has frequently been unresponsive recently, causing cTiVo to be unstable. This fixes the latter part.
