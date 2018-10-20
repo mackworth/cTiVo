@@ -92,7 +92,14 @@
 {
 	NSSize viewSize = ((NSViewController *)tabViewItem.windowController).view.frame.size;
 	NSSize newSize = NSMakeSize(viewSize.width+40, viewSize.height + 100);
-	NSRect frame = self.window.frame;
+//	NSLog(@"Main window = %@",NSStringFromRect([NSApp windows][0].frame));
+//	NSLog(@"Key window = %@",NSStringFromRect([NSApp keyWindow].frame));
+//	NSLog(@"SheetParent window = %@",NSStringFromRect(self.window.sheetParent.frame));
+//	NSLog(@"Pref window = %@",NSStringFromRect(self.window.frame));
+//	NSLog(@"New window = %@",NSStringFromRect([self getNewWindowRect:(MTTabViewItem *)tabViewItem]));
+	NSWindow * parent = self.window.sheetParent ?: [NSApp mainWindow];
+	if (!parent) parent = self.window;
+	NSRect frame = parent.frame;
 	double newXOrigin = frame.origin.x + (frame.size.width - newSize.width)/2.0;
 	double newYOrigin = frame.origin.y + frame.size.height - newSize.height;
 	return NSMakeRect(newXOrigin, newYOrigin, newSize.width, newSize.height);
