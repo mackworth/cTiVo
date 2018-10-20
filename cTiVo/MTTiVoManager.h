@@ -106,6 +106,7 @@
 -(void) updateTiVoDefaults:(MTTiVo *)tiVo;
 
 //---------------TiVo Management methods ----------
+-(void) startTiVos;
 -(void) deleteTivoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) stopRecordingShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) getSkipModeEDLWhenPossible: (MTDownload *) download;

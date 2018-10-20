@@ -265,7 +265,8 @@ void signalHandler(int signal)
 		  }
 	}];
 	[self.tiVoGlobalManager determineCurrentProcessingState];
-    DDLogDetail(@"Finished appDidFinishLaunch");
+	[self.tiVoGlobalManager startTiVos];
+	DDLogDetail(@"Finished appDidFinishLaunch");
  }
 
 -(void) systemSleep: (NSNotification *) notification {

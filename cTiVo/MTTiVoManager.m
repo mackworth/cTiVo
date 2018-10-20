@@ -73,8 +73,6 @@ __DDLOGHERE__
         [[NSUserDefaults standardUserDefaults] synchronize];
         myManager.tvdb = [MTTVDB sharedManager];
         [myManager setupNotifications];
-        [myManager searchForBonjourTiVos];
-        [myManager updateTiVosFromDefaults ];
     }
     return myManager;
 }
@@ -495,6 +493,11 @@ __DDLOGHERE__
 
 }
 #endif
+
+-(void) startTiVos {
+	[self searchForBonjourTiVos];
+	[self updateTiVosFromDefaults ];
+}
 
 -(void)searchForBonjourTiVos {
 	DDLogDetail(@"searching for Bonjour");
@@ -978,7 +981,7 @@ __DDLOGHERE__
 		MTTiVo * tivo = tivoShows[0].tiVo;
 		for (MTTiVoShow * show in [tivoShows copy]) {
 			if (show.tiVo == tivo) {
-				if (!show.edlList) {
+				if (!show.rpcData.edlList) {
 					[tivo findCommercialsForShow:show interrupting:interrupt];
 				}
 				[tivoShows removeObject:show];

@@ -1,5 +1,5 @@
 # Release 3.2.0 (SkipMode)
-### Main new features
+### Main new features:
 #### SkipMode use
 *    Use TiVo's SkipMode Info when available for Marking/Cutting commercials
 *    Hold off processing until SkipMode arrives (or doesn't)
@@ -14,11 +14,13 @@
 *    Stop Recording
 *    Reload Information
 *    Redesigned contextual menus
-
-###  Minor features:
+#### Mojave Support
 *    Dark Mode in Mojave
 *    AppleScript warnings for Mojave
 *    "Hardened" Apple-notarized binary for increased security
+•    Assorted compatibility fixes
+
+###  Minor features:
 *    Mark chapters when cutting commercials
 *    Duplicate downloads now fully supported (e.g. high-res/low-res Format subscriptions)
 *    Encrypted TiVo Format to download without decrypting
