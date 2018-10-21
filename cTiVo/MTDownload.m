@@ -214,7 +214,7 @@ __DDLOGHERE__
     self.downloadDirectory = nil;
 
 	self.downloadStatus = @(kMTStatusNew);
-	[self skipModeCheck];
+	[self skipModeCheck]; //redundant
     if (notifyTiVo) {
 		[self checkQueue];
 	}
@@ -2046,7 +2046,7 @@ __DDLOGHERE__
 				[self checkQueue];
 				break;
 			case kMTStatusSkipModeWaitInitial:
-				DDLogMajor(@"%@ was waiting for SkipMode, but now launching", self);
+				DDLogMajor(@"%@ was waiting for SkipMode, but now launching; commStrategy = %d", self, (int)commStrategy);
 				if (self.shouldSkipCommercials && !self.show.hasSkipModeList) { //otherwise we're good to go
 					switch (commStrategy) {
 						case 0:						//comskip only, so proceed
@@ -2104,7 +2104,8 @@ __DDLOGHERE__
 			DDLogMajor(@"Not waiting any more for SkipMode for %@", self);
 		}
 		_useSkipMode = NO;  //switch to comskip, but avoid recursion
-		if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial) {
+		if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial ||
+			self.downloadStatus.intValue == kMTStatusNew) {
 			if (commStrategy == 1) { 					//SkipMode only, so give up
 				self.skipCommercials = NO;
 				self.markCommercials = NO;
