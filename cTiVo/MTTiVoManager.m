@@ -487,7 +487,7 @@ __DDLOGHERE__
 }
 #ifdef kLogTiVos
 -(void) failBonjour {
-	[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal" : @"firstTime"
+	[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
 						success:@NO
 			   customAttributes:@{@"Symptom" : self.missingTiVoSymptom}];
 
@@ -2030,7 +2030,7 @@ __DDLOGHERE__
 #ifdef kLogTiVos
 			if (self.tiVoTimer) {
 				[self.tiVoTimer invalidate]; self.tiVoTimer = nil;
-				[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal" : @"firstTime"
+				[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
 									success:@YES
 						   customAttributes:@{}];
 			}
