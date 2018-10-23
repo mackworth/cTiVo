@@ -90,19 +90,26 @@
 
 -(NSRect)getNewWindowRect:(MTTabViewItem *)tabViewItem
 {
-	NSSize viewSize = ((NSViewController *)tabViewItem.windowController).view.frame.size;
+	NSRect viewFrame = ((NSViewController *)tabViewItem.windowController).view.frame;
+	NSSize viewSize = viewFrame.size;
 	NSSize newSize = NSMakeSize(viewSize.width+40, viewSize.height + 100);
+//	NSLog(@"Current frame = %@",NSStringFromRect(viewFrame));
 //	NSLog(@"Main window = %@",NSStringFromRect([NSApp windows][0].frame));
 //	NSLog(@"Key window = %@",NSStringFromRect([NSApp keyWindow].frame));
 //	NSLog(@"SheetParent window = %@",NSStringFromRect(self.window.sheetParent.frame));
 //	NSLog(@"Pref window = %@",NSStringFromRect(self.window.frame));
-//	NSLog(@"New window = %@",NSStringFromRect([self getNewWindowRect:(MTTabViewItem *)tabViewItem]));
 	NSWindow * parent = self.window.sheetParent ?: [NSApp mainWindow];
 	if (!parent) parent = self.window;
-	NSRect frame = parent.frame;
+	NSRect frame = parent.contentView.frame;
 	double newXOrigin = frame.origin.x + (frame.size.width - newSize.width)/2.0;
 	double newYOrigin = frame.origin.y + frame.size.height - newSize.height;
-	return NSMakeRect(newXOrigin, newYOrigin, newSize.width, newSize.height);
+	NSRect windowInFrame = NSMakeRect(newXOrigin, newYOrigin, newSize.width, newSize.height);
+	NSRect newRect  = [parent convertRectToScreen:windowInFrame];
+//	NSLog(@"ContentFrame = %@",NSStringFromRect(frame));
+//	NSLog(@"windowInFrame = %@",NSStringFromRect(windowInFrame));
+//	NSLog(@"New window = %@",NSStringFromRect(newRect));
+//	NSLog(@"");
+	return newRect;
 }
 
 #pragma mark - Tab View Delegate
