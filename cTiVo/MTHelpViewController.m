@@ -70,21 +70,55 @@
 }
 
 -(void) loadResource:(NSString *)rtfFile {
+	//Looks for RTF resource; first as rtf then as rtfd.
+	//if dark Mode, either finds rtfFileDark or auto-converts text to Textcolor
+	BOOL darkMode = NO;
+	BOOL autoDarkMode = NO;
+	if (@available(macOS 10.14, *) ) {
+		darkMode = [self.view.effectiveAppearance.name isEqualToString:NSAppearanceNameDarkAqua];
+	}
 	NSAttributedString *attrHelpText = nil;
-	NSURL *helpFile = [[NSBundle mainBundle] URLForResource:rtfFile withExtension:@"rtf"];
+	NSURL *helpFile = nil;
+	if (darkMode) {
+		helpFile = [[NSBundle mainBundle] URLForResource:[rtfFile stringByAppendingString:@"Dark"] withExtension:@"rtf"];
+	}
+	if (!helpFile) {
+		helpFile = [[NSBundle mainBundle] URLForResource:rtfFile withExtension:@"rtf"];
+		if (helpFile){
+			if (darkMode) autoDarkMode = YES;
+		}
+	}
 	if (helpFile) {
 		 attrHelpText= [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfURL:helpFile] documentAttributes:NULL];
+		if (autoDarkMode) {
+			
+		}
 	} else {
-		helpFile = [[NSBundle mainBundle] URLForResource:rtfFile withExtension:@"rtfd"];
-		NSError * error = nil;
-		NSFileWrapper * rtfdDirectory = [[NSFileWrapper alloc] initWithURL:helpFile options:0 error:&error];
-		if (rtfdDirectory && !error){
-			attrHelpText = [[NSAttributedString alloc] initWithRTFDFileWrapper:rtfdDirectory  documentAttributes:NULL];
+		//Must be a rtfd
+		if (darkMode) {
+			helpFile = [[NSBundle mainBundle] URLForResource:[rtfFile stringByAppendingString:@"Dark"] withExtension:@"rtfd"];
+		}
+		if (!helpFile) {
+			helpFile = [[NSBundle mainBundle] URLForResource:rtfFile withExtension:@"rtfd"];
+			if (darkMode) autoDarkMode = YES;
+		}
+		if (helpFile) {
+			NSError * error = nil;
+			NSFileWrapper * rtfdDirectory = [[NSFileWrapper alloc] initWithURL:helpFile options:0 error:&error];
+			if (rtfdDirectory && !error){
+				attrHelpText = [[NSAttributedString alloc] initWithRTFDFileWrapper:rtfdDirectory  documentAttributes:NULL];
+			}
 		}
 	}
 	if (!attrHelpText) {
 		attrHelpText = [[NSAttributedString alloc] initWithString:
 					[NSString stringWithFormat:@"Can't find help text for %@ at path %@", rtfFile, helpFile]];
+		if (darkMode) autoDarkMode = YES;
+	}
+	if (autoDarkMode) {
+		NSMutableAttributedString * temp = [[NSMutableAttributedString alloc] initWithAttributedString:attrHelpText];
+		[temp setAttributes:@{NSForegroundColorAttributeName : [NSColor textColor] } range:NSMakeRange(0, temp.length)];
+		attrHelpText = [[NSAttributedString alloc] initWithAttributedString:temp];
 	}
 	self.attributedString = attrHelpText;
 }

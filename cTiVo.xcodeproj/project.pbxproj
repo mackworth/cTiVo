@@ -53,6 +53,7 @@
 		1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
 		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
 		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
+		1E799EF12182D5370073C450 /* CommercialHelpFileDark.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 1E799EF02182D5360073C450 /* CommercialHelpFileDark.rtfd */; };
 		1E7A4CE720422E350081884D /* skipMode@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7A4CE520422E340081884D /* skipMode@2x.png */; };
 		1E7A4CE820422E350081884D /* skipModeInverted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7A4CE620422E350081884D /* skipModeInverted@2x.png */; };
 		1E7BED701F565AD500AB8E5F /* NSURL+MTURLExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */; };
@@ -436,6 +437,7 @@
 		1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTiVo-10.7-Info.plist"; path = "../cTiVo-10.7-Info.plist"; sourceTree = "<group>"; };
 		1E791BD21697C59300E47E84 /* MTSubscription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscription.h; sourceTree = "<group>"; };
 		1E791BD31697C59300E47E84 /* MTSubscription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTSubscription.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		1E799EF02182D5360073C450 /* CommercialHelpFileDark.rtfd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; path = CommercialHelpFileDark.rtfd; sourceTree = "<group>"; };
 		1E7A4CE520422E340081884D /* skipMode@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skipMode@2x.png"; sourceTree = "<group>"; };
 		1E7A4CE620422E350081884D /* skipModeInverted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skipModeInverted@2x.png"; sourceTree = "<group>"; };
 		1E7BED6E1F565AD500AB8E5F /* NSURL+MTURLExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+MTURLExtensions.h"; sourceTree = "<group>"; };
@@ -1114,6 +1116,7 @@
 			isa = PBXGroup;
 			children = (
 				1E02BDE02056E9BB000B9F56 /* CommercialHelpFile.rtfd */,
+				1E799EF02182D5360073C450 /* CommercialHelpFileDark.rtfd */,
 				D209B6A91813305E004E733B /* FindTiVoHelpFile.rtf */,
 				D2574E8517FE30EC00BBAB5C /* MAKHelpFile.rtf */,
 				D24A8D0D16A5F3DC00DFF890 /* catToFile */,
@@ -1299,6 +1302,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E799EF12182D5370073C450 /* CommercialHelpFileDark.rtfd in Resources */,
 				1EB49BA01C50A4B100887240 /* tivo-libre.jar in Resources */,
 				94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */,
 				D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */,
