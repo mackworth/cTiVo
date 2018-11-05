@@ -469,8 +469,8 @@ __DDLOGHERE__
 	if (selectedObjects.count == 0) return;
 	NSString * mainText = @"Warning: retrieving SkipMode data will temporarily interrupt current viewing on your TiVo!";
 	NSString * infoText = selectedObjects.count > 1 ?
-			[NSString stringWithFormat:@"Hit Ok to retrieve SkipMode data for %d %@s, or \nhit Cancel to cancel request.", (int) selectedObjects.count, object] :
-			[NSString stringWithFormat:@"Hit Ok to retrieve SkipMode data for %@, or \nhit Cancel to cancel request.", selectedObjects[0].seriesTitle];
+			[NSString stringWithFormat:@"Hit Ok to retrieve SkipMode data for %d %@s, or hit Cancel to cancel request.", (int) selectedObjects.count, object] :
+			[NSString stringWithFormat:@"Hit Ok to retrieve SkipMode data for %@, or hit Cancel to cancel request.", selectedObjects[0].seriesTitle];
 	NSAlert *myAlert = [NSAlert alertWithMessageText: mainText defaultButton:@"Ok" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"%@", infoText];
 	myAlert.alertStyle = NSCriticalAlertStyle;
 	NSInteger result = [myAlert runModal];

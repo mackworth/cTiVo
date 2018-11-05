@@ -3104,7 +3104,7 @@ NSInteger diskWriteFailure = 123;
 
 -(void)dealloc
 {
-	DDLogReport(@"deallocing Download %@", self);
+	DDLogMajor(@"deallocing Download %@", self);
 	[self stopWaitSkipModeTimer];
     if (_performanceTimer) {
         [_performanceTimer invalidate];

@@ -2630,7 +2630,7 @@
                         <action selector="skipInfoFromTiVo:" target="-1" id="Fp4-F7-PYF"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Play on TiVo" toolTip="Asks your TiVo do play this show on its TV." id="vX7-XL-MoE">
+                <menuItem title="Play on TiVo" toolTip="Asks your TiVo to play this show on its TV." id="vX7-XL-MoE">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="playOnTiVo:" target="-1" id="zjn-oi-t5y"/>
@@ -2733,7 +2733,7 @@
                         <action selector="skipInfoFromTiVo:" target="-1" id="cbA-n1-JWf"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Play on TiVo" toolTip="Asks your TiVo do play this show on its TV." id="YLC-a9-d6O">
+                <menuItem title="Play on TiVo" toolTip="Asks your TiVo to play this show on its TV." id="YLC-a9-d6O">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="playOnTiVo:" target="-1" id="9Z4-nz-6n0"/>
