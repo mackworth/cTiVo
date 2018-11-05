@@ -406,11 +406,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 #pragma mark - RPC switchboard
 
 -(void) receivedRPCData:(MTRPCData *)rpcData {
+	MTTiVoShow * owner = self.rpcIDs[rpcData.rpcID];
+	if (!owner) {
+		DDLogReport(@"Missing owner show for %@", rpcData);
+		return;
+	}
     if ([NSThread isMainThread]) {
-        self.rpcIDs[rpcData.rpcID].rpcData = rpcData;
+        owner.rpcData = rpcData;
     } else {
         dispatch_async(dispatch_get_main_queue(), ^{
-        self.rpcIDs[rpcData.rpcID].rpcData = rpcData;
+        owner.rpcData = rpcData;
     });
     }
 }
@@ -1015,6 +1020,7 @@ BOOL channelChecking = NO;
 	[self cancelCommercialingForShow:deletedShow];
 	deletedShow.imageString = @"deleted";
     if (deletedShow.isQueued) {
+		[deletedShow.tiVo cancelCommercialingForShow: deletedShow];
         NSArray <MTDownload *> * downloads = [tiVoManager downloadsForShow:deletedShow];
         for (MTDownload * download in downloads) {
 			if (download.isNew) {
