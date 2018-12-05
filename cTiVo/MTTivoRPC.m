@@ -737,7 +737,6 @@ static NSRegularExpression * isFinalRegex = nil;
         return;
     }
 	if (self.delegate.isMini) return;  //don't subscribe to updates from Minis
-	[self channelListWithCompletion:nil];
     NSDictionary * data = @{@"flatten": @"true",
                             @"format": @"idSequence",
                             @"bodyId": self.bodyID
@@ -1167,7 +1166,8 @@ static NSArray * imageResponseTemplate = nil;
 		   DDLogDetail(@"sent channelSearch; got %@", jsonResponse);
 		   NSMutableDictionary * channels = [NSMutableDictionary dictionaryWithCapacity:jsonResponse.count];
 		   for (NSDictionary * channel in jsonResponse[@"channel"]) {
-			   channels[channel[@"callSign"]] = channel;
+			   NSString * callSign = channel[@"callSign"];
+			   if (callSign.length) channels[callSign] = channel;
 			}
 
 		   if (completionHandler) completionHandler([channels copy]);

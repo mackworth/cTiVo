@@ -658,9 +658,23 @@ __DDLOGHERE__
 		NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:path];
 		NSDictionary *results = [fileURL resourceValuesForKeys:@[NSURLVolumeAvailableCapacityForImportantUsageKey] error:&error];
 		NSNumber * value = results[NSURLVolumeAvailableCapacityForImportantUsageKey];
-		if (!value) {
-			DDLogReport(@"Error retrieving resource keys for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
+		if (!value || error) {
+			DDLogReport(@"Error retrieving Important Volume key for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
 			return LLONG_MAX;
+		} else if (value.integerValue == 0) {
+			//ZFS and SANs may return 0.
+			results = [fileURL resourceValuesForKeys:@[NSURLVolumeAvailableCapacityKey] error:&error];
+			value = results[NSURLVolumeAvailableCapacityKey];
+			if (!value || error) {
+				DDLogReport(@"Error retrieving Volme Available key for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
+				return LLONG_MAX;
+			} else if (value.longLongValue == 0){
+				DDLogReport(@"Volume for %@ shows zero space", path);
+				return 0;
+			} else {
+				return value.longLongValue;
+			}
+
 		} else {
 			DDLogDetail(@"Got space for %@: %@", path, value);
 			return value.longLongValue;
