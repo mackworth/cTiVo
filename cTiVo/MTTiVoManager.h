@@ -70,6 +70,9 @@
 
 -(NSArray <MTDownload *> *) downloadsForShow: (MTTiVoShow *) show;
 -(BOOL) anyShowsWaiting;
+-(void) checkSleep: (NSNotification *) notification;
+-(void) preventSleep;
+
 -(NSInteger)numberOfShowsToDownload;
 -(long long)sizeOfShowsToDownload;
 -(long long)biggestShowToDownload;

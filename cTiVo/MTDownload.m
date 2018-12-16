@@ -1763,6 +1763,7 @@ __DDLOGHERE__
 
 	if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {
         DDLogReport(@"Starting URL %@ for show %@ in %0.1lf seconds", downloadURL,self, downloadDelay);
+		[tiVoManager preventSleep];
 		[self.activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[self.activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	}
@@ -2726,6 +2727,7 @@ NSInteger diskWriteFailure = 123;
         self.activeURLConnection = nil;
 	   self.show.tiVo.lastDownloadEnded = [NSDate date];
    }
+	[tiVoManager checkSleep:nil];
     if (self.bufferFileWriteHandle) {
 		[self.bufferFileWriteHandle closeFile];
         self.bufferFileWriteHandle = nil;
@@ -2751,6 +2753,7 @@ NSInteger diskWriteFailure = 123;
             [self performSelectorInBackground:@selector(writeData) withObject:nil];
         }
     }
+	[tiVoManager checkSleep:nil];
 	self.show.tiVo.lastDownloadEnded = [NSDate date];
     double downloadedFileSize = self.totalDataDownloaded;
     //Check to make sure a reasonable file size in case there was a problem.

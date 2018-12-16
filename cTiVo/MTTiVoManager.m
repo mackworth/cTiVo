@@ -582,12 +582,20 @@ __DDLOGHERE__
 	}
 }
 
--(void) checkSleep: (id) notification {
+-(void) allowSleep {
+	[(MTAppDelegate *) [NSApp delegate]  allowSleep];
+}
+
+-(void) preventSleep {
+	[(MTAppDelegate *) [NSApp delegate]  preventSleep];
+}
+
+-(void) checkSleep: (NSNotification *) notification {
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTPreventSleep] &&
 	   [tiVoManager anyShowsWaiting]) {
-		[(MTAppDelegate *) [NSApp delegate]  preventSleep];
+		[self preventSleep];
 	} else {
-		[(MTAppDelegate *) [NSApp delegate]  allowSleep];
+		[self allowSleep];
 	}
 }
 
