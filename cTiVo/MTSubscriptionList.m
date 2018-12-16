@@ -57,6 +57,10 @@
  multiple TiVos that may not check in regularly, but at least 30 days worth  and at most 90
  */
 
+-(void) launchDownload: (MTDownload *) download {
+	[tiVoManager addToDownloadQueue:@[download] beforeDownload:nil];
+}
+
 -(void) checkSubscription: (NSNotification *) notification {
     //called by system when a new show appears in listing, including all shows at startup
     MTTiVoShow * thisShow = (MTTiVoShow *) notification.object;
@@ -69,7 +73,12 @@
             for (MTSubscription * possMatch in self) {
                 if ([possMatch isSubscribed:thisShow ignoreDate:NO]) {
                     MTDownload * newDownload = [possMatch downloadForSubscribedShow:thisShow];
-                    [tiVoManager addToDownloadQueue:@[newDownload] beforeDownload:nil];
+					if (thisShow.rpcData == nil && thisShow.tiVo.supportsRPC) {
+						//wait until tivo has a chance to fill in RPC info
+						[self performSelector:@selector(launchDownload:) withObject:newDownload afterDelay:3.0];
+					} else {
+						[self launchDownload:newDownload];
+					}
                 }
             }
         } else {
