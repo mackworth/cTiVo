@@ -56,6 +56,7 @@ typedef NS_ENUM(NSUInteger, MTWhatsOnType) {
 -(void) rpcRecentChange;
 -(BOOL) isReachable;
 -(BOOL) isMini;
+-(BOOL) isOlderTiVo;
 -(void) connectionChanged;
 @end
 

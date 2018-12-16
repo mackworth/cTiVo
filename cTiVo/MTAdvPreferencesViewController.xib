@@ -297,6 +297,31 @@
                         <binding destination="15" name="selectedTag" keyPath="values.DebugLevel" id="KUT-YE-FlD"/>
                     </connections>
                 </popUpButton>
+                <textField toolTip="Specifies the number of encoders that can be run in parallel" verticalHuggingPriority="750" id="K2q-9r-8xI">
+                    <rect key="frame" x="223" y="430" width="67" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="RPC Time:" id="B0n-8K-poy">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField toolTip="Specifies the number of encoders that can be run in parallel" verticalHuggingPriority="750" id="c5W-FO-t5k" userLabel="Text Field Encoders">
+                    <rect key="frame" x="300" y="427" width="53" height="22"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" continuous="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="m0e-Uo-iAY">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                    <connections>
+                        <binding destination="15" name="value" keyPath="values.RPCTime" id="RxS-QV-uMJ">
+                            <dictionary key="options">
+                                <bool key="NSContinuouslyUpdatesValue" value="YES"/>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </textField>
             </subviews>
             <point key="canvasLocation" x="425.5" y="399.5"/>
         </customView>

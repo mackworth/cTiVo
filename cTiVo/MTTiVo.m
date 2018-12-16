@@ -293,6 +293,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	return [self.tiVoSerialNumber hasPrefix:@"A9"] && ![self.tiVoSerialNumber hasPrefix: @"A94"]; //not streams
 }
 
+-(BOOL) isOlderTiVo {
+	if (self.isMini) return NO;
+	char digit = (char)[self.tiVoSerialNumber characterAtIndex:0] ; //unicode irrelevant
+	return digit != 'A' && digit < '8';
+}
+
 -(BOOL) enabled {
     @synchronized (self) {
         return _enabled;
@@ -408,7 +414,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void) receivedRPCData:(MTRPCData *)rpcData {
 	MTTiVoShow * owner = self.rpcIDs[rpcData.rpcID];
 	if (!owner) {
-		DDLogReport(@"Missing owner show for %@", rpcData);
+		DDLogDetail(@"Metadata before XML for %@", rpcData);
 		return;
 	}
     if ([NSThread isMainThread]) {

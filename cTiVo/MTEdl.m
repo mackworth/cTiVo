@@ -136,7 +136,7 @@ __DDLOGHERE__
 		} else if (cutPartStart >= showLength && segmentLength == 0.0) {
 			segmentStart = showLength;
 		} else {
-			DDLogReport (@"In building EDL list, not enough Start points found: %@ v Lengths: %@ ==> failed EDL so far %@", startPoints, lengthPoints, edls);
+//			DDLogMajor (@"In building EDL list, not enough Start points found: %@ v Lengths: %@ ==> failed EDL so far %@", startPoints, lengthPoints, edls);
 				return @[];
 		}
 		//now create the cut that goes BEFORE the segment

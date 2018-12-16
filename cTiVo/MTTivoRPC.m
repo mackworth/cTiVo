@@ -51,6 +51,7 @@ typedef void (^ReadBlock)(NSDictionary *, BOOL);
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, NSDictionary* > * requests; //debug only
 
 @property (nonatomic, strong) NSMutableArray < MTRPCData *> *skipModeQueueMetaData, * skipModeQueueEDL;
+@property (atomic, assign) NSInteger goodJump, shortJumps, longJump;
 
 @end
 
@@ -74,6 +75,7 @@ __DDLOGHERE__
 
 static NSArray * _myCerts = nil;        //across all TiVos; never deallocated
 static SecKeychainRef keychain = NULL;  //
+NSTimeInterval delay1, delay2, delay3,delay4 = 1.0;
 
 +(void) setMyCerts:(NSArray *)myCerts {
     if (myCerts != _myCerts) {
@@ -467,6 +469,10 @@ static NSRegularExpression * isFinalRegex = nil;
 					if (isFinal) [self endUpdatingIfNecessary];
                     if ([jsonData[@"type"] isEqualToString:@"error"]) {
                         DDLogReport(@"Error: error JSON response. %@\n%@\n%@", headers, readPacket, jsonData);
+						if ([jsonData[@"code"] isEqualToString:@"mindUnavailable"]) {
+							[self.oStream close]; //mark to reset
+							[self checkStreamStatus];
+						}
                         return -packetLength;
                     } else {
                         if (readBlock) {
@@ -962,9 +968,6 @@ static NSRegularExpression * isFinalRegex = nil;
 -(MTRPCData *) rpcDataForID: (NSString *) idString {
     @synchronized (self.showMap) {
         MTRPCData * rpcData = self.showMap[idString];
-        if (rpcData && !rpcData.rpcID) {
-        	rpcData.rpcID = [NSString stringWithFormat:@"%@|%@",self.hostName, idString];
-		}
 		return rpcData;
     }
 }
@@ -1433,51 +1436,87 @@ static NSArray * imageResponseTemplate = nil;
 		} ];
 }
 
+//#define testJumps 1
+
+-(void) logString:(NSString *) msg {
+#ifdef testJumps
+	DDLogReport(@"%@",msg);
+#else
+	DDLogDetail(@"%@",msg);
+#endif
+	
+}
 -(void) getRemainingPositionsInto: 	(NSMutableArray <NSNumber *> *) positions
-					   shortJumps: (int) shortJump
+					   badJumps: (int) badJump
 		   withCompletionHandler: (void (^)(NSArray *)) completionHandler {
 	__weak __typeof__(self) weakSelf = self;
-	if (shortJump >= 2) {
+	if (badJump >= 3) {
 		//not getting anywhere
-		DDLogReport(@"Failing commercial retrieving due to multiple short jumps %@", positions);
+		DDLogReport(@"Failing commercial retrieving due to multiple bad jumps %@", positions);
 		if (completionHandler) completionHandler(positions);
 		return;
 	}
-	[self sendKeyEvent: @"play" withCompletion:^{
+	long long prevPosition = positions.firstObject.longLongValue;
+	[weakSelf retrievePositionWithCompletionHandler:^(long long position2, long long end2) {
+		DDLogReport(@"Current Position: %@ versus %@", @(position2), @(prevPosition));
+		if (positions.count == 1 &&
+			prevPosition - position2 > 30000 ) {
+			[weakSelf logString:@"Commercial Long Jump"];
+			weakSelf.longJump++;
+#ifdef testJumps
+			//abort after first jump if we're testing jumps
+			if (completionHandler) completionHandler(positions);
+			return;
+#endif
+		}
+		
+	    [weakSelf sendKeyEvent: @"play" withCompletion:^{
 		//note: indenting change to avoid tower effect, each line break is a new event-driven block
+		[weakSelf afterDelay:delay4 launchBlock:^{
 
 		[weakSelf sendKeyEvent: @"channelDown" withCompletion:^{
 			
+		[weakSelf afterDelay:delay4 launchBlock:^{
+			
 		[weakSelf sendKeyEvent: @"pause" withCompletion:^{
 		
-		[weakSelf afterDelay:1.5 launchBlock:^{
+		[weakSelf afterDelay:delay3 launchBlock:^{
 			
 		[weakSelf retrievePositionWithCompletionHandler:^(long long position, long long end) {
 			
-		long long prevPosition = positions.firstObject.longLongValue;
-		DDLogDetail(@"Next Position: %@ versus %@", @(position), @(prevPosition));
-		if (end != 0 && end != positions.lastObject.longLongValue) {
-			 DDLogDetail(@"End info: %@ versus %@", @(end), @(positions.lastObject.longLongValue));
-		}
+		DDLogMajor(@"Next Position: %@ versus %@", @(position), @(prevPosition));
 		long long jumpSize = prevPosition - position;
-		if (jumpSize > 10000 + shortJump * 3000 ||
+		if (jumpSize < 30000) {
+			NSString * msg = [NSString stringWithFormat: @"Commercial Short Jump: %lld", jumpSize/1000];
+			[self logString:msg];
+			self.shortJumps++;
+		} else {
+			[self logString:@"Commercial Good Jump"];
+			self.goodJump++;
+		}
+#ifdef testJumps
+		//abort after first jump if we're testing jumps
+		if (completionHandler) completionHandler(positions);
+		return;
+#endif
+		if (jumpSize > 30000 ||
 			(position > 60000 && jumpSize > 0)) {
 			int recentShortJumps;
-			if (jumpSize > 10000) {
+			if (jumpSize > 30000) {
 				//we have moved a significant amount, so record
 				[positions insertObject:@(position) atIndex:0]; //reverse in file
 				recentShortJumps = 0;
 			} else {
-				DDLogMajor(@"Short jump %d from %lld to %lld for %@", (int)shortJump, prevPosition, position, self);
-				recentShortJumps = shortJump+1;
+				DDLogReport(@"Short jump %d from %lld to %lld for %@", (int)badJump, prevPosition, position, self);
+				recentShortJumps = badJump+1;
 			}
 
 			if (position > 3000) {
 				[weakSelf jumpToPosition:position-3000 withCompletionHandler:^(BOOL success) {
 					if (success) {
-						[weakSelf afterDelay:1.0 launchBlock:^{
+						[weakSelf afterDelay:delay2 launchBlock:^{
 							[weakSelf getRemainingPositionsInto:positions
-													 shortJumps:recentShortJumps
+													 badJumps:recentShortJumps
 										  withCompletionHandler:completionHandler];
 						} ];
 					} else {
@@ -1491,6 +1530,9 @@ static NSArray * imageResponseTemplate = nil;
 			//haven't moved , so all done
 			if (completionHandler) completionHandler(positions);
 		}
+		}];
+		}];
+		}];
 		}];
 		}];
 		}];
@@ -1550,6 +1592,25 @@ static NSArray * imageResponseTemplate = nil;
 				[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialing object: self.delegate  ];
 				DDLogDetail(@"Getting SkipMode for: %@", rpcData);
 				[self findSkipModeRecursive:@0];
+				self.goodJump  = self.shortJumps = self.longJump = 0;
+				NSString * delayString = [[NSUserDefaults standardUserDefaults] stringForKey:@"RPCTime"  ];
+				if (delayString.length ==0) {
+					if (self.delegate.isOlderTiVo) {
+						delayString = @"2.0, 1.6, 1.0, 0.4";
+					} else {
+						delayString = @"0.5, 0.5, 0.5, 0.25";
+					}
+				}
+				NSArray <NSString *> * delays = [delayString componentsSeparatedByString:@","];
+				if (delays.count > 3) {
+					delay1 = delays[0].doubleValue;
+					delay2 = delays[1].doubleValue;
+					delay3 = delays[2].doubleValue;
+					delay4 = delays[3].doubleValue;
+				} else {
+					delay1 = delay2 = delay3 = delay4 = delayString.doubleValue;
+				}
+
 			} else {
 				DDLogDetail(@"Another SkipMode Already in Progress: %@", self.skipModeQueueEDL);
 				[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialing object:  nil  ];
@@ -1560,9 +1621,26 @@ static NSArray * imageResponseTemplate = nil;
 }
 
 -(void) findSkipModeRecursive: (NSNumber *) firstTryNumber {
-	BOOL lastTry = firstTryNumber.intValue >= 2 ; //try up to three times (due to interference)
-    if (self.skipModeQueueEDL.count == 0) {
-        DDLogMajor(@"Finished SkipMode queue");
+	BOOL lastTry = firstTryNumber.intValue >=
+
+#ifdef testJumps
+	19 //XXX 20 as experiment;
+#else
+	3 //try up to three times (due to interference)
+#endif
+	;
+	if (self.skipModeQueueEDL.count == 0) {
+		DDLogMajor(@"Finished SkipMode queue");
+		NSInteger tries = self.goodJump+self.shortJumps+self.longJump ;
+		NSString * result =[NSString stringWithFormat:@"After %@ attempts with delays %0.1f, %0.1f, %0.1f, %0.1f, the results were %@ Good; %@ Short; %@ Long. %0.0f%% good",  @(tries), delay1, delay2, delay3, delay4,  @(self.goodJump), @(self.shortJumps), @(self.longJump), 100.0*self.goodJump/(float)tries];
+#ifdef testJumps
+		DDLogReport(@"Jump Results = %@", result);
+		NSAlert * jumpAlert = [NSAlert alertWithMessageText:@"SkipMode Test" defaultButton:@"OK" alternateButton: nil otherButton:nil informativeTextWithFormat:@"%@",result];
+		[jumpAlert runModal];
+#else
+		DDLogDetail(@"Jump Results = %@", result);
+#endif
+
 		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ];
         return;
 	} else if (firstTryNumber.intValue == 0 ) {
@@ -1589,7 +1667,9 @@ static NSArray * imageResponseTemplate = nil;
 			}
 		} else {
 			//try again if we have a problem creating an EDL
+#ifndef testJumps
 			DDLogMajor(@"SkipMode Queue Retrying EDL list for %@", rpcData);
+#endif
 			[strongSelf findSkipModeRecursive:@(firstTryNumber.intValue + 1) ];
 		}
     }];
@@ -1603,13 +1683,21 @@ static NSArray * imageResponseTemplate = nil;
 	[self whatsOnSearchWithCompletion:^(MTWhatsOnType previousWhatsOn, NSString *previousRecordingID) {
 
 		[weakSelf playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
+			
+		[weakSelf afterDelay:delay1 launchBlock:^{
+
+		[weakSelf sendKeyEvent: @"pause" withCompletion:^{
 		
-		[weakSelf afterDelay:1.0 launchBlock:^{
+		[weakSelf afterDelay:delay4 launchBlock:^{
 
 		[weakSelf retrievePositionWithCompletionHandler:^(long long startingPoint, long long end) {
 			
-		DDLogDetail(@"found initial Point of %@ / %@", @(startingPoint), @(end));
-		if (startingPoint < 2000) startingPoint = 0; 
+#ifdef testJumps
+			DDLogReport(@"found initial Point of %@ / %@", @(startingPoint), @(end));
+#else
+			DDLogDetail(@"found initial Point of %@ / %@", @(startingPoint), @(end));
+#endif
+		if (startingPoint < 2000) startingPoint = 0;
 		if (end <= 0) {
 			if (rpcData.tempLength <= 0) {
 				DDLogReport(@"Neither show nor RPC has correct length");
@@ -1620,27 +1708,31 @@ static NSArray * imageResponseTemplate = nil;
 			}
 		} else {
 			if (ABS(rpcData.tempLength*1000 - end) > 2000) DDLogDetail(@"RPC shows length as  %0.1f vs showLength as %0.1f",end/1000.0, rpcData.tempLength);
+			end = MIN(rpcData.tempLength*1000, end);
 		}
-		[weakSelf jumpToPosition:end-5000 withCompletionHandler:^(BOOL success) {
-			
-		[weakSelf afterDelay:1.0 launchBlock:^{
 
-		[weakSelf sendKeyEvent: @"reverse" withCompletion:^{
+		[weakSelf jumpToPosition:end-20000 withCompletionHandler:^(BOOL success) {
 			
-		[weakSelf afterDelay:1.0 launchBlock:^{
+		[weakSelf afterDelay:delay2 launchBlock:^{
+			
+//		[weakSelf sendKeyEvent: @"reverse" withCompletion:^{
+//
+//		[weakSelf afterDelay:delay launchBlock:^{
 			
 		[weakSelf getRemainingPositionsInto: [NSMutableArray arrayWithObject:@(end)]
-								  shortJumps:0
+								  badJumps:0
 					  withCompletionHandler:^(NSArray * positions) {
 
 		DDLogDetail(@"Got positions of %@", positions);
-		
 		rpcData.edlList = [NSArray edlListFromSegments:rpcData.programSegments andStartPoints:positions];
-		DDLogDetail(@"Got EDL %@", rpcData.edlList);
-
+	    if (rpcData.edlList) {
+		    DDLogDetail(@"For %@, got EDL %@", rpcData, rpcData.edlList);
+	    } else {
+		    DDLogDetail(@"for %@, No EDL", rpcData);
+	    }
 	    [weakSelf sendKeyEvent: @"pause"  withCompletion:^{
 			
-		[weakSelf afterDelay:1.0 launchBlock:^{
+		[weakSelf afterDelay:delay1 launchBlock:^{
 		
 		void (^finishUp)(void) = ^void {
 			[weakSelf setBookmarkPosition:startingPoint
@@ -1651,12 +1743,14 @@ static NSArray * imageResponseTemplate = nil;
 		};
 		if (previousWhatsOn == MTWhatsOnRecording) {
 			[weakSelf playOnTiVo:previousRecordingID withCompletionHandler:^(BOOL restorePlaySuccess) {
-				[weakSelf sendKeyEvent: @"pause"  withCompletion: finishUp];
+				finishUp();
 			}];
 		} else {
 			[weakSelf jumpToPosition:startingPoint withCompletionHandler:^(BOOL success2){
-				[weakSelf sendKeyEvent: @"liveTv" withCompletion: finishUp];
+				[weakSelf afterDelay:delay1 launchBlock:^{
+					[weakSelf sendKeyEvent: @"liveTv" withCompletion: finishUp];
 			}];
+		}];
 		}
 		}];
 	  	}];
@@ -1668,7 +1762,7 @@ static NSArray * imageResponseTemplate = nil;
 		}];
 		}];
 		}];
-	}];
+		}];
 }
 
 #pragma mark System Interactions
