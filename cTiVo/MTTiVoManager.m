@@ -1560,34 +1560,35 @@ __DDLOGHERE__
 		if (index == NSNotFound) {
 			for (MTDownload *oldDownload in _downloadQueue) {  //this is probably unncessary
 				if (oldDownload.show.showID == download.show.showID	) {
-					DDLogMajor(@"Odd: two shows with same ID: %@ in queue v %@", download, oldDownload);
+					DDLogReport(@"Odd: two shows with same ID: %@ in queue v %@", download, oldDownload);
 					index = [_downloadQueue indexOfObjectIdenticalTo:oldDownload];
 					break;
 				}
 			}
 		}
 		if (index != NSNotFound) {
-			MTDownload *oldDownload = _downloadQueue[index];
 			[itemsToRemove addIndex:index];
-            [oldDownload cancel];
-			if (![self sharedShowWith:oldDownload]) {
-				[oldDownload.show.tiVo cancelCommercialingForShow: oldDownload.show];
-				oldDownload.show.isQueued = NO;
-			}
-			oldDownload.downloadStatus = @kMTStatusRemovedFromQueue;
 		}
 	}
 	
 	if (itemsToRemove.count > 0) {
 		DDLogVerbose(@"Deleted downloads: %@", itemsToRemove);
 		[_downloadQueue removeObjectsAtIndexes:itemsToRemove];
+		for (MTDownload * download in downloads) {
+			[download cancel];
+			if (![self sharedShowWith:download]) {
+				[download.show.tiVo cancelCommercialingForShow: download.show];
+				download.show.isQueued = NO;
+			}
+			download.downloadStatus = @kMTStatusRemovedFromQueue;
+
+		}
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadStatusChanged object:nil];
 		NSNotification *downloadQueueNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:downloadQueueNotification afterDelay:4.0];
 	} else {
 		DDLogDetail(@"No shows to delete?");
-
 	}
 }
 
