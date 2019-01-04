@@ -11,7 +11,7 @@
 
 @interface MTFormatPopUpButton : NSPopUpButton
 
-@property (strong) id owner;
+@property (weak) id owner;
 @property (nonatomic, strong) NSArray * formatList;
 @property (nonatomic, assign) BOOL showHidden;
 

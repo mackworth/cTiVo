@@ -42,10 +42,12 @@ __DDLOGHERE__
 //    mTTask.task  = [NSTask new];
     mTTask.download = download;
     mTTask.taskName = name;
-    if ([mTTask.task respondsToSelector:@selector(setQualityOfService:)]) {  //os10.0 and later
-        mTTask.task.qualityOfService = NSQualityOfServiceUtility;
+    if (@available (macOS 10.10, *)) {
+        if ([mTTask.task respondsToSelector:@selector(setQualityOfService:)]) {  //os10.10 and later
+            mTTask.task.qualityOfService = NSQualityOfServiceUtility;
+        }
     }
-    NSString * tmpDir = [tiVoManager tmpFilesDirectory];
+    NSString * tmpDir = download.tmpDirectory;
     if (tmpDir) {
         mTTask.task.currentDirectoryPath = tmpDir;  //just protective
     } else {
@@ -82,16 +84,17 @@ __DDLOGHERE__
 	}
 	[self cleanUp];
 	_taskName = taskName;
+    NSError * error = nil;
     if (self.download) {
-        self.logFilePath = [NSString stringWithFormat:@"%@/%@%@.txt",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
-        if (![[NSFileManager defaultManager] createFileAtPath:_logFilePath contents:[NSData data] attributes:nil]) {
-            DDLogReport(@"Could not create logfile at %@",_logFilePath);
+        self.logFilePath = [NSString stringWithFormat:@"%@/%@%@.txt",self.download.tmpDirectory,taskName,self.download.baseFileName];
+        if (![[NSData data] writeToFile:self.logFilePath options:0 error:&error]) {
+            DDLogReport(@"Could not create logfile at %@: %@",_logFilePath, error);
         }
         self.logFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:_logFilePath];
         self.logFileReadHandle	= [NSFileHandle fileHandleForReadingAtPath:_logFilePath];
-        self.errorFilePath = [NSString stringWithFormat:@"%@/%@%@.err",tiVoManager.tmpFilesDirectory,taskName,self.download.baseFileName];
-        if (![[NSFileManager defaultManager] createFileAtPath:_errorFilePath contents:[NSData data] attributes:nil]) {
-            DDLogReport(@"Could not create errfile at %@",_logFilePath);
+        self.errorFilePath = [NSString stringWithFormat:@"%@/%@%@.err",self.download.tmpDirectory,taskName,self.download.baseFileName];
+        if (![[NSData data] writeToFile:self.errorFilePath options:0 error:&error]) {
+            DDLogReport(@"Could not create errfile at %@:%@",_errorFilePath, error);
         }
         self.errorFileHandle = [NSFileHandle fileHandleForWritingAtPath:_errorFilePath];
         
@@ -108,7 +111,7 @@ __DDLOGHERE__
         if (self.errorFileHandle) {
             [self setStandardError:self.errorFileHandle];
         } else {
-            DDLogReport(@"%@ Could not read error file at %@",taskName, _errorFilePath);
+            DDLogReport(@"%@ Could not write error file at %@",taskName, _errorFilePath);
         }
     }
 }
@@ -122,8 +125,14 @@ __DDLOGHERE__
 	}
 	[self terminate];
 
+	usleep (100);
+	[self saveLogFile];
 	//following line has important side effect that it lets the task do whatever it needs to do to terminate before killing it dead in dealloc
-	[self performSelector:@selector(saveLogFile) withObject:self afterDelay:2.0];
+	[self performSelector:@selector(doNothing) withObject:self afterDelay:2.0];
+}
+
+-(void) doNothing {
+	
 }
 
 -(void)cleanUp
@@ -163,11 +172,8 @@ __DDLOGHERE__
         title = [title stringByAppendingString: @" for "];
         title = [title stringByAppendingString: [_task.launchPath lastPathComponent]];
     }
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-    NSString * subtitle = @"Please let us know Mac model at cTiVo's help site";
-#else
+
     NSString * subtitle = @"You may need '10.7' version of cTiVo";
-#endif
     [tiVoManager notifyWithTitle: title
                       subTitle: subtitle ];
     [self.download cancel];
@@ -202,6 +208,7 @@ __DDLOGHERE__
     } else {
         if (_completionHandler) {
 			if(!_completionHandler()) { //The task actually failed
+				_completionHandler = nil;
 				[self failedTaskCompletion];
 				return;
 			}
@@ -218,7 +225,7 @@ __DDLOGHERE__
 
 	if (!_download.isCanceled && _shouldReschedule){
 		_myTaskChain.beingRescheduled = YES;
-		[_download rescheduleShowWithDecrementRetries:@YES];
+		[_download rescheduleDownload];
     } else {
         // a non-critical task; so just continue
     }
@@ -337,7 +344,7 @@ __DDLOGHERE__
         }
         return argument;
     }];
-    desc = [desc stringByAppendingFormat:@"\nLaunchPath: %@ %@", _task.launchPath, [arguments componentsJoinedByString:@" "]];
+    desc = [desc stringByAppendingFormat:@"\nLaunchPath: %@ %@", _task.launchPath, [[arguments componentsJoinedByString:@" "] maskMediaKeys]] ;
     desc = [desc stringByAppendingFormat:@"\n%@ output pipe",_requiresOutputPipe ? @"Requires" : @"Does not require"];
     desc = [desc stringByAppendingFormat:@"\nStandard Input: %@",_task.standardInput];
     desc = [desc stringByAppendingFormat:@"\nStandard Output: %@",_task.standardOutput];
@@ -363,8 +370,9 @@ __DDLOGHERE__
 -(void)setLaunchPath:(NSString *)path
 {
     if (path.length > 0) {
-        if ([[NSFileManager defaultManager]  fileExistsAtPath:path]) {
-            if ([[NSFileManager defaultManager]  isExecutableFileAtPath:path]) {
+        BOOL isDir = NO;
+        if ([[NSFileManager defaultManager]  fileExistsAtPath:path isDirectory:&isDir ]) {
+            if (!isDir && [[NSFileManager defaultManager]  isExecutableFileAtPath:path]) {
                 [_task setLaunchPath:path];
             } else {
                 DDLogReport(@"Error: %@ file at path %@ not marked as executable", self.taskName, path);
@@ -419,6 +427,16 @@ __DDLOGHERE__
     }
     if (shouldLaunch) {
         DDLogVerbose(@"Launching: %@",self);
+        NSFileManager * fm = [NSFileManager defaultManager];
+        NSString * errorString = nil;
+        if ([fm fileExistsAtPath:_task.currentDirectoryPath]) {
+            errorString = [NSString stringWithFormat: @"current folder %@ exists", _task.currentDirectoryPath];
+        } else {
+            DDLogReport(@"Error on launch: No current directory %@", _task.currentDirectoryPath);
+            NSError * error = nil;
+           [fm createDirectoryAtPath:_task.currentDirectoryPath withIntermediateDirectories:YES  attributes: nil error: &error];
+            errorString = error.localizedDescription;
+        }
         @try {
             [_task launch];
             launched = YES;
@@ -435,6 +453,7 @@ __DDLOGHERE__
             [info setValue:exception.callStackReturnAddresses forKey:@"MTExceptionCallStackReturnAddresses"];
             [info setValue:exception.callStackSymbols forKey:@"MTExceptionCallStackSymbols"];
             [info setValue:exception.userInfo forKey:@"MtExceptionUserInfo"];
+            [info setValue:errorString forKey:@"MtExceptionTmpError"];
             [info setValue:desc forKey:@"MTExceptionTaskInfo"];
 
             NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:1 userInfo:info];

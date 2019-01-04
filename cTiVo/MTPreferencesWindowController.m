@@ -39,20 +39,7 @@
 		[thisController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
 		[tabViewItem.view addSubview:thisController.view];
 	}
-	
-//	NSTabViewItem *tabViewItem = [tabView tabViewItemAtIndex:[tabView indexOfTabViewItemWithIdentifier:@"TiVos"]];
-//	NSRect tabViewFrame = ((NSView *)tabViewItem.view).frame;
-//	NSRect editorViewFrame = manualTiVoEditorController.view.frame;
-//	[manualTiVoEditorController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
-//	[tabViewItem.view addSubview:manualTiVoEditorController.view];
-//
-//	tabViewItem = [tabView tabViewItemAtIndex:[tabView indexOfTabViewItemWithIdentifier:@"Formats"]];
-//	tabViewFrame = ((NSView *)tabViewItem.view).frame;
-//	editorViewFrame = formatEditorController.view.frame;
-//	[formatEditorController.view setFrameOrigin:NSMakePoint((tabViewFrame.size.width - editorViewFrame.size.width)/2.0, tabViewFrame.size.height - editorViewFrame.size.height)];
-//
-//	[tabViewItem.view addSubview:formatEditorController.view];
-	
+
 	if (_startingTabIdentifier && _startingTabIdentifier.length) {
 		NSTabViewItem *itemToSelect = [_myTabView tabViewItemAtIndex:[_myTabView indexOfTabViewItemWithIdentifier:_startingTabIdentifier]];
 		if (itemToSelect) {
@@ -61,6 +48,7 @@
 	}
 
 	MTTabViewItem *tabViewItem = (MTTabViewItem *)[_myTabView selectedTabViewItem];
+	self.window.preventsApplicationTerminationWhenModal = NO;
 	[self.window setFrame:[self getNewWindowRect:tabViewItem] display:NO];
 	_ignoreTabItemSelection = NO;
 }
@@ -78,10 +66,6 @@
 	}
 }
 
--(void)awakeFromNib
-{
-}
-
 -(IBAction)shouldCloseSheet:(id)sender
 {
 	MTTabViewItem *selectedItem = (MTTabViewItem *)[_myTabView selectedTabViewItem];
@@ -90,27 +74,42 @@
 		shouldClose = [selectedItem.windowController windowShouldClose:@{@"Target" : self , @"Argument" : @"", @"Selector" : @"closeSheet:"}];
 	}
 	if (shouldClose) {
+		[self closeSheet:sender];
+	}
+}
+
+-(IBAction)closeSheet:(id)sender
+{
+	if (self.window.sheetParent) {
+		[self.window.sheetParent endSheet:self.window returnCode:NSModalResponseOK ];
+	} else {
 		[NSApp endSheet:self.window];
 		[self.window orderOut:nil];
 	}
 }
 
-
-
--(IBAction)closeSheet:(id)sender
-{
-	[NSApp endSheet:self.window];
-	[self.window orderOut:nil];
-}
-
 -(NSRect)getNewWindowRect:(MTTabViewItem *)tabViewItem
 {
-	NSSize viewSize = ((NSViewController *)tabViewItem.windowController).view.frame.size;
+	NSRect viewFrame = ((NSViewController *)tabViewItem.windowController).view.frame;
+	NSSize viewSize = viewFrame.size;
 	NSSize newSize = NSMakeSize(viewSize.width+40, viewSize.height + 100);
-	NSRect frame = self.window.frame;
+//	NSLog(@"Current frame = %@",NSStringFromRect(viewFrame));
+//	NSLog(@"Main window = %@",NSStringFromRect([NSApp windows][0].frame));
+//	NSLog(@"Key window = %@",NSStringFromRect([NSApp keyWindow].frame));
+//	NSLog(@"SheetParent window = %@",NSStringFromRect(self.window.sheetParent.frame));
+//	NSLog(@"Pref window = %@",NSStringFromRect(self.window.frame));
+	NSWindow * parent = self.window.sheetParent ?: [NSApp mainWindow];
+	if (!parent) parent = self.window;
+	NSRect frame = parent.contentView.frame;
 	double newXOrigin = frame.origin.x + (frame.size.width - newSize.width)/2.0;
 	double newYOrigin = frame.origin.y + frame.size.height - newSize.height;
-	return NSMakeRect(newXOrigin, newYOrigin, newSize.width, newSize.height);
+	NSRect windowInFrame = NSMakeRect(newXOrigin, newYOrigin, newSize.width, newSize.height);
+	NSRect newRect  = [parent convertRectToScreen:windowInFrame];
+//	NSLog(@"ContentFrame = %@",NSStringFromRect(frame));
+//	NSLog(@"windowInFrame = %@",NSStringFromRect(windowInFrame));
+//	NSLog(@"New window = %@",NSStringFromRect(newRect));
+//	NSLog(@"");
+	return newRect;
 }
 
 #pragma mark - Tab View Delegate

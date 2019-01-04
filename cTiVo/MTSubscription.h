@@ -26,8 +26,9 @@
 @property (nonatomic, strong) NSMutableArray *prevRecorded;
 //Dictionary with keys; showTitle, episodeID, startTime, TivoName
 
+@property (nonatomic, strong) NSString *stationCallSign;
 @property (nonatomic, strong) NSNumber *addToiTunes;
-@property (nonatomic, strong) NSNumber *skipCommercials, *includeSuggestions, *markCommercials;
+@property (nonatomic, strong) NSNumber *skipCommercials, *includeSuggestions, *markCommercials, *useSkipMode;
 @property (nonatomic, strong) MTFormat *encodeFormat;
 @property (nonatomic, strong) NSNumber *genTextMetaData,
 #ifndef deleteXML
@@ -36,7 +37,6 @@
 #endif
 									   *exportSubtitles;
 
-@property (readonly) BOOL canSimulEncode;
 @property (readonly) BOOL canAddToiTunes;
 @property (readonly) BOOL shouldAddToiTunes;
 @property (readonly) BOOL canSkipCommercials;

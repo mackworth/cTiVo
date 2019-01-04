@@ -1,8 +1,5 @@
-@interface MTIsStringEmpty : NSValueTransformer {
-	
-}
+#import "MTIsStringEmpty.h"
 
-@end
 
 @implementation MTIsStringEmpty
 
@@ -13,12 +10,6 @@
 	return [NSNumber numberWithBool: ((NSString *) value).length  == 0];
 }
 
-
-@end
-
-@interface MTEmptyString : NSValueTransformer {
-	
-}
 
 @end
 
@@ -44,7 +35,16 @@
     }
     return retValue;
 }
+@end
 
+@implementation MTPlural //Yes if more than one 
+
++ (Class)transformedValueClass { return [NSNumber class]; }
++ (BOOL)allowsReverseTransformation { return NO; }
+- (id)transformedValue:(id)value {
+	
+	return [NSNumber numberWithBool: ((NSNumber *) value).integerValue > 1];
+}
 
 @end
 

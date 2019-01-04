@@ -7,6 +7,7 @@
 //
 
 #import "NSString+Helpers.h"
+#include <sys/xattr.h>
 
 @implementation NSString (Helpers)
 
@@ -77,7 +78,7 @@
 +(NSString *) stringWithEndofFileHandle:(NSFileHandle *) logHandle numBytes:(NSUInteger) numBytes {
     unsigned long long logFileSize = [logHandle seekToEndOfFile];
     if (logFileSize == 0)  return @"";
-    if (logFileSize <  numBytes) numBytes = (NSUInteger)logFileSize;
+    if (logFileSize <  (unsigned long long) numBytes) numBytes = (NSUInteger)logFileSize;
     [logHandle seekToFileOffset:(logFileSize-numBytes)];
     NSData *tailOfFile = [logHandle readDataOfLength:numBytes];
     if (tailOfFile.length == 0) return @"";
@@ -92,5 +93,82 @@
     return [NSString stringWithEndofFileHandle:logHandle numBytes:backup];
 }
 
+-(BOOL) hasCaseInsensitivePrefix: (NSString *) prefix {
+    NSRange prefixRange = [self rangeOfString:prefix
+                                      options:(NSAnchoredSearch | NSCaseInsensitiveSearch)];
+    return prefixRange.location == 0 ;
+}
+
+-(NSString *) removeParenthetical {
+    NSUInteger locOpen = [self rangeOfString:@"("].location;
+    NSUInteger locClose = [self rangeOfString:@")"].location;
+
+    if (locOpen != NSNotFound &&
+        locClose != NSNotFound &&
+        locOpen < locClose) {
+        return [self stringByReplacingCharactersInRange:NSMakeRange(locOpen, locClose-locOpen+1) withString:@""];
+    } else {
+        return self;
+    }
+
+
+}
+
+-(NSString *) escapedQueryString {
+    //do not use with whole URL, only with parts that are "quoted" within the query part of URL
+
+    return (NSString *) CFBridgingRelease (
+    CFURLCreateStringByAddingPercentEscapes(NULL,
+                                            (CFStringRef)self,
+                                            NULL,
+                                            CFSTR("￼=,$&+;@?\n\"<>#\t :/"),
+                                            kCFStringEncodingUTF8)) ;
+
+}
+
+-(NSString *) pathForParentDirectoryWithName: (NSString *) parent {
+    NSString * searchParent = self;
+    //if we're doing
+    while (searchParent.length > 1 && ![parent isEqualToString: [searchParent lastPathComponent]]) {
+        searchParent = [searchParent stringByDeletingLastPathComponent];
+    }
+    if ([parent isEqualToString: [searchParent lastPathComponent]]) {
+        return searchParent;
+    } else {
+        return self;
+    }
+}
+
+-(NSString *) getXAttr:(NSString *) key  {
+    NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
+    ssize_t len = getxattr([self fileSystemRepresentation], [key UTF8String], (void *)[buffer bytes], 256, 0, 0);
+    if (len > 0) {
+        NSData *idData = [NSData dataWithBytes:[buffer bytes] length:(NSUInteger)len];
+        NSString  *result = [[NSString alloc] initWithData:idData encoding:NSUTF8StringEncoding];
+        return result;
+    }
+    return nil;
+}
+
+
+-(void) setXAttr:(NSString *) key toValue:(NSString *) value  {
+    NSData * data = [value dataUsingEncoding:NSUTF8StringEncoding];
+    if ( setxattr([self fileSystemRepresentation],
+             [key UTF8String],
+             [data bytes],
+             data.length,
+				   0, 0)) {
+		DDLogAlways(@"XAttr error %d for setting %@ to %@ for file %@", errno, key, value, self);
+	}
+}
+
+-(NSString *) maskSerialNumber: (NSString *) TSN  {
+	if (TSN.length > 4 && [self contains:TSN]) {
+		NSString * maskedTSN = [NSString  stringWithFormat: @"%@XXXXXXXXX%@", [TSN substringToIndex:2], [TSN substringFromIndex:(TSN.length-4)]];
+		return [self stringByReplacingOccurrencesOfString:TSN withString:maskedTSN ];
+	} else {
+		return self;
+	}
+}
 
 @end

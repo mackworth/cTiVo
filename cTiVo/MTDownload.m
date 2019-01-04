@@ -11,9 +11,13 @@
 #import "MTTiVoManager.h"
 #import "MTDownload.h"
 #import "NSString+Helpers.h"
-#include <sys/xattr.h>
 #include "mp4v2.h"
 #include "NSNotificationCenter+Threads.h"
+#include "NSURL+MTURLExtensions.h"
+#include "NSDate+Tomorrow.h"
+#include "MTWeakTimer.h"
+#import <Carbon/Carbon.h>
+
 #ifndef DEBUG
 #import "Crashlytics/Crashlytics.h"
 #endif
@@ -21,8 +25,31 @@
 
 @interface MTDownload ()
 
+//Task Flow Types
+// bit 0 = Subtitle
+// bit 1 = Simultaneous download/encoding
+// bit 2 = Skip Com
+// bit 3 = Mark Com
+//no 12-15 because skipCom <==> ! markCom
+
+typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
+	kMTTaskFlowNonSimu = 0,
+	kMTTaskFlowSubtitles = 1,
+	kMTTaskFlowSimu = 2,
+	kMTTaskFlowSimuSubtitles = 3,
+	kMTTaskFlowSkipcom = 4,
+	kMTTaskFlowSkipcomSubtitles = 5,
+	kMTTaskFlowSimuSkipcom = 6,
+	kMTTaskFlowSimuSkipcomSubtitles = 7,
+	kMTTaskFlowMarkcom = 8,
+	kMTTaskFlowMarkcomSubtitles = 9,
+	kMTTaskFlowSimuMarkcom = 10,
+	kMTTaskFlowSimuMarkcomSubtitles = 11
+};
+
 @property (nonatomic, strong) MTTiVoShow * show;
 @property (nonatomic, strong) NSString *downloadDirectory;
+@property (nonatomic, strong) NSString *tmpDirectory;
 
 @property (nonatomic, strong) NSFileHandle  *bufferFileWriteHandle;
 //we read from EITHER bufferFileReadHandle or urlBuffer (if memory-based and encoder keeping up with Tivo)
@@ -44,13 +71,13 @@
 
 @property (atomic, assign) double displayedProcessProgress;
 
-@property (nonatomic, readonly) NSString *downloadDir;
-@property (strong, nonatomic) NSString *keywordPathPart; // any extra layers of directories due to keyword template
-
 @property (nonatomic) MTTask *decryptTask, *encodeTask, *commercialTask, *captionTask;
 
 @property (nonatomic, strong) NSDate *startTimeForPerformance;
 @property (nonatomic, assign) double startProgressForPerformance;
+@property (nonatomic, assign) NSTimeInterval downloadDelay;
+@property (nonatomic, strong) NSDate *downloadDelayStart;
+
 @property (nonatomic, strong) NSTimer * performanceTimer;
 @property (nonatomic, assign) int numZeroSpeeds;
 @property (nonatomic, assign) BOOL useTransportStream;
@@ -60,10 +87,11 @@
 @property (atomic, assign) double speed;
 
 @property (atomic, assign) BOOL volatile isRescheduled, downloadingShowFromTiVoFile, downloadingShowFromMPGFile;
+@property (nonatomic, assign) MTTaskFlowType taskFlowType;
 
 @property (nonatomic, strong) NSString *baseFileName,
 *tivoFilePath,  //For reading .tivo file from a prev run (not implemented; reuse bufferFilePath?)
-*mpgFilePath,   //For reading decoded .mpg from a prev run (not implemented; reuse decryptedFilePath?)
+//*mpgFilePath,   //For reading decoded .mpg from a prev run (not implemented; reuse decryptedFilePath?)
 *bufferFilePath,  //downloaded show prior to decryption; .tivo if complete, .bin if not (due to memory buffer usage)
 *decryptedFilePath, //show after decryption; .mpg
 *encodeFilePath, //show after encoding (e.g. MP4)
@@ -71,6 +99,7 @@
 *nameLockFilePath, //.lck to ensure we don't save to same file name twice
 *captionFilePath; //.srt after caption processing
 
+@property (nonatomic, strong) NSTimer * waitForSkipModeInfoTimer;
 
 @end
 
@@ -110,7 +139,8 @@ __DDLOGHERE__
 -(void) setupNotifications {
     [self addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
     [self addObserver:self forKeyPath:@"processProgress" options:NSKeyValueObservingOptionOld context:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationDownloadRowChanged object:nil];
+   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatMayHaveChanged) name:kMTNotificationFormatListUpdated object:nil];
 }
 
 -(id) copyWithZone:(NSZone *)zone {
@@ -118,10 +148,10 @@ __DDLOGHERE__
     if (download) {
         download.show = _show;
         download.encodeFormat = _encodeFormat;
-        download.downloadDirectory = _downloadDirectory;
         download.downloadStatus= @(kMTStatusNew);
         download.exportSubtitles = _exportSubtitles;
-        download.skipCommercials = _skipCommercials;
+		download.useSkipMode = _useSkipMode;
+		download.skipCommercials = _skipCommercials;
         download.markCommercials = _markCommercials;
         download.genTextMetaData = _genTextMetaData;
         [download prepareForDownload:NO];
@@ -130,12 +160,25 @@ __DDLOGHERE__
     return download;
 }
 
+-(void) setShow:(MTTiVoShow *)show {
+	if (show != _show) {
+		if (_show) {
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:kMTNotificationFoundSkipModeInfo object: _show ];
+			if (![tiVoManager sharedShowWith:self]) _show.isQueued = NO;
+		}
+		_show = show;
+		if (show) {
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(skipModeUpdated:) name:kMTNotificationFoundSkipModeInfo object: show];
+			show.isQueued = YES;
+		}
+	}
+}
+
 //always use this initializer; not init
-+(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format intoDirectory: (NSString *) downloadDirectory withQueueStatus: (NSInteger) status {
++(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format withQueueStatus: (NSInteger) status {
     MTDownload * download = [[MTDownload alloc] init];
     download.show = show;
     download.encodeFormat = format;
-    download.downloadDirectory = downloadDirectory;
     download.downloadStatus= @(status);
     [download setupNotifications];
     return download;
@@ -143,11 +186,12 @@ __DDLOGHERE__
 
 +(MTDownload *) downloadTestPSForShow:(MTTiVoShow *) show {
     MTFormat * testFormat = [tiVoManager testPSFormat];
-    MTDownload * download = [self downloadForShow:show withFormat: testFormat intoDirectory:[tiVoManager tmpFilesDirectory] withQueueStatus: kMTStatusNew];
-    download.exportSubtitles = NO;
+    MTDownload * download = [self downloadForShow:show withFormat: testFormat withQueueStatus: kMTStatusNew];
+    download.exportSubtitles = @NO;
     download.skipCommercials = NO;
-    download.markCommercials = NO;
-    download.genTextMetaData = NO;
+	download.useSkipMode = NO;
+	download.markCommercials = NO;
+    download.genTextMetaData = @NO;
     download.numRetriesRemaining = 0;
     return download;
 }
@@ -155,7 +199,6 @@ __DDLOGHERE__
 -(void)prepareForDownload: (BOOL) notifyTiVo {
     //set up initial parameters for download before submittal; can also be used to resubmit while still in DL queue
     if (self.downloadStatus.intValue == kMTStatusDeleted) return;
-    self.show.isQueued = YES;
     if (self.isInProgress) {
         [self cancel];
     }
@@ -168,15 +211,13 @@ __DDLOGHERE__
         self.numRetriesRemaining = (int) [[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries];
         self.numStartupRetriesRemaining = kMTMaxDownloadStartupRetries;
     }
-    if (!self.downloadDirectory) {
-        self.downloadDirectory = tiVoManager.downloadDirectory;
-    }
-    if (!self.isNew){
-        [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
-    }
+    self.downloadDirectory = nil;
+
+	self.downloadStatus = @(kMTStatusNew);
+	[self skipModeCheck]; //redundant
     if (notifyTiVo) {
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
-    }
+		[self checkQueue];
+	}
 }
 
 -(void)progressUpdated {
@@ -186,29 +227,29 @@ __DDLOGHERE__
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath compare:@"downloadStatus"] == NSOrderedSame) {
 		DDLogMajor(@"Changing DL status of %@ to %@ (%@)", object, [(MTDownload *)object showStatus], [(MTDownload *)object downloadStatus]);
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadRowChanged object:object];
-        if (self.performanceTimer) {
-            //if previous scheduled either cancel or cancel/restart
-            [self cancelPerformanceTimer];
-            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-        }
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadStatusChanged object:object];
+		[self skipModeCheck];
+		[self cancelPerformanceTimer];
+		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
          if (self.isInProgress) {
-             self.performanceTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
+             self.performanceTimer = [MTWeakTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(launchPerformanceTimer:) userInfo:nil repeats:NO];
              [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
          }
-        if (self.downloadStatus.intValue == kMTStatusEncoding) {
-            //if done downloading, then maybe taskchain needs to update progress
-            if (!(_encodeTask.progressCalc || _encodeTask.trackingRegEx)) {
-                self.activeTaskChain.providesProgress = YES;
-            }
-        }
+		//if done downloading, then maybe taskchain needs to update progress
+		if (self.downloadStatus.intValue == kMTStatusEncoding) {
+			self.activeTaskChain.providesProgress = !(_encodeTask.progressCalc || _encodeTask.trackingRegEx);
+		} else if (self.downloadStatus.intValue == kMTStatusCaptioning) {
+			self.activeTaskChain.providesProgress = !(_captionTask.progressCalc || _captionTask.trackingRegEx);
+		}
     } else if ([keyPath isEqualToString:@"processProgress"]) {
-        DDLogVerbose(@"%@ at %0.1f%%", self.show, self.processProgress*100);
-        double progressChange = self.processProgress - self.displayedProcessProgress;
-        if (progressChange > 0.02 || progressChange < -0.02) { //only update if enough change.
-            self.displayedProcessProgress = self.processProgress;
+        double progressChange = ABS(self.processProgress - self.displayedProcessProgress);
+        if (progressChange > 0.02) { //only update if enough change.
+            DDLogVerbose(@"%@ at %0.1f%%", self, self.processProgress*100);
+           self.displayedProcessProgress = self.processProgress;
             [self progressUpdated];
         }
+	} else {
+		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 
@@ -222,7 +263,7 @@ __DDLOGHERE__
 #pragma mark Performance timer for UI
 -(void) launchPerformanceTimer:(NSTimer *) timer {
     //start Timer after 5 seconds
-    self.performanceTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updatePerformance:) userInfo:nil repeats:YES];
+    self.performanceTimer = [MTWeakTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updatePerformance:) userInfo:nil repeats:YES];
     self.startTimeForPerformance = [NSDate date];
     self.startProgressForPerformance = self.processProgress;
     DDLogVerbose(@"creating performance timer");
@@ -246,11 +287,11 @@ __DDLOGHERE__
         if (recentSpeed < 0.0) recentSpeed = 0.0;
         if (recentSpeed == 0.0) {
             self.numZeroSpeeds ++;
-            if (self.numZeroSpeeds > 3) {
+            if (self.numZeroSpeeds > 9) {
                 //not getting much data; hide meter
-                if (self.numZeroSpeeds == 4) {
+                if (self.numZeroSpeeds == 10) {
                     self.speed = 0.0;
-                    DDLogVerbose(@"Four measurements of zero; hide speed");
+                    DDLogVerbose(@"ten measurements of zero; hide speed");
                     [self progressUpdated];
                 }
             }
@@ -272,11 +313,28 @@ __DDLOGHERE__
 }
 
 -(NSString *) timeLeft {
+	if (self.downloadStatus.intValue == kMTStatusWaiting) {
+		if (!self.downloadDelayStart) return nil;
+		NSTimeInterval actualTimeLeft = self.downloadDelay - [[NSDate date] timeIntervalSinceDate: self.downloadDelayStart];
+		return [NSString stringFromTimeInterval:  actualTimeLeft];
+	}
     if (!self.isInProgress) return nil;
     if (self.speed == 0.0) return nil;
     NSTimeInterval actualTimeLeft = self.show.fileSize *(1-self.processProgress) /self.speed;
     if (actualTimeLeft == 0.0) return nil;
     return [NSString stringFromTimeInterval:  actualTimeLeft];
+}
+
+-(void) updateDownloadDelay {
+	NSTimeInterval soFar = [[NSDate date] timeIntervalSinceDate: self.downloadDelayStart];
+	NSTimeInterval length = self.downloadDelay;
+	if (soFar > length) {
+		self.downloadStatus = @(kMTStatusDownloading);
+		self.processProgress = 0.0;
+	} else {
+		self.processProgress = soFar/length;
+		[self performSelector:@selector(updateDownloadDelay) withObject:nil afterDelay:0.2];
+	}
 }
 
 #pragma mark - Queue encoding/decoding methods for persistent queue, copy/paste, and drag/drop
@@ -288,10 +346,10 @@ __DDLOGHERE__
 	[self.show encodeWithCoder:encoder];
 	[encoder encodeObject:[NSNumber numberWithBool:self.addToiTunesWhenEncoded] forKey: kMTSubscribediTunes];
 	[encoder encodeObject:@(self.skipCommercials) forKey: kMTSubscribedSkipCommercials];
+	[encoder encodeObject:@(self.useSkipMode) forKey: kMTSubscribedUseSkipMode];
 	[encoder encodeObject:@(self.markCommercials) forKey: kMTSubscribedMarkCommercials];
 	[encoder encodeObject:self.encodeFormat.name forKey:kMTQueueFormat];
 	[encoder encodeObject:self.downloadStatus forKey: kMTQueueStatus];
-	[encoder encodeObject: self.downloadDirectory forKey: kMTQueueDirectory];
 	[encoder encodeObject: self.encodeFilePath forKey: kMTQueueFinalFile] ;
 	[encoder encodeObject: self.genTextMetaData forKey: kMTQueueGenTextMetaData];
 #ifndef deleteXML
@@ -310,13 +368,13 @@ __DDLOGHERE__
 								   @(self.show.showID), kMTQueueID,
 								   @(self.addToiTunesWhenEncoded), kMTSubscribediTunes,
 								   @(self.skipCommercials), kMTSubscribedSkipCommercials,
+								   @(self.useSkipMode), kMTSubscribedUseSkipMode,
 								   @(self.markCommercials), kMTSubscribedMarkCommercials,
 								   self.show.showTitle, kMTQueueTitle,
 								   self.show.tiVoName, kMTQueueTivo,
 								   nil];
 	if (self.encodeFormat.name) [result setValue:self.encodeFormat.name forKey:kMTQueueFormat];
 	if (self.downloadStatus)    [result setValue:self.downloadStatus forKey:kMTQueueStatus];
-	if (self.downloadDirectory) [result setValue:self.downloadDirectory forKey:kMTQueueDirectory];
 	if (self.encodeFilePath)    [result setValue:self.encodeFilePath forKey: kMTQueueFinalFile];
 	if (self.genTextMetaData)   [result setValue:self.genTextMetaData forKey: kMTQueueGenTextMetaData];
 #ifndef deleteXML
@@ -332,7 +390,7 @@ __DDLOGHERE__
 	NSInteger queueID = [queueEntry[kMTQueueID] integerValue];
 	BOOL result = (queueID == self.show.showID) && ([self.show.tiVoName compare:queueEntry[kMTQueueTivo]] == NSOrderedSame);
 	if (result && [self.show.showTitle compare:queueEntry[kMTQueueTitle]] != NSOrderedSame) {
-		DDLogReport(@"Very odd, but reloading anyways: same ID: %ld same TiVo:%@ but different titles: <<%@>> vs <<%@>>",queueID, queueEntry[kMTQueueTivo], self.show.showTitle, queueEntry[kMTQueueTitle] );
+		DDLogReport(@"Very odd, but reloading anyways: same ID: %ld same TiVo:%@ but different titles: <<%@>> vs <<%@>>",queueID, queueEntry[kMTQueueTivo], self, queueEntry[kMTQueueTitle] );
 	}
 	return result;
 	
@@ -349,7 +407,7 @@ __DDLOGHERE__
     NSInteger queueStatus = ((NSNumber *)queueEntry[kMTQueueStatus]).integerValue;
     if (queueStatus < kMTStatusDone) queueStatus = kMTStatusNew;
 
-    MTDownload *download = [MTDownload downloadForShow:fakeShow withFormat:format intoDirectory:queueEntry[kMTQueueDirectory] withQueueStatus: queueStatus];
+    MTDownload *download = [MTDownload downloadForShow:fakeShow withFormat:format  withQueueStatus: queueStatus];
     if (format.isTestPS) {
         download.numRetriesRemaining = 0;
         download.numStartupRetriesRemaining = 0;
@@ -359,10 +417,12 @@ __DDLOGHERE__
     }
 	download.addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
 	download.skipCommercials = [queueEntry[kMTSubscribedSkipCommercials ]  boolValue];
+	download.useSkipMode = [queueEntry[kMTSubscribedUseSkipMode ]  boolValue]; //could be nil, but that works.
 	download.markCommercials = [queueEntry[kMTSubscribedMarkCommercials ]  boolValue];
 
-	if (download.isInProgress) download.downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
-	
+	if (download.isInProgress || download.downloadStatus.intValue == kMTStatusAwaitingPostCommercial) {
+		download.downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
+	}
 	download.encodeFilePath = queueEntry[kMTQueueFinalFile];
 	download.show.protectedShow = @YES; //until we matchup with show or not.
 	download.genTextMetaData = queueEntry[kMTQueueGenTextMetaData]; if (!download.genTextMetaData) download.genTextMetaData= @(NO);
@@ -377,33 +437,50 @@ __DDLOGHERE__
 - (id)initWithCoder:(NSCoder *)decoder {
 	//keep parallel with updateFromDecodedShow
 	if ((self = [self init])) {
-		//NSString *title = [decoder decodeObjectForKey:kTitleKey];
+		//NSString *title = [decoder decodeObjectOfClass:[NSString class] forKey:kTitleKey];
 		//float rating = [decoder decodeFloatForKey:kRatingKey];
 		self.show = [[MTTiVoShow alloc] initWithCoder:decoder ];
-		self.downloadDirectory = [decoder decodeObjectForKey: kMTQueueDirectory];
-		self.addToiTunesWhenEncoded= [[decoder decodeObjectForKey: kMTSubscribediTunes] boolValue];
-//		self.simultaneousEncode	 =   [[decoder decodeObjectForKey: kMTSubscribedSimulEncode] boolValue];
-		self.skipCommercials   =     [[decoder decodeObjectForKey: kMTSubscribedSkipCommercials] boolValue];
-		self.markCommercials   =     [[decoder decodeObjectForKey: kMTSubscribedMarkCommercials] boolValue];
-		NSString * encodeName	 = [decoder decodeObjectForKey:kMTQueueFormat];
+		self.addToiTunesWhenEncoded= [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribediTunes] boolValue];
+//		self.simultaneousEncode	 =   [decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedSimulEncode];
+		self.skipCommercials   =     [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedSkipCommercials] boolValue];
+		self.useSkipMode   =    [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedUseSkipMode] boolValue];
+		self.markCommercials   =    [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedMarkCommercials] boolValue];
+		NSString * encodeName	 = [decoder decodeObjectOfClass:[NSString class] forKey:kMTQueueFormat];
 		self.encodeFormat =	[tiVoManager findFormat: encodeName]; //minor bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is then wrong for completed/failed entries
-		self.downloadStatus		 = [decoder decodeObjectForKey: kMTQueueStatus];
-		self.encodeFilePath = [decoder decodeObjectForKey:kMTQueueFinalFile];
-		self.genTextMetaData = [decoder decodeObjectForKey:kMTQueueGenTextMetaData]; if (!self.genTextMetaData) self.genTextMetaData= @(NO);
+		self.downloadStatus		 = [decoder decodeObjectOfClass:[NSNumber class] forKey: kMTQueueStatus];
+		self.encodeFilePath = [decoder decodeObjectOfClass:[NSString class] forKey:kMTQueueFinalFile];
+		self.genTextMetaData = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueGenTextMetaData]; if (!self.genTextMetaData) self.genTextMetaData= @(NO);
 #ifndef deleteXML
-		self.genXMLMetaData = [decoder decodeObjectForKey:kMTQueueGenXMLMetaData]; if (!self.genXMLMetaData) self.genXMLMetaData= @(NO);
-		self.includeAPMMetaData = [decoder decodeObjectForKey:kMTQueueIncludeAPMMetaData]; if (!self.includeAPMMetaData) self.includeAPMMetaData= @(NO);
+		self.genXMLMetaData = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueGenXMLMetaData]; if (!self.genXMLMetaData) self.genXMLMetaData= @(NO);
+		self.includeAPMMetaData = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueIncludeAPMMetaData]; if (!self.includeAPMMetaData) self.includeAPMMetaData= @(NO);
 #endif
-		self.exportSubtitles = [decoder decodeObjectForKey:kMTQueueExportSubtitles]; if (!self.exportSubtitles) self.exportSubtitles= @(NO);
+		self.exportSubtitles = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueExportSubtitles]; if (!self.exportSubtitles) self.exportSubtitles= @(NO);
         [self setupNotifications];
 	}
 	DDLogDetail(@"initWithCoder for %@",self);
 	return self;
 }
 
++(BOOL) supportsSecureCoding {
+    return YES;
+}
+
 -(void) convertProxyToRealForShow:(MTTiVoShow *) show {
+	MTTiVoShow * formerShow = self.show;
     self.show = show;
-    self.show.isQueued = YES;
+    show.isQueued = YES;
+	if (formerShow.rpcData && !show.rpcData) show.rpcData = formerShow.rpcData;
+	if (self.downloadStatus.integerValue == kMTStatusDeleted || [formerShow.imageString isEqualToString:@"deleted"]) {
+		DDLogDetail(@"Tivo restored previously deleted show %@",show);
+		if (self.downloadStatus.intValue == kMTStatusDeleted){
+			self.downloadStatus = @(kMTStatusNew);
+		}
+		if ( self.isNew ) { //inProgress is fine, as is completelyDone.
+			[self prepareForDownload:YES];
+		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
+			[self skipModeCheck];
+		}
+	}
 }
 
 -(BOOL) isSimilarTo:(MTDownload *) testDownload {
@@ -414,15 +491,14 @@ __DDLOGHERE__
 	}
 	return ([self.show isEqual:testDownload.show] &&
 			[self.encodeFormat isEqual: testDownload.encodeFormat] &&
-			(self.encodeFilePath == testDownload.encodeFilePath || [self.encodeFilePath isEqualToString:testDownload.encodeFilePath]) &&
-			(self.downloadDirectory == testDownload.downloadDirectory || [self.downloadDirectory isEqualToString:testDownload.downloadDirectory]));
+            (self.encodeFilePath == testDownload.encodeFilePath ||
+			 [self.encodeFilePath isEqualToString:testDownload.encodeFilePath]));
 }
 
 -(NSUInteger) hash {
     return [self.show hash] ^
     [self.encodeFormat hash] ^
-    [self.encodeFilePath hash] ^
-    [self.downloadDirectory hash];
+    [self.encodeFilePath hash];
 }
 
 - (id)pasteboardPropertyListForType:(NSString *)type {
@@ -450,394 +526,97 @@ __DDLOGHERE__
 
 + (NSArray *)readableTypesForPasteboard:(NSPasteboard *)pasteboard {
 	return @[kMTDownloadPasteBoardType];
-	
 }
+
 + (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard {
 	if ([type compare:kMTDownloadPasteBoardType] ==NSOrderedSame)
 		return NSPasteboardReadingAsKeyedArchive;
 	return 0;
 }
 
-
-#pragma mark - Download/conversion file Methods
+#pragma mark - Configure files
 
 //Method called at the beginning of the download to configure all required files and file handles
-
--(void)deallocDownloadHandling
-{
-    self.commercialFilePath = nil;
-    self.commercialFilePath = nil;
-    self.encodeFilePath = nil;
-    self.bufferFilePath = nil;
-    self.urlBuffer = nil;
-    if (self.bufferFileReadHandle ) {
-        [self.bufferFileReadHandle closeFile];
-        self.bufferFileReadHandle = nil;
-    }
-    if (self.bufferFileWriteHandle) {
-        [self.bufferFileWriteHandle closeFile];
-        self.bufferFileWriteHandle = nil;
-    }
-	
-}
-
--(void)cleanupFiles
-{
-	BOOL deleteFiles = ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    DDLogDetail(@"%@ cleaningup files",self.show.showTitle);
-	if (self.nameLockFilePath) {
-		if (deleteFiles) {
-			DDLogVerbose(@"deleting Lockfile %@",self.nameLockFilePath);
-			[fm removeItemAtPath:self.nameLockFilePath error:nil];
-		}
+-(void)deallocDownloadHandling {
+	self.commercialFilePath = nil;
+	self.commercialFilePath = nil;
+	self.encodeFilePath = nil;
+	self.bufferFilePath = nil;
+	self.urlBuffer = nil;
+	if (self.bufferFileReadHandle ) {
+		[self.bufferFileReadHandle closeFile];
+		self.bufferFileReadHandle = nil;
 	}
-    if (self.encodeFormat.isTestPS) {
-        //delete final file as this was a test
-        [self deleteVideoFile];
-    }
-	//Clean up files in TmpFilesDirectory
-    NSString *tmpDir = tiVoManager.tmpFilesDirectory;
-	if (deleteFiles && tmpDir && self.baseFileName) {
-		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:tmpDir error:nil];
-		[fm changeCurrentDirectoryPath:tmpDir];
-		for(NSString *file in tmpFiles){
-			NSRange tmpRange = [file rangeOfString:self.baseFileName];
-			if(tmpRange.location != NSNotFound) {
-				DDLogVerbose(@"Deleting tmp file %@", file);
-                NSError * error = nil;
-                if ( ![fm removeItemAtPath:file error:&error]) {
-                    DDLogMajor(@"Could not delete tmp file: %@/%@ because %@", tmpDir, file, error.localizedDescription ?:@"No reason found");
-                }
-			}
-		}
+	if (self.bufferFileWriteHandle) {
+		[self.bufferFileWriteHandle closeFile];
+		self.bufferFileWriteHandle = nil;
 	}
 }
 
--(NSString *) directoryForShowInDirectory:(NSString*) tryDirectory  {
-	//Check that download directory (including show directory) exists.  If create it.  If unsuccessful return nil
-	tryDirectory = [tryDirectory stringByAppendingPathComponent:self.keywordPathPart];
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs]) {
-		NSString *whichFolder = ([self.show isMovie])  ? @"Movies"  : self.show.seriesTitle;
-		if ( ! [tryDirectory.lastPathComponent isEqualToString:whichFolder]){
-			tryDirectory = [tryDirectory stringByAppendingPathComponent:whichFolder];
-			DDLogVerbose(@"Using sub folder %@",tryDirectory);
-		}
-	}
-	if (![[NSFileManager defaultManager] fileExistsAtPath: tryDirectory]) { // try to create it
-		DDLogDetail(@"Creating folder %@",tryDirectory);
-		if (![[NSFileManager defaultManager] createDirectoryAtPath:tryDirectory withIntermediateDirectories:YES attributes:nil error:nil]) {
-			DDLogDetail(@"Couldn't create folder %@",tryDirectory);
-			return nil;
-		}
-	}
-	return tryDirectory;
-}
-
-#pragma mark - Keyword Processing:
-/*
- From KMTTG:
- [title] = The Big Bang Theory – The Loobenfeld Decay
- [mainTitle] = The Big Bang Theory
- [episodeTitle] = The Loobenfeld Decay
- [channelNum] = 702
- [channel] = KCBSDT
- [min] = 00
- [hour] = 20
- [wday] = Mon
- [mday] = 24
- [month] = Mar
- [monthNum] = 03
- [year] = 2008
- [originalAirDate] = 2007-11-20
- [EpisodeNumber] = 302
- [tivoName]
- [/]
- 
- 
- By request some more advanced keyword processing was introduced to allow for conditional text.
- 
- You can define multiple space-separated fields within square brackets.
- Fields surrounded by quotes are treated as literal text.
- A single field with no quotes should be supplied which represents a conditional keyword
- If that keyword is available for the show in question then the keyword value along with any literal text surrounding it will be included in file name.
- If the keyword evaluates to null then the entire advanced keyword becomes null.
- For example:
- [mainTitle]["_Ep#" EpisodeNumber]_[wday]_[month]_[mday]
- The advanced keyword is highlighted in bold and signifies only include “_Ep#xxx” if EpisodeNumber exists for the show in question. “_Ep#” is literal string to which the evaluated contents of EpisodeNumber keyword are appended. If EpisodeNumber does not exist then the whole advanced keyword evaluates to empty string.
- 
- Added to KMTTG: 
-startTime
- seriesEpNumber
- TivoName
- TVDBSeriesID
- plexID
-	OR (|) option, uses second keyword if first is empty
-	Embedded optional values [ this option [with this embedded option] ]
-
-
- */
-
-//test routines moved to Advanced Preferences
-
-- (NSString *) replacementForKeyword:(NSString *) key usingDictionary: (NSDictionary*) keys {
-	NSMutableString * outStr = [NSMutableString string];
-
-	NSScanner *scanner = [NSScanner scannerWithString:key];
-	[scanner setCharactersToBeSkipped:nil];
-    NSCharacterSet * whitespaceSet = [NSCharacterSet whitespaceCharacterSet];
-    NSCharacterSet * brackets = [NSCharacterSet characterSetWithCharactersInString:@"[]"];
-    BOOL skipOne = NO;  //have we found a good alternative, so skip the rest?
-    NSString * foundKey;
-
-	while (![scanner isAtEnd]) {
-		[scanner scanCharactersFromSet:whitespaceSet intoString:nil];
-		//get any literal characters
-		if ([scanner scanString:@"\"" intoString:nil]) {
-			NSString * tempString;
-			if ([scanner scanUpToString: @"\"" intoString:&tempString]) {
-                if (skipOne) {
-                    skipOne = NO;
-                } else {
-                    [outStr appendString:tempString];
-                }
-			} //else no chars scanned before quote (or end of line), so ignore this quote
-			[scanner scanString:@"\"" intoString:nil];
-			[scanner scanCharactersFromSet:whitespaceSet intoString:nil];
-		} else if ([scanner scanString:@"[" intoString:nil]) {
-            //get any recursive fields
-            NSString * tempString;
-            int numBrackets = 1;
-            NSMutableString *bracketedString = [NSMutableString string];
-            tempString = @"";
-            while (numBrackets > 0) {
-                [bracketedString appendString:tempString];  //get recursive [ if any
-                if ([scanner scanUpToCharactersFromSet:brackets intoString:&tempString]) {
-                    [bracketedString appendString:tempString];
-                }
-                if ([scanner scanString:@"[" intoString:&tempString]) {
-                    numBrackets++;
-                } else if ([scanner scanString:@"]" intoString:&tempString]) {
-                    numBrackets--;
-                }
-            }
-            [scanner scanCharactersFromSet:whitespaceSet intoString:nil];
-            if (skipOne) {
-                skipOne = NO;
-            } else {
-                [outStr appendString: [self replacementForKeyword:bracketedString usingDictionary:keys]];
-            }
-       } else if ([scanner scanString:@"|" intoString:nil]) {
-            //got an alternative, but previous one must have been good (or we'd have eaten this)
-            skipOne = YES;
-        } else  {
-            //not space, quote, alternative or recursive, so get keyword and replace with value from Dictionary
-            if ([scanner scanUpToString:@" " intoString:&foundKey]) {
-                if (skipOne) {
-                    skipOne = NO;
-                } else {
-                    foundKey = foundKey.lowercaseString;
-                    if ([keys[foundKey] length] == 0) {
-                        DDLogDetail(@"No filename key: %@",foundKey);
-                        //found invalid or empty key so entire conditional fails and should be empty; ignore everything else, unless there's an OR (vertical bar)
-                        [scanner scanCharactersFromSet:whitespaceSet intoString:nil];
-                        if ([scanner scanString:@"|" intoString:nil]) {
-                            //ah, we've got an alternative, so let's keep going
-                        } else {
-                            return @"";
-                        }
-                    } else {
-                        DDLogVerbose(@"Swapping key %@ with %@",foundKey, keys[foundKey]);
-                        [outStr appendString:keys[foundKey]];
-                    }
-                }
-            }
-		} //else no chars scanned before ] (or end of line) so ignore this
-	}
-	return [NSString stringWithString:outStr];
-}
-
-NSString * twoChar(long n, BOOL allowZero) {
-	if (!allowZero && n == 0) return @"";
-	return [NSString stringWithFormat:@"%02ld", n];
-}
-NSString * fourChar(long n, BOOL allowZero) {
-	if (!allowZero && n == 0) return @"";
-	return [NSString stringWithFormat:@"%04ld", n];
-}
-
-#define NULLT(x) (x ?: @"")
-
- -(NSString *) swapKeywordsInString: (NSString *) str {
-     NSDateComponents *components;
-     if (self.show.showDate) {
-         components = [[NSCalendar currentCalendar]
-									components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear |NSCalendarUnitWeekday  |
-									NSCalendarUnitMinute | NSCalendarUnitHour
-											fromDate:self.show.showDate];
-     } else {
-         components = [[NSDateComponents alloc] init];
-     }
-	 NSString * originalAirDate =self.show.originalAirDateNoTime;
-	 if (!originalAirDate && [components year] > 0) {
-		 originalAirDate = [NSString stringWithFormat:@"%@-%@-%@",
-											fourChar([components year], NO),
-											twoChar([components month], YES),
-											twoChar([components day], YES)];
-	 }
-	 NSString * monthName = ([components month]> 0 && [components month] != NSUndefinedDateComponent) ?
-								[[[[NSDateFormatter alloc] init] shortMonthSymbols]
-													   objectAtIndex:[components month]-1] :
-								@"";
-	 
-     NSString *TVDBseriesID = nil;
-     @synchronized (tiVoManager.tvdbSeriesIdMapping) {
-         TVDBseriesID = [tiVoManager.tvdbSeriesIdMapping objectForKey:self.show.seriesTitle]; // see if we've already done this
-     }
-	 if (!TVDBseriesID) {
-         @synchronized (tiVoManager.tvdbCache) {
-             NSDictionary *TVDBepisodeEntry = [tiVoManager.tvdbCache objectForKey:self.show.episodeID];
-		 //could provide these ,too?
-		 // NSNumber * TVDBepisodeNum = [TVDBepisodeEntry objectForKey:@"episode"];
-		 //NSNumber * TVDBseasonNum = [TVDBepisodeEntry objectForKey:@"season"];
-             TVDBseriesID = [TVDBepisodeEntry objectForKey:@"series"];
-         };
-	 }
-     NSString * guests = [[self.show.guestStars.string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@", "];
-     NSString * extraEpisode = @"";
-     if (self.show.episode && self.show.season &&   //if we have an SxxExx AND either a 2 hr show OR a semicolon in episode title, then it might be a double episode
-         ((self.show.showLength > 115*60 && self.show.showLength < 125*60) ||
-          ([self.show.episodeTitle contains:@";"]))) {
-         extraEpisode = [NSString stringWithFormat:@"E%02d",self.show.episode+1];
-     }
-	 NSDictionary * keywords = @{  //lowercase so we can just lowercase keyword when found
-		 @"/":				@"|||",						//allows [/] for subdirs
-		 @"title":			NULLT(self.show.showTitle) ,
-		 @"maintitle":		NULLT(self.show.seriesTitle),
-		 @"episodetitle":	NULLT(self.show.episodeTitle),
-		 @"channelnum":		NULLT(self.show.channelString),
-		 @"channel":		NULLT(self.show.stationCallsign),
-		 @"starttime":		NULLT(self.show.showTime),
-		 @"min":			twoChar([components minute], YES),
-		 @"hour":			twoChar([components hour], YES),
-		 @"wday":			twoChar([components weekday], NO),
-		 @"mday":			twoChar([components day], NO),
-		 @"month":			monthName,
-		 @"monthnum":		twoChar([components month], NO),
-		 @"year": 			self.show.isMovie ? @"" : fourChar([components year], NO),
- 		 @"originalairdate": originalAirDate,
-		 @"episode":		twoChar(self.show.episode, NO),
-         @"extraepisode":  NULLT(extraEpisode),
-         @"season":			twoChar(self.show.season, NO),
-		 @"episodenumber":	NULLT(self.show.episodeNumber),
-         @"StartTime":     NULLT(self.show.startTime),
-		 @"seriesepnumber": NULLT(self.show.seasonEpisode),
-         @"guests":        NULLT(guests),
-		 @"tivoname":		NULLT(self.show.tiVoName),
-		 @"movieyear":		NULLT(self.show.movieYear),
-		 @"tvdbseriesid":	NULLT(TVDBseriesID),
-         @"format":         NULLT(self.encodeFormat.name)
-//         @"plexid":        [self ifString: self.show.seasonEpisode
-//                                elseString: originalAirDate],
-//         @"plexseason":    [self ifString: twoChar(self.show.season, NO)
-//                                 elseString: fourChar([components year], NO) ]
-		 };
-	 NSMutableString * outStr = [NSMutableString string];
-	 
-	 NSScanner *scanner = [NSScanner scannerWithString:str];
-	 [scanner setCharactersToBeSkipped:nil];
-     NSCharacterSet * brackets = [NSCharacterSet characterSetWithCharactersInString:@"[]"];
-	 while (![scanner isAtEnd]) {
-		 NSString * tempString;
-		 //get any literal characters
-		 if ([scanner scanUpToString: @"[" intoString:&tempString]) {
-			 [outStr appendString:tempString];
-		 }
-		 //get keyword and replace with values
-		 if ([scanner scanString:@"[" intoString:nil]) {
-
-             int numBrackets = 1;
-             NSMutableString *bracketedString = [NSMutableString string];
-             tempString = @"";
-             while (numBrackets > 0) {
-                 [bracketedString appendString:tempString];  //get recursive [ if any
-                 if ([scanner scanUpToCharactersFromSet:brackets intoString:&tempString]) {
-                     [bracketedString appendString:tempString];
-                 }
-                if ([scanner scanString:@"[" intoString:&tempString]) {
-                     numBrackets++;
-                } else if ([scanner scanString:@"]" intoString:&tempString]) {
-                     numBrackets--;
-                 }
-            }
-			 [outStr appendString: [self replacementForKeyword:bracketedString usingDictionary:keywords]];
-		 }
-	 }
-     NSString * finalStr = [outStr stringByReplacingOccurrencesOfString:@"/" withString:@"-"]; //remove accidental directory markers
-	 finalStr = [finalStr stringByReplacingOccurrencesOfString:@"|||" withString:@"/"];  ///insert intentional ones
-	 return finalStr;
- }
-#undef Null
-
-#pragma mark - Configure files
 -(BOOL)configureBaseFileNameAndDirectory {
 	if (!self.baseFileName) {
-		// generate only once
-		NSString * baseTitle  = [self.show.showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-		NSString * filenamePattern = [[NSUserDefaults standardUserDefaults] objectForKey:kMTFileNameFormat];
-		if (filenamePattern.length >0) {
-			//we have a pattern, so generate a name that way
-			NSString *keyBaseTitle = [self swapKeywordsInString:filenamePattern];
-			DDLogDetail(@"With file pattern %@ for show %@, got %@", filenamePattern, self.show, keyBaseTitle);
-			if (keyBaseTitle.length >0) {
-				baseTitle = [keyBaseTitle lastPathComponent];
-				//note that self.downloadDir depends on keywordPathPart being set
-				self.keywordPathPart = [keyBaseTitle stringByDeletingLastPathComponent];
-			}
+        // generate only once
+        NSMutableArray * optionArray = [NSMutableArray array];
+        if (self.skipCommercials) {
+			[optionArray addObject:@"Cut"];
 		}
-		if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
-		baseTitle = [baseTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
-		if (LOG_DETAIL  && [baseTitle compare: self.show.showTitle ]  != NSOrderedSame) {
-			DDLogDetail(@"changed filename %@ to %@",self.show.showTitle, baseTitle);
+        if (self.markCommercials) {
+			[optionArray addObject:@"Mark"];
 		}
-		self.baseFileName = [self createUniqueBaseFileName:baseTitle inDownloadDir:self.downloadDir];
+        if (self.useSkipMode) {
+			[optionArray addObject:@"SkipMode"];
+		}
+        if (self.exportSubtitles.boolValue) {
+			[optionArray addObject:@"Subtitle"];
+		}
+		NSString * options = optionArray.count == 0 ? @"" : [optionArray componentsJoinedByString:@","];
+        NSString * downloadName = [self.show downloadFileNameWithFormat:self.encodeFormat.name andOptions:options  createIfNecessary:YES];
+		if (!downloadName) return NO;
+        self.downloadDirectory = [downloadName stringByDeletingLastPathComponent];
+		self.tmpDirectory = tiVoManager.tmpFilesDirectory;
+        NSString * baseTitle = [downloadName lastPathComponent];
+		if (!baseTitle) return NO;
+		self.baseFileName = [self createUniqueBaseFileName:baseTitle ];
 	}
     return self.baseFileName ? YES : NO;
 }
 
 -(void) markCompleteCTiVoFile:(NSString *) path {
-    if (path ) {
-        NSData *tiVoID = [self.show.idString dataUsingEncoding:NSUTF8StringEncoding];
-        setxattr([path cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);  //This is for a checkpoint and tell us the file is complete with show ID
-    }
-}
+    //This is for a checkpoint and tell us the file is complete with show ID
+    [path setXAttr:kMTXATTRFileComplete toValue:self.show.idString];
 
+}
 
 -(BOOL) isCompleteCTiVoFile: (NSString *) path forFileType: (NSString *) fileType {
     NSFileManager *fm = [NSFileManager defaultManager];
     if ([fm fileExistsAtPath:path]) {
-        NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
-		ssize_t len = getxattr([path cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRFileComplete UTF8String], (void *)[buffer bytes], 256, 0, 0);
-        if (len >=0) {
-            NSString *tiVoID = [[NSString alloc] initWithData:[NSData dataWithBytes:[buffer bytes] length:len] encoding:NSUTF8StringEncoding];
-            if ([tiVoID compare:self.show.idString] == NSOrderedSame) {
-                DDLogMajor(@"Found Complete %@ File at %@", fileType, path);
-                return YES;
-            }
+        NSString *tiVoID = [path getXAttr:kMTXATTRFileComplete];
+        if ([tiVoID compare:self.show.idString] == NSOrderedSame) {
+            DDLogMajor(@"Found Complete %@ File at %@", fileType, path);
+            return YES;
         }
     }
     return NO;
 }
 
--(NSString *)createUniqueBaseFileName:(NSString *)baseName inDownloadDir:(NSString *)downloadDir
-{
+-(NSString *)createUniqueBaseFileName:(NSString *)baseName {
+	if (!baseName) {
+		DDLogReport(@"No basename for %@!",self);
+		return nil;
+	}
 	NSFileManager *fm = [NSFileManager defaultManager];
-    NSString * tmpDir = tiVoManager.tmpFilesDirectory;
-    if (!tmpDir) return nil;
-    NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,self.encodeFormat.filenameExtension];
+    NSString * tmpDir = self.tmpDirectory;
+	if (!tmpDir) {
+		DDLogReport(@"No temporary directory for %@!",self);
+		return nil;
+	}
+    NSString * downloadDir = [self downloadDirectory];
+    NSString * extension = self.useTransportStream ? self.encodeFormat.transportStreamExtension :
+                                                     self.encodeFormat.filenameExtension;
+    NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,extension];
 	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tmpDir,baseName];
 	self.tivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tmpDir,baseName];
-	self.mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tmpDir,baseName];
+//	self.mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tmpDir,baseName];
     BOOL tivoFileExists = NO; // [self isCompleteCTiVoFile:self.tivoFilePath forFileType:@"TiVo"];  Note: if tivFileExists, then stomps on file w/ current basename!
     
     self.downloadingShowFromTiVoFile = NO;
@@ -862,7 +641,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 			nextBase = [baseName stringByAppendingString:@"-1"];
 			DDLogVerbose(@"found output file named %@, adding version number", baseName);
 		}
-		return [self createUniqueBaseFileName:nextBase inDownloadDir:downloadDir];
+		return [self createUniqueBaseFileName:nextBase ];
 		
 	} else {
 		DDLogDetail(@"Using baseFileName %@",baseName);
@@ -873,22 +652,38 @@ NSString * fourChar(long n, BOOL allowZero) {
 	
 }
 
--(NSString *)downloadDir  //not valid until after configureBaseFileNameAndDirectory has been called
-						  //layered on top of downloadDirectory to add subdirs and check for existence/create if necessary
-						  //maybe should change to update downloadDirectory at configureFiles time to avoid reassembling subdirs?
-{
-		NSString *ddir = [self directoryForShowInDirectory:[self downloadDirectory]];
-		
-		//go to current directory if one at show scheduling time failed
-		if (!ddir) {
-			ddir = [self directoryForShowInDirectory:[tiVoManager downloadDirectory]];
+-(long long) spaceAvailable:(NSString *) path {
+	NSError *error = nil;
+	if (@available(macOS 10.13, *)) {
+		NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:path];
+		NSDictionary *results = [fileURL resourceValuesForKeys:@[NSURLVolumeAvailableCapacityForImportantUsageKey] error:&error];
+		NSNumber * value = results[NSURLVolumeAvailableCapacityForImportantUsageKey];
+		if (!value || error) {
+			DDLogReport(@"Error retrieving Important Volume key for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
+			return LLONG_MAX;
+		} else if (value.integerValue == 0) {
+			//ZFS and SANs may return 0.
+			results = [fileURL resourceValuesForKeys:@[NSURLVolumeAvailableCapacityKey] error:&error];
+			value = results[NSURLVolumeAvailableCapacityKey];
+			if (!value || error) {
+				DDLogReport(@"Error retrieving Volme Available key for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
+				return LLONG_MAX;
+			} else if (value.longLongValue == 0){
+				DDLogReport(@"Volume for %@ shows zero space", path);
+				return 0;
+			} else {
+				return value.longLongValue;
+			}
+
+		} else {
+			DDLogDetail(@"Got space for %@: %@", path, value);
+			return value.longLongValue;
 		}
-		
-		//finally, go to default if not successful
-		if (!ddir) {
-			ddir = [self directoryForShowInDirectory:[tiVoManager defaultDownloadDirectory]];
-		}
-    return ddir;
+	} else {
+    	NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfFileSystemForPath:path error:&error];
+    	if (error || !attributes) return LLONG_MAX;
+    	return  ( (NSNumber *)[attributes objectForKey:NSFileSystemFreeSize]).longLongValue;
+	}
 }
 
 -(BOOL)configureFiles
@@ -903,15 +698,50 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (! [self configureBaseFileNameAndDirectory]) {
         return NO;
     }
+    long long tmpSpace = [self spaceAvailable: self.tmpDirectory];
+    long long downloadSpace = [self spaceAvailable: self.downloadDirectory];
+    long long fileSize = self.show.fileSize;
+    if (!self.encodeFormat.isTestPS) {
+		DDLogVerbose(@"Checking Space Available: %lldMB tmp and %lldMB file", tmpSpace/1000000, downloadSpace/1000000);
+
+		if ((tmpSpace == downloadSpace  && downloadSpace < 1.5 * fileSize) ||
+			// both on same drive
+			(downloadSpace < fileSize))  {
+			[tiVoManager pauseQueue:nil];
+			DDLogReport(@"Disk space problem: %lldMB tmp and %lldMB download vs %lldMB fileSize", tmpSpace/1000000, downloadSpace/1000000, fileSize/1000000);
+			[self notifyUserWithTitle:@"Pausing downloads: Your download disk is low on space" subTitle:@"Probably need to delete some files."];
+		   return NO;
+		} else if (tmpSpace < fileSize)  {
+			[tiVoManager pauseQueue:nil];
+			DDLogReport(@"Disk space problem: %lldMB tmp and %lld download vs %lld fileSize", tmpSpace/1000000, downloadSpace/1000000, fileSize/1000000);
+			[self notifyUserWithTitle:@"Pausing downloads: Your temporary or boot drive is low on space" subTitle:@"Probably need to delete some files."];
+		   return NO;
+		}
+	}
+    NSString * warning = nil;
+    if (downloadSpace < tiVoManager.sizeOfShowsToDownload) {
+        warning =  @"Warning: you may be getting low on disk space";
+    } else if (tmpSpace < tiVoManager.biggestShowToDownload ) {
+        warning =  @"Warning: you may be getting low on temporary space";
+    }
+    if (warning) {
+		DDLogMajor(@"Disk space warning: %lldMB tmp and %lldMB download vs %lldMB biggest show and %lldMB total shows", tmpSpace/1000000, downloadSpace/1000000, tiVoManager.biggestShowToDownload/1000000, tiVoManager.sizeOfShowsToDownload/1000000);
+        [tiVoManager notifyForName: self.show.showTitle
+                         withTitle: warning
+                          subTitle: @"Should you delete some files?"
+                          isSticky: NO
+         ];
+   }
     if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {  //We need to download from the TiVo
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload]) {
-            self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",tiVoManager.tmpFilesDirectory,self.baseFileName];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload] &&
+			!(self.useSkipMode && self.markCommercials)) { //else might need the whole file later for post-commercial
+            self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",self.tmpDirectory,self.baseFileName];
             DDLogVerbose(@"downloading to memory; buffer: %@", self.bufferFilePath);
             self.urlBuffer = [NSMutableData new];
             self.urlReadPointer = 0;
             self.bufferFileReadHandle = nil;
         } else {
-            self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tiVoManager.tmpFilesDirectory,self.baseFileName];
+            self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",self.tmpDirectory,self.baseFileName];
             DDLogVerbose(@"downloading to file: %@", self.bufferFilePath);
             [fm createFileAtPath:self.bufferFilePath contents:[NSData data] attributes:nil];
             self.bufferFileWriteHandle = [NSFileHandle fileHandleForWritingAtPath:self.bufferFilePath];
@@ -920,22 +750,22 @@ NSString * fourChar(long n, BOOL allowZero) {
         }
     }
     if (!self.downloadingShowFromMPGFile) {
-        self.decryptedFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tiVoManager.tmpFilesDirectory,self.baseFileName];
+        self.decryptedFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",self.tmpDirectory,self.baseFileName];
         DDLogVerbose(@"setting decrypt path: %@", self.decryptedFilePath);
         [[NSFileManager defaultManager] createFileAtPath:self.decryptedFilePath contents:[NSData data] attributes:nil];
     }
-	self.encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.downloadDir,self.baseFileName,self.encodeFormat.filenameExtension];
+    NSString * extension = self.useTransportStream ? self.encodeFormat.transportStreamExtension :
+                                                     self.encodeFormat.filenameExtension;
+	self.encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.downloadDirectory,self.baseFileName,extension];
 	DDLogVerbose(@"setting encodepath: %@", self.encodeFilePath);
-    self.captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDir ,self.baseFileName];
+    self.captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDirectory ,self.baseFileName];
     DDLogVerbose(@"setting self.captionFilePath: %@", self.captionFilePath);
     
-    self.commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version
+    self.commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,self.tmpDirectory, self.baseFileName];  //0.92 version
     DDLogVerbose(@"setting self.commercialFilePath: %@", self.commercialFilePath);
     
-	if (!self.encodeFormat.isTestPS &&
-        [[NSUserDefaults standardUserDefaults] boolForKey:kMTGetEpisodeArt]) {
-       NSString * filename = [tiVoManager.tmpFilesDirectory stringByAppendingPathComponent:self.baseFileName];
-        [self.show retrieveArtworkIntoFile:filename];
+	if (!self.encodeFormat.isTestPS) {
+        [self.show artWorkImage];  //make sure it's available by time we finish
  	}
     return YES;
 }
@@ -943,7 +773,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 -(NSString *) encoderPath {
 	NSString *encoderLaunchPath = [self.encodeFormat pathForExecutable];
     if (!encoderLaunchPath) {
-        DDLogReport(@"Encoding of %@ failed for %@ format, encoder %@ not found",self.show.showTitle,self.encodeFormat.name,self.encodeFormat.encoderUsed);
+        DDLogReport(@"Encoding of %@ failed for %@ format, encoder %@ not found",self,self.encodeFormat.name,self.encodeFormat.encoderUsed);
         return nil;
     } else {
         DDLogVerbose(@"using encoder: %@", encoderLaunchPath);
@@ -951,7 +781,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 	}
 }
 
-#pragma mark - Download decrypt and encode Methods
+#pragma mark - Download processing Methods
 
 //should be in an NSMutableArray extension
 -(void)addArguments:(NSString *)argString toArray:(NSMutableArray *) arguments {
@@ -987,13 +817,14 @@ NSString * fourChar(long n, BOOL allowZero) {
 {
 	NSMutableArray *arguments = [NSMutableArray array];
     MTFormat * f = self.encodeFormat;
+	BOOL includeEDL = [f.comSkip boolValue] && self.skipCommercials && [self isArgument:f.edlFlag ];
+	[self addArguments:f.encoderEarlyVideoOptions toArray:arguments];
+	[self addArguments:f.encoderEarlyAudioOptions toArray:arguments];
+	[self addArguments:f.encoderEarlyOtherOptions toArray:arguments];
     if ( [self isArgument: f.outputFileFlag] ) {
-        [self addArguments:f.encoderEarlyVideoOptions toArray:arguments];
-        [self addArguments:f.encoderEarlyAudioOptions toArray:arguments];
-        [self addArguments:f.encoderEarlyOtherOptions toArray:arguments];
         [self addArgument: f.outputFileFlag toArray:arguments];
         [self addArgument: outputFilePath toArray:arguments];
-		if ([f.comSkip boolValue] && self.skipCommercials && [self isArgument:f.edlFlag ]) {
+		if (includeEDL) {
             [self addArgument:f.edlFlag toArray:arguments];
             [self addArgument:self.commercialFilePath toArray:arguments];
 		}
@@ -1007,10 +838,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             [self addArgument:inputFilePath toArray:arguments];
 		}
     } else {
-        [self addArguments:f.encoderEarlyVideoOptions toArray:arguments];
-        [self addArguments:f.encoderEarlyAudioOptions toArray:arguments];
-        [self addArguments:f.encoderEarlyOtherOptions toArray:arguments];
-		if ([f.comSkip boolValue] && _skipCommercials && [self isArgument:f.edlFlag ]) {
+		if (includeEDL) {
             [self addArgument:f.edlFlag toArray:arguments];
             [self addArgument:self.commercialFilePath toArray:arguments];
 		}
@@ -1056,9 +884,10 @@ NSString * fourChar(long n, BOOL allowZero) {
         catTask.requiresInputPipe = NO;
     }
     if ([outputFile isKindOfClass:[NSString class]]) {
+		__weak __typeof__(self) weakSelf = self;
         catTask.completionHandler = ^BOOL(){
             if (! [[NSFileManager defaultManager] fileExistsAtPath:outputFile] ) {
-                DDLogReport(@"Warning: %@: File %@ not found after cat completion",self, outputFile );
+                DDLogReport(@"Warning: %@: File %@ not found after cat completion", weakSelf, outputFile );
             }
             return YES;
         };
@@ -1072,8 +901,12 @@ NSString * fourChar(long n, BOOL allowZero) {
         NSRange badMAKRange = [log rangeOfString:@"Invalid MAK"];
         if (badMAKRange.location != NSNotFound) {
             DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
-            DDLogVerbose(@"log file: %@",[log maskMediaKeys]);
-            [self notifyUserWithTitle:@"Decoding Failed" subTitle: @"Invalid Media Access Key? " forNotification:kMTGrowlTivodecodeFailed];
+            DDLogDetail(@"log file: %@",[log maskMediaKeys]);
+			if (self.useTransportStream) {
+				[self notifyUserWithTitle:@"Decoding Failed" subTitle: @"Either an invalid Media Access Key or just a damaged file." ];
+			} else {
+				[self notifyUserWithTitle:@"Decoding Failed" subTitle: @"Possibly invalid Media Access Key? Or try Transport Stream, or maybe just a damaged file." ];
+			}
         }
     }
 }
@@ -1083,8 +916,15 @@ NSString * fourChar(long n, BOOL allowZero) {
     if (_decryptTask) {
         return _decryptTask;
     }
-    MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
-    NSString * decoder = [[NSUserDefaults standardUserDefaults] objectForKey:kMTDecodeBinary];
+	MTTask *decryptTask = [MTTask taskWithName:@"decrypt" download:self];
+	if (self.encodeFormat.isEncryptedDownload) {
+		//don't use decrypt, just copy file to disk
+		[decryptTask setLaunchPath:@"/bin/cat"];
+		decryptTask.requiresOutputPipe = YES;
+		_decryptTask = decryptTask;
+		return _decryptTask;
+	}
+	NSString * decoder = [[NSUserDefaults standardUserDefaults] objectForKey:kMTDecodeBinary];
     NSString * decryptPath = nil;
     NSString * libreJar = nil;
     if ([decoder isEqualToString:@"TivoLibre"]) {
@@ -1096,35 +936,38 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
     if (!decryptPath) { //should never happen, but did once.
         [self notifyUserWithTitle:[NSString stringWithFormat:@"Can't Find %@", decoder]
-                         subTitle:@"Please go to cTiVo site for help!"
-                   forNotification:kMTGrowlTivodecodeFailed];
+                         subTitle:@"Please go to cTiVo site for help!"];
         DDLogReport(@"Fatal Error: decoder %@ not found???", decoder);
         return nil;
     }
     [decryptTask setLaunchPath:decryptPath] ;
     decryptTask.successfulExitCodes = @[@0,@6];
+	__weak __typeof__(self) weakSelf = self;
 
     decryptTask.completionHandler = ^BOOL(){
-        if (!self.shouldSimulEncode) {
-            if (self.downloadStatus.intValue < kMTStatusDownloaded ) {
-                [self setValue:[NSNumber numberWithInt:kMTStatusDownloaded] forKeyPath:@"downloadStatus"];
+		__typeof__(self) strongSelf = weakSelf;
+		if (!strongSelf) return NO;
+        if (!strongSelf.shouldSimulEncode) {
+            if (strongSelf.downloadStatus.intValue < kMTStatusDownloaded ) {
+                strongSelf.downloadStatus = @(kMTStatusDownloaded);
             }
             [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationDecryptDidFinish object:nil];
-            if (self.decryptedFilePath) {
-                [self markCompleteCTiVoFile: self.decryptedFilePath ];
+            if (strongSelf.decryptedFilePath) {
+                [strongSelf markCompleteCTiVoFile: self.decryptedFilePath ];
             }
         }
 
-        [self checkDecodeLog];
+        [strongSelf checkDecodeLog];
 		return YES;
     };
 	
 	decryptTask.terminationHandler = ^(){
-        [self checkDecodeLog];
+        [weakSelf checkDecodeLog];
 	};
     
     if (self.downloadingShowFromTiVoFile) {
         [decryptTask setStandardError:decryptTask.logFileWriteHandle];
+		NSUInteger fileSize = self.show.fileSize ?: 1000000000; //defensive
         decryptTask.progressCalc = ^(NSString *data){
             NSArray *lines = [data componentsSeparatedByString:@"\n"];
             double position = 0.0;
@@ -1133,59 +976,49 @@ NSString * fourChar(long n, BOOL allowZero) {
                 NSArray * words = [line componentsSeparatedByString:@":"]; //always 1
                 position= [[words objectAtIndex:0] doubleValue];
                 if (position  > 0) {
-                    return (position/self.show.fileSize);
+                    return (position/fileSize);
                 }
             };
             return 0.0;
         };
     }
 
-//    decryptTask.cleanupHandler = ^(){
-//        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-//            if ([[NSFileManager defaultManager] fileExistsAtPath:self.bufferFilePath]) {
-//                [[NSFileManager defaultManager] removeItemAtPath:self.bufferFilePath error:nil];
-//            }
-//        }
-//    };
-	NSArray *arguments = @[
+	NSArray *arguments = nil;
+	if (self.shouldPipeFromDecrypt) {
+		decryptTask.requiresOutputPipe = YES;
+		if (libreJar) {
+			arguments = @[
+						  @"-jar",
+						  libreJar,
+						  @"-m", self.show.tiVo.mediaKey,
+						  @"-d"
+						  ];
+		} else {
+			arguments =@[
+						 @"-m", self.show.tiVo.mediaKey,
+						 @"-v",
+						 @"--",
+						 @"-"
+						 ];
+		}
+	} else {
+		decryptTask.requiresOutputPipe = NO;
+		if (libreJar) {
+			arguments = @[
+						  @"-jar",
+						  libreJar,
+						  @"-m",self.show.tiVo.mediaKey,
+						  @"-d",
+						  @"-o", self.decryptedFilePath
+						  ];
+		} else {
+			arguments = @[
 						  @"-m",self.show.tiVo.mediaKey,
 						  @"-o",self.decryptedFilePath,
 						  @"-v",
-                          @"-"
-                          ];
-    if (libreJar) {
-        arguments = @[
-                      @"-jar",
-                      libreJar,
-                      @"-m",self.show.tiVo.mediaKey,
-                      @"-d",
-                      @"-o", self.decryptedFilePath
-                      ];
-    }
-    decryptTask.requiresOutputPipe = NO;
-    if (self.exportSubtitles.boolValue || self.shouldSimulEncode) {  //use stdout to pipe to captions  or simultaneous encoding
-        arguments =@[
-                     @"-m", self.show.tiVo.mediaKey,
-                     @"-v",
-                     @"--",
-                     @"-"
-                     ];
-        if (libreJar) {
-            arguments = @[
-                          @"-jar",
-                          libreJar,
-                          @"-m", self.show.tiVo.mediaKey,
-                          @"-d"
-                          ];
-        }
-        decryptTask.requiresOutputPipe = YES;
-        //Not using the filebuffer so remove so it can act as a flag upon completion.
-        if (!self.skipCommercials && !self.exportSubtitles.boolValue && !self.markCommercials) {
-            if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-                [[NSFileManager defaultManager] removeItemAtPath:self.decryptedFilePath error:nil];
-            };
-            self.decryptedFilePath = nil;
-        }
+						  @"-"
+						  ];
+		}
     }
     [decryptTask setArguments:arguments];
     DDLogDetail(@"Decrypt Arguments: %@",[[arguments componentsJoinedByString:@" "] maskMediaKeys]);
@@ -1193,47 +1026,101 @@ NSString * fourChar(long n, BOOL allowZero) {
     return _decryptTask;
 }
 
-
 -(MTTask *)encodeTask
 {
     if (_encodeTask) {
         return _encodeTask;
     }
     MTTask *encodeTask = [MTTask taskWithName:@"encode" download:self];
+	
     NSString * encoderPath = [self encoderPath];
     if (!encoderPath) return nil;
     [encodeTask setLaunchPath:encoderPath];
     encodeTask.requiresOutputPipe = NO;
+	__weak __typeof__(self) weakSelf = self;
 
     encodeTask.completionHandler = ^BOOL(){
-        if (! [[NSFileManager defaultManager] fileExistsAtPath:self.encodeFilePath] ) {
-            DDLogReport(@" %@ encoding complete, but the video file not found: %@ ",self, self.encodeFilePath );
+		__typeof__(self) strongSelf = weakSelf;
+        if (! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.encodeFilePath] ) {
+            DDLogReport(@" %@ encoding complete, but the video file not found: %@ ",strongSelf, strongSelf.encodeFilePath );
             return NO;
         }
-        unsigned long long fileSize = [[[NSFileManager defaultManager] attributesOfItemAtPath:self.encodeFilePath error:nil] fileSize];
+        unsigned long long fileSize = [[[NSFileManager defaultManager] attributesOfItemAtPath:strongSelf.encodeFilePath error:nil] fileSize];
         if (fileSize == 0) {
-            DDLogReport(@" %@ encoding complete, but empty file found: %@",self, self.encodeFilePath );
+            DDLogReport(@" %@ encoding complete, but empty file found: %@",strongSelf, strongSelf.encodeFilePath );
             return NO;
         }
-        [self setValue:[NSNumber numberWithInt:kMTStatusEncoded] forKeyPath:@"downloadStatus"];
-        self.processProgress = 1.0;
-       if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
-            [self writeMetaDataFiles];
-            [self finishUpPostEncodeProcessing];
-        }
+        strongSelf.downloadStatus = @(kMTStatusEncoded);
+        strongSelf.processProgress = 1.0;
+		//normally when encode finished, we're all done, except when we have parallel tasks still running, or follow-on tasks to come.
+		BOOL notDone = NO;
+		switch (strongSelf.taskFlowType) {
+			case kMTTaskFlowSimuSubtitles:
+				notDone = strongSelf->_captionTask.isRunning;
+				if (notDone) strongSelf.downloadStatus = @(kMTStatusCaptioning);
+				break;
+			case kMTTaskFlowMarkcom:
+			case kMTTaskFlowMarkcomSubtitles:
+				notDone = strongSelf->_commercialTask.isRunning;
+				if (notDone) strongSelf.downloadStatus = @(kMTStatusCommercialing);
+			break;
+			case kMTTaskFlowSimuMarkcom :
+			case kMTTaskFlowSimuMarkcomSubtitles :
+				notDone = YES; //always run commercial after encoder
+				if (notDone) strongSelf.downloadStatus = @(kMTStatusCommercialing);
+				break;
+			default:
+				break;
+		}
+		if (!notDone) {
+			[strongSelf finishUpPostEncodeProcessing];
+		}
+
         return YES;
     };
-
+	NSString * errFilePath = encodeTask.errorFilePath; //hang onto for cleanup.
     encodeTask.cleanupHandler = ^(){
-        if (self.activeURLConnection || ! self.shouldSimulEncode) {  //else we've already checked
-            if ([self checkLogForAudio: _encodeTask.errorFilePath] ) {
-                [self handleNewTSChannel];
-            }
-            self.processProgress = 1.0;
-        }
-       if (self.isCanceled) {
-           [self deleteVideoFile];
-       }
+		__typeof__(self) strongSelf = weakSelf;
+		if (!strongSelf) return;
+		if (strongSelf.isCanceled) {
+			[strongSelf deleteVideoFile];
+			return;
+		}
+		double downloadedSize = strongSelf.totalDataDownloaded;
+		double filePercent =  downloadedSize/ strongSelf.show.fileSize*100;
+		if (filePercent > 0 &&
+			(filePercent < 70.0 || (!strongSelf.useTransportStream && filePercent < 80.0 ))) {
+			//hmm, doesn't look like it's big enough  (80% for PS; 70% for TS
+			BOOL foundAudioOnly = NO;
+			if (!strongSelf.useTransportStream ) {
+				if ([strongSelf checkLogForAudio: errFilePath]) {
+					foundAudioOnly = YES;
+				}
+				if (!strongSelf.encodeFormat.testsForAudioOnly && filePercent > 2.0 && filePercent < 25.0) {
+					//decrypted file, so encoder won't check, so rely on size alone
+					foundAudioOnly = YES;
+				}
+			}
+			
+			if ( strongSelf.encodeFormat.isTestPS) {
+				// if a test, then we only try once.
+				[strongSelf markMyChannelAsTSOnly];
+				[strongSelf cancel];
+				if (foundAudioOnly) {
+					strongSelf.downloadStatus = @(kMTStatusFailed);
+				} else {
+					strongSelf.downloadStatus = @(kMTStatusDone);
+				}
+				strongSelf.processProgress = 1.0;
+			} else if (foundAudioOnly) {
+				[strongSelf handleNewTSChannel];
+			} else {
+				  //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
+				DDLogReport(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", strongSelf.show, strongSelf.show.fileSize/1000, downloadedSize/1000, 100.0 * downloadedSize / strongSelf.show.fileSize);
+				[strongSelf notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
+								 subTitle:@"Transfer is too short" ];
+			}
+		}
     };
 
     encodeTask.terminationHandler = nil;
@@ -1246,23 +1133,25 @@ NSString * fourChar(long n, BOOL allowZero) {
             encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:self.encodeFilePath];
             encodeTask.requiresInputPipe = YES;
             __block NSPipe *encodePipe = [NSPipe new];
-            [encodeTask setStandardInput:encodePipe];
+			[encodeTask setStandardInput:encodePipe]; ///XXX maybe delete;
             encodeTask.startupHandler = ^BOOL(){
-                if ([self isCompleteCTiVoFile:self.encodeFilePath forFileType:@"Encoded"]){
+				__typeof__(self) strongSelf = weakSelf;
+                if ([strongSelf isCompleteCTiVoFile:self.encodeFilePath forFileType:@"Encoded"]){
                     return NO;
                 }
 
-                if (self.bufferFileReadHandle) {
-                    [self.bufferFileReadHandle closeFile];
+                if (strongSelf.bufferFileReadHandle) {
+                    [strongSelf.bufferFileReadHandle closeFile];
                 }
-                self.bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:self.decryptedFilePath];
-                self.urlBuffer = nil;
-                self.taskChainInputHandle = [encodePipe fileHandleForWriting];
-                self.processProgress = 0.0;
-                self.previousProcessProgress = 0.0;
-                self.totalDataRead = 0.0;
-                [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-                [self performSelectorInBackground:@selector(writeData) withObject:nil];
+                strongSelf.bufferFileReadHandle = [NSFileHandle fileHandleForReadingAtPath:self.decryptedFilePath];
+                strongSelf.urlBuffer = nil;
+                strongSelf.taskChainInputHandle = [encodePipe fileHandleForWriting];
+				strongSelf.activeTaskChain.dataSource = encodePipe;
+                strongSelf.processProgress = 0.0;
+                strongSelf.previousProcessProgress = 0.0;
+                strongSelf.totalDataRead = 0.0;
+                strongSelf.downloadStatus = @(kMTStatusEncoding);
+                [strongSelf performSelectorInBackground:@selector(writeData) withObject:nil];
                 return YES;
             };
 
@@ -1287,23 +1176,20 @@ NSString * fourChar(long n, BOOL allowZero) {
                             returnValue =  [[data substringWithRange:valueRange] doubleValue]/100.0;
                             DDLogVerbose(@"Encoder progress found data %lf",returnValue);
                         }
-
                     }
                     if (returnValue == -1.0) {
-                        DDLogMajor(@"Encode progress with RX %@ failed for task encoder for show %@\nEncoder report: %@",percents, self.show.showTitle, data);
-
+                        DDLogMajor(@"Encode progress with RX %@ failed for task encoder for show %@\nEncoder report: %@",percents, weakSelf, data);
                     }
                     return returnValue;
                 };
             };
             encodeTask.startupHandler = ^BOOL(){
-                self.processProgress = 0.0;
-                [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
+                weakSelf.processProgress = 0.0;
+                if (!weakSelf.isDownloading) weakSelf.downloadStatus = @(kMTStatusEncoding);
                 return YES;
             };
         }
     }
-
 
     [encodeTask setArguments:encoderArgs];
     DDLogDetail(@"encoderArgs: %@",encoderArgs);
@@ -1313,11 +1199,11 @@ NSString * fourChar(long n, BOOL allowZero) {
 
 -(void) fixupSRTsDueToCommercialSkipping {
     NSArray *srtEntries = [NSArray getFromSRTFile:self.captionFilePath];
-    NSArray *edlEntries = [NSArray getFromEDLFile:self.commercialFilePath];
+    NSArray *edlEntries = self.show.edlList;
     if (srtEntries.count && edlEntries.count) {
         NSArray *correctedSrts = [srtEntries processWithEDLs:edlEntries];
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-            NSString *oldCaptionPath = [[self.captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"2.srt"];
+            NSString *oldCaptionPath = [[self.captionFilePath stringByDeletingPathExtension] stringByAppendingString:@"-deleted.srt"];
             [[NSFileManager defaultManager] moveItemAtPath:self.captionFilePath toPath:oldCaptionPath error:nil];
         }
         if (correctedSrts.count) {
@@ -1327,18 +1213,22 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
 }
 
--(MTTask *)captionTask  //Captioning is done in parallel with download so no progress indicators are needed.
-{
-    NSAssert(self.exportSubtitles.boolValue,@"captionTask not requested");
+-(MTTask *)captionTask { //Captioning is done in parallel with download so no progress indicators are needed.
+	NSAssert(self.exportSubtitles.boolValue,@"captionTask not requested");
     if (_captionTask) {
         return _captionTask;
     }
+	if (!self.captionFilePath) {
+		self.captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDirectory ,self.baseFileName];
+	}
     MTTask *captionTask = [MTTask taskWithName:@"caption" download:self completionHandler:nil];
     [captionTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ccextractor" ]];
     captionTask.requiresOutputPipe = NO;
     captionTask.shouldReschedule  = NO;  //If captioning fails continue, just without captioning
+	__weak __typeof__(self) weakSelf = self;
 
     if (self.downloadingShowFromMPGFile) {
+		NSUInteger showLength = self.show.showLength ?: 120*60;
         captionTask.progressCalc = ^double(NSString *data){
             NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\d+:\\d\\d" options:NSRegularExpressionCaseInsensitive error:nil];
             NSArray *values = nil;
@@ -1354,44 +1244,62 @@ NSString * fourChar(long n, BOOL allowZero) {
 					NSString *timeString = [data substringWithRange:valueRange];
 					NSArray *components = [timeString componentsSeparatedByString:@":"];
 					double currentTimeOffset = [components[0] doubleValue] * 60.0 + [components[1] doubleValue];
-					returnValue = (currentTimeOffset/self.show.showLength);
+					returnValue = (currentTimeOffset/showLength);
 				}
-                
+				
             }
 			if (returnValue == -1.0){
-                DDLogMajor(@"Track progress with Rx failed for task caption for show %@: %@",self.show.showTitle, data);
+                DDLogMajor(@"Track progress with Rx failed for task caption for show %@: %@",self, data);
             }
 			return returnValue;
         };
         if (!self.encodeFormat.canSimulEncode) {
             captionTask.startupHandler = ^BOOL(){
-                self.processProgress = 0.0;
-                [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
+                weakSelf.processProgress = 0.0;
+                weakSelf.downloadStatus = @(kMTStatusCaptioning);
                 return YES;
             };
         }
     }
 
-    
+	__weak __typeof__(MTTask *) weakCaption = captionTask;
+
     captionTask.completionHandler = ^BOOL(){
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
-        if ( self.skipCommercials && _commercialTask.successfulExit) {
-            [self fixupSRTsDueToCommercialSkipping];
+		__typeof__(self) strongSelf = weakSelf;
+        //commercial or caption might finish first.
+        if ( strongSelf.skipCommercials &&
+			((!self.useSkipMode && strongSelf->_commercialTask.successfulExit) ||
+			 (self.useSkipMode && self.show.edlList.count > 0))) {
+            [strongSelf fixupSRTsDueToCommercialSkipping];
         }
-        [self markCompleteCTiVoFile:self.captionFilePath];
+        [strongSelf markCompleteCTiVoFile:strongSelf.captionFilePath];
 		return YES;
     };
     
     captionTask.cleanupHandler = ^(){
-        if (_captionTask.taskFailed) {
-            [self notifyUserWithTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" forNotification:kMTGrowlCommercialDetFailed];
+		__typeof__(self) strongSelf = weakSelf;
+       if (weakCaption.taskFailed) {
+            [strongSelf notifyUserWithTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" ];
         }
+		if (strongSelf.taskFlowType == kMTTaskFlowSimuSubtitles &&
+			strongSelf->_encodeTask.successfulExit) {
+				[strongSelf finishUpPostEncodeProcessing];
+		} else if (strongSelf.downloadStatus.intValue == kMTStatusCaptioning) {
+			if ((strongSelf.taskFlowType == kMTTaskFlowSkipcomSubtitles) ||
+			    (strongSelf.taskFlowType == kMTTaskFlowSimuSkipcomSubtitles)) {
+				//strongSelf.downloadStatus = @(kMTStatusCommercialing); commercial startup sets this
+			} else if (strongSelf.taskFlowType == kMTTaskFlowMarkcomSubtitles) {
+				//strongSelf.downloadStatus = @(kMTStatusEncoding); //encode startup sets this
+			}
+
+		}
         if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] &&
-            (self.isCanceled)) {
-            if ([[NSFileManager defaultManager] fileExistsAtPath:self.captionFilePath]) {
-                [[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
+            (strongSelf.isCanceled)) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.captionFilePath]) {
+                [[NSFileManager defaultManager] removeItemAtPath:strongSelf.captionFilePath error:nil];
             }
-            self.captionFilePath = nil;
+            strongSelf.captionFilePath = nil;
         }
     };
     
@@ -1413,9 +1321,35 @@ NSString * fourChar(long n, BOOL allowZero) {
     return captionTask;
 }
 
+#ifdef DEBUG
+- (void)writeAndAppendString:(NSString *)str toFile:(NSString *)fileName {
+	
+	NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
+	
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	if (0 < [paths count]) {
+		NSString *documentsDirPath = [paths objectAtIndex:0];
+		NSString *filePath = [documentsDirPath stringByAppendingPathComponent:fileName];
+		
+		NSFileManager *fileManager = [NSFileManager defaultManager];
+		if ([fileManager fileExistsAtPath:filePath]) {
+			// Add the text at the end of the file.
+			NSFileHandle *fileHandler = [NSFileHandle fileHandleForUpdatingAtPath:filePath];
+			[fileHandler seekToEndOfFile];
+			[fileHandler writeData:data];
+			[fileHandler closeFile];
+		} else {
+			// Create the file and write text to it.
+			[data writeToFile:filePath atomically:YES];
+		}
+	}
+}
+#endif
+
 -(MTTask *)commercialTask
 {
-    NSAssert(self.skipCommercials || self.markCommercials ,@"Commercial Task not requested?");
+	BOOL postCommercialing = self.downloadStatus.intValue == kMTStatusAwaitingPostCommercial; //this is a stand-alone commercialing due to not eventually getting a SkipMode list
+    NSAssert(self.runComskipNow || (postCommercialing) ,@"Commercial Task not requested?");
 
     if (_commercialTask) {
         return _commercialTask;
@@ -1428,33 +1362,39 @@ NSString * fourChar(long n, BOOL allowZero) {
     commercialTask.shouldReschedule  = NO;  //If comskip fails continue just without commercial inputs
     [commercialTask setStandardError:commercialTask.logFileWriteHandle];  //progress data is in err output
     
-    
-    commercialTask.cleanupHandler = ^(){
-        if (_commercialTask.taskFailed) {
-            if ([self checkLogForAudio: self.commercialTask.logFilePath]) {
-                [self handleNewTSChannel];
-            } else {
-                [self notifyUserWithTitle:@"Detecting Commercials Failed" subTitle:@"Not processing commercials" forNotification:kMTGrowlCommercialDetFailed];
+	__weak __typeof__(self) weakSelf = self;
+	__weak __typeof__(MTTask *) weakCommercial = commercialTask;
 
-                if ([[NSFileManager defaultManager] fileExistsAtPath:self.commercialFilePath]) {
-                    [[NSFileManager defaultManager] removeItemAtPath:self.commercialFilePath error:nil];
+    commercialTask.cleanupHandler = ^(){
+		__typeof__(self) strongSelf = weakSelf;
+		__typeof__(MTTask *) strongCommercial = weakCommercial;
+		if (!strongSelf || !strongCommercial) return;
+        if (weakCommercial.taskFailed) {
+            if ([strongSelf checkLogForAudio: strongCommercial.logFilePath]) {
+                [strongSelf handleNewTSChannel];
+            } else {
+                [strongSelf notifyUserWithTitle:@"Detecting Commercials Failed" subTitle:@"Not processing commercials" ];
+
+                if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.commercialFilePath]) {
+                    [[NSFileManager defaultManager] removeItemAtPath:strongSelf.commercialFilePath error:nil];
                 }
                 NSData *zeroData = [NSData data];
-                [zeroData writeToFile:self.commercialFilePath atomically:YES];
-                if (_commercialTask.completionHandler) _commercialTask.completionHandler();
+                [zeroData writeToFile:strongSelf.commercialFilePath atomically:YES];
+                if (strongCommercial.completionHandler) strongCommercial.completionHandler();
             }
         }
     };
-
-    if (self.taskFlowType != kMTTaskFlowNonSimuMarkcom && self.taskFlowType != kMTTaskFlowNonSimuMarkcomSubtitles) {
-        // For these cases the encoding tasks is the driver
+	
+	BOOL parallelToEncode = self.taskFlowType == kMTTaskFlowMarkcom || self.taskFlowType == kMTTaskFlowMarkcomSubtitles;
+	//if parallel to encoding, commercialing doesn't do progress or download status updates
+    if (postCommercialing || !parallelToEncode ) {
         commercialTask.startupHandler = ^BOOL(){
-            self.processProgress = 0.0;
-            [self setValue:[NSNumber numberWithInt:kMTStatusCommercialing] forKeyPath:@"downloadStatus"];
+            weakSelf.processProgress = 0.0;
+			weakSelf.downloadStatus = postCommercialing ?  @kMTStatusPostCommercialing :  @kMTStatusCommercialing;
             return YES;
         };
 
-        NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)\\%" options:NSRegularExpressionCaseInsensitive error:nil];
+		NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:@"(\\d+)(?:.\\d*)?\\%" options:NSRegularExpressionCaseInsensitive error:nil];
         commercialTask.progressCalc = ^double(NSString *data){
             if (!data) return 0.0;
             NSArray *values = [percents matchesInString:data options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, data.length)];
@@ -1462,33 +1402,53 @@ NSString * fourChar(long n, BOOL allowZero) {
             NSRange valueRange = [lastItem rangeAtIndex:1];
             return [[data substringWithRange:valueRange] doubleValue]/100.0;
         };
+	}
+	__weak __typeof__(MTTask *) weakCaption = _captionTask;
 
-    
-        commercialTask.completionHandler = ^BOOL{
-            DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
-             if (self.taskFlowType != kMTTaskFlowSimuMarkcom && self.taskFlowType != kMTTaskFlowSimuMarkcomSubtitles) {
-				 if (!self.shouldSimulEncode) {
-					self.processProgress = 1.0;
-				 }
-				[self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
-				if (self.exportSubtitles.boolValue && self.skipCommercials && self.captionFilePath && _captionTask.successfulExit) {
-                    [self fixupSRTsDueToCommercialSkipping];
+	commercialTask.completionHandler = ^BOOL{
+		__typeof__(self) strongSelf = weakSelf;
+		if (! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.commercialFilePath] ) {
+			DDLogMajor(@"Warning: %@: File %@ not found after comskip completion", weakSelf, strongSelf.commercialFilePath );
+			return NO;
+		}
+
+		DDLogMajor(@"Finished detecting commercials in %@",strongSelf);
+		strongSelf.show.edlList = [NSArray getFromEDLFile:strongSelf.commercialFilePath];
+#ifdef DEBUG
+		if (strongSelf.show.edlList != strongSelf.show.rpcData.edlList &&
+			strongSelf.show.edlList.count && strongSelf.show.rpcData.edlList.count) {
+			NSString * compareEDLs = [strongSelf.show.rpcData.edlList compareEDL: strongSelf.show.edlList];
+			NSString * output = [NSString stringWithFormat:@"%@\n%@",strongSelf.show.showTitle,compareEDLs];
+			[strongSelf writeAndAppendString:output toFile:@"CompareEDLs"];
+		}
+#endif
+		if (postCommercialing) {
+			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  // Free up an encoder / update UI
+			[strongSelf finalFinalProcessing];
+		} else {
+			strongSelf.downloadStatus = @(kMTStatusCommercialed);
+			if (strongSelf.skipCommercials) {
+			 	//commercialing pre-encoding
+				strongSelf.processProgress = 1.0;
+				if (strongSelf.exportSubtitles.boolValue &&  strongSelf.captionFilePath && weakCaption.successfulExit) {
+					[strongSelf fixupSRTsDueToCommercialSkipping];
 				}
-             } else {
-                 self.processProgress = 1.0;
-                 [self setValue:[NSNumber numberWithInt:kMTStatusCommercialed] forKeyPath:@"downloadStatus"];
-                 [self writeMetaDataFiles];
-                 [self finishUpPostEncodeProcessing];
-             }
-            [self markCompleteCTiVoFile:self.commercialFilePath];
-            return YES;
-        };
-    } else {
-        commercialTask.completionHandler = ^BOOL{
-            DDLogMajor(@"Finished detecting commercials in %@",self.show.showTitle);
-			return YES;
-        };
-    }
+			} else if (strongSelf->_encodeTask.successfulExit) {
+				//either parallel and finished, or post-encoding
+				strongSelf.processProgress = 1.0;
+				[strongSelf finishUpPostEncodeProcessing];
+			} else {
+				//parallel and not finished
+				strongSelf.downloadStatus = @(kMTStatusEncoding);
+			}
+		 }
+		return YES;
+	};
+	if (postCommercialing) {
+		commercialTask.terminationHandler = ^{
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self];  // Free up an encoder / update UI
+    	};
+	}
 
 	NSMutableArray *arguments = [NSMutableArray array];
     [self addArguments:self.encodeFormat.comSkipOptions toArray:arguments];
@@ -1500,7 +1460,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     
     if ((self.taskFlowType == kMTTaskFlowSimuMarkcom || self.taskFlowType == kMTTaskFlowSimuMarkcomSubtitles) && [self canPostDetectCommercials]) {
         [arguments addObject:self.encodeFilePath]; //Run on the final file for these conditions
-        self.commercialFilePath = [NSString stringWithFormat:@"%@/%@.edl" ,tiVoManager.tmpFilesDirectory, self.baseFileName];  //0.92 version  (probably wrong, but not currently used)
+        self.commercialFilePath = [NSString stringWithFormat:@"%@/%@.edl" ,self.tmpDirectory, self.baseFileName];  //0.92 version  (probably wrong, but not currently used)
     } else {
         [arguments addObject:self.decryptedFilePath];// Run this on the output of tivodecode
     }
@@ -1512,35 +1472,14 @@ NSString * fourChar(long n, BOOL allowZero) {
   
 }
 
-//Task Flow Types
-// bit 0 = Subtitle
-// bit 1 = Simultaneous download/encoding
-// bit 2 = Skip Com
-// bit 3 = Mark Com
-//no 12-15 because skipCom <==> ! markCom
-
-typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
-    kMTTaskFlowNonSimu = 0,
-    kMTTaskFlowNonSimuSubtitles = 1,
-    kMTTaskFlowSimu = 2,
-    kMTTaskFlowSimuSubtitles = 3,
-    kMTTaskFlowNonSimuSkipcom = 4,
-    kMTTaskFlowNonSimuSkipcomSubtitles = 5,
-    kMTTaskFlowSimuSkipcom = 6,
-    kMTTaskFlowSimuSkipcomSubtitles = 7,
-    kMTTaskFlowNonSimuMarkcom = 8,
-    kMTTaskFlowNonSimuMarkcomSubtitles = 9,
-    kMTTaskFlowSimuMarkcom = 10,
-    kMTTaskFlowSimuMarkcomSubtitles = 11
-};
-
--(MTTaskFlowType)taskFlowType
+-(MTTaskFlowType)calculateTaskFlowType
 {
-  return (MTTaskFlowType)
+	BOOL runComskip = self.runComskipNow;
+	return (MTTaskFlowType)
           1 * (int) self.exportSubtitles.boolValue +
           2 * (int) self.encodeFormat.canSimulEncode +
-          4 * (int) self.skipCommercials +
-          8 * (int) self.markCommercials;
+          4 * (int) (self.skipCommercials && runComskip) +
+          8 * (int) (self.markCommercials && runComskip);
 }
 
 -(void)launchDownload
@@ -1560,16 +1499,22 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 channelUsesTS == NSOnState ||                   //user specified TS for this channel OR
                 (channelUsesTS == NSMixedState && channelPSFailed == NSOnState )); //user didn't care, but we've seen need
     }
-
+	if (self.encodeFormat.isEncryptedDownload) {
+		self.skipCommercials = NO;
+		self.markCommercials = NO;
+		self.exportSubtitles = @NO;
+	}
     BOOL channelCommercialsOff = [tiVoManager commercialsForChannel:channelName] == NSOffState;
     if ((channelCommercialsOff) &&
         (self.skipCommercials || self.markCommercials)) {
         //this channel doesn't use commercials
-        DDLogMajor(@"Channel %@ doesn't use commercials; overriding  for %@",self.show.stationCallsign, self.show);
+        DDLogMajor(@"Channel %@ doesn't use commercials; overriding  for %@",self.show.stationCallsign, self);
         self.skipCommercials = NO;
         self.markCommercials = NO;
     }
-	DDLogReport(@"Starting %d download for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@%@; %@",
+	[self skipModeCheck];
+	self.taskFlowType = [self calculateTaskFlowType];
+	DDLogReport(@"Starting download (type %d) for %@; Format: %@; %@%@%@%@%@%@%@%@%@%@%@; %@",
 				(int)self.taskFlowType,
 				self,
 				self.encodeFormat.name ,
@@ -1577,11 +1522,12 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                     @"simul encode" :
                     @"",
 				self.skipCommercials ?
-					@" Skip commercials;" :
+					@" Skip commercials" :
                     @"",
                 self.markCommercials ?
-					 @" Mark commercials;" :
+					 @" Mark commercials" :
 					 @"",
+				self.runComskipNow ? @" with Comskip;" : @";",
 				self.addToiTunesWhenEncoded ?
 					@" Add to iTunes;" :
 					@"",
@@ -1597,29 +1543,32 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 				[defaults boolForKey:kMTSaveTmpFiles] ?
 					@" Save Temp files;" :
 					@"",
-				[defaults boolForKey:kMTUseMemoryBufferForDownload]?
+				self.urlBuffer?
 					@"" :
 					@" No Memory Buffer;",
-               [defaults boolForKey:kMTGetEpisodeArt] ?
-                    @" " :
-					@" No TVDB art; ",
                [defaults objectForKey:kMTDecodeBinary],
                self.useTransportStream ? @"Transport Stream" : @"Program Stream"
 				);
 	self.isCanceled = NO;
 	self.isRescheduled = NO;
     self.progressAt100Percent = nil;  //Reset end of progress failure delay
-    //Before starting make sure we can launch.
-	if (![self encoderPath] || ! [self configureFiles]) {
+	//Before starting make sure we can launch.
+	if (![self encoderPath]) {
+		self.downloadStatus = @(kMTStatusFailed);
+		self.processProgress = 1.0;
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
+		return;
+	}
+	if ( ! [self configureFiles]) {
         DDLogReport(@"Cancelling launch");
-        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
-        self.processProgress = 1.0;
-        [self progressUpdated];
-        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
+		[self rescheduleDownloadFalseStart];
 		return;
 	}
 
-    self.decryptTask = self.encodeTask = self.commercialTask = self.captionTask = nil; //make sure we're not reusing an old task from previous run.
+	self.decryptTask = nil;
+	self.encodeTask = nil;
+	self.commercialTask = nil;
+	self.captionTask = nil; //make sure we're not reusing an old task from previous run.
     self.activeTaskChain = [MTTaskChain new];
     self.activeTaskChain.download = self;
     if (!self.downloadingShowFromMPGFile && !self.downloadingShowFromTiVoFile) {
@@ -1629,10 +1578,15 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     } else if (self.downloadingShowFromTiVoFile) {
         self.activeTaskChain.dataSource = self.tivoFilePath;
         DDLogMajor(@"Downloading from file tivo file %@",self.tivoFilePath);
-    } else if (self.downloadingShowFromMPGFile) {
-        DDLogMajor(@"Downloading from file MPG file %@",self.mpgFilePath);
-        self.activeTaskChain.dataSource = self.mpgFilePath;
+//    } else if (self.downloadingShowFromMPGFile) {
+//        DDLogMajor(@"Downloading from file MPG file %@",self.mpgFilePath);
+//        self.activeTaskChain.dataSource = self.mpgFilePath;
     }
+	if (self.hasEDL && self.shouldSkipCommercials  ){
+		if (![self.show.edlList writeToEDLFile:self.commercialFilePath] ) {
+			DDLogReport(@"Could not write EDLFile to disk at %@", self.commercialFilePath);
+		}
+	}
 	
     NSMutableArray *taskArray = [NSMutableArray array];
 	
@@ -1642,24 +1596,31 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             [taskArray addObject:@[decryptTask]];
         } else {
             [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
-            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+            self.downloadStatus = @(kMTStatusFailed);
             return;
         }
     }
     MTTask * encodeTask = self.encodeTask;
     if (!encodeTask) {
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
-        [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+        self.downloadStatus = @(kMTStatusFailed);
         return;
     }
     switch (self.taskFlowType) {
         case kMTTaskFlowNonSimu:  //Just encode with non-simul encoder
+			[taskArray addObject:@[encodeTask]];
+			break;
+			
         case kMTTaskFlowSimu:  //Just encode with simul encoder
-           [taskArray addObject:@[encodeTask]];
-            break;
+			if (!self.mayComskipInFuture || self.downloadingShowFromMPGFile) {
+				[taskArray addObject:@[encodeTask]];
+			} else {
+				[taskArray addObject:@[encodeTask,[self catTask:self.decryptedFilePath]]];
+			}
+			break;
             
-        case kMTTaskFlowNonSimuSubtitles:  //Encode with non-simul encoder and subtitles
-            if(self.downloadingShowFromMPGFile) {
+        case kMTTaskFlowSubtitles:  //Encode with non-simul encoder and subtitles
+            if (self.downloadingShowFromMPGFile) {
                 [taskArray addObject:@[self.captionTask]];
             } else {
                 [taskArray addObject:@[self.captionTask,[self catTask:self.decryptedFilePath]]];
@@ -1668,27 +1629,31 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             break;
             
         case kMTTaskFlowSimuSubtitles:  //Encode with simul encoder and subtitles
-			[taskArray addObject:@[encodeTask,self.captionTask]];
+			if (!self.mayComskipInFuture || self.downloadingShowFromMPGFile) {
+				[taskArray addObject:@[encodeTask,self.captionTask]];
+			} else {
+				[taskArray addObject:@[encodeTask,self.captionTask, [self catTask:self.decryptedFilePath]]];
+			}
             break;
-            
-        case kMTTaskFlowNonSimuSkipcom:  //Encode with non-simul encoder skipping commercials
+        //the rest can't have mayComSkipInFuture
+        case kMTTaskFlowSkipcom:  //Encode with non-simul encoder skipping commercials
         case kMTTaskFlowSimuSkipcom:  //Encode with simul encoder skipping commercials
             [taskArray addObject:@[self.commercialTask]]; //must be complete before encode to skip
             [taskArray addObject:@[encodeTask]];
             break;
             
-        case kMTTaskFlowNonSimuSkipcomSubtitles:  //Encode with non-simul encoder skipping commercials and subtitles
+        case kMTTaskFlowSkipcomSubtitles:  //Encode with non-simul encoder skipping commercials and subtitles
         case kMTTaskFlowSimuSkipcomSubtitles:  //Encode with simul encoder skipping commercials and subtitles
 			[taskArray addObject:@[self.captionTask,[self catTask:self.decryptedFilePath]]];
 			[taskArray addObject:@[self.commercialTask]];
 			[taskArray addObject:@[encodeTask]];
             break;
             
-        case kMTTaskFlowNonSimuMarkcom:  //Encode with non-simul encoder marking commercials
+        case kMTTaskFlowMarkcom:  //Encode with non-simul encoder marking commercials
             [taskArray addObject:@[encodeTask, self.commercialTask]];
             break;
             
-        case kMTTaskFlowNonSimuMarkcomSubtitles:  //Encode with non-simul encoder marking commercials and subtitles
+        case kMTTaskFlowMarkcomSubtitles:  //Encode with non-simul encoder marking commercials and subtitles
             if(self.downloadingShowFromMPGFile) {
                 assert(self.captionTask);
                 [taskArray addObject:@[self.captionTask]];
@@ -1782,133 +1747,32 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     self.previousProcessProgress = 0.0;
 
     if (![self.activeTaskChain run]) {
-        [self rescheduleShowWithDecrementRetries:@YES];
+        [self rescheduleDownload];
         return;
     };
     double downloadDelay = kMTTiVoAccessDelayServerFailure - [[NSDate date] timeIntervalSinceDate:self.show.tiVo.lastDownloadEnded];
-    if (downloadDelay < 0) {
+    if (downloadDelay <= 0) {
         downloadDelay = 0;
-    }
-    [self setValue:@(kMTStatusWaiting) forKeyPath:@"downloadStatus"];
-    [self performSelector:@selector(setDownloadStatus:) withObject:@(kMTStatusDownloading) afterDelay:downloadDelay];
+		self.downloadStatus = @(kMTStatusDownloading);
+	} else {
+		self.downloadStatus = @(kMTStatusWaiting);
+		self.downloadDelayStart = [NSDate date];
+		self.downloadDelay = downloadDelay;
+		[self performSelector:@selector(updateDownloadDelay) withObject:nil afterDelay:0.2];
+	}
 
-	if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile)
-	{
-        DDLogReport(@"Starting URL %@ for show %@ in %0.1lf seconds", downloadURL,self.show.showTitle, downloadDelay);
+	if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {
+        DDLogReport(@"Starting URL %@ for show %@ in %0.1lf seconds", downloadURL,self, downloadDelay);
+		[tiVoManager preventSleep];
 		[self.activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[self.activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	}
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
     [self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay] + downloadDelay];
 }
 
-
 #pragma mark -
 #pragma mark Post processing methods
-- (NSImage *) artworkWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {
-	prefix = [prefix lowercaseString];
-	suffix = [suffix lowercaseString];
-    if (directory.length == 0) return nil;
-	NSString * realDirectory = [directory stringByStandardizingPath];
-	DDLogVerbose(@"Checking for %@_%@ artwork in %@", prefix, suffix ?:@"", realDirectory);
-	NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:realDirectory error:nil];
-	for (NSString *filename in dirContents) {
-		NSString *lowerCaseFilename = [filename lowercaseString];
-		if (!prefix || [lowerCaseFilename hasPrefix:prefix]) {
-			NSString * extension = [lowerCaseFilename pathExtension];
-			if ([[NSImage imageFileTypes] indexOfObject:extension] != NSNotFound) {
-				NSString * base = [lowerCaseFilename stringByDeletingPathExtension];
-				if (!suffix || [base hasSuffix:suffix]){
-					NSString * path = [realDirectory stringByAppendingPathComponent: filename];
-					DDLogDetail(@"found artwork for %@ in %@",self.show.seriesTitle, path);
-					NSImage * image = [[NSImage alloc] initWithContentsOfFile:path];
-					if (image) {
-						return image;
-					} else {
-						DDLogReport(@"Couldn't load artwork for %@ from %@",self.show.seriesTitle, path);
-					}
-				}
-			}
-		}
-	}
-	return nil;
-}
-
-- (NSImage *) findArtWork {
-	NSString *currentDir   = self.downloadDir;
-    if(!currentDir) return nil;
-	NSString *thumbnailDir = [currentDir stringByAppendingPathComponent:@"thumbnails"];
-	NSArray * directories;
-	NSString * legalSeriesName = [self.show.seriesTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-	legalSeriesName = [legalSeriesName stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
-
-	NSString * userThumbnailDir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTThumbnailsDirectory];
-	if (userThumbnailDir) {
-		directories = @[userThumbnailDir];
-	} else if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTMakeSubDirs]) {
-		NSString *parentDir = [currentDir stringByDeletingLastPathComponent];
-		NSString *parentThumbDir = [parentDir stringByAppendingPathComponent:@"thumbnails"];
-		directories = @[currentDir, thumbnailDir, parentDir, parentThumbDir];
-	} else {
-		directories = @[currentDir, thumbnailDir];
-	}
-    
-    if (self.show.isMovie) {
-        for (NSString * dir in directories) {
-            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:self.show.movieYear  InPath:dir ];
-            if (artwork) return artwork;
-        }
-        for (NSString * dir in directories) {
-            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
-            if (artwork) return artwork;
-        }
-
-        //then for downloaded temp art
-        if (self.show.artworkFile) {
-            NSImage * image = [[NSImage alloc] initWithContentsOfFile:self.show.artworkFile];
-            if (image) {
-                return image;
-            } else {
-                DDLogReport(@"Couldn't load downloaded artwork for %@ from %@",self.show.seriesTitle, self.show.artworkFile);
-            }
-
-        }
-    } else 	if (self.show.season > 0) {
-		//first check for user-specified, episode-specific art
-		if (self.show.seasonEpisode.length > 0) {
-			for (NSString * dir in directories) {
-				NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:self.show.seasonEpisode  InPath:dir ];
-				if (artwork) return artwork;
-			}
-        }
-
-        //then for season-specific art
-        NSString * season = [NSString stringWithFormat:@"S%0.2d",self.show.season];
-        for (NSString * dir in directories) {
-            NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:season InPath:dir ];
-            if (artwork) return artwork;
-        }
-	}
-	//finally for series-level art
-	for (NSString * dir in directories) {
-		NSImage * artwork = [self artworkWithPrefix:legalSeriesName andSuffix:nil InPath:dir ];
-		if (artwork) return artwork;
-	}
-    //then for downloaded temp art
-    if (self.show.artworkFile) {
-        NSImage * image = [[NSImage alloc] initWithContentsOfFile:self.show.artworkFile];
-        if (image) {
-            return image;
-        } else {
-            DDLogReport(@"Couldn't load downloaded artwork for %@ from %@",self.show.seriesTitle, self.show.artworkFile);
-        }
-    }
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesIcon]) {
-		return [NSImage imageNamed:@"cTiVo.png"];  //from iTivo; use our logo for any new video files.
-	}
-	DDLogDetail(@"artwork for %@ not found",self.show.seriesTitle);
-	return nil;
-}
-
 
 -(void) writeTextMetaData:(NSString*) value forKey: (NSString *) key toFile: (NSFileHandle *) handle {
 	if ( key.length > 0 && value.length > 0) {
@@ -1919,7 +1783,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void) writeMetaDataFiles {
 	
-	NSString * detailFilePath = [NSString stringWithFormat:@"%@/%@_%d_Details.xml",kMTTmpDetailsDir,self.show.tiVoName,self.show.showID];
 #ifndef deleteXML
 	if (self.genXMLMetaData.boolValue) {
 		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
@@ -1929,8 +1792,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		}
 	}
 #endif
-	if (self.genTextMetaData.boolValue && [[NSFileManager defaultManager] fileExistsAtPath:detailFilePath]) {
-		NSData * xml = [NSData dataWithContentsOfFile:detailFilePath];
+    NSURL * detailFileURL = self.show.detailFileURL;
+	if (self.genTextMetaData.boolValue && [detailFileURL fileExists]) {
+		NSData * xml = [NSData dataWithContentsOfURL:detailFileURL];
 		NSXMLDocument *xmldoc = [[NSXMLDocument alloc] initWithData:xml options:0 error:nil];
 		NSString * xltTemplate = [[NSBundle mainBundle] pathForResource:@"pytivo_txt" ofType:@"xslt"];
 		id returnxml = [xmldoc objectByApplyingXSLTAtURL:[NSURL fileURLWithPath:xltTemplate] arguments:nil error:nil	];
@@ -1952,18 +1816,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             }
         }
 	}
-}
-
--(void) addXAttrs:(NSString *) videoFilePath {
-	//Add xattrs
-	NSData *tiVoName = [self.show.tiVoName dataUsingEncoding:NSUTF8StringEncoding];
-	NSData *tiVoID = [self.show.idString dataUsingEncoding:NSUTF8StringEncoding];
-	NSData *spotlightKeyword = [kMTSpotlightKeyword dataUsingEncoding:NSUTF8StringEncoding];
-	setxattr([videoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], [tiVoName bytes], tiVoName.length, 0, 0);
-	setxattr([videoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], [tiVoID bytes], tiVoID.length, 0, 0);
-	setxattr([videoFilePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRSpotlight UTF8String], [spotlightKeyword bytes], spotlightKeyword.length, 0, 0);
-    
-	[tiVoManager updateShowOnDisk:self.show.showKey withPath: videoFilePath];
 }
 
 
@@ -1992,139 +1844,495 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         }
     }
 }
+#pragma mark - AppleScript calls for user download complete
+- (NSAppleEventDescriptor *)downloadEventDescriptor {
+	// parameters
+	//success, title, filename, episode, startTime, tivo?
+	//(where success = 1 if file is successful, 0, if a failed try, or -1 if final failure
+	NSString * success = @"0";
+	if (self.downloadStatus.intValue == kMTStatusFailed){
+		success = @"-1";
+	} else if (self.downloadStatus.intValue == kMTStatusDone ){
+		success = @"1";
+	}
+
+	NSAppleEventDescriptor *parameters = [NSAppleEventDescriptor listDescriptor];
+	// you have to love a language with indices that start at 1 instead of 0
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:success] 						atIndex:1];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.showTitle] 			atIndex:2];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.encodeFilePath] 			atIndex:3];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.episodeNumber]  	atIndex:4];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.startTime] 			atIndex:5];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.tiVoName] 			atIndex:6];
+	[parameters insertDescriptor:[NSAppleEventDescriptor descriptorWithString:self.show.thumbnailFile.path] atIndex:7];
+
+	// target
+	ProcessSerialNumber psn = {0, kCurrentProcess};
+	NSAppleEventDescriptor *target = [NSAppleEventDescriptor descriptorWithDescriptorType:typeProcessSerialNumber bytes:&psn length:sizeof(ProcessSerialNumber)];
+	
+	// function
+	NSAppleEventDescriptor *function = [NSAppleEventDescriptor descriptorWithString:@"downloadDone"];
+	
+	// event
+	NSAppleEventDescriptor *event = [NSAppleEventDescriptor appleEventWithEventClass:kASAppleScriptSuite eventID:kASSubroutineEvent targetDescriptor:target returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
+	[event setParamDescriptor:function forKeyword:keyASSubroutineName];
+	[event setParamDescriptor:parameters forKeyword:keyDirectObject];
+	
+	return event;
+}
+
+-(NSUserAppleScriptTask *) downloadAppleScriptTask {
+	NSUserAppleScriptTask *result = nil;
+	
+	NSError *error;
+	NSURL *directoryURL = [[NSFileManager defaultManager] URLForDirectory:NSApplicationScriptsDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:YES error:&error]; //may only be in sandboxed version
+	if (!directoryURL) directoryURL = [NSURL URLWithString:@"~/Library/Application Scripts/com.cTiVo.cTiVo"];
+	if (directoryURL) {
+			NSURL *scriptURL = [directoryURL URLByAppendingPathComponent:@"DownloadDone.scpt"];
+			result = [[NSUserAppleScriptTask alloc] initWithURL:scriptURL error:&error];
+			if (result) {
+				DDLogDetail(@"Found downloadDone AppleScript task");
+			}
+		} else {
+			DDLogDetail(@"No Application Scripts folder; error = %@", error);
+		}
+		
+		return result;
+	}
+
+- (NSString *)stringForResultEventDescriptor:(NSAppleEventDescriptor *)resultEventDescriptor {
+	NSString *result = nil;
+	if (resultEventDescriptor) {
+		if ([resultEventDescriptor descriptorType] != kAENullEvent) {
+			if ([resultEventDescriptor descriptorType] == kTXNUnicodeTextData) {
+				result = [resultEventDescriptor stringValue];
+			}
+		}
+	}
+	return result;
+}
+
+-(void) launchUserScript {
+	NSUserAppleScriptTask *downloadAppleScriptTask = [self downloadAppleScriptTask];
+	if (downloadAppleScriptTask) {
+		NSAppleEventDescriptor *event = [self downloadEventDescriptor];
+		[downloadAppleScriptTask executeWithAppleEvent:event completionHandler:^(NSAppleEventDescriptor *resultEventDescriptor, NSError *error) {
+			if (! resultEventDescriptor) {
+				DDLogReport(@"Failure on AppleScript task; error = %@", error);
+			} else {
+				NSString * result = [self stringForResultEventDescriptor:resultEventDescriptor];
+				if (result.length > 0) {
+					DDLogReport(@"For %@, User task returned: \n%@", self, result);
+				}
+			}
+		}];
+	}
+}
+
+-(void) finalFinalProcessing {
+	//allows for delayed Marking of commercials
+	self.processProgress = 1.0;
+	[self writeMetaDataFiles];
+	//dispose of 3-character (BOM) subtitle files
+	unsigned long long fileSize =  [[NSFileManager defaultManager] attributesOfItemAtPath:self.captionFilePath error:nil].fileSize;
+	if ( fileSize <= 3) {
+		if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
+			[[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
+		}
+		self.captionFilePath = nil;
+	}
+	if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
+		MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
+		NSArray <MTEdl *> *edls = self.show.edlList;
+		if (edls.count > 0 && (self.shouldMarkCommercials || self.shouldSkipCommercials)) {
+			[edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength keepingCommercials: !self.shouldSkipCommercials ];
+		}
+		if (self.shouldEmbedSubtitles && self.captionFilePath) {
+			NSArray * srtEntries = [NSArray getFromSRTFile:self.captionFilePath];
+			if (srtEntries.count > 0) {
+				[srtEntries embedSubtitlesInMP4File:encodedFile forLanguage:[MTSrt languageFromFileName:self.captionFilePath]];
+			}
+			if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
+				[[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
+			}
+		}
+		if (self.encodeFormat.canAcceptMetaData) {
+			[self.show addExtendedMetaDataToFile:encodedFile withImage:self.show.artWorkImage];
+		}
+		
+		MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
+	}
+
+	if (self.addToiTunesWhenEncoded) {
+		self.downloadStatus = @(kMTStatusAddingToItunes);
+		DDLogMajor(@"Adding to iTunes %@", self);
+		__weak __typeof__(self) weakSelf = self;
+		dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+			MTiTunes *iTunes = [[MTiTunes alloc] init];
+			NSString * iTunesPath = [iTunes importIntoiTunes:weakSelf withArt:self.show.artWorkImage] ;
+
+			dispatch_async(dispatch_get_main_queue(), ^{
+				__typeof__(self) strongSelf = weakSelf;
+
+				if (iTunesPath && ![iTunesPath isEqualToString: strongSelf.encodeFilePath]) {
+					//apparently iTunes created new file
+					if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
+						[strongSelf deleteVideoFile];
+						//move caption, commercial, and pytivo metadata files along with video
+						NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
+						if (strongSelf.shouldEmbedSubtitles && strongSelf.captionFilePath) {
+							strongSelf.captionFilePath = [strongSelf moveFile:strongSelf.captionFilePath toITunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: strongSelf.captionFilePath;
+						}
+						if (strongSelf.genTextMetaData.boolValue) {
+							NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
+							NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
+							[strongSelf moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
+						}
+						//but remember new file for future processing
+						strongSelf.encodeFilePath= iTunesPath;
+					}
+					//Need to add xattrs to iTunes copy as well
+					[tiVoManager addShow: strongSelf.show onDiskAtPath: iTunesPath];
+				}
+				[strongSelf notifyAndCleanUp];
+			});
+		});
+	} else {
+		[self notifyAndCleanUp];
+		
+	}
+}
+
+-(void) notifyAndCleanUp {
+#ifndef DEBUG
+	NSInteger retries = ([[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries] - self.numRetriesRemaining) ;
+	NSString * retryString = [NSString stringWithFormat:@"%d",(int) retries];
+	[Answers logCustomEventWithName:@"Success"
+				   customAttributes:@{@"Format" : self.encodeFormat.name,
+									  @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
+									  @"Retries" : retryString }];
+#endif
+	[self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil ];
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTIfSuccessDeleteFromTiVo]) {
+		DDLogReport(@"Deleting %@ from TiVo after successful download",self);
+		[self.show.tiVo deleteTiVoShows:@[self.show] ];
+	}
+	[self cleanupFiles];
+	self.downloadStatus = @(kMTStatusDone);
+	[self launchUserScript];
+}
+
+-(void) addEDLtoFilesOnDisk {
+	if (self.show.edlList.count == 0) return;
+	MTTiVoShow * show = self.show;
+	for (NSString * filename in show.copiesOnDisk) {
+		MP4FileHandle *encodedFile = MP4Modify([filename cStringUsingEncoding:NSUTF8StringEncoding],0);
+		BOOL added = [show.edlList addAsChaptersToMP4File: encodedFile forShow: show.showTitle withLength: show.showLength keepingCommercials: YES ];
+		if (added) DDLogMajor(@"Retroactively added commercial info to download %@ in file %@", self, filename);
+		MP4Close(encodedFile, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
+	}
+}
+
+-(void) skipModeUpdated: (NSNotification *) notification {
+	if (notification.object == self || notification.object == self.show ) {
+		DDLogDetail(@"Possible SkipMode Info change for %@", self);
+		[self skipModeCheck];
+	}
+}
+
+-(void) skipModeCheck {
+	if ([self.show.protectedShow boolValue]) return;
+	if (self.downloadStatus.intValue == kMTStatusRemovedFromQueue) return; //we've been deleted
+	NSInteger commStrategy = [[NSUserDefaults standardUserDefaults] integerForKey:@"CommercialStrategy"];
+	//check for contradiction between userDefaults and this download
+	if (self.useSkipMode) {
+		if (commStrategy == 0) commStrategy = 3;
+	} else  {
+		if (commStrategy  > 0) commStrategy = 0;
+	}
+	
+	BOOL needEDLNow = ( self.isNew && self.shouldSkipCommercials) ||
+					  ( self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd && self.shouldMarkCommercials);
+	if (self.show.hasSkipModeList || commStrategy == 0 || ! needEDLNow) {
+		//ready to go to next step
+		[self stopWaitSkipModeTimer];
+		switch (self.downloadStatus.intValue) {
+			case kMTStatusNew:
+				[self checkQueue];
+				break;
+			case kMTStatusSkipModeWaitInitial:
+				DDLogMajor(@"%@ was waiting for SkipMode, but now launching; commStrategy = %d", self, (int)commStrategy);
+				if (self.shouldSkipCommercials && !self.show.hasSkipModeList) { //otherwise we're good to go
+					switch (commStrategy) {
+						case 0:						//comskip only, so proceed
+							break;
+						case 1: 					//SkipMode only, so give up
+							self.skipCommercials = NO;
+							self.markCommercials = NO;
+							break;
+						case 2: 					//skipMode => comskip
+							_useSkipMode = NO;
+							break;
+						case 3:						//skipMode => comskip mark only
+							_useSkipMode = NO;
+							self.skipCommercials = NO;
+							if (self.canMarkCommercials) self.markCommercials = YES;
+							break;
+						default:
+							break;
+					}
+				}
+				self.downloadStatus = @(kMTStatusNew);
+				[self checkQueue];
+				break;
+			case kMTStatusSkipModeWaitEnd:
+				if (self.show.hasSkipModeList) {
+					DDLogMajor(@"Got EDL for %@: %@", self, self.show.edlList);
+					[self addEDLtoFilesOnDisk];
+					[self finalFinalProcessing];
+				} else if ( !self.shouldMarkCommercials) {
+					DDLogMajor(@"Was waiting for SkipMode Mark, but it's not coming, and user disabled mark for %@", self);
+					[self finalFinalProcessing];
+				} else if (commStrategy == 1) {
+					DDLogMajor(@"Was waiting for SkipMode Mark, but it's not coming for %@, and user requested no comskip", self);
+					[self finalFinalProcessing];
+				} else {
+					DDLogMajor(@"Was waiting for SkipMode Mark, but user disabled for %@; launching comskip", self);
+					self.downloadStatus = @kMTStatusAwaitingPostCommercial ;
+					[self checkQueue];
+				}
+				break;
+			case kMTStatusAwaitingPostCommercial:
+				if (!self.shouldMarkCommercials) { //looks like user changed their mind
+					[self finalFinalProcessing];
+				}
+				break;
+			default:
+				break;
+		}
+	} else if (!self.show.mightHaveSkipModeInfo) {
+		//skip mode never coming
+		[self stopWaitSkipModeTimer];
+		if (self.show.skipModeFailed) {
+			DDLogReport(@"Got Invalid EDL for %@", self);
+		} else {
+			DDLogMajor(@"Not waiting any more for SkipMode for %@", self);
+		}
+		_useSkipMode = NO;  //switch to comskip, but avoid recursion
+		if (self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial ||
+			self.downloadStatus.intValue == kMTStatusNew) {
+			if (commStrategy == 1) { 					//SkipMode only, so give up
+				self.skipCommercials = NO;
+				self.markCommercials = NO;
+			} else if (commStrategy == 3 && self.skipCommercials) {						//skipMode => comskip mark only
+				self.skipCommercials = NO;
+				if (self.canMarkCommercials) self.markCommercials = YES;
+			}
+			self.downloadStatus = @(kMTStatusNew);
+			[self checkQueue];
+		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
+			if (commStrategy == 1) { //skipMode only
+				[self finalFinalProcessing];
+			} else if (commStrategy == 2 || commStrategy == 3) { //already at mark; fallback to comskip Mark
+				DDLogMajor(@"Launching comskip post-processing %@", self);
+				self.downloadStatus = @kMTStatusAwaitingPostCommercial ;
+			}
+			[self checkQueue];
+		}
+	} else {
+		//SkipMode list not here yet, but still expected, so need to wait
+		if (self.downloadStatus.intValue == kMTStatusNew) {
+			self.downloadStatus = @(kMTStatusSkipModeWaitInitial);
+			//will recurse to update timers
+		} else if (self.show.hasSkipModeInfo) {
+			//now we want the skipmode EDL, but it hasn't been pulled over yet
+			[self stopWaitSkipModeTimer];
+			DDLogDetail(@"Now Waiting for SkipMode EDL %@", self);
+			[tiVoManager getSkipModeEDLWhenPossible:self];
+		} else {
+			[self startWaitSkipModeTimer];
+		}
+	}
+}
+
+-(void) skipModeExpired {
+	//called if timer expires on downloading show info
+	DDLogMajor(@"SkipModeTimer went off for %@, which ended at %@",self, self.show.stopTime);
+	[self stopWaitSkipModeTimer];
+	if (!self.useSkipMode) return;
+	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
+		DDLogReport(@"SkipModeTimer went off, but we have SkipMode info?? %@",self);
+		[self skipModeCheck];
+		return; //shouldn't be here
+	}
+	[self.show.tiVo loadSkipModeInfoForShow: self.show ]; //last try
+}
+
+-(void) startWaitSkipModeTimer {
+	if (!self.waitForSkipModeInfoTimer) {
+		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome+10;
+		if (waitTime > 0) {
+			DDLogDetail(@"Setting skipModeTimer at %0.1f minutes for %@", waitTime/60.0, self );
+			self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
+		}
+	}
+}
+
+-(void) stopWaitSkipModeTimer {
+	[self.waitForSkipModeInfoTimer invalidate]; self.waitForSkipModeInfoTimer = nil;
+}
 
 -(void) finishUpPostEncodeProcessing {
+	//This is called from Completion routines of tasks. Let them finish up before final pass
+	[self performSelector:@selector(finishUpPostEncodeProcessingDelayed) withObject:nil afterDelay:0.1];
+}
+
+-(void) finishUpPostEncodeProcessingDelayed {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(finishUpPostEncodeProcessingDelayed) object:nil];
     if (_decryptTask.isRunning ||
         _encodeTask.isRunning ||
         _commercialTask.isRunning ||
         _captionTask.isRunning)  {
         //if any of the tasks exist and are still running, then let them finish; checkStillActive will eventually fail them if no progress
-        DDLogDetail(@"Finishing up, but processes still running");
-        [self performSelector:@selector(finishUpPostEncodeProcessing) withObject:nil afterDelay:0.5];
+        DDLogMajor(@"Finishing up, but processes still running for %@", self);
+        [self performSelector:@selector(finishUpPostEncodeProcessingDelayed) withObject:nil afterDelay:0.5];
         return;
     }
-    NSDate *startTime = [NSDate date];
+	NSDate *startTime = [NSDate date];
     DDLogMajor(@"Starting finishing @ %@",startTime);
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
-    if (!self.encodeFormat.isTestPS) {
-        if (!(_decryptTask.successfulExit && _encodeTask.successfulExit)) {
+    if (self.encodeFormat.isTestPS) {
+		self.downloadStatus = @(kMTStatusDone);
+	} else {
+        if ((_decryptTask && !_decryptTask.successfulExit) ||
+			(_encodeTask && !_encodeTask.successfulExit)) {
             DDLogReport(@"Strange: thought we were finished, but later %@ failure", _decryptTask.successfulExit ? @"encode" : @"decrypt");
             [self cancel]; //just in case
-            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+            self.downloadStatus = @(kMTStatusFailed);
             return;
         }
-        NSImage * artwork = nil;
-        if (self.encodeFormat.canAcceptMetaData || self.addToiTunesWhenEncoded) {
-            //see if we can find artwork for this series
-            artwork = [self findArtWork];
-        }
-        //dispose of 3-character (BOM) subtitle files
-        unsigned long long fileSize =  [[NSFileManager defaultManager] attributesOfItemAtPath:self.captionFilePath error:nil].fileSize;
-        if ( fileSize <= 3) {
-            if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
-                [[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
-            }
-            self.captionFilePath = nil;
-        }
-        if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
-            MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
-            if (self.shouldMarkCommercials) {
-                if ([[NSFileManager defaultManager] fileExistsAtPath:self.commercialFilePath]) {
-                    NSArray *edls = [NSArray getFromEDLFile:self.commercialFilePath];
-                    if ( edls.count > 0) {
-                        [edls addAsChaptersToMP4File: encodedFile forShow: self.show.showTitle withLength: self.show.showLength ];
-                    }
-                }
-            }
-            if (self.shouldEmbedSubtitles && self.captionFilePath) {
-                NSArray * srtEntries = [NSArray getFromSRTFile:self.captionFilePath];
-                if (srtEntries.count > 0) {
-                    [srtEntries embedSubtitlesInMP4File:encodedFile forLanguage:[MTSrt languageFromFileName:self.captionFilePath]];
-                }
-            }
-            if (self.encodeFormat.canAcceptMetaData) {
-                [self.show addExtendedMetaDataToFile:encodedFile withImage:artwork];
-            }
-            
-            MP4Close(encodedFile, 0);
-        }
-        if (self.addToiTunesWhenEncoded) {
-            DDLogMajor(@"Adding to iTunes %@", self.show.showTitle);
-            self.processProgress = 1.0;
-            [self setValue:[NSNumber numberWithInt:kMTStatusAddingToItunes] forKeyPath:@"downloadStatus"];
-            MTiTunes *iTunes = [[MTiTunes alloc] init];
-            NSString * iTunesPath = [iTunes importIntoiTunes:self withArt:artwork] ;
-            
-            if (iTunesPath && ![iTunesPath isEqualToString: self.encodeFilePath]) {
-                //apparently iTunes created new file
-                if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
-                    [self deleteVideoFile];
-                    //move caption, commercial, and pytivo metadata files along with video
-                    NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];
-                    if (self.shouldEmbedSubtitles && self.captionFilePath) {
-                         self.captionFilePath = [self moveFile:self.captionFilePath toITunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: self.captionFilePath;
-                    }
-                    if (self.genTextMetaData.boolValue) {
-                        NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
-                        NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
-                        [self moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
-                    }
-                    //but remember new file for future processing
-                    self.encodeFilePath= iTunesPath;
-                } else {
-                    //two copies now, so add xattrs to iTunes copy as well; leave captions/metadata/commercials with original
-                    [self addXAttrs:iTunesPath];
-                }
-            }
-        }
-        [self addXAttrs:self.encodeFilePath];
+        [tiVoManager addShow: self.show onDiskAtPath:self.encodeFilePath];
     //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
-        DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], self.show.showTitle);
-#ifndef DEBUG
-        NSInteger retries = ([[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries] - self.numRetriesRemaining) ;
-        NSString * retryString = [NSString stringWithFormat:@"%d",(int) retries];
-        [Answers logCustomEventWithName:@"Success"
-                       customAttributes:@{@"Format" : self.encodeFormat.name,
-                                          @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
-                                          @"Retries" : retryString }];
-#endif
-        [self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil forNotification:kMTGrowlEndDownload];
+        DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], self);
     }
-	[self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
+	if (self.markCommercials && self.useSkipMode) {
+		self.downloadStatus = @(kMTStatusSkipModeWaitEnd);
+		[self skipModeCheck];
+	} else {
+		[self finalFinalProcessing];
+	}
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  //Currently Free up an encoder/ notify subscription module / update UI
     self.processProgress = 1.0;
-    [self progressUpdated];
 
-    [self cleanupFiles];
     //Reset tasks
-    self.decryptTask = self.captionTask = self.commercialTask = self.encodeTask  = nil;
+	self.decryptTask = nil;
+	self.captionTask = nil;
+	self.commercialTask = nil;
+	self.encodeTask  = nil;
 }
 
-
-#pragma mark - Download/Conversion  Progress Tracking
-
--(void)transientNotifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle forNotification: (NSString *) notification {   //download  notification
-    [tiVoManager notifyForName: self.show.showTitle
-                     withTitle: title
-                      subTitle: subTitle
-                      isSticky: NO
-               forNotification: notification
-     ];
+-(void)launchPostCommercial {
+	//used when we are waiting for skipMode, and realize it's never coming.
+	//called from TiVoManager right after incrementing numencoders or when user turns off comskip
+	if (!self.decryptedFilePath) {
+		//should never happen
+		DDLogReport(@"No decrypted file! %@", self);
+		[self rescheduleDownload];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];  //Decrement num encoders right away
+		return;
+	}
+	DDLogMajor(@"Starting post-processing comskip for %@; Format: %@", self, self.encodeFormat.name);
+	
+	self.progressAt100Percent = nil;  //Reset end of progress failure delay
+	//Before starting make sure we can launch.
+	
+	self.commercialTask = nil;
+	
+	self.activeTaskChain = [MTTaskChain new];
+	self.activeTaskChain.download = self;
+	DDLogMajor(@"Post-Commercialing for MPG file %@",self.decryptedFilePath);
+	MTTask * commercialTask = self.commercialTask;
+	if (commercialTask) {
+		self.activeTaskChain.taskArray = @ [@[commercialTask]] ; 
+	} else {
+		self.activeTaskChain = nil;
+	}
+	self.processProgress = 0.0;
+	if (![self.activeTaskChain run]) {
+		DDLogReport(@"Could not launch post-processing comskip %@; Format: %@", self, self.encodeFormat.name);
+		[self rescheduleDownload];
+	};
 }
 
+#pragma mark - Download Termination or Rescheduling
 
--(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle  forNotification: (NSString *) notification {   //download  notification
-    [tiVoManager notifyForName: self.show.showTitle
-              withTitle: title
-               subTitle: subTitle
-               isSticky: YES
-        forNotification: notification
-     ];
+// There are three a download can finish: success, failure, or canceled.
+// If successful, call finishUpPostEncodeProcessing.
+// 		If it doesn't needs SkipCom Marking, this will call finalFinalProcessing.
+// 		If it does, then eventually skipModeCheck will call finalFinalProcessing.
+// If failed download, call RescheduleDownload, which has two variants: RescheduleDownload decrements retries. RescheduleDownloadFalseStart is for non-download-specific cases (e.g. Server is Busy, or Access Forbidden or we found out this was a Transport Stream, so need to start over)., and decrements the startupRetries (which user doesn't have control over).
+// To cancel download in the middle, (e.g user specifies Reschedule), normally call preparefordownload, which resets retry count and DL status to new. PrepareForDownload is also used before adding to queue, by user or subscription. If you want to cancel and never retry, just call cancel directly, then set DL status to failure.
+
+// Cancel makes sure all connections/processes have ceased, called by both prepareForDownload and Reschedule. Does not update DL or retry status.
+
+// 	Note that either finishUpPostEncodeProcessing and cancel must eventually be called to notify Tivo that any show has finished (freeing up an "encoder" for another show). Cancel will only call for an In-progress show.
+
+-(void)cleanupFiles {
+	BOOL deleteFiles = ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles];
+	NSFileManager *fm = [NSFileManager defaultManager];
+	DDLogDetail(@"%@ cleaningup files",self);
+	if (self.nameLockFilePath) {
+		if (deleteFiles) {
+			DDLogVerbose(@"deleting Lockfile %@",self.nameLockFilePath);
+			[fm removeItemAtPath:self.nameLockFilePath error:nil];
+		}
+	}
+	if (self.encodeFormat.isTestPS) {
+		//delete final file as this was a test
+		[self deleteVideoFile];
+	}
+	//Clean up files in TmpFilesDirectory
+	NSString *tmpDir = self.tmpDirectory;
+	if (deleteFiles && tmpDir && self.baseFileName) {
+		NSArray *tmpFiles = [fm contentsOfDirectoryAtPath:tmpDir error:nil];
+		for (NSString *file in tmpFiles) {
+			NSRange tmpRange = [file rangeOfString:self.baseFileName];
+			if (tmpRange.location != NSNotFound) {
+				//check if we're looking at a "episodename" file versus a "episodename-n" file
+				NSUInteger nextChar = NSMaxRange(tmpRange);
+				if (file.length > nextChar &&
+					(char)[file characterAtIndex:nextChar] == '-') {
+					DDLogDetail(@"For baseFileName %@, ignoring another download's tmp file %@", self.baseFileName, file);
+					continue;
+				}
+				DDLogDetail(@"For basename %@, deleting temp file %@", self.baseFileName, file);
+				NSError * error = nil;
+				NSString * tmpPath = [tmpDir stringByAppendingPathComponent:file];
+				if ( ![fm removeItemAtPath:tmpPath error:&error]) {
+					DDLogMajor(@"Could not delete tmp file: %@ because %@", tmpPath, error.localizedDescription ?:@"No reason found");
+				}
+			}
+		}
+	}
 }
 
+-(void) rescheduleDownload {
+	if (![NSThread isMainThread]) {
+		[self performSelectorOnMainThread:@selector(rescheduleDownload) withObject:nil waitUntilDone:YES];
+	} else {
+		[self rescheduleDownload:NO];
+	}
+}
 
--(void)rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries
-{
+-(void) rescheduleDownloadFalseStart {
+	if (![NSThread isMainThread]) {
+		[self performSelectorOnMainThread:@selector(rescheduleDownloadFalseStart) withObject:nil waitUntilDone:YES];
+	} else {
+		[self rescheduleDownload:YES];
+	}
+}
+
+-(void)rescheduleDownload:(BOOL) falseStart {
     if (self.isRescheduled) {
         return;
     }
@@ -2136,26 +2344,23 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         //if it was a test, then we knew it would fail whether it's audio-only OR no video encoder, so everything's good
         if (!self.isDone) {
             //test failed without triggering a audiocheck!
-            DDLogReport(@"Failure during PS Test for %@", self.show.showTitle );
-            [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];
-            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+            DDLogReport(@"Failure during PS Test for %@", self );
+			[self cancel];
+            self.downloadStatus = @(kMTStatusFailed);
         }
         self.processProgress = 1.0;
     } else {
+        DDLogMajor(@"Stopping at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self, self.processProgress, self.previousCheck );
         [self cancel];
-        DDLogMajor(@"Stopping at %@, %@ download of %@ with progress at %lf with previous check at %@",self.showStatus,(self.numRetriesRemaining > 0) ? @"restarting":@"canceled",  self.show.showTitle, self.processProgress, self.previousCheck );
-        if (self.downloadStatus.intValue == kMTStatusDone) {
-            self.baseFileName = nil;
-        }
+		self.baseFileName = nil;
         if (self.downloadStatus.intValue == kMTStatusDeleted) {
             self.numRetriesRemaining = 0;
             self.processProgress = 1.0;
             [self notifyUserWithTitle: @"TiVo deleted program."
-                             subTitle:@"Download cancelled"
-                      forNotification:kMTGrowlEndDownload];
-        } else if (([decrementRetries boolValue] && self.numRetriesRemaining <= 0) ||
-                   (![decrementRetries boolValue] && self.numStartupRetriesRemaining <=0)) {
-            [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
+                             subTitle:@"Download cancelled"];
+        } else if ((!falseStart && self.numRetriesRemaining        <= 0) ||
+                   ( falseStart && self.numStartupRetriesRemaining <= 0)) {
+            self.downloadStatus = @(kMTStatusFailed);
             self.processProgress = 1.0;
 #ifndef DEBUG
            [Answers logCustomEventWithName:@"Failure"
@@ -2163,53 +2368,57 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                                                @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
 #endif
             [self notifyUserWithTitle: @"TiVo show failed."
-                             subTitle:@"Retries Cancelled"
-                      forNotification:kMTGrowlEndDownload];
-
+                             subTitle:@"Retries Cancelled"];
+			[self launchUserScript];
         } else {
-            if ([decrementRetries boolValue]) {
-                self.numRetriesRemaining--;
-                [self notifyUserWithTitle:@"TiVo show failed" subTitle:@"Retrying" forNotification:kMTGrowlCantDownload];
+            if (falseStart) {
+				self.numStartupRetriesRemaining--;
+				DDLogDetail(@"Decrementing startup retries to %@",@(self.numStartupRetriesRemaining));
+			} else {
+				self.numRetriesRemaining--;
+                [self notifyUserWithTitle:@"TiVo show failed" subTitle:@"Retrying" ];
 #ifndef DEBUG
                 [Answers logCustomEventWithName:@"Retry"
                                customAttributes:@{ @"Format" : self.encodeFormat.name,
                                                    @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
 #endif
                 DDLogMajor(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
-            } else {
-               self.numStartupRetriesRemaining--;
-                DDLogDetail(@"Decrementing startup retries to %@",@(self.numStartupRetriesRemaining));
             }
-            [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
+            self.downloadStatus = @(kMTStatusNew);
+			[self launchUserScript];
         }
     }
-    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
-    
+	[self checkQueue];
 }
 
--(void)cancel
-{
-    if (self.isCanceled || !self.isInProgress) {
+-(void) cancel {
+    if (self.isCanceled || self.isNew || self.isCompletelyDone) {
         return;
     }
     self.isCanceled = YES;
-    DDLogMajor(@"Canceling of %@", self.show.showTitle);
+    DDLogMajor(@"Canceling of %@", self);
 //    NSFileManager *fm = [NSFileManager defaultManager];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (self.activeURLConnection) {
         [self.activeURLConnection cancel];
-		self.show.tiVo.lastDownloadEnded = [NSDate date];
         self.activeURLConnection = nil;
+		if (self.downloadStatus.intValue == kMTStatusDownloading) {
+			self.show.tiVo.lastDownloadEnded = [NSDate date];
+		}
 	}
-    if(self.activeTaskChain.isRunning) {
+    if (self.activeTaskChain.isRunning) {
         [self.activeTaskChain cancel];
     }
+	[self cancelPerformanceTimer];
     self.activeTaskChain = nil;
 //    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:bufferFileReadHandle];
-    if (!self.isNew && !self.isDone ) { //tests are already marked for success/failure
+    if ( self.isInProgress ) { //tests are already marked for success/failure
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:nil];
     }
-    self.decryptTask = self.captionTask = self.commercialTask = self.encodeTask  = nil;
+	self.decryptTask = nil;
+	self.captionTask = nil;
+	self.commercialTask = nil;
+	self.encodeTask  = nil;
     
 	NSDate *now = [NSDate date];
     while (self.writingData && (-1.0 * [now timeIntervalSinceNow]) < 5.0){ //Wait for no more than 5 seconds.
@@ -2223,74 +2432,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     if (self.downloadStatus.intValue == kMTStatusDone) {
         self.baseFileName = nil;  //Force new file for rescheduled, complete show.
     }
-//    if ([self.downloadStatus intValue] == kMTStatusEncoding || (self.simultaneousEncode && self.isDownloading)) {
-//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationEncodeWasCanceled object:self];
-//    }
-//    if ([self.downloadStatus intValue] == kMTStatusCaptioning) {
-//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionWasCanceled object:self];
-//    }
-//    if ([self.downloadStatus intValue] == kMTStatusCommercialing) {
-//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCommercialWasCanceled object:self];
-//    }
-//    [self setValue:[NSNumber numberWithInt:kMTStatusNew] forKeyPath:@"downloadStatus"];
     self.processProgress = 0.0;
-
-}
-
--(void)checkStillActive
-{
-    if (self.isCanceled || !self.isInProgress) {
-        return;
-    }
-
-    if (self.previousProcessProgress == self.processProgress) { //The process is stalled so cancel and restart
-		//Cancel and restart or delete depending on number of time we've been through this
-        BOOL reschedule = YES;
-        if (self.processProgress == 1.0) {
-            reschedule = NO;
-			if (!self.progressAt100Percent) {  //This is the first time here so record as the start of 100 % period
-                DDLogMajor(@"Starting extended wait for 100%% progress stall (Handbrake) for show %@",self.show.showTitle);
-                self.progressAt100Percent = [NSDate date];
-            } else if ([[NSDate date] timeIntervalSinceDate:self.progressAt100Percent] > kMTProgressFailDelayAt100Percent){
-                DDLogReport(@"Failed extended wait for 100%% progress stall (Handbrake) for show %@",self.show.showTitle);
-                reschedule = YES;
-            } else {
-				DDLogVerbose(@"In extended wait for Handbrake");
-			}
-        } else {
-                DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", self.processProgress*100.0, self.show.showTitle);
-        }
-		if (reschedule) {
-			[self rescheduleShowWithDecrementRetries:@(YES)];
-		} else {
-			[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
-		}
-	} else if ([self isInProgress]){
-        DDLogVerbose (@"Progress check OK for %@; %0.2f%%", self.show, self.processProgress*100);
-		self.previousProcessProgress = self.processProgress;
-		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
-	}
-    self.previousCheck = [NSDate date];
-}
-
-
--(BOOL) isInProgress {
-    return (!(self.isNew || self.isDone));
-}
-
--(BOOL) isDownloading {
-	return ([self.downloadStatus intValue] == kMTStatusDownloading ||[self.downloadStatus intValue] == kMTStatusWaiting );
-}
-
--(BOOL) isDone {
-	int status = [self.downloadStatus intValue];
-	return (status == kMTStatusDone) ||
-	(status == kMTStatusFailed) ||
-	(status == kMTStatusDeleted);
-}
-
--(BOOL) isNew {
-	return ([self.downloadStatus intValue] == kMTStatusNew);
 }
 
 #pragma mark - Video manipulation methods
@@ -2306,16 +2448,24 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 }
 
 -(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted {
-	if (!self.isDone) return nil;
-	NSURL *   URL =  [self URLExists: self.encodeFilePath];
-    if (!URL) {
-        URL = [self URLExists:self.decryptedFilePath];
-    }
-    if (!URL && encrypted) {
-        if ([self.bufferFilePath contains:@".tivo"]){ //not just a buffer
-            URL= [self URLExists: self.bufferFilePath];
-        }
-    }
+	NSURL *   URL = nil;
+	if (self.isDone) {
+		URL =  [self URLExists: self.encodeFilePath];
+		if (!URL) {
+			URL = [self URLExists:self.decryptedFilePath];
+		}
+		if (!URL && encrypted) {
+			if ([self.bufferFilePath contains:@".tivo"]){ //not just a buffer
+				URL= [self URLExists: self.bufferFilePath];
+			}
+		}
+	}
+	if (!URL) {
+		NSArray <NSString *> * paths = self.show.copiesOnDisk;
+		if (paths.count > 0) {
+			URL = [NSURL fileURLWithPath: paths[0]];
+		}
+	}
 	return URL;
 }
 
@@ -2331,29 +2481,47 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 			return [[NSWorkspace sharedWorkspace] openURL:showURL];
 		}
 	}
-	return NO;
-}
-
--(BOOL) revealInFinder {
-	NSURL * showURL =[self videoFileURLWithEncrypted:YES];
-	if (showURL) {
-		DDLogMajor(@"Revealing file %@ ", showURL);
-		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ showURL ]];
-		return YES;
-	}
-	return NO;
+	return [self.show playVideo];
 }
 
 #pragma mark - Background routines
 
--(void)rescheduleOnMain
-{
-//	self.isCanceled = YES;
-	[self performSelectorOnMainThread:@selector(rescheduleShowWithDecrementRetries:) withObject:@YES waitUntilDone:NO];
+-(void)checkStillActive {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkStillActive) object:nil];
+	if (self.isCanceled || !self.isInProgress) {
+		return;
+	}
+	
+	BOOL reschedule = NO;
+	if (self.previousProcessProgress == self.processProgress) { //The process is stalled so ...
+		//Cancel and restart or delete depending on number of time we've been through this
+		if (self.processProgress == 1.0) {
+			if (!self.progressAt100Percent) {  //This is the first time here so record as the start of 100 % period
+				DDLogMajor(@"Starting extended wait for 100%% progress stall (Handbrake) for show %@",self);
+				self.progressAt100Percent = [NSDate date];
+			} else if ([[NSDate date] timeIntervalSinceDate:self.progressAt100Percent] > kMTProgressFailDelayAt100Percent){
+				DDLogReport(@"Failed extended wait for 100%% progress stall (Handbrake) for show %@",self);
+				reschedule = YES;
+			} else {
+				DDLogVerbose(@"In extended wait for Handbrake");
+			}
+		} else {
+			reschedule = YES;
+			DDLogMajor (@"process stalled at %0.1f%%; rescheduling show %@ ", self.processProgress*100.0, self);
+		}
+	} else if ([self isInProgress]){
+		DDLogVerbose (@"Progress check OK for %@; %0.2f%%", self, self.processProgress*100);
+		self.previousProcessProgress = self.processProgress;
+	}
+	if (reschedule) {
+		[self rescheduleDownload];
+	} else {
+		[self performSelector:@selector(checkStillActive) withObject:nil afterDelay:[[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxProgressDelay]];
+	}
+	self.previousCheck = [NSDate date];
 }
 
--(void)writeData
-{
+-(void)writeData {
     // writeData supports getting its data from either an NSData buffer (self.urlBuffer) or a file on disk (self.bufferFilePath).  This allows cTiVo to
     // initially try to keep the dataflow off the disk, except for final products, where possible.  But, the ability to do this depends on the
     // processor being able to keep up with the data flow from the TiVo which is often not the case due to either a slow processor, fast network
@@ -2384,10 +2552,10 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 			}
 			@catch (NSException *exception) {
                 if (!self.isCanceled){
-                    [self rescheduleOnMain];
+                    [self rescheduleDownload];
                     DDLogDetail(@"Rescheduling");
                 };
-				DDLogMajor(@"buffer read fail:%@; %@", exception.reason, self.show.showTitle);
+				DDLogMajor(@"buffer read fail:%@; %@", exception.reason, self);
 			}
 			@finally {
 			}
@@ -2404,7 +2572,7 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 ssize_t amountSent= write ([self.taskChainInputHandle fileDescriptor], [data bytes]+data.length-bytesLeft, bytesLeft);
                 if (amountSent < 0) {
                     if (!self.isCanceled){
-                        DDLogReport(@"write fail1 for %@; tried %lu bytes; error: %zd",self.show, (unsigned long)[data length], amountSent);
+                        DDLogReport(@"write fail1 for %@; tried %lu bytes; error: %zd",self, (unsigned long)[data length], amountSent);
                     };
                     break;
                 } else {
@@ -2421,21 +2589,21 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                     DDLogReport(@"Write Fail2: couldn't write to pipe after three tries");
                 }
                 if (!self.isCanceled) {
-                    [self rescheduleOnMain];
+					[self rescheduleDownload];
                 }
             }
 
             @synchronized (self) {
                 self.totalDataRead += dataRead;
                 double newProgress = self.totalDataRead/self.show.fileSize;
-                DDLogVerbose(@"For %@, read %luKB of %luKB: %0.1f%% processed", self.show, dataRead/1000, self.totalDataRead/1000, newProgress *100);
+                DDLogVerbose(@"For %@, read %luKB of %luKB: %0.1f%% processed", self, dataRead/1000, self.totalDataRead/1000, newProgress *100);
                 self.processProgress = newProgress;
             }
          }
     }
         self.writingData = NO; //we are now committed to closing this background thread, so any further data will need new thread
 	if (!self.activeURLConnection || self.isCanceled) {
-		DDLogDetail(@"Writedata all done for show %@",self.show.showTitle);
+		DDLogDetail(@"Writedata all done for show %@",self);
 		[self.taskChainInputHandle closeFile];
 		self.taskChainInputHandle = nil;
         [self.bufferFileReadHandle closeFile];
@@ -2445,79 +2613,28 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
     }
 
 }
-
-#pragma mark - NSURL Delegate Methods
-
--(BOOL) checkLogForAudio: (NSString *) filePath {
-    //if we find audio required, then mark channel as TS.
-    //If not, then IF it was a successfulencode, then mark as not needing TS
-    if ( ! self.useTransportStream) {
-        //If we did Program Stream and encoder says "I only see Audio", then probably TS required
-        NSArray * audioOnlyStrings = @[
-                                       @"Video stream is mandatory!",       //mencoder:
-                                       @"No title found",                   //handbrake
-                                       @"no video streams",                 //ffmpeg
-                                       @"Stream #0:0: Audio",               //ffmpeg
-                                       @"Could not open video codec"        //comskip
-                                       ];
-        NSString *log = [NSString stringWithEndOfFile:filePath ];
-        if ( ! log.length) return NO;
-        for (NSString * errMsg in audioOnlyStrings) {
-            if ([log rangeOfString:errMsg].location != NSNotFound) {
-                DDLogVerbose(@"found audio %@ in log file: %@",errMsg, [log maskMediaKeys]);
-                return YES;
-            }
-        }
-    }
-    return NO;
-}
-
--(void) markMyChannelAsTSOnly {
-    NSString * channelName = self.show.stationCallsign;
-    DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self.show, channelName);
-    if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
-        [tiVoManager setFailedPS:YES forChannelNamed:channelName];
-        if ([tiVoManager useTSForChannel:channelName] == NSOffState && !self.encodeFormat.isTestPS) {
-            //only notify if we're not (testing, OR previously seen, OR forcing PS)
-            [self transientNotifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName]  forNotification:kMTGrowlTivodecodeFailed];
-        }
-    }
-}
-
--(void) handleNewTSChannel {
-    [self markMyChannelAsTSOnly];
-    //On a regular file, throw away audio-only file and try again
-        [self deleteVideoFile];
-    if (self.show.tiVo.supportsTransportStream) {
-        self.numRetriesRemaining++;
-        [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
-    } else {
-        [self cancel];
-        [self setValue:@(kMTStatusFailed) forKeyPath:@"downloadStatus"];
-        [self notifyUserWithTitle: @"Warning: This channel requires Transport Stream."
-                               subTitle:@"But this TiVo does not support TS." forNotification:kMTGrowlPossibleProblem];
-    }
-}
+#pragma mark - NSURLConnection delegate routines.
 
 -(void) connection:(NSURLConnection *) connection didReceiveResponse:(nonnull NSURLResponse *)response {
-    if (![self.activeURLConnection respondsToSelector:@selector(currentRequest)] ) return;
-    DDLogVerbose(@"MainURL: %@", [self.activeURLConnection.currentRequest URL]);
-    DDLogVerbose(@"Headers for Request: %@", [self.activeURLConnection.currentRequest allHTTPHeaderFields]);
-    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
-    if ([response respondsToSelector:@selector(allHeaderFields)]) {
-        DDLogVerbose(@"Response: %@ - %@",@([httpResponse statusCode]), [NSHTTPURLResponse localizedStringForStatusCode:[httpResponse statusCode]]);
-        DDLogVerbose(@"Response Headers: %@", [httpResponse allHeaderFields]);
-    }
+	DDLogVerbose(@"MainURL: %@", [self.activeURLConnection.currentRequest URL]);
+	DDLogVerbose(@"Headers for Request: %@", [self.activeURLConnection.currentRequest allHTTPHeaderFields]);
+	NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
+	if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+		DDLogVerbose(@"Response: %@ - %@",@([httpResponse statusCode]), [NSHTTPURLResponse localizedStringForStatusCode:[httpResponse statusCode]]);
+		DDLogVerbose(@"Response Headers: %@", [httpResponse allHeaderFields]);
+	}
 }
 
--(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
-{
+NSString * cTiVoDomain = @"com.ctivo.ctivo";
+NSInteger diskWriteFailure = 123;
+
+-(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     self.totalDataDownloaded += data.length;
-    if (self.totalDataDownloaded > 5000000 && self.encodeFormat.isTestPS) {
-        //we've gotten 5MB on our testTS run, so looks good.  Mark it and finish up...
+    if (self.totalDataDownloaded > 8000000 && self.encodeFormat.isTestPS) {
+        //we've gotten 8MB on our testTS run, so looks good.  Mark it and finish up...
         [tiVoManager setFailedPS:NO forChannelNamed: self.show.stationCallsign];
         [connection cancel];
-        [self connectionDidFinishLoading:connection];
+		[self connectionDidFinishLoading:connection];
         return;
     }
     if (self.urlBuffer) {
@@ -2544,7 +2661,16 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 			}
 		};
 	} else {
-		[self.bufferFileWriteHandle writeData:data];
+        @try {
+            [self.bufferFileWriteHandle writeData:data];
+        } @catch (NSException *exception) {
+            NSDictionary * info = @{ NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Disk write failure: %@",exception.reason],
+                                     NSLocalizedRecoverySuggestionErrorKey: @"Delete some files and try again?",
+                                     };
+            NSError * error = [NSError errorWithDomain: cTiVoDomain code: diskWriteFailure userInfo:info];
+            [self connection:connection didFailWithError:error];
+            return;
+        }
 	}
         
     @synchronized (self) {
@@ -2573,48 +2699,46 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
         [challenge.sender cancelAuthenticationChallenge:challenge];
         BOOL noMAK = self.show.tiVo.mediaKey.length == 0;
         DDLogMajor(@"%@ MAK, so failing URL Authentication %@",noMAK ? @"No" : @"Invalid", self.show.tiVoName);
-        [self cancel];
+		[self rescheduleDownload];
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self.show.tiVo, @"reason" : @"incorrect"}];
     }
-    
 }
-
-//- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
-//    return YES;
-//}
-//
-//- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-//    //    [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-//    DDLogDetail(@"Show password check");
-//    [challenge.sender useCredential:[NSURLCredential credentialWithUser:@"tivo" password:self.show.tiVo.mediaKey persistence:NSURLCredentialPersistenceForSession] forAuthenticationChallenge:challenge];
-//    [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
-//}
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    DDLogMajor(@"Download URL Connection Failed with error %@",[error maskMediaKeys]);
+    DDLogReport(@"Download URL Connection Failed for %@ with error %@", self, [error maskMediaKeys]);
     
-    NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
-    DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
-    if (error.code == -1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
-        [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
-                         subTitle: @"Antivirus program may be blocking connection"
-                  forNotification: kMTGrowlPossibleProblem];
+    if ([error.domain isEqualToString:@"com.ctivo.ctivo"] && error.code == diskWriteFailure) {
+        [self notifyUserWithTitle: error.userInfo[NSLocalizedDescriptionKey] subTitle: error.userInfo[NSLocalizedRecoverySuggestionErrorKey]];
+    } else {
+        NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
+        DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
+        if ([streamError isKindOfClass:[NSNumber class]] &&
+            ((error.code == -1004  && streamError.intValue == 49) ||
+			 (error.code == -1200  && streamError.intValue == 49) ||
+             (error.code == -1005  && streamError.intValue == 57))) {
+            [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
+                             subTitle: @"Antivirus program may be blocking connection, or you may need to reboot TiVo"
+                      ];
+        }
     }
    if (self.activeURLConnection) {
         [self.activeURLConnection cancel];
         self.activeURLConnection = nil;
-    }
+	   self.show.tiVo.lastDownloadEnded = [NSDate date];
+   }
+	[tiVoManager checkSleep:nil];
     if (self.bufferFileWriteHandle) {
 		[self.bufferFileWriteHandle closeFile];
         self.bufferFileWriteHandle = nil;
 	}
-	[self rescheduleOnMain];
+	[self rescheduleDownload];
 }
 
 #define kMTMinTiVoFileSize 100000
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
+	DDLogVerbose(@"Download URL Connection finished for %@", self);
 	if (self.bufferFileWriteHandle) {
 		[self.bufferFileWriteHandle closeFile];
         self.bufferFileWriteHandle   = nil;
@@ -2629,11 +2753,12 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             [self performSelectorInBackground:@selector(writeData) withObject:nil];
         }
     }
+	[tiVoManager checkSleep:nil];
 	self.show.tiVo.lastDownloadEnded = [NSDate date];
     double downloadedFileSize = self.totalDataDownloaded;
     //Check to make sure a reasonable file size in case there was a problem.
 	if (downloadedFileSize < kMTMinTiVoFileSize) { //Not a good download - reschedule
-        DDLogMajor(@"For show %@, only received %0.0f bytes",self.show, downloadedFileSize);
+        DDLogMajor(@"For show %@, only received %0.0f bytes",self, downloadedFileSize);
         NSString *dataReceived = nil;
         if (self.urlBuffer) {
             dataReceived = [[NSString alloc] initWithData:self.urlBuffer encoding:NSUTF8StringEncoding];
@@ -2641,20 +2766,19 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             dataReceived = [NSString stringWithEndOfFile:self.bufferFilePath ];
         }
 		if (dataReceived) {
-			NSRange noRecording = [dataReceived rangeOfString:@"recording not found" options:NSCaseInsensitiveSearch];
+			NSRange noRecording = [dataReceived rangeOfString:@"not found" options:NSCaseInsensitiveSearch];
 			if (noRecording.location != NSNotFound) { //This is a missing recording
 				DDLogReport(@"Deleted TiVo show; marking %@",self);
-				self.downloadStatus = [NSNumber numberWithInt: kMTStatusDeleted];
-                [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
-                [self.show.tiVo scheduleNextUpdateAfterDelay:0];
+				[self cancel];
+				self.downloadStatus = @(kMTStatusDeleted);
 				return;
             } else {
                 NSRange serverBusy = [dataReceived rangeOfString:@"Server Busy" options:NSCaseInsensitiveSearch];
                 if (serverBusy.location != NSNotFound) { //TiVo is overloaded
                     [self.show.tiVo notifyUserWithTitle: @"TiVo Warning: Server Busy."
-                                           subTitle: @"If this recurs, your TiVo (%@) may need to be restarted."];
+                                               subTitle: [NSString stringWithFormat:@"If this recurs, your TiVo (%@) may need to be restarted.", self.show.tiVo.tiVo.name]];
                     DDLogReport(@"Warning Server Busy %@", self);
-                    [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+					[self rescheduleDownloadFalseStart];
                     return;
                 } else {
                     NSRange accessForbidden = [dataReceived rangeOfString:@"Access Forbidden" options:NSCaseInsensitiveSearch];
@@ -2662,64 +2786,20 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                         [self.show.tiVo notifyUserWithTitle: @"TiVo Warning: Forbidden Access."
                                            subTitle: @"Enable Video Sharing at https://www.tivo.com/tivo-mma/dvrpref.do."];
                         DDLogReport(@"Warning: Forbidden Access %@", self);
-                        [self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+						[self rescheduleDownloadFalseStart];
                         return;
                     }
-
                 }
             }
 		}
 		DDLogMajor(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
-		[self performSelector:@selector(rescheduleShowWithDecrementRetries:) withObject:@(NO) afterDelay:0];
+		[self rescheduleDownloadFalseStart];
 	} else {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
         double filePercent = downloadedFileSize / self.show.fileSize*100;
         DDLogDetail(@"finished loading TiVo file: %0.1f of %0.1f KB expected; %0.1f%% ", downloadedFileSize/1000, self.show.fileSize/1000, filePercent);
-		if (filePercent < 70.0 ||
-             (!self.useTransportStream && filePercent < 80.0 )) {
-                 //hmm, doesn't look like it's big enough  (80% for PS; 70% for TS
-            BOOL foundAudioOnly = NO;
-            if (!self.useTransportStream ) {
-                if ([self checkLogForAudio: self.encodeTask.errorFilePath]) {
-                    foundAudioOnly = YES;
-                }
-                if (!self.encodeFormat.testsForAudioOnly && filePercent > 2.0 && filePercent < 25.0) {
-                    //decrypted file, so encoder won't check, so rely on size alone
-                    foundAudioOnly = YES;
-                }
-            }
-
-            if ( self.encodeFormat.isTestPS) {
-                // if a test, then we only try once.
-                if (!self.isDone) {
-                    [self cancel];
-                    if (foundAudioOnly) {
-                       [self setValue:[NSNumber numberWithInt:kMTStatusFailed] forKeyPath:@"downloadStatus"];
-                    } else {
-                        [self setValue:[NSNumber numberWithInt:kMTStatusDone] forKeyPath:@"downloadStatus"];
-                    }
-                    self.processProgress = 1.0;
-                }
-                [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:4.0];
-           } else if (foundAudioOnly) {
-               [self handleNewTSChannel];
-           } else {
-                //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
-                DDLogMajor(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", self.show,self.show.fileSize/1000, downloadedFileSize/1000, 100.0*downloadedFileSize / self.show.fileSize);
-                [self notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
-                             subTitle:@"Transfer is too short" forNotification:kMTGrowlPossibleProblem];
-                if (self.shouldSimulEncode) {
-                    [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-                } else if ( self.exportSubtitles.boolValue ){
-                    [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
-                }
-            }
-		} else {
-            if (self.shouldSimulEncode ) {
-                [self setValue:[NSNumber numberWithInt:kMTStatusEncoding] forKeyPath:@"downloadStatus"];
-            } else if (self.exportSubtitles.boolValue) {
-                [self setValue:[NSNumber numberWithInt:kMTStatusCaptioning] forKeyPath:@"downloadStatus"];
-            }
+		if (filePercent > 80.0 || (self.useTransportStream && filePercent > 70.0 )) {
+			//hmm, looks like it's big enough  (80% for PS; 70% for TS
 			self.show.fileSize = downloadedFileSize;  //More accurate file size
             if ([self.bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
                 if ([[self.bufferFilePath substringFromIndex:self.bufferFilePath.length-4] compare:@"tivo"] == NSOrderedSame  && !self.isCanceled) { //We finished a complete download so mark it so
@@ -2727,24 +2807,139 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
                 }
             }
 		}
+		self.downloadStatus = [self postDownloadState];
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDetailsLoaded object:self.show];
-        //        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadRowChanged object:self];
- //		NSLog(@"File size after reset %lf %lf",self.show.fileSize,downloadedFileSize);
-
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTransferDidFinish object:self.show.tiVo afterDelay:kMTTiVoAccessDelay];
-//        bufferFileReadHandle = nil;
 	}
 }
 
+-(NSNumber *) postDownloadState {
+	switch (self.taskFlowType) {
+		case kMTTaskFlowNonSimu:  //Just encode with non-simul encoder
+		case kMTTaskFlowSimu:  //Just encode with simul encoder
+		case kMTTaskFlowSimuSubtitles:  //Encode with simul encoder and subtitles
+		case kMTTaskFlowMarkcom:  //Encode with non-simul encoder marking commercials
+		case kMTTaskFlowSimuMarkcom:  //Encode with simul encoder marking commercials
+		case kMTTaskFlowSimuMarkcomSubtitles:  //Encode with simul encoder marking commercials and subtitles
+		return @(kMTStatusEncoding);
+		
+		case kMTTaskFlowSubtitles:  //Encode with non-simul encoder and subtitles
+		case kMTTaskFlowSkipcomSubtitles:  //Encode with non-simul encoder skipping commercials and subtitles
+		case kMTTaskFlowSimuSkipcomSubtitles:  //Encode with simul encoder skipping commercials and subtitles
+		case kMTTaskFlowMarkcomSubtitles:  //Encode with non-simul encoder marking commercials and subtitles
+		return @(kMTStatusCaptioning);
+		
+		case kMTTaskFlowSkipcom:  //Encode with non-simul encoder skipping commercials
+		case kMTTaskFlowSimuSkipcom:  //Encode with simul encoder skipping commercials
+		return @(kMTStatusCommercialing);
+			
+		default:
+			return @(kMTStatusEncoding); //never happens
+	}
+}
+
+#pragma mark - Transport Stream detection
+
+-(BOOL) checkLogForAudio: (NSString *) filePath {
+	if (!filePath) return NO;
+	//if we find audio required, then mark channel as TS.
+	//If not, then IF it was a successfulencode, then mark as not needing TS
+	if ( ! self.useTransportStream) {
+		//If we did Program Stream and encoder says "I only see Audio", then probably TS required
+		NSArray * audioOnlyStrings = @[
+									   @"Video stream is mandatory!",       //mencoder:
+									   @"No title found",                   //handbrake
+									   @"no video streams",                 //ffmpeg
+									   @"Stream #0:0: Audio",               //ffmpeg
+									   @"Could not open video codec"        //comskip
+									   ];
+		NSString *log = [NSString stringWithEndOfFile:filePath ];
+		if ( ! log.length) return NO;
+		for (NSString * errMsg in audioOnlyStrings) {
+			if ([log rangeOfString:errMsg].location != NSNotFound) {
+				DDLogVerbose(@"found audio %@ in log file: %@",errMsg, [log maskMediaKeys]);
+				return YES;
+			}
+		}
+	}
+	return NO;
+}
+
+-(void) markMyChannelAsTSOnly {
+	NSString * channelName = self.show.stationCallsign;
+	DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self, channelName);
+	if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
+		[tiVoManager setFailedPS:YES forChannelNamed:channelName];
+		if ([tiVoManager useTSForChannel:channelName] == NSOffState && !self.encodeFormat.isTestPS) {
+			//only notify if we're not (testing, OR previously seen, OR forcing PS)
+			[self transientNotifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName] ];
+		}
+	}
+}
+
+-(void) handleNewTSChannel {
+	[self markMyChannelAsTSOnly];
+	//On a regular file, throw away audio-only file and try again
+	[self deleteVideoFile];
+	if (self.show.tiVo.supportsTransportStream) {
+		[self rescheduleDownloadFalseStart];
+	} else {
+		[self cancel];
+		[self setValue:@(kMTStatusFailed) forKeyPath:@"downloadStatus"];
+		[self notifyUserWithTitle: @"Warning: This channel requires Transport Stream."
+						 subTitle:@"But this TiVo does not support TS." ];
+	}
+}
 
 #pragma mark - Convenience methods
 
--(BOOL) canSimulEncode {
-    return self.encodeFormat.canSimulEncode;
+-(void)transientNotifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle  {   //download  notification
+	[tiVoManager notifyForName: self.show.showTitle
+					 withTitle: title
+					  subTitle: subTitle
+					  isSticky: NO
+	 ];
 }
 
+-(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle   {   //download  notification
+	[tiVoManager notifyForName: self.show.showTitle
+					 withTitle: title
+					  subTitle: subTitle
+					  isSticky: YES
+	 ];
+}
+
+-(BOOL) isInProgress {
+	return (!(self.isNew || self.isDone));
+}
+
+-(BOOL) isDownloading {
+	return ([self.downloadStatus intValue] == kMTStatusDownloading ||[self.downloadStatus intValue] == kMTStatusWaiting );
+}
+
+-(BOOL) isCompletelyDone {
+	int status = [self.downloadStatus intValue];
+	return (status == kMTStatusDone) ||
+	(status == kMTStatusFailed) ||
+	(status == kMTStatusDeleted) ||
+	(status == kMTStatusRemovedFromQueue);
+}
+
+-(BOOL) isDone {
+	return self.isCompletelyDone || self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd || self.downloadStatus.intValue == kMTStatusAwaitingPostCommercial;
+}
+
+-(BOOL) isNew {
+	return (self.downloadStatus.intValue == kMTStatusNew || self.downloadStatus.intValue == kMTStatusSkipModeWaitInitial);
+}
 -(BOOL) shouldSimulEncode {
-    return (self.encodeFormat.canSimulEncode && !self.shouldSkipCommercials);// && !self.downloadingShowFromMPGFile);
+	return self.encodeFormat.canSimulEncode &&
+	       !(self.shouldSkipCommercials && self.runComskipNow);
+	       // && !self.downloadingShowFromMPGFile);
+}
+
+-(BOOL) shouldPipeFromDecrypt {
+	return (self.shouldSimulEncode || self.exportSubtitles.boolValue) ;
 }
 
 -(BOOL) canSkipCommercials {
@@ -2752,19 +2947,46 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 }
 
 -(BOOL) shouldSkipCommercials {
-    return self.skipCommercials &&
-    ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState);
+    return self.canSkipCommercials &&
+    	   self.skipCommercials &&
+           ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState);
 }
 
 -(BOOL) canMarkCommercials {
     return self.encodeFormat.canMarkCommercials;
 }
 
--(BOOL) shouldMarkCommercials
-{
-    return  self.encodeFormat.canMarkCommercials &&
+-(BOOL) shouldMarkCommercials {
+    return  self.canMarkCommercials &&
             self.markCommercials &&
             ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState);
+}
+
+-(BOOL) canSkipModeCommercials {
+	return self.show.tiVo.supportsRPC && (self.canMarkCommercials || self.canSkipCommercials);
+}
+
+-(BOOL) mayComskipInFuture {
+	return self.markCommercials && self.useSkipMode && !self.hasEDL;
+}
+
+-(BOOL) runComskipNow {
+	//we're launching now, so should we use comskip or not
+	//Either  we want commercials but won't/can't use SkipMode, OR we want to skip but we don't have list yet. (Can add mark later)
+	if (self.hasEDL) return NO;
+	if (self.shouldSkipCommercials) return YES;
+	if (!self.shouldMarkCommercials) return NO;
+	if (self.useSkipMode) return NO;
+	return YES;
+}
+
+-(BOOL) hasEDL { //from either source
+	BOOL reuse = [[NSUserDefaults standardUserDefaults] boolForKey:kMTReuseEDLs];
+    if (reuse) {
+		return self.show.edlList.count > 0;
+	} else {
+		return self.show.rpcData.edlList.count > 0;
+	}
 }
 
 -(BOOL) shouldEmbedSubtitles
@@ -2797,8 +3019,9 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(NSString *) showStatus {
 	switch (self.downloadStatus.intValue) {
-		case  kMTStatusNew :				return @"";
-        case  kMTStatusWaiting :            return @"Waiting";
+		case  kMTStatusNew :				return @"Ready";
+		case  kMTStatusSkipModeWaitInitial: return @"Waiting for SkipMode";
+		case  kMTStatusWaiting :            return @"Waiting for TiVo";
         case  kMTStatusDownloading :		return @"Downloading";
 		case  kMTStatusDownloaded :			return @"Downloaded";
 		case  kMTStatusDecrypting :			return @"Decrypting";
@@ -2811,19 +3034,28 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 		case  kMTStatusCaptioned:			return @"Subtitled";
 		case  kMTStatusCaptioning:			return @"Subtitling";
         case  kMTStatusMetaDataProcessing:	return @"Adding MetaData";
+		case  kMTStatusSkipModeWaitEnd :    return @"Wait SkipMode (Mark)";
+		case  kMTStatusPostCommercialing :  return @"Post-Detecting Ads";
+		case  kMTStatusAwaitingPostCommercial :  return @"Waiting for Ads";
         case  kMTStatusDone :				return @"Complete";
 		case  kMTStatusDeleted :			return @"TiVo Deleted";
 		case  kMTStatusFailed :				return @"Failed";
+		case  kMTStatusRemovedFromQueue :	return @"Removed From Queue";
 		default: return @"";
 	}
 }
 
 -(NSInteger) downloadStatusSorter {
-//used to put column in right order; sorts Done/Failed together
-
+//used to put column in right order; sorts Done/Failed/waitEnd and Ready/Waiting together
+//temporary before updating queue.
     NSInteger status = self.downloadStatus.integerValue;
-    if (status > kMTStatusDone) {
-        status = kMTStatusDone;
+	if (status == kMTStatusSkipModeWaitInitial) status = kMTStatusNew;
+    if (status >= kMTStatusDone ) {
+		if (status == kMTStatusSkipModeWaitEnd) {
+			status = kMTStatusDone; //sort just below other Done ones
+		} else {
+			status = kMTStatusDone+1;
+		}
     }
     return status;
 }
@@ -2836,11 +3068,18 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	}
 }
 
+-(void) checkQueue {
+	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self.show.tiVo afterDelay:2.0];
+}
+
 -(void) setEncodeFormat:(MTFormat *) encodeFormat {
     if (_encodeFormat != encodeFormat ) {
+		BOOL wasNil = _encodeFormat == nil;
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];
         BOOL markWasDisabled = ![self canMarkCommercials];
+		BOOL skipModeWasDisabled = ![self canSkipModeCommercials];
+		
         _encodeFormat = encodeFormat;
         if (!self.canAddToiTunes && self.shouldAddToiTunes) {
             //no longer possible
@@ -2849,20 +3088,31 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
             //newly possible, so take user default
             self.addToiTunesWhenEncoded = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
         }
-        if (!self.canSkipCommercials && self.shouldSkipCommercials) {
+        if (!self.canSkipCommercials && self.skipCommercials) {
             //no longer possible
             self.skipCommercials = NO;
         } else if (skipWasDisabled && [self canSkipCommercials]) {
             //newly possible, so take user default
-            self.skipCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:@"RunComSkip"];
+            self.skipCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSkipCommercials];
         }
-        if (!self.canMarkCommercials && self.markCommercials) {
-            //no longer possible
-            self.markCommercials = NO;
+		if (self.markCommercials && (self.skipCommercials || !self.canMarkCommercials)) {
+			if (self.markCommercials) {
+				self.markCommercials = NO;
+			}
         } else if (markWasDisabled && [self canMarkCommercials]) {
             //newly possible, so take user default
-            self.markCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:@"MarkCommercials"];
+            self.markCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:kMTMarkCommercials];
         }
+		if (self.useSkipMode && ![self canSkipModeCommercials]) {
+			self.useSkipMode = NO;
+		} else if (skipModeWasDisabled && [self canSkipModeCommercials]) {
+			//newly possible, so take user default
+			self.useSkipMode = [[NSUserDefaults standardUserDefaults] integerForKey:kMTCommercialStrategy] > 0;
+		}
+		
+		if (!wasNil) { //no need at launch
+			[self skipModeCheck];
+		}
     }
 }
 
@@ -2871,7 +3121,8 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 -(void)dealloc
 {
-    self.encodeFormat = nil;
+	DDLogMajor(@"deallocing Download %@", self);
+	[self stopWaitSkipModeTimer];
     if (_performanceTimer) {
         [_performanceTimer invalidate];
         _performanceTimer = nil;
@@ -2883,11 +3134,10 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 	
 }
 
--(NSString *)description
-{
-    return [NSString stringWithFormat:@"%@ (%@)%@",self.show.showTitle,self.show.tiVoName,[self.show.protectedShow boolValue]?@"-Protected":@""];
+-(NSString *)description {
+#pragma clang diagnostic ignored "-Wdeprecated-objc-pointer-introspection"
+    return [NSString stringWithFormat:@"%@-%@(%x)%@",self.show.showTitle, self.show.tiVoName, ((int)self) & 0xFFFFF,[self.show.protectedShow boolValue]?@"-Protected":@""];
 }
-
 
 @end
 

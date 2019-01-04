@@ -12,33 +12,88 @@
 #import "MTSubscriptionTableView.h"
 #import "MTSubscriptionList.h"
 #import "MTHelpViewController.h"
+#import "MTShowFolder.h"
+#import "MTAppDelegate.h"
+#import "NSArray+Map.h"
 
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"
 #import "MTTiVo.h"
+#import "MTTVDB.h"
+#import "NSArray+Map.h"
+
 #import <Quartz/Quartz.h>
+
+//All this mess is just to avoid the error msg that "Drawer cannot have first responder of MTProgramTableView"
+//remove if we move from Drawer to splitView or expanded Row concept
+@interface NSWindow (FirstResponding)
+-(void)_setFirstResponder:(NSResponder *)responder;
+@end
+@interface NSDrawerWindow : NSWindow
+@end
+@implementation NSDrawerWindow (avoidWarning)
+
+-(void) _setFirstResponder:(NSView *) view {
+	if (![view isKindOfClass:[NSTableView class]]) {
+		[super _setFirstResponder:view];
+	}
+}
+@end
 
 @implementation NSView (HS)
 
--(NSView *)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode
-{
-    Class vibrantClass=NSClassFromString(@"NSVisualEffectView");
-    if (vibrantClass) { //supported
-        NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
-        [vibrant setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-        [vibrant setBlendingMode:mode];
+-(NSView *)insertVibrancyView {
+    if (@available(macOS 10.10, *)) {
+        if (NSClassFromString(@"NSVisualEffectView") ) { //should always be supported
+            NSVisualEffectView *vibrant=[[NSVisualEffectView alloc] initWithFrame:self.bounds];
+            [vibrant setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+            [vibrant setBlendingMode:NSVisualEffectBlendingModeBehindWindow];
             [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
-        return vibrant;
-    } else {
-        return self;
+            return vibrant;
+        }
     }
+    return self;
 }
 
 @end
 
-@interface MTMainWindowController ()
+@interface MTMainWindowController () {
+	IBOutlet NSPopUpButton *tiVoListPopUp;
+	IBOutlet MTFormatPopUpButton *formatListPopUp;
+	IBOutlet NSTextField *loadingProgramListLabel,  *tiVoListPopUpLabel, *pausedLabel;
+	IBOutlet NSProgressIndicator *loadingProgramListIndicator, *searchingTiVosIndicator;
+	
+	IBOutlet MTDownloadTableView *__weak downloadQueueTable;
+	IBOutlet MTProgramTableView  *__weak tiVoShowTable;
+	IBOutlet MTSubscriptionTableView  *__weak subscriptionTable;
+	IBOutlet NSDrawer *showDetailDrawer;
+}
+
+@property (nonatomic, weak) MTDownloadTableView *downloadQueueTable;
+@property (nonatomic, weak) MTProgramTableView *tiVoShowTable;
+@property (nonatomic, weak) MTSubscriptionTableView *subscriptionTable;
+@property (nonatomic, strong) NSString *selectedTiVo;
+@property (nonatomic, strong) MTTiVoShow *showForDetail;
+@property (weak, nonatomic, readonly) MTTiVoManager *myTiVoManager;
+@property (nonatomic, weak) NSMenuItem *showInFinderMenuItem, *playVideoMenuItem;
+@property (nonatomic, strong) IBOutlet NSView *cancelQuitView;
+
+-(IBAction)selectFormat:(id)sender;
+-(IBAction)subscribe:(id) sender;
+-(IBAction) revealInFinder:(id) sender;
+-(IBAction) playVideo: (id) sender;
+
+-(IBAction)downloadSelectedShows:(id)sender;
+-(IBAction)getDownloadDirectory:(id)sender;
+//-(IBAction)changeSimultaneous:(id)sender;
+-(IBAction)changeiTunes:(id)sender;
+-(IBAction)dontQuit:(id)sender;
+
 
 @property (nonatomic, strong) NSSound *trashSound;
+@property (nonatomic, strong) NSCountedSet *loadingTiVos;
+@property (nonatomic, strong) NSCountedSet *commercialingTiVos;
+
 @end
 
 @implementation MTMainWindowController
@@ -49,10 +104,11 @@ __DDLOGHERE__
 
 -(id)initWithWindowNibName:(NSString *)windowNibName
 {
-	DDLogDetail(@"creating Main Window");
+    DDLogDetail(@"creating Main Window");
 	self = [super initWithWindowNibName:windowNibName];
 	if (self) {
-		loadingTiVos = [NSMutableArray new];
+		_loadingTiVos = [NSCountedSet new];
+		_commercialingTiVos = [NSCountedSet new];
         self.selectedTiVo = nil;
         _myTiVoManager = tiVoManager;
 	}
@@ -68,16 +124,9 @@ __DDLOGHERE__
 	DDLogDetail(@"MainWindow windowDidLoad");
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     
-    [self.window.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+    [self.window.contentView insertVibrancyView];
  
-    if ([[NSBundle mainBundle] respondsToSelector:@selector(loadNibNamed:owner:topLevelObjects:)]) {
-        [[NSBundle mainBundle] loadNibNamed:@"MTMainWindowDrawer" owner:self topLevelObjects:nil];
-    } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        [NSBundle loadNibNamed:@"MTMainWindowDrawer" owner:self];  //10.7 only
-#pragma clang diagnostic pop
-    }
+    [[NSBundle mainBundle] loadNibNamed:@"MTMainWindowDrawer" owner:self topLevelObjects:nil];
 	showDetailDrawer.parentWindow = self.window;
 	
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
@@ -89,11 +138,12 @@ __DDLOGHERE__
 	//Spinner Progress Handling 
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationTiVoUpdating object:nil];
     [defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationTiVoUpdated object:nil];
+	[defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationTiVoCommercialing object:nil];
+	[defaultCenter addObserver:self selector:@selector(manageLoadingIndicator:) name:kMTNotificationTiVoCommercialed object:nil];
     [defaultCenter addObserver:self selector:@selector(networkChanged:) name:kMTNotificationNetworkChanged object:nil];
 	
     [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidMoveNotification object:nil];
     [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
-	[tiVoManager addObserver:self forKeyPath:@"downloadDirectory" options:NSKeyValueObservingOptionInitial context:nil];
 	
 	[self buildColumnMenuForTables ];
 	[pausedLabel setNextResponder:downloadQueueTable];  //Pass through mouse events to the downloadQueueTable.
@@ -114,15 +164,13 @@ __DDLOGHERE__
 
 }
 
+-(void) showCancelQuitView:(BOOL) show {
+	self.cancelQuitView.hidden = !show;
+}
+
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-	if ([keyPath compare:@"downloadDirectory"] == NSOrderedSame) {
-		DDLogDetail(@"changing downloadDirectory");
-		NSString *dir = tiVoManager.downloadDirectory;
-		if (!dir) dir = @"Directory not available!";
-		downloadDirectory.title   = dir;
-		downloadDirectory.toolTip = dir;
-    } else 	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
+	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
         [formatListPopUp selectFormat:[tiVoManager selectedFormat]];
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -137,26 +185,51 @@ __DDLOGHERE__
 	
 }
 
+-(NSMutableAttributedString *) stringForDisplay: (NSSet <MTTiVo *> *) set forCommercials: (BOOL) commercials {
+	NSString * path = commercials ? @"skipModeStatus" : @"tiVo.name";
+	NSColor * red =  [NSColor redColor];
+	if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+	NSDictionary <NSAttributedStringKey,id> * attribs = commercials ? @{NSForegroundColorAttributeName:red}  : @{};
+	NSString * list = [[[[set allObjects] valueForKeyPath: path] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)] componentsJoinedByString:@", "];
+ return [[NSMutableAttributedString alloc] initWithString: list attributes:attribs];
+}
+
 -(void)manageLoadingIndicator:(NSNotification *)notification
 {
 	if (!notification) { //Don't accept nil notifications
 		return;  
 	}
     MTTiVo * tivo = (MTTiVo *) notification.object;
-	DDLogDetail(@"LoadingIndicator: %@ for %@",notification.name, tivo.tiVo.name);
-    if ([notification.name  compare:kMTNotificationTiVoUpdating] == NSOrderedSame) {
-		if ([loadingTiVos indexOfObject:tivo] == NSNotFound) {
-			[loadingTiVos addObject:tivo];
+    if (tivo) {
+		DDLogDetail(@"LoadingIndicator: %@ for %@",notification.name, tivo.tiVo.name);
+		if ([notification.name  compare:kMTNotificationTiVoUpdating] == NSOrderedSame) {
+			[self.loadingTiVos addObject:tivo];
+		} else if ([notification.name compare:kMTNotificationTiVoUpdated] == NSOrderedSame) {
+			[self.loadingTiVos removeObject:tivo];
+		} else if ([notification.name compare:kMTNotificationTiVoCommercialing] == NSOrderedSame) {
+			[self.commercialingTiVos addObject:tivo];
+		} else if ([notification.name compare:kMTNotificationTiVoCommercialed] == NSOrderedSame) {
+			[self.commercialingTiVos removeObject:tivo];
 		}
-	} else if ([notification.name compare:kMTNotificationTiVoUpdated] == NSOrderedSame) {
-		[loadingTiVos removeObject:tivo];
-	}
-    
-	if (loadingTiVos.count) {
+	}// else just update the current string
+	if (self.loadingTiVos.count + self.commercialingTiVos.count > 0) {
         [loadingProgramListIndicator startAnimation:nil];
-        NSString *message =[NSString stringWithFormat: @"Updating %@",[[loadingTiVos valueForKeyPath:@"tiVo.name" ] componentsJoinedByString:@", "]];
-
-        loadingProgramListLabel.stringValue = message;
+		NSMutableAttributedString *message =  [[NSMutableAttributedString alloc] init];
+		if (self.loadingTiVos.count > 0) {
+			[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@"Updating "]];
+			[message appendAttributedString:[self stringForDisplay:self.loadingTiVos forCommercials:NO]];
+			if (self.commercialingTiVos.count > 0) {
+				[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@", "]];
+			}
+		}
+		if (self.commercialingTiVos.count > 0) {
+			NSColor * red =  [NSColor redColor];
+			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+			[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@"Getting SkipMode for "
+																				   attributes:@{NSForegroundColorAttributeName:red} ]];
+			[message appendAttributedString:[self stringForDisplay:self.commercialingTiVos forCommercials:YES]];
+		}
+		[loadingProgramListLabel setAttributedStringValue: message];
     } else {
         [loadingProgramListIndicator stopAnimation:nil];
         loadingProgramListLabel.stringValue = @"";
@@ -198,7 +271,9 @@ __DDLOGHERE__
         if (!ts.isReachable) {
             NSFont *thisFont = [NSFont systemFontOfSize:13];
             NSString *thisTitle = [NSString stringWithFormat:@"%@ offline",ts.tiVo.name];
-            NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]];
+			NSColor * red =  [NSColor redColor];
+			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+			NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:@ { NSForegroundColorAttributeName: red, NSFontAttributeName:  thisFont}];
             [thisItem setAttributedTitle:aTitle];
 
         }
@@ -224,7 +299,9 @@ __DDLOGHERE__
         if (!ts.isReachable) {
             NSFont *thisFont = [NSFont systemFontOfSize:13];
             NSString *thisTitle = [NSString stringWithFormat:@"TiVo: %@ offline",ts.tiVo.name];
-            NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor redColor], NSForegroundColorAttributeName, thisFont, NSFontAttributeName, nil]];
+			NSColor * red =  [NSColor redColor];
+			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+			NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:@ { NSForegroundColorAttributeName: red, NSFontAttributeName:  thisFont}];
             [tiVoListPopUpLabel setAttributedStringValue:aTitle];
 			
         }
@@ -241,21 +318,11 @@ __DDLOGHERE__
     }
 }
 
--(void)popupHelpIfNotTiVosAfterInterval
-{
-   	//Get help text for encoder
-	NSString *helpFilePath = [[NSBundle mainBundle] pathForResource:@"FindTiVoHelpFile" ofType:@"rtf"];
-	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
-    NSPopover *myPopover = [[NSPopover alloc] init];
-    myPopover.delegate = self;
-    myPopover.behavior = NSPopoverBehaviorTransient;
-    MTHelpViewController *helpContoller = [[MTHelpViewController alloc] initWithNibName:@"MTHelpViewController" bundle:nil];
-    myPopover.contentViewController = helpContoller;
-    [helpContoller loadView];
-    [helpContoller.displayMessage.textStorage setAttributedString:attrHelpText];
-    //	[self.helpController.displayMessage insertText:helpText];
-	[myPopover showRelativeToRect:searchingTiVosIndicator.bounds ofView:searchingTiVosIndicator preferredEdge:NSMaxXEdge];
- 
+-(void)popupHelpIfNotTiVosAfterInterval {
+	//Get help text for Finding TiVos
+	MTHelpViewController *helpController = [[MTHelpViewController alloc] init];
+	[helpController loadResource:@"FindTiVoHelpFile"];
+	[helpController pointToView:searchingTiVosIndicator preferredEdge: NSMaxXEdge];
 }
 
 #pragma mark - UI Actions
@@ -283,141 +350,231 @@ __DDLOGHERE__
 
 #pragma mark - Menu Delegate
 
--(BOOL)validateMenuItem:(NSMenuItem *)menuItem
-{
-	BOOL returnValue = YES;
-	if (menuItem == _showInFinderMenuItem || menuItem == _playVideoMenuItem) {
-		BOOL itemsToProcess = [self selectionContainsCompletedShows];
-		if (!itemsToProcess) {
-			returnValue = NO;
-		}
+-(BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+	if ([menuItem action]==@selector(copy:) ||
+		[menuItem action]==@selector(subscribe:) ||
+		[menuItem action]==@selector(showDetails:) ||
+		[menuItem action]==@selector(reloadAllInfo:) ||
+		[menuItem action]==@selector(revealInNowPlaying:) ||
+		[menuItem action]==@selector(downloadSelectedShows:)) {
+		
+		MTProgramTableView * table = self.tiVoShowTable; //default; could also be download or subscribe; must have actionItems property
+		if ([self.window.firstResponder isKindOfClass:[NSTableView class]]) table = (MTProgramTableView *) self.window.firstResponder;
+		return (table.actionItems.count > 0);
 	}
-	if ([menuItem.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+	BOOL deleteItem =  menuItem.action == @selector(deleteOnTiVo:);
+	BOOL playItem =  menuItem.action == @selector(playOnTiVo:);
+	BOOL stopItem =    menuItem.action == @selector(stopRecordingOnTiVo:);
+	BOOL getSkipItem = menuItem.action == @selector(skipInfoFromTiVo:);
+	if (deleteItem ||playItem || stopItem || getSkipItem) {
+		if (deleteItem) menuItem.title = @"Delete from TiVo"; //alternates with remove from Queue
+		NSArray	*selectedShows = [self selectedShows ];
+		for (MTTiVoShow * show in selectedShows) {
+			if (show.rpcData && show.tiVo.rpcActive) {
+				if (stopItem) {
+					if (show.inProgress.boolValue) return YES;
+				} else if (getSkipItem) {
+					if (show.hasSkipModeInfo && !show.hasSkipModeList && !show.skipModeFailed) return YES;
+				} else {
+					return YES;
+				}
+			}
+		}
+		return NO;
+	} else if (menuItem.action == @selector(revealInFinder:) ||
+			   menuItem.action == @selector(playVideo:)) {
+        return [self selectionContainsCompletedShows];
+	} else if ([menuItem.title rangeOfString:@"refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
 		if (tiVoManager.tiVoList.count > 1) {
 			menuItem.title = @"Refresh this TiVo";
 		} else {
 			menuItem.title = @"Refresh TiVo";
 		}
 	}
-	return returnValue;
-}
-
-
--(void)menuWillOpen:(NSMenu *)menu
-{
-	menuCursorPosition = [self.window mouseLocationOutsideOfEventStream];
-	NSTableView<MTTableViewProtocol> *workingTable = nil;
-	SEL selector = NULL;
-	if ([menu.title compare:@"ProgramTableMenu"] == NSOrderedSame) {
-		workingTable = tiVoShowTable;
-		selector = @selector(programMenuHandler:);
-	}
-	if ([menu.title compare:@"DownloadTableMenu"] == NSOrderedSame) {
-		workingTable = downloadQueueTable;
-		selector = @selector(downloadMenuHandler:);
-	}
-	if ([menu.title compare:@"SubscriptionTableMenu"] == NSOrderedSame) {
-		workingTable = subscriptionTable;
-		selector = @selector(subscriptionMenuHandler:);
-	}
-	if (workingTable) {
-		NSPoint p = [workingTable convertPoint:menuCursorPosition fromView:nil];
-		menuTableRow = [workingTable rowAtPoint:p];
-		for (NSMenuItem *mi in [menu itemArray]) {
-			[mi setAction:selector];
-		}
-		if (menuTableRow < 0) { //disable row functions  Row based functions have tag=1 or 2;
-			for (NSMenuItem *mi in [menu itemArray]) {
-				if (mi.tag == 1 || mi.tag == 2) {
-					[mi setAction:NULL];
-				}
-			}
-		} else {
-			if (![[workingTable selectedRowIndexes] containsIndex:menuTableRow] ) {
-				[workingTable selectRowIndexes:[NSIndexSet indexSetWithIndex:menuTableRow] byExtendingSelection:NO];
-			}
-			if (workingTable == downloadQueueTable) {
-				MTDownload *thisDownload = downloadQueueTable.sortedDownloads[menuTableRow];
-				//diable menu items that depend on having a completed show tag = 2
-				if (!thisDownload.canPlayVideo) {
-					for (NSMenuItem *mi in [menu itemArray]) {
-						if (mi.tag == 2 ) {
-							[mi setAction:NULL];
-						}
-					}
-				}
-			}
-			if (workingTable == tiVoShowTable) {
-				MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
-				//diable menu items that depend on having a completed show tag = 2
-				if (![tiVoManager.showsOnDisk objectForKey:thisShow.showKey]) {
-					for (NSMenuItem *mi in [menu itemArray]) {
-						if (mi.tag == 2 ) {
-							[mi setAction:NULL];
-						}
-					}
-				}
-			}
-		}
-		if ([workingTable selectedRowIndexes].count == 0) { //No selection so disable group functions
-			for (NSMenuItem *mi in [menu itemArray]) {
-				if (mi.tag == 0) {
-					[mi setAction:NULL];
-				}
-			}
-
-		}
-
-	}
+    return YES;
 }
 
 - (void) openDrawer:(MTTiVoShow *) show {
 	if (show) {		
 		self.showForDetail = show;
 		[showDetailDrawer open];
-		//[self.drawerVariableFields setAutoresizingMask:self.drawerVariableFields.autoresizingMask |NSViewHeightSizable]; //workaround bug in IB?
+    }
+}
+
+-(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads includingDone: (BOOL) includeDone {
+    NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
+    for (MTDownload * download in downloads) {
+		if ((includeDone || !download.isCompletelyDone) && ![shows containsObject:download.show]) {
+			[shows addObject:download.show];
+		}
+    }
+    return [shows copy];
+}
+
+-(NSArray <MTTiVoShow *> *) selectedShows {
+	if (self.window.firstResponder == self.downloadQueueTable) {
+		return [self showsForDownloads:downloadQueueTable.actionItems includingDone:YES];
+	} else {
+		return [self.tiVoShowTable actionItems];
 	}
 }
 
--(IBAction)programMenuHandler:(NSMenuItem *)menu
-{
-	if ([menu.title caseInsensitiveCompare:@"Download"] == NSOrderedSame) {
-		[self downloadSelectedShows:menu];
-	} else if ([menu.title rangeOfString:@"Refresh" options:NSCaseInsensitiveSearch].location != NSNotFound) {
-		NSMutableSet * tiVos = [NSMutableSet set];
-		for (MTTiVoShow * show in [tiVoShowTable.sortedShows objectsAtIndexes:[tiVoShowTable selectedRowIndexes]]) {
-			[tiVos addObject: show.tiVo];
+-(IBAction) stopRecordingOnTiVo: (id) sender {
+	NSArray <MTTiVoShow *> * theseShows  = [self selectedShows];
+	NSArray * recordingShows =  [theseShows mapObjectsUsingBlock:^id(MTTiVoShow * show, NSUInteger idx) {
+		if (show.inProgress.boolValue) {
+			return show;
+		} else {
+			return nil;
 		}
-		for (MTTiVo* tiVo in tiVos) {
-			[tiVo  updateShows:nil];
-		}
-	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
-		[self subscribe:menu];
-	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
-		[self openDrawer:tiVoShowTable.sortedShows[menuTableRow]];
-	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
-		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
-        //Eventually if more than 1 download present will open up choice alert (or extend menu with a right pull)
-        //For now just play the first
-        if ([tiVoManager.showsOnDisk objectForKey:thisShow.showKey]) {
-                [thisShow playVideo:[tiVoManager.showsOnDisk objectForKey:thisShow.showKey][0]];
-        }
-    } else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
-		MTTiVoShow *thisShow = tiVoShowTable.sortedShows[menuTableRow];
-        //Eventually if more than 1 download present will open up choice alert (or extend menu with a right pull)
-        //For now just play the first
-        if ([tiVoManager.showsOnDisk objectForKey:thisShow.showKey]) {
-            [thisShow revealInFinder:[tiVoManager.showsOnDisk objectForKey:thisShow.showKey]];
-        }
+	}];
+	if (recordingShows.count == 0) return;
+	if ([self confirmBehavior:@"stop recording" preposition:@"on" forShows:recordingShows]) {
+		[tiVoManager stopRecordingShows:recordingShows];
 	}
 }
 
+-(IBAction) deleteOnTiVo: (id) sender {
+	NSArray <MTTiVoShow *> * theseShows  = [self selectedShows];
+	if (theseShows.count == 0) return;
+	if ([self confirmBehavior:@"delete" preposition: @"from" forShows:theseShows]) {
+		[tiVoManager deleteTivoShows:theseShows];
+	}
+}
+
+-(IBAction) playOnTiVo: (id) sender {
+	NSArray <MTTiVoShow *> * theseShows = [self selectedShows];
+	NSArray <MTTiVoShow *> * videoShows =  [theseShows mapObjectsUsingBlock:^id(MTTiVoShow * show, NSUInteger idx) {
+		if (show.rpcData) {
+			return show;
+		} else {
+			return nil;
+		}
+	}];
+
+	if (videoShows.count  == 0) return;
+	[videoShows[0].tiVo playShow:videoShows[0]];
+}
+
+-(IBAction)skipInfoFromTiVo:(id)sender {
+	BOOL programTable = self.window.firstResponder != downloadQueueTable;
+	NSString * object = programTable ? @"show" : @"download";
+	NSArray <MTTiVoShow *>* selectedObjects = [[self selectedShows] mapObjectsUsingBlock:^MTTiVoShow *(MTTiVoShow * show, NSUInteger idx) {
+		if (show.hasSkipModeInfo && !show.hasSkipModeList && !show.skipModeFailed) {
+			return show;
+		} else {
+			return nil;
+		}
+	}];
+	if (selectedObjects.count == 0) return;
+	NSString * mainText = @"Warning: retrieving SkipMode data will temporarily interrupt current viewing on your TiVo!";
+	NSString * infoText = selectedObjects.count > 1 ?
+			[NSString stringWithFormat:@"Hit Ok to retrieve SkipMode data for %d %@s, or hit Cancel to cancel request.", (int) selectedObjects.count, object] :
+			[NSString stringWithFormat:@"Hit Ok to retrieve SkipMode data for %@, or hit Cancel to cancel request.", selectedObjects[0].seriesTitle];
+	NSAlert *myAlert = [NSAlert alertWithMessageText: mainText defaultButton:@"Ok" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"%@", infoText];
+	myAlert.alertStyle = NSCriticalAlertStyle;
+	NSInteger result = [myAlert runModal];
+	if (result == NSAlertAlternateReturn) return;
+
+	NSArray <MTTiVoShow *> * shows = nil;
+	if (result == NSAlertDefaultReturn) {
+		shows = selectedObjects;
+	}
+	if (shows.count) [tiVoManager skipModeRetrieval:shows interrupting:YES];
+}
+
+-(IBAction)expireDateOnTiVo:(id)sender {
+	DDLogReport(@"XXX NOT IMPLEMENTED YET");
+}
+
+-(IBAction)showDetails:(id)sender {
+	NSArray <MTTiVoShow *> * theseShows  = [self selectedShows];
+	if (theseShows.count  == 0) return;
+	MTTiVoShow * thisShow = theseShows[0];
+	[self openDrawer:thisShow];
+}
+
+-(IBAction)reloadAllInfo:(id)sender {
+	for (MTTiVoShow * show in [self selectedShows]) {
+		[show resetSourceInfo:YES];
+	}
+	NSIndexSet * columns = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.tiVoShowTable.numberOfColumns)];
+	[self.tiVoShowTable reloadDataForRowIndexes:[tiVoShowTable selectedRowIndexes] columnIndexes:columns];
+}
+
+-(IBAction)revealInFinder: (id) sender {
+	if (self.window.firstResponder == downloadQueueTable) {
+		[tiVoManager revealInFinderDownloads:self.downloadQueueTable.actionItems];
+	} else {
+		[tiVoManager revealInFinderShows:self.tiVoShowTable.actionItems];
+	}
+}
+
+-(IBAction)revealInNowPlaying:(id)sender {
+	NSArray <MTTiVoShow *> * shows = [tiVoManager showsForDownloads:self.downloadQueueTable.actionItems includingDone:YES];
+	if (shows.count > 0) {
+		[self.tiVoShowTable selectShows:shows];
+		[self.window makeFirstResponder:self.tiVoShowTable];
+	}
+}
+
+-(IBAction)playVideo: (id) sender {
+	NSArray <MTTiVoShow *> * theseShows  = [self selectedShows];
+	NSArray * videoShows =  [theseShows mapObjectsUsingBlock:^id(MTTiVoShow * show, NSUInteger idx) {
+		if (show.isOnDisk) {
+			return show;
+		} else {
+			return nil;
+		}
+	}];
+	
+	if (videoShows.count  == 0) return;
+	[videoShows[0] playVideo];
+}
+
+-(IBAction)copy: (id) sender {
+	NSArray	*selectedShows = [self selectedShows ];
+	if (selectedShows.count > 0) {
+		MTTiVoShow * firstShow = selectedShows[0];
+		NSPasteboard * pboard = [NSPasteboard generalPasteboard];
+		[pboard declareTypes:[firstShow writableTypesForPasteboard:pboard] owner:nil];
+		[[NSPasteboard generalPasteboard] writeObjects:selectedShows];
+	}
+}
+
+-(IBAction)delete:(id)sender {
+	NSArray	<MTTiVoShow *> *selectedShows = [self selectedShows ];
+	if (selectedShows.count > 0)
+		if ([self confirmBehavior:@"delete" preposition: @"from" forShows:selectedShows]) {
+			[tiVoManager deleteTivoShows:selectedShows];
+		}
+}
+
+-(BOOL) confirmBehavior: (NSString *) behavior preposition:(NSString *) prep forShows:(NSArray <MTTiVoShow *> *) shows {
+    NSString * msg = nil;
+    if (shows.count == 1) {
+        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' %@ TiVo %@?", behavior, shows[0].showTitle, prep, shows[0].tiVoName ];
+    } else if (shows.count == 2) {
+        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and '%@' %@ your TiVo?",behavior, shows[0].showTitle, shows[1].showTitle, prep ];
+    } else {
+        msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and %d others %@ your TiVo?", behavior, shows[0].showTitle, (int)shows.count -1, prep ];
+    }
+
+    NSAlert *myAlert = [NSAlert alertWithMessageText:msg defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@"This cannot be undone from cTiVo."];
+    myAlert.alertStyle = NSCriticalAlertStyle;
+    NSInteger result = [myAlert runModal];
+    return (result == NSAlertAlternateReturn);
+}
 
 -(IBAction)doubleClickForDetails:(id)input {
 	if (input==tiVoShowTable) {
 		NSInteger rowNumber = [tiVoShowTable clickedRow];
 		if (rowNumber != -1) {
-			[self openDrawer:tiVoShowTable.sortedShows[rowNumber]];
+			MTTiVoShow *thisShow = [tiVoShowTable itemAtRow:rowNumber];
+			if ([thisShow isKindOfClass:[MTShowFolder class]]) {
+				thisShow = ((MTShowFolder *)thisShow).folder[0];
+			}
+			[self openDrawer:thisShow];
 		}
 	}else if (input==downloadQueueTable) {
 		NSInteger rowNumber = [downloadQueueTable clickedRow];
@@ -425,102 +582,38 @@ __DDLOGHERE__
 			MTDownload * download = [[downloadQueueTable sortedDownloads] objectAtIndex:rowNumber];
 			[self openDrawer:download.show];
 			if (!download.show.protectedShow.boolValue) {
-				[download revealInFinder];
+				[tiVoManager revealInFinderDownloads:@[download]];
 				[download playVideo];
 			}
 		}
 	}
 }
 
-
--(IBAction)downloadMenuHandler:(NSMenuItem *)menu
-{
-	DDLogMajor(@"User specified to %@",menu.title);
-	if ([menu.title caseInsensitiveCompare:@"Delete"] == NSOrderedSame) {
-		[self removeFromDownloadQueue:menu];
-	} else if ([menu.title caseInsensitiveCompare:@"Reschedule"] == NSOrderedSame) {
-		NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
-		NSArray *itemsToReschedule = [downloadQueueTable.sortedDownloads objectsAtIndexes:selectedRows];
-		if ([tiVoManager.processingPaused boolValue]) {
-			for (MTDownload *download in itemsToReschedule) {
-                if (!download.show.protectedShow.boolValue && download.downloadStatus.intValue != kMTStatusDeleted) {
-					[download prepareForDownload:YES];
-                }
-			}
-		} else {
-			//Can't reschedule items that haven't loaded yet or have been deleted.
-			NSMutableArray * realItemsToReschedule = [NSMutableArray arrayWithArray:itemsToReschedule];
-			for (MTDownload *download in itemsToReschedule) {
-				if (download.show.protectedShow.boolValue || download.downloadStatus.intValue == kMTStatusDeleted) {
-					//A proxy DL waiting for "real" show
-					[download prepareForDownload:YES];
-					[realItemsToReschedule removeObject:download];
-				}
-			}
-			[tiVoManager deleteFromDownloadQueue:realItemsToReschedule];
-			[tiVoManager addToDownloadQueue:realItemsToReschedule beforeDownload:nil];
-		}
-	} else if ([menu.title caseInsensitiveCompare:@"Subscribe to series"] == NSOrderedSame) {
-		NSArray * selectedDownloads = [downloadQueueTable.sortedDownloads objectsAtIndexes:downloadQueueTable.selectedRowIndexes];
-		[tiVoManager.subscribedShows addSubscriptionsDL:selectedDownloads];
-	} else if ([menu.title caseInsensitiveCompare:@"Show Details"] == NSOrderedSame) {
-		MTDownload * download = downloadQueueTable.sortedDownloads[menuTableRow];
-		[self openDrawer:download.show];
-	} else if ([menu.title caseInsensitiveCompare:@"Play Video"] == NSOrderedSame) {
-		[downloadQueueTable playVideo];
-	} else if ([menu.title caseInsensitiveCompare:@"Show in Finder"] == NSOrderedSame) {
-		[downloadQueueTable revealInFinder];
-		
-	}
-	
-}
-
 -(BOOL) selectionContainsCompletedShows {
-	BOOL itemsToProcess = [self.downloadQueueTable selectionContainsCompletedShows ] ;
-	return itemsToProcess;
-}
-
--(IBAction)revealInFinder: (id) sender
-{
-	[self.downloadQueueTable revealInFinder];
-}
-
--(IBAction)playVideo: (id) sender
-{
-	[self.downloadQueueTable playVideo];
-	
+	if ([self.window.firstResponder respondsToSelector:@selector(selectionContainsCompletedShows)]) {
+		return [(MTProgramTableView *) self.window.firstResponder selectionContainsCompletedShows];
+	} else{
+		return NO;
+	}
 }
 
 -(void) playTrashSound {
-	self.trashSound = [[NSSound alloc] initWithContentsOfFile:@"/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/dock/drag to trash.aif" byReference:YES];
-	if (_trashSound) {
-		[self.trashSound play];
+	if (!self.trashSound) {
+		self.trashSound = [[NSSound alloc] initWithContentsOfFile:@"/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/dock/drag to trash.aif" byReference:YES];
 	}
+	[self.trashSound play];
 }
 
 #pragma mark - Subscription Buttons
 
--(IBAction)subscriptionMenuHandler:(NSMenuItem *)menu
-{
-	if ([menu.title caseInsensitiveCompare:@"Unsubscribe"] == NSOrderedSame) {
-		[subscriptionTable unsubscribeSelectedItems:menu];
-	} else if ([menu.title caseInsensitiveCompare:@"Re-Apply to Shows"] == NSOrderedSame) {
-		[subscriptionTable reapplySelectedItems:menu];
-	}
-}
-
 -(IBAction)subscribe:(id) sender {
-	NSArray * selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:tiVoShowTable.selectedRowIndexes];
-	[tiVoManager.subscribedShows addSubscriptionsShows:selectedShows];
+	[tiVoManager.subscribedShows addSubscriptionsShows:[self selectedShows]];
 }
 
 #pragma mark - Download Buttons
 
--(IBAction)downloadSelectedShows:(id)sender
-{
-	NSIndexSet *selectedRows = [tiVoShowTable selectedRowIndexes];
-	NSArray *selectedShows = [tiVoShowTable.sortedShows objectsAtIndexes:selectedRows];
-	[tiVoManager downloadShowsWithCurrentOptions:selectedShows beforeDownload:nil];
+-(IBAction)downloadSelectedShows:(id)sender {
+	[tiVoManager downloadShowsWithCurrentOptions:[tiVoShowTable actionItems] beforeDownload:nil];
     
 	[downloadQueueTable deselectAll:nil];
 }
@@ -530,51 +623,11 @@ __DDLOGHERE__
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationUserCanceledQuit object:nil ];
 }
 
--(BOOL) confirmCancel:(NSString *) title {
-    NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",title] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@""];
-    myAlert.alertStyle = NSCriticalAlertStyle;
-    NSInteger result = [myAlert runModal];
-    return (result == NSAlertAlternateReturn);
-    
-}
-
--(IBAction)removeFromDownloadQueue:(id)sender
-{
-	NSArray *itemsToRemove;
-	if ([sender isKindOfClass:[NSArray class]]) {
-		itemsToRemove = sender;
-	}else {
-		NSIndexSet *selectedRows = [downloadQueueTable selectedRowIndexes];
-		itemsToRemove = [downloadQueueTable.sortedDownloads objectsAtIndexes:selectedRows];
-	}
- 	for (MTDownload * download in itemsToRemove) {
-        if (download.isInProgress && download.downloadStatus.intValue != kMTStatusWaiting) {
-            //if just waiting on TiVo, go ahead w/o confirmation
-            if( ![self confirmCancel:download.show.showTitle]) {
-                //if any cancelled, cancel the whole group
-                return;
-            }
-        }
-    }
-	[tiVoManager deleteFromDownloadQueue:itemsToRemove];
-	if (itemsToRemove.count)[self playTrashSound];
-
- 	[downloadQueueTable deselectAll:nil];
-}
-
--(IBAction)getDownloadDirectory:(id)sender
-{
-	NSOpenPanel *myOpenPanel = [NSOpenPanel openPanel];
-	[myOpenPanel setCanChooseDirectories:YES];
-	[myOpenPanel setCanChooseFiles:NO];
-	[myOpenPanel setAllowsMultipleSelection:NO];
-    [myOpenPanel setCanCreateDirectories:YES];
-    [myOpenPanel setTitle:@"Choose Directory for Download of Videos"];
-    [myOpenPanel setPrompt:@"Choose"];
-	NSInteger ret = [myOpenPanel runModal];
-	if (ret == NSFileHandlingPanelOKButton) {
-		tiVoManager.downloadDirectory = myOpenPanel.URL.path;
-	}
+-(IBAction)getDownloadDirectory:(id)sender {
+	[(MTAppDelegate *)[NSApplication sharedApplication].delegate promptForNewDirectory:tiVoManager.downloadDirectory
+																		   withMessage:@"Choose Directory for Download of Videos"
+																			 isProblem:NO
+																			 isTempDir:NO];
 }
 
 #pragma mark - Download Options
@@ -585,9 +638,6 @@ __DDLOGHERE__
 	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
 		MTDownload *download = (MTDownload *)(checkbox.owner);
         download.skipCommercials = ! download.skipCommercials;
-		//		if (download.skipCommercials) {  //Need to make sure that simul encode is not checked
-		//				download.simultaneousEncode = NO;
-		//		}
 		if (download.skipCommercials) {
 			download.markCommercials = NO;
 		}
@@ -599,9 +649,6 @@ __DDLOGHERE__
 		if ([sub.skipCommercials boolValue]) {
 			sub.markCommercials = @NO;
 		}
-		//		if ([sub.skipCommercials boolValue]) { //Need to make sure simultaneous encode is off
-		//			sub.simultaneousEncode = @(NO);
-		//		}
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
                 
     }
@@ -613,9 +660,6 @@ __DDLOGHERE__
 	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
 		MTDownload *download = (MTDownload *)(checkbox.owner);
         download.markCommercials = ! download.markCommercials;
-		//		if (download.skipCommercials) {  //Need to make sure that simul encode is not checked
-		//				download.simultaneousEncode = NO;
-		//		}
 		if (download.markCommercials) {
 			download.skipCommercials = NO;
 		}
@@ -628,33 +672,22 @@ __DDLOGHERE__
 			sub.skipCommercials = @NO;
 		}
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
-		//		if ([sub.skipCommercials boolValue]) { //Need to make sure simultaneous encode is off
-		//			sub.simultaneousEncode = @(NO);
-		//		}
-                
+		
     }
 }
-
-//-(IBAction)changeSimultaneous:(id)sender
-//{
-//    MTCheckBox *checkbox = sender;
-//	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
-//		MTDownload *download = (MTDownload *)(checkbox.owner);
-//        download.simultaneousEncode = ! download.simultaneousEncode;
-//		if (download.simultaneousEncode) {  //Need to make sure that simul encode is not checked
-//				download.skipCommercials = NO;
-//		}
-//        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:download];
-//    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
-//		
-//        MTSubscription *sub = (MTSubscription *)(checkbox.owner);
-//		sub.simultaneousEncode = [NSNumber numberWithBool: ! [sub.simultaneousEncode boolValue]];
-//		if ([sub.simultaneousEncode boolValue]) { //Need to make sure simultaneous encode is off
-//			sub.skipCommercials = @(NO);
-//		}
-//        //        
-//    }
-//}
+-(IBAction)changeUseSkipMode:(id)sender
+{
+	MTCheckBox *checkbox = sender;
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
+		MTDownload *download = (MTDownload *)(checkbox.owner);
+		download.useSkipMode = ! download.useSkipMode;
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:download];
+	} else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
+		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		sub.useSkipMode = @(! sub.useSkipMode.boolValue);
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
+	}
+}
 
 -(IBAction)changeiTunes:(id)sender
 {
@@ -762,7 +795,7 @@ __DDLOGHERE__
             NSString *title = [[column headerCell] title];
             NSMenuItem *item = [tableHeaderContextMenu addItemWithTitle:title action:@selector(contextMenuSelected:) keyEquivalent:@""];
             [item setTarget:self];
-            [item setRepresentedObject:@{@"Column" : column, @"Table" : table}];
+            [item setRepresentedObject:column];
             [item setState:column.isHidden?NSOffState: NSOnState];
         }
 	}
@@ -771,8 +804,29 @@ __DDLOGHERE__
 
 - (void)contextMenuSelected:(id)sender {
 	NSMenuItem * menuItem = (NSMenuItem *) sender;
-    NSTableColumn *column = [menuItem representedObject][@"Column"];
+    NSTableColumn *column = [menuItem representedObject];
 	BOOL wasOn = ([menuItem state] == NSOnState);
+	if (wasOn &&
+		column == self.tiVoShowTable.outlineTableColumn &&
+		[[NSUserDefaults standardUserDefaults] boolForKey:kMTShowFolders]) {
+		//apparently user wants to switch outline columns
+
+		NSTableColumn * combo = [self.tiVoShowTable tableColumnWithIdentifier: @"Programs"];
+		NSTableColumn * series = [self.tiVoShowTable tableColumnWithIdentifier: @"Series"];
+		if (column == series) {
+			combo.hidden = NO;
+			self.tiVoShowTable.outlineTableColumn = combo;
+		} else {
+			series.hidden = NO;
+			self.tiVoShowTable.outlineTableColumn = series;
+		}
+		NSMenu * thisMenu = [menuItem menu];
+		NSInteger outlineIndex = [thisMenu indexOfItemWithRepresentedObject:self.tiVoShowTable.outlineTableColumn];
+	    if (outlineIndex != NSNotFound) {
+			NSMenuItem * outlineMenuItem = [thisMenu itemAtIndex:outlineIndex];
+			[outlineMenuItem setState:NSOnState];
+		}
+	}
 	[column setHidden:wasOn];
 	if(wasOn) {
 		[menuItem setState: NSOffState ];
@@ -789,6 +843,7 @@ __DDLOGHERE__
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [tiVoManager removeObserver:self forKeyPath:@"selectedFormat"];
 }
 
 

@@ -10,15 +10,14 @@
 #import "MTTiVoManager.h"
 #import "MTFormatPopUpButton.h"
 #import "NSString+Helpers.h"
+#import "MTFormat.h"
+#import "MTHelpViewController.h"
 
 @interface MTFormatEditorController ()
 {
     IBOutlet MTFormatPopUpButton *formatPopUpButton;
     NSAlert *deleteAlert, *saveOrCancelAlert, *cancelAlert;
-    IBOutlet NSButton *cancelButton, *saveButton, *encodeHelpButton, *comSkipHelpButton;
-    NSPopover *myPopover;
-    IBOutlet NSWindow *popoverDetachWindow;
-    IBOutlet MTHelpViewController *popoverDetachController, *helpContoller;
+    IBOutlet NSButton *saveButton, *encodeHelpButton, *comSkipHelpButton;
 }
 
 @property (nonatomic, strong) MTFormat *currentFormat;
@@ -31,6 +30,7 @@
 @property (nonatomic, strong) IBOutlet NSPopUpButton *presetPopup;
 @property (nonatomic, assign) NSInteger customPresetStart;
 @property (nonatomic, strong) NSDictionary *alertResponseInfo;
+@property (weak, nonatomic) IBOutlet NSButton * helpButton;
 //@property (nonatomic, strong) NSArray * ;
 @end
 
@@ -43,8 +43,7 @@
     self = [super initWithCoder:aDecoder];
     if (self) {
         // Initialization code here.
-		myPopover = nil;
-		self.validExecutableColor = [NSColor blackColor];
+		self.validExecutableColor = [NSColor textColor];
 		self.validExecutable = [NSNumber numberWithBool:YES];
 		self.validExecutableString = @"No valid executable found.";
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateForFormatChange) name:kMTNotificationFormatChanged object:nil];
@@ -56,7 +55,7 @@
 
 -(void)awakeFromNib
 {
-    popoverDetachWindow.contentView = popoverDetachController.view;
+	[super awakeFromNib];
     [self launchReadPreset];
     formatPopUpButton.showHidden = YES;
     self.shouldSave = @NO;
@@ -112,7 +111,12 @@
 
     handbrake.standardError = pipe;
     handbrake.standardOutput = pipe;
-    [handbrake setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"HandBrakeCLI" ]];
+    NSString * cliLocation = [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"HandBrakeCLI" ];
+    if (!cliLocation) {
+        NSLog(@"HandbrakeCLI is missing?");
+        return nil;
+    }
+    [handbrake setLaunchPath:cliLocation];
     [handbrake setArguments: @[ @"--preset-import-gui", @"--preset-list"]];
     [handbrake launch];
 
@@ -202,7 +206,7 @@
 {
 	[[NSApp keyWindow] makeFirstResponder:[NSApp keyWindow]]; //save any text edits in process
 	if ([self.shouldSave boolValue]) {
-		saveOrCancelAlert = [NSAlert alertWithMessageText:@"You have edited the formats.  Leaving the window will discard your changes.  Do you want to save your changes?" defaultButton:@"Save" alternateButton:@"Leave Window" otherButton:@"Continue Editing" informativeTextWithFormat:@""];
+		saveOrCancelAlert = [NSAlert alertWithMessageText:@"You have edited the formats.  Leaving the window will discard your changes.  Do you want to save your changes?" defaultButton:@"Save" alternateButton:@"Leave Window" otherButton:@"Continue Editing" informativeTextWithFormat:@" "];
  		[saveOrCancelAlert beginSheetModalForWindow:self.view.window ?: [NSApp keyWindow]
                                       modalDelegate:self
                                      didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
@@ -313,11 +317,15 @@
 {
 	NSString *validPath = [_currentFormat pathForExecutable];
 	if (validPath) {
-        self.validExecutableColor = [NSColor blackColor];
+        self.validExecutableColor = [NSColor textColor];
 		self.validExecutableString = [NSString stringWithFormat:@"Found at %@",validPath];
         self.validExecutable = @YES;
     } else {
-        self.validExecutableColor = [NSColor redColor];
+		if (@available(macOS 10.10, *)) {
+			self.validExecutableColor = [NSColor systemRedColor];
+		} else {
+			self.validExecutableColor = [NSColor redColor];
+		}
         self.validExecutableString = @"File not found or not executable.";
         self.validExecutable = @NO;
 
@@ -426,7 +434,7 @@
 
 -(IBAction)deleteFormat:(id)sender
 {
-	deleteAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to delete the format %@ entirely?",_currentFormat.name] defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@""];
+	deleteAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to delete the format %@ entirely?",_currentFormat.name] defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@" "];
  	[deleteAlert beginSheetModalForWindow:self.view.window ?: [NSApp keyWindow]
                             modalDelegate:self
                            didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
@@ -484,48 +492,25 @@
     [formatPopUpButton selectFormat:_currentFormat];
 }
 
--(IBAction)help:(id)sender
+-(IBAction)encodeHelp:(id)sender
 {
 	//Get help text for encoder
-	NSString *helpFilePath = nil;;
+	MTHelpViewController *helpController = [[MTHelpViewController alloc] init];
 	if (sender == encodeHelpButton) {
-		helpFilePath = [[NSBundle mainBundle] pathForResource:@"EncoderHelpText" ofType:@"rtf"];
+		[helpController loadResource:@"EncoderHelpText"];
 	} else if (sender == comSkipHelpButton) {
-		helpFilePath = [[NSBundle mainBundle] pathForResource:@"ComSkipHelpText" ofType:@"rtf"];
+		[helpController loadResource:@"ComSkipHelpText"];
 	}
-	NSAttributedString *attrHelpText = [[NSAttributedString alloc] initWithRTF:[NSData dataWithContentsOfFile:helpFilePath] documentAttributes:NULL];
-	NSButton *thisButton = (NSButton *)sender;
-	if (!myPopover) {
-		myPopover = [[NSPopover alloc] init];
-		myPopover.delegate = self;
-		myPopover.behavior = NSPopoverBehaviorTransient;
-		myPopover.contentViewController = helpContoller;
-		[helpContoller loadView];
-		[helpContoller.displayMessage.textStorage setAttributedString:attrHelpText];
-	}
-	//	[self.helpController.displayMessage insertText:helpText];
-	[popoverDetachController.displayMessage.textStorage setAttributedString:attrHelpText];
-	[myPopover showRelativeToRect:thisButton.bounds ofView:thisButton preferredEdge:NSMaxXEdge];
+	[helpController pointToView:sender preferredEdge:NSMaxXEdge];
 }
 
-
-#pragma mark - Popover Delegate Methods
-
--(NSWindow *)detachableWindowForPopover:(NSPopover *)popover
-{
-	return popoverDetachWindow;
+-(IBAction) help:(id)sender {
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Advanced-Topics#edit-formats"]];
 }
-
--(void)popoverDidClose:(NSNotification *)notification
-{
-	myPopover = nil;
-}
-
 
 #pragma mark - Memory Management
 
 -(void) dealloc {
-    myPopover.delegate = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

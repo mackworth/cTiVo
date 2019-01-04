@@ -19,6 +19,8 @@
 @property (nonatomic, strong) iTunesLibraryPlaylist *libraryPlayList;
 @property (nonatomic, strong) iTunesPlaylist *tivoPlayList;
 
+-(void) iTunesPermissionCheck;
+
 -(NSString *) importIntoiTunes: (MTDownload * ) download withArt:(NSImage *) image;
 //returns nil if can't add; location of video file if it can
 //this may be a new file if iTunes copies

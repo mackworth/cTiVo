@@ -3,47 +3,71 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 2.5.1; H.264 and other major improvements</description>
+        <description>Version 3.1.2; Certificate Update</description>
         <language>en</language>
         <item>
-            <title>Version 2.5.1`; H.264 and other major improvements</title>
+            <title>Version 3.1.2; Certificate Update</title>
             <description><![CDATA[
-                <h2 id="release-2.5">Release 2.5.1</h1>
+				<h2 id="release-3.1">Release 3.1.2: Certificate Update!</h2>
+                <h3>3.1.2 features</h2>
                 <ul>
-                <li>H.264 compatibility (new format for cable companies)</li>
-                <li>Autodetects H.264 transition by channel</li>
-                <li>Redesigned Formats (simpler, more compatible)</li>
-                <li>New Channels preference screen</li>
-                <li>Better handling for AC3 5.1 audio</li>
-                <li>Many bug fixes</li>
-                <li>Full 10.9 and 10.10 compatability</li>
+                <li>A small release to update the certificate used to communicate with TiVo's RPC mechanism, which otherwise would expire at the end of April.</li>
+                <li>Also, TVDB has frequently been unresponsive recently, causing cTiVo to be unstable. This fixes the latter part.</li>
                 </ul>
-                <h2 id="mpeg-4-transition">MPEG-4 Transition</h2>
+				<h2 id="release-3.1">Release 3.1.1: Directories!</h2>
+                <h3>3.1.1 features</h2>
+                <ul>
+				<li>If Download or Temporary directories have a problem, cTiVo will pause and ask.</li>
+                <li>Download directory now fixed when download job starts, not when first created.</li>
+                <li>Uses user-specific temp folder, rather than /tmp/ctivo.</li>
+				<li>(Note: this release is exactly same as 3.1.1beta4)</li>
+                </ul>
+				
+                <h3>Minor Improvements:</h3>
+                <ul>
+                <li>Option for automatic deletion on TiVo after download (Adv Prefs).</li>
+				<li>Option for number of simultaneous encoders.</li>
+                </ul>
+				
+				<h2>3.1 features: Folders!</h2>
+				<ul>
+				<li>Shows can now be grouped in series folders.</li>
+				<li>Advanced Preferences is no longer hidden behind Option key.</li>
+				<li>Preferences has simpler directory structure choices (e.g. Plex support)</li>
+				<li>Auto-relocation to Applications directory.</li>
+				</ul>
 
-                <p>Comcast and other cable companies are migrating from MPEG-2 compressed streams to MPEG-4 (aka H.264). They do this to reduce the size and improve the quality of their signals. Comcast seem to be rolling this out slowly, one market at a time and changing over one channel at a time. Although this transition requires many changes to cTiVo, they are transparent in normal operation, except that older Formats may be incompatible. With this release, we&rsquo;ve provided a whole new set of Formats, and taken the opportunity to make the Format selection process easier.</p>
+				<h2>3.0 features</h2>
+                <h3>Artwork enhancements:</h3>
+                <ul>
+                <li>New Artwork column in Now Playing List.</li>
+                <li>Your choice of artwork from TiVo* or theTVDB (Series, Season, Episode, or Movie from theMovieDB).</li>
+                <li>Manual updates of artwork by drag/drop onto table.</li>
+                <li>Manual artwork updates apply to files already recorded as well.</li>
+                <li>Finder Icons now reflect artwork of file.</li>
+                </ul>
+                <h3>Real-time features:</h3>
+                <ul>
+                <li>TiVo now notifies cTiVo as the Now Playing list changes, so new shows are updated instantaneously.*</li>
+                <li>Ability to "Delete Show from TiVo" (in Edit menu and contextual menu).*</li>
+                <li>Ability to "Stop Recording show from TiVo" (in Edit menu and contextual menu).*</li>
+                </ul>
+                <p>*Starred* items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)</p>
 
-                <h2 id="older-os-and-processors">Older OS and processors</h2>
-
-                <p>If you&rsquo;re still using 10.7 or 10.8, you&rsquo;ll need to use a different version: cTiVo-10.7 </p>
-
-                See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
+                <p>See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.</p>
             ]]>
             </description>
-            <pubDate>Sun., February 3, 2017 20:00:00 -0800</pubDate>
+            <pubDate>Sat., March 3, 2018 22:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.1/cTiVo.zip"
-            sparkle:version="714" sparkle:shortVersionString="2.5.1"
-            length="41189839"
-            type="application/octet-stream"
-            sparkle:dsaSignature="MC0CFFr5NDsYyL7iHoEqtO5sjpNrlZXvAhUA5w5eyUF2BEf7EN6QbTHHXqH2VRc=" />
+            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/3.1.2/cTiVo.zip" sparkle:version="857" sparkle:shortVersionString="3.1.2" length="50552671" type="application/octet-stream" sparkle:dsaSignature="MCwCFA1HNQMlJtGDksc5pb8ghb6J1c27AhQnyDxCLxJ0W3OJtb9zJ0rnsNrfpw=="/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>
             <description><![CDATA[
                 <h2 id="release-2.5.1">Release 2.5.1 - 10.7 and 10.8</h1>
 
-                <p>This version is only for systems using 10.7 or 10.8 (and possibly older Macs) </p>
-                <p>Due to the included binaries from other open-source efforts, it&rsquo;s getting much harder to support these older systems, but given the H.264 conversion, We wanted to provide at least one more release. But be aware that after this release, we may not be able to keep it up to date. It has the older binaries (such as mencoder, ffmpeg, ccextractor etc) but otherwise should run fine.</p>
+                <p>This version is only for systems using 10.7 or 10.8 as well as older Macs</p>
+                <p>Due to the included binaries from other open-source efforts, it&rsquo;s getting much harder to support these older systems, but given the H.264 conversion, It has the older binaries (such as mencoder, ffmpeg, ccextractor etc) but otherwise should run fine.</p>
                 <ul>
                 <li>H.264 compatibility (new format for cable companies)</li>
                 <li>Autodetects H.264 transition by channel</li>

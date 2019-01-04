@@ -9,46 +9,62 @@
 #import <Foundation/Foundation.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "MTNetService.h"
-
-@protocol MTTableViewProtocol
-
-@optional
--(NSArray *)sortedShows;
-
-@end
-
+#import "MTRPCData.h"
 
 @class MTTiVoManager, MTTiVoShow;
 
-@interface MTTiVo : NSObject <NSXMLParserDelegate>
+@interface MTTiVo : NSObject <NSXMLParserDelegate, MTRPCDelegate>
 
 @property (nonatomic, strong) NSDate *lastDownloadEnded;
-@property (strong) NSArray *shows;
+@property (strong) NSArray < MTTiVoShow *> *shows;
 @property (nonatomic, strong) MTNetService *tiVo;
-@property BOOL  manualTiVo, enabled;
-@property BOOL mediaKeyIsGood,storeMediaKeyInKeychain;
-@property BOOL isReachable;
+@property (nonatomic, strong) NSString * tiVoSerialNumber;
+@property (readonly)  BOOL  manualTiVo;
+@property (readonly) BOOL isMini;
+@property (atomic, assign) BOOL enabled;
+@property (nonatomic, assign)BOOL storeMediaKeyInKeychain;
+@property (atomic, assign) BOOL isReachable;
 @property (nonatomic, strong) NSString *mediaKey;
 @property int manualTiVoID;
-@property (nonatomic) BOOL supportsTransportStream;
+@property (nonatomic, readonly) BOOL supportsTransportStream, supportsRPC;
+@property (nonatomic, strong) NSDictionary <NSString *, NSDictionary <NSString *, NSString *> *> *channelList;
+@property (nonatomic, readonly) NSString * skipModeStatus;
 
-+(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue;
-+(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;
-+(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue;
++(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo
+     withOperationQueue:(NSOperationQueue *)queue
+       withSerialNumber:(NSString *) TSN;
++(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description
+                  withOperationQueue:(NSOperationQueue *)queue;
 
--(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL) isManual withID:(int)manualTiVoID;
 -(void)scheduleNextUpdateAfterDelay:(NSInteger) delay;
 -(void)updateShows:(id)sender;
--(void)manageDownloads:(id)info;
+-(void)manageDownloads;
 //-(void) reportNetworkFailure;
 -(NSInteger)isProcessing;
 -(void)rescheduleAllShows;
--(void)setupNotifications;
 -(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle; // notification of Tivo problem
 
 -(void) saveLastLoadTime:(NSDate *) newDate;
 -(void)resetAllDetails;
 -(void)getMediaKey;
--(NSDictionary *)defaultsDictionary;
+
+-(NSDictionary *)descriptionDictionary;
+-(void) updateWithDescription:(NSDictionary *) newTiVo;
+
+//RPC pass throughs
+-(void) reloadShowInfoForShows: (NSArray <MTTiVoShow *> *) shows;
+-(MTRPCData *)registerRPCforShow: (MTTiVoShow *) show;
+-(BOOL) rpcActive;
+-(void) whatsOnWithCompletion:  (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler;
+
+-(void) deleteTiVoShows: (NSArray <MTTiVoShow *> *) shows;
+-(void) playShow: (MTTiVoShow *) show;
+-(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows;
+-(void) sendKeyEvent: (NSString *) keyEvent;
+-(void) sendURL: (NSString *) URL;
+
+-(void) loadSkipModeInfoForShow:(MTTiVoShow *) show;
+-(void) findCommercialsForShow:(MTTiVoShow *) show interrupting:(BOOL) interrupt; //results when rpcData is set
+-(void) cancelCommercialingForShow: (MTTiVoShow *) show;
 
 @end

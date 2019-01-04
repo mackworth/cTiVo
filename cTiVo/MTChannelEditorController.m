@@ -21,16 +21,6 @@
 
 @implementation MTChannelEditorController
 
--(void) viewWillAppear {
-    //note: only called in 10.10; older OS will not change button name from Selected
-    if ( tiVoManager.allShowsSelected ) {
-        self.testButton.title = @"Test All Channels";
-    } else {
-        self.testButton.title = @"Test Selected Channels";
-    }
-
-}
-
 -(BOOL)windowShouldClose:(id)sender {
 	[self.view.window makeFirstResponder:self.view]; //This closes out handling editing.
     [tiVoManager removeAllChannelsStartingWith:@"???"];//clean up any extra channels
@@ -39,12 +29,7 @@
 }
 
 -(IBAction) addChannel:(id)sender {
-    NSDictionary * newChannel = @{kMTChannelInfoName: @"???",
-                                  kMTChannelInfoCommercials: @(NSOnState),
-                                  kMTChannelInfoPSFailed: @(NSMixedState),
-                                   kMTChannelInfoUseTS: @(NSMixedState)};
-
-    [tiVoManager createChannel:newChannel];
+    [tiVoManager createChannel];
 }
 
 -(void) testAllChannels:(id)sender {
@@ -55,4 +40,10 @@
     [tiVoManager removeAllPSTests];
 
 }
+
+-(IBAction) help:(id)sender {
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Advanced-Topics#edit-channels"]];
+}
+
+
 @end

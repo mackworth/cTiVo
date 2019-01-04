@@ -20,7 +20,7 @@
 //#define kMTNotificationCommercialWasCanceled @"MTNotificationCommercialWasCanceled"
 //#define kMTNotificationCaptionDidFinish @"MTNotificationCaptionDidFinish"
 //#define kMTNotificationCaptionWasCanceled @"MTNotificationCaptionWasCanceled"
-#define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"
+#define kMTNotificationDownloadStatusChanged @"MTNotificationDownloadStatusChanged"  //object= download that changed its download status
 #define kMTNotificationShowDownloadDidFinish @"MTNotificationShowDownloadDidFinish"     //object = MTDownload that just finished its entire process
 #define kMTNotificationShowDownloadWasCanceled @"MTNotificationShowDownloadWasCanceled"
 
@@ -31,23 +31,30 @@
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"  // optional object: which MTDownload, 
 #define kMTNotificationNetworkChanged @"MTNotificationNetworkChanged"
 #define kMTNotificationDetailsLoaded @"MTNotificationDetailsLoaded"  //object: which MTTiVoShow was loaded
+#define kMTNotificationPictureLoaded @"MTNotificationPictureLoaded"  //object: which MTTiVoShow's image was loaded (or just changed)
 #define kMTNotificationDownloadRowChanged @"NotificationDownloadRowChanged"  //object: which MTDownload was changed
 #define kMTNotificationSubscriptionChanged @"NotificationSubscriptionChanged"  //object: which MTSubscription was changed
 //#define kMTNotificationReloadEpisode @"MTNotificationReloadEpisode"
 #define kMTNotificationMediaKeyNeeded @"MTNotificationMediaKeyNeeded"  //object: which MTTiVo needs a key
 #define kMTNotificationFormatChanged @"MTNotificationFormatChanged"     //object: which MTFormat changed
+#define kMTNotificationChannelsChanged @"MTNotificationChannelsChanged"  //object: which TiVo changed their channelList
 #define kMTNotificationFoundMultipleTiVos @"MTNotificationFoundMultipleTiVo"
+#define kMTNotificationFoundSkipModeInfo @"MTNotificationFoundSkipModeInfo" //object: show
+#define kMTNotificationLogLevelsUpdated @"MTNotificationLogLevelsUpdated"
 
 //Tivo busy indicator
 #define kMTNotificationTiVoUpdating @"MTNotificationTiVoUpdating"  //object: which MTTivo has started updating
+#define kMTNotificationTiVoCommercialed @"MTNotificationTiVoCommercialed"  //object: which MTTivo has finished getting SkipMode
+#define kMTNotificationTiVoCommercialing @"MTNotificationTiVoCommercialing"  //object: which MTTivo has started getting SkipMode
 #define kMTNotificationTiVoUpdated  @"MTNotificationTiVoUpdated" //object: which MTTivo is updated
 
 #define kMTNotificationUserCanceledQuit @"kMTNotificationUserCanceledQuit" 
 
 #define deleteXML 1   //placeholder to store deleted code in case we decide to restore XML export; need to add to downloadTable, subTable, menu and pref NIBx also
 
-//Download Status
+//Download Status  Note: at some time in future, reorder back to normal (and move to 10x to allow new numbers.
 #define kMTStatusNew 0
+#define kMTStatusSkipModeWaitInitial 17  //Waiting before download
 #define kMTStatusWaiting 1
 #define kMTStatusDownloading 2
 #define kMTStatusDownloaded 3
@@ -60,14 +67,20 @@
 #define kMTStatusCaptioned 10
 #define kMTStatusMetaDataProcessing 11
 #define kMTStatusEncoded 12
+#define kMTStatusSkipModeWaitEnd 18  //waiting after download (for marking)
+#define kMTStatusAwaitingPostCommercial 19
+#define kMTStatusPostCommercialing 20
 #define kMTStatusAddingToItunes 13
 #define kMTStatusDone 14
 #define kMTStatusDeleted 15
 #define kMTStatusFailed 16
+#define kMTStatusRemovedFromQueue 99
 
 //Contants
 
-#define kMTUpdateIntervalMinDefault 15 //Default Update interval for re-checking current TiVo
+#define kMTUpdateIntervalMinDefault 240 //Default Update interval for re-checking current TiVo for RPC TiVos
+#define kMTUpdateIntervalMinDefaultNonRPC 15 //Default Update interval for re-checking current TiVo for 3 Series
+#define kMTDefaultDelayForSkipModeInfo 360 //Default time to wait for RPC skipMode to arrive
 #define kMTMaxDownloadRetries 3		// Only allow 3 retries to download a show; default, overriden by userPref
 #define kMTMaxDownloadStartupRetries 20		// Only allow 20 retries due to a download startup failuer
 //#define kMTProgressCheckDelay (2 * 60.0)	//Check progress every 60 seconds to make sure its not stalled
@@ -85,6 +98,7 @@
 #define kMTSubscribediTunes @"addToiTunes"
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
 #define kMTSubscribedSkipCommercials @"skipCommercials"
+#define kMTSubscribedUseSkipMode @"useSkipMode"
 #define kMTSubscribedMarkCommercials @"markCommercials"
 #define kMTSubscribedIncludeSuggestions @"includeSuggestions"
 #define kMTSubscribedGenTextMetaData     @"GenTextMetadata"
@@ -98,6 +112,9 @@
 #define kMTSubscribedSDOnly  @"SDOnly"
 #define kMTSubscribedPrevRecorded @"PrevRecorded" //not used
 #define kMTSubscribedRegExPattern @"RegExPattern"
+#define kMTSubscribedCallSign @"StationCallSign"
+#define kMTTVDBToken @"TVDBToken"
+#define kMTTVDBTokenExpire @"TVDBTokenExpire"
 
 //Download queue userDefaults
 #define kMTQueue      @"Queue"
@@ -117,7 +134,6 @@
 #endif
 #define kMTQueueIncludeAPMMetaData  @"QueueIncludeAPMMetaData"
 #define kMTQueueExportSubtitles  @"QueueExportSubtitles"
-#define kMTGetEpisodeArt @"GetEpisodeArt"
 
 
 //Column editing userDefaults
@@ -140,8 +156,6 @@
 #define kMTTivoShowPasteBoardType @"com.cTiVo.TivoShow"
 #define kMTDownloadPasteBoardType @"com.cTiVo.Download"
 #define kMTInputLocationToken @"<<<INPUT>>>"
-#define kMTTmpDir @"/tmp/ctivo/"
-#define kMTTmpDetailsDir @"/tmp/ctivo_details"
 
 //XATTRs
 
@@ -155,7 +169,10 @@
 
 #define kMTUserDefaultVersion @"UserDefaultVersion"  //have we updated this users defaults (0 = original 2= mencoder transition
 #define kMTTheTVDBCache @"TVDBLocalCache"   //Local cache for TVDB information
-#define kMTTrustTVDB @"TrustTVDB"          //Should we override TiVo with TVDB season/episode
+#define kMTTrustTVDBEpisodes @"TrustTVDBEpisodes"     //Should we override TiVo with TVDB season/episode
+#define KMTPreferredImageSource @"PrefImageSource"   //which source does user prefer (see tivoshow.m for MTImageSource enum)
+
+#define kMTRPCMap @"RPCMap"                     //Cache for TiVo RPC information; use " - " hostname afterwards
 #define	kMTQueuePaused @"QueuePaused"			//State of pause for the download queue
 #define kMTTiVos @"TiVos"           //List of defined tiVos both discovered and manually defined.
 #define kMTPreventSleep @"PreventSleep"			//If true this will prevent sleep when possible
@@ -168,42 +185,60 @@
 #define kMTThumbnailsDirectory  @"ThumbnailsDirectory"  //Pathname for directory for dowloaded files (no GUI)
 #define kMTSubscriptionList @"SubscriptionList"     //Array of subscription dictionaries
 #define kMTTiVoLastLoadTimes @"TiVoLastLoadTImes"   //Array of Date each tivo last processed
+#define kMTManualEpisodeData @"ManualEpisodeData"   //Array of manually entered episode data (esp season/episode nums)
 #define kMTiTunesSubmit @"iTunesSubmit"             //Whether to submit to iTunes after encoding
+#define kMTiTunesSubmitCheck @"iTunesSubmitCheck"   //Whether we have checked for iTunes availability
 #define kMTiTunesSync @"iTunesSync"                 // Whether to sync iDevices after iTunes submital
 #define kMTiTunesDelete @"iTunesDelete"				//Whether to delete original file after submitting to iTunes
+#define kMTIfSuccessDeleteFromTiVo @"IfSuccessDeleteFromTiVo" //Whether to delete show from TiVo after successful download
 #define kMTiTunesContentIDExperiment @"iTunesContentID"  //Whether to add episodeID as contentID for iTunes; doesn't seem to work
 //#define kMTSimultaneousEncode @"SimultaneousEncode" //Whether to encode while downloading
 #define kMTDisableDragSelect @"DisableDragSelect"   //Whether to disable drag-select in downloadshow list (vs drag/drop
 #define kMTAllowDups @"AllowDups"			//Whether to allow duplicate entries in downloads/subscriptions (e.g. for different formats)
-#define kMTMakeSubDirs @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir)
 #define kMTShowCopyProtected @"ShowCopyProtected"   // Whether to display uncopyable shows (greyed out)
 #define kMTShowSuggestions @"ShowSuggestions"		// Whether to display Tivo Suggestions (and to subscribe thereto)
+#define kMTShowFolders @"ShowFolders"		// Whether to display shows grouped in Folders or not
 #define kMTSaveTmpFiles @"SaveTmpFiles"				// Turn off AutoDelete of intermediate files (to make debugging encoders easier)
+#define kMTReuseEDLs @"ReuseEDLs"				// Default NO; whether to use an existing EDL for a second download. (otherwise re-run comskip.)
 #define kMTUseMemoryBufferForDownload @"UseMemoryBufferForDownload" //Default is YES.  Turn off to make sure downloaded file is complete. Principally for debugging use and checkpointing.
 #define kMTSaveMPGFile @"SaveMPGFile"               //Don't delete decrypted MPG file after processing (also puts in download v tmp folder and disables simultaneous encoding)
 
+#define kMTTmpFilesPath @"TmpFilesPath"   //Where are temporary files saved
+
 #define kMTFileNameFormat @"FileNameFormat"			//keyword pattern for filenames
-#define kMTTmpFilesDirectory @"TmpFilesDirectory"   //Where are temporary files saved
+#define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | OriginalAirDate [\"-\" ExtraEpisode][\" - \" EpisodeTitle | Guests]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
+#define kMTcTiVoFolder @"[[MainTitle / MainTitle \" - \" EpisodeTitle | Guests | OriginalAirDate]|[\"Movies\"  / MainTitle \" (\" MovieYear \")\"]]"
+#define kMTcTiVoDefault @"[Title]"
 
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
-#define kMTUpdateIntervalMinutes @"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes (No GUI)
-#define kMTMaxNumEncoders @"MaxNumberEncoders"	//Limit number of encoders to limit cpu usage (No GUI) //
+#define kMTUpdateIntervalMinutesOld @"UpdateIntervalMinutes" //How many minutes to wait between tivo refreshes
+#define kMTUpdateIntervalMinutesNew @"UpdateIntervalMinutesNew" //How many minutes to wait between tivo refreshes
+#define kMTWaitForSkipModeInfoTime @"WaitForSkipModeInfoTime" //How many minutes to wait for RPC skipMode info
+
+#define kMTSubscriptionExpiration @"SubscriptionExpirationDays" //How many days to wait before deleting previous recording info (potentially leading to duplicates) (No GUI)
+#define kMTSubscriptionRelyOnDiskOnly @"SubscriptionRelyOnDiskOnly" //Don't take into account previous recording info at all (relying on existence on disk only) No GUI
+
+#define kMTMaxNumEncoders @"MaxNumberEncoders"	     //Limit number of encoders to limit cpu usage//
 #define kMTMaxProgressDelay @"MaxProgressDelay"      //Maximum time of no encoder progress before giving up (No GUI)  //
 
-#define kMTRunComSkip @"RunComSkip"                 // Whether to run comSkip program after conversion
+#define kMTSkipCommercials @"RunComSkip"                  // Whether to run comSkip program after conversion (historic reasons for code)
 #define kMTMarkCommercials @"MarkCommercials"        // Whether insert chapters for commercials when possible
-#define kMTExportSubtitles @"ExportSubtitles"       // Whether to export subtitles with ts2ami
-#define kMTExportTextMetaData @"ExportTextMetaData" // Whether to export text metadata for PyTivo
+#define kMTCommercialStrategy @"CommercialStrategy"  // 0 - comskip; 1= skipMode only; 2 = skipMode, fallback to Comskip, 3 = SkipMode, fallback to comskip,mark only
+#define kMTExportSubtitles @"ExportSubtitles"        // Whether to export subtitles with ts2ami
+#define kMTExportTextMetaData @"ExportTextMetaData"  // Whether to export text metadata for PyTivo
 
 #ifndef deleteXML
-#define kMTExportTivoMetaData @"ExportTivoMetaData" // Whether to export XML metadata
-#define kMTExportMetaData @"ExportMetaData" // Whether to export metadata with Atomic Parsley
+#define kMTExportTivoMetaData @"ExportTivoMetaData"  // Whether to export XML metadata
+#define kMTExportMetaData @"ExportMetaData"          // Whether to export metadata with Atomic Parsley
 #endif
 
 #define kMTScheduledOperations @"ScheduledOperations"// Whether to run queue at a scheduled time;
 #define kMTScheduledStartTime  @"ScheduledStartTime" // NSDate when to start queue
 #define kMTScheduledEndTime    @"ScheduledEndTime"   // NSDate when to end queue
 #define kMTScheduledSleep      @"ScheduledSleep"     // Whether to start queue to sleep after scheduled downloads
+#define kMTScheduledSkipModeScan    @"ScheduleSkipMode"        //Whether to automatically run SkipMode
+#define kMTScheduledSkipModeScanStartTime @"ScheduledSkipModeStartTime" // NSDate when to start skipMode process
+#define kMTScheduledSkipModeScanEndTime @"ScheduledSkipModeEndTime" // NSDate when to end skipMode process
 #define kMKTQueuePaused        @"QueuePaused"        //Restore state of whether queue was manually paused last time?
 
 #define kMTDebugLevel       @"DebugLevel"
@@ -212,15 +247,13 @@
 #define kMTDecodeBinary  @"DecodeBinary"
 #define kMTDownloadTSFormat @"DownloadTSFormat"
 
-#define kMTChannelInfo @"ChannelInfo"
-#define kMTChannelInfoName @"name"
-#define kMTChannelInfoCommercials @"commercials"
-#define kMTChannelInfoPSFailed @"PSFailed"
-#define kMTChannelInfoUseTS @"useTS"
-
 //Obsolete keys, but kept for upgrade path
-#define kMTManualTiVos @"ManualTiVos"           //Array of manually defined tiVo address. -replaced by MTTiVos
-#define kMTMediaKeys @"MediaKeys"                   //MAK dictionary, indexed by TiVo Name  --replaced by MTTiVos
+#define kMTMakeSubDirsObsolete @"MakeSubDirs"               // Whether to make separate subdirectories for each series (in download dir) (obsolete)
+#define kMTTrustTVDBObsolete @"TrustTVDB"          //Should we override TiVo with TVDB season/episode; obsolete
+#define kMTManualTiVosObsolete @"ManualTiVos"           //Array of manually defined tiVo address. -replaced by MTTiVos
+#define kMTMediaKeysObsolete @"MediaKeys"                   //MAK dictionary, indexed by TiVo Name  --replaced by MTTiVos
+#define kMTTmpFilesDirectoryObsolete @"TmpFilesDirectory"   //Where are temporary files saved
+#define kMTTmpDirObsolete @"/tmp/ctivo/"
 
 //List of keys in TiVo Preference Dictionary
 #define kMTTiVoEnabled @"enabled"
@@ -231,17 +264,11 @@
 #define kMTTiVoIPAddress @"IPAddress"
 #define kMTTiVoUserPort @"userPort"
 #define kMTTiVoUserPortSSL @"userPortSSL"
+#define kMTTiVoUserPortRPC @"userPortRPC"
+#define kMTTiVoTSN @"tiVoTSN"
 #define kMTTiVoManualTiVo @"manualTiVo"
 #define kMTTiVoNullKey @"00000000"
 
-
-//Growl notification constants (see growlRegDict file)
-#define kMTGrowlBeginDownload @"Begin Download"
-#define kMTGrowlEndDownload   @"End Download"
-#define kMTGrowlCantDownload  @"Can't Download"
-#define kMTGrowlPossibleProblem  @"Possible Problem"
-#define kMTGrowlCommercialDetFailed @"Commercial Detection Failed"
-#define kMTGrowlTivodecodeFailed @"Tivodecode Failed"
 
 //NOT IMPLEMENTED
 #define kMTiTunesIcon @"iTunesIcon"                 // Whether to use video frame (versus cTivo logo) for iTUnes icon

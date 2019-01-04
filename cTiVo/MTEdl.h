@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #include "mp4v2.h"
 
-@interface MTEdl : NSObject
+@interface MTEdl : NSObject <NSSecureCoding>
 
 #define kMinEdlLength 5
 
@@ -17,15 +17,18 @@
 @property (nonatomic) int edlType;
 @property (nonatomic) double offset;
 
-+(MTEdl *)edlFromString:edlString;
-
 @end
 
 @interface NSArray (MTEDLList)
 
 +(NSArray *)getFromEDLFile:(NSString *)edlFile;
+-(BOOL) writeToEDLFile:(NSString *) edlFile;
+-(BOOL) equivalentToEDL: (NSArray <MTEdl *> *) edlList; // returns true if almost identical to other EDL
+-(NSString *) compareEDL: (NSArray <MTEdl *> *) edlList;
 
--(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length;
+-(BOOL)addAsChaptersToMP4File: (MP4FileHandle *) encodedFile forShow:(NSString *) showName withLength:(double) length keepingCommercials: (BOOL) keepCommercials; 
+
++(NSArray *)edlListFromSegments:(NSArray <NSNumber *> *) segments andStartPoints:(NSArray <NSNumber *> *) startPoints;
 
 @end
 

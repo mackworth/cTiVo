@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13156.6" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment version="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="7706"/>
+        <deployment version="1090" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13156.6"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTMainWindowController">
@@ -24,7 +25,7 @@
             <rect key="frame" x="0.0" y="0.0" width="315" height="573"/>
             <subviews>
                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="9">
-                    <rect key="frame" x="225" y="525" width="76" height="32"/>
+                    <rect key="frame" x="226" y="525" width="75" height="32"/>
                     <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="10">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
@@ -154,14 +155,21 @@
                     <constraints>
                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="126"/>
                     </constraints>
-                    <textFieldCell key="cell" lineBreakMode="truncatingMiddle" selectable="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" state="on" alignment="left" title="Episode Number" placeholderString="" id="127">
+                    <textFieldCell key="cell" lineBreakMode="truncatingMiddle" selectable="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" state="on" alignment="left" title="Episode Number" placeholderString="SxxExx" id="127">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                     <connections>
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="gnn-YM-NIS"/>
-                        <binding destination="-2" name="value" keyPath="self.showForDetail.seasonEpisode" id="735"/>
+                        <binding destination="-2" name="value" keyPath="self.showForDetail.seasonEpisode" id="UUC-hq-Myg">
+                            <dictionary key="options">
+                                <bool key="NSConditionallySetsEditable" value="YES"/>
+                                <string key="NSNoSelectionPlaceholder">SxxExx</string>
+                                <string key="NSNotApplicablePlaceholder">SxxExx</string>
+                                <string key="NSNullPlaceholder">SxxExx</string>
+                            </dictionary>
+                        </binding>
                     </connections>
                 </textField>
                 <textField horizontalHuggingPriority="75" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="133" userLabel="Season Text">
@@ -252,7 +260,7 @@
                     </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="356" userLabel="Year Label">
-                    <rect key="frame" x="45" y="434" width="66" height="14"/>
+                    <rect key="frame" x="46" y="434" width="65" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Movie Year:" id="357">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -266,8 +274,8 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="153" userLabel="Series Label">
-                    <rect key="frame" x="64" y="412" width="47" height="14"/>
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="153" userLabel="Series Label">
+                    <rect key="frame" x="46" y="412" width="65" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Series:" id="154">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -278,7 +286,7 @@
                     </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="159" userLabel="Episode Label">
-                    <rect key="frame" x="60" y="390" width="51" height="14"/>
+                    <rect key="frame" x="61" y="390" width="50" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Episode:" id="160">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -293,8 +301,8 @@
                     </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="165" userLabel="Episode Number Label">
-                    <rect key="frame" x="15" y="368" width="96" height="14"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Episode Number:" id="166">
+                    <rect key="frame" x="17" y="368" width="94" height="14"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Episode Number:" placeholderString="" id="166">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -303,8 +311,8 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="pUO-OG-tNP"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="171" userLabel="Season Label">
-                    <rect key="frame" x="64" y="346" width="47" height="14"/>
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="171" userLabel="Season Label">
+                    <rect key="frame" x="46" y="346" width="65" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Season:" id="172">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -314,8 +322,8 @@
                         <binding destination="-2" name="hidden" keyPath="self.showForDetail.isMovie" id="OFQ-xw-ANb"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="147" userLabel="Genre Label">
-                    <rect key="frame" x="64" y="324" width="47" height="14"/>
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="147" userLabel="Genre Label">
+                    <rect key="frame" x="46" y="324" width="65" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Genre:" id="148">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -337,8 +345,8 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="272" userLabel="Actors Label">
-                    <rect key="frame" x="64" y="225" width="47" height="14"/>
+                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="272" userLabel="Actors Label">
+                    <rect key="frame" x="46" y="225" width="65" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Actors:" id="273">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -346,7 +354,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="280" userLabel="Guest Stars Label">
-                    <rect key="frame" x="41" y="168" width="70" height="14"/>
+                    <rect key="frame" x="42" y="168" width="69" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Guest Stars:" id="281">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -354,7 +362,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="287" userLabel="DIrectors Label">
-                    <rect key="frame" x="55" y="111" width="56" height="14"/>
+                    <rect key="frame" x="55" y="112" width="56" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Directors:" id="288">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -362,28 +370,26 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="295" userLabel="Producers Label">
-                    <rect key="frame" x="49" y="54" width="62" height="14"/>
+                    <rect key="frame" x="50" y="55" width="61" height="14"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Producers:" id="296">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="1" verticalCompressionResistancePriority="250" misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="183" userLabel="Description Text">
-                    <rect key="frame" x="117" y="246" width="178" height="49"/>
+                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="1" verticalCompressionResistancePriority="250" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="183" userLabel="Description Text">
+                    <rect key="frame" x="117" y="247" width="178" height="49"/>
                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="lWb-hj-Cnb">
-                        <rect key="frame" x="1" y="1" width="173" height="47"/>
+                        <rect key="frame" x="1" y="1" width="176" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" findStyle="panel" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="184">
-                                <rect key="frame" x="0.0" y="0.0" width="173" height="47"/>
+                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="184">
+                                <rect key="frame" x="0.0" y="0.0" width="176" height="47"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <size key="minSize" width="176" height="47"/>
                                 <size key="maxSize" width="463" height="10000000"/>
                                 <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <size key="minSize" width="176" height="47"/>
-                                <size key="maxSize" width="463" height="10000000"/>
                                 <connections>
                                     <binding destination="-2" name="attributedString" keyPath="self.showForDetail.attribDescription" id="740">
                                         <dictionary key="options">
@@ -404,25 +410,23 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="186">
-                        <rect key="frame" x="158" y="1" width="16" height="47"/>
+                        <rect key="frame" x="161" y="1" width="16" height="47"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
                 <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="201" userLabel="Actors Text">
                     <rect key="frame" x="117" y="190" width="178" height="49"/>
                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="pI5-Tl-iQm">
-                        <rect key="frame" x="1" y="1" width="173" height="47"/>
+                        <rect key="frame" x="1" y="1" width="176" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" findStyle="panel" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="205">
-                                <rect key="frame" x="0.0" y="0.0" width="173" height="47"/>
+                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="205">
+                                <rect key="frame" x="0.0" y="0.0" width="176" height="47"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <size key="minSize" width="176" height="47"/>
                                 <size key="maxSize" width="463" height="10000000"/>
                                 <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <size key="minSize" width="176" height="47"/>
-                                <size key="maxSize" width="463" height="10000000"/>
                                 <connections>
                                     <binding destination="-2" name="attributedString" keyPath="self.showForDetail.actors" id="742">
                                         <dictionary key="options">
@@ -443,25 +447,23 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="203">
-                        <rect key="frame" x="158" y="1" width="16" height="47"/>
+                        <rect key="frame" x="161" y="1" width="16" height="47"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
-                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="231" userLabel="GuestStars Text">
-                    <rect key="frame" x="117" y="132" width="178" height="49"/>
+                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="231" userLabel="GuestStars Text">
+                    <rect key="frame" x="117" y="134" width="178" height="48"/>
                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="0uY-RI-059">
-                        <rect key="frame" x="1" y="1" width="173" height="47"/>
+                        <rect key="frame" x="1" y="1" width="176" height="46"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" findStyle="panel" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="232">
-                                <rect key="frame" x="0.0" y="0.0" width="173" height="47"/>
+                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="232">
+                                <rect key="frame" x="0.0" y="0.0" width="176" height="46"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <size key="minSize" width="176" height="47"/>
+                                <size key="minSize" width="176" height="46"/>
                                 <size key="maxSize" width="463" height="10000000"/>
                                 <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <size key="minSize" width="176" height="47"/>
-                                <size key="maxSize" width="463" height="10000000"/>
                                 <connections>
                                     <binding destination="-2" name="attributedString" keyPath="self.showForDetail.guestStars" id="744">
                                         <dictionary key="options">
@@ -482,25 +484,23 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="234">
-                        <rect key="frame" x="158" y="1" width="16" height="47"/>
+                        <rect key="frame" x="161" y="1" width="16" height="46"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
                 <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="244" userLabel="Directors Text">
-                    <rect key="frame" x="117" y="76" width="178" height="49"/>
+                    <rect key="frame" x="117" y="77" width="178" height="49"/>
                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="KuS-QA-J7V">
-                        <rect key="frame" x="1" y="1" width="173" height="47"/>
+                        <rect key="frame" x="1" y="1" width="176" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" findStyle="panel" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="247">
-                                <rect key="frame" x="0.0" y="0.0" width="173" height="47"/>
+                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="247">
+                                <rect key="frame" x="0.0" y="0.0" width="176" height="47"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <size key="minSize" width="176" height="47"/>
                                 <size key="maxSize" width="463" height="10000000"/>
                                 <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <size key="minSize" width="176" height="47"/>
-                                <size key="maxSize" width="463" height="10000000"/>
                                 <connections>
                                     <binding destination="-2" name="attributedString" keyPath="self.showForDetail.directors" id="746">
                                         <dictionary key="options">
@@ -521,25 +521,23 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="245">
-                        <rect key="frame" x="158" y="1" width="16" height="47"/>
+                        <rect key="frame" x="161" y="1" width="16" height="47"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
-                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="257" userLabel="Producers Text">
-                    <rect key="frame" x="117" y="19" width="178" height="49"/>
+                <scrollView horizontalHuggingPriority="75" verticalHuggingPriority="75" verticalCompressionResistancePriority="250" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="257" userLabel="Producers Text">
+                    <rect key="frame" x="117" y="20" width="178" height="49"/>
                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="dh9-sg-Zpi">
-                        <rect key="frame" x="1" y="1" width="173" height="46"/>
+                        <rect key="frame" x="1" y="1" width="176" height="47"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" findStyle="panel" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="258">
-                                <rect key="frame" x="0.0" y="0.0" width="173" height="47"/>
+                            <textView editable="NO" drawsBackground="NO" importsGraphics="NO" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="258">
+                                <rect key="frame" x="0.0" y="0.0" width="176" height="47"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <size key="minSize" width="176" height="47"/>
                                 <size key="maxSize" width="463" height="10000000"/>
                                 <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <size key="minSize" width="176" height="47"/>
-                                <size key="maxSize" width="463" height="10000000"/>
                                 <connections>
                                     <binding destination="-2" name="attributedString" keyPath="self.showForDetail.producers" id="747">
                                         <dictionary key="options">
@@ -559,7 +557,7 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="260">
-                        <rect key="frame" x="158" y="1" width="16" height="46"/>
+                        <rect key="frame" x="161" y="1" width="16" height="47"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>

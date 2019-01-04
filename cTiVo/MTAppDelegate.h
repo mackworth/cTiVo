@@ -8,13 +8,18 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MTTiVoManager.h"
+@class MTRemoteWindowController;
 
-@interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSPopoverDelegate> 
+@interface MTAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSPopoverDelegate, NSOpenSavePanelDelegate> 
 
+@property (nonatomic, strong) MTRemoteWindowController  *remoteControlWindowController;
 
 -(BOOL)checkForExit;
 
 -(NSArray <MTTiVoShow*> *)currentSelectedShows; //used for test purposes
--(BOOL) allShowsSelected;
+-(void) promptForNewDirectory:(NSString *) oldDir withMessage: (NSString *) message isProblem: (BOOL) problem isTempDir:(BOOL) temp; //used by Preferences
+
+-(void) preventSleep;
+-(void)allowSleep;
 
 @end

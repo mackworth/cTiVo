@@ -7,13 +7,13 @@
 //
 
 #import "MTTiVo.h"
+#import "MTTivoRPC.h"
 #import "MTTiVoShow.h"
 #import "MTDownload.h"
 #import "NSString+HTML.h"
 #import "MTTiVoManager.h"
 #import "NSNotificationCenter+Threads.h"
-
-#include <sys/xattr.h>
+#import "NSArray+Map.h"
 
 #define kMTStringType 0
 #define kMTBoolType 1
@@ -30,14 +30,14 @@
 
 @interface MTTiVo ()
 {
-    BOOL volatile isConnecting, managingDownloads, firstUpdate, canPing;
-    NSURLConnection *showURLConnection;
+    BOOL volatile isConnecting, managingDownloads, firstUpdate, cancelRefresh;
     NSMutableData *urlData;
     NSMutableArray *newShows;
     SCNetworkReachabilityContext reachabilityContext;
     int totalItemsOnTivo;
     int lastChangeDate;
     int itemStart;
+    int tivoBugDuplicatePossibleStart, tivoBugDuplicateCount;
     int itemCount;
     int numAddedThisBatch; //should be itemCount minus duplicates
     int authenticationTries;
@@ -49,52 +49,73 @@
 
 }
 
+@property (atomic, assign) BOOL oneBatch;
+@property (nonatomic, strong) NSMutableArray<NSString *> * addedShows;
+@property (nonatomic, strong) NSMutableArray<NSNumber *> * addedShowIndices;
+
 @property (nonatomic, strong) NSDate *networkAvailability;
 @property (nonatomic, strong) NSOperationQueue *opsQueue;
 @property (nonatomic, strong) NSURLConnection *showURLConnection;
-@property BOOL isResponding;
 @property (nonatomic, strong) 	NSDate *currentNPLStarted;
 
+@property (nonatomic, strong) NSMutableSet <MTTiVoShow *> * postponedCommercialShows;
 @property SCNetworkReachabilityRef reachability;
 @property (nonatomic, readonly) NSArray *downloadQueue;
+@property (nonatomic, strong) MTTivoRPC * myRPC;
+@property (atomic, strong) NSMutableDictionary <NSString *, MTTiVoShow *> * rpcIDs;
+
 @end
 
 @implementation MTTiVo
+@synthesize enabled = _enabled;
 
-@synthesize showURLConnection;
 
 __DDLOGHERE__
 
-+(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue
-{
-    return [MTTiVo tiVoWithTiVo:tiVo withOperationQueue:queue manual:NO  withID:0];
++(MTTiVo *)tiVoWithTiVo:(MTNetService *)tiVo
+     withOperationQueue:(NSOperationQueue *)queue
+       withSerialNumber:(NSString *)TSN {
+    MTTiVo *thisTiVo = [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue manual:NO withID:(int)0 withSerialNumber:TSN ];
+    DDLogVerbose(@"Checking Enabled for %@", self);
+    for (NSDictionary *description in tiVoManager.savedTiVos) {
+        if ([description[kMTTiVoUserName] isEqual:thisTiVo.tiVo.name]) {
+            thisTiVo.tiVoSerialNumber = description[kMTTiVoTSN];
+            thisTiVo.enabled = [description[kMTTiVoEnabled] boolValue];
+            if ((description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey]) {
+                thisTiVo.mediaKey = description[kMTTiVoMediaKey];
+            }
+            DDLogDetail(@"%@ is%@ Enabled", thisTiVo.tiVo.name,thisTiVo.enabled ? @"": @" not");
+            return thisTiVo;
+        }
+    }
+    thisTiVo.enabled = YES;
+    DDLogMajor(@"First time seeing %@ (previous: %@)",thisTiVo, [tiVoManager.savedTiVos maskMediaKeys]);
+    return thisTiVo;
 }
 
-+(MTTiVo *)tiVoWithTiVo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID
-    {
-	return [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue manual:isManual withID:(int)manualTiVoID];
-}
-
-+(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue
-{
-    if (!description[kMTTiVoUserPort] ||
-        !description[kMTTiVoUserPortSSL] ||
-        !description[kMTTiVoUserName] ||
-        !description[kMTTiVoIPAddress]
-        ) {
++(MTTiVo *)manualTiVoWithDescription:(NSDictionary *)description withOperationQueue:(NSOperationQueue *)queue {
+    //recently added RPC, so shouldn't fail if it's missing, but default to 1413 instead.  Could check in future.
+    if (![description[kMTTiVoUserPort]    intValue] ||
+        ![description[kMTTiVoUserPortSSL] intValue] ||
+        ![description[kMTTiVoUserName]    length] ||
+        ![description[kMTTiVoIPAddress]   length]  ) {
         return nil;
     }
     MTNetService *tiVo = [MTNetService new];
     tiVo.userPortSSL = (short)[description[kMTTiVoUserPortSSL] intValue];
+    tiVo.userPortRPC = (short)[description[kMTTiVoUserPortRPC] ?: @1413 intValue];
     tiVo.userPort = (short)[description[kMTTiVoUserPort] intValue];
     tiVo.userName = description[kMTTiVoUserName];
     tiVo.iPAddress = description[kMTTiVoIPAddress];
-    MTTiVo *thisTiVo = [MTTiVo tiVoWithTiVo:tiVo withOperationQueue:queue manual:YES withID:[description[kMTTiVoID] intValue]];
-    if (!(description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqualTo:kMTTiVoNullKey]) {
+    MTTiVo *thisTiVo = [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:queue manual:YES withID:[description[kMTTiVoID] intValue] withSerialNumber:description[kMTTiVoTSN]];
+    if ((description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey]) {
         thisTiVo.mediaKey = description[kMTTiVoMediaKey];
     }
-    thisTiVo.enabled = [description[kMTTiVoEnabled] boolValue];
-    thisTiVo.manualTiVoID = [description[kMTTiVoID] intValue];
+    if ([tiVoManager duplicateTiVoFor:thisTiVo]) {
+        thisTiVo.enabled = NO;
+        return nil;
+    }
+    thisTiVo.enabled = YES;
     return thisTiVo;
 }
 	
@@ -107,58 +128,60 @@ __DDLOGHERE__
 		newShows = [NSMutableArray new];
 		_tiVo = nil;
 		previousShowList = nil;
-		showURLConnection = nil;
+		self.showURLConnection = nil;
 		_mediaKey = @"";
 		isConnecting = NO;
-		_mediaKeyIsGood = NO;
         managingDownloads = NO;
-        _supportsTransportStream = YES;
         _manualTiVo = NO;
 		firstUpdate = YES;
-		_enabled = YES;
+        _enabled = NO;
         _storeMediaKeyInKeychain = NO;
         itemStart = 0;
         itemCount = 50;
+        tivoBugDuplicatePossibleStart = -1;
         reachabilityContext.version = 0;
         reachabilityContext.info = (__bridge void *)(self);
         reachabilityContext.retain = NULL;
         reachabilityContext.release = NULL;
         reachabilityContext.copyDescription = NULL;
         elementToPropertyMap = @{
-            @"Title" : @{kMTValue : @"seriesTitle", kMTType : [NSNumber numberWithInt:kMTStringType]},
-            @"EpisodeTitle" : @{kMTValue : @"episodeTitle", kMTType : [NSNumber numberWithInt:kMTStringType]},
-            @"CopyProtected" : @{kMTValue : @"protectedShow", kMTType : [NSNumber numberWithInt:kMTBoolType]},
-            @"InProgress" : @{kMTValue : @"inProgress", kMTType : [NSNumber numberWithInt:kMTBoolType]},
-            @"SourceSize" : @{kMTValue : @"fileSize", kMTType : [NSNumber numberWithInt:kMTNumberType]},
-            @"Duration" : @{kMTValue : @"showLengthString", kMTType : [NSNumber numberWithInt:kMTStringType]},
-            @"CaptureDate" : @{kMTValue : @"showDate", kMTType : [NSNumber numberWithInt:kMTDateType]},
-            @"Description" : @{kMTValue : @"showDescription", kMTType : [NSNumber numberWithInt:kMTStringType]},
-            @"SourceChannel" : @{kMTValue : @"channelString", kMTType : [NSNumber numberWithInt:kMTStringType]},
-            @"SourceStation" : @{kMTValue : @"stationCallsign", kMTType : [NSNumber numberWithInt:kMTStringType]},
-            @"HighDefinition" : @{kMTValue : @"isHD", kMTType : [NSNumber numberWithInt:kMTBoolType]},
-            @"ProgramId" : @{kMTValue : @"programId", kMTType : [NSNumber numberWithInt:kMTStringType]},
-            @"SeriesId" : @{kMTValue : @"seriesId", kMTType : [NSNumber numberWithInt:kMTStringType]},
-            @"TvRating" : @{kMTValue : @"tvRating", kMTType : [NSNumber numberWithInt:kMTNumberType]},
-            @"MpaaRating" : @{kMTValue : @"mpaaRating", kMTType : [NSNumber numberWithInt:kMTNumberType]},
-            @"SourceType" : @{kMTValue : @"sourceType", kMTType : [NSNumber numberWithInt:kMTStringType]},
-            @"IdGuideSource" : @{kMTValue : @"idGuidSource", kMTType : [NSNumber numberWithInt:kMTStringType]}};
+            @"Title" :          @{kMTValue : @"seriesTitle",      kMTType : @(kMTStringType)},
+            @"EpisodeTitle" :   @{kMTValue : @"episodeTitle",     kMTType : @(kMTStringType)},
+            @"CopyProtected" :  @{kMTValue : @"protectedShow",    kMTType : @(kMTBoolType)},
+            @"InProgress" :     @{kMTValue : @"inProgress",       kMTType : @(kMTBoolType)},
+            @"SourceSize" :     @{kMTValue : @"fileSize",         kMTType : @(kMTNumberType)},
+            @"Duration" :       @{kMTValue : @"showLengthString", kMTType : @(kMTStringType)},
+			@"CaptureDate" :    @{kMTValue : @"showDate",         kMTType : @(kMTDateType)},
+			@"ShowingStartTime":@{kMTValue : @"showDate",         kMTType : @(kMTDateType)},
+            @"Description" :    @{kMTValue : @"showDescription",  kMTType : @(kMTStringType)},
+            @"SourceChannel" :  @{kMTValue : @"channelString",    kMTType : @(kMTStringType)},
+            @"SourceStation" :  @{kMTValue : @"stationCallsign",  kMTType : @(kMTStringType)},
+            @"HighDefinition" : @{kMTValue : @"isHD",             kMTType : @(kMTBoolType)},
+            @"ProgramId" :      @{kMTValue : @"programId",        kMTType : @(kMTStringType)},
+            @"SeriesId" :       @{kMTValue : @"seriesId",         kMTType : @(kMTStringType)},
+            @"TvRating" :       @{kMTValue : @"tvRating",         kMTType : @(kMTNumberType)},
+            @"MpaaRating" :     @{kMTValue : @"mpaaRating",       kMTType : @(kMTNumberType)},
+            @"SourceType" :     @{kMTValue : @"sourceType",       kMTType : @(kMTStringType)},
+            @"IdGuideSource" :  @{kMTValue : @"idGuidSource",     kMTType : @(kMTStringType)}};
 		elementToPropertyMap = [[NSDictionary alloc] initWithDictionary:elementToPropertyMap];
 		_currentNPLStarted = nil;
-		_lastDownloadEnded = [NSDate dateWithTimeIntervalSince1970:0];
+		_lastDownloadEnded = [NSDate date];
 		_manualTiVoID = -1;
+        self.rpcIDs = [NSMutableDictionary dictionary];
 	}
 	return self;
 	
 }
 
--(id) initWithTivo:(id)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID
-{
+-(id) initWithTivo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID withSerialNumber:(NSString *)TSN {
 	self = [self init];
 	if (self) {
 		self.tiVo = tiVo;
-        self.manualTiVo = isManual;
+		_enabled = YES;
+        _manualTiVo = isManual;
         self.manualTiVoID = manualTiVoID;
 		self.opsQueue = queue;
+        _tiVoSerialNumber = TSN;
         DDLogMajor(@"testing reachability for tivo %@ with address %@",self.tiVo.name, self.tiVo.addresses[0]);
         if (isManual) {
             _reachability = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [self.tiVo.iPAddress UTF8String]);
@@ -174,7 +197,6 @@ __DDLOGHERE__
 		_isReachable = didSchedule;
 		if (!_isReachable) DDLogReport(@"Failed to schedule reachability for tivo %@", _tiVo.name);
 		[self performSelectorOnMainThread:@selector(getMediaKey) withObject:nil waitUntilDone:YES];
-		[self checkEnabled];
 		[self setupNotifications];
 	}
 	return self;
@@ -189,23 +211,33 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     BOOL needsConnection = ((flags & kSCNetworkFlagsConnectionRequired) != 0);
 
     thisTivo.isReachable = isReachable && !needsConnection ;
+    DDLogReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
     if (thisTivo.isReachable) {
 		thisTivo.networkAvailability = [NSDate date];
 		[NSObject cancelPreviousPerformRequestsWithTarget:thisTivo selector:@selector(manageDownloads:) object:thisTivo];
-		[thisTivo performSelector:@selector(manageDownloads:) withObject:thisTivo afterDelay:kMTTiVoAccessDelay+2];
-        [thisTivo scheduleNextUpdateAfterDelay: kMTTiVoAccessDelay];
-	} 
+		if (thisTivo.supportsRPC) {
+			[thisTivo.myRPC launchServer];
+		} else {
+        	[thisTivo scheduleNextUpdateAfterDelay: kMTTiVoAccessDelay];
+		}
+		[thisTivo performSelector:@selector(manageDownloads) withObject:nil afterDelay:kMTTiVoAccessDelay+2];
+	} else {
+		[thisTivo.myRPC stopServer];
+	}
     [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationNetworkChanged object:nil];
-    DDLogCReport(@"Tivo %@ is now %@", thisTivo.tiVo.name, thisTivo.isReachable ? @"online" : @"offline");
 }
 
 -(void)setupNotifications
 {
+	if (self.isMini) return;
 	NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDownloadQueueUpdated object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationTransferDidFinish object:nil];
 	[defaultCenter addObserver:self selector:@selector(manageDownloads:) name:kMTNotificationDecryptDidFinish object:nil];
-	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(appWillTerminate:)
+												 name:NSApplicationWillTerminateNotification
+											   object:nil];
 }
 
 -(void) saveLastLoadTime:(NSDate *) newDate{
@@ -222,56 +254,135 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(NSString * ) description
 {
     if (self.manualTiVo) {
-        return [NSString stringWithFormat:@"%@ (%@:%hd/%hd)",
+        return [NSString stringWithFormat:@"%@ (%@:%hd/%hd/%hd) %@",
             self.tiVo.name,
             self.tiVo.iPAddress,
             self.tiVo.userPort,
-            self.tiVo.userPortSSL
+            self.tiVo.userPortSSL,
+            self.tiVo.userPortRPC,
+            self.enabled ? @"": @" disabled"
             ];
     } else {
-		return self.tiVo.name;
+		return [self.tiVo.name stringByAppendingString: self.enabled ? @"": @" disabled"];
     }
 }
 
--(NSDictionary *)defaultsDictionary
+-(void)setEnabled:(BOOL) enabled {
+	if (enabled && [tiVoManager duplicateTiVoFor:self]) {
+		enabled = NO;
+	}
+	@synchronized (self) {
+		_enabled = enabled;
+	}
+    if (enabled && !self.myRPC) {
+        if (self.supportsRPC) {
+            int port = self.manualTiVo ? self.tiVo.userPortRPC : 1413;
+            self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName tsn:self.tiVoSerialNumber onPort: port andMAK:self.mediaKey forDelegate:self];
+        }
+    } else if (!enabled && self.myRPC){
+        [self.myRPC stopServer];
+        self.myRPC = nil;
+    }
+	if (!self.isMini) {
+		[tiVoManager channelsChanged:self];
+	}
+    [tiVoManager updateTiVoDefaults:self];
+}
+
+-(BOOL) isMini {
+	return [self.tiVoSerialNumber hasPrefix:@"A9"] && ![self.tiVoSerialNumber hasPrefix: @"A94"]; //not streams
+}
+
+-(BOOL) isOlderTiVo {
+	if (self.isMini) return NO;
+	char digit = (char)[self.tiVoSerialNumber characterAtIndex:0] ; //unicode irrelevant
+	return digit != 'A' && digit < '8';
+}
+
+-(BOOL) enabled {
+    @synchronized (self) {
+        return _enabled;
+    }
+}
+
+-(void) setTiVoSerialNumber:(NSString *)TSN {
+    if ([TSN hasPrefix:@"tsn:"]) {
+        TSN = [TSN substringWithRange:NSMakeRange(4, TSN.length-4)];
+    }
+    if (TSN.length == 0) return;
+    if ([TSN isEqualToString:_tiVoSerialNumber]) return;
+    _tiVoSerialNumber = TSN;
+    if (self.enabled && [tiVoManager duplicateTiVoFor:self]) {
+        self.enabled = NO;
+    } else {
+        [tiVoManager updateTiVoDefaults:self];
+    }
+}
+
+-(NSDictionary *)descriptionDictionary
 {
     NSDictionary *retValue = nil;
     if (_manualTiVo) {
-        retValue = @{kMTTiVoManualTiVo : @YES,
-                     kMTTiVoUserName : self.tiVo.name,
-                     kMTTiVoUserPort : [NSNumber numberWithInt:(int)self.tiVo.userPort],
-                     kMTTiVoUserPortSSL : [NSNumber numberWithInt:(int)self.tiVo.userPortSSL],
-                     kMTTiVoIPAddress : self.tiVo.iPAddress,
-                     kMTTiVoEnabled : [NSNumber numberWithBool:self.enabled],
-                     kMTTiVoID : [NSNumber numberWithInt:self.manualTiVoID],
-                     kMTTiVoMediaKey : self.mediaKey
+        retValue = @{kMTTiVoManualTiVo :   @YES,
+                     kMTTiVoUserName :      self.tiVo.name,
+                     kMTTiVoUserPort :    @(self.tiVo.userPort),
+                     kMTTiVoUserPortSSL : @(self.tiVo.userPortSSL),
+                     kMTTiVoTSN :           self.tiVoSerialNumber ?: @"",
+                     kMTTiVoUserPortRPC : @(self.tiVo.userPortRPC),
+                     kMTTiVoIPAddress :     self.tiVo.iPAddress,
+                     kMTTiVoEnabled :     @(self.enabled),
+                     kMTTiVoID :          @(self.manualTiVoID),
+                     kMTTiVoMediaKey :      self.mediaKey
                      };
     } else {
-        retValue = @{kMTTiVoManualTiVo : @NO,
-                     kMTTiVoUserName : self.tiVo.name,
-                     kMTTiVoEnabled : [NSNumber numberWithBool:self.enabled],
-                     kMTTiVoMediaKey : self.mediaKey
+        retValue = @{kMTTiVoManualTiVo :   @NO,
+                     kMTTiVoUserName :      self.tiVo.name,
+                     kMTTiVoTSN :           self.tiVoSerialNumber ?: @"",
+                     kMTTiVoEnabled :     @(self.enabled),
+                     kMTTiVoMediaKey :      self.mediaKey
                      };
     }
     return retValue;
 }
 
--(void)checkEnabled
-{
-	DDLogVerbose(@"Checking Enabled for %@", self);
-    NSArray *savedTiVos = tiVoManager.savedTiVos;
-    if (savedTiVos.count == 0) {
-        DDLogVerbose(@"No saved TiVos to check for enabled");
-        return;
+-(void) updateWithDescription:(NSDictionary *) newTiVo {
+    BOOL shouldUpdate = NO;
+    BOOL newEnabled = ((NSNumber *) newTiVo[kMTTiVoEnabled]).boolValue;
+
+    if (self.manualTiVo) {
+        BOOL rpcChanged = [self.tiVo.iPAddress caseInsensitiveCompare:newTiVo[kMTTiVoIPAddress]] != NSOrderedSame ||
+                          self.tiVo.userPortRPC != [newTiVo[kMTTiVoUserPortRPC] intValue];
+        if (rpcChanged ||
+            [self.tiVo.userName  compare:newTiVo[kMTTiVoUserName]] != NSOrderedSame ||
+            self.tiVo.userPort != [newTiVo[kMTTiVoUserPort] intValue] ||
+            self.tiVo.userPortSSL != [newTiVo[kMTTiVoUserPortSSL] intValue]
+           ) { // If there's a change then edit it and update
+            self.tiVo.iPAddress = newTiVo[kMTTiVoIPAddress];
+            self.tiVo.userName = newTiVo[kMTTiVoUserName];
+            self.tiVo.userPort = (short)[newTiVo[kMTTiVoUserPort] intValue];
+            self.tiVo.userPortSSL = (short)[newTiVo[kMTTiVoUserPortSSL] intValue];
+            self.tiVo.userPortRPC = (short)[newTiVo[kMTTiVoUserPortRPC] intValue];
+            shouldUpdate = YES;
+            if (rpcChanged) self.myRPC = nil; //will be restarted by "enabled"
+        }
     }
-    for (NSDictionary *tiVo in savedTiVos) {
-        if ([tiVo[kMTTiVoUserName] isEqualTo:self.tiVo.name]) {
-			self.enabled = [tiVo[kMTTiVoEnabled] boolValue];
-			DDLogDetail(@"%@ is%@ Enabled", self,self.enabled ? @"": @" not");
-			return;
-		}
-	}
-	DDLogReport(@"Warning: didn't find %@ in %@", self, savedTiVos);
+
+    if ((newTiVo[kMTTiVoEnabled]  && self.enabled != newEnabled) ||
+        (newTiVo[kMTTiVoTSN]      && ! [newTiVo[kMTTiVoTSN]      isEqualToString: self.tiVoSerialNumber]) ||
+        (newTiVo[kMTTiVoMediaKey] && ! [newTiVo[kMTTiVoMediaKey] isEqualToString: self.mediaKey] && ![newTiVo[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey])) {
+        self.tiVoSerialNumber = (NSString *)newTiVo[kMTTiVoTSN];  //must be after enabled
+        self.mediaKey = newTiVo[kMTTiVoMediaKey];
+        shouldUpdate = YES;
+    }
+    self.enabled = newEnabled;
+
+    if (shouldUpdate ) {
+        DDLogDetail(@"Updated  TiVo %@ with %@",self, [newTiVo maskMediaKeys]);
+       //Turn off label in UI
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoUpdated object:self];
+        //RE-update shows
+        if (newEnabled) [self scheduleNextUpdateAfterDelay:0];
+    }
 }
 
 -(void)getMediaKey
@@ -292,56 +403,320 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             foundMediaKey = YES;
         }
     }
-    if (!foundMediaKey) {  //Need to update defaults
+    if (!foundMediaKey) {
+        //Need to update defaults
         [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:YES];
     }
-    
 }
 
+#pragma mark - RPC switchboard
+
+-(void) receivedRPCData:(MTRPCData *)rpcData {
+	MTTiVoShow * owner = self.rpcIDs[rpcData.rpcID];
+	if (!owner) {
+		DDLogDetail(@"Metadata before XML for %@", rpcData);
+		return;
+	}
+    if ([NSThread isMainThread]) {
+        owner.rpcData = rpcData;
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+        owner.rpcData = rpcData;
+    });
+    }
+}
+
+-(MTRPCData *) registerRPCforShow: (MTTiVoShow *) show  {
+    NSString * rpcKey = [NSString stringWithFormat:@"%@|%@",self.tiVo.hostName, show.idString];
+    [self.rpcIDs setObject:show forKey:rpcKey ];
+    return [show.tiVo.myRPC rpcDataForID:show.idString];
+}
+
+- (void)rpcRecentChange {
+	//maybe skipMode change
+	DDLogDetail(@"Reloading recent shows due to skipMode notification");
+	[self reloadRecentShows];
+}
+
+- (void)rpcResync {
+	//maybe a show moved in list, suggesting that it was a suggestion, and now isn't
+	DDLogDetail(@"Resynching shows due to skipMode notification");
+	[self reloadRecentShows];
+	[self updateShows:self];
+}
+
+-(void) tivoReports: (NSInteger) numShows
+		       withNewShows:(NSArray<NSString *> *)addedShows
+              atTiVoIndices: (NSArray <NSNumber *> *) addedShowIndices
+            andDeletedShows:(NSDictionary < NSString *, MTRPCData *> *)deletedIds {
+    //In future, addedShowIndices could become NSIndexSet
+    NSAssert(addedShowIndices.count == addedShows.count, @"Added RPC show problem");
+    if (isConnecting) {
+        //change during a Tivo XML refresh; need to restart after termination
+		if (!cancelRefresh) {
+			DDLogMajor(@"Show list change during Tivo %@ XML refresh", self);
+        	cancelRefresh = YES;
+		}
+        return;
+    }
+    DDLogDetail(@"Updating Tivo %@ from RPC", self);
+    DDLogVerbose(@"Adding %@ and deleting %@", addedShows, deletedIds);
+	if (addedShows.count + deletedIds.count >= 10) {
+		DDLogMajor(@"Too many RPC changes; reloading %@", self);
+		[self updateShows:self];
+		return;
+	}
+	if (self.shows.count + addedShows.count - deletedIds.count != (NSUInteger) numShows ) {
+		DDLogMajor(@"NPL and RPC out of sync; reloading %@", self);
+		[self updateShows:self];
+        return;
+    }
+    NSMutableArray <MTTiVoShow *> * showsAfterDeletions = [NSMutableArray arrayWithCapacity:self.shows.count];
+	NSMutableArray <NSString *> * showsToLookFor = [addedShows mutableCopy];
+	NSMutableArray <NSNumber *> * indicesToLookFor = [addedShowIndices mutableCopy];
+    [self.shows enumerateObjectsUsingBlock:^(MTTiVoShow * _Nonnull show, NSUInteger showsIndex, BOOL * _Nonnull stop) {
+        if (deletedIds[show.idString ] ){
+            [self markDeletedDownloadShow:show];
+        } else if (show.inProgress.boolValue) {
+            //this is tricky.
+            //pretend inProgress have been deleted and then added back in
+            //so insert them into showsToLookFor.
+            //matching indicesToLookFor is where it should end up.
+            //everyone before this show is either in showsAfterDeletion OR in
+            //showsToLookFor with an index less than ours.
+            NSUInteger addedIndex = [indicesToLookFor indexOfObjectPassingTest:^BOOL(NSNumber * _Nonnull obj, NSUInteger indicesIdx, BOOL * _Nonnull stop2) {
+                return obj.unsignedIntegerValue > showsAfterDeletions.count+indicesIdx;
+            }];
+           if (addedIndex == NSNotFound) addedIndex = showsToLookFor.count;
+            DDLogDetail(@"adding In Progress show %@(%@) to RPC added list at %d", show, show.idString, (int)addedIndex);
+            [showsToLookFor insertObject:show.idString atIndex:addedIndex];
+            [indicesToLookFor insertObject:@(showsAfterDeletions.count + addedIndex) atIndex:addedIndex];
+        } else {
+            [showsAfterDeletions addObject:show];
+        }
+    }];
+    self.shows = showsAfterDeletions;
+    DDLogVerbose(@"Previous shows after deletions were: %@:",showsAfterDeletions); 
+
+    if (showsToLookFor.count > 0) {
+        self.addedShows = showsToLookFor;
+        self.addedShowIndices = indicesToLookFor;
+        [self startNPLDownload:NO];
+    } else {
+    	[self reloadRecentShows]; //not going to be done by NPLDownload, so do it now.
+        [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationTiVoShowsUpdated object:nil];
+    }
+}
+
+-(NSRange) getFirstRange:(NSArray <NSNumber *> *)indices {
+    if (indices.count == 0) return NSMakeRange(0, 0);;
+    NSUInteger end = 0;
+    //look for sequence
+    while (end+1 < indices.count && indices[end].unsignedIntegerValue +1 == indices[end+1].unsignedIntegerValue) end++;
+    NSUInteger startValue = indices[0].unsignedIntegerValue;
+    NSUInteger endValue = indices[end].unsignedIntegerValue;
+    NSRange result = NSMakeRange(startValue,
+                       endValue-startValue+1);
+    return result;
+}
+
+-(void) startNPLDownload:(BOOL) getAll {
+    
+    if (isConnecting || !self.enabled) {
+        DDLogDetail(@"But was %@", isConnecting? @"Connecting!": @"Disabled!");
+        return;
+    }
+    if (self.showURLConnection) {
+        [self.showURLConnection cancel];
+        self.showURLConnection = nil;
+    }
+    isConnecting = YES;
+    cancelRefresh = NO;
+    [newShows removeAllObjects];
+
+    [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationTiVoUpdating object:self];
+    if (self.currentNPLStarted) {
+        [self saveLastLoadTime:self.currentNPLStarted];
+    }
+    self.currentNPLStarted = [NSDate date];
+    self.oneBatch = !getAll;
+    if (getAll) {
+		previousShowList = [NSMutableDictionary dictionary];
+		for (MTTiVoShow * show in _shows) {
+			if(!show.inProgress.boolValue){
+				[previousShowList setValue:show forKey:show.idString];
+			}
+		}
+		DDLogVerbose(@"Previous shows were: %@:",previousShowList);
+		tivoBugDuplicatePossibleStart = -1;
+        [self updateShowsForRange:NSMakeRange(0, kMTNumberShowToGetFirst)];
+    } else {
+        [self updateShowsForRange:[self getFirstRange: self.addedShowIndices]];
+    }
+}
+
+-(void) reloadShowInfoForShows: (NSArray <MTTiVoShow *> *) shows {
+    NSMutableArray <NSString *> * showIDs = [NSMutableArray arrayWithCapacity:shows.count];
+    for (MTTiVoShow * eachShow in shows) {
+        [showIDs addObject:eachShow.idString];
+    }
+    [self.myRPC purgeShows:showIDs ];
+    [self.myRPC getShowInfoForShows:showIDs];  //rely on setting rpcData for each show
+}
+
+-(BOOL) supportsTransportStream {
+    NSString * TSN = self.tiVoSerialNumber;
+    return TSN.length == 0 || [TSN characterAtIndex:0] > '6' || [TSN hasPrefix:@"663"] || [TSN hasPrefix:@"658"] || [TSN hasPrefix:@"652"];
+}
+
+-(BOOL) supportsRPC {
+    return self.tiVoSerialNumber.length == 0 || [self.tiVoSerialNumber characterAtIndex:0] > '6' ;
+}
+
+BOOL channelChecking = NO;
+-(void) connectionChanged {
+	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoListUpdated object:nil];
+	if (self.rpcActive && !self.channelList && !self.isMini && !channelChecking) {
+		channelChecking = YES;
+		[self.myRPC channelListWithCompletion:^(NSDictionary <NSString *, NSDictionary <NSString *, NSString *> *> *channels) {
+			self.channelList = channels;
+			[tiVoManager channelsChanged:self];
+			channelChecking = NO;
+		}];
+	}
+}
+
+-(BOOL) rpcActive {
+    return self.myRPC != nil && self.myRPC.isActive;
+}
+
+-(NSArray < NSString *> *) recordingIDsForShows: (NSArray <MTTiVoShow *> *) shows {
+    NSArray * recordingIds = [shows mapObjectsUsingBlock:^id(MTTiVoShow * show, NSUInteger idx) {
+        if (show.tiVo != self) {
+            return nil;
+        } else {
+            return show.rpcData.recordingID;
+        }
+    }];
+    return recordingIds;
+}
+
+-(void) deleteTiVoShows: (NSArray <MTTiVoShow *> *) shows {
+    [self.myRPC deleteShowsWithRecordIds:[self recordingIDsForShows:shows]];
+}
+
+-(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows {
+    [self.myRPC stopRecordingShowsWithRecordIds:[self recordingIDsForShows:shows]];
+}
+
+-(void) sendKeyEvent: (NSString *) keyEvent {
+	[self.myRPC sendKeyEvent: keyEvent withCompletion:nil];
+}
+
+-(void) sendURL: (NSString *) URL {
+	[self.myRPC sendURL:URL];
+}
+
+-(void) playShow:(MTTiVoShow *)show {
+    if ([show.tiVo isEqual:self] &&
+		show.rpcData.recordingID.length > 0) {
+		[self.myRPC playOnTiVo:show.rpcData.recordingID withCompletionHandler:nil];
+    }
+}
+
+-(void) whatsOnWithCompletion:  (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler {
+	[self.myRPC whatsOnSearchWithCompletion:completionHandler];
+}
+
+-(void) findCommercialsForShow: (MTTiVoShow *) show interrupting:(BOOL) interrupt {
+	if (!show || show.edlList.count > 0) return;
+	BOOL notAlreadyWaitingForCommercials = self.postponedCommercialShows == nil;
+	if (notAlreadyWaitingForCommercials) {
+		self.postponedCommercialShows = [NSMutableSet setWithObject:show];
+	} else {
+		[self.postponedCommercialShows addObject:show];
+	}
+	if (interrupt) {
+		[self reallyFindCommercialsForShows]; //as long as we're interrupting, send ones that were waiting as well
+	} else if (notAlreadyWaitingForCommercials) {
+		[self findCommercialsNoInterrupt];
+	} else {
+		//we're already waiting, so let it continue.
+	}
+}
+
+-(void) cancelCommercialingForShow: (MTTiVoShow *) show {
+	[self.postponedCommercialShows removeObject:show];
+}
+
+-(void) findCommercialsNoInterrupt {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(findCommercialsNoInterrupt) object:nil ];
+	if (self.postponedCommercialShows.count == 0 || !tiVoManager.autoSkipModeScanAllowedNow) {
+		self.postponedCommercialShows = nil;
+	} else {
+		[self whatsOnWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
+			if (whatsOn == MTWhatsOnLiveTV) {
+				[self reallyFindCommercialsForShows];
+			} else {
+				DDLogDetail(@"Waiting for TiVo UI to be available");
+				[self performSelector:@selector(findCommercialsNoInterrupt) withObject:nil afterDelay:60];
+			}
+		}];
+	}
+}
+
+-(void) reallyFindCommercialsForShows {
+	NSSortDescriptor * sorter = [NSSortDescriptor sortDescriptorWithKey:@"hasSkipModeInfo" ascending:NO];
+	NSArray <MTTiVoShow *> * hasInfoFirst = [self.postponedCommercialShows sortedArrayUsingDescriptors:@[sorter]];
+	self.postponedCommercialShows = nil;
+	for (MTTiVoShow * show in hasInfoFirst) {
+		if (show.tiVo == self) {
+			if ( !show.inProgress.boolValue && show.mightHaveSkipModeInfo && (show.rpcData.edlList.count == 0)) {
+            	DDLogMajor(@"Asking for SkipMode data for %@ on %@", show, self);
+				show.rpcData.tempLength = show.showLength; //hint in case tivo isn't reporting this
+            	[self.myRPC findSkipModeEDLForShow:show.rpcData];
+        	} else {
+				DDLogDetail(@"No need for SkipMode data for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : show.edlList.count > 0 ? @"Already have" : !show.mightHaveSkipModeInfo ? @"won't have for other reason" : @"Error" );
+			}
+        }
+	}
+}
+
+-(NSString *) skipModeStatus {
+	NSArray <MTRPCData *> * skipModeQueue = [self.myRPC showsWaitingForSkipMode];
+	if (skipModeQueue.count == 0) return @"";
+	NSString * title = skipModeQueue[0].series;
+	if (!title.length) {
+		DDLogReport(@"Missing SkipMode title: %@", skipModeQueue[0]);
+		return [NSString stringWithFormat: @"%@ (%d)", self.tiVo.name, (int)skipModeQueue.count];
+	}
+	if (skipModeQueue.count == 1) {
+		return [NSString stringWithFormat: @"%@ (%@)", self.tiVo.name, title];
+	} else {
+		return [NSString stringWithFormat: @"%@ (%@ + %d)", self.tiVo.name, title, (int)(skipModeQueue.count - 1)];
+	}
+}
+			
 -(void) scheduleNextUpdateAfterDelay:(NSInteger)delay {
     [MTTiVo cancelPreviousPerformRequestsWithTarget:self
                                            selector:@selector(updateShows:)
                                              object:nil ];
-    NSInteger updateTime = [[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutes] * 60.0;
-    if (updateTime > 0) {
-        if (delay < 0) delay = updateTime;
-        [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay ];
+    if (delay < 0) {
+        NSInteger minDelay =  [[NSUserDefaults standardUserDefaults] integerForKey:kMTUpdateIntervalMinutesNew];
+        if (minDelay == 0) {
+            minDelay = (self.rpcActive ?  kMTUpdateIntervalMinDefault : kMTUpdateIntervalMinDefaultNonRPC);
+        }
+        delay = minDelay*60;
     }
+    DDLogDetail(@"Scheduling Update with delay of %lu seconds", (long)delay);
+    [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay ];
 }
 
 -(void)updateShows:(id)sender
 {
 	DDLogDetail(@"Updating Tivo %@", self);
-	if (isConnecting || !self.enabled) {
-        DDLogDetail(@"But was %@", isConnecting? @"Connecting": @"Disabled");
-		return;
-	}
-	if (showURLConnection) {
-		[showURLConnection cancel];
-		self.showURLConnection = nil;
-	}
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateShows:) object:nil];
-    isConnecting = YES;
-	if (previousShowList) {
-		 previousShowList = nil;
-	}
-	previousShowList = [NSMutableDictionary dictionary];
-	for (MTTiVoShow * show in _shows) {
-		NSString * idString = [NSString stringWithFormat:@"%d",show.showID];
-//		NSLog(@"prevID: %@ %@",idString,show.showTitle);
-		if(!show.inProgress.boolValue){
-			[previousShowList setValue:show forKey:idString];
-		}
-	}
-    DDLogVerbose(@"Previous shows were: %@:",previousShowList);
-	[newShows removeAllObjects];
-//	[_shows removeAllObjects];
-	[NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationTiVoUpdating object:self];
-	if (self.currentNPLStarted) {
-		[self saveLastLoadTime:self.currentNPLStarted];
-	}
-	self.currentNPLStarted = [NSDate date];
-	[self updateShowsStartingAt:0 withCount:kMTNumberShowToGetFirst];
+    [self startNPLDownload:YES];
 }
 
 -(NSInteger)isProcessing
@@ -363,34 +738,43 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
--(void)updateShowsStartingAt:(int)anchor withCount:(int)count
-{
+-(void) updateShowsForRange:(NSRange) range {
     NSString *portString = @"";
     if ([_tiVo isKindOfClass:[MTNetService class]]) {
         portString = [NSString stringWithFormat:@":%d",_tiVo.userPortSSL];
     }
+    if (self.oneBatch && tivoBugDuplicatePossibleStart > 0 && range.location >= (NSUInteger) tivoBugDuplicatePossibleStart) {
+        //Tivo bug: for a requested show range above a certain number, TiVo will return shows "slipped" down by one.
+        //e.g. if number is 30, then range accesses  31 - 35 will actually returns 30-34.
+        //You'll see this when we pull the whole show list, some shows will be thrown away as a duplicate
+        //That's sufficent for NPL, but if we are told by RPC that there's a new show at #75 (e.g. a Tivo Suggestion), then
+        //when we request only that show's XML, we get the wrong one.
+        //To work around, we remember the range prior to that one, and when looking for a single show, we ask for more instead of one, and ignore the extras. Worst case, if tivo fixes bug but leaves dups, we only pull a couple extra shows.
+        range.length = range.length + tivoBugDuplicateCount;
+       DDLogDetail(@"Increasing length by %@ to %@ due to possible TiVo Range bug",@(tivoBugDuplicateCount), NSStringFromRange(range));
+    }
 
-    NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,anchor,count] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    if (previousShowList.count ==0 && anchor ==0) {
+    NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,(int)range.location,(int)range.length] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    if (self.oneBatch) {
+        DDLogMajor(@"Loading RPC info from TiVo %@ shows from %d to %d at URL %@",self, (int)range.location, (int)NSMaxRange(range)-1, tivoURLString);
+    } else if (previousShowList.count ==0 && range.location ==0) {
         //first time for this tivo:
         DDLogReport(@"Initial loading from TiVo %@ at URL %@",self, tivoURLString);
     } else {
-        DDLogMajor(@"Loading from TiVo %@ shows from %d to %d at URL %@",self, anchor, anchor+count, tivoURLString);
+        DDLogMajor(@"Loading from TiVo %@ shows from %d to %d at URL %@",self, (int)range.location, (int)NSMaxRange(range)-1, tivoURLString);
     }
     NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
     NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
     self.showURLConnection = [NSURLConnection connectionWithRequest:tivoURLRequest delegate:self];
     [urlData setData:[NSData data]];
     authenticationTries = 0;
-    [showURLConnection start];
+    [self.showURLConnection start];
 }
 
 -(void)resetAllDetails
 {
-    for (MTTiVoShow *show in _shows) {
-        show.gotTVDBDetails = NO;
-        show.gotDetails = NO;
-    }
+    [self.myRPC emptyCaches];
+    self.shows = nil;
 }
 
 #pragma mark - NSXMLParser Delegate Methods
@@ -433,11 +817,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     [element appendString:string];
 }
 
--(void)parserElement:(NSString*) elementName {
-	//just gives a shorter method name for DDLog
-	DDLogVerbose(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
-}
-
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
 	[self endElement:elementName];
@@ -446,7 +825,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void) endElement:(NSString *) elementName {
 	//just gives a shorter method name for DDLog
 
-	[self parserElement: elementName];
+    DDLogVerbose(@"%@:  %@ --> %@",_tiVo.name,elementName,element);
     if (parsingShow) {
         //extract show parameters here
 //        [currentShow setValue:element forKey:elementToPropertyMap[elementName]];
@@ -486,7 +865,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				NSString *introURL = @"urn:tivo:image:";
 				if ([element hasPrefix: introURL]){
 					currentShow.imageString = [element substringFromIndex:introURL.length];
-				} 
+				}
 				DDLogVerbose(@"Image String is %@",currentShow.imageString);
 			}
         } else if ([elementToPropertyMap objectForKey:elementName]){
@@ -526,40 +905,73 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
         } else if ([elementName compare:@"Item"] == NSOrderedSame) {
             parsingShow = NO;
+            DDLogVerbose(@"Done loading XML for %@",currentShow);
             for (MTTiVoShow * oldShow in newShows) {
-                if ([oldShow isEqualTo:currentShow]) {
-                    DDLogDetail(@"Skipping duplicate new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested ":@"", currentShow.showTitle, currentShow.showDateString);
+                if ([oldShow isEqual:currentShow]) {
+                    DDLogDetail(@"Skipping duplicate new %@show %@ (%@) at %@",currentShow.isSuggestion ? @"suggested ":@"", currentShow.showTitle, currentShow.showDateString, @(newShows.count));
+					if (!self.oneBatch) {
+						if (tivoBugDuplicatePossibleStart < 0) {
+                        	tivoBugDuplicatePossibleStart = itemStart - itemCount;
+							tivoBugDuplicateCount = 1;
+						} else {
+							tivoBugDuplicateCount++;
+						}
+					}
                     currentShow = nil;
                     return;
                 }
             }
-            numAddedThisBatch++;
-            MTTiVoShow *thisShow = [previousShowList valueForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
-            if (!thisShow) {
-                DDLogDetail(@"Added new %@show %@ (%@) ",currentShow.isSuggestion ? @"suggested ":@"", currentShow.showTitle, currentShow.showDateString);
-				[newShows addObject:currentShow];
-				if (currentShow.inProgress.boolValue) {
-					//can't use actual npl time, must use just before earliest in-progress so when it finishes, we'll pick it up next time
-					NSDate * backUpToTime = [ currentShow.showDate dateByAddingTimeInterval:-1]; 
-					if ([backUpToTime isLessThan:self.currentNPLStarted]) {
-						self.currentNPLStarted = backUpToTime;  
+            if (currentShow.inProgress.boolValue) {
+                //can't use actual npl time, must use just before earliest in-progress so when it finishes, we'll pick it up next time
+                NSDate * backUpToTime = [ currentShow.showDate dateByAddingTimeInterval:-1];
+                if ([backUpToTime isLessThan:self.currentNPLStarted]) {
+                    self.currentNPLStarted = backUpToTime;
+                }
+            }
+            NSString * newShowID = currentShow.idString;
+            MTTiVoShow *thisShow = nil;
+           if (self.oneBatch) {
+               for (NSString * showID in [self.addedShows copy]) {
+                    if ([newShowID isEqualToString:showID]) {
+						thisShow = [tiVoManager replaceProxyInQueue:currentShow]; //check for undeleted
+                        DDLogMajor(@"RPC Adding %@ at %@", currentShow, newShowID);
+                        [self.addedShows removeObject:showID];
+                       break;
+                    }
+               }
+               if (!thisShow) {
+				   DDLogDetail(@"Ignoring show %@: %@", newShowID, currentShow);
+                }
+            } else {
+                thisShow = [previousShowList valueForKey:newShowID];
+                if (thisShow) {
+                    DDLogDetail(@"Updated show %@", currentShow.showTitle);
+                    [previousShowList removeObjectForKey:newShowID];
+					if (thisShow.inProgress.boolValue) {
+						thisShow = currentShow;
+					} else {
+						//need to update from latest version. (Only thing in tivo xml that may change)
+						if (thisShow.isSuggestion && ! currentShow.isSuggestion) {
+							//set by imageString
+							[self loadSkipModeInfoForShow: currentShow];
+						}
+						thisShow.imageString = currentShow.imageString;
 					}
-				}
-				NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:currentShow selector:@selector(getShowDetail) object:nil];
-				[self.opsQueue addOperation:nextDetail];
-				//Now check and see if this was in the oldQueue (from last time we ran)
-				if(firstUpdate)[tiVoManager replaceProxyInQueue:currentShow];
-				
-			} else {
-				DDLogDetail(@"Updated show %@", currentShow.showTitle);
-				if (!thisShow.gotDetails || !thisShow.gotTVDBDetails) {
-					NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil];
-					[self.opsQueue addOperation:nextDetail];
+                } else {
+                    DDLogDetail(@"Added new %@show %@ (%@) at %@",currentShow.isSuggestion ? @"suggested " : @"", currentShow.showTitle, currentShow.showDateString, @(newShows.count));
+                    //Now check and see if this was in the oldQueue (from last ctivo execution) OR an undeletedShow
+					thisShow = [tiVoManager replaceProxyInQueue:currentShow];
+                }
+           }
+            if (thisShow) {
+                [newShows addObject:thisShow];
+                numAddedThisBatch++;
+                if (!thisShow.gotDetails) {
+                   NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:thisShow selector:@selector(getShowDetail) object:nil];
+                    [self.opsQueue addOperation:nextDetail];
 
-				}
-				[newShows addObject:thisShow];
-				[previousShowList removeObjectForKey:[NSString stringWithFormat:@"%d",currentShow.showID]];
-			}
+                }
+           }
 			currentShow = nil;
         }
     } else {
@@ -568,10 +980,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 			DDLogDetail(@"TotalItems: %d",totalItemsOnTivo);
         } else if ([elementName compare:@"ItemStart"] == NSOrderedSame) {
             itemStart = [element intValue];
-			DDLogVerbose(@"ItemStart: %d",itemStart);
+			DDLogDetail(@"ItemStart: %d",itemStart);
         } else if ([elementName compare:@"ItemCount"] == NSOrderedSame) {
             itemCount = [element intValue];
-			DDLogVerbose(@"ItemCount: %d",itemCount);
+			DDLogDetail(@"ItemCount: %d",itemCount);
         } else if ([elementName compare:@"LastChangeDate"] == NSOrderedSame) {
             int newLastChangeDate = [element intValue];
             if (newLastChangeDate != lastChangeDate) {
@@ -610,50 +1022,116 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	}
 }
 
+-(void) markDeletedDownloadShow: (MTTiVoShow *) deletedShow {
+	[self cancelCommercialingForShow:deletedShow];
+	deletedShow.imageString = @"deleted";
+    if (deletedShow.isQueued) {
+		[deletedShow.tiVo cancelCommercialingForShow: deletedShow];
+        NSArray <MTDownload *> * downloads = [tiVoManager downloadsForShow:deletedShow];
+        for (MTDownload * download in downloads) {
+			if (download.isNew) {
+            	download.downloadStatus = @(kMTStatusDeleted);
+        	}
+		}
+    }
+}
+
+-(void) loadSkipModeInfoForShow:(MTTiVoShow *) show {
+	[self.myRPC getShowInfoForShows:@[show.idString] ];
+}
+
+-(void) reloadRecentShows {
+//	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(reloadRecentShows) object:nil];
+    //so when we get an RPC, it might signal a metadata change, so reload recent ones.
+	NSMutableArray <NSString *> * recentIDs = [NSMutableArray array];
+	NSMutableArray <MTTiVoShow *> * recentShows = [NSMutableArray array];
+	NSTimeInterval recentTime = 60 * ( [[NSUserDefaults standardUserDefaults] integerForKey: kMTWaitForSkipModeInfoTime] + 60); //round up an hour
+	for (MTTiVoShow * show in self.shows) {
+		if (-[show.showDate timeIntervalSinceNow] < (show.showLength+recentTime)) {
+			if (!show.protectedShow.boolValue && ![show hasSkipModeInfo] && show.mightHaveSkipModeInfo) {
+				[recentIDs addObject:show.idString];
+				[recentShows addObject:show];
+			}
+		}
+	}
+	if (recentIDs.count > 0) {
+		DDLogMajor(@"reloading shows for metadata: %@", recentShows);
+		[self.myRPC getShowInfoForShows:[recentIDs copy] ];
+	}
+}
+
 -(void)parserDidEndDocument:(NSXMLParser *)parser
 {
 	//Check if we're done yet
     int numDuplicates =itemCount-numAddedThisBatch;
     if (itemCount == 0) {
-        DDLogReport(@"TiVo returned ZERO requested shows! Ignoring shows from %d to %d", itemStart, totalItemsOnTivo);
+        if (self.oneBatch) {
+            DDLogReport(@"TiVo returned ZERO of %d requested shows for RPC!", (int)[self getFirstRange:self.addedShowIndices].length);
+            cancelRefresh = YES;
+        } else {
+            DDLogReport(@"TiVo returned ZERO requested shows! Ignoring shows from %d to %d", itemStart, totalItemsOnTivo);
+        }
     } else if (numDuplicates == 0) {
-        DDLogMajor(@"Finished batch for %@. Added %d shows.", self, numAddedThisBatch);
+        DDLogMajor(@"Finished batch for %@. Found %d shows.", self, numAddedThisBatch);
     } else if (numAddedThisBatch == 0) {  //Streaming Movies reported as shows bug
         DDLogMajor(@"Finished batch for %@. Only duplicated shows.", self);
     } else {
-        DDLogMajor(@"Finished batch for %@. Added %d shows, but %d duplicate%@.", self, numAddedThisBatch, numDuplicates, numDuplicates == 1 ? @"": @"s" );
+        DDLogMajor(@"Finished batch for %@. Found %d shows, but %d duplicate%@.", self, numAddedThisBatch, numDuplicates, numDuplicates == 1 ? @"": @"s" );
     }
-
-    if (itemCount > 0 && itemStart+itemCount < totalItemsOnTivo) { // && numAddedThisBatch > 0) {
- 		if (newShows.count > _shows.count) {
-			self.shows = [NSArray arrayWithArray:newShows];
-		}
-		[self updateShowsStartingAt:itemStart + itemCount withCount:kMTNumberShowToGet];
-	} else {
- 		DDLogMajor(@"TiVo %@ completed parsing", self);
-		isConnecting = NO;
-		self.shows = [NSArray arrayWithArray:newShows];
-		if (firstUpdate) {
-			[tiVoManager checkDownloadQueueForDeletedEntries:self];
-			firstUpdate = NO;
-		}
-		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
+    if (cancelRefresh) {
+        //had some kind of sync problem, so start all over.
+        DDLogReport(@"Resynching TiVo %@!", self);
+        isConnecting = NO;
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
+       [self scheduleNextUpdateAfterDelay:0];
+    } else if (self.oneBatch) {
+        NSRange currentBatch = [self getFirstRange:self.addedShowIndices];
+        if (currentBatch.length != newShows.count ||
+            currentBatch.location > self.shows.count) {
+            DDLogMajor(@"TiVo %@ out of RPC sync!", self);
+            isConnecting = NO;
+            [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
+            [self scheduleNextUpdateAfterDelay:0];
+        } else {
+            DDLogDetail(@"got next batch %@ of RPC: %@", NSStringFromRange(currentBatch), newShows);
+            NSMutableArray * updatedShows = [self.shows mutableCopy];
+            [updatedShows insertObjects:newShows atIndexes:[NSIndexSet indexSetWithIndexesInRange:currentBatch]];
+            self.shows = updatedShows;
+            [newShows removeAllObjects];
+            [self.addedShowIndices removeObjectsInRange:NSMakeRange(0, currentBatch.length)];
+            if (self.addedShowIndices.count > 0) {
+                [self updateShowsForRange :[self getFirstRange:self.addedShowIndices]];
+            } else {
+                isConnecting = NO;
+                [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
+            }
+        }
+		[self reloadRecentShows];
+    } else if (self.enabled  && (itemCount > 0 && itemStart+itemCount < totalItemsOnTivo)) { // && numAddedThisBatch > 0) {
+        DDLogDetail(@"More shows to load from %@", self);
+        if (newShows.count > _shows.count) {
+            self.shows = [NSArray arrayWithArray:newShows];
+        }
+        [self updateShowsForRange :NSMakeRange( itemStart + itemCount,kMTNumberShowToGet)];
+    } else {
+        isConnecting = NO;
+        DDLogMajor(@"TiVo %@ completed full update", self);
+        self.shows = [NSArray arrayWithArray:newShows];
+        if (firstUpdate) {
+            [tiVoManager checkDownloadQueueForDeletedEntries:self];
+            firstUpdate = NO;
+        }
         [self scheduleNextUpdateAfterDelay:-1];
-        DDLogVerbose(@"Deleted shows: %@",previousShowList);
-		for (MTTiVoShow * show in [previousShowList objectEnumerator]){
-			if (show.isQueued) {
-				MTDownload * download = [tiVoManager findInDownloadQueue:show];
-				if (download.isNew) {
-					download.downloadStatus = [NSNumber numberWithInt:kMTStatusDeleted];
-				}
-				show.imageString = @"deleted";
-			}
-		}
-		 previousShowList = nil;
+        DDLogDetail(@"Deleted shows: %@",previousShowList);
+        for (MTTiVoShow * deletedShow in [previousShowList objectEnumerator]){
+            [self markDeletedDownloadShow:deletedShow];
+        };
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
+		[self reloadRecentShows];
+        previousShowList = nil;
         //allows reporting when all other ops completed
         NSInvocationOperation *nextDetail = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(detailsComplete) object:nil];
         [self.opsQueue addOperation:nextDetail];
-
 	}
     [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoShowsUpdated object:nil];
 	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:self];
@@ -663,6 +1141,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 - (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError {
     DDLogReport(@"TiVo %@ had parsing error: %@", self, parseError.localizedDescription);
     isConnecting = NO;
+    [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
 
     [self scheduleNextUpdateAfterDelay:-1];
     previousShowList = nil;
@@ -674,11 +1153,10 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     //called when each show completes its details
     //DDLogReport (@"Ops Count = %lu; shows = %lu; connection: %@; queue = %@", (unsigned long)self.opsQueue.operationCount, self.shows.count, self.showURLConnection, self.opsQueue);
 
-    if (self.opsQueue.operationCount <= 1 && [tiVoManager tvdbQueue].operationCount <= 1 &&!isConnecting) {
+    if (self.opsQueue.operationCount <= 1 && !tiVoManager.tvdb.isActive && !isConnecting) {
         DDLogMajor(@"Got all details for %@",self.tiVo.name);
-        @synchronized(tiVoManager.theTVDBStatistics) {
-            DDLogDetail(@"Statistics for TVDB since start or reset: %@",tiVoManager.theTVDBStatistics);
-        }
+        DDLogDetail(@"Statistics for TVDB since start or reset: %@",[tiVoManager.tvdb stats]);
+
         //        for testing the movidedB
         //        for (MTTiVoShow * show in [self.shows copy]) {
         //            if (show.isMovie) {
@@ -697,62 +1175,65 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     return [tiVoManager downloadQueueForTiVo:self];
 }
 
--(void)manageDownloads:(id)info
+-(void)manageDownloads:(NSNotification *)notification
 {
 //    if ([tiVoManager.hasScheduledQueueStart boolValue]  && [tiVoManager.queueStartTime compare:[NSDate date]] == NSOrderedDescending) { //Don't start unless we're after the scheduled time if we're supposed to be scheduled.
 //        DDLogMajor(@"%@ Delaying download until %@",self,tiVoManager.queueStartTime);
 //		return;
 //    }
 	if ([tiVoManager checkForExit]) return;
-	if (tiVoManager.processingPaused.boolValue) return;
-
-	if ([info isKindOfClass:[NSNotification class]]) {
-		NSNotification *notification = (NSNotification *)info;
-		if (!notification.object || notification.object == self) {
-			DDLogDetail(@"%@ got manageDownload notification %@",self, notification.name);
-			[self manageDownloads];
-		} else {
-			DDLogDetail(@"%@ ignoring notification %@ for %@",self,notification.name, notification.object);
-		}
-	} else if ([info isKindOfClass:[self class]] && info == self ) {
-			[self manageDownloads];
+	id object = notification.object;
+	if (!object || object == self ||
+		([object isKindOfClass:[MTTiVoShow class]] && ((MTTiVoShow *)object).tiVo == self)) {
+		DDLogDetail(@"%@ got manageDownload notification %@",self, notification.name);
+		[self manageDownloads];
 	} else {
-		DDLogMajor(@"Unrecognized info to launch manageDownloads %@",info);
+		DDLogDetail(@"%@ ignoring notification %@ for %@",self,notification.name, notification.object);
 	}
-
 }
 
 -(void)manageDownloads
 {
-	DDLogMajor(@"Checking %@ queue", self);
 	if (managingDownloads) {
         return;
     }
-    managingDownloads = YES;
+	managingDownloads = YES;
+	if (!self.isReachable || !self.enabled ||
+		tiVoManager.numEncoders >= [[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxNumEncoders]) {
+		managingDownloads = NO;
+		return;
+	}
     //We are only going to have one each of Downloading, Encoding, and Decrypting.  So scan to see what currently happening
 //	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(manageDownloads) object:nil];
     BOOL isDownloading = NO;
-    for (MTDownload *s in self.downloadQueue) {
-        if (s.isDownloading) {
+    for (MTDownload *download in self.downloadQueue) {
+        if (download.isDownloading) {
             isDownloading = YES;
-            break;
-        }
-    }
-    if (!isDownloading) {
+			break;
+		}
+	}
+	if (!tiVoManager.processingPaused.boolValue) {
 		DDLogDetail(@"%@ Checking for new download", self);
-		for (MTDownload *s in self.downloadQueue) {
-			if ([s.show.protectedShow boolValue]) {
-				managingDownloads = NO;
-				return;
+		for (MTDownload *download in self.downloadQueue) {
+			if ([download.show.protectedShow boolValue] ) {
+				//protectedShow is used in downloadQueue during startup to indicate not loaded yet.
+				if( [download isDone]) {
+					continue;  //ignore completed ones
+				} else {
+					break; //but don't process if we have uncompleted, unloaded ones
+				}
 			}
-            if (s.isNew && (tiVoManager.numEncoders < [[NSUserDefaults standardUserDefaults] integerForKey: kMTMaxNumEncoders])) {
-                if(s.show.tiVo.isReachable) {  //isn't this self.isReachable?
-					tiVoManager.numEncoders++;
-					DDLogMajor(@"Num encoders after increment in MTTiVo %@ for show \"%@\"  is %d",self.tiVo.name,s.show.showTitle, tiVoManager.numEncoders);
-					[s launchDownload];
-                }
-                break;
-            }
+			if (download.downloadStatus.intValue == kMTStatusNew  && !isDownloading) {
+				tiVoManager.numEncoders++;
+				DDLogMajor(@"Number of encoders after launching show \"%@\"  is %d",download.show.showTitle, tiVoManager.numEncoders);
+				[download launchDownload];
+				break;
+			} else if (download.downloadStatus.intValue == kMTStatusAwaitingPostCommercial ) {
+				tiVoManager.numEncoders++;
+				DDLogMajor(@"Number of encoders after commercial launch for show \"%@\"  is %d",download.show.showTitle, tiVoManager.numEncoders);
+				[download launchPostCommercial];
+				break;
+				}
         }
     }
     managingDownloads = NO;
@@ -781,7 +1262,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
               withTitle: title
                subTitle: subTitle
                isSticky: YES
-        forNotification:kMTGrowlPossibleProblem
      ];
 }
 
@@ -794,13 +1274,15 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
 - (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-	NSString *password = self.mediaKey;
 	if (challenge.previousFailureCount == 0) {
 		DDLogDetail(@"%@ password ask",self);
         if (challenge.proposedCredential) {
             DDLogDetail(@"Got mediaKey from keyChain");
-            self.mediaKey = challenge.proposedCredential.password;
-            [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:NO];
+            NSString * newPassword = challenge.proposedCredential.password;
+            if (newPassword && ![newPassword isEqualToString:self.mediaKey]) {
+                self.mediaKey = newPassword;
+                [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:NO];
+            }
 
             [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
         } else {
@@ -809,15 +1291,16 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             if (self.storeMediaKeyInKeychain) {
                 persistance = NSURLCredentialPersistencePermanent;
             }
-            NSURLCredential *myCredential = [NSURLCredential credentialWithUser:@"tivo" password:password persistence:persistance];
+            NSURLCredential *myCredential = [NSURLCredential credentialWithUser:@"tivo" password:self.mediaKey persistence:persistance];
             [challenge.sender useCredential:myCredential forAuthenticationChallenge:challenge];
         }
 	} else {
 		DDLogReport(@"%@ challenge failed",self);
 		[challenge.sender cancelAuthenticationChallenge:challenge];
-		[showURLConnection cancel];
+		[self.showURLConnection cancel];
 		self.showURLConnection = nil;
 		isConnecting = NO;
+        [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
 		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"incorrect"}];
 	}
 }
@@ -828,9 +1311,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     DDLogReport(@"TiVo URL Connection Failed with error %@",[error maskMediaKeys]);
     NSNumber * streamError = error.userInfo[@"_kCFStreamErrorCodeKey"];
     DDLogDetail(@"URL ErrorCode: %@, streamErrorCode: %@ (%@)", @(error.code), streamError, [streamError class]);
-    if (error.code == -1004 && [streamError isKindOfClass:[NSNumber class]] && streamError.intValue == 49) {
-        [self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
-                          subTitle:@"Antivirus program may be blocking connection"];
+	if ([streamError isKindOfClass:[NSNumber class]] &&
+			((error.code == -1004  && streamError.intValue == 49) ||
+			 (error.code == -1200  && streamError.intValue == 49) ||
+			 (error.code == -1005  && streamError.intValue == 57))) {
+     	[self notifyUserWithTitle: @"Warning: Could not reach TiVo!"
+						 subTitle: @"Antivirus program may be blocking connection"];
     }
 
     [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationTiVoUpdated object:self];
@@ -848,23 +1334,48 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	DDLogDetail(@"%@ URL Connection completed ",self);
     DDLogVerbose(@"Data received is %@",[[NSString alloc] initWithData:urlData encoding:NSUTF8StringEncoding]);
 
-    NSXMLParser *parser = [[NSXMLParser alloc] initWithData:urlData];
-	parser.delegate = self;
-	[parser parse];
+	if (urlData.length == 0) {
+		DDLogReport(@"No data received from %@ on %@", self, connection);
+		isConnecting = NO;
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
+		[self scheduleNextUpdateAfterDelay:-1];
+	} else {
+		NSXMLParser *parser = [[NSXMLParser alloc] initWithData:urlData];
+		parser.delegate = self;
+		[parser parse];
+	}
     self.showURLConnection = nil;
 }
 
 #pragma mark - Memory Management
 
+-(void) appWillTerminate: (id) notification {
+	NSArray <MTTiVoShow *> * shows = self.shows;
+	NSMutableArray <NSString *> * showIDs = [NSMutableArray arrayWithCapacity:shows.count];
+	for (MTTiVoShow * show in shows) {
+		//get rid of shows that might be updated by the next time we run
+		if (!show.rpcData.edlList && !show.rpcData.clipMetaDataId && [show mightHaveSkipModeInfoLongest]) {
+			DDLogDetail(@"Purging RPC for show %@",show);
+			[showIDs addObject:show.idString];
+		}
+	}
+	[self.myRPC purgeShows:showIDs];
+}
+
 -(void)dealloc
 {
     DDLogDetail(@"Deallocing TiVo %@",self);
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver: self];
 	SCNetworkReachabilityUnscheduleFromRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
 	if (_reachability) {
 		CFRelease(_reachability);
 	}
     _reachability = nil;
+    [self.myRPC stopServer];
+    self.tiVo = nil;
+    self.myRPC.delegate = nil;
+    self.myRPC = nil;
 }
 
 @end

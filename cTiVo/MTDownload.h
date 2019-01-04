@@ -16,12 +16,13 @@
 #import "MTTask.h"
 #import "MTTaskChain.h"
 
-@interface MTDownload : NSObject  <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSCoding>
+@interface MTDownload : NSObject  <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSSecureCoding>
 
 
 #pragma mark - Properties for download/conversion configuration
 @property (nonatomic, readonly) MTTiVoShow *show;
 @property (nonatomic, readonly) NSString *downloadDirectory;
+@property (nonatomic, readonly) NSString *tmpDirectory;
 @property (nonatomic, readonly) NSString *baseFileName;
 @property (nonatomic, readonly) NSString *encodeFilePath;
 @property (nonatomic, strong)   MTFormat *encodeFormat;  //changeable until download starts
@@ -33,21 +34,24 @@
 #endif
                                         *exportSubtitles;
 @property (nonatomic, assign) BOOL      addToiTunesWhenEncoded,
-                                        skipCommercials,
+										useSkipMode,
+										skipCommercials,
                                         markCommercials;
 
-
 #pragma mark - Methods for download/conversion work
-+(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format intoDirectory: (NSString *) downloadDirectory withQueueStatus: (NSInteger) status;
++(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format withQueueStatus: (NSInteger) status;
 +(MTDownload *) downloadTestPSForShow:(MTTiVoShow *) show;
 +(MTDownload *) downloadFromQueue:(NSDictionary *) queueEntry;
 
 -(void) prepareForDownload: (BOOL) notifyTiVo;  //reset for a new download
--(void) rescheduleShowWithDecrementRetries:(NSNumber *)decrementRetries;  //decrementRetries is a BOOL standing
+
+-(void) rescheduleDownloadFalseStart;
+-(void) rescheduleDownload; //can be called from background
 -(void) cancel;
+
 -(void) launchDownload;  //actually launch the download process
--(void) rescheduleOnMain; //convenience version for use in background threads
--(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle  forNotification: (NSString *) notification;   //download  notification
+-(void) launchPostCommercial; //ok to launch now
+-(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle ;   //download  notification
 
 -(BOOL) isSimilarTo: (MTDownload *) testDownload;
 
@@ -55,7 +59,7 @@
 @property (atomic, strong) NSNumber *downloadStatus;
 @property (readonly) NSInteger downloadStatusSorter;
 
-@property (readonly) BOOL isNew, isDownloading, isInProgress, isDone;
+@property (readonly) BOOL isNew, isDownloading, isInProgress, isDone, isCompletelyDone;
 //convenience versions of downloadStatus
 @property (atomic, assign) BOOL isCanceled;
 @property (atomic, assign) double processProgress; //Should be between 0 and 1
@@ -80,11 +84,6 @@
 -(NSURL *) videoFileURLWithEncrypted: (BOOL) encrypted;
 -(BOOL) canPlayVideo;
 -(BOOL) playVideo;
--(BOOL) revealInFinder;
-
-
-#pragma mark - Test Methods
--(NSString *)swapKeywordsInString: (NSString *) testString;
 
 
 @end

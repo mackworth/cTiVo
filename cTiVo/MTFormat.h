@@ -32,6 +32,8 @@
 										*captionOptions,
 										*regExProgress;
 
+@property (nonatomic, readonly) NSString *transportStreamExtension;
+
 @property (nonatomic, strong) NSNumber	*comSkip,
 										*iTunes,
 										*mustDownloadFirst,
@@ -40,7 +42,7 @@
 
 @property (nonatomic, readonly) NSAttributedString *attributedFormatDescription;
 
-@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip, canAcceptMetaData, canMarkCommercials, isTestPS, testsForAudioOnly, isDeprecated;
+@property (nonatomic, readonly) BOOL canAddToiTunes, canSimulEncode, isAvailable, canSkip, canAcceptMetaData, canMarkCommercials, isTestPS, isEncryptedDownload, testsForAudioOnly, isDeprecated, canDuplicate;
 @property (nonatomic, strong) NSString * pathForExecutable;
 
 @property (nonatomic, strong) NSString * formerName;//only used to update existing format objects when name is edited.

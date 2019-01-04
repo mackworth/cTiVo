@@ -20,4 +20,20 @@
 
 +(NSString *) stringWithEndOfFile:(NSString *) path;
 
+-(BOOL) hasCaseInsensitivePrefix: (NSString *) prefix;
+
+-(NSString *) removeParenthetical;
+
+-(NSString *) escapedQueryString;
+
+-(NSString *) pathForParentDirectoryWithName: (NSString *) parent;
+//traverses up chain looking for directory "parent"; if not found, returns self.
+
+//for these two, assumed that self is a filename and we're getting/setting filesystem attributes
+-(NSString *) getXAttr:(NSString *) key;
+
+-(void) setXAttr:(NSString *) key toValue:(NSString *) value;
+
+-(NSString *) maskSerialNumber: (NSString *) TSN;
+
 @end

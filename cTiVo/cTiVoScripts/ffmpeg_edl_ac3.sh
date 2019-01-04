@@ -204,17 +204,22 @@ mkdir -p "$tmpdir/logs"
 # first use ffmpeg to get info about duration, stream IDs
 file_info=$("$ffmpeg_path" -i "$input" 2>&1 >/dev/null)
 
-original_duration=$(echo "$file_info" | grep Duration: | awk '{print $2}')
+original_duration=$(echo "$file_info" | grep 'Duration: [0-9]' | awk '{print $2}')
 if [ -z "$original_duration" ]; then
-  echo "Unable to determine duration from input file $input:"
+  echo "WARNING: Unable to determine duration from input file $input:; Guessing 2 hours"
   echo "$file_info"
-  exit 1
+  original_duration="2:00:00"
 fi
 
 # figure out the duration after cutting, for the progress indicator
 original_duration=$(timestamp_to_seconds $original_duration)
-cut_duration=$(awk "BEGIN {total=0} {total += ($original_duration < \$2 ? $original_duration : \$2)-\$1} END {print total}" "$edl_file")
-duration=$(echo "$original_duration-$cut_duration" | bc -l)
+
+if [ -s "$edl_file" ]; then
+  cut_duration=$(awk "BEGIN {total=0} {total += ($original_duration < \$2 ? $original_duration : \$2)-\$1} END {print total}" "$edl_file")
+  duration=$(echo "$original_duration-$cut_duration" | bc -l)
+else
+  duration=$original_duration
+fi
 
 # look for first video and audio stream in input file
 audio_line=$(echo "$file_info" | /usr/bin/perl -ne 'if (/^\s*Stream #(\d:\d).*Audio:.*/) {print "$1,$_"; exit}')
@@ -241,7 +246,7 @@ if [[ ! -z "$ac3" ]]; then
 fi
 
 # attempt to munge users's ffmpeg args with our auto-generated -map and audio encoder opts.
-encode_opts=("${ffmpeg_opts_pre_input[@]}" -i "$input" "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" "${audio_opts[@]}")
+encode_opts=("${ffmpeg_opts_pre_input[@]}" -i "$input" -max_muxing_queue_size 4000 "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" "${audio_opts[@]}")
 
 if [ ! -s "$edl_file" ]; then
   # no edl file or empty, don't need to encode segments and merge, simply encode

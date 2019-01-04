@@ -11,6 +11,15 @@
 
 @interface MTHelpViewController : NSViewController <MTTabViewItemControllerDelegate>
 
-@property (nonatomic, strong) IBOutlet NSTextView *displayMessage;
+@property (atomic, assign) CGSize preferredContentSize;
+
+//context can come either by setting text or by loading from an RTF file in resources
+@property (nonatomic) NSAttributedString * attributedString;
+@property (nonatomic) NSString * text;
+
+-(void) loadResource: (NSString *) rtfFile;
+
+-(void) checkLinks; //marks any URLS in text 
+-(void) pointToView:(NSView *) view preferredEdge: (NSRectEdge) edge;
 
 @end

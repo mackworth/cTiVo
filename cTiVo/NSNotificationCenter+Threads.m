@@ -47,14 +47,8 @@
 
 +(void)postNotificationNameOnMainThread:(NSString *)name object:(id)object userInfo:(NSDictionary *)userInfo afterDelay:(NSTimeInterval)delay {
 
-    if (delay == 0.0) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:name object:object userInfo:userInfo];
-        });
-    } else {
-        NSNotification * notification = [NSNotification notificationWithName:name object:object userInfo:userInfo];
-        [self postNotificationOnMainThread:notification afterDelay: delay];
-    }
+    NSNotification * notification = [NSNotification notificationWithName:name object:object userInfo:userInfo];
+    [self postNotificationOnMainThread:notification afterDelay: delay];
 }
 
 

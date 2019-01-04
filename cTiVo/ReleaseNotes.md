@@ -1,3 +1,164 @@
+# Release 3.2.0 (SkipMode)
+### Main new features:
+#### SkipMode use
+*    Use TiVo's SkipMode Info when available for Marking/Cutting commercials
+*    Hold off processing until SkipMode arrives (or doesn't)
+*    Fallback to Comskip if SkipMode unavailable or fails
+#### Remote Control Window
+*    TiVo remote emulation
+*    Keystroke alternatives
+*    Directly select streaming services
+#### New TiVo menu 
+*    Play on TiVo
+*    Delete on TiVo
+*    Stop Recording
+*    Reload Information
+*    Redesigned contextual menus
+#### Mojave Support
+*    Dark Mode in Mojave
+*    AppleScript warnings for Mojave
+*    "Hardened" Apple-notarized binary for increased security
+•    Assorted compatibility fixes
+
+###  Minor features:
+*    Mark chapters when cutting commercials
+*    Duplicate downloads now fully supported (e.g. high-res/low-res Format subscriptions)
+*    Encrypted TiVo Format to download without decrypting
+*    Time before download starts now tracked with progress bar
+*    Contextual menus selection now behaves like Mail 
+*    Optional user script upon completion
+*    Applescript for Pushover integration
+*    Updated Binaries (Comskip, ffmpeg, Handbrake)
+
+### Bug fixes:
+*    Avoid images disappearing from folders on refresh
+*    Sorting shows within folders
+*    Extra check for SSL block by antivirus
+*    Detects High-Sierra OS freeze and recovers
+*    Detects invalid HTML errors from TVDB
+*    Undeleted shows matched up with pending downloads.
+*    Paused label no longer interferes with selecting downloads behind it.
+*    Change confusing Formats "Hide in User Interface" to "Show in")
+*    Fix OnDisk problem for shows with accents
+*    Better disk space testing under APFS
+*    Removed experimental SubscriptionRelyOnDiskOnly option
+*    Many process flow and status reporting fixes
+
+# Release 3.1.2
+* A small release to update the certificate used to communicate with TiVo's RPC mechanism, which otherwise would expire at the end of April.
+Also, TVDB has frequently been unresponsive recently, causing cTiVo to be unstable. This fixes the latter part.
+
+# Release 3.1.1
+#### New features:
+* Option for automatic deletion of show on TiVo after a successful download. (For those of you just using your TiVo as a collection device). In Adv Prefs.
+* Option to control number of simultaneous encoders (prev available as Terminal option, now in Adv Prefs)
+
+For those of you using non-default download directories or temporary folders, this release makes a number of cleanups/improvements. Please experiment with these and try to break it!
+* If either Download or Temporary drive is not available (when cTiVo launches or while running), cTiVo will pause and ask for a new directory (rather than assuming default).
+* However, if external drive then comes online (e.g. a slow-to-connect NAS, or mistakenly ejected external drive), cTiVo will recognize it and automatically continue on.
+* Similarly, if there's an error in download directory, say write-protection, then it will ask for new directory (or correct existing problem), not assume default.
+* Changed confusing behavior: Download directory is now fixed at start of download process, not creation of download entry. So if you change download directories, all future downloads go to that directory, not just for newly created downloads.
+* Default is to now use system-provided user temporary folder rather than /tmp/ctivo to avoid problems with High Sierra
+
+#### Bug Fixes:
+Contextual menu `Delete from TiVo` for a folder will now delete all shows in that folder (upon confirmation).
+File menu commands `Play Video` and `Show in Finder` now work for Now Playing table (main one), not just for Download table.
+More accurate information about sleep prevention (when AppDelegate at Major or above).
+Avoids spurious error about Drawer first responder in logs.
+Antivirus warning during download as well as NowPlaying access.
+Warning if no data received during NowPlaying access.
+Avoids RPC crash if manual TiVo created with invalid IP address.
+Plugged Memory leak on Downloads
+
+# Release 3.1
+### Finally!  Folders in cTiVo.
+
+#### Major changes:
+* Shows can now be grouped in series folders.
+* Advanced Preferences is no longer hidden behind Option key.
+* Preferences has simpler directory structure choices (e.g. Plex support)
+* Auto-relocation to Applications directory.
+
+#### Minor Improvements:
+* File template string now reflects directory options.
+* Help button on each Preference screen.
+* Better warning and diagnostics on disk space (versus tmp space).
+* Improved Sleep log notices.
+* Allows longer TiVo names.
+* Support TiVo's ShowingStartTime (if after Capture date in XML).
+
+#### Bug Fixes:
+* Significantly better handling of network failures/sleep for RPC.
+* Columns resizing believed to be finally fixed.
+* Avoid rounding time when scheduling next TiVo checkin.
+* Fix \n typo in logs.
+* Avoid obscure crashes if missing episode information during RPC reference or resetting TVDB info or subscription.
+* Use one keychain reference across all TiVos.
+
+# Release 3.0
+3.0 is a major new release of cTiVo with comprehensive artwork support and much more accurate information due to use of real-time features from TiVo. After extensive beta testing, it is also the most reliable release yet (especially with High Sierra). Note that 3.0 requires Mac OS 10.9 or later.  Earlier systems should continue to use [2.5.1's 10.7 version](https://github.com/dscottbuch/cTiVo/releases/tag/2.5.1).
+(3.0.1 fixes some table formatting issues, and a crash in an obscure RPC scenario)
+
+#### Artwork enhancements:
+New Artwork column in Now Playing List.
+Your choice of artwork from TiVo* or theTVDB (Series, Season, Episode, or Movie from theMovieDB).
+Manual updates of artwork by drag/drop onto table.
+Manual artwork updates apply to files already recorded as well.
+Finder Icons now reflect artwork of file.
+
+#### Real-time features:
+TiVo now notifies cTiVo as the Now Playing list changes, so new shows are updated instantaneously.*
+Ability to "Delete Show from TiVo" (in Edit menu and contextual menu).*
+Ability to "Stop Recording show from TiVo"  (in Edit menu and contextual menu).*
+
+#### Season/Episode Information:
+Much better matching with TVDB; enhanced statistic information.
+Episode and Genre information from TiVo is now correct.*
+Manually edit season/episode information in drawer if TiVo is incorrect.
+
+#### Usage notes:
+- Thumbnails in Artwork column reflect images that will be added to the show when downloaded. You select which kind of artwork you want in Preferences. You can change the visual size of the image by changing the width of the column, which will increase the height of the row proportionately. If you would like to change it, find a better image and just drag it onto the image in the table.  If you don't want any artwork for a particular show (or to reverse the manual choice), just drag the image to the trashcan. If the show has already been downloaded, cTiVo will even change the artwork in the file on disk.
+- As the Now Playing list should always be up to date, we no longer need to refresh regularly (historically every 15 minutes unless changed). For now, I've changed this to every 4 hours, just to make sure there's no sync issues. You can change this in Adv Preferences.
+- The RPC capabilities will also work remotely (over a WAN). In Edit>Edit TiVos, you have to set a third port on your router to point to 1413 on your TiVo.
+
+*Starred items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 3, HD, or HD XL)
+
+#### Minor changes:
+New default (0) for refresh times ( 240 minutes for RPC-enabled and 15 minutes for older devices).
+Extended Subscription option (no GUI, set SubscriptionExpirationDays in Console).
+Doesn't record Subscriptions if recording already on disk.
+"Reload TVDB" contextual menu item.
+Newest version of all executables: ffmpeg, mencoder, ccextractor, comskip, Handbrake.
+Detects and avoids duplicate TiVos (e.g. WAN and local).
+Warning message about disk space before downloads.
+Larger program status icons when Art column is showing.
+Shared caches between Remote and local cTiVos (ie if you move your laptop back and forth).
+Moved artwork and TiVo detail information to Cache folder, where they belong.
+Remove iTiVo migration and Growl support.
+
+#### Bug Fixes:
+Resets logging of Verbose mode to Major during startup (unless Control-Option held)
+High Sierra compatibility issues: during launch, tmp directory, double window, drag/drop, and artwork processing
+Remove From Queue contextual menu item working again
+Tivos were sometimes not getting called during startup
+Allows season zero (specials); formatted as S00Exx
+Sorting by episode names now sorts series that have no episode information by Original Air Date
+Change to .ts for unencoded files copied over Transport Stream (for compatibility with PyTiVo)
+Non-"sticky" messages in notifications should disappear
+Cleaned up contextual menus.
+
+#### MPEG-4 Transition:
+For those upgrading from 2.4 and earlier, you should be aware that cable companies are migrating from MPEG-2 compressed streams to MPEG-4 (aka H.264). They do this to reduce the size and improve the quality of their signals. They seem to be rolling this out slowly, one market at a time and even one channel at a time. Although this transition required many changes to cTiVo, they should be transparent in normal operation, except that older Formats may be incompatible.
+
+#### Older OS and processors:
+If you're still using 10.7 or 10.8, you'll need to use [2.5.1's 10.7 release](https://github.com/dscottbuch/cTiVo/releases/tag/2.5.1). In addition, if you have an older processor, you may get an incompatibility warning which might also require that version. Due to the included binaries from other open-source efforts, it's impossible to support these older systems. The 2.5.1 release has the older binaries (such as mencoder, ffmpeg, ccextractor etc) but otherwise should run fine.
+
+#### Older TiVos:
+If you have a TiVo Series3 or older, then you may have received an offer to upgrade as it won't be compatible at all with the H.264 transition. In adddition, although TiVo HD and HD-XL do work with the MPEG-4 signals, they unfortunately will not properly transfer the files to the Mac, so they will become unusable with cTiVo for channels migrated to MP4. Furthermore, Series 3 and HDs do not support cTiVo's new real-time functionality so several features (starred above) will not operate, and the season/episode information should be retrieved from theTVDB instead.
+
+Much thanks to Kevin Moye (of KMTTG fame) and Anthony Lieuallen for blazing the trail on the totally undocumented TiVo RPC information.
+
+
 # Release 2.5
 2.5 is a major upgrade to cTiVo. There's been extensive beta testing, so it is even more reliable than 2.4.4, but please let us know if you have any problems at all in the [Issues area](https://github.com/dscottbuch/cTiVo/issues).
 

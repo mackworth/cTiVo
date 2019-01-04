@@ -12,19 +12,17 @@
 #import "MTDownloadCheckTableCell.h"
 #import "MTProgressindicator.h"
 
-@interface MTDownloadTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource, MTTableViewProtocol> {
+@interface MTDownloadTableView : NSTableView <NSTableViewDataSource, NSTableViewDelegate, NSDraggingDestination, NSDraggingSource> {
     IBOutlet MTMainWindowController *myController;
 	IBOutlet NSButton *removeFromQueueButton;
-    NSTableColumn *tiVoColumnHolder;
 }
 
 @property (nonatomic, strong) NSArray *sortedDownloads;
-@property (nonatomic, weak) IBOutlet NSTextField *performanceLabel;
 
 
 -(BOOL)playVideo;
--(BOOL)revealInFinder;
 -(BOOL)selectionContainsCompletedShows;
+-(NSArray <MTDownload *> *) actionItems;
 
 - (IBAction)clearHistory:(id)sender;
 @end

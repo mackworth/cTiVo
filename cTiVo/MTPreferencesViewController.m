@@ -7,15 +7,102 @@
 //
 
 #import "MTPreferencesViewController.h"
+#import "MTTiVoManager.h"
+#import "MTHelpViewController.h"
 
 @interface MTPreferencesViewController ()
+@property (weak, nonatomic) IBOutlet NSPopUpButton *directoryFormatPopup;
+@property (weak, nonatomic) IBOutlet NSMenuItem *perModuleMenuItem;
+@property (weak, nonatomic) IBOutlet NSMenuItem *tiVoArtworkItem;
 
 @end
 
 @implementation MTPreferencesViewController
 
--(IBAction)setDebugLevel:(id)sender {
-	[DDLog setAllClassesLogLevelFromUserDefaults: kMTDebugLevel];
+-(void)awakeFromNib {
+	[super awakeFromNib];
+	if (!self.directoryFormatPopup) return;
+	NSArray <NSMenuItem *> *formats = 	self.directoryFormatPopup.menu.itemArray;
+	if (formats.count < 4) return;
+	formats[0].representedObject = kMTcTiVoDefault;
+	formats[1].representedObject = kMTcTiVoFolder;
+	formats[2].representedObject = kMTPlexFolder;
+	formats[3].representedObject = nil;
+	[self.directoryFormatPopup.menu setAutoenablesItems:NO];
+	formats[3].enabled = NO;
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTFileNameFormat options:NSKeyValueObservingOptionInitial context:nil];
+}
+
+-(BOOL) validateMenuItem:(NSMenuItem *)menuItem {
+    if ([menuItem.title isEqualToString: @"TiVo"]) {
+        for (MTTiVo *tiVo in tiVoManager.tiVoList) {
+            if (tiVo.supportsRPC) return YES;
+        }
+        return NO;
+	} else if ([menuItem.title isEqualToString:@"<Per Module>"]) {
+		if ([[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel] > 0) {
+			return NO;
+		}
+	}
+    return YES;
+}
+
+-(BOOL) enableTivoArtwork {
+	for (MTTiVo *tiVo in tiVoManager.tiVoList) {
+		if (tiVo.supportsRPC) return YES;
+	}
+	return NO;
+}
+
+-(BOOL) enablePerModule {
+	if ([[NSUserDefaults standardUserDefaults] integerForKey:kMTDebugLevel] > 0) {
+		return NO;
+	}
+	return YES;
+
+}
+-(IBAction)commercialHelp:(id)sender {
+	MTHelpViewController *helpController = [[MTHelpViewController alloc] init];
+	[helpController loadResource:@"CommercialHelpFile"];
+	[helpController pointToView:sender preferredEdge:NSMaxXEdge];
+}
+
+-(void) selectDirectoryFormat {
+	NSString * format = [[NSUserDefaults standardUserDefaults] stringForKey:kMTFileNameFormat];
+	if (!format.length) return;
+	NSArray <NSMenuItem *> *formats = 	self.directoryFormatPopup.menu.itemArray;
+	[self.directoryFormatPopup selectItemAtIndex:formats.count -1 ];
+
+	for (NSUInteger i = 0; i < formats.count-1;  i++ ) {
+		 if ([format isEqual: formats[i].representedObject]){
+			 [self.directoryFormatPopup selectItemAtIndex:i];
+		 }
+	 }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey, id> *)change context:(void *)context {
+	if ([kMTFileNameFormat isEqualToString:keyPath]) {
+		[self selectDirectoryFormat];
+	} else {
+		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+	}
+}
+
+-(IBAction) directoryFormatSelected:(id)sender {
+	NSPopUpButton * cell =  (NSPopUpButton *) sender;
+	NSString * format = [cell.selectedItem representedObject];
+	if (format) {
+		[[NSUserDefaults standardUserDefaults] setObject:format forKey:kMTFileNameFormat];
+	}
+}
+
+-(IBAction) help:(id)sender {
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Configuration#options"]];
+}
+
+-(void) dealloc {
+	[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath: kMTFileNameFormat ];
 }
 
 @end
+

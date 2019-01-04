@@ -770,6 +770,40 @@ audio: mp2 at 192kbs</string>
 		</dict>
 		<dict>
 			<key>formatDescription</key>
+			<string>Save the encrypted TiVo file. File can only be used to upload back to TiVo later. (Cannot duplicate Format)</string>
+			<key>comSkip</key>
+			<false/>
+			<key>edlFlag</key>
+			<string></string>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>filenameExtension</key>
+			<string>.tivo</string>
+			<key>encoderUsed</key>
+			<string>catToFile</string>
+			<key>name</key>
+			<string>Encrypted TiVo Show</string>
+			<key>encoderVideoOptions</key>
+			<string></string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>iTunes</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<false/>
+			<key>outputFileFlag</key>
+			<string></string>
+			<key>inputFileFlag</key>
+			<string></string>
+			<key>regExProgress</key>
+			<string></string>
+			<key>isHidden</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>formatDescription</key>
 			<string>Save the decrypted TiVo file</string>
 			<key>comSkip</key>
 			<false/>
@@ -1221,7 +1255,7 @@ audio: mp3 at 192kbps</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>formatDescription</key>
-			<string>Only to test if a channel works with Program Stream vs TransportStream</string>
+			<string>Only to test if a channel works with Program Stream vs TransportStream. (Cannot duplicate Format)</string>
 			<key>isHidden</key>
 			<true/>
 			<key>iTunes</key>

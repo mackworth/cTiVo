@@ -15,43 +15,14 @@
 @class MTSubscriptionTableView;
 @class MTFormatPopUpButton;
 
-@interface MTMainWindowController : NSWindowController <NSMenuDelegate, NSPopoverDelegate> {
-	IBOutlet NSPopUpButton *tiVoListPopUp;
-	IBOutlet MTFormatPopUpButton *formatListPopUp;
-	IBOutlet NSTextField *loadingProgramListLabel,  *tiVoListPopUpLabel, *pausedLabel;
-    IBOutlet NSButton  *__weak downloadDirectory;
-	IBOutlet NSProgressIndicator *loadingProgramListIndicator, *searchingTiVosIndicator;
-	IBOutlet MTDownloadTableView *__weak downloadQueueTable;
-	IBOutlet MTProgramTableView  *__weak tiVoShowTable;
-	IBOutlet MTSubscriptionTableView  *__weak subscriptionTable;
-	IBOutlet NSDrawer *showDetailDrawer;
-	NSPoint menuCursorPosition;
-	NSInteger menuTableRow;
-	NSMutableArray *loadingTiVos;
-}
+@interface MTMainWindowController : NSWindowController <NSMenuDelegate, NSPopoverDelegate> 
 
-@property (nonatomic, weak) MTDownloadTableView *downloadQueueTable;
-@property (nonatomic, weak) MTProgramTableView *tiVoShowTable;
-@property (nonatomic, weak) MTSubscriptionTableView *subscriptionTable;
-@property (nonatomic, strong) NSString *selectedTiVo;
-@property (nonatomic, strong) MTTiVoShow *showForDetail;
-@property (weak, nonatomic, readonly) MTTiVoManager *myTiVoManager;
-@property (nonatomic, weak) NSMenuItem *showInFinderMenuItem, *playVideoMenuItem;
-@property (nonatomic, strong) IBOutlet NSView *cancelQuitView;
+@property (weak, readonly) MTDownloadTableView *downloadQueueTable;
+@property (weak, readonly) MTProgramTableView *tiVoShowTable;
+@property (weak, readonly) MTSubscriptionTableView *subscriptionTable;
 
--(IBAction)selectFormat:(id)sender;
--(IBAction)subscribe:(id) sender;
--(BOOL) selectionContainsCompletedShows;
--(IBAction) revealInFinder:(id) sender;
--(IBAction) playVideo: (id) sender;
 -(void) playTrashSound;
-
--(IBAction)downloadSelectedShows:(id)sender;
--(IBAction)removeFromDownloadQueue:(id)sender;
--(IBAction)getDownloadDirectory:(id)sender;
-//-(IBAction)changeSimultaneous:(id)sender;
--(IBAction)changeiTunes:(id)sender;
--(IBAction)dontQuit:(id)sender;
-
+-(void) showCancelQuitView:(BOOL) show;
+-(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads includingDone: (BOOL) includeDone;
 
 @end

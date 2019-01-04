@@ -5,46 +5,53 @@
 //  Created by Scott Buchanan on 12/6/12.
 //  Copyright (c) 2012 Scott Buchanan. All rights reserved.
 //
+#define kLogTiVos 1
 
 #import "MTTiVoManager.h"
-#import "MTiTivoImport.h"
 #import "MTAppDelegate.h"
 #import "MTSubscription.h"
 #import "MTSubscriptionList.h"
-//#import "NSNotificationCenter+Threads.h"
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-#import <Growl/Growl.h>
-#endif
+#import "MTiTunes.h"
+#import "MTNetService.h"
+#import "NSURL+MTURLExtensions.h"
+#import "NSNotificationCenter+Threads.h"
+#import "NSArray+Map.h"
 #import "NSString+Helpers.h"
-
+#import "NSDate+Tomorrow.h"
 #include <arpa/inet.h>
-#include <sys/xattr.h>
 
-
-
-@interface MTTiVoManager ()
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
-    <NSUserNotificationCenterDelegate>  
+#ifdef kLogTiVos
+#include "MTWeakTimer.h"
+#import "Crashlytics/Crashlytics.h"
 #endif
-        {
 
+@interface MTTiVoManager ()    <NSUserNotificationCenterDelegate>        {
     NSNetServiceBrowser *tivoBrowser;
-
-    int numEncoders;// numCommercials, numCaptions;//Want to limit launches to two encoders.
-	
-    NSMetadataQuery *cTiVoQuery;
+	NSMetadataQuery *cTiVoQuery;
 	BOOL volatile loadingManualTiVos;
-
 }
 
 @property (atomic, strong)     NSOperationQueue *opsQueue;
+@property (nonatomic, strong) NSMutableDictionary <NSString *, NSDictionary  *> * manualEpisodeData;
+@property (nonatomic, strong) NSDictionary *showsOnDisk;
+@property (nonatomic, strong) NSURL *cacheDirectory;
+@property (nonatomic, strong) NSURL *tivoTempDirectory;
+@property (nonatomic, strong) NSURL *tvdbTempDirectory;
+@property (nonatomic, strong) NSURL *detailsTempDirectory;
+@property (nonatomic, strong) NSDictionary <NSString *, NSDictionary <NSString *, NSString *> *> *channelList; //union of all TiVos' channelLists
 
+@property (nonatomic,readonly) NSMutableArray <NSNetService *> *tivoServices;
+
+@property (nonatomic, strong) NSDate * lastSkipModeWarningTime; //for warnings
+#ifdef kLogTiVos
+@property (nonatomic, strong) NSTimer * tiVoTimer; //used to notify  of failure.
+@property (nonatomic, strong) NSString * missingTiVoSymptom;
+#endif
 @end
-
 
 @implementation MTTiVoManager
 
-@synthesize subscribedShows = _subscribedShows, numEncoders, tiVoList = _tiVoList;
+@synthesize tiVoList = _realTiVoList;
 
 __DDLOGHERE__
 
@@ -63,6 +70,8 @@ __DDLOGHERE__
     });
     if (firstTime) {
         [myManager restoreOldQueue]; //no reason to fire all notifications on initial queue
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        myManager.tvdb = [MTTVDB sharedManager];
         [myManager setupNotifications];
     }
     return myManager;
@@ -72,99 +81,81 @@ __DDLOGHERE__
 {
 	self = [super init];
 	if (self) {
-		DDLogDetail(@"setting up TivoManager");
+        DDLogDetail(@"setting up TivoManager");
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 		_tivoServices = [NSMutableArray new];
-		_tiVoList = [NSMutableArray new];
+		_realTiVoList = [NSArray new];
+		_tiVoMinis = [NSArray new];
 		self.opsQueue = [NSOperationQueue new];
         _downloadQueue = [NSMutableArray new];
-
+		_channelList = [NSDictionary new];
+		
         _lastLoadedTivoTimes = [[defaults dictionaryForKey:kMTTiVoLastLoadTimes] mutableCopy];
 		if (!_lastLoadedTivoTimes) {
 			_lastLoadedTivoTimes = [NSMutableDictionary new];
 		}
-		
-		NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
-		NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
-		_formatList = [NSMutableArray arrayWithArray:[formats objectForKey:@"formats"]];
-		NSMutableArray *tmpArray = [NSMutableArray array];
-		for (NSDictionary *fl in _formatList) {
-			MTFormat *thisFormat = [MTFormat formatWithDictionary:fl];
-			thisFormat.isFactoryFormat = [NSNumber numberWithBool:YES];
-			[tmpArray addObject:thisFormat];
-		}
-		_formatList = tmpArray;
-        DDLogVerbose(@"factory Formats: %@", tmpArray);
-		
-        //Set user desired hiding of the user pref, if any
-        
-        NSArray *hiddenFormatNames = [defaults objectForKey:kMTHiddenFormats];
-        if (hiddenFormatNames) {
-            //Un hide all 
-            DDLogVerbose(@"Hiding formats: %@", hiddenFormatNames);
-			for (MTFormat *f in _formatList) {
-                f.isHidden = [NSNumber numberWithBool:NO];
-            }
-            //Hide what the user wants
-            for (NSString *name in hiddenFormatNames) {
-                MTFormat *f = [self findFormat:name];
-                if ([name isEqualToString:f.name]) {  //confirm find didn't return a default format
-					f.isHidden = [NSNumber numberWithBool:YES];
-				}
-            }
-        }
-		
-		//Load user formats from preferences if any
-		NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTFormats];
-		if (userFormats) {
-			DDLogVerbose(@"User formats: %@", userFormats);
-            [self addFormatsToList:userFormats withNotification:NO];
-		}
-		
-		//Make sure there's a selected format, especially on first launch
-
-        NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
-        self.selectedFormat = [self findFormat:formatName];
-        DDLogVerbose(@"defaultFormat %@", formatName);
-
-
+       [self initialFormatSetup];
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
-		DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
+        DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
+       [self restoreManualEpisodeInfo];
 
-		numEncoders = 0;
+		self.numEncoders = 0;
 		_signalError = 0;
 		self.opsQueue.maxConcurrentOperationCount = 4;
 
 		_processingPaused = @(NO);
-		
 		[self loadUserNotifications];
-//		NSLog(@"Getting Host Addresses");
-//      Note that NSHost is unsafe in general
-//		hostAddresses = [[[NSHost currentHost] addresses] retain];
-//        NSLog(@"Host Addresses = %@",self.hostAddresses);
-//        NSLog(@"Host Names = %@",[[NSHost currentHost] names]);
-//        NSLog(@"Host addresses for first name %@",[[NSHost hostWithName:[[NSHost currentHost] names][0]] addresses]);
         [self setupMetadataQuery];
+		[self updateSkipModeToChannels]; //update older skipmodes
  		loadingManualTiVos = NO;
-        self.tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
-		self.tvdbCache = [NSMutableDictionary dictionaryWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:kMTTheTVDBCache]];
-        self.theTVDBStatistics = [NSMutableDictionary dictionary];
-        self.tvdbQueue = [[NSOperationQueue alloc] init];
-        self.tvdbQueue.maxConcurrentOperationCount = kMTMaxTVDBRate;
-        
-        //Clean up old entries
-        NSMutableArray *keysToDelete = [NSMutableArray array];
-        for (NSString *key in _tvdbCache) {
-            NSDate *d = [[_tvdbCache objectForKey:key] objectForKey:@"date"];
-            if ([[NSDate date] timeIntervalSinceDate:d] > 60.0 * 60.0 * 24.0 * 30.0) { //Too old so throw out
-                [keysToDelete addObject:key];
-            }
-        }
-        for (NSString *key in keysToDelete) {
-            [_tvdbCache removeObjectForKey:key];
-        }
 	}
 	return self;
+}
+
+-(void) initialFormatSetup {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+
+    NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
+    NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
+    _formatList = [NSMutableArray arrayWithArray:[formats objectForKey:@"formats"]];
+    NSMutableArray *tmpArray = [NSMutableArray array];
+    for (NSDictionary *fl in _formatList) {
+        MTFormat *thisFormat = [MTFormat formatWithDictionary:fl];
+        thisFormat.isFactoryFormat = [NSNumber numberWithBool:YES];
+        [tmpArray addObject:thisFormat];
+    }
+    _formatList = tmpArray;
+    DDLogVerbose(@"factory Formats: %@", tmpArray);
+
+    //Set user desired hiding of the user pref, if any
+    NSArray *hiddenFormatNames = [defaults objectForKey:kMTHiddenFormats];
+    if (hiddenFormatNames) {
+        //Un hide all
+        DDLogVerbose(@"Hiding formats: %@", hiddenFormatNames);
+        for (MTFormat *f in _formatList) {
+            f.isHidden = [NSNumber numberWithBool:NO];
+        }
+        //Hide what the user wants
+        for (NSString *name in hiddenFormatNames) {
+            MTFormat *f = [self findFormat:name];
+            if ([name isEqualToString:f.name]) {  //confirm find didn't return a default format
+                f.isHidden = [NSNumber numberWithBool:YES];
+            }
+        }
+    }
+
+    //Load user formats from preferences if any
+    NSArray *userFormats = [[NSUserDefaults standardUserDefaults] arrayForKey:kMTFormats];
+    if (userFormats) {
+        DDLogVerbose(@"User formats: %@", userFormats);
+        [self addFormatsToList:userFormats withNotification:NO];
+    }
+
+    //Make sure there's a selected format, especially on first launch
+
+    NSString *formatName = [defaults objectForKey:kMTSelectedFormat];
+    self.selectedFormat = [self findFormat:formatName];
+    DDLogVerbose(@"defaultFormat %@", formatName);
 }
 
 -(void) setupMetadataQuery {
@@ -172,9 +163,9 @@ __DDLOGHERE__
     cTiVoQuery = [[NSMetadataQuery alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidUpdateNotification object:cTiVoQuery];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidFinishGatheringNotification object:cTiVoQuery];
-    NSPredicate *mdqueryPredicate = [NSPredicate predicateWithFormat:@"kMDItemFinderComment ==[c] 'cTiVoDownload'"];
+    NSPredicate *mdqueryPredicate = [NSPredicate predicateWithFormat:@"kMDItemFinderComment ==[c] '" kMTSpotlightKeyword @"'"];
     [cTiVoQuery setPredicate:mdqueryPredicate];
-    [cTiVoQuery setSearchScopes:@[NSMetadataQueryLocalComputerScope]];
+    [cTiVoQuery setSearchScopes:@[]];
     [cTiVoQuery setNotificationBatchingInterval:2.0];
     [cTiVoQuery startQuery];
 }
@@ -183,48 +174,58 @@ __DDLOGHERE__
 {
 	DDLogDetail(@"Got Metadata Result with count %ld",[cTiVoQuery resultCount]);
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
-    NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
 	for (NSUInteger i =0; i < [cTiVoQuery resultCount]; i++) {
         NSMetadataItem * item = [cTiVoQuery resultAtIndex:i];
         if (![item isKindOfClass:[NSMetadataItem class]]) continue;
         NSString *filePath = [item valueForAttribute:NSMetadataItemPathKey];
-		ssize_t len = getxattr([filePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoID UTF8String], (void *)[buffer bytes], 256, 0, 0);
-		if (len > 0) {
-			NSData *idData = [NSData dataWithBytes:[buffer bytes] length:(NSUInteger)len];
-			NSString  *showID = [[NSString alloc] initWithData:idData encoding:NSUTF8StringEncoding];
-			len = getxattr([filePath cStringUsingEncoding:NSASCIIStringEncoding], [kMTXATTRTiVoName UTF8String], (void *)[buffer bytes], 256, 0, 0);
-			if (len > 0) {
-				NSData *nameData = [NSData dataWithBytes:[buffer bytes] length:len];
-				NSString *tiVoName = [[NSString alloc] initWithData:nameData encoding:NSUTF8StringEncoding];
-				NSString *key = [NSString stringWithFormat:@"%@: %@",tiVoName,showID];
-				if ([tmpDict objectForKey:key]) {
-					NSArray *paths = [tmpDict objectForKey:key];
-					[tmpDict setObject:[paths arrayByAddingObject:filePath] forKey:key];
-				} else {
-					[tmpDict setObject:@[filePath] forKey:key];
-				}
+        NSString * showID = [filePath getXAttr:kMTXATTRTiVoID ];
+        NSString * tiVoName = [filePath getXAttr:kMTXATTRTiVoName ];
+        if (showID.length && tiVoName.length) {
+            NSString *key = [NSString stringWithFormat:@"%@: %@",tiVoName,showID];
+            if ([tmpDict objectForKey:key]) {
+                NSArray *paths = [tmpDict objectForKey:key];
+                [tmpDict setObject:[paths arrayByAddingObject:filePath] forKey:key];
+            } else {
+                [tmpDict setObject:@[filePath] forKey:key];
 			}
 		}
-
 	}
 	self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	DDLogVerbose(@"showsOnDisk = %@",self.showsOnDisk);
-    
 }
-#pragma mark - Loading queue from Preferences
 
--(void)updateShowOnDisk:(NSString *)key withPath:(NSString *)path
-{
-	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:self.showsOnDisk];
-	if ([tmpDict objectForKey:key]) {
-		NSArray *paths = [tmpDict objectForKey:key];
-		[tmpDict setObject:[paths arrayByAddingObject:path] forKey:key];
-	} else {
-		[tmpDict setObject:@[path] forKey:key];
-	}
-	self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
+-(NSString *)keyForShow: (MTTiVoShow *) show {
+    return [NSString stringWithFormat:@"%@: %@",show.tiVoName,show.idString];
 }
+
+-(NSArray <NSString *> *) copiesOnDiskForShow:(MTTiVoShow *) show {
+    return [self.showsOnDisk objectForKey: [self keyForShow:show]];
+}
+
+-(void) addShow:(MTTiVoShow *) show onDiskAtPath:(NSString *)path {
+	DDLogDetail(@"Adding xattr data to show %@ at %@", show, path);
+
+    //Add xattrs
+    [path setXAttr:kMTXATTRTiVoName toValue:show.tiVoName ];
+    [path setXAttr:kMTXATTRTiVoID toValue:show.idString ];
+    [path setXAttr:kMTXATTRSpotlight toValue:kMTSpotlightKeyword ];
+
+    NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:self.showsOnDisk];
+    NSString * key = [self keyForShow:show];
+	NSArray *paths = [tmpDict objectForKey:key];
+    if (paths) {
+		if (![paths containsObject:path]) {
+        	[tmpDict setObject:[paths arrayByAddingObject:path] forKey:key];
+		}
+    } else {
+        [tmpDict setObject:@[path] forKey:key];
+    }
+    self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
+}
+
+
+#pragma mark - Loading queue from Preferences
 
 -(void) restoreOldQueue {
 	NSArray *oldQueue = [[NSUserDefaults standardUserDefaults] objectForKey:kMTQueue];
@@ -232,7 +233,7 @@ __DDLOGHERE__
 	
 	NSMutableArray * newShows = [NSMutableArray arrayWithCapacity:oldQueue.count];
 	for (NSDictionary * queueEntry in oldQueue) {
-		DDLogDetail(@"Restoring show %@",queueEntry[kMTQueueTitle]);
+		DDLogVerbose(@"Restoring show %@",queueEntry[kMTQueueTitle]);
 		MTDownload * newDownload= [MTDownload downloadFromQueue:queueEntry];
 		[newShows addObject:newDownload];
 	}
@@ -265,32 +266,38 @@ __DDLOGHERE__
         }
         [[NSUserDefaults standardUserDefaults] setInteger:2 forKey:kMTUserDefaultVersion];
     }
-
 }
 
--(NSInteger) findProxyShowInDLQueue:(MTTiVoShow *) showTarget {
-	NSString * targetTivoName = showTarget.tiVo.tiVo.name;
-	return [self.downloadQueue indexOfObjectPassingTest:^BOOL(MTDownload * download, NSUInteger idx, BOOL *stop) {
-		MTTiVoShow * possShow = download.show;
-		return [targetTivoName isEqualToString:[possShow tempTiVoName]] &&
-		showTarget.showID == possShow.showID &&
-        possShow.protectedShow.boolValue;
-	}];
-}
-
--(void) replaceProxyInQueue: (MTTiVoShow *) newShow {
-    NSInteger dlIndex;
-    while ((dlIndex =[tiVoManager findProxyShowInDLQueue:newShow]) != NSNotFound) {
-		MTDownload * proxyDL = [tiVoManager downloadQueue][dlIndex];
-		DDLogVerbose(@"Found proxy %@ at %ld on tiVo %@",newShow, dlIndex, proxyDL.show.tiVoName);
-        [proxyDL convertProxyToRealForShow: newShow];
-		//this is a back door entry into queue, so need to check for uniqueness again in current environment
-//		[self checkShowTitleUniqueness:newShow];
-		if (proxyDL.downloadStatus.integerValue == kMTStatusDeleted) {
-			DDLogDetail(@"Tivo restored previously deleted show %@",newShow);
-			[proxyDL prepareForDownload:YES];
+-(MTTiVoShow *) replaceProxyInQueue: (MTTiVoShow *) newShow {
+	NSString * targetTivoName = newShow.tiVo.tiVo.name;
+	MTTiVoShow * showToUse = newShow;
+	BOOL changedPriorProxy = NO; //very unlikely case of hitting a deleted show (or proxy) before hitting a reloaded show
+	for (MTDownload * download in self.downloadQueue) {
+		MTTiVoShow * oldShow = download.show;
+		if (oldShow.showID != showToUse.showID) continue;
+		if (oldShow.tiVo != showToUse.tiVo) continue;
+		if ([oldShow.imageString isEqualToString:@"deleted"] || download.downloadStatus.intValue == kMTStatusDeleted ||
+			(oldShow.protectedShow.boolValue && [targetTivoName isEqualToString:[oldShow tempTiVoName]])) {
+			changedPriorProxy = YES;
+			[download convertProxyToRealForShow: showToUse];
+			if (oldShow.protectedShow) {
+				DDLogVerbose(@"Found proxy %@ for download %@ on tiVo %@",showToUse, download, download.show.tiVoName);
+			} else {
+				DDLogMajor(@"Restoring deleted show %@ for download %@", showToUse, download);
+			}
+		} else {
+			//must be a "reloading" of the same show, so let's use older version
+			DDLogMajor(@"Reloaded show %@, using older %@ for %@", newShow, oldShow, download);
+			if (showToUse != newShow && showToUse != oldShow) {
+				DDLogReport(@"Two old proxies for same show? Loaded %@ for %@ and %@ (in %@)", newShow, showToUse, oldShow, download);
+			}
+			showToUse = oldShow;
+			if (changedPriorProxy) {
+				return [self replaceProxyInQueue:oldShow]; //use recursion to fix prior mistake
+			}
 		}
 	}
+	return showToUse;
 }
 
 -(void)checkDownloadQueueForDeletedEntries: (MTTiVo *) tiVo {
@@ -298,7 +305,7 @@ __DDLOGHERE__
 	for (MTDownload * download in self.downloadQueue) {
 		if(download.show.protectedShow.boolValue &&
 		   [targetTivoName isEqualToString:download.show.tiVoName]) {
-			if (! download.isDone) {
+			if ( ! download.isCompletelyDone ) {
 				DDLogDetail(@"Marking %@ as deleted", download.show.showTitle);
 				download.downloadStatus =@kMTStatusDeleted;
 			}
@@ -308,15 +315,16 @@ __DDLOGHERE__
 	}
 }
 
-
--(void)writeDownloadQueueToUserDefaults {
+-(void)saveState {
 	NSMutableArray * downloadArray = [NSMutableArray arrayWithCapacity:_downloadQueue.count];
 	for (MTDownload * download in _downloadQueue) {
 		[downloadArray addObject:[download queueRecord]];
 	}
     DDLogVerbose(@"writing DL queue: %@", downloadArray);
 	[[NSUserDefaults standardUserDefaults] setObject:downloadArray forKey:kMTQueue];
-		
+
+    [tiVoManager.tvdb saveDefaults];
+    [self saveManualEpisodeInfo];
 	[self.subscribedShows saveSubscriptions];
 	[[NSUserDefaults standardUserDefaults] synchronize];
 
@@ -325,122 +333,110 @@ __DDLOGHERE__
 
 #pragma mark - TiVo Search Methods
 
--(void) loadManualTiVos
-{
-//    BOOL didFindTiVo = NO;
+-(void) updateTiVosFromDefaults {
 	if (loadingManualTiVos) {
 		return;
 	}
 	loadingManualTiVos = YES;
 	DDLogDetail(@"LoadingTivos");
-	NSMutableArray *bonjourTiVoList = [NSMutableArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == NO"]]];
-	NSArray *manualTiVoList = [NSArray arrayWithArray:[_tiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
-//	[_tiVoList removeObjectsInArray:manualTiVoList];
+	NSMutableArray *bonjourTiVoList = [NSMutableArray arrayWithArray:[_realTiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == NO"]]];
+	NSArray *manualTiVoList = [NSArray arrayWithArray:[_realTiVoList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"manualTiVo == YES"]]];
 	DDLogVerbose(@"Manual TiVos: %@",manualTiVoList);
 	
 	//Update rebuild manualTiVoList reusing what can be reused.
 	NSMutableArray *newManualTiVoList = [NSMutableArray array];
 	for (NSDictionary *mTiVo in self.savedTiVos) {
         if ([mTiVo[kMTTiVoManualTiVo] boolValue]) {
-			if ([mTiVo[kMTTiVoEnabled] boolValue]) { //Don't do anything if not enabled
-				MTTiVo *targetMTTiVo = nil;
-				BOOL shouldUpdateTiVo = NO;
-				for (MTTiVo *currentMTiVo in manualTiVoList) { // See if there is a current TiVo that matches (by ID as name may change)
-					if (currentMTiVo.manualTiVoID == [mTiVo[kMTTiVoID] intValue]) {
-						targetMTTiVo = currentMTiVo; //Found a TiVo to edit
-						break;
-					}
-				}
-				if (!targetMTTiVo) { //Create a new MTTiVo
-					targetMTTiVo = [MTTiVo manualTiVoWithDescription:mTiVo withOperationQueue:self.opsQueue];
-					if(targetMTTiVo){
-						shouldUpdateTiVo = YES;
-						DDLogDetail(@"Adding new manual TiVo %@",targetMTTiVo);
-					}
-				}
-				if (targetMTTiVo) {
-					if ([targetMTTiVo.tiVo.iPAddress caseInsensitiveCompare:mTiVo[kMTTiVoIPAddress]] != NSOrderedSame ||  //Update if required, incl. a new MTTiVo
-							   [targetMTTiVo.tiVo.userName compare:mTiVo[kMTTiVoUserName]] != NSOrderedSame ||
-							   targetMTTiVo.tiVo.userPort != [mTiVo[kMTTiVoUserPort] intValue] ||
-							   targetMTTiVo.tiVo.userPortSSL != [mTiVo[kMTTiVoUserPortSSL] intValue] ||
-							   ![targetMTTiVo.mediaKey isEqualToString:mTiVo[kMTTiVoMediaKey]]
-							   ) { // If there's a change then edit it and update
-						targetMTTiVo.tiVo.iPAddress = mTiVo[kMTTiVoIPAddress];
-						targetMTTiVo.tiVo.userName = mTiVo[kMTTiVoUserName];
-						targetMTTiVo.tiVo.userPort = (short)[mTiVo[kMTTiVoUserPort] intValue];
-						targetMTTiVo.tiVo.userPortSSL = (short)[mTiVo[kMTTiVoUserPortSSL] intValue];
-						targetMTTiVo.enabled = [mTiVo[kMTTiVoEnabled] boolValue];
-						targetMTTiVo.mediaKey = mTiVo[kMTTiVoMediaKey];
-						DDLogDetail(@"Updated manual TiVo %@",targetMTTiVo);
-						shouldUpdateTiVo = YES;
-					}
-					if (shouldUpdateTiVo) {
-						//Turn off label in UI
-						[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoUpdated object:targetMTTiVo];
-						//RE-update shows
-						[targetMTTiVo scheduleNextUpdateAfterDelay:0];
-					}
-					[newManualTiVoList addObject:targetMTTiVo];
+            MTTiVo *targetMTTiVo = nil;
+            for (MTTiVo *currentMTiVo in manualTiVoList) { // See if there is a current TiVo that matches (by ID as name may change)
+                if (currentMTiVo.manualTiVoID == [mTiVo[kMTTiVoID] intValue]) {
+                    targetMTTiVo = currentMTiVo; //Found a TiVo to edit
+                    break;
+                }
+            }
+            if ([mTiVo[kMTTiVoEnabled] boolValue]) { //Don't do anything if not enabled, which deletes
+               if (targetMTTiVo) {
+                    [targetMTTiVo updateWithDescription:mTiVo];
+                } else {
+                    targetMTTiVo = [MTTiVo manualTiVoWithDescription:mTiVo withOperationQueue:self.opsQueue];
+                    if (targetMTTiVo) {
+                        [targetMTTiVo scheduleNextUpdateAfterDelay:0];
+                        DDLogDetail(@"Adding new manual TiVo %@",targetMTTiVo);
+                    }
+                }
+                 if (targetMTTiVo)  [newManualTiVoList addObject:targetMTTiVo];
+            } else {
+                if (targetMTTiVo) {  //going to delete, so turn off searching
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoUpdated object:targetMTTiVo];
+                }
+            }
+		} else if ([mTiVo[kMTTiVoTSN] hasPrefix:@"A9"] && ![mTiVo[kMTTiVoTSN] hasPrefix:@"A94"]) {
+			for (MTTiVo *targetTiVo in self.tiVoMinis) {
+				if ([targetTiVo.tiVo.name isEqualToString: mTiVo[kMTTiVoUserName]] ) {
+					[targetTiVo  updateWithDescription:mTiVo];
+					break;
 				}
 			}
 		} else {
 			//bonjour tivo, so just check if it needs to be refreshed
 			for (MTTiVo *targetTiVo in bonjourTiVoList) {
 				if ([targetTiVo.tiVo.name isEqualToString: mTiVo[kMTTiVoUserName]] ) {
-					if (!targetTiVo.enabled  ||  ![targetTiVo.mediaKey isEqualToString:mTiVo[kMTTiVoMediaKey]]) {
-						//Turn off label in UI
-						//RE-update shows
-						[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoUpdated object:targetTiVo];
-						targetTiVo.enabled = YES;
-						targetTiVo.mediaKey = mTiVo[kMTTiVoMediaKey];
-						[targetTiVo scheduleNextUpdateAfterDelay:0];
-						break;
-					}
+                    [targetTiVo  updateWithDescription:mTiVo];
+                    break;
 				}
 			}
 		}
 		
 	}
-	NSArray *bonjourTiVoDescriptions = self.savedBonjourTiVos;
-	for (NSDictionary *mTiVo in bonjourTiVoDescriptions) {
-        if ([mTiVo[kMTTiVoEnabled] boolValue]) { //Don't do anything if not enabled
-		}
-	}
 
 //	//Re build _tivoList
 	[bonjourTiVoList addObjectsFromArray:newManualTiVoList];
 	self.tiVoList = bonjourTiVoList;
-	DDLogDetail(@"TiVo List %@",self.tiVoList);
+	DDLogDetail(@"TiVo List %@",[self.tiVoList maskMediaKeys]);
 	NSNotification *notification = [NSNotification notificationWithName:kMTNotificationTiVoListUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	loadingManualTiVos = NO;
 }
 
+////Found issues with corrupt, or manually edited entries in the manual array so use this to remove them
+//-(NSArray *)getManualTiVoDescriptions
+//{
+//	NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
+//	NSMutableArray *itemsToRemove = [NSMutableArray array];
+//    for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
+//		if (manualTiVoDescription.count != 7 ||
+//			((NSString *)manualTiVoDescription[kMTTiVoUserName]).length == 0 ||
+//			((NSString *)manualTiVoDescription[kMTTiVoIPAddress]).length == 0) {
+//			[itemsToRemove addObject:manualTiVoDescription];
+//			continue;
+//		}
+//	}
+//	if (itemsToRemove.count) {
+//		DDLogMajor(@"Removing manual Tivos %@", itemsToRemove);
+//		[manualTiVoDescriptions removeObjectsInArray:itemsToRemove];
+//		[[NSUserDefaults standardUserDefaults] setObject:manualTiVoDescriptions forKey:kMTManualTiVos];
+//	}
+//	return [NSArray arrayWithArray:manualTiVoDescriptions];
+//}
 
-//Found issues with corrupt, or manually edited entries in the manual array so use this to remove them
--(NSArray *)getManualTiVoDescriptions
-{
-	NSMutableArray *manualTiVoDescriptions = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] arrayForKey:kMTManualTiVos]];
-	NSMutableArray *itemsToRemove = [NSMutableArray array];
-    for (NSDictionary *manualTiVoDescription in manualTiVoDescriptions) {
-		if (manualTiVoDescription.count != 6 ||
-			((NSString *)manualTiVoDescription[kMTTiVoUserName]).length == 0 ||
-			((NSString *)manualTiVoDescription[kMTTiVoIPAddress]).length == 0) {
-			[itemsToRemove addObject:manualTiVoDescription];
-			continue;
-		}
-	}
-	if (itemsToRemove.count) {
-		DDLogMajor(@"Removing manual Tivos %@", itemsToRemove);
-		[manualTiVoDescriptions removeObjectsInArray:itemsToRemove];
-		[[NSUserDefaults standardUserDefaults] setObject:manualTiVoDescriptions forKey:kMTManualTiVos];
-	}
-	return [NSArray arrayWithArray:manualTiVoDescriptions];
+-(NSArray *)savedTiVos {
+    return [[NSUserDefaults standardUserDefaults] objectForKey:kMTTiVos];
 }
 
--(NSArray *)savedTiVos
-{
-    return [[NSUserDefaults standardUserDefaults] objectForKey:kMTTiVos];
+-(BOOL) duplicateTiVoFor:(MTTiVo *) tiVo {
+    if (!tiVo.tiVoSerialNumber.length) return NO;
+    for (MTTiVo * otherTiVo in [tiVoManager tiVoList]) {
+        if (otherTiVo == tiVo) continue;
+        if (!otherTiVo.enabled) continue;
+        if ([tiVo.tiVoSerialNumber isEqualToString: otherTiVo.tiVoSerialNumber]) {
+            if (!tiVo.manualTiVo && otherTiVo.manualTiVo) {
+                otherTiVo.enabled = NO;
+            } else {
+                return YES;
+            }
+        }
+    }
+    return NO;
 }
 
 -(void)updateTiVoDefaults:(MTTiVo *)tiVo
@@ -448,7 +444,7 @@ __DDLOGHERE__
     DDLogDetail(@"Updating TiVo Defaults with tivo %@",tiVo);
     NSArray *currentSavedTiVos = tiVoManager.savedTiVos;
     NSMutableArray *updatedSavedTiVos = [NSMutableArray new];
-	NSDictionary *tiVoDict = [tiVo defaultsDictionary];
+	NSDictionary *tiVoDict = [tiVo descriptionDictionary];
 	BOOL foundTiVo = NO;
     for (NSDictionary *savedTiVo in currentSavedTiVos) {
 		NSDictionary * dictToAdd = savedTiVo;
@@ -464,77 +460,69 @@ __DDLOGHERE__
 		[updatedSavedTiVos addObject:dictToAdd];
     }
 	if (!foundTiVo) {
-		DDLogReport(@"Warning: didn't find tivo %@",tiVo);
+		DDLogReport(@"First time finding %@",tiVo);
         [updatedSavedTiVos addObject:tiVoDict];
 	}
-    DDLogVerbose(@"Saving new tivos %@",[updatedSavedTiVos maskMediaKeys]);
     [[NSUserDefaults standardUserDefaults] setValue:updatedSavedTiVos forKeyPath:kMTTiVos];
+	if (LOG_VERBOSE) {
+		NSString * tivos = [updatedSavedTiVos maskMediaKeys];
+		for (NSDictionary * tivo in updatedSavedTiVos) {
+			tivos = [tivos maskSerialNumber:tivo[@"tiVoTSN"]];
+		}
+		DDLogVerbose(@"Saving new TiVos: %@", tivos);
+	}
 }
 
--(int) nextManualTiVoID
-{
+-(int) nextManualTiVoID{
     NSArray *manualTiVos = self.savedTiVos;
-    int retValue = 1;
+    int highValue = 0;
     for (NSDictionary *manualTiVo in manualTiVos) {
-        if ([manualTiVo[kMTTiVoID] intValue] > retValue) {
-            retValue = [manualTiVo[kMTTiVoID] intValue];
+        BOOL isManual = ((NSNumber *)manualTiVo[kMTTiVoManualTiVo]).boolValue;
+        int tivoID = [manualTiVo[kMTTiVoID] intValue];
+        if (isManual && tivoID> highValue) {
+            highValue =tivoID;
         }
     }
-    return retValue+1;
+    return highValue + 1;
+}
+#ifdef kLogTiVos
+-(void) failBonjour {
+	[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
+						success:@NO
+			   customAttributes:@{@"Symptom" : self.missingTiVoSymptom}];
+
+}
+#endif
+
+-(void) startTiVos {
+	[self searchForBonjourTiVos];
+	[self updateTiVosFromDefaults ];
 }
 
-
--(void)searchForBonjourTiVos
-{
+-(void)searchForBonjourTiVos {
 	DDLogDetail(@"searching for Bonjour");
     tivoBrowser = [NSNetServiceBrowser new];
     tivoBrowser.delegate = self;
     [tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-    [tivoBrowser searchForServicesOfType:@"_tivo-videos._tcp" inDomain:@"local"];
+	[tivoBrowser stop]; //internet voodoo to make search more reliable?
+	[tivoBrowser searchForServicesOfType:@"_tivo-device._tcp" inDomain:@"local."];
+#ifdef kLogTiVos
+	self.missingTiVoSymptom = @"None";
+	self.tiVoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:kMTTimeToHelpIfNoTiVoFound target:self selector:@selector(failBonjour) userInfo:nil repeats:NO];
+#endif
 }
 
-//-(NSArray *)hostAddresses
-//{
-//    NSArray *ret = _hostAddresses;
-//    if (!_hostAddresses) {
-//        self.hostAddresses = [[NSHost currentHost] addresses];
-//		DDLogDetail(@"Host Addresses:  %@",self.hostAddresses);
-//        ret = _hostAddresses;
-//    }
-//    return ret;
-//}
-
--(NSArray *)tiVoAddresses
-{
-    NSMutableArray *addresses = [NSMutableArray array];
-    for (MTTiVo *tiVo in _tiVoList) {
-        if ([tiVo.tiVo addresses] && [tiVo.tiVo addresses].count) {
-            NSString *ipAddress = [self getStringFromAddressData:[tiVo.tiVo addresses][0]];
-            [addresses addObject:ipAddress];
-        }
-    }
-	DDLogVerbose(@"Tivo Addresses:  %@",addresses);
-    return addresses;
-}
-
--(NSArray *)allTiVos
-{
-    return _tiVoList;
-}
-
--(NSArray *)tiVoList {
+-(NSArray <MTTiVo *> *)tiVoList {
     NSPredicate *enabledTiVos = [NSPredicate predicateWithFormat:@"enabled == YES"];
-//    NSArray *enabledTiVoList = [_tiVoList filteredArrayUsingPredicate:enabledTiVos];
-//    NSLog(@"return %lu enabled tivos",enabledTiVoList.count);
-	return [_tiVoList filteredArrayUsingPredicate:enabledTiVos];
+	return [_realTiVoList filteredArrayUsingPredicate:enabledTiVos];
 }
 
 -(void) setTiVoList: (NSArray *) tiVoList {
-	if (_tiVoList != tiVoList) {
+	if (_realTiVoList != tiVoList) {
 		NSSortDescriptor *manualSort = [NSSortDescriptor sortDescriptorWithKey:@"manualTiVo" ascending:NO];
 		NSSortDescriptor *nameSort = [NSSortDescriptor sortDescriptorWithKey:@"tiVo.name" ascending:YES];
-		_tiVoList = [tiVoList sortedArrayUsingDescriptors:[NSArray arrayWithObjects:manualSort,nameSort, nil]];
-		DDLogVerbose(@"resorting TiVoList %@", _tiVoList);
+		_realTiVoList = [tiVoList sortedArrayUsingDescriptors:[NSArray arrayWithObjects:manualSort,nameSort, nil]];
+		DDLogVerbose(@"resorting TiVoList %@", _realTiVoList);
 	}
 }
 
@@ -542,23 +530,31 @@ __DDLOGHERE__
 
     DDLogVerbose(@"setting tivoManager notifications");
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
-    
-    [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadDidFinish object:nil];
+
+	[defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadDidFinish object:nil];
     [defaultCenter addObserver:self selector:@selector(encodeFinished:) name:kMTNotificationShowDownloadWasCanceled object:nil];
-//    [defaultCenter addObserver:self selector:@selector(encodeFinished) name:kMTNotificationEncodeWasCanceled object:nil];
-//    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialDidFinish object:nil];
-//    [defaultCenter addObserver:self selector:@selector(commercialFinished) name:kMTNotificationCommercialWasCanceled object:nil];
-//    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionDidFinish object:nil];
-//    [defaultCenter addObserver:self selector:@selector(captionFinished) name:kMTNotificationCaptionWasCanceled object:nil];
+    [defaultCenter addObserver:self selector:@selector(checkSleep:) name:kMTNotificationDownloadQueueUpdated object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(checkSubscription:) name: kMTNotificationDetailsLoaded object:nil];
     [defaultCenter addObserver:self.subscribedShows selector:@selector(initialLastLoadedTimes) name:kMTNotificationTiVoListUpdated object:nil];
+	[defaultCenter addObserver:self selector:@selector(skipModeChannelFound:) name:kMTNotificationFoundSkipModeInfo object:nil];
 
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTUpdateIntervalMinutes options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledOperations options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledEndTime options:NSKeyValueObservingOptionNew context:nil];
-	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTScheduledStartTime options:NSKeyValueObservingOptionNew context:nil];
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTTiVos options:NSKeyValueObservingOptionNew context:nil];
-
+	for (NSString * path in @[ kMTUpdateIntervalMinutesNew,
+							   kMTScheduledOperations,
+							   kMTScheduledEndTime,
+							   kMTScheduledStartTime,
+							   kMTScheduledSkipModeScanStartTime,
+							   kMTScheduledSkipModeScanEndTime,
+							   kMTScheduledSkipModeScan,
+							   kMTTrustTVDBEpisodes,
+							   kMTPreventSleep,
+							   kMTMaxNumEncoders,
+							   KMTPreferredImageSource,
+							   kMTTiVos,
+							   kMTiTunesSubmit
+							]) {
+		 [[NSUserDefaults standardUserDefaults]  addObserver:self forKeyPath:path options:0 context:nil];
+	}
+	[self checkiTunesPermissions];
 }
 
 #pragma mark - Scheduling routine
@@ -584,18 +580,33 @@ __DDLOGHERE__
 	} else {
         [self unPauseQueue];
 	}
-	
+}
+
+-(void) allowSleep {
+	[(MTAppDelegate *) [NSApp delegate]  allowSleep];
+}
+
+-(void) preventSleep {
+	[(MTAppDelegate *) [NSApp delegate]  preventSleep];
+}
+
+-(void) checkSleep: (NSNotification *) notification {
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTPreventSleep] &&
+	   [tiVoManager anyShowsWaiting]) {
+		[self preventSleep];
+	} else {
+		[self allowSleep];
+	}
 }
 
 -(BOOL) anyTivoActive {
-	for (MTTiVo *tiVo in _tiVoList) {
+	for (MTTiVo *tiVo in self.tiVoList) {
 		if ([tiVo isProcessing]) {
            return YES;
 		}
 	}
 	return NO;
 }
-
 
 -(BOOL) anyShowsWaiting {
 	for (MTDownload * show in tiVoManager.downloadQueue) {
@@ -615,13 +626,21 @@ __DDLOGHERE__
 	return NO;
 }
 
+-(BOOL) sharedShowWith:(MTDownload *) download {
+	for (MTDownload * otherDownload in [self downloadQueue]) {
+		if (otherDownload == download) continue;
+		if (otherDownload.show == download.show) return YES;
+	}
+	return NO;
+}
+
 -(void) clearDownloadHistory {
 	NSMutableIndexSet * itemsToRemove= [NSMutableIndexSet indexSet];
 	for (unsigned int index = 0;index< tiVoManager.downloadQueue.count; index++) {
 		MTDownload * download = tiVoManager.downloadQueue[index];
-		if (download.isDone) {
+		if (download.isCompletelyDone ) {
 			[itemsToRemove addIndex:index];
-			download.show.isQueued = NO;
+			if (![self sharedShowWith:download]) download.show.isQueued = NO;
 		}
 	}
 
@@ -632,20 +651,28 @@ __DDLOGHERE__
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	} else {
 		DDLogDetail(@"No history to delete?");
-		
 	}
-
 }
 
 -(void)pauseQueue:(NSNumber *)askUser
+//@YES: ask user to cancel, reschedule or complete
+//@NO: don't ask user, reschedule all
+//nil means don't ask user or reschedule
 {
     if ([askUser boolValue] && [self anyTivoActive] ) {
-		NSAlert *scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current show(s)" informativeTextWithFormat:@""];
+    	BOOL plural = [self numberOfShowsToDownload] > 1;
+		
+		NSAlert *scheduleAlert = nil;
+		if (plural) {
+			scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current shows" informativeTextWithFormat:@" "];
+		} else {
+			scheduleAlert = [NSAlert alertWithMessageText:@"There are a show in process, and you are pausing the queue.  Should the current in-process show  be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current show" informativeTextWithFormat:@" "];
+		}
 		NSInteger returnValue = [scheduleAlert runModal];
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
 		if (returnValue == NSAlertDefaultReturn) {
 			//We're rescheduling shows
-            for (MTTiVo *tiVo in _tiVoList) {
+            for (MTTiVo *tiVo in self.tiVoList) {
                 [tiVo rescheduleAllShows];
             }
             NSNotification *notification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
@@ -672,8 +699,10 @@ __DDLOGHERE__
         }
     } else {
         self.processingPaused = @(YES);
-        for (MTTiVo *tiVo in _tiVoList) {
-            [tiVo rescheduleAllShows];
+        if (askUser != nil) {
+            for (MTTiVo *tiVo in self.tiVoList) {
+                [tiVo rescheduleAllShows];
+            }
         }
 
     }
@@ -692,38 +721,7 @@ __DDLOGHERE__
 {
 	[self setQueueStartTime];
 	[self setQueueEndTime];
-}
-
--(double) secondsUntilNextTimeOfDay:(NSDate *) date {
-	NSCalendar *myCalendar = [NSCalendar currentCalendar];
-	NSDateComponents *currentComponents = [myCalendar components:(NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit) fromDate:[NSDate date]];
-	NSDateComponents *targetComponents = [myCalendar components:(NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit) fromDate:date];
-	double currentSeconds = (double)currentComponents.hour * 3600.0 +(double) currentComponents.minute * 60.0 + (double) currentComponents.second;
-	double targetSeconds = (double)targetComponents.hour * 3600.0 + (double)targetComponents.minute * 60.0 + (double) targetComponents.second;
-	if (targetSeconds <= currentSeconds) {
-		targetSeconds += 3600 * 24;
-	}
-	return targetSeconds - currentSeconds;
-}
-
--(NSDate *) tomorrowAtTime: (NSInteger) hour {
-    //may be called at launch, so don't assume anything is setup
-    NSUInteger units = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond  ;
-    NSDateComponents *comps = [[NSCalendar currentCalendar] components:units fromDate:[NSDate date]];
-    comps.day = comps.day + 1;    // Add one day
-    comps.hour = hour;
-    comps.minute = 0;
-    comps.second = 0;
-    NSDate *tomorrowTime = [[NSCalendar currentCalendar] dateFromComponents:comps];
-    return tomorrowTime;
-}
-
--(NSDate *) defaultQueueStartTime {
-return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
-}
-
--(NSDate *) defaultQueueEndTime {
-    return [self tomorrowAtTime:6];  //end at 6AM tomorrow]
+	[self setSkipModeTime];
 }
 
 -(void)setQueueStartTime
@@ -734,11 +732,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 		return;
 	}
 	NSDate* startDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledStartTime];
-    if (!startDate) {
-        [[NSUserDefaults standardUserDefaults] setObject:[self defaultQueueStartTime] forKey:kMTScheduledStartTime]; //recursive
-        return;
-    }
-    double targetSeconds = [self secondsUntilNextTimeOfDay:startDate];
+    double targetSeconds = [startDate secondsUntilNextTimeOfDay];
 	DDLogDetail(@"Will start queue in %f seconds (%f hours), due to beginDate of %@",targetSeconds, (targetSeconds/3600.0), startDate);
 	[self performSelector:@selector(unPauseQueue) withObject:nil afterDelay:targetSeconds];
 }
@@ -751,27 +745,59 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 		return;
 	}
 	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledEndTime];
-    if (!endDate) {
-         [[NSUserDefaults standardUserDefaults] setObject:[self defaultQueueEndTime] forKey:kMTScheduledEndTime];//recursive
-        return;
-    }
-    double targetSeconds = [self secondsUntilNextTimeOfDay:endDate];
+    double targetSeconds = [endDate secondsUntilNextTimeOfDay];
 	DDLogDetail(@"Will pause queue in %f seconds (%f hours), due to endDate of %@",targetSeconds, (targetSeconds/3600.0), endDate);
 	[self performSelector:@selector(pauseQueue:) withObject:@(NO) afterDelay:targetSeconds];
 }
 
+-(BOOL) autoSkipModeScanAllowedNow {
+	BOOL autoSkip = [[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan];
+	if (!autoSkip) return NO;
+	NSDate * skipDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
+	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanEndTime ];
+	double startSeconds = [skipDate secondsUntilNextTimeOfDay];
+	double endSeconds =   [endDate secondsUntilNextTimeOfDay];
+	return endSeconds < startSeconds;  //if distance to nextEnd < to nextStart, we must be in middle of allowed time.
+}
+
+-(void)setSkipModeTime {
+	//launchNow if being manually set, so user may expect it to go.
+	[self scheduleNextSkipModeIncludingNow:YES];
+}
+
+-(void) scheduleNextSkipModeIncludingNow:(BOOL) now {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(skipModeForAllActiveDownloads) object:nil];
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
+		DDLogDetail(@"No skipMode Auto Scan ");
+		return;
+	}
+	NSDate * skipDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
+	NSDate * endDate = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanEndTime ];
+	double startSeconds = [skipDate secondsUntilNextTimeOfDay];
+	double endSeconds =   [endDate secondsUntilNextTimeOfDay];
+	if (now && startSeconds >= endSeconds) {
+		//we're already in active period, but delay a few seconds e.g. startup setting defaults, or user typing a new time.
+		DDLogMajor(@"Will run SkipMode Scan in 15 seconds"); 
+		[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:nil afterDelay:15];
+	} else {
+		DDLogMajor(@"Will run SkipMode in %f seconds (%f hours), due to skipDate of %@",startSeconds, (startSeconds/3600.0), skipDate);
+		[self performSelector:@selector(skipModeForAllActiveDownloads) withObject:nil afterDelay:startSeconds];
+	}
+}
+
+
 -(void)startAllTiVoQueues
 {
-    for (MTTiVo *tiVo in _tiVoList) {
+    for (MTTiVo *tiVo in self.tiVoList) {
         DDLogDetail(@"Starting download on tiVo %@",tiVo.tiVo.name);
-		[tiVo manageDownloads:tiVo];
+		[tiVo manageDownloads];
     }
 }
 
 -(void) cancelAllDownloads {
 	for (MTDownload *download in tiVoManager.downloadQueue) {
 		if (download.isInProgress){
-			[download rescheduleShowWithDecrementRetries:@NO];
+			[download rescheduleDownloadFalseStart];
 		}
 	}
 }
@@ -814,84 +840,195 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         DDLogMajor(@"Set operations end time to %@",[defs objectForKey: kMTScheduledEndTime]);
 		[self setQueueEndTime];
 	} else if ([keyPath compare:kMTScheduledStartTime] == NSOrderedSame) {
-       DDLogMajor(@"Set operations start time to %@",[defs objectForKey: kMTScheduledStartTime]);
-        [self setQueueStartTime];
+		DDLogMajor(@"Set operations start time to %@",[defs objectForKey: kMTScheduledStartTime]);
+		[self setQueueStartTime];
+	} else if ([keyPath compare:kMTScheduledSkipModeScan] == NSOrderedSame) {
+		DDLogMajor(@"Turning SkipModeTime %@",[defs boolForKey: kMTScheduledSkipModeScan] ? @"On" : @"Off");
+		[self setSkipModeTime];
+	} else if ([keyPath compare:kMTScheduledSkipModeScanStartTime] == NSOrderedSame) {
+		DDLogMajor(@"Setting SkipMode start time to %@",[defs objectForKey: kMTScheduledSkipModeScanStartTime]);
+		[self setSkipModeTime];
+	} else if ([keyPath compare:kMTScheduledSkipModeScanEndTime] == NSOrderedSame) {
+		DDLogMajor(@"Setting SkipMode end time to %@",[defs objectForKey: kMTScheduledSkipModeScanEndTime]);
+		[self setSkipModeTime];
 	} else if ([keyPath isEqualToString:kMTTiVos]){
-        DDLogMajor(@"Changed TiVo list to %@",[[defs objectForKey:  kMTTiVos] maskMediaKeys]);
-        [self updateTiVos];
-    } else if ([keyPath isEqualToString:kMTUpdateIntervalMinutes]){
-        DDLogMajor(@"Changed Update Time to %ld",(long)[defs integerForKey:kMTUpdateIntervalMinutes]);
-        for (MTTiVo *tiVo in _tiVoList) {
+        [self updateTiVosFromDefaults];
+        DDLogMajor(@"Changed TiVo list to %@",[self.tiVoList maskMediaKeys]);
+    } else if ([keyPath isEqualToString:kMTUpdateIntervalMinutesNew]){
+        DDLogMajor(@"Changed Update Time to %ld",(long)[defs integerForKey:kMTUpdateIntervalMinutesNew]);
+        for (MTTiVo *tiVo in self.tiVoList) {
             [tiVo scheduleNextUpdateAfterDelay:-1];
         }
-    } else {
+    } else if ( [keyPath isEqualToString:KMTPreferredImageSource] ){
+        DDLogMajor(@"Changed User TVDB preference to imageSource: %@", [defs objectForKey:KMTPreferredImageSource]);
+        for (MTTiVoShow * show in self.tiVoShows) {
+            [show resetSourceInfo:NO];
+        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+    } else if ([keyPath isEqualToString:kMTTrustTVDBEpisodes]) {
+        DDLogMajor(@"Changed User TVDB preference to episodes: %@", [defs objectForKey:kMTTrustTVDBEpisodes] ? @"YES": @"NO" );
+        for (MTTiVoShow * show in self.tiVoShows) {
+            [show checkAllInfoSources];
+        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
+    } else if ([keyPath isEqualToString:kMTPreventSleep]) {
+        DDLogMajor(@"Changed User Prevent Sleep preference to: %@", [defs objectForKey:kMTPreventSleep] ? @"YES": @"NO" );
+		[self checkSleep:nil];
+    } else if ([keyPath isEqualToString:kMTMaxNumEncoders]) {
+        DDLogMajor(@"Changed Max Number Encoders to: %@", @([defs integerForKey:kMTMaxNumEncoders]) );
+		[self performSelector:@selector(startAllTiVoQueues) withObject:nil afterDelay:10];
+ 	} else if ([keyPath compare:kMTiTunesSubmit] == NSOrderedSame) {
+ 		[self checkiTunesPermissions];
+   } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
-
 }
 
--(void)updateTiVos
-{
-    //Make sure enabled state and media key are correct for network tivos and
-    //mediakey, enabled, ports and hostname for manual tivos
-    for (MTTiVo *tiVo in _tiVoList) {
-		if (tiVo.manualTiVo) {
-			for (NSDictionary *savedTiVo in self.savedTiVos) {
-				if ([savedTiVo[kMTTiVoID] intValue] == tiVo.manualTiVoID) {
-					tiVo.tiVo.userName = savedTiVo[kMTTiVoUserName];
-					tiVo.tiVo.userPort = (short)[savedTiVo[kMTTiVoUserPort] intValue];
-					tiVo.tiVo.userPortSSL = (short)[savedTiVo[kMTTiVoUserPortSSL] intValue];
-					tiVo.mediaKey = savedTiVo[kMTTiVoMediaKey];
-					tiVo.tiVo.iPAddress = savedTiVo[kMTTiVoIPAddress];
-					tiVo.enabled = [savedTiVo[kMTTiVoEnabled] boolValue];
-				}
-			}
-        } else {
-			for (NSDictionary *savedTiVo in self.savedTiVos) {
-				if ([savedTiVo[kMTTiVoUserName] isEqualToString:tiVo.tiVo.name]) {
-					tiVo.mediaKey = savedTiVo[kMTTiVoMediaKey];
-					tiVo.enabled = [savedTiVo[kMTTiVoEnabled] boolValue];
-				}
-			}
+-(void) checkiTunesPermissions {
+    NSUserDefaults * defs = [NSUserDefaults standardUserDefaults];
+	if ([defs boolForKey:kMTiTunesSubmit]) {
+		[[[MTiTunes alloc] init] iTunesPermissionCheck];
+	} else {
+		if ([defs integerForKey:kMTiTunesSubmitCheck] == 4) {
+			[self disableiTunes];
 		}
-    }
-	DDLogDetail(@"Notifying %@",kMTNotificationTiVoListUpdated);[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+		[defs setObject:nil forKey:kMTiTunesSubmitCheck];
+	}
 }
 
--(void)refreshAllTiVos
-{
+-(void)refreshAllTiVos {
 	DDLogMajor(@"Refreshing all Tivos");
-	for (MTTiVo *tiVo in _tiVoList) {
-		if (tiVo.isReachable && tiVo.enabled) {
+	for (MTTiVo *tiVo in self.tiVoList) {
+		if (tiVo.isReachable) {
 			[tiVo updateShows:nil];
 		}
 	}
 }
 
--(void)resetAllDetails
-{
-	DDLogMajor(@"Resetting the caches!");
-	//Remove TVDB Cache
-    [[NSUserDefaults standardUserDefaults] setObject:@{} forKey:kMTTheTVDBCache];
-	self.tvdbCache =  [NSMutableDictionary dictionary];
-	self.tvdbSeriesIdMapping = [NSMutableDictionary dictionary];
-    @synchronized(self.theTVDBStatistics) {
-        self.theTVDBStatistics = [NSMutableDictionary dictionary];
-    }
-    //Remove TiVo Detail Cache
+-(void) emptyDirectory: (NSURL *) directoryURL {
     NSFileManager *fm = [NSFileManager defaultManager];
-    NSArray *files = [fm contentsOfDirectoryAtPath:kMTTmpDetailsDir error:nil];
-    for (NSString *file in files) {
-        NSString *filePath = [NSString stringWithFormat:@"%@/%@",kMTTmpDetailsDir,file];
-        [fm removeItemAtPath:filePath error:nil];
+    NSArray <NSURL *> *files = [fm contentsOfDirectoryAtURL:directoryURL
+                                 includingPropertiesForKeys:@[]
+                                                    options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                      error:nil];
+    for (NSURL *fileURL in files) {
+       [fm removeItemAtURL:fileURL  error:nil];
     }
-	for (MTTiVo *tiVo in _tiVoList) {
+}
+
+-(void)resetAllDetails{
+	DDLogMajor(@"Resetting the caches!");
+    [self.tvdb resetAll];
+
+    //Remove TiVo Detail Cache
+    [self emptyDirectory:[self detailsTempDirectory]];
+    [self emptyDirectory:[self tivoTempDirectory]];
+    [self emptyDirectory:[self tvdbTempDirectory]];
+
+	for (MTTiVo *tiVo in self.tiVoList) {
         [tiVo resetAllDetails];
 	}
 	[self refreshAllTiVos];
-
 }
 
+-(void) disableiTunes {
+	for (MTDownload * download in tiVoManager.downloadQueue ) {
+		if (![download isCompletelyDone] && download.addToiTunesWhenEncoded) {
+			download.addToiTunesWhenEncoded = NO;
+		}
+	}
+	for (MTSubscription * subscription in tiVoManager.subscribedShows ) {
+		if (subscription.addToiTunes.boolValue) {
+			subscription.addToiTunes = @NO;
+		}
+	}
+}
+
+-(NSSet <MTTiVo *> *) tiVosForShows: (NSArray<MTTiVoShow *> *)shows {
+    NSSet <MTTiVo *> * tiVos = [NSSet setWithArray:[shows mapObjectsUsingBlock:^MTTiVo *(MTTiVoShow * show, NSUInteger idx) {
+        return show.tiVo;
+    }]];
+    return tiVos;
+}
+
+-(void) deleteTivoShows:(NSArray<MTTiVoShow *> *)shows {
+    NSSet * tiVos = [self tiVosForShows:shows];
+    for (MTTiVo * tiVo in tiVos) {
+        [tiVo deleteTiVoShows:shows];
+    }
+}
+
+-(void) stopRecordingShows:(NSArray<MTTiVoShow *> *)shows {
+    NSArray * filteredShows = [shows mapObjectsUsingBlock:^id(MTTiVoShow * show, NSUInteger idx) {
+        return (show.inProgress.boolValue) ? show : nil;
+    }];
+    NSSet * tiVos = [self tiVosForShows:filteredShows];
+    for (MTTiVo * tiVo in tiVos) {
+        [tiVo stopRecordingTiVoShows:filteredShows];
+    }
+}
+
+-(void) skipModeForAllActiveDownloads  {
+	NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
+	DDLogMajor(@"Scanning all active downloads for SkipMode");
+	for (MTDownload * download in self.downloadQueue) {
+		int status = download.downloadStatus.intValue;
+		if (status == kMTStatusSkipModeWaitInitial ||
+			status == kMTStatusSkipModeWaitEnd ||
+			(!download.isCompletelyDone && download.useSkipMode && download.markCommercials)) {
+			[shows addObject:download.show];
+		}
+	}
+	[self skipModeRetrieval:[shows copy] interrupting: NO];
+	[self scheduleNextSkipModeIncludingNow: NO];
+}
+
+-(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows interrupting: (BOOL) interrupt {
+	NSMutableArray <MTTiVoShow *> * tivoShows = [shows mutableCopy];
+	while (tivoShows.count > 0) {
+		MTTiVo * tivo = tivoShows[0].tiVo;
+		for (MTTiVoShow * show in [tivoShows copy]) {
+			if (show.tiVo == tivo) {
+				if (!show.rpcData.edlList) {
+					[tivo findCommercialsForShow:show interrupting:interrupt];
+				}
+				[tivoShows removeObject:show];
+			}
+		}
+	}
+}
+
+-(void)revealInFinderDownloads:(NSArray <MTDownload *> *) downloads {
+	NSMutableArray * showURLs = [NSMutableArray arrayWithCapacity:downloads.count];
+	for (MTDownload *download in downloads) {
+		NSURL * showURL = [download videoFileURLWithEncrypted:YES];
+		if (showURL) {
+			[showURLs addObject:showURL];
+		} else if (download.show.isOnDisk) {
+			for (NSString * path in download.show.copiesOnDisk) {
+				[showURLs addObject:[NSURL fileURLWithPath:path]];
+			}
+		}
+
+	}
+	if (showURLs.count > 0) {
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
+	}
+}
+
+-(void)revealInFinderShows:(NSArray<MTTiVoShow *> *)shows {
+	NSMutableArray <NSURL *> * showURLs = [NSMutableArray array];
+	for (MTTiVoShow *show in shows) {
+		if (show.isOnDisk) {
+			for (NSString * path in show.copiesOnDisk) {
+				[showURLs addObject:[NSURL fileURLWithPath:path]];
+			}
+		}
+	}
+	if (showURLs.count > 0) {
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:showURLs];
+	}
+}
 
 -(NSMutableArray *) subscribedShows {
     
@@ -1014,6 +1151,13 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 #pragma mark - Channel management
 
+#define kMTChannelInfo @"ChannelInfo"
+#define kMTChannelInfoName @"name"
+#define kMTChannelInfoCommercials @"commercials"
+#define kMTChannelInfoSkipMode @"SkipMode"
+#define kMTChannelInfoPSFailed @"PSFailed"
+#define kMTChannelInfoUseTS @"useTS"
+
 -(void) updateChannel: (NSDictionary *) newChannel {
     if (!newChannel) return;
     NSMutableArray *channels = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo] mutableCopy];
@@ -1027,6 +1171,15 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     }
     [channels addObject:newChannel];
     [[NSUserDefaults standardUserDefaults] setValue:channels forKeyPath:kMTChannelInfo];
+}
+
+-(void) createChannel {
+	NSDictionary * newChannel = @{kMTChannelInfoName: @"???",
+								  kMTChannelInfoCommercials: @(NSOnState),
+								  kMTChannelInfoPSFailed: @(NSMixedState),
+								  kMTChannelInfoSkipMode: @(NSMixedState),
+								  kMTChannelInfoUseTS: @(NSMixedState)};
+	[self createChannel: newChannel];
 }
 
 -(void) createChannel: (NSDictionary *) newChannel  {
@@ -1054,11 +1207,15 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     if (newChannel) {
         NSMutableDictionary * mutChannel = [newChannel mutableCopy];
         [mutChannel setValue:@(psFailed) forKey:kMTChannelInfoPSFailed];
+        if (((NSNumber *)newChannel[kMTChannelInfoUseTS]).intValue == NSMixedState) {
+			[mutChannel setValue:@(NSOnState) forKey:kMTChannelInfoUseTS];
+        }
         newChannel = [NSDictionary dictionaryWithDictionary: mutChannel ];
     } else {
         newChannel = @{kMTChannelInfoName: channelName,
-                      kMTChannelInfoCommercials: @(NSOnState),
-                      kMTChannelInfoPSFailed: @(psFailed),
+					   kMTChannelInfoCommercials: @(NSOnState),
+					   kMTChannelInfoSkipMode: @(NSMixedState),
+                       kMTChannelInfoPSFailed: @(psFailed),
                        kMTChannelInfoUseTS: @(psFailed ? NSOnState : NSMixedState)};
     }
     [self updateChannel:newChannel];
@@ -1120,17 +1277,76 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     }
 }
 
--(NSCellStateValue) commercialsForChannel:(NSString *) channelName {
-    NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
-    if (channelInfo) {
-        return ((NSNumber*) channelInfo[kMTChannelInfoCommercials ]).intValue;
-    } else {
-        return NSOnState;
-    }
+-(NSCellStateValue ) defaultSkipModeForChannel:(NSString *) channel {
+	NSArray <NSString *> * skipChannels = @[@"amc", @"bravo", @"comedy", @"food", @"freeform", @"fx", @"hg", @"history", @"life", @"syfy", @"tbs", @"tdc", @"the discovery", @"tlc", @"tnt", @"usa"];
+	NSString * lowerChannel = channel.lowercaseString;
+	for (NSString * skipChannel in skipChannels) {
+		if ([lowerChannel hasPrefix:skipChannel]) {
+			return NSOnState;
+		}
+	}
+	return NSMixedState;
 }
 
--(BOOL) allShowsSelected {
-    return ((MTAppDelegate *) [NSApp delegate]).allShowsSelected;
+-(void) updateSkipModeToChannels { //updates old defaults to have maybe on skipmode
+	NSArray <NSDictionary *> * oldChannels = [[NSUserDefaults standardUserDefaults] objectForKey:kMTChannelInfo];
+	if (oldChannels.count > 0  && !oldChannels[0] [kMTChannelInfoSkipMode]) {
+		NSMutableArray *newChannels = [NSMutableArray arrayWithCapacity:oldChannels.count ];
+		for (NSDictionary * channel in oldChannels) {
+			NSMutableDictionary * newChannel = [channel mutableCopy];
+			newChannel [kMTChannelInfoSkipMode] = @([self defaultSkipModeForChannel: channel[kMTChannelInfoName]]);
+			[newChannels addObject:newChannel];
+		}
+		[[NSUserDefaults standardUserDefaults] setValue:newChannels forKey:kMTChannelInfo];
+	}
+}
+
+-(void) skipModeChannelFound: (NSNotification *) notification {
+	MTTiVoShow * show = notification.object;
+	if (![show hasSkipModeInfo]) return;
+	NSString * channelName = show.stationCallsign;
+	NSMutableDictionary * channelInfo = [[tiVoManager channelNamed:channelName] mutableCopy];
+	if (channelInfo) {
+		if (((NSNumber *)channelInfo[kMTChannelInfoSkipMode]).intValue == NSMixedState) {
+			channelInfo[kMTChannelInfoSkipMode] = @(NSOnState);
+			[self updateChannel:channelInfo];
+		}
+	} else {
+		channelInfo = [@{kMTChannelInfoName: channelName,
+						  kMTChannelInfoCommercials: @(NSOnState),
+						  kMTChannelInfoPSFailed: @(NSMixedState),
+						  kMTChannelInfoSkipMode: @(NSOnState),
+						  kMTChannelInfoUseTS: @(NSMixedState)} mutableCopy];
+		[self createChannel:channelInfo];
+	}
+}
+
+-(NSCellStateValue) skipModeForChannel:(NSString *) channelName {
+	NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
+	if (channelInfo) {
+		return ((NSNumber*) channelInfo[kMTChannelInfoSkipMode ]).intValue;
+	} else {
+		//haven't seen this one before, so if it's a Default one, add it
+		NSCellStateValue state = [self defaultSkipModeForChannel:channelName];
+		if (state == NSOnState) {
+			NSDictionary * newChannel = @{kMTChannelInfoName: channelName,
+										  kMTChannelInfoCommercials: @(NSOnState),
+										  kMTChannelInfoPSFailed: @(NSMixedState),
+										  kMTChannelInfoSkipMode: @(NSOnState),
+										  kMTChannelInfoUseTS: @(NSMixedState)};
+			[self createChannel:newChannel];
+		}
+		return state;
+	}
+}
+
+-(NSCellStateValue) commercialsForChannel:(NSString *) channelName {
+	NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
+	if (channelInfo) {
+		return ((NSNumber*) channelInfo[kMTChannelInfoCommercials ]).intValue;
+	} else {
+		return NSOnState;
+	}
 }
 
 -(void) testAllChannelsForPS {
@@ -1171,17 +1387,26 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
         }
     }
     [self deleteFromDownloadQueue:testDownloads ];
+}
 
+-(void) channelsChanged: (MTTiVo *) newTiVo {
+	NSMutableDictionary * newList = [NSMutableDictionary new];
+	for (MTTiVo * tiVo in self.tiVoList) {
+		if (tiVo.enabled) {
+			[newList addEntriesFromDictionary:tiVo.channelList];
+		}
+	}
+	if (![self.channelList isEqualToDictionary:newList]) {
+		self.channelList = [newList copy];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationChannelsChanged object:self];
+	}
 }
 
 #pragma mark - Media Key Support
 
-
--(NSString *)getAMediaKey
-{
+-(NSString *)getAMediaKey {
 	NSString *key = nil;
-	NSArray *currentTiVoList = [NSArray arrayWithArray:[self allTiVos]];
-	for (MTTiVo *tiVo in currentTiVoList) {
+	for (MTTiVo *tiVo in self.tiVoList) {
 		if (tiVo.mediaKey && tiVo.mediaKey.length) {
 			key = tiVo.mediaKey;
 			break;
@@ -1192,13 +1417,13 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 #pragma mark - Download Management
 
--(NSIndexSet *) moveShowsInDownloadQueue:(NSArray *) shows
+-(NSIndexSet *) moveShowsInDownloadQueue:(NSArray <MTDownload *> *) downloads
 								 toIndex:(NSUInteger)insertIndex
 {
-	DDLogDetail(@"moving shows %@ to %ld", shows,insertIndex);
+	DDLogDetail(@"moving shows %@ to %ld", downloads,insertIndex);
 	NSIndexSet * fromIndexSet = [[tiVoManager downloadQueue] indexesOfObjectsPassingTest:
-								 ^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-									return [shows indexOfObject:obj] != NSNotFound;
+								 ^BOOL(MTDownload * download, NSUInteger idx, BOOL *stop) {
+									return [downloads indexOfObjectIdenticalTo:download] != NSNotFound;
 								 }];
 
 	// If any of the removed objects come before the insertion index,
@@ -1206,14 +1431,14 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     NSMutableArray * dlQueue = [self downloadQueue];
     NSUInteger adjustedInsertIndex = insertIndex -
     [fromIndexSet countOfIndexesInRange:(NSRange){0, insertIndex}];
-    NSRange destinationRange = NSMakeRange(adjustedInsertIndex, shows.count);
+    NSRange destinationRange = NSMakeRange(adjustedInsertIndex, downloads.count);
     NSIndexSet *destinationIndexes = [NSIndexSet indexSetWithIndexesInRange:destinationRange];
-    DDLogVerbose(@"moving shows %@ from %@ to %@", shows,fromIndexSet, destinationIndexes);
+    DDLogVerbose(@"moving shows %@ from %@ to %@", downloads,fromIndexSet, destinationIndexes);
     if (fromIndexSet.count > 0) {
         //objects may be copies, so not in queue already
         [dlQueue removeObjectsAtIndexes: fromIndexSet];
     }
-    [dlQueue insertObjects:shows atIndexes:destinationIndexes];
+    [dlQueue insertObjects:downloads atIndexes:destinationIndexes];
 
 	DDLogDetail(@"Posting DLUpdated notifications");
 	[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:nil];
@@ -1230,13 +1455,14 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	}];
 }
 
--(MTDownload *) findInDownloadQueue: (MTTiVoShow *) show {
+-(NSArray <MTDownload *> *) downloadsForShow: (MTTiVoShow *) show {
+	NSMutableArray * downloads = [NSMutableArray array];
 	for (MTDownload * download in _downloadQueue) {
 		if (download.show == show) {
-			return download;
+			[downloads addObject:download];
 		}
 	}
-	return nil;
+	return downloads;
 }
 
 -(MTDownload *) findRealDownload: (MTDownload *) proxyDownload  {
@@ -1272,12 +1498,10 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
                 }
             }
             if (!showFound) {
-                //Make sure the title isn't the same and if it is add a -1 modifier
                 submittedAny = YES;
-//                [self checkShowTitleUniqueness:newShow];
 				[newDownload prepareForDownload:NO];
 				if (nextDownload) {
-                    NSUInteger index = [_downloadQueue indexOfObject:nextDownload];
+                    NSUInteger index = [_downloadQueue indexOfObjectIdenticalTo:nextDownload];
                     if (index == NSNotFound) {
 						DDLogDetail(@"Prev show not found, adding %@ at end",newDownload);
 						[_downloadQueue addObject:newDownload];
@@ -1306,16 +1530,17 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	for (MTTiVoShow * thisShow in shows) {
 		NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 		DDLogDetail(@"Adding show: %@", thisShow);
-        MTDownload * newDownload = [MTDownload downloadForShow:thisShow withFormat: self.selectedFormat intoDirectory:self.downloadDirectory withQueueStatus: kMTStatusNew];
+        MTDownload * newDownload = [MTDownload downloadForShow:thisShow withFormat: self.selectedFormat withQueueStatus: kMTStatusNew];
 		newDownload.exportSubtitles = [defaults objectForKey:kMTExportSubtitles];
 		newDownload.addToiTunesWhenEncoded = newDownload.encodeFormat.canAddToiTunes &&
 											[defaults boolForKey:kMTiTunesSubmit];
-//		newDownload.simultaneousEncode = newDownload.encodeFormat.canSimulEncode &&
-//											[defaults boolForKey:kMTSimultaneousEncode];
 		newDownload.skipCommercials = [newDownload.encodeFormat.comSkip boolValue] &&
-											[defaults boolForKey:@"RunComSkip"];
+											[defaults boolForKey:kMTSkipCommercials];
 		newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials &&
-											[defaults boolForKey:@"MarkCommercials"];
+											[defaults boolForKey:kMTMarkCommercials];
+		newDownload.useSkipMode = (newDownload.encodeFormat.canMarkCommercials || newDownload.encodeFormat.comSkip) &&
+									[defaults integerForKey:kMTCommercialStrategy] > 0;
+		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 #ifndef deleteXML
 		newDownload.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
@@ -1328,23 +1553,20 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(void) deleteFromDownloadQueue:(NSArray *) downloads {
     NSMutableIndexSet * itemsToRemove= [NSMutableIndexSet indexSet];
-	DDLogDetail(@"Delete shows: %@", downloads);
+	DDLogDetail(@"Delete downloads: %@", downloads);
 	for (MTDownload * download in downloads) {
 
 		NSUInteger index = [_downloadQueue indexOfObject:download];
 		if (index == NSNotFound) {
 			for (MTDownload *oldDownload in _downloadQueue) {  //this is probably unncessary
 				if (oldDownload.show.showID == download.show.showID	) {
-					DDLogMajor(@"Odd: two shows with same ID: %@ in queue v %@", download, oldDownload);
-					index = [_downloadQueue indexOfObject:oldDownload];
+					DDLogReport(@"Odd: two shows with same ID: %@ in queue v %@", download, oldDownload);
+					index = [_downloadQueue indexOfObjectIdenticalTo:oldDownload];
 					break;
 				}
 			}
 		}
 		if (index != NSNotFound) {
-			MTDownload *oldDownload = _downloadQueue[index];
-            [oldDownload cancel];
-			oldDownload.show.isQueued = NO;
 			[itemsToRemove addIndex:index];
 		}
 	}
@@ -1352,13 +1574,43 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	if (itemsToRemove.count > 0) {
 		DDLogVerbose(@"Deleted downloads: %@", itemsToRemove);
 		[_downloadQueue removeObjectsAtIndexes:itemsToRemove];
+		for (MTDownload * download in downloads) {
+			[download cancel];
+			if (![self sharedShowWith:download]) {
+				[download.show.tiVo cancelCommercialingForShow: download.show];
+				download.show.isQueued = NO;
+			}
+			download.downloadStatus = @kMTStatusRemovedFromQueue;
+
+		}
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 		[[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadStatusChanged object:nil];
 		NSNotification *downloadQueueNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
 		[[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:downloadQueueNotification afterDelay:4.0];
 	} else {
 		DDLogDetail(@"No shows to delete?");
+	}
+}
 
+-(void) rescheduleDownloads: (NSArray <MTDownload *> *) downloads {
+	if ([self.processingPaused boolValue]) {
+		for (MTDownload *download in downloads) {
+			if (!download.show.protectedShow.boolValue && download.downloadStatus.intValue != kMTStatusDeleted) {
+				[download prepareForDownload:YES];
+			}
+		}
+	} else {
+		//Can't reschedule items that haven't loaded yet or have been deleted.
+		NSMutableArray * realItemsToReschedule = [NSMutableArray arrayWithArray:downloads];
+		for (MTDownload *download in downloads) {
+			if (download.show.protectedShow.boolValue || download.downloadStatus.intValue == kMTStatusDeleted) {
+				//A proxy DL waiting for "real" show
+				[download prepareForDownload:YES];
+				[realItemsToReschedule removeObject:download];
+			}
+		}
+		[tiVoManager deleteFromDownloadQueue:realItemsToReschedule];
+		[tiVoManager addToDownloadQueue:realItemsToReschedule beforeDownload:nil];
 	}
 }
 
@@ -1372,75 +1624,85 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	}
 	return n;
 }
+-(long long)sizeOfShowsToDownload
+{
+    long long size = 0;
+    for (MTDownload *download in _downloadQueue) {
+        if (!download.isDone && !download.encodeFormat.isTestPS) {
+            size +=download.show.fileSize;
+        }
+    }
+    return size;
+}
+
+-(long long)biggestShowToDownload
+{
+    long long size = 0;
+    for (MTDownload *download in _downloadQueue) {
+        if (!download.isDone &&
+            size < download.show.fileSize) {
+            size =download.show.fileSize;
+        }
+    }
+    return size;
+}
+
+-(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads includingDone: (BOOL) includeDone {
+	NSMutableArray <MTTiVoShow *> * shows = [NSMutableArray array];
+	for (MTDownload * download in downloads) {
+		if ((includeDone || !download.isCompletelyDone) &&
+			!download.show.inProgress.boolValue &&
+			(download.downloadStatus.integerValue != kMTStatusDeleted) &&
+			![shows containsObject:download.show]) {
+			[shows addObject:download.show];
+		}
+	}
+	return [shows copy];
+}
 
 -(BOOL) checkForExit {
     return [(MTAppDelegate *) [NSApp delegate] checkForExit];
 }
 
-#pragma mark - Growl/Apple Notifications
+#pragma mark - Apple Notifications
 
 -(void) loadUserNotifications {
-	
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-	if(NSAppKitVersionNumber >= NSAppKitVersionNumber10_6) {
-		NSBundle *myBundle = [NSBundle mainBundle];
-		NSString *growlPath = [[myBundle privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
-		NSBundle *growlFramework = [NSBundle bundleWithPath:growlPath];
-		
-		if (growlFramework && [growlFramework load]) {
-			// Register ourselves as a Growl delegate
-			
-			NSDictionary *infoDictionary = [growlFramework infoDictionary];
-			DDLogMajor(@"Using Growl.framework %@ (%@)",
-				  [infoDictionary objectForKey:@"CFBundleShortVersionString"],
-				  [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey]);
-			
-			Class GAB = NSClassFromString(@"GrowlApplicationBridge");
-			if([GAB respondsToSelector:@selector(setGrowlDelegate:)]) {
-				[GAB performSelector:@selector(setGrowlDelegate:) withObject:self];
-			}
-		}
-	}
-#else
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
-#endif
 }
-//Note that any new notification types need to be added to constants.h, but especially Growl Registration Ticket.growRegDict
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center
      shouldPresentNotification:(NSUserNotification *)notification {
     return YES;
 }
+
 -(void) notifyWithTitle:(NSString *) title subTitle: (NSString*) subTitle {
-    [self notifyForName: nil withTitle:title subTitle:subTitle isSticky:YES forNotification:kMTGrowlPossibleProblem];
+    [self notifyForName: nil withTitle:title subTitle:subTitle isSticky:YES ];
 }
 
-- (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky forNotification: (NSString *) notification {
-    DDLogReport(@"Notify: %@/n%@", title, subTitle ?: @"");
+- (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky {
+	DDLogReport(@"Notify: %@: %@\n%@", objName, title, subTitle ?: @"");
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-    //Note: when removing in future, remove all kMTGrowlxxx strings as well
-    NSString * subTitleCombo = subTitle.length ? (objName.length ? [NSString stringWithFormat:@"%@: %@", subTitle, objName]
-                                                                 : subTitle)
-                                                : objName;
-	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
-	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
-		[GAB notifyWithTitle: title
-				 description: subTitleCombo
-			notificationName: notification
-					iconData: nil  //use our app logo
-					priority: 0
-					isSticky: sticky
-				clickContext: nil
-		 ];
-#else
     NSUserNotification *userNot = [[NSUserNotification alloc] init ];
     userNot.title = title;
     userNot.subtitle = objName;
     userNot.informativeText = subTitle;
     userNot.soundName = NSUserNotificationDefaultSoundName;
+    userNot.userInfo = @{@"Sticky": @(sticky)};
     [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:userNot];
-#endif
+}
+
+- (void)userNotificationCenter:(NSUserNotificationCenter *)center didDeliverNotification:(NSUserNotification *)notification{
+    // If we're not sticky, let's wait about 60 seconds and then remove the notification.
+    if (![[[notification userInfo] objectForKey:@"Sticky"] boolValue]) {
+        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:notification,@"notification",center,@"center",nil];
+        [self performSelector:@selector(expireNotification:) withObject:dict afterDelay:60];
+    }
+}
+
+- (void)expireNotification:(NSDictionary *)dict {
+    NSUserNotification *notification = [dict objectForKey:@"notification"];
+    NSUserNotificationCenter *center = [dict objectForKey:@"center"];
+    [center removeDeliveredNotification:notification];
 }
 
 -(MTTiVoShow *) findRealShow:(MTTiVoShow *) showTarget {
@@ -1460,131 +1722,208 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 -(int)totalShows
 {
     int total = 0;
-    for (MTTiVo *tiVo in _tiVoList) {
-       if (tiVo.enabled) total += tiVo.shows.count;
+    for (MTTiVo *tiVo in self.tiVoList) {
+       total += tiVo.shows.count;
     }
     return total;
 }
 
--(BOOL)foundTiVoNamed:(NSString *)tiVoName
-{
-	BOOL ret = NO;
-	for (MTTiVo *tiVo in _tiVoList) {
+-(BOOL)foundTiVoNamed:(NSString *)tiVoName {
+	for (MTTiVo *tiVo in self.tiVoList) {
 		if ([tiVo.tiVo.name compare:tiVoName] == NSOrderedSame) {
-			ret = YES;
-			break;
+			return YES;
 		}
 	}
-	return ret;
+	return NO;
 }
 
--(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo
-{
+-(NSArray *)downloadQueueForTiVo:(MTTiVo *)tiVo {
 //    return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"tiVo.tiVo.name == %@",tiVo.tiVo.name]];
     return [_downloadQueue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"show.tiVoName == %@",tiVo.tiVo.name]];
 }
 
-
--(void)encodeFinished:(NSNotification *)notification
-{
-    if (numEncoders == 0) {
+-(void)encodeFinished:(NSNotification *)notification {
+    if (self.numEncoders == 0) {
         [self notifyWithTitle: @"Internal Logic Error! " subTitle: @"numEncoders under 0" ];
-
     } else {
-        numEncoders--;
+        self.numEncoders--;
     }
-    DDLogMajor(@"Num encoders after decrement from notification %@ is %d ",notification.name,numEncoders);
+    DDLogMajor(@"Num encoders after decrement from notification %@ is %d ",notification.name,self.numEncoders);
 
     NSNotification *restartNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
     [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:restartNotification afterDelay:2];
 }
 
+-(void) getSkipModeEDLWhenPossible: (MTDownload *) download {
+	MTTiVoShow * show = download.show;
+	if (show.hasSkipModeList) return;  //if we already have EDL, no warning needed
+	if (self.autoSkipModeScanAllowedNow) {
+		[download.show.tiVo findCommercialsForShow:show interrupting:NO];
+	} else {
+		//Skip mode Info is here, so maybe warn user that we need EDL to continue
+		if (-[self.lastSkipModeWarningTime timeIntervalSinceNow] < 24*60*60) {
+			//already warned, so nothing to do
+			return;
+		}
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTScheduledSkipModeScan]) {
+			//scheduled, so if it's soon enough, just wait, otherwise warn.
+			NSDate * scheduled = [[NSUserDefaults standardUserDefaults] objectForKey:kMTScheduledSkipModeScanStartTime];
+			NSTimeInterval nextEDLTime = [scheduled secondsUntilNextTimeOfDay];
+			if (nextEDLTime > 18*60*60) {
+				[self notifyForName:show.showTitle
+						  withTitle:@"Warning: Missed SkipMode time"
+						   subTitle:[NSString stringWithFormat:@"You can manually load, or cTiVo will try again in %d hrs", (int)floor(nextEDLTime/3600)]
+						   isSticky:YES];
+				self.lastSkipModeWarningTime = [NSDate date];
+			}
+		} else {
+			//not scheduled so warn
+			[self notifyForName:show.showTitle
+					  withTitle:@"Warning: SkipMode Data Not Retrieved"
+					   subTitle:@"You can manually load SkipMode data, or set up automatic schedule in Preferences."
+					   isSticky:YES];
+			self.lastSkipModeWarningTime = [NSDate date];
+		}
+	}
+}
+
 #pragma mark - Handle directory
 
--(BOOL) checkDirectory: (NSString *) directory {
-	return ([[NSFileManager defaultManager]	createDirectoryAtPath:[directory stringByExpandingTildeInPath]
-										  withIntermediateDirectories:YES
-														   attributes:nil
-																error:nil]);
+-(NSURL *) cacheDirectory {
+    if (!_cacheDirectory) {
+    }
+    return _cacheDirectory;
+}
+
+-(NSURL *) checkAndCreateCacheDirectoryForType:(NSString *) type {
+    NSFileManager *fm =[NSFileManager defaultManager];
+
+    NSArray <NSURL *> * caches =  [fm URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
+    if (caches.count == 0) {
+        DDLogReport(@"Could not open main cache directory");
+    } else {
+        NSString* bundleID = [[NSBundle mainBundle] bundleIdentifier];
+
+        NSURL * ctiVoCache = [caches[0] URLByAppendingPathComponent:bundleID];
+        NSURL * tempURL = [ctiVoCache URLByAppendingPathComponent:type];
+        NSError * error = nil;
+        if ([fm createDirectoryAtURL:tempURL
+          withIntermediateDirectories:YES
+                           attributes:nil
+                                error:&error]) {
+            return tempURL;
+        } else {
+            DDLogReport(@"Could not open cache directory: %@", error.localizedDescription);
+        }
+    }
+    return nil;
+}
+
+-(NSURL *) tivoTempDirectory {
+    if (!_tivoTempDirectory) {
+        _tivoTempDirectory =  [self checkAndCreateCacheDirectoryForType:@"TiVo Images/"];
+    }
+    return _tivoTempDirectory;
+}
+
+-(NSURL *) tvdbTempDirectory {
+    if (!_tvdbTempDirectory) {
+        _tvdbTempDirectory =  [self checkAndCreateCacheDirectoryForType:@"TVDB Images/"];
+    }
+    return _tvdbTempDirectory;
+}
+
+-(NSURL *) detailsTempDirectory {
+    if (!_detailsTempDirectory) {
+        _detailsTempDirectory =  [self checkAndCreateCacheDirectoryForType:@"Details/"];
+    }
+    return _detailsTempDirectory;
 }
 
 -(void) setDownloadDirectory: (NSString *) newDir {
- 	if (newDir != _downloadDirectory) {
-        if ([newDir isEquivalentToPath:kMTTmpDir] ||
-            [newDir isEquivalentToPath:[[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory]]) {
-            DDLogReport(@"Can't set download directory to temp directory%@; trying default", newDir);
-            newDir = nil;
-        }
-		if (newDir.length > 0) {
-			if (![self checkDirectory:newDir]) {
-				DDLogReport(@"Can't open user's download directory %@; trying default", newDir);
-				newDir = nil;
-			}
-		}
-		if (!newDir) {
-			// nil, or it was bad
-			newDir = [self defaultDownloadDirectory];
-			
-			if (![self checkDirectory:newDir]) {
-				DDLogReport(@"Can't open default download directory:  %@ ", newDir); //whoa. very bad things in user directory land
-				newDir = nil;
-			}
-		}
-		if (newDir) {
- 			[[NSUserDefaults standardUserDefaults] setValue:newDir forKey:kMTDownloadDirectory];
-			_downloadDirectory = newDir;
-		}
-	}
+	[[NSUserDefaults standardUserDefaults] setObject:newDir forKey: kMTDownloadDirectory];
 }
 
--(NSString *) defaultDownloadDirectory {
-	return [NSString stringWithFormat:@"%@/%@/",NSHomeDirectory(),kMTDefaultDownloadDir];
-//note this will fail in sandboxing. Need something like...
+-(NSString *)downloadDirectory {
+	NSString * downloadPath =  [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory];
+	if (![[NSFileManager defaultManager] fileExistsAtPath:downloadPath]) {
+		self.downloadDirectory = downloadPath; // trigger validation process
+	}
+	return downloadPath;
+}
 
-//		NSArray * movieDirs = [[NSFileManager defaultManager] URLsForDirectory:NSMoviesDirectory inDomains:NSUserDomainMask];
-//		if (movieDirs.count >0) {
-//			NSURL *movieURL = (NSURL *) movieDirs[0];
-//			return [movieURL URLByAppendingPathComponent:@"TiVoShows"].path;
-//      }
-
+-(void) setTmpFilesDirectory: (NSString *) newDir {
+	[[NSUserDefaults standardUserDefaults] setObject:newDir forKey: kMTTmpFilesPath];
 }
 
 -(NSString *)tmpFilesDirectory {
-
-    NSString * tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:tmpPath]) {
-            [[NSUserDefaults standardUserDefaults] setObject:tmpPath forKey: kMTTmpFilesDirectory]; //trigger validation process
-            tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesDirectory];
-        }
-//    }
-    return tmpPath;
- 
+	NSString * tmpPath = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath];
+	if (![[NSFileManager defaultManager] fileExistsAtPath:tmpPath]) {
+		self.tmpFilesDirectory = tmpPath; // trigger validation process
+	}
+	return tmpPath;
 }
 
-
--(NSMutableArray *)tiVoShows
-{
+-(NSMutableArray *)tiVoShows {
 	NSMutableArray *totalShows = [NSMutableArray array];
 	DDLogVerbose(@"reloading shows");
-	for (MTTiVo *tv in _tiVoList) {
-		if (tv.enabled) {
-			[totalShows addObjectsFromArray:tv.shows];
-
-		}
+	for (MTTiVo *tv in self.tiVoList) {
+		[totalShows addObjectsFromArray:tv.shows];
 	}
 	return totalShows;
 }
+#pragma mark - Manual Show information
 
+-(void) saveManualEpisodeInfo {
+    @synchronized (self.manualEpisodeData) {
+        for (NSString *key in self.manualEpisodeData.allKeys) {
+            NSDictionary * info = self.manualEpisodeData[key];
+            if (-[(NSDate *)info[@"date"] timeIntervalSinceNow ] > 60*60*24*90) {
+                [self.manualEpisodeData removeObjectForKey:key];
+            }
+        }
+        [[NSUserDefaults standardUserDefaults] setObject:
+                                             (self.manualEpisodeData.count > 0) ?
+                                              self.manualEpisodeData :
+                                              nil
+                                              forKey:kMTManualEpisodeData];
+    }
+}
+
+-(void) restoreManualEpisodeInfo {
+    self.manualEpisodeData = [[[NSUserDefaults standardUserDefaults] objectForKey:kMTManualEpisodeData] mutableCopy]
+    ?: [NSMutableDictionary dictionary];
+}
+
+-(void) updateManualInfo:(NSDictionary *)info forShow:(MTTiVoShow *)show {
+    @synchronized(self.manualEpisodeData) {
+        NSMutableDictionary * newDatedInfo = [info mutableCopy];
+        [newDatedInfo setValue:[NSDate date] forKey:@"date"];
+        [self.manualEpisodeData setValue:[newDatedInfo copy] forKey: show.uniqueID];
+    }
+}
+
+-(NSDictionary *) getManualInfo: (MTTiVoShow *) show {
+    NSDictionary <NSString *, NSString *> *info;
+    @synchronized (self.manualEpisodeData) {
+        info = self.manualEpisodeData[show.uniqueID];
+    }
+    //we mark current date every time we access
+    if (info) [self updateManualInfo: info forShow:show];
+    return info;
+}
 
 #pragma mark - Bonjour browser delegate methods
 
-- (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
-{
-	DDLogMajor(@"Found Service %@",netService);
+- (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing {
+	DDLogReport(@"Found Service %@",netService); //XXX
     for (NSNetService * prevService in _tivoServices) {
         if ([prevService.name compare:netService.name] == NSOrderedSame) {
-			DDLogDetail(@"Already had %@",netService);
-            return; //already got this one
+			DDLogReport(@"Already had %@",netService); //XXX
+#ifdef kLogTiVos
+			self.missingTiVoSymptom = @"Redundant";
+#endif
+			return; //already got this one
         }
     }
     [_tivoServices addObject:netService];
@@ -1593,19 +1932,21 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)browser
-             didNotSearch:(NSDictionary *)errorDict
-{
+             didNotSearch:(NSDictionary *)errorDict {
+#ifdef kLogTiVos
+	self.missingTiVoSymptom = @"No service";
+#endif
     DDLogReport(@"Bonjour service not found: %@",errorDict);
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing {
-    DDLogReport(@"Removing Service: %@",aNetService.name);
-
+#ifdef kLogTiVos
+	self.missingTiVoSymptom = @"Disappeared";
+#endif
+    DDLogReport(@"Service disappeared: %@",aNetService.name);
 }
 
 #pragma mark - NetService delegate methods
-
-
 
 - (NSString *)dataToString:(NSData *) data {
     // Helper for getting information from the TXT data
@@ -1616,8 +1957,7 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
     return resultString;
 }
 
-- (void)netServiceDidResolveAddress:(NSNetService *)sender
-{
+- (void)netServiceDidResolveAddress:(MTNetService *)sender {
     [sender stop];
 	NSArray * addresses = [sender addresses];
 	if (addresses.count == 0) return;
@@ -1630,15 +1970,20 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 //        return;
 //    }
 	NSDictionary * TXTRecord = [NSNetService dictionaryFromTXTRecordData:sender.TXTRecordData ];
+	NSString * TSN = [self dataToString:TXTRecord[@"tsn"]];
 	for (NSString * key in [TXTRecord allKeys]) {
-		DDLogDetail(@"TXTKey: %@ = %@", key, [self dataToString:TXTRecord[key]]);
+		if ([key isEqualToString:@"TSN"] && TSN.length > 4) {
+			DDLogDetail(@"TXTKey: tsn = %@", [TSN maskSerialNumber: TSN]);
+		}  else {
+			DDLogDetail(@"TXTKey: %@ = %@", key, [self dataToString:TXTRecord[key]]);
+		}
 	}
 
 	NSString * platform = [self dataToString:TXTRecord[@"platform"]];
-	NSString * TSN = [self dataToString:TXTRecord[@"tsn"]];
 	NSString * identity = [self dataToString:TXTRecord[@"identity"]];
     NSString * version= [self dataToString:TXTRecord[@"swversion"]];
-    
+	DDLogReport(@"resolved Address: %@", TXTRecord); //XXX
+
 	if ([TSN hasPrefix:@"A94"] || [identity hasPrefix:@"A94"]) {
 		DDLogDetail(@"Found Stream %@ - %@(%@); rejecting",TSN, sender.name, ipAddress);
 		return;
@@ -1646,52 +1991,82 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 	if ([platform hasSuffix:@"pyTivo"]) {
 		//filter out pyTivo
 		DDLogDetail(@"Found pyTivo %@(%@); rejecting ",sender.name,ipAddress);
+#ifdef kLogTiVos
+		self.missingTiVoSymptom = @"pytivo";
+#endif
 		return;
 	}
     
 	if ([version hasSuffix:@"1.95a"]) {
 		//filter out tivo desktop
+#ifdef kLogTiVos
+		self.missingTiVoSymptom = @"tivoDesktop";
+#endif
 		DDLogDetail(@"Found old TiVo Desktop %@(%@) ",sender.name,ipAddress);
 		return;
 	}
 	
 	if (!TSN || TSN.length == 0) {
+#ifdef kLogTiVos
+		self.missingTiVoSymptom = @"NoTSN";
+#endif
 		DDLogDetail(@"No TSN; rejecting TiVo %@(%@)",sender.name,ipAddress);
 		return;
 	}
 
 	if (platform && ![platform hasPrefix:@"tcd"]) {
 		//filter out other non-tivos
+#ifdef kLogTiVos
+		self.missingTiVoSymptom = @"Invalid tcd";
+#endif
 		DDLogDetail(@"Invalid TiVo platform %@; rejecting %@(%@) ",platform, sender.name,ipAddress);
 		return;
 	}
-    
-	for (NSString *tiVoAddress in [self tiVoAddresses]) {
-		DDLogVerbose(@"Comparing new TiVo %@ address %@ to existing %@",sender.name, ipAddress, tiVoAddress);
-		if ([tiVoAddress caseInsensitiveCompare:ipAddress] == NSOrderedSame) {
-			DDLogDetail(@"Rejecting duplicate TiVo at %@",ipAddress);
-			return;  // This filters out tivos that have already been found from a manual entry
+	
+    MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender
+                        withOperationQueue:self.opsQueue
+                          withSerialNumber:TSN];
+	if (newTiVo.isMini ) { 
+		_tiVoMinis = [_tiVoMinis arrayByAddingObject: newTiVo];
+		DDLogReport(@"Got new TiVo Mini: %@ at %@", newTiVo, ipAddress);
+#ifdef kLogTiVos
+		self.missingTiVoSymptom = @"tivoMini";
+#endif
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+	} else {
+		self.tiVoList = [_realTiVoList arrayByAddingObject: newTiVo];
+		if (newTiVo.enabled){
+#ifdef kLogTiVos
+			if (self.tiVoTimer) {
+				[self.tiVoTimer invalidate]; self.tiVoTimer = nil;
+				[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
+									success:@YES
+						   customAttributes:@{}];
+			}
+#endif
+			if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
+				//Haven't seen multiple TiVos before, so enable the TiVo column this one time.
+				//In future, if user hides, we don't mess with it.
+				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
+				[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
+			}
+			DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
+			[newTiVo updateShows:self];
+		} else {
+#ifdef kLogTiVos
+			self.missingTiVoSymptom = @"Disabled";
+#endif
+			DDLogReport(@"Found disabled TiVo: %@ at %@", newTiVo, ipAddress); //XXX
 		}
 	}
-    
-	MTTiVo *newTiVo = [MTTiVo tiVoWithTiVo:sender withOperationQueue:self.opsQueue];
-    newTiVo.supportsTransportStream = [TSN characterAtIndex:0] > '6' || [TSN hasPrefix:@"663"];
-
-    [newTiVo scheduleNextUpdateAfterDelay:0];
-  
-	self.tiVoList = [_tiVoList arrayByAddingObject: newTiVo];
-	if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {  //This is the first time we've found more than 1 tivo
-		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
-	}
-	DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
-
 }
 
 
--(void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict
-{
+-(void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict {
+#ifdef kLogTiVos
+	self.missingTiVoSymptom = @"No Resolve";
+#endif
     DDLogReport(@"Service %@ failed to resolve",sender.name);
     [sender stop];
 }
@@ -1717,15 +2092,17 @@ return [self tomorrowAtTime:1];  //start at 1AM tomorrow]
 
 -(NSString *) maskMediaKeys {
     NSString * outString =[self description];
-    for (MTTiVo * tiVo in tiVoManager.tiVoList) {
-        NSString * mediaKey = tiVo.mediaKey;
+	NSString * lastMediaKey = @"";
+    for (NSDictionary * tiVo in tiVoManager.savedTiVos) {
+        NSString * mediaKey = tiVo[kMTTiVoMediaKey];
+		if ([lastMediaKey isEqualToString:mediaKey]) continue;
         if (mediaKey.length > 0) {
-            NSString * maskedKey = [NSString stringWithFormat:@"<<%@ MediaKey>>",tiVo.tiVo.name];
+            NSString * maskedKey = [NSString stringWithFormat:@"<<%@ MediaKey>>",tiVo[kMTTiVoUserName]];
             outString = [outString stringByReplacingOccurrencesOfString:mediaKey withString:maskedKey];
+			lastMediaKey = mediaKey;
         }
     }
     return outString;
 }
-    
 
 @end

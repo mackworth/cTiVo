@@ -13,11 +13,7 @@
 
 @interface MTTaskChain ()
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-    @property (atomic, strong) NSMutableDictionary *teeBranches;
-#else
     @property (atomic, strong) NSMapTable *teeBranches;
-#endif
 
 @property (atomic, assign) ssize_t totalDataRead;
 
@@ -74,12 +70,7 @@ __DDLOGHERE__
 		}
 	}
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-    //this is a kludge; putting it back the way it was before cleaning it up with MapTable
-    self.teeBranches = [NSMutableDictionary new];
-#else
-    self.teeBranches = [NSMapTable strongToStrongObjectsMapTable]; 
-#endif
+    self.teeBranches = [NSMapTable strongToStrongObjectsMapTable];
 
     DDLogVerbose(@"tasks BEFORE config: %@", [self maskMediaKeys]);
     for (NSArray <MTTask *> *currentTaskGroup in self.taskArray) {
@@ -99,12 +90,7 @@ __DDLOGHERE__
                 }
 			}
             if (sourceToTee) {
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-                //this is a kludge; putting it back the way it was before cleaning it up with MapTable
-                [self.teeBranches setObject:[NSArray arrayWithArray:inputPipes] forKey:(id<NSCopying> _Nonnull)sourceToTee];  //have to ignore warning for 10.7
-#else
                 [self.teeBranches setObject:[NSArray arrayWithArray:inputPipes] forKey:sourceToTee];
-#endif
             }
 		}
 		if (currentTaskGroup != self.taskArray.lastObject ) {
@@ -194,10 +180,10 @@ __DDLOGHERE__
 		}
 
         long priority;
-        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9) {
-            priority = DISPATCH_QUEUE_PRIORITY_LOW;
+        if (@available (macOS 10.10, *)) {
+            priority = QOS_CLASS_UTILITY;
         } else {
-            priority = QOS_CLASS_USER_INITIATED;
+            priority = DISPATCH_QUEUE_PRIORITY_LOW;
         }
         dispatch_queue_t queue = dispatch_get_global_queue (priority, 0);
 
@@ -217,22 +203,7 @@ __DDLOGHERE__
                                  typeof(self) strongSelf = weakSelf;
                                  if (strongSelf) {
                                      if (strongSelf.beingRescheduled || strongSelf.download.isCanceled) return;
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-                                     const void *buffer = NULL;
-                                     size_t size = 0;
-                                     dispatch_data_t new_data_file = dispatch_data_create_map(data, &buffer, &size);
-                                    NSData *nsData = [[NSData alloc] initWithBytes:buffer length:size];
-                                 
-                                     [strongSelf teeInBackground:nsData isDone: done forHandle:fileHandle];
-                                    // clean up
-                                    free((void *)buffer); // warning: passing const void * to parameter of type void *
-
-                                     if(new_data_file){
-                                         /* to hang onto it until now; - since dispatch_data_create_map demands we care about the return arg */
-                                     }
-#else
                                      [strongSelf teeInBackground:(NSData *)(data) isDone: done forHandle:fileHandle];
-#endif
                                  }
                              });
         }
@@ -266,12 +237,12 @@ __DDLOGHERE__
     }
     if (!taskRunning) {
         //We need to move on
-        DDLogVerbose(@"Finished task chain: moving on to %@", _nextTaskChain ?: @"finish up");
+        DDLogDetail(@"Finished task chain: moving on to %@", _nextTaskChain ?: @"finish up");
         self.isRunning = NO;
         if (_nextTaskChain && !_beingRescheduled && !self.download.isCanceled) {
             self.download.activeTaskChain = _nextTaskChain;
             if (![_nextTaskChain run]) {
-                [self.download rescheduleShowWithDecrementRetries:@YES];
+				[self.download rescheduleDownload];
             };
         }
     } else if (self.isRunning) {
@@ -336,7 +307,7 @@ __DDLOGHERE__
                         DDLogReport(@"Write Fail; tried %lu bytes; error: %d; %@ may have crashed.", bytesLeft, errno, taskName);
                     }
                     if (!currentTask || currentTask.shouldReschedule) {
-                        [_download rescheduleOnMain];
+                        [_download rescheduleDownload];
                     } else if (! currentTask.shouldReschedule) {
                         //this task not critical, proceeding without it.
                         if (pipes.count <= 1) {
@@ -346,12 +317,7 @@ __DDLOGHERE__
                         } else {
                             NSMutableArray * newPipes = [pipes mutableCopy];
                             [newPipes removeObject:pipe];
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-                            //this is a kludge; putting it back the way it was before cleaning it up with MapTable
-                            [self.teeBranches setObject:[NSArray arrayWithArray:newPipes] forKey:(id<NSCopying> _Nonnull)incomingHandle];  //have to ignore warning for 10.7
-#else
                             [self.teeBranches setObject:[NSArray arrayWithArray:newPipes] forKey:incomingHandle];
-#endif
                        }
                         [currentTask cancel];
                     }
@@ -369,7 +335,7 @@ __DDLOGHERE__
 			@catch (NSException *exception) {
 				DDLogDetail(@"download close pipe fileHandleForWriting fail: %@", exception.reason);
 				if (!_download.isCanceled) {
-					[_download rescheduleOnMain];
+					[_download rescheduleDownload];
 					DDLogDetail(@"Rescheduling");
 				}
 				return;

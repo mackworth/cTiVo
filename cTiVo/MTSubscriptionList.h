@@ -14,6 +14,8 @@
 -(void) checkSubscription: (NSNotification *) notification;  //Notification.object should be show to check
 -(void) checkSubscriptionsNew:(NSArray *) newSubs;
 
+-(void) initialLastLoadedTimes; //called when TivoList changes
+
 -(NSArray *) addSubscriptionsShows:(NSArray *) shows; //returns new subs
 -(NSArray *) addSubscriptionsDL: (NSArray *) downloads;
 -(NSArray *) addSubscriptionsFormattedStrings: (NSArray *) strings;

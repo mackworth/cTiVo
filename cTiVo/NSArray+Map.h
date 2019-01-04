@@ -12,4 +12,6 @@
 
 - (NSArray *)mapObjectsUsingBlock:(id (^)(id obj, NSUInteger idx))block;
 
+- (instancetype)arrayByRemovingObject:(id)object;
+
 @end

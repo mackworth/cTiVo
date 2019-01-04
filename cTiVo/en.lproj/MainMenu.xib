@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11542" systemVersion="16B2657" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14306.4" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11542"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14306.4"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -35,12 +36,6 @@
                             <menuItem title="Preferences..." keyEquivalent="," id="1064">
                                 <connections>
                                     <action selector="showPreferences:" target="494" id="1066"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Adv. Preferences..." alternate="YES" keyEquivalent="," id="1070">
-                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                <connections>
-                                    <action selector="showAdvPreferences:" target="494" id="1072"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="143">
@@ -88,15 +83,23 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="1097"/>
-                            <menuItem title="Play Video" keyEquivalent=" " toolTip="Launches current show in system video player" id="1098"/>
-                            <menuItem title="Show in Finder" keyEquivalent="R" toolTip="Opens folder containing video" id="1099"/>
+                            <menuItem title="Play Video" keyEquivalent=" " toolTip="Launches current show in system video player" id="1098">
+                                <connections>
+                                    <action selector="playVideo:" target="-1" id="6uO-j4-BP2"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Reveal in Finder" keyEquivalent="R" toolTip="Opens folder containing video in Finder" id="1099">
+                                <connections>
+                                    <action selector="revealInFinder:" target="-1" id="WT7-TM-vBY"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="896"/>
                             <menuItem title="Pause Queue" keyEquivalent="u" toolTip="Stops/starts all queue processing" id="1078">
                                 <connections>
                                     <action selector="togglePause:" target="494" id="1091"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Refresh TiVo" keyEquivalent="r" toolTip="Reload Now Playing from TiVo" id="876"/>
+                            <menuItem title="Refresh TiVo" keyEquivalent="r" toolTip="Reload Now Playing list from TiVo" id="876"/>
                             <menuItem isSeparatorItem="YES" id="900"/>
                             <menuItem title="Export Formats..." toolTip="Write custom encoding formats to a file" id="898">
                                 <modifierMask key="keyEquivalentModifierMask"/>
@@ -158,7 +161,7 @@ CA
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="886"/>
-                            <menuItem title="Clear Completed History..." keyEquivalent="e" toolTip="Edit custom formats and menu" id="1131">
+                            <menuItem title="Clear Completed History..." keyEquivalent="e" toolTip="Remove all completed downloads (successful or not) from download table." id="1131">
                                 <connections>
                                     <action selector="clearHistory:" target="494" id="1135"/>
                                     <binding destination="494" name="enabled" keyPath="tiVoGlobalManager.anyShowsCompleted" id="1138"/>
@@ -189,7 +192,7 @@ CA
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="893"/>
-                            <menuItem title="Find..." keyEquivalent="f" id="1118">
+                            <menuItem title="Find..." keyEquivalent="f" toolTip="Filter Now Playing list by show name" id="1118">
                                 <connections>
                                     <action selector="findShows:" target="494" id="1119"/>
                                 </connections>
@@ -203,55 +206,48 @@ CA
                         </items>
                     </menu>
                 </menuItem>
+                <menuItem title="TiVo" id="RSu-a5-P4r">
+                    <menu key="submenu" title="TiVo" id="aSG-Mr-VlP">
+                        <items>
+                            <menuItem title="Play on TiVo" toolTip="Start this show playing on your TiVo" id="bfS-2H-Q96">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="playOnTiVo:" target="-1" id="Tyw-bZ-TaK"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Delete from TiVo" toolTip="Remove this show from your TiVo" id="1hW-Q1-vap">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="deleteOnTiVo:" target="-1" id="ePd-TL-FeH"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Stop Recording" toolTip="Tell your TiVo to stop recording this show" id="T8Z-5k-Yke">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="stopRecordingOnTiVo:" target="-1" id="e17-jg-Zgp"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Get SkipMode from TiVo" toolTip="Launches SkipMode process to find commercials in this show. WILL interrupt any shows currently being watched on your TiVo." id="tYx-fe-9qd">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="skipInfoFromTiVo:" target="-1" id="2Yi-o5-gZe"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="VoV-SY-MpP">
+                                <attributedString key="attributedTitle"/>
+                            </menuItem>
+                            <menuItem title="Show Remote Control" toolTip="Bring up Remote Control window to control your TiVo" id="GSE-S9-k5L">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showRemoteControlWindow:" target="494" id="sD7-JD-LSm"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
                 <menuItem title="Options" id="971">
                     <menu key="submenu" title="Options" id="972">
                         <items>
-                            <menuItem title="Mark Commercials" toolTip="Create chapter markers to easily skip commercials while viewing. Mutually exclusive with Skip Commercials." id="1109">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.MarkCommercials" id="mAh-YP-JUC"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Skip Commercials" toolTip="Will attempt to remove commercials.  Mutually exclusive with Mark Commercials." id="1106">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.RunComSkip" id="qQj-dE-L8i"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Add to iTunes when complete" toolTip="Adds video file and metadata to iTunes when processing is complete (per show)" id="1108">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.iTunesSubmit" id="HHC-dP-tGv"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem isSeparatorItem="YES" id="1107">
-                                <attributedString key="attributedTitle"/>
-                            </menuItem>
-                            <menuItem title="Export Subtitles" toolTip="Export text of subtitles to &lt;file&gt;.srt" id="1073">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.ExportSubtitles" id="1116"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Export pyTivo Metadata" toolTip="Exports information about this video to file.ext.txt; useful for pyTivo server (e.g. to &quot;go back&quot; to Tivo)" id="986">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.ExportTextMetaData" id="1128">
-                                        <dictionary key="options">
-                                            <bool key="NSConditionallySetsEnabled" value="NO"/>
-                                        </dictionary>
-                                    </binding>
-                                </connections>
-                            </menuItem>
-                            <menuItem isSeparatorItem="YES" id="989">
-                                <attributedString key="attributedTitle"/>
-                            </menuItem>
-                            <menuItem title="Disable Sleep" toolTip="Disables sleep while queue is processing" id="934">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <binding destination="926" name="value" keyPath="values.PreventSleep" id="961"/>
-                                </connections>
-                            </menuItem>
                             <menuItem title="Show Protected Shows" toolTip="Include copy-protected shows in list, even though they can't be processed." id="962">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
@@ -264,16 +260,37 @@ CA
                                     <binding destination="926" name="value" keyPath="values.ShowSuggestions" id="1123"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Create Sub-Folder per Series" toolTip="Create a separate sub-folder in download folder for each series" id="968">
+                            <menuItem title="Show In Folders" toolTip="Group shows in outline-mode folders" id="H99-YS-cr3">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <binding destination="926" name="value" keyPath="values.MakeSubDirs" id="970"/>
+                                    <binding destination="926" name="value" keyPath="values.ShowFolders" id="H5p-ku-3Pp"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Sync iTunes devices" toolTip="After adding to iTunes, have it sync devices to ensure video files available" id="1012">
+                            <menuItem isSeparatorItem="YES" id="wz5-lr-PXJ">
+                                <attributedString key="attributedTitle"/>
+                            </menuItem>
+                            <menuItem title="Mark Commercials" toolTip="Create chapter markers to easily skip over commercials while viewing. Mutually exclusive with Cut Commercials." id="1109">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <binding destination="926" name="value" keyPath="values.iTunesSync" id="1015"/>
+                                    <binding destination="926" name="value" keyPath="values.MarkCommercials" id="mAh-YP-JUC"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Cut Commercials" toolTip="Remove commercials during processing.  Mutually exclusive with Mark Commercials." id="1106">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <binding destination="926" name="value" keyPath="values.RunComSkip" id="qQj-dE-L8i"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Export Captions" toolTip="Extract captions and embed in show as well as text of subtitles to &lt;file&gt;.srt" id="1073">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <binding destination="926" name="value" keyPath="values.ExportSubtitles" id="1116"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Add to iTunes when complete" toolTip="Adds video file and metadata to iTunes when processing is complete (per show)" id="1108">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <binding destination="926" name="value" keyPath="values.iTunesSubmit" id="HHC-dP-tGv"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -282,11 +299,18 @@ CA
                 <menuItem title="Window" id="19">
                     <menu key="submenu" title="Window" systemMenu="window" id="24">
                         <items>
-                            <menuItem title="Main Window" id="857">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Main Window" keyEquivalent="1" id="857">
                                 <connections>
                                     <action selector="showMainWindow:" target="494" id="858"/>
                                 </connections>
+                            </menuItem>
+                            <menuItem title="Remote Control" keyEquivalent="2" toolTip="Bring up Remote Control window to control your TiVo" id="b7Z-cN-J9N">
+                                <connections>
+                                    <action selector="showRemoteControlWindow:" target="494" id="tsw-zo-x8m"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="92">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
                             <menuItem title="Minimize" keyEquivalent="m" id="23">
                                 <connections>
@@ -298,7 +322,7 @@ CA
                                     <action selector="performZoom:" target="-1" id="240"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="92">
+                            <menuItem isSeparatorItem="YES" id="RGg-HP-6hg">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
                             <menuItem title="Bring All to Front" id="5">
@@ -348,15 +372,12 @@ CA
                 <outlet property="markCommercialsItem" destination="1109" id="tQK-EL-TeA"/>
                 <outlet property="optionsMenu" destination="972" id="1021"/>
                 <outlet property="pauseMenuItem" destination="1078" id="1090"/>
-                <outlet property="playVideoMenuItem" destination="1098" id="1104"/>
                 <outlet property="refreshTiVoMenuItem" destination="876" id="882"/>
-                <outlet property="showInFinderMenuItem" destination="1099" id="1105"/>
                 <outlet property="skipCommercialsItem" destination="1106" id="qMr-xa-n71"/>
             </connections>
         </customObject>
         <customObject id="420" customClass="NSFontManager"/>
         <customObject id="873" customClass="SUUpdater"/>
-        <menuItem title="Close Window" keyEquivalent="w" id="875"/>
         <customView id="919">
             <rect key="frame" x="0.0" y="0.0" width="528" height="246"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -439,11 +460,11 @@ CA
                             </tableView>
                         </subviews>
                     </clipView>
-                    <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="905">
+                    <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="905">
                         <rect key="frame" x="1" y="210" width="232" height="16"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
-                    <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="907">
+                    <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="907">
                         <rect key="frame" x="224" y="17" width="15" height="102"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
@@ -460,6 +481,5 @@ CA
             </subviews>
         </customView>
         <userDefaultsController representsSharedInstance="YES" id="926"/>
-        <menuItem title="Preferences" keyEquivalent="," id="1067"/>
     </objects>
 </document>

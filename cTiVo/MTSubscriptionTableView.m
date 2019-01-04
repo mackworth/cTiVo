@@ -8,8 +8,9 @@
 
 #import "MTSubscriptionTableView.h"
 #import "MTMainWindowController.h"
-#import "MTPopUpTableCellView.h"
+#import "MTFormatPopUpTableCellView.h"
 #import "MTTiVoPopUpTableCellView.h"
+#import "MTChannelPopUpTableCellView.h"
 #import "MTDownloadCheckTableCell.h"
 #import "MTSubscriptionList.h"
 
@@ -96,9 +97,9 @@ __DDLOGHERE__
     [self reloadData];
 }
 
--(IBAction) unsubscribeSelectedItems:(id) sender {
+-(IBAction) delete:(id) sender {
 	DDLogDetail(@"User Requested delete subscriptions");
-    NSArray * itemsToRemove = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
+    NSArray * itemsToRemove =self.actionItems;
     [self deselectAll:nil];
 
 	[tiVoManager.subscribedShows  deleteSubscriptions:itemsToRemove];
@@ -107,7 +108,7 @@ __DDLOGHERE__
 
 -(IBAction) reapplySelectedItems:(id) sender {
 	DDLogDetail(@"User Requested reapply subscriptions");
-    NSArray * itemsToApply = [self.sortedSubscriptions objectsAtIndexes:self.selectedRowIndexes];
+    NSArray * itemsToApply = self.actionItems;
 	[tiVoManager.subscribedShows clearHistory:itemsToApply];
 	[tiVoManager.subscribedShows checkSubscriptionsNew:itemsToApply];
 }
@@ -126,7 +127,16 @@ __DDLOGHERE__
 	if ([thisButton.owner class] == [MTSubscription class]) {
 		MTSubscription * subscription = (MTSubscription *) thisButton.owner;
 		
-		subscription.preferredTiVo = [thisButton selectedItem].representedObject;
+        subscription.preferredTiVo = [thisButton selectedItem].representedObject ?: @"";
+	}
+}
+
+-(IBAction)selectChannelPopUp:(id)sender
+{
+	MTChannelPopUpButton *thisButton = (MTChannelPopUpButton *)sender;
+	if ([thisButton.owner class] == [MTSubscription class]) {
+		MTSubscription * subscription = (MTSubscription *) thisButton.owner;
+		subscription.stationCallSign = [thisButton selectedItem].representedObject ?: @"";
 	}
 }
 
@@ -175,6 +185,19 @@ __DDLOGHERE__
     }
 }
 
+- (NSArray<NSTableViewRowAction *> *)tableView:(NSTableView *)tableView
+		rowActionsForRow:(NSInteger)row
+		edge:(NSTableRowActionEdge)edge  API_AVAILABLE(macos(10.11)){
+		__weak __typeof__(self) weakSelf = self;
+ 	return @[ [NSTableViewRowAction rowActionWithStyle:NSTableViewRowActionStyleDestructive
+		  title:@"Delete"
+		handler:^(NSTableViewRowAction * _Nonnull action, NSInteger deleteRow) {
+	__typeof__(self) strongSelf = weakSelf;
+			if ((NSUInteger) deleteRow >= strongSelf.sortedSubscriptions.count) return;
+	[tiVoManager.subscribedShows  deleteSubscriptions:@[strongSelf.sortedSubscriptions[deleteRow]]];
+		}]
+	];
+}
 
 
 #pragma mark - Table Data Source Protocol
@@ -223,20 +246,31 @@ static NSDateFormatter *dateFormatter;
             [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
             
         }
-		result.textField.stringValue = [dateFormatter stringFromDate: thisSubscription.displayDate ];
+        NSDate * displayDate = thisSubscription.displayDate;
+        if (!displayDate || [displayDate isEqualToDate: [NSDate dateWithTimeIntervalSince1970:0]]) {
+            result.textField.stringValue = @"Never";
+        } else {
+            result.textField.stringValue = [dateFormatter stringFromDate: displayDate ];
+        }
 		[result.textField setAlignment:NSRightTextAlignment];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"FormatPopUp"] == NSOrderedSame) {
-		MTFormatPopUpButton * popUp = ((MTPopUpTableCellView *)result).popUpButton;
+		MTFormatPopUpButton * popUp = ((MTFormatPopUpTableCellView *)result).popUpButton;
 		popUp.owner = thisSubscription;
 		thisSubscription.encodeFormat = [popUp selectFormat:thisSubscription.encodeFormat];
         popUp.formatList = tiVoManager.formatList;
         popUp.target = myController;
         popUp.action = @selector(selectFormat:);
+	} else if ([tableColumn.identifier compare:@"ChannelPopUp"] == NSOrderedSame) {
+		MTChannelPopUpButton * popUp = ((MTChannelPopUpTableCellView *)result).popUpButton;
+        popUp.target = self;
+        popUp.action = @selector(selectChannelPopUp:);
+		popUp.owner = thisSubscription;
+		[popUp selectChannel:thisSubscription.stationCallSign];
 	} else if ([tableColumn.identifier compare:@"TiVoPopUp"] == NSOrderedSame) {
 		MTTiVoPopUpButton * popUp = ((MTTiVoPopUpTableCellView *)result).popUpButton;
-        popUp.target = self;
-        popUp.action = @selector(selectTivoPopUp:);
+		popUp.target = self;
+		popUp.action = @selector(selectTivoPopUp:);
 		popUp.owner = thisSubscription;
 		popUp.currentTivo = thisSubscription.preferredTiVo;
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
@@ -260,6 +294,13 @@ static NSDateFormatter *dateFormatter;
         [checkBox setEnabled: [thisSubscription canMarkCommercials]] ;
         [checkBox setOn:[[ thisSubscription markCommercials]boolValue]];
         checkBox.owner = thisSubscription;
+	} else if ([tableColumn.identifier compare:@"UseSkipMode"] == NSOrderedSame) {
+		MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+		checkBox.target = myController;
+		checkBox.action = @selector(changeUseSkipMode:);
+		[checkBox setEnabled:  [thisSubscription canMarkCommercials] ||  [thisSubscription canSkipCommercials]] ;
+		[checkBox setOn: thisSubscription.useSkipMode.boolValue];
+		checkBox.owner = thisSubscription;
 #ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
@@ -324,49 +365,42 @@ static NSDateFormatter *dateFormatter;
 
 //Drag&drop source (for now,just for delete)
 
- //should use this for 10.7 and after, but redundant with above
 - (void)tableView:(NSTableView *)tableView draggingSession:(NSDraggingSession *)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
 	
 	if (operation == NSDragOperationDelete) {
         DDLogDetail(@"User dragged subscriptions to trash");
-		[self unsubscribeSelectedItems:nil];
+		[self delete:nil];
     }
 }
 
-//- (id<NSPasteboardWriting>)tableView:(NSTableView *)tableView
-//              pasteboardWriterForRow:(NSInteger)row {
-//
-//}
+- (id<NSPasteboardWriting>)tableView:(NSTableView *)tableView
+              pasteboardWriterForRow:(NSInteger)row {
+	if ((NSUInteger) row >= self.sortedSubscriptions.count) return nil;
+	return self.sortedSubscriptions[row];
+}
 
-- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard*)pboard {
-	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
+- (BOOL)canDragRowsWithIndexes:(NSIndexSet *)rowIndexes
+                       atPoint:(NSPoint)mouseDownPoint {
+   	if (![[NSUserDefaults standardUserDefaults]boolForKey:kMTDisableDragSelect] ) {
         //if user wants drag-to-select, then check if we're selecting new rows or not
         //drag/drop if current row is  already selected OR we're over name of show
         //this is parallel to Finder behavior.
-		NSPoint windowPoint = [self.window mouseLocationOutsideOfEventStream];
-		NSPoint p = [tv convertPoint:windowPoint fromView:nil];
-		NSInteger r = [tv rowAtPoint:p];
-		NSInteger c = [tv columnAtPoint:p];
-		if (c >= 0 && r >=0 ) {
-            NSTableColumn *selectedColumn = tv.tableColumns[c];
-            BOOL isSelectedRow = [tv isRowSelected:r];
-            BOOL isOverText = NO;
+//		NSPoint p = [self convertPoint:windowPoint fromView:nil];
+		NSInteger r = [self rowAtPoint:mouseDownPoint];
+		NSInteger c = [self columnAtPoint:mouseDownPoint];
+		if (c >= 0 && r >=0 && ![self isRowSelected:r]) {
+            NSTableColumn *selectedColumn = self.tableColumns[c];
             if ([selectedColumn.identifier caseInsensitiveCompare:@"series"] == NSOrderedSame) { //Check if over text
-                NSTableCellView *showCellView = [tv viewAtColumn:c row:r makeIfNecessary:NO];
+                NSTableCellView *showCellView = [self viewAtColumn:c row:r makeIfNecessary:NO];
                 NSTextField *showField = showCellView.textField;
-                NSPoint clickInText = [showField convertPoint:windowPoint fromView:nil];
+                NSPoint clickInText = [showField convertPoint:mouseDownPoint fromView:self];
                 NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
-                if (clickInText.x < stringSize.width) {
-                    isOverText = YES;
+                if (clickInText.x > stringSize.width) {
+                    return NO;
                 }
-            }
-            if (!isSelectedRow && !isOverText) {
-                return NO;
             }
         }
 	}
-	[self selectRowIndexes:rowIndexes byExtendingSelection:NO ];
-    [pboard writeObjects:[self.sortedSubscriptions objectsAtIndexes:rowIndexes]];
 	return YES;
 }
 
@@ -387,13 +421,14 @@ static NSDateFormatter *dateFormatter;
 //Drag and drop receiver methods
 
 - (NSDragOperation)tableView:(NSTableView *)aTableView validateDrop:(id < NSDraggingInfo >)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)operation {
-	if ([info draggingSource] == aTableView) {
-		return NSDragOperationMove;
+	if ([info draggingSource] == self) {
+		return NSDragOperationNone;
 	} else if ([info draggingSource] == myController.tiVoShowTable ||
-			   [info draggingSource] == myController.downloadQueueTable) {
+			   [info draggingSource] == myController.downloadQueueTable ||
+			   [[info draggingPasteboard].types containsObject:NSPasteboardTypeString]) {
+		[self setDropRow: self.sortedSubscriptions.count dropOperation:NSTableViewDropAbove];
+		self.draggingDestinationFeedbackStyle = NSTableViewDraggingDestinationFeedbackStyleRegular;
 		return NSDragOperationCopy;
-	} else if ([[info draggingPasteboard].types containsObject:NSPasteboardTypeString]){
-        return NSDragOperationCopy;
     } else {
 		return NSDragOperationNone;
 	}
@@ -462,6 +497,15 @@ static NSDateFormatter *dateFormatter;
     }
 }
 
+-(NSArray <MTSubscription *> *) actionItems {
+	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
+	if (self.clickedRow < 0 || (NSUInteger) self.clickedRow >= self.sortedSubscriptions.count || [selectedRowIndexes containsIndex:self.clickedRow]) {
+		return [self.sortedSubscriptions objectsAtIndexes:selectedRowIndexes];
+	} else {
+		return @[self.sortedSubscriptions[self.clickedRow]];
+	}
+}
+
 - (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id )info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation {
     NSArray * newSubs = nil;
 	if ( [info draggingSource] == myController.tiVoShowTable ){
@@ -482,7 +526,7 @@ static NSDateFormatter *dateFormatter;
     if ([menuItem action]==@selector(copy:) ||
         [menuItem action]==@selector(cut:)  ||
         [menuItem action]==@selector(delete:)) {
-        return (self.numberOfSelectedRows >0);
+        return (self.actionItems > 0);
     } else  if ([menuItem action]==@selector(paste:)) {
         NSPasteboard * pboard = [NSPasteboard generalPasteboard];
         return  ([pboard.types containsObject:kMTTivoShowPasteBoardType] ||
@@ -493,11 +537,9 @@ static NSDateFormatter *dateFormatter;
 }
 
 -(IBAction)copy: (id) sender {
-    NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    NSArray *selectedSubs = [self.sortedSubscriptions objectsAtIndexes:selectedRowIndexes];
+    NSArray *selectedSubs = self.actionItems;
     if (selectedSubs.count > 0) {
         MTSubscription * firstSub = selectedSubs[0];
-
         NSPasteboard * pboard = [NSPasteboard generalPasteboard];
         [pboard declareTypes:[firstSub writableTypesForPasteboard:pboard] owner:nil];
         [pboard writeObjects:selectedSubs];
@@ -511,6 +553,7 @@ static NSDateFormatter *dateFormatter;
 
 -(IBAction)paste: (id) sender {
     NSUInteger row = [self selectedRowIndexes].firstIndex;
+	if (self.clickedRow >= 0) row = self.clickedRow;
     NSPasteboard * pboard = [NSPasteboard generalPasteboard];
     if ([pboard.types containsObject:kMTDownloadPasteBoardType]) {
         [self insertDownloadsFromPasteboard:pboard atRow:row];
@@ -519,11 +562,6 @@ static NSDateFormatter *dateFormatter;
     } else if ([pboard.types containsObject:NSPasteboardTypeString]) {
       [self insertStringsFromPasteboard:pboard atRow:row];
         }
-}
-
--(IBAction)delete:(id)sender{
-    DDLogMajor(@"user request to delete subscriptions");
-    [self unsubscribeSelectedItems:sender];
 }
 
 -(void)dealloc
