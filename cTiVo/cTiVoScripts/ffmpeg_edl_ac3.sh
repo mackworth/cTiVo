@@ -17,6 +17,7 @@ sleep_duration=3
 
 # Do we want to pass through AC3?
 ac3="YES"
+stereo="YES"
 
 usage() {
   cat << EOF 1>&2
@@ -26,6 +27,7 @@ Script to drive ffmpeg, adding Edit Decision List capability (e.g. comskip) and 
 Calls ffmpeg to get duration and audio stream information about the input file
 If a 5.1 audio stream exists, both it and a derived AAC stereo stream will be copied through
 To avoid AC3 passthrough, just add "-noAC3" to calling line
+To avoid stereo creation, just add "--noStereo" to calling line
 For EDL, use the "-edl filename.edl" option
 For this text, use the "-h" option
 Other parameters will be passed through from calling program, with a few Limitations:
@@ -162,6 +164,10 @@ while (( $# > 0 )); do
     ac3=''
     shift 1
     continue
+  elif [ "$1" == "-noStereo" ]; then
+    stereo=''
+    shift 1
+    continue
   fi
   # last positional argument should be the output file
   if (( $# == 1 )); then
@@ -233,15 +239,29 @@ else
   echo "$no_video_stream_message" >&2
   exit 1
 fi
-if [[ -n "$audio_stream" ]]; then
-  map_opts+=(-map "$audio_stream")
-  audio_opts+=(-c:a:0 aac -ac:a:0 2)
-fi
-if [[ ! -z "$ac3" ]]; then
-  if echo "$audio_line" | cut -d, -f2- | grep ac3 | grep --quiet '5\.1'; then
-    # if audio is ac3 5.1 (Dolby Digital), create an additional ac3 stream for surround sound
+if [[ -n "$audio_stream" ]] ; then
+  ac3Stream="0"
+  if [[ ! -z "$stereo" ]]; then
+    # if user didn't specify No Stereo
     map_opts+=(-map "$audio_stream")
-    audio_opts+=(-c:a:1 ac3)
+    audio_opts+=(-c:a:0 aac -ac:a:0 2)
+    ac3Stream="1"
+  fi
+  if [[ ! -z "$ac3" ]]; then
+    checkAC3=$(echo "$audio_line" | cut -d, -f2- | grep ac3)
+    if [[ ! -z "$checkAC3" ]]; then
+      # if we have an AC3, then we may have 5.1
+      check51=$(echo "$checkAC3" | grep '5\.1')
+      if [[ -z "$stereo" ]] || [[ ! -z "$check51" ]] ; then
+        # if audio is ac3 5.1 (Dolby Digital), create an additional ac3 stream for surround sound
+        map_opts+=(-map "$audio_stream")
+        audio_opts+=(-c:a:"$ac3Stream" copy)
+      fi
+    elif [[ -z "$stereo" ]] ; then
+      # if user said no stereo, but yes AC3, then try to create AC3
+      map_opts+=(-map "$audio_stream")
+      audio_opts+=(-c:a:"$ac3Stream" ac3)
+    fi
   fi
 fi
 
