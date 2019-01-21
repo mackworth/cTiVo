@@ -466,8 +466,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) isDeprecated {
-    return ([self.encoderUsed isEqualToString:@"mencoder"] && !self.isTestPS) ||
-    [self.name hasPrefix:@"HB Old"];
+    return ([self.encoderUsed isEqualToString:@"mencoder"] && !self.isTestPS);
 }
 
 -(void)dealloc
