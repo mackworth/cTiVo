@@ -655,7 +655,7 @@ BOOL channelChecking = NO;
 		self.postponedCommercialShows = nil;
 	} else {
 		[self whatsOnWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
-			if (whatsOn == MTWhatsOnLiveTV) {
+			if (whatsOn == MTWhatsOnLiveTV || whatsOn == MTWhatsOnStreamingOrMenus) {
 				[self reallyFindCommercialsForShows];
 			} else {
 				DDLogDetail(@"Waiting for TiVo UI to be available");
