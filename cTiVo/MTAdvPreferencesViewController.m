@@ -11,6 +11,7 @@
 #import "MTAppDelegate.h"
 #import "NSString+Helpers.h"
 #import "MTHelpViewController.h"
+#import "NSTask+RunTask.h"
 
 @interface MTAdvPreferencesViewController ()
 
@@ -322,21 +323,8 @@
 }
 
 -(BOOL) javaInstalled {
-    NSPipe *pipe = [NSPipe pipe];
-    NSFileHandle *file = pipe.fileHandleForReading;
-
-    NSTask *task = [[NSTask alloc] init];
-    task.launchPath = @"/usr/libexec/java_home";
-    task.standardOutput = pipe;
-    task.standardError = pipe;
-
-    [task launch];
-
-    NSData *data = [file readDataToEndOfFile];
-    [file closeFile];
-
-    NSString *grepOutput = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
-    return ![grepOutput hasPrefix:@"Unable"];
+	NSString *javaOutput = [NSTask runProgram:@"/usr/libexec/java_home" withArguments:@[]];
+    return ![javaOutput hasPrefix:@"Unable"];
 }
 
 -(IBAction) help:(id)sender {

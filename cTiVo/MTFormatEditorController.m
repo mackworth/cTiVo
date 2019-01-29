@@ -12,6 +12,7 @@
 #import "NSString+Helpers.h"
 #import "MTFormat.h"
 #import "MTHelpViewController.h"
+#import "NSTask+RunTask.h"
 
 @interface MTFormatEditorController ()
 {
@@ -104,26 +105,15 @@
 
 }
 
-- (NSString *) launchReadPreset {
+- (void)launchReadPreset {
+	NSString * cliLocation = [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"HandBrakeCLI" ];
+	if (!cliLocation) {
+		NSLog(@"HandbrakeCLI is missing??");
+		return;
+	}
+	NSString * handBrakeOutput = [NSTask runProgram:cliLocation withArguments:@[ @"--preset-import-gui", @"--preset-list"]];
 
-    NSTask * handbrake = [NSTask new];
-    NSPipe *pipe = [NSPipe pipe];
-
-    handbrake.standardError = pipe;
-    handbrake.standardOutput = pipe;
-    NSString * cliLocation = [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"HandBrakeCLI" ];
-    if (!cliLocation) {
-        NSLog(@"HandbrakeCLI is missing?");
-        return nil;
-    }
-    [handbrake setLaunchPath:cliLocation];
-    [handbrake setArguments: @[ @"--preset-import-gui", @"--preset-list"]];
-    [handbrake launch];
-
-    NSFileHandle *presetsReadHandle = pipe.fileHandleForReading;
-    NSString * result =  [[NSString alloc] initWithData:[presetsReadHandle readDataToEndOfFile] encoding:NSUTF8StringEncoding];
-
-    NSArray *presetLines = [result componentsSeparatedByString:@"\n"];
+    NSArray *presetLines = [handBrakeOutput componentsSeparatedByString:@"\n"];
     [self.presetPopup removeAllItems];
     NSString * description = @"";
     //    put a title here
@@ -180,8 +170,6 @@
     if (description.length) {
         [[self.presetPopup lastItem] setToolTip:description];
     }
-    return result;
-
 }
 
 -(void)refreshFormatList
