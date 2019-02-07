@@ -323,7 +323,14 @@ static NSDateFormatter *dateFormatter;
         checkBox.action = @selector(changeSubtitle:);
         [checkBox setOn: thisSubscription.exportSubtitles.boolValue];
         checkBox.owner = thisSubscription;
-		checkBox.enabled = YES;		
+		checkBox.enabled = YES;
+	} else if ([tableColumn.identifier isEqualToString:@"Delete"]) {
+		MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+		checkBox.target = myController;
+		checkBox.action = @selector(changeDelete:);
+		[checkBox setOn: thisSubscription.deleteAfterDownload.boolValue];
+		checkBox.owner = thisSubscription;
+		checkBox.enabled = YES;
 #ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;

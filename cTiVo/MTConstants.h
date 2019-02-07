@@ -114,6 +114,8 @@
 #define kMTSubscribedPrevRecorded @"PrevRecorded" //not used
 #define kMTSubscribedRegExPattern @"RegExPattern"
 #define kMTSubscribedCallSign @"StationCallSign"
+#define kMTSubscribedDeleteAfterDownload @"DeleteAfterDownload"
+
 #define kMTTVDBToken @"TVDBToken"
 #define kMTTVDBTokenExpire @"TVDBTokenExpire"
 
@@ -126,8 +128,6 @@
 #define kMTQueueStatus  @"QueueStatus"
 #define kMTQueueShowStatus @"QueueShowStatus"
 #define kMTQueueDirectory @"QueueDirectory"
-//#define kMTQueueDownloadFile @"QueueDownloadFile"
-//#define kMTQueueBufferFile @"QueueBufferFile"
 #define kMTQueueFinalFile @"QueueFileName"
 #define kMTQueueGenTextMetaData     @"QueueGenTextMetadata"
 #ifndef deleteXML
@@ -135,6 +135,7 @@
 #endif
 #define kMTQueueIncludeAPMMetaData  @"QueueIncludeAPMMetaData"
 #define kMTQueueExportSubtitles  @"QueueExportSubtitles"
+#define kMTQueueDeleteAfterDownload  @"QueueDeleteAfterDownload"
 
 
 //Column editing userDefaults

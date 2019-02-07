@@ -458,6 +458,13 @@ __DDLOGHERE__
         checkBox.action = @selector(changeSubtitle:);
         checkBox.owner = download;
 		checkBox.enabled = download.isNew && !protected;
+	} else if ([tableColumn.identifier isEqualToString:@"Delete"]) {
+		MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+		[checkBox setOn: download.deleteAfterDownload.boolValue];
+		checkBox.target = myController;
+		checkBox.action = @selector(changeDelete:);
+		checkBox.owner = download;
+		checkBox.enabled = !download.isCompletelyDone && !protected ;
 #ifndef deleteXML
 	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;

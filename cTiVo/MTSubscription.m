@@ -157,6 +157,7 @@ __DDLOGHERE__
     //should we have a directory per subscription? UI?
 	newDownload.addToiTunesWhenEncoded = ([self canAddToiTunes] && [self shouldAddToiTunes]);
 	newDownload.exportSubtitles = self.exportSubtitles;
+	newDownload.deleteAfterDownload = self.deleteAfterDownload;
 	newDownload.skipCommercials = self.shouldSkipCommercials && self.canSkipCommercials;
 	newDownload.useSkipMode =     self.useSkipMode.boolValue;
 	newDownload.markCommercials = self.shouldMarkCommercials && self.canMarkCommercials ;
@@ -215,7 +216,7 @@ __DDLOGHERE__
 #define kMTSubChannel 5
 #define kMTSubMin 6
 
-#define kMTSubStringsArray  @[@"iTunes", @"skipAds", @"markAds",  @"suggestions",  @"pyTiVo",  @"subtitles",  @"HDOnly",  @"SDOnly", @"SkipMode"]
+#define kMTSubStringsArray  @[@"iTunes", @"skipAds", @"markAds",  @"suggestions",  @"pyTiVo",  @"subtitles",  @"HDOnly",  @"SDOnly", @"SkipMode", @"Delete"]
 #define kMTSubiTunes 0
 #define kMTSubSkipAds 1
 #define kMTSubMarkAds 2
@@ -225,6 +226,7 @@ __DDLOGHERE__
 #define kMTSubHD 6
 #define kMTSubSD 7
 #define kMTSubSkipMode 8
+#define kMTSubDelete 9
 
 +(instancetype) subscriptionFromString:(NSString *) str {
     //imports a subscription from an imported string
@@ -261,6 +263,7 @@ __DDLOGHERE__
         newSub.includeSuggestions = @NO;
         newSub.genTextMetaData = @NO;
         newSub.exportSubtitles=  @NO;
+		newSub.deleteAfterDownload=  @NO;
         newSub.HDOnly= @NO;
         newSub.SDOnly= @NO;
 
@@ -278,6 +281,7 @@ __DDLOGHERE__
                 case kMTSubSuggestions: newSub.includeSuggestions = @YES;   break;
                 case kMTSubPyTiVo:      newSub.genTextMetaData = @YES;      break;
                 case kMTSubCaptions:    newSub.exportSubtitles=  @YES;      break;
+				case kMTSubDelete:      newSub.deleteAfterDownload =  @YES; break;
                 case kMTSubHD:          newSub.HDOnly= @YES;                break;
 				case kMTSubSD:          newSub.SDOnly= @YES;                break;
 				case kMTSubSkipMode:    newSub.useSkipMode= @YES;           break;
@@ -336,6 +340,8 @@ __DDLOGHERE__
 #endif
     tempSub.exportSubtitles = sub[kMTSubscribedExportSubtitles];
     if (tempSub.exportSubtitles ==nil) tempSub.exportSubtitles = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportSubtitles];
+	tempSub.deleteAfterDownload = sub[kMTSubscribedDeleteAfterDownload];
+	if (tempSub.deleteAfterDownload == nil) tempSub.deleteAfterDownload = @NO;
     tempSub.preferredTiVo = sub[kMTSubscribedPreferredTiVo];
     if (!tempSub.preferredTiVo || ([tempSub.preferredTiVo isEqualToString:@"Any TiVo"]) ){
         tempSub.preferredTiVo = @"";
@@ -395,7 +401,8 @@ __DDLOGHERE__
 	if (self.useSkipMode.boolValue )        [outString addObject: kMTSubStringsArray [kMTSubSkipMode]];
     if (self.includeSuggestions.boolValue ) [outString addObject: kMTSubStringsArray [kMTSubSuggestions]];
     if (self.genTextMetaData.boolValue )    [outString addObject: kMTSubStringsArray [kMTSubPyTiVo]];
-    if (self.exportSubtitles.boolValue )    [outString addObject: kMTSubStringsArray [kMTSubCaptions]];
+	if (self.exportSubtitles.boolValue )    [outString addObject: kMTSubStringsArray [kMTSubCaptions]];
+	if (self.exportSubtitles.boolValue )    [outString addObject: kMTSubStringsArray [kMTSubDelete]];
     if (self.HDOnly.boolValue )             [outString addObject: kMTSubStringsArray [kMTSubHD]];
     if (self.SDOnly.boolValue )             [outString addObject: kMTSubStringsArray [kMTSubSD]];
     return [outString componentsJoinedByString:@"\t"];

@@ -33,7 +33,8 @@
                                         *includeAPMMetaData,
 #endif
 										*useTransportStream,
-                                        *exportSubtitles;
+                                        *exportSubtitles,
+										*deleteAfterDownload;
 @property (nonatomic, assign) BOOL      addToiTunesWhenEncoded,
 										useSkipMode,
 										skipCommercials,

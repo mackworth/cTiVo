@@ -266,7 +266,8 @@
         newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
         newSub.includeAPMMetaData = [defaults objectForKey:kMTExportMetaData];
 #endif
-        newSub.exportSubtitles	  =[defaults objectForKey:kMTExportSubtitles];
+        newSub.exportSubtitles	  = [defaults objectForKey:kMTExportSubtitles];
+		newSub.deleteAfterDownload= [defaults objectForKey:kMTIfSuccessDeleteFromTiVo];
 		newSub.encodeFormat = tiVoManager.selectedFormat;
 
         DDLogVerbose(@"Subscribing show %@ as: %@ ", tivoShow, newSub);
@@ -293,6 +294,7 @@
         newSub.includeAPMMetaData = [NSNumber numberWithBool: download.includeAPMMetaData];
 #endif
         newSub.exportSubtitles=  download.exportSubtitles;
+		newSub.deleteAfterDownload=  download.deleteAfterDownload;
 		newSub.encodeFormat = download.encodeFormat;
         DDLogVerbose(@"Subscribing download %@ as: %@ ", tivoShow, newSub);
         [self addObject:newSub];
@@ -350,6 +352,7 @@
 								  sub.useSkipMode       ?: @YES,    kMTSubscribedUseSkipMode,
                                   sub.genTextMetaData   ?: @NO ,    kMTSubscribedGenTextMetaData,
                                   sub.exportSubtitles   ?: @NO,     kMTSubscribedExportSubtitles,
+								  sub.deleteAfterDownload   ?: @NO,     kMTSubscribedDeleteAfterDownload,
                                   sub.preferredTiVo     ?: @"",     kMTSubscribedPreferredTiVo,
                                   sub.HDOnly            ?: @NO,     kMTSubscribedHDOnly,
                                   sub.SDOnly            ?: @NO,     kMTSubscribedSDOnly,

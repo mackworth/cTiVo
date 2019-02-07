@@ -126,6 +126,7 @@ __DDLOGHERE__
 		_includeAPMMetaData = nil;
 #endif
 		_exportSubtitles = nil;
+		_deleteAfterDownload = @NO;
         _urlReadPointer = 0;
         _useTransportStream = nil;
         _downloadStatus = @(0);
@@ -150,7 +151,8 @@ __DDLOGHERE__
         download.show = _show;
         download.encodeFormat = _encodeFormat;
         download.downloadStatus= @(kMTStatusNew);
-        download.exportSubtitles = _exportSubtitles;
+		download.exportSubtitles = _exportSubtitles;
+		download.deleteAfterDownload = _deleteAfterDownload;
 		download.useSkipMode = _useSkipMode;
 		download.skipCommercials = _skipCommercials;
         download.markCommercials = _markCommercials;
@@ -374,6 +376,7 @@ __DDLOGHERE__
 	[encoder encodeObject: self.includeAPMMetaData forKey:	kMTQueueIncludeAPMMetaData];
 #endif
 	[encoder encodeObject: self.exportSubtitles forKey:	kMTQueueExportSubtitles];
+	[encoder encodeObject: self.deleteAfterDownload forKey:	kMTQueueDeleteAfterDownload];
 }
 
 - (NSDictionary *) queueRecord {
@@ -400,7 +403,8 @@ __DDLOGHERE__
 	if (self.includeAPMMetaData) [result setValue:self.includeAPMMetaData forKey: kMTQueueIncludeAPMMetaData];
 #endif
 	if (self.exportSubtitles) [result setValue:self.exportSubtitles forKey: kMTQueueExportSubtitles];
-	
+	if (self.deleteAfterDownload) [result setValue:self.deleteAfterDownload forKey: kMTQueueDeleteAfterDownload];
+
 	return [NSDictionary dictionaryWithDictionary: result];
 }
 
@@ -447,9 +451,10 @@ __DDLOGHERE__
 	download.genTextMetaData = queueEntry[kMTQueueGenTextMetaData]; if (!download.genTextMetaData) download.genTextMetaData= @(NO);
 #ifndef deleteXML
 	download.genXMLMetaData = queueEntry[kMTQueueGenXMLMetaData]; if (!download.genXMLMetaData) download.genXMLMetaData= @(NO);
-	download.includeAPMMetaData = queueEntry[kMTQueueIncludeAPMMetaData]; if (!download.includeAPMMetaData) download.includeAPMMetaData= @(NO);
+	download.includeAPMMetaData = queueEntry[kMTQueueIncludeAPMMetaData]; if (!download.includeAPMMetaData) download.includeAPMMetaData= @NO;
 #endif
 	download.exportSubtitles = queueEntry[kMTQueueExportSubtitles]; if (!download.exportSubtitles) download.exportSubtitles= @(NO);
+	download.deleteAfterDownload = queueEntry[kMTQueueDeleteAfterDownload]; if (!download.deleteAfterDownload) download.deleteAfterDownload= @NO;
     return download;
 }
 
@@ -475,6 +480,7 @@ __DDLOGHERE__
 		self.includeAPMMetaData = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueIncludeAPMMetaData]; if (!self.includeAPMMetaData) self.includeAPMMetaData= @(NO);
 #endif
 		self.exportSubtitles = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueExportSubtitles]; if (!self.exportSubtitles) self.exportSubtitles= @(NO);
+		self.deleteAfterDownload = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueDeleteAfterDownload]; if (!self.deleteAfterDownload) self.deleteAfterDownload= @(NO);
         [self setupNotifications];
 	}
 	DDLogDetail(@"initWithCoder for %@",self);
@@ -587,7 +593,7 @@ __DDLOGHERE__
         if (self.useSkipMode) {
 			[optionArray addObject:@"SkipMode"];
 		}
-        if (self.exportSubtitles.boolValue) {
+		if (self.exportSubtitles.boolValue) {
 			[optionArray addObject:@"Subtitle"];
 		}
 		NSString * options = optionArray.count == 0 ? @"" : [optionArray componentsJoinedByString:@","];
@@ -2120,7 +2126,7 @@ __DDLOGHERE__
 									  @"Retries" : retryString }];
 #endif
 	[self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil ];
-	if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTIfSuccessDeleteFromTiVo]) {
+	if (self.deleteAfterDownload.boolValue) {
 		DDLogReport(@"Deleting %@ from TiVo after successful download",self);
 		[self.show.tiVo deleteTiVoShows:@[self.show] ];
 	}

@@ -346,7 +346,7 @@ __DDLOGHERE__
 -(void) setEdlList:(NSArray<MTEdl *> *)edlList {
 	if (_edlList != edlList) {
 		_edlList = edlList;
-		if (edlList.count > 0) {
+		if (edlList != nil) {
 			DDLogDetail(@"Got EDL for %@: %@", self, edlList);
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
 		}
@@ -357,7 +357,7 @@ __DDLOGHERE__
 	if (rpcData) {
 		_rpcData = rpcData;
 		self.episodeGenre = rpcData.genre;  //no conflict with TVDB
-		if (rpcData.edlList.count > 0) self.edlList = rpcData.edlList;
+		if (rpcData.edlList != nil) self.edlList = rpcData.edlList;
 		self.clipMetaDataId = rpcData.clipMetaDataId;  //notifies downloads
 		[self checkAllInfoSources];
 	}

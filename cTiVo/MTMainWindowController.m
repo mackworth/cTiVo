@@ -143,8 +143,9 @@ __DDLOGHERE__
     [defaultCenter addObserver:self selector:@selector(networkChanged:) name:kMTNotificationNetworkChanged object:nil];
 	
     [defaultCenter addObserver:self selector:@selector(columnOrderChanged:) name:NSTableViewColumnDidMoveNotification object:nil];
-    [tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
-	
+	[tiVoManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
+	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTIfSuccessDeleteFromTiVo options:NSKeyValueObservingOptionInitial context:nil];
+
 	[self buildColumnMenuForTables ];
 	[pausedLabel setNextResponder:downloadQueueTable];  //Pass through mouse events to the downloadQueueTable.
 	
@@ -172,7 +173,23 @@ __DDLOGHERE__
 {
 	if ([keyPath compare:@"selectedFormat"] == NSOrderedSame) {
         [formatListPopUp selectFormat:[tiVoManager selectedFormat]];
-    } else {
+	} else if ([keyPath compare:kMTIfSuccessDeleteFromTiVo] == NSOrderedSame) {
+		//Always show Del After columns if user enables DeleteFromTiVo
+		BOOL deleteAfter =[[NSUserDefaults standardUserDefaults] boolForKey:kMTIfSuccessDeleteFromTiVo];
+		if (deleteAfter) {
+			NSTableColumn * downloadDeleteAfter = [self.downloadQueueTable tableColumnWithIdentifier: @"Delete"];
+			if (downloadDeleteAfter.isHidden) downloadDeleteAfter.hidden = NO;
+			NSTableColumn * subDeleteAfter = [self.subscriptionTable tableColumnWithIdentifier: @"Delete"];
+			if (subDeleteAfter.isHidden) subDeleteAfter.hidden = NO;
+			if ([self.downloadQueueTable respondsToSelector:@selector(columnChanged:)]) {
+				[self.downloadQueueTable performSelector:@selector(columnChanged:) withObject:downloadDeleteAfter];
+			}
+			if ([self.subscriptionTable respondsToSelector:@selector(columnChanged:)]) {
+				[self.subscriptionTable performSelector:@selector(columnChanged:) withObject:subDeleteAfter];
+			}
+
+		}
+	} else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
@@ -780,6 +797,21 @@ __DDLOGHERE__
 		sub.exportSubtitles = newVal;
         		
     }
+}
+
+-(IBAction)changeDelete:(id)sender
+{
+	MTCheckBox *checkbox = sender;
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
+		//updating an individual show in download queue
+		MTDownload * download = (MTDownload *)checkbox.owner;
+		NSNumber *newVal = @( ! download.deleteAfterDownload.boolValue);
+		download.deleteAfterDownload = newVal;
+	} else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
+		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
+		NSNumber *newVal = @( ! sub.deleteAfterDownload.boolValue );
+		sub.deleteAfterDownload = newVal;
+	}
 }
 
 
