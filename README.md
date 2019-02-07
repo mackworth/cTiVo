@@ -1,6 +1,6 @@
 **cTiVo** is a free Mac application to download shows from your TiVo and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, taking full advantage of MacOS, but very flexible. 
 
-You can download the latest release from the [Release page](https://github.com/dscottbuch/cTiVo/releases) on this site.
+You can download the latest release from the [Release page](../../releases) on this site.
 
 cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
 
@@ -76,17 +76,16 @@ Download the [cTiVo application](https://github.com/dscottbuch/cTiVo/releases), 
 
 ## Documentation:
 
-  * [How to get cTiVo running quickly](Quick-Start)
-  * [Quick overview of cTiVo for iTiVo users](iTiVo-Users)
-  * [Overview of Using cTivo](Overview)
-  * [How to install cTiVo](Installation)
-  * [How to configure cTiVo ](Configuration)
-  * [How to set up and configure subscriptions in cTiVo](Subscriptions)
-  * [Frequently Asked Questions](FAQ)
-  * [User-contributed alternative video formats](Alternative-Formats)
-  * [Q and A on different video formats](Video-Formats)
-  * [Other Advanced Topics](Advanced-Topics)
+  * [How to get cTiVo running quickly](../../wiki/Quick-Start)
+  * [Overview of Using cTivo](../../wiki/Overview)
+  * [How to install cTiVo](../../wiki/Installation)
+  * [How to configure cTiVo ](../../wiki/Configuration)
+  * [How to set up and configure subscriptions in cTiVo](../../wiki/Subscriptions)
+  * [Frequently Asked Questions](../../wiki/FAQ)
+  * [User-contributed alternative video formats](../../wiki/Alternative-Formats)
+  * [Q and A on different video formats](../../wiki/Video-Formats)
+  * [Other Advanced Topics](../../wiki/Advanced-Topics)
 
-cTiVo is fully compatible with MacOS High Sierra (10.13) back through Mavericks (10.9); not compatible with Snow Leopard (10.6) or earlier. In addition, we provide a special version (cTiVo-10.7) for use with 10.7 and 10.8, but support is limited.
+cTiVo is fully compatible with MacOS Mojave (10.14) back through Mavericks (10.9); not compatible with Snow Leopard (10.6) or earlier. In addition, we provide a special version (cTiVo-10.7) for use with 10.7 and 10.8, but support is limited.
 
-**cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/dscottbuch/cTiVo/issues).
+**cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
