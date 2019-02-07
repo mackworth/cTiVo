@@ -1129,6 +1129,40 @@ static NSArray * imageResponseTemplate = nil;
 	   }];
 }
 
+-(void) rebootTiVo {
+	DDLogReport(@"Rebooting Tivo %@", self.delegate);
+	NSDictionary * data = @{
+							@"type": @"uiNavigate",
+							@"uri":  @"x-tivo:classicui:restartDvr",
+							};
+	__weak __typeof__(self) weakSelf = self;
+
+	[self sendRpcRequest:@"uiNavigate"
+				 monitor:NO
+				withData:data
+	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+	  //using blank lines instead of indenting.
+	   [weakSelf afterDelay:5.0 launchBlock:^{
+		   
+	   [weakSelf sendKeyEvent: @"thumbsDown" withCompletion:^{
+		   
+	   [weakSelf sendKeyEvent: @"thumbsDown" withCompletion:^{
+		   
+	   [weakSelf sendKeyEvent: @"thumbsDown" withCompletion:^{
+		   
+	   [weakSelf sendKeyEvent: @"enter" withCompletion:^{
+		   
+	   DDLogReport(@"Finished rebooting Tivo %@", self.delegate);
+	   [weakSelf tearDownStreams];
+		   
+	   }];
+	   }];
+	   }];
+	   }];
+	   }];
+	}];
+}
+
 -(void) channelListWithCompletion: (void (^)(NSDictionary <NSString *, NSString *> *)) completionHandler {
 	DDLogDetail(@"Asking what channels exist:");
 

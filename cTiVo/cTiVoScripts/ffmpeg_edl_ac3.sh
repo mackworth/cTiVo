@@ -327,6 +327,7 @@ END {print ss,""}
     segment_absolute_path=$(realpath "$segment_filename")
     segment_absolute_path_escaped=$(echo "$segment_absolute_path" | sed "s/'/'\\\''/g")
     echo file "'$segment_absolute_path_escaped'" >> "$merge_filename"
+    echo duration "$this_duration" >> "$merge_filename"
 
     launch_and_monitor_ffmpeg $(echo "$merge_start_percent * ($progress / $duration)" | bc -l) \
                               $(echo "$merge_start_percent * (($progress + $this_duration) / $duration)" | bc -l) \
@@ -346,5 +347,5 @@ END {print ss,""}
                             $duration \
                             "$output" \
                             "$tmpdir/logs/ffmpeg_concat.log" \
-                            -f concat -safe 0 -i "$merge_filename" -map 0 -c copy
+                            -fflags +genpts -f concat -safe 0 -i "$merge_filename" -map 0 -c copy
 fi

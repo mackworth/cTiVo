@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14313.18"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14460.31"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -939,13 +939,13 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveName="DownloadTable" rowSizeStyle="automatic" headerView="49" viewBased="YES" id="51" customClass="MTDownloadTableView">
-                                                    <rect key="frame" x="0.0" y="0.0" width="946" height="127"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="976" height="127"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                                     <tableColumns>
-                                                        <tableColumn identifier="Order" width="33" minWidth="18" maxWidth="40" headerToolTip="Download order of shows" id="54">
+                                                        <tableColumn identifier="Order" width="38" minWidth="18" maxWidth="40" headerToolTip="Download order of shows" id="54">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="##">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -960,11 +960,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="55">
-                                                                    <rect key="frame" x="1" y="1" width="33" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="38" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="57">
-                                                                            <rect key="frame" x="1" y="1" width="32" height="17"/>
+                                                                            <rect key="frame" x="1" y="1" width="37" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="1" id="58">
                                                                                 <font key="font" metaFont="system"/>
@@ -979,7 +979,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="icon" width="44" minWidth="18" maxWidth="45" headerToolTip="Status of show on TiVo" id="1261">
+                                                        <tableColumn identifier="icon" width="45" minWidth="18" maxWidth="45" headerToolTip="Status of show on TiVo" id="1261">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Status">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -994,7 +994,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="1263">
-                                                                    <rect key="frame" x="37" y="1" width="44" height="17"/>
+                                                                    <rect key="frame" x="42" y="1" width="45" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                     <subviews>
                                                                         <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="TOe-go-xA7">
@@ -1009,7 +1009,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Programs" width="347.5" minWidth="175" maxWidth="2000" headerToolTip="Program to download" id="351">
+                                                        <tableColumn identifier="Programs" width="352.5" minWidth="175" maxWidth="2000" headerToolTip="Program to download" id="351">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Download Queue">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1024,11 +1024,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="AmG-fv-mOh" customClass="MTProgressindicator">
-                                                                    <rect key="frame" x="84" y="1" width="348" height="17"/>
+                                                                    <rect key="frame" x="90" y="1" width="353" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" id="z7y-2w-uIB" userLabel="leftText">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="287" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="291" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" id="kqs-BA-Sw6">
                                                                                 <font key="font" metaFont="system"/>
@@ -1037,7 +1037,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="KRR-0A-sUq" userLabel="rightText">
-                                                                            <rect key="frame" x="288" y="0.0" width="60" height="17"/>
+                                                                            <rect key="frame" x="293" y="0.0" width="60" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" id="icx-VM-9gi">
                                                                                 <font key="font" size="10" name="Helvetica"/>
@@ -1053,7 +1053,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="SkipMode" width="59" minWidth="22" maxWidth="70" id="T01-au-qjU">
+                                                        <tableColumn identifier="SkipMode" width="64" minWidth="22" maxWidth="70" id="T01-au-qjU">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SkipData">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1069,7 +1069,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="VsS-3d-Q7U">
-                                                                    <rect key="frame" x="435" y="1" width="59" height="17"/>
+                                                                    <rect key="frame" x="446" y="1" width="64" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="Q7N-hn-Gdc">
@@ -1103,7 +1103,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" id="qQB-l8-FUr" userLabel="leftText">
-                                                                            <rect key="frame" x="21" y="0.0" width="0.0" height="17"/>
+                                                                            <rect key="frame" x="25" y="0.0" width="0.0" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="nX6-ru-GCz">
                                                                                 <font key="font" metaFont="system"/>
@@ -1112,7 +1112,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="FEf-Ia-wX9" userLabel="rightText">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="80" height="17"/>
+                                                                            <rect key="frame" x="-2" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="a0F-vx-fpu">
                                                                                 <font key="font" size="10" name="Helvetica"/>
@@ -1128,7 +1128,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="DL Stage" editable="NO" width="101" minWidth="48" maxWidth="150" headerToolTip="Stage of download process" id="V6k-sx-7Uz">
+                                                        <tableColumn identifier="DL Stage" editable="NO" width="106" minWidth="48" maxWidth="150" headerToolTip="Stage of download process" id="V6k-sx-7Uz">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="DL Stage">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1143,11 +1143,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="NcC-st-sjz" customClass="MTProgressindicator">
-                                                                    <rect key="frame" x="497" y="1" width="101" height="17"/>
+                                                                    <rect key="frame" x="513" y="1" width="106" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" id="jKf-Ch-dzY" userLabel="leftText">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="0.0" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="5" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="VsL-mZ-KVX">
                                                                                 <font key="font" metaFont="system"/>
@@ -1156,7 +1156,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="nzl-2Y-QR2" userLabel="rightText">
-                                                                            <rect key="frame" x="53" y="0.0" width="80" height="17"/>
+                                                                            <rect key="frame" x="58" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="AQg-n8-IeC">
                                                                                 <font key="font" size="10" name="Helvetica"/>
@@ -1240,7 +1240,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Does channel that show is on use H.264 (more compressed)" id="Joh-em-Aac">
+                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Does this show use H.264 (more compressed) or MPEG2? Before downloading, uses channel's history." id="Joh-em-Aac">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="H.264">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1750,7 +1750,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Format" width="107.5" minWidth="50" maxWidth="180" headerToolTip="Format of Video to use during download" id="52">
+                                                        <tableColumn identifier="Format" width="111.5" minWidth="50" maxWidth="180" headerToolTip="Format of Video to use during download" id="52">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Format">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1765,7 +1765,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Format of video file to create" id="63" customClass="MTFormatPopUpTableCellView">
-                                                                    <rect key="frame" x="601" y="1" width="107" height="17"/>
+                                                                    <rect key="frame" x="622" y="1" width="112" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -1785,13 +1785,13 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView toolTip="Will be added to iTunes" id="167" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="711" y="1" width="45" height="17"/>
+                                                                    <rect key="frame" x="737" y="1" width="45" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Skip" width="30" minWidth="32" maxWidth="30" headerToolTip="Find and delete commercials.   Mutually exclusive with Mark commercials" id="945">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Cut">
+                                                        <tableColumn identifier="UseTS" width="32" minWidth="32" maxWidth="45" hidden="YES" id="945">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Use TS">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1802,14 +1802,15 @@
                                                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                             <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="skipCommercials"/>
+                                                            <string key="headerToolTip">Use Transport Stream (v. PS: Program Stream) with this Download. Essential with H.264 shows, but TS can cause corrupted downloads with MPEG2 shows. cTiVo will automatically switch when necessary, or when encoding errors found.</string>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="947" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="759" y="1" width="30" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="0.0" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="948">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="33" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="4" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="949">
                                                                                 <font key="font" metaFont="system"/>
@@ -1820,6 +1821,40 @@
                                                                     </subviews>
                                                                     <connections>
                                                                         <outlet property="textField" destination="948" id="950"/>
+                                                                    </connections>
+                                                                </tableCellView>
+                                                            </prototypeCellViews>
+                                                        </tableColumn>
+                                                        <tableColumn identifier="Skip" width="32" minWidth="32" maxWidth="45" headerToolTip="Find and delete commercials.   Mutually exclusive with Mark commercials" id="N0W-kB-fED">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Cut">
+                                                                <font key="font" metaFont="smallSystem"/>
+                                                                <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
+                                                            </tableHeaderCell>
+                                                            <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="9hb-tB-4bc">
+                                                                <font key="font" metaFont="system"/>
+                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                            </textFieldCell>
+                                                            <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="skipCommercials"/>
+                                                            <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                                            <prototypeCellViews>
+                                                                <tableCellView id="B3m-z9-f15" customClass="MTDownloadCheckTableCell">
+                                                                    <rect key="frame" x="785" y="1" width="32" height="17"/>
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                    <subviews>
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="7k2-XT-brh">
+                                                                            <rect key="frame" x="0.0" y="0.0" width="35" height="17"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
+                                                                            <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="Uun-Uq-qMX">
+                                                                                <font key="font" metaFont="system"/>
+                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                    </subviews>
+                                                                    <connections>
+                                                                        <outlet property="textField" destination="7k2-XT-brh" id="cBw-sf-qQq"/>
                                                                     </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -1839,7 +1874,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="1319" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="792" y="1" width="32" height="17"/>
+                                                                    <rect key="frame" x="820" y="1" width="32" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="1321">
@@ -1858,7 +1893,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="UseSkipMode" width="58" minWidth="32" maxWidth="70" id="EJ2-3d-oxm">
+                                                        <tableColumn identifier="UseSkipMode" width="62" minWidth="32" maxWidth="70" id="EJ2-3d-oxm">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SkipMode">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1874,11 +1909,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="kwk-9k-Idr" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="827" y="1" width="58" height="17"/>
+                                                                    <rect key="frame" x="855" y="1" width="62" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="yXF-lu-on1">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="61" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="65" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="xYr-TN-UYi">
                                                                                 <font key="font" metaFont="system"/>
@@ -1927,7 +1962,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Subtitles" width="50" minWidth="30" maxWidth="56" headerToolTip="Export subtitles .SRT file" id="912">
+                                                        <tableColumn identifier="Subtitles" width="54" minWidth="30" maxWidth="56" headerToolTip="Export subtitles .SRT file" id="912">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Subtitle">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1942,11 +1977,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="919" customClass="MTDownloadCheckTableCell">
-                                                                    <rect key="frame" x="888" y="1" width="50" height="17"/>
+                                                                    <rect key="frame" x="920" y="1" width="54" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="920">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="50" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="54" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="921">
                                                                                 <font key="font" metaFont="system"/>
@@ -1972,7 +2007,7 @@
                                             </subviews>
                                             <nil key="backgroundColor"/>
                                         </clipView>
-                                        <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="50">
+                                        <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="50">
                                             <rect key="frame" x="1" y="128" width="946" height="16"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
@@ -1981,7 +2016,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                         <tableHeaderView key="headerView" id="49">
-                                            <rect key="frame" x="0.0" y="0.0" width="946" height="17"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="976" height="17"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableHeaderView>
                                     </scrollView>

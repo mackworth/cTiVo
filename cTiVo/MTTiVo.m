@@ -624,6 +624,10 @@ BOOL channelChecking = NO;
     }
 }
 
+-(void) reboot {
+	[self.myRPC rebootTiVo];
+}
+
 -(void) whatsOnWithCompletion:  (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler {
 	[self.myRPC whatsOnSearchWithCompletion:completionHandler];
 }
@@ -1025,8 +1029,8 @@ BOOL channelChecking = NO;
 -(void) markDeletedDownloadShow: (MTTiVoShow *) deletedShow {
 	[self cancelCommercialingForShow:deletedShow];
 	deletedShow.imageString = @"deleted";
+	[deletedShow.tiVo cancelCommercialingForShow: deletedShow];
     if (deletedShow.isQueued) {
-		[deletedShow.tiVo cancelCommercialingForShow: deletedShow];
         NSArray <MTDownload *> * downloads = [tiVoManager downloadsForShow:deletedShow];
         for (MTDownload * download in downloads) {
 			if (download.isNew) {

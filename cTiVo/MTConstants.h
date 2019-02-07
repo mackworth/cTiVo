@@ -99,6 +99,7 @@
 #define kMTSubscribedSimulEncode @"simultaneousEncode"
 #define kMTSubscribedSkipCommercials @"skipCommercials"
 #define kMTSubscribedUseSkipMode @"useSkipMode"
+#define kMTSubscribedUseTS @"useTS"
 #define kMTSubscribedMarkCommercials @"markCommercials"
 #define kMTSubscribedIncludeSuggestions @"includeSuggestions"
 #define kMTSubscribedGenTextMetaData     @"GenTextMetadata"

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1090" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14460.31"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -16,7 +16,7 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <userDefaultsController representsSharedInstance="YES" id="48"/>
-        <view misplaced="YES" id="416">
+        <view id="416">
             <rect key="frame" x="0.0" y="0.0" width="511" height="505"/>
             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
@@ -43,7 +43,7 @@
                         <binding destination="VwR-AV-Z73" name="enabled" keyPath="canRemove" id="2cq-Sm-Saj"/>
                     </connections>
                 </button>
-                <scrollView misplaced="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="417">
+                <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="417">
                     <rect key="frame" x="17" y="52" width="474" height="398"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <clipView key="contentView" id="CYN-kZ-RDO">
@@ -57,7 +57,7 @@
                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                 <tableColumns>
-                                    <tableColumn identifier="" width="120" minWidth="40" maxWidth="1000" headerToolTip="Name of channel; must be unique" id="442">
+                                    <tableColumn width="120" minWidth="40" maxWidth="1000" headerToolTip="Name of channel; must be unique" id="442">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Channel">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -79,7 +79,7 @@
                                             </binding>
                                         </connections>
                                     </tableColumn>
-                                    <tableColumn identifier="" width="86" minWidth="20" maxWidth="200" headerToolTip="Does TiVo provide SkipMode for this channel? Maybe means we haven't seen; No means don't use SkipMode." id="1K1-hZ-h8N">
+                                    <tableColumn width="86" minWidth="20" maxWidth="200" headerToolTip="Does TiVo provide SkipMode for this channel? Maybe means we haven't seen; No means don't use SkipMode." id="1K1-hZ-h8N">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="SkipMode?">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -100,7 +100,7 @@
                                             </binding>
                                         </connections>
                                     </tableColumn>
-                                    <tableColumn identifier="" width="86" minWidth="20" maxWidth="200" headerToolTip="Might this channel have commercials? &quot;No&quot; overrides commercial marking/skipping." id="441">
+                                    <tableColumn width="86" minWidth="20" maxWidth="200" headerToolTip="Might this channel have commercials? &quot;No&quot; overrides commercial marking/skipping." id="441">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Commercials?">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -121,7 +121,7 @@
                                             </binding>
                                         </connections>
                                     </tableColumn>
-                                    <tableColumn identifier="" width="86" minWidth="20" maxWidth="200" id="440">
+                                    <tableColumn width="86" minWidth="20" maxWidth="200" id="440">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Use TS">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -144,14 +144,9 @@ Yes = force Transport Stream</string>
                                                     <bool key="NSValidatesImmediately" value="YES"/>
                                                 </dictionary>
                                             </binding>
-                                            <binding destination="48" name="enabled" keyPath="values.DownloadTSFormat" id="dbv-7e-Yct">
-                                                <dictionary key="options">
-                                                    <string key="NSValueTransformerName">NSNegateBoolean</string>
-                                                </dictionary>
-                                            </binding>
                                         </connections>
                                     </tableColumn>
-                                    <tableColumn identifier="" editable="NO" width="79" minWidth="20" maxWidth="200" headerToolTip="Does it look like this channel migrated to H.264? (If so, needs Transport Stream)." id="5IF-Fa-cF2">
+                                    <tableColumn editable="NO" width="79" minWidth="20" maxWidth="200" headerToolTip="Does it look like this channel migrated to H.264? (If so, needs Transport Stream)." id="5IF-Fa-cF2">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="H.264?">
                                             <font key="font" metaFont="smallSystem"/>
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -176,11 +171,11 @@ Yes = force Transport Stream</string>
                             </tableView>
                         </subviews>
                     </clipView>
-                    <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="436">
+                    <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="436">
                         <rect key="frame" x="1" y="381" width="471" height="16"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
-                    <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="434">
+                    <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="434">
                         <rect key="frame" x="224" y="17" width="15" height="102"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
@@ -189,7 +184,7 @@ Yes = force Transport Stream</string>
                         <autoresizingMask key="autoresizingMask"/>
                     </tableHeaderView>
                 </scrollView>
-                <button toolTip="Runs a test download for all untested channels in Program Table " verticalHuggingPriority="750" misplaced="YES" id="STy-iF-kCG">
+                <button toolTip="Runs a test download for all untested channels in Program Table " verticalHuggingPriority="750" id="STy-iF-kCG">
                     <rect key="frame" x="122" y="13" width="183" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
                     <buttonCell key="cell" type="push" title="Test Selected Channels" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="0yq-Jk-uoh">
@@ -200,7 +195,7 @@ Yes = force Transport Stream</string>
                         <action selector="testAllChannels:" target="-2" id="Gtm-nv-FXJ"/>
                     </connections>
                 </button>
-                <button toolTip="Cleans out all tests from Download Queue." verticalHuggingPriority="750" misplaced="YES" id="RRj-Mp-O38">
+                <button toolTip="Cleans out all tests from Download Queue." verticalHuggingPriority="750" id="RRj-Mp-O38">
                     <rect key="frame" x="354" y="13" width="143" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                     <buttonCell key="cell" type="push" title="Remove All Tests" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lND-yN-oEU">
@@ -211,7 +206,7 @@ Yes = force Transport Stream</string>
                         <action selector="removeAllTests:" target="-2" id="do5-Ud-6ea"/>
                     </connections>
                 </button>
-                <button verticalHuggingPriority="750" misplaced="YES" id="6Oq-n5-Q7h">
+                <button verticalHuggingPriority="750" id="6Oq-n5-Q7h">
                     <rect key="frame" x="390" y="457" width="68" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="Help" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ngF-1w-sIq">
@@ -222,10 +217,10 @@ Yes = force Transport Stream</string>
                         <action selector="help:" target="-2" id="h20-dM-dfK"/>
                     </connections>
                 </button>
-                <button toolTip="Forces TS for all channels. Overrides TS values below." misplaced="YES" id="qVI-hc-NaG" userLabel="Transport Stream">
+                <button toolTip="Forces TS for all channels. Overrides TS values below." id="qVI-hc-NaG" userLabel="Transport Stream">
                     <rect key="frame" x="15" y="466" width="337" height="18"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Always Use TiVo's Transport Stream Format" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="iDB-7u-Dde">
+                    <buttonCell key="cell" type="check" title="Default to Using TiVo's Transport Stream Format" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="iDB-7u-Dde">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>

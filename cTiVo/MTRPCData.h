@@ -8,14 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import "MTEdl.h"
-//typedef NS_ENUM(NSUInteger, MPEGFormat) {
-//    MPEGFormatUnknown,
-//    MPEGFormatMP2,
-//    MPEGFormatMP4,
-//    MPEGFormatOther,
-//
-//};
-//
+typedef NS_ENUM(NSUInteger, MPEGFormat) {
+    MPEGFormatUnknown = 0,
+    MPEGFormatMPG2,
+    MPEGFormatH264,
+    MPEGFormatOther,
+};
+
 typedef NS_ENUM(NSUInteger, MTWhatsOnType) {
     MTWhatsOnUnknown = 0,
     MTWhatsOnLiveTV,
@@ -34,7 +33,7 @@ typedef NS_ENUM(NSUInteger, MTWhatsOnType) {
 @property (nonatomic, strong) NSString * genre;
 @property (nonatomic, strong) NSString * clipMetaDataId;
 @property (nonatomic, assign) BOOL skipModeFailed;
-//@property (nonatomic, assign) MPEGFormat format;
+@property (nonatomic, assign) MPEGFormat format;
 @property (nonatomic, assign) NSTimeInterval tempLength; //hint from TiVoShow, as sometimes TiVo doesn't report
 
 @property (nonatomic, strong) NSString * imageURL;

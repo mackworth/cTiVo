@@ -654,6 +654,15 @@ __DDLOGHERE__
     }
 }
 
+-(IBAction)changeUseTS:(id)sender {
+	MTCheckBox *checkbox = sender;
+	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
+		MTDownload *download = (MTDownload *)(checkbox.owner);
+		download.useTransportStream = @(! download.useTransportStream.boolValue);
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:download];
+	}
+}
+
 -(IBAction)changeMark:(id)sender
 {
     MTCheckBox *checkbox = sender;

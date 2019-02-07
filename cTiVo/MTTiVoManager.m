@@ -1210,7 +1210,7 @@ __DDLOGHERE__
         NSMutableDictionary * mutChannel = [newChannel mutableCopy];
         [mutChannel setValue:@(psFailed) forKey:kMTChannelInfoPSFailed];
         if (((NSNumber *)newChannel[kMTChannelInfoUseTS]).intValue == NSMixedState) {
-			[mutChannel setValue:@(NSOnState) forKey:kMTChannelInfoUseTS];
+			[mutChannel setValue:@(psFailed ? NSOnState : NSOffState) forKey:kMTChannelInfoUseTS];
         }
         newChannel = [NSDictionary dictionaryWithDictionary: mutChannel ];
     } else {
@@ -1218,7 +1218,7 @@ __DDLOGHERE__
 					   kMTChannelInfoCommercials: @(NSOnState),
 					   kMTChannelInfoSkipMode: @(NSMixedState),
                        kMTChannelInfoPSFailed: @(psFailed),
-                       kMTChannelInfoUseTS: @(psFailed ? NSOnState : NSMixedState)};
+                       kMTChannelInfoUseTS: @(psFailed ? NSOnState : NSOffState)};
     }
     [self updateChannel:newChannel];
 }
@@ -1280,7 +1280,7 @@ __DDLOGHERE__
 }
 
 -(NSCellStateValue ) defaultSkipModeForChannel:(NSString *) channel {
-	NSArray <NSString *> * skipChannels = @[@"amc", @"bravo", @"comedy", @"food", @"freeform", @"fx", @"hg", @"history", @"life", @"syfy", @"tbs", @"tdc", @"the discovery", @"tlc", @"tnt", @"usa"];
+	NSArray <NSString *> * skipChannels = @[@"amc", @"bravo", @"comedy", @"cw", @"food", @"freeform", @"fx", @"hg", @"history", @"life", @"syfy", @"tbs", @"tdc", @"the discovery", @"tlc", @"tnt", @"usa"];
 	NSString * lowerChannel = channel.lowercaseString;
 	for (NSString * skipChannel in skipChannels) {
 		if ([lowerChannel hasPrefix:skipChannel]) {
@@ -1362,7 +1362,7 @@ __DDLOGHERE__
         }
     }
     for (MTTiVoShow * show in programs) {
-        if (!(show.protectedShow.boolValue) && ! show.isQueued ) {
+        if (!(show.protectedShow.boolValue) ) {
             NSString * channel = show.stationCallsign;
             if (channel) {
                 if ( ! [channelsTested containsObject:channel]) {

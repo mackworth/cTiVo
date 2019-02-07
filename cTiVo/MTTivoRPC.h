@@ -34,6 +34,7 @@
 -(void) sendKeyEvent: (NSString *) keyEvent withCompletion: (void (^) (void)) completionHandler;
 -(void) sendURL: (NSString *) URL;
 -(void) playOnTiVo: (NSString *) recordingId withCompletionHandler: (void (^)(BOOL success)) completionHandler;
+-(void) rebootTiVo;
 
 -(void) findSkipModeEDLForShow:(MTRPCData *) rpcData;
 -(NSArray <MTRPCData *> *) showsWaitingForSkipMode;

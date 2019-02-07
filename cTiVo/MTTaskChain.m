@@ -162,6 +162,13 @@ __DDLOGHERE__
 			[task cancel];
         }
     }
+	if ([_dataSource isKindOfClass:[NSPipe class]]) { //Data source from pipe
+		[[(NSPipe *)_dataSource fileHandleForReading] closeFile];
+	}
+	if ([_dataSource isKindOfClass:[NSFileHandle class]]) {//Data source from filehandel
+		[(NSFileHandle *)_dataSource closeFile];
+	}
+
     _isRunning = NO;
 }
 

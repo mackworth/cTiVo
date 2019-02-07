@@ -1389,7 +1389,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ]; then\n  cp $SRCROOT/cTiVo/Crashlytics.sh $UNLOCALIZED_RESOURCES_FOLDER_PATH/\n  $SRCROOT/cTiVo/Crashlytics.sh\nfi";
+			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ]; then\n  cp $SRCROOT/cTiVo/Crashlytics.sh $UNLOCALIZED_RESOURCES_FOLDER_PATH/\n  $SRCROOT/cTiVo/Crashlytics.sh\nfi\n";
 		};
 		D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1403,7 +1403,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "git=`sh /etc/profile; which git`\nappBuild=`\"$git\" rev-list HEAD --count | awk '{print $1 + 50}'`\nif [ $CONFIGURATION = \"Debug\" ]; then\nbranchName=`\"$git\" rev-parse --abbrev-ref HEAD`\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild-$branchName branch\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild-$branchName branch\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist\"\nelse\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist\"\nfi\necho \"Incremented the build number ${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"";
+			shellScript = "git=`sh /etc/profile; which git`\nappBuild=`\"$git\" rev-list HEAD --count | awk '{print $1 + 50}'`\nif [ $CONFIGURATION = \"Debug\" ]; then\nbranchName=`\"$git\" rev-parse --abbrev-ref HEAD`\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild-$branchName branch\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild-$branchName branch\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist\"\nelse\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist\"\nfi\necho \"Incremented the build number ${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
 		};
 		D2AA030A1833F09B00AEE326 /* Sign Bundled Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;

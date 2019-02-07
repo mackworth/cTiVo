@@ -16,6 +16,8 @@
 #include "NSURL+MTURLExtensions.h"
 #include "NSDate+Tomorrow.h"
 #include "MTWeakTimer.h"
+#include "NSTask+RunTask.h"
+
 #import <Carbon/Carbon.h>
 
 #ifndef DEBUG
@@ -80,7 +82,6 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 
 @property (nonatomic, strong) NSTimer * performanceTimer;
 @property (nonatomic, assign) int numZeroSpeeds;
-@property (nonatomic, assign) BOOL useTransportStream;
 
 @property (atomic, assign) ssize_t  totalDataRead, totalDataDownloaded;
 
@@ -126,7 +127,7 @@ __DDLOGHERE__
 #endif
 		_exportSubtitles = nil;
         _urlReadPointer = 0;
-        _useTransportStream = NO;
+        _useTransportStream = nil;
         _downloadStatus = @(0);
         _baseFileName = nil;
         _processProgress = 0.0;
@@ -155,6 +156,7 @@ __DDLOGHERE__
         download.markCommercials = _markCommercials;
         download.genTextMetaData = _genTextMetaData;
         [download prepareForDownload:NO];
+		[download checkTransportStream];
         [download setupNotifications];
     }
     return download;
@@ -173,6 +175,24 @@ __DDLOGHERE__
 		}
 	}
 }
+-(void) checkTransportStream {
+	if (self.show.inProgress.boolValue || !self.show.tiVo) return; //not set up yet
+	if (self.isDone) return; //no reason to change
+	if (self.encodeFormat.isTestPS) {
+		self.useTransportStream = @NO;  //if testing whether PS is bad, naturally don't use TS
+	} else if (!self.useTransportStream) {
+		NSString * channelName = self.show.stationCallsign;
+		NSCellStateValue channelUsesTS =     [ tiVoManager useTSForChannel:channelName];
+		NSCellStateValue channelPSFailed =    [tiVoManager failedPSForChannel:channelName];
+		BOOL alwaysDownloadTS = [[NSUserDefaults standardUserDefaults] boolForKey:kMTDownloadTSFormat];
+
+		self.useTransportStream =
+			@(self.show.tiVo.supportsTransportStream &&
+			 ( (alwaysDownloadTS && channelUsesTS != NSOffState) ||  //always use TS (if user hasn't specified PS for this channel) OR
+			   (channelUsesTS == NSOnState) || //user specified TS for this channel OR
+			   (channelUsesTS == NSMixedState && channelPSFailed == NSOnState ))); //user didn't care, but we've seen need
+	}
+}
 
 //always use this initializer; not init
 +(MTDownload *) downloadForShow:(MTTiVoShow *) show withFormat: (MTFormat *) format withQueueStatus: (NSInteger) status {
@@ -180,19 +200,15 @@ __DDLOGHERE__
     download.show = show;
     download.encodeFormat = format;
     download.downloadStatus= @(status);
+	[download checkTransportStream];
     [download setupNotifications];
     return download;
 }
 
 +(MTDownload *) downloadTestPSForShow:(MTTiVoShow *) show {
-    MTFormat * testFormat = [tiVoManager testPSFormat];
-    MTDownload * download = [self downloadForShow:show withFormat: testFormat withQueueStatus: kMTStatusNew];
-    download.exportSubtitles = @NO;
-    download.skipCommercials = NO;
-	download.useSkipMode = NO;
-	download.markCommercials = NO;
-    download.genTextMetaData = @NO;
-    download.numRetriesRemaining = 0;
+    MTDownload * download = [self downloadForShow:show
+									   withFormat: [tiVoManager testPSFormat]
+								  withQueueStatus: kMTStatusNew];
     return download;
 }
 
@@ -347,6 +363,7 @@ __DDLOGHERE__
 	[encoder encodeObject:[NSNumber numberWithBool:self.addToiTunesWhenEncoded] forKey: kMTSubscribediTunes];
 	[encoder encodeObject:@(self.skipCommercials) forKey: kMTSubscribedSkipCommercials];
 	[encoder encodeObject:@(self.useSkipMode) forKey: kMTSubscribedUseSkipMode];
+	[encoder encodeObject:self.useTransportStream forKey: kMTSubscribedUseTS];
 	[encoder encodeObject:@(self.markCommercials) forKey: kMTSubscribedMarkCommercials];
 	[encoder encodeObject:self.encodeFormat.name forKey:kMTQueueFormat];
 	[encoder encodeObject:self.downloadStatus forKey: kMTQueueStatus];
@@ -373,6 +390,7 @@ __DDLOGHERE__
 								   self.show.showTitle, kMTQueueTitle,
 								   self.show.tiVoName, kMTQueueTivo,
 								   nil];
+	if (self.useTransportStream) [result setValue:self.useTransportStream forKey:kMTSubscribedUseTS];
 	if (self.encodeFormat.name) [result setValue:self.encodeFormat.name forKey:kMTQueueFormat];
 	if (self.downloadStatus)    [result setValue:self.downloadStatus forKey:kMTQueueStatus];
 	if (self.encodeFilePath)    [result setValue:self.encodeFilePath forKey: kMTQueueFinalFile];
@@ -402,6 +420,7 @@ __DDLOGHERE__
 	fakeShow.showID   = [(NSNumber *)queueEntry[kMTQueueID] intValue];
 	[fakeShow setShowSeriesAndEpisodeFrom: queueEntry[kMTQueueTitle]];
 	fakeShow.tempTiVoName = queueEntry[kMTQueueTivo] ;
+	fakeShow.protectedShow = @YES; //until we matchup with show or not.
 
     MTFormat * format = [tiVoManager findFormat: queueEntry[kMTQueueFormat]]; //bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is wrong for completed/failed entries
     NSInteger queueStatus = ((NSNumber *)queueEntry[kMTQueueStatus]).integerValue;
@@ -418,13 +437,13 @@ __DDLOGHERE__
 	download.addToiTunesWhenEncoded = [queueEntry[kMTSubscribediTunes ]  boolValue];
 	download.skipCommercials = [queueEntry[kMTSubscribedSkipCommercials ]  boolValue];
 	download.useSkipMode = [queueEntry[kMTSubscribedUseSkipMode ]  boolValue]; //could be nil, but that works.
+	download.useTransportStream = (NSNumber *) queueEntry[kMTSubscribedUseTS ];
 	download.markCommercials = [queueEntry[kMTSubscribedMarkCommercials ]  boolValue];
 
 	if (download.isInProgress || download.downloadStatus.intValue == kMTStatusAwaitingPostCommercial) {
 		download.downloadStatus = @kMTStatusNew;		//until we can launch an in-progress item
 	}
 	download.encodeFilePath = queueEntry[kMTQueueFinalFile];
-	download.show.protectedShow = @YES; //until we matchup with show or not.
 	download.genTextMetaData = queueEntry[kMTQueueGenTextMetaData]; if (!download.genTextMetaData) download.genTextMetaData= @(NO);
 #ifndef deleteXML
 	download.genXMLMetaData = queueEntry[kMTQueueGenXMLMetaData]; if (!download.genXMLMetaData) download.genXMLMetaData= @(NO);
@@ -444,6 +463,7 @@ __DDLOGHERE__
 //		self.simultaneousEncode	 =   [decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedSimulEncode];
 		self.skipCommercials   =     [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedSkipCommercials] boolValue];
 		self.useSkipMode   =    [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedUseSkipMode] boolValue];
+		self.useSkipMode   =    [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedUseTS] boolValue];
 		self.markCommercials   =    [[decoder decodeObjectOfClass:[NSNumber class] forKey: kMTSubscribedMarkCommercials] boolValue];
 		NSString * encodeName	 = [decoder decodeObjectOfClass:[NSString class] forKey:kMTQueueFormat];
 		self.encodeFormat =	[tiVoManager findFormat: encodeName]; //minor bug here: will not be able to restore a no-longer existent format, so will substitue with first one available, which is then wrong for completed/failed entries
@@ -469,6 +489,7 @@ __DDLOGHERE__
 	MTTiVoShow * formerShow = self.show;
     self.show = show;
     show.isQueued = YES;
+	[self checkTransportStream];
 	if (formerShow.rpcData && !show.rpcData) show.rpcData = formerShow.rpcData;
 	if (self.downloadStatus.integerValue == kMTStatusDeleted || [formerShow.imageString isEqualToString:@"deleted"]) {
 		DDLogDetail(@"Tivo restored previously deleted show %@",show);
@@ -611,7 +632,7 @@ __DDLOGHERE__
 		return nil;
 	}
     NSString * downloadDir = [self downloadDirectory];
-    NSString * extension = self.useTransportStream ? self.encodeFormat.transportStreamExtension :
+    NSString * extension = self.useTransportStream.boolValue ? self.encodeFormat.transportStreamExtension :
                                                      self.encodeFormat.filenameExtension;
     NSString *trialEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",downloadDir,baseName,extension];
 	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tmpDir,baseName];
@@ -754,7 +775,7 @@ __DDLOGHERE__
         DDLogVerbose(@"setting decrypt path: %@", self.decryptedFilePath);
         [[NSFileManager defaultManager] createFileAtPath:self.decryptedFilePath contents:[NSData data] attributes:nil];
     }
-    NSString * extension = self.useTransportStream ? self.encodeFormat.transportStreamExtension :
+    NSString * extension = self.useTransportStream.boolValue ? self.encodeFormat.transportStreamExtension :
                                                      self.encodeFormat.filenameExtension;
 	self.encodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.downloadDirectory,self.baseFileName,extension];
 	DDLogVerbose(@"setting encodepath: %@", self.encodeFilePath);
@@ -763,7 +784,7 @@ __DDLOGHERE__
     
     self.commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,self.tmpDirectory, self.baseFileName];  //0.92 version
     DDLogVerbose(@"setting self.commercialFilePath: %@", self.commercialFilePath);
-    
+	
 	if (!self.encodeFormat.isTestPS) {
         [self.show artWorkImage];  //make sure it's available by time we finish
  	}
@@ -852,6 +873,49 @@ __DDLOGHERE__
 	return arguments;
 }
 
+-(MTTask *)mpegTask {
+	//cancels current download if MP2 file and reschedules as Program Stream
+	if (!self.useTransportStream.boolValue) {
+		DDLogReport(@"Error: only for use with Transport Stream");
+		return nil;
+	}
+	MTTask *mpegTask = [MTTask taskWithName:@"mpegCheck" download:self];
+	[mpegTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ffmpeg"]];
+	[mpegTask setArguments:@[@"-i",@"pipe:"]];
+	 
+//	[[NSFileManager defaultManager] createFileAtPath:self.mpegCheckFilePath contents:[NSData data] attributes:nil];
+//	NSFileHandle *file = [NSFileHandle fileHandleForWritingAtPath:self.mpegCheckFilePath];
+	//mpegTask.standardOutput = file;
+	mpegTask.requiresInputPipe = YES;
+	mpegTask.requiresOutputPipe = NO;
+
+	mpegTask.shouldReschedule  = NO;  //expected to fail, but other tasks should continue
+	
+	__weak __typeof__(self) weakSelf = self;
+	NSString * errFilePath = mpegTask.errorFilePath ;
+	mpegTask.cleanupHandler = ^(){
+		__typeof__(self) strongSelf = weakSelf;
+		if (! [[NSFileManager defaultManager] fileExistsAtPath:errFilePath] ) {
+			DDLogReport(@"Warning: %@: File %@ not found after mpegTask completion", strongSelf, errFilePath );
+			return;
+		}
+		NSString *log = [NSString stringWithEndOfFile:errFilePath ];
+		if ([log contains:@"mpeg2video"]) {
+			//for future reference; mpegts ==> transport stream; h264 => h.264 video; "Input #0, mpeg," == program stream
+			if (![log contains:@"mpegts"]) { //double check
+				DDLogReport(@"Error: mpegTask called on Program stream: %@", log);
+			} else {
+				self.useTransportStream = @NO;
+				DDLogReport(@"Found Mpeg2 video in Transport Stream. Rescheduling");
+				DDLogDetail(@"%@", log);
+				[self rescheduleDownloadFalseStart];
+			}
+		}
+	};
+	DDLogVerbose(@"MPEG task created");
+	return mpegTask;
+}
+
 -(MTTask *)catTask:(NSString *)outputFilePath
 {
     return [self catTask:outputFilePath withInputFile:nil];
@@ -902,7 +966,7 @@ __DDLOGHERE__
         if (badMAKRange.location != NSNotFound) {
             DDLogMajor(@"tivodecode failed with 'Invalid MAK' error message");
             DDLogDetail(@"log file: %@",[log maskMediaKeys]);
-			if (self.useTransportStream) {
+			if (self.useTransportStream.boolValue) {
 				[self notifyUserWithTitle:@"Decoding Failed" subTitle: @"Either an invalid Media Access Key or just a damaged file." ];
 			} else {
 				[self notifyUserWithTitle:@"Decoding Failed" subTitle: @"Possibly invalid Media Access Key? Or try Transport Stream, or maybe just a damaged file." ];
@@ -1088,11 +1152,40 @@ __DDLOGHERE__
 		}
 		double downloadedSize = strongSelf.totalDataDownloaded;
 		double filePercent =  downloadedSize/ strongSelf.show.fileSize*100;
+		BOOL useTS = strongSelf.useTransportStream.boolValue;
+		if (useTS) {
+			MPEGFormat format = [strongSelf videoFileType:self.decryptedFilePath];
+			strongSelf.show.rpcData.format = format;
+			//xxx currently test is redundant, but if we allow, what should happen to channel? And auto-retry w/ PS?
+			if (format == MPEGFormatMPG2) {  //MPEG2
+				strongSelf.useTransportStream = @NO;
+				if (strongSelf.encodeTask.taskFailed) {
+					//Looks like either user forced us to use TS OR channel is sending mixture of H.264 and MPEG2
+					//try again with ProgramStream
+					DDLogReport(@"For download %@, after downloading file with Transport Stream, we find it is an MPEG2, which has apparently led to a corrupted video file. Retrying with Program Stream.", strongSelf);
+					strongSelf.useTransportStream = @NO;
+					[strongSelf markMyChannelAsPSOnly];
+					return;
+				} else {
+					DDLogMajor(@"Warning: For download %@, after downloading file with Transport Stream, we find it is an MPEG2, which might lead to a corrupted video file.", strongSelf );
+				}
+			} else if (format == MPEGFormatH264) {
+				if (strongSelf.encodeTask.taskFailed) {
+					DDLogMajor(@"After downloading file with Transport Stream, encoding failed, but it's indeed an MP4 stream %@",strongSelf);
+				} else {
+					DDLogDetail(@"After downloading file with Transport Stream, encoding passed with an MP4 stream %@",strongSelf);
+				}
+			} else {
+				DDLogDetail(@"After downloading file with Transport Stream, invalid video file %@",strongSelf);
+			}
+		} else {
+			
+		}
 		if (filePercent > 0 &&
-			(filePercent < 70.0 || (!strongSelf.useTransportStream && filePercent < 80.0 ))) {
+			(filePercent < 70.0 || (!useTS && filePercent < 80.0 ))) {
 			//hmm, doesn't look like it's big enough  (80% for PS; 70% for TS
 			BOOL foundAudioOnly = NO;
-			if (!strongSelf.useTransportStream ) {
+			if (!useTS ) {
 				if ([strongSelf checkLogForAudio: errFilePath]) {
 					foundAudioOnly = YES;
 				}
@@ -1104,14 +1197,12 @@ __DDLOGHERE__
 			
 			if ( strongSelf.encodeFormat.isTestPS) {
 				// if a test, then we only try once.
-				[strongSelf markMyChannelAsTSOnly];
 				[strongSelf cancel];
-				if (foundAudioOnly) {
-					strongSelf.downloadStatus = @(kMTStatusFailed);
-				} else {
-					strongSelf.downloadStatus = @(kMTStatusDone);
-				}
 				strongSelf.processProgress = 1.0;
+				strongSelf.downloadStatus = @(kMTStatusDone);
+				if (foundAudioOnly) {
+					[strongSelf markMyChannelAsTSOnly];
+				}
 			} else if (foundAudioOnly) {
 				[strongSelf handleNewTSChannel];
 			} else {
@@ -1486,25 +1577,12 @@ __DDLOGHERE__
 {
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 
-    NSString * channelName = self.show.stationCallsign;
-
-    if (self.encodeFormat.isTestPS) {
-        self.useTransportStream = NO;  //if testing whether PS is bad, naturally don't use TS
-    } else { 
-        NSCellStateValue channelUsesTS =     [ tiVoManager useTSForChannel:channelName];
-        NSCellStateValue channelPSFailed =    [tiVoManager failedPSForChannel:channelName];
-        self.useTransportStream =
-             self.show.tiVo.supportsTransportStream && (
-                [defaults boolForKey:kMTDownloadTSFormat] ||  //always use TS OR
-                channelUsesTS == NSOnState ||                   //user specified TS for this channel OR
-                (channelUsesTS == NSMixedState && channelPSFailed == NSOnState )); //user didn't care, but we've seen need
-    }
 	if (self.encodeFormat.isEncryptedDownload) {
 		self.skipCommercials = NO;
 		self.markCommercials = NO;
 		self.exportSubtitles = @NO;
 	}
-    BOOL channelCommercialsOff = [tiVoManager commercialsForChannel:channelName] == NSOffState;
+    BOOL channelCommercialsOff = [tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOffState;
     if ((channelCommercialsOff) &&
         (self.skipCommercials || self.markCommercials)) {
         //this channel doesn't use commercials
@@ -1547,7 +1625,7 @@ __DDLOGHERE__
 					@"" :
 					@" No Memory Buffer;",
                [defaults objectForKey:kMTDecodeBinary],
-               self.useTransportStream ? @"Transport Stream" : @"Program Stream"
+               self.useTransportStream.boolValue ? @"Transport Stream" : @"Program Stream"
 				);
 	self.isCanceled = NO;
 	self.isRescheduled = NO;
@@ -1606,89 +1684,118 @@ __DDLOGHERE__
         self.downloadStatus = @(kMTStatusFailed);
         return;
     }
+	MTTask * mpegTask = nil;
+	if (self.shouldCheckMPEG ) {
+		mpegTask = self.mpegTask;
+	}
+
     switch (self.taskFlowType) {
         case kMTTaskFlowNonSimu:  //Just encode with non-simul encoder
+			if (mpegTask) {
+				[taskArray addObject:@[[self catTask:self.decryptedFilePath],mpegTask]];
+			}
 			[taskArray addObject:@[encodeTask]];
 			break;
 			
-        case kMTTaskFlowSimu:  //Just encode with simul encoder
-			if (!self.mayComskipInFuture || self.downloadingShowFromMPGFile) {
-				[taskArray addObject:@[encodeTask]];
-			} else {
-				[taskArray addObject:@[encodeTask,[self catTask:self.decryptedFilePath]]];
+		case kMTTaskFlowSimu: { //Just encode with simul encoder
+			NSArray <MTTask *> * taskGroup = @[encodeTask];
+			if (self.mayComskipInFuture && ! self.downloadingShowFromMPGFile) {
+				taskGroup = [taskGroup arrayByAddingObject:[self catTask:self.decryptedFilePath]];
 			}
+			if (mpegTask) {
+				taskGroup = [taskGroup arrayByAddingObject:mpegTask];
+			}
+			[taskArray addObject: taskGroup];
 			break;
-            
-        case kMTTaskFlowSubtitles:  //Encode with non-simul encoder and subtitles
-            if (self.downloadingShowFromMPGFile) {
-                [taskArray addObject:@[self.captionTask]];
-            } else {
-                [taskArray addObject:@[self.captionTask,[self catTask:self.decryptedFilePath]]];
+		}
+		case kMTTaskFlowSubtitles: { //Encode with non-simul encoder and subtitles
+			NSArray <MTTask *> * taskGroup = @[self.captionTask];
+			if (!self.downloadingShowFromMPGFile) {
+				taskGroup = [taskGroup arrayByAddingObject:[self catTask:self.decryptedFilePath]];
             }
+			if (mpegTask) {
+				taskGroup = [taskGroup arrayByAddingObject:mpegTask];
+			}
+			[taskArray addObject: taskGroup];
 			[taskArray addObject:@[encodeTask]];
             break;
-            
-        case kMTTaskFlowSimuSubtitles:  //Encode with simul encoder and subtitles
-			if (!self.mayComskipInFuture || self.downloadingShowFromMPGFile) {
-				[taskArray addObject:@[encodeTask,self.captionTask]];
-			} else {
-				[taskArray addObject:@[encodeTask,self.captionTask, [self catTask:self.decryptedFilePath]]];
+		}
+		case kMTTaskFlowSimuSubtitles: { //Encode with simul encoder and subtitles
+			NSArray <MTTask *> * taskGroup = @[encodeTask, self.captionTask];
+			if ((self.mayComskipInFuture && ! self.downloadingShowFromMPGFile) || mpegTask) {
+				taskGroup = [taskGroup arrayByAddingObject:[self catTask:self.decryptedFilePath]];
 			}
+			if (mpegTask) {
+				taskGroup = [taskGroup arrayByAddingObject:mpegTask];
+			}
+			[taskArray addObject: taskGroup];
             break;
+		}
         //the rest can't have mayComSkipInFuture
         case kMTTaskFlowSkipcom:  //Encode with non-simul encoder skipping commercials
-        case kMTTaskFlowSimuSkipcom:  //Encode with simul encoder skipping commercials
-            [taskArray addObject:@[self.commercialTask]]; //must be complete before encode to skip
-            [taskArray addObject:@[encodeTask]];
+		case kMTTaskFlowSimuSkipcom:  {//Encode with simul encoder skipping commercials
+			if (mpegTask) {
+				[taskArray addObject:@[[self catTask:self.decryptedFilePath],mpegTask]];
+			}
+			[taskArray addObject: @[self.commercialTask]];
+			[taskArray addObject:@[encodeTask]];
             break;
-            
+		}
         case kMTTaskFlowSkipcomSubtitles:  //Encode with non-simul encoder skipping commercials and subtitles
-        case kMTTaskFlowSimuSkipcomSubtitles:  //Encode with simul encoder skipping commercials and subtitles
-			[taskArray addObject:@[self.captionTask,[self catTask:self.decryptedFilePath]]];
+		case kMTTaskFlowSimuSkipcomSubtitles: { //Encode with simul encoder skipping commercials and subtitles
+			NSArray <MTTask *> * taskGroup = @[self.captionTask,[self catTask:self.decryptedFilePath]];
+			if (mpegTask) {
+				taskGroup = [taskGroup arrayByAddingObject:mpegTask];
+			}
+			[taskArray addObject: taskGroup];
 			[taskArray addObject:@[self.commercialTask]];
 			[taskArray addObject:@[encodeTask]];
             break;
-            
+		}
         case kMTTaskFlowMarkcom:  //Encode with non-simul encoder marking commercials
-            [taskArray addObject:@[encodeTask, self.commercialTask]];
+			if (mpegTask) {
+				[taskArray addObject:@[mpegTask,[self catTask:self.decryptedFilePath]]];
+			}
+			[taskArray addObject:@[encodeTask, self.commercialTask]];
             break;
             
-        case kMTTaskFlowMarkcomSubtitles:  //Encode with non-simul encoder marking commercials and subtitles
-            if(self.downloadingShowFromMPGFile) {
-                assert(self.captionTask);
-                [taskArray addObject:@[self.captionTask]];
-            } else {
-                [taskArray addObject:@[self.captionTask,[self catTask:self.decryptedFilePath]]];
-            }
+		case kMTTaskFlowMarkcomSubtitles: { //Encode with non-simul encoder marking commercials and subtitles
+			NSArray <MTTask *> * taskGroup = @[self.captionTask];
+			if (!self.downloadingShowFromMPGFile || mpegTask) {
+				taskGroup = [taskGroup arrayByAddingObject:[self catTask:self.decryptedFilePath]];
+				if (mpegTask) {
+					taskGroup = [taskGroup arrayByAddingObject:mpegTask];
+				}
+			}
+			[taskArray addObject: taskGroup];
+			
             [taskArray addObject:@[encodeTask, self.commercialTask]];
             break;
-            
-        case kMTTaskFlowSimuMarkcom:  //Encode with simul encoder marking commercials
-            if(self.downloadingShowFromMPGFile) {
-                [taskArray addObject:@[encodeTask]];
-            } else {
-                if ([self canPostDetectCommercials]) {
-                    [taskArray addObject:@[encodeTask]];
-                } else {
-                    [taskArray addObject:@[encodeTask,[self catTask:self.decryptedFilePath] ]];
-                }
-            }
-            [taskArray addObject:@[self.commercialTask]];
+		}
+		case kMTTaskFlowSimuMarkcom: { //Encode with simul encoder marking commercials
+			NSArray <MTTask *> * taskGroup = @[encodeTask];
+			if ((![self canPostDetectCommercials] && ! self.downloadingShowFromMPGFile) || mpegTask) {
+				taskGroup = [taskGroup arrayByAddingObject:[self catTask:self.decryptedFilePath]];
+				if (mpegTask) {
+					taskGroup = [taskGroup arrayByAddingObject:mpegTask];
+				}
+			}
+			[taskArray addObject: taskGroup];
+			[taskArray addObject:@[self.commercialTask]];
            break;
-            
-        case kMTTaskFlowSimuMarkcomSubtitles:  //Encode with simul encoder marking commercials and subtitles
-            if(self.downloadingShowFromMPGFile) {
-                [taskArray addObject:@[self.captionTask,encodeTask]];
-            } else {
-                if ([self canPostDetectCommercials]) {
-                    [taskArray addObject:@[encodeTask, self.captionTask]];
-                } else {
-                    [taskArray addObject:@[encodeTask, self.captionTask,[self catTask:self.decryptedFilePath]]];
-                }
-            }
-            [taskArray addObject:@[self.commercialTask]];
+		}
+		case kMTTaskFlowSimuMarkcomSubtitles: { //Encode with simul encoder marking commercials and subtitles
+			NSArray <MTTask *> * taskGroup = @[encodeTask, self.captionTask];
+			if ((![self canPostDetectCommercials] && ! self.downloadingShowFromMPGFile) || mpegTask) {
+				taskGroup = [taskGroup arrayByAddingObject:[self catTask:self.decryptedFilePath]];
+				if (mpegTask) {
+					taskGroup = [taskGroup arrayByAddingObject:mpegTask];
+				}
+			}
+			[taskArray addObject: taskGroup];
+			[taskArray addObject:@[self.commercialTask]];
            break;
-            
+		}
         default:
             break;
     }
@@ -1728,7 +1835,7 @@ __DDLOGHERE__
     NSURL * downloadURL = nil;
     if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {
         downloadURL = self.show.downloadURL;
-        if (self.useTransportStream) {
+        if (self.useTransportStream.boolValue) {
             NSString * downloadString = [downloadURL absoluteString];
             if (![downloadString hasSuffix:@"&Format=video/x-tivo-mpeg-ts"]) {
                 if ([downloadString hasSuffix:@"&Format=video/x-tivo-mpeg"]) {
@@ -1928,7 +2035,7 @@ __DDLOGHERE__
 		}];
 	}
 }
-
+#pragma mark - Post Processing
 -(void) finalFinalProcessing {
 	//allows for delayed Marking of commercials
 	self.processProgress = 1.0;
@@ -2383,9 +2490,9 @@ __DDLOGHERE__
                                                    @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
 #endif
                 DDLogMajor(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
+				[self launchUserScript];
             }
             self.downloadStatus = @(kMTStatusNew);
-			[self launchUserScript];
         }
     }
 	[self checkQueue];
@@ -2632,9 +2739,12 @@ NSInteger diskWriteFailure = 123;
     self.totalDataDownloaded += data.length;
     if (self.totalDataDownloaded > 8000000 && self.encodeFormat.isTestPS) {
         //we've gotten 8MB on our testTS run, so looks good.  Mark it and finish up...
+		DDLogMajor(@"Program stream test passed for %@ on %@",self, self.show.stationCallsign);
+		self.show.rpcData.format = MPEGFormatMPG2;
         [tiVoManager setFailedPS:NO forChannelNamed: self.show.stationCallsign];
         [connection cancel];
 		[self connectionDidFinishLoading:connection];
+		self.processProgress = 1.0;
         return;
     }
     if (self.urlBuffer) {
@@ -2798,7 +2908,7 @@ NSInteger diskWriteFailure = 123;
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);
         double filePercent = downloadedFileSize / self.show.fileSize*100;
         DDLogDetail(@"finished loading TiVo file: %0.1f of %0.1f KB expected; %0.1f%% ", downloadedFileSize/1000, self.show.fileSize/1000, filePercent);
-		if (filePercent > 80.0 || (self.useTransportStream && filePercent > 70.0 )) {
+		if (filePercent > 80.0 || (self.useTransportStream.boolValue && filePercent > 70.0 )) {
 			//hmm, looks like it's big enough  (80% for PS; 70% for TS
 			self.show.fileSize = downloadedFileSize;  //More accurate file size
             if ([self.bufferFileReadHandle isKindOfClass:[NSFileHandle class]]) {
@@ -2840,11 +2950,29 @@ NSInteger diskWriteFailure = 123;
 
 #pragma mark - Transport Stream detection
 
+-(MPEGFormat)videoFileType: (NSString *) filePath {
+	NSString * ffmpegPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ffmpeg" ];
+	
+	NSString * ffmpegOut = [NSTask runProgram:ffmpegPath withArguments:@[@"-i", filePath]];
+	if (ffmpegOut.length == 0 || [ffmpegOut contains:@"No such file"]) {
+		DDLogReport(@"Invalid file %@ for %@", filePath, self);
+		return MPEGFormatUnknown;
+	}
+	DDLogDetail(@"H264check: %@", ffmpegOut);
+	if ([ffmpegOut contains:@"mpeg2video"]) {
+		return MPEGFormatMPG2;
+	} else if ([ffmpegOut contains:@"h264"]) {
+		return MPEGFormatH264;
+	} else {
+		return MPEGFormatUnknown;
+	}
+}
+
 -(BOOL) checkLogForAudio: (NSString *) filePath {
 	if (!filePath) return NO;
 	//if we find audio required, then mark channel as TS.
 	//If not, then IF it was a successfulencode, then mark as not needing TS
-	if ( ! self.useTransportStream) {
+	if ( ! self.useTransportStream.boolValue) {
 		//If we did Program Stream and encoder says "I only see Audio", then probably TS required
 		NSArray * audioOnlyStrings = @[
 									   @"Video stream is mandatory!",       //mencoder:
@@ -2865,12 +2993,28 @@ NSInteger diskWriteFailure = 123;
 	return NO;
 }
 
+-(void) markMyChannelAsPSOnly {
+	NSString * channelName = self.show.stationCallsign;
+	DDLogMajor(@"Due to problems with %@, converting %@ to Program Stream only",self, channelName);
+	if ( [tiVoManager failedPSForChannel:channelName] != NSOffState ) {
+		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSOnState;
+		[tiVoManager setFailedPS:NO forChannelNamed:channelName];
+		if (notify) {
+			//only notify if we've been forcing TS)
+			[self transientNotifyWithTitle:@"MPEG2 Channel" subTitle:[NSString stringWithFormat:@"Due to corrupted video, marking %@ as Program Stream",channelName] ];
+		}
+	}
+}
+
+
 -(void) markMyChannelAsTSOnly {
 	NSString * channelName = self.show.stationCallsign;
 	DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self, channelName);
+	self.show.rpcData.format = MPEGFormatH264;
 	if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
+		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSOffState;
 		[tiVoManager setFailedPS:YES forChannelNamed:channelName];
-		if ([tiVoManager useTSForChannel:channelName] == NSOffState && !self.encodeFormat.isTestPS) {
+		if (notify && !self.encodeFormat.isTestPS) {
 			//only notify if we're not (testing, OR previously seen, OR forcing PS)
 			[self transientNotifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName] ];
 		}
@@ -2882,6 +3026,7 @@ NSInteger diskWriteFailure = 123;
 	//On a regular file, throw away audio-only file and try again
 	[self deleteVideoFile];
 	if (self.show.tiVo.supportsTransportStream) {
+		self.useTransportStream = @YES;
 		[self rescheduleDownloadFalseStart];
 	} else {
 		[self cancel];
@@ -2938,8 +3083,12 @@ NSInteger diskWriteFailure = 123;
 	       // && !self.downloadingShowFromMPGFile);
 }
 
+-(BOOL) shouldCheckMPEG {
+	return self.useTransportStream.boolValue;
+}
+
 -(BOOL) shouldPipeFromDecrypt {
-	return (self.shouldSimulEncode || self.exportSubtitles.boolValue) ;
+	return (self.shouldSimulEncode || self.exportSubtitles.boolValue || self.shouldCheckMPEG ) ; //ts for mpegcheck
 }
 
 -(BOOL) canSkipCommercials {
@@ -3073,7 +3222,18 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(void) setEncodeFormat:(MTFormat *) encodeFormat {
-    if (_encodeFormat != encodeFormat ) {
+	if (_encodeFormat == encodeFormat ) return;
+	if (encodeFormat == [tiVoManager testPSFormat]) {
+		_encodeFormat = encodeFormat;
+		self.exportSubtitles = @NO;
+		self.skipCommercials = NO;
+		self.useSkipMode = NO;
+		self.markCommercials = NO;
+		self.genTextMetaData = @NO;
+		self.numRetriesRemaining = 0;
+		self.useTransportStream = @NO;
+		self.addToiTunesWhenEncoded = NO;
+	} else {
 		BOOL wasNil = _encodeFormat == nil;
         BOOL iTunesWasDisabled = ![self canAddToiTunes];
         BOOL skipWasDisabled = ![self canSkipCommercials];

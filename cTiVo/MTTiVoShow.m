@@ -323,7 +323,6 @@ __DDLOGHERE__
 
 -(void) setClipMetaDataId:(NSString *)clipMetaDataId {
 	//note we have to notify even if clipMetaData is nil, as this is the signal when we've completed one last check at timer expiry
-	BOOL notify = _clipMetaDataId != clipMetaDataId || self.isQueued;
 	if ((_clipMetaDataId == nil) && (clipMetaDataId != nil)) {
 		//newly arrived (although maybe from cache at startup)
 		NSTimeInterval timeLeft = self.timeLeftTillRPCInfoWontCome;
@@ -335,8 +334,8 @@ __DDLOGHERE__
 			DDLogMajor(@"SkipMode MetaData arrived %@for %@; %d:%04.1f (hr:min) after show ended", (timeLeft < 0) ? @"late " : @"", self, hrs, min);
 		}
 	}
-	_clipMetaDataId = clipMetaDataId;
-	if (notify) {
+	if (_clipMetaDataId != clipMetaDataId) {
+		_clipMetaDataId = clipMetaDataId;
 		DDLogDetail(@"Notifying skipMode from %@", self);
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
 	} else {
@@ -754,22 +753,26 @@ __DDLOGHERE__
 }
 
 -(NSString *) h264String {
-    NSCellStateValue state = [tiVoManager failedPSForChannel:self.stationCallsign];
-    switch (state) {
-        case NSOffState: {
-            return @"-";
-        }
-        case NSOnState: {
-            return @"√";
-        }
-        default: {
-            return @"";
-        }
-    }
+	if (self.rpcData.format != MPEGFormatUnknown) {
+		return [self checkString:self.rpcData.format == MPEGFormatH264 ];
+	} else {
+		NSCellStateValue state = [tiVoManager failedPSForChannel:self.stationCallsign];
+		switch (state) {
+			case NSOffState: {
+				return @"-";
+			}
+			case NSOnState: {
+				return @"√";
+			}
+			default: {
+				return @"";
+			}
+		}
+	}
 }
 
 -(NSString *)checkString:(BOOL) test {
-  return test ? @"✔" : @"";
+  return test ? @"✔" : @"--";
 }
 
 -(NSString*) lengthString {

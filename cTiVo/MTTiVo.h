@@ -62,6 +62,7 @@
 -(void) stopRecordingTiVoShows: (NSArray <MTTiVoShow *> *) shows;
 -(void) sendKeyEvent: (NSString *) keyEvent;
 -(void) sendURL: (NSString *) URL;
+-(void) reboot;
 
 -(void) loadSkipModeInfoForShow:(MTTiVoShow *) show;
 -(void) findCommercialsForShow:(MTTiVoShow *) show interrupting:(BOOL) interrupt; //results when rpcData is set

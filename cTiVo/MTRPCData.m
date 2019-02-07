@@ -20,6 +20,7 @@ static NSString * kImageURL  = @"imageURL";
 static NSString * kSeries = @"title";
 static NSString * kSegments = @"segments";
 static NSString * kEDL = @"EDLList";
+static NSString * kFormat = @"Format";
 
 
 - (instancetype)init {
@@ -41,6 +42,7 @@ static NSString * kEDL = @"EDLList";
 		_series =      [coder decodeObjectOfClass:[NSString class] forKey:  kSeries];
 		_programSegments =      [coder decodeObjectOfClass:[NSArray class] forKey:  kSegments];
 		_edlList =      [coder decodeObjectOfClass:[NSArray class] forKey:  kEDL];
+		_format =  [coder decodeIntegerForKey: kFormat];
 
     }
     return self;
@@ -68,6 +70,7 @@ static NSString * kEDL = @"EDLList";
 	 [coder encodeObject: _clipMetaDataId forKey:kClipMetaData];
      [coder encodeObject:_imageURL forKey:kImageURL];
 	 [coder encodeObject:_series forKey:kSeries];
+	 [coder encodeInteger:_format forKey:kFormat];
 	if (_edlList) {
 		[coder encodeObject:_edlList forKey:kEDL];
 	} else {
@@ -76,7 +79,7 @@ static NSString * kEDL = @"EDLList";
 }
 
 -(NSString *)description {
-	return [NSString stringWithFormat:@"%@: S%0.2dE%0.2d (%@); %@; clip:%@ %@", self.series, (int)self.seasonNum, (int)self.episodeNum, self.genre, self.recordingID, self.clipMetaDataId, self.edlList != nil && self.edlList.count == 0 ? @"Failed" : @""];
+	return [NSString stringWithFormat:@"%@: S%0.2dE%0.2d (%@); %@; clip:%@ %@; format: %@", self.series, (int)self.seasonNum, (int)self.episodeNum, self.genre, self.recordingID, self.clipMetaDataId, self.edlList != nil && self.edlList.count == 0 ? @"Failed" : @"", @(self.format)];
 }
 
 

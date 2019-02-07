@@ -32,6 +32,7 @@
                                         *genXMLMetaData,
                                         *includeAPMMetaData,
 #endif
+										*useTransportStream,
                                         *exportSubtitles;
 @property (nonatomic, assign) BOOL      addToiTunesWhenEncoded,
 										useSkipMode,

@@ -402,7 +402,13 @@ __DDLOGHERE__
         checkBox.target = myController;
         checkBox.action = @selector(changeSkip:);
         [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSkip];
-        
+	} else if ([tableColumn.identifier isEqualToString:@"UseTS"]) {
+		MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+		[checkBox setOn: download.useTransportStream.boolValue];
+		checkBox.owner = download;
+		checkBox.target = myController;
+		checkBox.action = @selector(changeUseTS:);
+		[checkBox setEnabled: download.isNew && !protected && download.show.tiVo.supportsTransportStream];
  	} else if ([tableColumn.identifier isEqualToString:@"Mark"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.markCommercials];
