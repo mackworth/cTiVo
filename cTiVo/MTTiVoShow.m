@@ -754,7 +754,11 @@ __DDLOGHERE__
 
 -(NSString *) h264String {
 	if (self.rpcData.format != MPEGFormatUnknown) {
-		return [self checkString:self.rpcData.format == MPEGFormatH264 ];
+		if ([self checkString:self.rpcData.format == MPEGFormatH264 ]) {
+			return @"✔";
+		} else {
+			return @"--";
+		}
 	} else {
 		NSCellStateValue state = [tiVoManager failedPSForChannel:self.stationCallsign];
 		switch (state) {
@@ -772,7 +776,7 @@ __DDLOGHERE__
 }
 
 -(NSString *)checkString:(BOOL) test {
-  return test ? @"✔" : @"--";
+  return test ? @"✔" : @"";
 }
 
 -(NSString*) lengthString {

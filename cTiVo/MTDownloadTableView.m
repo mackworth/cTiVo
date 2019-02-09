@@ -292,6 +292,13 @@ __DDLOGHERE__
     BOOL seriesColumn = [tableColumn.identifier isEqualToString:@"Series"];
     BOOL stageColumn = [tableColumn.identifier isEqualToString:@"DL Stage"];
 
+	MTCheckBox * checkBox = nil;
+	if ([result isKindOfClass:[MTCheckBox class]]) {
+		checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
+		checkBox.target = myController;
+		checkBox.owner = download;
+		checkBox.alignment = NSCenterTextAlignment;
+	}
 	if (programColumn || seriesColumn || stageColumn) {
         //Progress status should show in first visible of DL Stage, then Programs, then Series
  		NSString * cellVal;
@@ -355,14 +362,10 @@ __DDLOGHERE__
 		   cell.textField.hidden= NO;
 		}
     } else if ([tableColumn.identifier isEqualToString:@"iTunes"]) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.addToiTunesWhenEncoded];
         [checkBox setEnabled: !download.isCompletelyDone && !protected &&
                               download.encodeFormat.canAddToiTunes ];
-        checkBox.target = myController;
         checkBox.action = @selector(changeiTunes:);
-         checkBox.owner = download;
-
 	} else if ([tableColumn.identifier isEqualToString:@"icon"]) {
         NSString * imageName = download.imageString;
            DDLogVerbose(@"Icon: %@ for %@",imageName, download.show.showTitle);
@@ -396,44 +399,22 @@ __DDLOGHERE__
 		result.imageView.frame = CGRectMake(leftMargin, topMargin, height, height);
 		return result;
 	} else if ([tableColumn.identifier isEqualToString:@"Skip"]) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.skipCommercials];
-        checkBox.owner = download;
-        checkBox.target = myController;
         checkBox.action = @selector(changeSkip:);
         [checkBox setEnabled: download.isNew && !protected && download.encodeFormat.canSkip];
 	} else if ([tableColumn.identifier isEqualToString:@"UseTS"]) {
-		MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
 		[checkBox setOn: download.useTransportStream.boolValue];
-		checkBox.owner = download;
-		checkBox.target = myController;
 		checkBox.action = @selector(changeUseTS:);
 		[checkBox setEnabled: download.isNew && !protected && download.show.tiVo.supportsTransportStream];
  	} else if ([tableColumn.identifier isEqualToString:@"Mark"]) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.markCommercials];
-        checkBox.owner = download;
-        checkBox.target = myController;
         checkBox.action = @selector(changeMark:);
 		int status = download.downloadStatus.intValue;
 		[checkBox setEnabled: (download.isNew || status == kMTStatusSkipModeWaitEnd || status == kMTStatusAwaitingPostCommercial ||
 							   (download.isInProgress && download.useSkipMode) ) &&
 		 						!protected && download.encodeFormat.canMarkCommercials];
-        
-#ifndef deleteXML
- 	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: download.genXMLMetaData.boolValue];
-        checkBox.owner = download;
-        checkBox.target = myController;
-        checkBox.action = @selector(changeXML:);
-		checkBox.enabled = !download.isDone && !protected;
-#endif
 	} else if ([tableColumn.identifier isEqualToString:@"UseSkipMode"]) {
-		MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
 		[checkBox setOn: download.useSkipMode];
-		checkBox.owner = download;
-		checkBox.target = myController;
 		checkBox.action = @selector(changeUseSkipMode:);
 		int status = download.downloadStatus.intValue;
 		[checkBox setEnabled:
@@ -445,35 +426,17 @@ __DDLOGHERE__
 		 	(download.encodeFormat.canMarkCommercials || download.encodeFormat.canSkip)];
 		
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.genTextMetaData.boolValue];
-        checkBox.target = myController;
         checkBox.action = @selector(changepyTiVo:);
-        checkBox.owner = download;
 		checkBox.enabled = !download.isDone && !protected;
 	} else if ([tableColumn.identifier isEqualToString:@"Subtitles"]) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         [checkBox setOn: download.exportSubtitles.boolValue];
-        checkBox.target = myController;
         checkBox.action = @selector(changeSubtitle:);
-        checkBox.owner = download;
 		checkBox.enabled = download.isNew && !protected;
 	} else if ([tableColumn.identifier isEqualToString:@"Delete"]) {
-		MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
 		[checkBox setOn: download.deleteAfterDownload.boolValue];
-		checkBox.target = myController;
 		checkBox.action = @selector(changeDelete:);
-		checkBox.owner = download;
 		checkBox.enabled = !download.isCompletelyDone && !protected ;
-#ifndef deleteXML
-	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        [checkBox setOn: download.includeAPMMetaData.boolValue && download.encodeFormat.canAcceptMetaData];
-        checkBox.target = myController;
-        checkBox.action = @selector(changeMetadata:);
-        checkBox.owner = download;
-		checkBox.enabled = download.encodeFormat.canAcceptMetaData && !download.isDone && !protected;
-#endif
   	} else if ([tableColumn.identifier isEqualToString:@"Date"]) {
 		if ([tableColumn width] > 135) {
 			textVal = thisShow.showMediumDateString;
@@ -497,7 +460,7 @@ __DDLOGHERE__
     } else if ([tableColumn.identifier compare:@"H.264"] == NSOrderedSame) {
         textVal = thisShow.h264String;
         result.textField.alignment = NSCenterTextAlignment;
-        result.toolTip =@"Does this channel use H.264 compression?";
+        result.toolTip =@"Does this show (✔) or channel (√) use H.264 compression v. MPEG2 ( -- or -)?";
 	} else if ([tableColumn.identifier isEqualToString:@"Channel"]) {
 		textVal = thisShow.channelString;
 	} else if ([tableColumn.identifier isEqualToString:@"Size"]) {

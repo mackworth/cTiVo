@@ -50,8 +50,6 @@
 
 #define kMTNotificationUserCanceledQuit @"kMTNotificationUserCanceledQuit" 
 
-#define deleteXML 1   //placeholder to store deleted code in case we decide to restore XML export; need to add to downloadTable, subTable, menu and pref NIBx also
-
 //Download Status  Note: at some time in future, reorder back to normal (and move to 10x to allow new numbers.
 #define kMTStatusNew 0
 #define kMTStatusSkipModeWaitInitial 17  //Waiting before download
@@ -103,9 +101,6 @@
 #define kMTSubscribedMarkCommercials @"markCommercials"
 #define kMTSubscribedIncludeSuggestions @"includeSuggestions"
 #define kMTSubscribedGenTextMetaData     @"GenTextMetadata"
-#ifndef deleteXML
-#define kMTSubscribedGenXMLMetaData	    @"GenXMLMetadata"
-#endif
 #define kMTSubscribedIncludeAPMMetaData  @"IncludeAPMMetaData"
 #define kMTSubscribedExportSubtitles  @"ExportSubtitles"
 #define kMTSubscribedPreferredTiVo  @"PreferredTiVo"
@@ -130,9 +125,6 @@
 #define kMTQueueDirectory @"QueueDirectory"
 #define kMTQueueFinalFile @"QueueFileName"
 #define kMTQueueGenTextMetaData     @"QueueGenTextMetadata"
-#ifndef deleteXML
-#define kMTQueueGenXMLMetaData	    @"QueueGenXMLMetadata"
-#endif
 #define kMTQueueIncludeAPMMetaData  @"QueueIncludeAPMMetaData"
 #define kMTQueueExportSubtitles  @"QueueExportSubtitles"
 #define kMTQueueDeleteAfterDownload  @"QueueDeleteAfterDownload"
@@ -228,11 +220,6 @@
 #define kMTExportTextMetaData @"ExportTextMetaData"  // Whether to export text metadata for PyTivo
 #define kMTKeepSRTs            @"KeepSRTs"           // Whether to keep SRTs when embedded in main file time? NO GUI
 #define kMTAllowMP2InTS        @"AllowMP2InTS"       // Whether to reject MPEG2 streams downloaded in Transport Stream?
-
-#ifndef deleteXML
-#define kMTExportTivoMetaData @"ExportTivoMetaData"  // Whether to export XML metadata
-#define kMTExportMetaData @"ExportMetaData"          // Whether to export metadata with Atomic Parsley
-#endif
 
 #define kMTScheduledOperations @"ScheduledOperations"// Whether to run queue at a scheduled time;
 #define kMTScheduledStartTime  @"ScheduledStartTime" // NSDate when to start queue

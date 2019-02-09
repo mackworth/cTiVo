@@ -301,15 +301,6 @@ static NSDateFormatter *dateFormatter;
 		[checkBox setEnabled:  [thisSubscription canMarkCommercials] ||  [thisSubscription canSkipCommercials]] ;
 		[checkBox setOn: thisSubscription.useSkipMode.boolValue];
 		checkBox.owner = thisSubscription;
-#ifndef deleteXML
-	} else if ([tableColumn.identifier isEqualToString:@"XML"]) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        checkBox.target = myController;
-        checkBox.action = @selector(changeXML:);
-        [checkBox setOn: thisSubscription.genXMLMetaData.boolValue];
-        checkBox.owner = thisSubscription;
-		checkBox.enabled = YES;		
-#endif
 	} else if ([tableColumn.identifier isEqualToString:@"pyTiVo"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         checkBox.target = myController;
@@ -331,15 +322,6 @@ static NSDateFormatter *dateFormatter;
 		[checkBox setOn: thisSubscription.deleteAfterDownload.boolValue];
 		checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;
-#ifndef deleteXML
-	} else if ([tableColumn.identifier isEqualToString:@"Metadata"]) {
-        MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
-        checkBox.target = myController;
-        checkBox.action = @selector(changeMetadata:);
-        [checkBox setOn: thisSubscription.includeAPMMetaData.boolValue && thisSubscription.encodeFormat.canAcceptMetaData];
-        checkBox.owner = thisSubscription;
-		checkBox.enabled = thisSubscription.encodeFormat.canAcceptMetaData;
-#endif
 	} else if([tableColumn.identifier isEqualToString: @"Suggestions"]) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         checkBox.target = self;

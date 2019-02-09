@@ -721,50 +721,11 @@ __DDLOGHERE__
 	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
         //updating an individual show in download queue
             ((MTDownload *)checkbox.owner).addToiTunesWhenEncoded = !((MTDownload *)checkbox.owner).addToiTunesWhenEncoded;
-
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
 		sub.addToiTunes = [NSNumber numberWithBool: ! sub.shouldAddToiTunes];
-                
     }
 }
-#ifndef deleteXML
--(IBAction)changeXML:(id)sender
-{
-    MTCheckBox *checkbox = sender;
-	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
-        //updating an individual show in download queue
-		MTDownload * download = (MTDownload *)checkbox.owner;
-		NSNumber *newVal = [NSNumber numberWithBool: ! download.genXMLMetaData.boolValue ];
-		download.genXMLMetaData = newVal;
-		
-    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
-		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
-		NSNumber *newVal = [NSNumber numberWithBool: ! sub.genXMLMetaData.boolValue ];
-		sub.genXMLMetaData = newVal;
-                
-    }
-}
-
--(IBAction)changeMetadata:(id)sender
-{
-    MTCheckBox *checkbox = sender;
-	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
-        //updating an individual show in download queue
-		MTDownload * download = (MTDownload *)checkbox.owner;
-		NSNumber *newVal = [NSNumber numberWithBool: ! download.includeAPMMetaData.boolValue ];
-		download.includeAPMMetaData = newVal;
-		
-    } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
-		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
-		NSNumber *newVal = [NSNumber numberWithBool: ! sub.includeAPMMetaData.boolValue ];
-		sub.includeAPMMetaData = newVal;
-                
-    }
-}
-
-
-#endif
 
 -(IBAction)changepyTiVo:(id)sender
 {
@@ -790,12 +751,10 @@ __DDLOGHERE__
 		MTDownload * download = (MTDownload *)checkbox.owner;
 		NSNumber *newVal = [NSNumber numberWithBool: ! download.exportSubtitles.boolValue ];
 		download.exportSubtitles = newVal;
-		
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){ 
 		MTSubscription *sub = (MTSubscription *)(checkbox.owner);
 		NSNumber *newVal = [NSNumber numberWithBool: ! sub.exportSubtitles.boolValue ];
 		sub.exportSubtitles = newVal;
-        		
     }
 }
 
@@ -813,7 +772,6 @@ __DDLOGHERE__
 		sub.deleteAfterDownload = newVal;
 	}
 }
-
 
 #pragma mark - Customize Columns
 

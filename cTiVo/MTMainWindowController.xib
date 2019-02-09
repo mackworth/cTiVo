@@ -1240,7 +1240,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Does this show use H.264 (more compressed) or MPEG2? Before downloading, uses channel's history." id="Joh-em-Aac">
+                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Does this show (✔) or channel (√) use H.264 compression v. MPEG2 ( -- or -)? Before downloading, uses channel's history." id="Joh-em-Aac">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="H.264">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>

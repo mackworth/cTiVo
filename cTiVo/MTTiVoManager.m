@@ -1558,10 +1558,6 @@ __DDLOGHERE__
 									[defaults integerForKey:kMTCommercialStrategy] > 0;
 		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 		newDownload.deleteAfterDownload = [defaults objectForKey:kMTIfSuccessDeleteFromTiVo];
-#ifndef deleteXML
-		newDownload.genXMLMetaData = [defaults objectForKey:kMTExportTivoMetaData];
-		newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAcceptMetaData && [defaults boolForKey:kMTExportMetaData])];
-#endif
 		[downloads addObject: newDownload];
 	}
 	[self addToDownloadQueue:downloads beforeDownload:nextDownload ];

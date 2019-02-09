@@ -121,10 +121,6 @@ __DDLOGHERE__
 		_addToiTunesWhenEncoded = NO;
 		_writingData = NO;
 		_genTextMetaData = nil;
-#ifndef deleteXML
-		_genXMLMetaData = nil;
-		_includeAPMMetaData = nil;
-#endif
 		_exportSubtitles = nil;
 		_deleteAfterDownload = @NO;
         _urlReadPointer = 0;
@@ -371,10 +367,6 @@ __DDLOGHERE__
 	[encoder encodeObject:self.downloadStatus forKey: kMTQueueStatus];
 	[encoder encodeObject: self.encodeFilePath forKey: kMTQueueFinalFile] ;
 	[encoder encodeObject: self.genTextMetaData forKey: kMTQueueGenTextMetaData];
-#ifndef deleteXML
-	[encoder encodeObject: self.genXMLMetaData forKey:	kMTQueueGenXMLMetaData];
-	[encoder encodeObject: self.includeAPMMetaData forKey:	kMTQueueIncludeAPMMetaData];
-#endif
 	[encoder encodeObject: self.exportSubtitles forKey:	kMTQueueExportSubtitles];
 	[encoder encodeObject: self.deleteAfterDownload forKey:	kMTQueueDeleteAfterDownload];
 }
@@ -398,10 +390,6 @@ __DDLOGHERE__
 	if (self.downloadStatus)    [result setValue:self.downloadStatus forKey:kMTQueueStatus];
 	if (self.encodeFilePath)    [result setValue:self.encodeFilePath forKey: kMTQueueFinalFile];
 	if (self.genTextMetaData)   [result setValue:self.genTextMetaData forKey: kMTQueueGenTextMetaData];
-#ifndef deleteXML
-	if (self.genXMLMetaData) [result setValue:self.genXMLMetaData forKey: kMTQueueGenXMLMetaData];
-	if (self.includeAPMMetaData) [result setValue:self.includeAPMMetaData forKey: kMTQueueIncludeAPMMetaData];
-#endif
 	if (self.exportSubtitles) [result setValue:self.exportSubtitles forKey: kMTQueueExportSubtitles];
 	if (self.deleteAfterDownload) [result setValue:self.deleteAfterDownload forKey: kMTQueueDeleteAfterDownload];
 
@@ -449,10 +437,6 @@ __DDLOGHERE__
 	}
 	download.encodeFilePath = queueEntry[kMTQueueFinalFile];
 	download.genTextMetaData = queueEntry[kMTQueueGenTextMetaData]; if (!download.genTextMetaData) download.genTextMetaData= @(NO);
-#ifndef deleteXML
-	download.genXMLMetaData = queueEntry[kMTQueueGenXMLMetaData]; if (!download.genXMLMetaData) download.genXMLMetaData= @(NO);
-	download.includeAPMMetaData = queueEntry[kMTQueueIncludeAPMMetaData]; if (!download.includeAPMMetaData) download.includeAPMMetaData= @NO;
-#endif
 	download.exportSubtitles = queueEntry[kMTQueueExportSubtitles]; if (!download.exportSubtitles) download.exportSubtitles= @(NO);
 	download.deleteAfterDownload = queueEntry[kMTQueueDeleteAfterDownload]; if (!download.deleteAfterDownload) download.deleteAfterDownload= @NO;
     return download;
@@ -475,10 +459,6 @@ __DDLOGHERE__
 		self.downloadStatus		 = [decoder decodeObjectOfClass:[NSNumber class] forKey: kMTQueueStatus];
 		self.encodeFilePath = [decoder decodeObjectOfClass:[NSString class] forKey:kMTQueueFinalFile];
 		self.genTextMetaData = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueGenTextMetaData]; if (!self.genTextMetaData) self.genTextMetaData= @(NO);
-#ifndef deleteXML
-		self.genXMLMetaData = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueGenXMLMetaData]; if (!self.genXMLMetaData) self.genXMLMetaData= @(NO);
-		self.includeAPMMetaData = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueIncludeAPMMetaData]; if (!self.includeAPMMetaData) self.includeAPMMetaData= @(NO);
-#endif
 		self.exportSubtitles = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueExportSubtitles]; if (!self.exportSubtitles) self.exportSubtitles= @(NO);
 		self.deleteAfterDownload = [decoder decodeObjectOfClass:[NSNumber class] forKey:kMTQueueDeleteAfterDownload]; if (!self.deleteAfterDownload) self.deleteAfterDownload= @(NO);
         [self setupNotifications];
@@ -1809,33 +1789,6 @@ __DDLOGHERE__
             break;
     }
 	
-#ifndef deleteXML
-	//	if (self.captionTask) {
-//		if (self.commercialTask) {
-//			[taskArray addObject:@[self.captionTask,[self catTask:self.decryptedFilePath]]];
-//			[taskArray addObject:@[self.commercialTask]];
-//			[taskArray addObject:@[self.encodeTask]];
-//		} else if (self.encodeFormat.canSimulEncode) {
-//            if(self.downloadingShowFromMPGFile)self.activeTaskChain.providesProgress = YES;
-//			[taskArray addObject:@[self.encodeTask,self.captionTask]];
-//		} else {
-//            if(self.downloadingShowFromMPGFile) {
-//                [taskArray addObject:@[self.captionTask]];
-//            } else {
-//                [taskArray addObject:@[self.captionTask,[self catTask:self.decryptedFilePath]]];                
-//            }
-//			[taskArray addObject:@[self.encodeTask]];
-//		}
-//	} else {
-//		if (self.commercialTask) {
-//			[taskArray addObject:@[self.commercialTask]];
-//		}
-//		[taskArray addObject:@[self.encodeTask]];
-//	}
-//	if (self.apmTask) {
-//		[taskArray addObject:@[self.apmTask]];
-//	}
-#endif
 	self.activeTaskChain.taskArray = [NSArray arrayWithArray:taskArray];
     if(self.downloadingShowFromMPGFile)self.activeTaskChain.providesProgress = YES;
     
@@ -1899,7 +1852,7 @@ __DDLOGHERE__
 
 -(void) writeMetaDataFiles {
 	
-#ifndef deleteXML
+#ifdef generate
 	if (self.genXMLMetaData.boolValue) {
 		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
 		DDLogMajor(@"Writing XML to    %@",tivoMetaPath);

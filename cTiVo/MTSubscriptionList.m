@@ -262,10 +262,6 @@
         newSub.skipCommercials = @([defaults boolForKey:kMTSkipCommercials] && newSub.encodeFormat.comSkip.boolValue);
         newSub.markCommercials = @([defaults boolForKey:kMTMarkCommercials] && newSub.encodeFormat.canMarkCommercials);
         newSub.genTextMetaData=  [defaults objectForKey:kMTExportTextMetaData];
-#ifndef deleteXML
-        newSub.genXMLMetaData	  =	[defaults objectForKey:kMTExportTivoMetaData];
-        newSub.includeAPMMetaData = [defaults objectForKey:kMTExportMetaData];
-#endif
         newSub.exportSubtitles	  = [defaults objectForKey:kMTExportSubtitles];
 		newSub.deleteAfterDownload= [defaults objectForKey:kMTIfSuccessDeleteFromTiVo];
 		newSub.encodeFormat = tiVoManager.selectedFormat;
@@ -289,10 +285,6 @@
 		newSub.markCommercials = [NSNumber numberWithBool: download.markCommercials];
 		newSub.useSkipMode = [NSNumber numberWithBool: download.useSkipMode];
         newSub.genTextMetaData = download.genTextMetaData;
-#ifndef deleteXML
-        newSub.genXMLMetaData = [NSNumber numberWithBool: download.genXMLMetaData];
-        newSub.includeAPMMetaData = [NSNumber numberWithBool: download.includeAPMMetaData];
-#endif
         newSub.exportSubtitles=  download.exportSubtitles;
 		newSub.deleteAfterDownload=  download.deleteAfterDownload;
 		newSub.encodeFormat = download.encodeFormat;

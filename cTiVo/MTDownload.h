@@ -28,10 +28,6 @@
 @property (nonatomic, strong)   MTFormat *encodeFormat;  //changeable until download starts
 
 @property (nonatomic, strong)  NSNumber *genTextMetaData,
-#ifndef deleteXML
-                                        *genXMLMetaData,
-                                        *includeAPMMetaData,
-#endif
 										*useTransportStream,
                                         *exportSubtitles,
 										*deleteAfterDownload;

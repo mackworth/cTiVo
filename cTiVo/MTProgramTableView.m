@@ -798,7 +798,7 @@ __DDLOGHERE__
 		result.textField.alignment = NSCenterTextAlignment;
 	} else if ([identifier isEqualToString:@"H.264"]) {
 		result.textField.alignment = NSCenterTextAlignment;
-		result.toolTip =@"Does this channel use H.264 compression?";
+		result.toolTip =@"Does this show (✔) or channel (√) use H.264 compression v. MPEG2 ( -- or -)?";
 	} else if ([identifier isEqualToString:@"OnDisk"]) {
 		result.toolTip =@"Is program already downloaded and still on disk?";
 	}

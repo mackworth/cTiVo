@@ -162,10 +162,6 @@ __DDLOGHERE__
 	newDownload.useSkipMode =     self.useSkipMode.boolValue;
 	newDownload.markCommercials = self.shouldMarkCommercials && self.canMarkCommercials ;
 	newDownload.genTextMetaData = self.genTextMetaData;
-#ifndef deleteXML
-	newDownload.genXMLMetaData = self.genXMLMetaData;
-	newDownload.includeAPMMetaData =[NSNumber numberWithBool:(newDownload.encodeFormat.canAcceptMetaData && self.includeAPMMetaData.boolValue)];
-#endif
     DDLogDetail(@"Adding %@: ID: %@, Sub: %@, date: %@, Tivo: %@", thisShow, thisShow.episodeID, thisShow.uniqueID, thisShow.showDate, thisShow.tiVoName );
 
     if ( thisShow.showTitle &&  thisShow.uniqueID && thisShow.showDate && thisShow.tiVoName ) { //protective only; should always be non-nil
@@ -332,12 +328,6 @@ __DDLOGHERE__
     if (tempSub.markCommercials ==nil) tempSub.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMarkCommercials];
     tempSub.genTextMetaData = sub[kMTSubscribedGenTextMetaData];
     if (tempSub.genTextMetaData ==nil) tempSub.genTextMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTextMetaData];
-#ifndef deleteXML
-    tempSub.genXMLMetaData = sub[kMTSubscribedGenXMLMetaData];
-    if (tempSub.genXMLMetaData ==nil) tempSub.genXMLMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportTivoMetaData];
-    tempSub.includeAPMMetaData = sub[kMTSubscribedIncludeAPMMetaData];
-    if (tempSub.includeAPMMetaData ==nil) tempSub.includeAPMMetaData = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportMetaData];
-#endif
     tempSub.exportSubtitles = sub[kMTSubscribedExportSubtitles];
     if (tempSub.exportSubtitles ==nil) tempSub.exportSubtitles = [[NSUserDefaults standardUserDefaults] objectForKey:kMTExportSubtitles];
 	tempSub.deleteAfterDownload = sub[kMTSubscribedDeleteAfterDownload];
