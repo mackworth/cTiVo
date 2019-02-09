@@ -53,6 +53,7 @@
 
 -(void) launchDownload;  //actually launch the download process
 -(void) launchPostCommercial; //ok to launch now
+-(void) skipModeCheck;
 -(void)notifyUserWithTitle:(NSString *) title subTitle: (NSString*) subTitle ;   //download  notification
 
 -(BOOL) isSimilarTo: (MTDownload *) testDownload;

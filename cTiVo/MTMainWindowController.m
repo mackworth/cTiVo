@@ -885,6 +885,7 @@ __DDLOGHERE__
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [tiVoManager removeObserver:self forKeyPath:@"selectedFormat"];
+	[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:kMTIfSuccessDeleteFromTiVo];
 }
 
 

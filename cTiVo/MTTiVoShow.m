@@ -917,6 +917,8 @@ __DDLOGHERE__
 }
 
 #pragma mark - Custom Setters; many for parsing
+#define kMTFirstName @"MTFirstName"
+#define kMTLastName @"MTLastName"
 
 -(NSString *)nameString:(NSDictionary *)nameDictionary
 {

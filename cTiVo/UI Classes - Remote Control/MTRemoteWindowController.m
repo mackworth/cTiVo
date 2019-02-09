@@ -83,9 +83,24 @@ __DDLOGHERE__
 							   forView:(NSButton *)sender];
 }
 
+-(void) confirmReboot {
+	NSString *message = [NSString stringWithFormat:@"Do you want to reboot your TiVo %@?", self.selectedTiVo.tiVo.name];
+	NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"Cancel" alternateButton:@"Reboot" otherButton:nil informativeTextWithFormat:@"Warning: this will immediately reboot your TiVo, interrupting all downloads, recordings, etc. for several minutes."];
+	
+	NSInteger button = [keyAlert runModal];
+	if (button == NSAlertAlternateReturn) {
+		DDLogMajor(@"Rebooting TiVo %@",self.selectedTiVo);
+		[self.selectedTiVo reboot];
+	}
+}
+
 - (IBAction)serviceMenuSelected:(NSPopUpButton *)sender {
 	NSMenuItem * item = sender.selectedItem;
 	if (!item) return;
+	if ([item.title isEqualToString:@"Reboot TiVo"]) {
+		[self confirmReboot];
+		return;
+	}
 	NSDictionary * commands = @{
 	  @"Netflix" 		:   @"x-tivo:netflix:netflix",
 	  @"HBO Go"			: 	@"x-tivo:web:https://tivo.hbogo.com",

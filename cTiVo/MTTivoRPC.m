@@ -728,7 +728,7 @@ static NSRegularExpression * isFinalRegex = nil;
                    DDLogVerbose(@"Got BodyID");
                    strongSelf.tiVoSerialNumber = bodyId;
                    [strongSelf.delegate setTiVoSerialNumber:bodyId];
-				   [self.delegate connectionChanged];
+				   [strongSelf.delegate connectionChanged];
                    [strongSelf getAllShows];
                }
            }
@@ -1154,7 +1154,8 @@ static NSArray * imageResponseTemplate = nil;
 		   
 	   DDLogReport(@"Finished rebooting Tivo %@", self.delegate);
 	   [weakSelf tearDownStreams];
-		   
+	   [weakSelf performSelector:@selector(launchServer) withObject:nil afterDelay:120]; //start trying to reconnect in 2 minutes
+
 	   }];
 	   }];
 	   }];

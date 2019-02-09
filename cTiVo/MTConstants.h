@@ -76,7 +76,7 @@
 #define kMTStatusFailed 16
 #define kMTStatusRemovedFromQueue 99
 
-//Contants
+//Constants
 
 #define kMTUpdateIntervalMinDefault 240 //Default Update interval for re-checking current TiVo for RPC TiVos
 #define kMTUpdateIntervalMinDefaultNonRPC 15 //Default Update interval for re-checking current TiVo for 3 Series
@@ -146,8 +146,6 @@
 
 //Misc
 
-#define kMTFirstName @"MTFirstName"
-#define kMTLastName @"MTLastName"
 #define kMTAllTiVos @"All TiVos"
 #define kMTDefaultDownloadDir  @"Movies/TiVoShows/"
 #define kMTMaxBuffSize 50000000
@@ -228,6 +226,8 @@
 #define kMTCommercialStrategy @"CommercialStrategy"  // 0 - comskip; 1= skipMode only; 2 = skipMode, fallback to Comskip, 3 = SkipMode, fallback to comskip,mark only
 #define kMTExportSubtitles @"ExportSubtitles"        // Whether to export subtitles with ts2ami
 #define kMTExportTextMetaData @"ExportTextMetaData"  // Whether to export text metadata for PyTivo
+#define kMTKeepSRTs            @"KeepSRTs"           // Whether to keep SRTs when embedded in main file time? NO GUI
+#define kMTAllowMP2InTS        @"AllowMP2InTS"       // Whether to reject MPEG2 streams downloaded in Transport Stream?
 
 #ifndef deleteXML
 #define kMTExportTivoMetaData @"ExportTivoMetaData"  // Whether to export XML metadata

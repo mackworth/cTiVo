@@ -504,10 +504,9 @@ __DDLOGHERE__
 		}
 		if ( self.isNew ) { //inProgress is fine, as is completelyDone.
 			[self prepareForDownload:YES];
-		} else if (self.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
-			[self skipModeCheck];
 		}
 	}
+	[self skipModeCheck];
 }
 
 -(BOOL) isSimilarTo:(MTDownload *) testDownload {
@@ -1174,6 +1173,10 @@ __DDLOGHERE__
 					return;
 				} else {
 					DDLogMajor(@"Warning: For download %@, after downloading file with Transport Stream, we find it is an MPEG2, which might lead to a corrupted video file.", strongSelf );
+					if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowMP2InTS]) {
+						strongSelf.useTransportStream = @NO;
+						[strongSelf markMyChannelAsPSOnly];
+					}
 				}
 			} else if (format == MPEGFormatH264) {
 				if (strongSelf.encodeTask.taskFailed) {
@@ -2065,7 +2068,8 @@ __DDLOGHERE__
 			if (srtEntries.count > 0) {
 				[srtEntries embedSubtitlesInMP4File:encodedFile forLanguage:[MTSrt languageFromFileName:self.captionFilePath]];
 			}
-			if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
+			if ( ! ([[NSUserDefaults standardUserDefaults] boolForKey:kMTKeepSRTs]  ||
+					[[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] )) {
 				[[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
 			}
 		}
@@ -3090,7 +3094,7 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(BOOL) shouldCheckMPEG {
-	return self.useTransportStream.boolValue;
+	return self.useTransportStream.boolValue && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowMP2InTS];
 }
 
 -(BOOL) shouldPipeFromDecrypt {

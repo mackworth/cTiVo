@@ -550,7 +550,8 @@ __DDLOGHERE__
 							   kMTMaxNumEncoders,
 							   KMTPreferredImageSource,
 							   kMTTiVos,
-							   kMTiTunesSubmit
+							   kMTiTunesSubmit,
+							   kMTIfSuccessDeleteFromTiVo
 							]) {
 		 [[NSUserDefaults standardUserDefaults]  addObserver:self forKeyPath:path options:0 context:nil];
 	}
@@ -879,9 +880,22 @@ __DDLOGHERE__
 		[self performSelector:@selector(startAllTiVoQueues) withObject:nil afterDelay:10];
  	} else if ([keyPath compare:kMTiTunesSubmit] == NSOrderedSame) {
  		[self checkiTunesPermissions];
+	} else if ([keyPath compare:kMTIfSuccessDeleteFromTiVo] == NSOrderedSame) {
+		[self cancelAllDeleteAfterDownloads];
    } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
+}
+
+-(void) cancelAllDeleteAfterDownloads {
+	for (MTDownload * download in self.downloadQueue) {
+		if (!download.isCompletelyDone && download.deleteAfterDownload) {
+			download.deleteAfterDownload = @NO;
+		}
+	}
+	for (MTSubscription * sub in self.subscribedShows) {
+		if (sub.deleteAfterDownload) sub.deleteAfterDownload = @NO;
+	}
 }
 
 -(void) checkiTunesPermissions {

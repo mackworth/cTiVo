@@ -1227,6 +1227,7 @@ BOOL channelChecking = NO;
 					break; //but don't process if we have uncompleted, unloaded ones
 				}
 			}
+			[download skipModeCheck];
 			if (download.downloadStatus.intValue == kMTStatusNew  && !isDownloading) {
 				tiVoManager.numEncoders++;
 				DDLogMajor(@"Number of encoders after launching show \"%@\"  is %d",download.show.showTitle, tiVoManager.numEncoders);
