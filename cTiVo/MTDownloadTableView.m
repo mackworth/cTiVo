@@ -293,7 +293,7 @@ __DDLOGHERE__
     BOOL stageColumn = [tableColumn.identifier isEqualToString:@"DL Stage"];
 
 	MTCheckBox * checkBox = nil;
-	if ([result isKindOfClass:[MTCheckBox class]]) {
+	if ([result isKindOfClass:[MTDownloadCheckTableCell class]]) {
 		checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
 		checkBox.target = myController;
 		checkBox.owner = download;

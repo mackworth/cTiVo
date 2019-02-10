@@ -126,16 +126,16 @@
 
 -(void)tabView:(NSTabView *)tabView willSelectTabViewItem:(NSTabViewItem *)tabViewItem
 {
-	if (!_ignoreTabItemSelection) {
-		[[self.window animator] setFrame:[self getNewWindowRect:(MTTabViewItem *)tabViewItem] display:NO];
-	}
 }
 
 -(void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem
 {
 //	NSRect frame = self.window.frame;
 //	NSLog(@"Actual new window size is %f %f %f %f",frame.origin.x,frame.origin.y, frame.size.width, frame.size.height);
-	
+	if (!_ignoreTabItemSelection) {
+		[[self.window animator] setFrame:[self getNewWindowRect:(MTTabViewItem *)tabViewItem] display:NO];
+	}
+
 }
 
 -(void)dealloc

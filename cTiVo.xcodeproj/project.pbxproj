@@ -448,6 +448,7 @@
 		1E6F45422210C0AE007714E0 /* libicui18n.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicui18n.58.dylib; sourceTree = "<group>"; };
 		1E6F45432210C0AF007714E0 /* libicuuc.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicuuc.58.dylib; sourceTree = "<group>"; };
 		1E6F45472210C135007714E0 /* libfdk-aac.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libfdk-aac.2.dylib"; sourceTree = "<group>"; };
+		1E6F45492210C6E0007714E0 /* cTiVoBinariesBuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = cTiVoBinariesBuild.sh; path = cTiVo/cTiVoBinariesBuild.sh; sourceTree = SOURCE_ROOT; };
 		1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTiVo-10.7-Info.plist"; path = "../cTiVo-10.7-Info.plist"; sourceTree = "<group>"; };
 		1E791BD21697C59300E47E84 /* MTSubscription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscription.h; sourceTree = "<group>"; };
 		1E791BD31697C59300E47E84 /* MTSubscription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTSubscription.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
@@ -962,6 +963,7 @@
 		94F32E0A1D6A6798004B7FEB /* cTiVoScripts */ = {
 			isa = PBXGroup;
 			children = (
+				1E6F45492210C6E0007714E0 /* cTiVoBinariesBuild.sh */,
 				1EB49B9F1C50A49000887240 /* tivo-libre.jar */,
 				1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */,
 				1E2725C316CB63D500A21940 /* elgatoProgress.scpt */,
