@@ -881,7 +881,9 @@ __DDLOGHERE__
  	} else if ([keyPath compare:kMTiTunesSubmit] == NSOrderedSame) {
  		[self checkiTunesPermissions];
 	} else if ([keyPath compare:kMTIfSuccessDeleteFromTiVo] == NSOrderedSame) {
-		[self cancelAllDeleteAfterDownloads];
+		if (![defs boolForKey:kMTIfSuccessDeleteFromTiVo]) {
+			[self cancelAllDeleteAfterDownloads];
+		}
    } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
@@ -891,10 +893,14 @@ __DDLOGHERE__
 	for (MTDownload * download in self.downloadQueue) {
 		if (!download.isCompletelyDone && download.deleteAfterDownload) {
 			download.deleteAfterDownload = @NO;
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:download];
 		}
 	}
 	for (MTSubscription * sub in self.subscribedShows) {
-		if (sub.deleteAfterDownload) sub.deleteAfterDownload = @NO;
+		if (sub.deleteAfterDownload) {
+			sub.deleteAfterDownload = @NO;
+			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
+		}
 	}
 }
 

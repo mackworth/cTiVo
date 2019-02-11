@@ -312,13 +312,16 @@
                         </binding>
                     </connections>
                 </button>
-                <button toolTip="Allows cTiVo to replace TiVo's episode information with theTVDB's when available" id="K8G-jl-NGE">
-                    <rect key="frame" x="18" y="435" width="242" height="18"/>
+                <button toolTip="Otherwise, cTiVo only allows one Download record per show, and non-overlapping Subscriptions. Useful for multiple Formats." id="K8G-jl-NGE">
+                    <rect key="frame" x="18" y="435" width="297" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Prefer TVDB's episode Info to TiVo's" bezelStyle="regularSquare" imagePosition="left" inset="2" id="sbh-hk-ENH">
+                    <buttonCell key="cell" type="check" title="Allow duplicate Downloads and Subscriptions" bezelStyle="regularSquare" imagePosition="left" inset="2" id="sbh-hk-ENH">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
+                    <connections>
+                        <binding destination="15" name="value" keyPath="values.AllowDups" id="Bq9-bB-B0g"/>
+                    </connections>
                 </button>
                 <button toolTip="Stores Metadata in a file for use by pyTiVo" id="5A8-T1-dt0">
                     <rect key="frame" x="18" y="465" width="247" height="18"/>
@@ -327,6 +330,9 @@
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
+                    <connections>
+                        <binding destination="15" name="value" keyPath="values.ExportTextMetaData" id="VWu-es-dfM"/>
+                    </connections>
                 </button>
                 <customView id="28" userLabel="Custom View Debug levels">
                     <rect key="frame" x="0.0" y="0.0" width="546" height="322"/>

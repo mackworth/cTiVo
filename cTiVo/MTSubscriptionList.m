@@ -110,12 +110,12 @@
 }
 
 - (MTSubscription *) findShow: (MTTiVoShow *) show {
-    MTSubscription * possMatch = [self findSubscriptionNamed:show.seriesTitle checkSuggestion:show.isSuggestion];
+    MTSubscription * possMatch = [self findSubscriptionNamed:show.seriesTitle checkSuggestion:show.isSuggestion checkTiVo:show.tiVo checkChannel:show.stationCallsign ];
     if (possMatch) DDLogVerbose(@"found show %@ in subscription %@", show, possMatch);
     return possMatch;
 }
 
--(MTSubscription *) findSubscriptionNamed: (NSString *) seriesSearchString checkSuggestion: (BOOL) followSubsSuggestionValue {
+-(MTSubscription *) findSubscriptionNamed: (NSString *) seriesSearchString checkSuggestion: (BOOL) followSubsSuggestionValue checkTiVo: (MTTiVo *) tiVo checkChannel: (NSString *) channelName{
 
     if (!seriesSearchString) return nil;
     for (MTSubscription * possMatch in self) {
@@ -124,9 +124,18 @@
                  numberOfMatchesInString:seriesSearchString
                  options:0
                  range:NSMakeRange(0,seriesSearchString.length)
-                 ] > 0) {
-                return possMatch;
-            }
+                 ] <= 0) {
+				continue;
+			}
+			//Now check that we're on the right Tivo, if specified
+			if ((possMatch.preferredTiVo.length > 0) && (![possMatch.preferredTiVo isEqualToString: tiVo.tiVo.name]))  {
+				continue;
+			}
+			//check that we're on right station if specified
+			if (possMatch.stationCallSign.length > 0 && ![possMatch.stationCallSign isEqualToString:channelName]) {
+				continue;
+			}
+			return possMatch;
         }
     }
     return nil;
@@ -192,7 +201,7 @@
     for (NSString * multilineString in strings) {
         for (NSString * str in [self divideStringIntoLines:multilineString]) {
             MTSubscription * newSub = [MTSubscription subscriptionFromString:str];
-            if (newSub &&  ([[NSUserDefaults standardUserDefaults]boolForKey:kMTAllowDups] || ![self findSubscriptionNamed:newSub.displayTitle checkSuggestion:NO])) {
+            if (newSub &&  ([[NSUserDefaults standardUserDefaults]boolForKey:kMTAllowDups] || ![self findSubscriptionNamed:newSub.displayTitle checkSuggestion:NO checkTiVo:nil checkChannel:nil]	)) {
                 [newSubs addObject:newSub];
                 [self addObject:newSub];
             }

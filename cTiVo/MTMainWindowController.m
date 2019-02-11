@@ -176,18 +176,21 @@ __DDLOGHERE__
 	} else if ([keyPath compare:kMTIfSuccessDeleteFromTiVo] == NSOrderedSame) {
 		//Always show Del After columns if user enables DeleteFromTiVo
 		BOOL deleteAfter =[[NSUserDefaults standardUserDefaults] boolForKey:kMTIfSuccessDeleteFromTiVo];
-		if (deleteAfter) {
-			NSTableColumn * downloadDeleteAfter = [self.downloadQueueTable tableColumnWithIdentifier: @"Delete"];
-			if (downloadDeleteAfter.isHidden) downloadDeleteAfter.hidden = NO;
-			NSTableColumn * subDeleteAfter = [self.subscriptionTable tableColumnWithIdentifier: @"Delete"];
-			if (subDeleteAfter.isHidden) subDeleteAfter.hidden = NO;
+		NSTableColumn * downloadDeleteAfter = [self.downloadQueueTable tableColumnWithIdentifier: @"Delete"];
+		if (downloadDeleteAfter.isHidden == deleteAfter) {
+			downloadDeleteAfter.hidden = !deleteAfter;
 			if ([self.downloadQueueTable respondsToSelector:@selector(columnChanged:)]) {
 				[self.downloadQueueTable performSelector:@selector(columnChanged:) withObject:downloadDeleteAfter];
 			}
+			[self buildColumnMenuForTable: downloadQueueTable];
+		}
+		NSTableColumn * subDeleteAfter = [self.subscriptionTable tableColumnWithIdentifier: @"Delete"];
+		if (subDeleteAfter.isHidden == deleteAfter) {
+			subDeleteAfter.hidden = !deleteAfter;
 			if ([self.subscriptionTable respondsToSelector:@selector(columnChanged:)]) {
 				[self.subscriptionTable performSelector:@selector(columnChanged:) withObject:subDeleteAfter];
 			}
-
+			[self buildColumnMenuForTable: subscriptionTable];
 		}
 	} else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

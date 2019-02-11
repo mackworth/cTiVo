@@ -301,7 +301,7 @@ END {print ss,""}
     if [[ -n "$to" && -n "$ss" ]]; then
       this_duration=$(echo "$to - $ss" | bc -l)
     elif [[ -n "$ss" ]]; then
-      if (($(echo "$ss > $original_duration" | bc -l))); then
+      if (($(echo "$ss > $original_duration - 1"  | bc -l))); then //ignore fraction of second at end.
         continue
       fi
       this_duration=$(echo "$original_duration - $ss" | bc -l)
