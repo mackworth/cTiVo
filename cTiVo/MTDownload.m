@@ -890,10 +890,10 @@ __DDLOGHERE__
 			if (![log contains:@"mpegts"]) { //double check
 				DDLogReport(@"Error: mpegTask called on Program stream: %@", log);
 			} else {
-				self.useTransportStream = @NO;
+				strongSelf.useTransportStream = @NO;
 				DDLogReport(@"Found Mpeg2 video in Transport Stream. Rescheduling");
 				DDLogDetail(@"%@", log);
-				[self rescheduleDownloadFalseStart];
+				[strongSelf rescheduleDownloadFalseStart];
 			}
 		}
 	};
@@ -1002,7 +1002,7 @@ __DDLOGHERE__
             }
             [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationDecryptDidFinish object:nil];
             if (strongSelf.decryptedFilePath) {
-                [strongSelf markCompleteCTiVoFile: self.decryptedFilePath ];
+                [strongSelf markCompleteCTiVoFile: strongSelf.decryptedFilePath ];
             }
         }
 
@@ -1278,6 +1278,8 @@ __DDLOGHERE__
 }
 
 -(void) fixupSRTsDueToCommercialSkipping {
+//  do this if we ever reuse captions
+//	if ([self isCompleteCTiVoFile:self.captionFilePath forFileType:@"srt"]) return;
     NSArray *srtEntries = [NSArray getFromSRTFile:self.captionFilePath];
     NSArray *edlEntries = self.show.edlList;
     if (srtEntries.count && edlEntries.count) {
@@ -1348,12 +1350,9 @@ __DDLOGHERE__
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
 		__typeof__(self) strongSelf = weakSelf;
         //commercial or caption might finish first.
-        if ( strongSelf.skipCommercials &&
-			((!self.useSkipMode && strongSelf->_commercialTask.successfulExit) ||
-			 (self.useSkipMode && self.show.edlList.count > 0))) {
+        if ( strongSelf.skipCommercials && strongSelf.show.edlList.count ) {
             [strongSelf fixupSRTsDueToCommercialSkipping];
         }
-        [strongSelf markCompleteCTiVoFile:strongSelf.captionFilePath];
 		return YES;
     };
     
@@ -1503,7 +1502,7 @@ __DDLOGHERE__
 		}
 #endif
 		if (postCommercialing) {
-			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:self];  // Free up an encoder / update UI
+			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadDidFinish object:strongSelf];  // Free up an encoder / update UI
 			[strongSelf finalFinalProcessing];
 		} else {
 			strongSelf.downloadStatus = @(kMTStatusCommercialed);
@@ -1526,7 +1525,7 @@ __DDLOGHERE__
 	};
 	if (postCommercialing) {
 		commercialTask.terminationHandler = ^{
-		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:self];  // Free up an encoder / update UI
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationShowDownloadWasCanceled object:weakSelf];  // Free up an encoder / update UI
     	};
 	}
 
@@ -1985,13 +1984,14 @@ __DDLOGHERE__
 	NSUserAppleScriptTask *downloadAppleScriptTask = [self downloadAppleScriptTask];
 	if (downloadAppleScriptTask) {
 		NSAppleEventDescriptor *event = [self downloadEventDescriptor];
+		__weak __typeof__(self) weakSelf = self;
 		[downloadAppleScriptTask executeWithAppleEvent:event completionHandler:^(NSAppleEventDescriptor *resultEventDescriptor, NSError *error) {
 			if (! resultEventDescriptor) {
 				DDLogReport(@"Failure on AppleScript task; error = %@", error);
 			} else {
-				NSString * result = [self stringForResultEventDescriptor:resultEventDescriptor];
+				NSString * result = [weakSelf stringForResultEventDescriptor:resultEventDescriptor];
 				if (result.length > 0) {
-					DDLogReport(@"For %@, User task returned: \n%@", self, result);
+					DDLogReport(@"For %@, User task returned: \n%@", weakSelf, result);
 				}
 			}
 		}];
@@ -2039,7 +2039,7 @@ __DDLOGHERE__
 		__weak __typeof__(self) weakSelf = self;
 		dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
 			MTiTunes *iTunes = [[MTiTunes alloc] init];
-			NSString * iTunesPath = [iTunes importIntoiTunes:weakSelf withArt:self.show.artWorkImage] ;
+			NSString * iTunesPath = [iTunes importIntoiTunes:weakSelf withArt:weakSelf.show.artWorkImage] ;
 
 			dispatch_async(dispatch_get_main_queue(), ^{
 				__typeof__(self) strongSelf = weakSelf;
@@ -2054,8 +2054,8 @@ __DDLOGHERE__
 							strongSelf.captionFilePath = [strongSelf moveFile:strongSelf.captionFilePath toITunes:iTunesBaseName forType:@"caption" andExtension: @"srt"] ?: strongSelf.captionFilePath;
 						}
 						if (strongSelf.genTextMetaData.boolValue) {
-							NSString * textMetaPath = [self.encodeFilePath stringByAppendingPathExtension:@"txt"];
-							NSString * doubleExtension = [[self.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
+							NSString * textMetaPath = [strongSelf.encodeFilePath stringByAppendingPathExtension:@"txt"];
+							NSString * doubleExtension = [[strongSelf.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
 							[strongSelf moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
 						}
 						//but remember new file for future processing
@@ -2225,17 +2225,24 @@ __DDLOGHERE__
 	}
 }
 
--(void) skipModeExpired {
+-(void) skipModeExpired: (NSTimer *) timer {
 	//called if timer expires on downloading show info
 	DDLogMajor(@"SkipModeTimer went off for %@, which ended at %@",self, self.show.stopTime);
 	[self stopWaitSkipModeTimer];
 	if (!self.useSkipMode) return;
-	if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
-		DDLogReport(@"SkipModeTimer went off, but we have SkipMode info?? %@",self);
+	if (timer.userInfo) { //first time
+		if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
+			DDLogReport(@"SkipModeTimer went off, but we have SkipMode info?? %@",self);
+			[self skipModeCheck];
+			return; //shouldn't be here
+		}
+		//one last try, but make sure we eventually move forward.
+		[self.show.tiVo loadSkipModeInfoForShow: self.show ];
+		self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:30 target:self selector:@selector(skipModeExpired:) userInfo:nil repeats:NO]; //nil = second try
+	} else {
+		DDLogMajor(@"Backup SkipModeTimer went off for %@",self);
 		[self skipModeCheck];
-		return; //shouldn't be here
 	}
-	[self.show.tiVo loadSkipModeInfoForShow: self.show ]; //last try
 }
 
 -(void) startWaitSkipModeTimer {
@@ -2243,7 +2250,7 @@ __DDLOGHERE__
 		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome+10;
 		if (waitTime > 0) {
 			DDLogDetail(@"Setting skipModeTimer at %0.1f minutes for %@", waitTime/60.0, self );
-			self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired) userInfo:nil repeats:NO];
+			self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired:) userInfo:@YES repeats:NO]; //YES = first try
 		}
 	}
 }

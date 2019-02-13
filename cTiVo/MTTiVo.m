@@ -409,7 +409,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
-#pragma mark - RPC switchboard
+#pragma mark - RPC delegate
 
 -(void) receivedRPCData:(MTRPCData *)rpcData {
 	MTTiVoShow * owner = self.rpcIDs[rpcData.rpcID];
@@ -555,6 +555,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
+#pragma mark - TiVoRPC switchboard
+
 -(void) reloadShowInfoForShows: (NSArray <MTTiVoShow *> *) shows {
     NSMutableArray <NSString *> * showIDs = [NSMutableArray arrayWithCapacity:shows.count];
     for (MTTiVoShow * eachShow in shows) {
@@ -573,14 +575,17 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     return self.tiVoSerialNumber.length == 0 || [self.tiVoSerialNumber characterAtIndex:0] > '6' ;
 }
 
+
 BOOL channelChecking = NO;
 -(void) connectionChanged {
 	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoListUpdated object:nil];
 	if (self.rpcActive && !self.channelList && !self.isMini && !channelChecking) {
 		channelChecking = YES;
+		__weak __typeof__(self) weakSelf = self;
 		[self.myRPC channelListWithCompletion:^(NSDictionary <NSString *, NSDictionary <NSString *, NSString *> *> *channels) {
-			self.channelList = channels;
-			[tiVoManager channelsChanged:self];
+			__typeof__(self) strongSelf = weakSelf;
+			strongSelf.channelList = channels;
+			[tiVoManager channelsChanged:strongSelf];
 			channelChecking = NO;
 		}];
 	}
@@ -643,7 +648,9 @@ BOOL channelChecking = NO;
 	if (interrupt) {
 		[self reallyFindCommercialsForShows]; //as long as we're interrupting, send ones that were waiting as well
 	} else if (notAlreadyWaitingForCommercials) {
-		[self findCommercialsNoInterrupt];
+		//let any other shows get into queue before launching.
+		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(findCommercialsNoInterrupt) object:nil ];
+		[self performSelector:@selector(findCommercialsNoInterrupt) withObject:nil afterDelay:2];
 	} else {
 		//we're already waiting, so let it continue.
 	}
@@ -658,12 +665,14 @@ BOOL channelChecking = NO;
 	if (self.postponedCommercialShows.count == 0 || !tiVoManager.autoSkipModeScanAllowedNow) {
 		self.postponedCommercialShows = nil;
 	} else {
+		__weak __typeof__(self) weakSelf = self;
 		[self whatsOnWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
+			__typeof__(self) strongSelf = weakSelf;
 			if (whatsOn == MTWhatsOnLiveTV || whatsOn == MTWhatsOnStreamingOrMenus) {
-				[self reallyFindCommercialsForShows];
+				[strongSelf reallyFindCommercialsForShows];
 			} else {
 				DDLogDetail(@"Waiting for TiVo UI to be available");
-				[self performSelector:@selector(findCommercialsNoInterrupt) withObject:nil afterDelay:60];
+				[strongSelf performSelector:@selector(findCommercialsNoInterrupt) withObject:nil afterDelay:60];
 			}
 		}];
 	}

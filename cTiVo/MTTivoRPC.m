@@ -1626,7 +1626,6 @@ static NSArray * imageResponseTemplate = nil;
 				//    [self sendKeyEvent: @"nowShowing" andPause :4.0];
 				[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialing object: self.delegate  ];
 				DDLogDetail(@"Getting SkipMode for: %@", rpcData);
-				[self findSkipModeRecursive:@0];
 				self.goodJump  = self.shortJumps = self.longJump = 0;
 				NSString * delayString = [[NSUserDefaults standardUserDefaults] stringForKey:@"RPCTime"  ];
 				if (delayString.length ==0) {
@@ -1645,6 +1644,7 @@ static NSArray * imageResponseTemplate = nil;
 				} else {
 					delay1 = delay2 = delay3 = delay4 = delayString.doubleValue;
 				}
+				[self findSkipModeRecursive:@0];
 
 			} else {
 				DDLogDetail(@"Another SkipMode Already in Progress: %@", self.skipModeQueueEDL);
@@ -1685,7 +1685,8 @@ static NSArray * imageResponseTemplate = nil;
 	MTRPCData * rpcData = self.skipModeQueueEDL[0];
 	DDLogMajor(@"skipMode queue %@checking for commercials for %@", firstTryNumber.intValue == 0 ? @"" : @"re-", rpcData);
 	__weak __typeof__(self) weakSelf = self;
-
+	[self.delegate tiVoActive];
+	
 	[self findSkipModePointsForShow:rpcData withCompletionHandler:^{
 		__typeof__(self) strongSelf = weakSelf;
 		if (rpcData.edlList.count > 0 || lastTry) {
