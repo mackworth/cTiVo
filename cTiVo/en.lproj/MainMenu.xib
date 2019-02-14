@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14306.4" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14306.4"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14460.31"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -236,10 +236,16 @@ CA
                             <menuItem isSeparatorItem="YES" id="VoV-SY-MpP">
                                 <attributedString key="attributedTitle"/>
                             </menuItem>
-                            <menuItem title="Show Remote Control" toolTip="Bring up Remote Control window to control your TiVo" id="GSE-S9-k5L">
+                            <menuItem title="Reboot TiVo" toolTip="Allows you to reboot your TiVo, even remotely. Will interrupt all programming, recordings, downloads until TiVo restarts." id="GSE-S9-k5L">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="showRemoteControlWindow:" target="494" id="sD7-JD-LSm"/>
+                                    <action selector="rebootTiVo:" target="-1" id="J3p-3p-zQf"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Show Remote Control" toolTip="Bring up Remote Control window to control your TiVo" id="8aF-Hd-G56">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showRemoteControlWindow:" target="-1" id="Xzp-z1-rzz"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -301,12 +307,12 @@ CA
                         <items>
                             <menuItem title="Main Window" keyEquivalent="1" id="857">
                                 <connections>
-                                    <action selector="showMainWindow:" target="494" id="858"/>
+                                    <action selector="showMainWindow:" target="-1" id="R20-gQ-QII"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Remote Control" keyEquivalent="2" toolTip="Bring up Remote Control window to control your TiVo" id="b7Z-cN-J9N">
                                 <connections>
-                                    <action selector="showRemoteControlWindow:" target="494" id="tsw-zo-x8m"/>
+                                    <action selector="showRemoteControlWindow:" target="-1" id="Xwt-aV-s1r"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="92">

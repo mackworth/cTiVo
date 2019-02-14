@@ -824,7 +824,7 @@ NSObject * assertionID = nil;
 -(void)showWindowController: (MTPreferencesWindowController *) controller {
     //prefer to show window as attached sheet, but sometimes in the field, we don't have a window?, so just show it regular.
     if (!controller.window) return;
-    NSWindow * mainWindow =  _mainWindowController.window ?: [NSApp keyWindow];
+    NSWindow * mainWindow =  _mainWindowController.window ?: [NSApp mainWindow];
     if (mainWindow) {
         [mainWindow beginSheet:controller.window completionHandler:nil];
     } else {
@@ -1069,6 +1069,16 @@ NSObject * assertionID = nil;
 		_mainWindowController = [[MTMainWindowController alloc] initWithWindowNibName:@"MTMainWindowController"];
 	}
 	return _mainWindowController;
+}
+
+-(BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+	if (menuItem.action == @selector(showRemoteControlWindow:)) {
+		return [NSApp keyWindow ] != _remoteControlWindowController.window;
+	} else 	if (menuItem.action == @selector(showMainWindow:)) {
+		return [NSApp keyWindow ] != _mainWindowController.window;
+	} else {
+		return YES;
+	}
 }
 
 -(IBAction)showMainWindow:(id)sender {

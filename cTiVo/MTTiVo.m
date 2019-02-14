@@ -78,7 +78,8 @@ __DDLOGHERE__
     MTTiVo *thisTiVo = [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:(NSOperationQueue *)queue manual:NO withID:(int)0 withSerialNumber:TSN ];
     DDLogVerbose(@"Checking Enabled for %@", self);
     for (NSDictionary *description in tiVoManager.savedTiVos) {
-        if ([description[kMTTiVoUserName] isEqual:thisTiVo.tiVo.name]) {
+		BOOL isManual = ((NSNumber *)description[kMTTiVoManualTiVo]).boolValue;
+        if (! isManual && [description[kMTTiVoUserName] isEqual:thisTiVo.tiVo.name]) {
             thisTiVo.tiVoSerialNumber = description[kMTTiVoTSN];
             thisTiVo.enabled = [description[kMTTiVoEnabled] boolValue];
             if ((description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey]) {

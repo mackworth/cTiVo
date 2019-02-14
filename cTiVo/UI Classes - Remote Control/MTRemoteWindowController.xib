@@ -22,7 +22,7 @@
                 <binding destination="-2" name="contentArray" keyPath="tiVoList" id="CFQ-VK-cea"/>
             </connections>
         </arrayController>
-        <window title="TiVo Remote" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" frameAutosaveName="TiVoRemote" animationBehavior="default" id="Ays-WX-T3b">
+        <window title="TiVo Remote" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" frameAutosaveName="TiVoRemote" animationBehavior="default" tabbingMode="disallowed" id="Ays-WX-T3b">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="283" y="305" width="309" height="880"/>
@@ -673,8 +673,6 @@ DQ
                                             <menuItem title="WWE" id="kuw-ha-mJi"/>
                                             <menuItem title="Yahoo" id="xnV-n2-eE4"/>
                                             <menuItem title="YuppTV" id="zYl-Cc-pdG"/>
-                                            <menuItem isSeparatorItem="YES" id="lyz-FZ-XJx"/>
-                                            <menuItem title="Reboot TiVo" id="LZy-yG-Itf"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
