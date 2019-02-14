@@ -2227,10 +2227,11 @@ __DDLOGHERE__
 
 -(void) skipModeExpired: (NSTimer *) timer {
 	//called if timer expires on downloading show info
-	DDLogMajor(@"SkipModeTimer went off for %@, which ended at %@",self, self.show.stopTime);
+	BOOL firstTime = ((NSNumber *)timer.userInfo).boolValue;
+	DDLogMajor(@"%@ SkipModeTimer went off for %@, which ended at %@", firstTime ? @"Initial" : @"Final", self, self.show.stopTime);
 	[self stopWaitSkipModeTimer];
 	if (!self.useSkipMode) return;
-	if (timer.userInfo) { //first time
+	if (firstTime) {
 		if (self.show.hasSkipModeInfo || self.show.hasSkipModeList) {
 			DDLogReport(@"SkipModeTimer went off, but we have SkipMode info?? %@",self);
 			[self skipModeCheck];
@@ -2238,7 +2239,7 @@ __DDLOGHERE__
 		}
 		//one last try, but make sure we eventually move forward.
 		[self.show.tiVo loadSkipModeInfoForShow: self.show ];
-		self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:30 target:self selector:@selector(skipModeExpired:) userInfo:nil repeats:NO]; //nil = second try
+		self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:30 target:self selector:@selector(skipModeExpired:) userInfo:@NO repeats:NO]; //nil = second try
 	} else {
 		DDLogMajor(@"Backup SkipModeTimer went off for %@",self);
 		[self skipModeCheck];
@@ -2250,7 +2251,7 @@ __DDLOGHERE__
 		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome+10;
 		if (waitTime > 0) {
 			DDLogDetail(@"Setting skipModeTimer at %0.1f minutes for %@", waitTime/60.0, self );
-			self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired:) userInfo:@YES repeats:NO]; //YES = first try
+			self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired:) userInfo:@(YES) repeats:NO]; //YES = first try
 		}
 	}
 }
