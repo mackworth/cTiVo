@@ -57,6 +57,5 @@ typedef NS_ENUM(NSUInteger, MTWhatsOnType) {
 -(BOOL) isMini;
 -(BOOL) isOlderTiVo;
 -(void) connectionChanged;
--(void) tiVoActive; //called when we are about to do a SkipMode
 @end
 

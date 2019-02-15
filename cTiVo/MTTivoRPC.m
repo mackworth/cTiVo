@@ -1685,7 +1685,6 @@ static NSArray * imageResponseTemplate = nil;
 	MTRPCData * rpcData = self.skipModeQueueEDL[0];
 	DDLogMajor(@"skipMode queue %@checking for commercials for %@", firstTryNumber.intValue == 0 ? @"" : @"re-", rpcData);
 	__weak __typeof__(self) weakSelf = self;
-	[self.delegate tiVoActive];
 	
 	[self findSkipModePointsForShow:rpcData withCompletionHandler:^{
 		__typeof__(self) strongSelf = weakSelf;
