@@ -81,15 +81,24 @@ __DDLOGHERE__
 		BOOL isManual = ((NSNumber *)description[kMTTiVoManualTiVo]).boolValue;
         if (! isManual && [description[kMTTiVoUserName] isEqual:thisTiVo.tiVo.name]) {
             thisTiVo.tiVoSerialNumber = description[kMTTiVoTSN];
-            thisTiVo.enabled = [description[kMTTiVoEnabled] boolValue];
-            if ((description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey]) {
-                thisTiVo.mediaKey = description[kMTTiVoMediaKey];
-            }
+			BOOL toEnable = [description[kMTTiVoEnabled] boolValue];
+			NSString * possMediaKey = description[kMTTiVoMediaKey];
+            if (possMediaKey.length == 0 || [possMediaKey isEqual:kMTTiVoNullKey]) {
+				if (toEnable) {
+					[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : thisTiVo, @"reason" : @"new"}];
+				}
+			} else {
+				thisTiVo.mediaKey = possMediaKey;
+			}
+			thisTiVo.enabled = toEnable;
             DDLogDetail(@"%@ is%@ Enabled", thisTiVo.tiVo.name,thisTiVo.enabled ? @"": @" not");
             return thisTiVo;
         }
     }
-    thisTiVo.enabled = YES;
+	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : thisTiVo, @"reason" : @"new"}];
+	if (thisTiVo.mediaKey.length > 0) {
+		thisTiVo.enabled = YES;
+	}
     DDLogMajor(@"First time seeing %@ (previous: %@)",thisTiVo, [tiVoManager.savedTiVos maskMediaKeys]);
     return thisTiVo;
 }
@@ -268,26 +277,31 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
+-(void) checkRPC {
+	if (self.enabled && !self.myRPC.isActive) {
+		if (self.supportsRPC && self.mediaKey.length > 0) {
+			int port = self.manualTiVo ? self.tiVo.userPortRPC : 1413;
+			self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName tsn:self.tiVoSerialNumber onPort: port andMAK:self.mediaKey forDelegate:self];
+		}
+	} else if (!self.enabled && self.myRPC){
+		[self.myRPC stopServer];
+		self.myRPC = nil;
+	}
+}
+
 -(void)setEnabled:(BOOL) enabled {
 	if (enabled && [tiVoManager duplicateTiVoFor:self]) {
 		enabled = NO;
 	}
+	BOOL didChange = enabled == _enabled;
 	@synchronized (self) {
 		_enabled = enabled;
 	}
-    if (enabled && !self.myRPC) {
-        if (self.supportsRPC) {
-            int port = self.manualTiVo ? self.tiVo.userPortRPC : 1413;
-            self.myRPC = [[MTTivoRPC alloc] initServer:self.tiVo.hostName tsn:self.tiVoSerialNumber onPort: port andMAK:self.mediaKey forDelegate:self];
-        }
-    } else if (!enabled && self.myRPC){
-        [self.myRPC stopServer];
-        self.myRPC = nil;
-    }
-	if (!self.isMini) {
+	[self checkRPC];
+	if (didChange && !self.isMini) {
 		[tiVoManager channelsChanged:self];
 	}
-    [tiVoManager updateTiVoDefaults:self];
+    if (didChange) [tiVoManager updateTiVoDefaults:self];
 }
 
 -(BOOL) isMini {
@@ -333,14 +347,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
                      kMTTiVoIPAddress :     self.tiVo.iPAddress,
                      kMTTiVoEnabled :     @(self.enabled),
                      kMTTiVoID :          @(self.manualTiVoID),
-                     kMTTiVoMediaKey :      self.mediaKey
+                     kMTTiVoMediaKey :      self.mediaKey.length ? self.mediaKey: kMTTiVoNullKey
                      };
     } else {
         retValue = @{kMTTiVoManualTiVo :   @NO,
                      kMTTiVoUserName :      self.tiVo.name,
                      kMTTiVoTSN :           self.tiVoSerialNumber ?: @"",
                      kMTTiVoEnabled :     @(self.enabled),
-                     kMTTiVoMediaKey :      self.mediaKey
+					 kMTTiVoMediaKey :      self.mediaKey.length ? self.mediaKey: kMTTiVoNullKey
                      };
     }
     return retValue;
@@ -367,12 +381,12 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             if (rpcChanged) self.myRPC = nil; //will be restarted by "enabled"
         }
     }
-
+	NSString * possMediaKey = newTiVo[kMTTiVoMediaKey];
     if ((newTiVo[kMTTiVoEnabled]  && self.enabled != newEnabled) ||
         (newTiVo[kMTTiVoTSN]      && ! [newTiVo[kMTTiVoTSN]      isEqualToString: self.tiVoSerialNumber]) ||
-        (newTiVo[kMTTiVoMediaKey] && ! [newTiVo[kMTTiVoMediaKey] isEqualToString: self.mediaKey] && ![newTiVo[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey])) {
+        (possMediaKey.length > 0 && ! [possMediaKey isEqualToString: self.mediaKey] && ![possMediaKey isEqual:kMTTiVoNullKey])) {
         self.tiVoSerialNumber = (NSString *)newTiVo[kMTTiVoTSN];  //must be after enabled
-        self.mediaKey = newTiVo[kMTTiVoMediaKey];
+        self.mediaKey = possMediaKey;
         shouldUpdate = YES;
     }
     self.enabled = newEnabled;
@@ -389,23 +403,37 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void)getMediaKey
 {
 	DDLogDetail(@"Getting media key for %@", self);
-    BOOL foundMediaKey = NO;
     NSArray *savedTiVos = tiVoManager.savedTiVos;
     if (savedTiVos.count == 0) {
         DDLogDetail(@"No Media Key to Crib");
         return;
     }
+	BOOL foundMediaKey = NO;
+	//check for this tivo
+	for (NSDictionary *tiVo in savedTiVos) {
+		NSString * possMediaKey = tiVo[kMTTiVoMediaKey];
+		if ([tiVo[kMTTiVoUserName] isEqual:self.tiVo.name] &&
+			![possMediaKey isEqual:kMTTiVoNullKey] &&
+			possMediaKey.length > 0) {
+			self.mediaKey = possMediaKey;
+			foundMediaKey = YES;
+			break;
+		}
+	}
+	if (!foundMediaKey) { //look for any with a key
+		for (NSDictionary * tiVo in savedTiVos) {
+			NSString *possMediaKey = tiVo[kMTTiVoMediaKey];
+			if (possMediaKey.length && ![possMediaKey isEqualToString:kMTTiVoNullKey]) {
+				self.mediaKey = possMediaKey;
+				foundMediaKey = YES;
+				break;
+			}
+		}
+	}
 
-    if (savedTiVos[0][kMTTiVoMediaKey] && ![savedTiVos[0][kMTTiVoMediaKey] isEqualToString:kMTTiVoNullKey]) self.mediaKey = savedTiVos[0][kMTTiVoMediaKey];
-    
-    for (NSDictionary *tiVo in savedTiVos) {
-        if ([tiVo[kMTTiVoUserName] isEqual:self.tiVo.name] && ![tiVo[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey] && [tiVo[kMTTiVoMediaKey] length] > 0) {
-            self.mediaKey = tiVo[kMTTiVoMediaKey];
-            foundMediaKey = YES;
-        }
-    }
-    if (!foundMediaKey) {
+	if (foundMediaKey) {
         //Need to update defaults
+		[self checkRPC];
         [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:YES];
     }
 }
@@ -522,7 +550,8 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void) startNPLDownload:(BOOL) getAll {
-    
+	if (self.isMini) return;
+	
     if (isConnecting || !self.enabled) {
         DDLogDetail(@"But was %@", isConnecting? @"Connecting!": @"Disabled!");
         return;
@@ -1315,14 +1344,15 @@ BOOL channelChecking = NO;
 	} else {
 		DDLogReport(@"%@ challenge failed",self);
 		[challenge.sender cancelAuthenticationChallenge:challenge];
+		BOOL noMAK = self.mediaKey.length == 0;
+		DDLogMajor(@"%@ MAK, so failing URL Authentication %@",noMAK ? @"No" : @"Invalid", self);
 		[self.showURLConnection cancel];
 		self.showURLConnection = nil;
 		isConnecting = NO;
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
-		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : @"incorrect"}];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : self, @"reason" : noMAK ?@"new" : @"incorrect"}];
 	}
 }
-
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {

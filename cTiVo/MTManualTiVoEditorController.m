@@ -79,7 +79,7 @@ __DDLOGHERE__
         tiVos = [NSMutableArray arrayWithArray:existingTivos];
     }
     NSInteger newID = [tiVoManager nextManualTiVoID]; 
-    [tiVos addObject:@{@"enabled" : @NO, kMTTiVoUserName : @"TiVo Name", kMTTiVoIPAddress : @"0.0.0.0", kMTTiVoUserPort : @"80", kMTTiVoUserPortSSL : @"443", kMTTiVoUserPortRPC: @"1413", kMTTiVoID : @(newID), kMTTiVoTSN : @"", kMTTiVoManualTiVo : @YES, kMTTiVoMediaKey : @""}];
+    [tiVos addObject:@{@"enabled" : @NO, kMTTiVoUserName : @"TiVo Name", kMTTiVoIPAddress : @"0.0.0.0", kMTTiVoUserPort : @"80", kMTTiVoUserPortSSL : @"443", kMTTiVoUserPortRPC: @"1413", kMTTiVoID : @(newID), kMTTiVoTSN : @"", kMTTiVoManualTiVo : @YES, kMTTiVoMediaKey : kMTTiVoNullKey}];
    [[NSUserDefaults standardUserDefaults] setValue:tiVos forKeyPath:kMTTiVos];
 }
 

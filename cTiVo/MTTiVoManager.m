@@ -1300,14 +1300,21 @@ __DDLOGHERE__
 }
 
 -(NSCellStateValue ) defaultSkipModeForChannel:(NSString *) channel {
-	NSArray <NSString *> * skipChannels = @[@"amc", @"bravo", @"comedy", @"cw", @"food", @"freeform", @"fx", @"hg", @"history", @"life", @"syfy", @"tbs", @"tdc", @"the discovery", @"tlc", @"tnt", @"usa"];
+	NSArray <NSString *> * skipChannels = @[@"amc", @"bravo", @"comedy", @"cw", @"food", @"freeform", @"fx", @"hgtv", @"history", @"life", @"syfy", @"tbs", @"tdc", @"the discovery", @"tlc", @"tnt", @"usa"];
+
 	NSString * lowerChannel = channel.lowercaseString;
 	for (NSString * skipChannel in skipChannels) {
 		if ([lowerChannel hasPrefix:skipChannel]) {
 			return NSOnState;
 		}
 	}
-	return NSMixedState;
+	NSArray <NSString *> * skipAffiliates = @[@"ABC Affiliate", @"CBS Affiliate", @"NBC Affiliate", @"Fox Affiliate", @"CW Affiliate"];
+	NSString * affiliate  = self.channelList[channel][@"affiliate"];
+	if ([skipAffiliates containsObject: affiliate]) {
+		return NSOnState;
+	} else {
+		return NSMixedState;
+	}
 }
 
 -(void) updateSkipModeToChannels { //updates old defaults to have maybe on skipmode

@@ -50,7 +50,7 @@
 		<true/>
 	</dict>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>cTiVo needs access to iTunes to be able to add TV Shows and Movies</string>
+	<string>cTiVo needs access to iTunes to be able to add TV Shows and Movies, and ImageEvents to send notices.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2019 Scott Buchanan and Hugh Mackworth. All rights reserved.</string>
 	<key>NSMainNibFile</key>

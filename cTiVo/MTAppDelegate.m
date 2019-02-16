@@ -92,8 +92,8 @@ void signalHandler(int signal)
     if (![defaults boolForKey:kMTCrashlyticsOptOut]) {
         [Fabric with:@[[Crashlytics class]]];
     }
-#endif
 	PFMoveToApplicationsFolderIfNecessary();
+#endif
     CGEventRef event = CGEventCreate(NULL);
     CGEventFlags modifiers = CGEventGetFlags(event);
     CFRelease(event);
@@ -155,15 +155,15 @@ void signalHandler(int signal)
 	}
 
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
-										  @NO, kMTShowCopyProtected,
-										  @YES, kMTShowSuggestions,
+										  @YES, kMTShowCopyProtected,
+										  @NO, kMTShowSuggestions,
 										  @YES, kMTShowFolders,
-										  @NO, kMTPreventSleep,
+										  @YES, kMTPreventSleep,
 										  @kMTMaxDownloadRetries, kMTNumDownloadRetries,
 										  @0, kMTUpdateIntervalMinutesNew,
 										  @NO, kMTiTunesDelete,
 										  @NO, kMTHasMultipleTivos,
-										  @NO, kMTMarkCommercials,
+										  @YES, kMTMarkCommercials,
                                           @YES, kMTiTunesIcon,
 										  @YES, kMTUseMemoryBufferForDownload,
 										  // @NO, kMTAllowDups, future
@@ -184,9 +184,10 @@ void signalHandler(int signal)
 										  @(kMTDefaultDelayForSkipModeInfo), kMTWaitForSkipModeInfoTime,
 										  [NSDate tomorrowAtTime:1*60], kMTScheduledStartTime,  //start at 1AM tomorrow]
                                           [NSDate tomorrowAtTime:6*60], kMTScheduledEndTime,  //end at 6AM tomorrow],
+										  @YES, kMTScheduledSkipModeScan,
 										  [NSDate tomorrowAtTime:30], kMTScheduledSkipModeScanStartTime, //start SkipMode scan at 12:30AM tomorrow]
 										  [NSDate tomorrowAtTime:5*60+45], kMTScheduledSkipModeScanEndTime, //end SkipMode scan at 5:45AM tomorrow]
-										  @0, kMTCommercialStrategy,
+										  @3, kMTCommercialStrategy,
 										  nil];
 
     [defaults registerDefaults:userDefaultsDefaults];
@@ -985,17 +986,22 @@ NSObject * assertionID = nil;
     if (!tiVo.enabled) {
         gettingMediaKey = NO;
         [mediaKeyQueue removeObject:request];
-        return;
+		[self getMediaKeyFromUser:nil];//Process rest of queue
+		return;
     }
 	NSString *reason = request[@"reason"];
     NSString *message = nil;
 	if ([reason isEqualToString:@"new"]) {
         [tiVo getMediaKey];
         if (tiVo.mediaKey.length ==0) {
-            message = [NSString stringWithFormat:@"Need new Media Key for %@",tiVo.tiVo.name];
-        }
+            message = [NSString stringWithFormat:@"Need Media Access Key for %@",tiVo.tiVo.name];
+		} else {
+			tiVo.enabled = YES;
+			[tiVo updateShows:nil];
+			//yay. someone else filled in our media key
+		}
 	} else {
-		message = [NSString stringWithFormat:@"Incorrect Media Key for %@",tiVo.tiVo.name];
+		message = [NSString stringWithFormat:@"Incorrect Media Access Key for %@",tiVo.tiVo.name];
 	}
     if (message) {
         NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"Save Key" alternateButton:@"Ignore TiVo" otherButton:nil informativeTextWithFormat:@" "];
@@ -1021,18 +1027,20 @@ NSObject * assertionID = nil;
         [keychainButton setState:NSOffState];
         [accView addSubview:keychainButton];
         
-        if (tiVo.mediaKey) [input setStringValue:tiVo.mediaKey];
+        if (tiVo.mediaKey.length) [input setStringValue:tiVo.mediaKey];
         [keyAlert setAccessoryView:accView];
         NSInteger button = [keyAlert runModal];
         if (button == NSAlertDefaultReturn) {
             [input validateEditing];
             DDLogDetail(@"Got New Media Key" );
             tiVo.mediaKey = input.stringValue;
- 			tiVo.enabled = YES;
-			[tiVo updateShows:nil];
-            if (keychainButton.state == NSOnState ) {
-                tiVo.storeMediaKeyInKeychain = YES;
-            }
+			tiVo.enabled = tiVo.mediaKey.length > 0;
+			if (tiVo.enabled) {
+				[tiVo updateShows:nil];
+				if (keychainButton.state == NSOnState ) {
+					tiVo.storeMediaKeyInKeychain = YES;
+				}
+			}
         } else {
             tiVo.enabled = NO;
 //            tiVo.mediaKey = input.stringValue;
@@ -1040,8 +1048,6 @@ NSObject * assertionID = nil;
     }
 	[mediaKeyQueue removeObject:request];
 	[tiVoManager updateTiVoDefaults:tiVo];
-
-	
 	gettingMediaKey = NO;
 	[self getMediaKeyFromUser:nil];//Process rest of queue
 }

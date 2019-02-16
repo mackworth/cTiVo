@@ -399,11 +399,15 @@ __DDLOGHERE__
 	if (self.hasSkipModeInfo || self.hasSkipModeList) return YES;
 	if (self.skipModeFailed) return NO;
 	if (self.isSuggestion) return NO;
-	if ([tiVoManager skipModeForChannel:self.stationCallsign] != NSOnState) return NO;
-	if ([tiVoManager commercialsForChannel:self.stationCallsign] != NSOnState) return NO;
+	if (self.stationCallsign) {
+		if ([tiVoManager skipModeForChannel:self.stationCallsign] != NSOnState) return NO;
+		if ([tiVoManager commercialsForChannel:self.stationCallsign] != NSOnState) return NO;
+	}
 	NSString * genre = self.episodeGenre.lowercaseString;
-	if ([genre isEqualToString:@"news"] ) return NO; //allow news magazine
-	if ([genre isEqualToString:@"sports"] ) return NO;
+	if (genre) {
+		if ([genre isEqualToString:@"news"] ) return NO; //allow news magazine
+		if ([genre isEqualToString:@"sports"] ) return NO;
+	}
 	if (!self.inProgress.boolValue && timeLeft < 0) {
 		DDLogVerbose(@"No SkipMode for %@; Past deadline for SkipInfo to arrive by %0.1f", self, -timeLeft);
 		return NO;
@@ -754,7 +758,7 @@ __DDLOGHERE__
 
 -(NSString *) h264String {
 	if (self.rpcData.format != MPEGFormatUnknown) {
-		if ([self checkString:self.rpcData.format == MPEGFormatH264 ]) {
+		if (self.rpcData.format == MPEGFormatH264) {
 			return @"✔";
 		} else {
 			return @"--";
@@ -916,6 +920,7 @@ __DDLOGHERE__
 	if ([self skipModeFailed]) return @2;
 	if ([self hasSkipModeInfo]) return @1;
 	if (self.edlList.count > 0) return @5;
+	if (self.protectedShow.boolValue) return @0;
 	if ([self mightHaveSkipModeInfo ]) return @4;
 	return @0;
 }

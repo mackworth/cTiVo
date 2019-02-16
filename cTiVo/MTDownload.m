@@ -891,6 +891,7 @@ __DDLOGHERE__
 				DDLogReport(@"Error: mpegTask called on Program stream: %@", log);
 			} else {
 				strongSelf.useTransportStream = @NO;
+				[strongSelf markMyChannelAsPSOnly];
 				DDLogReport(@"Found Mpeg2 video in Transport Stream. Rescheduling");
 				DDLogDetail(@"%@", log);
 				[strongSelf rescheduleDownloadFalseStart];
@@ -1141,9 +1142,7 @@ __DDLOGHERE__
 		if (useTS) {
 			MPEGFormat format = [strongSelf videoFileType:self.decryptedFilePath];
 			strongSelf.show.rpcData.format = format;
-			//xxx currently test is redundant, but if we allow, what should happen to channel? And auto-retry w/ PS?
 			if (format == MPEGFormatMPG2) {  //MPEG2
-				strongSelf.useTransportStream = @NO;
 				if (strongSelf.encodeTask.taskFailed) {
 					//Looks like either user forced us to use TS OR channel is sending mixture of H.264 and MPEG2
 					//try again with ProgramStream
@@ -1191,8 +1190,11 @@ __DDLOGHERE__
 				strongSelf.downloadStatus = @(kMTStatusDone);
 				if (foundAudioOnly) {
 					[strongSelf markMyChannelAsTSOnly];
+				} else {
+					[strongSelf markMyChannelAsPSOnly];
 				}
 			} else if (foundAudioOnly) {
+				strongSelf.useTransportStream = @YES;
 				[strongSelf handleNewTSChannel];
 			} else {
 				  //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
@@ -1200,8 +1202,11 @@ __DDLOGHERE__
 				[strongSelf notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
 								 subTitle:@"Transfer is too short" ];
 			}
+		} else {
+			//got full length file, so it must be MP2
+			[strongSelf markMyChannelAsPSOnly];
 		}
-    };
+	};
 
     encodeTask.terminationHandler = nil;
     NSArray * encoderArgs = nil;
@@ -2967,6 +2972,7 @@ NSInteger diskWriteFailure = 123;
 -(void) markMyChannelAsPSOnly {
 	NSString * channelName = self.show.stationCallsign;
 	DDLogMajor(@"Due to problems with %@, converting %@ to Program Stream only",self, channelName);
+	self.show.rpcData.format = MPEGFormatMPG2;
 	if ( [tiVoManager failedPSForChannel:channelName] != NSOffState ) {
 		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSOnState;
 		[tiVoManager setFailedPS:NO forChannelNamed:channelName];
