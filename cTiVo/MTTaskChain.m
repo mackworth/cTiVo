@@ -308,11 +308,13 @@ __DDLOGHERE__
                 if (bytesLeft >0 && !_download.isCanceled){
                     //Couldn't write all data
                     NSString * taskName = currentTask.taskName ?: @"unknown task";
-                    if (numTries == 0) {
-                        DDLogReport(@"Write Fail: couldn't write to pipe after three tries; %@ may have crashed.", taskName);
-                    } else {
-                        DDLogReport(@"Write Fail; tried %lu bytes; error: %d; %@ may have crashed.", bytesLeft, errno, taskName);
-                    }
+					if (!currentTask.successfulExit) {
+						if (numTries == 0) {
+							DDLogReport(@"Write Fail: couldn't write to pipe after three tries; %@ may have failed.", taskName);
+						} else {
+							DDLogReport(@"Write Fail; tried %lu bytes; error: %d; %@ may have failed.", bytesLeft, errno, taskName);
+						}
+					}
                     if (!currentTask || currentTask.shouldReschedule) {
                         [_download rescheduleDownload];
                     } else if (! currentTask.shouldReschedule) {

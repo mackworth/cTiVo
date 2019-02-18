@@ -867,7 +867,7 @@ __DDLOGHERE__
 	MTTask *mpegTask = [MTTask taskWithName:@"mpegCheck" download:self];
 	[mpegTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ffmpeg"]];
 	[mpegTask setArguments:@[@"-i",@"pipe:"]];
-	 
+	mpegTask.successfulExitCodes = @[@0,@1]; //just want text; expected to return 1
 //	[[NSFileManager defaultManager] createFileAtPath:self.mpegCheckFilePath contents:[NSData data] attributes:nil];
 //	NSFileHandle *file = [NSFileHandle fileHandleForWritingAtPath:self.mpegCheckFilePath];
 	//mpegTask.standardOutput = file;
@@ -885,17 +885,19 @@ __DDLOGHERE__
 			return;
 		}
 		NSString *log = [NSString stringWithEndOfFile:errFilePath ];
-		if ([log contains:@"mpeg2video"]) {
+		if (![log contains:@"mpegts"]) { //double check
+			DDLogReport(@"Error: mpegTask called on Program stream: %@", log);
+		} else if ([log contains:@"mpeg2video"]) {
 			//for future reference; mpegts ==> transport stream; h264 => h.264 video; "Input #0, mpeg," == program stream
-			if (![log contains:@"mpegts"]) { //double check
-				DDLogReport(@"Error: mpegTask called on Program stream: %@", log);
-			} else {
-				strongSelf.useTransportStream = @NO;
-				[strongSelf markMyChannelAsPSOnly];
-				DDLogReport(@"Found Mpeg2 video in Transport Stream. Rescheduling");
-				DDLogDetail(@"%@", log);
-				[strongSelf rescheduleDownloadFalseStart];
-			}
+			strongSelf.useTransportStream = @NO;
+			[strongSelf markMyChannelAsPSOnly];
+			DDLogReport(@"Found Mpeg2 video in Transport Stream. Rescheduling");
+			DDLogDetail(@"%@", log);
+			[strongSelf rescheduleDownloadFalseStart];
+		} else if ([log contains: @"h264"]) { //good file
+			[strongSelf markMyChannelAsTSOnly];
+		} else {
+			DDLogReport(@"Neither MPEG2 nor H.264 video in %@: %@", strongSelf, log);
 		}
 	};
 	DDLogVerbose(@"MPEG task created");
@@ -1139,72 +1141,67 @@ __DDLOGHERE__
 		double downloadedSize = strongSelf.totalDataDownloaded;
 		double filePercent =  downloadedSize/ strongSelf.show.fileSize*100;
 		BOOL useTS = strongSelf.useTransportStream.boolValue;
+		BOOL tooSmall = filePercent > 0 && ((useTS && filePercent < 70.0) ||
+											(!useTS && filePercent < 80.0 ));
 		if (useTS) {
 			MPEGFormat format = [strongSelf videoFileType:self.decryptedFilePath];
 			strongSelf.show.rpcData.format = format;
 			if (format == MPEGFormatMPG2) {  //MPEG2
-				if (strongSelf.encodeTask.taskFailed) {
+				BOOL failed = strongSelf.encodeTask.taskFailed;
+				DDLogReport(@"For download %@, after downloading file with Transport Stream, we find it is an MPEG2, which %@ to a corrupted video file. Retrying with Program Stream.", strongSelf, failed ? @"apparently led" : @"might lead");
+
+				if (tooSmall || failed || ![[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowMP2InTS]) {
 					//Looks like either user forced us to use TS OR channel is sending mixture of H.264 and MPEG2
 					//try again with ProgramStream
-					DDLogReport(@"For download %@, after downloading file with Transport Stream, we find it is an MPEG2, which has apparently led to a corrupted video file. Retrying with Program Stream.", strongSelf);
 					strongSelf.useTransportStream = @NO;
 					[strongSelf markMyChannelAsPSOnly];
-					return;
-				} else {
-					DDLogMajor(@"Warning: For download %@, after downloading file with Transport Stream, we find it is an MPEG2, which might lead to a corrupted video file.", strongSelf );
-					if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowMP2InTS]) {
-						strongSelf.useTransportStream = @NO;
-						[strongSelf markMyChannelAsPSOnly];
-					}
+					tooSmall = NO; //don't warn below
 				}
 			} else if (format == MPEGFormatH264) {
 				if (strongSelf.encodeTask.taskFailed) {
-					DDLogMajor(@"After downloading file with Transport Stream, encoding failed, but it's indeed an MP4 stream %@",strongSelf);
+					DDLogMajor(@"After downloading file with Transport Stream, encoding failed, but it actually is an H264 stream %@",strongSelf);
 				} else {
-					DDLogDetail(@"After downloading file with Transport Stream, encoding passed with an MP4 stream %@",strongSelf);
+					DDLogDetail(@"After downloading file with Transport Stream, encoding passed with an H264 stream %@",strongSelf);
 				}
 			} else {
 				DDLogDetail(@"After downloading file with Transport Stream, invalid video file %@",strongSelf);
 			}
 		} else {
-			
-		}
-		if (filePercent > 0 &&
-			(filePercent < 70.0 || (!useTS && filePercent < 80.0 ))) {
-			//hmm, doesn't look like it's big enough  (80% for PS; 70% for TS
-			BOOL foundAudioOnly = NO;
-			if (!useTS ) {
-				if ([strongSelf checkLogForAudio: errFilePath]) {
-					foundAudioOnly = YES;
+			//Program Stream
+			if (tooSmall) {   //hmm, doesn't look like it's big enough
+				BOOL foundAudioOnly = [strongSelf checkLogForAudio: errFilePath] ||
+										(!strongSelf.encodeFormat.testsForAudioOnly &&
+										 filePercent > 2.0 &&
+										 filePercent < 25.0);
+						//encoder won't check decrypted-only file, so rely on size alone
+				
+				if (strongSelf.encodeFormat.isTestPS) {
+					// if a test, then we only try once.
+					[strongSelf cancel];
+					strongSelf.processProgress = 1.0;
+					strongSelf.downloadStatus = @(kMTStatusDone);
+					if (foundAudioOnly) {
+						[strongSelf markMyChannelAsTSOnly];
+					} else {
+						[strongSelf markMyChannelAsPSOnly];
+					}
+					tooSmall = NO; //don't warn below
+				} else if (foundAudioOnly) {
+					DDLogMajor(@"Due to Audio Only in file, switching to Transport Stream %@",strongSelf);
+					[strongSelf handleNewTSChannel];
+					tooSmall = NO; //don't warn below
 				}
-				if (!strongSelf.encodeFormat.testsForAudioOnly && filePercent > 2.0 && filePercent < 25.0) {
-					//decrypted file, so encoder won't check, so rely on size alone
-					foundAudioOnly = YES;
-				}
-			}
-			
-			if ( strongSelf.encodeFormat.isTestPS) {
-				// if a test, then we only try once.
-				[strongSelf cancel];
-				strongSelf.processProgress = 1.0;
-				strongSelf.downloadStatus = @(kMTStatusDone);
-				if (foundAudioOnly) {
-					[strongSelf markMyChannelAsTSOnly];
-				} else {
-					[strongSelf markMyChannelAsPSOnly];
-				}
-			} else if (foundAudioOnly) {
-				strongSelf.useTransportStream = @YES;
-				[strongSelf handleNewTSChannel];
 			} else {
-				  //Too small, AND (TS OR (PS, but doesn't look like audio-only, nor testPS))
-				DDLogReport(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", strongSelf.show, strongSelf.show.fileSize/1000, downloadedSize/1000, 100.0 * downloadedSize / strongSelf.show.fileSize);
-				[strongSelf notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
-								 subTitle:@"Transfer is too short" ];
+				//got full length file, so under Program Stream, it must be MP2
+				[strongSelf markMyChannelAsPSOnly];
 			}
-		} else {
-			//got full length file, so it must be MP2
-			[strongSelf markMyChannelAsPSOnly];
+
+		}
+		//Too small, and not handled above
+		if (tooSmall) {
+			DDLogReport(@"Show %@ supposed to be %0.0f Kbytes, actually %0.0f Kbytes (%0.1f%%)", strongSelf.show, strongSelf.show.fileSize/1000, downloadedSize/1000, 100.0 * downloadedSize / strongSelf.show.fileSize);
+			[strongSelf notifyUserWithTitle: @"Warning: Show may be damaged/incomplete."
+								   subTitle:@"Transfer is too short" ];
 		}
 	};
 
@@ -1455,6 +1452,7 @@ __DDLOGHERE__
 		if (!strongSelf || !strongCommercial) return;
         if (weakCommercial.taskFailed) {
             if ([strongSelf checkLogForAudio: strongCommercial.logFilePath]) {
+				DDLogMajor(@"Due to audio-only failure, switching to Transport Stream for %@", strongSelf);
                 [strongSelf handleNewTSChannel];
             } else {
                 [strongSelf notifyUserWithTitle:@"Detecting Commercials Failed" subTitle:@"Not processing commercials" ];
@@ -2971,30 +2969,35 @@ NSInteger diskWriteFailure = 123;
 
 -(void) markMyChannelAsPSOnly {
 	NSString * channelName = self.show.stationCallsign;
-	DDLogMajor(@"Due to problems with %@, converting %@ to Program Stream only",self, channelName);
 	self.show.rpcData.format = MPEGFormatMPG2;
 	if ( [tiVoManager failedPSForChannel:channelName] != NSOffState ) {
+		DDLogMajor(@"Due to problems with %@, converting %@ to Program Stream only",self, channelName);
 		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSOnState;
 		[tiVoManager setFailedPS:NO forChannelNamed:channelName];
 		if (notify) {
 			//only notify if we've been forcing TS)
 			[self transientNotifyWithTitle:@"MPEG2 Channel" subTitle:[NSString stringWithFormat:@"Due to corrupted video, marking %@ as Program Stream",channelName] ];
 		}
+	} else {
+		DDLogMajor(@"Confirmed MPEG2 in %@ on channel %@",self, channelName);
 	}
 }
 
 
 -(void) markMyChannelAsTSOnly {
 	NSString * channelName = self.show.stationCallsign;
-	DDLogMajor(@"Found evidence of audio-only stream in %@ on %@",self, channelName);
 	self.show.rpcData.format = MPEGFormatH264;
 	if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
+		DDLogMajor(@"Setting H.264 on %@ due to %@", channelName, self);
 		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSOffState;
 		[tiVoManager setFailedPS:YES forChannelNamed:channelName];
 		if (notify && !self.encodeFormat.isTestPS) {
 			//only notify if we're not (testing, OR previously seen, OR forcing PS)
 			[self transientNotifyWithTitle:@"H.264 Channel" subTitle:[NSString stringWithFormat:@"Marking %@ as Transport Stream",channelName] ];
 		}
+	} else {
+		DDLogDetail(@"Confirmed H.264 in %@ on channel %@",self, channelName);
+
 	}
 }
 
