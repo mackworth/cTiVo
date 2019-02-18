@@ -58,8 +58,8 @@
 
 //---------------Download Queue Manager methods ----------
 -(void) cancelAllDownloads;
--(void) addToDownloadQueue:(NSArray <MTDownload *> *)downloads beforeDownload:(MTDownload *) nextShow;
--(void) downloadShowsWithCurrentOptions:(NSArray<MTTiVoShow *> *) shows beforeDownload:(MTDownload *) nextShow;
+-(NSArray <MTDownload *> *) addToDownloadQueue:(NSArray <MTDownload *> *)downloads beforeDownload:(MTDownload *) nextShow;
+-(NSArray <MTDownload *> *) downloadShowsWithCurrentOptions:(NSArray<MTTiVoShow *> *) shows beforeDownload:(MTDownload *) nextShow;
 -(void) deleteFromDownloadQueue:(NSArray <MTDownload *>*)downloads;
 -(void) rescheduleDownloads: (NSArray <MTDownload *> *) downloads;
 -(NSIndexSet *) moveShowsInDownloadQueue:(NSArray <MTDownload *> *) downloads

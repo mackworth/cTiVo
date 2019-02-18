@@ -798,15 +798,15 @@ __DDLOGHERE__
     }
 
 
-    [tiVoManager downloadShowsWithCurrentOptions:realShows beforeDownload:insertTarget];
-
+    NSArray <MTDownload *> * newDownloads = [tiVoManager downloadShowsWithCurrentOptions:realShows beforeDownload:insertTarget];
+	if (!newDownloads.count) return NO;
+	
     self.sortedDownloads = nil;
     [tiVoManager sortDownloadQueue];
     DDLogVerbose(@"afterSort: %@", self.sortedDownloads);
 
-    NSIndexSet * selectionIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-        MTDownload * download = (MTDownload *) obj;
-        return [realShows indexOfObjectIdenticalTo:download.show] !=NSNotFound;
+    NSIndexSet * selectionIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(MTDownload * download, NSUInteger idx, BOOL *stop) {
+		return [newDownloads containsObject: download];
     }];
 	[self insertRowsAtIndexes:selectionIndexes withAnimation:NSTableViewAnimationEffectGap];
     //now leave new shows selected

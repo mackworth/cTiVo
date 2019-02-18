@@ -375,12 +375,20 @@ __DDLOGHERE__
 		[menuItem action]==@selector(subscribe:) ||
 		[menuItem action]==@selector(showDetails:) ||
 		[menuItem action]==@selector(reloadAllInfo:) ||
-		[menuItem action]==@selector(revealInNowPlaying:) ||
 		[menuItem action]==@selector(downloadSelectedShows:)) {
 		
 		MTProgramTableView * table = self.tiVoShowTable; //default; could also be download or subscribe; must have actionItems property
 		if ([self.window.firstResponder isKindOfClass:[NSTableView class]]) table = (MTProgramTableView *) self.window.firstResponder;
 		return (table.actionItems.count > 0);
+	}
+	if ([menuItem action]==@selector(revealInNowPlaying:)) {
+		NSArray <MTDownload *> * downloads = self.downloadQueueTable.actionItems;
+		for (MTDownload * download in downloads) {
+			if (download.downloadStatus.intValue != kMTStatusDeleted) {
+				return YES;
+			}
+		}
+		return NO;
 	}
 	BOOL deleteItem =  menuItem.action == @selector(deleteOnTiVo:);
 	BOOL playItem =  menuItem.action == @selector(playOnTiVo:);
@@ -390,7 +398,7 @@ __DDLOGHERE__
 		if (deleteItem) menuItem.title = @"Delete from TiVo"; //alternates with remove from Queue
 		NSArray	*selectedShows = [self selectedShows ];
 		for (MTTiVoShow * show in selectedShows) {
-			if (show.rpcData && show.tiVo.rpcActive) {
+			if (show.rpcData && show.tiVo.rpcActive && ! [show.imageString isEqualToString:@"Deleted"]) {
 				if (stopItem) {
 					if (show.inProgress.boolValue) return YES;
 				} else if (getSkipItem) {

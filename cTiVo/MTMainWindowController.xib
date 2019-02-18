@@ -527,7 +527,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Does channel show is on use H.264 (more compressed)" id="UMt-1R-5R9">
+                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Does this show (✔) or channel (√) use H.264 compression v. MPEG2 ( -- or -)?" id="UMt-1R-5R9">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="H.264">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>

@@ -1507,8 +1507,8 @@ __DDLOGHERE__
 	return [self.downloadQueue sortedArrayUsingDescriptors:sortDescripters];
 }
 
--(void)addToDownloadQueue:(NSArray *)newDownloads beforeDownload:(MTDownload *) nextDownload {
-	BOOL submittedAny = NO;
+-(NSArray <MTDownload *> *) addToDownloadQueue:(NSArray *)newDownloads beforeDownload:(MTDownload *) nextDownload {
+	NSMutableArray <MTDownload *> * submittedDownloads = [NSMutableArray array];
 	for (MTDownload *newDownload in newDownloads){
 		MTTiVoShow * newShow = newDownload.show;
 		if (![newShow.protectedShow boolValue]) {
@@ -1527,8 +1527,8 @@ __DDLOGHERE__
                 }
             }
             if (!showFound) {
-                submittedAny = YES;
 				[newDownload prepareForDownload:NO];
+				[submittedDownloads addObject:newDownload];
 				if (nextDownload) {
                     NSUInteger index = [_downloadQueue indexOfObjectIdenticalTo:nextDownload];
                     if (index == NSNotFound) {
@@ -1546,15 +1546,16 @@ __DDLOGHERE__
             }
         }
 	}
-	if (submittedAny){
+	if (submittedDownloads.count){
 		DDLogDetail(@"Posting showsUpdated notifications");
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
         [[NSNotificationCenter defaultCenter ] postNotificationName:  kMTNotificationDownloadQueueUpdated object:nil];
 	}
+	return [submittedDownloads copy];
 }
 
 
--(void) downloadShowsWithCurrentOptions:(NSArray *) shows beforeDownload:(MTDownload *) nextDownload {
+-(NSArray <MTDownload *> *) downloadShowsWithCurrentOptions:(NSArray *) shows beforeDownload:(MTDownload *) nextDownload {
 	NSMutableArray * downloads = [NSMutableArray arrayWithCapacity:shows.count];
 	for (MTTiVoShow * thisShow in shows) {
 		NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
@@ -1573,7 +1574,8 @@ __DDLOGHERE__
 		newDownload.deleteAfterDownload = [defaults objectForKey:kMTIfSuccessDeleteFromTiVo];
 		[downloads addObject: newDownload];
 	}
-	[self addToDownloadQueue:downloads beforeDownload:nextDownload ];
+	return [self addToDownloadQueue:downloads beforeDownload:nextDownload ];
+	
 }
 
 -(void) deleteFromDownloadQueue:(NSArray *) downloads {
