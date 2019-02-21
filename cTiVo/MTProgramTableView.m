@@ -802,8 +802,14 @@ __DDLOGHERE__
 	} else if ([identifier isEqualToString:@"OnDisk"]) {
 		result.toolTip =@"Is program already downloaded and still on disk?";
 	}
-
-	if ([thisShow isOnDisk]){
+	BOOL onDisk = [thisShow isOnDisk];
+	if (folderHolder) {
+		for (MTTiVoShow * show in folderHolder.folder) {
+			onDisk = [show isOnDisk];
+			if (!onDisk) break;
+		}
+	}
+	if (onDisk){
 		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];
 	} else {
 		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toNotHaveTrait:NSFontBoldTrait];
