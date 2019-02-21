@@ -1561,17 +1561,28 @@ __DDLOGHERE__
 		NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 		DDLogDetail(@"Adding show: %@", thisShow);
         MTDownload * newDownload = [MTDownload downloadForShow:thisShow withFormat: self.selectedFormat withQueueStatus: kMTStatusNew];
-		newDownload.exportSubtitles = [defaults objectForKey:kMTExportSubtitles];
-		newDownload.addToiTunesWhenEncoded = newDownload.encodeFormat.canAddToiTunes &&
-											[defaults boolForKey:kMTiTunesSubmit];
-		newDownload.skipCommercials = [newDownload.encodeFormat.comSkip boolValue] &&
-											[defaults boolForKey:kMTSkipCommercials];
-		newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials &&
-											[defaults boolForKey:kMTMarkCommercials];
-		newDownload.useSkipMode = (newDownload.encodeFormat.canMarkCommercials || newDownload.encodeFormat.comSkip) &&
-									[defaults integerForKey:kMTCommercialStrategy] > 0;
-		newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
-		newDownload.deleteAfterDownload = [defaults objectForKey:kMTIfSuccessDeleteFromTiVo];
+		if (newDownload.encodeFormat.isTestPS || newDownload.encodeFormat.isEncryptedDownload ) {
+			newDownload.exportSubtitles = @NO;
+			newDownload.addToiTunesWhenEncoded = NO;
+			newDownload.skipCommercials = NO;
+			newDownload.markCommercials = NO;
+			newDownload.useSkipMode = NO;
+			newDownload.deleteAfterDownload = @NO;
+			newDownload.genTextMetaData = @NO;
+			newDownload.deleteAfterDownload = @NO;
+		} else {
+			newDownload.exportSubtitles = [defaults objectForKey:kMTExportSubtitles];
+			newDownload.addToiTunesWhenEncoded = newDownload.encodeFormat.canAddToiTunes &&
+												[defaults boolForKey:kMTiTunesSubmit];
+			newDownload.skipCommercials = [newDownload.encodeFormat.comSkip boolValue] &&
+												[defaults boolForKey:kMTSkipCommercials];
+			newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials &&
+												[defaults boolForKey:kMTMarkCommercials];
+			newDownload.useSkipMode = (newDownload.encodeFormat.canMarkCommercials || newDownload.encodeFormat.comSkip) &&
+										[defaults integerForKey:kMTCommercialStrategy] > 0;
+			newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
+			newDownload.deleteAfterDownload = [defaults objectForKey:kMTIfSuccessDeleteFromTiVo];
+		}
 		[downloads addObject: newDownload];
 	}
 	return [self addToDownloadQueue:downloads beforeDownload:nextDownload ];

@@ -917,9 +917,9 @@ __DDLOGHERE__
 
 -(NSNumber *) rpcSkipMode { //only for sorting in tables
 	if ([self hasSkipModeList]) return @3;
+	if (self.edlList.count > 0) return @5;
 	if ([self skipModeFailed]) return @2;
 	if ([self hasSkipModeInfo]) return @1;
-	if (self.edlList.count > 0) return @5;
 	if (self.protectedShow.boolValue) return @0;
 	if ([self mightHaveSkipModeInfo ]) return @4;
 	return @0;

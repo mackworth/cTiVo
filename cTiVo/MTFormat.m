@@ -421,6 +421,7 @@ __DDLOGHERE__
 
 -(BOOL)canMarkCommercials
 {
+	if (self.isTestPS) return NO;
 	NSArray * allowedExtensions = @[@".mp4", @".m4v"];
 	NSString * extension = [self.filenameExtension lowercaseString];
 	return [allowedExtensions containsObject: extension];

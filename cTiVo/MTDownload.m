@@ -1568,10 +1568,11 @@ __DDLOGHERE__
 {
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 
-	if (self.encodeFormat.isEncryptedDownload) {
+	if (self.encodeFormat.isEncryptedDownload || self.encodeFormat.isTestPS) {
 		self.skipCommercials = NO;
 		self.markCommercials = NO;
 		self.exportSubtitles = @NO;
+		self.useSkipMode = NO;
 	}
     BOOL channelCommercialsOff = [tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOffState;
     if ((channelCommercialsOff) &&
@@ -2716,9 +2717,9 @@ NSInteger diskWriteFailure = 123;
 		DDLogMajor(@"Program stream test passed for %@ on %@",self, self.show.stationCallsign);
 		self.show.rpcData.format = MPEGFormatMPG2;
         [tiVoManager setFailedPS:NO forChannelNamed: self.show.stationCallsign];
-        [connection cancel];
-		[self connectionDidFinishLoading:connection];
+        [self cancel];
 		self.processProgress = 1.0;
+		self.downloadStatus = @(kMTStatusDone);
         return;
     }
     if (self.urlBuffer) {
@@ -2830,6 +2831,7 @@ NSInteger diskWriteFailure = 123;
     if (self.isCanceled) return;
     //Make sure to flush the last of the buffer file into the pipe and close it.
     @synchronized(self) {
+		[self.activeURLConnection cancel];
         self.activeURLConnection = nil;
         if (!self.writingData) {
             DDLogVerbose (@"writing last data for %@",self);
