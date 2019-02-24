@@ -2158,6 +2158,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             } else {
                 NSInteger statusCode = ((NSHTTPURLResponse *) response).statusCode;
                 if ( statusCode == 404 || statusCode == 500 || statusCode == 503 ||data.length < 500) {
+                    DDLogMajor(@"Artwork unavailable for %@ from %@ , Error: %@", self.seriesTitle, urlString, @(statusCode));
                     [self failureHandlerForSource:source thumbnail:thumbnail];
                 } else {
                     [[NSFileManager defaultManager] createDirectoryAtPath:[filename directory] withIntermediateDirectories:YES attributes:nil error:nil];

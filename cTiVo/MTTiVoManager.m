@@ -505,7 +505,7 @@ __DDLOGHERE__
     tivoBrowser.delegate = self;
     [tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 	[tivoBrowser stop]; //internet voodoo to make search more reliable?
-	[tivoBrowser searchForServicesOfType:@"_tivo-device._tcp" inDomain:@"local."];
+	[tivoBrowser searchForServicesOfType:@"_http._tcp" inDomain:@"local."];
 #ifdef kLogTiVos
 	self.missingTiVoSymptom = @"None";
 	self.tiVoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:kMTTimeToHelpIfNoTiVoFound target:self selector:@selector(failBonjour) userInfo:nil repeats:NO];
@@ -1842,8 +1842,8 @@ __DDLOGHERE__
     } else {
         NSString* bundleID = [[NSBundle mainBundle] bundleIdentifier];
 
-        NSURL * ctiVoCache = [caches[0] URLByAppendingPathComponent:bundleID];
-        NSURL * tempURL = [ctiVoCache URLByAppendingPathComponent:type];
+        NSURL * ctiVoCache = [caches[0] URLByAppendingPathComponent:bundleID isDirectory:YES];
+        NSURL * tempURL = [ctiVoCache URLByAppendingPathComponent:type isDirectory:YES];
         NSError * error = nil;
         if ([fm createDirectoryAtURL:tempURL
           withIntermediateDirectories:YES
@@ -2016,19 +2016,30 @@ __DDLOGHERE__
 			DDLogDetail(@"TXTKey: %@ = %@", key, [self dataToString:TXTRecord[key]]);
 		}
 	}
-
+	if (!TSN.length) {
+#ifdef kLogTiVos
+		self.missingTiVoSymptom = @"NoTSN";
+#endif
+		DDLogDetail(@"Rejecting non-TiVo device %@ at %@ ",sender.name,ipAddress);
+		return;
+	}
 	NSString * platform = [self dataToString:TXTRecord[@"platform"]];
 	NSString * identity = [self dataToString:TXTRecord[@"identity"]];
     NSString * version= [self dataToString:TXTRecord[@"swversion"]];
-	DDLogReport(@"resolved Address: %@", TXTRecord); //XXX
-
+	DDLogVerbose(@"resolved Address: %@", TXTRecord);
+	DDLogDetail(@"Platform: %@; identity: %@; version: %@",platform, identity,version);
+	
+	if ([platform contains:@"Silverstr"]) {
+		DDLogDetail(@"Rejecting Silverstreak %@ - %@(%@)",TSN, sender.name, ipAddress);
+		return;
+	}
 	if ([TSN hasPrefix:@"A94"] || [identity hasPrefix:@"A94"]) {
-		DDLogDetail(@"Found Stream %@ - %@(%@); rejecting",TSN, sender.name, ipAddress);
+		DDLogDetail(@"Rejecting Stream %@ - %@(%@)",TSN, sender.name, ipAddress);
 		return;
 	}
 	if ([platform hasSuffix:@"pyTivo"]) {
 		//filter out pyTivo
-		DDLogDetail(@"Found pyTivo %@(%@); rejecting ",sender.name,ipAddress);
+		DDLogDetail(@"Rejecting pyTivo %@(%@)",sender.name, ipAddress);
 #ifdef kLogTiVos
 		self.missingTiVoSymptom = @"pytivo";
 #endif
@@ -2040,24 +2051,16 @@ __DDLOGHERE__
 #ifdef kLogTiVos
 		self.missingTiVoSymptom = @"tivoDesktop";
 #endif
-		DDLogDetail(@"Found old TiVo Desktop %@(%@) ",sender.name,ipAddress);
+		DDLogDetail(@"Rejecting old TiVo Desktop %@(%@) ",sender.name,ipAddress);
 		return;
 	}
 	
-	if (!TSN || TSN.length == 0) {
-#ifdef kLogTiVos
-		self.missingTiVoSymptom = @"NoTSN";
-#endif
-		DDLogDetail(@"No TSN; rejecting TiVo %@(%@)",sender.name,ipAddress);
-		return;
-	}
-
 	if (platform && ![platform hasPrefix:@"tcd"]) {
 		//filter out other non-tivos
 #ifdef kLogTiVos
 		self.missingTiVoSymptom = @"Invalid tcd";
 #endif
-		DDLogDetail(@"Invalid TiVo platform %@; rejecting %@(%@) ",platform, sender.name,ipAddress);
+		DDLogDetail(@"Rejecting Invalid TiVo platform %@; rejecting %@(%@) ",platform, sender.name,ipAddress);
 		return;
 	}
 	
@@ -2066,7 +2069,7 @@ __DDLOGHERE__
                           withSerialNumber:TSN];
 	if (newTiVo.isMini ) { 
 		_tiVoMinis = [_tiVoMinis arrayByAddingObject: newTiVo];
-		DDLogReport(@"Got new TiVo Mini: %@ at %@", newTiVo, ipAddress);
+		DDLogReport(@"Found TiVo Mini: %@ at %@", newTiVo, ipAddress);
 #ifdef kLogTiVos
 		self.missingTiVoSymptom = @"tivoMini";
 #endif
@@ -2088,14 +2091,14 @@ __DDLOGHERE__
 				[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundMultipleTiVos object:nil];
 				[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTHasMultipleTivos];
 			}
-			DDLogReport(@"Got new TiVo: %@ at %@", newTiVo, ipAddress);
+			DDLogReport(@"Found TiVo: %@ at %@", newTiVo, ipAddress);
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
 			[newTiVo updateShows:self];
 		} else {
 #ifdef kLogTiVos
 			self.missingTiVoSymptom = @"Disabled";
 #endif
-			DDLogReport(@"Found disabled TiVo: %@ at %@", newTiVo, ipAddress); //XXX
+			DDLogReport(@"Disabled TiVo: %@ at %@", newTiVo, ipAddress); //XXX
 		}
 	}
 }

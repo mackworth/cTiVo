@@ -301,7 +301,8 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
  }
 
 -(BOOL) isActive {
-    return self.iStream.streamStatus == NSStreamStatusOpen;
+	return self.iStream.streamStatus == NSStreamStatusOpen ||
+		   self.iStream.streamStatus == NSStreamStatusOpening;
 }
 
 -(BOOL) streamClosed: (NSStream *) stream {

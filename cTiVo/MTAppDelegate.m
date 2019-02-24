@@ -237,6 +237,7 @@ void signalHandler(int signal)
 	[self clearTmpDirectory];
 	
     //Make sure details and thumbnails directories are available
+	[self fixCacheStructure];
     [self checkDirectoryAndPurge:[tiVoManager tivoTempDirectory]];
     [self checkDirectoryAndPurge:[tiVoManager tvdbTempDirectory]];
     [self checkDirectoryAndPurge:[tiVoManager detailsTempDirectory]];
@@ -375,6 +376,65 @@ NSObject * assertionID = nil;
 -(void)checkVolumes: (NSNotification *) notification {
 	[self validateDownloadDirectory];
 	[self validateTmpDirectory];
+}
+
+-(BOOL) moveCacheFile: (NSURL *) url to: (NSURL *) toFolder {
+	NSFileManager * fm = [NSFileManager defaultManager];
+	NSURL * newURL = [toFolder URLByAppendingPathComponent:url.lastPathComponent ];
+	NSError * error = nil;
+	if (![fm moveItemAtURL:url
+					 toURL:newURL
+					 error:&error]) {
+		if (error.code == 516) {
+			DDLogVerbose(@"When moving %@ to %@, already there?", url, newURL);
+			[fm removeItemAtURL:url error:&error]; //no need to keep old one
+		} else {
+			DDLogReport(@"Could not move cache file %@ to %@: %@", url, newURL, error);
+			return NO;
+		}
+	}
+	return YES;
+}
+
+-(void)fixCacheStructure {
+	//relocate cache files to proper subirectories in cache folder
+	//this bug was introduced long ago, and this fix should be removed after some period (doesn't really matt
+	NSFileManager * fm = [NSFileManager defaultManager];
+	NSArray <NSURL *> * caches =  [fm URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
+	if (caches.count == 0) {
+		DDLogReport(@"Could not open main cache directory");
+		return;
+	}
+	NSString* bundleID = [[NSBundle mainBundle] bundleIdentifier];
+	NSURL * ctiVoCache = [caches[0] URLByAppendingPathComponent:bundleID isDirectory:YES];
+	NSError * error = nil;
+	NSArray <NSURL *> * fileList = [fm contentsOfDirectoryAtURL:ctiVoCache
+					   includingPropertiesForKeys:[NSArray array]
+										  options:0
+											error:&error
+											];
+	if (error) {
+		DDLogReport(@"Could not get cache listing");
+		return;
+	}
+
+	if (fileList.count > 10) { //url cache, sparkle, subdirs
+		NSURL * detailsURL = [tiVoManager detailsTempDirectory];
+		NSInteger prefSource = [[NSUserDefaults standardUserDefaults] integerForKey:KMTPreferredImageSource];
+		NSURL * graphicsURL = prefSource <= 1 ? [tiVoManager tivoTempDirectory] : [tiVoManager tvdbTempDirectory];
+		NSInteger numErrors = 0;
+		for (NSURL * url in fileList) {
+			if ([url.pathExtension isEqualToString: @"xml"]) {
+				if (![self moveCacheFile:url to:detailsURL ]) numErrors++;
+			} else if ([url.pathExtension isEqualToString: @"jpg"]) {
+				if (![self moveCacheFile:url to:graphicsURL ]) numErrors++;
+			}
+			if (numErrors > 5) {
+				DDLogReport(@"While trying to move cache files, too many errors. Cancelling process: From %@ to %@ and %@", ctiVoCache, detailsURL, graphicsURL);
+				return;
+			}
+		}
+	}
 }
 
 -(void) checkDirectoryAndPurge: (NSURL *) directory  {
