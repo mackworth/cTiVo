@@ -79,13 +79,13 @@ __DDLOGHERE__
             MTTask *currentTask = currentTaskGroup[0];
 			// No need to tee if only 1 task in group
 			if (sourceToTee && currentTask.requiresInputPipe) {
-				currentTask.task.standardInput = sourceToTee;
+				currentTask.standardInput = sourceToTee;
 			}
 		} else {
 			for (MTTask *task in currentTaskGroup) {
                 if (task.requiresInputPipe) {
                     NSPipe *pipe = [NSPipe new];
-                    task.task.standardInput = pipe;
+                    task.standardInput = pipe;
                     [inputPipes addObject:pipe];
                 }
 			}
@@ -98,7 +98,7 @@ __DDLOGHERE__
             MTTask *currentTask = currentTaskGroup[0];  //Source for next group is first task of this group
 			if (currentTask.requiresOutputPipe) {
 				NSPipe *outputPipe = [NSPipe pipe];
-				currentTask.task.standardOutput = outputPipe;
+				currentTask.standardOutput = outputPipe;
 				sourceToTee = [outputPipe fileHandleForReading];
 			} else {
                 //as next group of tasks requires a finished file, not a pipe, we have to separate into a new taskChain
@@ -127,7 +127,7 @@ __DDLOGHERE__
 	}
 	if (self.dataSink) {
         NSArray <MTTask *> *lastTaskGroup = [self.taskArray lastObject];
-        [lastTaskGroup firstObject].task.standardOutput = self.dataSink;
+        [lastTaskGroup firstObject].standardOutput = self.dataSink;
 	}
     DDLogVerbose(@" teeBranches = %@", self.teeBranches);
     //Show configuration
@@ -261,7 +261,7 @@ __DDLOGHERE__
 -(MTTask *) taskforPipe: (NSPipe *) pipe {
     for (NSArray <MTTask *> * taskGroup in self.taskArray) {
         for (MTTask *task in taskGroup) {
-            if (task.task.standardInput == pipe) {
+            if (task.standardInput == pipe) {
                 return task;
             }
         }

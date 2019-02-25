@@ -22,6 +22,24 @@
 {
     BOOL launched;
 }
+@property (strong, nonatomic) NSTask *task;
+
+@property (strong, nonatomic) NSString	*taskName,
+//                                        *baseName,
+//										*outputFilePath,
+*logFilePath,
+*errorFilePath;
+
+@property (strong, nonatomic) NSFileHandle	*outputFileHandle,
+*errorFileHandle,
+*logFileWriteHandle,
+*logFileReadHandle;
+
+@property (strong, nonatomic) NSRegularExpression *trackingRegEx; //not currently used
+
+@property (atomic) BOOL taskRunning;
+
+@property int pid;
 
 @end
 
@@ -406,6 +424,12 @@ __DDLOGHERE__
 {
     [_task setStandardOutput:stdo];
 }
+
+-(id)standardInput
+{
+	return _task.standardInput;
+}
+
 
 -(void)setStandardInput:(id)stdi
 {

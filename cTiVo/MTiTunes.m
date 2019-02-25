@@ -91,9 +91,11 @@ __DDLOGHERE__
 				if ([newPlayList exists]) {
 					newPlayList.name = @"Tivo Shows";
 				} else {
-					DDLogMajor(@"couldn't create TivoShow list");
+					DDLogMajor(@"couldn't create Tivo Shows list");
 				}
 				_tivoPlayList = newPlayList;
+			} else {
+				DDLogMajor(@"No playlist created.");
 			}
 		}
 	}
