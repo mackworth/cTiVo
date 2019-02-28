@@ -2683,16 +2683,15 @@ __DDLOGHERE__
             }
          }
     }
-        self.writingData = NO; //we are now committed to closing this background thread, so any further data will need new thread
+	self.writingData = NO; //we are now committed to closing this background thread, so any further data will need new thread
 	if (!self.activeURLConnection || self.isCanceled) {
 		DDLogDetail(@"Writedata all done for show %@",self);
 		[self.taskChainInputHandle closeFile];
 		self.taskChainInputHandle = nil;
         [self.bufferFileReadHandle closeFile];
 		self.bufferFileReadHandle = nil;
-        self.urlBuffer = nil;
     }
-    }
+    }//end autoreleasepool
 
 }
 #pragma mark - NSURLConnection delegate routines.
@@ -2711,7 +2710,8 @@ NSString * cTiVoDomain = @"com.ctivo.ctivo";
 NSInteger diskWriteFailure = 123;
 
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    self.totalDataDownloaded += data.length;
+	if (self.isCanceled) return;
+	self.totalDataDownloaded += data.length;
     if (self.totalDataDownloaded > 8000000 && self.encodeFormat.isTestPS) {
         //we've gotten 8MB on our testTS run, so looks good.  Mark it and finish up...
 		DDLogMajor(@"Program stream test passed for %@ on %@",self, self.show.stationCallsign);
@@ -2878,7 +2878,7 @@ NSInteger diskWriteFailure = 123;
                 }
             }
 		}
-		DDLogMajor(@"Downloaded file  too small - rescheduling; File sent was %@",dataReceived);
+		DDLogMajor(@"Downloaded file too small - rescheduling; File sent was %@",dataReceived);
 		[self rescheduleDownloadFalseStart];
 	} else {
 //		NSLog(@"File size before reset %lf %lf",self.show.fileSize,downloadedFileSize);

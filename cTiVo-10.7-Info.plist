@@ -56,7 +56,7 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>SUFeedURL</key>
-	<string>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</string>
+	<string>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</string>
 	<key>SUPublicDSAKeyFile</key>
 	<string>cTiVo_sparkle_pub.pem</string>
 </dict>

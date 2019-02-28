@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"  xmlns:dc="http://purl.org/dc/elements/1.1/">
     <channel>
         <title>cTiVo Updates</title>
-        <link>https://raw.github.com/dscottbuch/cTiVo/master/update/sparklecast.xml</link>
+        <link>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</link>
         <description>Version 2.5.1; H.264 and other major improvements</description>
         <language>en</language>
         <item>
@@ -26,12 +26,12 @@
 
                 <p>If you&rsquo;re still using 10.7 or 10.8, you&rsquo;ll need to use a different version: cTiVo-10.7 </p>
 
-                See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
+                See <a href="https://github.com/mackworth/cTiVo"> cTiVo Home </a> for more information.
             ]]>
             </description>
             <pubDate>Sun., February 3, 2017 20:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.1/cTiVo.zip"
+            <enclosure url="https://github.com/mackworth/cTiVo/releases/download/2.5.1/cTiVo.zip"
             sparkle:version="714" sparkle:shortVersionString="2.5.1"
             length="41189839"
             type="application/octet-stream"
@@ -56,11 +56,11 @@
 
                 <p>Comcast and other cable companies are migrating from MPEG-2 compressed streams to MPEG-4 (aka H.264). They do this to reduce the size and improve the quality of their signals. Comcast seem to be rolling this out slowly, one market at a time and changing over one channel at a time. Although this transition requires many changes to cTiVo, they are transparent in normal operation, except that older Formats may be incompatible. With this release, we&rsquo;ve provided a whole new set of Formats, and taken the opportunity to make the Format selection process easier.</p>
 
-                See <a href="https://github.com/dscottbuch/cTiVo"> cTiVo Home </a> for more information.
+                See <a href="https://github.com/mackworth/cTiVo"> cTiVo Home </a> for more information.
             ]]>
             </description>
             <pubDate>Sun., February 3, 2017 20:00:00 -0800</pubDate>
-            <enclosure url="https://github.com/dscottbuch/cTiVo/releases/download/2.5.1/cTiVo-10.7.zip"
+            <enclosure url="https://github.com/mackworth/cTiVo/releases/download/2.5.1/cTiVo-10.7.zip"
             sparkle:version="714" sparkle:shortVersionString="2.5.1"
             length="39761117"
             type="application/octet-stream"

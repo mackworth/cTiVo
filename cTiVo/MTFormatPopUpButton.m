@@ -83,7 +83,7 @@
 }
 
 -(IBAction)formatHelp:(id)sender {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/dscottbuch/cTiVo/wiki/Video-Formats"]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/mackworth/cTiVo/wiki/Video-Formats"]];
     [self selectItemWithTitle:self.preferredFormatName];
 }
 

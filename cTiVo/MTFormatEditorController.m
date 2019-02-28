@@ -493,7 +493,7 @@
 }
 
 -(IBAction) help:(id)sender {
-	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Advanced-Topics#edit-formats"]];
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/mackworth/cTiVo/wiki/Advanced-Topics#edit-formats"]];
 }
 
 #pragma mark - Memory Management

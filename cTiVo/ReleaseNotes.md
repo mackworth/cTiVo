@@ -96,7 +96,7 @@ Plugged Memory leak on Downloads
 * Use one keychain reference across all TiVos.
 
 # Release 3.0
-3.0 is a major new release of cTiVo with comprehensive artwork support and much more accurate information due to use of real-time features from TiVo. After extensive beta testing, it is also the most reliable release yet (especially with High Sierra). Note that 3.0 requires Mac OS 10.9 or later.  Earlier systems should continue to use [2.5.1's 10.7 version](https://github.com/dscottbuch/cTiVo/releases/tag/2.5.1).
+3.0 is a major new release of cTiVo with comprehensive artwork support and much more accurate information due to use of real-time features from TiVo. After extensive beta testing, it is also the most reliable release yet (especially with High Sierra). Note that 3.0 requires Mac OS 10.9 or later.  Earlier systems should continue to use [2.5.1's 10.7 version](https://github.com/mackworth/cTiVo/releases/tag/2.5.1).
 (3.0.1 fixes some table formatting issues, and a crash in an obscure RPC scenario)
 
 #### Artwork enhancements:
@@ -151,7 +151,7 @@ Cleaned up contextual menus.
 For those upgrading from 2.4 and earlier, you should be aware that cable companies are migrating from MPEG-2 compressed streams to MPEG-4 (aka H.264). They do this to reduce the size and improve the quality of their signals. They seem to be rolling this out slowly, one market at a time and even one channel at a time. Although this transition required many changes to cTiVo, they should be transparent in normal operation, except that older Formats may be incompatible.
 
 #### Older OS and processors:
-If you're still using 10.7 or 10.8, you'll need to use [2.5.1's 10.7 release](https://github.com/dscottbuch/cTiVo/releases/tag/2.5.1). In addition, if you have an older processor, you may get an incompatibility warning which might also require that version. Due to the included binaries from other open-source efforts, it's impossible to support these older systems. The 2.5.1 release has the older binaries (such as mencoder, ffmpeg, ccextractor etc) but otherwise should run fine.
+If you're still using 10.7 or 10.8, you'll need to use [2.5.1's 10.7 release](https://github.com/mackworth/cTiVo/releases/tag/2.5.1). In addition, if you have an older processor, you may get an incompatibility warning which might also require that version. Due to the included binaries from other open-source efforts, it's impossible to support these older systems. The 2.5.1 release has the older binaries (such as mencoder, ffmpeg, ccextractor etc) but otherwise should run fine.
 
 #### Older TiVos:
 If you have a TiVo Series3 or older, then you may have received an offer to upgrade as it won't be compatible at all with the H.264 transition. In adddition, although TiVo HD and HD-XL do work with the MPEG-4 signals, they unfortunately will not properly transfer the files to the Mac, so they will become unusable with cTiVo for channels migrated to MP4. Furthermore, Series 3 and HDs do not support cTiVo's new real-time functionality so several features (starred above) will not operate, and the season/episode information should be retrieved from theTVDB instead.
@@ -160,7 +160,7 @@ Much thanks to Kevin Moye (of KMTTG fame) and Anthony Lieuallen for blazing the 
 
 
 # Release 2.5
-2.5 is a major upgrade to cTiVo. There's been extensive beta testing, so it is even more reliable than 2.4.4, but please let us know if you have any problems at all in the [Issues area](https://github.com/dscottbuch/cTiVo/issues).
+2.5 is a major upgrade to cTiVo. There's been extensive beta testing, so it is even more reliable than 2.4.4, but please let us know if you have any problems at all in the [Issues area](https://github.com/mackworth/cTiVo/issues).
 
 ## MPEG-4 Transition
 Comcast and other cable companies are migrating from MPEG-2 compressed streams to MPEG-4 (aka H.264). They do this to reduce the size and improve the quality of their signals. Comcast seem to be rolling this out slowly, one market at a time and changing over one channel at a time. Although this transition requires many changes to cTiVo, they are transparent in normal operation, except that older Formats may be incompatible. With this release, we've provided a whole new set of Formats, and taken the opportunity to make the Format selection process easier. 
@@ -332,7 +332,7 @@ The `mencoder` program we have used for many of the original Formats (e.g. iPhon
 
 I really need help testing all the different combinations and Formats. Any volunteers out there who can help test and, in particular, find the best way to re-encode the interlaced MP4 content to make them compatible with iTunes and iDevices would be great!
 
-Nonetheless, I believe 2.5 Beta2 is significantly more stable than the current release, so I encourage wide usage and expect to do a final release shortly. Any comments/discussions here at: https://github.com/dscottbuch/cTiVo/issues/206
+Nonetheless, I believe 2.5 Beta2 is significantly more stable than the current release, so I encourage wide usage and expect to do a final release shortly. Any comments/discussions here at: https://github.com/mackworth/cTiVo/issues/206
 
 # Background
 As you may have read, Comcast and other cable companies is in the process of converting from MPEG-2 compression to MPEG-4 compression (aka H.264) They do this to reduce the size and improve the quality of a channel. Comcast seem to be rolling this out slowly, one market at a time and changing over one channel at a time.  If you have an active older TiVo, then you may have received an offer to upgrade as it won't be compatible with this transition. This change has implications, choices, and limitations on each phase of cTiVo's processing. 
@@ -410,7 +410,7 @@ The `mencoder` program we have used for many of the original Formats (e.g. iPhon
 
 I really need help testing all the different combinations and Formats. Any volunteers out there who can help test and, in particular, find the best way to re-encode the interlaced MP4 content to make them compatible with iTunes and iDevices would be great!
 
-Nonetheless, I believe 2.5 Beta1 is significantly more stable than the current release, so I encourage wide usage. Any comments/discussions here at: https://github.com/dscottbuch/cTiVo/issues/163
+Nonetheless, I believe 2.5 Beta1 is significantly more stable than the current release, so I encourage wide usage. Any comments/discussions here at: https://github.com/mackworth/cTiVo/issues/163
 
 # Background
 As you may have read, Comcast and other cable companies is in the process of converting from MPEG-2 compression to MPEG-4 compression (aka H.264) They do this to reduce the size and improve the quality of a channel. Comcast seem to be rolling this out slowly, one market at a time and changing over one channel at a time.  If you have an active older TiVo, then you may have received an offer to upgrade as it won't be compatible with this transition. This change has implications, choices, and limitations on each phase of cTiVo's processing. 
@@ -489,7 +489,7 @@ RELEASE 2.5 ALPHA 10
 ### Commercial:
  I really need help testing all the different combinations and Formats. I know some of the existing Formats work with the MPEG4 channels, and some don't. Any volunteers out there who can help test and, in particular, find the best way to re-encode the interlaced MP4 content to make them compatible with iTunes and iDevices would be great!
  
- Any comments/discussions here at: https://github.com/dscottbuch/cTiVo/issues/163
+ Any comments/discussions here at: https://github.com/mackworth/cTiVo/issues/163
  
 
 # Overview

@@ -42,7 +42,7 @@
 }
 
 -(IBAction) help:(id)sender {
-	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Advanced-Topics#edit-channels"]];
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/mackworth/cTiVo/wiki/Advanced-Topics#edit-channels"]];
 }
 
 

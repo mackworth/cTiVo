@@ -328,7 +328,7 @@
 }
 
 -(IBAction) help:(id)sender {
-	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/dscottbuch/cTiVo/wiki/Advanced-Topics#advanced-settings"]];
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/mackworth/cTiVo/wiki/Advanced-Topics#advanced-settings"]];
 }
 
 -(IBAction)emptyCaches:(id)sender
