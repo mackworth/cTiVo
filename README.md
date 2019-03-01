@@ -72,7 +72,7 @@ Starred* items require RPC, real-time functionality, only available on TiVo Prem
 
 ## To install:
 
-Download the [cTiVo application](https://github.com/dscottbuch/cTiVo/releases), and drag it to your Applications Folder.
+Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), and drag it to your Applications Folder.
 
 ## Documentation:
 
