@@ -2129,11 +2129,11 @@ NSString * fourChar(long n, BOOL allowZero) {
                 baseUrlString = @"http://image.tmdb.org/t/p/w780%@";
             }
         } else {
-            if (thumbnail) {
-                baseUrlString = @"http://thetvdb.com/banners/_cache/%@";
-            } else {
+//            if (thumbnail) {
+//                baseUrlString = @"http://thetvdb.com/banners/_cache/%@";
+//            } else {
                 baseUrlString = @"http://thetvdb.com/banners/%@";
-            }
+//            }
         }
         NSString * tvdbKey = [self mapTVDBKeyFromSource:source];
         if (!tvdbKey) {

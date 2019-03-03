@@ -1578,7 +1578,7 @@ __DDLOGHERE__
 												[defaults boolForKey:kMTSkipCommercials];
 			newDownload.markCommercials = newDownload.encodeFormat.canMarkCommercials &&
 												[defaults boolForKey:kMTMarkCommercials];
-			newDownload.useSkipMode = (newDownload.encodeFormat.canMarkCommercials || newDownload.encodeFormat.comSkip) &&
+			newDownload.useSkipMode = (newDownload.encodeFormat.canMarkCommercials || newDownload.encodeFormat.canSkip) &&
 										[defaults integerForKey:kMTCommercialStrategy] > 0;
 			newDownload.genTextMetaData = [defaults objectForKey:kMTExportTextMetaData];
 			newDownload.deleteAfterDownload = [defaults objectForKey:kMTIfSuccessDeleteFromTiVo];

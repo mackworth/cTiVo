@@ -71,7 +71,7 @@ __DDLOGHERE__
             self.skipCommercials = [NSNumber numberWithBool:NO];
         } else if (skipWasDisabled && [self canSkipCommercials]) {
             //newly possible, so take user default
-            self.skipCommercials = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTSkipCommercials] && self.encodeFormat.comSkip)];
+            self.skipCommercials = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTSkipCommercials] && self.encodeFormat.canSkip)];
         }
         if (!self.canMarkCommercials && self.shouldMarkCommercials) {
             //no longer possible
