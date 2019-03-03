@@ -452,7 +452,7 @@ __DDLOGHERE__
         shouldLaunch = _startupHandler();
     }
     if (shouldLaunch) {
-        DDLogVerbose(@"Launching: %@",self);
+        DDLogDetail(@"Launching: %@",self);
         NSFileManager * fm = [NSFileManager defaultManager];
         NSString * errorString = nil;
         if ([fm fileExistsAtPath:_task.currentDirectoryPath]) {
@@ -463,6 +463,15 @@ __DDLOGHERE__
            [fm createDirectoryAtPath:_task.currentDirectoryPath withIntermediateDirectories:YES  attributes: nil error: &error];
             errorString = error.localizedDescription;
         }
+		__weak __typeof__(self) weakSelf = self;
+		_task.terminationHandler = ^(NSTask * _Nonnull task) {
+			__typeof__(self) strongSelf = weakSelf; if (!strongSelf) return;
+			dispatch_async(dispatch_get_main_queue(), ^{
+				[NSObject cancelPreviousPerformRequestsWithTarget:strongSelf selector:@selector(trackProcess) object:nil ];
+				DDLogDetail(@"%@ task terminated. Status: %@",strongSelf.taskName, @(strongSelf.task.terminationStatus));
+				[strongSelf trackProcess];
+			});
+		};
         @try {
             [_task launch];
             launched = YES;

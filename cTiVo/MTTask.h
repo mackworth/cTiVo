@@ -42,7 +42,10 @@
 
 @property (nonatomic, copy) void (^cleanupHandler)(void);
 
-@property BOOL requiresInputPipe, requiresOutputPipe, shouldReschedule;
+@property BOOL 	requiresInputPipe,
+				requiresOutputPipe,
+				shouldReschedule,
+				terminatesEarly; //not expected to use full stream;
 
 @property (nonatomic, readonly) BOOL taskFailed;
 @property (nonatomic, readonly) BOOL successfulExit;

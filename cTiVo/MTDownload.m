@@ -257,7 +257,7 @@ __DDLOGHERE__
 		}
     } else if ([keyPath isEqualToString:@"processProgress"]) {
         double progressChange = ABS(self.processProgress - self.displayedProcessProgress);
-        if (progressChange > 0.02) { //only update if enough change.
+        if (progressChange > 0.02 || self.processProgress >= 1.0) { //only update if enough changed or done.
             DDLogVerbose(@"%@ at %0.1f%%", self, self.processProgress*100);
            self.displayedProcessProgress = self.processProgress;
             [self progressUpdated];
@@ -873,7 +873,7 @@ __DDLOGHERE__
 	//mpegTask.standardOutput = file;
 	mpegTask.requiresInputPipe = YES;
 	mpegTask.requiresOutputPipe = NO;
-
+	mpegTask.terminatesEarly = YES;
 	mpegTask.shouldReschedule  = NO;  //expected to fail, but other tasks should continue
 	
 	__weak __typeof__(self) weakSelf = self;
@@ -881,7 +881,7 @@ __DDLOGHERE__
 	mpegTask.cleanupHandler = ^(){
 		__typeof__(self) strongSelf = weakSelf;
 		if (! [[NSFileManager defaultManager] fileExistsAtPath:errFilePath] ) {
-			DDLogReport(@"Warning: %@: File %@ not found after mpegTask completion", strongSelf, errFilePath );
+			if (!strongSelf.isCanceled) DDLogReport(@"Warning: %@: File %@ not found after mpegTask completion", strongSelf, errFilePath );
 			return;
 		}
 		NSString *log = [NSString stringWithEndOfFile:errFilePath ];
@@ -938,7 +938,7 @@ __DDLOGHERE__
     if ([outputFile isKindOfClass:[NSString class]]) {
 		__weak __typeof__(self) weakSelf = self;
         catTask.completionHandler = ^BOOL(){
-            if (! [[NSFileManager defaultManager] fileExistsAtPath:outputFile] ) {
+            if (!weakSelf.isCanceled && ! [[NSFileManager defaultManager] fileExistsAtPath:outputFile] ) {
                 DDLogReport(@"Warning: %@: File %@ not found after cat completion", weakSelf, outputFile );
             }
             return YES;
@@ -1489,8 +1489,8 @@ __DDLOGHERE__
 
 	commercialTask.completionHandler = ^BOOL{
 		__typeof__(self) strongSelf = weakSelf;
-		if (! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.commercialFilePath] ) {
-			DDLogMajor(@"Warning: %@: File %@ not found after comskip completion", weakSelf, strongSelf.commercialFilePath );
+		if (!strongSelf.isCanceled && ! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.commercialFilePath] ) {
+			DDLogMajor(@"Warning: %@: File %@ not found after comskip completion", strongSelf, strongSelf.commercialFilePath );
 			return NO;
 		}
 
