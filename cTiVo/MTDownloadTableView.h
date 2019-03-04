@@ -23,6 +23,7 @@
 -(BOOL)playVideo;
 -(BOOL)selectionContainsCompletedShows;
 -(NSArray <MTDownload *> *) actionItems;
+-(void)columnChanged:(NSTableColumn *) column;
 
 - (IBAction)clearHistory:(id)sender;
 @end

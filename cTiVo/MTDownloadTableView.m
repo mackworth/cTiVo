@@ -361,6 +361,8 @@ __DDLOGHERE__
 		   popUpButton.hidden = YES;
 		   cell.textField.hidden= NO;
 		}
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
     } else if ([tableColumn.identifier isEqualToString:@"iTunes"]) {
         [checkBox setOn: download.addToiTunesWhenEncoded];
         [checkBox setEnabled: !download.isCompletelyDone && !protected &&
@@ -437,6 +439,7 @@ __DDLOGHERE__
 		[checkBox setOn: download.deleteAfterDownload.boolValue];
 		checkBox.action = @selector(changeDelete:);
 		checkBox.enabled = !download.isCompletelyDone && !protected ;
+#pragma clang diagnostic pop
   	} else if ([tableColumn.identifier isEqualToString:@"Date"]) {
 		if ([tableColumn width] > 135) {
 			textVal = thisShow.showMediumDateString;

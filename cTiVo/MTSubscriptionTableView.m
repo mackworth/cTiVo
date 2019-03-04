@@ -273,6 +273,8 @@ static NSDateFormatter *dateFormatter;
 		popUp.action = @selector(selectTivoPopUp:);
 		popUp.owner = thisSubscription;
 		popUp.currentTivo = thisSubscription.preferredTiVo;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
 	} else if ([tableColumn.identifier compare:@"iTunes"] == NSOrderedSame) {
         MTCheckBox * checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
         checkBox.target = myController;
@@ -344,6 +346,7 @@ static NSDateFormatter *dateFormatter;
         checkBox.owner = thisSubscription;
 		checkBox.enabled = YES;
 	}
+#pragma clang diagnostic pop
 
     // return the result.
     return result;
