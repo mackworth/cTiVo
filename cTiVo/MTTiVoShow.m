@@ -353,8 +353,22 @@ __DDLOGHERE__
 	}
 }
 
+-(void) setMpegFormat:(MPEGFormat)mpegFormat {
+	BOOL changed = (mpegFormat != self.rpcData.format);
+	if (!self.rpcData) {
+		_rpcData = [MTRPCData new];
+	}
+	self.rpcData.format = mpegFormat;
+	if (changed) {
+		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self];
+	}
+}
+
 -(void) setRpcData:(MTRPCData *)rpcData {
 	if (rpcData) {
+		if (_rpcData.format != MPEGFormatUnknown) {
+			rpcData.format = _rpcData.format;
+		}
 		_rpcData = rpcData;
 		self.episodeGenre = rpcData.genre;  //no conflict with TVDB
 		if (rpcData.edlList != nil) self.edlList = rpcData.edlList;
@@ -923,6 +937,10 @@ __DDLOGHERE__
 	if (self.protectedShow.boolValue) return @0;
 	if ([self mightHaveSkipModeInfo ]) return @4;
 	return @0;
+}
+
+-(MPEGFormat) mpegFormat {
+	return self.rpcData.format;
 }
 
 #pragma mark - Custom Setters; many for parsing

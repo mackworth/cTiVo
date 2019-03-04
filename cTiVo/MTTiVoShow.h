@@ -93,6 +93,7 @@
 
 @property (nonatomic, strong) NSDictionary <NSString *, id> * tvdbData;
 @property (nonatomic, strong) MTRPCData * rpcData;
+@property (nonatomic, assign) MPEGFormat mpegFormat;
 
 //--------------------------------------------------------------
 #pragma mark - Calculated properties for display 

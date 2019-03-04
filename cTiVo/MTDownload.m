@@ -878,10 +878,6 @@ __DDLOGHERE__
 
 -(MTTask *)mpegTask {
 	//cancels current download if MP2 file and reschedules as Program Stream
-	if (!self.useTransportStream.boolValue) {
-		DDLogReport(@"Error: only for use with Transport Stream");
-		return nil;
-	}
 	MTTask *mpegTask = [MTTask taskWithName:@"mpegCheck" download:self];
 	[mpegTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ffmpeg"]];
 	[mpegTask setArguments:@[@"-i",@"pipe:"]];
@@ -903,19 +899,34 @@ __DDLOGHERE__
 			return;
 		}
 		NSString *log = [NSString stringWithEndOfFile:errFilePath ];
-		if (![log contains:@"mpegts"]) { //double check
-			DDLogReport(@"Error: mpegTask called on Program stream: %@", log);
-		} else if ([log contains:@"mpeg2video"]) {
-			//for future reference; mpegts ==> transport stream; h264 => h.264 video; "Input #0, mpeg," == program stream
-			strongSelf.useTransportStream = @NO;
-			[strongSelf markMyChannelAsPSOnly];
-			DDLogReport(@"Found Mpeg2 video in Transport Stream. Rescheduling");
-			DDLogDetail(@"%@", log);
-			[strongSelf rescheduleDownloadFalseStart];
-		} else if ([log contains: @"h264"]) { //good file
-			[strongSelf markMyChannelAsTSOnly];
-		} else {
-			DDLogReport(@"Neither MPEG2 nor H.264 video in %@: %@", strongSelf, log);
+		//for future reference; mpegts ==> transport stream; h264 => h.264 video; "Input #0, mpeg," == program stream
+		if ([log contains:@"mpegts"]) {
+			if ([log contains:@"mpeg2video"]) {
+				DDLogReport(@"Found Mpeg2 video in Transport Stream. Rescheduling");
+				DDLogDetail(@"%@", log);
+				strongSelf.useTransportStream = @NO;
+				[strongSelf markMyChannelAsPSOnly];
+				[strongSelf rescheduleDownloadFalseStart];
+			} else if ([log contains: @"h264"]) { //good file
+				[strongSelf markMyChannelAsTSOnly];
+			} else {
+				DDLogReport(@"Neither MPEG2 nor H.264 video in %@: %@", strongSelf, log);
+			}
+		} else { //program Stream
+			if ([log contains:@"mpeg2video"]) {
+				DDLogMajor(@"Program stream test passed for %@ on %@",strongSelf, strongSelf.show.stationCallsign);
+				[strongSelf markMyChannelAsPSOnly];
+			} else {
+				[strongSelf markMyChannelAsTSOnly];
+				if (! strongSelf.encodeFormat.isTestPS) {
+					[strongSelf rescheduleDownloadFalseStart];
+				}
+			}
+			if (strongSelf.encodeFormat.isTestPS) {
+				[strongSelf cancel];
+				strongSelf.processProgress = 1.0;
+				strongSelf.downloadStatus = @(kMTStatusDone);
+			}
 		}
 	};
 	DDLogVerbose(@"MPEG task created");
@@ -1193,18 +1204,7 @@ __DDLOGHERE__
 										 filePercent < 25.0);
 						//encoder won't check decrypted-only file, so rely on size alone
 				
-				if (strongSelf.encodeFormat.isTestPS) {
-					// if a test, then we only try once.
-					[strongSelf cancel];
-					strongSelf.processProgress = 1.0;
-					strongSelf.downloadStatus = @(kMTStatusDone);
-					if (foundAudioOnly) {
-						[strongSelf markMyChannelAsTSOnly];
-					} else {
-						[strongSelf markMyChannelAsPSOnly];
-					}
-					tooSmall = NO; //don't warn below
-				} else if (foundAudioOnly) {
+				if (foundAudioOnly) {
 					DDLogMajor(@"Due to Audio Only in file, switching to Transport Stream %@",strongSelf);
 					[strongSelf handleNewTSChannel];
 					tooSmall = NO; //don't warn below
@@ -1698,7 +1698,9 @@ __DDLOGHERE__
 	if (self.shouldCheckMPEG ) {
 		mpegTask = self.mpegTask;
 	}
-
+	if (self.encodeFormat.isTestPS) {
+		[taskArray addObject:@[mpegTask]];
+	} else { //not indented due to size of block
     switch (self.taskFlowType) {
         case kMTTaskFlowNonSimu:  //Just encode with non-simul encoder
 			if (mpegTask) {
@@ -1809,7 +1811,7 @@ __DDLOGHERE__
         default:
             break;
     }
-	
+	}
 	self.activeTaskChain.taskArray = [NSArray arrayWithArray:taskArray];
     if(self.downloadingShowFromMPGFile)self.activeTaskChain.providesProgress = YES;
     
@@ -2730,16 +2732,6 @@ NSInteger diskWriteFailure = 123;
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
 	if (self.isCanceled) return;
 	self.totalDataDownloaded += data.length;
-    if (self.totalDataDownloaded > 8000000 && self.encodeFormat.isTestPS) {
-        //we've gotten 8MB on our testTS run, so looks good.  Mark it and finish up...
-		DDLogMajor(@"Program stream test passed for %@ on %@",self, self.show.stationCallsign);
-		self.show.rpcData.format = MPEGFormatMPG2;
-        [tiVoManager setFailedPS:NO forChannelNamed: self.show.stationCallsign];
-        [self cancel];
-		self.processProgress = 1.0;
-		self.downloadStatus = @(kMTStatusDone);
-        return;
-    }
     if (self.urlBuffer) {
         // cTiVo's URL connection supports sending its data to either an NSData buffer (self.urlBuffer) or a file on disk (self.bufferFilePath).  This allows cTiVo to 
         // initially try to keep the dataflow off the disk, except for final products, where possible.  But, the ability to do this depends on the processor 
@@ -2999,7 +2991,7 @@ NSInteger diskWriteFailure = 123;
 			[self transientNotifyWithTitle:@"MPEG2 Channel" subTitle:[NSString stringWithFormat:@"Due to corrupted video, marking %@ as Program Stream",channelName] ];
 		}
 	} else {
-		DDLogMajor(@"Confirmed MPEG2 in %@ on channel %@",self, channelName);
+		DDLogDetail(@"Confirmed MPEG2 in %@ on channel %@",self, channelName);
 	}
 }
 
@@ -3084,7 +3076,10 @@ NSInteger diskWriteFailure = 123;
 }
 
 -(BOOL) shouldCheckMPEG {
-	return self.useTransportStream.boolValue && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowMP2InTS];
+	BOOL useTS = self.useTransportStream.boolValue;
+	return self.encodeFormat.isTestPS ||
+		   (!useTS && !self.encodeFormat.testsForAudioOnly) ||
+		   (useTS && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTAllowMP2InTS]);
 }
 
 -(BOOL) shouldPipeFromDecrypt {
