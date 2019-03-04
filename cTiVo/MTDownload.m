@@ -179,16 +179,34 @@ __DDLOGHERE__
 	if (self.encodeFormat.isTestPS) {
 		self.useTransportStream = @NO;  //if testing whether PS is bad, naturally don't use TS
 	} else if (!self.useTransportStream) {
-		NSString * channelName = self.show.stationCallsign;
-		NSCellStateValue channelUsesTS =     [ tiVoManager useTSForChannel:channelName];
-		NSCellStateValue channelPSFailed =    [tiVoManager failedPSForChannel:channelName];
-		BOOL alwaysDownloadTS = [[NSUserDefaults standardUserDefaults] boolForKey:kMTDownloadTSFormat];
-
-		self.useTransportStream =
-			@(self.show.tiVo.supportsTransportStream &&
-			 ( (alwaysDownloadTS && channelUsesTS != NSOffState) ||  //always use TS (if user hasn't specified PS for this channel) OR
-			   (channelUsesTS == NSOnState) || //user specified TS for this channel OR
-			   (channelUsesTS == NSMixedState && channelPSFailed == NSOnState ))); //user didn't care, but we've seen need
+		if (!self.show.tiVo.supportsTransportStream) {
+			self.useTransportStream = @NO;
+		} else {
+			switch (self.show.rpcData.format) {
+				case MPEGFormatMPG2:    self.useTransportStream = @NO;  break;
+				case MPEGFormatH264:    self.useTransportStream = @YES; break;
+				case MPEGFormatUnknown:
+				case MPEGFormatOther:
+				default: {
+					NSString * channelName = self.show.stationCallsign;
+					switch ([ tiVoManager useTSForChannel:channelName]) {
+						case NSOffState:
+							self.useTransportStream = @NO;
+							break;
+						case NSOnState: //user specified TS for this channel
+							self.useTransportStream = @YES;
+							break;
+						case NSMixedState: //user didn't specify for this channel, but did in general OR we've seen need
+						default: {
+							BOOL alwaysDownloadTS = [[NSUserDefaults standardUserDefaults] boolForKey:kMTDownloadTSFormat];
+							NSCellStateValue channelPSFailed =    [tiVoManager failedPSForChannel:channelName];
+							self.useTransportStream = @(alwaysDownloadTS || (channelPSFailed == NSOnState));
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
