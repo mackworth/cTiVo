@@ -94,7 +94,7 @@ void signalHandler(int signal)
     }
 	PFMoveToApplicationsFolderIfNecessary();
 #endif
-    CGEventRef event = CGEventCreate(NULL);
+	CGEventRef event = CGEventCreate(NULL);
     CGEventFlags modifiers = CGEventGetFlags(event);
     CFRelease(event);
 	[MTLogWatcher sharedInstance]; //self retained
@@ -208,7 +208,7 @@ void signalHandler(int signal)
 	gettingMediaKey = NO;
 	signal(SIGPIPE, &signalHandler);
 	signal(SIGABRT, &signalHandler );
-	
+
 	//Turn off check mark on Pause/Resume queue menu item
 	[pauseMenuItem setOnStateImage:nil];
 
@@ -638,9 +638,9 @@ NSObject * assertionID = nil;
 
 -(void)validateDownloadDirectory {
 	NSString *downloadDir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory];
-	if ([downloadDir isEquivalentToPath: [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath]] ) {
-			//Oops; user confused temp dir with download dir
-			[self promptForNewDirectory:downloadDir withMessage:@"Your temp directory %@ needs to be separate from your download directory." isProblem: YES isTempDir:NO];
+	 if ([downloadDir isEquivalentToPath: [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath]] ) {
+		//Oops; user confused temp dir with download dir
+		[self promptForNewDirectory:downloadDir withMessage:@"Your temp directory %@ needs to be separate from your download directory." isProblem: YES isTempDir:NO];
 	} else {
 		[self validateDirectoryShared:downloadDir isTempDir:NO];
 	}
@@ -666,7 +666,7 @@ NSObject * assertionID = nil;
 	BOOL isDir = YES;
 	if (![fm fileExistsAtPath:dirPath isDirectory:&isDir]) {
 		NSError *error = nil;
-		
+
 		if ([dirPath hasPrefix:@"/Volumes"]) {
 			NSArray <NSString *> * pathComponents = [dirPath pathComponents];
 			if (pathComponents.count > 1) {
@@ -705,10 +705,10 @@ NSObject * assertionID = nil;
 -(void)clearTmpDirectory
 {
 	//Make sure the tmp directory exists and delete
-    NSString * tmpPath = tiVoManager.tmpFilesDirectory;
-    if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-      if ([tmpPath contains: NSTemporaryDirectory()]) {
-        //only erase all files if we're in default temp dir. Too risky elsewise;
+	NSString * tmpPath = tiVoManager.tmpFilesDirectory;
+	if(![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+		if ([tmpPath contains: NSTemporaryDirectory()]) {
+		//only erase all files if we're in default temp dir. Too risky elsewise;
 		//Clear it if not saving intermediate files
 			NSFileManager *fm = [NSFileManager defaultManager];
 			NSError *err = nil;

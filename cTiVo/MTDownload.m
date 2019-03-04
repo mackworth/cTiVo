@@ -1958,7 +1958,7 @@ __DDLOGHERE__
 	
 	NSError *error;
 	NSURL *directoryURL = [[NSFileManager defaultManager] URLForDirectory:NSApplicationScriptsDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:YES error:&error]; //may only be in sandboxed version
-	if (!directoryURL) directoryURL = [NSURL URLWithString:@"~/Library/Application Scripts/com.cTiVo.cTiVo"];
+	if (!directoryURL) directoryURL = [NSURL fileURLWithPath:@"~/Library/Application Scripts/com.cTiVo.cTiVo"];
 	if (directoryURL) {
 			NSURL *scriptURL = [directoryURL URLByAppendingPathComponent:@"DownloadDone.scpt"];
 			result = [[NSUserAppleScriptTask alloc] initWithURL:scriptURL error:&error];

@@ -2385,7 +2385,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 if (_thumbnailImage) {
                     self.thumbnailFile = [NSURL fileURLWithPath:self.userSpecifiedArtworkFile isDirectory:NO];
                 } else {
-                    [self invalidateCurrentThumbnail:[NSURL URLWithString:self.userSpecifiedArtworkFile]];
+                    [self invalidateCurrentThumbnail:[NSURL fileURLWithPath:self.userSpecifiedArtworkFile]];
                     self.userSpecifiedArtworkFile = nil;
                 }
             }
