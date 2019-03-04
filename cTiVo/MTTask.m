@@ -143,7 +143,7 @@ __DDLOGHERE__
 	}
 	[self terminate];
 
-	if (ddLogLevel & LOG_LEVEL_DETAIL) {
+	if (ddLogLevel & LOG_FLAG_DETAIL) {
 		usleep (100);
 		[self saveLogFile];
 	}
@@ -157,6 +157,7 @@ __DDLOGHERE__
 
 -(void)cleanUp
 {
+	self.taskRunning = NO;
     if (_cleanupHandler) {
         _cleanupHandler();
         _cleanupHandler = nil; //only call once
@@ -183,7 +184,6 @@ __DDLOGHERE__
 			[[NSFileManager defaultManager] removeItemAtPath:_errorFilePath error:nil];
 		}
 	}
-    self.taskRunning = NO;
 }
 
 -(void) reportOldProcessor {

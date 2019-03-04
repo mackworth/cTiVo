@@ -308,7 +308,7 @@ __DDLOGHERE__
                 if (bytesLeft >0 && !_download.isCanceled){
                     //Couldn't write all data
                     NSString * taskName = currentTask.taskName ?: @"unknown task";
-					if (!currentTask.successfulExit) {
+					if (currentTask && !currentTask.successfulExit) {
 						if (numTries == 0) {
 							DDLogReport(@"Write Fail: couldn't write to pipe after three tries; %@ may have failed.", taskName);
 						} else {
