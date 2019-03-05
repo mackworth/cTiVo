@@ -182,7 +182,7 @@ __DDLOGHERE__
 		if (!self.show.tiVo.supportsTransportStream) {
 			self.useTransportStream = @NO;
 		} else {
-			switch (self.show.rpcData.format) {
+			switch (self.show.mpegFormat) {
 				case MPEGFormatMPG2:    self.useTransportStream = @NO;  break;
 				case MPEGFormatH264:    self.useTransportStream = @YES; break;
 				case MPEGFormatUnknown:
@@ -1174,7 +1174,7 @@ __DDLOGHERE__
 											(!useTS && filePercent < 80.0 ));
 		if (useTS) {
 			MPEGFormat format = [strongSelf videoFileType:self.decryptedFilePath];
-			strongSelf.show.rpcData.format = format;
+			strongSelf.show.mpegFormat = format;
 			if (format == MPEGFormatMPG2) {  //MPEG2
 				BOOL failed = strongSelf.encodeTask.taskFailed;
 				DDLogReport(@"For download %@, after downloading file with Transport Stream, we find it is an MPEG2, which %@ to a corrupted video file. Retrying with Program Stream.", strongSelf, failed ? @"apparently led" : @"might lead");
@@ -2981,7 +2981,7 @@ NSInteger diskWriteFailure = 123;
 
 -(void) markMyChannelAsPSOnly {
 	NSString * channelName = self.show.stationCallsign;
-	self.show.rpcData.format = MPEGFormatMPG2;
+	self.show.mpegFormat = MPEGFormatMPG2;
 	if ( [tiVoManager failedPSForChannel:channelName] != NSOffState ) {
 		DDLogMajor(@"Due to problems with %@, converting %@ to Program Stream only",self, channelName);
 		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSOnState;
@@ -2998,7 +2998,7 @@ NSInteger diskWriteFailure = 123;
 
 -(void) markMyChannelAsTSOnly {
 	NSString * channelName = self.show.stationCallsign;
-	self.show.rpcData.format = MPEGFormatH264;
+	self.show.mpegFormat = MPEGFormatH264;
 	if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
 		DDLogMajor(@"Setting H.264 on %@ due to %@", channelName, self);
 		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSOffState;
@@ -3276,7 +3276,7 @@ NSInteger diskWriteFailure = 123;
 
 -(void)dealloc
 {
-	DDLogMajor(@"deallocing Download %@", self);
+	DDLogDetail(@"deallocing Download %@", self);
 	[self stopWaitSkipModeTimer];
     if (_performanceTimer) {
         [_performanceTimer invalidate];
