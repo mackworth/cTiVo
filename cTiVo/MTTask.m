@@ -219,6 +219,7 @@ __DDLOGHERE__
 
 -(void)completeProcess
 {
+	_task.terminationHandler = NULL; // in case timer went off before handler
     DDLogMajor(@"Finished task %@ of show %@ with completion code %d and reason %@",_taskName, _download.show.showTitle, _task.terminationStatus,[self reasonForTermination]);
     if (self.taskFailed) {
         if (_task.terminationStatus == 0x4 && _task.terminationReason == NSTaskTerminationReasonUncaughtSignal) {
@@ -231,6 +232,8 @@ __DDLOGHERE__
 				_completionHandler = nil;
 				[self failedTaskCompletion];
 				return;
+			} else {
+				_completionHandler = nil;
 			}
         }
         [self cleanUp];
@@ -469,7 +472,7 @@ __DDLOGHERE__
 		_task.terminationHandler = ^(NSTask * _Nonnull task) {
 			__typeof__(self) strongSelf = weakSelf; if (!strongSelf) return;
 			dispatch_async(dispatch_get_main_queue(), ^{
-				[NSObject cancelPreviousPerformRequestsWithTarget:strongSelf selector:@selector(trackProcess) object:nil ];
+				[NSObject cancelPreviousPerformRequestsWithTarget:strongSelf selector:@selector(trackProcess) object:nil ]; //this has to be on main queue
 				DDLogDetail(@"%@ task terminated. Status: %@",strongSelf.taskName, @(strongSelf.task.terminationStatus));
 				[strongSelf trackProcess];
 			});
