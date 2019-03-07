@@ -119,6 +119,7 @@ git clone git://github.com/essandess/matryoshka-name-tool
 git clone git://github.com/CCExtractor/ccextractor
 
 #now build comskip
+export MACOSX_DEPLOYMENT_TARGET=10.9
 cd comskip; ./autogen.sh; ./configure; make; cd ..
 mkdir cTiVoBinaries; cd cTiVoBinaries; mkdir bin; mkdir lib; cd bin
 cp ../../comskip/comskip comskip; cp /opt/local/bin/mencoder mencoder; cp /opt/local/bin/ffmpeg ffmpeg
@@ -149,6 +150,6 @@ cp lib/* ~/Documents/Develop/cTiVoGitHub/cTivo/cTiVoBinaries/lib/
 echo "Now copy HandbrakeCLI into cTiVoBinaries/bin folder"
 
 echo "And get tivodecode-ng from https://github.com/wmcbrine/tivodecode-ng/releases"
-
+and ./configure ; make; #then rename to tivodecode-ng
 #finally restore your MacPorts:
 sudo mv /opt/oldLocal /opt/local
