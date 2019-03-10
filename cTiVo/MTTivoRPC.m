@@ -1478,12 +1478,13 @@ static NSArray * imageResponseTemplate = nil;
 #ifdef testJumps
 	DDLogReport(@"%@",msg);
 #else
-	DDLogDetail(@"%@",msg);
+	DDLogMajor(@"%@",msg);
 #endif
 	
 }
 -(void) getRemainingPositionsInto: 	(NSMutableArray <NSNumber *> *) positions
 					   badJumps: (int) badJump
+						forShow: (NSString *) show
 		   withCompletionHandler: (void (^)(NSArray *)) completionHandler {
 	__weak __typeof__(self) weakSelf = self;
 	if (badJump >= 3) {
@@ -1494,7 +1495,7 @@ static NSArray * imageResponseTemplate = nil;
 	}
 	long long prevPosition = positions.firstObject.longLongValue;
 	[weakSelf retrievePositionWithCompletionHandler:^(long long position2, long long end2) {
-		DDLogReport(@"Current Position: %@ versus %@", @(position2), @(prevPosition));
+		DDLogMajor(@"Current Position: %@ versus %@", @(position2), @(prevPosition));
 		if (positions.count == 1 &&
 			prevPosition - position2 > 30000 ) {
 			[weakSelf logString:@"Commercial Long Jump"];
@@ -1522,6 +1523,7 @@ static NSArray * imageResponseTemplate = nil;
 			
 		DDLogMajor(@"Next Position: %@ versus %@", @(position), @(prevPosition));
 		long long jumpSize = prevPosition - position;
+#ifdef testJumps
 		if (jumpSize < 30000) {
 			NSString * msg = [NSString stringWithFormat: @"Commercial Short Jump: %lld", jumpSize/1000];
 			[self logString:msg];
@@ -1530,21 +1532,23 @@ static NSArray * imageResponseTemplate = nil;
 			[self logString:@"Commercial Good Jump"];
 			self.goodJump++;
 		}
-#ifdef testJumps
 		//abort after first jump if we're testing jumps
 		if (completionHandler) completionHandler(positions);
 		return;
 #endif
 		if (jumpSize > 30000 ||
-			(position > 60000 && jumpSize > 0)) {
+			(position > 150000 && jumpSize > 0)) {
 			int recentShortJumps;
 			if (jumpSize > 30000) {
 				//we have moved a significant amount, so record
 				[positions insertObject:@(position) atIndex:0]; //reverse in file
+				[self logString:[NSString stringWithFormat:@"Good Jump from %lld to %lld for %@", prevPosition, position, show]];
 				recentShortJumps = 0;
 			} else {
-				DDLogReport(@"Short jump %d from %lld to %lld for %@", (int)badJump, prevPosition, position, self);
 				recentShortJumps = badJump+1;
+				NSString * msg = [NSString stringWithFormat: @"Short Jump #%d: %lld from %lld to %lld for %@", (int)badJump, jumpSize/1000, prevPosition, position, show];
+				[self logString:msg];
+				self.shortJumps++;
 			}
 
 			if (position > 3000) {
@@ -1552,7 +1556,8 @@ static NSArray * imageResponseTemplate = nil;
 					if (success) {
 						[weakSelf afterDelay:delay2 launchBlock:^{
 							[weakSelf getRemainingPositionsInto:positions
-													 badJumps:recentShortJumps
+											           badJumps:recentShortJumps
+													    forShow:show
 										  withCompletionHandler:completionHandler];
 						} ];
 					} else {
@@ -1630,11 +1635,7 @@ static NSArray * imageResponseTemplate = nil;
 				self.goodJump  = self.shortJumps = self.longJump = 0;
 				NSString * delayString = [[NSUserDefaults standardUserDefaults] stringForKey:@"RPCTime"  ];
 				if (delayString.length ==0) {
-					if (self.delegate.isOlderTiVo) {
-						delayString = @"2.0, 1.6, 1.0, 0.4";
-					} else {
-						delayString = @"0.5, 0.5, 0.5, 0.25";
-					}
+					delayString = @"2.0, 1.6, 1.0, 0.4";
 				}
 				NSArray <NSString *> * delays = [delayString componentsSeparatedByString:@","];
 				if (delays.count > 3) {
@@ -1757,6 +1758,7 @@ static NSArray * imageResponseTemplate = nil;
 			
 		[weakSelf getRemainingPositionsInto: [NSMutableArray arrayWithObject:@(end)]
 								  badJumps:0
+		 							forShow:rpcData.series
 					  withCompletionHandler:^(NSArray * positions) {
 
 		DDLogDetail(@"Got positions of %@", positions);
