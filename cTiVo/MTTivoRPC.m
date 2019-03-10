@@ -1495,10 +1495,10 @@ static NSArray * imageResponseTemplate = nil;
 	}
 	long long prevPosition = positions.firstObject.longLongValue;
 	[weakSelf retrievePositionWithCompletionHandler:^(long long position2, long long end2) {
-		DDLogMajor(@"Current Position: %@ versus %@", @(position2), @(prevPosition));
 		if (positions.count == 1 &&
 			prevPosition - position2 > 30000 ) {
-			[weakSelf logString:@"Commercial Long Jump"];
+			[weakSelf logString:[NSString stringWithFormat:
+				@"Commercial Long Jump from %@ to %@ for %@", @(prevPosition), @(position2), show]];
 			weakSelf.longJump++;
 #ifdef testJumps
 			//abort after first jump if we're testing jumps
@@ -1521,7 +1521,6 @@ static NSArray * imageResponseTemplate = nil;
 			
 		[weakSelf retrievePositionWithCompletionHandler:^(long long position, long long end) {
 			
-		DDLogMajor(@"Next Position: %@ versus %@", @(position), @(prevPosition));
 		long long jumpSize = prevPosition - position;
 #ifdef testJumps
 		if (jumpSize < 30000) {
@@ -1667,7 +1666,6 @@ static NSArray * imageResponseTemplate = nil;
 #endif
 	;
 	if (self.skipModeQueueEDL.count == 0) {
-		DDLogMajor(@"Finished SkipMode queue");
 		NSInteger tries = self.goodJump+self.shortJumps+self.longJump ;
 		NSString * result =[NSString stringWithFormat:@"After %@ attempts with delays %0.1f, %0.1f, %0.1f, %0.1f, the results were %@ Good; %@ Short; %@ Long. %0.0f%% good",  @(tries), delay1, delay2, delay3, delay4,  @(self.goodJump), @(self.shortJumps), @(self.longJump), 100.0*self.goodJump/(float)tries];
 #ifdef testJumps
@@ -1675,7 +1673,7 @@ static NSArray * imageResponseTemplate = nil;
 		NSAlert * jumpAlert = [NSAlert alertWithMessageText:@"SkipMode Test" defaultButton:@"OK" alternateButton: nil otherButton:nil informativeTextWithFormat:@"%@",result];
 		[jumpAlert runModal];
 #else
-		DDLogDetail(@"Jump Results = %@", result);
+		DDLogMajor(@"Finished SkipMode Queue; Jump Results = %@", result);
 #endif
 
 		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ];
@@ -1764,9 +1762,9 @@ static NSArray * imageResponseTemplate = nil;
 		DDLogDetail(@"Got positions of %@", positions);
 		rpcData.edlList = [NSArray edlListFromSegments:rpcData.programSegments andStartPoints:positions];
 	    if (rpcData.edlList) {
-		    DDLogDetail(@"For %@, got EDL %@", rpcData, rpcData.edlList);
+		    DDLogMajor(@"For %@, got EDL %@", rpcData, rpcData.edlList);
 	    } else {
-		    DDLogDetail(@"for %@, No EDL", rpcData);
+		    DDLogMajor(@"for %@, No EDL", rpcData);
 	    }
 	    [weakSelf sendKeyEvent: @"pause"  withCompletion:^{
 			
