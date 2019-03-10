@@ -1068,7 +1068,6 @@ BOOL channelChecking = NO;
 -(void) markDeletedDownloadShow: (MTTiVoShow *) deletedShow {
 	[self cancelCommercialingForShow:deletedShow];
 	deletedShow.imageString = @"deleted";
-	[deletedShow.tiVo cancelCommercialingForShow: deletedShow];
     if (deletedShow.isQueued) {
         NSArray <MTDownload *> * downloads = [tiVoManager downloadsForShow:deletedShow];
         for (MTDownload * download in downloads) {

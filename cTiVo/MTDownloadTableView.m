@@ -179,9 +179,9 @@ __DDLOGHERE__
 				progressColumn = @"Programs";
 			}
 			NSInteger progressIndex = [self columnWithIdentifier:progressColumn];
-			NSUInteger i = [self.sortedDownloads indexOfObjectIdenticalTo:download];
-			if (i != NSNotFound) {
-				MTProgressindicator *cell = [self viewAtColumn:progressIndex row:i makeIfNecessary:NO];
+			NSUInteger row = [self.sortedDownloads indexOfObjectIdenticalTo:download];
+			if (row != NSNotFound && ((NSInteger)row < self.numberOfRows)) {
+				MTProgressindicator *cell = [self viewAtColumn:progressIndex row:row makeIfNecessary:NO];
 				[self updateProgressInCell: cell forDL: download];
 				cell.displayProgress = YES;
 				
