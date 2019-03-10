@@ -146,6 +146,7 @@
 #define kMTTimeToHelpIfNoTiVoFound 15
 
 #define kMTTivoShowPasteBoardType @"com.cTiVo.TivoShow"
+#define kMTTiVoShowArrayPasteBoardType @"com.cTiVo.TivoShows"
 #define kMTDownloadPasteBoardType @"com.cTiVo.Download"
 #define kMTInputLocationToken @"<<<INPUT>>>"
 

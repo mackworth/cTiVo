@@ -18,7 +18,7 @@
             [result addObject: newObj ];
         }
     }];
-    return result;
+    return [result copy];
 }
 
 - (instancetype)arrayByRemovingObject:(id)object {

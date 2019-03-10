@@ -35,7 +35,13 @@
 -(BOOL)isFolder {
 	return YES;
 }
-
+-(BOOL) isOnDisk {
+	for (MTTiVoShow * show in self.folder) {
+		if ([show isOnDisk]) return YES;
+	}
+	return NO;
+}
+	
 //lengthString and sizeString formatting copied from MTTiVoShow
 -(NSString *) sizeString {
 	double size = self.fileSize;
@@ -61,5 +67,93 @@
 	return @(skipMode);
 }
 
+
+- (NSArray<NSPasteboardType> *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
+	if (self.isOnDisk) {
+		return @[kMTTiVoShowArrayPasteBoardType, (NSString *)kUTTypeFileURL, NSPasteboardTypeString];
+	} else {
+		return @[kMTTiVoShowArrayPasteBoardType, NSPasteboardTypeString];
+	}
+}
+	
+- (NSPasteboardWritingOptions)writingOptionsForType:(NSPasteboardType)type pasteboard:(NSPasteboard *)pasteboard {
+	return 0;
+}
+	
+- (id)pasteboardPropertyListForType:(NSPasteboardType)type {
+	if ([type isEqualToString:kMTTiVoShowArrayPasteBoardType]) {
+		return  [NSKeyedArchiver archivedDataWithRootObject:self];
+	} else if ( [type isEqualToString:(NSString *)kUTTypeFileURL]) {
+		for (MTTiVoShow * show in self.folder) {
+			NSArray * files = [show copiesOnDisk];
+			if (files.count > 0) {
+				NSURL *URL = [NSURL fileURLWithPath:files[0] isDirectory:NO];
+				id temp =  [URL pasteboardPropertyListForType:(id)kUTTypeFileURL];
+				return temp;
+			}
+		}
+		return nil;
+	} else if ( [type isEqualToString:NSPasteboardTypeString]) {
+		NSMutableString * result = [@"" mutableCopy];
+		for (MTTiVoShow * show in self.folder) {
+			NSString * episodePart = show.seasonEpisode.length >0 ?
+				[NSString stringWithFormat:@"\t(%@)",show.seasonEpisode] :
+				@""; //skip empty episode info
+			NSString * protected = show.protectedShow.boolValue ? @"-CP":@"";
+			[result appendString: [NSString stringWithFormat:@"%@\t%@%@%@\n" ,show.showDateString, show.showTitle, protected, episodePart]] ;
+		}
+		return [result copy];
+	} else {
+		return nil;
+	}
+}
+
++ (NSArray *)readableTypesForPasteboard:(NSPasteboard *)pasteboard {
+	return @[kMTTiVoShowArrayPasteBoardType];
+	
+}
++ (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard {
+	if ([type compare:kMTTiVoShowArrayPasteBoardType] ==NSOrderedSame)
+		return NSPasteboardReadingAsKeyedArchive;
+	return 0;
+}
+
+-(void) encodeWithCoder:(NSCoder *)aCoder {
+	[aCoder encodeObject:self.folder forKey:@"Folder"];
+}
+
+-(id)initWithCoder:(NSCoder *)aDecoder {
+	if ((self = [self init])) {
+		self.folder = [aDecoder  decodeObjectOfClasses:[NSSet setWithObjects:[MTTiVoShow class], [NSArray class], nil] forKey: @"Folder"] ;
+	}
+	return self;
+}
+
++(BOOL) supportsSecureCoding {
+	return YES;
+}
+@end
+
+@implementation NSArray (FlattenShows)
+
+-(NSArray < MTTiVoShow *> *) flattenShows {
+	BOOL quickreturn = YES;
+	for (id obj in self) {
+		if (![ obj isKindOfClass:[MTTiVoShow class]]){
+			quickreturn = NO;
+			break;
+		}
+	}
+	if (quickreturn) return self;
+	NSMutableArray *result = [NSMutableArray arrayWithCapacity:[self count]];
+	[self enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+		if ([ obj isKindOfClass:[MTShowFolder class]]){
+			[result addObjectsFromArray:[(MTShowFolder*) obj folder]];
+		} else if ([ obj isKindOfClass:[MTTiVoShow class]]){
+			[result addObject: obj ];
+		} //else delete other kinds of objects
+	}];
+	return [result copy];
+}
 
 @end

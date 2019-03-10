@@ -13,6 +13,7 @@
 #import "MTChannelPopUpTableCellView.h"
 #import "MTDownloadCheckTableCell.h"
 #import "MTSubscriptionList.h"
+#import "MTShowFolder.h"
 
 @implementation MTSubscriptionTableView
 
@@ -59,7 +60,7 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableViewSelectionDidChange:) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationSubscriptionsUpdated object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationFormatListUpdated object:nil];
-	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, NSPasteboardTypeString, nil]];
+	[self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTTiVoShowArrayPasteBoardType, kMTDownloadPasteBoardType, NSPasteboardTypeString, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationDelete forLocal:NO];
 
 }
@@ -426,15 +427,16 @@ static NSDateFormatter *dateFormatter;
 	}
 }
 
+
 -(NSArray *)insertShowsFromPasteboard:(NSPasteboard *) pboard atRow:(NSUInteger) row {
-    NSArray	*classes = [NSArray arrayWithObject:[MTTiVoShow class]];
+    NSArray	*classes = @[[MTTiVoShow class], [MTShowFolder class]];
     NSDictionary *options = [NSDictionary dictionary];
     //NSDictionary * pasteboard = [[info draggingPasteboard] propertyListForType:kMTTivoShowPasteBoardType] ;
     //NSLog(@"calling readObjects%@",pasteboard);
     NSArray	*draggedShows = [pboard readObjectsForClasses:classes options:options];
     if (draggedShows.count == 0) return nil;
     DDLogDetail(@"Dragging into Subscriptions: %@", draggedShows);
-
+	draggedShows = [draggedShows flattenShows]; //expand any folders
     //dragged shows are copies, so we need to find the real show objects
     NSMutableArray * realShows = [NSMutableArray arrayWithCapacity:draggedShows.count ];
     for (MTTiVoShow * show in draggedShows) {
@@ -522,6 +524,7 @@ static NSDateFormatter *dateFormatter;
     } else  if ([menuItem action]==@selector(paste:)) {
         NSPasteboard * pboard = [NSPasteboard generalPasteboard];
         return  ([pboard.types containsObject:kMTTivoShowPasteBoardType] ||
+				 [pboard.types containsObject:kMTTiVoShowArrayPasteBoardType] ||
                  [pboard.types containsObject:kMTDownloadPasteBoardType] ||
                   [pboard.types containsObject:NSPasteboardTypeString]);
     }
@@ -549,7 +552,8 @@ static NSDateFormatter *dateFormatter;
     NSPasteboard * pboard = [NSPasteboard generalPasteboard];
     if ([pboard.types containsObject:kMTDownloadPasteBoardType]) {
         [self insertDownloadsFromPasteboard:pboard atRow:row];
-    } else if ([pboard.types containsObject:kMTTivoShowPasteBoardType]) {
+	} else if ([pboard.types containsObject:kMTTivoShowPasteBoardType] ||
+			   [pboard.types containsObject:kMTTiVoShowArrayPasteBoardType]) {
         [self insertShowsFromPasteboard:pboard atRow:row];
     } else if ([pboard.types containsObject:NSPasteboardTypeString]) {
       [self insertStringsFromPasteboard:pboard atRow:row];

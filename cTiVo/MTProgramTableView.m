@@ -804,10 +804,7 @@ __DDLOGHERE__
 	}
 	BOOL onDisk = [thisShow isOnDisk];
 	if (folderHolder) {
-		for (MTTiVoShow * show in folderHolder.folder) {
-			onDisk = [show isOnDisk];
-			if (!onDisk) break;
-		}
+		onDisk = [folderHolder isOnDisk];
 	}
 	if (onDisk){
 		result.textField.font = [[NSFontManager sharedFontManager] convertFont:result.textField.font toHaveTrait:NSFontBoldTrait];

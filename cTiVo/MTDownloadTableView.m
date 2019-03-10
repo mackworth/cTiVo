@@ -11,6 +11,7 @@
 #import "NSString+Helpers.h"
 #import "MTWeakTimer.h"
 #import "MTSubscriptionList.h"
+#import "MTShowFolder.h"
 
 @interface MTDownloadTableView ()
 @property (nonatomic, weak) IBOutlet NSTextField *performanceLabel;
@@ -51,7 +52,7 @@ __DDLOGHERE__
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDownloadRowChanged object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisodeShow:) name:kMTNotificationDetailsLoaded	object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTiVoColumn:) name:kMTNotificationFoundMultipleTiVos object:nil];
-    [self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTDownloadPasteBoardType, nil]];
+    [self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTTiVoShowArrayPasteBoardType, kMTDownloadPasteBoardType, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
 }
@@ -769,9 +770,10 @@ __DDLOGHERE__
         insertRow = [[tiVoManager downloadQueue] indexOfObject:insertTarget];
     }
     
-    NSArray	*classes = @[[MTTiVoShow class]];
+    NSArray	*classes = @[[MTTiVoShow class], [MTShowFolder class]];
     NSDictionary *options = [NSDictionary dictionary];
     NSArray	*draggedShows = [pboard readObjectsForClasses:classes options:options];
+	draggedShows = [draggedShows flattenShows]; //expand any folders
     DDLogMajor(@"Accepting drop: %@", draggedShows);
 
     //dragged shows are proxies, so we need to find the real show objects
@@ -934,7 +936,8 @@ __DDLOGHERE__
     } else  if ([menuItem action]==@selector(paste:)) {
         NSPasteboard * pboard = [NSPasteboard generalPasteboard];
         return  ([pboard.types containsObject:kMTTivoShowPasteBoardType] ||
-                 [pboard.types containsObject:kMTDownloadPasteBoardType]);
+				 [pboard.types containsObject:kMTTiVoShowArrayPasteBoardType] ||
+				 [pboard.types containsObject:kMTDownloadPasteBoardType]);
     }
     return YES;
 }
@@ -962,8 +965,9 @@ __DDLOGHERE__
     NSPasteboard * pboard = [NSPasteboard generalPasteboard];
     if ([pboard.types containsObject:kMTDownloadPasteBoardType]) {
         [self insertDownloadsFromPasteboard:pboard atRow:row];
-    } else if ([pboard.types containsObject:kMTTivoShowPasteBoardType]) {
-        [self insertShowsFromPasteboard:pboard atRow:row];
+	} else if ([pboard.types containsObject:kMTTivoShowPasteBoardType] ||
+			   [pboard.types containsObject:kMTTiVoShowArrayPasteBoardType]) {
+		[self insertShowsFromPasteboard:pboard atRow:row];
     }
 }
 
