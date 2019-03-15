@@ -1378,7 +1378,14 @@ __DDLOGHERE__
     
     captionTask.cleanupHandler = ^(){
 		__typeof__(self) strongSelf = weakSelf;
-       if (weakCaption.taskFailed) {
+		if (strongSelf.isCanceled) {
+			if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
+				if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.captionFilePath]) {
+					[[NSFileManager defaultManager] removeItemAtPath:strongSelf.captionFilePath error:nil];
+				}
+				strongSelf.captionFilePath = nil;
+			}
+		} else if (weakCaption.taskFailed) {
             [strongSelf notifyUserWithTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" ];
         }
 		if (strongSelf.taskFlowType == kMTTaskFlowSimuSubtitles &&
@@ -1393,13 +1400,6 @@ __DDLOGHERE__
 			}
 
 		}
-        if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] &&
-            (strongSelf.isCanceled)) {
-            if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.captionFilePath]) {
-                [[NSFileManager defaultManager] removeItemAtPath:strongSelf.captionFilePath error:nil];
-            }
-            strongSelf.captionFilePath = nil;
-        }
     };
     
     NSMutableArray * captionArgs = [NSMutableArray array];

@@ -1542,6 +1542,7 @@ static NSArray * imageResponseTemplate = nil;
 				//we have moved a significant amount, so record
 				[positions insertObject:@(position) atIndex:0]; //reverse in file
 				[self logString:[NSString stringWithFormat:@"Good Jump from %lld to %lld for %@", prevPosition, position, show]];
+				self.goodJump++;
 				recentShortJumps = 0;
 			} else {
 				recentShortJumps = badJump+1;
