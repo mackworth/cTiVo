@@ -37,9 +37,7 @@ __DDLOGHERE__
 		_iTunesLibrary = [self iTunesLibraryHelper];
 		if (!_iTunesLibrary) {
 			DDLogReport(@"couldn't find iTunes Library. Probably permissions problem.");
-			dispatch_sync(dispatch_get_main_queue(), ^{
-				[self warnUserPermissions];
-			});
+			[self warnUserPermissions];
 			_iTunesLibrary = [self iTunesLibraryHelper];
 			
 		}
@@ -237,7 +235,11 @@ __DDLOGHERE__
 #pragma mark - iTunes Permissions   Yuck.
 
 -(void) warnUserPermissions {
-	if(@available(macOS 10.14, *)) {
+	if (![NSThread isMainThread]) {
+		dispatch_sync(dispatch_get_main_queue(), ^{
+			[self warnUserPermissions];
+		});
+	} else if (@available(macOS 10.14, *)) {
 		//trigger check
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTiTunesSubmit];
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTiTunesSubmit];
@@ -403,10 +405,10 @@ __DDLOGHERE__
 }
 
 -(BOOL) confirmiTunesPermissionFixed {
-	NSAlert *alert = [NSAlert alertWithMessageText: @"Please click OK when you have enabled cTiVo's iTunes Automation permission in Privacy."
+	NSAlert *alert = [NSAlert alertWithMessageText: @"Please click OK when you have enabled cTiVo's iTunes permission in Privacy."
 									 defaultButton: @"OK"
 								   alternateButton: @"Disable cTiVo's use of iTunes"
-									   otherButton: @"No such switch?"
+									   otherButton: @"No such switch??"
 						 informativeTextWithFormat: @"Or you can choose to disable iTunes submittal entirely."];
 	NSInteger returnValue = [alert runModal];
 	switch (returnValue) {
@@ -428,7 +430,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) offerResetPermissions {
-	NSAlert *alert = [NSAlert alertWithMessageText: @"Still no iTunes access; cTiVo can reset all macOS Automation permissions if you wish."
+	NSAlert *alert = [NSAlert alertWithMessageText: @"Still no iTunes access; cTiVo can reset macOS Automation permissions for ALL apps if you wish."
 									 defaultButton: @"Reset Automation Permissions"
 								   alternateButton: @"Disable cTiVo's use of iTunes"
 									   otherButton: nil
