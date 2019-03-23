@@ -9,8 +9,9 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 * Drag/drop and contextual menus for ease of use; submit, reschedule, delete all by dragging the shows.
 * Download queue for batch processing, restored on restart.
 * 'Subscriptions' to your regular shows: automatically downloading shows whenever new episodes are available.
-* Even subscribe to "ALL" shows, including suggestions or not
+* Even subscribe to "ALL" shows, including suggestions or not.
 * Removes commercials from downloaded shows, or just mark for quick skip in player.
+* Uses TiVo's SkipMode when available, or analyzes content to locate commercials.
 * Extracts closed caption info (adjusted for removal of commercials); adds to MPEG and creates subtitle files.
 * Adds artwork to downloaded shows from TiVo or theTVDB and theMovieDB (as available).
 * Copies shows to iTunes with all data about the show (metadata) transferred as well.
@@ -26,12 +27,13 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 * Change download directories for each download.
 * Create custom Formats with completely customizable encoder options for multiple formats.
 * Show only the encoding formats you actually use.
-* Specify filename formats for compatability with Plex or other media systems.
+* Specify filename formats for compatibility with Plex or other media systems.
 * Support for different encoders, including HandBrake, mencoder, ffmpeg, Elgato.
 * Scheduling of when the queue will be processed.
 * Options to prevent sleep or quitting until processing complete.
 * Access remote TiVos (requires network reconfiguration).
 * Folders optionally created for each series.
+* Provides a Remote Control to run your TiVo from your Mac.
 
 ## Information About Your Shows
 * Customizable columns about shows, downloads and subscriptions; show exactly what you want to see and no more.
@@ -41,6 +43,54 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 * Filter which shows are seen by keywords or TiVo.
 * Show/Hide copy-protected shows and TiVo suggestions.
 * Notifications when downloads complete.
+
+## 3.3 features
+
+#### SkipMode use *
+*    Use TiVo's SkipMode info when available for Marking/Cutting commercials.
+*    Hold off processing until SkipMode arrives (or doesn't).
+* Fallback to Comskip if SkipMode unavailable or fails.
+* There are some issues to be aware of, so please see [Commercial wiki page](Commercials).
+
+#### MPEG2 streams only download over a Transport Stream connection.
+*  New Download column "Use TS". Set by channel's TS status initially, but changes automatically after bad download.
+*  New Advanced Preference: Allow MPEG2 in Transport Streams (Regardless, will retry with Program Stream if MPEG2 fails encoding).
+*  Each show now has a column for whether it is MPEG2 or H264 (measured by either actual download attempt OR by the channel).
+
+#### Remote Control Window
+*    TiVo remote control emulation.
+*    Keystroke alternatives.
+*    Directly select streaming services.
+
+#### New TiVo menu *
+*    Play / Delete / Stop Recording on TiVo.
+*    Reload Information.
+*    Reboot TiVo.
+*    Redesigned contextual menus.
+
+#### Mojave Support
+*    Dark Mode in Mojave.
+*    iTunes permission check and AppleScript warnings for Mojave.
+*   "Hardened" Apple-notarized binary for increased security.
+*    Assorted compatibility fixes.
+
+###  Minor features:
+*    Mark chapters even when cutting commercials.
+*    Duplicate downloads now fully supported (e.g. high-res/low-res Format subscriptions)
+*    Encrypted TiVo Format to download without decrypting.
+*    Time before download starts now tracked with progress bar.
+*    Contextual menus selection now behaves like Mail.
+*    Ability to limit subscriptions to a specific channel.
+*    Optional user script upon completion.
+*    Pushover integration via Applescript ([see Pushover note below](#Notes-On-Pushover)).
+* Delete after Download is now an option per Subscription/Download.
+* Remote reboot of TiVo.
+* New  -noStereo flag on Default, and now copy AC3 over rather than regenerate.
+* Moved "Export Metadata to pyTiVo"  to Advanced Prefs.
+* Added "Allow Duplicate Downloads/Subscriptions" to Advanced Prefs.
+* Removed "Prefer TVDB's episode Info" option as TiVo's data is now accurate through RPC.
+* First-use defaults changed to enable more features; handles dual TiVos better.
+* All helper apps updated (ffmpeg, ccextractor, comskip, mencoder, HandBrakeCLI).
 
 ## 3.1 features
 * Improved handling of Download and Temporary directories
@@ -75,21 +125,21 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 
 ## To install:
 
-Download the [cTiVo application](https://github.com/dscottbuch/cTiVo/releases), and drag it to your Applications Folder.
+Download the [cTiVo application](https://github.com/dscottbuch/cTiVo/releases), and run it. It will ask if OK to move to Applications folder.
 
 ## Documentation:
 
 * [How to get cTiVo running quickly](Quick-Start)
-* [Quick overview of cTiVo for iTiVo users](iTiVo-Users)
 * [Overview of Using cTivo](Overview)
 * [How to install cTiVo](Installation)
 * [How to configure cTiVo ](Configuration)
 * [How to set up and configure subscriptions in cTiVo](Subscriptions)
 * [Frequently Asked Questions](FAQ)
+* [Commercials and cTiVo](Commercials)
 * [User-contributed alternative video formats](Alternative-Formats)
 * [Q and A on different video formats](Video-Formats)
 * [Other Advanced Topics](Advanced-Topics)
 
-cTiVo is fully compatible with MacOS High Sierra (10.13) back through Mavericks (10.9); not compatible with Snow Leopard (10.6) or earlier. In addition, we provide a special version (cTiVo-10.7) for use with 10.7 and 10.8, but support is limited.
+cTiVo is fully compatible with MacOS Mojave (10.14) back through Mavericks (10.9).
 
 **cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/dscottbuch/cTiVo/issues).
