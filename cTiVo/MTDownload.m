@@ -2938,7 +2938,10 @@ NSInteger diskWriteFailure = 123;
 
 -(MPEGFormat)videoFileType: (NSString *) filePath {
 	NSString * ffmpegPath = [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ffmpeg" ];
-	
+	if (!ffmpegPath) {
+		DDLogReport(@"couldn't find ffmpeg for %@ in %@", filePath, self);
+		return MPEGFormatUnknown;
+	}
 	NSString * ffmpegOut = [NSTask runProgram:ffmpegPath withArguments:@[@"-i", filePath]];
 	if (ffmpegOut.length == 0 || [ffmpegOut contains:@"No such file"]) {
 		DDLogReport(@"Invalid file %@ for %@", filePath, self);

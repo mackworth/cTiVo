@@ -9,7 +9,7 @@
             <title>Version 3.3.0; SkipMode</title>
             <description><![CDATA[
 				<h2 id="release-3.3">Release 3.3.0: SkipMode!</h2>
-				<h3>3.3.0 features</h2>
+				<h3>3.3.0 features</h3>
 				<ul>
 				<li>Use TiVo's SkipMode information for Marking/Cutting commercials (when available)</li>
 				<li>Remote Control Window</li>
@@ -19,7 +19,7 @@
 				</ul>
 				
 				<p>See <a href="https://github.com/mackworth/cTiVo/releases/tag/3.3.0"> cTiVo Release Notes</a> or <a href="https://github.com/mackworth/cTiVo"> cTiVo Home </a>for more information.</p>
-				<p/>
+				<br />
 				<p>Most new features require RPC for real-time functionality, which is only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)</p>
             ]]>
             </description>
