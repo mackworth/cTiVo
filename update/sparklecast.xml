@@ -3,63 +3,29 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.1.2; Certificate Update</description>
+        <description>Version 3.3.0; SkipMode!</description>
         <language>en</language>
         <item>
-            <title>Version 3.1.2; Certificate Update</title>
+            <title>Version 3.3.0; SkipMode</title>
             <description><![CDATA[
-				<h2 id="release-3.1">Release 3.1.2: Certificate Update!</h2>
-                <h3>3.1.2 features</h2>
-                <ul>
-                <li>A small release to update the certificate used to communicate with TiVo's RPC mechanism, which otherwise would expire at the end of April.</li>
-                <li>Also, TVDB has frequently been unresponsive recently, causing cTiVo to be unstable. This fixes the latter part.</li>
-                </ul>
-				<h2 id="release-3.1">Release 3.1.1: Directories!</h2>
-                <h3>3.1.1 features</h2>
-                <ul>
-				<li>If Download or Temporary directories have a problem, cTiVo will pause and ask.</li>
-                <li>Download directory now fixed when download job starts, not when first created.</li>
-                <li>Uses user-specific temp folder, rather than /tmp/ctivo.</li>
-				<li>(Note: this release is exactly same as 3.1.1beta4)</li>
-                </ul>
-				
-                <h3>Minor Improvements:</h3>
-                <ul>
-                <li>Option for automatic deletion on TiVo after download (Adv Prefs).</li>
-				<li>Option for number of simultaneous encoders.</li>
-                </ul>
-				
-				<h2>3.1 features: Folders!</h2>
+				<h2 id="release-3.3">Release 3.3.0: SkipMode!</h2>
+				<h3>3.3.0 features</h2>
 				<ul>
-				<li>Shows can now be grouped in series folders.</li>
-				<li>Advanced Preferences is no longer hidden behind Option key.</li>
-				<li>Preferences has simpler directory structure choices (e.g. Plex support)</li>
-				<li>Auto-relocation to Applications directory.</li>
+				<li>Use TiVo's SkipMode information for Marking/Cutting commercials (when available)</li>
+				<li>Remote Control Window</li>
+				<li>TiVo Control: Play Show / Delete Show / Stop Recording / Reboot</li>
+				<li>Dark Mode</li>
+				<li>Many minor new features and fixes </li>
 				</ul>
-
-				<h2>3.0 features</h2>
-                <h3>Artwork enhancements:</h3>
-                <ul>
-                <li>New Artwork column in Now Playing List.</li>
-                <li>Your choice of artwork from TiVo* or theTVDB (Series, Season, Episode, or Movie from theMovieDB).</li>
-                <li>Manual updates of artwork by drag/drop onto table.</li>
-                <li>Manual artwork updates apply to files already recorded as well.</li>
-                <li>Finder Icons now reflect artwork of file.</li>
-                </ul>
-                <h3>Real-time features:</h3>
-                <ul>
-                <li>TiVo now notifies cTiVo as the Now Playing list changes, so new shows are updated instantaneously.*</li>
-                <li>Ability to "Delete Show from TiVo" (in Edit menu and contextual menu).*</li>
-                <li>Ability to "Stop Recording show from TiVo" (in Edit menu and contextual menu).*</li>
-                </ul>
-                <p>*Starred* items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)</p>
-
-                <p>See <a href="https://github.com/mackworth/cTiVo"> cTiVo Home </a> for more information.</p>
+				
+				<p>See <a href="https://github.com/mackworth/cTiVo/releases/tag/3.3.0"> cTiVo Release Notes</a> or <a href="https://github.com/mackworth/cTiVo"> cTiVo Home </a>for more information.</p>
+				<p/>
+				<p>Most new features require RPC for real-time functionality, which is only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)</p>
             ]]>
             </description>
-            <pubDate>Sat., March 3, 2018 22:00:00 -0800</pubDate>
+            <pubDate>Sun., March 23, 2018 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.1.2/cTiVo.zip" sparkle:version="857" sparkle:shortVersionString="3.1.2" length="50552671" type="application/octet-stream" sparkle:dsaSignature="MCwCFA1HNQMlJtGDksc5pb8ghb6J1c27AhQnyDxCLxJ0W3OJtb9zJ0rnsNrfpw=="/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.3.0/cTiVo.app.zip" sparkle:version="1038" sparkle:shortVersionString="3.3.0 length="73827615" type="application/octet-stream" sparkle:dsaSignature="MCwCFBz3pqQWrqhDkPC3nxaXXhNeZh9DAhQsdLKCRjv/pxRudG8XKGaQFkUlDw=="/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>

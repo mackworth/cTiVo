@@ -1,11 +1,18 @@
-# Release 3.2.0 (SkipMode)
+# Release 3.3.0 (SkipMode)
+
+This release takes advantage of TiVo's SkipMode for Marking or Cutting commercials. There are some issues to be aware of, so please see [SkipMode note](#Notes-On-SkipMode) below (also in the help file in Preferences>General>Commercials>? ).
+
 ### Main new features:
 #### SkipMode use
 *    Use TiVo's SkipMode Info when available for Marking/Cutting commercials
 *    Hold off processing until SkipMode arrives (or doesn't)
 *    Fallback to Comskip if SkipMode unavailable or fails
+#### MPEG2 streams only download over a Transport Stream connection.
+*  New Download column "Use TS". Set by channel's TS status initially, but changes automatically after bad download.
+*  New Advanced Preference: Allow MPEG2 in Transport Streams (Regardless, will retry with Program Stream if MPEG2 fails encoding).
+*  Each show now has a column for whether it is MPEG2 or H264 (measured by either actual download attempt OR by the channel).
 #### Remote Control Window
-*    TiVo remote emulation
+*    TiVo remote control emulation
 *    Keystroke alternatives
 *    Directly select streaming services
 #### New TiVo menu 
@@ -13,24 +20,67 @@
 *    Delete on TiVo
 *    Stop Recording
 *    Reload Information
+*    Reboot TiVo
 *    Redesigned contextual menus
 #### Mojave Support
 *    Dark Mode in Mojave
-*    AppleScript warnings for Mojave
-*    "Hardened" Apple-notarized binary for increased security
-•    Assorted compatibility fixes
+*    iTunes permission check and AppleScript warnings for Mojave
+*   "Hardened" Apple-notarized binary for increased security
+*    Assorted compatibility fixes
 
-###  Minor features:
-*    Mark chapters when cutting commercials
+###  Minor new features:
+*    Mark chapters even when cutting commercials
 *    Duplicate downloads now fully supported (e.g. high-res/low-res Format subscriptions)
 *    Encrypted TiVo Format to download without decrypting
 *    Time before download starts now tracked with progress bar
 *    Contextual menus selection now behaves like Mail 
+*    Ability to limit subscriptions to a specific channel
 *    Optional user script upon completion
-*    Applescript for Pushover integration
-*    Updated Binaries (Comskip, ffmpeg, Handbrake)
+*    Pushover integration via Applescript ([see Pushover note below](#Notes-On-Pushover))
+*    Delete after Download is now an option per Subscription/Download
+*    Remote reboot of TiVo 
+*    New  -noStereo flag on Default, and now copy AC3 over rather than regenerate
+*    Moved "Export Metadata to pyTiVo"  to Advanced Prefs.
+*    Added "Allow Duplicate Downloads/Subscriptions" to Advanced Prefs.
+*    Removed "Prefer TVDB's episode Info" option as TiVo's data is now accurate through RPC.
+*    First-use defaults changed to enable more features; handles dual TiVos better.
+*    All helper apps updated (ffmpeg, ccextractor, comskip, mencoder, HandBrakeCLI).
+
+### Notes on SkipMode
+#### Overview
+With SkipMode, TiVo marks the commercials for certain shows. As TiVo's SkipMode analysis is done by humans, it is almost 100% accurate. However, there are some complications: 1) SkipMode may not appear until hours after a show ends, 2) SkipMode is only available for popular channels/shows, not news or sports, and may randomly be unavailable for an episode of a show that normally has it, 3) SkipMode is not available on TiVo Suggestions, unless you Keep the show on TiVo, and 4) most annoyingly, the only way to get the SkipMode breakpoints is for cTiVo to literally play the video and jump to each segment to find where it starts, thus disrupting viewing on the TiVo for 10-20 seconds per show. cTiVo makes it as easy as possible to take advantage of SkipMode, while falling back to Comskip as needed.
+
+When SkipMode breakpoints become available, they can be automatically retrieved for shows in the Download Queue. If the SkipMode breakpoints aren't available when needed, the download will pause until they become available or until the four-hour wait time expires. To avoid interrupting your viewing, you can schedule a range of times in Preferences that's acceptable for cTiVo to take over your TiVo (see “Auto SkipMode Restricted to” in Preferences>General). Furthermore, in Automatic mode, cTiVo will only retrieve SkipMode breakpoints when your TiVo is playing Live-TV (as that's the default mode for an idle TiVo). cTiVo will not interrupt a show being played back. 
+
+If you prefer not to have cTiVo retrieve automatically, you can disable Auto SkipMode, and the breakpoints can be retrieved manually by selecting a Show or Download and selecting "Get SkipMode from TiVo" from the cTiVo menus (either TiVo menu or right-click contextual menu). 
+
+#### Best of Both Worlds (for Commercials at least):
+In Preferences>General>Commercial>Strategy, you can choose whether to use Comskip or SkipMode only, or "SkipMode → Comskip", which means "Use SkipMode but if it's not available, fall back to Comskip instead". if you're concerned about losing any content due to any incorrect guesses in Comskip: set "Commercial Handling" to "SkipMode → Comskip (Mark)", then if you do a Skip on a show, and SkipMode is not available (or fails), then cTiVo will Mark using Comskip instead.
+
+#### So, if you want to use SkipMode...
+*	Go to Preferences>General>Commercials
+*	Choose whether to Cut or Mark commercials (you can also change this for each download/subscription).
+*	Set "Commercials>Strategy" to one of the SkipMode options.
+*	Enable "Auto SkipMode" and give it the range of time each day that you're NOT going to be watching TV.
+*	Note: if you want SkipMode for any pre-existing subscriptions or scheduled downloads, you'll need to enable it in the respective table rows.
+
+### Notes on Pushover:
+[Pushover (pushover.net) is a real-time notification system](https://pushover.net). Due to user requests, cTiVo will now let you know when your shows have completed. To use it, you'll have to sign up with their system, which will give you a userId. Download the attached Applescript, and save it in `~/Library/Application Scripts/com.cTiVo.cTiVo/DownloadDone.scpt `.  After the first successful download, the script will ask for your Pushover userId. (While this process is admittedly a little tedious, it only has to be done once, and Pushover reports back how many people are using the service.  if a lot do, then I'll include turning on the script in the UI.) 
+
+More generally, you could use the same hook to do any post-processing on downloaded shows you wish.  Documentation for now consists of looking at the Pushover script.
 
 ### Bug fixes:
+*    Allows drag/drop of show folders into Downloads or Subscriptions
+*    No longer uses mencoder for TestPS due to occasionally inaccurate results.
+*    Not using tvdb's thumbnail images for episodes, as they're not updating them.
+*    Ignores all options when using Test PS (, e.g. Cut, Mark, Captions)
+*    Shows folders in bold when all shows are onDisk
+*    Properly uses subdirectories in cache folder
+*    Picks up HD devices on Bonjour
+*    Improved audio sync after crossing a commercial on Apple devices with Default Format.
+*    Test PS marks both H264/MP2 channels as success.
+*    Delays launching download from subscription if no RPC data yet to get episode number correct.
+*    Enable RPC when mediaKey provided late*    
 *    Avoid images disappearing from folders on refresh
 *    Sorting shows within folders
 *    Extra check for SSL block by antivirus
@@ -38,11 +88,23 @@
 *    Detects invalid HTML errors from TVDB
 *    Undeleted shows matched up with pending downloads.
 *    Paused label no longer interferes with selecting downloads behind it.
-*    Change confusing Formats "Hide in User Interface" to "Show in")
+*    Change confusing Formats "Hide in User Interface" to "Show in"
 *    Fix OnDisk problem for shows with accents
 *    Better disk space testing under APFS
 *    Removed experimental SubscriptionRelyOnDiskOnly option
 *    Many process flow and status reporting fixes
+*    Episode information was occasionally wrong when subscription immediately fires, so filename would be wrong.
+*    IsQueued flag sometimes was cleared incorrectly when deleting
+*    Does not allow sleeping during network download, regardless of user setting.
+*    Add check for TiVo's middlemind being unavailable
+*    Volume size fix if 0; should help ZFS and some NAS devices
+*    Cancel commercialing when show is deleted from TiVo
+*    Fix Pref window attaching to wrong place and centering
+*    Fix for occasional "TiVos not found" on launch
+
+### Many thanks to: 
+moyekj of kmttg fame for leading the way on how to extract the SkipMode info
+Bill Tanner for extensive testing.
 
 # Release 3.1.2
 * A small release to update the certificate used to communicate with TiVo's RPC mechanism, which otherwise would expire at the end of April.
