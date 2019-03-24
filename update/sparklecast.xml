@@ -25,7 +25,7 @@
             </description>
             <pubDate>Sun., March 23, 2018 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.3.0/cTiVo.app.zip" sparkle:version="1038" sparkle:shortVersionString="3.3.0 length="73827615" type="application/octet-stream" sparkle:dsaSignature="MCwCFBz3pqQWrqhDkPC3nxaXXhNeZh9DAhQsdLKCRjv/pxRudG8XKGaQFkUlDw=="/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.3.0/cTiVo.app.zip" sparkle:version="1038" sparkle:shortVersionString="3.3.0" length="73827615" type="application/octet-stream" sparkle:dsaSignature="MCwCFBz3pqQWrqhDkPC3nxaXXhNeZh9DAhQsdLKCRjv/pxRudG8XKGaQFkUlDw=="/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>
