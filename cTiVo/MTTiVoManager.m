@@ -115,15 +115,16 @@ __DDLOGHERE__
 -(void) initialFormatSetup {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 
-    NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"];
+    NSString *formatListPath = [[NSBundle mainBundle] pathForResource:@"formats" ofType:@"plist"]; //if not found then crash below.
     NSDictionary *formats = [NSDictionary dictionaryWithContentsOfFile:formatListPath];
-    _formatList = [NSMutableArray arrayWithArray:[formats objectForKey:@"formats"]];
-    NSMutableArray *tmpArray = [NSMutableArray array];
-    for (NSDictionary *fl in _formatList) {
+	NSMutableArray <NSDictionary <NSString *, id> *> * formatDicts = [NSMutableArray arrayWithArray:[formats objectForKey:@"formats"]];
+    NSMutableArray <MTFormat *> *tmpArray = [NSMutableArray array];
+    for (NSDictionary *fl in formatDicts) {
         MTFormat *thisFormat = [MTFormat formatWithDictionary:fl];
         thisFormat.isFactoryFormat = [NSNumber numberWithBool:YES];
         [tmpArray addObject:thisFormat];
     }
+	if (tmpArray.count == 0) DDLogReport(@"WARNING: No factory Formats found to work with!!");
     _formatList = tmpArray;
     DDLogVerbose(@"factory Formats: %@", tmpArray);
 
@@ -1134,6 +1135,10 @@ __DDLOGHERE__
 	
 	if (oldFormats[formatName]) {
 		return [self findFormat:oldFormats[formatName]]; //recursion will stop assuming no circularity in oldFormats
+	}
+	if (_formatList.count == 0) {
+		DDLogReport(@"WARNING. NO Formats in cTiVo!!");
+		return nil;
 	}
     if (!defaultFormat) defaultFormat = _formatList[0];
     return defaultFormat;

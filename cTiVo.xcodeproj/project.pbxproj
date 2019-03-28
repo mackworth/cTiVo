@@ -459,6 +459,7 @@
 		1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+MTURLExtensions.m"; sourceTree = "<group>"; };
 		1E7F5ADA1701877A003AA96C /* in-progress-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "in-progress-recording.png"; sourceTree = "<group>"; };
 		1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PeanutRemote@2x.png"; sourceTree = "<group>"; };
+		1E8C1B57224B988600F285EF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		1E8E675B20E1E970005465EF /* DDOSLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDOSLogger.h; sourceTree = "<group>"; };
 		1E8E675C20E1E970005465EF /* DDOSLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDOSLogger.m; sourceTree = "<group>"; };
 		1E964C931882768900C19046 /* copyright@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "copyright@2x.png"; sourceTree = "<group>"; };
@@ -678,7 +679,6 @@
 		D2D60BB116766EFD00CE32DE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.objj.h; path = MTAppDelegate.h; sourceTree = "<group>"; };
 		D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTAppDelegate.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		D2D60BB716766EFD00CE32DE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		D2D60BC016766F3200CE32DE /* formats.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = formats.plist; sourceTree = "<group>"; };
 		D2D60BC916766FA600CE32DE /* MTTiVoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTiVoManager.m; sourceTree = "<group>"; };
 		D2D60BCA16766FA600CE32DE /* MTTiVoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTTiVoManager.h; sourceTree = "<group>"; };
@@ -1301,10 +1301,11 @@
 			};
 			buildConfigurationList = D2D60B9716766EFD00CE32DE /* Build configuration list for PBXProject "cTiVo" */;
 			compatibilityVersion = "Xcode 8.0";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = D2D60B9216766EFD00CE32DE;
 			productRefGroup = D2D60B9E16766EFD00CE32DE /* Products */;
@@ -1529,7 +1530,7 @@
 		D2D60BB616766EFD00CE32DE /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				D2D60BB716766EFD00CE32DE /* en */,
+				1E8C1B57224B988600F285EF /* Base */,
 			);
 			name = MainMenu.xib;
 			sourceTree = "<group>";
