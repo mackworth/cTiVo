@@ -461,12 +461,6 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     return [show.tiVo.myRPC rpcDataForID:show.idString];
 }
 
-- (void)rpcRecentChange {
-	//maybe skipMode change
-	DDLogDetail(@"Reloading recent shows due to skipMode notification");
-	[self reloadRecentShows];
-}
-
 - (void)rpcResync {
 	//maybe a show moved in list, suggesting that it was a suggestion, and now isn't
 	DDLogDetail(@"Resynching shows due to skipMode notification");

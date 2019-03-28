@@ -710,8 +710,12 @@ __DDLOGHERE__
 	}
 }
 
--(BOOL)configureFiles
-{
+-(BOOL) shouldUseMemoryBuffer {
+	return [[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload] &&
+	 !(self.useSkipMode && self.markCommercials); //else might need the whole file later for post-commercial
+}
+
+-(BOOL)configureFiles {
     DDLogDetail(@"configuring files for %@",self);
 	//Release all previous attached pointers
     [self deallocDownloadHandling];
@@ -757,8 +761,7 @@ __DDLOGHERE__
          ];
    }
     if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {  //We need to download from the TiVo
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTUseMemoryBufferForDownload] &&
-			!(self.useSkipMode && self.markCommercials)) { //else might need the whole file later for post-commercial
+        if ([self shouldUseMemoryBuffer]) {
             self.bufferFilePath = [NSString stringWithFormat:@"%@/buffer%@.bin",self.tmpDirectory,self.baseFileName];
             DDLogVerbose(@"downloading to memory; buffer: %@", self.bufferFilePath);
             self.urlBuffer = [NSMutableData new];
@@ -1631,7 +1634,7 @@ __DDLOGHERE__
 				[defaults boolForKey:kMTSaveTmpFiles] ?
 					@" Save Temp files;" :
 					@"",
-				self.urlBuffer?
+				[self shouldUseMemoryBuffer]?
 					@"" :
 					@" No Memory Buffer;",
                [defaults objectForKey:kMTDecodeBinary],
@@ -1697,10 +1700,11 @@ __DDLOGHERE__
 	MTTask * mpegTask = nil;
 	if (self.shouldCheckMPEG ) {
 		mpegTask = self.mpegTask;
+		if (self.encodeFormat.isTestPS) {
+			[taskArray addObject:@[mpegTask]];
+		}
 	}
-	if (self.encodeFormat.isTestPS) {
-		[taskArray addObject:@[mpegTask]];
-	} else { //not indented due to size of block
+	if (!self.encodeFormat.isTestPS)  //Warning: no brace and not indented due to size of block
     switch (self.taskFlowType) {
         case kMTTaskFlowNonSimu:  //Just encode with non-simul encoder
 			if (mpegTask) {
@@ -1811,7 +1815,6 @@ __DDLOGHERE__
         default:
             break;
     }
-	}
 	self.activeTaskChain.taskArray = [NSArray arrayWithArray:taskArray];
     if(self.downloadingShowFromMPGFile)self.activeTaskChain.providesProgress = YES;
     

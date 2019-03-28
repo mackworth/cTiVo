@@ -789,24 +789,11 @@ static NSRegularExpression * isFinalRegex = nil;
                    [strongSelf.showMap removeObjectForKey:objectID];
                }
 			   [strongSelf recursiveGetShowInfoForShows: lookupDetails];
-			   if (newIDs.count + deletedShows.count > 0) {
+			   if ((newIDs.count + deletedShows.count > 0) ||
+				   [shows isEqual:strongSelf.lastShowList]) {  //if any adds or delete, OR unchanged list
 				   [strongSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
-			   } else if (shows.count != self.lastShowList.count) {
-			   		//shouldn't be possible
-			   		[strongSelf.delegate rpcResync];
-				} else {
-					BOOL isSame = YES;
-					for (NSUInteger i = 0; i< shows.count; i++) {
-						if (![shows[i] isEqual:strongSelf.lastShowList[i]]) {
-							isSame = NO;
-							break;
-						}
-					}
-					if (isSame) {
-						[strongSelf.delegate rpcRecentChange];
-					} else {
-						[strongSelf.delegate rpcResync];
-					}
+				} else { //problem...
+					[strongSelf.delegate rpcResync];
 			   }
            }
 		   strongSelf.lastShowList = shows;

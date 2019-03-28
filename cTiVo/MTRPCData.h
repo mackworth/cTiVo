@@ -52,7 +52,6 @@ typedef NS_ENUM(NSUInteger, MTWhatsOnType) {
                 atTiVoIndices: (NSMutableArray <NSNumber *> *) newShowIndices
               andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows;
 -(void) rpcResync;
--(void) rpcRecentChange;
 -(BOOL) isReachable;
 -(BOOL) isMini;
 -(BOOL) isOlderTiVo;
