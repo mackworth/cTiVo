@@ -59,36 +59,44 @@ __DDLOGHERE__
 		BOOL skipModeWasDisabled = ![self canSkipModeCommercials];
        _encodeFormat = encodeFormat;
 
-		if (!self.canAddToiTunes && self.shouldAddToiTunes) {
-            //no longer possible
-            self.addToiTunes = [NSNumber numberWithBool:NO];
-        } else if (iTunesWasDisabled && [self canAddToiTunes]) {
-            //newly possible, so take user default
-            self.addToiTunes = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit] && self.encodeFormat.canAddToiTunes)];
+		NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+		if ([self canAddToiTunes]) { //if newly possible, take user default
+			if (iTunesWasDisabled) self.addToiTunes = @([defaults boolForKey:kMTiTunesSubmit] );
+		} else { //no longer possible
+            self.addToiTunes = @NO;
         }
-        if (!self.canSkipCommercials && self.shouldSkipCommercials) {
-            //no longer possible
-            self.skipCommercials = [NSNumber numberWithBool:NO];
-        } else if (skipWasDisabled && [self canSkipCommercials]) {
-            //newly possible, so take user default
-            self.skipCommercials = [NSNumber numberWithBool:([[NSUserDefaults standardUserDefaults] boolForKey:kMTSkipCommercials] && self.encodeFormat.canSkip)];
+		if ([self canSkipCommercials]) {
+			if (skipWasDisabled) self.skipCommercials = @([defaults boolForKey:kMTSkipCommercials]);
+		} else { //no longer possible
+            self.skipCommercials = @NO;
         }
-        if (!self.canMarkCommercials && self.shouldMarkCommercials) {
-            //no longer possible
-            self.markCommercials = @NO;
-        } else if (markWasDisabled && [self canMarkCommercials]) {
-            //newly possible, so take user default
-            self.markCommercials = [[NSUserDefaults standardUserDefaults] objectForKey:kMTMarkCommercials];
-        }
-		if (self.useSkipMode && ![self canSkipModeCommercials]) {
-			self.useSkipMode = @NO;
-		} else if (skipModeWasDisabled && [self canSkipModeCommercials]) {
-			//newly possible, so take user default
-			self.useSkipMode = @([[NSUserDefaults standardUserDefaults] integerForKey:kMTCommercialStrategy] > 0);
+		if ([self canMarkCommercials]) {
+			if (markWasDisabled) self.markCommercials = @([defaults boolForKey:kMTMarkCommercials]);
+		} else { //no longer possible
+			self.markCommercials = @NO;
 		}
-		
+		if ([self canSkipModeCommercials]) {
+			if (skipModeWasDisabled) self.useSkipMode = @([defaults integerForKey:kMTCommercialStrategy] > 0);
+		} else { //no longer possible
+			self.useSkipMode = @NO;
+		}
     }
 }
+
+-(void) setSkipCommercials:(NSNumber *)skipCommercials {
+	_skipCommercials = skipCommercials;
+	if (_skipCommercials.boolValue && _markCommercials.boolValue) {
+		self.markCommercials = @NO;
+	}
+}
+
+-(void) setMarkCommercials:(NSNumber *)markCommercials {
+	_markCommercials = markCommercials;
+	if (_skipCommercials.boolValue && _markCommercials.boolValue) {
+		self.skipCommercials = @NO;
+	}
+}
+
 - (void) formatMayHaveChanged{
 	//if format list is updated, we need to ensure our format still exists
 	//known bug: if name of current format changed, we will not find correct one

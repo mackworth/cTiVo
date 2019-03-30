@@ -154,6 +154,10 @@ void signalHandler(int signal)
 		
 	}
 
+	if ([defaults boolForKey:kMTSkipCommercials]) {
+		//transition from 3.1 to 3.3.1
+		[defaults setBool:NO forKey:kMTMarkCommercials];
+	}
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
 										  @YES, kMTShowCopyProtected,
 										  @NO, kMTShowSuggestions,

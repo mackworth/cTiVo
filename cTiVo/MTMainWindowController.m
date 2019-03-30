@@ -358,12 +358,13 @@ __DDLOGHERE__
             MTSubscription * subscription = (MTSubscription *) thisButton.owner;
             
             subscription.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
+			[[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationSubscriptionChanged object:subscription];
        } else if ([thisButton.owner class] == [MTDownload class]) {
             MTDownload * download = (MTDownload *) thisButton.owner;
            if(download.isNew) {
                 download.encodeFormat = [tiVoManager findFormat:[thisButton selectedItem].title];
             }
-          [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationDownloadStatusChanged object:download];
+          [[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationDownloadRowChanged object:download];
        }
      }
 }
@@ -660,25 +661,16 @@ __DDLOGHERE__
 
 #pragma mark - Download Options
 
--(IBAction)changeSkip:(id)sender
-{
+-(IBAction)changeSkip:(id)sender {
     MTCheckBox *checkbox = sender;
 	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
 		MTDownload *download = (MTDownload *)(checkbox.owner);
         download.skipCommercials = ! download.skipCommercials;
-		if (download.skipCommercials) {
-			download.markCommercials = NO;
-		}
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:download];
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
-		
         MTSubscription *sub = (MTSubscription *)(checkbox.owner);
-		sub.skipCommercials = [NSNumber numberWithBool: ! [sub.skipCommercials boolValue]];
-		if ([sub.skipCommercials boolValue]) {
-			sub.markCommercials = @NO;
-		}
+		sub.skipCommercials = @( ! sub.skipCommercials.boolValue);
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
-                
     }
 }
 
@@ -691,25 +683,16 @@ __DDLOGHERE__
 	}
 }
 
--(IBAction)changeMark:(id)sender
-{
+-(IBAction)changeMark:(id)sender {
     MTCheckBox *checkbox = sender;
 	if ([checkbox.owner isKindOfClass:[MTDownload class]]){
 		MTDownload *download = (MTDownload *)(checkbox.owner);
         download.markCommercials = ! download.markCommercials;
-		if (download.markCommercials) {
-			download.skipCommercials = NO;
-		}
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDownloadRowChanged object:download];
     } else if ([checkbox.owner isKindOfClass:[MTSubscription class]]){
-		
         MTSubscription *sub = (MTSubscription *)(checkbox.owner);
-		sub.markCommercials = [NSNumber numberWithBool: ! [sub.markCommercials boolValue]];
-		if ([sub.markCommercials boolValue]) {
-			sub.skipCommercials = @NO;
-		}
+		sub.markCommercials = @( ! [sub.markCommercials boolValue]);
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationSubscriptionChanged object:sub];
-		
     }
 }
 -(IBAction)changeUseSkipMode:(id)sender

@@ -3242,33 +3242,26 @@ NSInteger diskWriteFailure = 123;
 		BOOL skipModeWasDisabled = ![self canSkipModeCommercials];
 		
         _encodeFormat = encodeFormat;
-        if (!self.canAddToiTunes && self.shouldAddToiTunes) {
-            //no longer possible
+		NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+		if ([self canAddToiTunes]) { //newly possible, so take user default
+			if (iTunesWasDisabled ) self.addToiTunesWhenEncoded = [defaults boolForKey:kMTiTunesSubmit];
+		} else { //no longer possible
             self.addToiTunesWhenEncoded = NO;
-        } else if (iTunesWasDisabled && [self canAddToiTunes]) {
-            //newly possible, so take user default
-            self.addToiTunesWhenEncoded = [[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSubmit];
         }
-        if (!self.canSkipCommercials && self.skipCommercials) {
-            //no longer possible
+		if (self.canSkipCommercials) { //newly possible, so take user default
+			if (skipWasDisabled ) self.skipCommercials = [defaults boolForKey:kMTSkipCommercials];
+		} else { //no longer possible
             self.skipCommercials = NO;
-        } else if (skipWasDisabled && [self canSkipCommercials]) {
-            //newly possible, so take user default
-            self.skipCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:kMTSkipCommercials];
-        }
-		if (self.markCommercials && (self.skipCommercials || !self.canMarkCommercials)) {
-			if (self.markCommercials) {
-				self.markCommercials = NO;
-			}
-        } else if (markWasDisabled && [self canMarkCommercials]) {
-            //newly possible, so take user default
-            self.markCommercials = [[NSUserDefaults standardUserDefaults] boolForKey:kMTMarkCommercials];
-        }
-		if (self.useSkipMode && ![self canSkipModeCommercials]) {
+		}
+ 		if (self.canMarkCommercials) { //newly possible, so take user default
+			if (markWasDisabled) self.markCommercials = [defaults boolForKey:kMTMarkCommercials];
+		} else { //no longer possible
+			self.markCommercials = NO;
+		}
+		if ([self canSkipModeCommercials]) { //newly possible, so take user default
+			if (skipModeWasDisabled) self.useSkipMode = [defaults integerForKey:kMTCommercialStrategy] > 0;
+		} else {
 			self.useSkipMode = NO;
-		} else if (skipModeWasDisabled && [self canSkipModeCommercials]) {
-			//newly possible, so take user default
-			self.useSkipMode = [[NSUserDefaults standardUserDefaults] integerForKey:kMTCommercialStrategy] > 0;
 		}
 		
 		if (!wasNil) { //no need at launch
@@ -3277,6 +3270,19 @@ NSInteger diskWriteFailure = 123;
     }
 }
 
+-(void) setSkipCommercials:(BOOL)skipCommercials {
+	_skipCommercials = skipCommercials;
+	if (_skipCommercials && _markCommercials) {
+		self.markCommercials = NO;
+	}
+}
+
+-(void) setMarkCommercials:(BOOL)markCommercials {
+	_markCommercials = markCommercials;
+	if (_markCommercials && _skipCommercials) {
+		self.skipCommercials = NO;
+	}
+}
 
 #pragma mark - Memory Management
 
