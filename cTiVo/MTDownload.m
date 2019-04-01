@@ -920,7 +920,7 @@ __DDLOGHERE__
 				DDLogMajor(@"Program stream test passed for %@ on %@",strongSelf, strongSelf.show.stationCallsign);
 				[strongSelf markMyChannelAsPSOnly];
 			} else {
-				[strongSelf markMyChannelAsTSOnly];
+				[strongSelf handleNewTSChannel];
 				if (! strongSelf.encodeFormat.isTestPS) {
 					[strongSelf rescheduleDownloadFalseStart];
 				}
