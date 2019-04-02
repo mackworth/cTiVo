@@ -195,7 +195,6 @@
 		D22BC41F1680DB5E007D699C /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
 		D22E4B1916B76DCD00619A6E /* MTAdvPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D22E4B1716B76DCD00619A6E /* MTAdvPreferencesViewController.xib */; };
 		D235BF01168F52DE00320FA5 /* MTSubscriptionTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */; };
-		D240EF5E16EFE05E00635E53 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D240EF5D16EFE05E00635E53 /* QTKit.framework */; };
 		D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */ = {isa = PBXBuildFile; fileRef = D24A8D0D16A5F3DC00DFF890 /* catToFile */; };
 		D2574E8617FE30EC00BBAB5C /* MAKHelpFile.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D2574E8517FE30EC00BBAB5C /* MAKHelpFile.rtf */; };
 		D257C6E41697400700EBE30B /* MTFormatPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */; };
@@ -707,7 +706,6 @@
 				1E61CDBD1BB89E91006D6DBE /* libz.tbd in Frameworks */,
 				1E61CDB91BB89E6A006D6DBE /* libc++.tbd in Frameworks */,
 				D271F3631734BCDA00641435 /* Security.framework in Frameworks */,
-				D240EF5E16EFE05E00635E53 /* QTKit.framework in Frameworks */,
 				D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */,
 				D2CAF34016AB43AE004E4CFA /* IOKit.framework in Frameworks */,
 				D2B6706D169CA91F009CB164 /* SystemConfiguration.framework in Frameworks */,
