@@ -1471,11 +1471,11 @@ __DDLOGHERE__
 		__typeof__(self) strongSelf = weakSelf;
 		__typeof__(MTTask *) strongCommercial = weakCommercial;
 		if (!strongSelf || !strongCommercial) return;
-        if (weakCommercial.taskFailed) {
+        if (strongCommercial.taskFailed) {
             if ([strongSelf checkLogForAudio: strongCommercial.logFilePath]) {
 				DDLogMajor(@"Due to audio-only failure, switching to Transport Stream for %@", strongSelf);
                 [strongSelf handleNewTSChannel];
-            } else {
+            } else if (!strongSelf.isCanceled && strongSelf.isInProgress){
                 [strongSelf notifyUserWithTitle:@"Detecting Commercials Failed" subTitle:@"Not processing commercials" ];
 
                 if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.commercialFilePath]) {
