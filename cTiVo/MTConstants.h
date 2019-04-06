@@ -139,7 +139,6 @@
 //Misc
 
 #define kMTAllTiVos @"All TiVos"
-#define kMTDefaultDownloadDir  @"Movies/TiVoShows/"
 #define kMTMaxBuffSize 50000000
 #define kMTMaxReadPoints 1048576
 #define kMTMaxPointsBeforeWrite 1048576
@@ -175,6 +174,10 @@
 #define kMTSelectedTiVo @"SelectedTiVo"             //Name of currently selected TiVo
 #define kMTSelectedFormat @"SelectedFormat"         //Name of currently selected format for conversion
 #define kMTDownloadDirectory  @"DownloadDirectory"  //Pathname for directory for dowloaded files
+#ifdef SANDBOX
+#define kMTDownloadDirBookmark  @"DownloadDirBookmark"  //security-scope bookmark for directory for downloaded files (if not standard); overrides downloadDirectoryPath
+#define kMTRecentDownloadBookMarks @"RecentDownloadBookmarks"   //Array of security scope bookmark where we might have videos stored.
+#endif
 #define kMTThumbnailsDirectory  @"ThumbnailsDirectory"  //Pathname for directory for dowloaded files (no GUI)
 #define kMTSubscriptionList @"SubscriptionList"     //Array of subscription dictionaries
 #define kMTTiVoLastLoadTimes @"TiVoLastLoadTImes"   //Array of Date each tivo last processed

@@ -662,7 +662,7 @@ BOOL channelChecking = NO;
 }
 
 -(void) findCommercialsForShow: (MTTiVoShow *) show interrupting:(BOOL) interrupt {
-	if (!show || show.edlList.count > 0) return;
+	if (!show || show.rpcData.edlList.count > 0) return;
 	BOOL notAlreadyWaitingForCommercials = self.postponedCommercialShows == nil;
 	if (notAlreadyWaitingForCommercials) {
 		self.postponedCommercialShows = [NSMutableSet setWithObject:show];
@@ -713,7 +713,7 @@ BOOL channelChecking = NO;
 				show.rpcData.tempLength = show.showLength; //hint in case tivo isn't reporting this
             	[self.myRPC findSkipModeEDLForShow:show.rpcData];
         	} else {
-				DDLogDetail(@"No need for SkipMode data for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : show.edlList.count > 0 ? @"Already have" : !show.mightHaveSkipModeInfo ? @"won't have for other reason" : @"Error" );
+				DDLogDetail(@"No need for SkipMode data for %@ on %@: %@ %@", show, self, show.isSuggestion ? @"Suggestion" : @"", show.inProgress.boolValue ? @"In progress" : show.rpcData.edlList.count > 0 ? @"Already have" : !show.mightHaveSkipModeInfo ? @"won't have for other reason" : @"Error" );
 			}
         }
 	}

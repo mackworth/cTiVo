@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14460.31"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14490.70"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -30,7 +30,7 @@
                             <menuItem title="Check For Updates..." id="129">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="checkForUpdates:" target="873" id="874"/>
+                                    <action selector="checkForUpdates:" target="-1" id="24c-Yt-YzW"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Preferences..." keyEquivalent="," id="1064">
@@ -372,6 +372,7 @@ CA
         </menu>
         <customObject id="494" customClass="MTAppDelegate">
             <connections>
+                <outlet property="checkForUpdatesMenuItem" destination="129" id="FKa-h0-1OG"/>
                 <outlet property="exportTableView" destination="904" id="925"/>
                 <outlet property="formatSelectionTable" destination="919" id="920"/>
                 <outlet property="iTunesMenuItem" destination="1108" id="7GA-ju-aod"/>
@@ -383,7 +384,6 @@ CA
             </connections>
         </customObject>
         <customObject id="420" customClass="NSFontManager"/>
-        <customObject id="873" customClass="SUUpdater"/>
         <customView id="919">
             <rect key="frame" x="0.0" y="0.0" width="528" height="246"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>

@@ -28,6 +28,236 @@
 		1E3D27E01A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */; };
 		1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */; };
 		1E4A38481A37C0F4001D84A7 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */; };
+		1E5050CC22556CC300D5981B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
+		1E5050CD22556CC300D5981B /* MTProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */; };
+		1E5050CE22556CC300D5981B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BAD16766EFD00CE32DE /* main.m */; };
+		1E5050CF22556CC300D5981B /* MTChannelPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EFA8D4F211BFF6900B4505D /* MTChannelPopUpButton.m */; };
+		1E5050D022556CC300D5981B /* MTRemoteWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6AB106202A0BDB008A0F32 /* MTRemoteWindowController.m */; };
+		1E5050D122556CC300D5981B /* DDOSLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E675C20E1E970005465EF /* DDOSLogger.m */; };
+		1E5050D222556CC300D5981B /* MTAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */; };
+		1E5050D322556CC300D5981B /* MTTVDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */; };
+		1E5050D422556CC300D5981B /* MTTiVoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BC916766FA600CE32DE /* MTTiVoManager.m */; };
+		1E5050D522556CC300D5981B /* MTDownloadTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */; };
+		1E5050D622556CC300D5981B /* MTProgramTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */; };
+		1E5050D722556CC300D5981B /* MTProgressindicator.m in Sources */ = {isa = PBXBuildFile; fileRef = D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */; };
+		1E5050D822556CC300D5981B /* MTMainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D279D3E9167A32FA007F0677 /* MTMainWindowController.m */; };
+		1E5050D922556CC300D5981B /* MTHideTempFolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E15298320102C3D000D1705 /* MTHideTempFolder.m */; };
+		1E5050DA22556CC300D5981B /* MTTivoRPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E56038B1F44DFA400454157 /* MTTivoRPC.m */; };
+		1E5050DB22556CC300D5981B /* MTTiVoShow.m in Sources */ = {isa = PBXBuildFile; fileRef = D22BC41E1680DB5E007D699C /* MTTiVoShow.m */; };
+		1E5050DC22556CC300D5981B /* MTDownloadCheckTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */; };
+		1E5050DD22556CC300D5981B /* MTiTunes.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C390741687FFA600D2062E /* MTiTunes.m */; };
+		1E5050DE22556CC300D5981B /* NSTask+RunTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E32CC6F21FE61F200C6D8A2 /* NSTask+RunTask.m */; };
+		1E5050DF22556CC300D5981B /* NSDate+Tomorrow.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E20061A2051E70C003FA2D9 /* NSDate+Tomorrow.m */; };
+		1E5050E022556CC300D5981B /* MTCheckBox.m in Sources */ = {isa = PBXBuildFile; fileRef = D2995CA5168B8BB200B960B9 /* MTCheckBox.m */; };
+		1E5050E122556CC300D5981B /* MTSubscriptionTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D235BF00168F52DE00320FA5 /* MTSubscriptionTableView.m */; };
+		1E5050E222556CC300D5981B /* MTFormatPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E21697400600EBE30B /* MTFormatPopUpButton.m */; };
+		1E5050E322556CC300D5981B /* MTFormatPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = D257C6E7169740A000EBE30B /* MTFormatPopUpTableCellView.m */; };
+		1E5050E422556CC300D5981B /* MTTiVo.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A648F116991CD300C7DA01 /* MTTiVo.m */; };
+		1E5050E522556CC300D5981B /* MTSubscription.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E791BD31697C59300E47E84 /* MTSubscription.m */; };
+		1E5050E622556CC300D5981B /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */; };
+		1E5050E722556CC300D5981B /* MTFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A7269716A23E3D00C58C5F /* MTFormat.m */; };
+		1E5050E822556CC300D5981B /* MTFormatEditorController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2A7269A16A25DEB00C58C5F /* MTFormatEditorController.m */; };
+		1E5050E922556CC300D5981B /* MTHelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D219D5E816A4F88D00C79962 /* MTHelpViewController.m */; };
+		1E5050EA22556CC300D5981B /* MTNetService.m in Sources */ = {isa = PBXBuildFile; fileRef = D28EB0F916B3182100AA0330 /* MTNetService.m */; };
+		1E5050EB22556CC300D5981B /* MTManualTiVoEditorController.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D2C6EE16B3816B001AFE75 /* MTManualTiVoEditorController.m */; };
+		1E5050EC22556CC300D5981B /* MTPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D27579BB16B4DC2B0090D137 /* MTPreferencesWindowController.m */; };
+		1E5050ED22556CC300D5981B /* MTTabViewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D27579C116B575A20090D137 /* MTTabViewItem.m */; };
+		1E5050EE22556CC300D5981B /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
+		1E5050EF22556CC300D5981B /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
+		1E5050F022556CC300D5981B /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
+		1E5050F122556CC300D5981B /* MTShowFolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E17E1181FF7ED8900AF0F7C /* MTShowFolder.m */; };
+		1E5050F222556CC300D5981B /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
+		1E5050F322556CC300D5981B /* NSNotificationCenter+Threads.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */; };
+		1E5050F422556CC300D5981B /* NSURL+MTURLExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */; };
+		1E5050F522556CC300D5981B /* MTIsStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */; };
+		1E5050F622556CC300D5981B /* NSArray+Map.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3C43BF1D79EA1100367866 /* NSArray+Map.m */; };
+		1E5050F722556CC300D5981B /* MTTextFieldNoInteraction.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E09DD412099449D0010CAB4 /* MTTextFieldNoInteraction.m */; };
+		1E5050F822556CC300D5981B /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
+		1E5050FA22556CC300D5981B /* MTChannelEditorController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD9D3F1C8265D600FBC78D /* MTChannelEditorController.m */; };
+		1E5050FB22556CC300D5981B /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
+		1E5050FC22556CC300D5981B /* NSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD116766FA600CE32DE /* NSString+HTML.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1E5050FD22556CC300D5981B /* MTGCDTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB2D98D2110DC7B00E50C9B /* MTGCDTimer.m */; };
+		1E5050FE22556CC300D5981B /* MTChannelPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EFA8D51211BFF6900B4505D /* MTChannelPopUpTableCellView.m */; };
+		1E5050FF22556CC300D5981B /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		1E50510022556CC300D5981B /* MTTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C6BB591714681C00289751 /* MTTask.m */; };
+		1E50510122556CC300D5981B /* CrashlyticsLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */; };
+		1E50510222556CC300D5981B /* MTTaskChain.m in Sources */ = {isa = PBXBuildFile; fileRef = D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */; };
+		1E50510322556CC300D5981B /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C3173DC7D100B47539 /* DDFileLogger.m */; };
+		1E50510422556CC300D5981B /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
+		1E50510522556CC300D5981B /* DragDropImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E52C5251F2420A700389E93 /* DragDropImageView.m */; };
+		1E50510622556CC300D5981B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
+		1E50510722556CC300D5981B /* MTTiVoPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */; };
+		1E50510822556CC300D5981B /* MTTiVoPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49974174D898D0022E084 /* MTTiVoPopUpTableCellView.m */; };
+		1E50510922556CC300D5981B /* MTWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EE3AB62201589E500F36731 /* MTWeakTimer.m */; };
+		1E50510A22556CC300D5981B /* MTRPCData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E56038E1F45103400454157 /* MTRPCData.m */; };
+		1E50510B22556CC300D5981B /* NSString+Helpers.m in Sources */ = {isa = PBXBuildFile; fileRef = D295CE82175A6AE500D010B8 /* NSString+Helpers.m */; };
+		1E50510D22556CC300D5981B /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDBC1BB89E91006D6DBE /* libz.tbd */; };
+		1E50510E22556CC300D5981B /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB81BB89E6A006D6DBE /* libc++.tbd */; };
+		1E50510F22556CC300D5981B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D271F3621734BCDA00641435 /* Security.framework */; };
+		1E50511022556CC300D5981B /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A09C7916C77E9D00F2B86F /* Quartz.framework */; };
+		1E50511122556CC300D5981B /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2CAF33F16AB43AE004E4CFA /* IOKit.framework */; };
+		1E50511222556CC300D5981B /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */; };
+		1E50511322556CC300D5981B /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */; };
+		1E50511422556CC300D5981B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA116766EFD00CE32DE /* Cocoa.framework */; };
+		1E50511622556CC300D5981B /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC1A1730296C0036125A /* libmp4v2.a */; };
+		1E50511722556CC300D5981B /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */; };
+		1E50511822556CC300D5981B /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB61BB89DA5006D6DBE /* Fabric.framework */; };
+		1E50511A22556CC300D5981B /* CommercialHelpFileDark.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 1E799EF02182D5360073C450 /* CommercialHelpFileDark.rtfd */; };
+		1E50511B22556CC300D5981B /* tivo-libre.jar in Resources */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50511C22556CC300D5981B /* ffmpeg_edl_ac3.sh in Resources */ = {isa = PBXBuildFile; fileRef = 94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50511D22556CC300D5981B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
+		1E50511E22556CC300D5981B /* suggestion-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C9B1882768A00C19046 /* suggestion-recording@2x.png */; };
+		1E50511F22556CC300D5981B /* skipModeSlash@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E20061C205441D6003FA2D9 /* skipModeSlash@2x.png */; };
+		1E50512022556CC300D5981B /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BB016766EFD00CE32DE /* Credits.rtf */; };
+		1E50512122556CC300D5981B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BB616766EFD00CE32DE /* MainMenu.xib */; };
+		1E50512222556CC300D5981B /* formats.plist in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BC016766F3200CE32DE /* formats.plist */; };
+		1E50512322556CC300D5981B /* save-until-i-delete-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C9A1882768A00C19046 /* save-until-i-delete-recording@2x.png */; };
+		1E50512422556CC300D5981B /* CommercialHelpFile.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 1E02BDE02056E9BB000B9F56 /* CommercialHelpFile.rtfd */; };
+		1E50512522556CC300D5981B /* MTMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D279D3EA167A32FA007F0677 /* MTMainWindowController.xib */; };
+		1E50512722556CC300D5981B /* MTOpenPanelDefaultView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E152980201006B0000D1705 /* MTOpenPanelDefaultView.xib */; };
+		1E50512822556CC300D5981B /* MTFormatEditorController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2A7269B16A25DEB00C58C5F /* MTFormatEditorController.xib */; };
+		1E50512922556CC300D5981B /* MTHelpViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D219D5E616A4F88C00C79962 /* MTHelpViewController.xib */; };
+		1E50512A22556CC300D5981B /* EncoderHelpText.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D219D5F316A503C100C79962 /* EncoderHelpText.rtf */; };
+		1E50512B22556CC300D5981B /* checkImage2.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964CA5188313ED00C19046 /* checkImage2.png */; };
+		1E50512C22556CC300D5981B /* catToFile in Resources */ = {isa = PBXBuildFile; fileRef = D24A8D0D16A5F3DC00DFF890 /* catToFile */; };
+		1E50512E22556CC300D5981B /* expired-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C951882768A00C19046 /* expired-recording@2x.png */; };
+		1E50512F22556CC300D5981B /* MAKHelpFile.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D2574E8517FE30EC00BBAB5C /* MAKHelpFile.rtf */; };
+		1E50513022556CC300D5981B /* skipModeInverted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7A4CE620422E350081884D /* skipModeInverted@2x.png */; };
+		1E50513122556CC300D5981B /* MTManualTiVoEditorController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2D2C6ED16B3816B001AFE75 /* MTManualTiVoEditorController.xib */; };
+		1E50513222556CC300D5981B /* MTPreferencesWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D27579BC16B4DC2B0090D137 /* MTPreferencesWindowController.xib */; };
+		1E50513322556CC300D5981B /* MTPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D208560616B61B9B002F5F8C /* MTPreferencesViewController.xib */; };
+		1E50513422556CC300D5981B /* MTChannelEditorController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1ECD9D401C8265D600FBC78D /* MTChannelEditorController.xib */; };
+		1E50513522556CC300D5981B /* MTAdvPreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D22E4B1716B76DCD00619A6E /* MTAdvPreferencesViewController.xib */; };
+		1E50513622556CC300D5981B /* comskip.ini in Resources */ = {isa = PBXBuildFile; fileRef = D2B73F3516BC8A90003CB4ED /* comskip.ini */; };
+		1E50513722556CC300D5981B /* ComSkipHelpText.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D274653416C8081C0012CFF7 /* ComSkipHelpText.rtf */; };
+		1E50513822556CC300D5981B /* deleted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C941882768A00C19046 /* deleted@2x.png */; };
+		1E50513922556CC300D5981B /* elgatoScript.pl in Resources */ = {isa = PBXBuildFile; fileRef = 1E2724EE16C9A8B500A21940 /* elgatoScript.pl */; };
+		1E50513A22556CC300D5981B /* cdata.p12 in Resources */ = {isa = PBXBuildFile; fileRef = 1E5603901F45206100454157 /* cdata.p12 */; };
+		1E50513B22556CC300D5981B /* elgatoLaunch.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */; };
+		1E50513C22556CC300D5981B /* tivo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323819C502980052E6C6 /* tivo.png */; };
+		1E50513D22556CC300D5981B /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
+		1E50513E22556CC300D5981B /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
+		1E50513F22556CC300D5981B /* expires-soon-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C961882768A00C19046 /* expires-soon-recording@2x.png */; };
+		1E50514022556CC300D5981B /* copyright.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7516E2C50B000F5C6E /* copyright.png */; };
+		1E50514122556CC300D5981B /* skipModeComskip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EB2D98F2113D7F300E50C9B /* skipModeComskip@2x.png */; };
+		1E50514222556CC300D5981B /* FindTiVoHelpFile.rtf in Resources */ = {isa = PBXBuildFile; fileRef = D209B6A91813305E004E733B /* FindTiVoHelpFile.rtf */; };
+		1E50514322556CC300D5981B /* copyright@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C931882768900C19046 /* copyright@2x.png */; };
+		1E50514422556CC300D5981B /* skipModeQuestion@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E09D27420C5A90F00A56B83 /* skipModeQuestion@2x.png */; };
+		1E50514522556CC300D5981B /* recent-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C991882768A00C19046 /* recent-recording@2x.png */; };
+		1E50514622556CC300D5981B /* skipMode@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7A4CE520422E340081884D /* skipMode@2x.png */; };
+		1E50514722556CC300D5981B /* expired-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7716E2C50B000F5C6E /* expired-recording.png */; };
+		1E50514822556CC300D5981B /* tivo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EDE323919C502980052E6C6 /* tivo@2x.png */; };
+		1E50514922556CC300D5981B /* expires-soon-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7816E2C50B000F5C6E /* expires-soon-recording.png */; };
+		1E50514A22556CC300D5981B /* save-until-i-delete-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7916E2C50B000F5C6E /* save-until-i-delete-recording.png */; };
+		1E50514B22556CC300D5981B /* status-unknown@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C981882768A00C19046 /* status-unknown@2x.png */; };
+		1E50514C22556CC300D5981B /* suggestion-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7A16E2C50B000F5C6E /* suggestion-recording.png */; };
+		1E50514D22556CC300D5981B /* MTRemoteWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E6AB107202A0BDB008A0F32 /* MTRemoteWindowController.xib */; };
+		1E50514E22556CC300D5981B /* status-unknown.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A8616E3A010000F5C6E /* status-unknown.png */; };
+		1E50514F22556CC300D5981B /* in-progress-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C971882768A00C19046 /* in-progress-recording@2x.png */; };
+		1E50515022556CC300D5981B /* deleted.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A8A16E3A338000F5C6E /* deleted.png */; };
+		1E50515122556CC300D5981B /* in-progress-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7F5ADA1701877A003AA96C /* in-progress-recording.png */; };
+		1E50515222556CC300D5981B /* recent-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E0C5DD8170236B30015C55D /* recent-recording.png */; };
+		1E50515322556CC300D5981B /* checkImage2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964CA6188313ED00C19046 /* checkImage2@2x.png */; };
+		1E50515422556CC300D5981B /* cTiVo.help in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145D1708AC1500166E5F /* cTiVo.help */; };
+		1E50515522556CC300D5981B /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145F1708AF7000166E5F /* cTiVo.icns */; };
+		1E50515622556CC300D5981B /* MTMainWindowDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */; };
+		1E50515722556CC300D5981B /* elgatoQuit.scpt in Resources */ = {isa = PBXBuildFile; fileRef = D2B4B4F31732D69C005B97F1 /* elgatoQuit.scpt */; };
+		1E50515822556CC300D5981B /* PeanutRemote@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */; };
+		1E50515922556CC300D5981B /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
+		1E50515B22556CC300D5981B /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E1395941F5928E800FFA4E7 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50515C22556CC300D5981B /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EE1D65B2210AF820012080F /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50515D22556CC300D5981B /* comskip in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B891CD127E90014D85B /* comskip */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50515E22556CC300D5981B /* ffmpeg in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B8A1CD127E90014D85B /* ffmpeg */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50515F22556CC300D5981B /* ccextractor in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1ECB90EF20DD35B200E3317D /* ccextractor */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516022556CC300D5981B /* mencoder in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B8B1CD127E90014D85B /* mencoder */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516222556CC300D5981B /* libargtable2.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F320DD364800E3317D /* libargtable2.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516322556CC300D5981B /* libass.9.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912E20DD364F00E3317D /* libass.9.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516422556CC300D5981B /* libavcodec.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90FC20DD364800E3317D /* libavcodec.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516522556CC300D5981B /* libavdevice.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910720DD364900E3317D /* libavdevice.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516622556CC300D5981B /* libavfilter.7.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913720DD365000E3317D /* libavfilter.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516722556CC300D5981B /* libavformat.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912720DD364E00E3317D /* libavformat.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516822556CC300D5981B /* libavresample.4.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910920DD364A00E3317D /* libavresample.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516922556CC300D5981B /* libavutil.56.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913320DD364F00E3317D /* libavutil.56.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516A22556CC300D5981B /* libbluray.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911920DD364C00E3317D /* libbluray.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516B22556CC300D5981B /* libbz2.1.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912C20DD364E00E3317D /* libbz2.1.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516C22556CC300D5981B /* libcairo.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910B20DD364A00E3317D /* libcairo.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516D22556CC300D5981B /* libcroco-0.6.3.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F020DD364700E3317D /* libcroco-0.6.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516E22556CC300D5981B /* libcrypto.1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911320DD364B00E3317D /* libcrypto.1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50516F22556CC300D5981B /* libdv.4.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912F20DD364F00E3317D /* libdv.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517022556CC300D5981B /* libexpat.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913C20DD365000E3317D /* libexpat.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517122556CC300D5981B /* libfaac.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912320DD364D00E3317D /* libfaac.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517222556CC300D5981B /* libfdk-aac.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45472210C135007714E0 /* libfdk-aac.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517322556CC300D5981B /* libffi.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910F20DD364B00E3317D /* libffi.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517422556CC300D5981B /* libfontconfig.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911B20DD364C00E3317D /* libfontconfig.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517522556CC300D5981B /* libfreetype.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90FA20DD364800E3317D /* libfreetype.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517622556CC300D5981B /* libfribidi.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912920DD364E00E3317D /* libfribidi.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517722556CC300D5981B /* libgdk_pixbuf-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90FE20DD364800E3317D /* libgdk_pixbuf-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517822556CC300D5981B /* libgio-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910D20DD364A00E3317D /* libgio-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517922556CC300D5981B /* libglib-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912A20DD364E00E3317D /* libglib-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517A22556CC300D5981B /* libgmodule-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910520DD364900E3317D /* libgmodule-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517B22556CC300D5981B /* libgmp.10.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910E20DD364A00E3317D /* libgmp.10.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517C22556CC300D5981B /* libgnutls.30.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911620DD364B00E3317D /* libgnutls.30.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517D22556CC300D5981B /* libgobject-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F820DD364800E3317D /* libgobject-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517E22556CC300D5981B /* libgraphite2.3.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913520DD365000E3317D /* libgraphite2.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50517F22556CC300D5981B /* libgthread-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F420DD364800E3317D /* libgthread-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518022556CC300D5981B /* libharfbuzz.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F920DD364800E3317D /* libharfbuzz.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518122556CC300D5981B /* libhogweed.4.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910620DD364900E3317D /* libhogweed.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518222556CC300D5981B /* libiconv.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911820DD364C00E3317D /* libiconv.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518322556CC300D5981B /* libicudata.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45412210C0AE007714E0 /* libicudata.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518422556CC300D5981B /* libicui18n.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45422210C0AE007714E0 /* libicui18n.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518522556CC300D5981B /* libicuuc.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45432210C0AF007714E0 /* libicuuc.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518622556CC300D5981B /* libidn2.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913920DD365000E3317D /* libidn2.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518722556CC300D5981B /* libintl.8.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911020DD364B00E3317D /* libintl.8.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518822556CC300D5981B /* libjpeg.9.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912020DD364D00E3317D /* libjpeg.9.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518922556CC300D5981B /* liblzma.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913D20DD365100E3317D /* liblzma.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518A22556CC300D5981B /* liblzo2.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912D20DD364F00E3317D /* liblzo2.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518B22556CC300D5981B /* libmad.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912420DD364D00E3317D /* libmad.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518C22556CC300D5981B /* libmodplug.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910220DD364900E3317D /* libmodplug.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518D22556CC300D5981B /* libmp3lame.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911120DD364B00E3317D /* libmp3lame.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518E22556CC300D5981B /* libncurses.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911E20DD364D00E3317D /* libncurses.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50518F22556CC300D5981B /* libnettle.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910820DD364A00E3317D /* libnettle.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519022556CC300D5981B /* libogg.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911520DD364B00E3317D /* libogg.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519122556CC300D5981B /* libopenjp2.7.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911C20DD364C00E3317D /* libopenjp2.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519222556CC300D5981B /* libopus.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB914220DD365100E3317D /* libopus.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519322556CC300D5981B /* libp11-kit.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F720DD364800E3317D /* libp11-kit.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519422556CC300D5981B /* libpango-1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913020DD364F00E3317D /* libpango-1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519522556CC300D5981B /* libpangocairo-1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910A20DD364A00E3317D /* libpangocairo-1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519622556CC300D5981B /* libpangoft2-1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913420DD364F00E3317D /* libpangoft2-1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519722556CC300D5981B /* libpcre.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910320DD364900E3317D /* libpcre.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519822556CC300D5981B /* libpixman-1.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90FD20DD364800E3317D /* libpixman-1.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519922556CC300D5981B /* libpng16.16.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913820DD365000E3317D /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519A22556CC300D5981B /* libpostproc.55.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913120DD364F00E3317D /* libpostproc.55.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519B22556CC300D5981B /* librsvg-2.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911D20DD364C00E3317D /* librsvg-2.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519C22556CC300D5981B /* librtmp.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913220DD364F00E3317D /* librtmp.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519D22556CC300D5981B /* libSDL2-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913E20DD365100E3317D /* libSDL2-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519E22556CC300D5981B /* libsoxr.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913620DD365000E3317D /* libsoxr.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E50519F22556CC300D5981B /* libspeex.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911A20DD364C00E3317D /* libspeex.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051A022556CC300D5981B /* libssl.1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911720DD364C00E3317D /* libssl.1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051A122556CC300D5981B /* libswresample.3.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910020DD364900E3317D /* libswresample.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051A222556CC300D5981B /* libswscale.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913A20DD365000E3317D /* libswscale.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051A322556CC300D5981B /* libtasn1.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F620DD364800E3317D /* libtasn1.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051A422556CC300D5981B /* libtheoradec.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90FB20DD364800E3317D /* libtheoradec.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051A522556CC300D5981B /* libtheoraenc.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912120DD364D00E3317D /* libtheoraenc.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051A622556CC300D5981B /* libtwolame.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911F20DD364D00E3317D /* libtwolame.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051A722556CC300D5981B /* libunistring.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911220DD364B00E3317D /* libunistring.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051A822556CC300D5981B /* libuuid.16.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913F20DD365100E3317D /* libuuid.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051A922556CC300D5981B /* libvorbis.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90FF20DD364900E3317D /* libvorbis.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051AA22556CC300D5981B /* libvorbisenc.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F120DD364800E3317D /* libvorbisenc.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051AB22556CC300D5981B /* libvpx.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912220DD364D00E3317D /* libvpx.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051AC22556CC300D5981B /* libX11-xcb.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912B20DD364E00E3317D /* libX11-xcb.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051AD22556CC300D5981B /* libX11.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB914020DD365100E3317D /* libX11.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051AE22556CC300D5981B /* libx264.152.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911420DD364B00E3317D /* libx264.152.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051AF22556CC300D5981B /* libx265.169.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E58F5992210B3D700B21C06 /* libx265.169.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051B022556CC300D5981B /* libXau.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910420DD364900E3317D /* libXau.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051B122556CC300D5981B /* libxcb-render.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913B20DD365000E3317D /* libxcb-render.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051B222556CC300D5981B /* libxcb.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912520DD364D00E3317D /* libxcb.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051B322556CC300D5981B /* libXdmcp.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F520DD364800E3317D /* libXdmcp.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051B422556CC300D5981B /* libXext.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F220DD364800E3317D /* libXext.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051B522556CC300D5981B /* libxml2.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912820DD364E00E3317D /* libxml2.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051B622556CC300D5981B /* libXrender.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912620DD364E00E3317D /* libXrender.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051B722556CC300D5981B /* libz.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910C20DD364A00E3317D /* libz.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5051C62255720A00D5981B /* container-migration.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1E5051C32255720900D5981B /* container-migration.plist */; };
+		1E5051C72255720A00D5981B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E5051C52255720A00D5981B /* Images.xcassets */; };
 		1E52C5261F2420A700389E93 /* DragDropImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E52C5251F2420A700389E93 /* DragDropImageView.m */; };
 		1E5486731FF898A800412D7B /* PFMoveApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E5486711FF898A800412D7B /* PFMoveApplication.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1E557BCB1CD801350014D85B /* comskip in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B891CD127E90014D85B /* comskip */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -243,6 +473,127 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1E50515A22556CC300D5981B /* Copy Executables */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				1E50515B22556CC300D5981B /* HandBrakeCLI in Copy Executables */,
+				1E50515C22556CC300D5981B /* tivodecode-ng in Copy Executables */,
+				1E50515D22556CC300D5981B /* comskip in Copy Executables */,
+				1E50515E22556CC300D5981B /* ffmpeg in Copy Executables */,
+				1E50515F22556CC300D5981B /* ccextractor in Copy Executables */,
+				1E50516022556CC300D5981B /* mencoder in Copy Executables */,
+			);
+			name = "Copy Executables";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1E50516122556CC300D5981B /* Copy shared libraries for executables */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = Contents/lib;
+			dstSubfolderSpec = 1;
+			files = (
+				1E50516222556CC300D5981B /* libargtable2.0.dylib in Copy shared libraries for executables */,
+				1E50516322556CC300D5981B /* libass.9.dylib in Copy shared libraries for executables */,
+				1E50516422556CC300D5981B /* libavcodec.58.dylib in Copy shared libraries for executables */,
+				1E50516522556CC300D5981B /* libavdevice.58.dylib in Copy shared libraries for executables */,
+				1E50516622556CC300D5981B /* libavfilter.7.dylib in Copy shared libraries for executables */,
+				1E50516722556CC300D5981B /* libavformat.58.dylib in Copy shared libraries for executables */,
+				1E50516822556CC300D5981B /* libavresample.4.dylib in Copy shared libraries for executables */,
+				1E50516922556CC300D5981B /* libavutil.56.dylib in Copy shared libraries for executables */,
+				1E50516A22556CC300D5981B /* libbluray.2.dylib in Copy shared libraries for executables */,
+				1E50516B22556CC300D5981B /* libbz2.1.0.dylib in Copy shared libraries for executables */,
+				1E50516C22556CC300D5981B /* libcairo.2.dylib in Copy shared libraries for executables */,
+				1E50516D22556CC300D5981B /* libcroco-0.6.3.dylib in Copy shared libraries for executables */,
+				1E50516E22556CC300D5981B /* libcrypto.1.0.0.dylib in Copy shared libraries for executables */,
+				1E50516F22556CC300D5981B /* libdv.4.dylib in Copy shared libraries for executables */,
+				1E50517022556CC300D5981B /* libexpat.1.dylib in Copy shared libraries for executables */,
+				1E50517122556CC300D5981B /* libfaac.0.dylib in Copy shared libraries for executables */,
+				1E50517222556CC300D5981B /* libfdk-aac.2.dylib in Copy shared libraries for executables */,
+				1E50517322556CC300D5981B /* libffi.6.dylib in Copy shared libraries for executables */,
+				1E50517422556CC300D5981B /* libfontconfig.1.dylib in Copy shared libraries for executables */,
+				1E50517522556CC300D5981B /* libfreetype.6.dylib in Copy shared libraries for executables */,
+				1E50517622556CC300D5981B /* libfribidi.0.dylib in Copy shared libraries for executables */,
+				1E50517722556CC300D5981B /* libgdk_pixbuf-2.0.0.dylib in Copy shared libraries for executables */,
+				1E50517822556CC300D5981B /* libgio-2.0.0.dylib in Copy shared libraries for executables */,
+				1E50517922556CC300D5981B /* libglib-2.0.0.dylib in Copy shared libraries for executables */,
+				1E50517A22556CC300D5981B /* libgmodule-2.0.0.dylib in Copy shared libraries for executables */,
+				1E50517B22556CC300D5981B /* libgmp.10.dylib in Copy shared libraries for executables */,
+				1E50517C22556CC300D5981B /* libgnutls.30.dylib in Copy shared libraries for executables */,
+				1E50517D22556CC300D5981B /* libgobject-2.0.0.dylib in Copy shared libraries for executables */,
+				1E50517E22556CC300D5981B /* libgraphite2.3.dylib in Copy shared libraries for executables */,
+				1E50517F22556CC300D5981B /* libgthread-2.0.0.dylib in Copy shared libraries for executables */,
+				1E50518022556CC300D5981B /* libharfbuzz.0.dylib in Copy shared libraries for executables */,
+				1E50518122556CC300D5981B /* libhogweed.4.dylib in Copy shared libraries for executables */,
+				1E50518222556CC300D5981B /* libiconv.2.dylib in Copy shared libraries for executables */,
+				1E50518322556CC300D5981B /* libicudata.58.dylib in Copy shared libraries for executables */,
+				1E50518422556CC300D5981B /* libicui18n.58.dylib in Copy shared libraries for executables */,
+				1E50518522556CC300D5981B /* libicuuc.58.dylib in Copy shared libraries for executables */,
+				1E50518622556CC300D5981B /* libidn2.0.dylib in Copy shared libraries for executables */,
+				1E50518722556CC300D5981B /* libintl.8.dylib in Copy shared libraries for executables */,
+				1E50518822556CC300D5981B /* libjpeg.9.dylib in Copy shared libraries for executables */,
+				1E50518922556CC300D5981B /* liblzma.5.dylib in Copy shared libraries for executables */,
+				1E50518A22556CC300D5981B /* liblzo2.2.dylib in Copy shared libraries for executables */,
+				1E50518B22556CC300D5981B /* libmad.0.dylib in Copy shared libraries for executables */,
+				1E50518C22556CC300D5981B /* libmodplug.1.dylib in Copy shared libraries for executables */,
+				1E50518D22556CC300D5981B /* libmp3lame.0.dylib in Copy shared libraries for executables */,
+				1E50518E22556CC300D5981B /* libncurses.6.dylib in Copy shared libraries for executables */,
+				1E50518F22556CC300D5981B /* libnettle.6.dylib in Copy shared libraries for executables */,
+				1E50519022556CC300D5981B /* libogg.0.dylib in Copy shared libraries for executables */,
+				1E50519122556CC300D5981B /* libopenjp2.7.dylib in Copy shared libraries for executables */,
+				1E50519222556CC300D5981B /* libopus.0.dylib in Copy shared libraries for executables */,
+				1E50519322556CC300D5981B /* libp11-kit.0.dylib in Copy shared libraries for executables */,
+				1E50519422556CC300D5981B /* libpango-1.0.0.dylib in Copy shared libraries for executables */,
+				1E50519522556CC300D5981B /* libpangocairo-1.0.0.dylib in Copy shared libraries for executables */,
+				1E50519622556CC300D5981B /* libpangoft2-1.0.0.dylib in Copy shared libraries for executables */,
+				1E50519722556CC300D5981B /* libpcre.1.dylib in Copy shared libraries for executables */,
+				1E50519822556CC300D5981B /* libpixman-1.0.dylib in Copy shared libraries for executables */,
+				1E50519922556CC300D5981B /* libpng16.16.dylib in Copy shared libraries for executables */,
+				1E50519A22556CC300D5981B /* libpostproc.55.dylib in Copy shared libraries for executables */,
+				1E50519B22556CC300D5981B /* librsvg-2.2.dylib in Copy shared libraries for executables */,
+				1E50519C22556CC300D5981B /* librtmp.1.dylib in Copy shared libraries for executables */,
+				1E50519D22556CC300D5981B /* libSDL2-2.0.0.dylib in Copy shared libraries for executables */,
+				1E50519E22556CC300D5981B /* libsoxr.0.dylib in Copy shared libraries for executables */,
+				1E50519F22556CC300D5981B /* libspeex.1.dylib in Copy shared libraries for executables */,
+				1E5051A022556CC300D5981B /* libssl.1.0.0.dylib in Copy shared libraries for executables */,
+				1E5051A122556CC300D5981B /* libswresample.3.dylib in Copy shared libraries for executables */,
+				1E5051A222556CC300D5981B /* libswscale.5.dylib in Copy shared libraries for executables */,
+				1E5051A322556CC300D5981B /* libtasn1.6.dylib in Copy shared libraries for executables */,
+				1E5051A422556CC300D5981B /* libtheoradec.1.dylib in Copy shared libraries for executables */,
+				1E5051A522556CC300D5981B /* libtheoraenc.1.dylib in Copy shared libraries for executables */,
+				1E5051A622556CC300D5981B /* libtwolame.0.dylib in Copy shared libraries for executables */,
+				1E5051A722556CC300D5981B /* libunistring.2.dylib in Copy shared libraries for executables */,
+				1E5051A822556CC300D5981B /* libuuid.16.dylib in Copy shared libraries for executables */,
+				1E5051A922556CC300D5981B /* libvorbis.0.dylib in Copy shared libraries for executables */,
+				1E5051AA22556CC300D5981B /* libvorbisenc.2.dylib in Copy shared libraries for executables */,
+				1E5051AB22556CC300D5981B /* libvpx.5.dylib in Copy shared libraries for executables */,
+				1E5051AC22556CC300D5981B /* libX11-xcb.1.dylib in Copy shared libraries for executables */,
+				1E5051AD22556CC300D5981B /* libX11.6.dylib in Copy shared libraries for executables */,
+				1E5051AE22556CC300D5981B /* libx264.152.dylib in Copy shared libraries for executables */,
+				1E5051AF22556CC300D5981B /* libx265.169.dylib in Copy shared libraries for executables */,
+				1E5051B022556CC300D5981B /* libXau.6.dylib in Copy shared libraries for executables */,
+				1E5051B122556CC300D5981B /* libxcb-render.0.dylib in Copy shared libraries for executables */,
+				1E5051B222556CC300D5981B /* libxcb.1.dylib in Copy shared libraries for executables */,
+				1E5051B322556CC300D5981B /* libXdmcp.6.dylib in Copy shared libraries for executables */,
+				1E5051B422556CC300D5981B /* libXext.6.dylib in Copy shared libraries for executables */,
+				1E5051B522556CC300D5981B /* libxml2.2.dylib in Copy shared libraries for executables */,
+				1E5051B622556CC300D5981B /* libXrender.1.dylib in Copy shared libraries for executables */,
+				1E5051B722556CC300D5981B /* libz.1.dylib in Copy shared libraries for executables */,
+			);
+			name = "Copy shared libraries for executables";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1E5051B822556CC300D5981B /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1E557BCE1CD8033F0014D85B /* Copy shared libraries for executables */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 12;
@@ -403,6 +754,12 @@
 		1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTIsStringEmpty.m; sourceTree = "<group>"; };
 		1E4A38461A37C0F4001D84A7 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
 		1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionList.m; sourceTree = "<group>"; };
+		1E5051C022556CC300D5981B /* cTiVo MAS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "cTiVo MAS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E5051C122556CC400D5981B /* cTiVo MAS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTiVo MAS-Info.plist"; path = "/Users/hugh/Documents/Develop/cTiVoGithub/cTiVo/cTiVo MAS-Info.plist"; sourceTree = "<absolute>"; };
+		1E5051C22255720900D5981B /* binary.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = binary.entitlements; sourceTree = "<group>"; };
+		1E5051C32255720900D5981B /* container-migration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "container-migration.plist"; sourceTree = "<group>"; };
+		1E5051C42255720900D5981B /* cTiVo MAS.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "cTiVo MAS.entitlements"; sourceTree = "<group>"; };
+		1E5051C52255720A00D5981B /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		1E52C5241F2420A700389E93 /* DragDropImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DragDropImageView.h; sourceTree = "<group>"; };
 		1E52C5251F2420A700389E93 /* DragDropImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DragDropImageView.m; sourceTree = "<group>"; };
 		1E5486711FF898A800412D7B /* PFMoveApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PFMoveApplication.m; sourceTree = "<group>"; };
@@ -448,7 +805,7 @@
 		1E6F45432210C0AF007714E0 /* libicuuc.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicuuc.58.dylib; sourceTree = "<group>"; };
 		1E6F45472210C135007714E0 /* libfdk-aac.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libfdk-aac.2.dylib"; sourceTree = "<group>"; };
 		1E6F45492210C6E0007714E0 /* cTiVoBinariesBuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = cTiVoBinariesBuild.sh; path = cTiVo/cTiVoBinariesBuild.sh; sourceTree = SOURCE_ROOT; };
-		1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTiVo-10.7-Info.plist"; path = "../cTiVo-10.7-Info.plist"; sourceTree = "<group>"; };
+		1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "cTiVo-10.7-Info.plist"; sourceTree = "<group>"; };
 		1E791BD21697C59300E47E84 /* MTSubscription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscription.h; sourceTree = "<group>"; };
 		1E791BD31697C59300E47E84 /* MTSubscription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTSubscription.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		1E799EF02182D5360073C450 /* CommercialHelpFileDark.rtfd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; path = CommercialHelpFileDark.rtfd; sourceTree = "<group>"; };
@@ -699,6 +1056,24 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1E50510C22556CC300D5981B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E50510D22556CC300D5981B /* libz.tbd in Frameworks */,
+				1E50510E22556CC300D5981B /* libc++.tbd in Frameworks */,
+				1E50510F22556CC300D5981B /* Security.framework in Frameworks */,
+				1E50511022556CC300D5981B /* Quartz.framework in Frameworks */,
+				1E50511122556CC300D5981B /* IOKit.framework in Frameworks */,
+				1E50511222556CC300D5981B /* SystemConfiguration.framework in Frameworks */,
+				1E50511322556CC300D5981B /* ScriptingBridge.framework in Frameworks */,
+				1E50511422556CC300D5981B /* Cocoa.framework in Frameworks */,
+				1E50511622556CC300D5981B /* libmp4v2.a in Frameworks */,
+				1E50511722556CC300D5981B /* Crashlytics.framework in Frameworks */,
+				1E50511822556CC300D5981B /* Fabric.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D2D60B9A16766EFD00CE32DE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1050,6 +1425,7 @@
 			isa = PBXGroup;
 			children = (
 				D2D60B9D16766EFD00CE32DE /* cTiVo.app */,
+				1E5051C022556CC300D5981B /* cTiVo MAS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1088,7 +1464,6 @@
 		D2D60BA716766EFD00CE32DE /* cTiVo */ = {
 			isa = PBXGroup;
 			children = (
-				1EFA8D4D211A659D00B4505D /* cTiVo.entitlements */,
 				D297AC121730296C0036125A /* mp4v2 */,
 				D2D60BB616766EFD00CE32DE /* MainMenu.xib */,
 				D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */,
@@ -1117,7 +1492,13 @@
 		D2D60BA816766EFD00CE32DE /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				1EFA8D4D211A659D00B4505D /* cTiVo.entitlements */,
+				1E5051C22255720900D5981B /* binary.entitlements */,
+				1E5051C32255720900D5981B /* container-migration.plist */,
+				1E5051C42255720900D5981B /* cTiVo MAS.entitlements */,
+				1E5051C52255720A00D5981B /* Images.xcassets */,
 				D2D60BA916766EFD00CE32DE /* cTiVo-Info.plist */,
+				1E5051C122556CC400D5981B /* cTiVo MAS-Info.plist */,
 				1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */,
 				D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */,
 				D2D60BAD16766EFD00CE32DE /* main.m */,
@@ -1251,6 +1632,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1E5050CA22556CC300D5981B /* cTiVo MAS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E5051BD22556CC300D5981B /* Build configuration list for PBXNativeTarget "cTiVo MAS" */;
+			buildPhases = (
+				1E5050CB22556CC300D5981B /* Sources */,
+				1E50510C22556CC300D5981B /* Frameworks */,
+				1E50511922556CC300D5981B /* Resources */,
+				1E50515A22556CC300D5981B /* Copy Executables */,
+				1E50516122556CC300D5981B /* Copy shared libraries for executables */,
+				1E5051B822556CC300D5981B /* CopyFiles */,
+				1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */,
+				1E5051BB22556CC300D5981B /* Run Script */,
+				1E5051BC22556CC300D5981B /* Sign Executables */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "cTiVo MAS";
+			productName = cTiVo;
+			productReference = 1E5051C022556CC300D5981B /* cTiVo MAS.app */;
+			productType = "com.apple.product-type.application";
+		};
 		D2D60B9C16766EFD00CE32DE /* cTiVo */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
@@ -1293,6 +1697,9 @@
 							com.apple.Keychain = {
 								enabled = 0;
 							};
+							com.apple.Sandbox = {
+								enabled = 0;
+							};
 						};
 					};
 				};
@@ -1311,11 +1718,83 @@
 			projectRoot = "";
 			targets = (
 				D2D60B9C16766EFD00CE32DE /* cTiVo */,
+				1E5050CA22556CC300D5981B /* cTiVo MAS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1E50511922556CC300D5981B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E50511A22556CC300D5981B /* CommercialHelpFileDark.rtfd in Resources */,
+				1E5051C72255720A00D5981B /* Images.xcassets in Resources */,
+				1E50511B22556CC300D5981B /* tivo-libre.jar in Resources */,
+				1E50511C22556CC300D5981B /* ffmpeg_edl_ac3.sh in Resources */,
+				1E50511D22556CC300D5981B /* InfoPlist.strings in Resources */,
+				1E50511E22556CC300D5981B /* suggestion-recording@2x.png in Resources */,
+				1E50511F22556CC300D5981B /* skipModeSlash@2x.png in Resources */,
+				1E50512022556CC300D5981B /* Credits.rtf in Resources */,
+				1E50512122556CC300D5981B /* MainMenu.xib in Resources */,
+				1E50512222556CC300D5981B /* formats.plist in Resources */,
+				1E50512322556CC300D5981B /* save-until-i-delete-recording@2x.png in Resources */,
+				1E50512422556CC300D5981B /* CommercialHelpFile.rtfd in Resources */,
+				1E50512522556CC300D5981B /* MTMainWindowController.xib in Resources */,
+				1E50512722556CC300D5981B /* MTOpenPanelDefaultView.xib in Resources */,
+				1E50512822556CC300D5981B /* MTFormatEditorController.xib in Resources */,
+				1E50512922556CC300D5981B /* MTHelpViewController.xib in Resources */,
+				1E50512A22556CC300D5981B /* EncoderHelpText.rtf in Resources */,
+				1E50512B22556CC300D5981B /* checkImage2.png in Resources */,
+				1E50512C22556CC300D5981B /* catToFile in Resources */,
+				1E50512E22556CC300D5981B /* expired-recording@2x.png in Resources */,
+				1E50512F22556CC300D5981B /* MAKHelpFile.rtf in Resources */,
+				1E50513022556CC300D5981B /* skipModeInverted@2x.png in Resources */,
+				1E50513122556CC300D5981B /* MTManualTiVoEditorController.xib in Resources */,
+				1E50513222556CC300D5981B /* MTPreferencesWindowController.xib in Resources */,
+				1E50513322556CC300D5981B /* MTPreferencesViewController.xib in Resources */,
+				1E50513422556CC300D5981B /* MTChannelEditorController.xib in Resources */,
+				1E50513522556CC300D5981B /* MTAdvPreferencesViewController.xib in Resources */,
+				1E50513622556CC300D5981B /* comskip.ini in Resources */,
+				1E50513722556CC300D5981B /* ComSkipHelpText.rtf in Resources */,
+				1E50513822556CC300D5981B /* deleted@2x.png in Resources */,
+				1E50513922556CC300D5981B /* elgatoScript.pl in Resources */,
+				1E50513A22556CC300D5981B /* cdata.p12 in Resources */,
+				1E50513B22556CC300D5981B /* elgatoLaunch.scpt in Resources */,
+				1E50513C22556CC300D5981B /* tivo.png in Resources */,
+				1E50513D22556CC300D5981B /* elgatoProgress.scpt in Resources */,
+				1E50513E22556CC300D5981B /* pytivo_txt.xslt in Resources */,
+				1E50513F22556CC300D5981B /* expires-soon-recording@2x.png in Resources */,
+				1E50514022556CC300D5981B /* copyright.png in Resources */,
+				1E50514122556CC300D5981B /* skipModeComskip@2x.png in Resources */,
+				1E50514222556CC300D5981B /* FindTiVoHelpFile.rtf in Resources */,
+				1E50514322556CC300D5981B /* copyright@2x.png in Resources */,
+				1E50514422556CC300D5981B /* skipModeQuestion@2x.png in Resources */,
+				1E50514522556CC300D5981B /* recent-recording@2x.png in Resources */,
+				1E50514622556CC300D5981B /* skipMode@2x.png in Resources */,
+				1E50514722556CC300D5981B /* expired-recording.png in Resources */,
+				1E50514822556CC300D5981B /* tivo@2x.png in Resources */,
+				1E50514922556CC300D5981B /* expires-soon-recording.png in Resources */,
+				1E50514A22556CC300D5981B /* save-until-i-delete-recording.png in Resources */,
+				1E50514B22556CC300D5981B /* status-unknown@2x.png in Resources */,
+				1E50514C22556CC300D5981B /* suggestion-recording.png in Resources */,
+				1E50514D22556CC300D5981B /* MTRemoteWindowController.xib in Resources */,
+				1E50514E22556CC300D5981B /* status-unknown.png in Resources */,
+				1E50514F22556CC300D5981B /* in-progress-recording@2x.png in Resources */,
+				1E50515022556CC300D5981B /* deleted.png in Resources */,
+				1E50515122556CC300D5981B /* in-progress-recording.png in Resources */,
+				1E50515222556CC300D5981B /* recent-recording.png in Resources */,
+				1E5051C62255720A00D5981B /* container-migration.plist in Resources */,
+				1E50515322556CC300D5981B /* checkImage2@2x.png in Resources */,
+				1E50515422556CC300D5981B /* cTiVo.help in Resources */,
+				1E50515522556CC300D5981B /* cTiVo.icns in Resources */,
+				1E50515622556CC300D5981B /* MTMainWindowDrawer.xib in Resources */,
+				1E50515722556CC300D5981B /* elgatoQuit.scpt in Resources */,
+				1E50515822556CC300D5981B /* PeanutRemote@2x.png in Resources */,
+				1E50515922556CC300D5981B /* cTiVo.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D2D60B9B16766EFD00CE32DE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1332,14 +1811,12 @@
 				1E964CA31882768A00C19046 /* save-until-i-delete-recording@2x.png in Resources */,
 				1E02BDE12056E9BB000B9F56 /* CommercialHelpFile.rtfd in Resources */,
 				D279D3EC167A32FA007F0677 /* MTMainWindowController.xib in Resources */,
-				D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */,
 				1E152981201006B0000D1705 /* MTOpenPanelDefaultView.xib in Resources */,
 				D2A7269D16A25DEB00C58C5F /* MTFormatEditorController.xib in Resources */,
 				D219D5E916A4F88D00C79962 /* MTHelpViewController.xib in Resources */,
 				D219D5F416A503C100C79962 /* EncoderHelpText.rtf in Resources */,
 				1E964CA7188313ED00C19046 /* checkImage2.png in Resources */,
 				D24A8D0E16A5F3DC00DFF890 /* catToFile in Resources */,
-				1EFE66FF1BE967460083386C /* sparklecast.xml in Resources */,
 				1E964C9E1882768A00C19046 /* expired-recording@2x.png in Resources */,
 				D2574E8617FE30EC00BBAB5C /* MAKHelpFile.rtf in Resources */,
 				1E7A4CE820422E350081884D /* skipModeInverted@2x.png in Resources */,
@@ -1384,6 +1861,8 @@
 				D2B4B4F41732D69C005B97F1 /* elgatoQuit.scpt in Resources */,
 				1E8296CF202A0E8600AA4C10 /* PeanutRemote@2x.png in Resources */,
 				1E9A10EF1757200000863C44 /* cTiVo.png in Resources */,
+				D2995CAB168D08B300B960B9 /* cTiVo_sparkle_pub.pem in Resources */,
+				1EFE66FF1BE967460083386C /* sparklecast.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1403,6 +1882,52 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ]; then\n  cp $SRCROOT/cTiVo/Crashlytics.sh $UNLOCALIZED_RESOURCES_FOLDER_PATH/\n  $SRCROOT/cTiVo/Crashlytics.sh\nfi\n";
+		};
+		1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Record Bundle Number as GIT commit count";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "git=`sh /etc/profile; which git`\nappBuild=`\"$git\" rev-list HEAD --count | awk '{print $1 + 50}'`\nif [ $CONFIGURATION = \"Debug\" ]; then\nbranchName=`\"$git\" rev-parse --abbrev-ref HEAD`\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild-$branchName branch\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild-$branchName branch\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist\"\nelse\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist\"\nfi\necho \"Incremented the build number ${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
+		};
+		1E5051BB22556CC300D5981B /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ]; then\n  cp $SRCROOT/cTiVo/Crashlytics.sh $UNLOCALIZED_RESOURCES_FOLDER_PATH/\n  $SRCROOT/cTiVo/Crashlytics.sh\nfi\n";
+		};
+		1E5051BC22556CC300D5981B /* Sign Executables */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Sign Executables";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${EXECUTABLE_FOLDER_PATH}\"\nENTITLEMENT=\"$SRCROOT/cTiVo/binary.entitlements\"\n# By default, use the configured code signing identity for the project/target\nIDENTITY=\"${CODE_SIGN_IDENTITY}\"\necho $IDENTITY\ncat \"$ENTITLEMENT\"\n/usr/bin/codesign --force --sign \"3rd Party Mac Developer\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/HandBrakeCLI\"\n/usr/bin/codesign --force --sign \"3rd Party Mac Developer\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/tivodecode-ng\"\n/usr/bin/codesign --force --sign \"3rd Party Mac Developer\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/comskip\"\n/usr/bin/codesign --force --sign \"3rd Party Mac Developer\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/ffmpeg\"\n/usr/bin/codesign --force --sign \"3rd Party Mac Developer\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/ccextractor\"\n/usr/bin/codesign --force --sign \"3rd Party Mac Developer\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/mencoder\"\n";
 		};
 		D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1435,6 +1960,76 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1E5050CB22556CC300D5981B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E5050CC22556CC300D5981B /* DDLog.m in Sources */,
+				1E5050CD22556CC300D5981B /* MTProgressCell.m in Sources */,
+				1E5050CE22556CC300D5981B /* main.m in Sources */,
+				1E5050CF22556CC300D5981B /* MTChannelPopUpButton.m in Sources */,
+				1E5050D022556CC300D5981B /* MTRemoteWindowController.m in Sources */,
+				1E5050D122556CC300D5981B /* DDOSLogger.m in Sources */,
+				1E5050D222556CC300D5981B /* MTAppDelegate.m in Sources */,
+				1E5050D322556CC300D5981B /* MTTVDB.m in Sources */,
+				1E5050D422556CC300D5981B /* MTTiVoManager.m in Sources */,
+				1E5050D522556CC300D5981B /* MTDownloadTableView.m in Sources */,
+				1E5050D622556CC300D5981B /* MTProgramTableView.m in Sources */,
+				1E5050D722556CC300D5981B /* MTProgressindicator.m in Sources */,
+				1E5050D822556CC300D5981B /* MTMainWindowController.m in Sources */,
+				1E5050D922556CC300D5981B /* MTHideTempFolder.m in Sources */,
+				1E5050DA22556CC300D5981B /* MTTivoRPC.m in Sources */,
+				1E5050DB22556CC300D5981B /* MTTiVoShow.m in Sources */,
+				1E5050DC22556CC300D5981B /* MTDownloadCheckTableCell.m in Sources */,
+				1E5050DD22556CC300D5981B /* MTiTunes.m in Sources */,
+				1E5050DE22556CC300D5981B /* NSTask+RunTask.m in Sources */,
+				1E5050DF22556CC300D5981B /* NSDate+Tomorrow.m in Sources */,
+				1E5050E022556CC300D5981B /* MTCheckBox.m in Sources */,
+				1E5050E122556CC300D5981B /* MTSubscriptionTableView.m in Sources */,
+				1E5050E222556CC300D5981B /* MTFormatPopUpButton.m in Sources */,
+				1E5050E322556CC300D5981B /* MTFormatPopUpTableCellView.m in Sources */,
+				1E5050E422556CC300D5981B /* MTTiVo.m in Sources */,
+				1E5050E522556CC300D5981B /* MTSubscription.m in Sources */,
+				1E5050E622556CC300D5981B /* MTSubscriptionList.m in Sources */,
+				1E5050E722556CC300D5981B /* MTFormat.m in Sources */,
+				1E5050E822556CC300D5981B /* MTFormatEditorController.m in Sources */,
+				1E5050E922556CC300D5981B /* MTHelpViewController.m in Sources */,
+				1E5050EA22556CC300D5981B /* MTNetService.m in Sources */,
+				1E5050EB22556CC300D5981B /* MTManualTiVoEditorController.m in Sources */,
+				1E5050EC22556CC300D5981B /* MTPreferencesWindowController.m in Sources */,
+				1E5050ED22556CC300D5981B /* MTTabViewItem.m in Sources */,
+				1E5050EE22556CC300D5981B /* MTPreferencesViewController.m in Sources */,
+				1E5050EF22556CC300D5981B /* MTAdvPreferencesViewController.m in Sources */,
+				1E5050F022556CC300D5981B /* MTDownload.m in Sources */,
+				1E5050F122556CC300D5981B /* MTShowFolder.m in Sources */,
+				1E5050F222556CC300D5981B /* NSString+RFC3339Date.m in Sources */,
+				1E5050F322556CC300D5981B /* NSNotificationCenter+Threads.m in Sources */,
+				1E5050F422556CC300D5981B /* NSURL+MTURLExtensions.m in Sources */,
+				1E5050F522556CC300D5981B /* MTIsStringEmpty.m in Sources */,
+				1E5050F622556CC300D5981B /* NSArray+Map.m in Sources */,
+				1E5050F722556CC300D5981B /* MTTextFieldNoInteraction.m in Sources */,
+				1E5050F822556CC300D5981B /* MTSrt.m in Sources */,
+				1E5050FA22556CC300D5981B /* MTChannelEditorController.m in Sources */,
+				1E5050FB22556CC300D5981B /* MTEdl.m in Sources */,
+				1E5050FC22556CC300D5981B /* NSString+HTML.m in Sources */,
+				1E5050FD22556CC300D5981B /* MTGCDTimer.m in Sources */,
+				1E5050FE22556CC300D5981B /* MTChannelPopUpTableCellView.m in Sources */,
+				1E5050FF22556CC300D5981B /* GTMNSString+HTML.m in Sources */,
+				1E50510022556CC300D5981B /* MTTask.m in Sources */,
+				1E50510122556CC300D5981B /* CrashlyticsLogger.m in Sources */,
+				1E50510222556CC300D5981B /* MTTaskChain.m in Sources */,
+				1E50510322556CC300D5981B /* DDFileLogger.m in Sources */,
+				1E50510422556CC300D5981B /* MTLogFormatter.m in Sources */,
+				1E50510522556CC300D5981B /* DragDropImageView.m in Sources */,
+				1E50510622556CC300D5981B /* MTLog.m in Sources */,
+				1E50510722556CC300D5981B /* MTTiVoPopUpButton.m in Sources */,
+				1E50510822556CC300D5981B /* MTTiVoPopUpTableCellView.m in Sources */,
+				1E50510922556CC300D5981B /* MTWeakTimer.m in Sources */,
+				1E50510A22556CC300D5981B /* MTRPCData.m in Sources */,
+				1E50510B22556CC300D5981B /* NSString+Helpers.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D2D60B9916766EFD00CE32DE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1484,7 +2079,6 @@
 				1E3C43C01D79EA1100367866 /* NSArray+Map.m in Sources */,
 				1E09DD422099449D0010CAB4 /* MTTextFieldNoInteraction.m in Sources */,
 				D2001C261704F93F00B75D9C /* MTSrt.m in Sources */,
-				1E5486731FF898A800412D7B /* PFMoveApplication.m in Sources */,
 				1ECD9D411C8265D600FBC78D /* MTChannelEditorController.m in Sources */,
 				D2001C281704F93F00B75D9C /* MTEdl.m in Sources */,
 				D291436E1713467A00CE3202 /* NSString+HTML.m in Sources */,
@@ -1503,6 +2097,7 @@
 				1EE3AB63201589E500F36731 /* MTWeakTimer.m in Sources */,
 				1E56038F1F45103400454157 /* MTRPCData.m in Sources */,
 				D295CE84175A6AE500D010B8 /* NSString+Helpers.m in Sources */,
+				1E5486731FF898A800412D7B /* PFMoveApplication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1536,6 +2131,104 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		1E5051BE22556CC300D5981B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "cTiVo/cTiVo MAS.entitlements";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = E8XXXD4S77;
+				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/cTiVo",
+					"$(SRCROOT)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/cTiVo",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					MAC_APP_STORE,
+					SANDBOX,
+				);
+				GCC_WARN_UNDECLARED_SELECTOR = NO;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
+				INFOPLIST_FILE = "$(SRCROOT)/cTiVo/cTiVo-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/cTiVo/cTiVoBinaries/lib",
+					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
+					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		1E5051BF22556CC300D5981B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "cTiVo/cTiVo MAS.entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = E8XXXD4S77;
+				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/cTiVo",
+					"$(SRCROOT)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/cTiVo",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					MAC_APP_STORE,
+					SANDBOX,
+				);
+				GCC_WARN_UNDECLARED_SELECTOR = NO;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
+				INFOPLIST_FILE = "$(SRCROOT)/cTiVo/cTiVo-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/cTiVo/cTiVoBinaries/lib",
+					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
+					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				"OTHER_LDFLAGS[arch=*]" = (
+					"-framework",
+					Crashlytics,
+					"-framework",
+					Fabric,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 		D2D60BB916766EFD00CE32DE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1562,6 +2255,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1584,6 +2278,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREPROCESS = YES;
+				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1633,6 +2330,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_MULTIPLE_DEFINITION_TYPES_FOR_SELECTOR = NO;
@@ -1641,6 +2339,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREPROCESS = YES;
+				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
@@ -1678,7 +2379,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
-				GCC_WARN_UNDECLARED_SELECTOR = NO;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
@@ -1719,7 +2420,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "cTiVo/cTiVo-Prefix.pch";
-				GCC_WARN_UNDECLARED_SELECTOR = NO;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
@@ -1747,6 +2448,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1E5051BD22556CC300D5981B /* Build configuration list for PBXNativeTarget "cTiVo MAS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E5051BE22556CC300D5981B /* Debug */,
+				1E5051BF22556CC300D5981B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D2D60B9716766EFD00CE32DE /* Build configuration list for PBXProject "cTiVo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

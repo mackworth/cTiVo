@@ -12,3 +12,6 @@
 
 @end
 
+@interface MTHideHomeFolder : NSValueTransformer
+
+@end

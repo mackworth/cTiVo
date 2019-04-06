@@ -95,8 +95,10 @@ __DDLOGHERE__
 			_lastLoadedTivoTimes = [NSMutableDictionary new];
 		}
        [self initialFormatSetup];
+#ifndef SANDBOX
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
         DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
+#endif
        [self restoreManualEpisodeInfo];
 
 		self.numEncoders = 0;
@@ -105,7 +107,6 @@ __DDLOGHERE__
 
 		_processingPaused = @(NO);
 		[self loadUserNotifications];
-        [self setupMetadataQuery];
 		[self updateSkipModeToChannels]; //update older skipmodes
  		loadingManualTiVos = NO;
 	}
@@ -159,20 +160,26 @@ __DDLOGHERE__
     DDLogVerbose(@"defaultFormat %@", formatName);
 }
 
--(void) setupMetadataQuery {
+-(void) launchMetadataQuery {
+	DDLogDetail(@"Launching Metadata search");
+	if (cTiVoQuery) {
+		[cTiVoQuery stopQuery];
+	} else {
     //Set up query for existing downloads using
-    cTiVoQuery = [[NSMetadataQuery alloc] init];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidUpdateNotification object:cTiVoQuery];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidFinishGatheringNotification object:cTiVoQuery];
-    NSPredicate *mdqueryPredicate = [NSPredicate predicateWithFormat:@"kMDItemFinderComment ==[c] '" kMTSpotlightKeyword @"'"];
-    [cTiVoQuery setPredicate:mdqueryPredicate];
-    [cTiVoQuery setSearchScopes:@[]];
-    [cTiVoQuery setNotificationBatchingInterval:2.0];
+		cTiVoQuery = [[NSMetadataQuery alloc] init];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidUpdateNotification object:cTiVoQuery];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(metadataQueryHandler:) name:NSMetadataQueryDidFinishGatheringNotification object:cTiVoQuery];
+		NSPredicate *mdqueryPredicate = [NSPredicate predicateWithFormat:@"kMDItemFinderComment ==[c] '" kMTSpotlightKeyword @"'"];
+		[cTiVoQuery setPredicate:mdqueryPredicate];
+		[cTiVoQuery setSearchScopes:@[]];
+		[cTiVoQuery setNotificationBatchingInterval:2.0];
+    }
     [cTiVoQuery startQuery];
 }
 
 -(void)metadataQueryHandler:(id)sender
 {
+	[cTiVoQuery disableUpdates];
 	DDLogDetail(@"Got Metadata Result with count %ld",[cTiVoQuery resultCount]);
 	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
 	for (NSUInteger i =0; i < [cTiVoQuery resultCount]; i++) {
@@ -191,6 +198,7 @@ __DDLOGHERE__
 			}
 		}
 	}
+	[cTiVoQuery enableUpdates];
 	self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
 	DDLogVerbose(@"showsOnDisk = %@",self.showsOnDisk);
@@ -1884,7 +1892,8 @@ __DDLOGHERE__
 }
 
 -(void) setDownloadDirectory: (NSString *) newDir {
-	[[NSUserDefaults standardUserDefaults] setObject:newDir forKey: kMTDownloadDirectory];
+	NSString * shortDir = [newDir stringByAbbreviatingWithTildeInPath];
+	[[NSUserDefaults standardUserDefaults] setObject:shortDir forKey: kMTDownloadDirectory];
 }
 
 -(NSString *)downloadDirectory {

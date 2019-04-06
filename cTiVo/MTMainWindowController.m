@@ -77,6 +77,7 @@
 @property (weak, nonatomic, readonly) MTTiVoManager *myTiVoManager;
 @property (nonatomic, weak) NSMenuItem *showInFinderMenuItem, *playVideoMenuItem;
 @property (nonatomic, strong) IBOutlet NSView *cancelQuitView;
+@property (nonatomic, weak) IBOutlet NSImageView * icon;
 
 -(IBAction)selectFormat:(id)sender;
 -(IBAction)subscribe:(id) sender;
@@ -125,7 +126,9 @@ __DDLOGHERE__
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     
     [self.window.contentView insertVibrancyView];
- 
+#ifdef MAC_APP_STORE
+	self.icon.image = [NSApp applicationIconImage];
+#endif
     [[NSBundle mainBundle] loadNibNamed:@"MTMainWindowDrawer" owner:self topLevelObjects:nil];
 	showDetailDrawer.parentWindow = self.window;
 	

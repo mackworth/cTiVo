@@ -95,10 +95,12 @@ typedef NS_ENUM(NSUInteger, MTTaskFlowType) {
 //*mpgFilePath,   //For reading decoded .mpg from a prev run (not implemented; reuse decryptedFilePath?)
 *bufferFilePath,  //downloaded show prior to decryption; .tivo if complete, .bin if not (due to memory buffer usage)
 *decryptedFilePath, //show after decryption; .mpg
-*encodeFilePath, //show after encoding (e.g. MP4)
+*encodeFilePath, //ultimate destination for show after encoding (e.g. MP4)
+*tempEncodeFilePath, //same in temp folder before final xfer due to sandbox problem.(No difference in non-sandbox)
 *commercialFilePath,  //.edl after commercial processing
 *nameLockFilePath, //.lck to ensure we don't save to same file name twice
-*captionFilePath; //.srt after caption processing
+*captionFilePath, //ultimate destination for .srt after caption processing
+*tempCaptionFilePath; //same in temp folder before final xfer due to sandbox problem. (No difference in non-sandbox)
 
 @property (nonatomic, strong) NSTimer * waitForSkipModeInfoTimer;
 
@@ -787,7 +789,14 @@ __DDLOGHERE__
 	DDLogVerbose(@"setting encodepath: %@", self.encodeFilePath);
     self.captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDirectory ,self.baseFileName];
     DDLogVerbose(@"setting self.captionFilePath: %@", self.captionFilePath);
-    
+#ifdef SANDBOX
+	self.tempEncodeFilePath = [NSString stringWithFormat:@"%@/%@%@",self.tmpDirectory,self.baseFileName,extension];
+	self.tempCaptionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.tmpDirectory ,self.baseFileName];
+#else
+	self.tempEncodeFilePath = self.encodeFilePath;
+	self.tempCaptionFilePath = self.captionFilePath;
+#endif
+	
     self.commercialFilePath = [NSString stringWithFormat:@"%@/buffer%@.edl" ,self.tmpDirectory, self.baseFileName];  //0.92 version
     DDLogVerbose(@"setting self.commercialFilePath: %@", self.commercialFilePath);
 	
@@ -1125,15 +1134,24 @@ __DDLOGHERE__
 
     encodeTask.completionHandler = ^BOOL(){
 		__typeof__(self) strongSelf = weakSelf;
-        if (! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.encodeFilePath] ) {
-            DDLogReport(@" %@ encoding complete, but the video file not found: %@ ",strongSelf, strongSelf.encodeFilePath );
+        if (! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.tempEncodeFilePath] ) {
+            DDLogReport(@" %@ encoding complete, but the video file not found: %@ ",strongSelf, strongSelf.tempEncodeFilePath );
             return NO;
         }
-        unsigned long long fileSize = [[[NSFileManager defaultManager] attributesOfItemAtPath:strongSelf.encodeFilePath error:nil] fileSize];
+        unsigned long long fileSize = [[[NSFileManager defaultManager] attributesOfItemAtPath:strongSelf.tempEncodeFilePath error:nil] fileSize];
         if (fileSize == 0) {
-            DDLogReport(@" %@ encoding complete, but empty file found: %@",strongSelf, strongSelf.encodeFilePath );
+            DDLogReport(@" %@ encoding complete, but empty file found: %@",strongSelf, strongSelf.tempEncodeFilePath );
             return NO;
         }
+#ifdef SANDBOX
+		NSError * error = nil;
+		if (! [[NSFileManager defaultManager]
+			   	moveItemAtPath:strongSelf.tempEncodeFilePath
+						toPath:strongSelf.encodeFilePath
+			   			 error: &error] ) {
+			DDLogReport(@" %@ encoding complete, but could not transfer file %@ to destination directory: %@ Error: %@",strongSelf, strongSelf.tempEncodeFilePath, strongSelf.encodeFilePath, error.localizedDescription);
+		}
+#endif
         strongSelf.downloadStatus = @(kMTStatusEncoded);
         strongSelf.processProgress = 1.0;
 		//normally when encode finished, we're all done, except when we have parallel tasks still running, or follow-on tasks to come.
@@ -1230,16 +1248,16 @@ __DDLOGHERE__
     NSArray * encoderArgs = nil;
 
     if (self.shouldSimulEncode)  {
-        encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:self.encodeFilePath];
+        encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:self.tempEncodeFilePath];
     } else {
         if (self.encodeFormat.canSimulEncode) {  //Need to setup up the startup for sequential processing to use the writeData progress tracking
-            encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:self.encodeFilePath];
+            encoderArgs = [self encodingArgumentsWithInputFile:@"-" outputFile:self.tempEncodeFilePath];
             encodeTask.requiresInputPipe = YES;
             __block NSPipe *encodePipe = [NSPipe new];
 			[encodeTask setStandardInput:encodePipe]; ///XXX maybe delete;
             encodeTask.startupHandler = ^BOOL(){
 				__typeof__(self) strongSelf = weakSelf;
-                if ([strongSelf isCompleteCTiVoFile:self.encodeFilePath forFileType:@"Encoded"]){
+                if ([strongSelf isCompleteCTiVoFile:self.tempEncodeFilePath forFileType:@"Encoded"]){
                     return NO;
                 }
 
@@ -1259,7 +1277,7 @@ __DDLOGHERE__
             };
 
         } else {
-            encoderArgs = [self encodingArgumentsWithInputFile:self.decryptedFilePath outputFile:self.encodeFilePath];
+            encoderArgs = [self encodingArgumentsWithInputFile:self.decryptedFilePath outputFile:self.tempEncodeFilePath];
             encodeTask.requiresInputPipe = NO;
             NSRegularExpression *percents = [NSRegularExpression regularExpressionWithPattern:self.encodeFormat.regExProgress ?:@"" options:NSRegularExpressionCaseInsensitive error:nil];
             if (!percents) {
@@ -1323,8 +1341,15 @@ __DDLOGHERE__
     if (_captionTask) {
         return _captionTask;
     }
-	if (!self.captionFilePath) {
-		self.captionFilePath = [NSString stringWithFormat:@"%@/%@.srt",self.downloadDirectory ,self.baseFileName];
+	if (!self.tempCaptionFilePath) {
+
+#ifdef  SANDBOX
+		NSString * directory =self.tmpDirectory;
+#else
+		NSString * directory =self.downloadDirectory;
+#endif
+		self.tempCaptionFilePath = [NSString stringWithFormat:@"%@/%@.srt",directory,
+ 									self.baseFileName];
 	}
     MTTask *captionTask = [MTTask taskWithName:@"caption" download:self completionHandler:nil];
     [captionTask setLaunchPath:[[NSBundle mainBundle] pathForAuxiliaryExecutable:@"ccextractor" ]];
@@ -1373,6 +1398,15 @@ __DDLOGHERE__
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
 		__typeof__(self) strongSelf = weakSelf;
         //commercial or caption might finish first.
+#ifdef  SANDBOX
+		NSError * error = nil;
+		if (! [[NSFileManager defaultManager] moveItemAtPath:strongSelf.tempCaptionFilePath
+													  toPath:strongSelf.captionFilePath
+													   error: &error] ) {
+			DDLogReport(@" %@ caption complete, but could not transfer file %@ to destination directory: %@ Error: %@",strongSelf, strongSelf.tempCaptionFilePath, strongSelf.captionFilePath, error.localizedDescription);
+			return NO;
+		}
+#endif
         if ( strongSelf.skipCommercials && strongSelf.show.edlList.count ) {
             [strongSelf fixupSRTsDueToCommercialSkipping];
         }
@@ -1383,9 +1417,10 @@ __DDLOGHERE__
 		__typeof__(self) strongSelf = weakSelf;
 		if (strongSelf.isCanceled) {
 			if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
-				if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.captionFilePath]) {
-					[[NSFileManager defaultManager] removeItemAtPath:strongSelf.captionFilePath error:nil];
+				if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.tempCaptionFilePath]) {
+					[[NSFileManager defaultManager] removeItemAtPath:strongSelf.tempCaptionFilePath error:nil];
 				}
+				strongSelf.tempCaptionFilePath = nil;
 				strongSelf.captionFilePath = nil;
 			}
 		} else if (weakCaption.taskFailed) {
@@ -1415,7 +1450,7 @@ __DDLOGHERE__
     //[captionArgs addObject:@"-debug"];
     [captionArgs addObject:@"-"];
     [captionArgs addObject:@"-o"];
-    [captionArgs addObject:self.captionFilePath];
+    [captionArgs addObject:self.tempCaptionFilePath];
     DDLogVerbose(@"ccExtractorArgs: %@",captionArgs);
     [captionTask setArguments:captionArgs];
     DDLogVerbose(@"Caption Task = %@",captionTask);
@@ -1533,7 +1568,7 @@ __DDLOGHERE__
 			if (strongSelf.skipCommercials) {
 			 	//commercialing pre-encoding
 				strongSelf.processProgress = 1.0;
-				if (strongSelf.exportSubtitles.boolValue &&  strongSelf.captionFilePath && weakCaption.successfulExit) {
+				if (strongSelf.exportSubtitles.boolValue &&  strongSelf.tempCaptionFilePath && weakCaption.successfulExit) {
 					[strongSelf fixupSRTsDueToCommercialSkipping];
 				}
 			} else if (strongSelf->_encodeTask.successfulExit) {
@@ -1562,7 +1597,7 @@ __DDLOGHERE__
     }
     
     if ((self.taskFlowType == kMTTaskFlowSimuMarkcom || self.taskFlowType == kMTTaskFlowSimuMarkcomSubtitles) && [self canPostDetectCommercials]) {
-        [arguments addObject:self.encodeFilePath]; //Run on the final file for these conditions
+        [arguments addObject:self.tempEncodeFilePath]; //Run on the final file for these conditions: moved already?
         self.commercialFilePath = [NSString stringWithFormat:@"%@/%@.edl" ,self.tmpDirectory, self.baseFileName];  //0.92 version  (probably wrong, but not currently used)
     } else {
         [arguments addObject:self.decryptedFilePath];// Run this on the output of tivodecode
@@ -2032,6 +2067,7 @@ __DDLOGHERE__
 	//dispose of 3-character (BOM) subtitle files
 	unsigned long long fileSize =  [[NSFileManager defaultManager] attributesOfItemAtPath:self.captionFilePath error:nil].fileSize;
 	if ( fileSize <= 3) {
+		DDLogMajor(@"Empty caption file for %@", self);
 		if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
 			[[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
 		}

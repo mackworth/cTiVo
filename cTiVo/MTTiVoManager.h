@@ -137,6 +137,7 @@
 
 -(NSArray <NSString *> *) copiesOnDiskForShow:(MTTiVoShow *) show;
 -(void) addShow:(MTTiVoShow *) show onDiskAtPath:(NSString *)path;
+-(void) launchMetadataQuery;
 
 -(void) updateManualInfo:(NSDictionary *) info forShow: (MTTiVoShow *) show;
 -(NSDictionary *) getManualInfo: (MTTiVoShow *) show;

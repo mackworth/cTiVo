@@ -13,22 +13,46 @@
 
 + (Class)transformedValueClass { return [NSString class]; }
 + (BOOL)allowsReverseTransformation { return YES; }
-- (id)reverseTransformedValue:(id)value {
-	
-	NSString *retValue = value;
-	if (!value || ([value isKindOfClass:[NSString class]] && ((NSString *)value).length == 0)) {
-		retValue = [NSTemporaryDirectory() stringByAppendingPathComponent:@"ctivo"];
+
+- (id)reverseTransformedValue: (NSString *)value {
+	if (!value || ([value isKindOfClass:[NSString class]] && value.length == 0)) {
+		return [NSTemporaryDirectory() stringByAppendingPathComponent:@"ctivo"];
+	} else {
+		return value;
 	}
-	return retValue;
 }
-- (id)transformedValue:(id)value {
-	
-	NSString *retValue = value;
+
+- (id)transformedValue:(NSString *)value {
 	NSString * defDir = [NSTemporaryDirectory() stringByAppendingPathComponent:@"ctivo"];
-	if ([value isKindOfClass:[NSString class]] && [(NSString *)value  isEqualToString:defDir]) {
-		retValue = @"";
+	if ([value isKindOfClass:[NSString class]] && [value  isEqualToString:defDir]) {
+		return @"";
+	} else {
+		return value;
 	}
-	return retValue;
+}
+
+@end
+
+@implementation MTHideHomeFolder
+
++ (Class)transformedValueClass { return [NSString class]; }
++ (BOOL)allowsReverseTransformation { return YES; }
+
+-(id) reverseTransformedValue: (NSString *)value {
+	if (!value || ([value isKindOfClass:[NSString class]] && [value hasPrefix:@"~/"])) {
+		return [value stringByExpandingTildeInPath];
+	} else {
+		return value;
+	}
+}
+
+-(id) transformedValue: (NSString *)value {
+	NSString * defDir = NSHomeDirectory();
+	if ([value isKindOfClass:[NSString class]] && [value hasPrefix:defDir]) {
+		return [value stringByAbbreviatingWithTildeInPath];
+	} else {
+		return value;
+	}
 }
 
 @end
