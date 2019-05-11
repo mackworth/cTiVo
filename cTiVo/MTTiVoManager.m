@@ -1994,7 +1994,7 @@ __DDLOGHERE__
 - (NSString *)dataToString:(NSData *) data {
     // Helper for getting information from the TXT data
     NSString *resultString = nil;
-    if (data) {
+    if (data && data != (id) [NSNull null]) {
         resultString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     }
     return resultString;

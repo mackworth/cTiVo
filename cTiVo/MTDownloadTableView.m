@@ -134,7 +134,7 @@ __DDLOGHERE__
     
 }
 
--(NSArray *)sortedDownloads
+-(NSArray <MTDownload *> *) sortedDownloads
 {
 	if (!_sortedDownloads) {
         self.sortedDownloads = [tiVoManager currentDownloadQueueSortedBy: self.sortDescriptors];
@@ -220,9 +220,9 @@ __DDLOGHERE__
 {
 	[removeFromQueueButton setEnabled:[self numberOfSelectedRows] != 0];
     NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
-    if (selectedRowIndexes.count == 1) {
-        NSArray *selectedRows = [self.sortedDownloads objectsAtIndexes:selectedRowIndexes];
-		MTTiVoShow * show = ((MTDownload *) selectedRows[0]).show;
+	NSUInteger index = [selectedRowIndexes firstIndex];
+    if (selectedRowIndexes.count == 1 && index < self.sortedDownloads.count) {
+		MTTiVoShow * show = self.sortedDownloads[index].show;
 		if (!show.protectedShow.boolValue && self == self.window.firstResponder ) {
 			[myController setValue:show forKey:@"showForDetail"];
 		}

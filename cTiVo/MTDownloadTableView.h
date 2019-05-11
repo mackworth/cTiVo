@@ -17,7 +17,7 @@
 	IBOutlet NSButton *removeFromQueueButton;
 }
 
-@property (nonatomic, strong) NSArray *sortedDownloads;
+@property (nonatomic, strong) NSArray <MTDownload *> * sortedDownloads;
 
 
 -(BOOL)playVideo;
