@@ -2161,7 +2161,7 @@
 				);
 				GCC_WARN_UNDECLARED_SELECTOR = NO;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
-				INFOPLIST_FILE = "$(SRCROOT)/cTiVo/cTiVo-Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/cTiVo/cTiVo MAS-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -2206,7 +2206,7 @@
 				);
 				GCC_WARN_UNDECLARED_SELECTOR = NO;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
-				INFOPLIST_FILE = "$(SRCROOT)/cTiVo/cTiVo-Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/cTiVo/cTiVo MAS-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
