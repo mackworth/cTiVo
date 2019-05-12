@@ -1892,8 +1892,7 @@ __DDLOGHERE__
 }
 
 -(void) setDownloadDirectory: (NSString *) newDir {
-	NSString * shortDir = [newDir stringByAbbreviatingWithTildeInPath];
-	[[NSUserDefaults standardUserDefaults] setObject:shortDir forKey: kMTDownloadDirectory];
+	[[NSUserDefaults standardUserDefaults] setObject:newDir forKey: kMTDownloadDirectory];
 }
 
 -(NSString *)downloadDirectory {

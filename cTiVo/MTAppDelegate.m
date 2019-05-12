@@ -280,6 +280,8 @@ void signalHandler(int signal)
 #ifdef SANDBOX
 	//get permission for various older download folders:
 	[self accessCachedBookMarks];
+#else
+	[tiVoManager launchMetadataQuery];
 #endif
     //Make sure details and thumbnails directories are available
 	[self fixCacheStructure];
