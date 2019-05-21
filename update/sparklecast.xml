@@ -24,9 +24,9 @@
 				<p>Most new features require RPC for real-time functionality, which is only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)</p>
             ]]>
             </description>
-            <pubDate>Tues., May 21, 2018 12:00:00 -0800</pubDate>
+            <pubDate>Tues., May 21, 2019 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.3.1/cTiVo.3.3.1.final.zip" sparkle:version="1038" sparkle:shortVersionString="3.3.1" length="73844279" type="application/octet-stream" sparkle:dsaSignature="MC4CFQCtZEr73hrp79g3doBacnyH3YskLwIVAOK0wsnkKHtlujLGqCWRyV8jwCNj"/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.3.1/cTiVo.3.3.1.final.zip" sparkle:version="1053" sparkle:shortVersionString="3.3.1" length="73844279" type="application/octet-stream" sparkle:dsaSignature="MC4CFQCtZEr73hrp79g3doBacnyH3YskLwIVAOK0wsnkKHtlujLGqCWRyV8jwCNj"/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>
