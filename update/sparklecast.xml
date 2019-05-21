@@ -3,14 +3,15 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.3.0; SkipMode!</description>
+        <description>Version 3.3.1; SkipMode!</description>
         <language>en</language>
         <item>
-            <title>Version 3.3.0; SkipMode</title>
+            <title>Version 3.3.1; SkipMode</title>
             <description><![CDATA[
-				<h2 id="release-3.3">Release 3.3.0: SkipMode!</h2>
-				<h3>3.3.0 features</h3>
+				<h2 id="release-3.3">Release 3.3.1: SkipMode!</h2>
+				<h3>3.3.1 features</h3>
 				<ul>
+				<li>3.3.1 has new status icons and minor fixes for 3.3.0</li>
 				<li>Use TiVo's SkipMode information for Marking/Cutting commercials (when available)</li>
 				<li>Remote Control Window</li>
 				<li>TiVo Control: Play Show / Delete Show / Stop Recording / Reboot</li>
@@ -23,9 +24,9 @@
 				<p>Most new features require RPC for real-time functionality, which is only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)</p>
             ]]>
             </description>
-            <pubDate>Sun., March 23, 2018 12:00:00 -0800</pubDate>
+            <pubDate>Tues., May 21, 2018 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.3.0/cTiVo.app.zip" sparkle:version="1038" sparkle:shortVersionString="3.3.0" length="73827615" type="application/octet-stream" sparkle:dsaSignature="MCwCFBz3pqQWrqhDkPC3nxaXXhNeZh9DAhQsdLKCRjv/pxRudG8XKGaQFkUlDw=="/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.3.1/cTiVo.3.3.1.final.zip" sparkle:version="1038" sparkle:shortVersionString="3.3.1" length="73844279" type="application/octet-stream" sparkle:dsaSignature="MC4CFQCtZEr73hrp79g3doBacnyH3YskLwIVAOK0wsnkKHtlujLGqCWRyV8jwCNj"/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>
