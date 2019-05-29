@@ -106,18 +106,23 @@ __DDLOGHERE__
     
 	//save selection to restore after reload
 	DDLogDetail(@"Reloading DL table");
-	NSArray * selectedShows = [self.sortedDownloads objectsAtIndexes: self.selectedRowIndexes];
+	NSArray * selectedShows = @[];
+	if (self.selectedRowIndexes.lastIndex < self.sortedDownloads.count) {
+		selectedShows = [self.sortedDownloads objectsAtIndexes: self.selectedRowIndexes];
+	}
     CGRect frame = self.enclosingScrollView.documentVisibleRect;
 	[self sizeToFit];
     self.sortedDownloads =nil;
     [super reloadData];
 	
 	//now restore selection
-	NSIndexSet * showIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-		return [selectedShows indexOfObjectIdenticalTo:obj] !=NSNotFound;
-	}];
+	if (selectedShows.count > 0) {
+		NSIndexSet * showIndexes = [self.sortedDownloads indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+			return [selectedShows indexOfObjectIdenticalTo:obj] !=NSNotFound;
+		}];
 	
-	[self selectRowIndexes:showIndexes byExtendingSelection:NO];
+		[self selectRowIndexes:showIndexes byExtendingSelection:NO];
+	}
 	[self scrollRectToVisible:frame];
 
     if (tiVoManager.anyTivoActive) {
