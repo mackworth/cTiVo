@@ -14,6 +14,10 @@
 @property (weak, nonatomic) IBOutlet NSPopUpButton *directoryFormatPopup;
 @property (weak, nonatomic) IBOutlet NSMenuItem *perModuleMenuItem;
 @property (weak, nonatomic) IBOutlet NSMenuItem *tiVoArtworkItem;
+@property (weak) IBOutlet NSButton *addToiTunes;
+@property (weak) IBOutlet NSButton *deleteFromItunes;
+@property (weak) IBOutlet NSButton *AutoSynciTunes;
+@property (weak) IBOutlet NSTextField *iTunesSection;
 
 @end
 
@@ -31,6 +35,13 @@
 	[self.directoryFormatPopup.menu setAutoenablesItems:NO];
 	formats[3].enabled = NO;
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTFileNameFormat options:NSKeyValueObservingOptionInitial context:nil];
+	if (@available(macOS 10.15, *)) {
+        self.iTunesSection.cell.title = @"Apple TV app:"; [self.iTunesSection sizeToFit];
+        self.addToiTunes.title =  @"Add to Apple TV When Complete"; [self.addToiTunes sizeToFit];
+        self.deleteFromItunes.title = @"Delete file after copying to Apple TV"; [self.deleteFromItunes sizeToFit];
+		self.AutoSynciTunes.hidden = YES;
+
+	}
 }
 
 -(BOOL) validateMenuItem:(NSMenuItem *)menuItem {

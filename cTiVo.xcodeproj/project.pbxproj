@@ -1685,7 +1685,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = MT;
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1100;
 				ORGANIZATIONNAME = cTiVo;
 				TargetAttributes = {
 					D2D60B9C16766EFD00CE32DE = {
@@ -2187,6 +2187,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = "cTiVo/cTiVo MAS.entitlements";
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = E8XXXD4S77;
 				ENABLE_HARDENED_RUNTIME = YES;

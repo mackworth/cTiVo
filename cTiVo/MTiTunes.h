@@ -7,17 +7,11 @@
 
 #import <Foundation/Foundation.h>
 
-@class iTunesApplication, iTunesSource, iTunesLibraryPlaylist, iTunesPlaylist,
-		MTDownload;
+@class MTDownload;
 
 @interface MTiTunes : NSObject {
 	
 }
-
-@property (nonatomic, strong) iTunesApplication *iTunes;
-@property (nonatomic, strong) iTunesSource *iTunesLibrary;
-@property (nonatomic, strong) iTunesLibraryPlaylist *libraryPlayList;
-@property (nonatomic, strong) iTunesPlaylist *tivoPlayList;
 
 -(void) iTunesPermissionCheck;
 

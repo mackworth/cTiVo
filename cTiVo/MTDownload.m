@@ -2103,13 +2103,21 @@ __DDLOGHERE__
 		dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
 			MTiTunes *iTunes = [[MTiTunes alloc] init];
 			NSString * iTunesPath = [iTunes importIntoiTunes:weakSelf withArt:weakSelf.show.artWorkImage] ;
-
+			NSString * path = weakSelf.encodeFilePath;
+			if (!iTunesPath) {
+				DDLogMajor(@"Nil from iTunes; problem adding %@ at %@?", weakSelf, path);
+			} else if ( [iTunesPath isEqualToString: path]) {
+				DDLogMajor(@"Added %@ to iTunes at %@?", self, path);
+			} else {
+				DDLogMajor(@"Added %@ to iTunes at %@; copied to %@", weakSelf, path, iTunesPath);
+			}
 			dispatch_async(dispatch_get_main_queue(), ^{
 				__typeof__(self) strongSelf = weakSelf;
 
 				if (iTunesPath && ![iTunesPath isEqualToString: strongSelf.encodeFilePath]) {
 					//apparently iTunes created new file
 					if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
+                        DDLogDetail(@"Deleting %@", path);
 						[strongSelf deleteVideoFile];
 						//move caption, commercial, and pytivo metadata files along with video
 						NSString * iTunesBaseName = [iTunesPath stringByDeletingPathExtension];

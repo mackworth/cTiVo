@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "iTunes.h"
 #import "MTTiVo.h"
 #import "MTFormat.h"
 #import "mp4v2.h"
