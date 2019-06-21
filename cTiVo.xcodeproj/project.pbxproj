@@ -754,7 +754,7 @@
 		1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTIsStringEmpty.m; sourceTree = "<group>"; };
 		1E4A38461A37C0F4001D84A7 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
 		1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionList.m; sourceTree = "<group>"; };
-		1E5051C022556CC300D5981B /* cTiVo MAS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "cTiVo MAS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E5051C022556CC300D5981B /* cTiVo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTiVo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E5051C122556CC400D5981B /* cTiVo MAS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTiVo MAS-Info.plist"; path = "/Users/hugh/Documents/Develop/cTiVoGithub/cTiVo/cTiVo MAS-Info.plist"; sourceTree = "<absolute>"; };
 		1E5051C22255720900D5981B /* binary.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = binary.entitlements; sourceTree = "<group>"; };
 		1E5051C32255720900D5981B /* container-migration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "container-migration.plist"; sourceTree = "<group>"; };
@@ -1425,7 +1425,7 @@
 			isa = PBXGroup;
 			children = (
 				D2D60B9D16766EFD00CE32DE /* cTiVo.app */,
-				1E5051C022556CC300D5981B /* cTiVo MAS.app */,
+				1E5051C022556CC300D5981B /* cTiVo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1652,7 +1652,7 @@
 			);
 			name = "cTiVo MAS";
 			productName = cTiVo;
-			productReference = 1E5051C022556CC300D5981B /* cTiVo MAS.app */;
+			productReference = 1E5051C022556CC300D5981B /* cTiVo.app */;
 			productType = "com.apple.product-type.application";
 		};
 		D2D60B9C16766EFD00CE32DE /* cTiVo */ = {
@@ -2171,7 +2171,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = cTiVo;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
@@ -2187,7 +2187,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = "cTiVo/cTiVo MAS.entitlements";
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = E8XXXD4S77;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -2223,7 +2223,7 @@
 					Fabric,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = cTiVo;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
