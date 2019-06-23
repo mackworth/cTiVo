@@ -1,11 +1,12 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf340
-{\fonttbl\f0\fnil\fcharset0 LucidaGrande;}
-{\colortbl;\red255\green255\blue255;}
+{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf500
+{\fonttbl\f0\fnil\fcharset0 LucidaGrande;\f1\fnil\fcharset0 LucidaGrande-Bold;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0\cname textColor;}
 \margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \deftab720
 \pard\pardeftab720\partightenfactor0
 
-\f0\fs22 \cf0 Enter either the name or the full path to the encoder to be used. The paths searched for the encoder are (in order)\
+\f0\fs22 \cf2 Enter either the name or the full path to the encoder to be used. The paths searched for the encoder are (in order)\
 \
 	<Main Bundle>\
 	/usr/local/bin\
@@ -19,15 +20,15 @@ If the encoder accepts - (dash) for standard input, you should check 'Can run do
 \
 \pard\pardeftab720\partightenfactor0
 
-\b \cf0 mencoder
-\b0  & 
-\b HandBrakeCLI
-\b0  are included in the cTiVo bundle.\
+\f1\b \cf2 mencoder
+\f0\b0  & 
+\f1\b HandBrakeCLI
+\f0\b0  are included in the cTiVo bundle.\
 \
 If the encoder cannot support simultaneous encoding (e.g. HandBrakeCLI), the encoder should provide in its standard output the percentage complete as a number from 0-100.\'a0 You will need to provide a regex expression for extracting this number from the last few lines of the standard output.\'a0 This will only be used when doing sequential downloading, decrypting and encoding.\'a0 When doing simultaneous encoding, the data flow through the pipes is used to measure progress.\
 \pard\pardeftab720\partightenfactor0
 
-\fs20 \cf0 \
+\fs20 \cf2 \
 The arguments passed from the options are:\
 	<Video options>\
 	<Audio options>\
@@ -49,16 +50,16 @@ OR, if no outputFileFlag:\
 	<<outputFileName>>\
 \
 if your encoder (such as ffmpeg) requires some or all of one of the options to occur AFTER the inputFileName, then just add <<<INPUT>>> wherever the inputFileFlag and inputFileName should appear. For example, if you have videoOptions of 
-\b -a -b <<<INPUT>>> -c -d
-\b0  and audioOptions of 
-\b -e -f <<<INPUT>>> -g -h
-\b0 , and an output flag of 
-\b -o
-\b0  and all the rest are empty, then the command line would look like:
-\b    encoder -a -b -e -f -o outFile.mpg inputFile.mpg \'97c -d g -h.
-\b0  If no output flag, the command line would be: 
-\b encoder -a -b -e -f inputFile.mpg -c -d -g -h outFile.mpg
-\b0 \
+\f1\b -a -b <<<INPUT>>> -c -d
+\f0\b0  and audioOptions of 
+\f1\b -e -f <<<INPUT>>> -g -h
+\f0\b0 , and an output flag of 
+\f1\b -o
+\f0\b0  and all the rest are empty, then the command line would look like:
+\f1\b    encoder -a -b -e -f -o outFile.mpg inputFile.mpg \'97c -d g -h.
+\f0\b0  If no output flag, the command line would be: 
+\f1\b encoder -a -b -e -f inputFile.mpg -c -d -g -h outFile.mpg
+\f0\b0 \
 \
 Your encoder can be a script file (with standard first line of #! to specify script type, such as #!/usr/bin/osascript for Applescript), provided it accepts the above arguments and is marked as executable.\'a0\
 \

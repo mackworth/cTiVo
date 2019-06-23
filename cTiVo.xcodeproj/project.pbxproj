@@ -102,7 +102,6 @@
 		1E50511622556CC300D5981B /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC1A1730296C0036125A /* libmp4v2.a */; };
 		1E50511722556CC300D5981B /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */; };
 		1E50511822556CC300D5981B /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB61BB89DA5006D6DBE /* Fabric.framework */; };
-		1E50511A22556CC300D5981B /* CommercialHelpFileDark.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 1E799EF02182D5360073C450 /* CommercialHelpFileDark.rtfd */; };
 		1E50511B22556CC300D5981B /* tivo-libre.jar in Resources */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50511C22556CC300D5981B /* ffmpeg_edl_ac3.sh in Resources */ = {isa = PBXBuildFile; fileRef = 94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50511D22556CC300D5981B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
@@ -290,7 +289,6 @@
 		1E6F45452210C0E0007714E0 /* libicui18n.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45422210C0AE007714E0 /* libicui18n.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E6F45462210C0E0007714E0 /* libicuuc.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45432210C0AF007714E0 /* libicuuc.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E6F45482210C137007714E0 /* libfdk-aac.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45472210C135007714E0 /* libfdk-aac.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E799EF12182D5370073C450 /* CommercialHelpFileDark.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 1E799EF02182D5360073C450 /* CommercialHelpFileDark.rtfd */; };
 		1E7A4CE720422E350081884D /* skipMode@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7A4CE520422E340081884D /* skipMode@2x.png */; };
 		1E7A4CE820422E350081884D /* skipModeInverted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7A4CE620422E350081884D /* skipModeInverted@2x.png */; };
 		1E7BED701F565AD500AB8E5F /* NSURL+MTURLExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */; };
@@ -808,7 +806,6 @@
 		1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "cTiVo-10.7-Info.plist"; sourceTree = "<group>"; };
 		1E791BD21697C59300E47E84 /* MTSubscription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscription.h; sourceTree = "<group>"; };
 		1E791BD31697C59300E47E84 /* MTSubscription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTSubscription.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		1E799EF02182D5360073C450 /* CommercialHelpFileDark.rtfd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; path = CommercialHelpFileDark.rtfd; sourceTree = "<group>"; };
 		1E7A4CE520422E340081884D /* skipMode@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skipMode@2x.png"; sourceTree = "<group>"; };
 		1E7A4CE620422E350081884D /* skipModeInverted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skipModeInverted@2x.png"; sourceTree = "<group>"; };
 		1E7BED6E1F565AD500AB8E5F /* NSURL+MTURLExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+MTURLExtensions.h"; sourceTree = "<group>"; };
@@ -1512,7 +1509,6 @@
 			isa = PBXGroup;
 			children = (
 				1E02BDE02056E9BB000B9F56 /* CommercialHelpFile.rtfd */,
-				1E799EF02182D5360073C450 /* CommercialHelpFileDark.rtfd */,
 				D209B6A91813305E004E733B /* FindTiVoHelpFile.rtf */,
 				D2574E8517FE30EC00BBAB5C /* MAKHelpFile.rtf */,
 				D24A8D0D16A5F3DC00DFF890 /* catToFile */,
@@ -1728,7 +1724,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E50511A22556CC300D5981B /* CommercialHelpFileDark.rtfd in Resources */,
 				1E5051C72255720A00D5981B /* Images.xcassets in Resources */,
 				1E50511B22556CC300D5981B /* tivo-libre.jar in Resources */,
 				1E50511C22556CC300D5981B /* ffmpeg_edl_ac3.sh in Resources */,
@@ -1799,7 +1794,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E799EF12182D5370073C450 /* CommercialHelpFileDark.rtfd in Resources */,
 				1EB49BA01C50A4B100887240 /* tivo-libre.jar in Resources */,
 				94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */,
 				D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */,

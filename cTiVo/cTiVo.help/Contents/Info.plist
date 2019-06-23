@@ -25,9 +25,9 @@
 	<key>HPDBookKBProduct</key>
 	<string>cTiVo</string>
 	<key>HPDBookKBURL</key>
-	<string>https://code.google.com/p/ctivo/</string>
+	<string>https://github.com/mackworth/cTiVo</string>
 	<key>HPDBookRemoteURL</key>
-	<string>https://code.google.com/p/ctivo/wiki/</string>
+	<string>https://github.com/mackworth/cTiVo/wiki</string>
 	<key>HPDBookTitle</key>
 	<string>cTiVo Help</string>
 	<key>HPDBookType</key>
