@@ -763,7 +763,9 @@ NSObject * assertionID = nil;
 -(void) accessCachedBookMarks {
 	NSArray <NSData *> * cache = [[NSUserDefaults standardUserDefaults ] objectForKey:kMTRecentDownloadBookMarks];
 	NSMutableArray <NSData *> * newCache = [NSMutableArray arrayWithCapacity:cache.count];
-	NSMutableSet <NSURL *> * urls = [NSMutableSet setWithObject:[NSURL URLWithString:[tiVoManager downloadDirectory]]];
+	NSString * downloadDir =[tiVoManager downloadDirectory];
+	NSURL * downURL = [NSURL fileURLWithPath:downloadDir isDirectory:YES];
+	NSMutableSet <NSURL *> * urls = [NSMutableSet setWithObject:downURL];
 	__block BOOL didChange = NO;
 	for (NSData * oldBookmark in cache) {
 		__block NSData * tempBookmark = oldBookmark;

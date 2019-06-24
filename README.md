@@ -125,7 +125,7 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 
 ## To install:
 
-Download the [cTiVo application](https://github.com/dscottbuch/cTiVo/releases), and run it. It will ask if OK to move to Applications folder.
+Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), and run it. It will ask if OK to move to Applications folder.
 
 ## Documentation:
 
@@ -142,4 +142,4 @@ Download the [cTiVo application](https://github.com/dscottbuch/cTiVo/releases), 
 
 cTiVo is fully compatible with MacOS Mojave (10.14) back through Mavericks (10.9).
 
-**cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/dscottbuch/cTiVo/issues).
+**cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
