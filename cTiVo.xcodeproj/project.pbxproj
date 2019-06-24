@@ -158,11 +158,9 @@
 		1E50515222556CC300D5981B /* recent-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E0C5DD8170236B30015C55D /* recent-recording.png */; };
 		1E50515322556CC300D5981B /* checkImage2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964CA6188313ED00C19046 /* checkImage2@2x.png */; };
 		1E50515422556CC300D5981B /* cTiVo.help in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145D1708AC1500166E5F /* cTiVo.help */; };
-		1E50515522556CC300D5981B /* cTiVo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1E18145F1708AF7000166E5F /* cTiVo.icns */; };
 		1E50515622556CC300D5981B /* MTMainWindowDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */; };
 		1E50515722556CC300D5981B /* elgatoQuit.scpt in Resources */ = {isa = PBXBuildFile; fileRef = D2B4B4F31732D69C005B97F1 /* elgatoQuit.scpt */; };
 		1E50515822556CC300D5981B /* PeanutRemote@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */; };
-		1E50515922556CC300D5981B /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1E50515B22556CC300D5981B /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E1395941F5928E800FFA4E7 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50515C22556CC300D5981B /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EE1D65B2210AF820012080F /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50515D22556CC300D5981B /* comskip in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E557B891CD127E90014D85B /* comskip */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -1782,11 +1780,9 @@
 				1E5051C62255720A00D5981B /* container-migration.plist in Resources */,
 				1E50515322556CC300D5981B /* checkImage2@2x.png in Resources */,
 				1E50515422556CC300D5981B /* cTiVo.help in Resources */,
-				1E50515522556CC300D5981B /* cTiVo.icns in Resources */,
 				1E50515622556CC300D5981B /* MTMainWindowDrawer.xib in Resources */,
 				1E50515722556CC300D5981B /* elgatoQuit.scpt in Resources */,
 				1E50515822556CC300D5981B /* PeanutRemote@2x.png in Resources */,
-				1E50515922556CC300D5981B /* cTiVo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

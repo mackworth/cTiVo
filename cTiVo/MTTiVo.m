@@ -429,13 +429,14 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 				break;
 			}
 		}
+		if (foundMediaKey) {
+			//Need to update defaults
+			[tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:YES];
+		}
 	}
-
 	if (foundMediaKey) {
-        //Need to update defaults
 		[self checkRPC];
-        [tiVoManager performSelectorOnMainThread:@selector(updateTiVoDefaults:) withObject:self waitUntilDone:YES];
-    }
+	}
 }
 
 #pragma mark - RPC delegate

@@ -771,7 +771,7 @@ NSObject * assertionID = nil;
 			tempBookmark = newBookmark;
 			didChange = YES;
 		}];
-		if (tempBookmark && ![urls containsObject:url]) {
+		if (tempBookmark && url && ![urls containsObject:url]) {
 			[newCache addObject:tempBookmark];
 			[urls addObject:url];
 		}
@@ -788,7 +788,12 @@ NSObject * assertionID = nil;
 		NSURL * downloadURL = [self resolveStoredBookmark:[defaults objectForKey:kMTDownloadDirBookmark]  forType:@"Download Directory" uponRenewal:^(NSData *newBookMark) {
 			[defaults setObject: newBookMark forKey:kMTDownloadDirBookmark];
 		} ];
-		tiVoManager.downloadDirectory =  downloadURL.path;
+		DDLogMajor(@"Sandbox found %@: %@",kMTDownloadDirBookmark, downloadURL);
+		NSString *oldDownloadDir = [defaults stringForKey:kMTDownloadDirectory];
+		NSString * newDownloadDir = downloadURL.path;
+		if (![oldDownloadDir isEqualToString:newDownloadDir]) { //avoid recursion
+			tiVoManager.downloadDirectory =  downloadURL.path;
+		}
 	}
 #endif
 

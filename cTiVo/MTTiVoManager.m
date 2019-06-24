@@ -522,6 +522,7 @@ __DDLOGHERE__
 }
 
 -(NSArray <MTTiVo *> *)tiVoList {
+	if (!_realTiVoList.count) return @[];
     NSPredicate *enabledTiVos = [NSPredicate predicateWithFormat:@"enabled == YES"];
 	return [_realTiVoList filteredArrayUsingPredicate:enabledTiVos];
 }
