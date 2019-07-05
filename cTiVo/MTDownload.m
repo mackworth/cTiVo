@@ -2109,11 +2109,10 @@ __DDLOGHERE__
 			} else if ( [iTunesPath isEqualToString: path]) {
 				DDLogMajor(@"Added %@ to iTunes at %@?", self, path);
 			} else {
-				DDLogMajor(@"Added %@ to iTunes at %@; copied to %@", weakSelf, path, iTunesPath);
+				DDLogMajor(@"Copied %@ to iTunes from %@ to %@", weakSelf, path, iTunesPath);
 			}
 			dispatch_async(dispatch_get_main_queue(), ^{
 				__typeof__(self) strongSelf = weakSelf;
-
 				if (iTunesPath && ![iTunesPath isEqualToString: strongSelf.encodeFilePath]) {
 					//apparently iTunes created new file
 					if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
@@ -2129,16 +2128,20 @@ __DDLOGHERE__
 							NSString * doubleExtension = [[strongSelf.encodeFilePath pathExtension] stringByAppendingString:@".txt"];
 							[strongSelf moveFile:textMetaPath toITunes:iTunesBaseName forType:@"metadata" andExtension:doubleExtension];
 						}
-						//but remember new file for future processing
+						//deleted our original, so remember new iTunes file for future processing
 						strongSelf.encodeFilePath= iTunesPath;
+					} else {
+						//keeping both old file and iTunes one
+						//So, need to add xattrs to iTunes copy as well
+						[tiVoManager addShow: strongSelf.show onDiskAtPath: iTunesPath];
 					}
-					//Need to add xattrs to iTunes copy as well
-					[tiVoManager addShow: strongSelf.show onDiskAtPath: iTunesPath];
 				}
+				[tiVoManager addShow: self.show onDiskAtPath:self.encodeFilePath];
 				[strongSelf notifyAndCleanUp];
 			});
 		});
 	} else {
+		[tiVoManager addShow: self.show onDiskAtPath:self.encodeFilePath];
 		[self notifyAndCleanUp];
 		
 	}
@@ -2360,8 +2363,6 @@ __DDLOGHERE__
             self.downloadStatus = @(kMTStatusFailed);
             return;
         }
-        [tiVoManager addShow: self.show onDiskAtPath:self.encodeFilePath];
-    //    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationDetailsLoaded object:self.show];
         DDLogVerbose(@"Took %lf seconds to complete for show %@",[[NSDate date] timeIntervalSinceDate:startTime], self);
     }
 	if (self.markCommercials && self.useSkipMode) {

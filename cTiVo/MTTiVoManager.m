@@ -33,7 +33,7 @@
 
 @property (atomic, strong)     NSOperationQueue *opsQueue;
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSDictionary  *> * manualEpisodeData;
-@property (nonatomic, strong) NSDictionary *showsOnDisk;
+@property (atomic, strong) NSDictionary *showsOnDisk;
 @property (nonatomic, strong) NSURL *cacheDirectory;
 @property (nonatomic, strong) NSURL *tivoTempDirectory;
 @property (nonatomic, strong) NSURL *tvdbTempDirectory;
@@ -172,36 +172,49 @@ __DDLOGHERE__
 		NSPredicate *mdqueryPredicate = [NSPredicate predicateWithFormat:@"kMDItemFinderComment ==[c] '" kMTSpotlightKeyword @"'"];
 		[cTiVoQuery setPredicate:mdqueryPredicate];
 		[cTiVoQuery setSearchScopes:@[]];
-		[cTiVoQuery setNotificationBatchingInterval:2.0];
+		[cTiVoQuery setNotificationBatchingInterval:0.1];//report in realtime, we batch below
     }
     [cTiVoQuery startQuery];
 }
 
--(void)metadataQueryHandler:(id)sender
-{
-	[cTiVoQuery disableUpdates];
+-(void)metadataQueryHandler:(id)sender {
 	DDLogDetail(@"Got Metadata Result with count %ld",[cTiVoQuery resultCount]);
-	NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
-	for (NSUInteger i =0; i < [cTiVoQuery resultCount]; i++) {
-        NSMetadataItem * item = [cTiVoQuery resultAtIndex:i];
-        if (![item isKindOfClass:[NSMetadataItem class]]) continue;
-        NSString *filePath = [item valueForAttribute:NSMetadataItemPathKey];
-        NSString * showID = [filePath getXAttr:kMTXATTRTiVoID ];
-        NSString * tiVoName = [filePath getXAttr:kMTXATTRTiVoName ];
-        if (showID.length && tiVoName.length) {
-            NSString *key = [NSString stringWithFormat:@"%@: %@",tiVoName,showID];
-            if ([tmpDict objectForKey:key]) {
-                NSArray *paths = [tmpDict objectForKey:key];
-                [tmpDict setObject:[paths arrayByAddingObject:filePath] forKey:key];
-            } else {
-                [tmpDict setObject:@[filePath] forKey:key];
+	//let any changes accumulate for a couple seconds
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(reallyHandleMetadata) object:nil];
+	[self performSelector:@selector(reallyHandleMetadata) withObject:nil afterDelay:2];
+}
+	
+-(void) reallyHandleMetadata {
+	NSMetadataQuery * localQuery = cTiVoQuery;
+	__weak __typeof__(self) weakSelf = self;
+	dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+		NSDate * startTime = [NSDate date];
+		[localQuery disableUpdates];
+		DDLogDetail(@"Launching metadata");
+		NSMutableDictionary *tmpDict = [NSMutableDictionary dictionary];
+		for (NSUInteger i =0; i < [localQuery resultCount]; i++) {
+			NSMetadataItem * item = [localQuery resultAtIndex:i];
+			if (![item isKindOfClass:[NSMetadataItem class]]) continue;
+			NSString *filePath = [item valueForAttribute:NSMetadataItemPathKey];
+			NSString * showID = [filePath getXAttr:kMTXATTRTiVoID ];
+			NSString * tiVoName = [filePath getXAttr:kMTXATTRTiVoName ];
+			if (showID.length && tiVoName.length) {
+				NSString *key = [NSString stringWithFormat:@"%@: %@",tiVoName,showID];
+				if ([tmpDict objectForKey:key]) {
+					NSArray *paths = [tmpDict objectForKey:key];
+					[tmpDict setObject:[paths arrayByAddingObject:filePath] forKey:key];
+				} else {
+					[tmpDict setObject:@[filePath] forKey:key];
+				}
+			} else {
+				DDLogDetail(@"Invalid show %@ on %@ at %@", showID, tiVoName, filePath);
 			}
 		}
-	}
-	[cTiVoQuery enableUpdates];
-	self.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoShowsUpdated object:nil];
-	DDLogVerbose(@"showsOnDisk = %@",self.showsOnDisk);
+		[localQuery enableUpdates];
+		weakSelf.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
+		DDLogDetail(@"Finished MetaData (%0.1f seconds), showsOnDisk = %@",-[startTime timeIntervalSinceNow], weakSelf.showsOnDisk);//xxx put back to verbose
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoShowsUpdated object:nil];
+	});
 }
 
 -(NSString *)keyForShow: (MTTiVoShow *) show {

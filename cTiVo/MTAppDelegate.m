@@ -764,7 +764,15 @@ NSObject * assertionID = nil;
 	NSArray <NSData *> * cache = [[NSUserDefaults standardUserDefaults ] objectForKey:kMTRecentDownloadBookMarks];
 	NSMutableArray <NSData *> * newCache = [NSMutableArray arrayWithCapacity:cache.count];
 	NSString * downloadDir =[tiVoManager downloadDirectory];
+	if (!downloadDir) {
+		DDLogReport(@"No download directory??");
+		return;
+	}
 	NSURL * downURL = [NSURL fileURLWithPath:downloadDir isDirectory:YES];
+	if (!downURL) {
+		DDLogReport(@"Invalid download dir for URL: %@??", downloadDir);
+		return;
+	}
 	NSMutableSet <NSURL *> * urls = [NSMutableSet setWithObject:downURL];
 	__block BOOL didChange = NO;
 	for (NSData * oldBookmark in cache) {
