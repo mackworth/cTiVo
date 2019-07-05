@@ -14,7 +14,7 @@
 @property (nonatomic, strong) iTunesSource *iTunesLibrary;
 @property (nonatomic, strong) iTunesLibraryPlaylist *libraryPlayList;
 @property (nonatomic, strong) iTunesPlaylist *tivoPlayList;
-
+@property (nonatomic, assign) BOOL audioOnly;
 @end
 
 @implementation MTiTunes
@@ -46,7 +46,7 @@ __DDLOGHERE__
 	if (!_iTunesLibrary) {
 		_iTunesLibrary = [self iTunesLibraryHelper];
 		if (!_iTunesLibrary) {
-			DDLogReport(@"couldn't find iTunes or AppleTV Library. Probably permissions problem.");
+			DDLogReport(@"couldn't find %@ Library. Probably permissions problem.", [self appName]);
 			[self warnUserPermissions];
 			_iTunesLibrary = [self iTunesLibraryHelper];
 			
@@ -69,7 +69,7 @@ __DDLOGHERE__
             }
 		}
         if (!_libraryPlayList) {
-			DDLogMajor(@"couldn't find iTunes or AppleTV playList");
+			DDLogMajor(@"couldn't find %@ playList", [self appName]);
 		}
 	}
 	return _libraryPlayList;
@@ -134,20 +134,21 @@ __DDLOGHERE__
 	//maintain source code parallel with MTTivoShow.m>metadataTagsWithImage
 	MTTiVoShow * show = download.show;
 	NSURL * showFileURL = [NSURL fileURLWithPath:download.encodeFilePath];
+    NSString * fileExtension = [[download.encodeFilePath pathExtension] uppercaseString];
+    NSSet * musicTypes =[NSSet setWithObjects:@"AAC", @"MPE",@"AIF",@"WAV",@"AIFF",@"M4A",@"MP3",nil];
+    self.audioOnly = [musicTypes containsObject:fileExtension] ;
+
     iTunesPlaylist * myPlayList = self.tivoPlayList;
     if (!myPlayList) {
-        DDLogReport(@"Couldn't create TiVo playlist, because library not found. Is iTunes or AppleTV frozen?" );
+        DDLogReport(@"Couldn't create TiVo playlist, because library not found. Is %@ frozen?", [self appName] );
         return nil;
     }
     iTunesFileTrack * newTrack = (iTunesFileTrack *)[self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
 	NSError * error = newTrack.lastError;
 	if ([newTrack exists]) {
-		DDLogReport(@"Added iTunes or AppleTV track:  %@", show.showTitle);
-		NSString * fileExtension = [[download.encodeFilePath pathExtension] uppercaseString];
-		NSSet * musicTypes =[NSSet setWithObjects:@"AAC", @"MPE",@"AIF",@"WAV",@"AIFF",@"M4A",nil];
-		BOOL audioOnly = [musicTypes containsObject:fileExtension] ;
-		if (audioOnly) {
-			newTrack.mediaKind = iTunesEMdKUnknown;
+		DDLogReport(@"Added %@ track:  %@", show.showTitle, [self appName]);
+		if (self.audioOnly) {
+			newTrack.mediaKind = iTunesEMdKSong;
 		} else if (show.isMovie) {
 			newTrack.mediaKind = iTunesEMdKMovie;
 		} else {
@@ -157,6 +158,7 @@ __DDLOGHERE__
 		if (show.isMovie) {
 			newTrack.name = show.showTitle;
             newTrack.artist = show.directors.string;
+            
 		} else {
 			if (show.season > 0) {
 				newTrack.album = [NSString stringWithFormat: @"%@, Season %d",show.seriesTitle, show.season];
@@ -227,7 +229,7 @@ __DDLOGHERE__
 			return newLocation;
 		}
 	} else {
-		DDLogReport(@"Couldn't add iTunes or AppleTV track: %@ (%@)from %@ because %@", show.showTitle, download.encodeFormat.name, showFileURL, [error localizedDescription] );
+		DDLogReport(@"Couldn't add %@ track: %@ (%@)from %@ because %@",  [self appName], show.showTitle, download.encodeFormat.name, showFileURL, [error localizedDescription] );
 		DDLogVerbose(@"track: %@, itunes: %@; playList: %@", newTrack, self.iTunes, self.tivoPlayList);
 		return nil;
 	}
@@ -383,7 +385,11 @@ __DDLOGHERE__
 
 -(NSString *) appBundleName {
 	if (@available(macOS 10.15, *)) {
-		return @"com.apple.TV";
+        if (self.audioOnly) {
+            return @"com.apple.Music";
+        } else {
+            return @"com.apple.TV";
+        }
 	} else {
 		return @"com.apple.iTunes";
 	}
@@ -391,7 +397,11 @@ __DDLOGHERE__
 }
 -(NSString *) appName {
 	if (@available(macOS 10.15, *)) {
-		return @"Apple TV";
+        if (self.audioOnly) {
+            return @"Music";
+        } else {
+            return @"Apple TV";
+        }
 	} else {
 		return @"iTunes";
 	}
@@ -406,7 +416,7 @@ __DDLOGHERE__
 										   defaultButton: @"Open System Preferences"
 										 alternateButton: altMsg
 											 otherButton: nil
-							   informativeTextWithFormat: @"You can fix in System Preferences OR disable iTunes submittal"];
+							   informativeTextWithFormat: @"You can fix in System Preferences OR disable %@ submittal", [self appName]];
 	NSInteger returnValue = [iTunesAlert runModal];
 	switch (returnValue) {
 		case NSAlertDefaultReturn: {
@@ -416,7 +426,7 @@ __DDLOGHERE__
 			return [self confirmiTunesPermissionFixed];
 		}
 		case NSAlertAlternateReturn:
-			DDLogMajor(@"User asked to disable iTunes or AppleTV");
+			DDLogMajor(@"User asked to disable %@",  [self appName]);
 			return NO;
 			break;
 		default:
@@ -452,7 +462,7 @@ __DDLOGHERE__
 			break;
 		}
 		case NSAlertAlternateReturn:
-			DDLogMajor(@"User asked to disable iTunes");
+			DDLogMajor(@"User asked to disable %@", [self appName]);
 			return NO;
 			break;
 		case NSAlertOtherReturn:
@@ -484,7 +494,7 @@ __DDLOGHERE__
 			break;
 		}
 		case NSAlertAlternateReturn:
-			DDLogMajor(@"User asked to disable iTunes or AppleTV");
+			DDLogMajor(@"User asked to disable %@", [self appName]);
 			return NO;
 			break;
 		default:
