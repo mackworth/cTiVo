@@ -155,7 +155,7 @@ void signalHandler(int signal)
 	[fileLogger setLogFormatter:fileLogFormat];
     [DDLog addLogger:fileLogger];
 
-    DDLogReport(@"Starting cTiVo%@; version: %@",
+    DDLogReport(@"Starting " kcTiVoName @"%@; version: %@",
 #ifdef SANDBOX
 	@" Sandboxed",
 #else
@@ -597,7 +597,7 @@ NSObject * assertionID = nil;
 	openPanel.prompt = @"Choose";
 	openPanel.delegate = self;
 	self.myOpenPanelIsTemp = isTemp;
-	[openPanel setTitle:[NSString stringWithFormat:@"Select Directory for %@ cTiVo Files", dirType]];
+	[openPanel setTitle:[NSString stringWithFormat:@"Select Directory for %@ " kcTiVoName @" Files", dirType]];
 
 	NSArray * views; //get default button from XIB.
 	if ([[NSBundle mainBundle] loadNibNamed:@"MTOpenPanelDefaultView" owner:self topLevelObjects:&views]) {
@@ -874,7 +874,7 @@ NSObject * assertionID = nil;
 		DDLogReport(@"Could not read %@ directory at %@", dirType, error);
 		NSString * message = (error.code == 257) ?
 			//sandbox violation
-			@"Please allow cTiVo to access %@." :
+			@"Please allow " kcTiVoName @" to access %@." :
 			@"You don't have read permission on %@.";
 		[self promptForNewDirectory:dirPath withMessage: message isProblem: YES isTempDir:isTempDir];
 		return;
@@ -1404,7 +1404,7 @@ NSObject * assertionID = nil;
 	[tiVoManager saveState];
 	[[NSUserDefaults standardUserDefaults] setBool: _remoteControlWindowController.window.isVisible forKey:@"RemoteVisible"];
 	 mediaKeyQueue = nil;
-    DDLogReport(@"cTiVo exiting");
+    DDLogReport(@"" kcTiVoName @" exiting");
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender

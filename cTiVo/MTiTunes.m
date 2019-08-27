@@ -258,11 +258,11 @@ __DDLOGHERE__
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTiTunesSubmit];
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTiTunesSubmit];
 	} else {
-		NSAlert *alert2 = [NSAlert alertWithMessageText: @"Warning: cTiVo cannot access iTunes. "
+		NSAlert *alert2 = [NSAlert alertWithMessageText: @"Warning: " kcTiVoName @" cannot access iTunes. "
 										  defaultButton: @"OK"
 										alternateButton: nil
 											otherButton: nil
-							  informativeTextWithFormat: @"Please contact cTiVo help site."];
+							  informativeTextWithFormat: @"Please contact " kcTiVoName @" help site."];
 		[alert2 runModal];
 	}
 }
@@ -410,8 +410,8 @@ __DDLOGHERE__
 -(BOOL) askForiTunesPermissionFix {
 	//ask user to fix problem
 	//returns YES to try again, no if not fixed.
-	NSString * msg = [NSString stringWithFormat:@"cTiVo cannot access %@, probably due to Automation Permission problem.", [self appName]];
-	NSString * altMsg = [NSString stringWithFormat:@"Disable cTiVo's use of %@ app", [self appName]];
+	NSString * msg = [NSString stringWithFormat:@"" kcTiVoName @" cannot access %@, probably due to Automation Permission problem.", [self appName]];
+	NSString * altMsg = [NSString stringWithFormat:@"Disable " kcTiVoName @"'s use of %@ app", [self appName]];
 	NSAlert *iTunesAlert = [NSAlert alertWithMessageText: msg
 										   defaultButton: @"Open System Preferences"
 										 alternateButton: altMsg
@@ -436,18 +436,18 @@ __DDLOGHERE__
 }
 
 -(void) warnQuitting {
-	NSString * msg = [NSString stringWithFormat: @"To connect to %@, cTiVo must now quit.", [self appName]];
+	NSString * msg = [NSString stringWithFormat: @"To connect to %@, " kcTiVoName @" must now quit.", [self appName]];
 	NSAlert *alert2 = [NSAlert alertWithMessageText: msg
 									  defaultButton: @"OK"
 									alternateButton: nil
 										otherButton: nil
-						  informativeTextWithFormat: @"Please restart cTiVo to check %@ access@", [self appName]];
+						  informativeTextWithFormat: @"Please restart " kcTiVoName @" to check %@ access@", [self appName]];
 	[alert2 runModal];
 }
 
 -(BOOL) confirmiTunesPermissionFixed {
-	NSString * msg = [NSString stringWithFormat:@"Please click OK when you have enabled cTiVo's %@ permission in Privacy.", [self appName]];
-	NSString * altMsg = [NSString stringWithFormat: @"Disable cTiVo's use of %@ app", [self appName]];
+	NSString * msg = [NSString stringWithFormat:@"Please click OK when you have enabled " kcTiVoName @"'s %@ permission in Privacy.", [self appName]];
+	NSString * altMsg = [NSString stringWithFormat: @"Disable " kcTiVoName @"'s use of %@ app", [self appName]];
 
 	NSAlert *alert = [NSAlert alertWithMessageText: msg
 									 defaultButton: @"OK"
@@ -474,8 +474,8 @@ __DDLOGHERE__
 }
 
 -(BOOL) offerResetPermissions {
-	NSString * msg = [NSString stringWithFormat:@"Still no %@ access; cTiVo can reset macOS Automation permissions for ALL apps if you wish.", [self appName]];
-	NSString * altMsg = [NSString stringWithFormat: @"Disable cTiVo's use of %@ app", [self appName]];
+	NSString * msg = [NSString stringWithFormat:@"Still no %@ access; " kcTiVoName @" can reset macOS Automation permissions for ALL apps if you wish.", [self appName]];
+	NSString * altMsg = [NSString stringWithFormat: @"Disable " kcTiVoName @"'s use of %@ app", [self appName]];
 	NSAlert *alert = [NSAlert alertWithMessageText: msg
 									 defaultButton: @"Reset Automation Permissions"
 								   alternateButton: altMsg
@@ -504,12 +504,12 @@ __DDLOGHERE__
 }
 
 -(BOOL) warniTunesFailure {
-	NSString * msg = [NSString stringWithFormat:@"cTiVo still cannot access %@ app.", [self appName]];
+	NSString * msg = [NSString stringWithFormat:@"" kcTiVoName @" still cannot access %@ app.", [self appName]];
 	NSAlert *alert2 = [NSAlert alertWithMessageText: msg
 									  defaultButton: @"OK"
 									alternateButton: nil
 										otherButton: nil
-						  informativeTextWithFormat: @"Please check for help at cTiVo's website."];
+						  informativeTextWithFormat: @"Please check for help at " kcTiVoName @"'s website."];
 	[alert2 runModal];
 	return NO;
 }

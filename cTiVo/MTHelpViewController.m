@@ -16,6 +16,28 @@
 
 @end
 
+@interface NSAttributedString (replace)
+
+-(NSAttributedString *) replace:(NSString *) oldString with:(NSString *) newString;
+
+@end
+
+@implementation NSAttributedString (replace)
+-(NSAttributedString *) replace:(NSString *) oldString with:(NSString *) newString {
+	NSMutableAttributedString * string = [self mutableCopy];
+	NSRange range = [string.string rangeOfString:oldString options:NSLiteralSearch];
+	while (range.location != NSNotFound) {
+		[string replaceCharactersInRange:range withString:newString];
+		NSInteger start = range.location+ newString.length;
+		NSRange newRange = NSMakeRange( start,string.length-start) ;
+		range = [string.string rangeOfString:oldString options:NSLiteralSearch range:newRange];
+	}
+	return [string copy];
+
+}
+
+@end
+
 @implementation MTHelpViewController
 
 -(id) init {
@@ -90,7 +112,11 @@
 		attrHelpText = [[NSAttributedString alloc] initWithString:
 					[NSString stringWithFormat:@"Can't find help text for %@ at path %@", rtfFile, helpFile]];
 	}
+#ifdef MAC_APP_STORE
+	attrHelpText = [attrHelpText replace:@"cTiVo" with:@"cTV"];
+#endif
 	self.attributedString = attrHelpText;
+					
 }
 
 @end

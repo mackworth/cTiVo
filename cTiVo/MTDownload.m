@@ -1029,7 +1029,7 @@ __DDLOGHERE__
     }
     if (!decryptPath) { //should never happen, but did once.
         [self notifyUserWithTitle:[NSString stringWithFormat:@"Can't Find %@", decoder]
-                         subTitle:@"Please go to cTiVo site for help!"];
+                         subTitle:@"Please go to " kcTiVoName @" site for help!"];
         DDLogReport(@"Fatal Error: decoder %@ not found???", decoder);
         return nil;
     }

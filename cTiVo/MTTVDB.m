@@ -711,14 +711,13 @@ static BOOL inProgress = NO;
         statsCopy = self.theTVDBStatistics.copy;
     }
     NSString * statisticsReport =
-    @"\ncTiVo looks up the TiVo's shows on theTVDB and the movies on theMovieDB.\n"
+    @"\n" kcTiVoName @" looks up the TiVo's shows on theTVDB and the movies on theMovieDB.\n"
     "You can click on the individual URLs to see what information is available for shows that could not be found.\n\n"
     "Total number of shows is %lu\n"
     "%lu shows are marked as Movies\n"
     "%lu shows are marked as Episodic\n"
     "%lu shows are marked as Non-Episodic (e.g. news/sports events)\n"
-    "\n"
-    "cTiVo caches information as possible; successful lookups for 30 days; unsuccessful for 1 day\n"
+    "\n" kcTiVoName @" caches information as possible; successful lookups for 30 days; unsuccessful for 1 day\n"
     "\n"
     "In the last group we looked up, we had the following results:\n"
     "Movies:\n"
@@ -1328,7 +1327,7 @@ static BOOL inProgress = NO;
 
     if (!movieInfo || error) {
         if ([error.localizedDescription isEqualToString:@"The file “movie” couldn’t be opened."]) {
-            DDLogReport(@"On %@, hit theMovieDB Rate Limit; please report to cTiVo support site", show);
+            DDLogReport(@"On %@, hit theMovieDB Rate Limit; please report to " kcTiVoName @" support site", show);
         } else {
             DDLogMajor(@"For %@, theMovieDB returned %@", show, error.localizedDescription ? [@"error: " stringByAppendingString:error.localizedDescription] : @"no information");
        }

@@ -293,6 +293,7 @@
 		1E7F5ADB1701877A003AA96C /* in-progress-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7F5ADA1701877A003AA96C /* in-progress-recording.png */; };
 		1E81D3171BE9477200321370 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		1E8296CF202A0E8600AA4C10 /* PeanutRemote@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */; };
+		1E8489602314B1DB00D56756 /* cTVMainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E84895E2314B1DB00D56756 /* cTVMainMenu.xib */; };
 		1E8E675D20E1E971005465EF /* DDOSLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E675C20E1E970005465EF /* DDOSLogger.m */; };
 		1E8E676120E66CF6005465EF /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */; };
 		1E8E676220E678C9005465EF /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB61BB89DA5006D6DBE /* Fabric.framework */; };
@@ -750,11 +751,11 @@
 		1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTIsStringEmpty.m; sourceTree = "<group>"; };
 		1E4A38461A37C0F4001D84A7 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
 		1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSubscriptionList.m; sourceTree = "<group>"; };
-		1E5051C022556CC300D5981B /* cTiVo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTiVo.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		1E5051C122556CC400D5981B /* cTiVo MAS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTiVo MAS-Info.plist"; path = "/Users/hugh/Documents/Develop/cTiVoGithub/cTiVo/cTiVo MAS-Info.plist"; sourceTree = "<absolute>"; };
+		1E5051C022556CC300D5981B /* cTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E5051C122556CC400D5981B /* cTV MAS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "cTV MAS-Info.plist"; path = "/Users/hugh/Documents/Develop/cTiVoGithub/cTiVo/cTV MAS-Info.plist"; sourceTree = "<absolute>"; };
 		1E5051C22255720900D5981B /* binary.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = binary.entitlements; sourceTree = "<group>"; };
 		1E5051C32255720900D5981B /* container-migration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "container-migration.plist"; sourceTree = "<group>"; };
-		1E5051C42255720900D5981B /* cTiVo MAS.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "cTiVo MAS.entitlements"; sourceTree = "<group>"; };
+		1E5051C42255720900D5981B /* cTV MAS.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "cTV MAS.entitlements"; sourceTree = "<group>"; };
 		1E5051C52255720A00D5981B /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		1E52C5241F2420A700389E93 /* DragDropImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DragDropImageView.h; sourceTree = "<group>"; };
 		1E52C5251F2420A700389E93 /* DragDropImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DragDropImageView.m; sourceTree = "<group>"; };
@@ -810,6 +811,7 @@
 		1E7BED6F1F565AD500AB8E5F /* NSURL+MTURLExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+MTURLExtensions.m"; sourceTree = "<group>"; };
 		1E7F5ADA1701877A003AA96C /* in-progress-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "in-progress-recording.png"; sourceTree = "<group>"; };
 		1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PeanutRemote@2x.png"; sourceTree = "<group>"; };
+		1E84895F2314B1DB00D56756 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/cTVMainMenu.xib; sourceTree = "<group>"; };
 		1E8C1B57224B988600F285EF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		1E8E675B20E1E970005465EF /* DDOSLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDOSLogger.h; sourceTree = "<group>"; };
 		1E8E675C20E1E970005465EF /* DDOSLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDOSLogger.m; sourceTree = "<group>"; };
@@ -1420,7 +1422,7 @@
 			isa = PBXGroup;
 			children = (
 				D2D60B9D16766EFD00CE32DE /* cTiVo.app */,
-				1E5051C022556CC300D5981B /* cTiVo.app */,
+				1E5051C022556CC300D5981B /* cTV.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1461,6 +1463,7 @@
 			children = (
 				D297AC121730296C0036125A /* mp4v2 */,
 				D2D60BB616766EFD00CE32DE /* MainMenu.xib */,
+				1E84895E2314B1DB00D56756 /* cTVMainMenu.xib */,
 				D2D60BB316766EFD00CE32DE /* MTAppDelegate.h */,
 				D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */,
 				D2D60BCB16766FA600CE32DE /* MTConstants.h */,
@@ -1490,10 +1493,10 @@
 				1EFA8D4D211A659D00B4505D /* cTiVo.entitlements */,
 				1E5051C22255720900D5981B /* binary.entitlements */,
 				1E5051C32255720900D5981B /* container-migration.plist */,
-				1E5051C42255720900D5981B /* cTiVo MAS.entitlements */,
+				1E5051C42255720900D5981B /* cTV MAS.entitlements */,
 				1E5051C52255720A00D5981B /* Images.xcassets */,
 				D2D60BA916766EFD00CE32DE /* cTiVo-Info.plist */,
-				1E5051C122556CC400D5981B /* cTiVo MAS-Info.plist */,
+				1E5051C122556CC400D5981B /* cTV MAS-Info.plist */,
 				1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */,
 				D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */,
 				D2D60BAD16766EFD00CE32DE /* main.m */,
@@ -1646,7 +1649,7 @@
 			);
 			name = "cTiVo MAS";
 			productName = cTiVo;
-			productReference = 1E5051C022556CC300D5981B /* cTiVo.app */;
+			productReference = 1E5051C022556CC300D5981B /* cTV.app */;
 			productType = "com.apple.product-type.application";
 		};
 		D2D60B9C16766EFD00CE32DE /* cTiVo */ = {
@@ -1763,6 +1766,7 @@
 				1E50514222556CC300D5981B /* FindTiVoHelpFile.rtf in Resources */,
 				1E50514322556CC300D5981B /* copyright@2x.png in Resources */,
 				1E50514422556CC300D5981B /* skipModeQuestion@2x.png in Resources */,
+				1E8489602314B1DB00D56756 /* cTVMainMenu.xib in Resources */,
 				1E50514522556CC300D5981B /* recent-recording@2x.png in Resources */,
 				1E50514622556CC300D5981B /* skipMode@2x.png in Resources */,
 				1E50514722556CC300D5981B /* expired-recording.png in Resources */,
@@ -2094,6 +2098,14 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		1E84895E2314B1DB00D56756 /* cTVMainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1E84895F2314B1DB00D56756 /* Base */,
+			);
+			name = cTVMainMenu.xib;
+			sourceTree = "<group>";
+		};
 		D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -2129,7 +2141,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = "cTiVo/cTiVo MAS.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "cTiVo/cTV MAS.entitlements";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2151,7 +2163,7 @@
 				);
 				GCC_WARN_UNDECLARED_SELECTOR = NO;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
-				INFOPLIST_FILE = "$(SRCROOT)/cTiVo/cTiVo MAS-Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/cTiVo/cTV MAS-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -2160,8 +2172,8 @@
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = cTiVo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVo;
+				PRODUCT_NAME = cTV;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
@@ -2176,7 +2188,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = "cTiVo/cTiVo MAS.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "cTiVo/cTV MAS.entitlements";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = E8XXXD4S77;
@@ -2197,7 +2209,7 @@
 				);
 				GCC_WARN_UNDECLARED_SELECTOR = NO;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/cTiVo";
-				INFOPLIST_FILE = "$(SRCROOT)/cTiVo/cTiVo MAS-Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/cTiVo/cTV MAS-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -2212,8 +2224,8 @@
 					"-framework",
 					Fabric,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = cTiVo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVo;
+				PRODUCT_NAME = cTV;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;

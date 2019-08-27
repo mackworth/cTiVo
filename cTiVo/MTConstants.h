@@ -201,6 +201,12 @@
 
 #define kMTTmpFilesPath @"TmpFilesPath"   //Where are temporary files saved
 
+#ifdef MAC_APP_STORE
+#define kcTiVoName @"cTV"
+#else
+#define kcTiVoName @"cTiVo"
+#endif
+
 #define kMTFileNameFormat @"FileNameFormat"			//keyword pattern for filenames
 #define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | OriginalAirDate [\"-\" ExtraEpisode][\" - \" EpisodeTitle | Guests]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
 #define kMTcTiVoFolder @"[[MainTitle / MainTitle \" - \" EpisodeTitle | Guests | OriginalAirDate]|[\"Movies\"  / MainTitle \" (\" MovieYear \")\"]]"

@@ -1837,7 +1837,7 @@ __DDLOGHERE__
 			if (nextEDLTime > 18*60*60) {
 				[self notifyForName:show.showTitle
 						  withTitle:@"Warning: Missed SkipMode time"
-						   subTitle:[NSString stringWithFormat:@"You can manually load, or cTiVo will try again in %d hrs", (int)floor(nextEDLTime/3600)]
+						   subTitle:[NSString stringWithFormat:@"You can manually load, or " kcTiVoName @" will try again in %d hrs", (int)floor(nextEDLTime/3600)]
 						   isSticky:YES];
 				self.lastSkipModeWarningTime = [NSDate date];
 			}

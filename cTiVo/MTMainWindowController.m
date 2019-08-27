@@ -129,6 +129,7 @@ __DDLOGHERE__
 #ifdef MAC_APP_STORE
 	self.icon.image = [NSApp applicationIconImage];
 #endif
+	self.window.title = kcTiVoName;
     [[NSBundle mainBundle] loadNibNamed:@"MTMainWindowDrawer" owner:self topLevelObjects:nil];
 	showDetailDrawer.parentWindow = self.window;
 	
@@ -592,7 +593,7 @@ __DDLOGHERE__
         msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and %d others %@ your TiVo?", behavior, shows[0].showTitle, (int)shows.count -1, prep ];
     }
 
-    NSAlert *myAlert = [NSAlert alertWithMessageText:msg defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@"This cannot be undone from cTiVo."];
+    NSAlert *myAlert = [NSAlert alertWithMessageText:msg defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@"This cannot be undone from " kcTiVoName @"."];
     myAlert.alertStyle = NSCriticalAlertStyle;
     NSInteger result = [myAlert runModal];
     return (result == NSAlertAlternateReturn);
