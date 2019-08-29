@@ -1402,7 +1402,7 @@ static NSArray * imageResponseTemplate = nil;
 		if (!oldMetadataID) {
 		   DDLogMajor(@"Metadata just arrived for %@", rpcData);
 		} else {
-		   DDLogMajor(@"Revised commercial info found for %@", rpcData);
+		   DDLogMajor(@"Revised commercial metadata found for %@", rpcData);
 		}
 		__weak __typeof__(self) weakSelf = self;
 		[self retrieveSegments:rpcData.clipMetaDataId withCompletionHandler:^(NSArray * segments) {
@@ -1410,7 +1410,8 @@ static NSArray * imageResponseTemplate = nil;
 				DDLogReport(@"Segments failed %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId);
 				rpcData.skipModeFailed = YES;
 			} else {
-		   		DDLogDetail(@"Segments just arrived for %@ #: %@ contentId: %@; %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId,segments);
+				DDLogMajor(@"Segments just arrived for %@ #: %@ contentId: %@", showInfo[@"title"], rpcData.recordingID, rpcData.clipMetaDataId);
+				DDLogDetail(@"Segments: %@", segments);
 			}
 			rpcData.programSegments = segments;
 		   	[weakSelf.delegate receivedRPCData:rpcData];

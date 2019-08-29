@@ -413,6 +413,7 @@ __DDLOGHERE__
 	if (self.hasSkipModeInfo || self.hasSkipModeList) return YES;
 	if (self.skipModeFailed) return NO;
 	if (self.isSuggestion) return NO;
+	if ([self.imageString isEqualToString:@"deleted"]) return NO;
 	if (self.stationCallsign) {
 		if ([tiVoManager skipModeForChannel:self.stationCallsign] != NSOnState) return NO;
 		if ([tiVoManager commercialsForChannel:self.stationCallsign] != NSOnState) return NO;

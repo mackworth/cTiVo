@@ -2313,7 +2313,7 @@ __DDLOGHERE__
 		}
 		//one last try, but make sure we eventually move forward.
 		[self.show.tiVo loadSkipModeInfoForShow: self.show ];
-		self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:30 target:self selector:@selector(skipModeExpired:) userInfo:@NO repeats:NO]; //nil = second try
+		self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:30 target:self selector:@selector(skipModeExpired:) userInfo:@NO repeats:NO]; //@NO = second try
 	} else {
 		DDLogMajor(@"Backup SkipModeTimer went off for %@",self);
 		[self skipModeCheck];
@@ -2324,8 +2324,8 @@ __DDLOGHERE__
 	if (!self.waitForSkipModeInfoTimer) {
 		NSTimeInterval waitTime = self.show.timeLeftTillRPCInfoWontCome+10;
 		if (waitTime > 0) {
-			DDLogDetail(@"Setting skipModeTimer at %0.1f minutes for %@", waitTime/60.0, self );
-			self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired:) userInfo:@(YES) repeats:NO]; //YES = first try
+			DDLogMajor(@"Setting skipModeTimer at %0.1f minutes for %@", waitTime/60.0, self );
+			self.waitForSkipModeInfoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:waitTime target:self selector:@selector(skipModeExpired:) userInfo:@YES repeats:NO]; //@YES = first try
 		}
 	}
 }

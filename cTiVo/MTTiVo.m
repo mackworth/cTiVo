@@ -1067,7 +1067,12 @@ BOOL channelChecking = NO;
         NSArray <MTDownload *> * downloads = [tiVoManager downloadsForShow:deletedShow];
         for (MTDownload * download in downloads) {
 			if (download.isNew) {
-            	download.downloadStatus = @(kMTStatusDeleted);
+            	download.downloadStatus = @(kMTStatusDeleted); //never gonna happen
+			} else if (download.downloadStatus.intValue == kMTStatusWaiting ){ //might as well cancel
+				[download cancel];
+				download.downloadStatus = @(kMTStatusDeleted);
+			} else { // should finish, but need to update Status column in download.
+				[[NSNotificationCenter defaultCenter] postNotificationName: kMTNotificationDownloadRowChanged object:download];
         	}
 		}
     }
@@ -1251,30 +1256,35 @@ BOOL channelChecking = NO;
 	}
 	if (!tiVoManager.processingPaused.boolValue) {
 		DDLogDetail(@"%@ Checking for new download", self);
+		BOOL launchedOne = NO; //true after we launched one, to allow us to scan for skipMode's needed in rest of queue without ever launching 2
 		for (MTDownload *download in self.downloadQueue) {
 			if ([download.show.protectedShow boolValue] ) {
 				//protectedShow is used in downloadQueue during startup to indicate not loaded yet.
-				if( [download isDone]) {
+				if ([download isDone]) {
 					continue;  //ignore completed ones
 				} else {
 					break; //but don't process if we have uncompleted, unloaded ones
 				}
 			}
-			if (download.downloadStatus.intValue == kMTStatusWaiting ||
-				download.downloadStatus.intValue == kMTStatusSkipModeWaitEnd) {
+			int status = download.downloadStatus.intValue;
+			if (status == kMTStatusWaiting ||
+				status == kMTStatusSkipModeWaitEnd) {
 				[download skipModeCheck]; //note: may call us recursively, but status will = New or postcommercial
 			}
-			if (download.downloadStatus.intValue == kMTStatusNew  && !isDownloading) {
-				tiVoManager.numEncoders++;
-				DDLogMajor(@"Number of encoders after launching show \"%@\"  is %d",download.show.showTitle, tiVoManager.numEncoders);
-				[download launchDownload];
-				break;
-			} else if (download.downloadStatus.intValue == kMTStatusAwaitingPostCommercial ) {
-				tiVoManager.numEncoders++;
-				DDLogMajor(@"Number of encoders after commercial launch for show \"%@\"  is %d",download.show.showTitle, tiVoManager.numEncoders);
-				[download launchPostCommercial];
-				break;
+			if (!launchedOne) {
+				if ((status == kMTStatusNew  && !isDownloading ) ||
+					(status == kMTStatusAwaitingPostCommercial)) {
+					launchedOne = YES;
+					BOOL isNew = status == kMTStatusNew;
+					tiVoManager.numEncoders++;
+					DDLogMajor(@"Number of encoders after %@ show \"%@\"  is %d",isNew ? @"launching" : @"commercial launch" ,download.show.showTitle, tiVoManager.numEncoders);
+					if (isNew) {
+						[download launchDownload];
+					} else {
+						[download launchPostCommercial];
+					}
 				}
+			}
         }
     }
     managingDownloads = NO;
