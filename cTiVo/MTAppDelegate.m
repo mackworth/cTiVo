@@ -32,6 +32,7 @@
 #ifndef MAC_APP_STORE
 #import "Sparkle/SUUpdater.h"
 #import "PFMoveApplication.h"
+#import "NSTask+RunTask.h"
 #endif
 
 #import "NSNotificationCenter+Threads.h"
@@ -108,17 +109,59 @@ void signalHandler(int signal)
 #endif
 }
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
-{
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+	
+	//first check if we're migrating from MAS to direct version
+	// if so, copy prefs and cache over
+	//(other direction is handled by OS migration
 	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+#ifndef SANDBOX
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString * prefPath = [@"~/Library/Preferences/com.cTiVo.cTiVo.plist" stringByExpandingTildeInPath];
+	NSString * containerPrefPath = [@"~/Library/Containers/com.cTiVo.cTiVo/Data/Library/Preferences/com.cTiVo.cTiVo.plist" stringByExpandingTildeInPath];
+	if (![fm fileExistsAtPath: prefPath] &&  [fm fileExistsAtPath: containerPrefPath]) {
+		//
+		if ([defaults objectForKey:kMTQueue]) {
+			//defaults persistence wierdness; need to run again from scratch
+			NSLog(@"run too soon after last time!  Try again!");
+			[[NSApplication sharedApplication] terminate:nil];
+		}
+		NSString * tempDefaultsName = @"com.cTiVo.cTiVoMAS";
+		NSString * prefs = [NSTask runProgram:@"/usr/bin/defaults"
+							withArguments:@[@"import",
+											tempDefaultsName,
+											containerPrefPath]];
+		
+		if (prefs.length > 0) NSLog(@"Tried to import prefs, but got: %@", prefs);
+		NSDictionary<NSString *,id> * prefsMAS = [defaults persistentDomainForName:tempDefaultsName];
+		for (NSString * key in prefsMAS.allKeys ) {
+			[defaults setObject:prefsMAS[key] forKey:key];
+		}
+		NSLog (@"Migrated Preferences from Mac App Store version: %@",[prefsMAS.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)]);
+//
+		//now clean up...
+		[fm removeItemAtPath:[@"~/Library/Preferences/com.cTiVo.cTiVoMAS.plist" stringByExpandingTildeInPath]  error:nil ];
+		
+		//now move caches directory back to Direct location
+		NSString * oldCachesPath = [@"~/Library/Containers/com.cTiVo.cTiVo/Data/Library/Caches/com.cTiVo.cTiVo" stringByExpandingTildeInPath];
+		NSString * newCachesPath = [@"~/Library/Caches/com.cTiVo.cTiVo" stringByExpandingTildeInPath];
+		if (![fm fileExistsAtPath: newCachesPath] &&  [fm fileExistsAtPath: oldCachesPath]) {
+			[fm moveItemAtPath:oldCachesPath toPath:newCachesPath error:nil];
+		}
+		//and delete the sandbox Container; will be recreated if they run that app again.
+		[fm removeItemAtPath:[@"~/Library/Containers/com.cTiVo.cTiVo" stringByExpandingTildeInPath] error:nil ];
+	}
+#endif
+
 	[defaults registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
+	
 #ifndef DEBUG
     if (![defaults boolForKey:kMTCrashlyticsOptOut]) {
         [Fabric with:@[[Crashlytics class]]];
     }
-#endif
 #ifndef MAC_APP_STORE
 	PFMoveToApplicationsFolderIfNecessary();
+#endif
 #endif
 	CGEventRef event = CGEventCreate(NULL);
     CGEventFlags modifiers = CGEventGetFlags(event);
@@ -163,6 +206,23 @@ void signalHandler(int signal)
 #endif
 [[[NSBundle mainBundle] infoDictionary] valueForKey:@"CFBundleVersion"]);
 
+#ifdef SANDBOX
+	//in case we're porting from non-sandboxed:
+	NSString * oldTempPath = [defaults objectForKey:kMTTmpFilesPath];
+	if (oldTempPath.length) {  //remember in case we go back to non-sandboxed
+		[defaults setObject:oldTempPath forKey: @"OldTmpFilePath"];
+		[defaults setObject:nil forKey: kMTTmpFilesPath];
+	}
+#else
+	NSString * tempPath = [defaults objectForKey:kMTTmpFilesPath];
+	if (!tempPath.length) {
+		//maybe coming back from sandboxed
+		NSString * oldTmpPath= [defaults objectForKey: @"OldTmpFilePath"];
+		if (oldTmpPath.length) {
+			[defaults setObject:oldTmpPath forKey: kMTTmpFilesPath];
+			[defaults setObject:nil forKey: @"OldTmpFilePath"];
+		}
+	}
 	//Upgrade old defaults
 	NSString * oldtmp = [defaults stringForKey:kMTTmpFilesDirectoryObsolete];
 	if (oldtmp) {
@@ -176,10 +236,6 @@ void signalHandler(int signal)
 		}
 		[defaults setObject:nil forKey: kMTTmpFilesDirectoryObsolete];
 	}
-#ifdef SANDBOX
-	//in case we're porting from non-sandboxed:
-		[defaults setObject:nil forKey: kMTTmpFilesPath];
-#endif
 
 	if ([defaults stringForKey:kMTFileNameFormat].length == 0) {
 		NSString * newDefaultFileFormat = kMTcTiVoDefault;
@@ -188,13 +244,14 @@ void signalHandler(int signal)
 			[defaults setObject:nil forKey: kMTMakeSubDirsObsolete];
 		}
 		[defaults setObject:newDefaultFileFormat forKey: kMTFileNameFormat];
-		
 	}
 
 	if ([defaults boolForKey:kMTSkipCommercials]) {
 		//transition from 3.1 to 3.3.1
 		[defaults setBool:NO forKey:kMTMarkCommercials];
 	}
+#endif
+
 	NSDictionary *userDefaultsDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
 										  @YES, kMTShowCopyProtected,
 										  @NO, kMTShowSuggestions,
@@ -257,7 +314,9 @@ void signalHandler(int signal)
 	[_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueObservingOptionInitial context:nil];
 	[defaults addObserver:self forKeyPath:kMTSkipCommercials options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
+#ifndef SANDBOX
 	[defaults addObserver:self forKeyPath:kMTTmpFilesPath options:NSKeyValueObservingOptionInitial context:nil];
+#endif
 	[defaults addObserver:self forKeyPath:kMTDownloadDirectory options:NSKeyValueObservingOptionInitial context:nil];
 	if (@available(macOS 10.10.3, *)) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(thermalStateChanged:) name:NSProcessInfoThermalStateDidChangeNotification object:nil];
@@ -284,8 +343,7 @@ void signalHandler(int signal)
 	[tiVoManager launchMetadataQuery];
 #endif
     //Make sure details and thumbnails directories are available
-	[self fixCacheStructure];
-    [self checkDirectoryAndPurge:[tiVoManager tivoTempDirectory]];
+	[self checkDirectoryAndPurge:[tiVoManager tivoTempDirectory]];
     [self checkDirectoryAndPurge:[tiVoManager tvdbTempDirectory]];
     [self checkDirectoryAndPurge:[tiVoManager detailsTempDirectory]];
 
@@ -316,6 +374,19 @@ void signalHandler(int signal)
 	[self.tiVoGlobalManager startTiVos];
 	DDLogDetail(@"Finished appDidFinishLaunch");
  }
+
+-(BOOL) alreadyRunning { //returns true if another instance of cTiVo is running
+	NSArray <NSRunningApplication *> * apps = [[NSWorkspace sharedWorkspace] runningApplications];
+	int myProcess = [[NSProcessInfo  processInfo]  processIdentifier];
+	for (NSRunningApplication * app in apps) {
+		if ([app.bundleIdentifier isEqualToString: @"com.ctivo.ctivo"]) {
+			if (app.processIdentifier != myProcess ) {
+				return YES;
+			}
+		}
+	}
+	return NO;
+}
 
 -(void) systemSleep: (NSNotification *) notification {
 	DDLogReport(@"System Sleeping!");
@@ -442,46 +513,6 @@ NSObject * assertionID = nil;
 	return YES;
 }
 
--(void)fixCacheStructure {
-	//relocate cache files to proper subirectories in cache folder
-	//this bug was introduced long ago, and this fix should be removed after some period (doesn't really matt
-	NSFileManager * fm = [NSFileManager defaultManager];
-	NSArray <NSURL *> * caches =  [fm URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
-	if (caches.count == 0) {
-		DDLogReport(@"Could not open main cache directory");
-		return;
-	}
-	NSString* bundleID = [[NSBundle mainBundle] bundleIdentifier];
-	NSURL * ctiVoCache = [caches[0] URLByAppendingPathComponent:bundleID isDirectory:YES];
-	NSError * error = nil;
-	NSArray <NSURL *> * fileList = [fm contentsOfDirectoryAtURL:ctiVoCache
-					   includingPropertiesForKeys:[NSArray array]
-										  options:0
-											error:&error
-											];
-	if (error) {
-		DDLogReport(@"Could not get cache listing");
-		return;
-	}
-
-	if (fileList.count > 10) { //url cache, sparkle, subdirs
-		NSURL * detailsURL = [tiVoManager detailsTempDirectory];
-		NSInteger prefSource = [[NSUserDefaults standardUserDefaults] integerForKey:KMTPreferredImageSource];
-		NSURL * graphicsURL = prefSource <= 1 ? [tiVoManager tivoTempDirectory] : [tiVoManager tvdbTempDirectory];
-		NSInteger numErrors = 0;
-		for (NSURL * url in fileList) {
-			if ([url.pathExtension isEqualToString: @"xml"]) {
-				if (![self moveCacheFile:url to:detailsURL ]) numErrors++;
-			} else if ([url.pathExtension isEqualToString: @"jpg"]) {
-				if (![self moveCacheFile:url to:graphicsURL ]) numErrors++;
-			}
-			if (numErrors > 5) {
-				DDLogReport(@"While trying to move cache files, too many errors. Cancelling process: From %@ to %@ and %@", ctiVoCache, detailsURL, graphicsURL);
-				return;
-			}
-		}
-	}
-}
 
 -(void) checkDirectoryAndPurge: (NSURL *) directory  {
     NSFileManager *fm = [NSFileManager defaultManager];
@@ -818,7 +849,7 @@ NSObject * assertionID = nil;
 
 -(void)validateTmpDirectory {
 	//Validate users choice for tmpFilesDirectory
-	NSString *tmpdir = [[NSUserDefaults standardUserDefaults] stringForKey:kMTTmpFilesPath];
+	NSString *tmpdir = tiVoManager.tmpFilesDirectory;
 	if ([tmpdir isEquivalentToPath: [self defaultDownloadDirectory]] ||
 	    [tmpdir isEquivalentToPath: [[NSUserDefaults standardUserDefaults] stringForKey:kMTDownloadDirectory]] ) {
 			//Oops; user confused temp dir with download dir

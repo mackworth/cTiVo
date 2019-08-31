@@ -95,11 +95,10 @@ __DDLOGHERE__
 			_lastLoadedTivoTimes = [NSMutableDictionary new];
 		}
        [self initialFormatSetup];
-#ifndef SANDBOX
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
         DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);
-#endif
-       [self restoreManualEpisodeInfo];
+
+		[self restoreManualEpisodeInfo];
 
 		self.numEncoders = 0;
 		_signalError = 0;

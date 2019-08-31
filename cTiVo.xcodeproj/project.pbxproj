@@ -1639,8 +1639,8 @@
 				1E50515A22556CC300D5981B /* Copy Executables */,
 				1E50516122556CC300D5981B /* Copy shared libraries for executables */,
 				1E5051B822556CC300D5981B /* CopyFiles */,
-				1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */,
 				1E5051BB22556CC300D5981B /* Run Script */,
+				1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */,
 				1E5051BC22556CC300D5981B /* Sign Executables */,
 			);
 			buildRules = (
@@ -1662,8 +1662,8 @@
 				1EDBDFA61B1CB71200E979F0 /* Copy Executables */,
 				1E557BCE1CD8033F0014D85B /* Copy shared libraries for executables */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
-				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				1E07864E19C7F3CE00A68051 /* Run Script */,
+				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				D2AA030A1833F09B00AEE326 /* Sign Bundled Frameworks */,
 			);
 			buildRules = (
