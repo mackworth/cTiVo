@@ -24,6 +24,7 @@
 
 #import <Quartz/Quartz.h>
 
+#ifdef MAC_APP_STORE
 //All this mess is just to avoid the error msg that "Drawer cannot have first responder of MTProgramTableView"
 //remove if we move from Drawer to splitView or expanded Row concept
 @interface NSWindow (FirstResponding)
@@ -39,6 +40,7 @@
 	}
 }
 @end
+#endif
 
 @implementation NSView (HS)
 
