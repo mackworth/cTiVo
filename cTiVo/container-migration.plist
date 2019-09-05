@@ -5,6 +5,7 @@
 	<key>Move</key>
 	<array>
 		<string>${Caches}/com.cTiVo.cTiVo</string>
+		<string>${Library}/Logs/cTiVo/</string>
 	</array>
 </dict>
 </plist>

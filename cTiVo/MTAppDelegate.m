@@ -123,7 +123,9 @@ void signalHandler(int signal)
 		//
 		if ([defaults objectForKey:kMTQueue]) {
 			//defaults persistence wierdness; need to run again from scratch
-			NSLog(@"run too soon after last time!  Try again!");
+			NSLog(@"cTiVo run too soon after last time!  Try again!");
+			NSAlert *quitAlert = [NSAlert alertWithMessageText:@"cTiVo was run too soon after cTV exited." defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"You'll need to run it again now."];
+			[quitAlert runModal];
 			[[NSApplication sharedApplication] terminate:nil];
 		}
 		NSString * tempDefaultsName = @"com.cTiVo.cTiVoMAS";
@@ -148,6 +150,13 @@ void signalHandler(int signal)
 		if (![fm fileExistsAtPath: newCachesPath] &&  [fm fileExistsAtPath: oldCachesPath]) {
 			[fm moveItemAtPath:oldCachesPath toPath:newCachesPath error:nil];
 		}
+		
+		NSString * oldLogPath = [@"~/Library/Containers/com.cTiVo.cTiVo/Data/Library/Logs/cTiVo" stringByExpandingTildeInPath];
+		NSString * newLogPath = [@"~/Library/Logs/cTiVo" stringByExpandingTildeInPath];
+		if (![fm fileExistsAtPath: newLogPath] &&  [fm fileExistsAtPath: oldLogPath]) {
+			[fm moveItemAtPath:oldLogPath toPath:newLogPath error:nil];
+		}
+
 		//and delete the sandbox Container; will be recreated if they run that app again.
 		[fm removeItemAtPath:[@"~/Library/Containers/com.cTiVo.cTiVo" stringByExpandingTildeInPath] error:nil ];
 	}
@@ -314,7 +323,9 @@ void signalHandler(int signal)
 	[_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueObservingOptionInitial context:nil];
 	[defaults addObserver:self forKeyPath:kMTSkipCommercials options:NSKeyValueObservingOptionNew context:nil];
 	[defaults addObserver:self forKeyPath:kMTMarkCommercials options:NSKeyValueObservingOptionNew context:nil];
-#ifndef SANDBOX
+#ifdef SANDBOX
+	[self validateTmpDirectory];
+#else
 	[defaults addObserver:self forKeyPath:kMTTmpFilesPath options:NSKeyValueObservingOptionInitial context:nil];
 #endif
 	[defaults addObserver:self forKeyPath:kMTDownloadDirectory options:NSKeyValueObservingOptionInitial context:nil];
@@ -333,7 +344,6 @@ void signalHandler(int signal)
             name: NSWorkspaceDidWakeNotification object: NULL];
 
 	//Initialize tmp directory
-	[self checkVolumes:nil];
 	[self clearTmpDirectory];
 	
 #ifdef SANDBOX
@@ -753,7 +763,7 @@ NSObject * assertionID = nil;
 		DDLogReport(@"Could not start using the bookmarked %@ url: %@", bookMarkKey, url);
 		return nil;
 	}
-	DDLogReport(@"Bookmarked %@ url %@ resolved successfully!", bookMarkKey, url); //should be detail
+	DDLogDetail(@"Bookmarked %@ url %@ resolved successfully!", bookMarkKey, url);
 	return url;
 }
 

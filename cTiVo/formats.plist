@@ -1717,44 +1717,6 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderUsed</key>
 			<string>HandBrakeCLI</string>
 			<key>encoderVideoOptions</key>
-			<string>-Z&quot;H.265&quot;</string>
-			<key>filenameExtension</key>
-			<string>.mp4</string>
-			<key>formatDescription</key>
-			<string>H.265 video; HW accelerated on T2 Macs, AAC stereo audio, and Dolby Digital (AC-3) surround audio, in an MP4 container. Compatible with Apple iPhone 7 and later; iPads since 2017; Apple TV 4th Generation and later.</string>
-			<key>iTunes</key>
-			<true/>
-			<key>inputFileFlag</key>
-			<string>-i</string>
-			<key>isFactoryFormat</key>
-			<true/>
-			<key>isHidden</key>
-			<true/>
-			<key>mustDownloadFirst</key>
-			<true/>
-			<key>name</key>
-			<string>HB H.265 HW</string>
-			<key>outputFileFlag</key>
-			<string>-o</string>
-			<key>regExProgress</key>
-			<string> ([\d\.]*?) \%</string>
-		</dict>
-		<dict>
-			<key>captionOptions</key>
-			<string></string>
-			<key>comSkip</key>
-			<false/>
-			<key>comSkipOptions</key>
-			<string></string>
-			<key>edlFlag</key>
-			<string></string>
-			<key>encoderAudioOptions</key>
-			<string></string>
-			<key>encoderOtherOptions</key>
-			<string></string>
-			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
-			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Apple 540p30 Surround&quot;</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
