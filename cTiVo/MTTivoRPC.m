@@ -1646,14 +1646,7 @@ static NSArray * imageResponseTemplate = nil;
 }
 
 -(void) findSkipModeRecursive: (NSNumber *) firstTryNumber {
-	BOOL lastTry = firstTryNumber.intValue >=
-
-#ifdef testJumps
-	19 //XXX 20 as experiment;
-#else
-	3 //try up to three times (due to interference)
-#endif
-	;
+	BOOL lastTry = firstTryNumber.intValue >= 3; //try up to three times (due to interference)
 	if (self.skipModeQueueEDL.count == 0) {
 		NSInteger tries = self.goodJump+self.shortJumps+self.longJump ;
 		NSString * result =[NSString stringWithFormat:@"After %@ attempts with delays %0.1f, %0.1f, %0.1f, %0.1f, the results were %@ Good; %@ Short; %@ Long. %0.0f%% good",  @(tries), delay1, delay2, delay3, delay4,  @(self.goodJump), @(self.shortJumps), @(self.longJump), 100.0*self.goodJump/(float)tries];

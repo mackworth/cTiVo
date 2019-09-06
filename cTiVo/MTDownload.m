@@ -1343,7 +1343,7 @@ __DDLOGHERE__
     }
 	if (!self.tempCaptionFilePath) {
 
-#ifdef  SANDBOX
+#ifdef SANDBOX
 		NSString * directory =self.tmpDirectory;
 #else
 		NSString * directory =self.downloadDirectory;
@@ -1398,7 +1398,7 @@ __DDLOGHERE__
 //        [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationCaptionDidFinish object:nil];
 		__typeof__(self) strongSelf = weakSelf;
         //commercial or caption might finish first.
-#ifdef  SANDBOX
+#ifdef SANDBOX
 		NSError * error = nil;
 		if (! [[NSFileManager defaultManager] moveItemAtPath:strongSelf.tempCaptionFilePath
 													  toPath:strongSelf.captionFilePath
@@ -1913,15 +1913,13 @@ __DDLOGHERE__
 
 -(void) writeMetaDataFiles {
 	
-#ifdef generate
-	if (self.genXMLMetaData.boolValue) {
-		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
-		DDLogMajor(@"Writing XML to    %@",tivoMetaPath);
-		if (![[NSFileManager defaultManager] copyItemAtPath: detailFilePath toPath:tivoMetaPath error:nil]) {
-				DDLogReport(@"Couldn't write XML to file %@", tivoMetaPath);
-		}
-	}
-#endif
+//	if (self.genXMLMetaData.boolValue) {
+//		NSString * tivoMetaPath = [[self.encodeFilePath stringByDeletingPathExtension] stringByAppendingPathExtension:@"xml"];
+//		DDLogMajor(@"Writing XML to    %@",tivoMetaPath);
+//		if (![[NSFileManager defaultManager] copyItemAtPath: detailFilePath toPath:tivoMetaPath error:nil]) {
+//				DDLogReport(@"Couldn't write XML to file %@", tivoMetaPath);
+//		}
+//	}
     NSURL * detailFileURL = self.show.detailFileURL;
 	if (self.genTextMetaData.boolValue && [detailFileURL fileExists]) {
 		NSData * xml = [NSData dataWithContentsOfURL:detailFileURL];

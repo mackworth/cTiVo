@@ -5,7 +5,6 @@
 //  Created by Scott Buchanan on 12/6/12.
 //  Copyright (c) 2012 Scott Buchanan. All rights reserved.
 //
-#define kLogTiVos 1
 
 #import "MTTiVoManager.h"
 #import "MTAppDelegate.h"
@@ -20,10 +19,8 @@
 #import "NSDate+Tomorrow.h"
 #include <arpa/inet.h>
 
-#ifdef kLogTiVos
 #include "MTWeakTimer.h"
-#import "Crashlytics/Crashlytics.h"
-#endif
+#import "Crashlytics/Crashlytics.h"  //to log TiVo failure reasons
 
 @interface MTTiVoManager ()    <NSUserNotificationCenterDelegate>        {
     NSNetServiceBrowser *tivoBrowser;
@@ -43,10 +40,8 @@
 @property (nonatomic,readonly) NSMutableArray <NSNetService *> *tivoServices;
 
 @property (nonatomic, strong) NSDate * lastSkipModeWarningTime; //for warnings
-#ifdef kLogTiVos
 @property (nonatomic, strong) NSTimer * tiVoTimer; //used to notify  of failure.
 @property (nonatomic, strong) NSString * missingTiVoSymptom;
-#endif
 @end
 
 @implementation MTTiVoManager
@@ -211,7 +206,7 @@ __DDLOGHERE__
 		}
 		[localQuery enableUpdates];
 		weakSelf.showsOnDisk = [NSDictionary dictionaryWithDictionary:tmpDict];
-		DDLogDetail(@"Finished MetaData (%0.1f seconds), showsOnDisk = %@",-[startTime timeIntervalSinceNow], weakSelf.showsOnDisk);//xxx put back to verbose
+		DDLogVerbose(@"Finished MetaData (%0.1f seconds), showsOnDisk = %@",-[startTime timeIntervalSinceNow], weakSelf.showsOnDisk);
 		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoShowsUpdated object:nil];
 	});
 }
@@ -506,14 +501,13 @@ __DDLOGHERE__
     }
     return highValue + 1;
 }
-#ifdef kLogTiVos
+
 -(void) failBonjour {
 	[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
 						success:@NO
 			   customAttributes:@{@"Symptom" : self.missingTiVoSymptom}];
 
 }
-#endif
 
 -(void) startTiVos {
 	[self searchForBonjourTiVos];
@@ -527,10 +521,9 @@ __DDLOGHERE__
     [tivoBrowser scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 	[tivoBrowser stop]; //internet voodoo to make search more reliable?
 	[tivoBrowser searchForServicesOfType:@"_http._tcp" inDomain:@"local."];
-#ifdef kLogTiVos
+
 	self.missingTiVoSymptom = @"None";
 	self.tiVoTimer = [MTWeakTimer scheduledTimerWithTimeInterval:kMTTimeToHelpIfNoTiVoFound target:self selector:@selector(failBonjour) userInfo:nil repeats:NO];
-#endif
 }
 
 -(NSArray <MTTiVo *> *)tiVoList {
@@ -1980,13 +1973,11 @@ __DDLOGHERE__
 #pragma mark - Bonjour browser delegate methods
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing {
-	DDLogReport(@"Found Service %@",netService); //XXX
+	DDLogMajor(@"Found Service %@",netService);
     for (NSNetService * prevService in _tivoServices) {
         if ([prevService.name compare:netService.name] == NSOrderedSame) {
-			DDLogReport(@"Already had %@",netService); //XXX
-#ifdef kLogTiVos
+			DDLogMajor(@"Already had %@",netService);
 			self.missingTiVoSymptom = @"Redundant";
-#endif
 			return; //already got this one
         }
     }
@@ -1997,16 +1988,12 @@ __DDLOGHERE__
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)browser
              didNotSearch:(NSDictionary *)errorDict {
-#ifdef kLogTiVos
 	self.missingTiVoSymptom = @"No service";
-#endif
     DDLogReport(@"Bonjour service not found: %@",errorDict);
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing {
-#ifdef kLogTiVos
 	self.missingTiVoSymptom = @"Disappeared";
-#endif
     DDLogReport(@"Service disappeared: %@",aNetService.name);
 }
 
@@ -2043,9 +2030,7 @@ __DDLOGHERE__
 		}
 	}
 	if (!TSN.length) {
-#ifdef kLogTiVos
 		self.missingTiVoSymptom = @"NoTSN";
-#endif
 		DDLogDetail(@"Rejecting non-TiVo device %@ at %@ ",sender.name,ipAddress);
 		return;
 	}
@@ -2056,37 +2041,31 @@ __DDLOGHERE__
 	DDLogDetail(@"Platform: %@; identity: %@; version: %@",platform, identity,version);
 	
 	if ([platform contains:@"Silverstr"]) {
-		DDLogDetail(@"Rejecting Silverstreak %@ - %@(%@)",TSN, sender.name, ipAddress);
+		DDLogMajor(@"Rejecting Silverstreak %@ - %@(%@)",TSN, sender.name, ipAddress);
 		return;
 	}
 	if ([TSN hasPrefix:@"A94"] || [identity hasPrefix:@"A94"]) {
-		DDLogDetail(@"Rejecting Stream %@ - %@(%@)",TSN, sender.name, ipAddress);
+		DDLogMajor(@"Rejecting Stream %@ - %@(%@)",TSN, sender.name, ipAddress);
 		return;
 	}
 	if ([platform hasSuffix:@"pyTivo"]) {
 		//filter out pyTivo
-		DDLogDetail(@"Rejecting pyTivo %@(%@)",sender.name, ipAddress);
-#ifdef kLogTiVos
+		DDLogMajor(@"Rejecting pyTivo %@(%@)",sender.name, ipAddress);
 		self.missingTiVoSymptom = @"pytivo";
-#endif
 		return;
 	}
     
 	if ([version hasSuffix:@"1.95a"]) {
 		//filter out tivo desktop
-#ifdef kLogTiVos
 		self.missingTiVoSymptom = @"tivoDesktop";
-#endif
-		DDLogDetail(@"Rejecting old TiVo Desktop %@(%@) ",sender.name,ipAddress);
+		DDLogMajor(@"Rejecting old TiVo Desktop %@(%@) ",sender.name,ipAddress);
 		return;
 	}
 	
 	if (platform && ![platform hasPrefix:@"tcd"]) {
 		//filter out other non-tivos
-#ifdef kLogTiVos
 		self.missingTiVoSymptom = @"Invalid tcd";
-#endif
-		DDLogDetail(@"Rejecting Invalid TiVo platform %@; rejecting %@(%@) ",platform, sender.name,ipAddress);
+		DDLogMajor(@"Rejecting Invalid TiVo platform %@; rejecting %@(%@) ",platform, sender.name,ipAddress);
 		return;
 	}
 	
@@ -2096,21 +2075,17 @@ __DDLOGHERE__
 	if (newTiVo.isMini ) { 
 		_tiVoMinis = [_tiVoMinis arrayByAddingObject: newTiVo];
 		DDLogReport(@"Found TiVo Mini: %@ at %@", newTiVo, ipAddress);
-#ifdef kLogTiVos
 		self.missingTiVoSymptom = @"tivoMini";
-#endif
 		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
 	} else {
 		self.tiVoList = [_realTiVoList arrayByAddingObject: newTiVo];
 		if (newTiVo.enabled){
-#ifdef kLogTiVos
 			if (self.tiVoTimer) {
 				[self.tiVoTimer invalidate]; self.tiVoTimer = nil;
 				[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
 									success:@YES
 						   customAttributes:@{}];
 			}
-#endif
 			if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
 				//Haven't seen multiple TiVos before, so enable the TiVo column this one time.
 				//In future, if user hides, we don't mess with it.
@@ -2121,9 +2096,7 @@ __DDLOGHERE__
 			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoListUpdated object:nil];
 			[newTiVo updateShows:self];
 		} else {
-#ifdef kLogTiVos
 			self.missingTiVoSymptom = @"Disabled";
-#endif
 			DDLogReport(@"Disabled TiVo: %@ at %@", newTiVo, ipAddress); //XXX
 		}
 	}
@@ -2131,9 +2104,7 @@ __DDLOGHERE__
 
 
 -(void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict {
-#ifdef kLogTiVos
 	self.missingTiVoSymptom = @"No Resolve";
-#endif
     DDLogReport(@"Service %@ failed to resolve",sender.name);
     [sender stop];
 }

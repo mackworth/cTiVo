@@ -349,9 +349,8 @@ void signalHandler(int signal)
 #ifdef SANDBOX
 	//get permission for various older download folders:
 	[self accessCachedBookMarks];
-#else
-	[tiVoManager launchMetadataQuery];
 #endif
+	[tiVoManager launchMetadataQuery];
     //Make sure details and thumbnails directories are available
 	[self checkDirectoryAndPurge:[tiVoManager tivoTempDirectory]];
     [self checkDirectoryAndPurge:[tiVoManager tvdbTempDirectory]];
@@ -828,7 +827,6 @@ NSObject * assertionID = nil;
 		}
 	}
 	if (didChange)[[NSUserDefaults standardUserDefaults] setObject:newCache forKey:kMTRecentDownloadBookMarks];
-	[tiVoManager launchMetadataQuery];
 }
 #endif
 
