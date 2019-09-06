@@ -32,14 +32,13 @@ __DDLOGHERE__
 }
 
 -(iTunesSource *) iTunesLibraryHelper {
-	NSPredicate * libraryKindPred = [NSPredicate predicateWithFormat:@"kind == %@",[NSAppleEventDescriptor descriptorWithTypeCode:iTunesESrcLibrary]];
-	SBElementArray *librarySources = [self.iTunes sources];
-	[librarySources filterUsingPredicate:libraryKindPred];
-	if ([librarySources count] > 0){
-		return [librarySources objectAtIndex:0];
-	} else {
-		return nil;
-	}
+	NSArray<iTunesSource *> *librarySources = [[self.iTunes sources] get];
+    for ( iTunesSource * source in librarySources) {
+        if (source.kind == iTunesESrcLibrary) {
+            return source;
+        }
+    }
+    return nil;
 }
 
 -(iTunesSource *) iTunesLibrary   {
@@ -60,13 +59,9 @@ __DDLOGHERE__
 	if (!_libraryPlayList|| ![_libraryPlayList exists]) {
         iTunesSource * iLibrary = [self iTunesLibrary];
         if (!iLibrary) return nil;
-		SBElementArray * allLists = [iLibrary libraryPlaylists];
+		NSArray <iTunesLibraryPlaylist *> * allLists = [[iLibrary libraryPlaylists] get];
 		if (allLists.count > 0) {
-				
-			iTunesPlaylist * list = [allLists objectAtIndex:0];
-            if ([list exists]) {
-				_libraryPlayList = (iTunesLibraryPlaylist *)list;
-            }
+            _libraryPlayList = allLists[0];
 		}
         if (!_libraryPlayList) {
 			DDLogMajor(@"couldn't find %@ playList", [self appName]);
@@ -76,16 +71,17 @@ __DDLOGHERE__
 }
 
 -(iTunesPlaylist *) tivoPlayList {
-	if (!_tivoPlayList || ![_tivoPlayList exists]) {
+	if (!_tivoPlayList) {
         iTunesSource * iLibrary = [self iTunesLibrary];
         if (!iLibrary) return nil;
-		SBElementArray * allLists = [iLibrary playlists];
-        NSPredicate * libraryKindPred = [NSPredicate predicateWithFormat:@"name LIKE[CD] %@ ",@"Tivo Shows"];
-		NSArray *TivoLists = [allLists filteredArrayUsingPredicate:libraryKindPred];
-		if ([TivoLists count] > 0){
-			_tivoPlayList = [TivoLists objectAtIndex:0];
+		NSArray<iTunesPlaylist *> * allLists = [[iLibrary playlists] get];
+        for ( iTunesPlaylist * playList in allLists) {
+            if ([playList.name isEqualToString: @"Tivo Shows"]) {
+                _tivoPlayList = playList;
+                break;
+            }
         }
-		if (!_tivoPlayList || ![_tivoPlayList exists]) {
+		if (!_tivoPlayList ) {
 			//No tivo playlist found; create one
 			NSDictionary *props = @{
 				@"name":@"Tivo Shows",
@@ -93,9 +89,8 @@ __DDLOGHERE__
 			};
 			iTunesPlaylist * newPlayList = [[[[self iTunes] classForScriptingClass:@"playlist" ] alloc ] initWithProperties:props ];
 			
-			//newPlayList.specialKind = iTunesESpKMovies;
 			if (newPlayList ) {
-				[allLists  insertObject:newPlayList atIndex:[allLists count]-1];
+				[[iLibrary playlists]  insertObject:newPlayList atIndex:[allLists count]-1];
 				if ([newPlayList exists]) {
 					newPlayList.name = @"Tivo Shows";
 				} else {
@@ -128,6 +123,30 @@ __DDLOGHERE__
 	([self fileNumber:attributesA] == [self fileNumber:attributesB]);
 }
 
+//handles diffferences between TV and iTunes sdef
+-(void) setArtist:(NSString *) artist forTrack:(iTunesFileTrack *) track {
+	if (artist.length ==0) return;
+	if ([track respondsToSelector:@selector(setArtist:)]) {
+		[track performSelector:@selector(setArtist:) withObject:artist];
+	}
+	if ([track respondsToSelector:@selector(setAlbumArtist:)]) {
+		[track performSelector:@selector(setAlbumArtist:) withObject:artist];
+	}
+}
+
+-(void) setDirector:(NSString *)director forTrack:(iTunesFileTrack *) track {
+	if (director.length ==0) return;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+    if ([track respondsToSelector:@selector(setDirector:)]) {
+		[track performSelector:@selector(setDirector:) withObject:director];
+	}
+#pragma clang diagnostic pop
+	if ([track respondsToSelector:@selector(setArtist:)]) {
+		[track performSelector:@selector(setArtist:) withObject:director];
+	}
+}
+
 -(NSString *) importIntoiTunes: (MTDownload * ) download withArt:(NSImage *) image {
 	//Caller responsible for informing user of progress
 	// There can be a long delay as iTunes starts up
@@ -137,17 +156,18 @@ __DDLOGHERE__
     NSString * fileExtension = [[download.encodeFilePath pathExtension] uppercaseString];
     NSSet * musicTypes =[NSSet setWithObjects:@"AAC", @"MPE",@"AIF",@"WAV",@"AIFF",@"M4A",@"MP3",nil];
     self.audioOnly = [musicTypes containsObject:fileExtension] ;
-
-    iTunesPlaylist * myPlayList = self.tivoPlayList;
-    if (!myPlayList) {
+    iTunesLibraryPlaylist * myLibraryList = self.libraryPlayList;
+    if (!myLibraryList) {
         DDLogReport(@"Couldn't create TiVo playlist, because library not found. Is %@ frozen?", [self appName] );
         return nil;
     }
-    iTunesFileTrack * newTrack = (iTunesFileTrack *)[self.iTunes add:@[showFileURL] to: [self tivoPlayList] ];
-	NSError * error = newTrack.lastError;
-	if ([newTrack exists]) {
-		DDLogReport(@"Added %@ track:  %@", show.showTitle, [self appName]);
-		if (self.audioOnly) {
+    iTunesFileTrack * newTrack = (iTunesFileTrack *)[self.iTunes add:@[showFileURL] to: myLibraryList ];
+
+    NSError * error = newTrack.lastError;
+    if (newTrack && !error) {
+
+		DDLogReport(@"Added %@ track to %@", show.showTitle, [self appName]);
+        if (self.audioOnly) {
 			newTrack.mediaKind = iTunesEMdKSong;
 		} else if (show.isMovie) {
 			newTrack.mediaKind = iTunesEMdKMovie;
@@ -157,8 +177,7 @@ __DDLOGHERE__
 
 		if (show.isMovie) {
 			newTrack.name = show.showTitle;
-            newTrack.artist = show.directors.string;
-            
+			[self setDirector: show.directors.string forTrack:newTrack];
 		} else {
 			if (show.season > 0) {
 				newTrack.album = [NSString stringWithFormat: @"%@, Season %d",show.seriesTitle, show.season];
@@ -166,8 +185,8 @@ __DDLOGHERE__
 			} else {
 				newTrack.album =  show.seriesTitle;
 			}
-			newTrack.albumArtist = show.seriesTitle;
-			newTrack.artist =show.seriesTitle;
+			[self setArtist: show.seriesTitle forTrack:newTrack];
+			[self setDirector: show.directors.string forTrack:newTrack];
 			if (show.episodeTitle.length ==0) {
 				NSString * dateString = show.originalAirDateNoTime;
 				if (dateString.length == 0) {
@@ -212,18 +231,19 @@ __DDLOGHERE__
 			artwork.data = image;
 		}
 
-	/* haven't bothered with:
-	 tell application "Finder"
-	 set comment of this_item2 to (((show_name as string) & " - " & episodeName as string) & " - " & file_description as string)
-	 
-	 end tell
-	 */
+        iTunesPlaylist * myPlayList = self.tivoPlayList;
+        iTunesFileTrack * tivoShowTrack = (iTunesFileTrack *) [newTrack duplicateTo:myPlayList];
+        error = tivoShowTrack.lastError;
+        
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesSync]) {
 			[self updateAllIDevices];
 		}
-		NSString * newLocation =  [[newTrack location] path];
+        NSString * newLocation =  [[newTrack location] path];
 
-		if ([self is:newLocation sameFileAs:download.encodeFilePath]) {
+        if (error || !newLocation) {
+            DDLogReport(@"%@ reports problem with track: %@ (%@)from %@ because %@",  [self appName], show.showTitle, download.encodeFormat.name, showFileURL, [error localizedDescription] ?: @"no reason given");
+            return download.encodeFilePath;
+        }  else if ([self is:newLocation sameFileAs:download.encodeFilePath]) {
 			return download.encodeFilePath;
 		} else {
 			return newLocation;
@@ -398,9 +418,9 @@ __DDLOGHERE__
 -(NSString *) appName {
 	if (@available(macOS 10.15, *)) {
         if (self.audioOnly) {
-            return @"Music";
+            return @"Music";
         } else {
-            return @"Apple TV";
+            return @"TV";
         }
 	} else {
 		return @"iTunes";
@@ -411,7 +431,7 @@ __DDLOGHERE__
 	//ask user to fix problem
 	//returns YES to try again, no if not fixed.
 	NSString * msg = [NSString stringWithFormat:@"" kcTiVoName @" cannot access %@, probably due to Automation Permission problem.", [self appName]];
-	NSString * altMsg = [NSString stringWithFormat:@"Disable " kcTiVoName @"'s use of %@ app", [self appName]];
+	NSString * altMsg = [NSString stringWithFormat:@"Disable " kcTiVoName @"'s use of %@", [self appName]];
 	NSAlert *iTunesAlert = [NSAlert alertWithMessageText: msg
 										   defaultButton: @"Open System Preferences"
 										 alternateButton: altMsg
@@ -441,13 +461,13 @@ __DDLOGHERE__
 									  defaultButton: @"OK"
 									alternateButton: nil
 										otherButton: nil
-						  informativeTextWithFormat: @"Please restart " kcTiVoName @" to check %@ access@", [self appName]];
+						  informativeTextWithFormat: @"Please restart " kcTiVoName @" to check %@ access", [self appName]];
 	[alert2 runModal];
 }
 
 -(BOOL) confirmiTunesPermissionFixed {
 	NSString * msg = [NSString stringWithFormat:@"Please click OK when you have enabled " kcTiVoName @"'s %@ permission in Privacy.", [self appName]];
-	NSString * altMsg = [NSString stringWithFormat: @"Disable " kcTiVoName @"'s use of %@ app", [self appName]];
+	NSString * altMsg = [NSString stringWithFormat: @"Disable " kcTiVoName @"'s use of %@", [self appName]];
 
 	NSAlert *alert = [NSAlert alertWithMessageText: msg
 									 defaultButton: @"OK"
@@ -475,7 +495,7 @@ __DDLOGHERE__
 
 -(BOOL) offerResetPermissions {
 	NSString * msg = [NSString stringWithFormat:@"Still no %@ access; " kcTiVoName @" can reset macOS Automation permissions for ALL apps if you wish.", [self appName]];
-	NSString * altMsg = [NSString stringWithFormat: @"Disable " kcTiVoName @"'s use of %@ app", [self appName]];
+	NSString * altMsg = [NSString stringWithFormat: @"Disable " kcTiVoName @"'s use of %@", [self appName]];
 	NSAlert *alert = [NSAlert alertWithMessageText: msg
 									 defaultButton: @"Reset Automation Permissions"
 								   alternateButton: altMsg
@@ -504,7 +524,7 @@ __DDLOGHERE__
 }
 
 -(BOOL) warniTunesFailure {
-	NSString * msg = [NSString stringWithFormat:@"" kcTiVoName @" still cannot access %@ app.", [self appName]];
+	NSString * msg = [NSString stringWithFormat:@"" kcTiVoName @" still cannot access %@.", [self appName]];
 	NSAlert *alert2 = [NSAlert alertWithMessageText: msg
 									  defaultButton: @"OK"
 									alternateButton: nil

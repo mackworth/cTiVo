@@ -2062,15 +2062,17 @@ __DDLOGHERE__
 	//allows for delayed Marking of commercials
 	self.processProgress = 1.0;
 	[self writeMetaDataFiles];
+    if (self.exportSubtitles ) {
 	//dispose of 3-character (BOM) subtitle files
-	unsigned long long fileSize =  [[NSFileManager defaultManager] attributesOfItemAtPath:self.captionFilePath error:nil].fileSize;
-	if ( fileSize <= 3) {
-		DDLogMajor(@"Empty caption file for %@", self);
-		if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
-			[[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
-		}
-		self.captionFilePath = nil;
-	}
+        unsigned long long fileSize =  [[NSFileManager defaultManager] attributesOfItemAtPath:self.captionFilePath error:nil].fileSize;
+        if ( fileSize <= 3) {
+            DDLogMajor(@"Empty caption file for %@", self);
+            if ( ![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles] ) {
+                [[NSFileManager defaultManager] removeItemAtPath:self.captionFilePath error:nil];
+            }
+            self.captionFilePath = nil;
+        }
+    }
 	if (self.shouldMarkCommercials || self.encodeFormat.canAcceptMetaData || self.shouldEmbedSubtitles) {
 		MP4FileHandle *encodedFile = MP4Modify([self.encodeFilePath cStringUsingEncoding:NSUTF8StringEncoding],0);
 		NSArray <MTEdl *> *edls = self.show.edlList;
@@ -2105,7 +2107,7 @@ __DDLOGHERE__
 			if (!iTunesPath) {
 				DDLogMajor(@"Nil from iTunes; problem adding %@ at %@?", weakSelf, path);
 			} else if ( [iTunesPath isEqualToString: path]) {
-				DDLogMajor(@"Added %@ to iTunes at %@?", self, path);
+				DDLogMajor(@"Added %@ to iTunes at %@", self, path);
 			} else {
 				DDLogMajor(@"Copied %@ to iTunes from %@ to %@", weakSelf, path, iTunesPath);
 			}
@@ -3223,7 +3225,12 @@ NSInteger diskWriteFailure = 123;
 		case  kMTStatusCommercialed :		return @"Ads Detected";
 		case  kMTStatusEncoding :			return @"Encoding";
 		case  kMTStatusEncoded :			return @"Encoded";
-        case  kMTStatusAddingToItunes:		return @"Adding To iTunes";
+        case  kMTStatusAddingToItunes:
+			if (@available(macOS 10.15, *)) {
+				return @"Adding To TV";
+			} else {
+				return @"Adding To iTunes";
+			}
 		case  kMTStatusCaptioned:			return @"Subtitled";
 		case  kMTStatusCaptioning:			return @"Subtitling";
         case  kMTStatusMetaDataProcessing:	return @"Adding MetaData";

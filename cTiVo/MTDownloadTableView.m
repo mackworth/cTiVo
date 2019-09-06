@@ -35,6 +35,11 @@ __DDLOGHERE__
         self.delegate    = self;
         self.allowsMultipleSelection = YES;
         self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
+		if (@available(macOS 10.15, *)) {
+            NSTableColumn * iTunesColumn = [self tableColumnWithIdentifier:@"iTunes"];
+            iTunesColumn.title = [iTunesColumn.title stringByReplacingOccurrencesOfString:@"iTunes" withString:@"TV"];
+            iTunesColumn.headerToolTip = [iTunesColumn.headerToolTip stringByReplacingOccurrencesOfString:@"iTunes" withString:@"Apple's TV app"];
+		}
 	}
 	return self;
 }

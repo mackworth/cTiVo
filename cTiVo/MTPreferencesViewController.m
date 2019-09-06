@@ -23,6 +23,12 @@
 
 @implementation MTPreferencesViewController
 
+-(void)changeButtonToAppleTV: (NSButton *) button {
+    button.title = [button.title stringByReplacingOccurrencesOfString:@"iTunes" withString:@"TV" ];
+    button.toolTip = [button.toolTip stringByReplacingOccurrencesOfString:@"iTunes" withString:@"Apple's TV app" ];
+    [button sizeToFit];
+}
+                         
 -(void)awakeFromNib {
 	[super awakeFromNib];
 	if (!self.directoryFormatPopup) return;
@@ -36,11 +42,10 @@
 	formats[3].enabled = NO;
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTFileNameFormat options:NSKeyValueObservingOptionInitial context:nil];
 	if (@available(macOS 10.15, *)) {
-        self.iTunesSection.cell.title = @"Apple TV app:"; [self.iTunesSection sizeToFit];
-        self.addToiTunes.title =  @"Add to Apple TV When Complete"; [self.addToiTunes sizeToFit];
-        self.deleteFromItunes.title = @"Delete file after copying to Apple TV"; [self.deleteFromItunes sizeToFit];
+        self.iTunesSection.cell.title = @"Apple's TV app (TV):"; [self.iTunesSection sizeToFit];
+        [self changeButtonToAppleTV: self.addToiTunes];
+        [self changeButtonToAppleTV: self.deleteFromItunes];
 		self.AutoSynciTunes.hidden = YES;
-
 	}
 }
 

@@ -505,8 +505,8 @@ __DDLOGHERE__
 -(void) failBonjour {
 	[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
 						success:@NO
-			   customAttributes:@{@"Symptom" : self.missingTiVoSymptom}];
-
+			   customAttributes:@{@"Symptom": self.missingTiVoSymptom,
+								  @"Version": kcTiVoName }];
 }
 
 -(void) startTiVos {
@@ -2084,7 +2084,7 @@ __DDLOGHERE__
 				[self.tiVoTimer invalidate]; self.tiVoTimer = nil;
 				[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
 									success:@YES
-						   customAttributes:@{}];
+						   customAttributes:@{@"Version": kcTiVoName }];
 			}
 			if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
 				//Haven't seen multiple TiVos before, so enable the TiVo column this one time.
