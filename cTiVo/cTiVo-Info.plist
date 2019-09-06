@@ -21,7 +21,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>3.3.2 beta 4</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
@@ -50,7 +50,7 @@
 		<true/>
 	</dict>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>cTiVo needs access to iTunes to be able to add TV Shows and Movies, and ImageEvents to send notices.</string>
+	<string>cTiVo needs access to be able to add TV Shows and Movies (and ImageEvents to send notices).</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2019 Scott Buchanan and Hugh Mackworth. All rights reserved.</string>
 	<key>NSMainNibFile</key>

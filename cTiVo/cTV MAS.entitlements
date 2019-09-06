@@ -11,13 +11,25 @@
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
 	<key>com.apple.security.temporary-exception.apple-events</key>
-	<string>com.apple.iTunes</string>
+	<array>
+        <string>com.apple.iTunes</string>
+        <string>com.apple.TV</string>
+        <string>com.apple.Music</string>
+	</array>
 	<key>com.apple.security.scripting-targets</key>
 	<dict>
 		<key>com.apple.iTunes</key>
 		<array>
 			<string>com.apple.iTunes.library.read-write</string>
-			<string>com.apple.iTunes.library.devices</string>
+			<string>com.apple.iTunes.library.device</string>
+		</array>
+		<key>com.apple.TV</key>
+		<array>
+			<string>com.apple.TV.library.read-write</string>
+		</array>
+		<key>com.apple.Music</key>
+		<array>
+			<string>com.apple.Music.library.read-write</string>
 		</array>
 	</dict>
 	<key>com.apple.security.network.client</key>
