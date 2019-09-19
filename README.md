@@ -129,16 +129,16 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 
 ## Documentation:
 
-* [How to get cTiVo running quickly](Quick-Start)
-* [Overview of Using cTivo](Overview)
-* [How to install cTiVo](Installation)
-* [How to configure cTiVo ](Configuration)
-* [How to set up and configure subscriptions in cTiVo](Subscriptions)
-* [Frequently Asked Questions](FAQ)
-* [Commercials and cTiVo](Commercials)
-* [User-contributed alternative video formats](Alternative-Formats)
-* [Q and A on different video formats](Video-Formats)
-* [Other Advanced Topics](Advanced-Topics)
+* [How to get cTiVo running quickly](../../wiki/Quick-Start)
+* [Overview of Using cTivo](../../wiki/Overview)
+* [How to install cTiVo](../../wiki/Installation)
+* [How to configure cTiVo ](../../wiki/Configuration)
+* [How to set up and configure subscriptions in cTiVo](../../wiki/Subscriptions)
+* [Frequently Asked Questions](../../wiki/FAQ)
+* [Commercials and cTiVo](../../wiki/Commercials)
+* [User-contributed alternative video formats](../../wiki/Alternative-Formats)
+* [Q and A on different video formats](../../wiki/Video-Formats)
+* [Other Advanced Topics](../../wiki/Advanced-Topics)
 
 cTiVo is fully compatible with MacOS Mojave (10.14) back through Mavericks (10.9).
 
