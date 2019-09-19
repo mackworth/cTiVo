@@ -128,8 +128,6 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), and run it. It will ask if OK to move to Applications folder.
 
 ## Documentation:
-https://github.com/mackworth/cTiVo/wiki/Configuration
-https://github.com/mackworth/cTiVo/blob/master/Quick-Start
 
 * [How to get cTiVo running quickly](../../wiki/Quick-Start)
 * [Overview of Using cTivo](../../wiki/Overview)
