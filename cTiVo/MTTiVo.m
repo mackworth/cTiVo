@@ -339,19 +339,19 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     NSDictionary *retValue = nil;
     if (_manualTiVo) {
         retValue = @{kMTTiVoManualTiVo :   @YES,
-                     kMTTiVoUserName :      self.tiVo.name,
+                     kMTTiVoUserName :      self.tiVo.name ?: @"TiVo Default",
                      kMTTiVoUserPort :    @(self.tiVo.userPort),
                      kMTTiVoUserPortSSL : @(self.tiVo.userPortSSL),
                      kMTTiVoTSN :           self.tiVoSerialNumber ?: @"",
                      kMTTiVoUserPortRPC : @(self.tiVo.userPortRPC),
-                     kMTTiVoIPAddress :     self.tiVo.iPAddress,
+                     kMTTiVoIPAddress :     self.tiVo.iPAddress ?: @"0.0.0.0",
                      kMTTiVoEnabled :     @(self.enabled),
                      kMTTiVoID :          @(self.manualTiVoID),
                      kMTTiVoMediaKey :      self.mediaKey.length ? self.mediaKey: kMTTiVoNullKey
                      };
     } else {
         retValue = @{kMTTiVoManualTiVo :   @NO,
-                     kMTTiVoUserName :      self.tiVo.name,
+                     kMTTiVoUserName :      self.tiVo.name ?: @"TiVo Default",
                      kMTTiVoTSN :           self.tiVoSerialNumber ?: @"",
                      kMTTiVoEnabled :     @(self.enabled),
 					 kMTTiVoMediaKey :      self.mediaKey.length ? self.mediaKey: kMTTiVoNullKey
