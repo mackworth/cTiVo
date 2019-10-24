@@ -400,6 +400,29 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
     }
 }
 
+-(BOOL) isEqualToDescription:(NSDictionary *) tiVoDescrip {
+	if (self.enabled != ((NSNumber *) tiVoDescrip[kMTTiVoEnabled]).boolValue) return NO;
+	if (((NSString *)tiVoDescrip[kMTTiVoTSN]).length && ![self.tiVoSerialNumber isEqualToString: tiVoDescrip[kMTTiVoTSN]]) return NO;
+	if (![self.mediaKey 		isEqualToString: tiVoDescrip[kMTTiVoMediaKey]]) return NO;
+
+	BOOL manual = ((NSNumber *) tiVoDescrip[kMTTiVoManualTiVo]).boolValue;
+	if (manual != self.manualTiVo) return NO;
+	if (manual) {
+		if (
+			[self.tiVo.iPAddress caseInsensitiveCompare:tiVoDescrip[kMTTiVoIPAddress]] != NSOrderedSame ||
+            [self.tiVo.userName  compare:tiVoDescrip[kMTTiVoUserName]] != NSOrderedSame ||
+            self.tiVo.userPort    != ((NSNumber *) tiVoDescrip[kMTTiVoUserPort])   .intValue ||
+            self.tiVo.userPortSSL != ((NSNumber *) tiVoDescrip[kMTTiVoUserPortSSL]).intValue ||
+			self.tiVo.userPortRPC != ((NSNumber *) tiVoDescrip[kMTTiVoUserPortRPC]).intValue) {
+			return NO;
+
+		}
+	} else {
+		if (![self.tiVo.name isEqualToString:tiVoDescrip[kMTTiVoUserName]]) return NO;
+	}
+	return YES;
+}
+
 -(void)getMediaKey
 {
 	DDLogDetail(@"Getting media key for %@", self);
@@ -679,6 +702,10 @@ BOOL channelChecking = NO;
 	} else {
 		//we're already waiting, so let it continue.
 	}
+}
+
+-(void) tiVoInfoWithCompletion:  (void (^)(NSString * status)) completionHandler {
+	[self.myRPC tiVoInfoWithCompletion:completionHandler];
 }
 
 -(void) cancelCommercialingForShow: (MTTiVoShow *) show {

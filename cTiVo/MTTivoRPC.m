@@ -1200,6 +1200,77 @@ static NSArray * imageResponseTemplate = nil;
 	   }];
 }
 
+-(NSString *) describeNetwork: (NSDictionary <NSString *, NSString *> *) network  {
+	NSMutableString * outString = [NSMutableString string];
+	for (NSString * key in network.allKeys) {
+		if ([key isEqualToString:@"type"]) continue;
+		NSString * outKey = key;
+		if ([outKey isEqualToString:@"ipAddress"]) outKey = @"TCP/IP Address";
+		if ([outKey isEqualToString:@"interfaceState"]) outKey = @"Interface Status";
+		if ([outKey isEqualToString:@"mac"]) outKey = @"MAC Address";
+		if ([outKey isEqualToString:@"interfaceType"]) outKey = @"Interface Type";
+
+		if (network[key].length > 0) {
+			[outString appendFormat: @"    %@:  %@\n", outKey, network[key]];
+		}
+	}
+	return [outString copy];
+}
+
+-(void) tiVoInfoWithCompletion: (void (^)(NSString *)) completionHandler {
+	__weak __typeof__(self) weakSelf = self;
+
+	[self sendRpcRequest:@"bodyConfigSearch"
+				 monitor:NO
+				withData:@{}
+	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+		DDLogDetail(@"sent bodyConfigSearch; got %@", jsonResponse);
+		NSArray * configs =jsonResponse[@"bodyConfig"];
+		NSDictionary * configJSON;
+
+		if ([configs isKindOfClass:[NSArray class]] && configs.count > 0) {
+			configJSON = configs[0];
+		} else if ([configs isKindOfClass:[NSDictionary class]]) {
+			configJSON = (NSDictionary *) configs;
+		} else {
+			if (completionHandler) completionHandler(@"");
+		}
+		NSMutableString * outString = [NSMutableString string];
+		NSString * diskSizeString = configJSON[@"userDiskSize"];
+		NSString * diskUsedString = configJSON[@"userDiskUsed"];
+		double megabyte = 1024*1024;
+		double diskSizeGB = diskSizeString.longLongValue/megabyte; //reported in 1K chunks
+		double diskUsedGB = diskUsedString.longLongValue/megabyte;
+		if (diskSizeGB > 1.0) { //probably Mini otherwise
+			int percentUsed = (int)(diskUsedGB / diskSizeGB * 100.0);
+			[outString appendFormat:@"Disk Space: \n    Total: %0.1lld GB\n    Used: %0lld GB (%d%%)\n\n",  (int64_t) diskSizeGB, (int64_t) diskUsedGB, percentUsed];
+		}
+		NSArray * networks = configJSON[@"networkInterface"];
+		if (networks && [networks isKindOfClass:[NSArray class]] && networks.count > 0) {
+			if (networks.count > 1) {
+				[outString appendString:@"Network Interfaces:\n"];
+				for (NSDictionary * network in networks) {
+					[outString appendFormat:@"\n%@", [weakSelf describeNetwork: network]];
+				}
+			} else {
+				[outString appendString:@"Network Interface:\n"];
+				[outString appendFormat:@"%@", [weakSelf describeNetwork: networks[0]]];
+			}
+			[outString appendString:@"\n"];
+		}
+		NSString * version = configJSON[@"softwareVersion"];
+		if (version.length) {
+			[outString appendFormat:@"Software Version: %@\n\n", version];
+		}
+		NSString * controls = configJSON[@"parentalControlsState"];
+		if (controls.length) {
+			[outString appendFormat:@"Parental Controls: %@", controls];
+		}
+		if (completionHandler) completionHandler([outString copy]);
+	   }];
+
+}
+
 -(void) whatsOnSearchWithCompletion: (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler {
 	DDLogDetail(@"Asking What's on:");
 	[self sendRpcRequest:@"whatsOnSearch"

@@ -23,7 +23,6 @@
 
 @property (nonatomic, readonly) NSArray <MTTiVo *> *tiVoList;
 @property (nonatomic, readonly) NSArray <MTTiVo *> *tiVoMinis;
-@property (nonatomic, readonly) NSArray <MTTiVo *> *allTiVos;
 @property (nonatomic, readonly) NSArray <MTTiVoShow *> *tiVoShows;
 @property (nonatomic, strong) NSMutableArray <MTFormat *> *formatList;
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSDate *> *lastLoadedTivoTimes;

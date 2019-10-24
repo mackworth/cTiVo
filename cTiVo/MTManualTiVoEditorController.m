@@ -86,8 +86,65 @@ __DDLOGHERE__
 -(IBAction) help:(id)sender {
 	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/mackworth/cTiVo/wiki/Advanced-Topics#manual-tivos"]];
 }
+ 
 
+-(void) reportTiVoInfo: (NSArrayController *) arrayCtlr forRow: (NSInteger) row {
+	NSArray * tiVos = [arrayCtlr arrangedObjects];
+	if (row < 0 || (NSUInteger)row > tiVos.count) return;
+	NSDictionary * tiVoDescription = tiVos[row];
+    BOOL enabled = ((NSNumber *) tiVoDescription[kMTTiVoEnabled]).boolValue;
+	if (!enabled) {
+		NSAlert *alert = [[NSAlert alloc] init];
+		NSString * name = tiVoDescription[@"userName"] ;
+		[alert setMessageText:name];
+		[alert setInformativeText:@"Must be enabled to retrieve info."];
+		[alert addButtonWithTitle:@"OK"];
+		[alert setAlertStyle:NSAlertStyleInformational];
 
+		[alert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+		}];
+		return;
+	};
+	NSArray * allTiVos = [[tiVoManager tiVoList] arrayByAddingObjectsFromArray:[tiVoManager tiVoMinis]];
+	for (MTTiVo * candidate in allTiVos) {
+		if ([candidate isEqualToDescription:tiVoDescription]) {
+			if (candidate.rpcActive) {
+				[candidate tiVoInfoWithCompletion:^(NSString *status) {
+					NSAlert *alert = [[NSAlert alloc] init];
+					NSString * name = candidate.tiVo.name;
+					[alert setMessageText:name];
+					[alert setInformativeText:status];
+					[alert addButtonWithTitle:@"OK"];
+					[alert setAlertStyle:NSAlertStyleInformational];
+
+					[alert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+					}];
+
+				}];
+			}
+			return;
+		}
+	}
+	NSAlert *alert = [[NSAlert alloc] init];
+	NSString * name = tiVoDescription[@"userName"] ;
+	[alert setMessageText:name];
+	[alert setInformativeText:@"TiVo not found?"];
+	[alert addButtonWithTitle:@"OK"];
+	[alert setAlertStyle:NSAlertStyleInformational];
+
+	[alert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+	}];
+
+}
+
+-(IBAction) doubleClickManualRow:(NSTableView *) table {
+	[self reportTiVoInfo: manualTiVoArrayController forRow: [table clickedRow]];
+}
+
+-(IBAction) doubleClickNetworkRow:(NSTableView *) table {
+	[self reportTiVoInfo: networkTiVoArrayController forRow: [table clickedRow]];
+
+}
 
 -(void)dealloc
 {

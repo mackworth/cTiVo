@@ -27,6 +27,8 @@
 	//if needed, get showInfo for showIds; notification done to delegate ( RPCId is set for those shoes)
 	//not notified if rpdData (including clipmetadata already set
 -(void) channelListWithCompletion: (void (^)(NSDictionary <NSString *, NSString *> *)) completionHandler;
+-(void) tiVoInfoWithCompletion: (void (^)(NSString *)) completionHandler;
+
 -(void) deleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) stopRecordingShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
 -(void) undeleteShowsWithRecordIds: (NSArray <NSString *> *) recordingIds;
