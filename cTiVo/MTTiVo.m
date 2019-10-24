@@ -705,7 +705,60 @@ BOOL channelChecking = NO;
 }
 
 -(void) tiVoInfoWithCompletion:  (void (^)(NSString * status)) completionHandler {
-	[self.myRPC tiVoInfoWithCompletion:completionHandler];
+	__weak __typeof__(self) weakSelf = self;
+
+	[self.myRPC tiVoInfoWithCompletion:^(NSString * rpcText) {
+		
+		[weakSelf.myRPC whatsOnSearchWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
+			__typeof__(self) strongSelf = weakSelf;
+			NSMutableString * outString = [NSMutableString string];
+			
+			NSArray * myShows = strongSelf.shows;
+			NSPredicate * suggestedPredicate = [NSPredicate predicateWithFormat:@"isSuggestion == NO"];
+			NSArray * regularShows = [tiVoManager.tiVoShows filteredArrayUsingPredicate:suggestedPredicate];
+			int totalShows = (int)myShows.count;
+			int regShows = (int)regularShows.count;
+			[outString appendFormat:@"Recordings: %d  (%d Regular; %d Suggestions)\n\n",  totalShows, regShows, totalShows-regShows];
+			
+			NSString * result = nil;
+			switch (whatsOn) {
+				case MTWhatsOnUnknown:
+					result = @"Unknown";
+					break;
+				case MTWhatsOnLiveTV:
+					result = @"Showing live TV";
+					break;
+				case MTWhatsOnRecording:
+					if (strongSelf.isMini) myShows = tiVoManager.tiVoShows;
+					for (MTTiVoShow * show in myShows) {
+						if ([show.rpcData.recordingID isEqualToString:recordingID]) {
+							NSString * tivoName = @"";
+							if (strongSelf != show.tiVo ) {
+								tivoName = [NSString stringWithFormat:@" (%@)",show.tiVoName];
+							}
+							result = [NSString stringWithFormat:  @"Showing a recording:\n     %@%@%@"
+									  ,show.showTitle,tivoName,[show.protectedShow boolValue]?@"-Protected":@""];
+							break;
+						}
+					}
+					if (!result) result = @"Showing an unknown recording";
+					break;
+				case MTWhatsOnStreamingOrMenus:
+					result = @"Menus or streaming";
+					break;
+				default:
+					break;
+			}
+			if (result.length > 0) {
+				[outString appendFormat:@"Current Activity: %@\n\n", result];
+			}
+			[outString appendString:rpcText];
+			[outString appendFormat:@"Serial Number: %@\n\n", strongSelf.tiVoSerialNumber];
+			[outString appendFormat:@"Local Address: %@\n\n", strongSelf.tiVo.hostName];
+
+			if (completionHandler) completionHandler([outString copy]);
+		}];
+	} ];
 }
 
 -(void) cancelCommercialingForShow: (MTTiVoShow *) show {

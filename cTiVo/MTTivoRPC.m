@@ -1258,13 +1258,13 @@ static NSArray * imageResponseTemplate = nil;
 			}
 			[outString appendString:@"\n"];
 		}
+		NSString * controls = configJSON[@"parentalControlsState"];
+		if (controls.length) {
+			[outString appendFormat:@"Parental Controls: %@\n\n", controls];
+		}
 		NSString * version = configJSON[@"softwareVersion"];
 		if (version.length) {
 			[outString appendFormat:@"Software Version: %@\n\n", version];
-		}
-		NSString * controls = configJSON[@"parentalControlsState"];
-		if (controls.length) {
-			[outString appendFormat:@"Parental Controls: %@", controls];
 		}
 		if (completionHandler) completionHandler([outString copy]);
 	   }];
