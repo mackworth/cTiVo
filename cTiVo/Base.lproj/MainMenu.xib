@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14868" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14490.70"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14868"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -236,16 +236,21 @@ CA
                             <menuItem isSeparatorItem="YES" id="VoV-SY-MpP">
                                 <attributedString key="attributedTitle"/>
                             </menuItem>
-                            <menuItem title="Reboot TiVo" toolTip="Allows you to reboot your TiVo, even remotely. Will interrupt all programming, recordings, downloads until TiVo restarts." id="GSE-S9-k5L">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="rebootTiVo:" target="-1" id="J3p-3p-zQf"/>
-                                </connections>
-                            </menuItem>
                             <menuItem title="Show Remote Control" toolTip="Bring up Remote Control window to control your TiVo" id="8aF-Hd-G56">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showRemoteControlWindow:" target="-1" id="Xzp-z1-rzz"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Get Info..." keyEquivalent="i" toolTip="Allows you to reboot your TiVo, even remotely. Will interrupt all programming, recordings, downloads until TiVo restarts." id="GSE-S9-k5L">
+                                <connections>
+                                    <action selector="reportTiVoInfo:" target="-1" id="CeK-UE-e8e"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Reboot TiVo" toolTip="Allows you to reboot your TiVo, even remotely. Will interrupt all programming, recordings, downloads until TiVo restarts." id="TBX-qO-zvf">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="rebootTiVo:" target="-1" id="xIM-rV-hN8"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -369,6 +374,7 @@ CA
                     </menu>
                 </menuItem>
             </items>
+            <point key="canvasLocation" x="140" y="153"/>
         </menu>
         <customObject id="494" customClass="MTAppDelegate">
             <connections>
@@ -485,6 +491,7 @@ CA
                     </textFieldCell>
                 </textField>
             </subviews>
+            <point key="canvasLocation" x="139" y="154"/>
         </customView>
         <userDefaultsController representsSharedInstance="YES" id="926"/>
     </objects>

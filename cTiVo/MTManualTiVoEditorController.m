@@ -10,6 +10,8 @@
 #import "MTTiVoManager.h"
 
 @interface MTManualTiVoEditorController ()
+@property (weak) IBOutlet NSTableView *manualTiVosTableView;
+@property (weak) IBOutlet NSTableView *networkTiVosTableView;
 
 @end
 
@@ -86,25 +88,44 @@ __DDLOGHERE__
 -(IBAction) help:(id)sender {
 	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString: @"https://github.com/mackworth/cTiVo/wiki/Advanced-Topics#manual-tivos"]];
 }
- 
 
--(void) reportTiVoInfo: (NSArrayController *) arrayCtlr forRow: (NSInteger) row {
-	NSArray * tiVos = [arrayCtlr arrangedObjects];
-	if (row < 0 || (NSUInteger)row > tiVos.count) return;
-	NSDictionary * tiVoDescription = tiVos[row];
-    BOOL enabled = ((NSNumber *) tiVoDescription[kMTTiVoEnabled]).boolValue;
-	if (!enabled) {
-		NSAlert *alert = [[NSAlert alloc] init];
-		NSString * name = tiVoDescription[@"userName"] ;
-		[alert setMessageText:name];
-		[alert setInformativeText:@"Must be enabled to retrieve info."];
-		[alert addButtonWithTitle:@"OK"];
-		[alert setAlertStyle:NSAlertStyleInformational];
+-(BOOL) validateMenuItem:(NSMenuItem *)menuItem {
+	if (menuItem.action == @selector(reportTiVoInfo:)) {
+		NSTableView * tableView = (NSTableView *) [self.view.window firstResponder];
+		if (![tableView isKindOfClass: [NSTableView class] ]) return NO;
+		NSDictionary * tiVoDescription = [self selectedTiVo:tableView];
+		if (!tiVoDescription) return NO;
+		BOOL enabled = ((NSNumber *) tiVoDescription[kMTTiVoEnabled]).boolValue;
+		return enabled;
+	} else {
+		return YES;
+	}
+}
 
-		[alert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-		}];
-		return;
-	};
+-(IBAction) reportTiVoInfo: (NSView *) sender {
+	[self doubleClickTable:(NSTableView *) [self.view.window firstResponder]];
+}
+
+-(NSDictionary *) selectedTiVo: (NSTableView *) tableView  {
+	NSArrayController * controller = nil;
+	if (tableView == self.networkTiVosTableView  ) {
+		controller = networkTiVoArrayController;
+	} else if (tableView == self.manualTiVosTableView) {
+		controller = manualTiVoArrayController;
+	} else {
+		return nil;
+	}
+	NSArray * selected = [controller selectedObjects];
+	if (selected.count == 0) return nil;
+	return [selected firstObject];
+}
+								 
+-(IBAction) doubleClickTable:(NSTableView *) tableView {
+	if (![tableView isKindOfClass: [NSTableView class] ]) return;
+
+	NSDictionary * tiVoDescription = [self selectedTiVo:tableView] ;
+	if (!tiVoDescription) return;
+	
 	NSArray * allTiVos = [[tiVoManager tiVoList] arrayByAddingObjectsFromArray:[tiVoManager tiVoMinis]];
 	for (MTTiVo * candidate in allTiVos) {
 		if ([candidate isEqualToDescription:tiVoDescription]) {
@@ -134,16 +155,7 @@ __DDLOGHERE__
 
 	[alert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
 	}];
-
-}
-
--(IBAction) doubleClickManualRow:(NSTableView *) table {
-	[self reportTiVoInfo: manualTiVoArrayController forRow: [table clickedRow]];
-}
-
--(IBAction) doubleClickNetworkRow:(NSTableView *) table {
-	[self reportTiVoInfo: networkTiVoArrayController forRow: [table clickedRow]];
-
+	
 }
 
 -(void)dealloc

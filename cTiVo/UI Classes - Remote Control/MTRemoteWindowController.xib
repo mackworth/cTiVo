@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14868" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14460.31"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14868"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -79,7 +79,7 @@
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="45E-a2-Lsl" userLabel="TVPower">
-                                <rect key="frame" x="48" y="643" width="41" height="36"/>
+                                <rect key="frame" x="12" y="643" width="77" height="36"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="SD3-IO-Hc0">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -90,7 +90,7 @@
                                 </connections>
                             </button>
                             <button toolTip="L" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nXJ-Bj-eXr" userLabel="LiveTV">
-                                <rect key="frame" x="163" y="643" width="41" height="36"/>
+                                <rect key="frame" x="163" y="643" width="67" height="36"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="liveTv" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="JZp-lh-qrw">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -102,7 +102,7 @@
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="00p-oG-tcm" userLabel="Input">
-                                <rect key="frame" x="27" y="604" width="41" height="36"/>
+                                <rect key="frame" x="6" y="604" width="62" height="36"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="C5A-Mc-O9v">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -113,7 +113,7 @@
                                 </connections>
                             </button>
                             <button toolTip="I" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xow-iz-hmJ" userLabel="Info">
-                                <rect key="frame" x="182" y="608" width="41" height="36"/>
+                                <rect key="frame" x="182" y="608" width="48" height="36"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="info" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="xS2-XM-ank">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -187,7 +187,7 @@ IA
                                 </connections>
                             </button>
                             <button toolTip="K" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rAJ-L5-jEs" userLabel="Back">
-                                <rect key="frame" x="20" y="560" width="41" height="42"/>
+                                <rect key="frame" x="12" y="560" width="49" height="42"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="back" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="CL1-yK-v2q">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -213,7 +213,7 @@ Gw
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="N4j-z3-ei8" userLabel="VolUp">
-                                <rect key="frame" x="27" y="504" width="51" height="51"/>
+                                <rect key="frame" x="12" y="504" width="66" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="hcr-S4-oSq">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -224,7 +224,7 @@ Gw
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WGf-T0-UWn" userLabel="VolDown">
-                                <rect key="frame" x="37" y="456" width="51" height="51"/>
+                                <rect key="frame" x="12" y="456" width="76" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="4IR-a4-qG0">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -235,7 +235,7 @@ Gw
                                 </connections>
                             </button>
                             <button toolTip="PgUp or U or fn-↑" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LK6-w1-LVL" userLabel="ChUp">
-                                <rect key="frame" x="172" y="504" width="51" height="51"/>
+                                <rect key="frame" x="172" y="504" width="78" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="channelUp" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="sEN-Sp-1sL">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -247,11 +247,11 @@ Gw
                                 </connections>
                             </button>
                             <button toolTip="PgDn or N or fn-↓" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DK7-Io-En6" userLabel="ChDown">
-                                <rect key="frame" x="163" y="456" width="51" height="51"/>
+                                <rect key="frame" x="163" y="456" width="79" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="channelDown" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="t3h-Qa-Buk">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="system" size="6"/>
                                     <string key="keyEquivalent">n</string>
                                 </buttonCell>
                                 <connections>
@@ -282,7 +282,7 @@ Gw
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Cu-zr-1xq" userLabel="Mute">
-                                <rect key="frame" x="48" y="407" width="41" height="42"/>
+                                <rect key="frame" x="12" y="407" width="77" height="42"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="NXj-b7-nQO">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -293,7 +293,7 @@ Gw
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zmp-FC-OBh" userLabel="Record">
-                                <rect key="frame" x="163" y="407" width="41" height="42"/>
+                                <rect key="frame" x="163" y="407" width="79" height="42"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="record" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="3XJ-c2-9uu">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -317,11 +317,11 @@ Gw
                                 </connections>
                             </button>
                             <button toolTip="⌘←" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="CHF-Y7-eZC" userLabel="Reverse">
-                                <rect key="frame" x="55" y="321" width="41" height="62"/>
+                                <rect key="frame" x="20" y="319" width="76" height="62"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="reverse" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="v2D-xM-DhQ">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="system" size="10"/>
                                     <string key="keyEquivalent"></string>
                                     <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                                 </buttonCell>
@@ -342,11 +342,11 @@ Gw
                                 </connections>
                             </button>
                             <button toolTip="⌘→" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6wk-QJ-k9S" userLabel="Forward">
-                                <rect key="frame" x="154" y="321" width="41" height="62"/>
+                                <rect key="frame" x="154" y="321" width="76" height="62"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="forward" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="UsN-v8-Lte">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="system" size="4"/>
                                     <string key="keyEquivalent"></string>
                                     <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                                 </buttonCell>
@@ -367,7 +367,7 @@ Gw
                                 </connections>
                             </button>
                             <button toolTip="⌘Tab" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oIj-FY-4wA" userLabel="Replay">
-                                <rect key="frame" x="47" y="261" width="41" height="34"/>
+                                <rect key="frame" x="12" y="261" width="76" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="replay" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="KrJ-dS-MCA">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -382,7 +382,7 @@ CQ
                                 </connections>
                             </button>
                             <button toolTip="Tab" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yU4-FN-Ief" userLabel="Advance">
-                                <rect key="frame" x="161" y="261" width="41" height="34"/>
+                                <rect key="frame" x="161" y="261" width="76" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="advance" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="A3a-rz-Tlh">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -419,11 +419,11 @@ CQ
                                 </connections>
                             </button>
                             <button toolTip="-" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tp6-9v-uqX" userLabel="ThumbsDown">
-                                <rect key="frame" x="45" y="222" width="41" height="34"/>
+                                <rect key="frame" x="12" y="222" width="74" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="thumbsDown" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="gyY-1b-PCT">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="system" size="11"/>
                                     <string key="keyEquivalent">-</string>
                                 </buttonCell>
                                 <connections>
@@ -431,11 +431,11 @@ CQ
                                 </connections>
                             </button>
                             <button toolTip="+" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HRJ-bW-pto" userLabel="ThumbsUp">
-                                <rect key="frame" x="165" y="222" width="41" height="34"/>
+                                <rect key="frame" x="165" y="222" width="65" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="thumbsUp" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="KHZ-ez-TJe">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="system" size="7"/>
                                     <string key="keyEquivalent">+</string>
                                 </buttonCell>
                                 <connections>
@@ -443,11 +443,11 @@ CQ
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Cz7-xc-RcD" userLabel="A">
-                                <rect key="frame" x="45" y="178" width="41" height="34"/>
+                                <rect key="frame" x="12" y="178" width="74" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="actionA" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="NNK-gc-Ph1">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="system" size="9"/>
                                     <string key="keyEquivalent">a</string>
                                 </buttonCell>
                                 <connections>
@@ -459,7 +459,7 @@ CQ
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="actionB" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="PDo-cF-F1j">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="system" size="9"/>
                                     <string key="keyEquivalent">b</string>
                                 </buttonCell>
                                 <connections>
@@ -471,7 +471,7 @@ CQ
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="actionC" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="cFe-6D-uI7">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="system" size="9"/>
                                     <string key="keyEquivalent">c</string>
                                 </buttonCell>
                                 <connections>
@@ -479,7 +479,7 @@ CQ
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SE6-SA-X8s" userLabel="D">
-                                <rect key="frame" x="165" y="178" width="41" height="34"/>
+                                <rect key="frame" x="165" y="178" width="58" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="actionD" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="WZe-mV-03h">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -491,7 +491,7 @@ CQ
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5ro-zn-xgp" userLabel="1">
-                                <rect key="frame" x="38" y="137" width="58" height="40"/>
+                                <rect key="frame" x="20" y="137" width="76" height="40"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="num1" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="k3z-1k-iPC">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -515,7 +515,7 @@ CQ
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OJV-vM-BD8" userLabel="3">
-                                <rect key="frame" x="154" y="137" width="58" height="40"/>
+                                <rect key="frame" x="154" y="137" width="76" height="40"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="num3" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="cf4-SB-DdC">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -527,7 +527,7 @@ CQ
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nld-yv-LOS" userLabel="4">
-                                <rect key="frame" x="38" y="98" width="58" height="40"/>
+                                <rect key="frame" x="20" y="98" width="76" height="40"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="num4" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="aAQ-xr-Cf7">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -551,7 +551,7 @@ CQ
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vdH-zK-R7y" userLabel="6">
-                                <rect key="frame" x="154" y="98" width="58" height="40"/>
+                                <rect key="frame" x="154" y="98" width="76" height="40"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="num6" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="600-VT-qBv">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -563,7 +563,7 @@ CQ
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3q9-DN-wzp" userLabel="7">
-                                <rect key="frame" x="38" y="59" width="58" height="40"/>
+                                <rect key="frame" x="20" y="59" width="76" height="40"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="num7" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="nTY-oc-8ul">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -587,7 +587,7 @@ CQ
                                 </connections>
                             </button>
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oew-hR-1m6" userLabel="9">
-                                <rect key="frame" x="154" y="59" width="58" height="40"/>
+                                <rect key="frame" x="154" y="59" width="83" height="40"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="num9" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="Xmn-Lb-Wp7">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -611,7 +611,7 @@ CQ
                                 </connections>
                             </button>
                             <button toolTip="Delete" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Aq2-ww-XUF" userLabel="Clear">
-                                <rect key="frame" x="38" y="20" width="58" height="40"/>
+                                <rect key="frame" x="20" y="20" width="76" height="40"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="clear" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="zZv-BZ-Rwr">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -625,7 +625,7 @@ CA
                                 </connections>
                             </button>
                             <button toolTip="Return" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zug-1e-C4j" userLabel="Enter">
-                                <rect key="frame" x="154" y="20" width="58" height="40"/>
+                                <rect key="frame" x="154" y="20" width="83" height="40"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="enter" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="mo8-5q-309">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>

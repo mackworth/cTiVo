@@ -119,6 +119,23 @@ __DDLOGHERE__
 	[self.selectedTiVo sendKeyEvent: sender.title];
 }
 
+-(IBAction) reportTiVoInfo: (id) sender {
+	NSString * name = self.selectedTiVo.tiVo.name;
+	__weak __typeof__(self) weakSelf = self;
+
+	[self.selectedTiVo tiVoInfoWithCompletion:^(NSString *status) {
+		NSAlert *alert = [[NSAlert alloc] init];
+		[alert setMessageText:name];
+		[alert setInformativeText:status];
+		[alert addButtonWithTitle:@"OK"];
+		[alert setAlertStyle:NSAlertStyleInformational];
+
+		[alert beginSheetModalForWindow:weakSelf.window completionHandler:^(NSModalResponse returnCode) {
+		}];
+
+	}];
+}
+
 -(void) dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }

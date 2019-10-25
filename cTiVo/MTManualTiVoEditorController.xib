@@ -9,7 +9,9 @@
         <customObject id="-2" userLabel="File's Owner" customClass="MTManualTiVoEditorController">
             <connections>
                 <outlet property="manualTiVoArrayController" destination="121" id="qCS-a0-503"/>
+                <outlet property="manualTiVosTableView" destination="437" id="y1h-bq-Hir"/>
                 <outlet property="networkTiVoArrayController" destination="hNz-Uc-bTd" id="RWw-bt-0QT"/>
+                <outlet property="networkTiVosTableView" destination="KbP-N5-6GX" id="HOa-fj-WTe"/>
                 <outlet property="view" destination="416" id="456"/>
             </connections>
         </customObject>
@@ -185,7 +187,7 @@
                                     </tableColumn>
                                 </tableColumns>
                                 <connections>
-                                    <action trigger="doubleAction" selector="doubleClickManualRow:" target="-2" id="GWI-l7-4pI"/>
+                                    <action trigger="doubleAction" selector="doubleClickTable:" target="-2" id="WM7-jD-yhi"/>
                                 </connections>
                             </tableView>
                         </subviews>
@@ -303,7 +305,7 @@
                                     </tableColumn>
                                 </tableColumns>
                                 <connections>
-                                    <action trigger="doubleAction" selector="doubleClickNetworkRow:" target="-2" id="kMY-s5-3gV"/>
+                                    <action trigger="doubleAction" selector="doubleClickTable:" target="-2" id="XG6-bP-rRo"/>
                                 </connections>
                             </tableView>
                         </subviews>
@@ -348,15 +350,6 @@
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
-                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yPO-f3-BMN">
-                    <rect key="frame" x="221" y="0.0" width="307" height="21"/>
-                    <autoresizingMask key="autoresizingMask"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" alignment="right" title="Double-click each TiVo for more info" id="4iQ-X5-H8n">
-                        <font key="font" metaFont="system"/>
-                        <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
             </subviews>
