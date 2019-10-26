@@ -89,6 +89,7 @@ __DDLOGHERE__
 		if (!_lastLoadedTivoTimes) {
 			_lastLoadedTivoTimes = [NSMutableDictionary new];
 		}
+		DDLogReport (@"LoadTimes: %@", _lastLoadedTivoTimes);
        [self initialFormatSetup];
 		self.downloadDirectory  = [defaults objectForKey:kMTDownloadDirectory];
         DDLogVerbose(@"downloadDirectory %@", self.downloadDirectory);

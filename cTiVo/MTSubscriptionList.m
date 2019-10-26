@@ -69,7 +69,7 @@
     //note that theoretically, 12 hours could be replace by thisshow.duration if we parsed Tivos'  PT00H0M0S format;
     if ([thisShow.showDate isGreaterThan: earliestTime]) {
         if (!thisShow.isOnDisk) {
-            DDLogVerbose(@"Subscription check: recent enough %@", thisShow);
+            DDLogReport(@"Subscription check  %@: recent enough: %@ v %@", thisShow, thisShow.showDate, earliestTime);
             for (MTSubscription * possMatch in self) {
                 if ([possMatch isSubscribed:thisShow ignoreDate:NO]) {
                     MTDownload * newDownload = [possMatch downloadForSubscribedShow:thisShow];
@@ -82,10 +82,10 @@
                 }
             }
         } else {
-            DDLogVerbose(@"Subscription check: already recorded: %@", thisShow);
+            DDLogReport(@"Subscription check  %@: already recorded: %@ v %@", thisShow, thisShow.showDate, earliestTime);
         }
     } else {
-        DDLogVerbose(@"Subscription check: too old: %@", thisShow);
+        DDLogReport(@"Subscription check: %@ too old: %@ v %@", thisShow, thisShow.showDate, earliestTime);
     }
 }
 

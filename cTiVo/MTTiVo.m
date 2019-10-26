@@ -256,6 +256,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 	NSDate * currentDate = tiVoManager.lastLoadedTivoTimes[self.tiVo.name];
 
 	if (!currentDate || [newDate isGreaterThan: currentDate]) {
+		DDLogReport (@"Updating last load time from %@ to %@", currentDate, newDate);
 		tiVoManager.lastLoadedTivoTimes[self.tiVo.name] = newDate;
 	}
 
