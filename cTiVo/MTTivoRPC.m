@@ -1271,7 +1271,7 @@ static NSArray * imageResponseTemplate = nil;
 
 }
 
--(void) whatsOnSearchWithCompletion: (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler {
+-(void) whatsOnSearchWithCompletion: (void (^)(MTWhatsOnType whatsOn, NSString * recordingID, NSString * channelNumber)) completionHandler {
 	DDLogDetail(@"Asking What's on:");
 	[self sendRpcRequest:@"whatsOnSearch"
 				 monitor:NO
@@ -1281,6 +1281,7 @@ static NSArray * imageResponseTemplate = nil;
 		   NSDictionary * whatsOn = jsonResponse[@"whatsOn"][0];
 		   NSString * playback = whatsOn[@"playbackType"];
 		   NSString * recordingId = whatsOn[@"recordingId"];
+		   NSString * channelNumber = nil;
 		   MTWhatsOnType result = MTWhatsOnUnknown;
 		   if (!playback) {
 				DDLogReport(@"No playbackType?? got %@", jsonResponse);
@@ -1292,9 +1293,13 @@ static NSArray * imageResponseTemplate = nil;
 			   } else {
 				   DDLogDetail(@"Found playbackType: %@ with %@",playback, recordingId );
 				   result = (MTWhatsOnType) location;
+				   NSDictionary * channelId = whatsOn[@"channelIdentifier"];
+				   if (channelId) {
+					   channelNumber = channelId[@"channelNumber"]; //nil if not there
+				   }
 			   }
 		   }
-		   if (completionHandler) completionHandler(result,recordingId);
+		   if (completionHandler) completionHandler(result,recordingId, channelNumber);
 	   }];
 }
 
@@ -1768,7 +1773,7 @@ static NSArray * imageResponseTemplate = nil;
 	__weak __typeof__(self) weakSelf = self;
 	if (!rpcData) return;
 	//note: indenting change to avoid tower effect, each line break is a new block
-	[self whatsOnSearchWithCompletion:^(MTWhatsOnType previousWhatsOn, NSString *previousRecordingID) {
+	[self whatsOnSearchWithCompletion:^(MTWhatsOnType previousWhatsOn, NSString *previousRecordingID, NSString * channelNumber) {
 
 		[weakSelf playOnTiVo:rpcData.recordingID withCompletionHandler:^(BOOL complete) {
 			

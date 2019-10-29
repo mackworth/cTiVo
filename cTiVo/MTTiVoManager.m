@@ -320,7 +320,7 @@ __DDLOGHERE__
 	NSString *targetTivoName = tiVo.tiVo.name;
 	for (MTDownload * download in self.downloadQueue) {
 		if(download.show.protectedShow.boolValue &&
-		   [targetTivoName isEqualToString:download.show.tiVoName]) {
+		   (!download.show.tiVoName || [targetTivoName isEqualToString:download.show.tiVoName])) {
 			if ( ! download.isCompletelyDone ) {
 				DDLogDetail(@"Marking %@ as deleted", download.show.showTitle);
 				download.downloadStatus =@kMTStatusDeleted;

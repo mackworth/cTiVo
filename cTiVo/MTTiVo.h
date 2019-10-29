@@ -56,7 +56,7 @@
 -(void) reloadShowInfoForShows: (NSArray <MTTiVoShow *> *) shows;
 -(MTRPCData *)registerRPCforShow: (MTTiVoShow *) show;
 -(BOOL) rpcActive;
--(void) whatsOnWithCompletion:  (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler;
+-(void) whatsOnWithCompletion:  (void (^)(MTWhatsOnType whatsOn, NSString * recordingID, NSString * channelNumber)) completionHandler;
 -(void) tiVoInfoWithCompletion:  (void (^)(NSString * status)) completionHandler;
 
 -(void) deleteTiVoShows: (NSArray <MTTiVoShow *> *) shows;

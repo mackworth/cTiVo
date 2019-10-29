@@ -22,7 +22,7 @@
 -(MTRPCData *) rpcDataForID: (NSString *) idString;
 -(void) emptyCaches;
 -(void) purgeShows: (NSArray <NSString *> *) showIDs;
--(void) whatsOnSearchWithCompletion: (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler;
+-(void) whatsOnSearchWithCompletion: (void (^)(MTWhatsOnType whatsOn, NSString * recordingID, NSString * channelNumber)) completionHandler;
 -(void) getShowInfoForShows: (NSArray <NSString *> *) showIDs;
 	//if needed, get showInfo for showIds; notification done to delegate ( RPCId is set for those shoes)
 	//not notified if rpdData (including clipmetadata already set

@@ -681,7 +681,7 @@ BOOL channelChecking = NO;
 	[self.myRPC rebootTiVo];
 }
 
--(void) whatsOnWithCompletion:  (void (^)(MTWhatsOnType whatsOn, NSString * recordingID)) completionHandler {
+-(void) whatsOnWithCompletion:  (void (^)(MTWhatsOnType whatsOn, NSString * recordingID, NSString * channelNumber)) completionHandler {
 	[self.myRPC whatsOnSearchWithCompletion:completionHandler];
 }
 
@@ -709,7 +709,7 @@ BOOL channelChecking = NO;
 
 	[self.myRPC tiVoInfoWithCompletion:^(NSString * rpcText) {
 		
-		[weakSelf.myRPC whatsOnSearchWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
+		[weakSelf.myRPC whatsOnSearchWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID, NSString * channelNumber) {
 			__typeof__(self) strongSelf = weakSelf;
 			NSMutableString * outString = [NSMutableString string];
 			
@@ -721,12 +721,13 @@ BOOL channelChecking = NO;
 			[outString appendFormat:@"Recordings: %d  (%d Regular; %d Suggestions)\n\n",  totalShows, regShows, totalShows-regShows];
 			
 			NSString * result = nil;
+			NSString * channelString = channelNumber ? [NSString stringWithFormat:@" (channel: %@)",channelNumber] : @"";
 			switch (whatsOn) {
 				case MTWhatsOnUnknown:
 					result = @"Unknown";
 					break;
 				case MTWhatsOnLiveTV:
-					result = @"Showing live TV";
+					result = [NSString stringWithFormat: @"Showing live TV%@", channelString];;
 					break;
 				case MTWhatsOnRecording:
 					if (strongSelf.isMini) myShows = tiVoManager.tiVoShows;
@@ -736,8 +737,8 @@ BOOL channelChecking = NO;
 							if (strongSelf != show.tiVo ) {
 								tivoName = [NSString stringWithFormat:@" (%@)",show.tiVoName];
 							}
-							result = [NSString stringWithFormat:  @"Showing a recording:\n     %@%@%@"
-									  ,show.showTitle,tivoName,[show.protectedShow boolValue]?@"-Protected":@""];
+							result = [NSString stringWithFormat:  @"Showing a recording:\n     %@%@%@%@"
+									  ,show.showTitle,tivoName,channelString,[show.protectedShow boolValue]?@"-Protected":@""];
 							break;
 						}
 					}
@@ -771,7 +772,7 @@ BOOL channelChecking = NO;
 		self.postponedCommercialShows = nil;
 	} else {
 		__weak __typeof__(self) weakSelf = self;
-		[self whatsOnWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID) {
+		[self whatsOnWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID, NSString * channelNumber) {
 			__typeof__(self) strongSelf = weakSelf;
 			if (whatsOn == MTWhatsOnLiveTV || whatsOn == MTWhatsOnStreamingOrMenus) {
 				[strongSelf reallyFindCommercialsForShows];
