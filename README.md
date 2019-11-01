@@ -46,6 +46,28 @@ The current release is here:  https://github.com/mackworth/cTiVo/releases/
 * Show/Hide copy-protected shows and TiVo suggestions.
 * Notifications when downloads complete.
 
+## To install:
+
+Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), and run it. It will ask if OK to move to Applications folder. It will automatically find your TiVos, and show you what's available.
+
+## Documentation:
+
+* [How to get cTiVo running quickly](../../wiki/Quick-Start)
+* [Overview of Using cTivo](../../wiki/Overview)
+* [How to install cTiVo](../../wiki/Installation)
+* [How to configure cTiVo ](../../wiki/Configuration)
+* [How to set up and configure subscriptions in cTiVo](../../wiki/Subscriptions)
+* [Frequently Asked Questions](../../wiki/FAQ)
+* [Commercials and cTiVo](../../wiki/Commercials)
+* [User-contributed alternative video formats](../../wiki/Alternative-Formats)
+* [Q and A on different video formats](../../wiki/Video-Formats)
+* [Other Advanced Topics](../../wiki/Advanced-Topics)
+
+cTiVo is fully compatible with MacOS Catalina (10.15) back through Mavericks (10.9).
+
+**cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
+
+
 ## Recent features
 
 #### SkipMode use *
@@ -125,23 +147,3 @@ The current release is here:  https://github.com/mackworth/cTiVo/releases/
 * Better handling for AC3 5.1 audio
 * Many bug fixes
 
-## To install:
-
-Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), and run it. It will ask if OK to move to Applications folder. It will automatically find your TiVos, and show you what's available.
-
-## Documentation:
-
-* [How to get cTiVo running quickly](../../wiki/Quick-Start)
-* [Overview of Using cTivo](../../wiki/Overview)
-* [How to install cTiVo](../../wiki/Installation)
-* [How to configure cTiVo ](../../wiki/Configuration)
-* [How to set up and configure subscriptions in cTiVo](../../wiki/Subscriptions)
-* [Frequently Asked Questions](../../wiki/FAQ)
-* [Commercials and cTiVo](../../wiki/Commercials)
-* [User-contributed alternative video formats](../../wiki/Alternative-Formats)
-* [Q and A on different video formats](../../wiki/Video-Formats)
-* [Other Advanced Topics](../../wiki/Advanced-Topics)
-
-cTiVo is fully compatible with MacOS Catalina (10.15) back through Mavericks (10.9).
-
-**cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
