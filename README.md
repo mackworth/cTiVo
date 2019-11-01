@@ -4,6 +4,8 @@ cTiVo provides complete hands-off operation: once you choose or subscribe to you
 
 cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance and compatibility.
 
+The current release is here:  https://github.com/mackworth/cTiVo/releases/
+
 ## Automatic Download and Conversions
 * Auto-discovery of all your TiVos (using Bonjour).
 * Drag/drop and contextual menus for ease of use; submit, reschedule, delete all by dragging the shows.
@@ -44,7 +46,7 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 * Show/Hide copy-protected shows and TiVo suggestions.
 * Notifications when downloads complete.
 
-## 3.3 features
+## Recent features
 
 #### SkipMode use *
 *    Use TiVo's SkipMode info when available for Marking/Cutting commercials.
@@ -61,18 +63,18 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 *    TiVo remote control emulation.
 *    Keystroke alternatives.
 *    Directly select streaming services.
+*    Information about current status of TiVo (disk space, activity, network etc).
 
-#### New TiVo menu *
+#### TiVo menu *
 *    Play / Delete / Stop Recording on TiVo.
 *    Reload Information.
 *    Reboot TiVo.
-*    Redesigned contextual menus.
 
-#### Mojave Support
-*    Dark Mode in Mojave.
-*    iTunes permission check and AppleScript warnings for Mojave.
+#### Catalina Mojave Support
+*    Dark Mode.
+*    Works with TV app in Catalina as well as iTunes in prior releases.
+*    Permissions check and warnings.
 *   "Hardened" Apple-notarized binary for increased security.
-*    Assorted compatibility fixes.
 
 ###  Minor features:
 *    Mark chapters even when cutting commercials.
@@ -125,7 +127,7 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 
 ## To install:
 
-Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), and run it. It will ask if OK to move to Applications folder.
+Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), and run it. It will ask if OK to move to Applications folder. It will automatically find your TiVos, and show you what's available.
 
 ## Documentation:
 
@@ -140,6 +142,6 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 * [Q and A on different video formats](../../wiki/Video-Formats)
 * [Other Advanced Topics](../../wiki/Advanced-Topics)
 
-cTiVo is fully compatible with MacOS Mojave (10.14) back through Mavericks (10.9).
+cTiVo is fully compatible with MacOS Catalina (10.15) back through Mavericks (10.9).
 
 **cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
