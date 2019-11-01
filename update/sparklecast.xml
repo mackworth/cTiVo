@@ -3,30 +3,32 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.3.1; SkipMode!</description>
+        <description>Version 3.4.0; SkipMode!</description>
         <language>en</language>
         <item>
             <title>Version 3.3.1; SkipMode</title>
             <description><![CDATA[
-				<h2 id="release-3.3">Release 3.3.1: SkipMode!</h2>
-				<h3>3.3.1 features</h3>
-				<ul>
-				<li>3.3.1 has new status icons and minor fixes for 3.3.0</li>
-				<li>Use TiVo's SkipMode information for Marking/Cutting commercials (when available)</li>
-				<li>Remote Control Window</li>
-				<li>TiVo Control: Play Show / Delete Show / Stop Recording / Reboot</li>
-				<li>Dark Mode</li>
-				<li>Many minor new features and fixes </li>
-				</ul>
 				
-				<p>See <a href="https://github.com/mackworth/cTiVo/releases/tag/3.3.0"> cTiVo Release Notes</a> or <a href="https://github.com/mackworth/cTiVo"> cTiVo Home </a>for more information.</p>
-				<br />
-				<p>Most new features require RPC for real-time functionality, which is only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)</p>
+				<h2 id="Release-3.4.0">Release 3.4.0 (Catalina and Sandboxing)</h1>
+				<ul>
+				<li>Sends videos to Apple&rsquo;s TV app due to obsolescence of iTunes.<br>
+				    (Audio-only downloads to Music app)</li>
+				<li>New <em>Get Info</em> command for TiVos (disk space, network connectivity etc) in <em>Edit Tivos</em> and <em>Remote Control</em></li>
+				<li>Sandboxed <em>cTV</em> version also now available.</li>
+				</ul>
+				<h3 id="Fixes:">Fixes:</h3>
+				<ul>
+				<li>Improved reliability for finding completed videos on disk.</li>
+				<li>Help files look better in Dark mode.</li>
+				<li>Better logging to diagnose occasional delays in SkipMode.</li>
+				<li>Misc minor fixes.</li>
+				</ul>
+
             ]]>
             </description>
-            <pubDate>Tues., May 21, 2019 12:00:00 -0800</pubDate>
+            <pubDate>Fri., November 1, 2019 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.3.1/cTiVo.3.3.1.final.zip" sparkle:version="1053" sparkle:shortVersionString="3.3.1" length="73844279" type="application/octet-stream" sparkle:dsaSignature="MC4CFQCtZEr73hrp79g3doBacnyH3YskLwIVAOK0wsnkKHtlujLGqCWRyV8jwCNj"/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.0/cTiVo.zip" sparkle:version="1087" sparkle:shortVersionString="3.4.0" length="74021233" type="application/octet-stream" sparkle:dsaSignature="MC4CFQDPzBmaS9Wfc6HteofX1cmmk63sXQIVANky5sHBACsfv0bwp4J8vlz/TvTS"/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>
