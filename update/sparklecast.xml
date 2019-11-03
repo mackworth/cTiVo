@@ -11,7 +11,7 @@
 				
 				<h2 id="Release-3.4.0">Release 3.4.0 (Catalina and Sandboxing)</h1>
 				<ul>
-				<li>Sends videos to Apple&rsquo;s TV app due to obsolescence of iTunes.<br>
+				<li>On Catalina, sends videos to Apple&rsquo;s new TV app due to obsolescence of iTunes.<br>
 				    (Audio-only downloads to Music app)</li>
 				<li>New <em>Get Info</em> command for TiVos (disk space, network connectivity etc) in <em>Edit Tivos</em> and <em>Remote Control</em></li>
 				<li>Sandboxed <em>cTV</em> version also now available.</li>
