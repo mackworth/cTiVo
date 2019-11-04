@@ -16,6 +16,7 @@
 @property (nonatomic, readonly) MTTiVo * selectedTiVo;
 @property (nonatomic, weak) IBOutlet NSImageView * tivoRemote;
 @property (nonatomic, weak) IBOutlet NSMenu * serviceMenu;
+@property (weak) IBOutlet NSProgressIndicator *infoLoadingSpinner;
 @end
 
 @implementation MTRemoteWindowController
@@ -122,8 +123,10 @@ __DDLOGHERE__
 -(IBAction) reportTiVoInfo: (id) sender {
 	NSString * name = self.selectedTiVo.tiVo.name;
 	__weak __typeof__(self) weakSelf = self;
-
+	if (!name) return;
+	[self.infoLoadingSpinner startAnimation:nil];
 	[self.selectedTiVo tiVoInfoWithCompletion:^(NSString *status) {
+		[self.infoLoadingSpinner stopAnimation:nil];
 		NSAlert *alert = [[NSAlert alloc] init];
 		[alert setMessageText:name];
 		[alert setInformativeText:status];

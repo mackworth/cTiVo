@@ -8,6 +8,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="MTRemoteWindowController">
             <connections>
+                <outlet property="infoLoadingSpinner" destination="gXe-Vh-GIO" id="Nnf-tc-qtx"/>
                 <outlet property="serviceMenu" destination="2K4-cf-PqX" id="NtW-6E-5rJ"/>
                 <outlet property="tivoListPopup" destination="YLU-ny-jW3" id="lSy-SD-t2m"/>
                 <outlet property="tivoRemote" destination="zRz-zj-OeZ" id="KKe-RZ-Eo1"/>
@@ -423,7 +424,7 @@ CQ
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="thumbsDown" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="gyY-1b-PCT">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system" size="11"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <string key="keyEquivalent">-</string>
                                 </buttonCell>
                                 <connections>
@@ -447,7 +448,7 @@ CQ
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="actionA" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="NNK-gc-Ph1">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system" size="9"/>
+                                    <font key="font" metaFont="miniSystem"/>
                                     <string key="keyEquivalent">a</string>
                                 </buttonCell>
                                 <connections>
@@ -459,7 +460,7 @@ CQ
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="actionB" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="PDo-cF-F1j">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system" size="9"/>
+                                    <font key="font" metaFont="miniSystem"/>
                                     <string key="keyEquivalent">b</string>
                                 </buttonCell>
                                 <connections>
@@ -471,7 +472,7 @@ CQ
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <buttonCell key="cell" type="square" title="actionC" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" transparent="YES" imageScaling="proportionallyUpOrDown" inset="2" id="cFe-6D-uI7">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system" size="9"/>
+                                    <font key="font" metaFont="miniSystem"/>
                                     <string key="keyEquivalent">c</string>
                                 </buttonCell>
                                 <connections>
@@ -682,6 +683,10 @@ DQ
                             </popUpButton>
                         </subviews>
                     </customView>
+                    <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="gXe-Vh-GIO">
+                        <rect key="frame" x="20" y="806" width="32" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    </progressIndicator>
                 </subviews>
             </view>
             <connections>

@@ -12,6 +12,7 @@
                 <outlet property="manualTiVosTableView" destination="437" id="y1h-bq-Hir"/>
                 <outlet property="networkTiVoArrayController" destination="hNz-Uc-bTd" id="RWw-bt-0QT"/>
                 <outlet property="networkTiVosTableView" destination="KbP-N5-6GX" id="HOa-fj-WTe"/>
+                <outlet property="tiVoLoadingSpinner" destination="md1-cq-uLA" id="edZ-7C-ShG"/>
                 <outlet property="view" destination="416" id="456"/>
             </connections>
         </customObject>
@@ -352,6 +353,10 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="md1-cq-uLA">
+                    <rect key="frame" x="17" y="474" width="32" height="32"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                </progressIndicator>
             </subviews>
             <point key="canvasLocation" x="176" y="168.5"/>
         </view>

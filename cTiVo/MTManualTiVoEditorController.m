@@ -12,6 +12,7 @@
 @interface MTManualTiVoEditorController ()
 @property (weak) IBOutlet NSTableView *manualTiVosTableView;
 @property (weak) IBOutlet NSTableView *networkTiVosTableView;
+@property (weak) IBOutlet NSProgressIndicator *tiVoLoadingSpinner;
 
 @end
 
@@ -130,7 +131,9 @@ __DDLOGHERE__
 	for (MTTiVo * candidate in allTiVos) {
 		if ([candidate isEqualToDescription:tiVoDescription]) {
 			if (candidate.rpcActive) {
+				[self.tiVoLoadingSpinner startAnimation:nil];
 				[candidate tiVoInfoWithCompletion:^(NSString *status) {
+					[self.tiVoLoadingSpinner stopAnimation:nil];
 					NSAlert *alert = [[NSAlert alloc] init];
 					NSString * name = candidate.tiVo.name;
 					[alert setMessageText:name];
