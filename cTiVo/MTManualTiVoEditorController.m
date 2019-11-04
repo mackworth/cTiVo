@@ -147,8 +147,7 @@ __DDLOGHERE__
 		}
 	}
 	NSAlert *alert = [[NSAlert alloc] init];
-	NSString * name = tiVoDescription[@"userName"] ;
-	[alert setMessageText:name];
+	[alert setMessageText: tiVoDescription[@"userName"] ?: @"Unnamed TiVo"];
 	[alert setInformativeText:@"TiVo not found?"];
 	[alert addButtonWithTitle:@"OK"];
 	[alert setAlertStyle:NSAlertStyleInformational];

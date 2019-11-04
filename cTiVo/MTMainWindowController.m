@@ -216,7 +216,10 @@ __DDLOGHERE__
 	NSColor * red =  [NSColor redColor];
 	if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
 	NSDictionary <NSAttributedStringKey,id> * attribs = commercials ? @{NSForegroundColorAttributeName:red}  : @{};
-	NSString * list = [[[[set allObjects] valueForKeyPath: path] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)] componentsJoinedByString:@", "];
+	NSMutableArray * names = [[[set allObjects] valueForKeyPath: path] mutableCopy];
+	[names removeObjectIdenticalTo:[NSNull null]];
+	[names sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+	NSString * list = [names componentsJoinedByString:@", "];
  return [[NSMutableAttributedString alloc] initWithString: list attributes:attribs];
 }
 

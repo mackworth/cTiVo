@@ -372,11 +372,11 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
             self.tiVo.userPort != [newTiVo[kMTTiVoUserPort] intValue] ||
             self.tiVo.userPortSSL != [newTiVo[kMTTiVoUserPortSSL] intValue]
            ) { // If there's a change then edit it and update
-            self.tiVo.iPAddress = newTiVo[kMTTiVoIPAddress];
-            self.tiVo.userName = newTiVo[kMTTiVoUserName];
-            self.tiVo.userPort = (short)[newTiVo[kMTTiVoUserPort] intValue];
-            self.tiVo.userPortSSL = (short)[newTiVo[kMTTiVoUserPortSSL] intValue];
-            self.tiVo.userPortRPC = (short)[newTiVo[kMTTiVoUserPortRPC] intValue];
+            if (newTiVo[kMTTiVoIPAddress]) self.tiVo.iPAddress = newTiVo[kMTTiVoIPAddress];
+            if (newTiVo[kMTTiVoUserName]) self.tiVo.userName = newTiVo[kMTTiVoUserName];
+            if (newTiVo[kMTTiVoUserPort]) self.tiVo.userPort = (short)[newTiVo[kMTTiVoUserPort] intValue];
+            if (newTiVo[kMTTiVoUserPortSSL]) self.tiVo.userPortSSL = (short)[newTiVo[kMTTiVoUserPortSSL] intValue];
+            if (newTiVo[kMTTiVoUserPortRPC]) self.tiVo.userPortRPC = (short)[newTiVo[kMTTiVoUserPortRPC] intValue];
             shouldUpdate = YES;
             if (rpcChanged) self.myRPC = nil; //will be restarted by "enabled"
         }

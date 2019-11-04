@@ -2065,7 +2065,27 @@ __DDLOGHERE__
 	if (platform && ![platform hasPrefix:@"tcd"]) {
 		//filter out other non-tivos
 		self.missingTiVoSymptom = @"Invalid tcd";
-		DDLogMajor(@"Rejecting Invalid TiVo platform %@; rejecting %@(%@) ",platform, sender.name,ipAddress);
+		DDLogMajor(@"Rejecting Invalid TiVo platform %@; %@(%@) ",platform, sender.name, ipAddress);
+		return;
+	}
+	
+	if (!sender.name.length) {
+		self.missingTiVoSymptom = @"No name";
+		DDLogReport(@"Rejecting No Name TiVo: %@ ", ipAddress);
+		NSMutableString * newString = [NSMutableString string];
+		for (NSString * key in [TXTRecord allKeys]) {
+			NSString * txtRecordString = [NSString stringWithFormat:@"  %@ = %@", key, [[self dataToString:TXTRecord[key]] maskSerialNumber: TSN]];
+			DDLogReport(@"%@", txtRecordString);
+			[newString appendString:txtRecordString];
+			[newString appendString:@"\n"];
+		}
+		NSMutableDictionary * info = [NSMutableDictionary dictionary];
+		[info setValue:@"No Name TiVo"   					forKey:@"MTExceptionName"];
+		[info setValue:newString		 					forKey:@"MTExceptionReason"];
+
+		NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:2 userInfo:info];
+		[[Crashlytics sharedInstance] recordError:error];
+
 		return;
 	}
 	

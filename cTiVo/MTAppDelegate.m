@@ -1035,6 +1035,7 @@ NSObject * assertionID = nil;
 		NSMenu *thisMenu = [[NSMenu alloc] initWithTitle:@"Refresh Tivo"];
 		BOOL lastTivoWasManual = NO;
 		for (MTTiVo *tiVo in _tiVoGlobalManager.tiVoList) {
+			if (!tiVo.tiVo.name) continue;
 			if (!tiVo.manualTiVo && lastTivoWasManual) { //Insert a separator
 				NSMenuItem *menuItem = [NSMenuItem separatorItem];
 				[thisMenu addItem:menuItem];
