@@ -27,10 +27,13 @@ __DDLOGHERE__
 	if ((self = [self initWithWindowNibName:@"MTRemoteWindowController"])) {
 		[self updateTiVoList];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTiVoList) name:kMTNotificationTiVoListUpdated object:nil];
-		
         self.window.contentAspectRatio = self.tivoRemote.image.size;
     };
 	return self;
+}
+
+- (void)windowDidResignKey:(NSNotification *)notification {
+	[self.infoLoadingSpinner stopAnimation:nil];
 }
 
 -(MTTiVo *) selectedTiVo {

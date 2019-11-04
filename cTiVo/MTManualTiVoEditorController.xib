@@ -187,9 +187,6 @@
                                         </connections>
                                     </tableColumn>
                                 </tableColumns>
-                                <connections>
-                                    <action trigger="doubleAction" selector="doubleClickTable:" target="-2" id="WM7-jD-yhi"/>
-                                </connections>
                             </tableView>
                         </subviews>
                     </clipView>
@@ -305,9 +302,6 @@
                                         </connections>
                                     </tableColumn>
                                 </tableColumns>
-                                <connections>
-                                    <action trigger="doubleAction" selector="doubleClickTable:" target="-2" id="XG6-bP-rRo"/>
-                                </connections>
                             </tableView>
                         </subviews>
                     </clipView>

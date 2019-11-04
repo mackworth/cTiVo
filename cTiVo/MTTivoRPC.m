@@ -1286,7 +1286,7 @@ static NSArray * imageResponseTemplate = nil;
 		   if (!playback) {
 				DDLogReport(@"No playbackType?? got %@", jsonResponse);
 		   } else {
-			   NSArray * map = @[@"unknown", @"liveCache", @"recording", @"idle"];
+			   NSArray * map = @[@"unknown", @"liveCache", @"recording", @"idle", @"loopset"];
 			   NSInteger location = [map indexOfObject:playback];
 			   if (location == NSNotFound) {
 				   DDLogReport(@"Unknown playbackType: %@ in %@",playback, jsonResponse );

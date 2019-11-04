@@ -33,6 +33,7 @@ __DDLOGHERE__
 -(BOOL)windowShouldClose:(id)sender
 {
 	[self.view.window makeFirstResponder:self.view]; //This closes out handing editing.
+	[self.tiVoLoadingSpinner stopAnimation:nil];
 	return YES;
 }
 
@@ -82,7 +83,7 @@ __DDLOGHERE__
         tiVos = [NSMutableArray arrayWithArray:existingTivos];
     }
     NSInteger newID = [tiVoManager nextManualTiVoID]; 
-    [tiVos addObject:@{@"enabled" : @NO, kMTTiVoUserName : @"TiVo Name", kMTTiVoIPAddress : @"0.0.0.0", kMTTiVoUserPort : @"80", kMTTiVoUserPortSSL : @"443", kMTTiVoUserPortRPC: @"1413", kMTTiVoID : @(newID), kMTTiVoTSN : @"", kMTTiVoManualTiVo : @YES, kMTTiVoMediaKey : kMTTiVoNullKey}];
+    [tiVos addObject:@{@"enabled" : @NO, kMTTiVoUserName : @"TiVo Default", kMTTiVoIPAddress : @"0.0.0.0", kMTTiVoUserPort : @"80", kMTTiVoUserPortSSL : @"443", kMTTiVoUserPortRPC: @"1413", kMTTiVoID : @(newID), kMTTiVoTSN : @"", kMTTiVoManualTiVo : @YES, kMTTiVoMediaKey : kMTTiVoNullKey}];
    [[NSUserDefaults standardUserDefaults] setValue:tiVos forKeyPath:kMTTiVos];
 }
 
@@ -134,16 +135,17 @@ __DDLOGHERE__
 				[self.tiVoLoadingSpinner startAnimation:nil];
 				[candidate tiVoInfoWithCompletion:^(NSString *status) {
 					[self.tiVoLoadingSpinner stopAnimation:nil];
-					NSAlert *alert = [[NSAlert alloc] init];
-					NSString * name = candidate.tiVo.name;
-					[alert setMessageText:name];
-					[alert setInformativeText:status];
-					[alert addButtonWithTitle:@"OK"];
-					[alert setAlertStyle:NSAlertStyleInformational];
+					if (status) {
+						NSAlert *alert = [[NSAlert alloc] init];
+						NSString * name = candidate.tiVo.name ?:@"Unknown name";
+						[alert setMessageText:name];
+						[alert setInformativeText:status];
+						[alert addButtonWithTitle:@"OK"];
+						[alert setAlertStyle:NSAlertStyleInformational];
 
-					[alert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-					}];
-
+						[alert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+							}];
+					}
 				}];
 			}
 			return;

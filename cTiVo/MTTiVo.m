@@ -361,42 +361,60 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 }
 
 -(void) updateWithDescription:(NSDictionary *) newTiVo {
-    BOOL shouldUpdate = NO;
-    BOOL newEnabled = ((NSNumber *) newTiVo[kMTTiVoEnabled]).boolValue;
+    BOOL newlyEnabled = ((NSNumber *) newTiVo[kMTTiVoEnabled]).boolValue && !self.enabled;
+    BOOL shouldUpdate = newlyEnabled;
 
     if (self.manualTiVo) {
-        BOOL rpcChanged = [self.tiVo.iPAddress caseInsensitiveCompare:newTiVo[kMTTiVoIPAddress]] != NSOrderedSame ||
-                          self.tiVo.userPortRPC != [newTiVo[kMTTiVoUserPortRPC] intValue];
-        if (rpcChanged ||
-            [self.tiVo.userName  compare:newTiVo[kMTTiVoUserName]] != NSOrderedSame ||
-            self.tiVo.userPort != [newTiVo[kMTTiVoUserPort] intValue] ||
-            self.tiVo.userPortSSL != [newTiVo[kMTTiVoUserPortSSL] intValue]
-           ) { // If there's a change then edit it and update
-            if (newTiVo[kMTTiVoIPAddress]) self.tiVo.iPAddress = newTiVo[kMTTiVoIPAddress];
-            if (newTiVo[kMTTiVoUserName]) self.tiVo.userName = newTiVo[kMTTiVoUserName];
-            if (newTiVo[kMTTiVoUserPort]) self.tiVo.userPort = (short)[newTiVo[kMTTiVoUserPort] intValue];
-            if (newTiVo[kMTTiVoUserPortSSL]) self.tiVo.userPortSSL = (short)[newTiVo[kMTTiVoUserPortSSL] intValue];
-            if (newTiVo[kMTTiVoUserPortRPC]) self.tiVo.userPortRPC = (short)[newTiVo[kMTTiVoUserPortRPC] intValue];
+		BOOL rpcChanged = newlyEnabled;
+		NSString * newName = newTiVo[kMTTiVoUserName];
+		if (newName.length > 0 && [self.tiVo.userName  compare:newName] != NSOrderedSame) {
+			self.tiVo.userName = newTiVo[kMTTiVoUserName];
             shouldUpdate = YES;
-            if (rpcChanged) self.myRPC = nil; //will be restarted by "enabled"
-        }
+		}
+
+		if (newTiVo[kMTTiVoIPAddress] && [self.tiVo.iPAddress caseInsensitiveCompare:newTiVo[kMTTiVoIPAddress]] != NSOrderedSame ) {
+			self.tiVo.iPAddress = newTiVo[kMTTiVoIPAddress];
+            shouldUpdate = YES;
+			rpcChanged = YES;
+		}
+
+		if (newTiVo[kMTTiVoUserPort] && self.tiVo.userPort != [newTiVo[kMTTiVoUserPort] intValue]) {
+			self.tiVo.userPort =  (short)[newTiVo[kMTTiVoUserPort] intValue];
+            shouldUpdate = YES;
+		}
+
+		if (newTiVo[kMTTiVoUserPortSSL] && self.tiVo.userPortSSL != [newTiVo[kMTTiVoUserPortSSL] intValue]) {
+			self.tiVo.userPortSSL = (short)[newTiVo[kMTTiVoUserPortSSL] intValue];
+            shouldUpdate = YES;
+		}
+
+		if (newTiVo[kMTTiVoUserPortRPC] && self.tiVo.userPortRPC != [newTiVo[kMTTiVoUserPortRPC] intValue]) {
+			self.tiVo.userPortRPC = (short)[newTiVo[kMTTiVoUserPortRPC] intValue];
+            shouldUpdate = YES;
+			rpcChanged = YES;
+		}
+		if (rpcChanged) self.myRPC = nil; //will be restarted by "enabled"
     }
+	
 	NSString * possMediaKey = newTiVo[kMTTiVoMediaKey];
-    if ((newTiVo[kMTTiVoEnabled]  && self.enabled != newEnabled) ||
-        (newTiVo[kMTTiVoTSN]      && ! [newTiVo[kMTTiVoTSN]      isEqualToString: self.tiVoSerialNumber]) ||
-        (possMediaKey.length > 0 && ! [possMediaKey isEqualToString: self.mediaKey] && ![possMediaKey isEqual:kMTTiVoNullKey])) {
-        self.tiVoSerialNumber = (NSString *)newTiVo[kMTTiVoTSN];  //must be after enabled
+    if ((possMediaKey.length > 0 && ! [possMediaKey isEqualToString: self.mediaKey] && ![possMediaKey isEqual:kMTTiVoNullKey])) {
         self.mediaKey = possMediaKey;
         shouldUpdate = YES;
     }
-    self.enabled = newEnabled;
+	
+    if ((newTiVo[kMTTiVoTSN]      && ! [newTiVo[kMTTiVoTSN]      isEqualToString: self.tiVoSerialNumber]) ) {
+        self.tiVoSerialNumber = (NSString *)newTiVo[kMTTiVoTSN];  //must be after enabled?
+        shouldUpdate = YES;
+    }
+
+	self.enabled = [newTiVo[kMTTiVoEnabled] boolValue ]; //side effects of launching RPC
 
     if (shouldUpdate ) {
         DDLogDetail(@"Updated  TiVo %@ with %@",self, [newTiVo maskMediaKeys]);
        //Turn off label in UI
         [[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationTiVoUpdated object:self];
         //RE-update shows
-        if (newEnabled) [self scheduleNextUpdateAfterDelay:0];
+        if (newlyEnabled) [self scheduleNextUpdateAfterDelay:0];
     }
 }
 
@@ -712,14 +730,18 @@ BOOL channelChecking = NO;
 		[weakSelf.myRPC whatsOnSearchWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID, NSString * channelNumber) {
 			__typeof__(self) strongSelf = weakSelf;
 			NSMutableString * outString = [NSMutableString string];
-			
 			NSArray * myShows = strongSelf.shows;
-			NSPredicate * suggestedPredicate = [NSPredicate predicateWithFormat:@"isSuggestion == NO"];
-			NSArray * regularShows = [tiVoManager.tiVoShows filteredArrayUsingPredicate:suggestedPredicate];
-			int totalShows = (int)myShows.count;
-			int regShows = (int)regularShows.count;
-			[outString appendFormat:@"Recordings: %d  (%d Regular; %d Suggestions)\n\n",  totalShows, regShows, totalShows-regShows];
 			
+			if (self.isMini) {
+				[outString appendString:@"TiVo Mini\n\n"];
+			} else {
+				NSPredicate * suggestedPredicate = [NSPredicate predicateWithFormat:@"isSuggestion == NO"];
+				NSArray * regularShows = [tiVoManager.tiVoShows filteredArrayUsingPredicate:suggestedPredicate];
+				int totalShows = (int)myShows.count;
+				int regShows = (int)regularShows.count;
+				[outString appendFormat:@"Recordings: %d  (%d Regular; %d Suggestions)\n\n",  totalShows, regShows, totalShows-regShows];
+				
+			}
 			NSString * result = nil;
 			NSString * channelString = channelNumber ? [NSString stringWithFormat:@" (channel: %@)",channelNumber] : @"";
 			switch (whatsOn) {
@@ -746,6 +768,9 @@ BOOL channelChecking = NO;
 					break;
 				case MTWhatsOnStreamingOrMenus:
 					result = @"Menus or streaming";
+					break;
+				case MTWhatsOnLoopset:
+					result = @"Screensaver";
 					break;
 				default:
 					break;
@@ -774,7 +799,7 @@ BOOL channelChecking = NO;
 		__weak __typeof__(self) weakSelf = self;
 		[self whatsOnWithCompletion:^(MTWhatsOnType whatsOn, NSString *recordingID, NSString * channelNumber) {
 			__typeof__(self) strongSelf = weakSelf;
-			if (whatsOn == MTWhatsOnLiveTV || whatsOn == MTWhatsOnStreamingOrMenus) {
+			if (whatsOn == MTWhatsOnLiveTV || whatsOn == MTWhatsOnStreamingOrMenus || whatsOn == MTWhatsOnLoopset) {
 				[strongSelf reallyFindCommercialsForShows];
 			} else {
 				DDLogDetail(@"Waiting for TiVo UI to be available");

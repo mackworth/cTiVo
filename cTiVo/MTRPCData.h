@@ -19,7 +19,8 @@ typedef NS_ENUM(NSUInteger, MTWhatsOnType) {
     MTWhatsOnUnknown = 0,
     MTWhatsOnLiveTV,
     MTWhatsOnRecording,
-    MTWhatsOnStreamingOrMenus  //unfortunately, also when nominally asleep
+    MTWhatsOnStreamingOrMenus, //unfortunately, also when nominally asleep
+	MTWhatsOnLoopset
 };
 
 @interface MTRPCData : NSObject <NSSecureCoding, NSCoding>

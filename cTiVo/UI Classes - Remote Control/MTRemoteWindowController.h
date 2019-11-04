@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <MTTiVo.h>
-@interface MTRemoteWindowController : NSWindowController
+@interface MTRemoteWindowController <NSWindowDelegate> : NSWindowController
 
 @property (nonatomic, readonly) NSArray <MTTiVo *> * tiVoList;
 
