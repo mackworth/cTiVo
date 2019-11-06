@@ -428,7 +428,10 @@ __DDLOGHERE__
 		} else {
 			menuItem.title = @"Refresh TiVo";
 		}
+	} else 	if (menuItem.action == @selector(reportTiVoInfo:)) {
+		return (tiVoManager.tiVoList.count >= 1);
 	}
+
     return YES;
 }
 
@@ -437,6 +440,38 @@ __DDLOGHERE__
 		self.showForDetail = show;
 		[showDetailDrawer open];
     }
+}
+
+-(IBAction) reportTiVoInfo: (NSView *) sender {
+	if (tiVoManager.tiVoList.count >= 1) return;
+	
+	MTTiVo * candidate = tiVoManager.tiVoList[0];
+	
+	if (!candidate.rpcActive)  return;
+	
+	__weak NSProgressIndicator * weakSpinner = loadingProgramListIndicator;
+	__weak __typeof__(self) weakSelf = self;
+
+	[weakSpinner startAnimation:nil];
+
+	[candidate tiVoInfoWithCompletion:^(NSString *status) {
+		__typeof__(self) strongSelf = weakSelf;
+		if (strongSelf.loadingTiVos.count + strongSelf.commercialingTiVos.count == 0) {
+			//otherwise our regular process will turn off.
+			[weakSpinner stopAnimation:nil];
+		}
+		if (status) {
+			NSAlert *alert = [[NSAlert alloc] init];
+			NSString * name = candidate.tiVo.name ?:@"Unknown name";
+			[alert setMessageText:name];
+			[alert setInformativeText:status];
+			[alert addButtonWithTitle:@"OK"];
+			[alert setAlertStyle:NSAlertStyleInformational];
+
+			[alert beginSheetModalForWindow:strongSelf.window completionHandler:^(NSModalResponse returnCode) {
+				}];
+		}
+	}];
 }
 
 -(NSArray <MTTiVoShow *> *) showsForDownloads:(NSArray <MTDownload *> *) downloads includingDone: (BOOL) includeDone {
