@@ -446,7 +446,15 @@ __DDLOGHERE__
 	if (tiVoManager.tiVoList.count >= 1) return;
 	
 	MTTiVo * candidate = tiVoManager.tiVoList[0];
-	
+	if (tiVoManager.tiVoList.count > 1 &&
+		![self.selectedTiVo isEqualToString:kMTAllTiVos]) {
+		for (MTTiVo *targetTiVo in tiVoManager.tiVoList) {
+			if ([targetTiVo.tiVo.name isEqualToString: self.selectedTiVo] ) {
+				candidate = targetTiVo;
+				break;
+			}
+		}
+	}
 	if (!candidate.rpcActive)  return;
 	
 	__weak NSProgressIndicator * weakSpinner = loadingProgramListIndicator;

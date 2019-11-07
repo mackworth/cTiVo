@@ -236,21 +236,22 @@ CA
                             <menuItem isSeparatorItem="YES" id="VoV-SY-MpP">
                                 <attributedString key="attributedTitle"/>
                             </menuItem>
+                            <menuItem title="Get TiVo Info..." keyEquivalent="i" toolTip="Info about your TiVo, e.g. disk space." id="li6-Qs-ffB">
+                                <connections>
+                                    <action selector="reportTiVoInfo:" target="-1" id="gbo-NX-fp4"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Show Remote Control" toolTip="Bring up Remote Control window to control your TiVo" id="8aF-Hd-G56">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showRemoteControlWindow:" target="-1" id="Xzp-z1-rzz"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Reboot TiVo" toolTip="Allows you to reboot your TiVo, even remotely. Will interrupt all programming, recordings, downloads until TiVo restarts." id="GSE-S9-k5L">
+                            <menuItem title="Reboot TiVo..." id="GSE-S9-k5L">
                                 <modifierMask key="keyEquivalentModifierMask"/>
+                                <string key="toolTip">Allows you to reboot your TiVo, even remotely. Will interrupt all programming, recordings, downloads until TiVo restarts. Only available in Remote Control Window.</string>
                                 <connections>
                                     <action selector="rebootTiVo:" target="-1" id="J3p-3p-zQf"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Get Info..." keyEquivalent="i" toolTip="Allows you to reboot your TiVo, even remotely. Will interrupt all programming, recordings, downloads until TiVo restarts." id="li6-Qs-ffB">
-                                <connections>
-                                    <action selector="reportTiVoInfo:" target="-1" id="gbo-NX-fp4"/>
                                 </connections>
                             </menuItem>
                         </items>
