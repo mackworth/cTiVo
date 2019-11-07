@@ -40,7 +40,7 @@ export MACOSX_DEPLOYMENT_TARGET=10.9
 
 #NNOW patch Macports to download official binaries
 open "/opt/local/libexec/macports/lib/port1.0/"
-echo 'Now edit portutil.tcl with following patch for get_portimage_name at about line 2538`
+echo 'Now edit portutil.tcl with following patch for get_portimage_name at about line 2565`
 ````
 --- /opt/local/libexec/macports/lib/port1.0/portutil.orig.tcl 2016-11-16 21:25:25.000000000 -0800
 +++ /opt/local/libexec/macports/lib/port1.0/portutil.tcl  2017-01-04 10:10:20.000000000 -0800
@@ -96,12 +96,15 @@ echo '   reinplace "s|HAVE_CLOCK_GETTIME|UNDEFINED_GIBBERISH|g" ${worksrcpath}/l
 read -p "Then press [return] key to continue, or Ctrl-C to cancel..."
 
 #to fix gnutls "can't link connectX" bug
-mkdir -p ~/ports/devel/gnutls/files
-cp -R “$(port dir gnutls)” ~/ports/devel
-curl -Lo ~/ports/devel/gnutls/files/patch.diff https://raw.github.com/darktable-org/darktable/master/packaging/macosx/gnutls-disable-connectx.diff
+#no longer needed
+#mkdir -p ~/ports/devel/gnutls/files
+#cp -R “$(port dir gnutls)” ~/ports/devel
+#curl -Lo ~/ports/devel/gnutls/files/patch.diff https://raw.github.com/darktable-org/darktable/master/packaging/macosx/gnutls-disable-connectx.diff
 
 #then append following line: to ~/ports/devel/gnutls/Portfile files you just copied
-echo `patchfiles-append patch.diff` >> ~/ports/devel/gnutls/Portfile
+#echo `patchfiles-append patch.diff` >> ~/ports/devel/gnutls/Portfile
+
+#now index above patches.
 cd ~/ports
 portindex
 
@@ -109,6 +112,8 @@ sudo port install ffmpeg +nonfree+gpl2
 echo ensure dependencies all say "darwin_13" (for OS 10.9)
 read -p "Then press [return] key to continue, or Ctrl-C to cancel..."
 
+#May need to copy /include/nettle/nettle-stdint.h
+#to /opt/local/include/nettle
 sudo port install mplayer +a52+mencoder_extras
 
 mkdir ~/NewcTivoBinaries
@@ -126,7 +131,7 @@ cp ../../comskip/comskip comskip; cp /opt/local/bin/mencoder mencoder; cp /opt/l
 python ../../matryoshka-name-tool/matryoshka_name_tool.py -d ../lib/ comskip ffmpeg mencoder
 
 #test for external symbol not available in OSX 10.9
-if [[ $(nm -g "/opt/local/lib/libavutil.56.22.100.dylib"  | grep "U _clock_gettime") ]]; then
+if [[ $(nm -g "/opt/local/lib/libavutil.56.31.100.dylib"  | grep "U _clock_gettime") ]]; then
   echo "Error! still has _clock_gettime symbol"
   exit 1
 fi

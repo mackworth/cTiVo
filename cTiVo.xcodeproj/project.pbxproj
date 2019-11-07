@@ -179,7 +179,6 @@
 		1E50516B22556CC300D5981B /* libbz2.1.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912C20DD364E00E3317D /* libbz2.1.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50516C22556CC300D5981B /* libcairo.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910B20DD364A00E3317D /* libcairo.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50516D22556CC300D5981B /* libcroco-0.6.3.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F020DD364700E3317D /* libcroco-0.6.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E50516E22556CC300D5981B /* libcrypto.1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911320DD364B00E3317D /* libcrypto.1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50516F22556CC300D5981B /* libdv.4.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912F20DD364F00E3317D /* libdv.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50517022556CC300D5981B /* libexpat.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913C20DD365000E3317D /* libexpat.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50517122556CC300D5981B /* libfaac.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912320DD364D00E3317D /* libfaac.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -198,11 +197,7 @@
 		1E50517E22556CC300D5981B /* libgraphite2.3.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913520DD365000E3317D /* libgraphite2.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50517F22556CC300D5981B /* libgthread-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F420DD364800E3317D /* libgthread-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50518022556CC300D5981B /* libharfbuzz.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F920DD364800E3317D /* libharfbuzz.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E50518122556CC300D5981B /* libhogweed.4.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910620DD364900E3317D /* libhogweed.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50518222556CC300D5981B /* libiconv.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911820DD364C00E3317D /* libiconv.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E50518322556CC300D5981B /* libicudata.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45412210C0AE007714E0 /* libicudata.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E50518422556CC300D5981B /* libicui18n.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45422210C0AE007714E0 /* libicui18n.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E50518522556CC300D5981B /* libicuuc.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45432210C0AF007714E0 /* libicuuc.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50518622556CC300D5981B /* libidn2.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913920DD365000E3317D /* libidn2.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50518722556CC300D5981B /* libintl.8.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911020DD364B00E3317D /* libintl.8.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50518822556CC300D5981B /* libjpeg.9.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912020DD364D00E3317D /* libjpeg.9.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -212,7 +207,6 @@
 		1E50518C22556CC300D5981B /* libmodplug.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910220DD364900E3317D /* libmodplug.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50518D22556CC300D5981B /* libmp3lame.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911120DD364B00E3317D /* libmp3lame.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50518E22556CC300D5981B /* libncurses.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911E20DD364D00E3317D /* libncurses.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E50518F22556CC300D5981B /* libnettle.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910820DD364A00E3317D /* libnettle.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50519022556CC300D5981B /* libogg.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911520DD364B00E3317D /* libogg.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50519122556CC300D5981B /* libopenjp2.7.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911C20DD364C00E3317D /* libopenjp2.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50519222556CC300D5981B /* libopus.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB914220DD365100E3317D /* libopus.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -229,7 +223,6 @@
 		1E50519D22556CC300D5981B /* libSDL2-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913E20DD365100E3317D /* libSDL2-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50519E22556CC300D5981B /* libsoxr.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913620DD365000E3317D /* libsoxr.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50519F22556CC300D5981B /* libspeex.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911A20DD364C00E3317D /* libspeex.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E5051A022556CC300D5981B /* libssl.1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911720DD364C00E3317D /* libssl.1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5051A122556CC300D5981B /* libswresample.3.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910020DD364900E3317D /* libswresample.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5051A222556CC300D5981B /* libswscale.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913A20DD365000E3317D /* libswscale.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5051A322556CC300D5981B /* libtasn1.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F620DD364800E3317D /* libtasn1.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -240,11 +233,8 @@
 		1E5051A822556CC300D5981B /* libuuid.16.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913F20DD365100E3317D /* libuuid.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5051A922556CC300D5981B /* libvorbis.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90FF20DD364900E3317D /* libvorbis.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5051AA22556CC300D5981B /* libvorbisenc.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F120DD364800E3317D /* libvorbisenc.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E5051AB22556CC300D5981B /* libvpx.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912220DD364D00E3317D /* libvpx.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5051AC22556CC300D5981B /* libX11-xcb.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912B20DD364E00E3317D /* libX11-xcb.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5051AD22556CC300D5981B /* libX11.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB914020DD365100E3317D /* libX11.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E5051AE22556CC300D5981B /* libx264.152.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911420DD364B00E3317D /* libx264.152.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E5051AF22556CC300D5981B /* libx265.169.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E58F5992210B3D700B21C06 /* libx265.169.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5051B022556CC300D5981B /* libXau.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910420DD364900E3317D /* libXau.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5051B122556CC300D5981B /* libxcb-render.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913B20DD365000E3317D /* libxcb-render.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5051B222556CC300D5981B /* libxcb.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912520DD364D00E3317D /* libxcb.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -264,7 +254,6 @@
 		1E56038F1F45103400454157 /* MTRPCData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E56038E1F45103400454157 /* MTRPCData.m */; };
 		1E5603911F45206100454157 /* cdata.p12 in Resources */ = {isa = PBXBuildFile; fileRef = 1E5603901F45206100454157 /* cdata.p12 */; };
 		1E58F5982210B17800B21C06 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EE1D65B2210AF820012080F /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E58F59B2210B41E00B21C06 /* libx265.169.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E58F5992210B3D700B21C06 /* libx265.169.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E59368919648C860008780B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
 		1E59368C19648CFF0008780B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
 		1E5BEC611F9532320082FA6B /* CrashlyticsLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */; };
@@ -283,9 +272,6 @@
 		1E6ECF4A16CF646300863EB0 /* pytivo_txt.xslt in Resources */ = {isa = PBXBuildFile; fileRef = 1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */; };
 		1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D516DD1F4C0071D291 /* MTDownload.m */; };
 		1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */; };
-		1E6F45442210C0E0007714E0 /* libicudata.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45412210C0AE007714E0 /* libicudata.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E6F45452210C0E0007714E0 /* libicui18n.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45422210C0AE007714E0 /* libicui18n.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E6F45462210C0E0007714E0 /* libicuuc.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45432210C0AF007714E0 /* libicuuc.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E6F45482210C137007714E0 /* libfdk-aac.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E6F45472210C135007714E0 /* libfdk-aac.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E7A4CE720422E350081884D /* skipMode@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7A4CE520422E340081884D /* skipMode@2x.png */; };
 		1E7A4CE820422E350081884D /* skipModeInverted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E7A4CE620422E350081884D /* skipModeInverted@2x.png */; };
@@ -298,6 +284,26 @@
 		1E8F6D2A1F5CA4D700830CB4 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E1395941F5928E800FFA4E7 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E90F0D62360AED4007F8BDB /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */; };
 		1E90F0D82360AED9007F8BDB /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB61BB89DA5006D6DBE /* Fabric.framework */; };
+		1E91657C2373AE2700847EF0 /* libcairo-gobject.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E91657E2373AE2700847EF0 /* libx264.157.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165792373AE2600847EF0 /* libx264.157.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165802373AE2700847EF0 /* libvpx.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91657A2373AE2600847EF0 /* libvpx.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165822373AE2700847EF0 /* libx265.179.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91657B2373AE2700847EF0 /* libx265.179.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165852373AE6800847EF0 /* libMacportsLegacySupport.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165842373AE6700847EF0 /* libMacportsLegacySupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165922373AF2900847EF0 /* libhogweed.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165912373AF2800847EF0 /* libhogweed.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165972373AF9400847EF0 /* libicudata.65.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165942373AF9300847EF0 /* libicudata.65.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165992373AF9400847EF0 /* libicui18n.65.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165952373AF9300847EF0 /* libicui18n.65.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E91659B2373AF9400847EF0 /* libicuuc.65.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165962373AF9400847EF0 /* libicuuc.65.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E91659E2373B04900847EF0 /* libnettle.7.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91659D2373B04900847EF0 /* libnettle.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165A12373B46700847EF0 /* libcairo-gobject.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165A22373B47E00847EF0 /* libhogweed.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165912373AF2800847EF0 /* libhogweed.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165A32373B48D00847EF0 /* libicudata.65.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165942373AF9300847EF0 /* libicudata.65.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165A42373B49100847EF0 /* libicui18n.65.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165952373AF9300847EF0 /* libicui18n.65.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165A52373B49500847EF0 /* libicuuc.65.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165962373AF9400847EF0 /* libicuuc.65.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165A62373B4A600847EF0 /* libMacportsLegacySupport.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165842373AE6700847EF0 /* libMacportsLegacySupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165A72373B4AD00847EF0 /* libnettle.7.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91659D2373B04900847EF0 /* libnettle.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165A82373B4BA00847EF0 /* libvpx.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91657A2373AE2600847EF0 /* libvpx.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165A92373B4C600847EF0 /* libx264.157.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165792373AE2600847EF0 /* libx264.157.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E9165AA2373B4C800847EF0 /* libx265.179.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91657B2373AE2700847EF0 /* libx265.179.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E964C9C1882768A00C19046 /* copyright@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C931882768900C19046 /* copyright@2x.png */; };
 		1E964C9D1882768A00C19046 /* deleted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C941882768A00C19046 /* deleted@2x.png */; };
 		1E964C9E1882768A00C19046 /* expired-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C951882768A00C19046 /* expired-recording@2x.png */; };
@@ -338,7 +344,6 @@
 		1EFB692720DD3BA0001F5DB6 /* libbz2.1.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912C20DD364E00E3317D /* libbz2.1.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB692820DD3BA0001F5DB6 /* libcairo.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910B20DD364A00E3317D /* libcairo.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB692920DD3BA0001F5DB6 /* libcroco-0.6.3.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F020DD364700E3317D /* libcroco-0.6.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1EFB692A20DD3BA0001F5DB6 /* libcrypto.1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911320DD364B00E3317D /* libcrypto.1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB692B20DD3BA0001F5DB6 /* libdv.4.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912F20DD364F00E3317D /* libdv.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB692C20DD3BA0001F5DB6 /* libexpat.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913C20DD365000E3317D /* libexpat.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB692D20DD3BA0001F5DB6 /* libfaac.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912320DD364D00E3317D /* libfaac.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -356,7 +361,6 @@
 		1EFB693A20DD3BA0001F5DB6 /* libgraphite2.3.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913520DD365000E3317D /* libgraphite2.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB693B20DD3BA0001F5DB6 /* libgthread-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F420DD364800E3317D /* libgthread-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB693C20DD3BA0001F5DB6 /* libharfbuzz.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F920DD364800E3317D /* libharfbuzz.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1EFB693D20DD3BA0001F5DB6 /* libhogweed.4.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910620DD364900E3317D /* libhogweed.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB693E20DD3BA0001F5DB6 /* libiconv.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911820DD364C00E3317D /* libiconv.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB693F20DD3BA0001F5DB6 /* libidn2.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913920DD365000E3317D /* libidn2.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB694020DD3BA0001F5DB6 /* libintl.8.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911020DD364B00E3317D /* libintl.8.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -367,7 +371,6 @@
 		1EFB694520DD3BA0001F5DB6 /* libmodplug.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910220DD364900E3317D /* libmodplug.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB694620DD3BA0001F5DB6 /* libmp3lame.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911120DD364B00E3317D /* libmp3lame.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB694720DD3BA0001F5DB6 /* libncurses.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911E20DD364D00E3317D /* libncurses.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1EFB694820DD3BA0001F5DB6 /* libnettle.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910820DD364A00E3317D /* libnettle.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB694920DD3BA0001F5DB6 /* libogg.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911520DD364B00E3317D /* libogg.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB694A20DD3BA0001F5DB6 /* libopenjp2.7.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911C20DD364C00E3317D /* libopenjp2.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB694B20DD3BA0001F5DB6 /* libopus.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB914220DD365100E3317D /* libopus.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -384,7 +387,6 @@
 		1EFB695620DD3BA0001F5DB6 /* libSDL2-2.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913E20DD365100E3317D /* libSDL2-2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB695720DD3BA0001F5DB6 /* libsoxr.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913620DD365000E3317D /* libsoxr.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB695820DD3BA0001F5DB6 /* libspeex.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911A20DD364C00E3317D /* libspeex.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1EFB695920DD3BA0001F5DB6 /* libssl.1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911720DD364C00E3317D /* libssl.1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB695A20DD3BA0001F5DB6 /* libswresample.3.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910020DD364900E3317D /* libswresample.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB695B20DD3BA0001F5DB6 /* libswscale.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913A20DD365000E3317D /* libswscale.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB695C20DD3BA0001F5DB6 /* libtasn1.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F620DD364800E3317D /* libtasn1.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -395,10 +397,8 @@
 		1EFB696120DD3BA0001F5DB6 /* libuuid.16.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913F20DD365100E3317D /* libuuid.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB696220DD3BA0001F5DB6 /* libvorbis.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90FF20DD364900E3317D /* libvorbis.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB696320DD3BA0001F5DB6 /* libvorbisenc.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F120DD364800E3317D /* libvorbisenc.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1EFB696420DD3BA0001F5DB6 /* libvpx.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912220DD364D00E3317D /* libvpx.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB696520DD3BA0001F5DB6 /* libX11-xcb.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912B20DD364E00E3317D /* libX11-xcb.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB696620DD3BA0001F5DB6 /* libX11.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB914020DD365100E3317D /* libX11.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1EFB696720DD3BA0001F5DB6 /* libx264.152.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB911420DD364B00E3317D /* libx264.152.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB696920DD3BA0001F5DB6 /* libXau.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910420DD364900E3317D /* libXau.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB696A20DD3BA0001F5DB6 /* libxcb-render.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB913B20DD365000E3317D /* libxcb-render.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB696B20DD3BA0001F5DB6 /* libxcb.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB912520DD364D00E3317D /* libxcb.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -503,8 +503,8 @@
 				1E50516A22556CC300D5981B /* libbluray.2.dylib in Copy shared libraries for executables */,
 				1E50516B22556CC300D5981B /* libbz2.1.0.dylib in Copy shared libraries for executables */,
 				1E50516C22556CC300D5981B /* libcairo.2.dylib in Copy shared libraries for executables */,
+				1E9165A12373B46700847EF0 /* libcairo-gobject.2.dylib in Copy shared libraries for executables */,
 				1E50516D22556CC300D5981B /* libcroco-0.6.3.dylib in Copy shared libraries for executables */,
-				1E50516E22556CC300D5981B /* libcrypto.1.0.0.dylib in Copy shared libraries for executables */,
 				1E50516F22556CC300D5981B /* libdv.4.dylib in Copy shared libraries for executables */,
 				1E50517022556CC300D5981B /* libexpat.1.dylib in Copy shared libraries for executables */,
 				1E50517122556CC300D5981B /* libfaac.0.dylib in Copy shared libraries for executables */,
@@ -516,6 +516,7 @@
 				1E50517722556CC300D5981B /* libgdk_pixbuf-2.0.0.dylib in Copy shared libraries for executables */,
 				1E50517822556CC300D5981B /* libgio-2.0.0.dylib in Copy shared libraries for executables */,
 				1E50517922556CC300D5981B /* libglib-2.0.0.dylib in Copy shared libraries for executables */,
+				1E9165A22373B47E00847EF0 /* libhogweed.5.dylib in Copy shared libraries for executables */,
 				1E50517A22556CC300D5981B /* libgmodule-2.0.0.dylib in Copy shared libraries for executables */,
 				1E50517B22556CC300D5981B /* libgmp.10.dylib in Copy shared libraries for executables */,
 				1E50517C22556CC300D5981B /* libgnutls.30.dylib in Copy shared libraries for executables */,
@@ -523,21 +524,21 @@
 				1E50517E22556CC300D5981B /* libgraphite2.3.dylib in Copy shared libraries for executables */,
 				1E50517F22556CC300D5981B /* libgthread-2.0.0.dylib in Copy shared libraries for executables */,
 				1E50518022556CC300D5981B /* libharfbuzz.0.dylib in Copy shared libraries for executables */,
-				1E50518122556CC300D5981B /* libhogweed.4.dylib in Copy shared libraries for executables */,
 				1E50518222556CC300D5981B /* libiconv.2.dylib in Copy shared libraries for executables */,
-				1E50518322556CC300D5981B /* libicudata.58.dylib in Copy shared libraries for executables */,
-				1E50518422556CC300D5981B /* libicui18n.58.dylib in Copy shared libraries for executables */,
-				1E50518522556CC300D5981B /* libicuuc.58.dylib in Copy shared libraries for executables */,
+				1E9165A32373B48D00847EF0 /* libicudata.65.dylib in Copy shared libraries for executables */,
+				1E9165A42373B49100847EF0 /* libicui18n.65.dylib in Copy shared libraries for executables */,
+				1E9165A52373B49500847EF0 /* libicuuc.65.dylib in Copy shared libraries for executables */,
 				1E50518622556CC300D5981B /* libidn2.0.dylib in Copy shared libraries for executables */,
 				1E50518722556CC300D5981B /* libintl.8.dylib in Copy shared libraries for executables */,
 				1E50518822556CC300D5981B /* libjpeg.9.dylib in Copy shared libraries for executables */,
 				1E50518922556CC300D5981B /* liblzma.5.dylib in Copy shared libraries for executables */,
 				1E50518A22556CC300D5981B /* liblzo2.2.dylib in Copy shared libraries for executables */,
+				1E9165A62373B4A600847EF0 /* libMacportsLegacySupport.dylib in Copy shared libraries for executables */,
 				1E50518B22556CC300D5981B /* libmad.0.dylib in Copy shared libraries for executables */,
 				1E50518C22556CC300D5981B /* libmodplug.1.dylib in Copy shared libraries for executables */,
 				1E50518D22556CC300D5981B /* libmp3lame.0.dylib in Copy shared libraries for executables */,
 				1E50518E22556CC300D5981B /* libncurses.6.dylib in Copy shared libraries for executables */,
-				1E50518F22556CC300D5981B /* libnettle.6.dylib in Copy shared libraries for executables */,
+				1E9165A72373B4AD00847EF0 /* libnettle.7.dylib in Copy shared libraries for executables */,
 				1E50519022556CC300D5981B /* libogg.0.dylib in Copy shared libraries for executables */,
 				1E50519122556CC300D5981B /* libopenjp2.7.dylib in Copy shared libraries for executables */,
 				1E50519222556CC300D5981B /* libopus.0.dylib in Copy shared libraries for executables */,
@@ -554,7 +555,6 @@
 				1E50519D22556CC300D5981B /* libSDL2-2.0.0.dylib in Copy shared libraries for executables */,
 				1E50519E22556CC300D5981B /* libsoxr.0.dylib in Copy shared libraries for executables */,
 				1E50519F22556CC300D5981B /* libspeex.1.dylib in Copy shared libraries for executables */,
-				1E5051A022556CC300D5981B /* libssl.1.0.0.dylib in Copy shared libraries for executables */,
 				1E5051A122556CC300D5981B /* libswresample.3.dylib in Copy shared libraries for executables */,
 				1E5051A222556CC300D5981B /* libswscale.5.dylib in Copy shared libraries for executables */,
 				1E5051A322556CC300D5981B /* libtasn1.6.dylib in Copy shared libraries for executables */,
@@ -565,11 +565,11 @@
 				1E5051A822556CC300D5981B /* libuuid.16.dylib in Copy shared libraries for executables */,
 				1E5051A922556CC300D5981B /* libvorbis.0.dylib in Copy shared libraries for executables */,
 				1E5051AA22556CC300D5981B /* libvorbisenc.2.dylib in Copy shared libraries for executables */,
-				1E5051AB22556CC300D5981B /* libvpx.5.dylib in Copy shared libraries for executables */,
+				1E9165A82373B4BA00847EF0 /* libvpx.6.dylib in Copy shared libraries for executables */,
 				1E5051AC22556CC300D5981B /* libX11-xcb.1.dylib in Copy shared libraries for executables */,
 				1E5051AD22556CC300D5981B /* libX11.6.dylib in Copy shared libraries for executables */,
-				1E5051AE22556CC300D5981B /* libx264.152.dylib in Copy shared libraries for executables */,
-				1E5051AF22556CC300D5981B /* libx265.169.dylib in Copy shared libraries for executables */,
+				1E9165AA2373B4C800847EF0 /* libx265.179.dylib in Copy shared libraries for executables */,
+				1E9165A92373B4C600847EF0 /* libx264.157.dylib in Copy shared libraries for executables */,
 				1E5051B022556CC300D5981B /* libXau.6.dylib in Copy shared libraries for executables */,
 				1E5051B122556CC300D5981B /* libxcb-render.0.dylib in Copy shared libraries for executables */,
 				1E5051B222556CC300D5981B /* libxcb.1.dylib in Copy shared libraries for executables */,
@@ -608,8 +608,8 @@
 				1EFB692620DD3BA0001F5DB6 /* libbluray.2.dylib in Copy shared libraries for executables */,
 				1EFB692720DD3BA0001F5DB6 /* libbz2.1.0.dylib in Copy shared libraries for executables */,
 				1EFB692820DD3BA0001F5DB6 /* libcairo.2.dylib in Copy shared libraries for executables */,
+				1E91657C2373AE2700847EF0 /* libcairo-gobject.2.dylib in Copy shared libraries for executables */,
 				1EFB692920DD3BA0001F5DB6 /* libcroco-0.6.3.dylib in Copy shared libraries for executables */,
-				1EFB692A20DD3BA0001F5DB6 /* libcrypto.1.0.0.dylib in Copy shared libraries for executables */,
 				1EFB692B20DD3BA0001F5DB6 /* libdv.4.dylib in Copy shared libraries for executables */,
 				1EFB692C20DD3BA0001F5DB6 /* libexpat.1.dylib in Copy shared libraries for executables */,
 				1EFB692D20DD3BA0001F5DB6 /* libfaac.0.dylib in Copy shared libraries for executables */,
@@ -628,21 +628,22 @@
 				1EFB693A20DD3BA0001F5DB6 /* libgraphite2.3.dylib in Copy shared libraries for executables */,
 				1EFB693B20DD3BA0001F5DB6 /* libgthread-2.0.0.dylib in Copy shared libraries for executables */,
 				1EFB693C20DD3BA0001F5DB6 /* libharfbuzz.0.dylib in Copy shared libraries for executables */,
-				1EFB693D20DD3BA0001F5DB6 /* libhogweed.4.dylib in Copy shared libraries for executables */,
+				1E9165922373AF2900847EF0 /* libhogweed.5.dylib in Copy shared libraries for executables */,
 				1EFB693E20DD3BA0001F5DB6 /* libiconv.2.dylib in Copy shared libraries for executables */,
-				1E6F45442210C0E0007714E0 /* libicudata.58.dylib in Copy shared libraries for executables */,
-				1E6F45452210C0E0007714E0 /* libicui18n.58.dylib in Copy shared libraries for executables */,
-				1E6F45462210C0E0007714E0 /* libicuuc.58.dylib in Copy shared libraries for executables */,
+				1E91659B2373AF9400847EF0 /* libicuuc.65.dylib in Copy shared libraries for executables */,
+				1E9165992373AF9400847EF0 /* libicui18n.65.dylib in Copy shared libraries for executables */,
+				1E9165972373AF9400847EF0 /* libicudata.65.dylib in Copy shared libraries for executables */,
 				1EFB693F20DD3BA0001F5DB6 /* libidn2.0.dylib in Copy shared libraries for executables */,
 				1EFB694020DD3BA0001F5DB6 /* libintl.8.dylib in Copy shared libraries for executables */,
 				1EFB694120DD3BA0001F5DB6 /* libjpeg.9.dylib in Copy shared libraries for executables */,
 				1EFB694220DD3BA0001F5DB6 /* liblzma.5.dylib in Copy shared libraries for executables */,
 				1EFB694320DD3BA0001F5DB6 /* liblzo2.2.dylib in Copy shared libraries for executables */,
+				1E9165852373AE6800847EF0 /* libMacportsLegacySupport.dylib in Copy shared libraries for executables */,
 				1EFB694420DD3BA0001F5DB6 /* libmad.0.dylib in Copy shared libraries for executables */,
 				1EFB694520DD3BA0001F5DB6 /* libmodplug.1.dylib in Copy shared libraries for executables */,
 				1EFB694620DD3BA0001F5DB6 /* libmp3lame.0.dylib in Copy shared libraries for executables */,
 				1EFB694720DD3BA0001F5DB6 /* libncurses.6.dylib in Copy shared libraries for executables */,
-				1EFB694820DD3BA0001F5DB6 /* libnettle.6.dylib in Copy shared libraries for executables */,
+				1E91659E2373B04900847EF0 /* libnettle.7.dylib in Copy shared libraries for executables */,
 				1EFB694920DD3BA0001F5DB6 /* libogg.0.dylib in Copy shared libraries for executables */,
 				1EFB694A20DD3BA0001F5DB6 /* libopenjp2.7.dylib in Copy shared libraries for executables */,
 				1EFB694B20DD3BA0001F5DB6 /* libopus.0.dylib in Copy shared libraries for executables */,
@@ -659,7 +660,6 @@
 				1EFB695620DD3BA0001F5DB6 /* libSDL2-2.0.0.dylib in Copy shared libraries for executables */,
 				1EFB695720DD3BA0001F5DB6 /* libsoxr.0.dylib in Copy shared libraries for executables */,
 				1EFB695820DD3BA0001F5DB6 /* libspeex.1.dylib in Copy shared libraries for executables */,
-				1EFB695920DD3BA0001F5DB6 /* libssl.1.0.0.dylib in Copy shared libraries for executables */,
 				1EFB695A20DD3BA0001F5DB6 /* libswresample.3.dylib in Copy shared libraries for executables */,
 				1EFB695B20DD3BA0001F5DB6 /* libswscale.5.dylib in Copy shared libraries for executables */,
 				1EFB695C20DD3BA0001F5DB6 /* libtasn1.6.dylib in Copy shared libraries for executables */,
@@ -670,11 +670,11 @@
 				1EFB696120DD3BA0001F5DB6 /* libuuid.16.dylib in Copy shared libraries for executables */,
 				1EFB696220DD3BA0001F5DB6 /* libvorbis.0.dylib in Copy shared libraries for executables */,
 				1EFB696320DD3BA0001F5DB6 /* libvorbisenc.2.dylib in Copy shared libraries for executables */,
-				1EFB696420DD3BA0001F5DB6 /* libvpx.5.dylib in Copy shared libraries for executables */,
+				1E9165802373AE2700847EF0 /* libvpx.6.dylib in Copy shared libraries for executables */,
 				1EFB696520DD3BA0001F5DB6 /* libX11-xcb.1.dylib in Copy shared libraries for executables */,
 				1EFB696620DD3BA0001F5DB6 /* libX11.6.dylib in Copy shared libraries for executables */,
-				1EFB696720DD3BA0001F5DB6 /* libx264.152.dylib in Copy shared libraries for executables */,
-				1E58F59B2210B41E00B21C06 /* libx265.169.dylib in Copy shared libraries for executables */,
+				1E9165822373AE2700847EF0 /* libx265.179.dylib in Copy shared libraries for executables */,
+				1E91657E2373AE2700847EF0 /* libx264.157.dylib in Copy shared libraries for executables */,
 				1EFB696920DD3BA0001F5DB6 /* libXau.6.dylib in Copy shared libraries for executables */,
 				1EFB696A20DD3BA0001F5DB6 /* libxcb-render.0.dylib in Copy shared libraries for executables */,
 				1EFB696B20DD3BA0001F5DB6 /* libxcb.1.dylib in Copy shared libraries for executables */,
@@ -769,7 +769,6 @@
 		1E56038D1F45103400454157 /* MTRPCData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTRPCData.h; sourceTree = "<group>"; };
 		1E56038E1F45103400454157 /* MTRPCData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTRPCData.m; sourceTree = "<group>"; };
 		1E5603901F45206100454157 /* cdata.p12 */ = {isa = PBXFileReference; lastKnownFileType = file; path = cdata.p12; sourceTree = "<group>"; };
-		1E58F5992210B3D700B21C06 /* libx265.169.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libx265.169.dylib; sourceTree = "<group>"; };
 		1E5936821964867E0008780B /* MTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLog.h; sourceTree = "<group>"; };
 		1E59368319648C180008780B /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
 		1E59368819648C860008780B /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
@@ -797,9 +796,6 @@
 		1E6F22D516DD1F4C0071D291 /* MTDownload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MTDownload.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		1E6F22D816DD3D9E0071D291 /* NSString+RFC3339Date.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+RFC3339Date.h"; sourceTree = "<group>"; };
 		1E6F22D916DD3D9E0071D291 /* NSString+RFC3339Date.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+RFC3339Date.m"; sourceTree = "<group>"; };
-		1E6F45412210C0AE007714E0 /* libicudata.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicudata.58.dylib; sourceTree = "<group>"; };
-		1E6F45422210C0AE007714E0 /* libicui18n.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicui18n.58.dylib; sourceTree = "<group>"; };
-		1E6F45432210C0AF007714E0 /* libicuuc.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicuuc.58.dylib; sourceTree = "<group>"; };
 		1E6F45472210C135007714E0 /* libfdk-aac.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libfdk-aac.2.dylib"; sourceTree = "<group>"; };
 		1E6F45492210C6E0007714E0 /* cTiVoBinariesBuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = cTiVoBinariesBuild.sh; path = cTiVo/cTiVoBinariesBuild.sh; sourceTree = SOURCE_ROOT; };
 		1E78719A1E47DCEF00EF1C5B /* cTiVo-10.7-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "cTiVo-10.7-Info.plist"; sourceTree = "<group>"; };
@@ -815,6 +811,16 @@
 		1E8C1B57224B988600F285EF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		1E8E675B20E1E970005465EF /* DDOSLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDOSLogger.h; sourceTree = "<group>"; };
 		1E8E675C20E1E970005465EF /* DDOSLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDOSLogger.m; sourceTree = "<group>"; };
+		1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libcairo-gobject.2.dylib"; sourceTree = "<group>"; };
+		1E9165792373AE2600847EF0 /* libx264.157.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libx264.157.dylib; sourceTree = "<group>"; };
+		1E91657A2373AE2600847EF0 /* libvpx.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libvpx.6.dylib; sourceTree = "<group>"; };
+		1E91657B2373AE2700847EF0 /* libx265.179.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libx265.179.dylib; sourceTree = "<group>"; };
+		1E9165842373AE6700847EF0 /* libMacportsLegacySupport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libMacportsLegacySupport.dylib; sourceTree = "<group>"; };
+		1E9165912373AF2800847EF0 /* libhogweed.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libhogweed.5.dylib; sourceTree = "<group>"; };
+		1E9165942373AF9300847EF0 /* libicudata.65.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicudata.65.dylib; sourceTree = "<group>"; };
+		1E9165952373AF9300847EF0 /* libicui18n.65.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicui18n.65.dylib; sourceTree = "<group>"; };
+		1E9165962373AF9400847EF0 /* libicuuc.65.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicuuc.65.dylib; sourceTree = "<group>"; };
+		1E91659D2373B04900847EF0 /* libnettle.7.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libnettle.7.dylib; sourceTree = "<group>"; };
 		1E964C931882768900C19046 /* copyright@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "copyright@2x.png"; sourceTree = "<group>"; };
 		1E964C941882768A00C19046 /* deleted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "deleted@2x.png"; sourceTree = "<group>"; };
 		1E964C951882768A00C19046 /* expired-recording@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expired-recording@2x.png"; sourceTree = "<group>"; };
@@ -863,9 +869,7 @@
 		1ECB910320DD364900E3317D /* libpcre.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libpcre.1.dylib; sourceTree = "<group>"; };
 		1ECB910420DD364900E3317D /* libXau.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libXau.6.dylib; sourceTree = "<group>"; };
 		1ECB910520DD364900E3317D /* libgmodule-2.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libgmodule-2.0.0.dylib"; sourceTree = "<group>"; };
-		1ECB910620DD364900E3317D /* libhogweed.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libhogweed.4.dylib; sourceTree = "<group>"; };
 		1ECB910720DD364900E3317D /* libavdevice.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libavdevice.58.dylib; sourceTree = "<group>"; };
-		1ECB910820DD364A00E3317D /* libnettle.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libnettle.6.dylib; sourceTree = "<group>"; };
 		1ECB910920DD364A00E3317D /* libavresample.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libavresample.4.dylib; sourceTree = "<group>"; };
 		1ECB910A20DD364A00E3317D /* libpangocairo-1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libpangocairo-1.0.0.dylib"; sourceTree = "<group>"; };
 		1ECB910B20DD364A00E3317D /* libcairo.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcairo.2.dylib; sourceTree = "<group>"; };
@@ -876,11 +880,8 @@
 		1ECB911020DD364B00E3317D /* libintl.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libintl.8.dylib; sourceTree = "<group>"; };
 		1ECB911120DD364B00E3317D /* libmp3lame.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libmp3lame.0.dylib; sourceTree = "<group>"; };
 		1ECB911220DD364B00E3317D /* libunistring.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libunistring.2.dylib; sourceTree = "<group>"; };
-		1ECB911320DD364B00E3317D /* libcrypto.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcrypto.1.0.0.dylib; sourceTree = "<group>"; };
-		1ECB911420DD364B00E3317D /* libx264.152.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libx264.152.dylib; sourceTree = "<group>"; };
 		1ECB911520DD364B00E3317D /* libogg.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libogg.0.dylib; sourceTree = "<group>"; };
 		1ECB911620DD364B00E3317D /* libgnutls.30.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libgnutls.30.dylib; sourceTree = "<group>"; };
-		1ECB911720DD364C00E3317D /* libssl.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libssl.1.0.0.dylib; sourceTree = "<group>"; };
 		1ECB911820DD364C00E3317D /* libiconv.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libiconv.2.dylib; sourceTree = "<group>"; };
 		1ECB911920DD364C00E3317D /* libbluray.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libbluray.2.dylib; sourceTree = "<group>"; };
 		1ECB911A20DD364C00E3317D /* libspeex.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libspeex.1.dylib; sourceTree = "<group>"; };
@@ -891,7 +892,6 @@
 		1ECB911F20DD364D00E3317D /* libtwolame.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libtwolame.0.dylib; sourceTree = "<group>"; };
 		1ECB912020DD364D00E3317D /* libjpeg.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libjpeg.9.dylib; sourceTree = "<group>"; };
 		1ECB912120DD364D00E3317D /* libtheoraenc.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libtheoraenc.1.dylib; sourceTree = "<group>"; };
-		1ECB912220DD364D00E3317D /* libvpx.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libvpx.5.dylib; sourceTree = "<group>"; };
 		1ECB912320DD364D00E3317D /* libfaac.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libfaac.0.dylib; sourceTree = "<group>"; };
 		1ECB912420DD364D00E3317D /* libmad.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libmad.0.dylib; sourceTree = "<group>"; };
 		1ECB912520DD364D00E3317D /* libxcb.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libxcb.1.dylib; sourceTree = "<group>"; };
@@ -1129,8 +1129,8 @@
 				1ECB911920DD364C00E3317D /* libbluray.2.dylib */,
 				1ECB912C20DD364E00E3317D /* libbz2.1.0.dylib */,
 				1ECB910B20DD364A00E3317D /* libcairo.2.dylib */,
+				1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */,
 				1ECB90F020DD364700E3317D /* libcroco-0.6.3.dylib */,
-				1ECB911320DD364B00E3317D /* libcrypto.1.0.0.dylib */,
 				1ECB912F20DD364F00E3317D /* libdv.4.dylib */,
 				1ECB913C20DD365000E3317D /* libexpat.1.dylib */,
 				1ECB912320DD364D00E3317D /* libfaac.0.dylib */,
@@ -1149,21 +1149,22 @@
 				1ECB913520DD365000E3317D /* libgraphite2.3.dylib */,
 				1ECB90F420DD364800E3317D /* libgthread-2.0.0.dylib */,
 				1ECB90F920DD364800E3317D /* libharfbuzz.0.dylib */,
-				1ECB910620DD364900E3317D /* libhogweed.4.dylib */,
+				1E9165912373AF2800847EF0 /* libhogweed.5.dylib */,
 				1ECB911820DD364C00E3317D /* libiconv.2.dylib */,
-				1E6F45412210C0AE007714E0 /* libicudata.58.dylib */,
-				1E6F45422210C0AE007714E0 /* libicui18n.58.dylib */,
-				1E6F45432210C0AF007714E0 /* libicuuc.58.dylib */,
+				1E9165942373AF9300847EF0 /* libicudata.65.dylib */,
+				1E9165952373AF9300847EF0 /* libicui18n.65.dylib */,
+				1E9165962373AF9400847EF0 /* libicuuc.65.dylib */,
 				1ECB913920DD365000E3317D /* libidn2.0.dylib */,
 				1ECB911020DD364B00E3317D /* libintl.8.dylib */,
 				1ECB912020DD364D00E3317D /* libjpeg.9.dylib */,
 				1ECB913D20DD365100E3317D /* liblzma.5.dylib */,
 				1ECB912D20DD364F00E3317D /* liblzo2.2.dylib */,
+				1E9165842373AE6700847EF0 /* libMacportsLegacySupport.dylib */,
 				1ECB912420DD364D00E3317D /* libmad.0.dylib */,
 				1ECB910220DD364900E3317D /* libmodplug.1.dylib */,
 				1ECB911120DD364B00E3317D /* libmp3lame.0.dylib */,
 				1ECB911E20DD364D00E3317D /* libncurses.6.dylib */,
-				1ECB910820DD364A00E3317D /* libnettle.6.dylib */,
+				1E91659D2373B04900847EF0 /* libnettle.7.dylib */,
 				1ECB911520DD364B00E3317D /* libogg.0.dylib */,
 				1ECB911C20DD364C00E3317D /* libopenjp2.7.dylib */,
 				1ECB914220DD365100E3317D /* libopus.0.dylib */,
@@ -1180,7 +1181,6 @@
 				1ECB913E20DD365100E3317D /* libSDL2-2.0.0.dylib */,
 				1ECB913620DD365000E3317D /* libsoxr.0.dylib */,
 				1ECB911A20DD364C00E3317D /* libspeex.1.dylib */,
-				1ECB911720DD364C00E3317D /* libssl.1.0.0.dylib */,
 				1ECB910020DD364900E3317D /* libswresample.3.dylib */,
 				1ECB913A20DD365000E3317D /* libswscale.5.dylib */,
 				1ECB90F620DD364800E3317D /* libtasn1.6.dylib */,
@@ -1191,11 +1191,11 @@
 				1ECB913F20DD365100E3317D /* libuuid.16.dylib */,
 				1ECB90FF20DD364900E3317D /* libvorbis.0.dylib */,
 				1ECB90F120DD364800E3317D /* libvorbisenc.2.dylib */,
-				1ECB912220DD364D00E3317D /* libvpx.5.dylib */,
+				1E91657A2373AE2600847EF0 /* libvpx.6.dylib */,
 				1ECB912B20DD364E00E3317D /* libX11-xcb.1.dylib */,
 				1ECB914020DD365100E3317D /* libX11.6.dylib */,
-				1ECB911420DD364B00E3317D /* libx264.152.dylib */,
-				1E58F5992210B3D700B21C06 /* libx265.169.dylib */,
+				1E9165792373AE2600847EF0 /* libx264.157.dylib */,
+				1E91657B2373AE2700847EF0 /* libx265.179.dylib */,
 				1ECB910420DD364900E3317D /* libXau.6.dylib */,
 				1ECB913B20DD365000E3317D /* libxcb-render.0.dylib */,
 				1ECB912520DD364D00E3317D /* libxcb.1.dylib */,
