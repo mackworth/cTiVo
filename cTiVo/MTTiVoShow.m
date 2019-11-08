@@ -1292,10 +1292,13 @@ static void * originalAirDateContext = &originalAirDateContext;
                 if (skipOne) {
                     skipOne = NO;
                 } else {
-                    foundKey = foundKey.lowercaseString;
-                    if ([keys[foundKey] length] == 0) {
-                        DDLogVerbose(@"No filename key: %@",foundKey);
-                        //found invalid or empty key so entire conditional fails and should be empty; ignore everything else, unless there's an OR (vertical bar)
+					NSString * foundValue = keys[foundKey.lowercaseString];
+					if (!foundValue) {
+                        DDLogReport(@"Unknown template key: %@",foundKey);
+                        [outStr appendFormat:@"(UNKNOWN KEYWORD-'%@')",foundKey];
+					} else if (foundValue.length == 0) {
+                        DDLogVerbose(@"Empty key: %@",foundKey);
+                        //found empty key so entire conditional fails and should be empty; ignore everything else, unless there's an OR (vertical bar)
                         [scanner scanCharactersFromSet:whitespaceSet intoString:nil];
                         if ([scanner scanString:@"|" intoString:nil]) {
                             //ah, we've got an alternative, so let's keep going
@@ -1303,8 +1306,8 @@ static void * originalAirDateContext = &originalAirDateContext;
                             return @"";
                         }
                     } else {
-                        DDLogVerbose(@"Swapping key %@ with %@",foundKey, keys[foundKey]);
-                        [outStr appendString:keys[foundKey]];
+                        DDLogVerbose(@"Swapping key %@ with %@",foundKey, foundValue);
+                        [outStr appendString:foundValue];
                     }
                 }
             }
