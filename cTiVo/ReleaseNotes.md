@@ -5,6 +5,15 @@
 * New *Get Info* command for TiVos (disk space, network connectivity etc) in *Edit Tivos* and *Remote Control*
 * Known as 3.3.2 during beta testing.
 
+### 3.4.1 fixes
+* Upgrade all binaries and libraries
+* Avoid crash due to manual TiVos with no name
+* *Get TiVo Info* improvements:
+      * Added to Main Window
+      * Remove double-click from Edit> TiVo Tables (confusing with edits)
+      * On Mini, Report Screensaver; don't show number of shows
+* Provide error on invalid Keyword in template
+
 ### Sandboxed cTV version:
 The Mac App Store beta version (now called cTV) is also available.  It is completely identical to cTiVo, except...
 * Now fully sandboxed, improving security of your Mac.
