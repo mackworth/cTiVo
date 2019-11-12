@@ -759,7 +759,8 @@ static NSRegularExpression * isFinalRegex = nil;
 		   DDLogVerbose(@"Got All Shows from TiVo RPC: %@", [strongSelf maskTSN:jsonResponse]);
            NSArray <NSString *> * shows = jsonResponse[@"objectIdAndType"];
            BOOL isFirstLaunch = strongSelf.lastShowList == nil;
-           DDLogDetail (@"Got %lu shows from TiVo: %@", shows.count, shows);
+           DDLogMajor (@"Got %lu shows from TiVo", shows.count);
+		   DDLogDetail(@"Shows from TiVo RPC: %@", [shows componentsJoinedByString:@", "]);
            if (!strongSelf.showMap) {
                strongSelf.showMap = [NSMutableDictionary dictionaryWithCapacity:shows.count];
                [strongSelf recursiveGetShowInfoForShows: shows ];
@@ -790,8 +791,9 @@ static NSRegularExpression * isFinalRegex = nil;
                }
 			   [strongSelf recursiveGetShowInfoForShows: lookupDetails];
 			   if ((newIDs.count + deletedShows.count > 0) ||
-				   [shows isEqual:strongSelf.lastShowList]) {  //if any adds or delete, OR unchanged list
-				   [strongSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows];
+				   [shows isEqual:strongSelf.lastShowList] ||
+				   isFirstLaunch) {  //if any adds or delete, OR unchanged list
+				   [strongSelf.delegate tivoReports:  shows.count withNewShows:newIDs atTiVoIndices:indices andDeletedShows:deletedShows isFirstLaunch: isFirstLaunch];
 				} else { //problem...
 					[strongSelf.delegate rpcResync];
 			   }

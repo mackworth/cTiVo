@@ -51,7 +51,8 @@ typedef NS_ENUM(NSUInteger, MTWhatsOnType) {
 -(void) tivoReports: (NSInteger) numShows
 			     withNewShows: (NSMutableArray <NSString *> *) newShows
                 atTiVoIndices: (NSMutableArray <NSNumber *> *) newShowIndices
-              andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows;
+              andDeletedShows: (NSMutableDictionary < NSString *, MTRPCData *> *) deletedShows
+				isFirstLaunch: (BOOL) firstLaunch;
 -(void) rpcResync;
 -(BOOL) isReachable;
 -(BOOL) isMini;

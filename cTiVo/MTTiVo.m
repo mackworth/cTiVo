@@ -514,14 +514,20 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 -(void) tivoReports: (NSInteger) numShows
 		       withNewShows:(NSArray<NSString *> *)addedShows
               atTiVoIndices: (NSArray <NSNumber *> *) addedShowIndices
-            andDeletedShows:(NSDictionary < NSString *, MTRPCData *> *)deletedIds {
+            andDeletedShows:(NSDictionary < NSString *, MTRPCData *> *)deletedIds
+			  isFirstLaunch:(BOOL)firstLaunch {
     //In future, addedShowIndices could become NSIndexSet
     NSAssert(addedShowIndices.count == addedShows.count, @"Added RPC show problem");
     if (isConnecting) {
         //change during a Tivo XML refresh; need to restart after termination
 		if (!cancelRefresh) {
-			DDLogMajor(@"Show list change during Tivo %@ XML refresh", self);
-        	cancelRefresh = YES;
+			if (firstUpdate && firstLaunch) {
+				//expected first RPC list during first NPL download; just ignore
+				DDLogDetail(@"Ignoring first RPC during first XML download %@ ", self);
+			} else {
+				DDLogMajor(@"Show list change during Tivo %@ XML refresh", self);
+				cancelRefresh = YES;
+			}
 		}
         return;
     }
@@ -603,7 +609,7 @@ void tivoNetworkCallback    (SCNetworkReachabilityRef target,
 
     [NSNotificationCenter  postNotificationNameOnMainThread:kMTNotificationTiVoUpdating object:self];
     if (self.currentNPLStarted) {
-        [self saveLastLoadTime:self.currentNPLStarted];
+        [self saveLastLoadTime:self.currentNPLStarted]; //remember previous successful load time
     }
     self.currentNPLStarted = [NSDate date];
     self.oneBatch = !getAll;
