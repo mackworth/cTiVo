@@ -1231,6 +1231,7 @@ BOOL channelChecking = NO;
         //had some kind of sync problem, so start all over.
         DDLogReport(@"Resynching TiVo %@!", self);
         isConnecting = NO;
+		self.currentNPLStarted = nil; //don't remember this update time
         [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoUpdated object:self];
        [self scheduleNextUpdateAfterDelay:0];
     } else if (self.oneBatch) {
