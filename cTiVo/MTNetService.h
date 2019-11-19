@@ -10,6 +10,8 @@
 
 @interface MTNetService : NSNetService
 
+-(MTNetService *) initWithName:(NSString *)name;
+
 @property (nonatomic, strong) NSString *userName, *iPAddress;
 
 @property (nonatomic) short userPort, userPortSSL, userPortRPC;

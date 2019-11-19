@@ -111,11 +111,12 @@ __DDLOGHERE__
         ![description[kMTTiVoIPAddress]   length]  ) {
         return nil;
     }
-    MTNetService *tiVo = [MTNetService new];
+
+    MTNetService *tiVo = [[MTNetService alloc]  initWithName: description[kMTTiVoUserName]];
     tiVo.userPortSSL = (short)[description[kMTTiVoUserPortSSL] intValue];
     tiVo.userPortRPC = (short)[description[kMTTiVoUserPortRPC] ?: @1413 intValue];
     tiVo.userPort = (short)[description[kMTTiVoUserPort] intValue];
-    tiVo.userName = description[kMTTiVoUserName];
+//    tiVo.userName = description[kMTTiVoUserName];
     tiVo.iPAddress = description[kMTTiVoIPAddress];
     MTTiVo *thisTiVo = [[MTTiVo alloc] initWithTivo:tiVo withOperationQueue:queue manual:YES withID:[description[kMTTiVoID] intValue] withSerialNumber:description[kMTTiVoTSN]];
     if ((description[kMTTiVoMediaKey])  && ![description[kMTTiVoMediaKey] isEqual:kMTTiVoNullKey]) {
@@ -184,14 +185,17 @@ __DDLOGHERE__
 }
 
 -(id) initWithTivo:(MTNetService *)tiVo withOperationQueue:(NSOperationQueue *)queue manual:(BOOL)isManual withID:(int)manualTiVoID withSerialNumber:(NSString *)TSN {
+	DDLogReport(@"Initing new TiVo with %@", tiVo);
 	self = [self init];
 	if (self) {
 		self.tiVo = tiVo;
+		DDLogReport(@"Created new TiVo %@ with %@", self, tiVo);
 		_enabled = YES;
         _manualTiVo = isManual;
         self.manualTiVoID = manualTiVoID;
 		self.opsQueue = queue;
         _tiVoSerialNumber = TSN;
+		DDLogReport(@"Created new TiVo %@ with %@", self, tiVo);
         DDLogMajor(@"testing reachability for tivo %@ with address %@",self.tiVo.name, self.tiVo.addresses[0]);
         if (isManual) {
             _reachability = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [self.tiVo.iPAddress UTF8String]);

@@ -11,16 +11,16 @@
 
 @implementation MTNetService
 
--(id)init{
-    self = [super init];
+-(MTNetService *) initWithName:(NSString *)name {
+    self = [[MTNetService alloc] initWithDomain: @"" type: @"_http._tcp" name: name];
     if (self) {
         self.userPort = 80;
         self.userPortSSL = 443;
         self.userPortRPC = 1413;
-        self.userName = nil;
+        self.userName = name;
         self.iPAddress = nil;
     }
-    return self;
+	return self;
 }
 
 -(NSInteger)port{
