@@ -190,16 +190,17 @@ __DDLOGHERE__
 	if (self) {
 		self.tiVo = tiVo;
 		DDLogReport(@"Created new TiVo %@ with %@", self, tiVo);
-		_enabled = YES;
+		_enabled = NO;
         _manualTiVo = isManual;
         self.manualTiVoID = manualTiVoID;
 		self.opsQueue = queue;
         _tiVoSerialNumber = TSN;
 		DDLogReport(@"Created new TiVo %@ with %@", self, tiVo);
-        DDLogMajor(@"testing reachability for tivo %@ with address %@",self.tiVo.name, self.tiVo.addresses[0]);
         if (isManual) {
+            DDLogMajor(@"testing reachability for tivo %@ with address %@",self.tiVo.name, self.tiVo.iPAddress);
             _reachability = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [self.tiVo.iPAddress UTF8String]);
         } else {
+            DDLogMajor(@"testing reachability for tivo %@ with address %@",self.tiVo.name, self.tiVo.addresses[0]);
             _reachability = SCNetworkReachabilityCreateWithAddress(NULL, [self.tiVo.addresses[0] bytes]);
         }
 		self.networkAvailability = [NSDate date];

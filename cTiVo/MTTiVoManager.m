@@ -1354,6 +1354,7 @@ __DDLOGHERE__
 	MTTiVoShow * show = notification.object;
 	if (![show hasSkipModeInfo]) return;
 	NSString * channelName = show.stationCallsign;
+    if (!channelName) return;
 	NSMutableDictionary * channelInfo = [[tiVoManager channelNamed:channelName] mutableCopy];
 	if (channelInfo) {
 		if (((NSNumber *)channelInfo[kMTChannelInfoSkipMode]).intValue == NSMixedState) {
