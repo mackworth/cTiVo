@@ -10,7 +10,7 @@
 #import "MTTiVoManager.h"
 #import "NSNotificationCenter+Threads.h"
 
-@interface MTRemoteWindowController ()
+@interface MTRemoteWindowController ()<NSWindowDelegate>
 @property (nonatomic, weak) IBOutlet NSPopUpButton * tivoListPopup;
 @property (nonatomic, strong) NSArray <MTTiVo *> * tiVoList;
 @property (nonatomic, readonly) MTTiVo * selectedTiVo;
@@ -29,11 +29,21 @@ __DDLOGHERE__
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateTiVoList) name:kMTNotificationTiVoListUpdated object:nil];
         self.window.contentAspectRatio = self.tivoRemote.image.size;
     };
+	self.window.delegate = self;
 	return self;
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification {
 	[self.infoLoadingSpinner stopAnimation:nil];
+}
+
+- (NSSize)windowWillResize:(NSWindow *)sender
+					toSize:(NSSize)frameSize {
+	if (isnan(frameSize.height)) {
+		//who knows why the OS is sending us this...?
+		frameSize.height = frameSize.width * (sender.frame.size.height/ sender.frame.size.width);
+	}
+	return frameSize;
 }
 
 -(MTTiVo *) selectedTiVo {

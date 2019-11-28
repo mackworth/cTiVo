@@ -24,24 +24,6 @@
 
 #import <Quartz/Quartz.h>
 
-#ifdef MAC_APP_STORE
-//All this mess is just to avoid the error msg that "Drawer cannot have first responder of MTProgramTableView"
-//remove if we move from Drawer to splitView or expanded Row concept
-@interface NSWindow (FirstResponding)
--(void)_setFirstResponder:(NSResponder *)responder;
-@end
-@interface NSDrawerWindow : NSWindow
-@end
-@implementation NSDrawerWindow (avoidWarning)
-
--(void) _setFirstResponder:(NSView *) view {
-	if (![view isKindOfClass:[NSTableView class]]) {
-		[super _setFirstResponder:view];
-	}
-}
-@end
-#endif
-
 @implementation NSView (HS)
 
 -(NSView *)insertVibrancyView {
