@@ -3,32 +3,25 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.4.0; SkipMode!</description>
+        <description>Version 3.4.1; Catalina!</description>
         <language>en</language>
         <item>
-            <title>Version 3.3.1; SkipMode</title>
+            <title>Version 3.4.1; Catalina</title>
             <description><![CDATA[
-				
-				<h2 id="Release-3.4.0">Release 3.4.0 (Catalina and Sandboxing)</h1>
+				<h2 id="Release-3.4.1">Release 3.4.1 (Catalina)</h1>
 				<ul>
+				<li>3.4.1 has miscellaneous fixes, especially for Catalina</li>
 				<li>On Catalina, sends videos to Apple&rsquo;s new TV app due to obsolescence of iTunes.<br>
 				    (Audio-only downloads to Music app)</li>
-				<li>New <em>Get Info</em> command for TiVos (disk space, network connectivity etc) in <em>Edit Tivos</em> and <em>Remote Control</em></li>
+				<li>New <em>Get Info</em> command for TiVos (disk space, network connectivity etc)</li>
 				<li>Sandboxed <em>cTV</em> version also now available.</li>
+				<li>See website for more info regarding using TiVo SkipMode if you're not using it yet with cTiVo.</li>
 				</ul>
-				<h3 id="Fixes:">Fixes:</h3>
-				<ul>
-				<li>Improved reliability for finding completed videos on disk.</li>
-				<li>Help files look better in Dark mode.</li>
-				<li>Better logging to diagnose occasional delays in SkipMode.</li>
-				<li>Misc minor fixes.</li>
-				</ul>
-
             ]]>
             </description>
-            <pubDate>Fri., November 1, 2019 12:00:00 -0800</pubDate>
+            <pubDate>Fri., November 28, 2019 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.0/cTiVo.zip" sparkle:version="1087" sparkle:shortVersionString="3.4.0" length="74021233" type="application/octet-stream" sparkle:dsaSignature="MC4CFQDPzBmaS9Wfc6HteofX1cmmk63sXQIVANky5sHBACsfv0bwp4J8vlz/TvTS"/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.1/cTiVo.app.zip" sparkle:version="1108" sparkle:shortVersionString="3.4.1" length="72876028" type="application/octet-stream" sparkle:dsaSignature="MC0CFDkiBwv9zvt2m9mW6XQv+Cx8OD4dAhUAu8PQSZdEBONlqsvNKVH1DXkGVV8="/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>
