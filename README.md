@@ -6,6 +6,9 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 
 The current release is here:  https://github.com/mackworth/cTiVo/releases/
 
+NOTE: TiVo's new Edge product is currently incompatible with any PC/Mac downloads. For more information or to discuss this with them, see here:
+(https://www.tivocommunity.com/community/index.php?threads/edge-issues-were-tracking.573641/)
+
 ## Automatic Download and Conversions
 * Auto-discovery of all your TiVos (using Bonjour).
 * Drag/drop and contextual menus for ease of use; submit, reschedule, delete all by dragging the shows.
