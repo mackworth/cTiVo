@@ -155,7 +155,7 @@
             } else {
                 description = line;
             }
-        } else {
+        } else if (! [line isEqualToString:@"HandBrake has exited."]) {
             //got a preset
             [self.presetPopup addItemWithTitle:line];
             [[self.presetPopup lastItem] setEnabled:YES];

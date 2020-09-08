@@ -1,3 +1,15 @@
+# 3.4.1: General Fixes
+* *Get TiVo Info* improvements:
+      * Available in Main Window; reports on first TiVo you have
+      * No double-click from Edit>TiVo Tables (was confusing with editing text)
+      * On Mini, reports when in Screensaver mode; don't show "number of shows"
+* Allows resizing Remote Control window
+* Provides error on invalid Keyword in template
+* Upgrade all binaries and libraries
+* Fixes for no-name manual TiVos with and full Catalina compatibility
+* Fix for occasional missed subscription on startup
+* Marked as `Version 1108` in `About cTiVo` or `About cTV`
+
 # Release 3.4.0 (Catalina and Sandboxing)
 * Sends videos to Apple's TV app due to obsolescence of iTunes.
 * Submits Audio-only downloads to Music app in Catalina.

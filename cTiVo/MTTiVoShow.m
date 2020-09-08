@@ -1462,7 +1462,6 @@ NSString * fourChar(long n, BOOL allowZero) {
 		keyPathPart = [keyBaseTitle stringByDeletingLastPathComponent];
 	}
 
-	if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
     baseTitle = [self cleanBaseFileName: baseTitle];
     if ([baseTitle compare: self.showTitle ]  != NSOrderedSame) {
         DDLogVerbose(@"changed filename %@ to %@",self.showTitle, baseTitle);
@@ -1633,9 +1632,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     //        }
 
     NSFileManager *fm = [NSFileManager defaultManager];
-    NSString * baseTitle  = [self.showTitle stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-    if (baseTitle.length > 245) baseTitle = [baseTitle substringToIndex:245];
-    baseTitle = [baseTitle stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+    NSString * baseTitle  = [self cleanBaseFileName:self.showTitle];
     NSString * filePath = [NSString stringWithFormat:@"%@/ZTEST%@.mp4", [tiVoManager downloadDirectory], baseTitle];
     NSString * testPath =[NSString stringWithFormat:@"%@/test.mp4", [tiVoManager downloadDirectory]];
     NSString * textMetaPath = [filePath stringByAppendingPathExtension:@"txt"];
@@ -1994,7 +1991,8 @@ NSString * fourChar(long n, BOOL allowZero) {
     NSString * newBase = [base stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
     newBase = [newBase stringByReplacingOccurrencesOfString:@": " withString:@"-"] ;
     newBase = [newBase stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
-    newBase = [newBase stringByReplacingOccurrencesOfString:@":" withString:@"-"] ;
+    if (newBase.length > 235) newBase = [newBase substringToIndex:235];
+      //leave space for commercialBASETITLE-100.txt to fit in 255 allowed chars
     return newBase;
 }
 

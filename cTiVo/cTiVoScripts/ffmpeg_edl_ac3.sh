@@ -27,7 +27,7 @@ Script to drive ffmpeg, adding Edit Decision List capability (e.g. comskip) and 
 Calls ffmpeg to get duration and audio stream information about the input file
 If a 5.1 audio stream exists, both it and a derived AAC stereo stream will be copied through
 To avoid AC3 passthrough, just add "-noAC3" to calling line
-To avoid stereo creation, just add "--noStereo" to calling line
+To avoid stereo creation, just add "-noStereo" to calling line
 For EDL, use the "-edl filename.edl" option
 For this text, use the "-h" option
 Other parameters will be passed through from calling program, with a few Limitations:

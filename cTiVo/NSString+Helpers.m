@@ -140,8 +140,11 @@
 }
 
 -(NSString *) getXAttr:(NSString *) key  {
+	if (!key) return nil;
     NSData *buffer = [NSData dataWithData:[[NSMutableData alloc] initWithLength:256]];
-    ssize_t len = getxattr([self fileSystemRepresentation], [key UTF8String], (void *)[buffer bytes], 256, 0, 0);
+	const char * filePath = [self fileSystemRepresentation];
+	if (!filePath) return nil;
+    ssize_t len = getxattr(filePath, [key UTF8String], (void *)[buffer bytes], 256, 0, 0);
     if (len > 0) {
         NSData *idData = [NSData dataWithBytes:[buffer bytes] length:(NSUInteger)len];
         NSString  *result = [[NSString alloc] initWithData:idData encoding:NSUTF8StringEncoding];
