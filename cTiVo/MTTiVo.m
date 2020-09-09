@@ -95,10 +95,10 @@ __DDLOGHERE__
             return thisTiVo;
         }
     }
+    
+    thisTiVo.enabled = YES; //temporary to allow media key request from user
 	[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationMediaKeyNeeded object:@{@"tivo" : thisTiVo, @"reason" : @"new"}];
-	if (thisTiVo.mediaKey.length > 0) {
-		thisTiVo.enabled = YES;
-	}
+    thisTiVo.enabled = thisTiVo.mediaKey.length > 0;
     DDLogMajor(@"First time seeing %@ (previous: %@)",thisTiVo, [tiVoManager.savedTiVos maskMediaKeys]);
     return thisTiVo;
 }
@@ -189,7 +189,6 @@ __DDLOGHERE__
 	self = [self init];
 	if (self) {
 		self.tiVo = tiVo;
-		DDLogReport(@"Created new TiVo %@ with %@", self, tiVo);
 		_enabled = NO;
         _manualTiVo = isManual;
         self.manualTiVoID = manualTiVoID;
@@ -206,6 +205,14 @@ __DDLOGHERE__
 		self.networkAvailability = [NSDate date];
 		BOOL didSchedule = NO;
 		if (_reachability) {
+            // If reachability information is available now, we don't get a callback later
+            SCNetworkConnectionFlags flags;
+            if (SCNetworkReachabilityGetFlags(_reachability, &flags)) {
+                DDLogDetail(@"Got reachability: %@", _tiVo);
+                tivoNetworkCallback(_reachability, flags, (__bridge void *)(self));
+            } else {
+                DDLogDetail(@"Waiting for reachability: %@", _tiVo);
+            }
 			SCNetworkReachabilitySetCallback(_reachability, tivoNetworkCallback, &reachabilityContext);
 			didSchedule = SCNetworkReachabilityScheduleWithRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
 		}
