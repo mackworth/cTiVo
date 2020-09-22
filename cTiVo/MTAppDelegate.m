@@ -22,6 +22,8 @@
 
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
+@import Firebase;
+
 #ifdef DEBUG
 #import "DDOSLogger.h"
 #else
@@ -168,6 +170,7 @@ void signalHandler(int signal)
 	[defaults registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
 	
 #ifndef DEBUG
+  [FIRApp configure];
     if (![defaults boolForKey:kMTCrashlyticsOptOut]) {
         [Fabric with:@[[Crashlytics class]]];
     }

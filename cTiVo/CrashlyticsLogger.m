@@ -5,7 +5,7 @@
 //
 
 #import "CrashlyticsLogger.h"
-#import "Crashlytics/Crashlytics.h"
+@import Firebase;
 
 @implementation CrashlyticsLogger
 
@@ -20,7 +20,7 @@
 	
 	if (logMsg)
 	{
-		CLSLog(@"%@",logMsg); 
+		[[FIRCrashlytics crashlytics] log:logMsg];
 	}
 }
 

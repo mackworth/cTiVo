@@ -20,7 +20,7 @@
 #include <arpa/inet.h>
 
 #include "MTWeakTimer.h"
-#import "Crashlytics/Crashlytics.h"  //to log TiVo failure reasons
+//#import "Crashlytics/Crashlytics.h"  //to log TiVo failure reasons
 
 @interface MTTiVoManager ()    <NSUserNotificationCenterDelegate>        {
     NSNetServiceBrowser *tivoBrowser;
@@ -504,10 +504,10 @@ __DDLOGHERE__
 }
 
 -(void) failBonjour {
-	[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
-						success:@NO
-			   customAttributes:@{@"Symptom": self.missingTiVoSymptom,
-								  @"Version": kcTiVoName }];
+//	[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
+//						success:@NO
+//			   customAttributes:@{@"Symptom": self.missingTiVoSymptom,
+//								  @"Version": kcTiVoName }];
 }
 
 -(void) startTiVos {
@@ -2080,19 +2080,19 @@ __DDLOGHERE__
 	if (!sender.name.length) {
 		self.missingTiVoSymptom = @"No name";
 		DDLogReport(@"Rejecting No Name TiVo: %@ ", ipAddress);
-		NSMutableString * newString = [NSMutableString string];
-		for (NSString * key in [TXTRecord allKeys]) {
-			NSString * txtRecordString = [NSString stringWithFormat:@"  %@ = %@", key, [[self dataToString:TXTRecord[key]] maskSerialNumber: TSN]];
-			DDLogReport(@"%@", txtRecordString);
-			[newString appendString:txtRecordString];
-			[newString appendString:@"\n"];
-		}
-		NSMutableDictionary * info = [NSMutableDictionary dictionary];
-		[info setValue:@"No Name TiVo"   					forKey:@"MTExceptionName"];
-		[info setValue:newString		 					forKey:@"MTExceptionReason"];
-
-		NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:2 userInfo:info];
-		[[Crashlytics sharedInstance] recordError:error];
+//		NSMutableString * newString = [NSMutableString string];
+//		for (NSString * key in [TXTRecord allKeys]) {
+//			NSString * txtRecordString = [NSString stringWithFormat:@"  %@ = %@", key, [[self dataToString:TXTRecord[key]] maskSerialNumber: TSN]];
+//			DDLogReport(@"%@", txtRecordString);
+//			[newString appendString:txtRecordString];
+//			[newString appendString:@"\n"];
+//		}
+//		NSMutableDictionary * info = [NSMutableDictionary dictionary];
+//		[info setValue:@"No Name TiVo"   					forKey:@"MTExceptionName"];
+//		[info setValue:newString		 					forKey:@"MTExceptionReason"];
+//
+//		NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:2 userInfo:info];
+//	//	[[Crashlytics sharedInstance] recordError:error];
 
 		return;
 	}
@@ -2110,9 +2110,9 @@ __DDLOGHERE__
 		if (newTiVo.enabled){
 			if (self.tiVoTimer) {
 				[self.tiVoTimer invalidate]; self.tiVoTimer = nil;
-				[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
-									success:@YES
-						   customAttributes:@{@"Version": kcTiVoName }];
+//				[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
+//									success:@YES
+//						   customAttributes:@{@"Version": kcTiVoName }];
 			}
 			if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
 				//Haven't seen multiple TiVos before, so enable the TiVo column this one time.
