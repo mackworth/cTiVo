@@ -31,7 +31,7 @@
 
 - (instancetype) initScheduledTimerWithTimeInterval:(NSTimeInterval)interval repeats:(BOOL)repeats block:(dispatch_block_t)block{
 	dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-	return self = [self initScheduledTimerWithTimeInterval:interval repeats:repeats queue:queue block:block];
+	return [self initScheduledTimerWithTimeInterval:interval repeats:repeats queue:queue block:block];
 }
 
 + (instancetype) scheduledTimerWithTimeInterval:(NSTimeInterval)interval repeats:(BOOL)repeats queue:(dispatch_queue_t)queue block:(dispatch_block_t)block{
