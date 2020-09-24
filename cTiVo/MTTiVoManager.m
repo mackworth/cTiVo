@@ -677,17 +677,23 @@ __DDLOGHERE__
 //nil means don't ask user or reschedule
 {
     if ([askUser boolValue] && [self anyTivoActive] ) {
-    	BOOL plural = [self numberOfShowsToDownload] > 1;
+    	BOOL plural = self.numEncoders > 1;
 		
-		NSAlert *scheduleAlert = nil;
+		NSAlert *scheduleAlert = [[NSAlert alloc] init];
+		[scheduleAlert addButtonWithTitle:@"Reschedule"];
+		[scheduleAlert addButtonWithTitle:@"Cancel"];
 		if (plural) {
-			scheduleAlert = [NSAlert alertWithMessageText:@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current shows" informativeTextWithFormat:@" "];
+			[scheduleAlert addButtonWithTitle:@"Complete current shows"];
+			scheduleAlert.messageText =
+			@"There are shows in process, and you are pausing the queue.  Should the current shows in process be rescheduled?" ;
 		} else {
-			scheduleAlert = [NSAlert alertWithMessageText:@"There are a show in process, and you are pausing the queue.  Should the current in-process show  be rescheduled?" defaultButton:@"Reschedule" alternateButton: @"Cancel" otherButton: @"Complete current show" informativeTextWithFormat:@" "];
+			[scheduleAlert addButtonWithTitle:@"Complete current show"];
+			scheduleAlert.messageText =
+			@"There is a show in process, and you are pausing the queue.  Should the current in-process show be rescheduled?";
 		}
-		NSInteger returnValue = [scheduleAlert runModal];
+		NSModalResponse returnValue = [scheduleAlert runModal];
 		DDLogDetail(@"User said %ld to cancel alert",returnValue);
-		if (returnValue == NSAlertDefaultReturn) {
+		if (returnValue == NSAlertFirstButtonReturn) {
 			//We're rescheduling shows
             for (MTTiVo *tiVo in self.tiVoList) {
                 [tiVo rescheduleAllShows];
@@ -709,9 +715,9 @@ __DDLOGHERE__
              [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationDownloadQueueUpdated object:nil afterDelay:4.0 ];           });
 #endif
             self.processingPaused = @(YES);
-        } else if (returnValue == NSAlertAlternateReturn) {
+        } else if (returnValue == NSAlertSecondButtonReturn) { //Cancel
             //no action:  self.processingPaused = @(NO);
-        } else { //NSAlertOtherReturn
+        } else { //NSAlertThirdButtonReturn  Complete
             self.processingPaused = @(YES);
         }
     } else {
@@ -1217,10 +1223,10 @@ __DDLOGHERE__
 
 -(void) createChannel {
 	NSDictionary * newChannel = @{kMTChannelInfoName: @"???",
-								  kMTChannelInfoCommercials: @(NSOnState),
-								  kMTChannelInfoPSFailed: @(NSMixedState),
-								  kMTChannelInfoSkipMode: @(NSMixedState),
-								  kMTChannelInfoUseTS: @(NSMixedState)};
+								  kMTChannelInfoCommercials: @(NSControlStateValueOn),
+								  kMTChannelInfoPSFailed: @(NSControlStateValueMixed),
+								  kMTChannelInfoSkipMode: @(NSControlStateValueMixed),
+								  kMTChannelInfoUseTS: @(NSControlStateValueMixed)};
 	[self createChannel: newChannel];
 }
 
@@ -1249,16 +1255,16 @@ __DDLOGHERE__
     if (newChannel) {
         NSMutableDictionary * mutChannel = [newChannel mutableCopy];
         [mutChannel setValue:@(psFailed) forKey:kMTChannelInfoPSFailed];
-        if (((NSNumber *)newChannel[kMTChannelInfoUseTS]).intValue == NSMixedState) {
-			[mutChannel setValue:@(psFailed ? NSOnState : NSOffState) forKey:kMTChannelInfoUseTS];
+		if (((NSNumber *)newChannel[kMTChannelInfoUseTS]).intValue == NSControlStateValueMixed) {
+			[mutChannel setValue:@(psFailed ? NSControlStateValueOn : NSControlStateValueOff) forKey:kMTChannelInfoUseTS];
         }
         newChannel = [NSDictionary dictionaryWithDictionary: mutChannel ];
     } else {
         newChannel = @{kMTChannelInfoName: channelName,
-					   kMTChannelInfoCommercials: @(NSOnState),
-					   kMTChannelInfoSkipMode: @(NSMixedState),
+					   kMTChannelInfoCommercials: @(NSControlStateValueOn),
+					   kMTChannelInfoSkipMode: @(NSControlStateValueMixed),
                        kMTChannelInfoPSFailed: @(psFailed),
-                       kMTChannelInfoUseTS: @(psFailed ? NSOnState : NSOffState)};
+                       kMTChannelInfoUseTS: @(psFailed ? NSControlStateValueOn : NSControlStateValueOff)};
     }
     [self updateChannel:newChannel];
 }
@@ -1301,39 +1307,39 @@ __DDLOGHERE__
     [[NSUserDefaults standardUserDefaults] setValue:newChannels  forKey:kMTChannelInfo];
 }
 
--(NSCellStateValue) useTSForChannel:(NSString *)channelName {
+-(NSControlStateValue) useTSForChannel:(NSString *)channelName {
     NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
     if (channelInfo) {
         return ((NSNumber*) channelInfo[kMTChannelInfoUseTS ]).intValue;
     } else {
-        return NSMixedState;
+		return NSControlStateValueMixed;
     }
 }
 
--(NSCellStateValue) failedPSForChannel:(NSString *) channelName {
+-(NSControlStateValue) failedPSForChannel:(NSString *) channelName {
     NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
     if (channelInfo) {
         return ((NSNumber*) channelInfo[kMTChannelInfoPSFailed ]).intValue;
     } else {
-        return NSMixedState;
+		return NSControlStateValueMixed;
     }
 }
 
--(NSCellStateValue ) defaultSkipModeForChannel:(NSString *) channel {
+-(NSControlStateValue ) defaultSkipModeForChannel:(NSString *) channel {
 	NSArray <NSString *> * skipChannels = @[@"amc", @"bravo", @"comedy", @"cw", @"food", @"freeform", @"fx", @"hgtv", @"history", @"life", @"syfy", @"tbs", @"tdc", @"the discovery", @"tlc", @"tnt", @"usa"];
 
 	NSString * lowerChannel = channel.lowercaseString;
 	for (NSString * skipChannel in skipChannels) {
 		if ([lowerChannel hasPrefix:skipChannel]) {
-			return NSOnState;
+			return NSControlStateValueOn;
 		}
 	}
 	NSArray <NSString *> * skipAffiliates = @[@"ABC Affiliate", @"CBS Affiliate", @"NBC Affiliate", @"Fox Affiliate", @"CW Affiliate"];
 	NSString * affiliate  = self.channelList[channel][@"affiliate"];
 	if ([skipAffiliates containsObject: affiliate]) {
-		return NSOnState;
+		return NSControlStateValueOn;
 	} else {
-		return NSMixedState;
+		return NSControlStateValueMixed;
 	}
 }
 
@@ -1357,45 +1363,45 @@ __DDLOGHERE__
     if (!channelName) return;
 	NSMutableDictionary * channelInfo = [[tiVoManager channelNamed:channelName] mutableCopy];
 	if (channelInfo) {
-		if (((NSNumber *)channelInfo[kMTChannelInfoSkipMode]).intValue == NSMixedState) {
-			channelInfo[kMTChannelInfoSkipMode] = @(NSOnState);
+		if (((NSNumber *)channelInfo[kMTChannelInfoSkipMode]).intValue == NSControlStateValueMixed) {
+			channelInfo[kMTChannelInfoSkipMode] = @(NSControlStateValueOn);
 			[self updateChannel:channelInfo];
 		}
 	} else {
 		channelInfo = [@{kMTChannelInfoName: channelName,
-						  kMTChannelInfoCommercials: @(NSOnState),
-						  kMTChannelInfoPSFailed: @(NSMixedState),
-						  kMTChannelInfoSkipMode: @(NSOnState),
-						  kMTChannelInfoUseTS: @(NSMixedState)} mutableCopy];
+						  kMTChannelInfoCommercials: @(NSControlStateValueOn),
+						 kMTChannelInfoPSFailed: @(NSControlStateValueMixed),
+						  kMTChannelInfoSkipMode: @(NSControlStateValueOn),
+						 kMTChannelInfoUseTS: @(NSControlStateValueMixed)} mutableCopy];
 		[self createChannel:channelInfo];
 	}
 }
 
--(NSCellStateValue) skipModeForChannel:(NSString *) channelName {
+-(NSControlStateValue) skipModeForChannel:(NSString *) channelName {
 	NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
 	if (channelInfo) {
 		return ((NSNumber*) channelInfo[kMTChannelInfoSkipMode ]).intValue;
 	} else {
 		//haven't seen this one before, so if it's a Default one, add it
-		NSCellStateValue state = [self defaultSkipModeForChannel:channelName];
-		if (state == NSOnState) {
+		NSControlStateValue state = [self defaultSkipModeForChannel:channelName];
+		if (state == NSControlStateValueOn) {
 			NSDictionary * newChannel = @{kMTChannelInfoName: channelName,
-										  kMTChannelInfoCommercials: @(NSOnState),
-										  kMTChannelInfoPSFailed: @(NSMixedState),
-										  kMTChannelInfoSkipMode: @(NSOnState),
-										  kMTChannelInfoUseTS: @(NSMixedState)};
+										  kMTChannelInfoCommercials: @(NSControlStateValueOn),
+										  kMTChannelInfoPSFailed: @(NSControlStateValueMixed),
+										  kMTChannelInfoSkipMode: @(NSControlStateValueOn),
+										  kMTChannelInfoUseTS: @(NSControlStateValueMixed)};
 			[self createChannel:newChannel];
 		}
 		return state;
 	}
 }
 
--(NSCellStateValue) commercialsForChannel:(NSString *) channelName {
+-(NSControlStateValue) commercialsForChannel:(NSString *) channelName {
 	NSDictionary * channelInfo = [tiVoManager channelNamed:channelName];
 	if (channelInfo) {
 		return ((NSNumber*) channelInfo[kMTChannelInfoCommercials ]).intValue;
 	} else {
-		return NSOnState;
+		return NSControlStateValueOn;
 	}
 }
 
@@ -1414,7 +1420,7 @@ __DDLOGHERE__
             NSString * channel = show.stationCallsign;
             if (channel) {
                 if ( ! [channelsTested containsObject:channel]) {
-                    if  ( [self useTSForChannel:channel ] != NSOnState ) {
+                    if  ( [self useTSForChannel:channel ] != NSControlStateValueOn ) {
                         MTDownload * newDownload = [MTDownload downloadTestPSForShow:show];
                         [testsToRun addObject:newDownload];
                     }

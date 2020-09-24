@@ -192,17 +192,17 @@ __DDLOGHERE__
 				default: {
 					NSString * channelName = self.show.stationCallsign;
 					switch ([ tiVoManager useTSForChannel:channelName]) {
-						case NSOffState:
+						case NSControlStateValueOff:
 							self.useTransportStream = @NO;
 							break;
-						case NSOnState: //user specified TS for this channel
+						case NSControlStateValueOn: //user specified TS for this channel
 							self.useTransportStream = @YES;
 							break;
-						case NSMixedState: //user didn't specify for this channel, but did in general OR we've seen need
+						case NSControlStateValueMixed: //user didn't specify for this channel, but did in general OR we've seen need
 						default: {
 							BOOL alwaysDownloadTS = [[NSUserDefaults standardUserDefaults] boolForKey:kMTDownloadTSFormat];
-							NSCellStateValue channelPSFailed =    [tiVoManager failedPSForChannel:channelName];
-							self.useTransportStream = @(alwaysDownloadTS || (channelPSFailed == NSOnState));
+							NSControlStateValue channelPSFailed =    [tiVoManager failedPSForChannel:channelName];
+							self.useTransportStream = @(alwaysDownloadTS || (channelPSFailed == NSControlStateValueOn));
 							break;
 						}
 					}
@@ -1630,7 +1630,7 @@ __DDLOGHERE__
 		self.exportSubtitles = @NO;
 		self.useSkipMode = NO;
 	}
-    BOOL channelCommercialsOff = [tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOffState;
+    BOOL channelCommercialsOff = [tiVoManager commercialsForChannel:self.show.stationCallsign] == NSControlStateValueOff;
     if ((channelCommercialsOff) &&
         (self.skipCommercials || self.markCommercials)) {
         //this channel doesn't use commercials
@@ -3033,9 +3033,9 @@ NSInteger diskWriteFailure = 123;
 -(void) markMyChannelAsPSOnly {
 	NSString * channelName = self.show.stationCallsign;
 	self.show.mpegFormat = MPEGFormatMPG2;
-	if ( [tiVoManager failedPSForChannel:channelName] != NSOffState ) {
+	if ( [tiVoManager failedPSForChannel:channelName] != NSControlStateValueOff ) {
 		DDLogMajor(@"Due to problems with %@, converting %@ to Program Stream only",self, channelName);
-		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSOnState;
+		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSControlStateValueOn;
 		[tiVoManager setFailedPS:NO forChannelNamed:channelName];
 		if (notify) {
 			//only notify if we've been forcing TS)
@@ -3050,9 +3050,9 @@ NSInteger diskWriteFailure = 123;
 -(void) markMyChannelAsTSOnly {
 	NSString * channelName = self.show.stationCallsign;
 	self.show.mpegFormat = MPEGFormatH264;
-	if ( [tiVoManager failedPSForChannel:channelName] != NSOnState ) {
+	if ( [tiVoManager failedPSForChannel:channelName] != NSControlStateValueOn ) {
 		DDLogMajor(@"Setting H.264 on %@ due to %@", channelName, self);
-		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSOffState;
+		BOOL notify = [tiVoManager useTSForChannel:channelName] == NSControlStateValueOff;
 		[tiVoManager setFailedPS:YES forChannelNamed:channelName];
 		if (notify && !self.encodeFormat.isTestPS) {
 			//only notify if we're not (testing, OR previously seen, OR forcing PS)
@@ -3144,7 +3144,7 @@ NSInteger diskWriteFailure = 123;
 -(BOOL) shouldSkipCommercials {
     return self.canSkipCommercials &&
     	   self.skipCommercials &&
-           ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState);
+           ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSControlStateValueOn);
 }
 
 -(BOOL) canMarkCommercials {
@@ -3154,7 +3154,7 @@ NSInteger diskWriteFailure = 123;
 -(BOOL) shouldMarkCommercials {
     return  self.canMarkCommercials &&
             self.markCommercials &&
-            ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSOnState);
+            ([tiVoManager commercialsForChannel:self.show.stationCallsign] == NSControlStateValueOn);
 }
 
 -(BOOL) canSkipModeCommercials {

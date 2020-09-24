@@ -32,11 +32,11 @@
     NSInteger textIndent = 9;
     CGRect subFramePopUp = NSMakeRect(4, 2, self.frame.size.width-8, self.frame.size.height-4);
     CGRect subFrameText = NSMakeRect(4+textIndent, -6, self.frame.size.width-8-textIndent, self.frame.size.height);
-    NSFont * cellFont = [NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSMiniControlSize]];
+	NSFont * cellFont = [NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeMini]];
 
     _popUpButton = [[MTTiVoPopUpButton alloc] initWithFrame:subFramePopUp pullsDown:NO];
     [_popUpButton setFont: cellFont];
-    [_popUpButton.cell setControlSize:NSMiniControlSize];
+	[_popUpButton.cell setControlSize:NSControlSizeMini];
     [_popUpButton setAutoresizesSubviews:YES];
     [_popUpButton setAutoresizingMask:NSViewWidthSizable ];
     [self addSubview:_popUpButton];

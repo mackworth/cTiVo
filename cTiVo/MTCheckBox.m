@@ -12,9 +12,9 @@
 
 -(void)setOn: (BOOL) shouldTurnOn {
     if (shouldTurnOn) {
-        self.state = NSOnState;
+        self.state = NSControlStateValueOn;
     } else {
-        self.state = NSOffState;
+        self.state = NSControlStateValueOff;
     }
 }
 

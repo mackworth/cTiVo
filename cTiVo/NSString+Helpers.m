@@ -117,13 +117,24 @@
 -(NSString *) escapedQueryString {
     //do not use with whole URL, only with parts that are "quoted" within the query part of URL
 
-    return (NSString *) CFBridgingRelease (
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
+    NSString * testString =  (NSString *) CFBridgingRelease (
     CFURLCreateStringByAddingPercentEscapes(NULL,
                                             (CFStringRef)self,
                                             NULL,
                                             CFSTR("￼=,$&+;@?\n\"<>#\t :/"),
                                             kCFStringEncodingUTF8)) ;
+#pragma clang diagnostic pop
 
+//	NSString * test2String = [self stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+//	if ([testString isEqual:test2String]) {
+//		NSLog(@"TestString GOOD");
+//	} else {
+//		NSLog(@"TestString BAD: \nOriginal:%@\nOld:%@\nNew:%@\n",self, testString, test2String);
+//	}
+	return testString;
+	
 }
 
 -(NSString *) pathForParentDirectoryWithName: (NSString *) parent {

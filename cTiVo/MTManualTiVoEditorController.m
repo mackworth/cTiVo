@@ -30,8 +30,7 @@ __DDLOGHERE__
     return self;
 }
 
--(BOOL)windowShouldClose:(id)sender
-{
+- (BOOL)windowShouldCloseOrDelayedClose: (void (^)(void))closeBlock {
 	[self.view.window makeFirstResponder:self.view]; //This closes out handing editing.
 	[self.tiVoLoadingSpinner stopAnimation:nil];
 	return YES;

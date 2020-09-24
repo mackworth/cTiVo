@@ -35,7 +35,7 @@
 -(void) initialSetup {
     // Initialization code here.
     _checkBox = [[MTCheckBox alloc] initWithFrame:CGRectMake((self.bounds.size.width-17)/2, self.bounds.origin.y, 17, self.bounds.size.height)];
-    [_checkBox setButtonType:NSSwitchButton];
+    [_checkBox setButtonType:NSButtonTypeSwitch];
     _checkBox.title = @"";
     [_checkBox setAutoresizingMask:NSViewMinXMargin | NSViewMaxXMargin ];
     [_checkBox setEnabled:NO];

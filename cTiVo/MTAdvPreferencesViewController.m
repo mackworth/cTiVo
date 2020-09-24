@@ -66,8 +66,8 @@
     [textField setDrawsBackground:NO];
     [textField setEditable:NO];
     [textField setSelectable:NO];
-	[textField setAlignment: NSRightTextAlignment ];
-	[textField setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]]];
+	[textField setAlignment: NSTextAlignmentRight ];
+	[textField setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]]];
 	[textField setAutoresizingMask: NSViewMinXMargin | NSViewWidthSizable | NSViewMaxXMargin | NSViewMinYMargin | NSViewHeightSizable | NSViewMaxYMargin];
 	return textField;
 }
@@ -191,6 +191,9 @@
     NSMutableString * fileNames = [NSMutableString stringWithFormat: @"FOR TEST PATTERN >>> %@\n\n",pattern];
 
     NSArray	*shows = [((MTAppDelegate *) [NSApp delegate]) currentSelectedShows] ;
+    if (shows.count == 0) {
+		[fileNames appendString: @"\n No Shows Selected\n"];
+	}
     for (MTTiVoShow * show in shows) {
         MTDownload * testDownload = [MTDownload downloadForShow:show withFormat:[tiVoManager selectedFormat] withQueueStatus: kMTStatusNew];
         [fileNames appendFormat:@"%@    >>>>    %@\n",show.showTitle, [testDownload.show swapKeywordsInString:pattern withFormat: [tiVoManager selectedFormat].name andOptions:@"Skip"] ];
@@ -246,7 +249,7 @@
 		NSRect frame = NSMakeRect(columnNum*columnWidth+labelWidth+horizMargin,vertBase-rowNum*(popupHeight+vertMargin),popupWidth,popupHeight);
 		NSPopUpButton * cell = [[NSPopUpButton alloc] initWithFrame:frame pullsDown:NO];
 		
-		cell.font= 	[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
+		cell.font= 	[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]];
 
 		[self addDebugMenuTo:cell withCurrentLevel: [DDLog levelForClass:class]];
 		cell.target = self;
@@ -338,22 +341,22 @@
 
 -(IBAction)emptyCaches:(id)sender
 {
-    NSAlert *cacheAlert = [NSAlert alertWithMessageText:@"Emptying the caches will then reload all information from the TiVos and from TheTVDB.\nDo you want to continue?" defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@" "];
-    NSInteger returnButton = [cacheAlert runModal];
-    if (returnButton != 1) {
-        return;
-    }
-    [tiVoManager resetAllDetails];
+	NSAlert *cacheAlert = [[NSAlert alloc] init];
+	cacheAlert.messageText = @"Emptying the caches will then reload all information from the TiVos and from TheTVDB.\nDo you want to continue?";
+	[cacheAlert addButtonWithTitle:@"Yes"];
+	[cacheAlert addButtonWithTitle:@"No"];
+	NSModalResponse returnValue = [cacheAlert runModal];
+	if (returnValue == NSAlertFirstButtonReturn) {
+		[tiVoManager resetAllDetails];
+	}
 }
 
-- (BOOL)windowShouldClose:(id)sender {
+- (BOOL)windowShouldCloseOrDelayedClose: (void (^)(void))closeBlock {
 	//notified by PreferenceWindowController that we're going to close, so save the currently edited textField
-	NSResponder * responder = [self.view.window firstResponder];
-	if ([responder class] == [NSTextView class] ) {
+	if (self.view.window.firstResponder.class == NSTextView.class) {
 		[self.view.window makeFirstResponder:nil ];
 	}
 	return YES;
 }
-
 
 @end

@@ -538,11 +538,16 @@ __DDLOGHERE__
 		targets =[NSString stringWithFormat:@"%d %@", (int) selectedObjects.count, targetType];
 	  }
 	  NSString * infoText =
-			  [NSString stringWithFormat:@"Hit Ok to retrieve SkipMode data for %@, or hit Cancel to cancel request.", targets];
-	  NSAlert *myAlert = [NSAlert alertWithMessageText: mainText defaultButton:@"Ok" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"%@", infoText];
-	  myAlert.alertStyle = NSCriticalAlertStyle;
-	  NSInteger result = [myAlert runModal];
-	  if (result == NSAlertAlternateReturn) return;
+			  [NSString stringWithFormat:@"Hit OK to retrieve SkipMode data for %@, or hit Cancel to cancel request.", targets];
+			  
+		NSAlert *alert = [[NSAlert alloc] init];
+		alert.messageText = mainText;
+		[alert addButtonWithTitle:@"OK"];
+		[alert addButtonWithTitle:@"Cancel"];
+		alert.informativeText = infoText;
+		[alert setAlertStyle:NSAlertStyleCritical];
+		if ([alert runModal] == NSAlertSecondButtonReturn) return;
+
 	}
 	[tiVoManager skipModeRetrieval:selectedObjects interrupting:YES];
 }
@@ -624,10 +629,13 @@ __DDLOGHERE__
         msg = [NSString stringWithFormat:@"Are you sure you want to %@ '%@' and %d others %@ your TiVo?", behavior, shows[0].showTitle, (int)shows.count -1, prep ];
     }
 
-    NSAlert *myAlert = [NSAlert alertWithMessageText:msg defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@"This cannot be undone from " kcTiVoName @"."];
-    myAlert.alertStyle = NSCriticalAlertStyle;
-    NSInteger result = [myAlert runModal];
-    return (result == NSAlertAlternateReturn);
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = msg;
+	[alert addButtonWithTitle:@"No" ];
+	[alert addButtonWithTitle:@"Yes" ];
+	alert.informativeText = @"This cannot be undone from " kcTiVoName @".";
+	NSModalResponse result = [alert runModal];
+    return (result == NSAlertSecondButtonReturn);
 }
 
 -(IBAction)doubleClickForDetails:(id)input {
@@ -824,7 +832,7 @@ __DDLOGHERE__
             NSMenuItem *item = [tableHeaderContextMenu addItemWithTitle:title action:@selector(contextMenuSelected:) keyEquivalent:@""];
             [item setTarget:self];
             [item setRepresentedObject:column];
-            [item setState:column.isHidden?NSOffState: NSOnState];
+            [item setState:column.isHidden?NSControlStateValueOff: NSControlStateValueOn];
         }
 	}
 }
@@ -833,7 +841,7 @@ __DDLOGHERE__
 - (void)contextMenuSelected:(id)sender {
 	NSMenuItem * menuItem = (NSMenuItem *) sender;
     NSTableColumn *column = [menuItem representedObject];
-	BOOL wasOn = ([menuItem state] == NSOnState);
+	BOOL wasOn = ([menuItem state] == NSControlStateValueOn);
 	if (wasOn &&
 		column == self.tiVoShowTable.outlineTableColumn &&
 		[[NSUserDefaults standardUserDefaults] boolForKey:kMTShowFolders]) {
@@ -852,14 +860,14 @@ __DDLOGHERE__
 		NSInteger outlineIndex = [thisMenu indexOfItemWithRepresentedObject:self.tiVoShowTable.outlineTableColumn];
 	    if (outlineIndex != NSNotFound) {
 			NSMenuItem * outlineMenuItem = [thisMenu itemAtIndex:outlineIndex];
-			[outlineMenuItem setState:NSOnState];
+			[outlineMenuItem setState:NSControlStateValueOn];
 		}
 	}
 	[column setHidden:wasOn];
 	if(wasOn) {
-		[menuItem setState: NSOffState ];
+		[menuItem setState: NSControlStateValueOff ];
 	} else {
-		[menuItem setState: NSOnState];
+		[menuItem setState: NSControlStateValueOn];
 	}
     if ([[column tableView] respondsToSelector:@selector(columnChanged:)]) {
         [[column tableView] performSelector:@selector(columnChanged:) withObject:column];

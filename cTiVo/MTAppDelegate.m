@@ -124,8 +124,11 @@ void signalHandler(int signal)
 		if ([defaults objectForKey:kMTQueue]) {
 			//defaults persistence wierdness; need to run again from scratch
 			NSLog(@"cTiVo run too soon after last time!  Try again!");
-			NSAlert *quitAlert = [NSAlert alertWithMessageText:@"cTiVo was run too soon after cTV exited." defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"You'll need to run it again now."];
-			[quitAlert runModal];
+			NSAlert *alert = [[NSAlert alloc] init];
+			alert.messageText = @"cTiVo was run too soon after cTV exited.";
+			[alert addButtonWithTitle:@"OK"];
+			alert.informativeText = @"You'll need to run it again now.";
+			[alert runModal];
 			[[NSApplication sharedApplication] terminate:nil];
 		}
 		NSString * tempDefaultsName = @"com.cTiVo.cTiVoMAS";
@@ -438,7 +441,7 @@ NSObject * assertionID = nil;
 	if (sinceLastPseudo > 1.7 * pseudoEventTime ) {
 		DDLogReport(@"Looks like cTiVo was frozen out for %0.0f seconds",sinceLastPseudo-pseudoEventTime);
 	}
-    NSEvent *pseudoEvent = [NSEvent otherEventWithType:NSApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:[NSDate timeIntervalSinceReferenceDate] windowNumber:0 context:nil subtype:0 data1:0 data2:0];
+	NSEvent *pseudoEvent = [NSEvent otherEventWithType:NSEventTypeApplicationDefined location:NSZeroPoint modifierFlags:0 timestamp:[NSDate timeIntervalSinceReferenceDate] windowNumber:0 context:nil subtype:0 data1:0 data2:0];
     [NSApp postEvent:pseudoEvent atStart:YES];
 	@synchronized(self) {
 		self.lastPseudoTime = [NSDate date];
@@ -1085,22 +1088,25 @@ NSObject * assertionID = nil;
 }
 
 -(IBAction)createManualSubscription:(id)sender {
-	NSString *message = @"Enter Series Name for new Subscription:";
-	NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"New Subscription" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Note: enter ALL to record all TiVo shows."];
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = @"Enter Series Name for new Subscription:";
+	[alert addButtonWithTitle:@"New Subscription" ];
+	[alert addButtonWithTitle:@"Cancel" ];
+	alert.informativeText = @"Note: enter ALL to record all TiVo shows.";
 	NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
-	
-	[input setStringValue:@""];
-	[keyAlert setAccessoryView:input];
-	NSInteger button = [keyAlert runModal];
-	if (button == NSAlertDefaultReturn) {
+
+	alert.accessoryView = input;
+	NSModalResponse returnValue = [alert runModal];
+	if (returnValue == NSAlertFirstButtonReturn) {
 		[input validateEditing];
 		DDLogMajor(@"Got new Subscription %@",input.stringValue);
 		NSArray * subs = [[tiVoManager subscribedShows]  addSubscriptionsPatterns:@[input.stringValue]];
 		if (subs.count == 0) {
-			NSAlert * badSub = [NSAlert alertWithMessageText:@"Invalid Subscription" defaultButton:@"Cancel" alternateButton:@"" otherButton:nil informativeTextWithFormat:@"The subscription pattern may be badly formed, or it may already covered by another subscription."];
+			NSAlert *badSub = [[NSAlert alloc] init];
+			badSub.messageText = @"Invalid Subscription";
+			[badSub addButtonWithTitle:@"Cancel"];
+			badSub.informativeText = [NSString stringWithFormat: @"The subscription pattern (%@) may be badly formed, or it may already covered by another subscription.", input.stringValue];
 			[badSub runModal];
-        } else {
-
         }
 	}
 }
@@ -1171,7 +1177,7 @@ NSObject * assertionID = nil;
     [mySavePanel setAccessoryView:formatSelectionTable];
     [exportTableView reloadData];
 	[mySavePanel beginWithCompletionHandler:^(NSInteger result){
-		if (result == NSFileHandlingPanelOKButton) {
+		if (result == NSModalResponseOK) {
 			NSMutableArray *formatsToWrite = [NSMutableArray array];
 			for (NSUInteger i = 0; i < self->_tiVoGlobalManager.userFormats.count; i++) {
 				//Get selected formats
@@ -1239,7 +1245,7 @@ NSObject * assertionID = nil;
 	[formatsOpenPanel setAllowedFileTypes:@[@"plist",@"enc"]];
 	[formatsOpenPanel beginWithCompletionHandler:^(NSInteger ret){
 		NSArray *newFormats = nil;
-		if (ret == NSFileHandlingPanelOKButton) {
+		if (ret == NSModalResponseOK) {
 			NSString *filename = formatsOpenPanel.URL.path;
 			if ([[[filename pathExtension ]lowercaseString] isEqualToString: @"plist"]) {
 				newFormats = [NSArray arrayWithContentsOfFile:filename];
@@ -1299,13 +1305,17 @@ NSObject * assertionID = nil;
 		message = [NSString stringWithFormat:@"Incorrect Media Access Key for %@",tiVo.tiVo.name];
 	}
     if (message) {
-        NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"Save Key" alternateButton:@"Ignore TiVo" otherButton:nil informativeTextWithFormat:@" "];
+        NSAlert *keyAlert = [[NSAlert alloc] init];
+        keyAlert.messageText = message;
+        [keyAlert addButtonWithTitle:@"Save Key"];
+        [keyAlert addButtonWithTitle:@"Ignore TiVo"];
+
         NSView *accView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 100)];
         NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(10, 60, 200, 24)];
         [accView addSubview:input];
         NSButton *helpButton = [NSButton new];
-        [helpButton setButtonType:NSMomentaryPushInButton];
-        [helpButton setBezelStyle:NSRoundedBezelStyle];
+		[helpButton setButtonType:NSButtonTypeMomentaryPushIn];
+		[helpButton setBezelStyle:NSBezelStyleRounded];
         [helpButton setTitle:@"Help"];
         [helpButton sizeToFit];
         [helpButton setFrame:NSMakeRect(220, 60, 70, 24) ];
@@ -1314,25 +1324,25 @@ NSObject * assertionID = nil;
         [accView addSubview:helpButton];
         
         NSButton *keychainButton = [NSButton new];
-        [keychainButton setButtonType:NSSwitchButton];
+		[keychainButton setButtonType:NSButtonTypeSwitch];
         [keychainButton setTitle:@"Save in Keychain"];
         [keychainButton sizeToFit];
         NSRect f = keychainButton.frame;
         [keychainButton setFrame:NSMakeRect(50, 20, f.size.width, f.size.height)];
-        [keychainButton setState:NSOffState];
+		[keychainButton setState:NSControlStateValueOff];
         [accView addSubview:keychainButton];
         
         if (tiVo.mediaKey.length) [input setStringValue:tiVo.mediaKey];
         [keyAlert setAccessoryView:accView];
-        NSInteger button = [keyAlert runModal];
-        if (button == NSAlertDefaultReturn) {
+        NSModalResponse button = [keyAlert runModal];
+        if (button == NSAlertFirstButtonReturn) {
             [input validateEditing];
             DDLogDetail(@"Got New Media Key" );
             tiVo.mediaKey = input.stringValue;
 			tiVo.enabled = tiVo.mediaKey.length > 0;
 			if (tiVo.enabled) {
 				[tiVo updateShows:nil];
-				if (keychainButton.state == NSOnState ) {
+				if (keychainButton.state == NSControlStateValueOn ) {
 					tiVo.storeMediaKeyInKeychain = YES;
 				}
 			}
@@ -1405,23 +1415,35 @@ NSObject * assertionID = nil;
 }
 
 -(void) confirmUserQuit {
-	NSString *message = [NSString stringWithFormat:@"Shows are in process, and would need to be restarted next time. Do you wish them to finish now, or quit immediately?"];
-	NSAlert *quitAlert = [NSAlert alertWithMessageText:message defaultButton:@"Finish current show" alternateButton:@"Cancel" otherButton:@"Quit Immediately" informativeTextWithFormat:@" "]; //space necessary to avoid constraint error msg
-	NSInteger returnValue = [quitAlert runModal];
-	switch (returnValue) {
-		case NSAlertDefaultReturn:
+	NSAlert *alert = [[NSAlert alloc] init];
+	BOOL plural = self.tiVoGlobalManager.numEncoders > 1;
+	NSString * message, *firstButton;
+	if (plural) {
+		message = @"Shows are in process, and would need to be restarted next time. Do you wish them to finish now, or quit immediately?";
+		firstButton = @"Finish Current Shows";
+	} else {
+		message = @"A show is in process, and would need to be restarted next time. Do you wish it to finish now, or quit immediately?";
+		firstButton = @"Finish Current Show";
+	}
+	alert.messageText = message;
+	[alert addButtonWithTitle:firstButton ];
+	[alert addButtonWithTitle:@"Cancel" ];
+	[alert addButtonWithTitle:@"Quit Immediately" ];
+	NSModalResponse result = [alert runModal];
+	switch (result) {
+		case NSAlertFirstButtonReturn:
 			DDLogMajor(@"User did ask to continue until finished");
 			tiVoManager.processingPaused = @(YES);
 			quitWhenCurrentDownloadsComplete = YES;
 			[self.mainWindowController showCancelQuitView:YES];
 			[NSApp replyToApplicationShouldTerminate:NO];
             break;
-		case NSAlertOtherReturn:
+		case NSAlertThirdButtonReturn:
 			DDLogMajor(@"User did ask to quit");
 			[self cleanup];
 			[NSApp replyToApplicationShouldTerminate:YES];
 			break;
-		case NSAlertAlternateReturn:
+		case NSAlertSecondButtonReturn:
 		default:
             DDLogMajor(@"User canceled quit");
 			[NSApp replyToApplicationShouldTerminate:NO];

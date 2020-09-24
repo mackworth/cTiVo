@@ -191,18 +191,6 @@ __DDLOGHERE__
 	[self reloadData];
 }
 
--(void)textDidEndEditing:(NSNotification *) notification {
-	if (notification.object != self.findText) {
-		DDLogMajor(@"Error invalid textField %@", notification.object);
-		return;
-	}
-	int movementCode = [notification.userInfo[@"NSTextMovement"] intValue];
-	DDLogVerbose(@"Ending FindText = %@",self.findText.stringValue);
-	if (movementCode == NSCancelTextMovement || [self.findText.stringValue isEqualToString:@""]) {
-		[self showFindField:NO];
-	}
-}
-
 #pragma mark - Table Delegate Protocol
 
 -(IBAction)selectTivo:(id)sender {
@@ -795,9 +783,9 @@ __DDLOGHERE__
 	}
 
 	if ([identifier isEqualToString:@"HD"]) {
-		result.textField.alignment = NSCenterTextAlignment;
+		result.textField.alignment = NSTextAlignmentCenter;
 	} else if ([identifier isEqualToString:@"H.264"]) {
-		result.textField.alignment = NSCenterTextAlignment;
+		result.textField.alignment = NSTextAlignmentCenter;
 		result.toolTip =@"Does this show (✔) or channel (√) use H.264 compression v. MPEG2 ( -- or -)?";
 	} else if ([identifier isEqualToString:@"OnDisk"]) {
 		result.toolTip =@"Is program already downloaded and still on disk?";
@@ -881,18 +869,18 @@ __DDLOGHERE__
                 NSSize stringSize = [showField.stringValue sizeWithAttributes:@{NSFontAttributeName : showField.font}];
                 NSSize cellSize = showCellView.frame.size;
                 switch (alignment) {
-                    case NSLeftTextAlignment:
-                    case NSNaturalTextAlignment:
+					case NSTextAlignmentLeft:
+					case NSTextAlignmentNatural:
                         if (clickInText.x > stringSize.width) {
                             return NO;
                         }
                         break;
-                    case NSRightTextAlignment:
+                    case NSTextAlignmentRight:
                         if (clickInText.x < cellSize.width - stringSize.width) {
                             return NO;
                         }
                         break;
-                    case NSCenterTextAlignment:
+					case NSTextAlignmentCenter:
                         if (clickInText.x > (cellSize.width + stringSize.width)/2.0 || clickInText.x < (cellSize.width - stringSize.width)/2.0) {
                             return NO;
                         }

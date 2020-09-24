@@ -22,12 +22,12 @@
 		calendar = [NSCalendar autoupdatingCurrentCalendar];
 		
 		calendarUnitFlags = 0;
-		calendarUnitFlags |= NSYearCalendarUnit;
-		calendarUnitFlags |= NSMonthCalendarUnit;
-		calendarUnitFlags |= NSDayCalendarUnit;
-		calendarUnitFlags |= NSHourCalendarUnit;
-		calendarUnitFlags |= NSMinuteCalendarUnit;
-		calendarUnitFlags |= NSSecondCalendarUnit;
+		calendarUnitFlags |= NSCalendarUnitYear;
+		calendarUnitFlags |= NSCalendarUnitMonth;
+		calendarUnitFlags |= NSCalendarUnitDay;
+		calendarUnitFlags |= NSCalendarUnitHour;
+		calendarUnitFlags |= NSCalendarUnitMinute;
+		calendarUnitFlags |= NSCalendarUnitSecond;
 //		if (aDateFormatter)
 //		{
 //			dateFormatter = aDateFormatter;

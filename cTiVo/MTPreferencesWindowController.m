@@ -69,11 +69,10 @@
 -(IBAction)shouldCloseSheet:(id)sender
 {
 	MTTabViewItem *selectedItem = (MTTabViewItem *)[_myTabView selectedTabViewItem];
-	BOOL shouldClose = YES;
-	if ([selectedItem.windowController respondsToSelector:@selector(windowShouldClose:)]) {
-		shouldClose = [selectedItem.windowController windowShouldClose:@{@"Target" : self , @"Argument" : @"", @"Selector" : @"closeSheet:"}];
-	}
-	if (shouldClose) {
+	__weak __typeof__(self) weakSelf = self;
+	if ([ selectedItem.windowController windowShouldCloseOrDelayedClose:^{
+			[weakSelf closeSheet:nil];
+	    }]) {
 		[self closeSheet:sender];
 	}
 }
@@ -114,14 +113,11 @@
 
 #pragma mark - Tab View Delegate
 
--(BOOL)tabView:(NSTabView *)tabView shouldSelectTabViewItem:(NSTabViewItem *)tabViewItem
-{
+-(BOOL)tabView:(NSTabView *)tabView shouldSelectTabViewItem:(NSTabViewItem *)tabViewItem {
 	MTTabViewItem *selectedItem = (MTTabViewItem *)[tabView selectedTabViewItem];
-	if ([selectedItem.windowController respondsToSelector:@selector(windowShouldClose:)]) {
-		return [selectedItem.windowController windowShouldClose:@{@"Target" : tabView , @"Argument" : tabViewItem, @"Selector" : @"selectTabViewItem:"}];
-	} else {
-		return YES;
-	}
+	return [ selectedItem.windowController windowShouldCloseOrDelayedClose:^{
+		[tabView selectTabViewItem:tabViewItem];
+	}];
 }
 
 -(void)tabView:(NSTabView *)tabView willSelectTabViewItem:(NSTabViewItem *)tabViewItem
@@ -135,7 +131,6 @@
 	if (!_ignoreTabItemSelection) {
 		[[self.window animator] setFrame:[self getNewWindowRect:(MTTabViewItem *)tabViewItem] display:NO];
 	}
-
 }
 
 -(void)dealloc

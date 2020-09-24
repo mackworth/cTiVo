@@ -78,10 +78,13 @@ __DDLOGHERE__
 
 -(IBAction)rebootTiVo:(NSButton *) sender {
 	NSString *message = [NSString stringWithFormat:@"Are you sure you want to reboot your TiVo %@?", self.selectedTiVo.tiVo.name];
-	NSAlert *keyAlert = [NSAlert alertWithMessageText:message defaultButton:@"Cancel" alternateButton:@"Reboot" otherButton:nil informativeTextWithFormat:@"Warning: this will immediately reboot your TiVo, interrupting all downloads, recordings, etc. for several minutes."];
-	
-	NSInteger button = [keyAlert runModal];
-	if (button == NSAlertAlternateReturn) {
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = message;
+	[alert addButtonWithTitle:@"Cancel"];
+	[alert addButtonWithTitle:@"Reboot"];
+	alert.informativeText = @"Warning: this will immediately reboot your TiVo, interrupting all downloads, recordings, etc. for several minutes.";
+	[alert setAlertStyle:NSAlertStyleCritical];
+	if ([alert runModal] == NSAlertSecondButtonReturn) {
 		DDLogMajor(@"Rebooting TiVo %@",self.selectedTiVo);
 		[self.selectedTiVo reboot];
 	}

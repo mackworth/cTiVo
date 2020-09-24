@@ -35,7 +35,7 @@ NSString *kPrivateDragUTI = @"com.pinetreesw.cocoadraganddrop";
 }
 
 - (void)setup {
-    [self registerForDraggedTypes:[NSImage imagePasteboardTypes]];
+    [self registerForDraggedTypes:[NSImage imageTypes]];
     self.allowDrag = YES;
     self.allowDrop = YES;
     self.highlight = NO;

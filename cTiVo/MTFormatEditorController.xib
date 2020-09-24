@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment version="1090" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14490.70"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -23,7 +22,7 @@
             <rect key="frame" x="0.0" y="0.0" width="546" height="713"/>
             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <textField verticalHuggingPriority="750" id="2457">
+                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2457">
                     <rect key="frame" x="17" y="665" width="60" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Formats:" id="2604">
@@ -32,7 +31,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <popUpButton verticalHuggingPriority="750" id="2479" customClass="MTFormatPopUpButton">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2479" customClass="MTFormatPopUpButton">
                     <rect key="frame" x="83" y="659" width="177" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="2578" id="2574">
@@ -50,7 +49,7 @@
                         <action selector="selectFormat:" target="-2" id="2671"/>
                     </connections>
                 </popUpButton>
-                <button toolTip="Encoder supports the commercial skipping process" id="2482">
+                <button toolTip="Encoder supports the commercial skipping process" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2482">
                     <rect key="frame" x="19" y="18" width="163" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Can Cut Commercials" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="2570">
@@ -66,7 +65,7 @@
                         </binding>
                     </connections>
                 </button>
-                <button toolTip="Indicates that the output files are compatible with iTunes" id="2484">
+                <button toolTip="Indicates that the output files are compatible with iTunes" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2484">
                     <rect key="frame" x="19" y="48" width="172" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Can be added to iTunes" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="2567">
@@ -82,7 +81,7 @@
                         </binding>
                     </connections>
                 </button>
-                <button toolTip="Allow use of pipes to decrypt and encode during download" id="2478">
+                <button toolTip="Allow use of pipes to decrypt and encode during download" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2478">
                     <rect key="frame" x="19" y="78" width="325" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Can run download and encode at the same time" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="2579">
@@ -102,7 +101,7 @@
                         </binding>
                     </connections>
                 </button>
-                <textField toolTip="e.g. .MP4" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" id="2474">
+                <textField toolTip="e.g. .MP4" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2474">
                     <rect key="frame" x="222" y="564" width="50" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="2584">
@@ -123,7 +122,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" id="2475">
+                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2475">
                     <rect key="frame" x="18" y="566" width="199" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="File Extension for encoded file:" id="2582">
@@ -132,7 +131,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Display name for format" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" id="2476">
+                <textField toolTip="Display name for format" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2476">
                     <rect key="frame" x="68" y="593" width="204" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="left" drawsBackground="YES" usesSingleLineMode="YES" id="2581">
@@ -154,7 +153,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField toolTip="Display name for format" verticalHuggingPriority="750" id="2477">
+                <textField toolTip="Display name for format" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2477">
                     <rect key="frame" x="18" y="596" width="45" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Name:" id="2580">
@@ -163,7 +162,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Usage hints for user" verticalHuggingPriority="750" id="2466">
+                <textField toolTip="Usage hints for user" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2466">
                     <rect key="frame" x="18" y="508" width="81" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Description:" id="2594">
@@ -172,7 +171,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" id="2465" userLabel="Encoder Text Field">
+                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2465" userLabel="Encoder Text Field">
                     <rect key="frame" x="21" y="413" width="500" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="2595">
@@ -194,7 +193,7 @@
                         <binding destination="-2" name="textColor" keyPath="validExecutableColor" id="2652"/>
                     </connections>
                 </textField>
-                <textField toolTip="Video-related command-line options " verticalHuggingPriority="750" id="2464">
+                <textField toolTip="Video-related command-line options " verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2464">
                     <rect key="frame" x="17" y="337" width="175" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="Video Options for Encoder:" id="2596">
@@ -203,7 +202,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Audio-related command-line options " verticalHuggingPriority="750" id="2463">
+                <textField toolTip="Audio-related command-line options " verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2463">
                     <rect key="frame" x="18" y="286" width="176" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="Audio Options for Encoder:" id="2597">
@@ -212,7 +211,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Other command-line options " verticalHuggingPriority="750" id="2462">
+                <textField toolTip="Other command-line options " verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2462">
                     <rect key="frame" x="17" y="235" width="175" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="Other Options for Encoder:" id="2598">
@@ -221,7 +220,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="2450">
+                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="108" translatesAutoresizingMaskIntoConstraints="NO" id="2450">
                     <rect key="frame" x="18" y="438" width="112" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <string key="toolTip">mencoder and HandBrakeCLI are built-in.  You can enter a custom encoder, either the full path or just filename.  If only the name the following paths will be searched in order: /usr/local/bin, /opt/local/bin, /usr/local/&lt;name&gt;/bin, /opt/local/&lt;name&gt;/bin.</string>
@@ -231,7 +230,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <popUpButton hidden="YES" toolTip="Presets defined by this encoder" verticalHuggingPriority="750" id="VhS-V4-kCa" userLabel="Preset Popup">
+                <popUpButton hidden="YES" toolTip="Presets defined by this encoder" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VhS-V4-kCa" userLabel="Preset Popup">
                     <rect key="frame" x="268" y="409" width="261" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingMiddle" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="yzh-20-AK5" id="euQ-w1-w18">
@@ -246,7 +245,7 @@
                         </menu>
                     </popUpButtonCell>
                 </popUpButton>
-                <button toolTip="Delete current format (not available for built-in formats)" verticalHuggingPriority="750" id="2456">
+                <button toolTip="Delete current format (not available for built-in formats)" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2456">
                     <rect key="frame" x="392" y="662" width="60" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="Delete" bezelStyle="roundedRect" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2606">
@@ -264,7 +263,7 @@
                         </binding>
                     </connections>
                 </button>
-                <button toolTip="Create a new Format based on current one" verticalHuggingPriority="750" id="2455">
+                <button toolTip="Create a new Format based on current one" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2455">
                     <rect key="frame" x="305" y="662" width="75" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="Duplicate" bezelStyle="roundedRect" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2608">
@@ -276,7 +275,7 @@
                         <binding destination="-2" name="enabled" keyPath="currentFormat.canDuplicate" id="7De-2J-d6A"/>
                     </connections>
                 </button>
-                <button toolTip="Create new empty format" verticalHuggingPriority="750" id="2483">
+                <button toolTip="Create new empty format" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2483">
                     <rect key="frame" x="466" y="662" width="60" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="New" bezelStyle="roundedRect" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2569">
@@ -287,7 +286,7 @@
                         <action selector="newFormat:" target="-2" id="2674"/>
                     </connections>
                 </button>
-                <button hidden="YES" toolTip="Cancel all changes made" verticalHuggingPriority="750" id="2458">
+                <button hidden="YES" toolTip="Cancel all changes made" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2458">
                     <rect key="frame" x="424" y="52" width="102" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="Cancel" bezelStyle="roundedRect" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2603">
@@ -302,7 +301,7 @@
                         <binding destination="-2" name="enabled" keyPath="self.shouldSave" id="2641"/>
                     </connections>
                 </button>
-                <button toolTip="Save all changes made" verticalHuggingPriority="750" id="2453">
+                <button toolTip="Save all changes made" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2453">
                     <rect key="frame" x="424" y="19" width="102" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="roundRect" title="Save" bezelStyle="roundedRect" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2612">
@@ -314,7 +313,7 @@
                         <binding destination="-2" name="enabled" keyPath="self.shouldSave" id="2642"/>
                     </connections>
                 </button>
-                <textField toolTip="Encoder command-line switch to specify input filename. Example:  -i" verticalHuggingPriority="750" id="2473">
+                <textField toolTip="Encoder command-line switch to specify input filename. Example:  -i" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2473">
                     <rect key="frame" x="485" y="593" width="41" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="2586">
@@ -335,7 +334,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField toolTip="Encoder command-line switch to specify output filename. Example:  -i" verticalHuggingPriority="750" id="2472">
+                <textField toolTip="Encoder command-line switch to specify output filename. Example:  -i" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2472">
                     <rect key="frame" x="335" y="596" width="144" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Input filename switch:" id="2587">
@@ -344,7 +343,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Encoder command-line switch to specify output filename. Example:  -o" verticalHuggingPriority="750" id="2471">
+                <textField toolTip="Encoder command-line switch to specify output filename. Example:  -o" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2471">
                     <rect key="frame" x="485" y="563" width="41" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="2588">
@@ -365,7 +364,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField toolTip="Encoder command-line switch to specify output filename. Example:   -o" verticalHuggingPriority="750" id="2470">
+                <textField toolTip="Encoder command-line switch to specify output filename. Example:   -o" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2470">
                     <rect key="frame" x="324" y="566" width="155" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Output filename switch:" id="2589">
@@ -374,7 +373,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Encoder command-line switch to specify edl list file: e.g.  -edl" verticalHuggingPriority="750" id="2678">
+                <textField toolTip="Encoder command-line switch to specify edl list file: e.g.  -edl" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2678">
                     <rect key="frame" x="485" y="534" width="41" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="2681">
@@ -403,7 +402,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField toolTip="Encoder command-line switch to specify output filename. Example:   -o" verticalHuggingPriority="750" id="2679">
+                <textField toolTip="Encoder command-line switch to specify output filename. Example:   -o" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2679">
                     <rect key="frame" x="344" y="537" width="135" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Edit List (edl) switch:" id="2680">
@@ -412,7 +411,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" id="2468">
+                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2468">
                     <rect key="frame" x="186" y="370" width="340" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <string key="toolTip">Regular Expression to parse the percentage complete from encoder log file; example: \((.*?)\%\) .  Not required for encoders that can download and encode at the same time - e.g. mencoder and ffmpeg.</string>
@@ -442,7 +441,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField toolTip="Regular Expression to parse the percentage complete from encoder log file; example: \((.*?)\%\)" verticalHuggingPriority="750" id="2469">
+                <textField toolTip="Regular Expression to parse the percentage complete from encoder log file; example: \((.*?)\%\)" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2469">
                     <rect key="frame" x="18" y="374" width="151" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="RegEx for Encoder Log:" id="2590">
@@ -451,7 +450,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Format provided by cTiVo program." verticalHuggingPriority="750" id="2459">
+                <textField toolTip="Format provided by cTiVo program." verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2459">
                     <rect key="frame" x="18" y="637" width="248" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="This is a Built-In Format (not editable)" id="2601">
@@ -467,7 +466,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <scrollView toolTip="Usage hints for user" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="2451">
+                <scrollView toolTip="Usage hints for user" fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2451">
                     <rect key="frame" x="108" y="468" width="418" height="57"/>
                     <autoresizingMask key="autoresizingMask"/>
                     <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="GJc-Ws-G2W">
@@ -507,7 +506,7 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
-                <textField toolTip="Video-related command-line options " verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" id="2481">
+                <textField toolTip="Video-related command-line options " verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2481">
                     <rect key="frame" x="20" y="311" width="506" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="2571">
@@ -528,7 +527,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField toolTip="Audio-related command-line options " verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" id="2467">
+                <textField toolTip="Audio-related command-line options " verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2467">
                     <rect key="frame" x="20" y="260" width="506" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="2593">
@@ -549,7 +548,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField toolTip="Other command-line options" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" id="2480">
+                <textField toolTip="Other command-line options" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2480">
                     <rect key="frame" x="20" y="210" width="506" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="2572">
@@ -570,7 +569,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField toolTip="Options to be added to comskip command line" verticalHuggingPriority="750" id="2688">
+                <textField toolTip="Options to be added to comskip command line" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2688">
                     <rect key="frame" x="18" y="185" width="118" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="ComSkip Options:" id="2691">
@@ -579,7 +578,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Options to be added to comskip command line" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" id="2689">
+                <textField toolTip="Options to be added to comskip command line" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2689">
                     <rect key="frame" x="20" y="158" width="506" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="2690">
@@ -608,7 +607,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <textField toolTip="Options to be added to ccExtractor (e.g. -sc to convert UPPERCASE to Sentence case) " verticalHuggingPriority="750" id="2709">
+                <textField toolTip="Options to be added to ccExtractor (e.g. -sc to convert UPPERCASE to Sentence case) " verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2709">
                     <rect key="frame" x="19" y="133" width="133" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="ccExtractor Options:" id="2712">
@@ -617,7 +616,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField toolTip="Options to be added to ccExtractor (e.g. -sc to convert UPPERCASE to Sentence case)" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" id="2710">
+                <textField toolTip="Options to be added to ccExtractor (e.g. -sc to convert UPPERCASE to Sentence case)" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2710">
                     <rect key="frame" x="20" y="106" width="506" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="2711">
@@ -638,7 +637,7 @@
                         </binding>
                     </connections>
                 </textField>
-                <button toolTip="Don't display this format in the User Interface" id="2460">
+                <button toolTip="Don't display this format in the User Interface" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2460">
                     <rect key="frame" x="368" y="635" width="160" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Show in User Interface" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="2599">
@@ -653,11 +652,11 @@
                         </binding>
                     </connections>
                 </button>
-                <box verticalHuggingPriority="750" boxType="separator" id="2461">
+                <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="2461">
                     <rect key="frame" x="0.0" y="624" width="541" height="5"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                 </box>
-                <button horizontalHuggingPriority="750" verticalHuggingPriority="750" id="2454">
+                <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2454">
                     <rect key="frame" x="125" y="436" width="25" height="25"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="help" bezelStyle="helpButton" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2610">
@@ -668,7 +667,7 @@
                         <action selector="encodeHelp:" target="-2" id="OXY-rz-HdR"/>
                     </connections>
                 </button>
-                <button horizontalHuggingPriority="750" verticalHuggingPriority="750" id="2700">
+                <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2700">
                     <rect key="frame" x="139" y="181" width="25" height="25"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="help" bezelStyle="helpButton" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2701">
@@ -679,7 +678,7 @@
                         <action selector="encodeHelp:" target="-2" id="Zzh-e4-Qcf"/>
                     </connections>
                 </button>
-                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" id="2452">
+                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="1" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2452">
                     <rect key="frame" x="169" y="441" width="355" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="No valid executable found." id="2614">
@@ -694,7 +693,7 @@
                         <binding destination="-2" name="value" keyPath="validExecutableString" id="2667"/>
                     </connections>
                 </textField>
-                <button verticalHuggingPriority="750" id="uVs-NL-Y9b">
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uVs-NL-Y9b">
                     <rect key="frame" x="464" y="685" width="68" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="Help" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="GR4-2e-QHX">

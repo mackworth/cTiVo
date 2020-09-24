@@ -308,7 +308,7 @@ __DDLOGHERE__
 		checkBox = ((MTDownloadCheckTableCell *)result).checkBox;
 		checkBox.target = myController;
 		checkBox.owner = download;
-		checkBox.alignment = NSCenterTextAlignment;
+		checkBox.alignment = NSTextAlignmentCenter;
 	}
 	if (programColumn || seriesColumn || stageColumn) {
         //Progress status should show in first visible of DL Stage, then Programs, then Series
@@ -469,11 +469,11 @@ __DDLOGHERE__
         result.toolTip =@"Is program already downloaded and still on disk?";
 	} else if ([tableColumn.identifier isEqualToString:@"HD"]) {
 		textVal = thisShow.isHDString;
-		result.textField.alignment = NSCenterTextAlignment;
+		result.textField.alignment = NSTextAlignmentCenter;
 		result.toolTip =@"Is program recorded in HD?";
     } else if ([tableColumn.identifier compare:@"H.264"] == NSOrderedSame) {
         textVal = thisShow.h264String;
-        result.textField.alignment = NSCenterTextAlignment;
+		result.textField.alignment = NSTextAlignmentCenter;
         result.toolTip =@"Does this show (✔) or channel (√) use H.264 compression v. MPEG2 ( -- or -)?";
 	} else if ([tableColumn.identifier isEqualToString:@"Channel"]) {
 		textVal = thisShow.channelString;
@@ -684,10 +684,12 @@ __DDLOGHERE__
 #pragma mark - user commands
 
 - (IBAction)clearHistory:(id)sender {
-	NSString *message = @"Are you sure you want to delete history of completed downloads?";
-	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Delete" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@" "];
-	NSInteger returnValue = [insertDownloadAlert runModal];
-	if (returnValue == 1) {
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = @"Are you sure you want to delete history of completed downloads?";
+	[alert addButtonWithTitle:@"Delete" ];
+	[alert addButtonWithTitle:@"Cancel" ];
+	NSModalResponse returnValue = [alert runModal];
+	if (returnValue == NSAlertFirstButtonReturn) {
 		DDLogDetail(@"User did clear history");
 		[tiVoManager clearDownloadHistory];
 	}
@@ -702,11 +704,13 @@ __DDLOGHERE__
 }
 
 -(BOOL) confirmCancel:(NSString *) title {
-	NSAlert *myAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",title] defaultButton:@"No" alternateButton:@"Yes" otherButton:nil informativeTextWithFormat:@" "];
-	myAlert.alertStyle = NSCriticalAlertStyle;
-	NSInteger result = [myAlert runModal];
-	return (result == NSAlertAlternateReturn);
-	
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = [NSString stringWithFormat:@"Do you want to cancel active download of '%@'?",title];
+	[alert addButtonWithTitle:@"No" ];
+	[alert addButtonWithTitle:@"Yes" ];
+	alert.alertStyle = NSAlertStyleCritical;
+	NSModalResponse returnValue = [alert runModal];
+	return (returnValue == NSAlertSecondButtonReturn);
 }
 
 -(IBAction)removeFromDownloadQueue:(id)sender {
@@ -741,9 +745,12 @@ __DDLOGHERE__
 -(BOOL) askReschedule: (MTDownload *) download {
 	//ask user if they'd like to reschedule a show that's being demoted
 	NSString *message = [NSString stringWithFormat:@"Do you want to reschedule %@?",download.show.showTitle];
-	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Reschedule" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@" "];
-	NSInteger returnValue = [insertDownloadAlert runModal];
-	if (returnValue == 1) {
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = message;
+	[alert addButtonWithTitle:@"Reschedule" ];
+	[alert addButtonWithTitle:@"No" ];
+	NSModalResponse result = [alert runModal];
+    if (result == NSAlertFirstButtonReturn) {
 		DDLogMajor(@"User did reschedule active show %@",download);
 		[download prepareForDownload: YES];
 		return YES;
@@ -758,13 +765,17 @@ __DDLOGHERE__
 	NSString * exampleShow = ((MTDownload *)restartShows[0]).show.showTitle;
 	NSString * message;
 	if (restartShows.count ==1) {
-		message =  [NSString stringWithFormat:@"Do you want to re-download %@?",exampleShow];
+		message =  [NSString stringWithFormat:@"Do you want to download %@ again?",exampleShow];
 	} else {
-		message = [NSString stringWithFormat:@"Do you want to re-download %@ and other completed shows?",exampleShow];
+		message = [NSString stringWithFormat:@"Do you want to download %@ and other completed shows again?",exampleShow];
 	}
-	NSAlert *insertDownloadAlert = [NSAlert alertWithMessageText:message defaultButton:@"Re-download" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@" "];
-	NSInteger returnValue = [insertDownloadAlert runModal];
-	if (returnValue == 1) {
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = message;
+	[alert addButtonWithTitle:@"Re-download" ];
+	[alert addButtonWithTitle:@"No" ];
+	NSModalResponse result = [alert runModal];
+    if (result == NSAlertFirstButtonReturn) {
+		DDLogMajor(@"User did reschedule demoted show(s) %@",exampleShow);
 		return YES;
 	} else {
 		return NO;

@@ -8,6 +8,7 @@
 
 #import "MTSubscription.h"
 #import "MTTiVoManager.h"
+#import <xlocale.h>
 
 @implementation MTSubscription
 
@@ -255,7 +256,13 @@ __DDLOGHERE__
             return nil;
         }
         newSub.encodeFormat = [tiVoManager findFormat:strArray[kMTSubFormat] ];
-        newSub.createdTime = [NSDate dateWithString:strArray[kMTSubDate]];
+        NSString * createDate = strArray[kMTSubDate];
+        struct tm  sometime;
+		const char *formatString = "%Y-%m-%d %H:%M:%S %z";
+		strptime_l(createDate.UTF8String, formatString, &sometime, NULL);
+		newSub.createdTime = [NSDate dateWithTimeIntervalSince1970: mktime(&sometime)];
+		DDLogDetail(@"NSDate is %@", newSub.createdTime );
+
         if (!newSub.createdTime) newSub.createdTime = [NSDate date];
         newSub.preferredTiVo= strArray[kMTSubTiVo];
 		newSub.stationCallSign = strArray[kMTSubChannel];

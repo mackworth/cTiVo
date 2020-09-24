@@ -120,11 +120,11 @@
 -(void) createChannel;
 -(void) sortChannelsAndMakeUnique;
 -(void) removeAllChannelsStartingWith: (NSString*) prefix;
--(NSCellStateValue) useTSForChannel:(NSString *) channelName;
+-(NSControlStateValue) useTSForChannel:(NSString *) channelName;
 -(void) setFailedPS:(BOOL) psFailed forChannelNamed: (NSString *) channelName;
--(NSCellStateValue) failedPSForChannel:(NSString *) channelName;
--(NSCellStateValue) commercialsForChannel:(NSString *) channelName;
--(NSCellStateValue) skipModeForChannel:(NSString *) channelName;
+-(NSControlStateValue) failedPSForChannel:(NSString *) channelName;
+-(NSControlStateValue) commercialsForChannel:(NSString *) channelName;
+-(NSControlStateValue) skipModeForChannel:(NSString *) channelName;
 -(void) testAllChannelsForPS;
 -(void) removeAllPSTests;
 -(void) channelsChanged:(MTTiVo *) tiVo; //notify TM to update channellist

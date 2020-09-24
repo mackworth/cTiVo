@@ -10,9 +10,7 @@
 
 @protocol MTTabViewItemControllerDelegate <NSObject>
 
-@optional
-
--(BOOL)windowShouldClose:(id)sender;
+-(BOOL)windowShouldCloseOrDelayedClose: (void (^)(void))closeBlock;
 
 @end
 

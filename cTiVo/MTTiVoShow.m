@@ -415,8 +415,8 @@ __DDLOGHERE__
 	if (self.isSuggestion) return NO;
 	if ([self.imageString isEqualToString:@"deleted"]) return NO;
 	if (self.stationCallsign) {
-		if ([tiVoManager skipModeForChannel:self.stationCallsign] != NSOnState) return NO;
-		if ([tiVoManager commercialsForChannel:self.stationCallsign] != NSOnState) return NO;
+		if ([tiVoManager skipModeForChannel:self.stationCallsign] != NSControlStateValueOn) return NO;
+		if ([tiVoManager commercialsForChannel:self.stationCallsign] != NSControlStateValueOn) return NO;
 	}
 	NSString * genre = self.episodeGenre.lowercaseString;
 	if (genre) {
@@ -779,12 +779,12 @@ __DDLOGHERE__
 			return @"--";
 		}
 	} else {
-		NSCellStateValue state = [tiVoManager failedPSForChannel:self.stationCallsign];
+		NSControlStateValue state = [tiVoManager failedPSForChannel:self.stationCallsign];
 		switch (state) {
-			case NSOffState: {
+			case NSControlStateValueOff: {
 				return @"-";
 			}
-			case NSOnState: {
+			case NSControlStateValueOn: {
 				return @"√";
 			}
 			default: {
@@ -1344,7 +1344,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                            twoChar([components month], YES),
                            twoChar([components day], YES)];
     }
-    NSString * monthName = ([components month]> 0 && [components month] != NSUndefinedDateComponent) ?
+	NSString * monthName = ([components month]> 0 && [components month] != NSDateComponentUndefined) ?
     [[[[NSDateFormatter alloc] init] shortMonthSymbols]
      objectAtIndex:[components month]-1] :
     @"";
@@ -1573,7 +1573,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
     if (image) {
         NSData *PNGData  = [NSBitmapImageRep representationOfImageRepsInArray: [image representations]
-                                                                    usingType:NSPNGFileType properties:@{NSImageInterlaced: @NO}];
+																	usingType:NSBitmapImageFileTypePNG properties:@{NSImageInterlaced: @NO}];
         MP4TagArtwork artwork;
 
         artwork.data = (void *)[PNGData bytes];
@@ -1723,10 +1723,7 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
 
     if (iTunMovi.count) {
-        NSData *serializedPlist = [NSPropertyListSerialization
-                                   dataFromPropertyList:iTunMovi
-                                   format:NSPropertyListXMLFormat_v1_0
-                                   errorDescription:nil];
+        NSData *serializedPlist = [NSPropertyListSerialization dataWithPropertyList:iTunMovi format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
         MP4ItmfItem* newItem = MP4ItmfItemAlloc( "----", 1 );
         newItem->mean = strdup( "com.apple.iTunes" );
         newItem->name = strdup( "iTunMOVI" );
@@ -1770,10 +1767,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         [tiVoInfo setObject:self.seriesId forKey:@"seriesId"];
     }
     if (tiVoInfo.count) {
-        NSData *serializedPlist = [NSPropertyListSerialization
-                                   dataFromPropertyList:tiVoInfo
-                                   format:NSPropertyListXMLFormat_v1_0
-                                   errorDescription:nil];
+        NSData *serializedPlist = [NSPropertyListSerialization dataWithPropertyList:tiVoInfo format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
         MP4ItmfItem* newItem = MP4ItmfItemAlloc( "----", 1 );
         newItem->mean = strdup( "com.pyTivo.pyTivo" );
         newItem->name = strdup( "tiVoINFO" );
@@ -1815,7 +1809,7 @@ NSString * fourChar(long n, BOOL allowZero) {
 
             if (image) {
                 NSData *PNGData  = [NSBitmapImageRep representationOfImageRepsInArray: [image representations]
-                                                                        usingType:NSPNGFileType properties:@{NSImageInterlaced: @NO}];
+                                                                        usingType:NSBitmapImageFileTypePNG properties:@{NSImageInterlaced: @NO}];
                 MP4TagArtwork artwork;
 
                 artwork.data = (void *)[PNGData bytes];
@@ -1888,7 +1882,11 @@ NSString * fourChar(long n, BOOL allowZero) {
         NSString *lowerCaseFilename = [filename lowercaseString];
         if (!prefix || [lowerCaseFilename hasPrefix:prefix]) {
             NSString * extension = [lowerCaseFilename pathExtension];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
+//Note: recommended [NSImage imageTypes] is a list of UTIs, not extensions
             if ([[NSImage imageFileTypes] indexOfObject:extension] != NSNotFound) {
+#pragma clang diagnostic pop
                 NSString * base = [lowerCaseFilename stringByDeletingPathExtension];
                 if (!suffix || [base hasSuffix:suffix]){
                     if (!suffix) {
@@ -1955,7 +1953,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             return;
         }
         NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData: [artwork TIFFRepresentation]];
-        NSData * imageData = [imageRep representationUsingType:NSJPEGFileType properties:@{NSImageCompressionFactor: @(1.0)}];
+		NSData * imageData = [imageRep representationUsingType:NSBitmapImageFileTypeJPEG properties:@{NSImageCompressionFactor: @(1.0)}];
 
         NSURL * fileName = [self filenameForUserArtwork];
         if ([imageData writeToURL:fileName atomically:YES]) {

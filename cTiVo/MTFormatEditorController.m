@@ -17,7 +17,6 @@
 @interface MTFormatEditorController ()
 {
     IBOutlet MTFormatPopUpButton *formatPopUpButton;
-    NSAlert *deleteAlert, *saveOrCancelAlert, *cancelAlert;
     IBOutlet NSButton *saveButton, *encodeHelpButton, *comSkipHelpButton;
 }
 
@@ -190,107 +189,46 @@
     [self updateForFormatChange];
 }
 
-- (BOOL)windowShouldClose:(id)sender
-{
+- (BOOL)windowShouldCloseOrDelayedClose: (void (^)(void))closeBlock {
 	[[NSApp keyWindow] makeFirstResponder:[NSApp keyWindow]]; //save any text edits in process
 	if ([self.shouldSave boolValue]) {
-		saveOrCancelAlert = [NSAlert alertWithMessageText:@"You have edited the formats.  Leaving the window will discard your changes.  Do you want to save your changes?" defaultButton:@"Save" alternateButton:@"Leave Window" otherButton:@"Continue Editing" informativeTextWithFormat:@" "];
- 		[saveOrCancelAlert beginSheetModalForWindow:self.view.window ?: [NSApp keyWindow]
-                                      modalDelegate:self
-                                     didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
-                                        contextInfo:nil];
-		self.alertResponseInfo = (NSDictionary *)sender;
-		return NO;
+		NSAlert * alert = [[NSAlert alloc] init];
+		alert.messageText = @"You have edited the formats. Leaving the window will discard your changes. ";
+		[alert addButtonWithTitle:@"Save" ];
+		[alert addButtonWithTitle:@"Leave Window" ];
+		[alert addButtonWithTitle:@"Continue Editing" ];
+		alert.informativeText = @"Do you want to save your changes?";
+		__weak __typeof__(self) weakSelf = self;
+
+		[alert beginSheetModalForWindow:self.view.window ?: [NSApp keyWindow]
+			completionHandler:^(NSModalResponse returnCode) {
+				__typeof__(self) strongSelf = weakSelf;
+				switch (returnCode) {
+				case NSAlertFirstButtonReturn: //Save
+					[strongSelf saveFormats:nil];
+					[strongSelf close:closeBlock];
+					break;
+				case NSAlertSecondButtonReturn: //Leave
+					[strongSelf close:closeBlock];
+					break;
+				case NSAlertThirdButtonReturn:  //Continue
+					//Don't close the window
+					break;
+				default:
+					break;
+			}
+		}];
+		return NO; //don't close until they answer
 	} else {
-		[self close];
+		[self close:nil];
 		return YES;
-
 	}
 }
 
-- (void) alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
-{
-	if (alert == deleteAlert) {
-		if (returnCode == 1) {
-            NSInteger startIndex = [formatPopUpButton indexOfItemWithRepresentedObject:_currentFormat];
-            //move to next one
-            NSInteger index = startIndex+1;
-            MTFormat *newFormat = nil;
-
-            while (index < formatPopUpButton.numberOfItems && ![(newFormat = [formatPopUpButton itemAtIndex:index].representedObject) isKindOfClass:[MTFormat class]]) {
-                index ++;
-            }
-            //unless there isn't one, then move to previous one
-            if (!newFormat) {
-                while (index > 0 && ![(newFormat =[formatPopUpButton itemAtIndex:index].representedObject) isKindOfClass:[MTFormat class]]) {
-                    index --;
-                }
-            }
-            [self.formatList removeObject:self.currentFormat];
-            if (!newFormat) newFormat = _formatList[0];
-            self.currentFormat = newFormat;
-
-			[self refreshFormatPopUp:nil];
-			[self updateForFormatChange];
-		}
-    } else if (alert == saveOrCancelAlert) {
-		switch (returnCode) {
-			case 1:
-				//Save changes here
-				[self saveFormats:nil];
-				//				[self.window close];
-				[self close];
-				[self alertResponse:_alertResponseInfo];
-				break;
-			case 0:
-				//Cancel Changes here and dismiss
-				//				[self.window close];
-				[self close];
-				[self alertResponse:_alertResponseInfo];
-				break;
-			case -1:
-				//Don't Close the window
-				break;
-			default:
-				break;
-		}
-	}
-}
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
--(void)alertResponse:(NSDictionary *)info
-{
-	id target = (id)info[@"Target"];
-	SEL selector = NSSelectorFromString(info[@"Selector"]);
-	id argument = (id)info[@"Argument"];
-	[target performSelector:selector withObject:argument];
-}
-#pragma clang diagnostic pop
-
-
--(void)close
-{
-//	[NSApp endSheet:self.window];
-//	[self.window orderOut:nil];
+-(void)close: (void (^)(void))closeBlock  {
 	[self refreshFormatList]; //throw away all changes
+	if (closeBlock) closeBlock();
 }
-
-
-//-(void)showWindow:(id)sender
-//{
-//	//Deepcopy array so we have new object
-//    if (formatPopUpButton) {  //Clumsy way of refreshing popup selection after dismissal and re-show of window.  Need better connection
-//		[self refreshFormatPopUp:nil];
-//		self.currentFormat= [formatPopUpButton selectFormatNamed:tiVoManager.selectedFormat.name];
-//		self.currentFormat = formatPopUpButton.selectedItem.representedObject;
-//  
-//         self.shouldSave = [NSNumber numberWithBool:NO];
-//    }
-//	[super showWindow:sender];
-//    [self updateForFormatChange];
-//}
-//
 #pragma mark - Utility Methods
 
 -(void)updateForFormatChange
@@ -408,7 +346,7 @@
 
 -(IBAction)cancelFormatEdit:(id)sender
 {
-	[self windowShouldClose:nil];
+	[self windowShouldCloseOrDelayedClose:nil];
 }
 
 -(IBAction)selectFormat:(id)sender
@@ -420,14 +358,40 @@
 }
 
 
--(IBAction)deleteFormat:(id)sender
-{
-	deleteAlert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Do you want to delete the format %@ entirely?",_currentFormat.name] defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@" "];
- 	[deleteAlert beginSheetModalForWindow:self.view.window ?: [NSApp keyWindow]
-                            modalDelegate:self
-                           didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
-                              contextInfo:nil];
-	
+-(IBAction)deleteFormat:(id)sender {
+	NSAlert * alert = [[NSAlert alloc] init];
+	alert.messageText = [NSString stringWithFormat:@"Do you want to delete the format %@ entirely?",_currentFormat.name];
+	[alert addButtonWithTitle:@"Yes" ];
+	[alert addButtonWithTitle:@"No" ];
+	__weak __typeof__(self) weakSelf = self;
+
+	[alert beginSheetModalForWindow:self.view.window ?: [NSApp keyWindow]
+		completionHandler:^(NSModalResponse returnCode) {
+			if (returnCode == NSAlertFirstButtonReturn) { //delete
+			__typeof__(self) strongSelf = weakSelf;
+
+			NSInteger startIndex = [strongSelf->formatPopUpButton indexOfItemWithRepresentedObject:strongSelf.currentFormat];
+			//move to next one
+			NSInteger index = startIndex+1;
+			MTFormat *newFormat = nil;
+
+			while (index < strongSelf->formatPopUpButton.numberOfItems && ![(newFormat = [strongSelf->formatPopUpButton itemAtIndex:index].representedObject) isKindOfClass:[MTFormat class]]) {
+				index ++;
+			}
+			//unless there isn't one, then move to previous one
+			if (!newFormat) {
+				while (index > 0 && ![(newFormat =[strongSelf->formatPopUpButton itemAtIndex:index].representedObject) isKindOfClass:[MTFormat class]]) {
+					index --;
+				}
+			}
+			[strongSelf.formatList removeObject:strongSelf.currentFormat];
+			if (!newFormat) newFormat = strongSelf.formatList[0];
+			strongSelf.currentFormat = newFormat;
+
+			[strongSelf refreshFormatPopUp:nil];
+			[strongSelf updateForFormatChange];
+		}
+	}];
 }
 
 -(IBAction)saveFormats:(id)sender

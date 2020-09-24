@@ -45,6 +45,10 @@
 	return self;
 }
 
+- (BOOL)windowShouldCloseOrDelayedClose:(void (^)(void))closeBlock {
+	return YES;
+}
+
 -(void) setPreferredContentSize:(NSSize)preferredContentSize {
 	myPreferredSize = preferredContentSize;
 	if (self.popover) {

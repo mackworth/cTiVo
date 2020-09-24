@@ -21,7 +21,7 @@
 
 @implementation MTChannelEditorController
 
--(BOOL)windowShouldClose:(id)sender {
+- (BOOL)windowShouldCloseOrDelayedClose: (void (^)(void))closeBlock {
 	[self.view.window makeFirstResponder:self.view]; //This closes out handling editing.
     [tiVoManager removeAllChannelsStartingWith:@"???"];//clean up any extra channels
     [tiVoManager sortChannelsAndMakeUnique];

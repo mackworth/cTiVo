@@ -123,7 +123,7 @@ __DDLOGHERE__
 	MTCheckBox *checkbox = sender;
 	//updating an individual show in download queue
 	MTSubscription * subscription = (MTSubscription *)checkbox.owner;
-	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSOnState];
+	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSControlStateValueOn];
 	subscription.includeSuggestions = newVal;
 }
 
@@ -149,7 +149,7 @@ __DDLOGHERE__
 -(void) changeHDOnly: (id) sender {
 	MTCheckBox *checkbox = sender;
 	MTSubscription * subscription = (MTSubscription *)checkbox.owner;
-	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSOnState];
+	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSControlStateValueOn];
 	subscription.HDOnly = newVal;
 	if (newVal.boolValue) {
 		subscription.SDOnly = @NO;
@@ -160,7 +160,7 @@ __DDLOGHERE__
 -(void) changeSDOnly: (id) sender {
 	MTCheckBox *checkbox = sender;
 	MTSubscription * subscription = (MTSubscription *)checkbox.owner;
-	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSOnState];
+	NSNumber *newVal = [NSNumber numberWithBool: checkbox.state == NSControlStateValueOn];
 	subscription.SDOnly = newVal;
 	if (newVal.boolValue) {
 		subscription.HDOnly = @NO;
@@ -258,7 +258,7 @@ static NSDateFormatter *dateFormatter;
         } else {
             result.textField.stringValue = [dateFormatter stringFromDate: displayDate ];
         }
-		[result.textField setAlignment:NSRightTextAlignment];
+		[result.textField setAlignment:NSTextAlignmentRight];
         result.toolTip = result.textField.stringValue;
 	} else if ([tableColumn.identifier compare:@"FormatPopUp"] == NSOrderedSame) {
 		MTFormatPopUpButton * popUp = ((MTFormatPopUpTableCellView *)result).popUpButton;

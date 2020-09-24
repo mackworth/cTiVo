@@ -278,11 +278,10 @@ __DDLOGHERE__
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTiTunesSubmit];
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTiTunesSubmit];
 	} else {
-		NSAlert *alert2 = [NSAlert alertWithMessageText: @"Warning: " kcTiVoName @" cannot access iTunes. "
-										  defaultButton: @"OK"
-										alternateButton: nil
-											otherButton: nil
-							  informativeTextWithFormat: @"Please contact " kcTiVoName @" help site."];
+		NSAlert *alert2 = [[NSAlert alloc] init];
+		alert2.messageText =  @"Warning: " kcTiVoName @" cannot access iTunes. ";
+		[alert2 addButtonWithTitle:@"OK"];
+		alert2.informativeText = @"Please contact " kcTiVoName @" help site.";
 		[alert2 runModal];
 	}
 }
@@ -432,20 +431,21 @@ __DDLOGHERE__
 	//returns YES to try again, no if not fixed.
 	NSString * msg = [NSString stringWithFormat:@"" kcTiVoName @" cannot access %@, probably due to Automation Permission problem.", [self appName]];
 	NSString * altMsg = [NSString stringWithFormat:@"Disable " kcTiVoName @"'s use of %@", [self appName]];
-	NSAlert *iTunesAlert = [NSAlert alertWithMessageText: msg
-										   defaultButton: @"Open System Preferences"
-										 alternateButton: altMsg
-											 otherButton: nil
-							   informativeTextWithFormat: @"You can fix in System Preferences OR disable %@ submittal", [self appName]];
-	NSInteger returnValue = [iTunesAlert runModal];
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = msg;
+	[alert addButtonWithTitle:@"Open System Preferences"];
+	[alert addButtonWithTitle:altMsg];
+	alert.informativeText = [NSString stringWithFormat:@"You can fix in System Preferences OR disable %@ submittal", [self appName]];
+	[alert setAlertStyle:NSAlertStyleCritical];
+	NSModalResponse returnValue = [alert runModal];
 	switch (returnValue) {
-		case NSAlertDefaultReturn: {
+		case NSAlertFirstButtonReturn: {
 			DDLogMajor(@"user asked for SysPrefs");
 			NSString *urlString = @"x-apple.systempreferences:com.apple.preference.security?Privacy_Automation";
 			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:urlString]];
 			return [self confirmiTunesPermissionFixed];
 		}
-		case NSAlertAlternateReturn:
+		case NSAlertSecondButtonReturn:
 			DDLogMajor(@"User asked to disable %@",  [self appName]);
 			return NO;
 			break;
@@ -457,53 +457,58 @@ __DDLOGHERE__
 
 -(void) warnQuitting {
 	NSString * msg = [NSString stringWithFormat: @"To connect to %@, " kcTiVoName @" must now quit.", [self appName]];
-	NSAlert *alert2 = [NSAlert alertWithMessageText: msg
-									  defaultButton: @"OK"
-									alternateButton: nil
-										otherButton: nil
-						  informativeTextWithFormat: @"Please restart " kcTiVoName @" to check %@ access", [self appName]];
-	[alert2 runModal];
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = msg;
+	[alert addButtonWithTitle:@"OK"];
+	alert.informativeText = [NSString stringWithFormat: @"Please restart " kcTiVoName @" to check %@ access", [self appName]];
+	[alert setAlertStyle:NSAlertStyleCritical];
+	[alert runModal];
 }
 
 -(BOOL) confirmiTunesPermissionFixed {
 	NSString * msg = [NSString stringWithFormat:@"Please click OK when you have enabled " kcTiVoName @"'s %@ permission in Privacy.", [self appName]];
 	NSString * altMsg = [NSString stringWithFormat: @"Disable " kcTiVoName @"'s use of %@", [self appName]];
-
-	NSAlert *alert = [NSAlert alertWithMessageText: msg
-									 defaultButton: @"OK"
-								   alternateButton: altMsg
-									   otherButton: @"No such switch??"
-						 informativeTextWithFormat: @"Or you can choose to disable %@ submittal entirely.", [self appName]];
-	NSInteger returnValue = [alert runModal];
+	
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = msg;
+	[alert addButtonWithTitle:@"OK"];
+	[alert addButtonWithTitle:altMsg];
+	[alert addButtonWithTitle:@"No such switch??"];
+	alert.informativeText = [NSString stringWithFormat:@"Or you can choose to disable %@ submittal entirely.", [self appName]];
+	[alert setAlertStyle:NSAlertStyleCritical];
+	NSModalResponse returnValue = [alert runModal];
 	switch (returnValue) {
-		case NSAlertDefaultReturn: {
+		case NSAlertFirstButtonReturn: {
 			DDLogMajor(@"user said to try again");
 			return YES;
 			break;
 		}
-		case NSAlertAlternateReturn:
+		case NSAlertSecondButtonReturn:
 			DDLogMajor(@"User asked to disable %@", [self appName]);
 			return NO;
 			break;
-		case NSAlertOtherReturn:
+		case NSAlertThirdButtonReturn:
 			return [self offerResetPermissions];
+			break;
 		default:
+			return NO;
 			break;
 	}
 	return NO; //shouldn't get here
 }
 
 -(BOOL) offerResetPermissions {
-	NSString * msg = [NSString stringWithFormat:@"Still no %@ access; " kcTiVoName @" can reset macOS Automation permissions for ALL apps if you wish.", [self appName]];
+	NSString * msg = [NSString stringWithFormat:@"Still no %@ access; " kcTiVoName @" can try to reset macOS Automation permissions for ALL apps if you wish.", [self appName]];
 	NSString * altMsg = [NSString stringWithFormat: @"Disable " kcTiVoName @"'s use of %@", [self appName]];
-	NSAlert *alert = [NSAlert alertWithMessageText: msg
-									 defaultButton: @"Reset Automation Permissions"
-								   alternateButton: altMsg
-									   otherButton: nil
-						 informativeTextWithFormat: @"Or you can choose to disable %@ submittal entirely.",  [self appName]];
-	NSInteger returnValue = [alert runModal];
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = msg;
+	[alert addButtonWithTitle:@"Reset Automation Permissions"];
+	[alert addButtonWithTitle:altMsg];
+	alert.informativeText = [NSString stringWithFormat:@"Or you can choose to disable %@ submittal entirely.", [self appName]];
+	[alert setAlertStyle:NSAlertStyleCritical];
+	NSModalResponse returnValue = [alert runModal];
 	switch (returnValue) {
-		case NSAlertDefaultReturn: {
+		case NSAlertFirstButtonReturn: {
 			DDLogMajor(@"user said to reset permissions");
 			NSTask *task = [[NSTask alloc] init];
 			task.launchPath = @"/usr/bin/tccutil";
@@ -513,11 +518,12 @@ __DDLOGHERE__
 			return YES;
 			break;
 		}
-		case NSAlertAlternateReturn:
+		case NSAlertSecondButtonReturn:
 			DDLogMajor(@"User asked to disable %@", [self appName]);
 			return NO;
 			break;
 		default:
+			return NO;
 			break;
 	}
 	return NO; //shouldn't get here
@@ -525,12 +531,12 @@ __DDLOGHERE__
 
 -(BOOL) warniTunesFailure {
 	NSString * msg = [NSString stringWithFormat:@"" kcTiVoName @" still cannot access %@.", [self appName]];
-	NSAlert *alert2 = [NSAlert alertWithMessageText: msg
-									  defaultButton: @"OK"
-									alternateButton: nil
-										otherButton: nil
-						  informativeTextWithFormat: @"Please check for help at " kcTiVoName @"'s website."];
-	[alert2 runModal];
+	NSAlert *alert = [[NSAlert alloc] init];
+	alert.messageText = msg;
+	[alert addButtonWithTitle:@"OK"];
+	alert.informativeText = @"Please check for help at " kcTiVoName @"'s website.";
+	[alert setAlertStyle:NSAlertStyleCritical];
+	[alert runModal];
 	return NO;
 }
 

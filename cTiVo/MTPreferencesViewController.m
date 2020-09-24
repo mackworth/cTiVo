@@ -120,5 +120,9 @@
 	[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath: kMTFileNameFormat ];
 }
 
+- (BOOL)windowShouldCloseOrDelayedClose:(void (^)(void))closeBlock {
+	return YES;
+}
+
 @end
 
