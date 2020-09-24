@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 48;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -1656,10 +1656,10 @@
 				1E50515A22556CC300D5981B /* Copy Executables */,
 				1E50516122556CC300D5981B /* Copy shared libraries for executables */,
 				1E5051B822556CC300D5981B /* CopyFiles */,
-				1E5051BB22556CC300D5981B /* Run Script */,
-				1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */,
 				1E5051BC22556CC300D5981B /* Sign Executables */,
 				18840CE49816D2B1B7EDF927 /* [CP] Embed Pods Frameworks */,
+				1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */,
+				1E5051BB22556CC300D5981B /* Run Script */,
 			);
 			buildRules = (
 			);
@@ -1681,10 +1681,9 @@
 				1EDBDFA61B1CB71200E979F0 /* Copy Executables */,
 				1E557BCE1CD8033F0014D85B /* Copy shared libraries for executables */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
-				1E07864E19C7F3CE00A68051 /* Run Script */,
-				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				D2AA030A1833F09B00AEE326 /* Sign Bundled Frameworks */,
 				E351538B6A40FF253B8B644C /* [CP] Embed Pods Frameworks */,
+				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				1E3557132519BDB3004AF628 /* Initialize CrashLytics */,
 			);
 			buildRules = (
@@ -1703,7 +1702,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = MT;
-				LastUpgradeCheck = 1100;
+				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = cTiVo;
 				TargetAttributes = {
 					D2D60B9C16766EFD00CE32DE = {
@@ -1723,7 +1722,7 @@
 				};
 			};
 			buildConfigurationList = D2D60B9716766EFD00CE32DE /* Build configuration list for PBXProject "cTiVo" */;
-			compatibilityVersion = "Xcode 8.0";
+			compatibilityVersion = "Xcode 11.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1907,22 +1906,6 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
-		};
-		1E07864E19C7F3CE00A68051 /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
-			);
-			name = "Run Script";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/FirebaseCrashlytics/run\"\n";
 		};
 		1E3557132519BDB3004AF628 /* Initialize CrashLytics */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2310,7 +2293,7 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MARKETING_VERSION = "3.4.2 beta";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVo;
 				PRODUCT_NAME = cTV;
@@ -2361,7 +2344,7 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MARKETING_VERSION = "3.4.2 beta";
 				"OTHER_LDFLAGS[arch=*]" = (
 					"-framework",
@@ -2398,7 +2381,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "";
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -2432,7 +2415,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"-Wall",
@@ -2468,7 +2451,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "";
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -2495,7 +2478,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = (
 					"-Wall",
 					"-Wextra",
@@ -2538,7 +2521,10 @@
 					"$(SRCROOT)/cTiVo",
 				);
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -2546,7 +2532,7 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MARKETING_VERSION = "3.4.2 beta";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2585,7 +2571,10 @@
 					"$(SRCROOT)/cTiVo",
 				);
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -2593,7 +2582,7 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MARKETING_VERSION = "3.4.2 beta";
 				"OTHER_LDFLAGS[arch=*]" = (
 					"-framework",
