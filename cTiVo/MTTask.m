@@ -15,7 +15,7 @@
 #import "NSString+Helpers.h"
 
 #ifndef DEBUG
-#import "Crashlytics/Crashlytics.h"
+@import Firebase;
 #endif
 
 @interface MTTask ()
@@ -497,7 +497,7 @@ __DDLOGHERE__
             [info setValue:desc forKey:@"MTExceptionTaskInfo"];
 
             NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:1 userInfo:info];
-            [[Crashlytics sharedInstance] recordError:error];
+			[[FIRCrashlytics crashlytics] recordError:error];
 #endif
             return NO;
         }

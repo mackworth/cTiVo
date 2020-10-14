@@ -21,7 +21,7 @@
 #import <Carbon/Carbon.h>
 
 #ifndef DEBUG
-#import "Crashlytics/Crashlytics.h"
+@import AppCenterAnalytics;
 #endif
 
 
@@ -1400,7 +1400,9 @@ __DDLOGHERE__
         //commercial or caption might finish first.
 #ifdef SANDBOX
 		NSError * error = nil;
-		if (! [[NSFileManager defaultManager] moveItemAtPath:strongSelf.tempCaptionFilePath
+		if (!strongSelf.tempCaptionFilePath ||
+			!strongSelf.captionFilePath ||
+			![[NSFileManager defaultManager] moveItemAtPath:strongSelf.tempCaptionFilePath
 													  toPath:strongSelf.captionFilePath
 													   error: &error] ) {
 			DDLogReport(@" %@ caption complete, but could not transfer file %@ to destination directory: %@ Error: %@",strongSelf, strongSelf.tempCaptionFilePath, strongSelf.captionFilePath, error.localizedDescription);
@@ -2154,10 +2156,18 @@ __DDLOGHERE__
 #ifndef DEBUG
 	NSInteger retries = ([[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries] - self.numRetriesRemaining) ;
 	NSString * retryString = [NSString stringWithFormat:@"%d",(int) retries];
-	[Answers logCustomEventWithName:@"Success"
-				   customAttributes:@{@"Format" : self.encodeFormat.name,
-									  @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
-									  @"Retries" : retryString }];
+
+	[MSAnalytics trackEvent:@"Success"
+		withProperties:@{@"Format" : self.encodeFormat.name,
+						@"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
+						@"Retries" : retryString }];
+		
+//	[FIRAnalytics logEventWithName:kFIREventSelectContent
+//                    parameters:@{
+//                                 kFIRParameterItemID:[NSString stringWithFormat:@"id-%@", self.title],
+//                                 kFIRParameterItemName:self.title,
+//                                 kFIRParameterContentType:@"image"
+//                                 }];
 #endif
 	[self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil ];
 	if (self.deleteAfterDownload.boolValue) {
@@ -2516,9 +2526,10 @@ __DDLOGHERE__
             self.downloadStatus = @(kMTStatusFailed);
             self.processProgress = 1.0;
 #ifndef DEBUG
-           [Answers logCustomEventWithName:@"Failure"
-                           customAttributes:@{ @"Format" : self.encodeFormat.name,
-                                               @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
+	[MSAnalytics trackEvent:@"Failure"
+		withProperties:@{@"Format" : self.encodeFormat.name,
+						@"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]
+						}];
 #endif
             [self notifyUserWithTitle: @"TiVo show failed."
                              subTitle:@"Retries Cancelled"];
@@ -2531,9 +2542,10 @@ __DDLOGHERE__
 				self.numRetriesRemaining--;
                 [self notifyUserWithTitle:@"TiVo show failed" subTitle:@"Retrying" ];
 #ifndef DEBUG
-                [Answers logCustomEventWithName:@"Retry"
-                               customAttributes:@{ @"Format" : self.encodeFormat.name,
-                                                   @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
+	[MSAnalytics trackEvent:@"Retry"
+		withProperties:@{@"Format" : self.encodeFormat.name,
+						@"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]
+						}];
 #endif
                 DDLogMajor(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
 				[self launchUserScript];

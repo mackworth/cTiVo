@@ -43,5 +43,7 @@
 	<string>cTVMainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED</key>
+	<false/>
 </dict>
 </plist>

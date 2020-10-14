@@ -5,28 +5,27 @@
 //
 
 #import "CrashlyticsLogger.h"
+#ifndef DEBUG
 @import Firebase;
+#endif
 
 @implementation CrashlyticsLogger
 
--(void) logMessage:(DDLogMessage *)logMessage
-{
+-(void) logMessage:(DDLogMessage *) logMessage {
+#ifndef DEBUG
 	NSString *logMsg = logMessage->_message;
-	
-	if (_logFormatter)
-	{
+	if (_logFormatter) {
 		logMsg = [_logFormatter formatLogMessage:logMessage];
 	}
 	
-	if (logMsg)
-	{
+	if (logMsg) {
 		[[FIRCrashlytics crashlytics] log:logMsg];
 	}
+#endif
 }
 
 
-+(CrashlyticsLogger*) sharedInstance
-{
++(CrashlyticsLogger*) sharedInstance {
 	static dispatch_once_t pred = 0;
 	static CrashlyticsLogger *_sharedInstance = nil;
 	

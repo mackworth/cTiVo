@@ -22,13 +22,14 @@
 
 #import "DDFileLogger.h"
 #import "MTLogFormatter.h"
-@import Firebase;
 
 #ifdef DEBUG
 #import "DDOSLogger.h"
 #else
 #import "CrashlyticsLogger.h"
-#import "Crashlytics/crashlytics.h"
+@import Firebase;
+@import AppCenter;
+@import AppCenterAnalytics;
 #endif
 
 #ifndef MAC_APP_STORE
@@ -38,10 +39,6 @@
 #endif
 
 #import "NSNotificationCenter+Threads.h"
-#ifndef DEBUG
-#import "Fabric/Fabric.h"
-#import "Crashlytics/Crashlytics.h"
-#endif
 #import "NSString+Helpers.h"
 
 #import <IOKit/pwr_mgt/IOPMLib.h>
@@ -170,9 +167,11 @@ void signalHandler(int signal)
 	[defaults registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
 	
 #ifndef DEBUG
-  [FIRApp configure];
     if (![defaults boolForKey:kMTCrashlyticsOptOut]) {
-        [Fabric with:@[[Crashlytics class]]];
+		[FIRApp configure];
+		[MSAppCenter start:@"d25a8abd-34c7-4be0-b7cc-94a186e1c5c5" withServices:@[
+		[MSAnalytics class],
+	]];
     }
 #ifndef MAC_APP_STORE
 	PFMoveToApplicationsFolderIfNecessary();
