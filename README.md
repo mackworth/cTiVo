@@ -1,4 +1,4 @@
-**cTiVo** is a free Mac application to download shows from your TiVo and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, taking full advantage of the MacOS, but very flexible. 
+**cTiVo** is a free Mac application to download shows from your TiVo and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, taking full advantage of MacOS, but very flexible. 
 
 cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
 
@@ -7,7 +7,6 @@ cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objecti
 The current release is here:  https://github.com/mackworth/cTiVo/releases/
 
 NOTE: Until recently, TiVo's new Edge product was incompatible with any PC/Mac downloads, but it appears that TiVo has finally fixed this with software release 21.9.7.v3-USM-12-D6F.
-(If anyone can confirm this, that would be great.)
 
 ## Automatic Download and Conversions
 * Auto-discovery of all your TiVos (using Bonjour).
@@ -66,7 +65,8 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 * [Q and A on different video formats](../../wiki/Video-Formats)
 * [Other Advanced Topics](../../wiki/Advanced-Topics)
 
-cTiVo is fully compatible with MacOS Catalina (10.15) back through Mavericks (10.9).
+cTiVo is fully compatible with MacOS Big Sur (10.16) back through Mavericks (10.11). 
+The latest release compatible with 10.10 and 10.9 is 3.4.1.
 
 **cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
 

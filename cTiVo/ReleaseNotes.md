@@ -1,4 +1,15 @@
-# 3.4.1: General Fixes
+# Release 3.4.2: Maintenance Release
+* Migration from Google Fabric to Firebase Crashlytics and Microsoft AppCenter 
+* Big Sur compatibility
+* Upgraded HandbrakeCLI (1.3.3)
+* Fixes:
+      * TiVos sometimes not appearing on startup on Catalina should be fixed
+      * No more "Handbrake has exited" on preset list
+      * Only warns about SkipMode interrupting TiVo once per session
+* Note: if you're using cTV sandboxed version, it will not auto - update
+* Note: Due to the migration, this release is not compatible with MacOS 10.10 or 10.9
+      
+# Release 3.4.1: General Fixes
 * *Get TiVo Info* improvements:
       * Available in Main Window; reports on first TiVo you have
       * No double-click from Edit>TiVo Tables (was confusing with editing text)
@@ -11,35 +22,26 @@
 * Marked as `Version 1108` in `About cTiVo` or `About cTV`
 
 # Release 3.4.0 (Catalina and Sandboxing)
-* Sends videos to Apple's TV app due to obsolescence of iTunes.
-* Submits Audio-only downloads to Music app in Catalina.
-* Sandboxed cTV app also available.
+* Sends videos to Apple's TV app due to obsolescence of iTunes
+* Submits Audio-only downloads to Music app in Catalina
+* Sandboxed cTV app also available
 * New *Get Info* command for TiVos (disk space, network connectivity etc) in *Edit Tivos* and *Remote Control*
-* Known as 3.3.2 during beta testing.
-
-### 3.4.1 fixes
-* Upgrade all binaries and libraries
-* Avoid crash due to manual TiVos with no name
-* *Get TiVo Info* improvements:
-      * Added to Main Window
-      * Remove double-click from Edit> TiVo Tables (confusing with edits)
-      * On Mini, Report Screensaver; don't show number of shows
-* Provide error on invalid Keyword in template
+* Known as 3.3.2 during beta testing
 
 ### Sandboxed cTV version:
 The Mac App Store beta version (now called cTV) is also available.  It is completely identical to cTiVo, except...
-* Now fully sandboxed, improving security of your Mac.
-* New name and icon (due to trademark concerns by Apple).
-* You can't change the temporary working directory (but you can change the Download directory).
-* Doesn't do its own updates nor moves to App directory, as these will be handled by App Store.
+* Now fully sandboxed, improving security of your Mac
+* New name and icon (due to trademark concerns by Apple)
+* You can't change the temporary working directory (but you can change the Download directory)
+* Doesn't do its own updates nor moves to App directory, as these will be handled by App Store
 
 Although it is an otherwise identical product in terms of features, your help is needed to test out the sandboxing part. Just download and run the cTV app.  cTV preferences and cache are migrated from cTIVo. cTiVo version 3.4.0 will reverse that migration, so you can alternate between these versions.  (Although strangely, you'll need to wait a couple minutes between exiting cTV and then starting cTiVo; if not, you'll get a message asking you to do so.) For now, both versions will continue to be available.  
 
 ### Fixes:
-* Improved reliability for finding completed videos on desk.
-* Help files look better in Dark mode.
-* Better logging to diagnose occasional delays in SkipMode.
-* Misc minor fixes.
+* Improved reliability for finding completed videos on desk
+* Help files look better in Dark mode
+* Better logging to diagnose occasional delays in SkipMode
+* Misc minor fixes
 
 # Release 3.3.1 
 ##  Minor fixes
@@ -60,10 +62,10 @@ This release takes advantage of TiVo's SkipMode for Marking or Cutting commercia
 *    Use TiVo's SkipMode Info when available for Marking/Cutting commercials
 *    Hold off processing until SkipMode arrives (or doesn't)
 *    Fallback to Comskip if SkipMode unavailable or fails
-#### MPEG2 streams only download over a Transport Stream connection.
-*  New Download column "Use TS". Set by channel's TS status initially, but changes automatically after bad download.
-*  New Advanced Preference: Allow MPEG2 in Transport Streams (Regardless, will retry with Program Stream if MPEG2 fails encoding).
-*  Each show now has a column for whether it is MPEG2 or H264 (measured by either actual download attempt OR by the channel).
+#### MPEG2 streams only download over a Transport Stream connection
+*  New Download column "Use TS". Set by channel's TS status initially, but changes automatically after bad download
+*  New Advanced Preference: Allow MPEG2 in Transport Streams (Regardless, will retry with Program Stream if MPEG2 fails encoding)
+*  Each show now has a column for whether it is MPEG2 or H264 (measured by either actual download attempt OR by the channel)
 #### Remote Control Window
 *    TiVo remote control emulation
 *    Keystroke alternatives
@@ -93,11 +95,11 @@ This release takes advantage of TiVo's SkipMode for Marking or Cutting commercia
 *    Delete after Download is now an option per Subscription/Download
 *    Remote reboot of TiVo 
 *    New  -noStereo flag on Default, and now copy AC3 over rather than regenerate
-*    Moved "Export Metadata to pyTiVo"  to Advanced Prefs.
-*    Added "Allow Duplicate Downloads/Subscriptions" to Advanced Prefs.
-*    Removed "Prefer TVDB's episode Info" option as TiVo's data is now accurate through RPC.
-*    First-use defaults changed to enable more features; handles dual TiVos better.
-*    All helper apps updated (ffmpeg, ccextractor, comskip, mencoder, HandBrakeCLI).
+*    Moved "Export Metadata to pyTiVo"  to Advanced Prefs
+*    Added "Allow Duplicate Downloads/Subscriptions" to Advanced Prefs
+*    Removed "Prefer TVDB's episode Info" option as TiVo's data is now accurate through RPC
+*    First-use defaults changed to enable more features; handles dual TiVos better
+*    All helper apps updated (ffmpeg, ccextractor, comskip, mencoder, HandBrakeCLI)
 
 ### Notes on SkipMode
 #### Overview
@@ -124,8 +126,8 @@ More generally, you could use the same hook to do any post-processing on downloa
 
 ### Bug fixes:
 *    Allows drag/drop of show folders into Downloads or Subscriptions
-*    No longer uses mencoder for TestPS due to occasionally inaccurate results.
-*    Not using tvdb's thumbnail images for episodes, as they're not updating them.
+*    No longer uses mencoder for TestPS due to occasionally inaccurate results
+*    Not using tvdb's thumbnail images for episodes, as they're not updating them
 *    Ignores all options when using Test PS (, e.g. Cut, Mark, Captions)
 *    Shows folders in bold when all shows are onDisk
 *    Properly uses subdirectories in cache folder
@@ -205,9 +207,9 @@ Plugged Memory leak on Downloads
 * Significantly better handling of network failures/sleep for RPC.
 * Columns resizing believed to be finally fixed.
 * Avoid rounding time when scheduling next TiVo checkin.
-* Fix \n typo in logs.
-* Avoid obscure crashes if missing episode information during RPC reference or resetting TVDB info or subscription.
-* Use one keychain reference across all TiVos.
+* Fix \n typo in logs
+* Avoid obscure crashes if missing episode information during RPC reference or resetting TVDB info or subscription
+* Use one keychain reference across all TiVos
 
 # Release 3.0.1 (Fixes)
 (some table formatting issues, and a crash in an obscure RPC scenario)
@@ -216,11 +218,11 @@ Plugged Memory leak on Downloads
 3.0 is a major new release of cTiVo with comprehensive artwork support and much more accurate information due to use of real-time features from TiVo. After extensive beta testing, it is also the most reliable release yet (especially with High Sierra). Note that 3.0 requires Mac OS 10.9 or later.  Earlier systems should continue to use [2.5.1's 10.7 version](https://github.com/mackworth/cTiVo/releases/tag/2.5.1).
 
 #### Artwork enhancements:
-New Artwork column in Now Playing List.
-Your choice of artwork from TiVo* or theTVDB (Series, Season, Episode, or Movie from theMovieDB).
-Manual updates of artwork by drag/drop onto table.
-Manual artwork updates apply to files already recorded as well.
-Finder Icons now reflect artwork of file.
+New Artwork column in Now Playing List
+Your choice of artwork from TiVo* or theTVDB (Series, Season, Episode, or Movie from theMovieDB)
+Manual updates of artwork by drag/drop onto table
+Manual artwork updates apply to files already recorded as well
+Finder Icons now reflect artwork of file
 
 #### Real-time features:
 TiVo now notifies cTiVo as the Now Playing list changes, so new shows are updated instantaneously.*
@@ -228,9 +230,9 @@ Ability to "Delete Show from TiVo" (in Edit menu and contextual menu).*
 Ability to "Stop Recording show from TiVo"  (in Edit menu and contextual menu).*
 
 #### Season/Episode Information:
-Much better matching with TVDB; enhanced statistic information.
-Episode and Genre information from TiVo is now correct.*
-Manually edit season/episode information in drawer if TiVo is incorrect.
+Much better matching with TVDB; enhanced statistic information
+Episode and Genre information from TiVo is now correct
+Manually edit season/episode information in drawer if TiVo is incorrect
 
 #### Usage notes:
 - Thumbnails in Artwork column reflect images that will be added to the show when downloaded. You select which kind of artwork you want in Preferences. You can change the visual size of the image by changing the width of the column, which will increase the height of the row proportionately. If you would like to change it, find a better image and just drag it onto the image in the table.  If you don't want any artwork for a particular show (or to reverse the manual choice), just drag the image to the trashcan. If the show has already been downloaded, cTiVo will even change the artwork in the file on disk.
@@ -240,17 +242,17 @@ Manually edit season/episode information in drawer if TiVo is incorrect.
 *Starred items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 3, HD, or HD XL)
 
 #### Minor changes:
-New default (0) for refresh times ( 240 minutes for RPC-enabled and 15 minutes for older devices).
-Extended Subscription option (no GUI, set SubscriptionExpirationDays in Console).
-Doesn't record Subscriptions if recording already on disk.
-"Reload TVDB" contextual menu item.
-Newest version of all executables: ffmpeg, mencoder, ccextractor, comskip, Handbrake.
-Detects and avoids duplicate TiVos (e.g. WAN and local).
-Warning message about disk space before downloads.
-Larger program status icons when Art column is showing.
-Shared caches between Remote and local cTiVos (ie if you move your laptop back and forth).
-Moved artwork and TiVo detail information to Cache folder, where they belong.
-Remove iTiVo migration and Growl support.
+New default (0) for refresh times ( 240 minutes for RPC-enabled and 15 minutes for older devices)
+Extended Subscription option (no GUI, set SubscriptionExpirationDays in Console)
+Doesn't record Subscriptions if recording already on disk
+"Reload TVDB" contextual menu item
+Newest version of all executables: ffmpeg, mencoder, ccextractor, comskip, Handbrake
+Detects and avoids duplicate TiVos (e.g. WAN and local)
+Warning message about disk space before downloads
+Larger program status icons when Art column is showing
+Shared caches between Remote and local cTiVos (ie if you move your laptop back and forth)
+Moved artwork and TiVo detail information to Cache folder, where they belong
+Remove iTiVo migration and Growl support
 
 #### Bug Fixes:
 Resets logging of Verbose mode to Major during startup (unless Control-Option held)
@@ -261,7 +263,7 @@ Allows season zero (specials); formatted as S00Exx
 Sorting by episode names now sorts series that have no episode information by Original Air Date
 Change to .ts for unencoded files copied over Transport Stream (for compatibility with PyTiVo)
 Non-"sticky" messages in notifications should disappear
-Cleaned up contextual menus.
+Cleaned up contextual menus
 
 #### MPEG-4 Transition:
 For those upgrading from 2.4 and earlier, you should be aware that cable companies are migrating from MPEG-2 compressed streams to MPEG-4 (aka H.264). They do this to reduce the size and improve the quality of their signals. They seem to be rolling this out slowly, one market at a time and even one channel at a time. Although this transition required many changes to cTiVo, they should be transparent in normal operation, except that older Formats may be incompatible.
@@ -393,7 +395,7 @@ I'm also pleased to report that we've also added a `FFMpeg Comskip/5.1` format w
 2) Added `ffmpeg` binary
 3) Filename template keywords Guests, StartTime, and ExtraEpisode
 4) Better Plex folder naming
-5) Caption and commercial failures will no longer fail download, just reports failure.
+5) Caption and commercial failures will no longer fail download, just reports failure
 6) New "OnDisk" column in tables to sort by whether downloaded file already exists on disk
 7) New "H.264" column in tables indicates whether a channel has migrated to H.264 yet
 8) Channels page can also specify "commercial-free" channels, which then avoids running comskip
@@ -401,7 +403,7 @@ I'm also pleased to report that we've also added a `FFMpeg Comskip/5.1` format w
 10) Anonymously reports via Crashlytics which Formats are used, to inform future development
 11) Changes needed for Rovi data transition
 12) Lower CPU priority of background tasks to avoid swamping user interface
-13) Many fixes for multitasking, iTunes, comskip, and Subscriptions.
+13) Many fixes for multitasking, iTunes, comskip, and Subscriptions
 
 # Detailed changes versus Alpha 10:
 * New ffmpeg Format, which allows comskip and 5.1AC3 to be used with ffmpeg (contributed by Ryan Child)
@@ -420,7 +422,7 @@ I'm also pleased to report that we've also added a `FFMpeg Comskip/5.1` format w
 
 Fixes:
 * Much testing and fixes around certain Format configuration flows
-* Subscription information now being properly recorded for new users.
+* Subscription information now being properly recorded for new users
 * Pause Queue and Quit will now properly complete the current show (if requested)
 * Don’t crash if iTunes is Frozen
 * Fixes Play-Video crash in pre-Maverick systems
@@ -463,7 +465,7 @@ RELEASE 2.5 ALPHA 10
  One exciting possibility is that the video streams are now already in H.264 format, which would mean that we don't need to re-encode them, which is the longest (and most CPU-intensive) part of the downloading process. However the .MPG container doesn't permit storing other information. Thus we have provided an `MP4 FFMpeg`  Format, which simple "re-muxes" the audio and video streams into an MP4 format with very little overhead, operating at the full download speed. I've seen two problems with this: first, if you do this with an MP2 channel, the resulting file will not be playable with QuickTime Player (although VLC works fine). Second, with MP4 files, the resulting file is incompatible with iTunes (I believe because it is interlaced.) It has been reported that these files work well with Plex; let me know if you find otherwise. I'd also like to know if they work well with pyTiVo.
 
 ## Formats:
- So, you currently have the choice of `Decrypted TiVo Show`, which decrypts the .tivo file into an .MPG file, essentially doing as few changes as possible. I believe the `MP4 FFMpeg`) will be a better choice for most people. Few applications expect to see H.264 streams inside an MPG container, and the MP4 container lets us add all the other metadata, commercial marking and subtitle information.n.
+ So, you currently have the choice of `Decrypted TiVo Show`, which decrypts the .tivo file into an .MPG file, essentially doing as few changes as possible. I believe the `MP4 FFMpeg`) will be a better choice for most people. Few applications expect to see H.264 streams inside an MPG container, and the MP4 container lets us add all the other metadata, commercial marking and subtitle information.
 
 ## Multitasking:
  I believe I have finally tracked down the last multitasking bug. This one leads to a crash approximatly one out of every 200 runs of the program (as reported by Crashlytics). To fix it required a signficant refactoring of the core multitasking code, so please let me know if you see any problems (especially UI freezes, or background processing that just stops). After enough usage, Crashlytics will tell me if the problem is actually fixed.
@@ -480,7 +482,7 @@ RELEASE 2.5 ALPHA 10
  3) Filename template keywords Guests, StartTime, and ExtraEpisode
  4) Choosing `comskip` will now be remembered across runs
  5) Better Plex folder naming
- 6) Caption failures will no longer fail download, just reported.
+ 6) Caption failures will no longer fail download, just reported
  7) New "OnDisk" column in tables to sort by whether downloaded file already exists on disk
  8) Channels page can now specify "commercial-free" channels which will then avoid running comskip
  9) New "Waiting" status for the time between downloads
