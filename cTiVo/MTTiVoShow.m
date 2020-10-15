@@ -271,7 +271,10 @@ __DDLOGHERE__
         DDLogDetail(@"downloading details %@ from path %@", self, self.detailURL);
         NSURLResponse *detailResponse = nil;
         NSURLRequest *detailRequest = [NSURLRequest requestWithURL:self.detailURL];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         xml = [NSURLConnection sendSynchronousRequest:detailRequest returningResponse:&detailResponse error:nil];
+#pragma clang diagnostic pop
         if (![_inProgress boolValue]) {
             [xml writeToURL:detailFileURL atomically:YES];
         }
@@ -2163,6 +2166,10 @@ NSString * fourChar(long n, BOOL allowZero) {
     }
     DDLogDetail(@"downloading artwork at %@ to %@",urlString, filename);
     NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+//	[[NSURLSession sharedSession] dataTaskWithRequest: req  //just needs testing...
+//        completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
     [NSURLConnection sendAsynchronousRequest:req
                 queue:[NSOperationQueue mainQueue]
         completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
@@ -2199,6 +2206,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             }
         });
     }];
+#pragma clang diagnostic pop
 }
 
 -(NSString *) mapTVDBKeyFromSource:(MTImageSource) source {

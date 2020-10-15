@@ -1871,7 +1871,10 @@ __DDLOGHERE__
         }
 
         NSURLRequest *thisRequest = [NSURLRequest requestWithURL:downloadURL];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         self.activeURLConnection = [[NSURLConnection alloc] initWithRequest:thisRequest delegate:self startImmediately:NO] ;
+#pragma clang diagnostic pop
     }
     self.processProgress = 0.0;
     self.previousProcessProgress = 0.0;

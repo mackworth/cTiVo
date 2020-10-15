@@ -916,8 +916,15 @@ BOOL channelChecking = NO;
         range.length = range.length + tivoBugDuplicateCount;
        DDLogDetail(@"Increasing length by %@ to %@ due to possible TiVo Range bug",@(tivoBugDuplicateCount), NSStringFromRange(range));
     }
+    
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+	// could replace with following, just needs testing.
+	//NSString * hostString = [_tiVo.hostName stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+	//NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",hostString,portString,(int)range.location,(int)range.length]
 
     NSString *tivoURLString = [[NSString stringWithFormat:@"https://%@%@/TiVoConnect?Command=QueryContainer&Container=%%2FNowPlaying&Recurse=Yes&AnchorOffset=%d&ItemCount=%d",_tiVo.hostName,portString,(int)range.location,(int)range.length] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+#pragma clang diagnostic pop
     if (self.oneBatch) {
         DDLogMajor(@"Loading RPC info from TiVo %@ shows from %d to %d at URL %@",self, (int)range.location, (int)NSMaxRange(range)-1, tivoURLString);
     } else if (previousShowList.count ==0 && range.location ==0) {
@@ -928,7 +935,10 @@ BOOL channelChecking = NO;
     }
     NSURL *tivoURL = [NSURL URLWithString:tivoURLString];
     NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     self.showURLConnection = [NSURLConnection connectionWithRequest:tivoURLRequest delegate:self];
+#pragma clang diagnostic pop
     [urlData setData:[NSData data]];
     authenticationTries = 0;
     [self.showURLConnection start];
