@@ -266,7 +266,7 @@ if [[ -n "$audio_stream" ]] ; then
 fi
 
 # attempt to munge users's ffmpeg args with our auto-generated -map and audio encoder opts.
-encode_opts=("${ffmpeg_opts_pre_input[@]}" -i "$input" -max_muxing_queue_size 4000 "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" "${audio_opts[@]}")
+encode_opts=("${ffmpeg_opts_pre_input[@]}" -i "$input" -max_muxing_queue_size 9999 "${map_opts[@]}" "${ffmpeg_opts_post_input[@]}" "${audio_opts[@]}")
 
 if [ ! -s "$edl_file" ]; then
   # no edl file or empty, don't need to encode segments and merge, simply encode

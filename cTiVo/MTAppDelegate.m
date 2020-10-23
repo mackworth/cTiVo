@@ -1286,12 +1286,6 @@ NSObject * assertionID = nil;
 	gettingMediaKey = YES;
 	NSDictionary *request = [mediaKeyQueue objectAtIndex:0]; //Pop off the first in the queue
 	MTTiVo *tiVo = request[@"tivo"]; //Pop off the first in the queue
-    if (!tiVo.enabled) {
-        gettingMediaKey = NO;
-        [mediaKeyQueue removeObject:request];
-		[self getMediaKeyFromUser:nil];//Process rest of queue
-		return;
-    }
 	NSString *reason = request[@"reason"];
     NSString *message = nil;
 	if ([reason isEqualToString:@"new"]) {
