@@ -10,6 +10,7 @@
 * Note: Due to the migration, this release is not compatible with MacOS 10.10 or 10.9
       
 # Release 3.4.1: General Fixes
+* Last version compatible with MacOS 10.10 or 10.9
 * *Get TiVo Info* improvements:
       * Available in Main Window; reports on first TiVo you have
       * No double-click from Edit>TiVo Tables (was confusing with editing text)

@@ -2,11 +2,8 @@
 
 cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
 
-cTiVo was inspired by the great work done on iTiVo, but written in Cocoa/Objective C for better performance and compatibility.
-
 The current release is here:  https://github.com/mackworth/cTiVo/releases/
-
-NOTE: Until recently, TiVo's new Edge product was incompatible with any PC/Mac downloads, but it appears that TiVo has finally fixed this with software release 21.9.7.v3-USM-12-D6F.
+Please let us know of any problems or suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
 
 ## Automatic Download and Conversions
 * Auto-discovery of all your TiVos (using Bonjour).
@@ -18,9 +15,9 @@ NOTE: Until recently, TiVo's new Edge product was incompatible with any PC/Mac d
 * Uses TiVo's SkipMode when available, or analyzes content to locate commercials.
 * Extracts closed caption info (adjusted for removal of commercials); adds to MPEG and creates subtitle files.
 * Adds artwork to downloaded shows from TiVo or theTVDB and theMovieDB (as available).
-* Copies shows to iTunes with all data about the show (metadata) transferred as well.
+* Copies shows to TV/iTunes with all data about the show (metadata) transferred as well.
 * Generates metadata appropriate for use by tools such as pyTivo and Plex.
-* Performs an 'iTunes sync' to your device when the download is completed. 
+* Performs a sync for your device when the download is completed. 
 * Maximum parallel processing, including downloading from multiple TiVos simultaneously.
 * Wide selection of predefined video Formats.
 * Target devices include iPhone, iPad, AppleTV, Xbox, YouTube.
@@ -48,6 +45,13 @@ NOTE: Until recently, TiVo's new Edge product was incompatible with any PC/Mac d
 * Show/Hide copy-protected shows and TiVo suggestions.
 * Notifications when downloads complete.
 
+## Remote Control Window
+*    TiVo remote control emulation.
+*    Keystroke alternatives.
+*    Directly select streaming services.
+*    Information about current status of TiVo (disk space, activity, network etc).
+
+
 ## To install:
 
 Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), and run it. It will ask if OK to move to Applications folder. It will automatically find your TiVos, and show you what's available.
@@ -65,11 +69,16 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 * [Q and A on different video formats](../../wiki/Video-Formats)
 * [Other Advanced Topics](../../wiki/Advanced-Topics)
 
+## Compatability:
+
 cTiVo is fully compatible with MacOS Big Sur (10.16) back through Mavericks (10.11). 
 The latest release compatible with 10.10 and 10.9 is 3.4.1.
 
-**cTiVo** is free to use, and the source is available for anyone to browse and contribute to. Please let us know of any problems/suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
+cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3HD TiVos do NOT support Transport Stream for download, which is necessary for any channels/shows transmitted by your cable company in H.264, which is true for most cable companies now. As Minis and Streams do not store their own shows, cTiVo only supports Remote Control for them.
 
+Note: Until recently, TiVo's new Edge product was incompatible with any PC/Mac downloads, but it appears that TiVo has finally fixed this with software release 21.9.7.v3-USM-12-D6F.
+
+cTiVo is free to use, and the source is available for anyone to browse and contribute to. 
 
 ## Recent features
 
@@ -79,16 +88,10 @@ The latest release compatible with 10.10 and 10.9 is 3.4.1.
 * Fallback to Comskip if SkipMode unavailable or fails.
 * There are some issues to be aware of, so please see [Commercial wiki page](Commercials).
 
-#### MPEG2 streams only download over a Transport Stream connection.
+#### MPEG2 streams only download over a Program Stream (PS) connection.
 *  New Download column "Use TS". Set by channel's TS status initially, but changes automatically after bad download.
 *  New Advanced Preference: Allow MPEG2 in Transport Streams (Regardless, will retry with Program Stream if MPEG2 fails encoding).
 *  Each show now has a column for whether it is MPEG2 or H264 (measured by either actual download attempt OR by the channel).
-
-#### Remote Control Window
-*    TiVo remote control emulation.
-*    Keystroke alternatives.
-*    Directly select streaming services.
-*    Information about current status of TiVo (disk space, activity, network etc).
 
 #### TiVo menu *
 *    Play / Delete / Stop Recording on TiVo.
@@ -149,4 +152,3 @@ The latest release compatible with 10.10 and 10.9 is 3.4.1.
 * New Channels preference screen
 * Better handling for AC3 5.1 audio
 * Many bug fixes
-
