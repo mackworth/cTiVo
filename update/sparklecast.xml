@@ -3,20 +3,46 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.4.1; Catalina!</description>
+        <description>Version 3.4.2; Maintenance!</description>
         <language>en</language>
         <item>
-            <title>Version 3.4.1; Catalina</title>
+            <title>Version 3.4.2; Maintenance</title>
             <description><![CDATA[
-				<h2 id="Release-3.4.1">Release 3.4.1 (Catalina)</h1>
+				<h2 id="Release-3.4.2">Release 3.4.2 (Maintenance)</h1>
 				<ul>
-				<li>3.4.1 has miscellaneous fixes, especially for Catalina</li>
-				<li>On Catalina, sends videos to Apple&rsquo;s new TV app due to obsolescence of iTunes.<br>
-				    (Audio-only downloads to Music app)</li>
-				<li>New <em>Get Info</em> command for TiVos (disk space, network connectivity etc)</li>
-				<li>Sandboxed <em>cTV</em> version also now available.</li>
-				<li>See website for more info regarding using TiVo SkipMode if you're not using it yet with cTiVo.</li>
+				<li>Big Sur compatibility</li>
+				<li>Upgraded Handbrake CLI</li>
+				<li>Migration to Firebase</li>
+				<li>Note: incompatible with macOS 10.9 or 10.10</li>
 				</ul>
+				<h3 id="Fixes:">Fixes:</h3>
+				<ul>
+				<li>Improved reliability for finding TiVos on Catalina.</li>
+				<li>Misc minor fixes.</li>
+				</ul>
+            ]]>
+            </description>
+            <pubDate>Sun., November 8, 2020 12:00:00 -0800</pubDate>
+            <sparkle:minimumSystemVersion>10.11.0</sparkle:minimumSystemVersion>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.2/cTiVo.app.zip" sparkle:version="1124" sparkle:shortVersionString="3.4.2" length="73211246" type="application/octet-stream" sparkle:dsaSignature="MC0CFBAXkZNwewoXl/jHfhRSvElUKmGxAhUAnPSbRbc+oCSi0lWqYrn8xjaiFd8="/>
+        </item>
+        <item>
+            <title>Version 3.4.1; Final for macOS 10.10</title>
+            <description><![CDATA[
+				
+				<h2 id="Release-3.4.1">Release 3.4.1</h1>
+                <p>This is final release for macOS 10.9 or 10.10</p>
+				<ul>
+				<li>New <em>Get Info</em> command for TiVos (disk space, network connectivity etc) in <em>Edit Tivos</em> and <em>Remote Control</em></li>
+				</ul>
+				<h3 id="Fixes:">Fixes:</h3>
+				<ul>
+				<li>Improved reliability for finding completed videos on disk.</li>
+				<li>Help files look better in Dark mode.</li>
+				<li>Better logging to diagnose occasional delays in SkipMode.</li>
+				<li>Misc minor fixes.</li>
+				</ul>
+
             ]]>
             </description>
             <pubDate>Fri., November 28, 2019 12:00:00 -0800</pubDate>
