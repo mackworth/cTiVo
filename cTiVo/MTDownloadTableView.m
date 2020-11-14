@@ -160,8 +160,13 @@ __DDLOGHERE__
 
 -(void) updateProgressInCell:(MTProgressindicator *) cell forDL:(MTDownload *) download {
     if (!cell) return;
-	cell.doubleValue = download.processProgress;
-	cell.rightText.stringValue = download.showStatus;
+    double progress = download.processProgress;
+    NSString * status = download.showStatus;
+	cell.doubleValue = progress;
+    if (progress > 0 && progress < 1.0) {
+      status = [NSString stringWithFormat:@"%@ (%d%%)",status, (int)(progress * 100) ];
+    }
+	cell.rightText.stringValue = status;
 	cell.leftText.toolTip = nil;
 	cell.rightText.toolTip = nil;
 	NSString * timeLeft = download.timeLeft;  //00:00:00
@@ -883,7 +888,7 @@ __DDLOGHERE__
 
     //Now look for reschedulings. Group could either be moving up over an active show, or moving an active show down...
 
-    for (MTDownload * activeDL in [tiVoManager downloadQueue]) {
+    for (MTDownload * activeDL in [[tiVoManager downloadQueue] copy]) {
         if (activeDL.isNew) break;  //we're through any active ones
         if (activeDL.isDone) continue;
         NSUInteger activeRow = [[tiVoManager downloadQueue] indexOfObject:activeDL];
