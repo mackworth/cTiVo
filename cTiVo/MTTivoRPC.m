@@ -108,7 +108,7 @@ NSTimeInterval delay1, delay2, delay3,delay4 = 1.0;
         if (status != errSecSuccess) {
             DDLogReport(@"Could not create temporary keychain \"%@\": [%d] %@", keychainPath, (int)status, securityErrorMessageString(status));
         } else if (keychain) {
-			NSString * tivoPassword = @"5vPNhg6sV4tD";
+			NSString * tivoPassword = @"XF7x4714qw";
 
 			NSDictionary * optionsDictionary = @{(id)kSecImportExportPassphrase: tivoPassword,
 												 (id)kSecImportExportKeychain:   (__bridge id)keychain};
