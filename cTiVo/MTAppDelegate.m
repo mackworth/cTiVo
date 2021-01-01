@@ -584,12 +584,20 @@ NSObject * assertionID = nil;
 }
 
 #define MTOpenPanelDefault 2873 //random; just different from OK v Cancel
+#define MTOpenPanelQuit    3965
 
 -(IBAction)defaultButton:(id)sender {
 	if (self.myOpenPanel) {
 		//user tapped "Use Default Button"
 		[self.myOpenPanel.sheetParent endSheet:self.myOpenPanel returnCode:MTOpenPanelDefault];
 	}
+}
+
+-(IBAction)quitButton:(id)sender {
+  if (self.myOpenPanel) {
+    //user tapped "Use Default Button"
+    [self.myOpenPanel.sheetParent endSheet:self.myOpenPanel returnCode:MTOpenPanelQuit];
+  }
 }
 
 - (BOOL)panel:(id)sender
@@ -636,7 +644,7 @@ NSObject * assertionID = nil;
 	} else {
 		DDLogMajor(@"User choosing new %@ directory.", dirType);
 	}
-	fullMessage = [fullMessage stringByAppendingString:[NSString stringWithFormat: @"\nPlease choose a new %@ directory, or 'Use Default Directory' , or Cancel.", dirType ]] ;
+	fullMessage = [fullMessage stringByAppendingString:[NSString stringWithFormat: @"\nPlease choose a new %@ directory, or 'Use Default Directory', Cancel to try again, or Quit to exit cTiVo.", dirType ]] ;
 	openPanel.canChooseFiles = NO;
 	openPanel.canChooseDirectories = YES;
 	openPanel.canCreateDirectories = YES;
@@ -691,14 +699,20 @@ NSObject * assertionID = nil;
 #endif
 				break;
 			}
+      case MTOpenPanelDefault:
+        directoryName = nil;
+        DDLogMajor(@"User chose default %@ directory.", dirType);
+        break;
+      case MTOpenPanelQuit:
+        DDLogMajor(@"User chose to Quit.");
+        [self cleanup];
+        [[NSApplication sharedApplication] terminate:nil];
+        return;
+        break;
 			case NSModalResponseCancel:
+      default:
 				directoryName = oldDir;
 				DDLogMajor(@"%@ directory selection cancelled", dirType);
-				break;
-			case MTOpenPanelDefault:
-			default:
-				directoryName = nil;
-				DDLogMajor(@"User chose default %@ directory.", dirType);
 				break;
 		}
 		[self.myOpenPanel orderOut:nil];
