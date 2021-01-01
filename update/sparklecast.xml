@@ -3,13 +3,14 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.4.2; Maintenance!</description>
+        <description>Version 3.4.3; New TiVo certificate</description>
         <language>en</language>
         <item>
-            <title>Version 3.4.2; Maintenance</title>
+            <title>Version 3.4.3; New TiVo certificate</title>
             <description><![CDATA[
-				<h2 id="Release-3.4.2">Release 3.4.2 (Maintenance)</h1>
+				<h2 id="Release-3.4.3">Release 3.4.3 (New TiVo certificate)</h1>
 				<ul>
+				<li>New TiVo certificate (old one expired December 2020)</li>
 				<li>Big Sur compatibility</li>
 				<li>Upgraded Handbrake CLI</li>
 				<li>Migration to Firebase</li>
@@ -22,9 +23,9 @@
 				</ul>
             ]]>
             </description>
-            <pubDate>Sun., November 8, 2020 12:00:00 -0800</pubDate>
+            <pubDate>Sun., November 18, 2020 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.11.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.2/cTiVo.app.zip" sparkle:version="1124" sparkle:shortVersionString="3.4.2" length="73211246" type="application/octet-stream" sparkle:dsaSignature="MC0CFBAXkZNwewoXl/jHfhRSvElUKmGxAhUAnPSbRbc+oCSi0lWqYrn8xjaiFd8="/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.3/cTiVo.app.zip" sparkle:version="1126" sparkle:shortVersionString="3.4.3" length="73211144" type="application/octet-stream" sparkle:dsaSignature="MC0CFHVZWr6DK5ov3L0Nt/mLhStOub1KAhUA3iGOdGOotFWvJEciaw1FVOEbZ8g="/>
         </item>
         <item>
             <title>Version 3.4.1; Final for macOS 10.10</title>
