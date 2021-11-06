@@ -3368,7 +3368,7 @@ NSInteger diskWriteFailure = 123;
 
 -(NSString *)description {
 #pragma clang diagnostic ignored "-Wdeprecated-objc-pointer-introspection"
-    return [NSString stringWithFormat:@"%@-%@(%x)%@",self.show.showTitle, self.show.tiVoName, ((int)self) & 0xFFFFF,[self.show.protectedShow boolValue]?@"-Protected":@""];
+  return [NSString stringWithFormat:@"%@-%@(%lx)%@",self.show.showTitle, self.show.tiVoName, ((long)self) & 0xFFFFF,[self.show.protectedShow boolValue]?@"-Protected":@""];
 }
 
 @end
