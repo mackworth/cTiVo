@@ -1,3 +1,5 @@
+#moved to homebrew for latest version...
+
 #here's the macports-based process to create ctivo binaries on Mojave.
 #There are a couple of issues. First with the stdc++ lib transition, MacPorts has given up on 10.7 and 10.8. We're just using the old binaries for the 10.7 version.
 #Second Macports isn't really designed to build older versions of software than your current system
@@ -6,6 +8,14 @@
 #The tricky part is getting it all to compile for previous versions of macOS, and avoid ones you may already have installed for your 
 #system. You can either completely empty out MacPorts directory /opt/bin and install using their package installer, 
 #OR create a temporary MacPorts directory as follows:
+
+
+NEWBINARIES="/Users/Hugh/Documents/Develop/ctivoBinaries/cTiVoBinaries-3.5/bin"
+WORKINGDIR="/Users/Hugh/Documents/Develop/ctivoBinaries/NewcTivoBinaries"
+OLDBINARIES="/Users/Hugh/Documents/Develop/ctivoBinaries/cTiVoBinaries-3.4.0/bin"  
+
+
+echo BEGINCOMMENT; : <<'ENDCOMMENT'
 
 echo "Until further debugged, you probably want to run this one step at a time to ensure it works."
 echo "Just copy commands into a Terminal session"
@@ -112,49 +122,103 @@ sudo port install ffmpeg +nonfree+gpl2
 echo ensure dependencies all say "darwin_13" (for OS 10.9)
 read -p "Then press [return] key to continue, or Ctrl-C to cancel..."
 
-#May need to copy /include/nettle/nettle-stdint.h
-#to /opt/local/include/nettle
-sudo port install mplayer +a52+mencoder_extras
 
-mkdir ~/NewcTivoBinaries
-cd ~/NewcTivoBinaries
+
+# #May need to copy /include/nettle/nettle-stdint.h
+# #to /opt/local/include/nettle
+# sudo port install mplayer +a52+mencoder_extras
+
+# Done already:
+# lipo ~/Documents/Develop/cTiVoGithub/cTiVo/mp4v2/mp4v2-10.9/libmp4v2.a /opt/homebrew/Cellar/mp4v2/2.0.0/lib/libmp4v2.a -create -output /Users/hugh/Documents/Develop/cTiVoGithub/cTiVo/mp4v2/mp4v2-10.9/combolibmp4v2.a
+
+ENDCOMMENT
+
+mkdir -p "$NEWBINARIES"; mkdir "$NEWBINARIES/../lib"
+
+mkdir "$WORKINGDIR"; cd "$WORKINGDIR"
 
 git clone git://github.com/erikkaashoek/Comskip  
-git clone git://github.com/essandess/matryoshka-name-tool 
 git clone git://github.com/CCExtractor/ccextractor
+git clone git://github.com/wmcbrine/tivodecode-ng
+git clone git://github.com/essandess/matryoshka-name-tool 
 
-#now build comskip
-export MACOSX_DEPLOYMENT_TARGET=10.9
-cd comskip; ./autogen.sh; ./configure; make; cd ..
-mkdir cTiVoBinaries; cd cTiVoBinaries; mkdir bin; mkdir lib; cd bin
-cp ../../comskip/comskip comskip; cp /opt/local/bin/mencoder mencoder; cp /opt/local/bin/ffmpeg ffmpeg
-python ../../matryoshka-name-tool/matryoshka_name_tool.py -d ../lib/ comskip ffmpeg mencoder
+brew install autoconf automake libtool argtable 
 
-#test for external symbol not available in OSX 10.9
-if [[ $(nm -g "/opt/local/lib/libavutil.56.31.100.dylib"  | grep "U _clock_gettime") ]]; then
-  echo "Error! still has _clock_gettime symbol"
-  exit 1
-fi
+echo Building ffmpeg 
+brew tap homebrew-ffmpeg/ffmpeg
+#if you change options, temporarily change next line to brew reinstall (or add brew uninstall homebrew-ffmpeg/ffmpeg/ffmpeg)
+#also if you get an error, the you may need brew uninstall ffmpeg
+brew install  homebrew-ffmpeg/ffmpeg/ffmpeg --with-fdk-aac --with-libbluray --with-libmodplug --with-openjpeg --with-librsvg --with-srt --with-xvid --with-zimg
+
+echo Building comskip
+export MACOSX_DEPLOYMENT_TARGET=10.11
+cd "$WORKINGDIR/comskip"
+./autogen.sh; ./configure; make; 
+
+echo Collecting and Doing matryoshka on all three executables
+cd "$NEWBINARIES"
+cp "$WORKINGDIR/comskip/comskip" comskip
+cp -f /opt/homebrew/bin/ffmpeg ffmpeg
+echo Getting old mencoder...only intel now
+cp "$OLDBINARIES/mencoder" mencoder
+
+python "$WORKINGDIR/matryoshka-name-tool/matryoshka_name_tool.py" -d ../lib/ -L "/opt/homebrew/" ffmpeg comskip
+
+# #re-codesign executables; have to move off existing inode to work???
+for f in {ffmpeg,comskip}; do
+   lipo "$OLDBINARIES/$f" "$NEWBINARIES/$f" -create -output $f-tmp; rm -f $f; mv $f-tmp $f
+   mv $f $f-tmp ; ditto $f-tmp $f ;  rm -f $f-tmp ; codesign  -s - -o library -f $f  
+done   
+
+cd ../lib
+for x86Ver in "$OLDBINARIES"/../lib/*.dylib ; do
+    armVer=$(basename "$x86Ver")
+    if test -f "$armVer" ; then
+        echo "Merging x86 and ARM for $armVer"
+        mv "$armVer" "tmp.dylib"
+        lipo "tmp.dylib" "$x86Ver" -create -output "$armVer"
+        rm -f "tmp.dylib"
+    else
+        echo "Copying x86 to $armVer"
+        ditto "$x86Ver" "$armVer"
+    fi
+done
+
+for i in *.dylib ; do 
+    mv $i tmp.dylib ; ditto tmp.dylib $i ;  yes | rm -f tmp.dylib 
+    codesign  -s - -o library -f $i
+done  
 
 
-cd ../../ccextractor/mac
-export MACOSX_DEPLOYMENT_TARGET=10.9
-./build.command
-cp ./ccextractor ../../cTiVoBinaries/bin
-cd ../../cTiVoBinaries/bin
+echo Building ccextractor
+cd "$WORKINGDIR/ccextractor/"
+mkdir build
+cd build
 
-for f in *; do otool -l $f| grep --label=$f -H '^  version 10.'; done
-for f in ../lib/*; do otool -l $f| grep --label=$f -H '^  version 10.'; done
-echo "please check that those are all version 10.9"
-read -p "Then press [return] key to continue, or Ctrl-C to cancel..."
+#Generate makefile using cmake and then compile
+cmake ../src/ -DWITHOUT_RUST=ON
+make
 
-cd ..
-cp bin/* ~/Documents/Develop/cTiVoGitHub/cTivo/cTiVoBinaries/bin/
-cp lib/* ~/Documents/Develop/cTiVoGitHub/cTivo/cTiVoBinaries/lib/
+lipo "$OLDBINARIES/ccextractor" ./ccextractor -create -output "$NEWBINARIES/ccextractor"
 
-echo "Now copy HandbrakeCLI into cTiVoBinaries/bin folder"
+ echo Building tivodecode-ng
+ cd "$WORKINGDIR/tivodecode-ng"
+ ./configure ; make; #then rename to tivodecode-ng
+ lipo "$OLDBINARIES/tivodecode-ng" ./tivodecode -create -output "$NEWBINARIES/tivodecode"
 
-echo "And get tivodecode-ng from https://github.com/wmcbrine/tivodecode-ng/releases"
-and ./configure ; make; #then rename to tivodecode-ng
+echo And checking versions:
+for f in ../bin/*; do otool -l $f| grep --label=$f -H '^  version '; done
+for f in ../lib/*; do otool -l $f| grep --label=$f -H '^  version '; done
+echo "please check that lib are all version 10.9 and version 10.11"
+read -p "Then press [return] key to copy into project, or Ctrl-C to cancel..."
+
+cd "$NEWBINARIES/.."
+rm -f ~/Documents/Develop/cTiVoGitHub/cTivo/cTiVoBinaries/bin/*
+rm -f ~/Documents/Develop/cTiVoGitHub/cTivo/cTiVoBinaries/lib/*
+ditto bin/* ~/Documents/Develop/cTiVoGitHub/cTivo/cTiVoBinaries/bin/
+ditto lib/* ~/Documents/Develop/cTiVoGitHub/cTivo/cTiVoBinaries/lib/
+
+echo "Don't forget to copy latest HandbrakeCLI into cTiVoBinaries/bin folder"
+
 #finally restore your MacPorts:
-sudo mv /opt/oldLocal /opt/local
+# sudo mv /opt/oldLocal /opt/local

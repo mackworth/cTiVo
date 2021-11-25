@@ -258,6 +258,31 @@
 		1E59368919648C860008780B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
 		1E59368C19648CFF0008780B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
 		1E5BEC611F9532320082FA6B /* CrashlyticsLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */; };
+		1E5C6FBD2748DAD40057541E /* libxcb-shm.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FBC2748DAC40057541E /* libxcb-shm.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FBF2748DB2C0057541E /* libxcb-shape.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FBE2748DB230057541E /* libxcb-shape.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FC12748DBA00057541E /* libxcb-xfixes.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FC02748DB7E0057541E /* libxcb-xfixes.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FC32748DBDF0057541E /* libvmaf.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FC22748DBD20057541E /* libvmaf.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FC62748DC270057541E /* libzimg.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FC42748DC120057541E /* libzimg.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FC82748DC6C0057541E /* libsrt.1.4.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FC72748DC620057541E /* libsrt.1.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FCA2748DC870057541E /* libaom.3.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FC92748DC830057541E /* libaom.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FCE2748DCC30057541E /* libbrotlicommon.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FCB2748DCB30057541E /* libbrotlicommon.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FCF2748DCC50057541E /* libbrotlidec.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FCC2748DCB30057541E /* libbrotlidec.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FD02748DCC90057541E /* libbrotlienc.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FCD2748DCB30057541E /* libbrotlienc.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FD42748DCFB0057541E /* libcrypto.1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FD32748DCEE0057541E /* libcrypto.1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FD52748DCFE0057541E /* libcrypto.1.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FD12748DCEE0057541E /* libcrypto.1.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FD62748DD000057541E /* libdav1d.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FD22748DCEE0057541E /* libdav1d.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FD82748DD1B0057541E /* libffi.8.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FD72748DD180057541E /* libffi.8.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FDA2748DD4D0057541E /* libhogweed.4.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FD92748DD440057541E /* libhogweed.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FDC2748DD740057541E /* libicudata.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FDB2748DD6A0057541E /* libicudata.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FDF2748DDB00057541E /* libicui18n.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FDD2748DD9C0057541E /* libicui18n.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FE12748DE030057541E /* libicuuc.58.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FE02748DDFE0057541E /* libicuuc.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FE32748DE2B0057541E /* libjxl.0.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FE22748DE1C0057541E /* libjxl.0.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FE62748DF180057541E /* libvpx.7.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FE42748DED40057541E /* libvpx.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FEA2748DF600057541E /* libx265.199.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FE92748DF4A0057541E /* libx265.199.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FEB2748DF6F0057541E /* libx264.163.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FE82748DF400057541E /* libx264.163.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FED2748DF930057541E /* libsnappy.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FEC2748DF8F0057541E /* libsnappy.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FF02748E0330057541E /* libssl.1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FEE2748DFD80057541E /* libssl.1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1E5C6FF12748E0370057541E /* libssl.1.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FEF2748DFD80057541E /* libssl.1.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E61CDB91BB89E6A006D6DBE /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB81BB89E6A006D6DBE /* libc++.tbd */; };
 		1E61CDBD1BB89E91006D6DBE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDBC1BB89E91006D6DBE /* libz.tbd */; };
 		1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7516E2C50B000F5C6E /* copyright.png */; };
@@ -283,9 +308,6 @@
 		1E8E675D20E1E971005465EF /* DDOSLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E675C20E1E970005465EF /* DDOSLogger.m */; };
 		1E8F6D2A1F5CA4D700830CB4 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E1395941F5928E800FFA4E7 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E91657C2373AE2700847EF0 /* libcairo-gobject.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E91657E2373AE2700847EF0 /* libx264.157.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165792373AE2600847EF0 /* libx264.157.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E9165802373AE2700847EF0 /* libvpx.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91657A2373AE2600847EF0 /* libvpx.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E9165822373AE2700847EF0 /* libx265.179.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91657B2373AE2700847EF0 /* libx265.179.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E9165852373AE6800847EF0 /* libMacportsLegacySupport.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165842373AE6700847EF0 /* libMacportsLegacySupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E9165922373AF2900847EF0 /* libhogweed.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165912373AF2800847EF0 /* libhogweed.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E9165972373AF9400847EF0 /* libicudata.65.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165942373AF9300847EF0 /* libicudata.65.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -299,9 +321,6 @@
 		1E9165A52373B49500847EF0 /* libicuuc.65.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165962373AF9400847EF0 /* libicuuc.65.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E9165A62373B4A600847EF0 /* libMacportsLegacySupport.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165842373AE6700847EF0 /* libMacportsLegacySupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E9165A72373B4AD00847EF0 /* libnettle.7.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91659D2373B04900847EF0 /* libnettle.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E9165A82373B4BA00847EF0 /* libvpx.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91657A2373AE2600847EF0 /* libvpx.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E9165A92373B4C600847EF0 /* libx264.157.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165792373AE2600847EF0 /* libx264.157.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E9165AA2373B4C800847EF0 /* libx265.179.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91657B2373AE2700847EF0 /* libx265.179.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E964C9C1882768A00C19046 /* copyright@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C931882768900C19046 /* copyright@2x.png */; };
 		1E964C9D1882768A00C19046 /* deleted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C941882768A00C19046 /* deleted@2x.png */; };
 		1E964C9E1882768A00C19046 /* expired-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C951882768A00C19046 /* expired-recording@2x.png */; };
@@ -331,6 +350,10 @@
 		1EE3AB63201589E500F36731 /* MTWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EE3AB62201589E500F36731 /* MTWeakTimer.m */; };
 		1EEA5CA42509748400E8A277 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1EEA5CA32509748400E8A277 /* GoogleService-Info.plist */; };
 		1EEA5CA52509748400E8A277 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1EEA5CA32509748400E8A277 /* GoogleService-Info.plist */; };
+		1EF4A2AA2749734900781BDD /* libvpx.5.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1EF4A2A92749732C00781BDD /* libvpx.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1EF4A2AC274973B800781BDD /* libx264.152.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1EF4A2AB274973AE00781BDD /* libx264.152.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1EF4A2AE2749741700781BDD /* libx265.169.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1EF4A2AD2749741100781BDD /* libx265.169.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1EF4A2B1274974BB00781BDD /* libnettle.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1EF4A2B0274974A100781BDD /* libnettle.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFA8D53211BFF6A00B4505D /* MTChannelPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EFA8D4F211BFF6900B4505D /* MTChannelPopUpButton.m */; };
 		1EFA8D54211BFF6A00B4505D /* MTChannelPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EFA8D51211BFF6900B4505D /* MTChannelPopUpTableCellView.m */; };
 		1EFB691E20DD3BA0001F5DB6 /* libargtable2.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB90F320DD364800E3317D /* libargtable2.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -410,8 +433,9 @@
 		1EFB697020DD3BA0001F5DB6 /* libz.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910C20DD364A00E3317D /* libz.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB697120DD3BB9001F5DB6 /* ccextractor in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1ECB90EF20DD35B200E3317D /* ccextractor */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFE66FF1BE967460083386C /* sparklecast.xml in Resources */ = {isa = PBXBuildFile; fileRef = 1EFE66FE1BE967460083386C /* sparklecast.xml */; };
+		5C98A48C2BE20ED1761FDB9D /* Pods_cTiVo_MAS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */; };
+		6E8C4CEF0E977C1049A1473C /* Pods_cTiVo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */; };
 		94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */ = {isa = PBXBuildFile; fileRef = 94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C332408482B502B2147E60E1 /* Pods_cTiVo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CCA304F39D62E23A1D78C4E6 /* Pods_cTiVo.framework */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
@@ -469,8 +493,94 @@
 		D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */; };
 		D2DFA68F1683C27600CD6CE0 /* MTDownloadCheckTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */; };
 		D2ED1BBB1715C3BF00742F18 /* MTTaskChain.m in Sources */ = {isa = PBXBuildFile; fileRef = D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */; };
-		EC1F7894C78599D8530653FE /* Pods_cTiVo_MAS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CC2BA1E88DE79144B6B5A75 /* Pods_cTiVo_MAS.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1EF4A2C227497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E2B63D462DB7F827C4B11FD51E4F8E2D;
+			remoteInfo = FirebaseCore;
+		};
+		1EF4A2C427497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8CC9178C366942FD6FF6A115604EAD58;
+			remoteInfo = FirebaseCoreDiagnostics;
+		};
+		1EF4A2C627497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 86375444C196BA272DDBB8165BF64A15;
+			remoteInfo = FirebaseCrashlytics;
+		};
+		1EF4A2C827497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 13C8C8B254851998F9289F71229B28A2;
+			remoteInfo = FirebaseInstallations;
+		};
+		1EF4A2CA27497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 856B5CD56F194FAD26EA91620B66D614;
+			remoteInfo = GoogleDataTransport;
+		};
+		1EF4A2CC27497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B43874C6CBB50E7134FBEC24BABFE14F;
+			remoteInfo = GoogleUtilities;
+		};
+		1EF4A2CE27497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 06FC5C9CF96D60C50FCD47D339C91951;
+			remoteInfo = nanopb;
+		};
+		1EF4A2D027497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 005E72C64425F889536DA731391212AB;
+			remoteInfo = "Pods-cTiVo";
+		};
+		1EF4A2D227497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CF746AC22CA043EC4EEAA6DECBFCD4AF;
+			remoteInfo = "Pods-cTiVo MAS";
+		};
+		1EF4A2D427497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3347A1AB6546F0A3977529B8F199DC41;
+			remoteInfo = PromisesObjC;
+		};
+		1EF4A2DB27497F0A00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = A6F770B76B2E88FFA47711E6AF3FD4B4;
+			remoteInfo = "Pods-cTiVo";
+		};
+		1EF4A2DD27497F1100781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = A5A3663D4E22C2D279C554893E4F283E;
+			remoteInfo = "Pods-cTiVo MAS";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		1E50515A22556CC300D5981B /* Copy Executables */ = {
@@ -568,11 +678,8 @@
 				1E5051A822556CC300D5981B /* libuuid.16.dylib in Copy shared libraries for executables */,
 				1E5051A922556CC300D5981B /* libvorbis.0.dylib in Copy shared libraries for executables */,
 				1E5051AA22556CC300D5981B /* libvorbisenc.2.dylib in Copy shared libraries for executables */,
-				1E9165A82373B4BA00847EF0 /* libvpx.6.dylib in Copy shared libraries for executables */,
 				1E5051AC22556CC300D5981B /* libX11-xcb.1.dylib in Copy shared libraries for executables */,
 				1E5051AD22556CC300D5981B /* libX11.6.dylib in Copy shared libraries for executables */,
-				1E9165AA2373B4C800847EF0 /* libx265.179.dylib in Copy shared libraries for executables */,
-				1E9165A92373B4C600847EF0 /* libx264.157.dylib in Copy shared libraries for executables */,
 				1E5051B022556CC300D5981B /* libXau.6.dylib in Copy shared libraries for executables */,
 				1E5051B122556CC300D5981B /* libxcb-render.0.dylib in Copy shared libraries for executables */,
 				1E5051B222556CC300D5981B /* libxcb.1.dylib in Copy shared libraries for executables */,
@@ -601,6 +708,7 @@
 			dstPath = Contents/lib;
 			dstSubfolderSpec = 1;
 			files = (
+				1E5C6FCA2748DC870057541E /* libaom.3.dylib in Copy shared libraries for executables */,
 				1EFB691E20DD3BA0001F5DB6 /* libargtable2.0.dylib in Copy shared libraries for executables */,
 				1EFB691F20DD3BA0001F5DB6 /* libass.9.dylib in Copy shared libraries for executables */,
 				1EFB692020DD3BA0001F5DB6 /* libavcodec.58.dylib in Copy shared libraries for executables */,
@@ -610,15 +718,22 @@
 				1EFB692420DD3BA0001F5DB6 /* libavresample.4.dylib in Copy shared libraries for executables */,
 				1EFB692520DD3BA0001F5DB6 /* libavutil.56.dylib in Copy shared libraries for executables */,
 				1EFB692620DD3BA0001F5DB6 /* libbluray.2.dylib in Copy shared libraries for executables */,
+				1E5C6FCE2748DCC30057541E /* libbrotlicommon.1.dylib in Copy shared libraries for executables */,
+				1E5C6FCF2748DCC50057541E /* libbrotlidec.1.dylib in Copy shared libraries for executables */,
+				1E5C6FD02748DCC90057541E /* libbrotlienc.1.dylib in Copy shared libraries for executables */,
 				1EFB692720DD3BA0001F5DB6 /* libbz2.1.0.dylib in Copy shared libraries for executables */,
 				1EFB692820DD3BA0001F5DB6 /* libcairo.2.dylib in Copy shared libraries for executables */,
 				1E91657C2373AE2700847EF0 /* libcairo-gobject.2.dylib in Copy shared libraries for executables */,
 				1EFB692920DD3BA0001F5DB6 /* libcroco-0.6.3.dylib in Copy shared libraries for executables */,
+				1E5C6FD42748DCFB0057541E /* libcrypto.1.0.0.dylib in Copy shared libraries for executables */,
+				1E5C6FD52748DCFE0057541E /* libcrypto.1.1.dylib in Copy shared libraries for executables */,
+				1E5C6FD62748DD000057541E /* libdav1d.5.dylib in Copy shared libraries for executables */,
 				1EFB692B20DD3BA0001F5DB6 /* libdv.4.dylib in Copy shared libraries for executables */,
 				1EFB692C20DD3BA0001F5DB6 /* libexpat.1.dylib in Copy shared libraries for executables */,
 				1EFB692D20DD3BA0001F5DB6 /* libfaac.0.dylib in Copy shared libraries for executables */,
 				1E6F45482210C137007714E0 /* libfdk-aac.2.dylib in Copy shared libraries for executables */,
 				1EFB692F20DD3BA0001F5DB6 /* libffi.6.dylib in Copy shared libraries for executables */,
+				1E5C6FD82748DD1B0057541E /* libffi.8.dylib in Copy shared libraries for executables */,
 				1EFB693020DD3BA0001F5DB6 /* libfontconfig.1.dylib in Copy shared libraries for executables */,
 				1EFB693120DD3BA0001F5DB6 /* libfreetype.6.dylib in Copy shared libraries for executables */,
 				1EFB693220DD3BA0001F5DB6 /* libfribidi.0.dylib in Copy shared libraries for executables */,
@@ -632,14 +747,19 @@
 				1EFB693A20DD3BA0001F5DB6 /* libgraphite2.3.dylib in Copy shared libraries for executables */,
 				1EFB693B20DD3BA0001F5DB6 /* libgthread-2.0.0.dylib in Copy shared libraries for executables */,
 				1EFB693C20DD3BA0001F5DB6 /* libharfbuzz.0.dylib in Copy shared libraries for executables */,
+				1E5C6FDA2748DD4D0057541E /* libhogweed.4.dylib in Copy shared libraries for executables */,
 				1E9165922373AF2900847EF0 /* libhogweed.5.dylib in Copy shared libraries for executables */,
 				1EFB693E20DD3BA0001F5DB6 /* libiconv.2.dylib in Copy shared libraries for executables */,
-				1E91659B2373AF9400847EF0 /* libicuuc.65.dylib in Copy shared libraries for executables */,
-				1E9165992373AF9400847EF0 /* libicui18n.65.dylib in Copy shared libraries for executables */,
+				1E5C6FDC2748DD740057541E /* libicudata.58.dylib in Copy shared libraries for executables */,
 				1E9165972373AF9400847EF0 /* libicudata.65.dylib in Copy shared libraries for executables */,
+				1E5C6FDF2748DDB00057541E /* libicui18n.58.dylib in Copy shared libraries for executables */,
+				1E9165992373AF9400847EF0 /* libicui18n.65.dylib in Copy shared libraries for executables */,
+				1E5C6FE12748DE030057541E /* libicuuc.58.dylib in Copy shared libraries for executables */,
+				1E91659B2373AF9400847EF0 /* libicuuc.65.dylib in Copy shared libraries for executables */,
 				1EFB693F20DD3BA0001F5DB6 /* libidn2.0.dylib in Copy shared libraries for executables */,
 				1EFB694020DD3BA0001F5DB6 /* libintl.8.dylib in Copy shared libraries for executables */,
 				1EFB694120DD3BA0001F5DB6 /* libjpeg.9.dylib in Copy shared libraries for executables */,
+				1E5C6FE32748DE2B0057541E /* libjxl.0.6.dylib in Copy shared libraries for executables */,
 				1EFB694220DD3BA0001F5DB6 /* liblzma.5.dylib in Copy shared libraries for executables */,
 				1EFB694320DD3BA0001F5DB6 /* liblzo2.2.dylib in Copy shared libraries for executables */,
 				1E9165852373AE6800847EF0 /* libMacportsLegacySupport.dylib in Copy shared libraries for executables */,
@@ -647,6 +767,7 @@
 				1EFB694520DD3BA0001F5DB6 /* libmodplug.1.dylib in Copy shared libraries for executables */,
 				1EFB694620DD3BA0001F5DB6 /* libmp3lame.0.dylib in Copy shared libraries for executables */,
 				1EFB694720DD3BA0001F5DB6 /* libncurses.6.dylib in Copy shared libraries for executables */,
+				1EF4A2B1274974BB00781BDD /* libnettle.6.dylib in Copy shared libraries for executables */,
 				1E91659E2373B04900847EF0 /* libnettle.7.dylib in Copy shared libraries for executables */,
 				1EFB694920DD3BA0001F5DB6 /* libogg.0.dylib in Copy shared libraries for executables */,
 				1EFB694A20DD3BA0001F5DB6 /* libopenjp2.7.dylib in Copy shared libraries for executables */,
@@ -662,8 +783,12 @@
 				1EFB695420DD3BA0001F5DB6 /* librsvg-2.2.dylib in Copy shared libraries for executables */,
 				1EFB695520DD3BA0001F5DB6 /* librtmp.1.dylib in Copy shared libraries for executables */,
 				1EFB695620DD3BA0001F5DB6 /* libSDL2-2.0.0.dylib in Copy shared libraries for executables */,
+				1E5C6FED2748DF930057541E /* libsnappy.1.dylib in Copy shared libraries for executables */,
 				1EFB695720DD3BA0001F5DB6 /* libsoxr.0.dylib in Copy shared libraries for executables */,
 				1EFB695820DD3BA0001F5DB6 /* libspeex.1.dylib in Copy shared libraries for executables */,
+				1E5C6FC82748DC6C0057541E /* libsrt.1.4.dylib in Copy shared libraries for executables */,
+				1E5C6FF02748E0330057541E /* libssl.1.0.0.dylib in Copy shared libraries for executables */,
+				1E5C6FF12748E0370057541E /* libssl.1.1.dylib in Copy shared libraries for executables */,
 				1EFB695A20DD3BA0001F5DB6 /* libswresample.3.dylib in Copy shared libraries for executables */,
 				1EFB695B20DD3BA0001F5DB6 /* libswscale.5.dylib in Copy shared libraries for executables */,
 				1EFB695C20DD3BA0001F5DB6 /* libtasn1.6.dylib in Copy shared libraries for executables */,
@@ -672,21 +797,29 @@
 				1EFB695F20DD3BA0001F5DB6 /* libtwolame.0.dylib in Copy shared libraries for executables */,
 				1EFB696020DD3BA0001F5DB6 /* libunistring.2.dylib in Copy shared libraries for executables */,
 				1EFB696120DD3BA0001F5DB6 /* libuuid.16.dylib in Copy shared libraries for executables */,
+				1E5C6FC32748DBDF0057541E /* libvmaf.1.dylib in Copy shared libraries for executables */,
 				1EFB696220DD3BA0001F5DB6 /* libvorbis.0.dylib in Copy shared libraries for executables */,
 				1EFB696320DD3BA0001F5DB6 /* libvorbisenc.2.dylib in Copy shared libraries for executables */,
-				1E9165802373AE2700847EF0 /* libvpx.6.dylib in Copy shared libraries for executables */,
+				1EF4A2AA2749734900781BDD /* libvpx.5.dylib in Copy shared libraries for executables */,
+				1E5C6FE62748DF180057541E /* libvpx.7.dylib in Copy shared libraries for executables */,
 				1EFB696520DD3BA0001F5DB6 /* libX11-xcb.1.dylib in Copy shared libraries for executables */,
 				1EFB696620DD3BA0001F5DB6 /* libX11.6.dylib in Copy shared libraries for executables */,
-				1E9165822373AE2700847EF0 /* libx265.179.dylib in Copy shared libraries for executables */,
-				1E91657E2373AE2700847EF0 /* libx264.157.dylib in Copy shared libraries for executables */,
+				1EF4A2AC274973B800781BDD /* libx264.152.dylib in Copy shared libraries for executables */,
+				1E5C6FEB2748DF6F0057541E /* libx264.163.dylib in Copy shared libraries for executables */,
+				1EF4A2AE2749741700781BDD /* libx265.169.dylib in Copy shared libraries for executables */,
+				1E5C6FEA2748DF600057541E /* libx265.199.dylib in Copy shared libraries for executables */,
 				1EFB696920DD3BA0001F5DB6 /* libXau.6.dylib in Copy shared libraries for executables */,
 				1EFB696A20DD3BA0001F5DB6 /* libxcb-render.0.dylib in Copy shared libraries for executables */,
+				1E5C6FBF2748DB2C0057541E /* libxcb-shape.0.dylib in Copy shared libraries for executables */,
+				1E5C6FBD2748DAD40057541E /* libxcb-shm.0.dylib in Copy shared libraries for executables */,
+				1E5C6FC12748DBA00057541E /* libxcb-xfixes.0.dylib in Copy shared libraries for executables */,
 				1EFB696B20DD3BA0001F5DB6 /* libxcb.1.dylib in Copy shared libraries for executables */,
 				1EFB696C20DD3BA0001F5DB6 /* libXdmcp.6.dylib in Copy shared libraries for executables */,
 				1EFB696D20DD3BA0001F5DB6 /* libXext.6.dylib in Copy shared libraries for executables */,
 				1EFB696E20DD3BA0001F5DB6 /* libxml2.2.dylib in Copy shared libraries for executables */,
 				1EFB696F20DD3BA0001F5DB6 /* libXrender.1.dylib in Copy shared libraries for executables */,
 				1EFB697020DD3BA0001F5DB6 /* libz.1.dylib in Copy shared libraries for executables */,
+				1E5C6FC62748DC270057541E /* libzimg.2.dylib in Copy shared libraries for executables */,
 			);
 			name = "Copy shared libraries for executables";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -782,6 +915,31 @@
 		1E5BEC5F1F9532320082FA6B /* CrashlyticsLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CrashlyticsLogger.h; sourceTree = "<group>"; };
 		1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CrashlyticsLogger.m; sourceTree = "<group>"; };
 		1E5C5C1A17FDF0B80056E794 /* readme.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme.md; sourceTree = "<group>"; };
+		1E5C6FBC2748DAC40057541E /* libxcb-shm.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libxcb-shm.0.dylib"; sourceTree = "<group>"; };
+		1E5C6FBE2748DB230057541E /* libxcb-shape.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libxcb-shape.0.dylib"; sourceTree = "<group>"; };
+		1E5C6FC02748DB7E0057541E /* libxcb-xfixes.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libxcb-xfixes.0.dylib"; sourceTree = "<group>"; };
+		1E5C6FC22748DBD20057541E /* libvmaf.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libvmaf.1.dylib; sourceTree = "<group>"; };
+		1E5C6FC42748DC120057541E /* libzimg.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libzimg.2.dylib; sourceTree = "<group>"; };
+		1E5C6FC72748DC620057541E /* libsrt.1.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libsrt.1.4.dylib; sourceTree = "<group>"; };
+		1E5C6FC92748DC830057541E /* libaom.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libaom.3.dylib; sourceTree = "<group>"; };
+		1E5C6FCB2748DCB30057541E /* libbrotlicommon.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libbrotlicommon.1.dylib; sourceTree = "<group>"; };
+		1E5C6FCC2748DCB30057541E /* libbrotlidec.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libbrotlidec.1.dylib; sourceTree = "<group>"; };
+		1E5C6FCD2748DCB30057541E /* libbrotlienc.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libbrotlienc.1.dylib; sourceTree = "<group>"; };
+		1E5C6FD12748DCEE0057541E /* libcrypto.1.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcrypto.1.1.dylib; sourceTree = "<group>"; };
+		1E5C6FD22748DCEE0057541E /* libdav1d.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libdav1d.5.dylib; sourceTree = "<group>"; };
+		1E5C6FD32748DCEE0057541E /* libcrypto.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcrypto.1.0.0.dylib; sourceTree = "<group>"; };
+		1E5C6FD72748DD180057541E /* libffi.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libffi.8.dylib; sourceTree = "<group>"; };
+		1E5C6FD92748DD440057541E /* libhogweed.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libhogweed.4.dylib; sourceTree = "<group>"; };
+		1E5C6FDB2748DD6A0057541E /* libicudata.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicudata.58.dylib; sourceTree = "<group>"; };
+		1E5C6FDD2748DD9C0057541E /* libicui18n.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicui18n.58.dylib; sourceTree = "<group>"; };
+		1E5C6FE02748DDFE0057541E /* libicuuc.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicuuc.58.dylib; sourceTree = "<group>"; };
+		1E5C6FE22748DE1C0057541E /* libjxl.0.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libjxl.0.6.dylib; sourceTree = "<group>"; };
+		1E5C6FE42748DED40057541E /* libvpx.7.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libvpx.7.dylib; sourceTree = "<group>"; };
+		1E5C6FE82748DF400057541E /* libx264.163.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libx264.163.dylib; sourceTree = "<group>"; };
+		1E5C6FE92748DF4A0057541E /* libx265.199.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libx265.199.dylib; sourceTree = "<group>"; };
+		1E5C6FEC2748DF8F0057541E /* libsnappy.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libsnappy.1.dylib; sourceTree = "<group>"; };
+		1E5C6FEE2748DFD80057541E /* libssl.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libssl.1.0.0.dylib; sourceTree = "<group>"; };
+		1E5C6FEF2748DFD80057541E /* libssl.1.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libssl.1.1.dylib; sourceTree = "<group>"; };
 		1E61CDB81BB89E6A006D6DBE /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 		1E61CDBC1BB89E91006D6DBE /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		1E684A7516E2C50B000F5C6E /* copyright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = copyright.png; sourceTree = "<group>"; };
@@ -815,9 +973,6 @@
 		1E8E675B20E1E970005465EF /* DDOSLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDOSLogger.h; sourceTree = "<group>"; };
 		1E8E675C20E1E970005465EF /* DDOSLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDOSLogger.m; sourceTree = "<group>"; };
 		1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libcairo-gobject.2.dylib"; sourceTree = "<group>"; };
-		1E9165792373AE2600847EF0 /* libx264.157.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libx264.157.dylib; sourceTree = "<group>"; };
-		1E91657A2373AE2600847EF0 /* libvpx.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libvpx.6.dylib; sourceTree = "<group>"; };
-		1E91657B2373AE2700847EF0 /* libx265.179.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libx265.179.dylib; sourceTree = "<group>"; };
 		1E9165842373AE6700847EF0 /* libMacportsLegacySupport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libMacportsLegacySupport.dylib; sourceTree = "<group>"; };
 		1E9165912373AF2800847EF0 /* libhogweed.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libhogweed.5.dylib; sourceTree = "<group>"; };
 		1E9165942373AF9300847EF0 /* libicudata.65.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libicudata.65.dylib; sourceTree = "<group>"; };
@@ -940,19 +1095,26 @@
 		1EE3AB62201589E500F36731 /* MTWeakTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTWeakTimer.m; sourceTree = "<group>"; };
 		1EEA5CA32509748400E8A277 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "cTiVo/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		1EEA5CA62509753D00E8A277 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		1EF4A2A92749732C00781BDD /* libvpx.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libvpx.5.dylib; sourceTree = "<group>"; };
+		1EF4A2AB274973AE00781BDD /* libx264.152.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libx264.152.dylib; sourceTree = "<group>"; };
+		1EF4A2AD2749741100781BDD /* libx265.169.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libx265.169.dylib; sourceTree = "<group>"; };
+		1EF4A2AF2749744900781BDD /* libncurses.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libncurses.6.dylib; sourceTree = "<group>"; };
+		1EF4A2B0274974A100781BDD /* libnettle.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libnettle.6.dylib; sourceTree = "<group>"; };
+		1EF4A2B227497E1A00781BDD /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Pods.xcodeproj; sourceTree = "<group>"; };
+		1EF4A2D627497ED300781BDD /* Podfile.lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile.lock; sourceTree = SOURCE_ROOT; };
 		1EFA8D4D211A659D00B4505D /* cTiVo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = cTiVo.entitlements; sourceTree = "<group>"; };
 		1EFA8D4F211BFF6900B4505D /* MTChannelPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTChannelPopUpButton.m; sourceTree = "<group>"; };
 		1EFA8D50211BFF6900B4505D /* MTChannelPopUpTableCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTChannelPopUpTableCellView.h; sourceTree = "<group>"; };
 		1EFA8D51211BFF6900B4505D /* MTChannelPopUpTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTChannelPopUpTableCellView.m; sourceTree = "<group>"; };
 		1EFA8D52211BFF6900B4505D /* MTChannelPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTChannelPopUpButton.h; sourceTree = "<group>"; };
 		1EFE66FE1BE967460083386C /* sparklecast.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sparklecast.xml; sourceTree = "<group>"; };
-		801DA2E1E1E61F64137AAE1C /* Pods-cTiVo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.debug.xcconfig"; sourceTree = "<group>"; };
-		8C6C395766D9437F74C86B8B /* Pods-cTiVo MAS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.debug.xcconfig"; sourceTree = "<group>"; };
-		8CC2BA1E88DE79144B6B5A75 /* Pods_cTiVo_MAS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo_MAS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DF8F749F3C5B1F6B81F9788 /* Pods-cTiVo MAS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.debug.xcconfig"; sourceTree = "<group>"; };
+		429447CEECD67FFF7A25125F /* Pods-cTiVo MAS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.release.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.release.xcconfig"; sourceTree = "<group>"; };
+		7AA8CE2ABFE88C1DF334192C /* Pods-cTiVo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.debug.xcconfig"; sourceTree = "<group>"; };
 		94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ffmpeg_edl_ac3.sh; sourceTree = "<group>"; };
-		A239E68EF0736EBD500BA435 /* Pods-cTiVo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.release.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.release.xcconfig"; sourceTree = "<group>"; };
-		BAC83CFDDA8DC1E681A47583 /* Pods-cTiVo MAS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.release.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.release.xcconfig"; sourceTree = "<group>"; };
-		CCA304F39D62E23A1D78C4E6 /* Pods_cTiVo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo_MAS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2001C211704F93F00B75D9C /* MTSrt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTSrt.h; sourceTree = "<group>"; };
 		D2001C221704F93F00B75D9C /* MTSrt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSrt.m; sourceTree = "<group>"; };
 		D2001C231704F93F00B75D9C /* MTEdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTEdl.h; sourceTree = "<group>"; };
@@ -1061,6 +1223,7 @@
 		D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadCheckTableCell.m; sourceTree = "<group>"; };
 		D2ED1BB91715C3BF00742F18 /* MTTaskChain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTaskChain.h; sourceTree = "<group>"; };
 		D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTaskChain.m; sourceTree = "<group>"; };
+		EAE15DEB65D37EC5642217B1 /* Pods-cTiVo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.release.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1079,7 +1242,7 @@
 				1E50511422556CC300D5981B /* Cocoa.framework in Frameworks */,
 				1E50511622556CC300D5981B /* libmp4v2.a in Frameworks */,
 				1E40C48E251D4FE7004BCC38 /* CoreData.framework in Frameworks */,
-				EC1F7894C78599D8530653FE /* Pods_cTiVo_MAS.framework in Frameworks */,
+				5C98A48C2BE20ED1761FDB9D /* Pods_cTiVo_MAS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1098,7 +1261,7 @@
 				D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */,
 				D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */,
 				1E81D3171BE9477200321370 /* Sparkle.framework in Frameworks */,
-				C332408482B502B2147E60E1 /* Pods_cTiVo.framework in Frameworks */,
+				6E8C4CEF0E977C1049A1473C /* Pods_cTiVo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1130,6 +1293,7 @@
 		1E557B8C1CD127E90014D85B /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				1E5C6FC92748DC830057541E /* libaom.3.dylib */,
 				1ECB90F320DD364800E3317D /* libargtable2.0.dylib */,
 				1ECB912E20DD364F00E3317D /* libass.9.dylib */,
 				1ECB90FC20DD364800E3317D /* libavcodec.58.dylib */,
@@ -1139,15 +1303,22 @@
 				1ECB910920DD364A00E3317D /* libavresample.4.dylib */,
 				1ECB913320DD364F00E3317D /* libavutil.56.dylib */,
 				1ECB911920DD364C00E3317D /* libbluray.2.dylib */,
+				1E5C6FCB2748DCB30057541E /* libbrotlicommon.1.dylib */,
+				1E5C6FCC2748DCB30057541E /* libbrotlidec.1.dylib */,
+				1E5C6FCD2748DCB30057541E /* libbrotlienc.1.dylib */,
 				1ECB912C20DD364E00E3317D /* libbz2.1.0.dylib */,
 				1ECB910B20DD364A00E3317D /* libcairo.2.dylib */,
 				1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */,
 				1ECB90F020DD364700E3317D /* libcroco-0.6.3.dylib */,
+				1E5C6FD32748DCEE0057541E /* libcrypto.1.0.0.dylib */,
+				1E5C6FD12748DCEE0057541E /* libcrypto.1.1.dylib */,
+				1E5C6FD22748DCEE0057541E /* libdav1d.5.dylib */,
 				1ECB912F20DD364F00E3317D /* libdv.4.dylib */,
 				1ECB913C20DD365000E3317D /* libexpat.1.dylib */,
 				1ECB912320DD364D00E3317D /* libfaac.0.dylib */,
 				1E6F45472210C135007714E0 /* libfdk-aac.2.dylib */,
 				1ECB910F20DD364B00E3317D /* libffi.6.dylib */,
+				1E5C6FD72748DD180057541E /* libffi.8.dylib */,
 				1ECB911B20DD364C00E3317D /* libfontconfig.1.dylib */,
 				1ECB90FA20DD364800E3317D /* libfreetype.6.dylib */,
 				1ECB912920DD364E00E3317D /* libfribidi.0.dylib */,
@@ -1161,14 +1332,19 @@
 				1ECB913520DD365000E3317D /* libgraphite2.3.dylib */,
 				1ECB90F420DD364800E3317D /* libgthread-2.0.0.dylib */,
 				1ECB90F920DD364800E3317D /* libharfbuzz.0.dylib */,
+				1E5C6FD92748DD440057541E /* libhogweed.4.dylib */,
 				1E9165912373AF2800847EF0 /* libhogweed.5.dylib */,
 				1ECB911820DD364C00E3317D /* libiconv.2.dylib */,
+				1E5C6FDB2748DD6A0057541E /* libicudata.58.dylib */,
 				1E9165942373AF9300847EF0 /* libicudata.65.dylib */,
+				1E5C6FDD2748DD9C0057541E /* libicui18n.58.dylib */,
 				1E9165952373AF9300847EF0 /* libicui18n.65.dylib */,
+				1E5C6FE02748DDFE0057541E /* libicuuc.58.dylib */,
 				1E9165962373AF9400847EF0 /* libicuuc.65.dylib */,
 				1ECB913920DD365000E3317D /* libidn2.0.dylib */,
 				1ECB911020DD364B00E3317D /* libintl.8.dylib */,
 				1ECB912020DD364D00E3317D /* libjpeg.9.dylib */,
+				1E5C6FE22748DE1C0057541E /* libjxl.0.6.dylib */,
 				1ECB913D20DD365100E3317D /* liblzma.5.dylib */,
 				1ECB912D20DD364F00E3317D /* liblzo2.2.dylib */,
 				1E9165842373AE6700847EF0 /* libMacportsLegacySupport.dylib */,
@@ -1176,6 +1352,8 @@
 				1ECB910220DD364900E3317D /* libmodplug.1.dylib */,
 				1ECB911120DD364B00E3317D /* libmp3lame.0.dylib */,
 				1ECB911E20DD364D00E3317D /* libncurses.6.dylib */,
+				1EF4A2AF2749744900781BDD /* libncurses.6.dylib */,
+				1EF4A2B0274974A100781BDD /* libnettle.6.dylib */,
 				1E91659D2373B04900847EF0 /* libnettle.7.dylib */,
 				1ECB911520DD364B00E3317D /* libogg.0.dylib */,
 				1ECB911C20DD364C00E3317D /* libopenjp2.7.dylib */,
@@ -1191,8 +1369,12 @@
 				1ECB911D20DD364C00E3317D /* librsvg-2.2.dylib */,
 				1ECB913220DD364F00E3317D /* librtmp.1.dylib */,
 				1ECB913E20DD365100E3317D /* libSDL2-2.0.0.dylib */,
+				1E5C6FEC2748DF8F0057541E /* libsnappy.1.dylib */,
 				1ECB913620DD365000E3317D /* libsoxr.0.dylib */,
 				1ECB911A20DD364C00E3317D /* libspeex.1.dylib */,
+				1E5C6FC72748DC620057541E /* libsrt.1.4.dylib */,
+				1E5C6FEE2748DFD80057541E /* libssl.1.0.0.dylib */,
+				1E5C6FEF2748DFD80057541E /* libssl.1.1.dylib */,
 				1ECB910020DD364900E3317D /* libswresample.3.dylib */,
 				1ECB913A20DD365000E3317D /* libswscale.5.dylib */,
 				1ECB90F620DD364800E3317D /* libtasn1.6.dylib */,
@@ -1201,21 +1383,29 @@
 				1ECB911F20DD364D00E3317D /* libtwolame.0.dylib */,
 				1ECB911220DD364B00E3317D /* libunistring.2.dylib */,
 				1ECB913F20DD365100E3317D /* libuuid.16.dylib */,
+				1E5C6FC22748DBD20057541E /* libvmaf.1.dylib */,
 				1ECB90FF20DD364900E3317D /* libvorbis.0.dylib */,
 				1ECB90F120DD364800E3317D /* libvorbisenc.2.dylib */,
-				1E91657A2373AE2600847EF0 /* libvpx.6.dylib */,
+				1EF4A2A92749732C00781BDD /* libvpx.5.dylib */,
+				1E5C6FE42748DED40057541E /* libvpx.7.dylib */,
 				1ECB912B20DD364E00E3317D /* libX11-xcb.1.dylib */,
 				1ECB914020DD365100E3317D /* libX11.6.dylib */,
-				1E9165792373AE2600847EF0 /* libx264.157.dylib */,
-				1E91657B2373AE2700847EF0 /* libx265.179.dylib */,
+				1EF4A2AB274973AE00781BDD /* libx264.152.dylib */,
+				1E5C6FE82748DF400057541E /* libx264.163.dylib */,
+				1EF4A2AD2749741100781BDD /* libx265.169.dylib */,
+				1E5C6FE92748DF4A0057541E /* libx265.199.dylib */,
 				1ECB910420DD364900E3317D /* libXau.6.dylib */,
 				1ECB913B20DD365000E3317D /* libxcb-render.0.dylib */,
+				1E5C6FBE2748DB230057541E /* libxcb-shape.0.dylib */,
+				1E5C6FBC2748DAC40057541E /* libxcb-shm.0.dylib */,
+				1E5C6FC02748DB7E0057541E /* libxcb-xfixes.0.dylib */,
 				1ECB912520DD364D00E3317D /* libxcb.1.dylib */,
 				1ECB90F520DD364800E3317D /* libXdmcp.6.dylib */,
 				1ECB90F220DD364800E3317D /* libXext.6.dylib */,
 				1ECB912820DD364E00E3317D /* libxml2.2.dylib */,
 				1ECB912620DD364E00E3317D /* libXrender.1.dylib */,
 				1ECB910C20DD364A00E3317D /* libz.1.dylib */,
+				1E5C6FC42748DC120057541E /* libzimg.2.dylib */,
 			);
 			path = lib;
 			sourceTree = "<group>";
@@ -1342,13 +1532,33 @@
 			name = "UI Classes- Format Edit";
 			sourceTree = "<group>";
 		};
+		1EF4A2B427497ECB00781BDD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EF4A2C327497ECB00781BDD /* FirebaseCore */,
+				1EF4A2C527497ECB00781BDD /* FirebaseCoreDiagnostics */,
+				1EF4A2C727497ECB00781BDD /* FirebaseCrashlytics */,
+				1EF4A2C927497ECB00781BDD /* FirebaseInstallations */,
+				1EF4A2CB27497ECB00781BDD /* GoogleDataTransport */,
+				1EF4A2CD27497ECB00781BDD /* GoogleUtilities */,
+				1EF4A2CF27497ECB00781BDD /* nanopb */,
+				1EF4A2D127497ECB00781BDD /* Pods-cTiVo */,
+				1EF4A2D327497ECB00781BDD /* Pods-cTiVo MAS */,
+				1EF4A2D527497ECB00781BDD /* PromisesObjC */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		66073F09C9423674FE368EAB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				801DA2E1E1E61F64137AAE1C /* Pods-cTiVo.debug.xcconfig */,
-				A239E68EF0736EBD500BA435 /* Pods-cTiVo.release.xcconfig */,
-				8C6C395766D9437F74C86B8B /* Pods-cTiVo MAS.debug.xcconfig */,
-				BAC83CFDDA8DC1E681A47583 /* Pods-cTiVo MAS.release.xcconfig */,
+				1EF4A2B227497E1A00781BDD /* Podfile */,
+				1EF4A2D627497ED300781BDD /* Podfile.lock */,
+				1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */,
+				7AA8CE2ABFE88C1DF334192C /* Pods-cTiVo.debug.xcconfig */,
+				EAE15DEB65D37EC5642217B1 /* Pods-cTiVo.release.xcconfig */,
+				3DF8F749F3C5B1F6B81F9788 /* Pods-cTiVo MAS.debug.xcconfig */,
+				429447CEECD67FFF7A25125F /* Pods-cTiVo MAS.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -1468,8 +1678,8 @@
 				D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */,
 				D2D60BA116766EFD00CE32DE /* Cocoa.framework */,
 				D2D60BA316766EFD00CE32DE /* Other Frameworks */,
-				CCA304F39D62E23A1D78C4E6 /* Pods_cTiVo.framework */,
-				8CC2BA1E88DE79144B6B5A75 /* Pods_cTiVo_MAS.framework */,
+				B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */,
+				96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1659,7 +1869,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1E5051BD22556CC300D5981B /* Build configuration list for PBXNativeTarget "cTiVo MAS" */;
 			buildPhases = (
-				51482D619FF16505DA2A1A16 /* [CP] Check Pods Manifest.lock */,
+				C26ACD59705BFC0B62946A8E /* [CP] Check Pods Manifest.lock */,
 				1E5050CB22556CC300D5981B /* Sources */,
 				1E50510C22556CC300D5981B /* Frameworks */,
 				1E50511922556CC300D5981B /* Resources */,
@@ -1669,11 +1879,12 @@
 				1E5051BC22556CC300D5981B /* Sign Executables */,
 				1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */,
 				1E5051BB22556CC300D5981B /* Initialize Crashlytics */,
-				079F28CDDA8A03352E11553C /* [CP] Embed Pods Frameworks */,
+				9027C4642EF378D0DCEE7A6F /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1EF4A2DE27497F1100781BDD /* PBXTargetDependency */,
 			);
 			name = "cTiVo MAS";
 			productName = cTiVo;
@@ -1684,7 +1895,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
 			buildPhases = (
-				9A0F30BE59A571CA7B147F72 /* [CP] Check Pods Manifest.lock */,
+				CEF4B635136BBCE1480DEAEC /* [CP] Check Pods Manifest.lock */,
 				D2D60B9916766EFD00CE32DE /* Sources */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
@@ -1694,11 +1905,12 @@
 				D2AA030A1833F09B00AEE326 /* Sign Sparkle */,
 				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				1E3557132519BDB3004AF628 /* Initialize Crashlytics */,
-				5CE4E1725F6D5B91BBB7F57F /* [CP] Embed Pods Frameworks */,
+				B20147B2778BB3F422CC2B77 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1EF4A2DC27497F0A00781BDD /* PBXTargetDependency */,
 			);
 			name = cTiVo;
 			productName = cTiVo;
@@ -1742,6 +1954,12 @@
 			mainGroup = D2D60B9216766EFD00CE32DE;
 			productRefGroup = D2D60B9E16766EFD00CE32DE /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1EF4A2B427497ECB00781BDD /* Products */;
+					ProjectRef = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				D2D60B9C16766EFD00CE32DE /* cTiVo */,
@@ -1749,6 +1967,88 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		1EF4A2C327497ECB00781BDD /* FirebaseCore */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = FirebaseCore;
+			path = FirebaseCore.framework;
+			remoteRef = 1EF4A2C227497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF4A2C527497ECB00781BDD /* FirebaseCoreDiagnostics */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = FirebaseCoreDiagnostics;
+			path = FirebaseCoreDiagnostics.framework;
+			remoteRef = 1EF4A2C427497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF4A2C727497ECB00781BDD /* FirebaseCrashlytics */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = FirebaseCrashlytics;
+			path = FirebaseCrashlytics.framework;
+			remoteRef = 1EF4A2C627497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF4A2C927497ECB00781BDD /* FirebaseInstallations */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = FirebaseInstallations;
+			path = FirebaseInstallations.framework;
+			remoteRef = 1EF4A2C827497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF4A2CB27497ECB00781BDD /* GoogleDataTransport */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = GoogleDataTransport;
+			path = GoogleDataTransport.framework;
+			remoteRef = 1EF4A2CA27497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF4A2CD27497ECB00781BDD /* GoogleUtilities */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = GoogleUtilities;
+			path = GoogleUtilities.framework;
+			remoteRef = 1EF4A2CC27497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF4A2CF27497ECB00781BDD /* nanopb */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = nanopb;
+			path = nanopb.framework;
+			remoteRef = 1EF4A2CE27497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF4A2D127497ECB00781BDD /* Pods-cTiVo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Pods_cTiVo.framework;
+			remoteRef = 1EF4A2D027497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF4A2D327497ECB00781BDD /* Pods-cTiVo MAS */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = "Pods-cTiVo MAS";
+			path = Pods_cTiVo_MAS.framework;
+			remoteRef = 1EF4A2D227497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF4A2D527497ECB00781BDD /* PromisesObjC */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = PromisesObjC;
+			path = FBLPromises.framework;
+			remoteRef = 1EF4A2D427497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1E50511922556CC300D5981B /* Resources */ = {
@@ -1895,23 +2195,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		079F28CDDA8A03352E11553C /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		1E3557132519BDB3004AF628 /* Initialize Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1980,7 +2263,41 @@
 			shellPath = /bin/sh;
 			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${EXECUTABLE_FOLDER_PATH}\"\nENTITLEMENT=\"$SRCROOT/cTiVo/binary.entitlements\"\n# By default, use the configured code signing identity for the project/target\nIDENTITY=\"${CODE_SIGN_IDENTITY}\"\nDEVIDENTITY=\"Developer ID Application\"\necho $IDENTITY \"==>\" $DEVIDENTITY\nIDENTITY=\"${DEVIDENTITY}\"\necho $IDENTITY \" from \" $DEVIDENTITY\ncat \"$ENTITLEMENT\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/HandBrakeCLI\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/tivodecode-ng\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/comskip\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/ffmpeg\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/ccextractor\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/mencoder\"\n";
 		};
-		51482D619FF16505DA2A1A16 /* [CP] Check Pods Manifest.lock */ = {
+		9027C4642EF378D0DCEE7A6F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B20147B2778BB3F422CC2B77 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C26ACD59705BFC0B62946A8E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2002,24 +2319,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		5CE4E1725F6D5B91BBB7F57F /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9A0F30BE59A571CA7B147F72 /* [CP] Check Pods Manifest.lock */ = {
+		CEF4B635136BBCE1480DEAEC /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2215,6 +2515,19 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		1EF4A2DC27497F0A00781BDD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Pods-cTiVo";
+			targetProxy = 1EF4A2DB27497F0A00781BDD /* PBXContainerItemProxy */;
+		};
+		1EF4A2DE27497F1100781BDD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Pods-cTiVo MAS";
+			targetProxy = 1EF4A2DD27497F1100781BDD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
 		1E84895E2314B1DB00D56756 /* cTVMainMenu.xib */ = {
 			isa = PBXVariantGroup;
@@ -2253,7 +2566,7 @@
 /* Begin XCBuildConfiguration section */
 		1E5051BE22556CC300D5981B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8C6C395766D9437F74C86B8B /* Pods-cTiVo MAS.debug.xcconfig */;
+			baseConfigurationReference = 3DF8F749F3C5B1F6B81F9788 /* Pods-cTiVo MAS.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -2293,7 +2606,7 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MARKETING_VERSION = 3.4.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVo;
 				PRODUCT_NAME = cTV;
@@ -2305,7 +2618,7 @@
 		};
 		1E5051BF22556CC300D5981B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BAC83CFDDA8DC1E681A47583 /* Pods-cTiVo MAS.release.xcconfig */;
+			baseConfigurationReference = 429447CEECD67FFF7A25125F /* Pods-cTiVo MAS.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -2344,7 +2657,7 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MARKETING_VERSION = 3.4.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVo;
 				PRODUCT_NAME = cTV;
@@ -2409,8 +2722,8 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				ONLY_ACTIVE_ARCH = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CFLAGS = (
 					"-Wall",
 					"-Wextra",
@@ -2472,7 +2785,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = (
 					"-Wall",
 					"-Wextra",
@@ -2488,10 +2801,10 @@
 		};
 		D2D60BBC16766EFD00CE32DE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 801DA2E1E1E61F64137AAE1C /* Pods-cTiVo.debug.xcconfig */;
+			baseConfigurationReference = 7AA8CE2ABFE88C1DF334192C /* Pods-cTiVo.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = x86_64;
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
@@ -2526,8 +2839,9 @@
 					"$(PROJECT_DIR)/cTiVo/cTiVoBinaries/lib",
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 3.4.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MARKETING_VERSION = 3.5.0;
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -2538,10 +2852,10 @@
 		};
 		D2D60BBD16766EFD00CE32DE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A239E68EF0736EBD500BA435 /* Pods-cTiVo.release.xcconfig */;
+			baseConfigurationReference = EAE15DEB65D37EC5642217B1 /* Pods-cTiVo.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = x86_64;
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
@@ -2576,8 +2890,8 @@
 					"$(PROJECT_DIR)/cTiVo/cTiVoBinaries/lib",
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9/",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 3.4.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MARKETING_VERSION = 3.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

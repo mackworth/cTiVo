@@ -905,7 +905,7 @@ __DDLOGHERE__
 	__weak __typeof__(self) weakSelf = self;
 	NSString * errFilePath = mpegTask.errorFilePath ;
 	mpegTask.cleanupHandler = ^(){
-		__typeof__(self) strongSelf = weakSelf;
+		__typeof__(self) strongSelf = weakSelf;    if (!strongSelf) return;
 		if (! [[NSFileManager defaultManager] fileExistsAtPath:errFilePath] ) {
 			if (!strongSelf.isCanceled) DDLogReport(@"Warning: %@: File %@ not found after mpegTask completion", strongSelf, errFilePath );
 			return;
@@ -1133,7 +1133,7 @@ __DDLOGHERE__
 	__weak __typeof__(self) weakSelf = self;
 
     encodeTask.completionHandler = ^BOOL(){
-		__typeof__(self) strongSelf = weakSelf;
+      __typeof__(self) strongSelf = weakSelf;    if (!strongSelf) return NO;
         if (! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.tempEncodeFilePath] ) {
             DDLogReport(@" %@ encoding complete, but the video file not found: %@ ",strongSelf, strongSelf.tempEncodeFilePath );
             return NO;
@@ -1256,7 +1256,7 @@ __DDLOGHERE__
             __block NSPipe *encodePipe = [NSPipe new];
 			[encodeTask setStandardInput:encodePipe]; ///XXX maybe delete;
             encodeTask.startupHandler = ^BOOL(){
-				__typeof__(self) strongSelf = weakSelf;
+                __typeof__(self) strongSelf = weakSelf;    if (!strongSelf) return NO;
                 if ([strongSelf isCompleteCTiVoFile:self.tempEncodeFilePath forFileType:@"Encoded"]){
                     return NO;
                 }
@@ -1416,7 +1416,7 @@ __DDLOGHERE__
     };
     
     captionTask.cleanupHandler = ^(){
-		__typeof__(self) strongSelf = weakSelf;
+      __typeof__(self) strongSelf = weakSelf; if (!strongSelf) return;
 		if (strongSelf.isCanceled) {
 			if (![[NSUserDefaults standardUserDefaults] boolForKey:kMTSaveTmpFiles]) {
 				if ([[NSFileManager defaultManager] fileExistsAtPath:strongSelf.tempCaptionFilePath]) {
@@ -1546,7 +1546,7 @@ __DDLOGHERE__
 	__weak __typeof__(MTTask *) weakCaption = _captionTask;
 
 	commercialTask.completionHandler = ^BOOL{
-		__typeof__(self) strongSelf = weakSelf;
+    __typeof__(self) strongSelf = weakSelf; if (!strongSelf) return NO;
 		if (!strongSelf.isCanceled && ! [[NSFileManager defaultManager] fileExistsAtPath:strongSelf.commercialFilePath] ) {
 			DDLogMajor(@"Warning: %@: File %@ not found after comskip completion", strongSelf, strongSelf.commercialFilePath );
 			return NO;
@@ -2104,20 +2104,20 @@ __DDLOGHERE__
 	if (self.addToiTunesWhenEncoded) {
 		self.downloadStatus = @(kMTStatusAddingToItunes);
 		DDLogMajor(@"Adding to iTunes %@", self);
-		__weak __typeof__(self) weakSelf = self;
-		dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+		__weak __typeof__(self) weakSelf = self;		dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+      __typeof__(self) strongSelf1 = weakSelf; if (!strongSelf1) return;
 			MTiTunes *iTunes = [[MTiTunes alloc] init];
-			NSString * iTunesPath = [iTunes importIntoiTunes:weakSelf withArt:weakSelf.show.artWorkImage] ;
-			NSString * path = weakSelf.encodeFilePath;
+			NSString * iTunesPath = [iTunes importIntoiTunes:strongSelf1 withArt:weakSelf.show.artWorkImage] ;
+			NSString * path = strongSelf1.encodeFilePath;
 			if (!iTunesPath) {
-				DDLogMajor(@"Nil from iTunes; problem adding %@ at %@?", weakSelf, path);
+				DDLogMajor(@"Nil from iTunes; problem adding %@ at %@?", strongSelf1, path);
 			} else if ( [iTunesPath isEqualToString: path]) {
-				DDLogMajor(@"Added %@ to iTunes at %@", self, path);
+				DDLogMajor(@"Added %@ to iTunes at %@", strongSelf1, path);
 			} else {
-				DDLogMajor(@"Copied %@ to iTunes from %@ to %@", weakSelf, path, iTunesPath);
+				DDLogMajor(@"Copied %@ to iTunes from %@ to %@", strongSelf1, path, iTunesPath);
 			}
 			dispatch_async(dispatch_get_main_queue(), ^{
-				__typeof__(self) strongSelf = weakSelf;
+        __typeof__(self) strongSelf = weakSelf; if (!strongSelf) return;
 				if (iTunesPath && ![iTunesPath isEqualToString: strongSelf.encodeFilePath]) {
 					//apparently iTunes created new file
 					if ([[NSUserDefaults standardUserDefaults] boolForKey:kMTiTunesDelete ]) {
@@ -2157,7 +2157,7 @@ __DDLOGHERE__
 	NSInteger retries = ([[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries] - self.numRetriesRemaining) ;
 	NSString * retryString = [NSString stringWithFormat:@"%d",(int) retries];
 
-	[MSAnalytics trackEvent:@"Success"
+	[MSACAnalytics trackEvent:@"Success"
 		withProperties:@{@"Format" : self.encodeFormat.name,
 						@"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
 						@"Retries" : retryString }];
@@ -2526,7 +2526,7 @@ __DDLOGHERE__
             self.downloadStatus = @(kMTStatusFailed);
             self.processProgress = 1.0;
 #ifndef DEBUG
-	[MSAnalytics trackEvent:@"Failure"
+	[MSACAnalytics trackEvent:@"Failure"
 		withProperties:@{@"Format" : self.encodeFormat.name,
 						@"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]
 						}];
@@ -2542,7 +2542,7 @@ __DDLOGHERE__
 				self.numRetriesRemaining--;
                 [self notifyUserWithTitle:@"TiVo show failed" subTitle:@"Retrying" ];
 #ifndef DEBUG
-	[MSAnalytics trackEvent:@"Retry"
+	[MSACAnalytics trackEvent:@"Retry"
 		withProperties:@{@"Format" : self.encodeFormat.name,
 						@"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]
 						}];

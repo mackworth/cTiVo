@@ -169,8 +169,8 @@ void signalHandler(int signal)
 #ifndef DEBUG
     if (![defaults boolForKey:kMTCrashlyticsOptOut]) {
 		[FIRApp configure];
-		[MSAppCenter start:@"d25a8abd-34c7-4be0-b7cc-94a186e1c5c5" withServices:@[
-		[MSAnalytics class],
+		[MSACAppCenter start:@"d25a8abd-34c7-4be0-b7cc-94a186e1c5c5" withServices:@[
+		[MSACAnalytics class],
 	]];
     }
 #ifndef MAC_APP_STORE
