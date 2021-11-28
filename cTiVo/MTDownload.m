@@ -1426,7 +1426,13 @@ __DDLOGHERE__
 				strongSelf.captionFilePath = nil;
 			}
 		} else if (weakCaption.taskFailed) {
-            [strongSelf notifyUserWithTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" ];
+            NSString * log = [NSString stringWithEndOfFile: weakCaption.logFilePath ];
+            if (!strongSelf.useTransportStream.boolValue && [log contains: @"(0 frames at"]) { //ccextractor reporting no video found
+                DDLogReport(@"Captions found no Video in PS stream; switching to TS");
+                [strongSelf handleNewTSChannel];
+            } else {
+                [strongSelf notifyUserWithTitle:@"Detecting Captions Failed" subTitle:@"Not including captions" ];
+            }
         }
 		if (strongSelf.taskFlowType == kMTTaskFlowSimuSubtitles &&
 			strongSelf->_encodeTask.successfulExit) {

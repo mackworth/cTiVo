@@ -82,7 +82,7 @@
     [logHandle seekToFileOffset:(logFileSize-numBytes)];
     NSData *tailOfFile = [logHandle readDataOfLength:numBytes];
     if (tailOfFile.length == 0) return @"";
-    NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSUTF8StringEncoding];
+    NSString * logString = [[NSString alloc] initWithData:tailOfFile encoding:NSASCIIStringEncoding]; //NSUTF8StringEncoding fails due to reporting junk
     return  logString;
 
 }
