@@ -672,19 +672,27 @@ __DDLOGHERE__
 			if ( [self isItemExpanded:folderHolder]) {
 				return result; //no icon when expanded
 			} else {
-				NSString * commonName =  nil;
+				MTTiVoShow * sampleShow = nil;
 				for (MTTiVoShow * show in folderHolder.folder) {
 					NSString * imageName = show.imageString;
-					if (!commonName) {
-						commonName = imageName ; //remember first one
-					} else if (!imageName || ![imageName isEqualToString:commonName]){
-						//not all the show are the same.
-						commonName = nil;
+					if (imageName) {
+						if ([imageName isEqualToString:@"in-progress-recording"] ) {
+							//any shows recording => mark folder as recording
+							sampleShow = show;
+							break;
+						} else if (!sampleShow) {
+							sampleShow = show; //remember first one
+						} else if (![imageName isEqualToString:sampleShow.imageString]){
+							sampleShow = nil; //two different non-recording icons => no icon
+							break;
+						}
+					} else {
+						sampleShow = nil; //any icons missing +> no icon
 						break;
 					}
 				}
-				if (commonName) {
-					return [self configureIconCell: result forShow: folderHolder.folder[0] withWidth: tableColumn.width];
+				if (sampleShow) { //all the same or recording
+					return [self configureIconCell: result forShow: sampleShow withWidth: tableColumn.width];
 				} else {
 					return result;
 				}
