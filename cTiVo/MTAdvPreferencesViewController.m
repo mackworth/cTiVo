@@ -331,8 +331,8 @@
 }
 
 -(BOOL) javaInstalled {
-	NSString *javaOutput = [NSTask runProgram:@"/usr/libexec/java_home" withArguments:@[]];
-    return ![javaOutput hasPrefix:@"Unable"];
+	NSString *javaOutput = [NSTask runProgram:@"/usr/bin/java" withArguments:@[@"-version"]];
+    return !([javaOutput containsString:@"No Java"] || [javaOutput containsString:@"Unable to locate"]);
 }
 
 -(IBAction) help:(id)sender {
