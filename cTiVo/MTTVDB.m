@@ -311,8 +311,10 @@ static BOOL inProgress = NO;
                 NSDictionary *jsonData = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error: &jsonError];
                 if (!jsonError && [jsonData isKindOfClass:[NSDictionary class]]) {
                     if (!jsonData[@"error"]) {
-                        DDLogVerbose(@"TVDB Episode JSON: %@", jsonData);
-                        nextPage = jsonData[@"links"][@"next"];
+                      DDLogVerbose(@"TVDB Episode JSON: %@", jsonData);
+                      NSDictionary * links = jsonData[@"links"];
+                      if ([links class] == [NSDictionary class]) {
+                        nextPage = links[@"next"];
                         NSArray * episodeList = jsonData[@"data"];
                         if ([episodeList isKindOfClass:[NSArray class]]) {
                             for (NSDictionary * episodeDict in episodeList) {
@@ -350,6 +352,9 @@ static BOOL inProgress = NO;
                         } else {
                             DDLogReport(@"TVDB Episode JSON type Error (should be Array): %@ for %@", episodeList, seriesID);
                         }
+                      } else {
+                        DDLogReport(@"TVDB Episode JSON type Error (no links data): %@ for %@", seriesID, episodeURL );
+                      }
                     } else {
                         DDLogDetail(@"TVDB error for %@: %@", seriesID, jsonData[@"error"]);
                     }
