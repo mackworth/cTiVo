@@ -40,7 +40,7 @@
 	<key>NSAppleEventsUsageDescription</key>
 	<string>cTiVo needs access to be able to add TV Shows and Movies (and ImageEvents to send notices).</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2020 Scott Buchanan and Hugh Mackworth. All rights reserved.</string>
+	<string>Copyright © 2022 Scott Buchanan and Hugh Mackworth. All rights reserved.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

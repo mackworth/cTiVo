@@ -1,3 +1,17 @@
+# Release 3.5.1: TVDB patch
+* Fixes crash that can occur if TVDB sends invalid data
+
+# Release 3.5.0: Universal Version
+* Fully suppport Apple Silicon
+* Blue icons instead of Yellow to match newer TiVo style; still uses ! to indicate potential imminent deletion.
+* Minor fixes:
+    * Allows Quit while asking for a missing disk in case an external disk is temporarily not present.
+    * Different (hopefully better) test for Java presence for TiVoLibre.
+    * Folder with any recordings in progress now shows recording icon to match TiVo's style.
+
+# Release 3.4.3: Certificate
+* Updates the certificate needed to talk to the TiVo using RPC until 12/22
+
 # Release 3.4.2: Maintenance Release
 * Migration from Google Fabric to Firebase Crashlytics and Microsoft AppCenter 
 * Big Sur compatibility
