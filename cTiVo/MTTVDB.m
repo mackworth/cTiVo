@@ -313,7 +313,7 @@ static BOOL inProgress = NO;
                     if (!jsonData[@"error"]) {
                       DDLogVerbose(@"TVDB Episode JSON: %@", jsonData);
                       NSDictionary * links = jsonData[@"links"];
-                      if ([links class] == [NSDictionary class]) {
+                      if ([links isKindOfClass :[NSDictionary class]]) {
                         nextPage = links[@"next"];
                         NSArray * episodeList = jsonData[@"data"];
                         if ([episodeList isKindOfClass:[NSArray class]]) {
