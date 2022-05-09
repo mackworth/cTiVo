@@ -3,12 +3,12 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.5.1; Universal Version / TVDB patch</description>
+        <description>Version 3.5.2; Universal Version / TVDB patch</description>
         <language>en</language>
         <item>
-            <title>Version 3.5.1; Universal Version / TVDB patch</title>
+            <title>Version 3.5.2; Universal Version / TVDB patch</title>
             <description><![CDATA[
-				<h2 id="Release-3.5.1">Release 3.5.1 (Universal version)</h2>
+				<h2 id="Release-3.5.2">Release 3.5.2 (Universal version)</h2>
 				<ul>
         <li>Apple Silicon support (universal, so unfortunately twice the size)</li>
         <li>Fixes crash that can occur if TVDB sends invalid data</li>
@@ -18,14 +18,15 @@
 				</ul>
 				<h3 id="Fixes:">Fixes:</h3>
 				<ul>
+				<li>3.5.2 fixes a bug accessing TVDB in 3.5.1; sorry 'bout that.</li>
 				<li>Better test for Java presence for TiVoLibre.</li>
 				<li>Folder with any recordings in progress now shows recording icon to match TiVo's style.</li>
 				</ul>
             ]]>
             </description>
-            <pubDate>Sat., May 7, 2022 12:00:00 -0800</pubDate>
+            <pubDate>Sat., May 9, 2022 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.12.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.5.1/cTiVo.app.zip" sparkle:version="1137" sparkle:shortVersionString="3.5.1" length="133963190" type="application/octet-stream" sparkle:dsaSignature="MCwCFBbmuuUwRbGavB7ktlloYyZ1aAR8AhRVLsf7zRsBFsldKJ92T0g6As2x4A=="/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.5.2/cTiVo.app.zip" sparkle:version="1139" sparkle:shortVersionString="3.5.2" length="133963418" type="application/octet-stream" sparkle:dsaSignature="MC4CFQDFGvuNzsZJnHXtO/h1TBey3FTC9AIVAKjXn0IQYN/T8awQOfwpScuNHbNU"/>
         </item>
         <item>
             <title>Version 3.4.3; New TiVo certificate</title>

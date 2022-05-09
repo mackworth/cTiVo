@@ -1,3 +1,6 @@
+# Release 3.5.2: TVDB patch for patch
+* Fixes a 3.5.1 bug accessing TVDB; sorry 'bout that.
+
 # Release 3.5.1: TVDB patch
 * Fixes crash that can occur if TVDB sends invalid data
 
