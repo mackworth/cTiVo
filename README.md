@@ -69,14 +69,14 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 * [Q and A on different video formats](../../wiki/Video-Formats)
 * [Other Advanced Topics](../../wiki/Advanced-Topics)
 
-## Compatability:
+## Compatibility:
 
 cTiVo is fully compatible with MacOS Monterey (10.16) back through Sierra (10.12). 
 The latest release compatible with 10.10 and 10.9 is 3.4.1.
 
 cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3HD TiVos do NOT support Transport Stream for download, which is necessary for any channels/shows transmitted by your cable company in H.264, which is true for most cable companies now. As Minis and Streams do not store their own shows, cTiVo only supports Remote Control for them.
 
-RPC Certificate: cTiVo's RPC Certificate will currently expire in December 2022. If we cannot update it, then the features that require the RPC connection (marked below with a asterisk * ), would not be available thereafter. The primary cTiVo functionalities (listing the Tivo's shows and downloading them) should continue, regardless.
+RPC Certificate: cTiVo's RPC Certificate will currently expire in December 2022, but we now have the certificate through May 2024. If we cannot update it beyond that, then the features that require the RPC connection (marked below with a asterisk * ), would not be available. The primary cTiVo functionalities (listing the Tivo's shows and downloading them) should continue, regardless.
 
 Until recently, TiVo's new Edge product was incompatible with any PC/Mac downloads, but it appears that TiVo has finally fixed this with software release 21.9.7.v3-USM-12-D6F.
 
