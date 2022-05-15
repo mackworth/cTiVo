@@ -14,7 +14,6 @@
         <li>Fixes crash that can occur if TVDB sends invalid data</li>
 				<li>Blue icons instead of Yellow to match newer TiVo style; still uses ! to indicate potential imminent deletion.</li>
 				<li></li>
-				<li><b>Warning</b>: TiVo RPC certificate will expire December 2022</li>
 				</ul>
 				<h3 id="Fixes:">Fixes:</h3>
 				<ul>
