@@ -87,8 +87,32 @@ NSTimeInterval delay1, delay2, delay3,delay4 = 1.0;
 	NSString * keychainPassword = @"password";
     static dispatch_once_t onceToken = 0;
     dispatch_once(&onceToken, ^{
-        DDLogDetail(@"Importing cert");
-        NSData *p12Data = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"cdata" ofType:@"p12"]];
+        DDLogDetail(@"Importing cert"); 
+        BOOL overrodeCert = NO;
+        NSString * p12Path = [[NSBundle mainBundle] pathForResource:@"cdata" ofType:@"p12"];
+        NSString * tivoPassword = @"vlZaKoduom";
+
+        //Check for user-provided certificate
+        NSFileManager * fileMgr = [NSFileManager defaultManager];
+        NSString* appBundleID = [[NSBundle mainBundle] bundleIdentifier];
+        // ~/Library/Application Support/com.ctivo.ctivo/cdata.*
+        NSURL *supportDir = [[[fileMgr URLsForDirectory: NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject] URLByAppendingPathComponent:appBundleID];
+        NSURL * overrideURL = [supportDir URLByAppendingPathComponent:@"cdata.p12"];
+
+        if (overrideURL && [fileMgr fileExistsAtPath:overrideURL.path]) {
+            DDLogReport(@"Overriding default TiVo Certificate with %@",overrideURL);
+            NSURL * newPassURL = [supportDir URLByAppendingPathComponent:@"cdata.password"];
+            NSString * newPass  = [NSString stringWithContentsOfURL:newPassURL encoding:NSUTF8StringEncoding error:nil];
+            if (newPass.length > 0) {
+                p12Path = overrideURL.path;
+                tivoPassword = newPass;
+                overrodeCert = YES;
+            } else {
+                DDLogReport(@"Override TiVo certificate is missing matching password file, so using default cert. To fix, quit cTiVo. Then put password file at %@ OR delete cert at %@. ", overrideURL.path, newPassURL.path);
+            }
+        }
+        
+        NSData *p12Data = [NSData dataWithContentsOfFile:p12Path];
         if (!p12Data.length) {
             DDLogReport(@"Error getting certificate");
         }
@@ -108,14 +132,16 @@ NSTimeInterval delay1, delay2, delay3,delay4 = 1.0;
         if (status != errSecSuccess) {
             DDLogReport(@"Could not create temporary keychain \"%@\": [%d] %@", keychainPath, (int)status, securityErrorMessageString(status));
         } else if (keychain) {
-			NSString * tivoPassword = @"vlZaKoduom";
-
 			NSDictionary * optionsDictionary = @{(id)kSecImportExportPassphrase: tivoPassword,
 												 (id)kSecImportExportKeychain:   (__bridge id)keychain};
 			CFArrayRef p12Items = NULL;
 			OSStatus result = SecPKCS12Import((__bridge CFDataRef)p12Data, (__bridge CFDictionaryRef)optionsDictionary, &p12Items);
 			if (result != noErr) {
-				DDLogReport(@"Error on pkcs12 import: %d", result);
+                if (overrodeCert) {
+                    DDLogReport(@"Password of %@ not working with TiVo certificate at %@: %d", tivoPassword, overrideURL.path, result);
+                } else {
+                    DDLogReport(@"Error %d on pkcs12 import of TiVo certificate", result);
+                }
 			} else {
 				CFDictionaryRef identityDict = CFArrayGetValueAtIndex(p12Items, 0);
 				if (identityDict) {
@@ -274,7 +300,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
      [oStream setProperty:NSStreamSocketSecurityLevelNegotiatedSSL
                    forKey:NSStreamSocketSecurityLevelKey];
      if (![MTTivoRPC myCerts]) {
-         DDLogReport(@"No certificate available?");
+        DDLogReport(@"TiVo Certificate failure. RPC functions not available");
      } else {
          NSDictionary * sslOptions = @{
                                        (NSString *)kCFStreamSSLValidatesCertificateChain: (id)kCFBooleanFalse,
@@ -282,21 +308,21 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
                                        (NSString *)kCFStreamSSLIsServer:                  (id)kCFBooleanFalse,
                                        (NSString *)kCFStreamSSLCertificates:              MTTivoRPC.myCerts
                                        } ;
-         [oStream setProperty:sslOptions forKey:(__bridge id)kCFStreamPropertySSLSettings];
-         
-         _iStreamAnchor = NO; _oStreamAnchor = NO;
-         self.iStream = iStream;
-         self.oStream = oStream;
-         self.deadmanTimer = [MTWeakTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
-         DDLogMajor(@"Launching RPC streams for %@", self.delegate);
+        [oStream setProperty:sslOptions forKey:(__bridge id)kCFStreamPropertySSLSettings];
+        
+        _iStreamAnchor = NO; _oStreamAnchor = NO;
+        self.iStream = iStream;
+        self.oStream = oStream;
+        self.deadmanTimer = [MTWeakTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
+        DDLogMajor(@"Launching RPC streams for %@", self.delegate);
         [iStream open];
-         [oStream open];
-     }
-	 if (self.skipModeQueueMetaData.count > 0 || self.skipModeQueueEDL.count > 0 ) { //recover commercialing under way (e.g. after sleep)
-	 	DDLogMajor(@"SkipMode Queue restarting: %@ AND %@", self.skipModeQueueMetaData, self.skipModeQueueEDL);
-		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ]; //remove if already there
-		 [self performSelector:@selector(findSkipModeRecursive:) withObject:@0 afterDelay:20];
-	 }
+        [oStream open];
+        if (self.skipModeQueueMetaData.count > 0 || self.skipModeQueueEDL.count > 0 ) { //recover commercialing under way (e.g. after sleep)
+            DDLogMajor(@"SkipMode Queue restarting: %@ AND %@", self.skipModeQueueMetaData, self.skipModeQueueEDL);
+            [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ]; //remove if already there
+            [self performSelector:@selector(findSkipModeRecursive:) withObject:@0 afterDelay:20];
+        }
+    }   
 
  }
 
@@ -330,7 +356,7 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
             [self performSelector:@selector(launchServer) withObject:nil afterDelay:seconds];
             self.retries ++;
        } else {
-           DDLogMajor(@"Stream failed, and unreachable: %@ (failure #%@); Awaiting reachability",self.oStream.streamError.description, @(self.retries) );
+           DDLogMajor(@"Stream failed, and unreachable: %@ (failure #%@); Awaiting reachability",self.oStream.streamError.description, @(self.oStream.streamError.code) );
         }
 		[self.delegate connectionChanged];
     }
@@ -562,7 +588,12 @@ static NSRegularExpression * isFinalRegex = nil;
             break;
         }
         case NSStreamEventErrorOccurred: {
-            DDLogMajor(@"StreamError on %@: %@", streamName, [theStream streamError]);
+            NSError * error = [theStream streamError];
+            DDLogMajor(@"StreamError on %@: %@", streamName, error);
+            if (error.code == -9828) { //certificate expired!
+                DDLogReport(@"Certificate has apparently expired!");
+                _myCerts = nil;
+            }
             [self checkStreamStatus];
             break;
         }
