@@ -25,8 +25,6 @@
 #ifdef DEBUG
 #import "DDOSLogger.h"
 #else
-#import "CrashlyticsLogger.h"
-#import "Crashlytics/crashlytics.h"
 #endif
 
 #ifndef MAC_APP_STORE
@@ -36,10 +34,6 @@
 #endif
 
 #import "NSNotificationCenter+Threads.h"
-#ifndef DEBUG
-#import "Fabric/Fabric.h"
-#import "Crashlytics/Crashlytics.h"
-#endif
 #import "NSString+Helpers.h"
 
 #import <IOKit/pwr_mgt/IOPMLib.h>
@@ -165,9 +159,6 @@ void signalHandler(int signal)
 	[defaults registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
 	
 #ifndef DEBUG
-    if (![defaults boolForKey:kMTCrashlyticsOptOut]) {
-        [Fabric with:@[[Crashlytics class]]];
-    }
 #ifndef MAC_APP_STORE
 	PFMoveToApplicationsFolderIfNecessary();
 #endif
@@ -186,15 +177,6 @@ void signalHandler(int signal)
         [defaults  registerDefaults:@{kMTDebugLevel: @1}];
     }
 
-#ifdef DEBUG
-    MTLogFormatter * ttyLogFormat = [MTLogFormatter new];
-	[DDLog addLogger:[DDOSLogger sharedInstance]];
-	[[DDOSLogger sharedInstance] setLogFormatter:ttyLogFormat];
-#else
-    MTLogFormatter * crashLyticsLogFormat = [MTLogFormatter new];
-    [[CrashlyticsLogger sharedInstance] setLogFormatter: crashLyticsLogFormat];
-    [DDLog addLogger:[CrashlyticsLogger sharedInstance]];
-#endif
 	// Initialize File Logger
     DDLogFileManagerDefault *ddlogFileManager = [[DDLogFileManagerDefault alloc] initWithLogsDirectory:[cTiVoLogDirectory stringByExpandingTildeInPath]];
     DDFileLogger *fileLogger = [[DDFileLogger alloc] initWithLogFileManager:ddlogFileManager];

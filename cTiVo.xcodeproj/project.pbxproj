@@ -80,7 +80,6 @@
 		1E5050FE22556CC300D5981B /* MTChannelPopUpTableCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EFA8D51211BFF6900B4505D /* MTChannelPopUpTableCellView.m */; };
 		1E5050FF22556CC300D5981B /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BD316766FA600CE32DE /* GTMNSString+HTML.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1E50510022556CC300D5981B /* MTTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C6BB591714681C00289751 /* MTTask.m */; };
-		1E50510122556CC300D5981B /* CrashlyticsLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */; };
 		1E50510222556CC300D5981B /* MTTaskChain.m in Sources */ = {isa = PBXBuildFile; fileRef = D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */; };
 		1E50510322556CC300D5981B /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C3173DC7D100B47539 /* DDFileLogger.m */; };
 		1E50510422556CC300D5981B /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
@@ -100,8 +99,6 @@
 		1E50511322556CC300D5981B /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */; };
 		1E50511422556CC300D5981B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA116766EFD00CE32DE /* Cocoa.framework */; };
 		1E50511622556CC300D5981B /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D297AC1A1730296C0036125A /* libmp4v2.a */; };
-		1E50511722556CC300D5981B /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */; };
-		1E50511822556CC300D5981B /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB61BB89DA5006D6DBE /* Fabric.framework */; };
 		1E50511B22556CC300D5981B /* tivo-libre.jar in Resources */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50511C22556CC300D5981B /* ffmpeg_edl_ac3.sh in Resources */ = {isa = PBXBuildFile; fileRef = 94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E50511D22556CC300D5981B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D2D60BAA16766EFD00CE32DE /* InfoPlist.strings */; };
@@ -256,7 +253,6 @@
 		1E58F5982210B17800B21C06 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EE1D65B2210AF820012080F /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E59368919648C860008780B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
 		1E59368C19648CFF0008780B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
-		1E5BEC611F9532320082FA6B /* CrashlyticsLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */; };
 		1E61CDB91BB89E6A006D6DBE /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB81BB89E6A006D6DBE /* libc++.tbd */; };
 		1E61CDBD1BB89E91006D6DBE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDBC1BB89E91006D6DBE /* libz.tbd */; };
 		1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7516E2C50B000F5C6E /* copyright.png */; };
@@ -282,8 +278,6 @@
 		1E8489602314B1DB00D56756 /* cTVMainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E84895E2314B1DB00D56756 /* cTVMainMenu.xib */; };
 		1E8E675D20E1E971005465EF /* DDOSLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E675C20E1E970005465EF /* DDOSLogger.m */; };
 		1E8F6D2A1F5CA4D700830CB4 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E1395941F5928E800FFA4E7 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E90F0D62360AED4007F8BDB /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */; };
-		1E90F0D82360AED9007F8BDB /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB61BB89DA5006D6DBE /* Fabric.framework */; };
 		1E91657C2373AE2700847EF0 /* libcairo-gobject.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E91657E2373AE2700847EF0 /* libx264.157.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165792373AE2600847EF0 /* libx264.157.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E9165802373AE2700847EF0 /* libvpx.6.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E91657A2373AE2600847EF0 /* libvpx.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -746,7 +740,6 @@
 		1E3C43BF1D79EA1100367866 /* NSArray+Map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Map.m"; sourceTree = "<group>"; };
 		1E3D27DE1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNotificationCenter+Threads.h"; sourceTree = "<group>"; };
 		1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNotificationCenter+Threads.m"; sourceTree = "<group>"; };
-		1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = Crashlytics.sh; path = cTiVo/Crashlytics.sh; sourceTree = "<group>"; };
 		1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTIsStringEmpty.h; sourceTree = "<group>"; };
 		1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTIsStringEmpty.m; sourceTree = "<group>"; };
 		1E4A38461A37C0F4001D84A7 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
@@ -774,11 +767,7 @@
 		1E59368819648C860008780B /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		1E59368B19648CFF0008780B /* MTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLog.m; sourceTree = "<group>"; };
 		1E5AB5FC1E047A5E00429667 /* sparklecast107.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = sparklecast107.xml; sourceTree = "<group>"; };
-		1E5BEC5F1F9532320082FA6B /* CrashlyticsLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CrashlyticsLogger.h; sourceTree = "<group>"; };
-		1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CrashlyticsLogger.m; sourceTree = "<group>"; };
 		1E5C5C1A17FDF0B80056E794 /* readme.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme.md; sourceTree = "<group>"; };
-		1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = cTiVo/Crashlytics.framework; sourceTree = "<group>"; };
-		1E61CDB61BB89DA5006D6DBE /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fabric.framework; path = cTiVo/Fabric.framework; sourceTree = "<group>"; };
 		1E61CDB81BB89E6A006D6DBE /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 		1E61CDBC1BB89E91006D6DBE /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		1E684A7516E2C50B000F5C6E /* copyright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = copyright.png; sourceTree = "<group>"; };
@@ -1066,8 +1055,6 @@
 				1E50511322556CC300D5981B /* ScriptingBridge.framework in Frameworks */,
 				1E50511422556CC300D5981B /* Cocoa.framework in Frameworks */,
 				1E50511622556CC300D5981B /* libmp4v2.a in Frameworks */,
-				1E50511722556CC300D5981B /* Crashlytics.framework in Frameworks */,
-				1E50511822556CC300D5981B /* Fabric.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1085,8 +1072,6 @@
 				D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */,
 				1E81D3171BE9477200321370 /* Sparkle.framework in Frameworks */,
 				1E6907871DA5A29900C429C2 /* libmp4v2.a in Frameworks */,
-				1E90F0D62360AED4007F8BDB /* Crashlytics.framework in Frameworks */,
-				1E90F0D82360AED9007F8BDB /* Fabric.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1299,8 +1284,6 @@
 				1E59368B19648CFF0008780B /* MTLog.m */,
 				1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */,
 				1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */,
-				1E5BEC5F1F9532320082FA6B /* CrashlyticsLogger.h */,
-				1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */,
 				1E8E675B20E1E970005465EF /* DDOSLogger.h */,
 				1E8E675C20E1E970005465EF /* DDOSLogger.m */,
 			);
@@ -1432,9 +1415,6 @@
 			children = (
 				1E61CDBC1BB89E91006D6DBE /* libz.tbd */,
 				1E61CDB81BB89E6A006D6DBE /* libc++.tbd */,
-				1E61CDB61BB89DA5006D6DBE /* Fabric.framework */,
-				1E61CDB21BB898E2006D6DBE /* Crashlytics.framework */,
-				1E3D27E41A4F5992006B9CC4 /* Crashlytics.sh */,
 				D2A09C7916C77E9D00F2B86F /* Quartz.framework */,
 				D2CAF33F16AB43AE004E4CFA /* IOKit.framework */,
 				D2B6706C169CA91F009CB164 /* SystemConfiguration.framework */,
@@ -1662,7 +1642,6 @@
 				1EDBDFA61B1CB71200E979F0 /* Copy Executables */,
 				1E557BCE1CD8033F0014D85B /* Copy shared libraries for executables */,
 				D2995CAE168D0F7D00B960B9 /* CopyFiles */,
-				1E07864E19C7F3CE00A68051 /* Run Script */,
 				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				D2AA030A1833F09B00AEE326 /* Sign Bundled Frameworks */,
 			);
@@ -1863,20 +1842,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		1E07864E19C7F3CE00A68051 /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ]; then\n  cp $SRCROOT/cTiVo/Crashlytics.sh $UNLOCALIZED_RESOURCES_FOLDER_PATH/\n  $SRCROOT/cTiVo/Crashlytics.sh\nfi\n";
-		};
 		1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2010,7 +1975,6 @@
 				1E5050FE22556CC300D5981B /* MTChannelPopUpTableCellView.m in Sources */,
 				1E5050FF22556CC300D5981B /* GTMNSString+HTML.m in Sources */,
 				1E50510022556CC300D5981B /* MTTask.m in Sources */,
-				1E50510122556CC300D5981B /* CrashlyticsLogger.m in Sources */,
 				1E50510222556CC300D5981B /* MTTaskChain.m in Sources */,
 				1E50510322556CC300D5981B /* DDFileLogger.m in Sources */,
 				1E50510422556CC300D5981B /* MTLogFormatter.m in Sources */,
@@ -2080,7 +2044,6 @@
 				1EFA8D54211BFF6A00B4505D /* MTChannelPopUpTableCellView.m in Sources */,
 				D291436F1713467F00CE3202 /* GTMNSString+HTML.m in Sources */,
 				D2C6BB5A1714681C00289751 /* MTTask.m in Sources */,
-				1E5BEC611F9532320082FA6B /* CrashlyticsLogger.m in Sources */,
 				D2ED1BBB1715C3BF00742F18 /* MTTaskChain.m in Sources */,
 				1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */,
 				1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */,
@@ -2442,12 +2405,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MARKETING_VERSION = 3.4.4;
-				"OTHER_LDFLAGS[arch=*]" = (
-					"-framework",
-					Crashlytics,
-					"-framework",
-					Fabric,
-				);
+				"OTHER_LDFLAGS[arch=*]" = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

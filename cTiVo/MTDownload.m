@@ -20,9 +20,6 @@
 
 #import <Carbon/Carbon.h>
 
-#ifndef DEBUG
-#import "Crashlytics/Crashlytics.h"
-#endif
 
 
 @interface MTDownload ()
@@ -2148,14 +2145,6 @@ __DDLOGHERE__
 }
 
 -(void) notifyAndCleanUp {
-#ifndef DEBUG
-	NSInteger retries = ([[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries] - self.numRetriesRemaining) ;
-	NSString * retryString = [NSString stringWithFormat:@"%d",(int) retries];
-	[Answers logCustomEventWithName:@"Success"
-				   customAttributes:@{@"Format" : self.encodeFormat.name,
-									  @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
-									  @"Retries" : retryString }];
-#endif
 	[self notifyUserWithTitle:@"TiVo show transferred." subTitle:nil ];
 	if (self.deleteAfterDownload.boolValue) {
 		DDLogReport(@"Deleting %@ from TiVo after successful download",self);
@@ -2512,11 +2501,6 @@ __DDLOGHERE__
                    ( falseStart && self.numStartupRetriesRemaining <= 0)) {
             self.downloadStatus = @(kMTStatusFailed);
             self.processProgress = 1.0;
-#ifndef DEBUG
-           [Answers logCustomEventWithName:@"Failure"
-                           customAttributes:@{ @"Format" : self.encodeFormat.name,
-                                               @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
-#endif
             [self notifyUserWithTitle: @"TiVo show failed."
                              subTitle:@"Retries Cancelled"];
 			[self launchUserScript];
@@ -2527,11 +2511,6 @@ __DDLOGHERE__
 			} else {
 				self.numRetriesRemaining--;
                 [self notifyUserWithTitle:@"TiVo show failed" subTitle:@"Retrying" ];
-#ifndef DEBUG
-                [Answers logCustomEventWithName:@"Retry"
-                               customAttributes:@{ @"Format" : self.encodeFormat.name,
-                                                   @"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]}];
-#endif
                 DDLogMajor(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
 				[self launchUserScript];
             }

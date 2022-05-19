@@ -20,7 +20,6 @@
 #include <arpa/inet.h>
 
 #include "MTWeakTimer.h"
-#import "Crashlytics/Crashlytics.h"  //to log TiVo failure reasons
 
 @interface MTTiVoManager ()    <NSUserNotificationCenterDelegate>        {
     NSNetServiceBrowser *tivoBrowser;
@@ -504,10 +503,6 @@ __DDLOGHERE__
 }
 
 -(void) failBonjour {
-	[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
-						success:@NO
-			   customAttributes:@{@"Symptom": self.missingTiVoSymptom,
-								  @"Version": kcTiVoName }];
 }
 
 -(void) startTiVos {
@@ -1137,7 +1132,6 @@ __DDLOGHERE__
 		  @"Quicktime (H.264   256kbps)" : @"H.264 Very Small 256kbps",
           @"ffmpeg ComSkip/5.1"         :@"Default",
           @"MP4 FFMpeg"                     : @"Decrypt MP4",
-          @"ffmpeg ComSkip/5.1"             : @"Default",
 		  @"Handbrake AppleTV"              : @"HB Default ",
 		  @"Handbrake iPhone"               : @"HB Default",
 		  @"HB Old AppleTV"              	: @"HB Default ",
@@ -2081,12 +2075,6 @@ __DDLOGHERE__
 			[newString appendString:txtRecordString];
 			[newString appendString:@"\n"];
 		}
-		NSMutableDictionary * info = [NSMutableDictionary dictionary];
-		[info setValue:@"No Name TiVo"   					forKey:@"MTExceptionName"];
-		[info setValue:newString		 					forKey:@"MTExceptionReason"];
-
-		NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:2 userInfo:info];
-		[[Crashlytics sharedInstance] recordError:error];
 
 		return;
 	}
@@ -2104,9 +2092,6 @@ __DDLOGHERE__
 		if (newTiVo.enabled){
 			if (self.tiVoTimer) {
 				[self.tiVoTimer invalidate]; self.tiVoTimer = nil;
-				[Answers logLoginWithMethod:[[NSUserDefaults standardUserDefaults] objectForKey: kMTQueue] ?  @"Normal2" : @"firstTime2"
-									success:@YES
-						   customAttributes:@{@"Version": kcTiVoName }];
 			}
 			if (self.tiVoList.count > 1 && ![[NSUserDefaults standardUserDefaults] boolForKey:kMTHasMultipleTivos]) {
 				//Haven't seen multiple TiVos before, so enable the TiVo column this one time.

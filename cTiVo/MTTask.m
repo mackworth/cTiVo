@@ -14,9 +14,6 @@
 #import "NSArray+Map.h"
 #import "NSString+Helpers.h"
 
-#ifndef DEBUG
-#import "Crashlytics/Crashlytics.h"
-#endif
 
 @interface MTTask ()
 {
@@ -486,19 +483,6 @@ __DDLOGHERE__
         } @catch (NSException *exception) {
             NSString * desc = self.description;
             DDLogReport(@"Error on launch: %@ for %@; cannot launch: %@",  [exception reason], self.taskName, desc);
-#ifndef DEBUG
-            NSMutableDictionary * info = [NSMutableDictionary dictionary];
-            [info setValue:exception.name forKey:@"MTExceptionName"];
-            [info setValue:exception.reason forKey:@"MTExceptionReason"];
-            [info setValue:exception.callStackReturnAddresses forKey:@"MTExceptionCallStackReturnAddresses"];
-            [info setValue:exception.callStackSymbols forKey:@"MTExceptionCallStackSymbols"];
-            [info setValue:exception.userInfo forKey:@"MtExceptionUserInfo"];
-            [info setValue:errorString forKey:@"MtExceptionTmpError"];
-            [info setValue:desc forKey:@"MTExceptionTaskInfo"];
-
-            NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:1 userInfo:info];
-            [[Crashlytics sharedInstance] recordError:error];
-#endif
             return NO;
         }
     } else {
