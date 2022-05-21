@@ -88,7 +88,7 @@ cTiVo is free to use, and the source is available for anyone to browse and contr
 *    Use TiVo's SkipMode info when available for Marking/Cutting commercials.
 *    Hold off processing until SkipMode arrives (or doesn't).
 * Fallback to Comskip if SkipMode unavailable or fails.
-* There are some issues to be aware of, so please see [Commercial wiki page](Commercials).
+* There are some issues to be aware of, so please see [Commercial wiki page](../../wiki/Commercials).
 
 #### MPEG2 streams only download over a Program Stream (PS) connection.
 *  New Download column "Use TS". Set by channel's TS status initially, but changes automatically after bad download.
