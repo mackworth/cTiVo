@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="15505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="20037" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="20037"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -19,6 +19,7 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <userDefaultsController representsSharedInstance="YES" id="BAG-Nz-feY"/>
         <arrayController objectClassName="MTTiVo" editable="NO" id="FVY-3s-Xoq" userLabel="TiVo Controller">
+            <classReference key="objectClass" className="MTTiVo"/>
             <connections>
                 <binding destination="-2" name="contentArray" keyPath="tiVoList" id="CFQ-VK-cea"/>
             </connections>
@@ -37,7 +38,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                         <popUpButtonCell key="cell" type="push" title="TiVo" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingMiddle" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyUpOrDown" inset="2" selectedItem="aRA-69-m6v" id="Dox-iV-9FR">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" size="16" name=".AppleSystemUIFont"/>
+                            <font key="font" metaFont="system" size="16"/>
                             <menu key="menu" id="Yda-nE-Gpr">
                                 <items>
                                     <menuItem title="TiVo" state="on" id="aRA-69-m6v"/>
@@ -376,7 +377,7 @@ Gw
                                     <string key="keyEquivalent" base64-UTF8="YES">
 CQ
 </string>
-                                    <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                                    <modifierMask key="keyEquivalentModifierMask" option="YES"/>
                                 </buttonCell>
                                 <connections>
                                     <action selector="buttonPressed:" target="-2" id="mhT-dG-YYT"/>
