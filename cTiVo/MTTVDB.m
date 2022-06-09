@@ -11,7 +11,7 @@
 #import "NSString+HTML.h"
 #import "DDLog.h"
 
-@interface MTTVDB ()
+@interface MTTVDB3 ()
     @property (atomic, strong) NSString * tvdbToken;
     @property (atomic, strong) NSDate * tvdbTokenExpireTime;
     @property (atomic, strong) NSURLSession * tvdbURLSession;
@@ -33,7 +33,14 @@
 	@property (atomic, strong) NSDate * failWaitUntilTime;
 @end
 
+//avoid linker complaint that there's no MTTVDB class
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
 @implementation MTTVDB
+@end
+#pragma clang diagnostic pop
+
+@implementation MTTVDB3
 
 __DDLOGHERE__
 @synthesize  tvdbURLSession = _tvdbURLSession;

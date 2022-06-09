@@ -305,6 +305,7 @@
 		1E81D3171BE9477200321370 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2995CAC168D0EE700B960B9 /* Sparkle.framework */; };
 		1E8296CF202A0E8600AA4C10 /* PeanutRemote@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */; };
 		1E8489602314B1DB00D56756 /* cTVMainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E84895E2314B1DB00D56756 /* cTVMainMenu.xib */; };
+		1E8945C728514E9500FFD411 /* MTTVDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8945C628514E9500FFD411 /* MTTVDB.swift */; };
 		1E8E675D20E1E971005465EF /* DDOSLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E675C20E1E970005465EF /* DDOSLogger.m */; };
 		1E8F6D2A1F5CA4D700830CB4 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E1395941F5928E800FFA4E7 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E91657C2373AE2700847EF0 /* libcairo-gobject.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -969,6 +970,8 @@
 		1E7F5ADA1701877A003AA96C /* in-progress-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "in-progress-recording.png"; sourceTree = "<group>"; };
 		1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PeanutRemote@2x.png"; sourceTree = "<group>"; };
 		1E84895F2314B1DB00D56756 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/cTVMainMenu.xib; sourceTree = "<group>"; };
+		1E8945C528514E9500FFD411 /* cTiVo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "cTiVo-Bridging-Header.h"; sourceTree = "<group>"; };
+		1E8945C628514E9500FFD411 /* MTTVDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDB.swift; sourceTree = "<group>"; };
 		1E8C1B57224B988600F285EF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		1E8E675B20E1E970005465EF /* DDOSLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDOSLogger.h; sourceTree = "<group>"; };
 		1E8E675C20E1E970005465EF /* DDOSLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDOSLogger.m; sourceTree = "<group>"; };
@@ -1816,6 +1819,7 @@
 				1E6F22D516DD1F4C0071D291 /* MTDownload.m */,
 				D22BC41D1680DB5E007D699C /* MTTiVoShow.h */,
 				D22BC41E1680DB5E007D699C /* MTTiVoShow.m */,
+				1E8945C628514E9500FFD411 /* MTTVDB.swift */,
 				1EC44B2D1F06F12100B73DE1 /* MTTVDB.h */,
 				1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */,
 				1E17E1171FF7ED8900AF0F7C /* MTShowFolder.h */,
@@ -1830,6 +1834,7 @@
 				D2C6BB591714681C00289751 /* MTTask.m */,
 				D2ED1BB91715C3BF00742F18 /* MTTaskChain.h */,
 				D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */,
+				1E8945C528514E9500FFD411 /* cTiVo-Bridging-Header.h */,
 			);
 			name = "Data Model";
 			sourceTree = "<group>";
@@ -1928,6 +1933,7 @@
 				ORGANIZATIONNAME = cTiVo;
 				TargetAttributes = {
 					D2D60B9C16766EFD00CE32DE = {
+						LastSwiftMigration = 1340;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.HardenedRuntime = {
@@ -2020,7 +2026,6 @@
 		1EF4A2CF27497ECB00781BDD /* nanopb */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			name = nanopb;
 			path = nanopb.framework;
 			remoteRef = 1EF4A2CE27497ECB00781BDD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -2044,7 +2049,6 @@
 		1EF4A2D527497ECB00781BDD /* PromisesObjC */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			name = PromisesObjC;
 			path = FBLPromises.framework;
 			remoteRef = 1EF4A2D427497ECB00781BDD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -2481,6 +2485,7 @@
 				D2D2C6F116B3816B001AFE75 /* MTManualTiVoEditorController.m in Sources */,
 				D27579BD16B4DC2B0090D137 /* MTPreferencesWindowController.m in Sources */,
 				D27579C216B575A30090D137 /* MTTabViewItem.m in Sources */,
+				1E8945C728514E9500FFD411 /* MTTVDB.swift in Sources */,
 				D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */,
 				1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */,
 				1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */,
@@ -2806,6 +2811,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
@@ -2847,6 +2853,9 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "cTiVo/cTiVo-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -2857,6 +2866,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
@@ -2897,6 +2907,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "cTiVo/cTiVo-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

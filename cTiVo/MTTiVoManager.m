@@ -18,6 +18,7 @@
 #import "NSString+Helpers.h"
 #import "NSDate+Tomorrow.h"
 #include <arpa/inet.h>
+#import "cTiVo-Swift.h"
 
 #include "MTWeakTimer.h"
 //#import "Crashlytics/Crashlytics.h"  //to log TiVo failure reasons
@@ -66,10 +67,29 @@ __DDLOGHERE__
     if (firstTime) {
         [myManager restoreOldQueue]; //no reason to fire all notifications on initial queue
         [[NSUserDefaults standardUserDefaults] synchronize];
-        myManager.tvdb = [MTTVDB sharedManager];
+        [myManager checkTVDBVersion];
         [myManager setupNotifications];
     }
     return myManager;
+}
+
+-(void) checkTVDBVersion {
+    MTTVDB * oldMgr = self.tvdb;
+    NSString * pin = [[NSUserDefaults standardUserDefaults] objectForKey:kMTTheTVDBPINKey];
+    if (pin.length) {
+        DDLogMajor(@"Launching Swift v4 TVDB");
+        self.tvdb = MTTVDB4.sharedManager;
+    } else {
+        DDLogMajor(@"Launching old v3 TVDB");
+        self.tvdb = MTTVDB3.sharedManager;
+    }
+    if (oldMgr && self.tvdb != oldMgr) {
+        //switching, not launching, so reset all tvdbdata
+        for (MTTiVoShow * show in self.tiVoShows) {
+            show.tvdbData = nil;
+        }
+        [self refreshAllTiVos];
+    } 
 }
 
 -(id)init
@@ -567,7 +587,8 @@ __DDLOGHERE__
 							   KMTPreferredImageSource,
 							   kMTTiVos,
 							   kMTiTunesSubmit,
-							   kMTIfSuccessDeleteFromTiVo
+							   kMTIfSuccessDeleteFromTiVo,
+							   kMTTheTVDBPINKey
 							]) {
 		 [[NSUserDefaults standardUserDefaults]  addObserver:self forKeyPath:path options:0 context:nil];
 	}
@@ -906,6 +927,8 @@ __DDLOGHERE__
 		if (![defs boolForKey:kMTIfSuccessDeleteFromTiVo]) {
 			[self cancelAllDeleteAfterDownloads];
 		}
+	} else if ([keyPath compare:kMTTheTVDBPINKey] == NSOrderedSame) {
+		[self checkTVDBVersion];
    } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
