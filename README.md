@@ -71,8 +71,10 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 
 ## Compatibility:
 
-cTiVo is fully compatible with MacOS Monterey (10.16) back through Sierra (10.12). 
-The latest release compatible with 10.10 and 10.9 is 3.4.1.
+[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.5.3) is fully compatible with MacOS Monterey (10.16) back through Sierra (10.12). 
+This (3.5.3) will be the final release for MacOS Sierra (10.12)
+For MacOS El Capitan (10.11), [final release is 3.4.5](https://github.com/mackworth/cTiVo/releases/tag/3.4.5)
+For MacOS Mavericks (10.9) and Yosemite (10.10), [final release is 3.4.4](https://github.com/mackworth/cTiVo/releases/tag/3.4.4)
 
 cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3HD TiVos do NOT support Transport Stream for download, which is necessary for any channels/shows transmitted by your cable company in H.264, which is true for most cable companies now. As Minis and Streams do not store their own shows, cTiVo only supports Remote Control for them.
 
