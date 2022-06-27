@@ -347,7 +347,7 @@ __DDLOGHERE__
    } else if ([tableColumn.identifier isEqualToString:@"TiVo"]) {
         textVal = thisShow.tiVoName ;
         result.textField.textColor = [NSColor controlTextColor];
-        if (!thisShow.tiVo.isReachable && download.isDownloading) {
+        if (thisShow.tiVo && ( !thisShow.tiVo.isReachable || thisShow.tiVo.connectionProblem) && download.isDownloading) {
 			if (@available(macOS 10.10,*)) {
             	result.textField.textColor = [NSColor systemRedColor];
 			} else {

@@ -811,7 +811,7 @@ __DDLOGHERE__
 	result.textField.textColor = [NSColor controlTextColor];
 	if ([thisShow.protectedShow boolValue]) {
 		result.textField.textColor = [NSColor disabledControlTextColor ];
-	} else if (thisShow && [identifier isEqualToString:@"TiVo"] && !thisShow.tiVo.isReachable) {
+	} else if (thisShow && [identifier isEqualToString:@"TiVo"] && (!thisShow.tiVo.isReachable || thisShow.tiVo.connectionProblem)) {
 		if (@available(macOS 10.10,*)) {
 			result.textField.textColor = [NSColor systemRedColor];
 		} else {

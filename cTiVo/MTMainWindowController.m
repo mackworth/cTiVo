@@ -256,9 +256,16 @@ __DDLOGHERE__
 
 }
 
--(void)refreshTiVoListPopup:(NSNotification *)notification
-{
-	if (notification) {
+-(NSAttributedString *) reportProblemString: (MTTiVo *) tivo {
+    NSFont *thisFont = [NSFont systemFontOfSize:13];
+    NSString *thisTitle = [NSString stringWithFormat:@"%@%@",tivo.tiVo.name, !tivo.isReachable ? @"Unreachable" : @": Not Connected"];
+    NSColor * red =  [NSColor redColor];
+    if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+    return [[NSAttributedString alloc] initWithString:thisTitle attributes:@ { NSForegroundColorAttributeName: red, NSFontAttributeName:  thisFont}];
+}
+
+-(void)refreshTiVoListPopup:(NSNotification *)notification {
+	if (notification && (!notification.object || [notification.object isKindOfClass:NSString.class])) {
 		self.selectedTiVo = notification.object;
 		if (!_selectedTiVo) {
 			self.selectedTiVo = [[NSUserDefaults standardUserDefaults] objectForKey:kMTSelectedTiVo];
@@ -279,14 +286,8 @@ __DDLOGHERE__
 		[tiVoListPopUp addItemWithTitle:tsTitle];
         [[tiVoListPopUp lastItem] setRepresentedObject:ts];
         NSMenuItem *thisItem = [tiVoListPopUp lastItem];
-        if (!ts.isReachable) {
-            NSFont *thisFont = [NSFont systemFontOfSize:13];
-            NSString *thisTitle = [NSString stringWithFormat:@"%@ offline",ts.tiVo.name];
-			NSColor * red =  [NSColor redColor];
-			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
-			NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:@ { NSForegroundColorAttributeName: red, NSFontAttributeName:  thisFont}];
-            [thisItem setAttributedTitle:aTitle];
-
+        if (!ts.isReachable ||ts.connectionProblem) {
+            [thisItem setAttributedTitle:[self reportProblemString:ts]];
         }
 		if ([ts.tiVo.name compare:self.selectedTiVo] == NSOrderedSame) {
 			[tiVoListPopUp selectItem:thisItem];
@@ -307,14 +308,8 @@ __DDLOGHERE__
 		[tiVoListPopUpLabel setHidden:NO];
 		[tiVoListPopUp setHidden:YES];
         tiVoListPopUpLabel.stringValue = [NSString stringWithFormat:@"TiVo: %@ (%ld)",ts.tiVo.name,ts.shows.count];
-        if (!ts.isReachable) {
-            NSFont *thisFont = [NSFont systemFontOfSize:13];
-            NSString *thisTitle = [NSString stringWithFormat:@"TiVo: %@ offline",ts.tiVo.name];
-			NSColor * red =  [NSColor redColor];
-			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
-			NSAttributedString *aTitle = [[NSAttributedString alloc] initWithString:thisTitle attributes:@ { NSForegroundColorAttributeName: red, NSFontAttributeName:  thisFont}];
-            [tiVoListPopUpLabel setAttributedStringValue:aTitle];
-			
+        if (!ts.isReachable ||ts.connectionProblem) {
+            [tiVoListPopUpLabel setAttributedStringValue:[self reportProblemString:ts]];
         }
     } else if (tiVoManager.tiVoList.count > 1){
         [searchingTiVosIndicator stopAnimation:nil];
