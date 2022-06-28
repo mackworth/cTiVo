@@ -11,7 +11,6 @@
 #import "MTTiVoManager.h"
 #import "MTMainWindowController.h"
 
-#import "MTDownloadCheckTableCell.h"
 #import "MTProgressCell.h"
 #import "DragDropImageView.h"
 #import "MTShowFolder.h"
