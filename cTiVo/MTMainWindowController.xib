@@ -127,7 +127,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Queued" editable="NO" width="42" minWidth="42" maxWidth="42" headerToolTip="Scheduled to be downloaded?" id="305">
+                                                        <tableColumn identifier="Queued" editable="NO" width="42" minWidth="42" maxWidth="75" headerToolTip="Scheduled to be downloaded?" id="305">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Que'd">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -161,7 +161,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="icon" width="45" minWidth="18" maxWidth="45" headerToolTip="Status of show on TiVo" id="1272">
+                                                        <tableColumn identifier="icon" width="45" minWidth="18" maxWidth="70" headerToolTip="Status of show on TiVo" id="1272">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Status">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -191,8 +191,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="SkipMode" width="58" minWidth="22" maxWidth="70" id="WAC-Dp-obF">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SkipData">
+                                                        <tableColumn identifier="SkipMode" width="58" minWidth="22" maxWidth="85" id="WAC-Dp-obF">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="SkipData">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -324,7 +324,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Episode" editable="NO" width="94" minWidth="65" maxWidth="120" headerToolTip="Name or number of episode" id="188">
+                                                        <tableColumn identifier="Episode" editable="NO" width="94" minWidth="65" maxWidth="180" headerToolTip="Name or number of episode" id="188">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Episode Number">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -392,7 +392,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Genre" width="64" minWidth="40" maxWidth="100" hidden="YES" headerToolTip="Genre for show" id="833">
+                                                        <tableColumn identifier="Genre" width="64" minWidth="40" maxWidth="160" hidden="YES" headerToolTip="Genre for show" id="833">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Genre">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -460,7 +460,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="HD" editable="NO" width="42" minWidth="42" maxWidth="42" headerToolTip="Is recorded show in HD" id="665">
+                                                        <tableColumn identifier="HD" editable="NO" width="42" minWidth="42" maxWidth="60" headerToolTip="Is recorded show in HD" id="665">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="HD">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -494,7 +494,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Folder" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Is this line a folder or a single show?" id="Jq9-Qz-qxf">
+                                                        <tableColumn identifier="Folder" editable="NO" width="42" minWidth="42" maxWidth="70" hidden="YES" headerToolTip="Is this line a folder or a single show?" id="Jq9-Qz-qxf">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Folder">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -528,7 +528,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Does this show (✔) or channel (√) use H.264 compression v. MPEG2 ( -- or -)?" id="UMt-1R-5R9">
+                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="70" hidden="YES" headerToolTip="Does this show (✔) or channel (√) use H.264 compression v. MPEG2 ( -- or -)?" id="UMt-1R-5R9">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="H.264">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -562,7 +562,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="OnDisk" editable="NO" width="42" minWidth="42" maxWidth="60" hidden="YES" headerToolTip="Is recorded show in HD" id="xg7-8c-eXL">
+                                                        <tableColumn identifier="OnDisk" editable="NO" width="42" minWidth="42" maxWidth="75" hidden="YES" headerToolTip="Is recorded show in HD" id="xg7-8c-eXL">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="OnDisk">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -664,7 +664,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="AgeRating" editable="NO" width="50" minWidth="30" maxWidth="70" hidden="YES" headerToolTip="Age Rating" id="bxS-yi-tlV">
+                                                        <tableColumn identifier="AgeRating" editable="NO" width="50" minWidth="30" maxWidth="95" hidden="YES" headerToolTip="Age Rating" id="bxS-yi-tlV">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Age Rating">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -698,7 +698,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="StarRating" editable="NO" width="50" minWidth="30" maxWidth="70" hidden="YES" headerToolTip="Star Rating" id="vTi-4j-l7o">
+                                                        <tableColumn identifier="StarRating" editable="NO" width="50" minWidth="30" maxWidth="95" hidden="YES" headerToolTip="Star Rating" id="vTi-4j-l7o">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Star Rating">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -980,7 +980,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="icon" width="45" minWidth="18" maxWidth="45" headerToolTip="Status of show on TiVo" id="1261">
+                                                        <tableColumn identifier="icon" width="45" minWidth="18" maxWidth="60" headerToolTip="Status of show on TiVo" id="1261">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Status">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1054,8 +1054,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="SkipMode" width="70" minWidth="22" maxWidth="70" id="T01-au-qjU">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SkipData">
+                                                        <tableColumn identifier="SkipMode" width="70" minWidth="22" maxWidth="85" id="T01-au-qjU">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="SkipData">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1241,7 +1241,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Does this show (✔) or channel (√) use H.264 compression v. MPEG2 ( -- or -)? Before downloading, uses channel's history." id="Joh-em-Aac">
+                                                        <tableColumn identifier="H.264" editable="NO" width="42" minWidth="42" maxWidth="70" hidden="YES" headerToolTip="Does this show (✔) or channel (√) use H.264 compression v. MPEG2 ( -- or -)? Before downloading, uses channel's history." id="Joh-em-Aac">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="H.264">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1275,7 +1275,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="HD" editable="NO" width="42" minWidth="42" maxWidth="42" hidden="YES" headerToolTip="Is recorded show in HD?" id="745">
+                                                        <tableColumn identifier="HD" editable="NO" width="42" minWidth="42" maxWidth="60" hidden="YES" headerToolTip="Is recorded show in HD?" id="745">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="HD">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1309,7 +1309,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="OnDisk" editable="NO" width="56" minWidth="42" maxWidth="60" hidden="YES" headerToolTip="Is recorded showa vailable on Disk" id="CMQ-fQ-p4F">
+                                                        <tableColumn identifier="OnDisk" editable="NO" width="56" minWidth="42" maxWidth="75" hidden="YES" headerToolTip="Is recorded show available on Disk?" id="CMQ-fQ-p4F">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="OnDisk">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1343,7 +1343,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Episode" editable="NO" width="74" minWidth="65" maxWidth="120" hidden="YES" headerToolTip="Name or number of episode" id="746">
+                                                        <tableColumn identifier="Episode" editable="NO" width="74" minWidth="65" maxWidth="180" hidden="YES" headerToolTip="Name or number of episode" id="746">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Episode Number">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1377,7 +1377,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Genre" width="64" minWidth="40" maxWidth="100" hidden="YES" headerToolTip="Genre for show" id="804">
+                                                        <tableColumn identifier="Genre" width="64" minWidth="40" maxWidth="160" hidden="YES" headerToolTip="Genre for show" id="804">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Genre">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1411,7 +1411,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="AgeRating" editable="NO" width="50" minWidth="30" maxWidth="70" hidden="YES" headerToolTip="Age Rating" id="juM-OS-WUS">
+                                                        <tableColumn identifier="AgeRating" editable="NO" width="50" minWidth="30" maxWidth="95" hidden="YES" headerToolTip="Age Rating" id="juM-OS-WUS">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Age Rating">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1445,7 +1445,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="StarRating" editable="NO" width="50" minWidth="30" maxWidth="70" hidden="YES" headerToolTip="Star Rating" id="Ff1-r4-e20">
+                                                        <tableColumn identifier="StarRating" editable="NO" width="50" minWidth="30" maxWidth="95" hidden="YES" headerToolTip="Star Rating" id="Ff1-r4-e20">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Star Rating">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1771,8 +1771,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="iTunes" width="45" minWidth="32" maxWidth="45" headerToolTip="Add to iTunes after encoding" id="165">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="iTunes">
+                                                        <tableColumn identifier="iTunes" width="45" minWidth="32" maxWidth="64" headerToolTip="Add to iTunes after encoding" id="165">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="iTunes">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1791,8 +1791,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="UseTS" width="32" minWidth="32" maxWidth="45" hidden="YES" id="945">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Use TS">
+                                                        <tableColumn identifier="UseTS" width="32" minWidth="32" maxWidth="70" hidden="YES" id="945">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Use TS">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1826,8 +1826,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Skip" width="41" minWidth="32" maxWidth="45" headerToolTip="Find and delete commercials.   Mutually exclusive with Mark commercials" id="N0W-kB-fED">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Cut">
+                                                        <tableColumn identifier="Skip" width="41" minWidth="32" maxWidth="75" headerToolTip="Find and delete commercials.   Mutually exclusive with Mark commercials" id="N0W-kB-fED">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Cut">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1860,8 +1860,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="32" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Skip commercials" id="1318">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Mark">
+                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="64" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Skip commercials" id="1318">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Mark">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1894,8 +1894,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="UseSkipMode" width="70" minWidth="32" maxWidth="70" id="EJ2-3d-oxm">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SkipMode">
+                                                        <tableColumn identifier="UseSkipMode" width="70" minWidth="32" maxWidth="100" id="EJ2-3d-oxm">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="SkipMode">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1929,7 +1929,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="pyTiVo" width="34" minWidth="30" maxWidth="45" hidden="YES" headerToolTip="Generate text metadata file necessary for pyTiVo usage" id="902">
+                                                        <tableColumn identifier="pyTiVo" width="34" minWidth="30" maxWidth="75" hidden="YES" headerToolTip="Generate text metadata file necessary for pyTiVo usage" id="902">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="pyTiVo">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1963,7 +1963,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Subtitles" width="56" minWidth="30" maxWidth="56" headerToolTip="Export subtitles .SRT file" id="912">
+                                                        <tableColumn identifier="Subtitles" width="56" minWidth="30" maxWidth="75" headerToolTip="Export subtitles .SRT file" id="912">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Subtitle">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1997,7 +1997,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Delete" width="54" minWidth="30" maxWidth="60" hidden="YES" headerToolTip="WARNING: will delete original show on TiVo after successful download." id="Q5C-UI-DDQ">
+                                                        <tableColumn identifier="Delete" width="54" minWidth="30" maxWidth="75" hidden="YES" headerToolTip="WARNING: will delete original show on TiVo after successful download." id="Q5C-UI-DDQ">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Del After">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -2278,8 +2278,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="iTunes" width="40" minWidth="32" maxWidth="40" headerToolTip="Add to iTunes after encoding" id="326">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="iTunes">
+                                                        <tableColumn identifier="iTunes" width="40" minWidth="32" maxWidth="64" headerToolTip="Add to iTunes after encoding" id="326">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="iTunes">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2298,8 +2298,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Skip" width="32" minWidth="32" maxWidth="32" headerToolTip="Attempt to delete commercials.   Mutually exclusive with Mark commercials" id="853">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Cut">
+                                                        <tableColumn identifier="Skip" width="32" minWidth="32" maxWidth="75" headerToolTip="Attempt to delete commercials.   Mutually exclusive with Mark commercials" id="853">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Cut">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2318,8 +2318,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="32" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Skip commercials" id="1324">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Mark">
+                                                        <tableColumn identifier="Mark" width="32" minWidth="32" maxWidth="64" headerToolTip="Find and mark commercials as chapters.  Mutually exclusive with Skip commercials" id="1324">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Mark">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2338,8 +2338,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="HDOnly" width="50" minWidth="32" maxWidth="50" hidden="YES" headerToolTip="Restricts recordings to only HD shows" id="1360">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="HD Only">
+                                                        <tableColumn identifier="HDOnly" width="50" minWidth="32" maxWidth="75" hidden="YES" headerToolTip="Restricts recordings to only HD shows" id="1360">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="HD Only">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2358,8 +2358,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="SDOnly" width="50" minWidth="32" maxWidth="50" hidden="YES" headerToolTip="Restrict recordings to Standard Definition (low resolution) only" id="1366">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SD Only">
+                                                        <tableColumn identifier="SDOnly" width="50" minWidth="32" maxWidth="75" hidden="YES" headerToolTip="Restrict recordings to Standard Definition (low resolution) only" id="1366">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="SD Only">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2378,8 +2378,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Suggestions" width="40" minWidth="32" maxWidth="80" hidden="YES" headerToolTip="Record Tivo Suggestions" id="1313">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Suggestions">
+                                                        <tableColumn identifier="Suggestions" width="40" minWidth="32" maxWidth="105" hidden="YES" headerToolTip="Record Tivo Suggestions" id="1313">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Suggestions">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2398,8 +2398,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="pyTiVo" width="32" minWidth="32" maxWidth="45" hidden="YES" headerToolTip="Generate text metadata file necessary for pyTiVo usage" id="951">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="pyTiVo">
+                                                        <tableColumn identifier="pyTiVo" width="32" minWidth="32" maxWidth="75" hidden="YES" headerToolTip="Generate text metadata file necessary for pyTiVo usage" id="951">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="pyTiVo">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2418,8 +2418,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="UseSkipMode" width="58" minWidth="32" maxWidth="70" id="igU-CQ-MIG">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="SkipMode">
+                                                        <tableColumn identifier="UseSkipMode" width="58" minWidth="32" maxWidth="100" id="igU-CQ-MIG">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="SkipMode">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2453,8 +2453,8 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Subtitles" width="32" minWidth="32" maxWidth="60" hidden="YES" headerToolTip="Export subtitles .SRT file" id="953">
-                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Subtitle">
+                                                        <tableColumn identifier="Subtitles" width="32" minWidth="32" maxWidth="75" hidden="YES" headerToolTip="Export subtitles .SRT file" id="953">
+                                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Subtitle">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -2473,7 +2473,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="Delete" width="54" minWidth="30" maxWidth="60" hidden="YES" headerToolTip="WARNING: will delete original show on TiVo after successful download." id="05W-de-TaL">
+                                                        <tableColumn identifier="Delete" width="54" minWidth="30" maxWidth="85" hidden="YES" headerToolTip="WARNING: will delete original show on TiVo after successful download." id="05W-de-TaL">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Del After">
                                                                 <font key="font" metaFont="smallSystem"/>
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
