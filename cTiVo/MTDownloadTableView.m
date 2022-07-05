@@ -305,8 +305,8 @@ __DDLOGHERE__
 	result.imageView.image = nil;
 	
     BOOL programColumn = [tableColumn.identifier isEqualToString:@"Programs"];
-    BOOL seriesColumn = [tableColumn.identifier isEqualToString:@"Series"];
-    BOOL stageColumn = [tableColumn.identifier isEqualToString:@"DL Stage"];
+    BOOL seriesColumn  = !programColumn && [tableColumn.identifier isEqualToString:@"Series"];
+    BOOL stageColumn   = !programColumn && !seriesColumn && [tableColumn.identifier isEqualToString:@"DL Stage"];
 
 	MTCheckBox * checkBox = nil;
 	if ([result isKindOfClass:[MTDownloadCheckTableCell class]]) {
