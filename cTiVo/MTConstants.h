@@ -113,9 +113,6 @@
 #define kMTSubscribedCallSign @"StationCallSign"
 #define kMTSubscribedDeleteAfterDownload @"DeleteAfterDownload"
 
-#define kMTTVDBToken @"TVDBToken"
-#define kMTTVDBTokenExpire @"TVDBTokenExpire"
-
 //Download queue userDefaults
 #define kMTQueue      @"Queue"
 #define kMTQueueID    @"QueueID"

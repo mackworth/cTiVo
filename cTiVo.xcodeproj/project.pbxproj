@@ -38,7 +38,6 @@
 		1E5050D022556CC300D5981B /* MTRemoteWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6AB106202A0BDB008A0F32 /* MTRemoteWindowController.m */; };
 		1E5050D122556CC300D5981B /* DDOSLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E675C20E1E970005465EF /* DDOSLogger.m */; };
 		1E5050D222556CC300D5981B /* MTAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */; };
-		1E5050D322556CC300D5981B /* MTTVDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */; };
 		1E5050D422556CC300D5981B /* MTTiVoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BC916766FA600CE32DE /* MTTiVoManager.m */; };
 		1E5050D522556CC300D5981B /* MTDownloadTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */; };
 		1E5050D622556CC300D5981B /* MTProgramTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCE16766FA600CE32DE /* MTProgramTableView.m */; };
@@ -340,7 +339,6 @@
 		1EB2D9902113D7F400E50C9B /* skipModeComskip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EB2D98F2113D7F300E50C9B /* skipModeComskip@2x.png */; };
 		1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1EB49BA01C50A4B100887240 /* tivo-libre.jar in Resources */ = {isa = PBXBuildFile; fileRef = 1EB49B9F1C50A49000887240 /* tivo-libre.jar */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1EC44B2F1F06F12100B73DE1 /* MTTVDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */; };
 		1ECD9D411C8265D600FBC78D /* MTChannelEditorController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD9D3F1C8265D600FBC78D /* MTChannelEditorController.m */; };
 		1ECD9D421C8265D600FBC78D /* MTChannelEditorController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1ECD9D401C8265D600FBC78D /* MTChannelEditorController.xib */; };
 		1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED49972174D898D0022E084 /* MTTiVoPopUpButton.m */; };
@@ -437,6 +435,19 @@
 		5C98A48C2BE20ED1761FDB9D /* Pods_cTiVo_MAS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */; };
 		6E8C4CEF0E977C1049A1473C /* Pods_cTiVo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */; };
 		94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */ = {isa = PBXBuildFile; fileRef = 94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		AABD5A102896DEEE0040A017 /* MTTVDBRateLimiterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A0F2896DEEE0040A017 /* MTTVDBRateLimiterTests.swift */; };
+		AABD5A16289716D00040A017 /* MTTVDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A15289716D00040A017 /* MTTVDBService.swift */; };
+		AABD5A17289716D00040A017 /* MTTVDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A15289716D00040A017 /* MTTVDBService.swift */; };
+		AABD5A19289731DC0040A017 /* MTTVDBServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A18289731DC0040A017 /* MTTVDBServiceTests.swift */; };
+		AABD5A1B289737E40040A017 /* MTTVDBMovieService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1A289737E40040A017 /* MTTVDBMovieService.swift */; };
+		AABD5A1C289737E40040A017 /* MTTVDBMovieService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1A289737E40040A017 /* MTTVDBMovieService.swift */; };
+		AABD5A1E28973D960040A017 /* MTTVDBMovieServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1D28973D960040A017 /* MTTVDBMovieServiceTests.swift */; };
+		AABD5A20289744560040A017 /* MTTVDBCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1F289744560040A017 /* MTTVDBCache.swift */; };
+		AABD5A21289744560040A017 /* MTTVDBCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1F289744560040A017 /* MTTVDBCache.swift */; };
+		AABD5A23289745680040A017 /* MTTVDBCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A22289745680040A017 /* MTTVDBCacheTests.swift */; };
+		AABD5A252897510F0040A017 /* MTTVDBTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A242897510F0040A017 /* MTTVDBTests.swift */; };
+		B81EA4A9630D6D39631FD164 /* MTTVDBRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */; };
+		B81EA7E591FD9C65339453AC /* MTTVDBRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
@@ -580,6 +591,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = A5A3663D4E22C2D279C554893E4F283E;
 			remoteInfo = "Pods-cTiVo MAS";
+		};
+		AABD59EE2895FECC0040A017 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D2D60B9416766EFD00CE32DE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2D60B9C16766EFD00CE32DE;
+			remoteInfo = cTiVo;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -1006,8 +1024,6 @@
 		1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLogFormatter.m; sourceTree = "<group>"; };
 		1EB49B9F1C50A49000887240 /* tivo-libre.jar */ = {isa = PBXFileReference; lastKnownFileType = archive.jar; name = "tivo-libre.jar"; path = "../tivo-libre.jar"; sourceTree = "<group>"; };
 		1EB757711D8712AB0045D040 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = ReleaseNotes.md; path = ../cTiVo/ReleaseNotes.md; sourceTree = "<group>"; };
-		1EC44B2D1F06F12100B73DE1 /* MTTVDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTVDB.h; sourceTree = "<group>"; };
-		1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTVDB.m; sourceTree = "<group>"; };
 		1ECB90EF20DD35B200E3317D /* ccextractor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ccextractor; sourceTree = "<group>"; };
 		1ECB90F020DD364700E3317D /* libcroco-0.6.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libcroco-0.6.3.dylib"; sourceTree = "<group>"; };
 		1ECB90F120DD364800E3317D /* libvorbisenc.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libvorbisenc.2.dylib; sourceTree = "<group>"; };
@@ -1117,7 +1133,17 @@
 		7AA8CE2ABFE88C1DF334192C /* Pods-cTiVo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.debug.xcconfig"; sourceTree = "<group>"; };
 		94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ffmpeg_edl_ac3.sh; sourceTree = "<group>"; };
 		96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo_MAS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AABD59EA2895FECC0040A017 /* cTiVoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = cTiVoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AABD5A0F2896DEEE0040A017 /* MTTVDBRateLimiterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBRateLimiterTests.swift; sourceTree = "<group>"; };
+		AABD5A15289716D00040A017 /* MTTVDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBService.swift; sourceTree = "<group>"; };
+		AABD5A18289731DC0040A017 /* MTTVDBServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBServiceTests.swift; sourceTree = "<group>"; };
+		AABD5A1A289737E40040A017 /* MTTVDBMovieService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBMovieService.swift; sourceTree = "<group>"; };
+		AABD5A1D28973D960040A017 /* MTTVDBMovieServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBMovieServiceTests.swift; sourceTree = "<group>"; };
+		AABD5A1F289744560040A017 /* MTTVDBCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBCache.swift; sourceTree = "<group>"; };
+		AABD5A22289745680040A017 /* MTTVDBCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBCacheTests.swift; sourceTree = "<group>"; };
+		AABD5A242897510F0040A017 /* MTTVDBTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBTests.swift; sourceTree = "<group>"; };
 		B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTTVDBRateLimiter.swift; sourceTree = "<group>"; };
 		D2001C211704F93F00B75D9C /* MTSrt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTSrt.h; sourceTree = "<group>"; };
 		D2001C221704F93F00B75D9C /* MTSrt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSrt.m; sourceTree = "<group>"; };
 		D2001C231704F93F00B75D9C /* MTEdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTEdl.h; sourceTree = "<group>"; };
@@ -1246,6 +1272,13 @@
 				1E50511622556CC300D5981B /* libmp4v2.a in Frameworks */,
 				1E40C48E251D4FE7004BCC38 /* CoreData.framework in Frameworks */,
 				5C98A48C2BE20ED1761FDB9D /* Pods_cTiVo_MAS.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AABD59E72895FECC0040A017 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1582,6 +1615,26 @@
 			path = cTiVoScripts;
 			sourceTree = "<group>";
 		};
+		AABD59EB2895FECC0040A017 /* cTiVoTests */ = {
+			isa = PBXGroup;
+			children = (
+				AABD5A0E2896DE2D0040A017 /* Data Model */,
+			);
+			path = cTiVoTests;
+			sourceTree = "<group>";
+		};
+		AABD5A0E2896DE2D0040A017 /* Data Model */ = {
+			isa = PBXGroup;
+			children = (
+				AABD5A22289745680040A017 /* MTTVDBCacheTests.swift */,
+				AABD5A1D28973D960040A017 /* MTTVDBMovieServiceTests.swift */,
+				AABD5A0F2896DEEE0040A017 /* MTTVDBRateLimiterTests.swift */,
+				AABD5A18289731DC0040A017 /* MTTVDBServiceTests.swift */,
+				AABD5A242897510F0040A017 /* MTTVDBTests.swift */,
+			);
+			name = "Data Model";
+			sourceTree = "<group>";
+		};
 		D272E49116B33D1600392165 /* UI Classes - Manual TiVo Editor */ = {
 			isa = PBXGroup;
 			children = (
@@ -1650,6 +1703,7 @@
 				1EEA5CA32509748400E8A277 /* GoogleService-Info.plist */,
 				D2C0380F17131F9A0001BA52 /* Update */,
 				D2D60BA716766EFD00CE32DE /* cTiVo */,
+				AABD59EB2895FECC0040A017 /* cTiVoTests */,
 				D2D60BA016766EFD00CE32DE /* Frameworks */,
 				D2D60B9E16766EFD00CE32DE /* Products */,
 				66073F09C9423674FE368EAB /* Pods */,
@@ -1661,6 +1715,7 @@
 			children = (
 				D2D60B9D16766EFD00CE32DE /* cTiVo.app */,
 				1E5051C022556CC300D5981B /* cTV.app */,
+				AABD59EA2895FECC0040A017 /* cTiVoTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1820,8 +1875,10 @@
 				D22BC41D1680DB5E007D699C /* MTTiVoShow.h */,
 				D22BC41E1680DB5E007D699C /* MTTiVoShow.m */,
 				1E8945C628514E9500FFD411 /* MTTVDB.swift */,
-				1EC44B2D1F06F12100B73DE1 /* MTTVDB.h */,
-				1EC44B2E1F06F12100B73DE1 /* MTTVDB.m */,
+				AABD5A1F289744560040A017 /* MTTVDBCache.swift */,
+				AABD5A1A289737E40040A017 /* MTTVDBMovieService.swift */,
+				B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */,
+				AABD5A15289716D00040A017 /* MTTVDBService.swift */,
 				1E17E1171FF7ED8900AF0F7C /* MTShowFolder.h */,
 				1E17E1181FF7ED8900AF0F7C /* MTShowFolder.m */,
 				1E791BD21697C59300E47E84 /* MTSubscription.h */,
@@ -1896,6 +1953,24 @@
 			productReference = 1E5051C022556CC300D5981B /* cTV.app */;
 			productType = "com.apple.product-type.application";
 		};
+		AABD59E92895FECC0040A017 /* cTiVoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AABD59F02895FECC0040A017 /* Build configuration list for PBXNativeTarget "cTiVoTests" */;
+			buildPhases = (
+				AABD59E62895FECC0040A017 /* Sources */,
+				AABD59E72895FECC0040A017 /* Frameworks */,
+				AABD59E82895FECC0040A017 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AABD59EF2895FECC0040A017 /* PBXTargetDependency */,
+			);
+			name = cTiVoTests;
+			productName = cTiVoTests;
+			productReference = AABD59EA2895FECC0040A017 /* cTiVoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		D2D60B9C16766EFD00CE32DE /* cTiVo */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
@@ -1929,9 +2004,15 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = MT;
+				LastSwiftUpdateCheck = 1340;
 				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = cTiVo;
 				TargetAttributes = {
+					AABD59E92895FECC0040A017 = {
+						CreatedOnToolsVersion = 13.4.1;
+						LastSwiftMigration = 1340;
+						TestTargetID = D2D60B9C16766EFD00CE32DE;
+					};
 					D2D60B9C16766EFD00CE32DE = {
 						LastSwiftMigration = 1340;
 						ProvisioningStyle = Automatic;
@@ -1970,6 +2051,7 @@
 			targets = (
 				D2D60B9C16766EFD00CE32DE /* cTiVo */,
 				1E5050CA22556CC300D5981B /* cTiVo MAS */,
+				AABD59E92895FECC0040A017 /* cTiVoTests */,
 			);
 		};
 /* End PBXProject section */
@@ -2026,6 +2108,7 @@
 		1EF4A2CF27497ECB00781BDD /* nanopb */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
+			name = nanopb;
 			path = nanopb.framework;
 			remoteRef = 1EF4A2CE27497ECB00781BDD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -2049,6 +2132,7 @@
 		1EF4A2D527497ECB00781BDD /* PromisesObjC */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
+			name = PromisesObjC;
 			path = FBLPromises.framework;
 			remoteRef = 1EF4A2D427497ECB00781BDD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -2123,6 +2207,13 @@
 				1E50515622556CC300D5981B /* MTMainWindowDrawer.xib in Resources */,
 				1E50515722556CC300D5981B /* elgatoQuit.scpt in Resources */,
 				1E50515822556CC300D5981B /* PeanutRemote@2x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AABD59E82895FECC0040A017 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2386,9 +2477,9 @@
 				1E5050CE22556CC300D5981B /* main.m in Sources */,
 				1E5050CF22556CC300D5981B /* MTChannelPopUpButton.m in Sources */,
 				1E5050D022556CC300D5981B /* MTRemoteWindowController.m in Sources */,
+				AABD5A21289744560040A017 /* MTTVDBCache.swift in Sources */,
 				1E5050D122556CC300D5981B /* DDOSLogger.m in Sources */,
 				1E5050D222556CC300D5981B /* MTAppDelegate.m in Sources */,
-				1E5050D322556CC300D5981B /* MTTVDB.m in Sources */,
 				1E5050D422556CC300D5981B /* MTTiVoManager.m in Sources */,
 				1E5050D522556CC300D5981B /* MTDownloadTableView.m in Sources */,
 				1E5050D622556CC300D5981B /* MTProgramTableView.m in Sources */,
@@ -2404,6 +2495,7 @@
 				1E5050E022556CC300D5981B /* MTCheckBox.m in Sources */,
 				1E5050E122556CC300D5981B /* MTSubscriptionTableView.m in Sources */,
 				1E5050E222556CC300D5981B /* MTFormatPopUpButton.m in Sources */,
+				AABD5A1C289737E40040A017 /* MTTVDBMovieService.swift in Sources */,
 				1E5050E322556CC300D5981B /* MTFormatPopUpTableCellView.m in Sources */,
 				1E5050E422556CC300D5981B /* MTTiVo.m in Sources */,
 				1E5050E522556CC300D5981B /* MTSubscription.m in Sources */,
@@ -2421,6 +2513,7 @@
 				1E5050F122556CC300D5981B /* MTShowFolder.m in Sources */,
 				1E5050F222556CC300D5981B /* NSString+RFC3339Date.m in Sources */,
 				1E5050F322556CC300D5981B /* NSNotificationCenter+Threads.m in Sources */,
+				AABD5A17289716D00040A017 /* MTTVDBService.swift in Sources */,
 				1E5050F422556CC300D5981B /* NSURL+MTURLExtensions.m in Sources */,
 				1E5050F522556CC300D5981B /* MTIsStringEmpty.m in Sources */,
 				1E5050F622556CC300D5981B /* NSArray+Map.m in Sources */,
@@ -2444,6 +2537,19 @@
 				1E50510922556CC300D5981B /* MTWeakTimer.m in Sources */,
 				1E50510A22556CC300D5981B /* MTRPCData.m in Sources */,
 				1E50510B22556CC300D5981B /* NSString+Helpers.m in Sources */,
+				B81EA4A9630D6D39631FD164 /* MTTVDBRateLimiter.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AABD59E62895FECC0040A017 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AABD5A19289731DC0040A017 /* MTTVDBServiceTests.swift in Sources */,
+				AABD5A23289745680040A017 /* MTTVDBCacheTests.swift in Sources */,
+				AABD5A252897510F0040A017 /* MTTVDBTests.swift in Sources */,
+				AABD5A102896DEEE0040A017 /* MTTVDBRateLimiterTests.swift in Sources */,
+				AABD5A1E28973D960040A017 /* MTTVDBMovieServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2456,9 +2562,9 @@
 				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
 				1EFA8D53211BFF6A00B4505D /* MTChannelPopUpButton.m in Sources */,
 				1E6AB108202A0BDB008A0F32 /* MTRemoteWindowController.m in Sources */,
+				AABD5A1B289737E40040A017 /* MTTVDBMovieService.swift in Sources */,
 				1E8E675D20E1E971005465EF /* DDOSLogger.m in Sources */,
 				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
-				1EC44B2F1F06F12100B73DE1 /* MTTVDB.m in Sources */,
 				D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */,
 				D2D60BD716766FA600CE32DE /* MTDownloadTableView.m in Sources */,
 				D2D60BD916766FA600CE32DE /* MTProgramTableView.m in Sources */,
@@ -2488,6 +2594,7 @@
 				1E8945C728514E9500FFD411 /* MTTVDB.swift in Sources */,
 				D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */,
 				1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */,
+				AABD5A20289744560040A017 /* MTTVDBCache.swift in Sources */,
 				1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */,
 				1E17E1191FF7ED8900AF0F7C /* MTShowFolder.m in Sources */,
 				1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */,
@@ -2501,6 +2608,7 @@
 				D2001C281704F93F00B75D9C /* MTEdl.m in Sources */,
 				D291436E1713467A00CE3202 /* NSString+HTML.m in Sources */,
 				1EB2D98E2110DC7B00E50C9B /* MTGCDTimer.m in Sources */,
+				AABD5A16289716D00040A017 /* MTTVDBService.swift in Sources */,
 				1EFA8D54211BFF6A00B4505D /* MTChannelPopUpTableCellView.m in Sources */,
 				D291436F1713467F00CE3202 /* GTMNSString+HTML.m in Sources */,
 				D2C6BB5A1714681C00289751 /* MTTask.m in Sources */,
@@ -2516,6 +2624,7 @@
 				1E56038F1F45103400454157 /* MTRPCData.m in Sources */,
 				D295CE84175A6AE500D010B8 /* NSString+Helpers.m in Sources */,
 				1E5486731FF898A800412D7B /* PFMoveApplication.m in Sources */,
+				B81EA7E591FD9C65339453AC /* MTTVDBRateLimiter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2531,6 +2640,11 @@
 			isa = PBXTargetDependency;
 			name = "Pods-cTiVo MAS";
 			targetProxy = 1EF4A2DD27497F1100781BDD /* PBXContainerItemProxy */;
+		};
+		AABD59EF2895FECC0040A017 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2D60B9C16766EFD00CE32DE /* cTiVo */;
+			targetProxy = AABD59EE2895FECC0040A017 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2612,7 +2726,7 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 3.4.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVo;
 				PRODUCT_NAME = cTV;
@@ -2663,13 +2777,97 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 3.4.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVo;
 				PRODUCT_NAME = cTV;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		AABD59F12895FECC0040A017 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = GRL5LU9H9X;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/cTiVo.app/Contents/MacOS/cTiVo";
+			};
+			name = Debug;
+		};
+		AABD59F22895FECC0040A017 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GRL5LU9H9X;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/cTiVo.app/Contents/MacOS/cTiVo";
 			};
 			name = Release;
 		};
@@ -2728,7 +2926,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CFLAGS = (
 					"-Wall",
@@ -2791,7 +2989,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = (
 					"-Wall",
 					"-Wextra",
@@ -2819,7 +3017,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = E8XXXD4S77;
+				DEVELOPMENT_TEAM = GRL5LU9H9X;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2846,7 +3044,7 @@
 					"$(PROJECT_DIR)/cTiVo/cTiVoBinaries/lib",
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 3.5.3;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
@@ -2901,7 +3099,7 @@
 					"$(PROJECT_DIR)/cTiVo/cTiVoBinaries/lib",
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9/",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 3.5.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2921,6 +3119,15 @@
 			buildConfigurations = (
 				1E5051BE22556CC300D5981B /* Debug */,
 				1E5051BF22556CC300D5981B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AABD59F02895FECC0040A017 /* Build configuration list for PBXNativeTarget "cTiVoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AABD59F12895FECC0040A017 /* Debug */,
+				AABD59F22895FECC0040A017 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
