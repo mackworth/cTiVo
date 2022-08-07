@@ -51,7 +51,6 @@ Please let us know of any problems or suggestions at [Issues](https://github.com
 *    Directly select streaming services.
 *    Information about current status of TiVo (disk space, activity, network etc).
 
-
 ## To install:
 
 Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), and run it. It will ask if OK to move to Applications folder. It will automatically find your TiVos, and show you what's available.
@@ -71,14 +70,16 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 
 ## Compatibility:
 
-cTiVo is fully compatible with MacOS Monterey (10.16) back through Sierra (10.12). 
-The latest release compatible with 10.10 and 10.9 is 3.4.1.
+[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.5.3) is fully compatible with MacOS Monterey (12.x) back through Sierra (10.12). 
+This (3.5.3) will be the final release for MacOS Sierra (10.12).
+For MacOS El Capitan (10.11), [final release is 3.4.5](https://github.com/mackworth/cTiVo/releases/tag/3.4.5)
+For MacOS Mavericks (10.9) and Yosemite (10.10), [final release is 3.4.4](https://github.com/mackworth/cTiVo/releases/tag/3.4.4)
 
 cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3HD TiVos do NOT support Transport Stream for download, which is necessary for any channels/shows transmitted by your cable company in H.264, which is true for most cable companies now. As Minis and Streams do not store their own shows, cTiVo only supports Remote Control for them.
 
-RPC Certificate: cTiVo's RPC Certificate will currently expire in December 2022, but we now have the certificate through May 2024. If we cannot update it beyond that, then the features that require the RPC connection (marked below with a asterisk * ), would not be available. The primary cTiVo functionalities (listing the Tivo's shows and downloading them) should continue, regardless.
+RPC Certificate: TiVo's RPC Certificate in versions 3.4.4, 3.4.5, and 3.5.3 will expire in May 2024, although we expect we will be able to get a new one before then. Prior versions will expire in December 2022, and the features that require the RPC connection (marked below with a asterisk * ) will not be available. The primary cTiVo functionalities (listing the Tivo's shows and downloading them) should continue regardless.
 
-Until recently, TiVo's new Edge product was incompatible with any PC/Mac downloads, but it appears that TiVo has finally fixed this with software release 21.9.7.v3-USM-12-D6F.
+Initially, TiVo's Edge DVR was incompatible with any PC/Mac downloads, but TiVo finally fixed this with software release 21.9.7.v3-USM-12-D6F.
 
 cTiVo is free to use, and the source is available for anyone to browse and contribute to. 
 

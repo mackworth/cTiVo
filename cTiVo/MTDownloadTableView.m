@@ -305,8 +305,8 @@ __DDLOGHERE__
 	result.imageView.image = nil;
 	
     BOOL programColumn = [tableColumn.identifier isEqualToString:@"Programs"];
-    BOOL seriesColumn = [tableColumn.identifier isEqualToString:@"Series"];
-    BOOL stageColumn = [tableColumn.identifier isEqualToString:@"DL Stage"];
+    BOOL seriesColumn  = !programColumn && [tableColumn.identifier isEqualToString:@"Series"];
+    BOOL stageColumn   = !programColumn && !seriesColumn && [tableColumn.identifier isEqualToString:@"DL Stage"];
 
 	MTCheckBox * checkBox = nil;
 	if ([result isKindOfClass:[MTDownloadCheckTableCell class]]) {
@@ -347,7 +347,7 @@ __DDLOGHERE__
    } else if ([tableColumn.identifier isEqualToString:@"TiVo"]) {
         textVal = thisShow.tiVoName ;
         result.textField.textColor = [NSColor controlTextColor];
-        if (!thisShow.tiVo.isReachable && download.isDownloading) {
+        if (thisShow.tiVo && ( !thisShow.tiVo.isReachable || thisShow.tiVo.connectionProblem) && download.isDownloading) {
 			if (@available(macOS 10.10,*)) {
             	result.textField.textColor = [NSColor systemRedColor];
 			} else {

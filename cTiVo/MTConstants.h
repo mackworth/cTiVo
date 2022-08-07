@@ -26,7 +26,7 @@
 
 //UI Change Notifications
 
-#define kMTNotificationTiVoListUpdated @"MTNotificationTiVoListUpdated"  //optional object: which Tivo changed/added; not used
+#define kMTNotificationTiVoListUpdated @"MTNotificationTiVoListUpdated"  //optional object: name of selected Tivo
 #define kMTNotificationFormatListUpdated @"MTNotificationFormatListUpdated"
 #define kMTNotificationProgressUpdated @"MTNotificationProgressUpdated"  // optional object: which MTDownload, 
 #define kMTNotificationNetworkChanged @"MTNotificationNetworkChanged"

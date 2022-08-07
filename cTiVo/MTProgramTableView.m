@@ -11,7 +11,6 @@
 #import "MTTiVoManager.h"
 #import "MTMainWindowController.h"
 
-#import "MTDownloadCheckTableCell.h"
 #import "MTProgressCell.h"
 #import "DragDropImageView.h"
 #import "MTShowFolder.h"
@@ -622,13 +621,7 @@ __DDLOGHERE__
 -(NSTableCellView *) configureIconCell: (NSTableCellView *) cell forShow: (MTTiVoShow *) thisShow withWidth:(CGFloat) width {
 	NSImageView * imageView = cell.imageView;
 	NSString * imageName = thisShow.imageString;
-	imageView.imageScaling = NSImageScaleProportionallyUpOrDown;
 	imageView.image = [NSImage imageNamed: imageName];
-	CGFloat height = MIN(width, MIN(self.imageRowHeight, 24));
-	CGFloat leftMargin = (width -height)/2;
-	CGFloat topMargin = (self.imageRowHeight-height)/2;
-	imageView.frame = CGRectMake(leftMargin, topMargin, height, height);
-	imageView.animates = YES;
 	cell.toolTip = [[imageName stringByReplacingOccurrencesOfString:@"-" withString:@" "] capitalizedString];
 	return cell;
 }
@@ -811,7 +804,7 @@ __DDLOGHERE__
 	result.textField.textColor = [NSColor controlTextColor];
 	if ([thisShow.protectedShow boolValue]) {
 		result.textField.textColor = [NSColor disabledControlTextColor ];
-	} else if (thisShow && [identifier isEqualToString:@"TiVo"] && !thisShow.tiVo.isReachable) {
+	} else if (thisShow && [identifier isEqualToString:@"TiVo"] && (!thisShow.tiVo.isReachable || thisShow.tiVo.connectionProblem)) {
 		if (@available(macOS 10.10,*)) {
 			result.textField.textColor = [NSColor systemRedColor];
 		} else {
