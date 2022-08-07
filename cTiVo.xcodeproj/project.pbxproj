@@ -29,6 +29,7 @@
 		1E40C478251D4EEA004BCC38 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA516766EFD00CE32DE /* CoreData.framework */; };
 		1E40C48E251D4FE7004BCC38 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA516766EFD00CE32DE /* CoreData.framework */; };
 		1E40C48F251D4FF1004BCC38 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E40C479251D4EF8004BCC38 /* libsqlite3.tbd */; };
+		1E41F3DF28A0562A006B0355 /* MTDDSwiftLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E41F3DE28A0562A006B0355 /* MTDDSwiftLogger.m */; };
 		1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */; };
 		1E4A38481A37C0F4001D84A7 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */; };
 		1E5050CC22556CC300D5981B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
@@ -886,6 +887,8 @@
 		1E3D27DE1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNotificationCenter+Threads.h"; sourceTree = "<group>"; };
 		1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNotificationCenter+Threads.m"; sourceTree = "<group>"; };
 		1E40C479251D4EF8004BCC38 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		1E41F3DD28A0562A006B0355 /* MTDDSwiftLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTDDSwiftLogger.h; sourceTree = "<group>"; };
+		1E41F3DE28A0562A006B0355 /* MTDDSwiftLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTDDSwiftLogger.m; sourceTree = "<group>"; };
 		1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTIsStringEmpty.h; sourceTree = "<group>"; };
 		1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTIsStringEmpty.m; sourceTree = "<group>"; };
 		1E4A38461A37C0F4001D84A7 /* MTSubscriptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTSubscriptionList.h; sourceTree = "<group>"; };
@@ -1495,6 +1498,8 @@
 			isa = PBXGroup;
 			children = (
 				1E59368319648C180008780B /* DDLog.h */,
+				1E41F3DD28A0562A006B0355 /* MTDDSwiftLogger.h */,
+				1E41F3DE28A0562A006B0355 /* MTDDSwiftLogger.m */,
 				1E59368819648C860008780B /* DDLog.m */,
 				1E0D65CC20ACA000006798CF /* DDLogMacros.h */,
 				1E0D65CA20AC9D85006798CF /* DDLegacyMacros.h */,
@@ -2509,6 +2514,7 @@
 				1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */,
 				1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */,
 				1E52C5261F2420A700389E93 /* DragDropImageView.m in Sources */,
+				1E41F3DF28A0562A006B0355 /* MTDDSwiftLogger.m in Sources */,
 				1E59368C19648CFF0008780B /* MTLog.m in Sources */,
 				1ED49975174D898D0022E084 /* MTTiVoPopUpButton.m in Sources */,
 				1ED49976174D898D0022E084 /* MTTiVoPopUpTableCellView.m in Sources */,
