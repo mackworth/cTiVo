@@ -2,6 +2,9 @@ PODS:
   - AppCenter/Analytics (4.3.0):
     - AppCenter/Core
   - AppCenter/Core (4.3.0)
+  - CocoaLumberjack/Core (3.7.4)
+  - CocoaLumberjack/Swift (3.7.4):
+    - CocoaLumberjack/Core
   - Firebase/CoreOnly (8.9.1):
     - FirebaseCore (= 8.9.1)
   - Firebase/Crashlytics (8.9.1):
@@ -47,11 +50,13 @@ PODS:
 
 DEPENDENCIES:
   - AppCenter/Analytics
+  - CocoaLumberjack/Swift
   - Firebase/Crashlytics
 
 SPEC REPOS:
   trunk:
     - AppCenter
+    - CocoaLumberjack
     - Firebase
     - FirebaseCore
     - FirebaseCoreDiagnostics
@@ -64,6 +69,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   AppCenter: 883369ab78427b0561c688158d689dfe1f993ea9
+  CocoaLumberjack: 543c79c114dadc3b1aba95641d8738b06b05b646
   Firebase: fb5114cd2bf96e2ff7bcb01d0d9a156cf5fd2f07
   FirebaseCore: c5aab092d9c4b8efea894946166b04c9d9ef0e68
   FirebaseCoreDiagnostics: 5daa63f1c1409d981a2d5007daa100b36eac6a34
@@ -74,6 +80,6 @@ SPEC CHECKSUMS:
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
 
-PODFILE CHECKSUM: 375dede83a478d95a597c794f939c8563c6078b8
+PODFILE CHECKSUM: 7d0f7878971dd54791243edee31bc0e9cb5c0b07
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3

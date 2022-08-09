@@ -7,13 +7,34 @@
 //
 
 import Foundation
+import CocoaLumberjack
 
+@objc(MTTVDB4)
 class MTTVDB4 : MTTVDB {
 
 static let _singletonInstance = MTTVDB4()
 private override init() {
     //This prevents others from using the default '()' initializer for this class.
 }
+public static var logLevel = DDLogLevel.verbose;
+  
+@objc public static var ddLogLevel : DDLogLevel { 
+  get {return logLevel}
+  @objc(ddSetLogLevel:) set {logLevel = newValue}
+}
+
+  func DDLogReport(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line ) {
+    DDLogError( msg, level: Self.logLevel, context: 1, file: file, function: function, line:line) 
+  }
+  func DDLogMajor(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line ) {
+    DDLogWarn( msg, level: Self.logLevel, context: 1, file: file, function: function, line:line) 
+  }
+  func DDLogDetail(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line ) {
+    DDLogInfo( msg, level: Self.logLevel, context: 1, file: file, function: function, line:line) 
+  }
+  func DDLogVerbose(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line ) {
+    CocoaLumberjack.DDLogVerbose( msg, level: Self.logLevel, context: 1, file: file, function: function, line:line)  
+  }
 
 override class func sharedManager() -> MTTVDB4 {
     return MTTVDB4._singletonInstance
@@ -21,13 +42,13 @@ override class func sharedManager() -> MTTVDB4 {
 
 override func getTheTVDBDetails(_ show: MTTiVoShow) {
     if let title = show.showTitle {
-        print ("Swift TVDB calling getTVDBDetails for \(title)")
+      DDLogReport( "Swift TVDB for \(title)")
     }
 }
 
 override func getTheMovieDBDetails(_ show: MTTiVoShow) {
     if let title = show.showTitle {
-        print ("Swift TVDB calling getTVDBDetails for \(title)")
+      DDLogVerbose("Swift MOVIEDB for \(title)")
     }
 }
 
