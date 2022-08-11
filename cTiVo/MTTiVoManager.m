@@ -21,9 +21,11 @@
 #import "cTiVo-Swift.h"
 
 #include "MTWeakTimer.h"
+@import UserNotifications;
+
 //#import "Crashlytics/Crashlytics.h"  //to log TiVo failure reasons
 
-@interface MTTiVoManager ()    <NSUserNotificationCenterDelegate>        {
+@interface MTTiVoManager ()    <NSUserNotificationCenterDelegate, UNUserNotificationCenterDelegate>        {
     NSNetServiceBrowser *tivoBrowser;
 	NSMetadataQuery *cTiVoQuery;
 	BOOL volatile loadingManualTiVos;
@@ -1733,8 +1735,63 @@ __DDLOGHERE__
 #pragma mark - Apple Notifications
 
 -(void) loadUserNotifications {
-    [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
+   if (@available(macOS 10.14,*)) {
+        UNUserNotificationCenter.currentNotificationCenter.delegate = self;
+        [UNUserNotificationCenter.currentNotificationCenter requestAuthorizationWithOptions:UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionProvisional  completionHandler:^(BOOL granted, NSError * _Nullable error) {
+            if (granted && !error) {
+                DDLogDetail(@"got authorization for Notifications");
+            } else {
+                DDLogReport(@"Notifications not authorized: %@", error.localizedDescription);
+            }
+        }];
+    } else {
+        [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
+    }
 }
+
+- (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky {
+	DDLogReport(@"Notify: %@: %@\n%@", objName, title, subTitle ?: @"");
+    if (@available(macOS 10.14, *)) {
+        [self notifyForNameNew:objName withTitle:title subTitle:subTitle isSticky:sticky];
+    } else {
+        [self notifyForNameOld:objName withTitle:title subTitle:subTitle isSticky:sticky];
+    }
+}
+
+//MacOS 10.14 and later:
+
+-(void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler API_AVAILABLE(macos(10.14)) {
+    UNNotificationPresentationOptions presentationOptions =
+    UNNotificationPresentationOptionSound
+    | UNNotificationPresentationOptionAlert;
+
+    completionHandler(presentationOptions);
+}
+
+-(void) cancelNotification: (NSString *) identifier API_AVAILABLE(macos(10.14)) {
+    [UNUserNotificationCenter.currentNotificationCenter removeDeliveredNotificationsWithIdentifiers:@[identifier]];
+}
+
+- (void)notifyForNameNew: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky API_AVAILABLE(macos(10.14)) {
+     [UNUserNotificationCenter.currentNotificationCenter getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
+        NSString * identifier = [NSString stringWithFormat:@"%@%@%@", title, subTitle, objName];
+        [UNUserNotificationCenter.currentNotificationCenter removeDeliveredNotificationsWithIdentifiers:@[identifier]];
+        
+        UNMutableNotificationContent * content = [[UNMutableNotificationContent alloc] init];
+        content.title = title;
+        content.subtitle = subTitle;
+        content.body = objName;
+        content.sound = [UNNotificationSound defaultSound];
+
+        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:identifier content:content trigger:nil];
+        [UNUserNotificationCenter.currentNotificationCenter addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+            if (error) DDLogReport(@"Notification error: %@", error.localizedDescription);
+            if (!sticky) [self performSelector:@selector(cancelNotification:) withObject:identifier afterDelay: 60];
+        }];
+    }];
+}
+
+//MacOS prior to 10_14:
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center
      shouldPresentNotification:(NSUserNotification *)notification {
@@ -1745,9 +1802,7 @@ __DDLOGHERE__
     [self notifyForName: nil withTitle:title subTitle:subTitle isSticky:YES ];
 }
 
-- (void)notifyForName: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky {
-	DDLogReport(@"Notify: %@: %@\n%@", objName, title, subTitle ?: @"");
-
+- (void)notifyForNameOld: (NSString *) objName withTitle:(NSString *) title subTitle: (NSString*) subTitle isSticky:(BOOL)sticky NS_DEPRECATED_MAC(10_0, 10_14,"Use UNUserNotification methods instead") {
     NSUserNotification *userNot = [[NSUserNotification alloc] init ];
     userNot.title = title;
     userNot.subtitle = objName;
@@ -1765,7 +1820,7 @@ __DDLOGHERE__
     }
 }
 
-- (void)expireNotification:(NSDictionary *)dict {
+- (void)expireNotification:(NSDictionary *)dict NS_DEPRECATED_MAC(10_0, 10_14 ,"Use UNUserNotification methods instead") {
     NSUserNotification *notification = [dict objectForKey:@"notification"];
     NSUserNotificationCenter *center = [dict objectForKey:@"center"];
     [center removeDeliveredNotification:notification];

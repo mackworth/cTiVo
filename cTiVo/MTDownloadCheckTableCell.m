@@ -37,11 +37,16 @@
     _checkBox = [[MTCheckBox alloc] initWithFrame:CGRectMake((self.bounds.size.width-17)/2, self.bounds.origin.y, 17, self.bounds.size.height)];
     [_checkBox setButtonType:NSButtonTypeSwitch];
     _checkBox.title = @"";
-    [_checkBox setAutoresizingMask:NSViewMinXMargin | NSViewMaxXMargin ];
+    _checkBox.translatesAutoresizingMaskIntoConstraints = NO;
+
     [_checkBox setEnabled:NO];
     [self addSubview:_checkBox];
     [self.textField removeFromSuperview];
      self.textField = nil;
+
+    [_checkBox.heightAnchor constraintEqualToConstant:17].active = YES;
+    [_checkBox.centerXAnchor constraintEqualToAnchor: self.centerXAnchor].active = YES;
+    [_checkBox.centerYAnchor constraintEqualToAnchor: self.centerYAnchor].active = YES;
 }
 
 -(void) setTarget:(id)target {

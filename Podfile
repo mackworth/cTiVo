@@ -6,6 +6,7 @@ use_frameworks!
 target 'cTiVo' do
   pod 'AppCenter/Analytics'
   pod 'Firebase/Crashlytics'
+  pod 'CocoaLumberjack/Swift'
 end
 
 target 'cTiVo MAS' do

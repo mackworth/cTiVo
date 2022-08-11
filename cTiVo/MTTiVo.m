@@ -871,7 +871,7 @@ BOOL channelChecking = NO;
         }
         delay = minDelay*60;
     }
-    DDLogDetail(@"Scheduling Update with delay of %lu seconds", (long)delay);
+    DDLogMajor(@"Scheduling Update with delay of %lu seconds", (long)delay);
     [self performSelector:@selector(updateShows:) withObject:nil afterDelay:delay ];
 }
 
@@ -1457,7 +1457,7 @@ BOOL channelChecking = NO;
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
 	DDLogVerbose(@"TiVo %@ sent data",self);
-    if(self.manualTiVo) _isReachable = YES;
+    self.connectionProblem = NO;
 	[urlData appendData:data];
 }
 
@@ -1510,11 +1510,16 @@ BOOL channelChecking = NO;
     }
 
     [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationTiVoUpdated object:self];
-//    [self reportNetworkFailure];
-    if(self.manualTiVo) _isReachable = NO;
+    if (!self.connectionProblem) {
+        self.connectionProblem = YES;
+        [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationNetworkChanged object:nil];
+    }
+
     self.showURLConnection = nil;
     
     isConnecting = NO;
+
+    [self scheduleNextUpdateAfterDelay:120]; //try again after 2 minutes (e.g. rebooting)
 	
 }
 
@@ -1523,7 +1528,10 @@ BOOL channelChecking = NO;
 {
 	DDLogDetail(@"%@ URL Connection completed ",self);
     DDLogVerbose(@"Data received is %@",[[NSString alloc] initWithData:urlData encoding:NSUTF8StringEncoding]);
-
+    if (self.connectionProblem) {
+        self.connectionProblem = NO;
+        [NSNotificationCenter postNotificationNameOnMainThread: kMTNotificationNetworkChanged object:nil];
+    }
 	if (urlData.length == 0) {
 		DDLogReport(@"No data received from %@ on %@", self, connection);
 		isConnecting = NO;

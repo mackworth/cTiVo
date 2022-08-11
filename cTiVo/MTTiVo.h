@@ -24,6 +24,7 @@
 @property (atomic, assign) BOOL enabled;
 @property (nonatomic, assign)BOOL storeMediaKeyInKeychain;
 @property (atomic, assign) BOOL isReachable;
+@property (atomic, assign) BOOL connectionProblem;
 @property (nonatomic, strong) NSString *mediaKey;
 @property int manualTiVoID;
 @property (nonatomic, readonly) BOOL supportsTransportStream, supportsRPC;

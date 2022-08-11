@@ -44,7 +44,8 @@
 
 @property (nonatomic, strong) NSMutableDictionary < NSString *, NSString *>  *seriesImages;
 
-@property (nonatomic, strong) NSTimer * deadmanTimer; //check connection good every few minutes
+@property (nonatomic, strong) NSTimer * streamDeadmanTimer; //check stream not closed
+@property (nonatomic, strong) NSTimer * roundTripDeadmanTimer; //check roundTrip connection good 
 
 typedef void (^ReadBlock)(NSDictionary *, BOOL);
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, ReadBlock > * readBlocks;
@@ -275,6 +276,14 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 }
 #pragma mark Communications
  -(void) launchServer {
+    if (![NSThread isMainThread]) {
+        //just to be sure; e.g. timers don't get canceled if invalidated from different runloop
+        DDLogReport(@"Launching RPC in background! %@",self.delegate);
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [self launchServer];
+            return;
+        });
+    }
      if (!self.delegate.isReachable) {
          DDLogMajor(@"Can't launch RPC; TiVo %@ offline",self.delegate);
          return;
@@ -313,7 +322,10 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
         _iStreamAnchor = NO; _oStreamAnchor = NO;
         self.iStream = iStream;
         self.oStream = oStream;
-        self.deadmanTimer = [MTWeakTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
+        [self.streamDeadmanTimer invalidate];
+        [self.roundTripDeadmanTimer invalidate];
+        self.streamDeadmanTimer = [MTWeakTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
+        self.roundTripDeadmanTimer = [MTWeakTimer scheduledTimerWithTimeInterval:300 target:self selector:@selector(checkTiVoLive) userInfo:nil repeats:YES];
         DDLogMajor(@"Launching RPC streams for %@", self.delegate);
         [iStream open];
         [oStream open];
@@ -395,8 +407,8 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 -(void) tearDownStreams {
 	DDLogMajor(@"Tearing down streams for %@", self.delegate);
 	
-	[self.deadmanTimer invalidate];
-	self.deadmanTimer = nil;
+	[self.streamDeadmanTimer invalidate];    self.streamDeadmanTimer    = nil;
+	[self.roundTripDeadmanTimer invalidate]; self.roundTripDeadmanTimer = nil;
     [self.iStream setDelegate: nil];
     [self.iStream close];
     [self.oStream setDelegate: nil];
@@ -1147,6 +1159,20 @@ static NSArray * imageResponseTemplate = nil;
 						   @"uiDestinationType":@"flash"}   //classicUI, hme, web, flash
 	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
 		   DDLogReport(@"sent checkService request; got %@", jsonResponse);
+	   }];
+}
+
+-(void) checkTiVoLive {
+    //optStatusGet is low-overhead request, just used to check connection 
+    //if not, underlying transport will re-establish
+	DDLogDetail(@"Checking stream %@", self.delegate);
+	NSDictionary * data = @{};
+	__weak __typeof__(self) weakSelf = self;
+	[self sendRpcRequest:@"optStatusGet"
+				 monitor:NO
+				withData:data
+	   completionHandler:^(NSDictionary *jsonResponse, BOOL isFinal) {
+        DDLogDetail(@"Confirmed stream live: %@", weakSelf.delegate);
 	   }];
 }
 
