@@ -435,13 +435,14 @@
 		5C98A48C2BE20ED1761FDB9D /* Pods_cTiVo_MAS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */; };
 		6E8C4CEF0E977C1049A1473C /* Pods_cTiVo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */; };
 		94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */ = {isa = PBXBuildFile; fileRef = 94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		AA41387C28A2A21B002C9813 /* MTMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA41387B28A2A21B002C9813 /* MTMock.swift */; };
 		AABD5A102896DEEE0040A017 /* MTTVDBRateLimiterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A0F2896DEEE0040A017 /* MTTVDBRateLimiterTests.swift */; };
 		AABD5A16289716D00040A017 /* MTTVDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A15289716D00040A017 /* MTTVDBService.swift */; };
 		AABD5A17289716D00040A017 /* MTTVDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A15289716D00040A017 /* MTTVDBService.swift */; };
 		AABD5A19289731DC0040A017 /* MTTVDBServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A18289731DC0040A017 /* MTTVDBServiceTests.swift */; };
-		AABD5A1B289737E40040A017 /* MTTVDBMovieService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1A289737E40040A017 /* MTTVDBMovieService.swift */; };
-		AABD5A1C289737E40040A017 /* MTTVDBMovieService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1A289737E40040A017 /* MTTVDBMovieService.swift */; };
-		AABD5A1E28973D960040A017 /* MTTVDBMovieServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1D28973D960040A017 /* MTTVDBMovieServiceTests.swift */; };
+		AABD5A1B289737E40040A017 /* MTTMDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1A289737E40040A017 /* MTTMDBService.swift */; };
+		AABD5A1C289737E40040A017 /* MTTMDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1A289737E40040A017 /* MTTMDBService.swift */; };
+		AABD5A1E28973D960040A017 /* MTTMDBServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1D28973D960040A017 /* MTTMDBServiceTests.swift */; };
 		AABD5A20289744560040A017 /* MTTVDBCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1F289744560040A017 /* MTTVDBCache.swift */; };
 		AABD5A21289744560040A017 /* MTTVDBCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A1F289744560040A017 /* MTTVDBCache.swift */; };
 		AABD5A23289745680040A017 /* MTTVDBCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A22289745680040A017 /* MTTVDBCacheTests.swift */; };
@@ -1133,12 +1134,13 @@
 		7AA8CE2ABFE88C1DF334192C /* Pods-cTiVo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.debug.xcconfig"; sourceTree = "<group>"; };
 		94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ffmpeg_edl_ac3.sh; sourceTree = "<group>"; };
 		96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo_MAS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA41387B28A2A21B002C9813 /* MTMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTMock.swift; sourceTree = "<group>"; };
 		AABD59EA2895FECC0040A017 /* cTiVoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = cTiVoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AABD5A0F2896DEEE0040A017 /* MTTVDBRateLimiterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBRateLimiterTests.swift; sourceTree = "<group>"; };
 		AABD5A15289716D00040A017 /* MTTVDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBService.swift; sourceTree = "<group>"; };
 		AABD5A18289731DC0040A017 /* MTTVDBServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBServiceTests.swift; sourceTree = "<group>"; };
-		AABD5A1A289737E40040A017 /* MTTVDBMovieService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBMovieService.swift; sourceTree = "<group>"; };
-		AABD5A1D28973D960040A017 /* MTTVDBMovieServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBMovieServiceTests.swift; sourceTree = "<group>"; };
+		AABD5A1A289737E40040A017 /* MTTMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTMDBService.swift; sourceTree = "<group>"; };
+		AABD5A1D28973D960040A017 /* MTTMDBServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTMDBServiceTests.swift; sourceTree = "<group>"; };
 		AABD5A1F289744560040A017 /* MTTVDBCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBCache.swift; sourceTree = "<group>"; };
 		AABD5A22289745680040A017 /* MTTVDBCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBCacheTests.swift; sourceTree = "<group>"; };
 		AABD5A242897510F0040A017 /* MTTVDBTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBTests.swift; sourceTree = "<group>"; };
@@ -1627,10 +1629,11 @@
 			isa = PBXGroup;
 			children = (
 				AABD5A22289745680040A017 /* MTTVDBCacheTests.swift */,
-				AABD5A1D28973D960040A017 /* MTTVDBMovieServiceTests.swift */,
+				AABD5A1D28973D960040A017 /* MTTMDBServiceTests.swift */,
 				AABD5A0F2896DEEE0040A017 /* MTTVDBRateLimiterTests.swift */,
 				AABD5A18289731DC0040A017 /* MTTVDBServiceTests.swift */,
 				AABD5A242897510F0040A017 /* MTTVDBTests.swift */,
+				AA41387B28A2A21B002C9813 /* MTMock.swift */,
 			);
 			name = "Data Model";
 			sourceTree = "<group>";
@@ -1876,7 +1879,7 @@
 				D22BC41E1680DB5E007D699C /* MTTiVoShow.m */,
 				1E8945C628514E9500FFD411 /* MTTVDB.swift */,
 				AABD5A1F289744560040A017 /* MTTVDBCache.swift */,
-				AABD5A1A289737E40040A017 /* MTTVDBMovieService.swift */,
+				AABD5A1A289737E40040A017 /* MTTMDBService.swift */,
 				B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */,
 				AABD5A15289716D00040A017 /* MTTVDBService.swift */,
 				1E17E1171FF7ED8900AF0F7C /* MTShowFolder.h */,
@@ -2495,7 +2498,7 @@
 				1E5050E022556CC300D5981B /* MTCheckBox.m in Sources */,
 				1E5050E122556CC300D5981B /* MTSubscriptionTableView.m in Sources */,
 				1E5050E222556CC300D5981B /* MTFormatPopUpButton.m in Sources */,
-				AABD5A1C289737E40040A017 /* MTTVDBMovieService.swift in Sources */,
+				AABD5A1C289737E40040A017 /* MTTMDBService.swift in Sources */,
 				1E5050E322556CC300D5981B /* MTFormatPopUpTableCellView.m in Sources */,
 				1E5050E422556CC300D5981B /* MTTiVo.m in Sources */,
 				1E5050E522556CC300D5981B /* MTSubscription.m in Sources */,
@@ -2545,11 +2548,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA41387C28A2A21B002C9813 /* MTMock.swift in Sources */,
 				AABD5A19289731DC0040A017 /* MTTVDBServiceTests.swift in Sources */,
 				AABD5A23289745680040A017 /* MTTVDBCacheTests.swift in Sources */,
 				AABD5A252897510F0040A017 /* MTTVDBTests.swift in Sources */,
 				AABD5A102896DEEE0040A017 /* MTTVDBRateLimiterTests.swift in Sources */,
-				AABD5A1E28973D960040A017 /* MTTVDBMovieServiceTests.swift in Sources */,
+				AABD5A1E28973D960040A017 /* MTTMDBServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2562,7 +2566,7 @@
 				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
 				1EFA8D53211BFF6A00B4505D /* MTChannelPopUpButton.m in Sources */,
 				1E6AB108202A0BDB008A0F32 /* MTRemoteWindowController.m in Sources */,
-				AABD5A1B289737E40040A017 /* MTTVDBMovieService.swift in Sources */,
+				AABD5A1B289737E40040A017 /* MTTMDBService.swift in Sources */,
 				1E8E675D20E1E971005465EF /* DDOSLogger.m in Sources */,
 				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
 				D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */,

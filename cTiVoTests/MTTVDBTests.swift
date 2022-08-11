@@ -123,12 +123,10 @@ class MTTVDBMovieServiceMock: MTTVDBMovieService {
 public class MTTVDBTests: XCTestCase {
 
     let tvdb = MTTVDB()
-    var tvdbService = MTTVDBServiceMock()
-    var tvdbMovieService = MTTVDBMovieServiceMock()
+    let tvdbService = MTTVDBServiceMock()
+    let tvdbMovieService = MTTVDBMovieServiceMock()
 
-    public override func setUp() async throws {
-        try await super.setUp()
-        await tvdb.resetAll() // Isolate multiple tests run against singleton
+    public override func setUp() {
         tvdb.tvdbService = tvdbService
         tvdb.tvdbMovieService = tvdbMovieService
     }

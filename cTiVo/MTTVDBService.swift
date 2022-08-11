@@ -68,9 +68,16 @@ public typealias MTTVDBKeyProvider = () -> (key: String, pin: String?)
 // Implementation of MTTVDBService
 //
 
-fileprivate func makeJSONRequest(url: String, token: String? = nil, data: Data? = nil) -> URLRequest {
-    // TODO:- handle bad URL string, even though it should be a runtime error if it fails
-    var request = URLRequest(url: URL(string: url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)!)
+fileprivate func makeJSONRequest(url: String, token: String? = nil, data: Data? = nil) -> URLRequest? {
+    guard let encodedURL = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+        DDLogReport("Failed to encode \(url)")
+        return nil
+    }
+    guard let requestURL = URL(string: encodedURL) else {
+        DDLogReport("Failed to construct \(url)")
+        return nil
+    }
+    var request = URLRequest(url: requestURL)
     request.setValue("application/json", forHTTPHeaderField: "Accept")
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     if let token = token {
@@ -87,8 +94,8 @@ fileprivate func makeJSONRequest(url: String, token: String? = nil, data: Data? 
 // Next two functions only used with #available fallback prior to macOS 12.0
 //
 
-fileprivate func fetchTVDBData(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?) -> Void) {
-    URLSession.shared.dataTask(with: request) { data, response, error in
+fileprivate func fetchTVDBDataResponse(with request: URLRequest, using session: URLSession, completionHandler: @escaping (Data?, URLResponse?) -> Void) {
+    session.dataTask(with: request) { data, response, error in
                 if let error = error {
                     DDLogReport("TVDB HTTP Request Error \(error): for \(String(describing: request.url))")
                     completionHandler(nil, nil)
@@ -97,35 +104,28 @@ fileprivate func fetchTVDBData(with request: URLRequest, completionHandler: @esc
             }.resume()
 }
 
-fileprivate func fetchTVDBData(with request: URLRequest) async -> (Data?, URLResponse?) {
+fileprivate func fetchTVDBDataResponse(with request: URLRequest, using session: URLSession) async -> (Data?, URLResponse?) {
     await withCheckedContinuation { continuation in
-        fetchTVDBData(with: request) { data, response in
+        fetchTVDBDataResponse(with: request, using: session) { data, response in
             continuation.resume(returning: (data, response))
         }
     }
 }
 
-fileprivate func queryTVDBService(request: URLRequest) async -> Data? {
+fileprivate func queryTVDBDataResponse(for request: URLRequest, using session: URLSession) async -> (Data?, URLResponse?) {
     let data: Data?, response: URLResponse?
     do {
         if #available(macOS 12.0, *) {
-            (data, response) = try await URLSession.shared.data(for: request)
+            (data, response) = try await session.data(for: request)
         } else {
             // Fallback on earlier versions
-            (data, response) = await fetchTVDBData(with: request)
+            (data, response) = await fetchTVDBDataResponse(with: request, using: session)
         }
     } catch {
         DDLogReport("TVDB HTTP Request Error \(error): for \(String(describing: request.url))")
-        return nil
+        (data, response) = (nil, nil)
     }
-
-    let statusCode = (response as? HTTPURLResponse)?.statusCode
-    if statusCode != 200 {
-        DDLogReport("TVDB HTTP Response Status Code Error \(statusCode ?? 0): for \(request.url?.absoluteString ?? "")")
-        return nil
-    }
-
-    return data
+    return (data, response)
 }
 
 fileprivate func decode<T: Decodable>(_ data: Data, url: String) -> T? {
@@ -133,38 +133,25 @@ fileprivate func decode<T: Decodable>(_ data: Data, url: String) -> T? {
     do {
         decodedData = try JSONDecoder().decode(T.self, from: data)
     } catch {
-        DDLogMajor("TVDB JSON Decoding Error \(error): parsing JSON data (\(String(data: data, encoding: String.Encoding.utf8) ?? "")) for \(url)")
+        DDLogReport("TVDB JSON Decoding Error \(error): parsing JSON data (\(String(data: data, encoding: String.Encoding.utf8) ?? "")) for \(url)")
         return nil
     }
     return decodedData
 }
 
-fileprivate func queryTVDBService<T: Decodable>(url: String, tokenSource: MTVDBAuthenticator) async -> T? {
-    guard let token = await tokenSource.fetchToken() else {
-        return nil
-    }
-
-    let request = makeJSONRequest(url: url, token: token)
-    
-    let data = await queryTVDBService(request: request)
-    guard let data = data else {
-        return nil
-    }
-    
-    return decode(data, url: url)
-}
-
-fileprivate protocol MTTVDBResponseV4 {
+fileprivate protocol MTTVDBResponseV4: Decodable {
     var status: String? { get }
 }
 
 struct MTTVDBServiceV4: MTTVDBService {
     
     let apiBaseURLV4 = "https://api4.thetvdb.com/v4"
-    
+
+    let session: URLSession
+
     func querySeries(name: String) async -> [MTTVDBSeries] {
         let url = "\(apiBaseURLV4)/search?query=\(name)&type=series"
-        let json: SearchResponseJSON? = await checkSuccess(url: url, response: queryTVDBService(url: url, tokenSource: tvdbTokenSource))
+        let json: SearchResponseJSON? = await queryTVDBService(url: url)
         return json?.data ?? []
     }
     
@@ -176,7 +163,7 @@ struct MTTVDBServiceV4: MTTVDBService {
             airDateParam = ""
         }
         let url = "\(apiBaseURLV4)/series/\(seriesID)/episodes/default?page=\(pageNumber)\(airDateParam)"
-        let json: EpisodeResponseJSON? = await checkSuccess(url: url, response: queryTVDBService(url: url, tokenSource: tvdbTokenSource))
+        let json: EpisodeResponseJSON? = await queryTVDBService(url: url)
         guard let episodes = json?.data?.episodes else {
             return nil
         }
@@ -186,13 +173,13 @@ struct MTTVDBServiceV4: MTTVDBService {
     
     func querySeriesArtwork(seriesID: String) async -> String? {
         let url = "\(apiBaseURLV4)/series/\(seriesID)"
-        let json: SeriesResponseJSON? = await checkSuccess(url: url, response: queryTVDBService(url: url, tokenSource: tvdbTokenSource))
+        let json: SeriesResponseJSON? = await queryTVDBService(url: url)
         return json?.data?.image
     }
     
     func querySeasonArtwork(seriesID: String, season: Int) async -> String? {
         let url = "\(apiBaseURLV4)/series/\(seriesID)/extended?short=true"
-        let json: SeriesResponseJSON? = await checkSuccess(url: url, response: queryTVDBService(url: url, tokenSource: tvdbTokenSource))
+        let json: SeriesResponseJSON? = await queryTVDBService(url: url)
         guard let seasons = json?.data?.seasons else {
             return nil
         }
@@ -205,30 +192,59 @@ struct MTTVDBServiceV4: MTTVDBService {
     }
     
     func saveToken() async {
-        await tvdbTokenSource.saveToken()
+        await authenticator.saveToken()
     }
     
     func loadToken() async {
-        await tvdbTokenSource.loadToken()
+        await authenticator.loadToken()
     }
     
-    init(keyProvider: @escaping MTTVDBKeyProvider = keyProvider) {
-        tvdbTokenSource = MTVDBAuthenticator(
-            baseURL: apiBaseURLV4,
-            duration: 30 * 24 * 60 * 60,
-            keyProvider: keyProvider)
+    init(keyProvider: @escaping MTTVDBKeyProvider = keyProvider, session: URLSession = URLSession.shared) {
+        self.session = session
+        authenticator = MTTVDBAuthenticator(
+                baseURL: apiBaseURLV4,
+                duration: 30 * 24 * 60 * 60,
+                keyProvider: keyProvider,
+                session: session)
     }
     
-    let tvdbTokenSource: MTVDBAuthenticator
-    
-    fileprivate func checkSuccess<T: MTTVDBResponseV4>(url: String, response: T?) async -> T? {
-        guard response?.status == "success" else {
-            // The response failed to explicitly indicate success, log it and discard response
-            DDLogVerbose("TVDB Did Not Return Status Success (\(String(describing: response))): for \(url)")
-            DDLogMajor("TVDB Did Not Return Status Success: for \(url)")
+    let authenticator: MTTVDBAuthenticator
+
+    fileprivate func queryTVDBService<T: MTTVDBResponseV4>(url: String) async -> T? {
+        guard let token = await authenticator.fetchToken() else {
             return nil
         }
-        return response
+
+        guard let request = makeJSONRequest(url: url, token: token) else {
+            return nil
+        }
+
+        let (data, response) = await queryTVDBDataResponse(for: request, using: session)
+
+        let statusCode = (response as? HTTPURLResponse)?.statusCode
+        if statusCode == 401 {
+            DDLogReport("TVDB Discarding Unauthorized Token \(token): for \(request.url?.absoluteString ?? "")")
+            await authenticator.discardThisToken(token)
+            return nil
+        } else if statusCode != 200 {
+            DDLogReport("TVDB HTTP Response Status Code Error \(statusCode ?? 0): for \(request.url?.absoluteString ?? "")")
+            return nil
+        }
+
+        guard let data = data else {
+            return nil
+        }
+
+        let result: T? = decode(data, url: request.url?.absoluteString ?? "")
+
+        guard result?.status == "success" else {
+            // The response failed to explicitly indicate success, log it and discard response
+            DDLogVerbose("TVDB Did Not Return Status Success (\(String(describing: response))): for \(request.url?.absoluteString ?? "")")
+            DDLogReport("TVDB Did Not Return Status Success: for \(request.url?.absoluteString ?? "")")
+            return nil
+        }
+
+        return result
     }
     
     struct SearchResponseJSON: Decodable, MTTVDBResponseV4 {
@@ -267,7 +283,7 @@ struct MTTVDBServiceV4: MTTVDBService {
             let episodes: [EpisodeJSON]?
         }
         struct Links: Decodable {
-            let next: Int?
+            let next: String?
         }
         let status: String?
         let data: DataJSON?
@@ -289,7 +305,7 @@ struct MTTVDBServiceV4: MTTVDBService {
     
     // Inject replacement date provider when testing expiration times
     func setDateProvider(_ dateProvider: @escaping () -> Date) async {
-        await tvdbTokenSource.setDateProvider(dateProvider)
+        await authenticator.setDateProvider(dateProvider)
     }
 }
 
@@ -297,14 +313,17 @@ fileprivate protocol MTVDBTokenJSON {
     func fetchToken() -> String?
 }
 
-actor MTVDBAuthenticator {
-    init(baseURL: String, duration: TimeInterval, keyProvider: @escaping MTTVDBKeyProvider) {
+actor MTTVDBAuthenticator {
+    let session: URLSession
+
+    init(baseURL: String, duration: TimeInterval, keyProvider: @escaping MTTVDBKeyProvider, session: URLSession = URLSession.shared) {
         self.duration = duration
         self.keyProvider = keyProvider
+        self.session = session
         tokenUrl = "\(baseURL)/login"
     }
-    func fetchToken() async -> String?
-    {
+
+    func fetchToken() async -> String? {
         if let token = token, let expiration = expiration, expiration > dateProvider() {
                 // Current token is good
                 DDLogVerbose("Using existing TVDB token")
@@ -322,9 +341,17 @@ actor MTVDBAuthenticator {
             requestData = try! JSONEncoder().encode(["apikey": key, "pin": pin])
         }
         
-        let request = makeJSONRequest(url: tokenUrl, data: requestData)
+        guard let request = makeJSONRequest(url: tokenUrl, data: requestData) else {
+            return nil
+        }
         
-        let data = await queryTVDBService(request: request)
+        let (data, response) = await queryTVDBDataResponse(for: request, using: session)
+
+        let statusCode = (response as? HTTPURLResponse)?.statusCode
+        if statusCode != 200 {
+            DDLogReport("TVDB Invalid Authentication Credentials \(statusCode ?? 0): for \(request.url?.absoluteString ?? "")")
+            return nil
+        }
         guard let data = data else { return  nil }
 
         let json: TokenJSONV4? = decode(data, url: "authentication request to \(tokenUrl)")
@@ -333,6 +360,7 @@ actor MTVDBAuthenticator {
         expiration = dateProvider().addingTimeInterval(duration)
         return token
     }
+
     struct TokenJSONV4: Decodable, MTVDBTokenJSON {
         struct DataJSON: Decodable {
             let token: String
@@ -342,6 +370,17 @@ actor MTVDBAuthenticator {
             data?.token
         }
     }
+
+    func discardThisToken(_ token: String) -> Void {
+        if token == self.token {
+            discardCurrentToken()
+        }
+    }
+
+    func discardCurrentToken() -> Void {
+        token = nil
+        expiration = nil
+    }
     
     // Key when persisting token and expiration date to UserDefaults
     // Specifically does not match kMTTVDBToken and kMTTVDBTokenExpire
@@ -350,15 +389,17 @@ actor MTVDBAuthenticator {
     static let userDefaultsTokenKey = "TVDBTokenV4"
     static let userDefaultsTokenExpireKey = "TVDBTokenV4Expire"
 
-    func saveToken() async {
-        UserDefaults.standard.set(token, forKey: MTVDBAuthenticator.userDefaultsTokenKey)
-        UserDefaults.standard.set(expiration, forKey: MTVDBAuthenticator.userDefaultsTokenExpireKey)
+    func saveToken() {
+        UserDefaults.standard.set(token, forKey: MTTVDBAuthenticator.userDefaultsTokenKey)
+        UserDefaults.standard.set(expiration, forKey: MTTVDBAuthenticator.userDefaultsTokenExpireKey)
 
     }
-    func loadToken() async {
-        token = UserDefaults.standard.object(forKey: MTVDBAuthenticator.userDefaultsTokenKey) as? String
-        expiration = UserDefaults.standard.object(forKey: MTVDBAuthenticator.userDefaultsTokenExpireKey) as? Date
+
+    func loadToken() {
+        token = UserDefaults.standard.object(forKey: MTTVDBAuthenticator.userDefaultsTokenKey) as? String
+        expiration = UserDefaults.standard.object(forKey: MTTVDBAuthenticator.userDefaultsTokenExpireKey) as? Date
     }
+
     private let duration: TimeInterval
     private let keyProvider: MTTVDBKeyProvider
     private let tokenUrl: String

@@ -1,5 +1,5 @@
 //
-//  MTTVDBMovieService.swift
+//  MTTMDBService.swift
 //  cTiVo
 //
 //  Created by Steve Schmadeke on 7/31/22.
@@ -41,8 +41,8 @@ public typealias MTTVDBMovieKeyProvider = () -> String
 // Next two functions only used with #available fallback prior to macOS 12.0
 //
 
-fileprivate func fetchTMDBData(from url: URL, completionHandler: @escaping (Data?, URLResponse?) -> Void) {
-    URLSession.shared.dataTask(with: url) { data, response, error in
+fileprivate func fetchTMDBData(from url: URL, using session: URLSession, completionHandler: @escaping (Data?, URLResponse?) -> Void) {
+    session.dataTask(with: url) { data, response, error in
                 if let error = error {
                     DDLogReport("TMDB HTTP Request Error \(error): for \(String(describing: url))")
                     completionHandler(nil, nil)
@@ -51,9 +51,9 @@ fileprivate func fetchTMDBData(from url: URL, completionHandler: @escaping (Data
             }.resume()
 }
 
-fileprivate func fetchTMDBData(from url: URL) async -> (Data?, URLResponse?) {
+fileprivate func fetchTMDBData(from url: URL, using session: URLSession) async -> (Data?, URLResponse?) {
     await withCheckedContinuation { continuation in
-        fetchTMDBData(from: url) { data, response in
+        fetchTMDBData(from: url, using: session) { data, response in
             continuation.resume(returning: (data, response))
         }
     }
@@ -64,6 +64,8 @@ fileprivate func fetchTMDBData(from url: URL) async -> (Data?, URLResponse?) {
 //
 
 public struct MTTVDBMovieServiceV3: MTTVDBMovieService {
+    let session: URLSession
+
     let keyProvider: MTTVDBMovieKeyProvider
 //    let rateLimiter = MTTVDBRateLimiter(limit: 38, limitInterval: 11)
 
@@ -76,14 +78,14 @@ public struct MTTVDBMovieServiceV3: MTTVDBMovieService {
         let data: Data?, response: URLResponse?
         if #available(macOS 12.0, *) {
             do {
-                (data, response) = try await URLSession.shared.data(from: url)
+                (data, response) = try await session.data(from: url)
             } catch {
                 DDLogReport("TMDB HTTP Request Error \(error): for \(reportURL(name: name))")
                 return []
             }
         } else {
             // Fallback on earlier versions
-            (data, response) = await fetchTMDBData(from: url)
+            (data, response) = await fetchTMDBData(from: url, using: session)
         }
 
         guard let data = data else { return [] }
@@ -98,15 +100,16 @@ public struct MTTVDBMovieServiceV3: MTTVDBMovieService {
         do {
             decodedData = try JSONDecoder().decode(ResponseJSON.self, from: data)
         } catch {
-            DDLogMajor("TMDB JSON Decoding Error \(error): parsing JSON data (\(String(data: data, encoding: String.Encoding.utf8) ?? "")) for \(reportURL(name: name))")
+            DDLogReport("TMDB JSON Decoding Error \(error): parsing JSON data (\(String(data: data, encoding: String.Encoding.utf8) ?? "")) for \(reportURL(name: name))")
             return []
         }
 
         return decodedData.results ?? []
     }
 
-    init(keyProvider: @escaping MTTVDBMovieKeyProvider = movieKeyProvider) {
-        self.keyProvider =  keyProvider
+    init(keyProvider: @escaping MTTVDBMovieKeyProvider = movieKeyProvider, session: URLSession = URLSession.shared) {
+        self.keyProvider = keyProvider
+        self.session = session
     }
 
     struct ResponseJSON: Decodable {
