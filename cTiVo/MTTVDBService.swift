@@ -70,11 +70,11 @@ public typealias MTTVDBKeyProvider = () -> (key: String, pin: String?)
 
 fileprivate func makeJSONRequest(url: String, token: String? = nil, data: Data? = nil) -> URLRequest? {
     guard let encodedURL = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
-        DDLogReport("Failed to encode \(url)")
+        MTTVDBLogger.DDLogReport("Failed to encode \(url)")
         return nil
     }
     guard let requestURL = URL(string: encodedURL) else {
-        DDLogReport("Failed to construct \(url)")
+        MTTVDBLogger.DDLogReport("Failed to construct \(url)")
         return nil
     }
     var request = URLRequest(url: requestURL)
@@ -97,7 +97,7 @@ fileprivate func makeJSONRequest(url: String, token: String? = nil, data: Data? 
 fileprivate func fetchTVDBDataResponse(with request: URLRequest, using session: URLSession, completionHandler: @escaping (Data?, URLResponse?) -> Void) {
     session.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    DDLogReport("TVDB HTTP Request Error \(error): for \(String(describing: request.url))")
+                    MTTVDBLogger.DDLogReport("TVDB HTTP Request Error \(error): for \(String(describing: request.url))")
                     completionHandler(nil, nil)
                 }
                 completionHandler(data, response)
@@ -122,7 +122,7 @@ fileprivate func queryTVDBDataResponse(for request: URLRequest, using session: U
             (data, response) = await fetchTVDBDataResponse(with: request, using: session)
         }
     } catch {
-        DDLogReport("TVDB HTTP Request Error \(error): for \(String(describing: request.url))")
+        MTTVDBLogger.DDLogReport("TVDB HTTP Request Error \(error): for \(String(describing: request.url))")
         (data, response) = (nil, nil)
     }
     return (data, response)
@@ -133,9 +133,10 @@ fileprivate func decode<T: Decodable>(_ data: Data, url: String) -> T? {
     do {
         decodedData = try JSONDecoder().decode(T.self, from: data)
     } catch {
-        DDLogReport("TVDB JSON Decoding Error \(error): parsing JSON data (\(String(data: data, encoding: String.Encoding.utf8) ?? "")) for \(url)")
+        MTTVDBLogger.DDLogReport("TVDB JSON Decoding Error \(error): parsing JSON data (\(String(data: data, encoding: String.Encoding.utf8) ?? "")) for \(url)")
         return nil
     }
+    MTTVDBLogger.DDLogVerbose("TVDB successfully parsed JSON data (\(String(data: data, encoding: String.Encoding.utf8) ?? "")) for \(url)")
     return decodedData
 }
 
@@ -223,11 +224,11 @@ struct MTTVDBServiceV4: MTTVDBService {
 
         let statusCode = (response as? HTTPURLResponse)?.statusCode
         if statusCode == 401 {
-            DDLogReport("TVDB Discarding Unauthorized Token \(token): for \(request.url?.absoluteString ?? "")")
+            MTTVDBLogger.DDLogReport("TVDB Discarding Unauthorized Token \(token): for \(request.url?.absoluteString ?? "")")
             await authenticator.discardThisToken(token)
             return nil
         } else if statusCode != 200 {
-            DDLogReport("TVDB HTTP Response Status Code Error \(statusCode ?? 0): for \(request.url?.absoluteString ?? "")")
+            MTTVDBLogger.DDLogReport("TVDB HTTP Response Status Code Error \(statusCode ?? 0): for \(request.url?.absoluteString ?? "")")
             return nil
         }
 
@@ -239,8 +240,8 @@ struct MTTVDBServiceV4: MTTVDBService {
 
         guard result?.status == "success" else {
             // The response failed to explicitly indicate success, log it and discard response
-            DDLogVerbose("TVDB Did Not Return Status Success (\(String(describing: response))): for \(request.url?.absoluteString ?? "")")
-            DDLogReport("TVDB Did Not Return Status Success: for \(request.url?.absoluteString ?? "")")
+            MTTVDBLogger.DDLogVerbose("TVDB Did Not Return Status Success (\(String(describing: response))): for \(request.url?.absoluteString ?? "")")
+            MTTVDBLogger.DDLogReport("TVDB Did Not Return Status Success: for \(request.url?.absoluteString ?? "")")
             return nil
         }
 
@@ -326,11 +327,11 @@ actor MTTVDBAuthenticator {
     func fetchToken() async -> String? {
         if let token = token, let expiration = expiration, expiration > dateProvider() {
                 // Current token is good
-                DDLogVerbose("Using existing TVDB token")
+            MTTVDBLogger.DDLogVerbose("Using existing TVDB token")
                 return token
         }
-        
-        DDLogVerbose("Fetching new TVDB token")
+
+        MTTVDBLogger.DDLogVerbose("Fetching new TVDB token")
         
         let (key, pin) = keyProvider()
         
@@ -349,7 +350,7 @@ actor MTTVDBAuthenticator {
 
         let statusCode = (response as? HTTPURLResponse)?.statusCode
         if statusCode != 200 {
-            DDLogReport("TVDB Invalid Authentication Credentials \(statusCode ?? 0): for \(request.url?.absoluteString ?? "")")
+            MTTVDBLogger.DDLogReport("TVDB Invalid Authentication Credentials \(statusCode ?? 0): for \(request.url?.absoluteString ?? "")")
             return nil
         }
         guard let data = data else { return  nil }

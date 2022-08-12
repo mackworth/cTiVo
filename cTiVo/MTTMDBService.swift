@@ -44,7 +44,7 @@ public typealias MTTVDBMovieKeyProvider = () -> String
 fileprivate func fetchTMDBData(from url: URL, using session: URLSession, completionHandler: @escaping (Data?, URLResponse?) -> Void) {
     session.dataTask(with: url) { data, response, error in
                 if let error = error {
-                    DDLogReport("TMDB HTTP Request Error \(error): for \(String(describing: url))")
+                    MTTVDBLogger.DDLogReport("TMDB HTTP Request Error \(error): for \(String(describing: url))")
                     completionHandler(nil, nil)
                 }
                 completionHandler(data, response)
@@ -80,7 +80,7 @@ public struct MTTVDBMovieServiceV3: MTTVDBMovieService {
             do {
                 (data, response) = try await session.data(from: url)
             } catch {
-                DDLogReport("TMDB HTTP Request Error \(error): for \(reportURL(name: name))")
+                MTTVDBLogger.DDLogReport("TMDB HTTP Request Error \(error): for \(reportURL(name: name))")
                 return []
             }
         } else {
@@ -92,7 +92,7 @@ public struct MTTVDBMovieServiceV3: MTTVDBMovieService {
 
         let statusCode = (response as? HTTPURLResponse)?.statusCode
         if statusCode != 200 {
-            DDLogReport("TMDB HTTP Response Status Code Error \(statusCode ?? 0): for \(reportURL(name: name))")
+            MTTVDBLogger.DDLogReport("TMDB HTTP Response Status Code Error \(statusCode ?? 0): for \(reportURL(name: name))")
             return []
         }
 
@@ -100,10 +100,11 @@ public struct MTTVDBMovieServiceV3: MTTVDBMovieService {
         do {
             decodedData = try JSONDecoder().decode(ResponseJSON.self, from: data)
         } catch {
-            DDLogReport("TMDB JSON Decoding Error \(error): parsing JSON data (\(String(data: data, encoding: String.Encoding.utf8) ?? "")) for \(reportURL(name: name))")
+            MTTVDBLogger.DDLogReport("TMDB JSON Decoding Error \(error): parsing JSON data (\(String(data: data, encoding: String.Encoding.utf8) ?? "")) for \(reportURL(name: name))")
             return []
         }
 
+        MTTVDBLogger.DDLogVerbose("TMDB successfully parsed JSON data (\(String(data: data, encoding: String.Encoding.utf8) ?? "")) for \(url)")
         return decodedData.results ?? []
     }
 

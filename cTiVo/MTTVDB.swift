@@ -7,6 +7,29 @@
 //
 
 import Foundation
+import CocoaLumberjack
+
+@objc(MTTVDB4)
+public class MTTVDBLogger: NSObject {
+    public static var logLevel = DDLogLevel.verbose;
+
+    @objc public static var ddLogLevel: DDLogLevel {
+        get { logLevel }
+        @objc(ddSetLogLevel:) set { logLevel = newValue }
+    }
+    static func DDLogReport(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+        DDLogError(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
+    }
+    static func DDLogMajor(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+        DDLogWarn(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
+    }
+    static func DDLogDetail(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+        DDLogInfo(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
+    }
+    static func DDLogVerbose(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+        CocoaLumberjack.DDLogVerbose(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
+    }
+}
 
 @objc
 public protocol MTTiVoShowReadOnly {
@@ -197,7 +220,7 @@ public class MTTVDB : NSObject {
     @objc public func getTheTVDBDetails(_ show: MTTiVoShowReadOnly, reset: Bool = false) async -> NSDictionary {
 
         if reset {
-            DDLogDetail("Resetting information for \(show.seriesTitle) (\(show.episodeID))")
+            MTTVDBLogger.DDLogDetail("Resetting information for \(show.seriesTitle) (\(show.episodeID))")
             _ = await [
                 tvdbCache.reset(show.episodeID),
                 seriesCache.set(nil, forKey: show.seriesTitle)
@@ -290,7 +313,7 @@ public class MTTVDB : NSObject {
     /// status of the show will be marked as either found or not found.
     /// The stats and the series cache also get updated as necessary.
     private func getTVDBData(_ show: MTTiVoShowReadOnly) async -> Void {
-        DDLogDetail("Need to get \(show.seriesTitle) (\(show.episodeID))")
+        MTTVDBLogger.DDLogDetail("Need to get \(show.seriesTitle) (\(show.episodeID))")
         await tvdbCache.setStatus(show.episodeID, status: .inProgress)
 
         let series = await getSeries(show.seriesTitle, bestMatches: show.isEpisodicShow ? matchesSeriesName : nil)
@@ -305,7 +328,7 @@ public class MTTVDB : NSObject {
                         onAirDate: show.originalAirDateNoTime
                 ) {
                     if let image = episode.image {
-                        DDLogDetail("TVDB Artwork for \(show.seriesTitle) (\(show.episodeID)) at \(image)")
+                        MTTVDBLogger.DDLogDetail("TVDB Artwork for \(show.seriesTitle) (\(show.episodeID)) at \(image)")
                     }
                     DDLogVerbose("Got TVDB episodeInfo for \(show.seriesTitle) (\(show.episodeID))")
                     await tvdbStatistics.increment(.seriesEpisodeFound)
@@ -322,7 +345,7 @@ public class MTTVDB : NSObject {
                             status: .found)
                 } else {
                     let urls = tvdbService.seriesURLs(series)
-                    DDLogDetail("TVDB does not have episodeInfo for \(show.seriesTitle) (\(show.episodeID)) on \(show.originalAirDateNoTime) (\(urls)")
+                    MTTVDBLogger.DDLogDetail("TVDB does not have episodeInfo for \(show.seriesTitle) (\(show.episodeID)) on \(show.originalAirDateNoTime) (\(urls)")
                     await tvdbStatistics.set("Date: \(show.originalAirDateNoTime), URLs: \(urls)",
                             forKey: .episodeNotFound,
                             forShow: show.seriesTitle)
@@ -335,7 +358,7 @@ public class MTTVDB : NSObject {
             } else {
                 await tvdbStatistics.increment(.nonEpisodicSeriesFound)
                 if (firstSeries.image == nil) {
-                    DDLogDetail("No artwork for \(show.seriesTitle) (\(show.episodeID)) Series ID: \(firstSeries.id)")
+                    MTTVDBLogger.DDLogDetail("No artwork for \(show.seriesTitle) (\(show.episodeID)) Series ID: \(firstSeries.id)")
                 }
                 await tvdbCache.setAll(
                         show.episodeID,
@@ -345,7 +368,7 @@ public class MTTVDB : NSObject {
                         status: .found)
             }
         } else {
-            DDLogDetail("No series found for \(show.seriesTitle) (\(show.episodeID))")
+            MTTVDBLogger.DDLogDetail("No series found for \(show.seriesTitle) (\(show.episodeID))")
             await tvdbStatistics.set(tvdbService.titleURL(show.seriesTitle),
                     forKey: show.isEpisodicShow ? .episodicSeriesNotFound : .nonEpisodicSeriesNotFound,
                     forShow: show.seriesTitle)
@@ -534,18 +557,18 @@ public class MTTVDB : NSObject {
         default:
             await tvdbCache.setStatus(show.episodeID, status: .inProgress)
 
-            DDLogDetail("Getting movie Data for \(show.seriesTitle) (\(show.episodeID)) using \(tvdbMovieService.reportURL(name: show.seriesTitle))")
+            MTTVDBLogger.DDLogDetail("Getting movie Data for \(show.seriesTitle) (\(show.episodeID)) using \(tvdbMovieService.reportURL(name: show.seriesTitle))")
             let movies = await tvdbMovieService.queryMovie(name: show.seriesTitle)
 
             let exactMatches = movies.filter { matches(movie: $0, show: show, exact: true) }
             let inexactMatches = movies.filter { matches(movie: $0, show: show) }
 
             if let posterPath = (exactMatches + inexactMatches).first?.posterPath {
-                DDLogDetail("For movie \(show.seriesTitle) (\(show.episodeID)), theMovieDB had image \(posterPath)")
+                MTTVDBLogger.DDLogDetail("For movie \(show.seriesTitle) (\(show.episodeID)), theMovieDB had image \(posterPath)")
                 await tvdbStatistics.increment(.movieFound)
                 await tvdbCache.setAll(show.episodeID, seriesArtwork: posterPath, status: .found)
             } else {
-                DDLogMajor("theMovieDB does not have any images for \(show.seriesTitle) (\(show.episodeID))")
+                MTTVDBLogger.DDLogMajor("theMovieDB does not have any images for \(show.seriesTitle) (\(show.episodeID))")
                 await tvdbStatistics.set(tvdbMovieService.lookupURL(name: show.seriesTitle), forKey: .movieNotFound, forShow: show.seriesTitle)
                 await tvdbCache.setAll(show.episodeID, seriesArtwork: "", status: .notFound)
             }
@@ -558,10 +581,10 @@ public class MTTVDB : NSObject {
         if let seriesID = await tvdbCache.getSeries(show.episodeID) {
             if await tvdbCache.getSeriesArtwork(show.episodeID) == nil {
                 if let seriesArtwork = await tvdbService.querySeriesArtwork(seriesID: seriesID) {
-                    DDLogDetail("Found series artwork for \(show.seriesTitle) (\(show.episodeID)): \(seriesArtwork)")
+                    MTTVDBLogger.DDLogDetail("Found series artwork for \(show.seriesTitle) (\(show.episodeID)): \(seriesArtwork)")
                     await tvdbCache.setSeriesArtwork(show.episodeID, seriesArtwork: seriesArtwork)
                 } else {
-                    DDLogDetail("No series artwork for \(show.seriesTitle) (\(show.episodeID))")
+                    MTTVDBLogger.DDLogDetail("No series artwork for \(show.seriesTitle) (\(show.episodeID))")
                     await tvdbCache.setSeriesArtwork(show.episodeID, seriesArtwork: "")
                 }
             }
@@ -573,10 +596,10 @@ public class MTTVDB : NSObject {
         if let seriesID = await tvdbCache.getSeries(show.episodeID) {
             if await tvdbCache.getSeasonArtwork(show.episodeID) == nil {
                 if let seasonArtwork = await tvdbService.querySeasonArtwork(seriesID: seriesID, season: show.season) {
-                    DDLogDetail("Found season artwork for \(show.seriesTitle) (\(show.episodeID)): \(seasonArtwork)")
+                    MTTVDBLogger.DDLogDetail("Found season artwork for \(show.seriesTitle) (\(show.episodeID)): \(seasonArtwork)")
                     await tvdbCache.setSeasonArtwork(show.episodeID, seasonArtwork: seasonArtwork)
                 } else {
-                    DDLogDetail("No season artwork for \(show.seriesTitle) (\(show.episodeID))")
+                    MTTVDBLogger.DDLogDetail("No season artwork for \(show.seriesTitle) (\(show.episodeID))")
                     await tvdbCache.setSeasonArtwork(show.episodeID, seasonArtwork: "")
                 }
             }
@@ -594,10 +617,10 @@ public class MTTVDB : NSObject {
             case .seriesArtwork:
                 await tvdbCache.setSeriesArtwork(show.episodeID, seriesArtwork: "")
             default:
-                DDLogMajor("Improper artwork key (\(forKey)) when rejecting artwork for \(show.seriesTitle) (\(show.episodeID))")
+                MTTVDBLogger.DDLogMajor("Improper artwork key (\(forKey)) when rejecting artwork for \(show.seriesTitle) (\(show.episodeID))")
             }
         } else {
-            DDLogMajor("Unknown artwork key (\(forKey)) when rejecting artwork for \(show.seriesTitle) (\(show.episodeID))")
+            MTTVDBLogger.DDLogMajor("Unknown artwork key (\(forKey)) when rejecting artwork for \(show.seriesTitle) (\(show.episodeID))")
         }
         return await (tvdbCache.getDictionary(show.episodeID) ?? [:]) as NSDictionary
     }

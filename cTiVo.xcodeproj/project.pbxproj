@@ -31,12 +31,10 @@
 		1E40C48F251D4FF1004BCC38 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E40C479251D4EF8004BCC38 /* libsqlite3.tbd */; };
 		1E45C8F316E11E59005C5334 /* MTIsStringEmpty.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */; };
 		1E4A38481A37C0F4001D84A7 /* MTSubscriptionList.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A38471A37C0F4001D84A7 /* MTSubscriptionList.m */; };
-		1E5050CC22556CC300D5981B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
 		1E5050CD22556CC300D5981B /* MTProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */; };
 		1E5050CE22556CC300D5981B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BAD16766EFD00CE32DE /* main.m */; };
 		1E5050CF22556CC300D5981B /* MTChannelPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EFA8D4F211BFF6900B4505D /* MTChannelPopUpButton.m */; };
 		1E5050D022556CC300D5981B /* MTRemoteWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6AB106202A0BDB008A0F32 /* MTRemoteWindowController.m */; };
-		1E5050D122556CC300D5981B /* DDOSLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E675C20E1E970005465EF /* DDOSLogger.m */; };
 		1E5050D222556CC300D5981B /* MTAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BB416766EFD00CE32DE /* MTAppDelegate.m */; };
 		1E5050D422556CC300D5981B /* MTTiVoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BC916766FA600CE32DE /* MTTiVoManager.m */; };
 		1E5050D522556CC300D5981B /* MTDownloadTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D2D60BCC16766FA600CE32DE /* MTDownloadTableView.m */; };
@@ -84,7 +82,6 @@
 		1E50510022556CC300D5981B /* MTTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D2C6BB591714681C00289751 /* MTTask.m */; };
 		1E50510122556CC300D5981B /* CrashlyticsLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */; };
 		1E50510222556CC300D5981B /* MTTaskChain.m in Sources */ = {isa = PBXBuildFile; fileRef = D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */; };
-		1E50510322556CC300D5981B /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C3173DC7D100B47539 /* DDFileLogger.m */; };
 		1E50510422556CC300D5981B /* MTLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */; };
 		1E50510522556CC300D5981B /* DragDropImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E52C5251F2420A700389E93 /* DragDropImageView.m */; };
 		1E50510622556CC300D5981B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
@@ -254,7 +251,6 @@
 		1E56038F1F45103400454157 /* MTRPCData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E56038E1F45103400454157 /* MTRPCData.m */; };
 		1E5603911F45206100454157 /* cdata.p12 in Resources */ = {isa = PBXBuildFile; fileRef = 1E5603901F45206100454157 /* cdata.p12 */; };
 		1E58F5982210B17800B21C06 /* tivodecode-ng in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1EE1D65B2210AF820012080F /* tivodecode-ng */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E59368919648C860008780B /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368819648C860008780B /* DDLog.m */; };
 		1E59368C19648CFF0008780B /* MTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E59368B19648CFF0008780B /* MTLog.m */; };
 		1E5BEC611F9532320082FA6B /* CrashlyticsLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */; };
 		1E5C6FBD2748DAD40057541E /* libxcb-shm.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FBC2748DAC40057541E /* libxcb-shm.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -305,7 +301,6 @@
 		1E8296CF202A0E8600AA4C10 /* PeanutRemote@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E8296CE202A0E8600AA4C10 /* PeanutRemote@2x.png */; };
 		1E8489602314B1DB00D56756 /* cTVMainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E84895E2314B1DB00D56756 /* cTVMainMenu.xib */; };
 		1E8945C728514E9500FFD411 /* MTTVDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8945C628514E9500FFD411 /* MTTVDB.swift */; };
-		1E8E675D20E1E971005465EF /* DDOSLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E675C20E1E970005465EF /* DDOSLogger.m */; };
 		1E8F6D2A1F5CA4D700830CB4 /* HandBrakeCLI in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1E1395941F5928E800FFA4E7 /* HandBrakeCLI */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E91657C2373AE2700847EF0 /* libcairo-gobject.2.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E9165852373AE6800847EF0 /* libMacportsLegacySupport.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E9165842373AE6700847EF0 /* libMacportsLegacySupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -332,7 +327,6 @@
 		1E964CA41882768A00C19046 /* suggestion-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C9B1882768A00C19046 /* suggestion-recording@2x.png */; };
 		1E964CA7188313ED00C19046 /* checkImage2.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964CA5188313ED00C19046 /* checkImage2.png */; };
 		1E964CA8188313ED00C19046 /* checkImage2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964CA6188313ED00C19046 /* checkImage2@2x.png */; };
-		1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9959C3173DC7D100B47539 /* DDFileLogger.m */; };
 		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1E9EA3FD1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */; };
 		1EB2D98E2110DC7B00E50C9B /* MTGCDTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB2D98D2110DC7B00E50C9B /* MTGCDTimer.m */; };
@@ -449,6 +443,7 @@
 		AABD5A252897510F0040A017 /* MTTVDBTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A242897510F0040A017 /* MTTVDBTests.swift */; };
 		B81EA4A9630D6D39631FD164 /* MTTVDBRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */; };
 		B81EA7E591FD9C65339453AC /* MTTVDBRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */; };
+		C8FAD56B9DE04FF70156EEB5 /* Pods_cTiVoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9C9B0C04ECC75CDE09FB686 /* Pods_cTiVoTests.framework */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
@@ -592,6 +587,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = A5A3663D4E22C2D279C554893E4F283E;
 			remoteInfo = "Pods-cTiVo MAS";
+		};
+		AA41389828A5C126002C9813 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C261436D14052AE3C35F240BCD155CAC;
+			remoteInfo = CocoaLumberjack;
 		};
 		AABD59EE2895FECC0040A017 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -880,8 +882,6 @@
 		1E09DD402099449D0010CAB4 /* MTTextFieldNoInteraction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTTextFieldNoInteraction.h; sourceTree = "<group>"; };
 		1E09DD412099449D0010CAB4 /* MTTextFieldNoInteraction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTTextFieldNoInteraction.m; sourceTree = "<group>"; };
 		1E0C5DD8170236B30015C55D /* recent-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "recent-recording.png"; sourceTree = "<group>"; };
-		1E0D65CA20AC9D85006798CF /* DDLegacyMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DDLegacyMacros.h; sourceTree = "<group>"; };
-		1E0D65CC20ACA000006798CF /* DDLogMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DDLogMacros.h; sourceTree = "<group>"; };
 		1E1395941F5928E800FFA4E7 /* HandBrakeCLI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = HandBrakeCLI; sourceTree = "<group>"; };
 		1E152980201006B0000D1705 /* MTOpenPanelDefaultView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MTOpenPanelDefaultView.xib; sourceTree = "<group>"; };
 		1E15298220102C3D000D1705 /* MTHideTempFolder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTHideTempFolder.h; sourceTree = "<group>"; };
@@ -928,8 +928,6 @@
 		1E56038E1F45103400454157 /* MTRPCData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTRPCData.m; sourceTree = "<group>"; };
 		1E5603901F45206100454157 /* cdata.p12 */ = {isa = PBXFileReference; lastKnownFileType = file; path = cdata.p12; sourceTree = "<group>"; };
 		1E5936821964867E0008780B /* MTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLog.h; sourceTree = "<group>"; };
-		1E59368319648C180008780B /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
-		1E59368819648C860008780B /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		1E59368B19648CFF0008780B /* MTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLog.m; sourceTree = "<group>"; };
 		1E5AB5FC1E047A5E00429667 /* sparklecast107.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = sparklecast107.xml; sourceTree = "<group>"; };
 		1E5BEC5F1F9532320082FA6B /* CrashlyticsLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CrashlyticsLogger.h; sourceTree = "<group>"; };
@@ -992,8 +990,6 @@
 		1E8945C528514E9500FFD411 /* cTiVo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "cTiVo-Bridging-Header.h"; sourceTree = "<group>"; };
 		1E8945C628514E9500FFD411 /* MTTVDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDB.swift; sourceTree = "<group>"; };
 		1E8C1B57224B988600F285EF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		1E8E675B20E1E970005465EF /* DDOSLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDOSLogger.h; sourceTree = "<group>"; };
-		1E8E675C20E1E970005465EF /* DDOSLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDOSLogger.m; sourceTree = "<group>"; };
 		1E9165782373AE2600847EF0 /* libcairo-gobject.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = "libcairo-gobject.2.dylib"; sourceTree = "<group>"; };
 		1E9165842373AE6700847EF0 /* libMacportsLegacySupport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libMacportsLegacySupport.dylib; sourceTree = "<group>"; };
 		1E9165912373AF2800847EF0 /* libhogweed.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libhogweed.5.dylib; sourceTree = "<group>"; };
@@ -1012,8 +1008,6 @@
 		1E964C9B1882768A00C19046 /* suggestion-recording@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "suggestion-recording@2x.png"; sourceTree = "<group>"; };
 		1E964CA5188313ED00C19046 /* checkImage2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkImage2.png; sourceTree = "<group>"; };
 		1E964CA6188313ED00C19046 /* checkImage2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkImage2@2x.png"; sourceTree = "<group>"; };
-		1E9959C2173DC7D100B47539 /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
-		1E9959C3173DC7D100B47539 /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
 		1E9A10EE1757200000863C44 /* cTiVo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cTiVo.png; sourceTree = "<group>"; };
 		1E9EA3FB1F1AD91C00F0A2C9 /* MTProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressCell.h; sourceTree = "<group>"; };
 		1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressCell.m; sourceTree = "<group>"; };
@@ -1129,11 +1123,13 @@
 		1EFA8D51211BFF6900B4505D /* MTChannelPopUpTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTChannelPopUpTableCellView.m; sourceTree = "<group>"; };
 		1EFA8D52211BFF6900B4505D /* MTChannelPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTChannelPopUpButton.h; sourceTree = "<group>"; };
 		1EFE66FE1BE967460083386C /* sparklecast.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sparklecast.xml; sourceTree = "<group>"; };
+		216A7C0AEBBD5FAF54F47429 /* Pods-cTiVoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.release.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.release.xcconfig"; sourceTree = "<group>"; };
 		3DF8F749F3C5B1F6B81F9788 /* Pods-cTiVo MAS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.debug.xcconfig"; sourceTree = "<group>"; };
 		429447CEECD67FFF7A25125F /* Pods-cTiVo MAS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.release.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.release.xcconfig"; sourceTree = "<group>"; };
 		7AA8CE2ABFE88C1DF334192C /* Pods-cTiVo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.debug.xcconfig"; sourceTree = "<group>"; };
 		94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ffmpeg_edl_ac3.sh; sourceTree = "<group>"; };
 		96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo_MAS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A5B9139CDEB9B5C18DD6144 /* Pods-cTiVoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.debug.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		AA41387B28A2A21B002C9813 /* MTMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTMock.swift; sourceTree = "<group>"; };
 		AABD59EA2895FECC0040A017 /* cTiVoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = cTiVoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AABD5A0F2896DEEE0040A017 /* MTTVDBRateLimiterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBRateLimiterTests.swift; sourceTree = "<group>"; };
@@ -1254,6 +1250,7 @@
 		D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadCheckTableCell.m; sourceTree = "<group>"; };
 		D2ED1BB91715C3BF00742F18 /* MTTaskChain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTaskChain.h; sourceTree = "<group>"; };
 		D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTaskChain.m; sourceTree = "<group>"; };
+		D9C9B0C04ECC75CDE09FB686 /* Pods_cTiVoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAE15DEB65D37EC5642217B1 /* Pods-cTiVo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.release.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1281,6 +1278,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C8FAD56B9DE04FF70156EEB5 /* Pods_cTiVoTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1529,20 +1527,12 @@
 		1E9959C1173DC73500B47539 /* DDLogger */ = {
 			isa = PBXGroup;
 			children = (
-				1E59368319648C180008780B /* DDLog.h */,
-				1E59368819648C860008780B /* DDLog.m */,
-				1E0D65CC20ACA000006798CF /* DDLogMacros.h */,
-				1E0D65CA20AC9D85006798CF /* DDLegacyMacros.h */,
-				1E9959C2173DC7D100B47539 /* DDFileLogger.h */,
-				1E9959C3173DC7D100B47539 /* DDFileLogger.m */,
 				1E5936821964867E0008780B /* MTLog.h */,
 				1E59368B19648CFF0008780B /* MTLog.m */,
 				1EB328AF173ED0F0005E8656 /* MTLogFormatter.h */,
 				1EB328B0173ED0F0005E8656 /* MTLogFormatter.m */,
 				1E5BEC5F1F9532320082FA6B /* CrashlyticsLogger.h */,
 				1E5BEC601F9532320082FA6B /* CrashlyticsLogger.m */,
-				1E8E675B20E1E970005465EF /* DDOSLogger.h */,
-				1E8E675C20E1E970005465EF /* DDOSLogger.m */,
 			);
 			name = DDLogger;
 			sourceTree = "<group>";
@@ -1573,6 +1563,7 @@
 		1EF4A2B427497ECB00781BDD /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				AA41389928A5C126002C9813 /* CocoaLumberjack */,
 				1EF4A2C327497ECB00781BDD /* FirebaseCore */,
 				1EF4A2C527497ECB00781BDD /* FirebaseCoreDiagnostics */,
 				1EF4A2C727497ECB00781BDD /* FirebaseCrashlytics */,
@@ -1597,6 +1588,8 @@
 				EAE15DEB65D37EC5642217B1 /* Pods-cTiVo.release.xcconfig */,
 				3DF8F749F3C5B1F6B81F9788 /* Pods-cTiVo MAS.debug.xcconfig */,
 				429447CEECD67FFF7A25125F /* Pods-cTiVo MAS.release.xcconfig */,
+				9A5B9139CDEB9B5C18DD6144 /* Pods-cTiVoTests.debug.xcconfig */,
+				216A7C0AEBBD5FAF54F47429 /* Pods-cTiVoTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -1741,6 +1734,7 @@
 				D2D60BA316766EFD00CE32DE /* Other Frameworks */,
 				B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */,
 				96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */,
+				D9C9B0C04ECC75CDE09FB686 /* Pods_cTiVoTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1960,6 +1954,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AABD59F02895FECC0040A017 /* Build configuration list for PBXNativeTarget "cTiVoTests" */;
 			buildPhases = (
+				7C475B1BC5F802A7647FF05D /* [CP] Check Pods Manifest.lock */,
 				AABD59E62895FECC0040A017 /* Sources */,
 				AABD59E72895FECC0040A017 /* Frameworks */,
 				AABD59E82895FECC0040A017 /* Resources */,
@@ -2138,6 +2133,14 @@
 			name = PromisesObjC;
 			path = FBLPromises.framework;
 			remoteRef = 1EF4A2D427497ECB00781BDD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		AA41389928A5C126002C9813 /* CocoaLumberjack */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = CocoaLumberjack;
+			path = CocoaLumberjack.framework;
+			remoteRef = AA41389828A5C126002C9813 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -2362,6 +2365,28 @@
 			shellPath = /bin/sh;
 			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${EXECUTABLE_FOLDER_PATH}\"\nENTITLEMENT=\"$SRCROOT/cTiVo/binary.entitlements\"\n# By default, use the configured code signing identity for the project/target\nIDENTITY=\"${CODE_SIGN_IDENTITY}\"\nDEVIDENTITY=\"Developer ID Application\"\necho $IDENTITY \"==>\" $DEVIDENTITY\nIDENTITY=\"${DEVIDENTITY}\"\necho $IDENTITY \" from \" $DEVIDENTITY\ncat \"$ENTITLEMENT\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/HandBrakeCLI\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/tivodecode-ng\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/comskip\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/ffmpeg\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/ccextractor\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/mencoder\"\n";
 		};
+		7C475B1BC5F802A7647FF05D /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-cTiVoTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		9027C4642EF378D0DCEE7A6F /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2475,13 +2500,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E5050CC22556CC300D5981B /* DDLog.m in Sources */,
 				1E5050CD22556CC300D5981B /* MTProgressCell.m in Sources */,
 				1E5050CE22556CC300D5981B /* main.m in Sources */,
 				1E5050CF22556CC300D5981B /* MTChannelPopUpButton.m in Sources */,
 				1E5050D022556CC300D5981B /* MTRemoteWindowController.m in Sources */,
 				AABD5A21289744560040A017 /* MTTVDBCache.swift in Sources */,
-				1E5050D122556CC300D5981B /* DDOSLogger.m in Sources */,
 				1E5050D222556CC300D5981B /* MTAppDelegate.m in Sources */,
 				1E5050D422556CC300D5981B /* MTTiVoManager.m in Sources */,
 				1E5050D522556CC300D5981B /* MTDownloadTableView.m in Sources */,
@@ -2531,7 +2554,6 @@
 				1E50510022556CC300D5981B /* MTTask.m in Sources */,
 				1E50510122556CC300D5981B /* CrashlyticsLogger.m in Sources */,
 				1E50510222556CC300D5981B /* MTTaskChain.m in Sources */,
-				1E50510322556CC300D5981B /* DDFileLogger.m in Sources */,
 				1E50510422556CC300D5981B /* MTLogFormatter.m in Sources */,
 				1E50510522556CC300D5981B /* DragDropImageView.m in Sources */,
 				1E50510622556CC300D5981B /* MTLog.m in Sources */,
@@ -2561,13 +2583,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E59368919648C860008780B /* DDLog.m in Sources */,
 				1E9EA3FD1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */,
 				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
 				1EFA8D53211BFF6A00B4505D /* MTChannelPopUpButton.m in Sources */,
 				1E6AB108202A0BDB008A0F32 /* MTRemoteWindowController.m in Sources */,
 				AABD5A1B289737E40040A017 /* MTTMDBService.swift in Sources */,
-				1E8E675D20E1E971005465EF /* DDOSLogger.m in Sources */,
 				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
 				D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */,
 				D2D60BD716766FA600CE32DE /* MTDownloadTableView.m in Sources */,
@@ -2618,7 +2638,6 @@
 				D2C6BB5A1714681C00289751 /* MTTask.m in Sources */,
 				1E5BEC611F9532320082FA6B /* CrashlyticsLogger.m in Sources */,
 				D2ED1BBB1715C3BF00742F18 /* MTTaskChain.m in Sources */,
-				1E9959C8173DC7D100B47539 /* DDFileLogger.m in Sources */,
 				1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */,
 				1E52C5261F2420A700389E93 /* DragDropImageView.m in Sources */,
 				1E59368C19648CFF0008780B /* MTLog.m in Sources */,
@@ -2793,6 +2812,7 @@
 		};
 		AABD59F12895FECC0040A017 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9A5B9139CDEB9B5C18DD6144 /* Pods-cTiVoTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -2836,6 +2856,7 @@
 		};
 		AABD59F22895FECC0040A017 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 216A7C0AEBBD5FAF54F47429 /* Pods-cTiVoTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;

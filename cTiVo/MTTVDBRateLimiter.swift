@@ -5,23 +5,6 @@
 
 import Foundation
 
-// TODO:- replace with real logging interface
-func DDLogReport(_ args: Any...) {
-//    print(args)
-}
-func DDLogMajor(_ args: Any...) {
-//    print(args)
-}
-func DDLogDetail(_ args: Any...) {
-//    print(args)
-}
-func DDLogAlways(_ args: Any...) {
-//    print(args)
-}
-func DDLogVerbose(_ args: Any...) {
-//    print(args)
-}
-
 public actor MTTVDBRateLimiter {
     let limit: Int
     let limitInterval: TimeInterval
@@ -36,7 +19,7 @@ public actor MTTVDBRateLimiter {
 
     func wait(_ show: String = "") async -> Void {
         calls += 1
-        DDLogDetail("TheMovieDB \(calls), Entering \(show) at \(end)")
+        MTTVDBLogger.DDLogDetail("TheMovieDB \(calls), Entering \(show) at \(end)")
         let delayInterval = end.timeIntervalSinceNow
         if delayInterval < 0 {
             // Past the end of the limit interval without triggering the
@@ -44,13 +27,13 @@ public actor MTTVDBRateLimiter {
             calls = 1
             end = Date(timeIntervalSinceNow: limitInterval)
         } else if calls > limit {
-            DDLogDetail("For Show: \(show), theMovieDB sleeping \(delayInterval)")
+            MTTVDBLogger.DDLogDetail("For Show: \(show), theMovieDB sleeping \(delayInterval)")
             let delay = UInt64(delayInterval * 1_000_000_000)
             try? await Task.sleep(nanoseconds: delay)
-            DDLogDetail("For Show: \(show), theMovieDB awaking")
+            MTTVDBLogger.DDLogDetail("For Show: \(show), theMovieDB awaking")
             calls = 1
             end = Date(timeIntervalSinceNow: limitInterval)
         }
-        DDLogDetail("TheMovieDB \(calls), Exiting \(show) at \(end)")
+        MTTVDBLogger.DDLogDetail("TheMovieDB \(calls), Exiting \(show) at \(end)")
     }
 }
