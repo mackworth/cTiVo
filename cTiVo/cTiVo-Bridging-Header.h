@@ -4,6 +4,3 @@
 #import <Cocoa/Cocoa.h>
 #import "MTLog.h"
 #import "MTConstants.h"
-
-#import "MTTiVoShow.h"
-#import "MTTVDB.h"

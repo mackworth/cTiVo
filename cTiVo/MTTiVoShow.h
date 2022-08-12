@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <cTiVo-Swift.h>
 #import "MTTiVo.h"
 #import "MTFormat.h"
 #import "mp4v2.h"
@@ -15,9 +16,16 @@
 
 @class MTProgramTableView;
 
-@interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSSecureCoding, DragDropImageViewDelegate> {
+@interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSSecureCoding, DragDropImageViewDelegate, MTTiVoShowReadOnly> {
  }
 
+// Ignore warnings about property attribute mismatches between
+// MTTiVoShow and generated MTTiVoReadOnly protocol.  The properties
+// used by the MTTVDB class via the MTTiVoShowReadOnly protocol are
+// fully initialized and quiescent by the time they are accessed,
+// so the copy and atomic property attributes do not matter.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
 
 #pragma mark - Which TiVo did we come from
 @property (nonatomic, weak) MTTiVo *tiVo;
@@ -96,6 +104,7 @@
 
 //--------------------------------------------------------------
 #pragma mark - Calculated properties for display 
+
 @property (nonatomic, strong)	NSString *showTitle;  //calculated from series: episode
 @property (nonatomic, readonly) NSString *originalAirDateNoTime,
                                          *showTitlePlusAirDate,
@@ -103,7 +112,14 @@
 										*showKey,
                                         *showDateRFCString,
 										 *showMediumDateString;
+
+// Ignore warning about mismatch between int property and NSInteger
+// property declared in the generated MTTiVoShowReadOnly protocol
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincompatible-property-type"
 @property (atomic, assign)		int	season, episode; //calculated from EpisodeNumber
+#pragma clang diagnostic push
+
 @property (nonatomic, readonly) NSString *seasonString;
 @property (nonatomic, readonly) NSString *seasonEpisode; // S02 E04 version
 @property (nonatomic, readonly) BOOL manualSeasonInfo;
@@ -172,3 +188,4 @@ typedef enum {
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image andResolution:(HDTypes) hdType;
 
 @end
+#pragma clang diagnostic pop

@@ -9,7 +9,6 @@
 
 #import "MTTiVoShow.h"
 #import "MTProgramTableView.h"
-#import "MTTVDB.h"
 #import "MTiTunes.h"
 #import "MTTiVoManager.h"
 #import "NSString+RFC3339Date.h"
@@ -29,6 +28,18 @@ typedef NS_ENUM(NSUInteger, MTImageSource) {
     MTTVDBSeries,  //also movieDB
     MTNoSource, // no source is possible
 };
+
+// Property keys for tvdbData
+// These should match corresponding values in the MTTVDBCache.Key enum
+#define kTVDBSeriesKey  @"series" //what TVDB SeriesID does this belong to?
+#define kTVDBSlugKey  @"slug" //slug to use when building reporting URL for TVDB
+#define kTVDBEpisodeArtworkKey @"episodeArtwork" //URL for artwork at TVDB
+#define kTVDBSeasonArtworkKey @"seasonArtwork" //URL for artwork at TVDB
+#define kTVDBSeriesArtworkKey @"seriesArtwork" //URL for artwork at TVDB
+#define kTVDBEpisodeKey @"episode"  //string with episode number
+#define kTVDBSeasonKey  @"season"   //string with season number
+#define kTVDBPossibleIDsKey  @"possibleIds" //Array of IDs that we checked to find series
+#define kTVDBPossibleSlugsKey  @"possibleIds" //corresponding Array of slugs for building reporting URLs for TVDB
 
 @interface MTTiVoShow () {
 	
@@ -315,9 +326,17 @@ __DDLOGHERE__
     }
     if (!self.tvdbData) {
         if (self.isMovie) {
-            [tiVoManager.tvdb getTheMovieDBDetails:self ];
+            [tiVoManager.tvdb getTheMovieDBDetails:self reset:NO completionHandler:^(NSDictionary * tvdbData) {
+                dispatch_async(dispatch_get_main_queue(), ^(void) {
+                    self.tvdbData = tvdbData;
+                });
+            }];
         } else {
-            [tiVoManager.tvdb getTheTVDBDetails:self ];
+            [tiVoManager.tvdb getTheTVDBDetails:self reset:NO completionHandler:^(NSDictionary * tvdbData) {
+                dispatch_async(dispatch_get_main_queue(), ^(void) {
+                    self.tvdbData = tvdbData;
+                });
+            }];
         }
     }
     DDLogDetail(@"GetDetails parsing Finished: %@", self.showTitle);
@@ -473,7 +492,8 @@ __DDLOGHERE__
 
         //check if tivo and TVDB disagree on season
         if (episodeRPC > 0 && episodeTVDB >0 && (episodeTVDB!= episodeRPC || seasonTVDB != seasonRPC)) {
-            NSString * details = [NSString stringWithFormat:@"TVDB has %d/%d v TiVo %d/%d; %@ aired %@; %@ ",seasonTVDB, episodeTVDB, seasonRPC, episodeRPC, self.seriesId, self.originalAirDateNoTime,  self.tvdbData[kTVDBURLsKey]];
+            NSString * reportingURL = [tiVoManager.tvdb getReportingURLWithId:self.tvdbData[kTVDBSeriesKey] slug:self.tvdbData[kTVDBSlugKey]];
+            NSString * details = [NSString stringWithFormat:@"TVDB has %d/%d v TiVo %d/%d; %@ aired %@; %@ ",seasonTVDB, episodeTVDB, seasonRPC, episodeRPC, self.seriesId, self.originalAirDateNoTime,  reportingURL];
             DDLogDetail(@"TheTVDB has different Sea/Eps info for %@: %@ %@", self.showTitle, details, useTiVoData ? @"leaving": @"updating" );
         }
 
@@ -1352,7 +1372,16 @@ NSString * fourChar(long n, BOOL allowZero) {
      objectAtIndex:[components month]-1] :
     @"";
 
-    NSString *TVDBseriesID = [[tiVoManager.tvdb seriesIDsForShow:self] componentsJoinedByString:@","];
+    NSMutableArray * seriesIDs = [NSMutableArray array];
+    if (self.tvdbData) {
+        if (self.tvdbData[kTVDBSeriesKey]) {
+            [seriesIDs addObject:self.tvdbData[kTVDBSeriesKey]];
+        } else if (self.tvdbData[kTVDBPossibleIDsKey]) {
+            [seriesIDs addObjectsFromArray:self.tvdbData[kTVDBPossibleIDsKey]];
+        }
+    }
+
+    NSString *TVDBseriesID = [seriesIDs componentsJoinedByString:@","];
     NSString * guests = [[self.guestStars.string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@","];
     NSString * extraEpisode = @"";
     if (self.episode && self.season &&   //if we have an SxxExx AND either a 2 hr show OR a semicolon in episode title, then it might be a double episode
@@ -1861,15 +1890,19 @@ NSString * fourChar(long n, BOOL allowZero) {
     _lastImageSource = MTSearchingSource;
 	_clipMetaDataId = nil;
 	_edlList = nil;
-	
-    if (all) {
-        [self.tiVo reloadShowInfoForShows:@[self]];
-        [tiVoManager.tvdb resetTVDBInfo:self];
-    }
+
     if (self.isMovie) {
-        [tiVoManager.tvdb getTheMovieDBDetails:self ];
+        [tiVoManager.tvdb getTheMovieDBDetails:self reset:all completionHandler:^(NSDictionary * tvdbData) {
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+                self.tvdbData = tvdbData;
+            });
+        }];
     } else {
-        [tiVoManager.tvdb getTheTVDBDetails:self ];
+        [tiVoManager.tvdb getTheTVDBDetails:self reset:all completionHandler:^(NSDictionary * tvdbData) {
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+                self.tvdbData = tvdbData;
+            });
+        }];
     }
     self.rpcData = [self.tiVo registerRPCforShow:self];
 }
@@ -2068,7 +2101,11 @@ NSString * fourChar(long n, BOOL allowZero) {
    } else  {
         NSString * tvdbkey = [self mapTVDBKeyFromSource:source];
         if (tvdbkey) {
-            self.tvdbData = [tiVoManager.tvdb cacheArtWork:@"" forKey:tvdbkey forShow:self];
+            [tiVoManager.tvdb invalidateArtwork:self forKey:tvdbkey completionHandler:^(NSDictionary * tvdbData) {
+                dispatch_async(dispatch_get_main_queue(), ^(void) {
+                    self.tvdbData = tvdbData;
+                });
+            }];
         }
     }
 }
@@ -2150,11 +2187,8 @@ NSString * fourChar(long n, BOOL allowZero) {
                 baseUrlString = @"http://image.tmdb.org/t/p/w780%@";
             }
         } else {
-//            if (thumbnail) {
-//                baseUrlString = @"http://thetvdb.com/banners/_cache/%@";
-//            } else {
-                baseUrlString = @"http://thetvdb.com/banners/%@";
-//            }
+            // TVDB provides full path
+            baseUrlString = @"%@";
         }
         NSString * tvdbKey = [self mapTVDBKeyFromSource:source];
         if (!tvdbKey) {
@@ -2335,13 +2369,21 @@ NSString * fourChar(long n, BOOL allowZero) {
 			return;
 		}
         self.tvdbInProgress = YES;
-        [tiVoManager.tvdb addSeasonArtwork:self];
+        [tiVoManager.tvdb addSeasonArtwork:self completionHandler:^(NSDictionary * tvdbData) {
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+                self.tvdbData = tvdbData;
+            });
+        }];
     } else if (source == MTTVDBSeries) {
 		if (self.tvdbInProgress) {
 			return;
 		}
         self.tvdbInProgress = YES;
-        [tiVoManager.tvdb addSeriesArtwork:self];
+        [tiVoManager.tvdb addSeriesArtwork:self completionHandler:^(NSDictionary * tvdbData) {
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+                self.tvdbData = tvdbData;
+            });
+        }];
     }
 }
 
@@ -2375,7 +2417,13 @@ NSString * fourChar(long n, BOOL allowZero) {
         //tvdb cache file, so remember the deletion
         DDLogDetail(@"Removing TVDB image %@", fileName);
         NSString * tvdbKey = [self mapTVDBKeyFromSource: self.lastImageSource];
-        if (tvdbKey) self.tvdbData = [tiVoManager.tvdb cacheArtWork:@"" forKey:tvdbKey forShow:self];
+        if (tvdbKey) {
+            [tiVoManager.tvdb invalidateArtwork:self forKey:tvdbKey completionHandler:^(NSDictionary * tvdbData) {
+                dispatch_async(dispatch_get_main_queue(), ^(void) {
+                    self.tvdbData = tvdbData;
+                });
+            }];
+        }
     } else if ([[tiVoManager tivoTempDirectory] directoryContainsURL:fileName]) {
         //tivo cache file, so remember the deletion
         DDLogDetail(@"Removing TiVo image %@", fileName);

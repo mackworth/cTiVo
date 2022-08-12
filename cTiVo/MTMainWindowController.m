@@ -19,7 +19,6 @@
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"
 #import "MTTiVo.h"
-#import "MTTVDB.h"
 #import "NSArray+Map.h"
 
 #import <Quartz/Quartz.h>
