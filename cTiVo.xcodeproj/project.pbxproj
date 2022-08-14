@@ -967,6 +967,7 @@
 		1E684A7A16E2C50B000F5C6E /* suggestion-recording.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "suggestion-recording.png"; sourceTree = "<group>"; };
 		1E684A8616E3A010000F5C6E /* status-unknown.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "status-unknown.png"; sourceTree = "<group>"; };
 		1E684A8A16E3A338000F5C6E /* deleted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = deleted.png; sourceTree = "<group>"; };
+		1E6911C328A9609E00D2F4A2 /* DDLogPatch.patch */ = {isa = PBXFileReference; lastKnownFileType = text; path = DDLogPatch.patch; sourceTree = "<group>"; };
 		1E6AB105202A0BDB008A0F32 /* MTRemoteWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTRemoteWindowController.h; sourceTree = "<group>"; };
 		1E6AB106202A0BDB008A0F32 /* MTRemoteWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTRemoteWindowController.m; sourceTree = "<group>"; };
 		1E6AB107202A0BDB008A0F32 /* MTRemoteWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MTRemoteWindowController.xib; sourceTree = "<group>"; };
@@ -1583,6 +1584,7 @@
 			children = (
 				1EF4A2B227497E1A00781BDD /* Podfile */,
 				1EF4A2D627497ED300781BDD /* Podfile.lock */,
+				1E6911C328A9609E00D2F4A2 /* DDLogPatch.patch */,
 				1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */,
 				7AA8CE2ABFE88C1DF334192C /* Pods-cTiVo.debug.xcconfig */,
 				EAE15DEB65D37EC5642217B1 /* Pods-cTiVo.release.xcconfig */,
