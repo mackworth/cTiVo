@@ -64,7 +64,7 @@
 	if (self.view) nil; //ensure it's loaded.
 	[self.displayMessage setEditable:YES];
 	[self.displayMessage setAutomaticLinkDetectionEnabled:YES];
-	[self.displayMessage checkTextInDocument:nil];
+	[self.displayMessage performSelector:@selector( checkTextInDocument:) withObject:nil afterDelay:0.1];
 }
 
 -(void) pointToView:(NSView *) view preferredEdge: (NSRectEdge) edge {

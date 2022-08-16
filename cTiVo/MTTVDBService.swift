@@ -150,10 +150,31 @@ struct MTTVDBServiceV4: MTTVDBService {
 
     let session: URLSession
 
+    // Placeholder used by TVDB for missing artwork.
+    private let missingArtwork = "https://artworks.thetvdb.com/banners/images/missing/series.jpg"
+
+    // Replace missing artwork placeholder with empty string so that
+    // downstream code can fall back to other options.  If other
+    // placeholders are identified, modify this function
+    private func filterMissingArtwork(_ artwork: String?) -> String? {
+        missingArtwork == artwork ? "" : artwork
+    }
+
+    // The maximum number of series to be returned from the TVDB API
+    let maxSeries = 10
+
     func querySeries(name: String) async -> [MTTVDBSeries] {
         let url = "\(apiBaseURLV4)/search?query=\(name)&type=series"
         let json: SearchResponseJSON? = await queryTVDBService(url: url)
-        return json?.data ?? []
+        let series = json?.data ?? []
+        return Array(series.map({
+            SearchResponseJSON.SeriesJSON.init(
+                    id: $0.id,
+                    slug: $0.slug,
+                    name: $0.name,
+                    image: filterMissingArtwork($0.image)
+            )
+        }).prefix(maxSeries))
     }
     
     func queryEpisodes(seriesID: String, originalAirDate: String?, pageNumber: Int) async -> (episodes: [MTTVDBEpisode], hasMore: Bool)? {
@@ -163,19 +184,28 @@ struct MTTVDBServiceV4: MTTVDBService {
         } else {
             airDateParam = ""
         }
-        let url = "\(apiBaseURLV4)/series/\(seriesID)/episodes/default?page=\(pageNumber)\(airDateParam)"
+        let url = "\(apiBaseURLV4)/series/\(seriesID)/episodes/alternate?page=\(pageNumber)\(airDateParam)"
         let json: EpisodeResponseJSON? = await queryTVDBService(url: url)
         guard let episodes = json?.data?.episodes else {
             return nil
         }
+        let filteredEpisodes = episodes.map {
+            EpisodeResponseJSON.DataJSON.EpisodeJSON.init(
+                    id: $0.id,
+                    name: $0.name,
+                    season: $0.season,
+                    number: $0.number,
+                    image: filterMissingArtwork($0.image)
+            )
+        }
         // If next is not null, assume there are more available
-        return (episodes: episodes, hasMore: json?.links?.next != nil)
+        return (episodes: filteredEpisodes, hasMore: json?.links?.next != nil)
     }
     
     func querySeriesArtwork(seriesID: String) async -> String? {
         let url = "\(apiBaseURLV4)/series/\(seriesID)"
         let json: SeriesResponseJSON? = await queryTVDBService(url: url)
-        return json?.data?.image
+        return filterMissingArtwork(json?.data?.image)
     }
     
     func querySeasonArtwork(seriesID: String, season: Int) async -> String? {
@@ -186,7 +216,7 @@ struct MTTVDBServiceV4: MTTVDBService {
         }
         for seasonJSON in seasons {
             if (seasonJSON.number == season) {
-                return seasonJSON.image
+                return filterMissingArtwork(seasonJSON.image)
             }
         }
         return nil

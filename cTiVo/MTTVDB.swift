@@ -7,29 +7,6 @@
 //
 
 import Foundation
-import CocoaLumberjack
-
-@objc(MTTVDB4)
-public class MTTVDBLogger: NSObject {
-    public static var logLevel = DDLogLevel.verbose;
-
-    @objc public static var ddLogLevel: DDLogLevel {
-        get { logLevel }
-        @objc(ddSetLogLevel:) set { logLevel = newValue }
-    }
-    static func DDLogReport(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
-        DDLogError(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
-    }
-    static func DDLogMajor(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
-        DDLogWarn(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
-    }
-    static func DDLogDetail(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
-        DDLogInfo(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
-    }
-    static func DDLogVerbose(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
-        CocoaLumberjack.DDLogVerbose(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
-    }
-}
 
 @objc
 public protocol MTTiVoShowReadOnly {
@@ -95,12 +72,18 @@ actor MTTVDBStatistics {
     func percent(_ cached: MTTVDBStatisticsListKey, _ notCached: MTTVDBStatisticsListKey) -> String {
         percent(val(cached), val(notCached))
     }
-    func list(_ key: MTTVDBStatisticsListKey) -> String {
-        if let list = lists[key] {
-            return String(describing: list as NSDictionary)
-        } else {
-            return "None"
+    func list(_ key: MTTVDBStatisticsListKey, purgeKey: MTTVDBStatisticsListKey? = nil) -> String {
+        if var list = lists[key] {
+            if let purgeKey = purgeKey {
+                if let purgeList = lists[purgeKey] {
+                    purgeList.keys.forEach { list[$0] = nil }
+                }
+            }
+            if !list.isEmpty {
+                return String(describing: list as NSDictionary)
+            }
         }
+        return "None"
     }
     func report() -> String {
         let valEpisodic =
@@ -124,8 +107,8 @@ actor MTTVDBStatistics {
 
                In the last group we looked up, we had the following results:
                Movies:
-                  \(val(.movieFound, .movieFoundCached)) shows found (cached: \(percent(.movieFoundCached, .movieFound)))
-                  \(val(.movieNotFound, .movieNotFoundCached)) series not found (cached: \(percent(.movieNotFoundCached, .movieNotFound)))
+                  \(val(.movieFound, .movieFoundCached)) movies found (cached: \(percent(.movieFoundCached, .movieFound)))
+                  \(val(.movieNotFound, .movieNotFoundCached)) movies not found (cached: \(percent(.movieNotFoundCached, .movieNotFound)))
 
                Episodic:
                   \(val(.seriesEpisodeFound, .seriesEpisodeFoundCached)) shows found (cached: \(percent(.seriesEpisodeFoundCached, .seriesEpisodeFound)))
@@ -141,25 +124,25 @@ actor MTTVDBStatistics {
                \(list(.movieNotFound))
 
                Movies not Found (Cached)
-               \(list(.movieNotFoundCached))
+               \(list(.movieNotFoundCached, purgeKey: .movieNotFound))
 
                Episodic Series not Found at TVDB
                \(list(.episodicSeriesNotFound))
 
                Episodic Series not Found (Cached)
-               \(list(.episodicSeriesNotFoundCached))
+               \(list(.episodicSeriesNotFoundCached, purgeKey: .episodicSeriesNotFound))
 
                Episodic Series Found, but episodes not found at TVDB
                \(list(.episodeNotFound))
 
                Episodic Series Found, but episodes not found (Cached)
-               \(list(.episodeNotFoundCached))
+               \(list(.episodeNotFoundCached, purgeKey: .episodeNotFound))
 
                Non-Episodic Series not Found at TVDB
                \(list(.nonEpisodicSeriesNotFound))
 
                Non-Episodic Series not Found (Cached)
-               \(list(.nonEpisodicSeriesNotFoundCached))
+               \(list(.nonEpisodicSeriesNotFoundCached, purgeKey: .nonEpisodicSeriesNotFound))
 
                """
     }
@@ -328,9 +311,18 @@ public class MTTVDB : NSObject {
                         onAirDate: show.originalAirDateNoTime
                 ) {
                     if let image = episode.image {
-                        MTTVDBLogger.DDLogDetail("TVDB Artwork for \(show.seriesTitle) (\(show.episodeID)) at \(image)")
+                        MTTVDBLogger.DDLogDetail("TVDB Episode Artwork for \(show.seriesTitle) (\(show.episodeID)) at \(image)")
                     }
-                    DDLogVerbose("Got TVDB episodeInfo for \(show.seriesTitle) (\(show.episodeID))")
+                    if let image = series.image {
+                        MTTVDBLogger.DDLogDetail("TVDB Series Artwork for \(show.seriesTitle) (\(show.episodeID)) at \(image)")
+                    }
+                    if episode.image == "" {
+                        MTTVDBLogger.DDLogDetail("Discarded placeholder for missing TVDB Episode Artwork for \(show.seriesTitle) (\(show.episodeID))")
+                    }
+                    if series.image == "" {
+                        MTTVDBLogger.DDLogDetail("Discarded placeholder for missing TVDB Series Artwork for \(show.seriesTitle) (\(show.episodeID))")
+                    }
+                    MTTVDBLogger.DDLogVerbose("Got TVDB episodeInfo for \(show.seriesTitle) (\(show.episodeID))")
                     await tvdbStatistics.increment(.seriesEpisodeFound)
                     // Remember the one that worked, forget all of the others
                     await seriesCache.set([series], forKey: show.seriesTitle)
@@ -359,6 +351,8 @@ public class MTTVDB : NSObject {
                 await tvdbStatistics.increment(.nonEpisodicSeriesFound)
                 if (firstSeries.image == nil) {
                     MTTVDBLogger.DDLogDetail("No artwork for \(show.seriesTitle) (\(show.episodeID)) Series ID: \(firstSeries.id)")
+                } else if firstSeries.image == "" {
+                    MTTVDBLogger.DDLogDetail("Discarded placeholder for missing TVDB Series Artwork for \(show.seriesTitle) (\(show.episodeID))")
                 }
                 await tvdbCache.setAll(
                         show.episodeID,
@@ -578,13 +572,23 @@ public class MTTVDB : NSObject {
     }
 
     @objc public func addSeriesArtwork(_ show: MTTiVoShowReadOnly) async -> NSDictionary {
-        if let seriesID = await tvdbCache.getSeries(show.episodeID) {
+        let status = await tvdbCache.getStatus(show.episodeID)
+        if status == .found || status == .notFound {
             if await tvdbCache.getSeriesArtwork(show.episodeID) == nil {
-                if let seriesArtwork = await tvdbService.querySeriesArtwork(seriesID: seriesID) {
-                    MTTVDBLogger.DDLogDetail("Found series artwork for \(show.seriesTitle) (\(show.episodeID)): \(seriesArtwork)")
-                    await tvdbCache.setSeriesArtwork(show.episodeID, seriesArtwork: seriesArtwork)
+                if let seriesID = await tvdbCache.getSeries(show.episodeID) {
+                    if let seriesArtwork = await tvdbService.querySeriesArtwork(seriesID: seriesID) {
+                        if seriesArtwork == "" {
+                            MTTVDBLogger.DDLogDetail("Discarding placeholder for missing TVDB series artwork for \(show.seriesTitle) (\(show.episodeID))")
+                        } else {
+                            MTTVDBLogger.DDLogDetail("Found series artwork for \(show.seriesTitle) (\(show.episodeID)): \(seriesArtwork)")
+                        }
+                        await tvdbCache.setSeriesArtwork(show.episodeID, seriesArtwork: seriesArtwork)
+                    } else {
+                        MTTVDBLogger.DDLogDetail("No series artwork for \(show.seriesTitle) (\(show.episodeID))")
+                        await tvdbCache.setSeriesArtwork(show.episodeID, seriesArtwork: "")
+                    }
                 } else {
-                    MTTVDBLogger.DDLogDetail("No series artwork for \(show.seriesTitle) (\(show.episodeID))")
+                    MTTVDBLogger.DDLogDetail("No series ID when adding series artwork for \(show.seriesTitle) (\(show.episodeID))")
                     await tvdbCache.setSeriesArtwork(show.episodeID, seriesArtwork: "")
                 }
             }
@@ -593,13 +597,23 @@ public class MTTVDB : NSObject {
     }
 
     @objc public func addSeasonArtwork(_ show: MTTiVoShowReadOnly) async -> NSDictionary {
-        if let seriesID = await tvdbCache.getSeries(show.episodeID) {
+        let status = await tvdbCache.getStatus(show.episodeID)
+        if status == .found || status == .notFound {
             if await tvdbCache.getSeasonArtwork(show.episodeID) == nil {
-                if let seasonArtwork = await tvdbService.querySeasonArtwork(seriesID: seriesID, season: show.season) {
-                    MTTVDBLogger.DDLogDetail("Found season artwork for \(show.seriesTitle) (\(show.episodeID)): \(seasonArtwork)")
-                    await tvdbCache.setSeasonArtwork(show.episodeID, seasonArtwork: seasonArtwork)
+                if let seriesID = await tvdbCache.getSeries(show.episodeID) {
+                    if let seasonArtwork = await tvdbService.querySeasonArtwork(seriesID: seriesID, season: show.season) {
+                        if seasonArtwork == "" {
+                            MTTVDBLogger.DDLogDetail("Discarding placeholder for missing TVDB season artwork for \(show.seriesTitle) (\(show.episodeID))")
+                        } else {
+                            MTTVDBLogger.DDLogDetail("Found season artwork for \(show.seriesTitle) (\(show.episodeID)): \(seasonArtwork)")
+                        }
+                        await tvdbCache.setSeasonArtwork(show.episodeID, seasonArtwork: seasonArtwork)
+                    } else {
+                        MTTVDBLogger.DDLogDetail("No season artwork for \(show.seriesTitle) (\(show.episodeID))")
+                        await tvdbCache.setSeasonArtwork(show.episodeID, seasonArtwork: "")
+                    }
                 } else {
-                    MTTVDBLogger.DDLogDetail("No season artwork for \(show.seriesTitle) (\(show.episodeID))")
+                    MTTVDBLogger.DDLogDetail("No series ID when adding season artwork for \(show.seriesTitle) (\(show.episodeID))")
                     await tvdbCache.setSeasonArtwork(show.episodeID, seasonArtwork: "")
                 }
             }

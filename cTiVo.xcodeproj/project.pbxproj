@@ -430,6 +430,7 @@
 		6E8C4CEF0E977C1049A1473C /* Pods_cTiVo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */; };
 		94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */ = {isa = PBXBuildFile; fileRef = 94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		AA41387C28A2A21B002C9813 /* MTMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA41387B28A2A21B002C9813 /* MTMock.swift */; };
+		AA41389E28AAD26E002C9813 /* MTTVDBLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA41389D28AAD26E002C9813 /* MTTVDBLogger.swift */; };
 		AABD5A102896DEEE0040A017 /* MTTVDBRateLimiterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A0F2896DEEE0040A017 /* MTTVDBRateLimiterTests.swift */; };
 		AABD5A16289716D00040A017 /* MTTVDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A15289716D00040A017 /* MTTVDBService.swift */; };
 		AABD5A17289716D00040A017 /* MTTVDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A15289716D00040A017 /* MTTVDBService.swift */; };
@@ -594,6 +595,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = C261436D14052AE3C35F240BCD155CAC;
 			remoteInfo = CocoaLumberjack;
+		};
+		AA4138AB28AAD26E002C9813 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A67D63554E61FF4E4687DFEDB64B3EB7;
+			remoteInfo = "Pods-cTiVoTests";
 		};
 		AABD59EE2895FECC0040A017 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1132,6 +1140,7 @@
 		96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo_MAS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A5B9139CDEB9B5C18DD6144 /* Pods-cTiVoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.debug.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		AA41387B28A2A21B002C9813 /* MTMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTMock.swift; sourceTree = "<group>"; };
+		AA41389D28AAD26E002C9813 /* MTTVDBLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBLogger.swift; sourceTree = "<group>"; };
 		AABD59EA2895FECC0040A017 /* cTiVoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = cTiVoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AABD5A0F2896DEEE0040A017 /* MTTVDBRateLimiterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBRateLimiterTests.swift; sourceTree = "<group>"; };
 		AABD5A15289716D00040A017 /* MTTVDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBService.swift; sourceTree = "<group>"; };
@@ -1574,6 +1583,7 @@
 				1EF4A2CF27497ECB00781BDD /* nanopb */,
 				1EF4A2D127497ECB00781BDD /* Pods-cTiVo */,
 				1EF4A2D327497ECB00781BDD /* Pods-cTiVo MAS */,
+				AA4138AC28AAD26E002C9813 /* Pods-cTiVoTests */,
 				1EF4A2D527497ECB00781BDD /* PromisesObjC */,
 			);
 			name = Products;
@@ -1891,6 +1901,7 @@
 				D2ED1BB91715C3BF00742F18 /* MTTaskChain.h */,
 				D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */,
 				1E8945C528514E9500FFD411 /* cTiVo-Bridging-Header.h */,
+				AA41389D28AAD26E002C9813 /* MTTVDBLogger.swift */,
 			);
 			name = "Data Model";
 			sourceTree = "<group>";
@@ -2143,6 +2154,14 @@
 			name = CocoaLumberjack;
 			path = CocoaLumberjack.framework;
 			remoteRef = AA41389828A5C126002C9813 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		AA4138AC28AAD26E002C9813 /* Pods-cTiVoTests */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = "Pods-cTiVoTests";
+			path = Pods_cTiVoTests.framework;
+			remoteRef = AA4138AB28AAD26E002C9813 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -2609,6 +2628,7 @@
 				D257C6E9169740A000EBE30B /* MTFormatPopUpTableCellView.m in Sources */,
 				D2A648F216991CD300C7DA01 /* MTTiVo.m in Sources */,
 				D2A648FB16994D2A00C7DA01 /* MTSubscription.m in Sources */,
+				AA41389E28AAD26E002C9813 /* MTTVDBLogger.swift in Sources */,
 				1E4A38481A37C0F4001D84A7 /* MTSubscriptionList.m in Sources */,
 				D2A7269816A23E3D00C58C5F /* MTFormat.m in Sources */,
 				D2A7269C16A25DEB00C58C5F /* MTFormatEditorController.m in Sources */,
