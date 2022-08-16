@@ -20,7 +20,7 @@ end
 post_install do |installer|
     puts 'Patching DDLog.m to fix RegisteredClasses bug, if needed.'
     filename = "Pods/CocoaLumberjack/Sources/CocoaLumberjack/DDLog.m"
-    outStr = %x(patch --forward #{filename} < Pods/DDlogPatch.patch)
+    outStr = %x(patch --forward #{filename} < DDlogPatch.patch)
     errStr = <<"EOS"  #if patch gives this exact error message, don't alarm user
 patching file #{filename}
 Reversed (or previously applied) patch detected!  Skipping patch.
