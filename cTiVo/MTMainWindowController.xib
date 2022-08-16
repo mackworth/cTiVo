@@ -111,17 +111,22 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="HFS-Zq-cHx" customClass="MTProgressCell">
-                                                                    <rect key="frame" x="1" y="1" width="110" height="50"/>
+                                                                    <rect key="frame" x="1" y="1" width="105" height="50"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
+                                                                        <progressIndicator maxValue="100" indeterminate="YES" controlSize="small" style="spinning" id="1Yr-5P-aPh">
+                                                                            <rect key="frame" x="49" y="17" width="16" height="16"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                                                        </progressIndicator>
                                                                         <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rAV-K7-JVu" customClass="DragDropImageView">
-                                                                            <rect key="frame" x="60" y="0.0" width="50" height="50"/>
+                                                                            <rect key="frame" x="55" y="0.0" width="50" height="50"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                             <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" id="y4H-iS-s49"/>
                                                                         </imageView>
                                                                     </subviews>
                                                                     <connections>
                                                                         <outlet property="imageView" destination="rAV-K7-JVu" id="BGc-1k-MNa"/>
+                                                                        <outlet property="progressIndicator" destination="1Yr-5P-aPh" id="5fF-ba-rto"/>
                                                                     </connections>
                                                                 </tableCellView>
                                                             </prototypeCellViews>
@@ -1091,7 +1096,7 @@
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qQB-l8-FUr" userLabel="leftText">
-                                                                            <rect key="frame" x="36" y="0.0" width="0.0" height="17"/>
+                                                                            <rect key="frame" x="38" y="0.0" width="0.0" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="nX6-ru-GCz">
                                                                                 <font key="font" metaFont="system"/>
@@ -1100,7 +1105,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FEf-Ia-wX9" userLabel="rightText">
-                                                                            <rect key="frame" x="-12" y="0.0" width="80" height="17"/>
+                                                                            <rect key="frame" x="-13" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingMiddle" sendsActionOnEndEditing="YES" state="on" alignment="right" drawsBackground="YES" id="a0F-vx-fpu">
                                                                                 <font key="font" size="10" name="Helvetica"/>

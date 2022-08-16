@@ -145,6 +145,12 @@ __DDLOGHERE__
 {
     MTTiVoShow *thisShow = notification.object;
     NSInteger row = [self rowForItem:thisShow];
+    if (row == -1) {
+      MTShowFolder * folder = [self.parentMap objectForKey:thisShow];
+      if (folder) {
+        row = [self rowForItem:folder];
+      }
+    }
     if (row != NSNotFound) {
         [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:[self columnWithIdentifier:kMTArtColumn] ]];
     }
@@ -593,7 +599,6 @@ __DDLOGHERE__
 	CGRect rect = CGRectMake(0, 0, width, fabs(self.imageRowHeight));
 	cell.frame = rect;
 	cell.imageView.frame = rect;
-	cell.progressIndicator.frame = rect;
 	NSImage * image = thisShow.thumbnailImage;
 	if (image) {
 		DDLogVerbose(@"got image for %@: %@",thisShow, NSStringFromRect(cell.bounds));
