@@ -400,9 +400,9 @@ __DDLOGHERE__
 }
 
 -(void) setTvdbData:(NSDictionary<NSString *,id> *) tvdbData {
-    if (tvdbData == _tvdbData ) return;
-    _tvdbData = tvdbData;
     self.tvdbInProgress = NO;
+    if (tvdbData == _tvdbData || [tvdbData isEqualTo: _tvdbData] ) return;
+    _tvdbData = tvdbData;
     [self checkAllInfoSources];
 }
 

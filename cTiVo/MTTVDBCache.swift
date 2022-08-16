@@ -201,7 +201,7 @@ actor MTTVDBCache {
 
     // Key when persisting cached data to UserDefaults
     // Matches kMTTheTVDBCache in MTConstants.h
-    static let userDefaultsKey = "TVDBLocalCache"
+    static let userDefaultsKey = "TVDBLocalCacheV4"
 
     func saveCache() {
         UserDefaults.standard.set(getDictionary() as NSDictionary, forKey: MTTVDBCache.userDefaultsKey)
