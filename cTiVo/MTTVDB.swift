@@ -343,6 +343,9 @@ public class MTTVDB : NSObject {
                             forShow: show.seriesTitle)
                     await tvdbCache.setAll(
                             show.episodeID,
+                            episodeArtwork: "",
+                            seasonArtwork: "",
+                            seriesArtwork: "",
                             possibleIds: series.map({$0.id}),
                             possibleSlugs: series.map({$0.slug}),
                             status: .notFound)
