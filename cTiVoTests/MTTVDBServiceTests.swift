@@ -154,7 +154,7 @@ class MTTVDBServiceTests: XCTestCase {
 
     let urlLogin = "https://api4.thetvdb.com/v4/login"
     let urlSeries = "https://api4.thetvdb.com/v4/search?query=Craig of the Creek&type=series"
-    let urlEpisodes = "https://api4.thetvdb.com/v4/series/338736/episodes/default?page=1&airDate=2021-02-06"
+    let urlEpisodes = "https://api4.thetvdb.com/v4/series/338736/episodes/alternate?page=1&airDate=2021-02-06"
     let urlSeriesArtwork = "https://api4.thetvdb.com/v4/series/338736"
     let urlSeasonArtwork = "https://api4.thetvdb.com/v4/series/338736/extended?short=true"
 
@@ -394,6 +394,30 @@ class MTTVDBServiceTests: XCTestCase {
         XCTAssertNil(result[0].image)
     }
 
+    func testQuerySeriesPlaceholderImage() async {
+        let placeholderSeries = """
+                                {
+                                  "status": "success",
+                                  "data": [
+                                    {
+                                      "tvdb_id": "338736",
+                                      "slug": "craig-of-the-creek",
+                                      "name": "Craig of the Creek",
+                                      "image_url": "https://artworks.thetvdb.com/banners/images/missing/series.jpg",
+                                    }
+                                  ]
+                                }
+                                """
+        let _ = setMockResponse(for: urlSeries, data: placeholderSeries, statusCode: 200)
+        let result = await service.querySeries(name: "Craig of the Creek")
+        XCTAssertEqual(result.count, 1)
+        guard result.count == 1 else { return }
+        XCTAssertEqual(result[0].id, "338736")
+        XCTAssertEqual(result[0].slug, "craig-of-the-creek")
+        XCTAssertEqual(result[0].name, "Craig of the Creek")
+        XCTAssertEqual(result[0].image, "")
+    }
+
     func testQueryEpisodesValid() async {
         let result = await service.queryEpisodes(seriesID: "338736", originalAirDate: "2021-02-06", pageNumber: 1)
         guard let result = result else { XCTFail(); return }
@@ -598,6 +622,39 @@ class MTTVDBServiceTests: XCTestCase {
         XCTAssertNil(result.episodes[0].image)
     }
 
+    func testQueryEpisodesPlaceholderImage() async {
+        let placeholderEpisodes = """
+                                  {
+                                    "status": "success",
+                                    "data": {
+                                      "episodes": [
+                                        {
+                                          "id": 8162231,
+                                          "name": "Snow Place Like Home",
+                                          "seasonNumber": 3,
+                                          "number": 20,
+                                          "image": "https://artworks.thetvdb.com/banners/images/missing/series.jpg"
+                                        }
+                                      ]
+                                    },
+                                    "links": {
+                                      "next": "next page url"
+                                    }
+                                  }
+                                  """
+        let _ = setMockResponse(for: urlEpisodes, data: placeholderEpisodes, statusCode: 200)
+        let result = await service.queryEpisodes(seriesID: "338736", originalAirDate: "2021-02-06", pageNumber: 1)
+        guard let result = result else { XCTFail(); return }
+        XCTAssertTrue(result.hasMore)
+        XCTAssertEqual(result.episodes.count, 1)
+        guard result.episodes.count == 1 else { return }
+        XCTAssertEqual(result.episodes[0].id, 8162231)
+        XCTAssertEqual(result.episodes[0].name, "Snow Place Like Home")
+        XCTAssertEqual(result.episodes[0].season, 3)
+        XCTAssertEqual(result.episodes[0].number, 20)
+        XCTAssertEqual(result.episodes[0].image, "")
+    }
+
     func testQueryEpisodesNoLinksKey() async {
         let minimalEpisodes = """
                               {
@@ -662,7 +719,7 @@ class MTTVDBServiceTests: XCTestCase {
 
     func testQueryEpisodesNoOriginalAirDateParameter() async {
         let _ = setMockResponse(for: urlEpisodes, data: "", statusCode: 500) // Remove response for original test URL
-        let shortUrlEpisodes = "https://api4.thetvdb.com/v4/series/338736/episodes/default?page=0"
+        let shortUrlEpisodes = "https://api4.thetvdb.com/v4/series/338736/episodes/alternate?page=0"
         let _ = setMockResponse(for: shortUrlEpisodes, data: dataEpisodes, statusCode: 200)
         let result = await service.queryEpisodes(seriesID: "338736")
         guard let result = result else { XCTFail(); return }
@@ -773,6 +830,20 @@ class MTTVDBServiceTests: XCTestCase {
         let _ = setMockResponse(for: urlSeriesArtwork, data: minimalSeriesArtwork, statusCode: 200)
         let result = await service.querySeriesArtwork(seriesID: "338736")
         XCTAssertNil(result)
+    }
+
+    func testQuerySeriesArtworkPlaceholderImage() async {
+        let placeholderSeriesArtwork = """
+                                       {
+                                         "status": "success",
+                                         "data": {
+                                           "image": "https://artworks.thetvdb.com/banners/images/missing/series.jpg"
+                                         }
+                                       }
+                                       """
+        let _ = setMockResponse(for: urlSeriesArtwork, data: placeholderSeriesArtwork, statusCode: 200)
+        let result = await service.querySeriesArtwork(seriesID: "338736")
+        XCTAssertEqual(result, "")
     }
 
     func testQuerySeasonArtworkValid() async {
@@ -931,6 +1002,30 @@ class MTTVDBServiceTests: XCTestCase {
         let _ = setMockResponse(for: urlSeasonArtwork, data: noMatchingSeasonArtwork, statusCode: 200)
         let result = await service.querySeasonArtwork(seriesID: "338736", season: 2)
         XCTAssertNil(result)
+    }
+
+    func testQuerySeasonArtworkPlaceholderImage() async {
+        let placeholderSeasonArtwork = """
+                                       {
+                                         "status": "success",
+                                         "data": {
+                                           "image": "seriesImage",
+                                           "seasons": [
+                                             {
+                                               "number": 1,
+                                               "image": "seasonImage1"
+                                             },
+                                             {
+                                               "number": 2,
+                                               "image": "https://artworks.thetvdb.com/banners/images/missing/series.jpg"
+                                             }
+                                           ]
+                                         }
+                                       }
+                                       """
+        let _ = setMockResponse(for: urlSeasonArtwork, data: placeholderSeasonArtwork, statusCode: 200)
+        let result = await service.querySeasonArtwork(seriesID: "338736", season: 2)
+        XCTAssertEqual(result, "")
     }
 }
 
