@@ -361,14 +361,28 @@ public class MTTVDB : NSObject {
                         seriesArtwork: firstSeries.image ?? "",
                         status: .found)
             }
-        } else {
+        } else if show.isEpisodicShow {
             MTTVDBLogger.DDLogDetail("No series found for \(show.seriesTitle) (\(show.episodeID))")
             await tvdbStatistics.set(tvdbService.titleURL(show.seriesTitle),
-                    forKey: show.isEpisodicShow ? .episodicSeriesNotFound : .nonEpisodicSeriesNotFound,
+                    forKey: .episodicSeriesNotFound,
                     forShow: show.seriesTitle)
             await tvdbCache.setAll(
                     show.episodeID,
-                    status: .notFound)
+                    episodeArtwork: "",
+                    seasonArtwork: "",
+                    seriesArtwork: "",
+                    status: .notFound
+            )
+        } else {
+            MTTVDBLogger.DDLogDetail("No series found for \(show.seriesTitle) (\(show.episodeID))")
+            await tvdbStatistics.set(tvdbService.titleURL(show.seriesTitle),
+                    forKey: .nonEpisodicSeriesNotFound,
+                    forShow: show.seriesTitle)
+            await tvdbCache.setAll(
+                    show.episodeID,
+                    seriesArtwork: "",
+                    status: .notFound
+            )
         }
     }
 

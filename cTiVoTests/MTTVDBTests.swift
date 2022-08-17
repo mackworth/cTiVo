@@ -420,7 +420,10 @@ public class MTTVDBTests: XCTestCase {
     func testEpisodicShowNotFoundNoSeriesCandidates() async {
         let show = MTTiVoShowStub()
         let result = await tvdb.getTheTVDBDetails(show)
-        XCTAssertEqual(result.count, 0)
+        XCTAssertEqual(result.count, 3)
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.episodeArtwork.rawValue) as? String, "")
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.seasonArtwork.rawValue) as? String, "")
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.seriesArtwork.rawValue) as? String, "")
         let episodicSeriesNotFound = await tvdb.val(.episodicSeriesNotFound)
         XCTAssertEqual(episodicSeriesNotFound, 1)
     }
@@ -429,7 +432,10 @@ public class MTTVDBTests: XCTestCase {
         let show = MTTiVoShowStub()
         let _ = await tvdb.getTheTVDBDetails(show)
         let result = await tvdb.getTheTVDBDetails(show)
-        XCTAssertEqual(result.count, 0)
+        XCTAssertEqual(result.count, 3)
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.episodeArtwork.rawValue) as? String, "")
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.seasonArtwork.rawValue) as? String, "")
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.seriesArtwork.rawValue) as? String, "")
         let episodicSeriesNotFound = await tvdb.val(.episodicSeriesNotFound)
         XCTAssertEqual(episodicSeriesNotFound, 1)
         let episodicSeriesNotFoundCached = await tvdb.val(.episodicSeriesNotFoundCached)
@@ -445,7 +451,10 @@ public class MTTVDBTests: XCTestCase {
         show2.episodeID = "episodeID2"
         let _ = await tvdb.getTheTVDBDetails(show1)
         let result = await tvdb.getTheTVDBDetails(show2)
-        XCTAssertEqual(result.count, 0)
+        XCTAssertEqual(result.count, 3)
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.episodeArtwork.rawValue) as? String, "")
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.seasonArtwork.rawValue) as? String, "")
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.seriesArtwork.rawValue) as? String, "")
         let episodicSeriesNotFound = await tvdb.val(.episodicSeriesNotFound)
         XCTAssertEqual(episodicSeriesNotFound, 2)
         XCTAssertEqual(tvdbService.seriesResponders.counts["seriesTitle"], 1)
@@ -613,7 +622,8 @@ public class MTTVDBTests: XCTestCase {
         let show = MTTiVoShowStub()
         show.isEpisodicShow = false
         let result = await tvdb.getTheTVDBDetails(show)
-        XCTAssertEqual(result.count, 0)
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.seriesArtwork.rawValue) as? String, "")
         let nonEpisodicSeriesNotFound = await tvdb.val(.nonEpisodicSeriesNotFound)
         XCTAssertEqual(nonEpisodicSeriesNotFound, 1)
     }
@@ -623,7 +633,8 @@ public class MTTVDBTests: XCTestCase {
         show.isEpisodicShow = false
         let _ = await tvdb.getTheTVDBDetails(show)
         let result = await tvdb.getTheTVDBDetails(show)
-        XCTAssertEqual(result.count, 0)
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result.value(forKey: MTTVDBCache.Key.seriesArtwork.rawValue) as? String, "")
         let nonEpisodicSeriesNotFound = await tvdb.val(.nonEpisodicSeriesNotFound)
         XCTAssertEqual(nonEpisodicSeriesNotFound, 1)
         let nonEpisodicSeriesNotFoundCached = await tvdb.val(.nonEpisodicSeriesNotFoundCached)
