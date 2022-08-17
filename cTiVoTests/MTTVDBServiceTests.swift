@@ -154,7 +154,7 @@ class MTTVDBServiceTests: XCTestCase {
 
     let urlLogin = "https://api4.thetvdb.com/v4/login"
     let urlSeries = "https://api4.thetvdb.com/v4/search?query=Craig of the Creek&type=series"
-    let urlEpisodes = "https://api4.thetvdb.com/v4/series/338736/episodes/alternate?page=1&airDate=2021-02-06"
+    let urlEpisodes = "https://api4.thetvdb.com/v4/series/338736/episodes/default?page=1&airDate=2021-02-06"
     let urlSeriesArtwork = "https://api4.thetvdb.com/v4/series/338736"
     let urlSeasonArtwork = "https://api4.thetvdb.com/v4/series/338736/extended?short=true"
 
@@ -719,7 +719,7 @@ class MTTVDBServiceTests: XCTestCase {
 
     func testQueryEpisodesNoOriginalAirDateParameter() async {
         let _ = setMockResponse(for: urlEpisodes, data: "", statusCode: 500) // Remove response for original test URL
-        let shortUrlEpisodes = "https://api4.thetvdb.com/v4/series/338736/episodes/alternate?page=0"
+        let shortUrlEpisodes = "https://api4.thetvdb.com/v4/series/338736/episodes/default?page=0"
         let _ = setMockResponse(for: shortUrlEpisodes, data: dataEpisodes, statusCode: 200)
         let result = await service.queryEpisodes(seriesID: "338736")
         guard let result = result else { XCTFail(); return }

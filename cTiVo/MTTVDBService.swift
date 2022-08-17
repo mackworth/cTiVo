@@ -184,7 +184,7 @@ struct MTTVDBServiceV4: MTTVDBService {
         } else {
             airDateParam = ""
         }
-        let url = "\(apiBaseURLV4)/series/\(seriesID)/episodes/alternate?page=\(pageNumber)\(airDateParam)"
+        let url = "\(apiBaseURLV4)/series/\(seriesID)/episodes/default?page=\(pageNumber)\(airDateParam)"
         let json: EpisodeResponseJSON? = await queryTVDBService(url: url)
         guard let episodes = json?.data?.episodes else {
             return nil
