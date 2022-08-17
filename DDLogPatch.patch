@@ -1,0 +1,18 @@
+--- /Users/hugh/Developer/cTiVoGithub/Pods/CocoaLumberjack/Sources/CocoaLumberjack/DDLog.m	2022-08-09 09:34:29.000000000 -0700
++++ /Users/hugh/Downloads/DDLog.m	2022-08-09 09:36:37.000000000 -0700
+@@ -608,9 +608,12 @@
+ 
+     for (NSUInteger i = 0; i < numClasses; i++) {
+         Class class = classes[i];
+-
+-        if ([self isRegisteredClass:class]) {
+-            [result addObject:class];
++      
++        NSString * nameString = NSStringFromClass(class);
++        if ([nameString hasPrefix:@"MT"]) {
++            if ([self isRegisteredClass:class]) {
++                [result addObject:class];
++            }
+         }
+     }
+ 
