@@ -1,4 +1,4 @@
-#import "DDLogMacros.h"
+@import CocoaLumberjack;
 
 // We want to use the following log levels:
 //

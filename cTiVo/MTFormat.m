@@ -8,6 +8,7 @@
 
 #import "MTFormat.h"
 #import "NSString+Helpers.h"
+#import "MTLog.h"
 
 @implementation MTFormat
 

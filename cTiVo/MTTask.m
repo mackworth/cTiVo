@@ -13,6 +13,7 @@
 #import "NSNotificationCenter+Threads.h"
 #import "NSArray+Map.h"
 #import "NSString+Helpers.h"
+#import "MTLog.h"
 
 #ifndef DEBUG
 @import Firebase;

@@ -9,6 +9,7 @@
 #import "MTRemoteWindowController.h"
 #import "MTTiVoManager.h"
 #import "NSNotificationCenter+Threads.h"
+#import "MTLog.h"
 
 @interface MTRemoteWindowController ()<NSWindowDelegate>
 @property (nonatomic, weak) IBOutlet NSPopUpButton * tivoListPopup;

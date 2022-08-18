@@ -7,7 +7,7 @@
 //
 
 #import "MTTivoRPC.h"
-#import "DDLog.h"
+#import "MTLog.h"
 #import "MTTiVoManager.h" //just for maskMediaKeys
 #import "NSNotificationCenter+Threads.h"
 #import "NSString+Helpers.h"

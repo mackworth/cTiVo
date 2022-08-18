@@ -17,6 +17,7 @@
 #include "NSDate+Tomorrow.h"
 #include "MTWeakTimer.h"
 #include "NSTask+RunTask.h"
+#import "MTLog.h"
 
 #import <Carbon/Carbon.h>
 

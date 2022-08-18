@@ -8,6 +8,7 @@
 
 #import "MTManualTiVoEditorController.h"
 #import "MTTiVoManager.h"
+#import "MTLog.h"
 
 @interface MTManualTiVoEditorController ()
 @property (weak) IBOutlet NSTableView *manualTiVosTableView;

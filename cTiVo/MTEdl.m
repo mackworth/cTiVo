@@ -7,6 +7,8 @@
 //
 
 #import "MTEdl.h"
+#import "MTLog.h"
+
 static NSString * kStartTime  = @"imageURL";
 static NSString * kEndTime  = @"endTime";
 static NSString * kEDLType  = @"edlType";

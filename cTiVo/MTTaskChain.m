@@ -10,6 +10,7 @@
 #import "MTDownload.h"
 #import "NSNotificationCenter+Threads.h"
 #import "MTTiVoManager.h" //Just for maskMediaKeys
+#import "MTLog.h"
 
 @interface MTTaskChain ()
 

@@ -15,6 +15,7 @@
 #import "MTShowFolder.h"
 #import "MTAppDelegate.h"
 #import "NSArray+Map.h"
+#import "MTLog.h"
 
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"

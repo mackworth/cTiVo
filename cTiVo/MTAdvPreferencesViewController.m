@@ -12,6 +12,7 @@
 #import "NSString+Helpers.h"
 #import "MTHelpViewController.h"
 #import "NSTask+RunTask.h"
+#import "MTLog.h"
 
 @interface MTAdvPreferencesViewController ()
 

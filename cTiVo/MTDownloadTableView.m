@@ -12,6 +12,7 @@
 #import "MTWeakTimer.h"
 #import "MTSubscriptionList.h"
 #import "MTShowFolder.h"
+#import "MTLog.h"
 
 @interface MTDownloadTableView ()
 @property (nonatomic, weak) IBOutlet NSTextField *performanceLabel;

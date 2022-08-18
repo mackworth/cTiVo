@@ -8,6 +8,7 @@
 
 #import "NSString+Helpers.h"
 #include <sys/xattr.h>
+#include "MTLog.h"
 
 @implementation NSString (Helpers)
 

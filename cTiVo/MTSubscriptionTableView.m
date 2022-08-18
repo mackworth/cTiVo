@@ -14,6 +14,7 @@
 #import "MTDownloadCheckTableCell.h"
 #import "MTSubscriptionList.h"
 #import "MTShowFolder.h"
+#import "MTLog.h"
 
 @implementation MTSubscriptionTableView
 

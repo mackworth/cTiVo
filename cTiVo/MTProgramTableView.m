@@ -14,6 +14,7 @@
 #import "MTProgressCell.h"
 #import "DragDropImageView.h"
 #import "MTShowFolder.h"
+#import "MTLog.h"
 
 @interface MTProgramTableView  ()
 

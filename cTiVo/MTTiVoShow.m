@@ -18,6 +18,7 @@
 #import "NSString+Helpers.h"
 #import "NSURL+MTURLExtensions.h"
 #import "NSArray+Map.h"
+#import "MTLog.h"
 
 typedef NS_ENUM(NSUInteger, MTImageSource) {
     //note this enum is referred to in Preference XIB and AppDelegate defaults

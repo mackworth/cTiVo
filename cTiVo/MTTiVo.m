@@ -14,6 +14,7 @@
 #import "MTTiVoManager.h"
 #import "NSNotificationCenter+Threads.h"
 #import "NSArray+Map.h"
+#import "MTLog.h"
 
 #define kMTStringType 0
 #define kMTBoolType 1

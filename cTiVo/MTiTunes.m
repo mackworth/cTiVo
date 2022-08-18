@@ -8,6 +8,7 @@
 #import "MTiTunes.h"
 #import "iTunes.h"
 #import "MTDownload.h"
+#import "MTLog.h"
 
 @interface MTiTunes()
 @property (nonatomic, strong) iTunesApplication *iTunes;

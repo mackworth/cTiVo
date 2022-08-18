@@ -19,6 +19,7 @@
 #import "NSDate+Tomorrow.h"
 #include <arpa/inet.h>
 #import "cTiVo-Swift.h"
+#import "MTLog.h"
 
 #include "MTWeakTimer.h"
 @import UserNotifications;

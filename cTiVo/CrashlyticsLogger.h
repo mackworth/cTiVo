@@ -5,7 +5,7 @@
 //  Copyright (c) 2013 TechSmith. All rights reserved.
 //
 
-#import <DDLog.h>
+#import <MTLog.h>
 
 @interface CrashlyticsLogger : DDAbstractLogger
 
