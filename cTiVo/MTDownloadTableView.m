@@ -36,11 +36,10 @@ __DDLOGHERE__
         self.delegate    = self;
         self.allowsMultipleSelection = YES;
         self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-		if (@available(macOS 10.15, *)) {
-            NSTableColumn * iTunesColumn = [self tableColumnWithIdentifier:@"iTunes"];
-            iTunesColumn.title = [iTunesColumn.title stringByReplacingOccurrencesOfString:@"iTunes" withString:@"TV"];
-            iTunesColumn.headerToolTip = [iTunesColumn.headerToolTip stringByReplacingOccurrencesOfString:@"iTunes" withString:@"Apple's TV app"];
-		}
+        //This should be in storyboard, now that iTunes not supported any more (10.15)
+        NSTableColumn * iTunesColumn = [self tableColumnWithIdentifier:@"iTunes"];
+        iTunesColumn.title = [iTunesColumn.title stringByReplacingOccurrencesOfString:@"iTunes" withString:@"TV"];
+        iTunesColumn.headerToolTip = [iTunesColumn.headerToolTip stringByReplacingOccurrencesOfString:@"iTunes" withString:@"Apple's TV app"];
 	}
 	return self;
 }
@@ -349,11 +348,7 @@ __DDLOGHERE__
         textVal = thisShow.tiVoName ;
         result.textField.textColor = [NSColor controlTextColor];
         if (thisShow.tiVo && ( !thisShow.tiVo.isReachable || thisShow.tiVo.connectionProblem) && download.isDownloading) {
-			if (@available(macOS 10.10,*)) {
-            	result.textField.textColor = [NSColor systemRedColor];
-			} else {
-				result.textField.textColor = [NSColor redColor];
-			}
+            result.textField.textColor = [NSColor systemRedColor];
         }
         
     } else if ([tableColumn.identifier isEqualToString:@"Order"]) {
@@ -623,12 +618,8 @@ __DDLOGHERE__
 - (NSDragOperation)tableView:(NSTableView *)aTableView validateDrop:(id < NSDraggingInfo >)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)operation {
 	if ([info draggingSource] == self) {
 		DDLogDetail(@"User dragged to Row: %@%@", @(row+1), operation == NSTableViewDropOn ? @"" : @"+");
-		if (@available(macOS 10.14,*)) {
 			//bug in Mojave
 			self.draggingDestinationFeedbackStyle = NSTableViewDraggingDestinationFeedbackStyleRegular;
-		} else {
-			self.draggingDestinationFeedbackStyle = NSTableViewDraggingDestinationFeedbackStyleGap;
-		}
 		if (operation != NSTableViewDropAbove ) {
 			[self setDropRow:row dropOperation:NSTableViewDropAbove];
 		}

@@ -314,26 +314,19 @@ __DDLOGHERE__
 
 -(NSAttributedString *) attributedFormatStringForFont:(NSFont *) font {
 	NSColor * formatColor = nil;
-	if (@available(macOS 10.10, *)) {
-		if (_isHidden.boolValue) {
-			if (_isFactoryFormat.boolValue) {
-				formatColor = [NSColor secondaryLabelColor ];
-			} else {
-				formatColor = [NSColor systemGrayColor];
-			}
-		} else {
-			if (_isFactoryFormat.boolValue) {
-				formatColor = [NSColor labelColor];
-			} else {
-				formatColor = [NSColor systemBlueColor];
-			}
-		}
-	} else {
-		formatColor = [NSColor colorWithDeviceRed: 0.0
-											green: 0.0
-											 blue: _isFactoryFormat.boolValue ? 0.0: 0.6
-											alpha: _isHidden.boolValue ? 0.5: 1.0];
-	}
+    if (_isHidden.boolValue) {
+        if (_isFactoryFormat.boolValue) {
+            formatColor = [NSColor secondaryLabelColor ];
+        } else {
+            formatColor = [NSColor systemGrayColor];
+        }
+    } else {
+        if (_isFactoryFormat.boolValue) {
+            formatColor = [NSColor labelColor];
+        } else {
+            formatColor = [NSColor systemBlueColor];
+        }
+    }
 	NSAttributedString *attTitle = [[NSAttributedString alloc] initWithString: _name
 																	attributes: @{NSFontAttributeName : font,
 												NSForegroundColorAttributeName: formatColor}];

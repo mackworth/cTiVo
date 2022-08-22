@@ -61,11 +61,7 @@ __DDLOGHERE__
 //    mTTask.task  = [NSTask new];
     mTTask.download = download;
     mTTask.taskName = name;
-    if (@available (macOS 10.10, *)) {
-        if ([mTTask.task respondsToSelector:@selector(setQualityOfService:)]) {  //os10.10 and later
-            mTTask.task.qualityOfService = NSQualityOfServiceUtility;
-        }
-    }
+    mTTask.task.qualityOfService = NSQualityOfServiceUtility;
     NSString * tmpDir = download.tmpDirectory;
     if (tmpDir) {
         mTTask.task.currentDirectoryPath = tmpDir;  //just protective

@@ -681,36 +681,30 @@ __DDLOGHERE__
 
 -(long long) spaceAvailable:(NSString *) path {
 	NSError *error = nil;
-	if (@available(macOS 10.13, *)) {
-		NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:path];
-		NSDictionary *results = [fileURL resourceValuesForKeys:@[NSURLVolumeAvailableCapacityForImportantUsageKey] error:&error];
-		NSNumber * value = results[NSURLVolumeAvailableCapacityForImportantUsageKey];
-		if (!value || error) {
-			DDLogReport(@"Error retrieving Important Volume key for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
-			return LLONG_MAX;
-		} else if (value.integerValue == 0) {
-			//ZFS and SANs may return 0.
-			results = [fileURL resourceValuesForKeys:@[NSURLVolumeAvailableCapacityKey] error:&error];
-			value = results[NSURLVolumeAvailableCapacityKey];
-			if (!value || error) {
-				DDLogReport(@"Error retrieving Volme Available key for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
-				return LLONG_MAX;
-			} else if (value.longLongValue == 0){
-				DDLogReport(@"Volume for %@ shows zero space", path);
-				return 0;
-			} else {
-				return value.longLongValue;
-			}
+    NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:path];
+    NSDictionary *results = [fileURL resourceValuesForKeys:@[NSURLVolumeAvailableCapacityForImportantUsageKey] error:&error];
+    NSNumber * value = results[NSURLVolumeAvailableCapacityForImportantUsageKey];
+    if (!value || error) {
+        DDLogReport(@"Error retrieving Important Volume key for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
+        return LLONG_MAX;
+    } else if (value.integerValue == 0) {
+        //ZFS and SANs may return 0.
+        results = [fileURL resourceValuesForKeys:@[NSURLVolumeAvailableCapacityKey] error:&error];
+        value = results[NSURLVolumeAvailableCapacityKey];
+        if (!value || error) {
+            DDLogReport(@"Error retrieving Volme Available key for %@: %@\n%@", path, [error localizedDescription], [error userInfo]);
+            return LLONG_MAX;
+        } else if (value.longLongValue == 0){
+            DDLogReport(@"Volume for %@ shows zero space", path);
+            return 0;
+        } else {
+            return value.longLongValue;
+        }
 
-		} else {
-			DDLogDetail(@"Got space for %@: %@", path, value);
-			return value.longLongValue;
-		}
-	} else {
-    	NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfFileSystemForPath:path error:&error];
-    	if (error || !attributes) return LLONG_MAX;
-    	return  ( (NSNumber *)[attributes objectForKey:NSFileSystemFreeSize]).longLongValue;
-	}
+    } else {
+        DDLogDetail(@"Got space for %@: %@", path, value);
+        return value.longLongValue;
+    }
 }
 
 -(BOOL) shouldUseMemoryBuffer {
@@ -3247,12 +3241,7 @@ NSInteger diskWriteFailure = 123;
 		case  kMTStatusCommercialed :		return @"Ads Detected";
 		case  kMTStatusEncoding :			return @"Encoding";
 		case  kMTStatusEncoded :			return @"Encoded";
-        case  kMTStatusAddingToItunes:
-			if (@available(macOS 10.15, *)) {
-				return @"Adding To TV";
-			} else {
-				return @"Adding To iTunes";
-			}
+        case  kMTStatusAddingToItunes:		return @"Adding To TV";
 		case  kMTStatusCaptioned:			return @"Subtitled";
 		case  kMTStatusCaptioning:			return @"Subtitling";
         case  kMTStatusMetaDataProcessing:	return @"Adding MetaData";

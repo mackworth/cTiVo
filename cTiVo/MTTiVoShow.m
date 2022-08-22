@@ -254,11 +254,7 @@ __DDLOGHERE__
 
 -(NSURL *) detailFileURL {
     NSString *detailFilePath = [NSString stringWithFormat:@"%@_%d_Details.xml",self.tiVoName,self.showID]; //keep in sync with parseDetails
-    if (@available (macOS 10.11, *)) {
-        return [NSURL fileURLWithPath:detailFilePath isDirectory:NO relativeToURL:[tiVoManager detailsTempDirectory]];
-    } else {
-        return [[tiVoManager detailsTempDirectory] URLByAppendingPathComponent:detailFilePath];
-    }
+    return [NSURL fileURLWithPath:detailFilePath isDirectory:NO relativeToURL:[tiVoManager detailsTempDirectory]];
 }
 
 -(void)getShowDetail {
@@ -2139,11 +2135,7 @@ NSString * fourChar(long n, BOOL allowZero) {
         baseName = [baseName stringByAppendingString:@"_Large"];
     }
     baseName = [baseName stringByAppendingPathExtension:@"jpg"];
-    if (@available (macOS 10.11, *)) {
-        return [NSURL fileURLWithPath:baseName isDirectory:NO relativeToURL:directory];
-    } else {
-        return [directory URLByAppendingPathComponent:baseName];
-    }
+    return [NSURL fileURLWithPath:baseName isDirectory:NO relativeToURL:directory];
 
 }
 -(void) getArtworkFromSource: (MTImageSource) source thumbVersion: (BOOL) thumbnail {
@@ -2314,6 +2306,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                 nextSource = MTNoSource;
                 break;
         }
+//      nextSource = MTNoSource; //uncomment to test each source by itself.
     }
     //check if we have the data yet.
     if (nextSource == MTTiVoSource) {

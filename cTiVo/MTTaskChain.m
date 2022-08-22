@@ -187,12 +187,7 @@ __DDLOGHERE__
 			}
 		}
 
-        long priority;
-        if (@available (macOS 10.10, *)) {
-            priority = QOS_CLASS_UTILITY;
-        } else {
-            priority = DISPATCH_QUEUE_PRIORITY_LOW;
-        }
+        long priority = QOS_CLASS_UTILITY;
         dispatch_queue_t queue = dispatch_get_global_queue (priority, 0);
 
         for (NSFileHandle *fileHandle in self.teeBranches) {

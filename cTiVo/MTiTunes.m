@@ -274,27 +274,20 @@ __DDLOGHERE__
 		dispatch_sync(dispatch_get_main_queue(), ^{
 			[self warnUserPermissions];
 		});
-	} else if (@available(macOS 10.14, *)) {
+	} else {
 		//trigger check
 		[[NSUserDefaults standardUserDefaults] setBool:NO forKey:kMTiTunesSubmit];
 		[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kMTiTunesSubmit];
-	} else {
-		NSAlert *alert2 = [[NSAlert alloc] init];
-		alert2.messageText =  @"Warning: " kcTiVoName @" cannot access iTunes. ";
-		[alert2 addButtonWithTitle:@"OK"];
-		alert2.informativeText = @"Please contact " kcTiVoName @" help site.";
-		[alert2 runModal];
 	}
 }
 
 -(BOOL) preflightiTunesCheck {
-	if (@available (macOS 10.14.0, *)) {
-		_iTunesLibrary = nil;
-		if (self.iTunesLibraryHelper) {
-			return YES;
-		} else {
-			return NO;
-		}
+    _iTunesLibrary = nil;
+    if (self.iTunesLibraryHelper) {
+        return YES;
+    } else {
+        return NO;
+    }
 //could also use:
 //		NSAppleEventDescriptor *targetAppEventDescriptor = [NSAppleEventDescriptor descriptorWithBundleIdentifier:@"com.apple.iTunes"];
 //
@@ -311,9 +304,6 @@ __DDLOGHERE__
 //		} else {
 //			return YES;
 //		}
-	} else {
-		return YES;
-	}
 }
 
 
@@ -325,10 +315,6 @@ __DDLOGHERE__
 	//2 = Suggested turning on permissions, need to confirm
 	//3 = Wiped out permissions, need to confirm
 	//4 = User confirmed don't use iTunes; OR something bad; we give up
-	if (@available(macOS 10.14, *)) {
-	} else {
-		return;
-	}
 	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 	if (![defaults boolForKey:kMTiTunesSubmit]) return;
 
@@ -404,27 +390,19 @@ __DDLOGHERE__
 }
 
 -(NSString *) appBundleName {
-	if (@available(macOS 10.15, *)) {
-        if (self.audioOnly) {
-            return @"com.apple.Music";
-        } else {
-            return @"com.apple.TV";
-        }
-	} else {
-		return @"com.apple.iTunes";
-	}
+    if (self.audioOnly) {
+        return @"com.apple.Music";
+    } else {
+        return @"com.apple.TV";
+    }
 
 }
 -(NSString *) appName {
-	if (@available(macOS 10.15, *)) {
-        if (self.audioOnly) {
-            return @"Music";
-        } else {
-            return @"TV";
-        }
-	} else {
-		return @"iTunes";
-	}
+    if (self.audioOnly) {
+        return @"Music";
+    } else {
+        return @"TV";
+    }
 }
 
 -(BOOL) askForiTunesPermissionFix {

@@ -24,6 +24,7 @@
 @implementation MTPreferencesViewController
 
 -(void)changeButtonToAppleTV: (NSButton *) button {
+    //This should be in storyboard, now that iTunes is no more
     button.title = [button.title stringByReplacingOccurrencesOfString:@"iTunes" withString:@"TV" ];
     button.toolTip = [button.toolTip stringByReplacingOccurrencesOfString:@"iTunes" withString:@"Apple's TV app" ];
     [button sizeToFit];
@@ -41,12 +42,11 @@
 	[self.directoryFormatPopup.menu setAutoenablesItems:NO];
 	formats[3].enabled = NO;
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTFileNameFormat options:NSKeyValueObservingOptionInitial context:nil];
-	if (@available(macOS 10.15, *)) {
-        self.iTunesSection.cell.title = @"Apple's TV app (TV):"; [self.iTunesSection sizeToFit];
-        [self changeButtonToAppleTV: self.addToiTunes];
-        [self changeButtonToAppleTV: self.deleteFromItunes];
-		self.AutoSynciTunes.hidden = YES;
-	}
+    //This should be in storyboard, now that iTunes is no more
+    self.iTunesSection.cell.title = @"Apple's TV app (TV):"; [self.iTunesSection sizeToFit];
+    [self changeButtonToAppleTV: self.addToiTunes];
+    [self changeButtonToAppleTV: self.deleteFromItunes];
+    self.AutoSynciTunes.hidden = YES;
 }
 
 -(BOOL) validateMenuItem:(NSMenuItem *)menuItem {
