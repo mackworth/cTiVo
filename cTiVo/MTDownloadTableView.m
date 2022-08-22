@@ -36,10 +36,6 @@ __DDLOGHERE__
         self.delegate    = self;
         self.allowsMultipleSelection = YES;
         self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-        //This should be in storyboard, now that iTunes not supported any more (10.15)
-        NSTableColumn * iTunesColumn = [self tableColumnWithIdentifier:@"iTunes"];
-        iTunesColumn.title = [iTunesColumn.title stringByReplacingOccurrencesOfString:@"iTunes" withString:@"TV"];
-        iTunesColumn.headerToolTip = [iTunesColumn.headerToolTip stringByReplacingOccurrencesOfString:@"iTunes" withString:@"Apple's TV app"];
 	}
 	return self;
 }

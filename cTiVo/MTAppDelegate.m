@@ -323,10 +323,6 @@ void signalHandler(int signal)
 
 	//Turn off check mark on Pause/Resume queue menu item
 	[pauseMenuItem setOnStateImage:nil];
-	//Don't reference iTunes on Catalina
-    //This should be in storyboard now that iTunes is no more
-    iTunesMenuItem.title = [iTunesMenuItem.title stringByReplacingOccurrencesOfString:@"iTunes" withString:@"TV" ];
-    iTunesMenuItem.toolTip = [iTunesMenuItem.toolTip stringByReplacingOccurrencesOfString:@"iTunes" withString:@"Apple's TV app" ];
 	[_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
 	[_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueObservingOptionInitial context:nil];
 	[defaults addObserver:self forKeyPath:kMTSkipCommercials options:NSKeyValueObservingOptionNew context:nil];
