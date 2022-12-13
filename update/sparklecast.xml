@@ -8,13 +8,12 @@
         <item>
             <title>Version 3.5.3; updated certificate</title>
             <description><![CDATA[
-				<h2 id="Release-3.5.3">Release 3.5.3 (updated certificate))</h2>
+				<h2 id="Release-3.5.3">Release 3.5.3 (updated certificate)</h2>
 				<ul>
         <li>Contains new TiVo certificate; good through May 2024</li>
         <li>Apple Silicon support (universal, so unfortunately twice the size)</li>
         <li>Fixes crash that can occur if TVDB sends invalid data</li>
 				<li>Blue icons instead of Yellow to match newer TiVo style; still uses ! to indicate potential imminent deletion.</li>
-				<li></li>
 				</ul>
             ]]>
             </description>
