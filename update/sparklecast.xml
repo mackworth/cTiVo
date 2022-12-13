@@ -3,36 +3,31 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.5.2; Universal Version / TVDB patch</description>
+        <description>Version 3.5.3; updated Certificate</description>
         <language>en</language>
         <item>
-            <title>Version 3.5.2; Universal Version / TVDB patch</title>
+            <title>Version 3.5.3; updated certificate</title>
             <description><![CDATA[
-				<h2 id="Release-3.5.2">Release 3.5.2 (Universal version)</h2>
+				<h2 id="Release-3.5.3">Release 3.5.3 (updated certificate))</h2>
 				<ul>
+        <li>Contains new TiVo certificate; good through May 2024</li>
         <li>Apple Silicon support (universal, so unfortunately twice the size)</li>
         <li>Fixes crash that can occur if TVDB sends invalid data</li>
 				<li>Blue icons instead of Yellow to match newer TiVo style; still uses ! to indicate potential imminent deletion.</li>
 				<li></li>
 				</ul>
-				<h3 id="Fixes:">Fixes:</h3>
-				<ul>
-				<li>3.5.2 fixes a bug accessing TVDB in 3.5.1; sorry 'bout that.</li>
-				<li>Better test for Java presence for TiVoLibre.</li>
-				<li>Folder with any recordings in progress now shows recording icon to match TiVo's style.</li>
-				</ul>
             ]]>
             </description>
-            <pubDate>Sat., May 9, 2022 12:00:00 -0800</pubDate>
+            <pubDate>Tue., Dec 13, 2022 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.12.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.5.2/cTiVo.app.zip" sparkle:version="1139" sparkle:shortVersionString="3.5.2" length="133963418" type="application/octet-stream" sparkle:dsaSignature="MC4CFQDFGvuNzsZJnHXtO/h1TBey3FTC9AIVAKjXn0IQYN/T8awQOfwpScuNHbNU"/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.5.3/cTiVo.app.zip" sparkle:version="1147" sparkle:shortVersionString="3.5.3" length="133964652" type="application/octet-stream" sparkle:dsaSignature="MCwCFCPJgfn9ZWIcFR3eZ3VO+EnhGfDAAhQX/7GQppYuacr2zHP1nSARhl68NQ=="/>
         </item>
         <item>
-            <title>Version 3.4.3; New TiVo certificate</title>
+            <title>Version 3.4.5; New TiVo certificate; Final release for 10.11</title>
             <description><![CDATA[
-				<h2 id="Release-3.4.3">Release 3.4.3 (New TiVo certificate)</h2>
+				<h2 id="Release-3.4.5">Release 3.4.5 (Newest TiVo certificate)</h2>
 				<ul>
-				<li>New TiVo certificate (old one expired December 2020)</li>
+				<li>New TiVo certificate through 2024 (old one expired December 2022)</li>
 				<li>Big Sur compatibility</li>
 				<li>Upgraded Handbrake CLI</li>
 				<li>Migration to Firebase</li>
@@ -45,32 +40,25 @@
 				</ul>
             ]]>
             </description>
-            <pubDate>Sun., November 18, 2020 12:00:00 -0800</pubDate>
+            <pubDate>Tue., December 13, 2022 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.11.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.3/cTiVo.app.zip" sparkle:version="1126" sparkle:shortVersionString="3.4.3" length="73211144" type="application/octet-stream" sparkle:dsaSignature="MC0CFHVZWr6DK5ov3L0Nt/mLhStOub1KAhUA3iGOdGOotFWvJEciaw1FVOEbZ8g="/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.5/cTiVo.app.zip" sparkle:version="1126" sparkle:shortVersionString="3.4.5" length="73373336" type="application/octet-stream" sparkle:dsaSignature="MC0CFHVZWr6DK5ov3L0Nt/mLhStOub1KAhUA3iGOdGOotFWvJEciaw1FVOEbZ8g="/>
         </item>
         <item>
-            <title>Version 3.4.1; Final for macOS 10.10</title>
+            <title>Version 3.4.4; Final for macOS 10.10</title>
             <description><![CDATA[
 				
-				<h2 id="Release-3.4.1">Release 3.4.1</h2>
+				<h2 id="Release-3.4.4">Release 3.4.4</h2>
                 <p>This is final release for macOS 10.9 or 10.10</p>
 				<ul>
-				<li>New <em>Get Info</em> command for TiVos (disk space, network connectivity etc) in <em>Edit Tivos</em> and <em>Remote Control</em></li>
-				</ul>
-				<h3 id="Fixes:">Fixes:</h3>
-				<ul>
-				<li>Improved reliability for finding completed videos on disk.</li>
-				<li>Help files look better in Dark mode.</li>
-				<li>Better logging to diagnose occasional delays in SkipMode.</li>
-				<li>Misc minor fixes.</li>
+        <li> 2024 certificate</li>
 				</ul>
 
             ]]>
             </description>
-            <pubDate>Fri., November 28, 2019 12:00:00 -0800</pubDate>
+            <pubDate>Tue., December 13, 2022 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.9.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.1/cTiVo.app.zip" sparkle:version="1108" sparkle:shortVersionString="3.4.1" length="72876028" type="application/octet-stream" sparkle:dsaSignature="MC0CFDkiBwv9zvt2m9mW6XQv+Cx8OD4dAhUAu8PQSZdEBONlqsvNKVH1DXkGVV8="/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.4/cTiVo.app.zip" sparkle:version="1108" sparkle:shortVersionString="3.4.4" length="72843604" type="application/octet-stream" sparkle:dsaSignature="MC0CFCQ1PAbZdhJad5a5tLYuG6FEcIiOAhUAmbLANApizPylFY+i+xjNJ7i8zSo="/>
         </item>
         <item>
             <title>Version 2.5.1; H.264 and other major improvements</title>
