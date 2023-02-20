@@ -14,6 +14,7 @@
 #import "MTDownloadCheckTableCell.h"
 #import "MTSubscriptionList.h"
 #import "MTShowFolder.h"
+#import "MTLog.h"
 
 @implementation MTSubscriptionTableView
 
@@ -40,24 +41,10 @@ __DDLOGHERE__
         //    self.rowHeight = 20;
         self.allowsMultipleSelection = YES;
         self.columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
-		if (@available(macOS 10.15, *)) {
-			NSTableColumn * iTunesColumn = [self tableColumnWithIdentifier:@"iTunes"];
-			iTunesColumn.title = [iTunesColumn.title stringByReplacingOccurrencesOfString:@"iTunes" withString:@"TV"];
-            iTunesColumn.headerToolTip = [iTunesColumn.headerToolTip stringByReplacingOccurrencesOfString:@"iTunes" withString:@"Apple's TV app"];
-		}
 	}
 	return self;
 }
 
-//-(id)initWithFrame:(NSRect)frameRect
-//{
-//	self = [super initWithFrame:frameRect];
-//	if (self) {
-//		[self setNotifications];
-//	}
-//	return self;
-//}
-//
 -(void)setNotifications
 {
 

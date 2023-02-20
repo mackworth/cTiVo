@@ -14,7 +14,6 @@
 #import "MTSubscription.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "MTFormat.h"
-#import "MTTVDB.h"
 
 @interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
 }

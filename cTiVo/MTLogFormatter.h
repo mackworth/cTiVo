@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MTLog.h"
 @protocol DDLogFormatter;
 
 @interface MTLogFormatter : NSObject<DDLogFormatter> {

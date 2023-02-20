@@ -22,12 +22,6 @@
 @end
 
 @implementation MTPreferencesViewController
-
--(void)changeButtonToAppleTV: (NSButton *) button {
-    button.title = [button.title stringByReplacingOccurrencesOfString:@"iTunes" withString:@"TV" ];
-    button.toolTip = [button.toolTip stringByReplacingOccurrencesOfString:@"iTunes" withString:@"Apple's TV app" ];
-    [button sizeToFit];
-}
                          
 -(void)awakeFromNib {
 	[super awakeFromNib];
@@ -41,12 +35,7 @@
 	[self.directoryFormatPopup.menu setAutoenablesItems:NO];
 	formats[3].enabled = NO;
 	[[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kMTFileNameFormat options:NSKeyValueObservingOptionInitial context:nil];
-	if (@available(macOS 10.15, *)) {
-        self.iTunesSection.cell.title = @"Apple's TV app (TV):"; [self.iTunesSection sizeToFit];
-        [self changeButtonToAppleTV: self.addToiTunes];
-        [self changeButtonToAppleTV: self.deleteFromItunes];
-		self.AutoSynciTunes.hidden = YES;
-	}
+    self.AutoSynciTunes.hidden = YES;
 }
 
 -(BOOL) validateMenuItem:(NSMenuItem *)menuItem {

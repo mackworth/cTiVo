@@ -15,11 +15,11 @@
 #import "MTShowFolder.h"
 #import "MTAppDelegate.h"
 #import "NSArray+Map.h"
+#import "MTLog.h"
 
 #import "MTFormatPopUpButton.h"
 #import "MTCheckBox.h"
 #import "MTTiVo.h"
-#import "MTTVDB.h"
 #import "NSArray+Map.h"
 
 #import <Quartz/Quartz.h>
@@ -27,14 +27,12 @@
 @implementation NSView (HS)
 
 -(NSView *)insertVibrancyView {
-    if (@available(macOS 10.10, *)) {
-        if (NSClassFromString(@"NSVisualEffectView") ) { //should always be supported
-            NSVisualEffectView *vibrant=[[NSVisualEffectView alloc] initWithFrame:self.bounds];
-            [vibrant setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-            [vibrant setBlendingMode:NSVisualEffectBlendingModeBehindWindow];
-            [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
-            return vibrant;
-        }
+    if (NSClassFromString(@"NSVisualEffectView") ) { //should always be supported
+        NSVisualEffectView *vibrant=[[NSVisualEffectView alloc] initWithFrame:self.bounds];
+        [vibrant setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+        [vibrant setBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+        [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
+        return vibrant;
     }
     return self;
 }
@@ -195,8 +193,7 @@ __DDLOGHERE__
 
 -(NSMutableAttributedString *) stringForDisplay: (NSSet <MTTiVo *> *) set forCommercials: (BOOL) commercials {
 	NSString * path = commercials ? @"skipModeStatus" : @"tiVo.name";
-	NSColor * red =  [NSColor redColor];
-	if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+	NSColor * red = [NSColor systemRedColor];
 	NSDictionary <NSAttributedStringKey,id> * attribs = commercials ? @{NSForegroundColorAttributeName:red}  : @{};
 	NSMutableArray * names = [[[set allObjects] valueForKeyPath: path] mutableCopy];
 	[names removeObjectIdenticalTo:[NSNull null]];
@@ -234,8 +231,7 @@ __DDLOGHERE__
 			}
 		}
 		if (self.commercialingTiVos.count > 0) {
-			NSColor * red =  [NSColor redColor];
-			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+            NSColor * red = [NSColor systemRedColor];
 			[message appendAttributedString:[[NSMutableAttributedString alloc] initWithString:@"Getting SkipMode for "
 																				   attributes:@{NSForegroundColorAttributeName:red} ]];
 			[message appendAttributedString:[self stringForDisplay:self.commercialingTiVos forCommercials:YES]];
@@ -259,8 +255,7 @@ __DDLOGHERE__
 -(NSAttributedString *) reportProblemString: (MTTiVo *) tivo {
     NSFont *thisFont = [NSFont systemFontOfSize:13];
     NSString *thisTitle = [NSString stringWithFormat:@"%@%@",tivo.tiVo.name, !tivo.isReachable ? @"Unreachable" : @": Not Connected"];
-    NSColor * red =  [NSColor redColor];
-    if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+    NSColor * red = [NSColor systemRedColor];
     return [[NSAttributedString alloc] initWithString:thisTitle attributes:@ { NSForegroundColorAttributeName: red, NSFontAttributeName:  thisFont}];
 }
 

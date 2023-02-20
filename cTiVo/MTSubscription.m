@@ -9,6 +9,7 @@
 #import "MTSubscription.h"
 #import "MTTiVoManager.h"
 #import <xlocale.h>
+#import "MTLog.h"
 
 @implementation MTSubscription
 

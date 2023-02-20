@@ -8,6 +8,7 @@
 
 #import "MTSrt.h"
 #import "MTEdl.h"
+#import "MTLog.h"
 #define MAXLINE 2048
 
 @implementation MTSrt

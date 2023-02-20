@@ -5,7 +5,6 @@
 //  Created by Hugh Mackworth on 5/11/13.
 //  Copyright (c) 2013 cTiVo. All rights reserved.
 //
-#import "DDLog.h"
 #import "MTLogFormatter.h"
 
 @implementation MTLogFormatter
@@ -61,7 +60,12 @@
 				   (long)components.hour,
 				   (long)components.minute,
 				   (long)components.second, milliseconds);
-	return [NSString stringWithFormat:@"%s %@@%lu>%@", ts, logMessage->_function, (unsigned long)logMessage->_line, logMessage->_message];
+  if (logMessage.context == 0) {
+    return [NSString stringWithFormat:@"%s %@@%lu>%@", ts, logMessage->_function, (unsigned long)logMessage->_line, logMessage->_message];
+  } else {
+    //Swift context == 1
+    return [NSString stringWithFormat:@"%s %@.%@@%lu>%@", ts, logMessage->_fileName, logMessage->_function, (unsigned long)logMessage->_line, logMessage->_message];
+  }
 }
 
 @end

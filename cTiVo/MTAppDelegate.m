@@ -323,11 +323,6 @@ void signalHandler(int signal)
 
 	//Turn off check mark on Pause/Resume queue menu item
 	[pauseMenuItem setOnStateImage:nil];
-	//Don't reference iTunes on Catalina
-	if (@available(macOS 10.15, *)) {
-		iTunesMenuItem.title = [iTunesMenuItem.title stringByReplacingOccurrencesOfString:@"iTunes" withString:@"TV" ];
-		iTunesMenuItem.toolTip = [iTunesMenuItem.toolTip stringByReplacingOccurrencesOfString:@"iTunes" withString:@"Apple's TV app" ];
-	}
 	[_tiVoGlobalManager addObserver:self forKeyPath:@"selectedFormat" options:NSKeyValueObservingOptionInitial context:nil];
 	[_tiVoGlobalManager addObserver:self forKeyPath:@"processingPaused" options:NSKeyValueObservingOptionInitial context:nil];
 	[defaults addObserver:self forKeyPath:kMTSkipCommercials options:NSKeyValueObservingOptionNew context:nil];
@@ -338,9 +333,8 @@ void signalHandler(int signal)
 	[defaults addObserver:self forKeyPath:kMTTmpFilesPath options:NSKeyValueObservingOptionInitial context:nil];
 #endif
 	[defaults addObserver:self forKeyPath:kMTDownloadDirectory options:NSKeyValueObservingOptionInitial context:nil];
-	if (@available(macOS 10.10.3, *)) {
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(thermalStateChanged:) name:NSProcessInfoThermalStateDidChangeNotification object:nil];
-	}
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(thermalStateChanged:) name:NSProcessInfoThermalStateDidChangeNotification object:nil];
+	
 	[[[NSWorkspace sharedWorkspace] notificationCenter]   addObserver: self selector: @selector(checkVolumes:) name: NSWorkspaceDidWakeNotification object: NULL];
 	[[[NSWorkspace sharedWorkspace] notificationCenter  ] addObserver:self selector:@selector(mountVolume:) name:NSWorkspaceDidMountNotification object:nil];
 	[[[NSWorkspace sharedWorkspace] notificationCenter  ] addObserver:self selector: @selector(unmountVolume:) name:NSWorkspaceDidUnmountNotification object:nil];
@@ -459,28 +453,26 @@ NSObject * assertionID = nil;
 
 -(void) thermalStateChanged: (NSNotification *) notification {
 	NSProcessInfo * processInfo  = (NSProcessInfo *) notification.object;
-	if (@available(macOS 10.10.3, *)) {
-		NSString * state;
-		switch (processInfo.thermalState) {
-			case NSProcessInfoThermalStateNominal:
-				state = @"Nominal";
-				break;
-			case NSProcessInfoThermalStateFair:
-				state = @"Fair";
-				break;
-			case NSProcessInfoThermalStateSerious:
-				state = @"Serious";
-				break;
-			case NSProcessInfoThermalStateCritical:
-				state = @"Critical";
-				break;
-			default:
-				state = @"Unknown";
-				break;
-		}
+    NSString * state;
+    switch (processInfo.thermalState) {
+        case NSProcessInfoThermalStateNominal:
+            state = @"Nominal";
+            break;
+        case NSProcessInfoThermalStateFair:
+            state = @"Fair";
+            break;
+        case NSProcessInfoThermalStateSerious:
+            state = @"Serious";
+            break;
+        case NSProcessInfoThermalStateCritical:
+            state = @"Critical";
+            break;
+        default:
+            state = @"Unknown";
+            break;
+    }
 		
-		DDLogDetail(@"Thermal State Changed to %@ for %@; %@on main thread", state, processInfo, [NSThread mainThread] ? @"" : @"not ");
-	}
+    DDLogDetail(@"Thermal State Changed to %@ for %@; %@on main thread", state, processInfo, [NSThread mainThread] ? @"" : @"not ");
 }
 
 #pragma mark -
@@ -666,9 +658,7 @@ NSObject * assertionID = nil;
 		}
 		if (accessoryView) {
 			[openPanel setAccessoryView:accessoryView];
-			if (@available(macOS 10.11, *)) {
-				openPanel.accessoryViewDisclosed = YES;
-			}
+            openPanel.accessoryViewDisclosed = YES;
 		}
 	};
 
@@ -1061,8 +1051,7 @@ NSObject * assertionID = nil;
 			}
 			lastTivoWasManual = tiVo.manualTiVo;
 			NSMenuItem *thisMenuItem = [[NSMenuItem alloc] initWithTitle:tiVo.tiVo.name action:NULL keyEquivalent:@""];
-			NSColor * red =  [NSColor redColor];
-			if (@available(macOS 10.10, *)) red = [NSColor systemRedColor];
+			NSColor * red = [NSColor systemRedColor];
 			if (!tiVo.isReachable) {
 				NSFont *thisFont = [NSFont systemFontOfSize:13];
 				NSString *thisTitle = [NSString stringWithFormat:@"%@ offline",tiVo.tiVo.name];

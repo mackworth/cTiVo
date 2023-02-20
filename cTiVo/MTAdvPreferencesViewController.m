@@ -12,6 +12,7 @@
 #import "NSString+Helpers.h"
 #import "MTHelpViewController.h"
 #import "NSTask+RunTask.h"
+#import "MTLog.h"
 
 @interface MTAdvPreferencesViewController ()
 
@@ -266,14 +267,16 @@
 }
 
 -(IBAction)TVDBStatistics:(id)sender {
-    NSString * statsString = [tiVoManager.tvdb stats];
+	[tiVoManager.tvdb statsWithCompletionHandler: ^(NSString * statsString) {
+		dispatch_async(dispatch_get_main_queue(), ^(void) {
+			MTHelpViewController * helpController = [[MTHelpViewController alloc] init];
+			helpController.text = statsString;
+			helpController.preferredContentSize = CGSizeMake(1100, 400);
+			[helpController checkLinks];
 
-	MTHelpViewController * helpController = [[MTHelpViewController alloc] init];
-	helpController.text = statsString;
-	helpController.preferredContentSize = CGSizeMake(1100, 400);
-	[helpController checkLinks];
-	
-	[helpController pointToView:sender preferredEdge:NSMaxYEdge];
+			[helpController pointToView:sender preferredEdge:NSMaxYEdge];
+		});
+	}];
 }
 
 -(IBAction) keywordSelected:(id)sender {

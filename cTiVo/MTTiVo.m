@@ -14,6 +14,7 @@
 #import "MTTiVoManager.h"
 #import "NSNotificationCenter+Threads.h"
 #import "NSArray+Map.h"
+#import "MTLog.h"
 
 #define kMTStringType 0
 #define kMTBoolType 1
@@ -1331,9 +1332,11 @@ BOOL channelChecking = NO;
     //called when each show completes its details
     //DDLogReport (@"Ops Count = %lu; shows = %lu; connection: %@; queue = %@", (unsigned long)self.opsQueue.operationCount, self.shows.count, self.showURLConnection, self.opsQueue);
 
-    if (self.opsQueue.operationCount <= 1 && !tiVoManager.tvdb.isActive && !isConnecting) {
+    if (self.opsQueue.operationCount <= 1 && !isConnecting) {
         DDLogMajor(@"Got all details for %@",self.tiVo.name);
-        DDLogDetail(@"Statistics for TVDB since start or reset: %@",[tiVoManager.tvdb stats]);
+		[tiVoManager.tvdb statsWithCompletionHandler:^(NSString * stats){
+			DDLogDetail(@"Statistics for TVDB since start or reset: %@", stats);
+		}];
 
         //        for testing the movidedB
         //        for (MTTiVoShow * show in [self.shows copy]) {

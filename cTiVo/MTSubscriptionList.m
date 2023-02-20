@@ -8,6 +8,7 @@
 
 #import "MTSubscriptionList.h"
 #import "MTTiVoManager.h"
+#import "MTLog.h"
 
 @implementation NSMutableArray (SubscriptionList)
 

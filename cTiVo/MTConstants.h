@@ -88,6 +88,8 @@
 #define kMTTiVoAccessDelayServerFailure 60		//Seconds to wait after TiVo reports Download server problem
 #define kMTTheTVDBAPIKey @"DB85D57BFFC7DD85"  //API Key for theTVDB
 #define kMTTheMoviedDBAPIKey @"84463a56eaa78a5426db8c179905e901"
+#define kMTTheTVDBPINKey @"TheTVDBPIN"  //PIN Key for user's subscription to theTVDB
+
 #define kMTMaxTVDBRate 10
 //Subscribed Show userDefaults
 #define kMTSubscribedSeries @"MTSubscribedSeries"
@@ -110,9 +112,6 @@
 #define kMTSubscribedRegExPattern @"RegExPattern"
 #define kMTSubscribedCallSign @"StationCallSign"
 #define kMTSubscribedDeleteAfterDownload @"DeleteAfterDownload"
-
-#define kMTTVDBToken @"TVDBToken"
-#define kMTTVDBTokenExpire @"TVDBTokenExpire"
 
 //Download queue userDefaults
 #define kMTQueue      @"Queue"
