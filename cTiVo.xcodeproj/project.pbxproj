@@ -2151,7 +2151,6 @@
 		AA41389928A5C126002C9813 /* CocoaLumberjack */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			name = CocoaLumberjack;
 			path = CocoaLumberjack.framework;
 			remoteRef = AA41389828A5C126002C9813 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -3064,7 +3063,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = GRL5LU9H9X;
+				DEVELOPMENT_TEAM = E8XXXD4S77;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
