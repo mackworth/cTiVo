@@ -22,6 +22,8 @@
 		1E2724EF16C9A8B500A21940 /* elgatoScript.pl in Resources */ = {isa = PBXBuildFile; fileRef = 1E2724EE16C9A8B500A21940 /* elgatoScript.pl */; };
 		1E2725C416CB63D500A21940 /* elgatoLaunch.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C216CB63D500A21940 /* elgatoLaunch.scpt */; };
 		1E2725C516CB63D500A21940 /* elgatoProgress.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 1E2725C316CB63D500A21940 /* elgatoProgress.scpt */; };
+		1E2FDD5C29A43612001A5637 /* MTTVDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8945C628514E9500FFD411 /* MTTVDB.swift */; };
+		1E2FDD6929A43635001A5637 /* MTTVDBLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA41389D28AAD26E002C9813 /* MTTVDBLogger.swift */; };
 		1E32CC7021FE61F200C6D8A2 /* NSTask+RunTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E32CC6F21FE61F200C6D8A2 /* NSTask+RunTask.m */; };
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
 		1E3C43C01D79EA1100367866 /* NSArray+Map.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3C43BF1D79EA1100367866 /* NSArray+Map.m */; };
@@ -426,8 +428,8 @@
 		1EFB697020DD3BA0001F5DB6 /* libz.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910C20DD364A00E3317D /* libz.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB697120DD3BB9001F5DB6 /* ccextractor in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1ECB90EF20DD35B200E3317D /* ccextractor */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFE66FF1BE967460083386C /* sparklecast.xml in Resources */ = {isa = PBXBuildFile; fileRef = 1EFE66FE1BE967460083386C /* sparklecast.xml */; };
-		5C98A48C2BE20ED1761FDB9D /* Pods_cTiVo_MAS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */; };
-		6E8C4CEF0E977C1049A1473C /* Pods_cTiVo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */; };
+		3FA88D4193D01432DD700C27 /* Pods_cTiVo_MAS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4E7E1F53C6530CBDE4F8C01 /* Pods_cTiVo_MAS.framework */; };
+		69683FDD754C8643955EE0B5 /* Pods_cTiVo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EA244752000863B9819F592 /* Pods_cTiVo.framework */; };
 		94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */ = {isa = PBXBuildFile; fileRef = 94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		AA41387C28A2A21B002C9813 /* MTMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA41387B28A2A21B002C9813 /* MTMock.swift */; };
 		AA41389E28AAD26E002C9813 /* MTTVDBLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA41389D28AAD26E002C9813 /* MTTVDBLogger.swift */; };
@@ -444,7 +446,7 @@
 		AABD5A252897510F0040A017 /* MTTVDBTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A242897510F0040A017 /* MTTVDBTests.swift */; };
 		B81EA4A9630D6D39631FD164 /* MTTVDBRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */; };
 		B81EA7E591FD9C65339453AC /* MTTVDBRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */; };
-		C8FAD56B9DE04FF70156EEB5 /* Pods_cTiVoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9C9B0C04ECC75CDE09FB686 /* Pods_cTiVoTests.framework */; };
+		956AB06E25FF4A57AD3E0791 /* Pods_cTiVoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 610369F0C5120C124B43EE00 /* Pods_cTiVoTests.framework */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
@@ -512,12 +514,12 @@
 			remoteGlobalIDString = E2B63D462DB7F827C4B11FD51E4F8E2D;
 			remoteInfo = FirebaseCore;
 		};
-		1EF4A2C427497ECB00781BDD /* PBXContainerItemProxy */ = {
+		1E2FDD1829A42BBB001A5637 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 8CC9178C366942FD6FF6A115604EAD58;
-			remoteInfo = FirebaseCoreDiagnostics;
+			remoteGlobalIDString = 148D0F9E8C7373FEAF40D800FC5F1BAA;
+			remoteInfo = FirebaseCoreInternal;
 		};
 		1EF4A2C627497ECB00781BDD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1132,13 +1134,14 @@
 		1EFA8D51211BFF6900B4505D /* MTChannelPopUpTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTChannelPopUpTableCellView.m; sourceTree = "<group>"; };
 		1EFA8D52211BFF6900B4505D /* MTChannelPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTChannelPopUpButton.h; sourceTree = "<group>"; };
 		1EFE66FE1BE967460083386C /* sparklecast.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sparklecast.xml; sourceTree = "<group>"; };
-		216A7C0AEBBD5FAF54F47429 /* Pods-cTiVoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.release.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.release.xcconfig"; sourceTree = "<group>"; };
-		3DF8F749F3C5B1F6B81F9788 /* Pods-cTiVo MAS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.debug.xcconfig"; sourceTree = "<group>"; };
-		429447CEECD67FFF7A25125F /* Pods-cTiVo MAS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.release.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.release.xcconfig"; sourceTree = "<group>"; };
-		7AA8CE2ABFE88C1DF334192C /* Pods-cTiVo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.debug.xcconfig"; sourceTree = "<group>"; };
+		209DDD71292D18B72B605A28 /* Pods-cTiVo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.release.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.release.xcconfig"; sourceTree = "<group>"; };
+		29A15E09194D46AD514B2ABF /* Pods-cTiVo MAS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.debug.xcconfig"; sourceTree = "<group>"; };
+		2EA244752000863B9819F592 /* Pods_cTiVo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		610369F0C5120C124B43EE00 /* Pods_cTiVoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		722BBA912C879C0578CD895D /* Pods-cTiVo MAS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.release.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.release.xcconfig"; sourceTree = "<group>"; };
+		8A9946295D37F7CBB7A50D69 /* Pods-cTiVoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.debug.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.debug.xcconfig"; sourceTree = "<group>"; };
+		8DDB006EDA8E2F70984E1575 /* Pods-cTiVoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.release.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.release.xcconfig"; sourceTree = "<group>"; };
 		94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ffmpeg_edl_ac3.sh; sourceTree = "<group>"; };
-		96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo_MAS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		9A5B9139CDEB9B5C18DD6144 /* Pods-cTiVoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.debug.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		AA41387B28A2A21B002C9813 /* MTMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTMock.swift; sourceTree = "<group>"; };
 		AA41389D28AAD26E002C9813 /* MTTVDBLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBLogger.swift; sourceTree = "<group>"; };
 		AABD59EA2895FECC0040A017 /* cTiVoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = cTiVoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1150,8 +1153,8 @@
 		AABD5A1F289744560040A017 /* MTTVDBCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBCache.swift; sourceTree = "<group>"; };
 		AABD5A22289745680040A017 /* MTTVDBCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBCacheTests.swift; sourceTree = "<group>"; };
 		AABD5A242897510F0040A017 /* MTTVDBTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBTests.swift; sourceTree = "<group>"; };
-		B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTTVDBRateLimiter.swift; sourceTree = "<group>"; };
+		B939CE454B7737E12C838A31 /* Pods-cTiVo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.debug.xcconfig"; sourceTree = "<group>"; };
 		D2001C211704F93F00B75D9C /* MTSrt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTSrt.h; sourceTree = "<group>"; };
 		D2001C221704F93F00B75D9C /* MTSrt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSrt.m; sourceTree = "<group>"; };
 		D2001C231704F93F00B75D9C /* MTEdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTEdl.h; sourceTree = "<group>"; };
@@ -1260,8 +1263,7 @@
 		D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadCheckTableCell.m; sourceTree = "<group>"; };
 		D2ED1BB91715C3BF00742F18 /* MTTaskChain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTaskChain.h; sourceTree = "<group>"; };
 		D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTaskChain.m; sourceTree = "<group>"; };
-		D9C9B0C04ECC75CDE09FB686 /* Pods_cTiVoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		EAE15DEB65D37EC5642217B1 /* Pods-cTiVo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.release.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.release.xcconfig"; sourceTree = "<group>"; };
+		E4E7E1F53C6530CBDE4F8C01 /* Pods_cTiVo_MAS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo_MAS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1280,7 +1282,7 @@
 				1E50511422556CC300D5981B /* Cocoa.framework in Frameworks */,
 				1E50511622556CC300D5981B /* libmp4v2.a in Frameworks */,
 				1E40C48E251D4FE7004BCC38 /* CoreData.framework in Frameworks */,
-				5C98A48C2BE20ED1761FDB9D /* Pods_cTiVo_MAS.framework in Frameworks */,
+				3FA88D4193D01432DD700C27 /* Pods_cTiVo_MAS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1288,7 +1290,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C8FAD56B9DE04FF70156EEB5 /* Pods_cTiVoTests.framework in Frameworks */,
+				956AB06E25FF4A57AD3E0791 /* Pods_cTiVoTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1307,7 +1309,7 @@
 				D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */,
 				D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */,
 				1E81D3171BE9477200321370 /* Sparkle.framework in Frameworks */,
-				6E8C4CEF0E977C1049A1473C /* Pods_cTiVo.framework in Frameworks */,
+				69683FDD754C8643955EE0B5 /* Pods_cTiVo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1575,7 +1577,7 @@
 			children = (
 				AA41389928A5C126002C9813 /* CocoaLumberjack */,
 				1EF4A2C327497ECB00781BDD /* FirebaseCore */,
-				1EF4A2C527497ECB00781BDD /* FirebaseCoreDiagnostics */,
+				1E2FDD1929A42BBB001A5637 /* FirebaseCoreInternal */,
 				1EF4A2C727497ECB00781BDD /* FirebaseCrashlytics */,
 				1EF4A2C927497ECB00781BDD /* FirebaseInstallations */,
 				1EF4A2CB27497ECB00781BDD /* GoogleDataTransport */,
@@ -1596,12 +1598,12 @@
 				1EF4A2D627497ED300781BDD /* Podfile.lock */,
 				1E6911C328A9609E00D2F4A2 /* DDLogPatch.patch */,
 				1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */,
-				7AA8CE2ABFE88C1DF334192C /* Pods-cTiVo.debug.xcconfig */,
-				EAE15DEB65D37EC5642217B1 /* Pods-cTiVo.release.xcconfig */,
-				3DF8F749F3C5B1F6B81F9788 /* Pods-cTiVo MAS.debug.xcconfig */,
-				429447CEECD67FFF7A25125F /* Pods-cTiVo MAS.release.xcconfig */,
-				9A5B9139CDEB9B5C18DD6144 /* Pods-cTiVoTests.debug.xcconfig */,
-				216A7C0AEBBD5FAF54F47429 /* Pods-cTiVoTests.release.xcconfig */,
+				B939CE454B7737E12C838A31 /* Pods-cTiVo.debug.xcconfig */,
+				209DDD71292D18B72B605A28 /* Pods-cTiVo.release.xcconfig */,
+				29A15E09194D46AD514B2ABF /* Pods-cTiVo MAS.debug.xcconfig */,
+				722BBA912C879C0578CD895D /* Pods-cTiVo MAS.release.xcconfig */,
+				8A9946295D37F7CBB7A50D69 /* Pods-cTiVoTests.debug.xcconfig */,
+				8DDB006EDA8E2F70984E1575 /* Pods-cTiVoTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -1744,9 +1746,9 @@
 				D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */,
 				D2D60BA116766EFD00CE32DE /* Cocoa.framework */,
 				D2D60BA316766EFD00CE32DE /* Other Frameworks */,
-				B387DAD0CECC9F594D34F280 /* Pods_cTiVo.framework */,
-				96EEBFFCD1F1B18C2AFE3D4A /* Pods_cTiVo_MAS.framework */,
-				D9C9B0C04ECC75CDE09FB686 /* Pods_cTiVoTests.framework */,
+				2EA244752000863B9819F592 /* Pods_cTiVo.framework */,
+				E4E7E1F53C6530CBDE4F8C01 /* Pods_cTiVo_MAS.framework */,
+				610369F0C5120C124B43EE00 /* Pods_cTiVoTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1941,7 +1943,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1E5051BD22556CC300D5981B /* Build configuration list for PBXNativeTarget "cTiVo MAS" */;
 			buildPhases = (
-				C26ACD59705BFC0B62946A8E /* [CP] Check Pods Manifest.lock */,
+				5208FDA327A5A701519E64C9 /* [CP] Check Pods Manifest.lock */,
 				1E5050CB22556CC300D5981B /* Sources */,
 				1E50510C22556CC300D5981B /* Frameworks */,
 				1E50511922556CC300D5981B /* Resources */,
@@ -1951,7 +1953,7 @@
 				1E5051BC22556CC300D5981B /* Sign Executables */,
 				1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */,
 				1E5051BB22556CC300D5981B /* Initialize Crashlytics */,
-				9027C4642EF378D0DCEE7A6F /* [CP] Embed Pods Frameworks */,
+				DABB4A5ED4753B7CE6C4C36B /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1967,7 +1969,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AABD59F02895FECC0040A017 /* Build configuration list for PBXNativeTarget "cTiVoTests" */;
 			buildPhases = (
-				7C475B1BC5F802A7647FF05D /* [CP] Check Pods Manifest.lock */,
+				4DA347B17D3691C675CFF597 /* [CP] Check Pods Manifest.lock */,
 				AABD59E62895FECC0040A017 /* Sources */,
 				AABD59E72895FECC0040A017 /* Frameworks */,
 				AABD59E82895FECC0040A017 /* Resources */,
@@ -1986,7 +1988,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
 			buildPhases = (
-				CEF4B635136BBCE1480DEAEC /* [CP] Check Pods Manifest.lock */,
+				73EFA26E8A1C2B380221F5ED /* [CP] Check Pods Manifest.lock */,
 				D2D60B9916766EFD00CE32DE /* Sources */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
@@ -1996,7 +1998,7 @@
 				D2AA030A1833F09B00AEE326 /* Sign Sparkle */,
 				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				1E3557132519BDB3004AF628 /* Initialize Crashlytics */,
-				B20147B2778BB3F422CC2B77 /* [CP] Embed Pods Frameworks */,
+				04340DCD51E11AE81C3E2DCF /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2016,7 +2018,7 @@
 			attributes = {
 				CLASSPREFIX = MT;
 				LastSwiftUpdateCheck = 1340;
-				LastUpgradeCheck = 1200;
+				LastUpgradeCheck = 1420;
 				ORGANIZATIONNAME = cTiVo;
 				TargetAttributes = {
 					AABD59E92895FECC0040A017 = {
@@ -2076,12 +2078,12 @@
 			remoteRef = 1EF4A2C227497ECB00781BDD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		1EF4A2C527497ECB00781BDD /* FirebaseCoreDiagnostics */ = {
+		1E2FDD1929A42BBB001A5637 /* FirebaseCoreInternal */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			name = FirebaseCoreDiagnostics;
-			path = FirebaseCoreDiagnostics.framework;
-			remoteRef = 1EF4A2C427497ECB00781BDD /* PBXContainerItemProxy */;
+			name = FirebaseCoreInternal;
+			path = FirebaseCoreInternal.framework;
+			remoteRef = 1E2FDD1829A42BBB001A5637 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		1EF4A2C727497ECB00781BDD /* FirebaseCrashlytics */ = {
@@ -2151,6 +2153,7 @@
 		AA41389928A5C126002C9813 /* CocoaLumberjack */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
+			name = CocoaLumberjack;
 			path = CocoaLumberjack.framework;
 			remoteRef = AA41389828A5C126002C9813 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -2317,6 +2320,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		04340DCD51E11AE81C3E2DCF /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		1E3557132519BDB3004AF628 /* Initialize Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2385,7 +2405,7 @@
 			shellPath = /bin/sh;
 			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${EXECUTABLE_FOLDER_PATH}\"\nENTITLEMENT=\"$SRCROOT/cTiVo/binary.entitlements\"\n# By default, use the configured code signing identity for the project/target\nIDENTITY=\"${CODE_SIGN_IDENTITY}\"\nDEVIDENTITY=\"Developer ID Application\"\necho $IDENTITY \"==>\" $DEVIDENTITY\nIDENTITY=\"${DEVIDENTITY}\"\necho $IDENTITY \" from \" $DEVIDENTITY\ncat \"$ENTITLEMENT\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/HandBrakeCLI\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/tivodecode-ng\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/comskip\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/ffmpeg\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/ccextractor\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/mencoder\"\n";
 		};
-		7C475B1BC5F802A7647FF05D /* [CP] Check Pods Manifest.lock */ = {
+		4DA347B17D3691C675CFF597 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2407,41 +2427,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		9027C4642EF378D0DCEE7A6F /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		B20147B2778BB3F422CC2B77 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		C26ACD59705BFC0B62946A8E /* [CP] Check Pods Manifest.lock */ = {
+		5208FDA327A5A701519E64C9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2463,7 +2449,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		CEF4B635136BBCE1480DEAEC /* [CP] Check Pods Manifest.lock */ = {
+		73EFA26E8A1C2B380221F5ED /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2513,6 +2499,23 @@
 			shellPath = /bin/sh;
 			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${FRAMEWORKS_FOLDER_PATH}\"\n\n# By default, use the configured code signing identity for the project/target\nIDENTITY=\"${EXPANDED_CODE_SIGN_IDENTITY}\"\nif [ \"$IDENTITY\" == \"\" ]\nthen\n    # If a code signing identity is not specified, use ad hoc signing\n    IDENTITY=\"-\"\nfi\ncodesign --verbose --force --deep -o runtime --sign \"$IDENTITY\" \"$LOCATION/Sparkle.framework/Versions/A/Resources/AutoUpdate.app\"\ncodesign --verbose --force -o runtime --sign \"$IDENTITY\" \"$LOCATION/Sparkle.framework/Versions/A\"\n";
 		};
+		DABB4A5ED4753B7CE6C4C36B /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -2524,7 +2527,7 @@
 				1E5050CE22556CC300D5981B /* main.m in Sources */,
 				1E5050CF22556CC300D5981B /* MTChannelPopUpButton.m in Sources */,
 				1E5050D022556CC300D5981B /* MTRemoteWindowController.m in Sources */,
-				AABD5A21289744560040A017 /* MTTVDBCache.swift in Sources */,
+				AABD5A1C289737E40040A017 /* MTTMDBService.swift in Sources */,
 				1E5050D222556CC300D5981B /* MTAppDelegate.m in Sources */,
 				1E5050D422556CC300D5981B /* MTTiVoManager.m in Sources */,
 				1E5050D522556CC300D5981B /* MTDownloadTableView.m in Sources */,
@@ -2541,10 +2544,10 @@
 				1E5050E022556CC300D5981B /* MTCheckBox.m in Sources */,
 				1E5050E122556CC300D5981B /* MTSubscriptionTableView.m in Sources */,
 				1E5050E222556CC300D5981B /* MTFormatPopUpButton.m in Sources */,
-				AABD5A1C289737E40040A017 /* MTTMDBService.swift in Sources */,
 				1E5050E322556CC300D5981B /* MTFormatPopUpTableCellView.m in Sources */,
 				1E5050E422556CC300D5981B /* MTTiVo.m in Sources */,
 				1E5050E522556CC300D5981B /* MTSubscription.m in Sources */,
+				1E2FDD6929A43635001A5637 /* MTTVDBLogger.swift in Sources */,
 				1E5050E622556CC300D5981B /* MTSubscriptionList.m in Sources */,
 				1E5050E722556CC300D5981B /* MTFormat.m in Sources */,
 				1E5050E822556CC300D5981B /* MTFormatEditorController.m in Sources */,
@@ -2553,13 +2556,14 @@
 				1E5050EB22556CC300D5981B /* MTManualTiVoEditorController.m in Sources */,
 				1E5050EC22556CC300D5981B /* MTPreferencesWindowController.m in Sources */,
 				1E5050ED22556CC300D5981B /* MTTabViewItem.m in Sources */,
+				1E2FDD5C29A43612001A5637 /* MTTVDB.swift in Sources */,
 				1E5050EE22556CC300D5981B /* MTPreferencesViewController.m in Sources */,
 				1E5050EF22556CC300D5981B /* MTAdvPreferencesViewController.m in Sources */,
+				AABD5A21289744560040A017 /* MTTVDBCache.swift in Sources */,
 				1E5050F022556CC300D5981B /* MTDownload.m in Sources */,
 				1E5050F122556CC300D5981B /* MTShowFolder.m in Sources */,
 				1E5050F222556CC300D5981B /* NSString+RFC3339Date.m in Sources */,
 				1E5050F322556CC300D5981B /* NSNotificationCenter+Threads.m in Sources */,
-				AABD5A17289716D00040A017 /* MTTVDBService.swift in Sources */,
 				1E5050F422556CC300D5981B /* NSURL+MTURLExtensions.m in Sources */,
 				1E5050F522556CC300D5981B /* MTIsStringEmpty.m in Sources */,
 				1E5050F622556CC300D5981B /* NSArray+Map.m in Sources */,
@@ -2569,6 +2573,7 @@
 				1E5050FB22556CC300D5981B /* MTEdl.m in Sources */,
 				1E5050FC22556CC300D5981B /* NSString+HTML.m in Sources */,
 				1E5050FD22556CC300D5981B /* MTGCDTimer.m in Sources */,
+				AABD5A17289716D00040A017 /* MTTVDBService.swift in Sources */,
 				1E5050FE22556CC300D5981B /* MTChannelPopUpTableCellView.m in Sources */,
 				1E5050FF22556CC300D5981B /* GTMNSString+HTML.m in Sources */,
 				1E50510022556CC300D5981B /* MTTask.m in Sources */,
@@ -2603,11 +2608,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AABD5A1B289737E40040A017 /* MTTMDBService.swift in Sources */,
+				AA41389E28AAD26E002C9813 /* MTTVDBLogger.swift in Sources */,
+				1E8945C728514E9500FFD411 /* MTTVDB.swift in Sources */,
+				AABD5A20289744560040A017 /* MTTVDBCache.swift in Sources */,
+				AABD5A16289716D00040A017 /* MTTVDBService.swift in Sources */,
+				B81EA7E591FD9C65339453AC /* MTTVDBRateLimiter.swift in Sources */,
 				1E9EA3FD1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */,
 				D2D60BAE16766EFD00CE32DE /* main.m in Sources */,
 				1EFA8D53211BFF6A00B4505D /* MTChannelPopUpButton.m in Sources */,
 				1E6AB108202A0BDB008A0F32 /* MTRemoteWindowController.m in Sources */,
-				AABD5A1B289737E40040A017 /* MTTMDBService.swift in Sources */,
 				D2D60BB516766EFD00CE32DE /* MTAppDelegate.m in Sources */,
 				D2D60BD416766FA600CE32DE /* MTTiVoManager.m in Sources */,
 				D2D60BD716766FA600CE32DE /* MTDownloadTableView.m in Sources */,
@@ -2627,7 +2637,6 @@
 				D257C6E9169740A000EBE30B /* MTFormatPopUpTableCellView.m in Sources */,
 				D2A648F216991CD300C7DA01 /* MTTiVo.m in Sources */,
 				D2A648FB16994D2A00C7DA01 /* MTSubscription.m in Sources */,
-				AA41389E28AAD26E002C9813 /* MTTVDBLogger.swift in Sources */,
 				1E4A38481A37C0F4001D84A7 /* MTSubscriptionList.m in Sources */,
 				D2A7269816A23E3D00C58C5F /* MTFormat.m in Sources */,
 				D2A7269C16A25DEB00C58C5F /* MTFormatEditorController.m in Sources */,
@@ -2636,10 +2645,8 @@
 				D2D2C6F116B3816B001AFE75 /* MTManualTiVoEditorController.m in Sources */,
 				D27579BD16B4DC2B0090D137 /* MTPreferencesWindowController.m in Sources */,
 				D27579C216B575A30090D137 /* MTTabViewItem.m in Sources */,
-				1E8945C728514E9500FFD411 /* MTTVDB.swift in Sources */,
 				D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */,
 				1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */,
-				AABD5A20289744560040A017 /* MTTVDBCache.swift in Sources */,
 				1E6F22D616DD1F4C0071D291 /* MTDownload.m in Sources */,
 				1E17E1191FF7ED8900AF0F7C /* MTShowFolder.m in Sources */,
 				1E6F22DA16DD3D9E0071D291 /* NSString+RFC3339Date.m in Sources */,
@@ -2653,7 +2660,6 @@
 				D2001C281704F93F00B75D9C /* MTEdl.m in Sources */,
 				D291436E1713467A00CE3202 /* NSString+HTML.m in Sources */,
 				1EB2D98E2110DC7B00E50C9B /* MTGCDTimer.m in Sources */,
-				AABD5A16289716D00040A017 /* MTTVDBService.swift in Sources */,
 				1EFA8D54211BFF6A00B4505D /* MTChannelPopUpTableCellView.m in Sources */,
 				D291436F1713467F00CE3202 /* GTMNSString+HTML.m in Sources */,
 				D2C6BB5A1714681C00289751 /* MTTask.m in Sources */,
@@ -2668,7 +2674,6 @@
 				1E56038F1F45103400454157 /* MTRPCData.m in Sources */,
 				D295CE84175A6AE500D010B8 /* NSString+Helpers.m in Sources */,
 				1E5486731FF898A800412D7B /* PFMoveApplication.m in Sources */,
-				B81EA7E591FD9C65339453AC /* MTTVDBRateLimiter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2730,7 +2735,7 @@
 /* Begin XCBuildConfiguration section */
 		1E5051BE22556CC300D5981B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3DF8F749F3C5B1F6B81F9788 /* Pods-cTiVo MAS.debug.xcconfig */;
+			baseConfigurationReference = 29A15E09194D46AD514B2ABF /* Pods-cTiVo MAS.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -2741,6 +2746,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = E8XXXD4S77;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2776,13 +2782,15 @@
 				PRODUCT_NAME = cTV;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "cTiVo/cTiVo-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
 		};
 		1E5051BF22556CC300D5981B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 429447CEECD67FFF7A25125F /* Pods-cTiVo MAS.release.xcconfig */;
+			baseConfigurationReference = 722BBA912C879C0578CD895D /* Pods-cTiVo MAS.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -2790,8 +2798,11 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = "cTiVo/cTV MAS.entitlements";
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = E8XXXD4S77;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2827,13 +2838,15 @@
 				PRODUCT_NAME = cTV;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "cTiVo/cTiVo-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
 		};
 		AABD59F12895FECC0040A017 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9A5B9139CDEB9B5C18DD6144 /* Pods-cTiVoTests.debug.xcconfig */;
+			baseConfigurationReference = 8A9946295D37F7CBB7A50D69 /* Pods-cTiVoTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -2845,10 +2858,11 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "$(inherited)";
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = GRL5LU9H9X;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2864,7 +2878,6 @@
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -2877,7 +2890,7 @@
 		};
 		AABD59F22895FECC0040A017 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 216A7C0AEBBD5FAF54F47429 /* Pods-cTiVoTests.release.xcconfig */;
+			baseConfigurationReference = 8DDB006EDA8E2F70984E1575 /* Pods-cTiVoTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -2889,10 +2902,11 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "$(inherited)";
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = GRL5LU9H9X;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -2938,7 +2952,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -2947,6 +2961,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -2973,7 +2988,7 @@
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				ONLY_ACTIVE_ARCH = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"-Wall",
 					"-Wextra",
@@ -3008,7 +3023,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = NO;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -3016,6 +3031,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -3046,23 +3062,26 @@
 					"-Wunguarded-availability",
 				);
 				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
 		};
 		D2D60BBC16766EFD00CE32DE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7AA8CE2ABFE88C1DF334192C /* Pods-cTiVo.debug.xcconfig */;
+			baseConfigurationReference = B939CE454B7737E12C838A31 /* Pods-cTiVo.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "$(inherited)";
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = cTiVo/cTiVo.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = E8XXXD4S77;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3092,7 +3111,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 3.5.3;
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -3106,18 +3124,20 @@
 		};
 		D2D60BBD16766EFD00CE32DE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EAE15DEB65D37EC5642217B1 /* Pods-cTiVo.release.xcconfig */;
+			baseConfigurationReference = 209DDD71292D18B72B605A28 /* Pods-cTiVo.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "$(inherited)";
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = cTiVo/cTiVo.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = E8XXXD4S77;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
