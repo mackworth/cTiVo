@@ -1794,11 +1794,11 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderUsed</key>
 			<string>HandBrakeCLI</string>
 			<key>encoderVideoOptions</key>
-			<string>-Z&quot;Apple 240p30&quot;</string>
+			<string>-Z&quot;Email 25 MB 10 Minutes 288p30&quot;</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>formatDescription</key>
-			<string>H.264 video (up to 240p30) and AAC stereo audio, in an MP4 container. Compatible with Apple iPod 5th Generation and later.</string>
+			<string>Very small H.264 video (up to 288p30) and AAC mono audio, in an MP4 container. Compatible with Apple iPod 5th Generation and later.</string>
 			<key>iTunes</key>
 			<true/>
 			<key>inputFileFlag</key>

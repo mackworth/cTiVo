@@ -7,25 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <cTiVo-Swift.h>
 #import "MTTiVo.h"
 #import "MTFormat.h"
 #import "mp4v2.h"
 #import "DragDropImageView.h"
 #import "MTRPCData.h"
 
-@class MTProgramTableView;
-
-@interface MTTiVoShow : NSObject <NSXMLParserDelegate, NSPasteboardWriting,NSPasteboardReading, NSSecureCoding, DragDropImageViewDelegate, MTTiVoShowReadOnly> {
+@interface MTTiVoShow : NSObject <NSPasteboardWriting, NSPasteboardReading, NSSecureCoding> {
  }
-
-// Ignore warnings about property attribute mismatches between
-// MTTiVoShow and generated MTTiVoReadOnly protocol.  The properties
-// used by the MTTVDB class via the MTTiVoShowReadOnly protocol are
-// fully initialized and quiescent by the time they are accessed,
-// so the copy and atomic property attributes do not matter.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
 
 #pragma mark - Which TiVo did we come from
 @property (nonatomic, weak) MTTiVo *tiVo;
@@ -188,4 +177,3 @@ typedef enum {
 -(const MP4Tags * ) metaDataTagsWithImage: (NSImage *) image andResolution:(HDTypes) hdType;
 
 @end
-#pragma clang diagnostic pop

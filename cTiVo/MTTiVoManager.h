@@ -14,6 +14,7 @@
 #import "MTSubscription.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "MTFormat.h"
+@class MTTVDB;
 
 @interface MTTiVoManager : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, NSURLConnectionDataDelegate, NSURLConnectionDelegate, NSTextFieldDelegate, NSAlertDelegate>  {
 }
@@ -49,6 +50,8 @@
 @property (nonatomic, readonly) BOOL anyShowsCompleted;
 @property (nonatomic, readonly) double aggregateSpeed; //sum of the speed of all downloads .
 @property (nonatomic, readonly)  NSTimeInterval aggregateTimeLeft; 
+
+-(void) statsWithCompletionHandler:(void (^)(NSString * stats)) completion;
 
 + (MTTiVoManager *)sharedTiVoManager;
 

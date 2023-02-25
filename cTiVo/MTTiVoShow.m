@@ -8,8 +8,7 @@
 // Class for handling individual TiVo Shows
 
 #import "MTTiVoShow.h"
-#import "MTProgramTableView.h"
-#import "MTiTunes.h"
+#import "MTiTunes.h" 
 #import "MTTiVoManager.h"
 #import "NSString+RFC3339Date.h"
 #import "mp4v2.h"
@@ -19,6 +18,12 @@
 #import "NSURL+MTURLExtensions.h"
 #import "NSArray+Map.h"
 #import "MTLog.h"
+
+#ifdef MAC_APP_STORE
+#import <cTV-Swift.h>
+#else
+#import <cTiVo-Swift.h>
+#endif
 
 typedef NS_ENUM(NSUInteger, MTImageSource) {
     //note this enum is referred to in Preference XIB and AppDelegate defaults
@@ -42,7 +47,7 @@ typedef NS_ENUM(NSUInteger, MTImageSource) {
 #define kTVDBPossibleIDsKey  @"possibleIds" //Array of IDs that we checked to find series
 #define kTVDBPossibleSlugsKey  @"possibleIds" //corresponding Array of slugs for building reporting URLs for TVDB
 
-@interface MTTiVoShow () {
+@interface MTTiVoShow () <NSXMLParserDelegate, DragDropImageViewDelegate, MTTiVoShowReadOnly> {
 	
 	NSMutableString *elementString;
 	NSMutableArray *elementArray;

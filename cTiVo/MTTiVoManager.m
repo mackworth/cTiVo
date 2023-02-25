@@ -18,8 +18,12 @@
 #import "NSString+Helpers.h"
 #import "NSDate+Tomorrow.h"
 #include <arpa/inet.h>
-#import "cTiVo-Swift.h"
 #import "MTLog.h"
+#ifdef MAC_APP_STORE
+#import <cTV-Swift.h>
+#else
+#import <cTiVo-Swift.h>
+#endif
 
 #include "MTWeakTimer.h"
 @import UserNotifications;
@@ -1828,6 +1832,10 @@ __DDLOGHERE__
 
     NSNotification *restartNotification = [NSNotification notificationWithName:kMTNotificationDownloadQueueUpdated object:nil];
     [[NSNotificationCenter defaultCenter] performSelector:@selector(postNotification:) withObject:restartNotification afterDelay:2];
+}
+
+-(void)statsWithCompletionHandler:(void (^)(NSString *))completion {
+  [self.tvdb statsWithCompletionHandler:completion];
 }
 
 -(void) getSkipModeEDLWhenPossible: (MTDownload *) download {

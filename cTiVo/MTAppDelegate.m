@@ -20,7 +20,6 @@
 #import "MTGCDTimer.h"
 #import "MTiTunes.h"
 
-#import "DDFileLogger.h"
 #import "MTLogFormatter.h"
 
 #ifdef DEBUG

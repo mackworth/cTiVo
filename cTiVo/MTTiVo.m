@@ -1334,7 +1334,7 @@ BOOL channelChecking = NO;
 
     if (self.opsQueue.operationCount <= 1 && !isConnecting) {
         DDLogMajor(@"Got all details for %@",self.tiVo.name);
-		[tiVoManager.tvdb statsWithCompletionHandler:^(NSString * stats){
+		[tiVoManager statsWithCompletionHandler:^(NSString * stats){
 			DDLogDetail(@"Statistics for TVDB since start or reset: %@", stats);
 		}];
 

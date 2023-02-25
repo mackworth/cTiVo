@@ -267,7 +267,7 @@
 }
 
 -(IBAction)TVDBStatistics:(id)sender {
-	[tiVoManager.tvdb statsWithCompletionHandler: ^(NSString * statsString) {
+	[tiVoManager statsWithCompletionHandler: ^(NSString * statsString) {
 		dispatch_async(dispatch_get_main_queue(), ^(void) {
 			MTHelpViewController * helpController = [[MTHelpViewController alloc] init];
 			helpController.text = statsString;
