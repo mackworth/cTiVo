@@ -40,11 +40,9 @@ __DDLOGHERE__
 
 - (NSSize)windowWillResize:(NSWindow *)sender
 					toSize:(NSSize)frameSize {
-	if (isnan(frameSize.height)) {
-		//who knows why the OS is sending us this...?
-		frameSize.height = frameSize.width * (sender.frame.size.height/ sender.frame.size.width);
-	}
-	return frameSize;
+  NSSize contentSize  = [sender contentRectForFrameRect:NSMakeRect(0, 0, frameSize.width, frameSize.height)].size;    
+  contentSize.height  = contentSize.width * 2.85;
+  return [sender frameRectForContentRect:NSMakeRect(0, 0, contentSize.width, contentSize.height)].size;
 }
 
 -(MTTiVo *) selectedTiVo {
