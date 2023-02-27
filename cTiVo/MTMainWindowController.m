@@ -254,7 +254,7 @@ __DDLOGHERE__
 
 -(NSAttributedString *) reportProblemString: (MTTiVo *) tivo {
     NSFont *thisFont = [NSFont systemFontOfSize:13];
-    NSString *thisTitle = [NSString stringWithFormat:@"%@%@",tivo.tiVo.name, !tivo.isReachable ? @"Unreachable" : @": Not Connected"];
+    NSString *thisTitle = [NSString stringWithFormat:@"%@%@",tivo.tiVo.name, !tivo.isReachable ? @": Unreachable" : @": Not Connected"];
     NSColor * red = [NSColor systemRedColor];
     return [[NSAttributedString alloc] initWithString:thisTitle attributes:@ { NSForegroundColorAttributeName: red, NSFontAttributeName:  thisFont}];
 }
