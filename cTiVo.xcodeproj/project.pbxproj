@@ -1992,6 +1992,7 @@
 				D2D60B9916766EFD00CE32DE /* Sources */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
+				1E3F60CA29AD691F005DBE1A /* Expand Handbrake if needed */,
 				1EDBDFA61B1CB71200E979F0 /* Copy Executables */,
 				1E557BCE1CD8033F0014D85B /* Copy shared libraries for executables */,
 				D2995CAE168D0F7D00B960B9 /* Copy Sparkle */,
@@ -2356,6 +2357,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ]; then\n  \"${PODS_ROOT}/FirebaseCrashlytics/run\"\nfi\n";
+		};
+		1E3F60CA29AD691F005DBE1A /* Expand Handbrake if needed */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/cTiVo/cTiVoBinaries/bin/HandBrakeCLI-1.6.1.dmg",
+			);
+			name = "Expand Handbrake if needed";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/cTiVo/cTiVoBinaries/bin/HandbrakeCLI",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nvolname=$(basename \"$SCRIPT_INPUT_FILE_0\") \nvolname=\"${volname%.*}\"\ndmg_path=\"$SCRIPT_INPUT_FILE_0\"\n\nIFS=$'\\n' read -d'\\n' dev_entry mount_point  < <(\n hdiutil attach -readonly \"${dmg_path}\" | grep $volname | awk '{print $1; print $3}'\n)\n\necho $dev_entry $mount_point\nif [ $? -ne 0 ]; then\n  echo \"HandbrakeCLI Mount unsuccessful! Exiting installation.\"\n  exit 1\nfi\n   \necho \"$(date): Expanding Handbrake...\"\ncp -rf \"$mount_point/HandBrakeCLI\" \"$SCRIPT_OUTPUT_FILE_0\"\n/usr/bin/hdiutil detach \"$dev_entry\"\n";
 		};
 		1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */ = {
 			isa = PBXShellScriptBuildPhase;
