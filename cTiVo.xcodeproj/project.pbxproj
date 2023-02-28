@@ -431,6 +431,7 @@
 		3FA88D4193D01432DD700C27 /* Pods_cTiVo_MAS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4E7E1F53C6530CBDE4F8C01 /* Pods_cTiVo_MAS.framework */; };
 		69683FDD754C8643955EE0B5 /* Pods_cTiVo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EA244752000863B9819F592 /* Pods_cTiVo.framework */; };
 		94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */ = {isa = PBXBuildFile; fileRef = 94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		956AB06E25FF4A57AD3E0791 /* Pods_cTiVoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 610369F0C5120C124B43EE00 /* Pods_cTiVoTests.framework */; };
 		AA41387C28A2A21B002C9813 /* MTMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA41387B28A2A21B002C9813 /* MTMock.swift */; };
 		AA41389E28AAD26E002C9813 /* MTTVDBLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA41389D28AAD26E002C9813 /* MTTVDBLogger.swift */; };
 		AABD5A102896DEEE0040A017 /* MTTVDBRateLimiterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A0F2896DEEE0040A017 /* MTTVDBRateLimiterTests.swift */; };
@@ -446,7 +447,6 @@
 		AABD5A252897510F0040A017 /* MTTVDBTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABD5A242897510F0040A017 /* MTTVDBTests.swift */; };
 		B81EA4A9630D6D39631FD164 /* MTTVDBRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */; };
 		B81EA7E591FD9C65339453AC /* MTTVDBRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */; };
-		956AB06E25FF4A57AD3E0791 /* Pods_cTiVoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 610369F0C5120C124B43EE00 /* Pods_cTiVoTests.framework */; };
 		D2001C261704F93F00B75D9C /* MTSrt.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C221704F93F00B75D9C /* MTSrt.m */; };
 		D2001C281704F93F00B75D9C /* MTEdl.m in Sources */ = {isa = PBXBuildFile; fileRef = D2001C241704F93F00B75D9C /* MTEdl.m */; };
 		D208560716B61B9B002F5F8C /* MTPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D208560516B61B9B002F5F8C /* MTPreferencesViewController.m */; };
@@ -507,19 +507,19 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		1EF4A2C227497ECB00781BDD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E2B63D462DB7F827C4B11FD51E4F8E2D;
-			remoteInfo = FirebaseCore;
-		};
 		1E2FDD1829A42BBB001A5637 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 148D0F9E8C7373FEAF40D800FC5F1BAA;
 			remoteInfo = FirebaseCoreInternal;
+		};
+		1EF4A2C227497ECB00781BDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E2B63D462DB7F827C4B11FD51E4F8E2D;
+			remoteInfo = FirebaseCore;
 		};
 		1EF4A2C627497ECB00781BDD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1947,6 +1947,7 @@
 				1E5050CB22556CC300D5981B /* Sources */,
 				1E50510C22556CC300D5981B /* Frameworks */,
 				1E50511922556CC300D5981B /* Resources */,
+				1E3F60E529AD8706005DBE1A /* Expand Handbrake if needed */,
 				1E50515A22556CC300D5981B /* Copy Executables */,
 				1E50516122556CC300D5981B /* Copy shared libraries for executables */,
 				1E5051B822556CC300D5981B /* No Sparkle */,
@@ -2071,20 +2072,20 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		1EF4A2C327497ECB00781BDD /* FirebaseCore */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			name = FirebaseCore;
-			path = FirebaseCore.framework;
-			remoteRef = 1EF4A2C227497ECB00781BDD /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		1E2FDD1929A42BBB001A5637 /* FirebaseCoreInternal */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			name = FirebaseCoreInternal;
 			path = FirebaseCoreInternal.framework;
 			remoteRef = 1E2FDD1829A42BBB001A5637 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF4A2C327497ECB00781BDD /* FirebaseCore */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = FirebaseCore;
+			path = FirebaseCore.framework;
+			remoteRef = 1EF4A2C227497ECB00781BDD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		1EF4A2C727497ECB00781BDD /* FirebaseCrashlytics */ = {
@@ -2359,6 +2360,26 @@
 			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ]; then\n  \"${PODS_ROOT}/FirebaseCrashlytics/run\"\nfi\n";
 		};
 		1E3F60CA29AD691F005DBE1A /* Expand Handbrake if needed */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/cTiVo/cTiVoBinaries/bin/HandBrakeCLI-1.6.1.dmg",
+			);
+			name = "Expand Handbrake if needed";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/cTiVo/cTiVoBinaries/bin/HandbrakeCLI",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nvolname=$(basename \"$SCRIPT_INPUT_FILE_0\") \nvolname=\"${volname%.*}\"\ndmg_path=\"$SCRIPT_INPUT_FILE_0\"\n\nIFS=$'\\n' read -d'\\n' dev_entry mount_point  < <(\n hdiutil attach -readonly \"${dmg_path}\" | grep $volname | awk '{print $1; print $3}'\n)\n\necho $dev_entry $mount_point\nif [ $? -ne 0 ]; then\n  echo \"HandbrakeCLI Mount unsuccessful! Exiting installation.\"\n  exit 1\nfi\n   \necho \"$(date): Expanding Handbrake...\"\ncp -rf \"$mount_point/HandBrakeCLI\" \"$SCRIPT_OUTPUT_FILE_0\"\n/usr/bin/hdiutil detach \"$dev_entry\"\n";
+		};
+		1E3F60E529AD8706005DBE1A /* Expand Handbrake if needed */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2798,7 +2819,7 @@
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 3.4.3;
+				MARKETING_VERSION = 3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVo;
 				PRODUCT_NAME = cTV;
 				PROVISIONING_PROFILE = "";
@@ -2854,7 +2875,7 @@
 					"$(PROJECT_DIR)/cTiVo/cTivoBinaries/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 3.4.3;
+				MARKETING_VERSION = 3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cTiVo.cTiVo;
 				PRODUCT_NAME = cTV;
 				PROVISIONING_PROFILE = "";
@@ -3131,7 +3152,7 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 3.5.3;
+				MARKETING_VERSION = 3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -3187,7 +3208,7 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9/",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 3.5.3;
+				MARKETING_VERSION = 3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cTiVo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
