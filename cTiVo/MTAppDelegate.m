@@ -299,6 +299,7 @@ void signalHandler(int signal)
 										  [NSDate tomorrowAtTime:30], kMTScheduledSkipModeScanStartTime, //start SkipMode scan at 12:30AM tomorrow]
 										  [NSDate tomorrowAtTime:5*60+45], kMTScheduledSkipModeScanEndTime, //end SkipMode scan at 5:45AM tomorrow]
 										  @3, kMTCommercialStrategy,
+										  @"-n", kMTTivodecodeOptions,
 										  nil];
 
     [defaults registerDefaults:userDefaultsDefaults];

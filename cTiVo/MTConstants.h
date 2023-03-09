@@ -225,6 +225,8 @@
 #define kMTSkipCommercials @"RunComSkip"                  // Whether to run comSkip program after conversion (historic reasons for code)
 #define kMTMarkCommercials @"MarkCommercials"        // Whether insert chapters for commercials when possible
 #define kMTCommercialStrategy @"CommercialStrategy"  // 0 - comskip; 1= skipMode only; 2 = skipMode, fallback to Comskip, 3 = SkipMode, fallback to comskip,mark only
+#define kMTTivodecodeOptions @"TivodecodeOptions"  // string containing options to hand to tivodecode. No GUI
+
 #define kMTExportSubtitles @"ExportSubtitles"        // Whether to export subtitles with ts2ami
 #define kMTExportTextMetaData @"ExportTextMetaData"  // Whether to export text metadata for PyTivo
 #define kMTKeepSRTs            @"KeepSRTs"           // Whether to keep SRTs when embedded in main file time? NO GUI

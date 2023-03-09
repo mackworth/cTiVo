@@ -1072,6 +1072,7 @@ __DDLOGHERE__
     }
 
 	NSArray *arguments = nil;
+	NSString *tvdOptions =[[NSUserDefaults standardUserDefaults] stringForKey:kMTTivodecodeOptions];
 	if (self.shouldPipeFromDecrypt) {
 		decryptTask.requiresOutputPipe = YES;
 		if (libreJar) {
@@ -1084,9 +1085,14 @@ __DDLOGHERE__
 		} else {
 			arguments =@[
 						 @"-m", self.show.tiVo.mediaKey,
-						 @"-v",
+						 @"-v"];
+			if (tvdOptions.length > 0) {
+				arguments = [arguments arrayByAddingObject:tvdOptions];
+			}
+			arguments = [arguments arrayByAddingObjectsFromArray:@[
 						 @"--",
 						 @"-"
+						 ]
 						 ];
 		}
 	} else {
@@ -1104,6 +1110,11 @@ __DDLOGHERE__
 						  @"-m",self.show.tiVo.mediaKey,
 						  @"-o",self.decryptedFilePath,
 						  @"-v",
+			];
+			if (tvdOptions.length > 0) {
+			   arguments = [arguments arrayByAddingObject:tvdOptions];
+			}
+			arguments = [arguments arrayByAddingObject:	
 						  @"-"
 						  ];
 		}
