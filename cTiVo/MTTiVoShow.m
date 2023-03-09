@@ -227,7 +227,7 @@ __DDLOGHERE__
                                         [NSString stringWithFormat:@"\t(%@)",self.seasonEpisode] :
                                         @""; //skip empty episode info
         NSString * protected = self.protectedShow.boolValue ? @"-CP":@"";
-        return [NSString stringWithFormat:@"%@\t%@%@%@" ,self.showDateString, self.showTitle, protected, episodePart] ;
+        return [NSString stringWithFormat:@"%@\t%@%@%@\t%@" ,self.showDateString, self.showTitle, protected, episodePart, self.tiVo.tiVo.name] ;
     } else {
         return nil;
     }
