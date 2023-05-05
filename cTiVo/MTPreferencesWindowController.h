@@ -23,6 +23,7 @@
 @property (nonatomic, strong) NSString *startingTabIdentifier;
 @property (nonatomic, strong) IBOutlet NSTabView *myTabView;
 @property BOOL ignoreTabItemSelection;
+@property (nonatomic, readonly) BOOL allowImportFormats;
 @property (nonatomic, strong) IBOutlet MTAdvPreferencesViewController * advPreferencesViewController;
 -(NSRect)getNewWindowRect:(MTTabViewItem *)tabViewItem;
 

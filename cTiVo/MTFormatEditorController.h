@@ -10,4 +10,5 @@
 
 @interface MTFormatEditorController : NSViewController <NSPopoverDelegate, MTTabViewItemControllerDelegate> 
 
+@property (nonatomic, readonly) BOOL allowImportExport;
 @end

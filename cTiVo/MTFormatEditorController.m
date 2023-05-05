@@ -31,7 +31,8 @@
 @property (nonatomic, assign) NSInteger customPresetStart;
 @property (nonatomic, strong) NSDictionary *alertResponseInfo;
 @property (weak, nonatomic) IBOutlet NSButton * helpButton;
-//@property (nonatomic, strong) NSArray * ;
+@property (assign, nonatomic) BOOL fixCLIPresented;  //only add CLI.sh to Handbrake once per format
+
 @end
 
 @implementation MTFormatEditorController
@@ -47,7 +48,7 @@
 		self.validExecutable = [NSNumber numberWithBool:YES];
 		self.validExecutableString = @"No valid executable found.";
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateForFormatChange) name:kMTNotificationFormatChanged object:nil];
-
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(formatListChange:) name:kMTNotificationFormatListUpdated object:nil];
     }
     
     return self;
@@ -75,21 +76,24 @@
     NSString * presetDesc = self.presetPopup.selectedItem.toolTip;
    if (self.currentFormat.isFactoryFormat.boolValue) {
         //if this is afactory one, create a user one to allow them to use it.
+        NSString * currentFormat = self.currentFormat.encoderUsed;
         [self newFormat:self];
-        self.currentFormat.encoderUsed=@"HandBrakeCLI";
+        self.currentFormat.encoderUsed = currentFormat;
         [self updateForFormatChange];
     }
     
     self.currentFormat.inputFileFlag = @"-i";
     self.currentFormat.outputFileFlag = @"-o";
-    self.currentFormat.name = [@"HB " stringByAppendingString:preset] ;
+    if ([self.currentFormat.name isEqualToString:@"New Format"]) {
+        self.currentFormat.name = [@"HB " stringByAppendingString:preset] ;
+    }
     self.currentFormat.regExProgress = @" ([\\d\\.]*?) \\%";
     NSString * importString = @"";
     if (customPreset) {
         importString = @"--preset-import-gui ";
     }
     self.currentFormat.encoderVideoOptions = [NSString stringWithFormat:@"%@-Z\"%@\"" , importString, preset];
-    self.currentFormat.comSkip = @NO;
+    self.currentFormat.comSkip = @([self.currentFormat.encoderUsed containsString:@".sh" ]); //handspringCLI cannot, but .sh version can
     NSString * extension = @".mp4";
     BOOL iTunes = YES;
     if ([preset contains:@"MKV"] || [presetDesc contains:@"MKV"]) {
@@ -241,6 +245,14 @@
 
 -(void)checkValidExecutable
 {
+    if (!self.fixCLIPresented && [[self.currentFormat.encoderUsed lowercaseString] isEqualTo:@"handbrake"]) {
+        NSString * name = @"HandBrakeCLI.sh";
+        self.currentFormat.encoderUsed = name;
+        self.executableTextField.stringValue = name;
+        self.executableTextField.currentEditor.selectedRange = NSMakeRange(name.length, 0);
+        self.currentFormat.comSkip = @YES;
+        self.fixCLIPresented = YES;
+    }
 	NSString *validPath = [_currentFormat pathForExecutable];
 	if (validPath) {
         self.validExecutableColor = [NSColor textColor];
@@ -258,32 +270,33 @@
     }
     CGRect execFrame = self.executableTextField.frame;
     CGRect popupFrame = self.presetPopup.frame;
-    if ( [[self.currentFormat.encoderUsed lowercaseString] hasPrefix:@"handbrake"]) {
-        self.currentFormat.encoderUsed = @"HandBrakeCLI";
-        self.executableTextField.stringValue = self.currentFormat.encoderUsed;
+    NSString *currentEncoder = self.currentFormat.encoderUsed;
+    if ([[currentEncoder lowercaseString] hasPrefix:@"handbrakecli"]) {
+      if (self.presetPopup.hidden) {
         //make room for preset and show it
         self.presetPopup.hidden = NO;
         CGFloat popupLeft = popupFrame.origin.x;
         execFrame.size.width = popupLeft - execFrame.origin.x - 12 ;
         self.executableTextField.frame = execFrame;
-        NSString * preset = self.presetPopup.selectedItem.title;
-        NSString * options = self.currentFormat.encoderVideoOptions;
-        if (!preset.length || ![options contains:preset]) {
-            //popup doesn't match preset (if any) in encoderVideoOptions
-            //so see if we have it
-            NSUInteger offset = [options rangeOfString:@"-Z\""].location;
-            if (offset == NSNotFound) {
-                [self.presetPopup selectItemAtIndex:0];
-            } else {
-                options = [options substringFromIndex:offset+3];
-                offset = [options rangeOfString:@"\""].location; //ending quote
-                if (offset != NSNotFound) {
-                    options = [options substringToIndex:offset];
-                }
-                [self.presetPopup selectItemWithTitle:options];
-            }
-        }
-        if (!self.presetPopup.selectedItem) [self.presetPopup selectItemAtIndex:0];
+      }
+      NSString * preset = self.presetPopup.selectedItem.title;
+      NSString * options = self.currentFormat.encoderVideoOptions;
+      if (!preset.length || ![options contains:preset]) {
+          //popup doesn't match preset (if any) in encoderVideoOptions
+          //so see if we have it
+          NSUInteger offset = [options rangeOfString:@"-Z\""].location;
+          if (offset == NSNotFound) {
+              [self.presetPopup selectItemAtIndex:0];
+          } else {
+              options = [options substringFromIndex:offset+3];
+              offset = [options rangeOfString:@"\""].location; //ending quote
+              if (offset != NSNotFound) {
+                  options = [options substringToIndex:offset];
+              }
+              [self.presetPopup selectItemWithTitle:options];
+          }
+      }
+      if (!self.presetPopup.selectedItem) [self.presetPopup selectItemAtIndex:0];
     } else {
         self.presetPopup.hidden = YES;
         CGFloat popupRight = popupFrame.origin.x + popupFrame.size.width;
@@ -354,7 +367,7 @@
 	MTFormatPopUpButton *thisButton = (MTFormatPopUpButton *)sender;
 	self.currentFormat = [[thisButton selectedItem] representedObject];
 	[self updateForFormatChange];
-	
+  self.fixCLIPresented = NO;
 }
 
 
@@ -413,8 +426,17 @@
     }
 
     [[NSUserDefaults standardUserDefaults] setObject:tmpFormatNames forKey:kMTHiddenFormats];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
 	[self updateForFormatChange];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFormatListUpdated object:nil];
+}
+
+-(BOOL)allowImportExport {
+	return !self.shouldSave.boolValue;
+}
+
+-(void)formatListChange: (NSNotification *) notification {
+	[[NSApp keyWindow] makeFirstResponder:[NSApp keyWindow]]; //save any text edits in process
+	[self refreshFormatList];
 }
 
 -(IBAction)newFormat:(id)sender

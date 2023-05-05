@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="20037" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="20037"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21701"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -105,7 +105,6 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="exportFormats:" target="494" id="901"/>
-                                    <binding destination="494" name="enabled" keyPath="numberOfUserFormats" id="931"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Import Formats..." toolTip="Read custom encoding formats from a file" id="899">
@@ -431,7 +430,7 @@ CA
                                             </button>
                                         </prototypeCellViews>
                                     </tableColumn>
-                                    <tableColumn identifier="name" width="151" minWidth="40" maxWidth="1000" id="909">
+                                    <tableColumn identifier="name" width="126" minWidth="40" maxWidth="1000" id="909">
                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" white="0.33333298560000002" alpha="1" colorSpace="calibratedWhite"/>
@@ -444,11 +443,11 @@ CA
                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         <prototypeCellViews>
                                             <tableCellView id="914">
-                                                <rect key="frame" x="49" y="1" width="155" height="17"/>
+                                                <rect key="frame" x="49" y="1" width="126" height="17"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="915">
-                                                        <rect key="frame" x="0.0" y="0.0" width="96" height="16"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="130" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="916">
                                                             <font key="font" metaFont="system"/>

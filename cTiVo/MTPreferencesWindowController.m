@@ -66,6 +66,10 @@
 	}
 }
 
+-(BOOL) allowImportFormats {
+	return formatEditorController.allowImportExport;
+}
+
 -(IBAction)shouldCloseSheet:(id)sender
 {
 	MTTabViewItem *selectedItem = (MTTabViewItem *)[_myTabView selectedTabViewItem];

@@ -28,6 +28,8 @@
 		1E389BB816C46BA600B80EC9 /* MTAdvPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E389BB716C46BA600B80EC9 /* MTAdvPreferencesViewController.m */; };
 		1E3C43C01D79EA1100367866 /* NSArray+Map.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3C43BF1D79EA1100367866 /* NSArray+Map.m */; };
 		1E3D27E01A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */; };
+		1E3F612A29C358BB005DBE1A /* HandBrakeCLI.sh in Resources */ = {isa = PBXBuildFile; fileRef = 1E3F612929C35722005DBE1A /* HandBrakeCLI.sh */; };
+		1E3F612B29C358C1005DBE1A /* HandBrakeCLI.sh in Resources */ = {isa = PBXBuildFile; fileRef = 1E3F612929C35722005DBE1A /* HandBrakeCLI.sh */; };
 		1E40C478251D4EEA004BCC38 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA516766EFD00CE32DE /* CoreData.framework */; };
 		1E40C48E251D4FE7004BCC38 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2D60BA516766EFD00CE32DE /* CoreData.framework */; };
 		1E40C48F251D4FF1004BCC38 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E40C479251D4EF8004BCC38 /* libsqlite3.tbd */; };
@@ -914,6 +916,7 @@
 		1E3C43BF1D79EA1100367866 /* NSArray+Map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Map.m"; sourceTree = "<group>"; };
 		1E3D27DE1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNotificationCenter+Threads.h"; sourceTree = "<group>"; };
 		1E3D27DF1A4DCB53006B9CC4 /* NSNotificationCenter+Threads.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNotificationCenter+Threads.m"; sourceTree = "<group>"; };
+		1E3F612929C35722005DBE1A /* HandBrakeCLI.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = HandBrakeCLI.sh; sourceTree = "<group>"; };
 		1E40C479251D4EF8004BCC38 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		1E45C8F116E11E59005C5334 /* MTIsStringEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTIsStringEmpty.h; sourceTree = "<group>"; };
 		1E45C8F216E11E59005C5334 /* MTIsStringEmpty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTIsStringEmpty.m; sourceTree = "<group>"; };
@@ -1619,6 +1622,7 @@
 				1E2724EE16C9A8B500A21940 /* elgatoScript.pl */,
 				1EA7EE90210BE5DB00B9C1CD /* DownloadDone.scpt */,
 				94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */,
+				1E3F612929C35722005DBE1A /* HandBrakeCLI.sh */,
 				1E6ECF4916CF646300863EB0 /* pytivo_txt.xslt */,
 			);
 			path = cTiVoScripts;
@@ -2178,6 +2182,7 @@
 				1E5051C72255720A00D5981B /* Images.xcassets in Resources */,
 				1E50511B22556CC300D5981B /* tivo-libre.jar in Resources */,
 				1E50511C22556CC300D5981B /* ffmpeg_edl_ac3.sh in Resources */,
+				1E3F612B29C358C1005DBE1A /* HandBrakeCLI.sh in Resources */,
 				1E50511D22556CC300D5981B /* InfoPlist.strings in Resources */,
 				1E50511E22556CC300D5981B /* suggestion-recording@2x.png in Resources */,
 				1E50511F22556CC300D5981B /* skipModeSlash@2x.png in Resources */,
@@ -2254,6 +2259,7 @@
 			files = (
 				1EB49BA01C50A4B100887240 /* tivo-libre.jar in Resources */,
 				94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */,
+				1E3F612A29C358BB005DBE1A /* HandBrakeCLI.sh in Resources */,
 				D2D60BAC16766EFD00CE32DE /* InfoPlist.strings in Resources */,
 				1E964CA41882768A00C19046 /* suggestion-recording@2x.png in Resources */,
 				1E20061D205441D7003FA2D9 /* skipModeSlash@2x.png in Resources */,

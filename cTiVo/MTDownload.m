@@ -341,9 +341,9 @@ __DDLOGHERE__
                 self.speed = newSpeed; //exponential decay on older average
             }
             [self progressUpdated];
-            self.startTimeForPerformance = [NSDate date];
-            self.startProgressForPerformance = self.processProgress;
-        }
+		}
+		self.startTimeForPerformance = [NSDate date];
+		self.startProgressForPerformance = self.processProgress;
     }
 }
 
@@ -644,7 +644,15 @@ __DDLOGHERE__
 	NSString *trialLockFilePath = [NSString stringWithFormat:@"%@/%@.lck" ,tmpDir,baseName];
 	self.tivoFilePath = [NSString stringWithFormat:@"%@/buffer%@.tivo",tmpDir,baseName];
 //	self.mpgFilePath = [NSString stringWithFormat:@"%@/buffer%@.mpg",tmpDir,baseName];
-    BOOL tivoFileExists = NO; // [self isCompleteCTiVoFile:self.tivoFilePath forFileType:@"TiVo"];  Note: if tivFileExists, then stomps on file w/ current basename!
+    BOOL tivoFileExists = NO; // [self isCompleteCTiVoFile:self.tivoFilePath forFileType:@"TiVo"];
+	//Notes for downloadingShowFromTiVoFile in future:
+	//currently if enabled, it stomps on file w/ current basename, so two shows can't be downloaded at once.
+	//we create new basename for each download, so it will never see older one
+	//need to set downloaded filename (bufferFile) w/o options and Formats and incrementing.
+	//BUT if actually downloading twice, then we do need to increment.
+	//to really use it, we need to look ahead in queue to see if we will want it, hence keep it versus delete now
+	//Can't use if memory buffering (hence .bin filename)
+	
     
     self.downloadingShowFromTiVoFile = NO;
 

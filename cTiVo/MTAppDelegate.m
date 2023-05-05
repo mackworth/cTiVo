@@ -70,7 +70,6 @@ void signalHandler(int signal)
 
 @property (nonatomic, strong) MTPreferencesWindowController *preferencesController;
 @property (nonatomic, strong) MTMainWindowController  *mainWindowController;
-@property (weak, nonatomic, readonly) NSNumber *numberOfUserFormats;
 @property (nonatomic, strong) MTTiVoManager *tiVoGlobalManager;
 #define pseudoEventTime 45
 #define pseudoCheckTime 71
@@ -1168,12 +1167,6 @@ NSObject * assertionID = nil;
 
 #pragma mark - Export Formats Methods
 
--(NSNumber *)numberOfUserFormats
-//used for menu binding
-{
-	return [NSNumber numberWithInteger:_tiVoGlobalManager.userFormats.count];
-}
-
 -(IBAction)exportFormats:(id)sender
 {
 	NSSavePanel *mySavePanel = [[NSSavePanel alloc] init];
@@ -1384,8 +1377,15 @@ NSObject * assertionID = nil;
 -(BOOL)validateMenuItem:(NSMenuItem *)menuItem {
 	if (menuItem.action == @selector(showRemoteControlWindow:)) {
 		return [NSApp keyWindow ] != _remoteControlWindowController.window;
-	} else 	if (menuItem.action == @selector(showMainWindow:)) {
+	} else if (menuItem.action == @selector(showMainWindow:)) {
 		return [NSApp keyWindow ] != _mainWindowController.window;
+	} else if (menuItem.action == @selector(importFormats:)) { 
+		return [NSApp keyWindow ] != _preferencesController.window ||
+				_preferencesController.allowImportFormats;
+	} else if (menuItem.action == @selector(exportFormats:)) { 
+		return _tiVoGlobalManager.userFormats.count > 0 &&
+				([NSApp keyWindow ] != _preferencesController.window ||
+				 _preferencesController.allowImportFormats) ;
 	} else {
 		return YES;
 	}

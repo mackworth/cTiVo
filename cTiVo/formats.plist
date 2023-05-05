@@ -1592,17 +1592,17 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>captionOptions</key>
 			<string></string>
 			<key>comSkip</key>
-			<false/>
+			<true/>
 			<key>comSkipOptions</key>
 			<string></string>
 			<key>edlFlag</key>
-			<string></string>
+			<string>-edl</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
+			<string>HandBrakeCLI.sh</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Super HQ 1080p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1630,17 +1630,17 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>captionOptions</key>
 			<string></string>
 			<key>comSkip</key>
-			<false/>
+			<true/>
 			<key>comSkipOptions</key>
 			<string></string>
 			<key>edlFlag</key>
-			<string></string>
+			<string>-edl</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
+			<string>HandBrakeCLI.sh</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Android 720p30&quot;</string>
 			<key>filenameExtension</key>
@@ -1668,17 +1668,17 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>captionOptions</key>
 			<string></string>
 			<key>comSkip</key>
-			<false/>
+			<true/>
 			<key>comSkipOptions</key>
 			<string></string>
 			<key>edlFlag</key>
-			<string></string>
+			<string>-edl</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
+			<string>HandBrakeCLI.sh</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Apple 1080p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1706,17 +1706,17 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>captionOptions</key>
 			<string></string>
 			<key>comSkip</key>
-			<false/>
+			<true/>
 			<key>comSkipOptions</key>
 			<string></string>
 			<key>edlFlag</key>
-			<string></string>
+			<string>-edl</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
+			<string>HandBrakeCLI.sh</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Apple 720p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1744,17 +1744,17 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>captionOptions</key>
 			<string></string>
 			<key>comSkip</key>
-			<false/>
+			<true/>
 			<key>comSkipOptions</key>
 			<string></string>
 			<key>edlFlag</key>
-			<string></string>
+			<string>-edl</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
+			<string>HandBrakeCLI.sh</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Apple 540p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1782,17 +1782,17 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>captionOptions</key>
 			<string></string>
 			<key>comSkip</key>
-			<false/>
+			<true/>
 			<key>comSkipOptions</key>
 			<string></string>
 			<key>edlFlag</key>
-			<string></string>
+			<string>-edl</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
+			<string>HandBrakeCLI.sh</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Email 25 MB 10 Minutes 288p30&quot;</string>
 			<key>filenameExtension</key>
@@ -1820,17 +1820,17 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>captionOptions</key>
 			<string></string>
 			<key>comSkip</key>
-			<false/>
+			<true/>
 			<key>comSkipOptions</key>
 			<string></string>
 			<key>edlFlag</key>
-			<string></string>
+			<string>-edl</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
+			<string>HandBrakeCLI.sh</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Roku 1080p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1858,17 +1858,17 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>captionOptions</key>
 			<string></string>
 			<key>comSkip</key>
-			<false/>
+			<true/>
 			<key>comSkipOptions</key>
 			<string></string>
 			<key>edlFlag</key>
-			<string></string>
+			<string>-edl</string>
 			<key>encoderAudioOptions</key>
 			<string></string>
 			<key>encoderOtherOptions</key>
 			<string></string>
 			<key>encoderUsed</key>
-			<string>HandBrakeCLI</string>
+			<string>HandBrakeCLI.sh</string>
 			<key>encoderVideoOptions</key>
 			<string>-Z&quot;Xbox 1080p30 Surround&quot;</string>
 			<key>filenameExtension</key>
@@ -1887,6 +1887,82 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<true/>
 			<key>name</key>
 			<string>HB Xbox</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<true/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string>-noAC3</string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandBrakeCLI.sh</string>
+			<key>encoderVideoOptions</key>
+			<string>-e vt_h264</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>H.264 video, AAC stereo audio, in an MP4 container. Hardware assisted, very fast, very small, but lower quality. Compatible with Apple iPhone 7 and later; Apple TV 2nd Generation and later.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<true/>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB HW Fast, Small</string>
+			<key>outputFileFlag</key>
+			<string>-o</string>
+			<key>regExProgress</key>
+			<string> ([\d\.]*?) \%</string>
+		</dict>
+		<dict>
+			<key>captionOptions</key>
+			<string></string>
+			<key>comSkip</key>
+			<true/>
+			<key>comSkipOptions</key>
+			<string></string>
+			<key>edlFlag</key>
+			<string>-edl</string>
+			<key>encoderAudioOptions</key>
+			<string></string>
+			<key>encoderOtherOptions</key>
+			<string></string>
+			<key>encoderUsed</key>
+			<string>HandBrakeCLI.sh</string>
+			<key>encoderVideoOptions</key>
+			<string>-e vt_h265_10bit</string>
+			<key>filenameExtension</key>
+			<string>.mp4</string>
+			<key>formatDescription</key>
+			<string>Hardware assisted, high quality. H.265 10-Bit video, AAC stereo audio, and Dolby Digital (AC-3) surround audio, in an MP4 container. Compatible with iOS 11 Apple iPhone 7 and later; iPad (6th gen) iPad Pro; Apple TV HD and later.</string>
+			<key>iTunes</key>
+			<true/>
+			<key>inputFileFlag</key>
+			<string>-i</string>
+			<key>isFactoryFormat</key>
+			<true/>
+			<key>isHidden</key>
+			<false/>
+			<key>mustDownloadFirst</key>
+			<true/>
+			<key>name</key>
+			<string>HB HW Default</string>
 			<key>outputFileFlag</key>
 			<string>-o</string>
 			<key>regExProgress</key>
