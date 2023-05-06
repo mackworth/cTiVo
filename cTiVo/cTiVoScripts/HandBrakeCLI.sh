@@ -116,10 +116,7 @@ launch_and_monitor_encoder() {
   echo "$last_percent" | awk '{printf(" %.2f %%\n",$1)}'
 #handbrakeCLI puts out % complete, not time complete (duration) as ffmpeg does
   while kill -0 $pid &> /dev/null; do
-    last_line=$(tail -c 1000 "$logfile"  | egrep -o '[0-9\.]+ %' |  tail -n1) 
-    progPerc=$(echo "$lastline" | cut -d" " -f1)
-    if [[ "$last_line" == *"Searching for start"* ]]; then
-
+    progPerc=$(tail -c 1000 "$logfile"  | egrep -o '[0-9\.]+ %' | cut -d" " -f1 | tail -n1)
     if [ -n "$progPerc" ]; then
       # echo "$min_percent $max_percent $progPerc $duration "
       percent=$(echo "$min_percent $max_percent $progPerc $duration " | awk '
