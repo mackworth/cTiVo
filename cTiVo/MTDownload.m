@@ -1918,7 +1918,7 @@ __DDLOGHERE__
 
 	if (!self.downloadingShowFromTiVoFile && !self.downloadingShowFromMPGFile) {
         DDLogReport(@"Starting URL %@ for show %@ in %0.1lf seconds", downloadURL,self, downloadDelay);
-		[tiVoManager preventSleep];
+		[tiVoManager checkSleep:nil];
 		[self.activeURLConnection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		[self.activeURLConnection performSelector:@selector(start) withObject:nil afterDelay:downloadDelay];
 	}
