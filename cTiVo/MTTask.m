@@ -460,11 +460,15 @@ __DDLOGHERE__
         if ([fm fileExistsAtPath:_task.currentDirectoryPath]) {
             errorString = [NSString stringWithFormat: @"current folder %@ exists", _task.currentDirectoryPath];
         } else {
-            DDLogReport(@"Error on launch: No current directory %@", _task.currentDirectoryPath);
+            errorString = [NSString stringWithFormat:@"Error on launch: No current directory %@; creating", _task.currentDirectoryPath];
+            DDLogReport(@"%@",errorString);
             NSError * error = nil;
-           [fm createDirectoryAtPath:_task.currentDirectoryPath withIntermediateDirectories:YES  attributes: nil error: &error];
-            errorString = error.localizedDescription;
-        }
+            [fm createDirectoryAtPath:_task.currentDirectoryPath withIntermediateDirectories:YES  attributes: nil error: &error];
+            if (error) {
+				errorString = [NSString stringWithFormat:@"Can't create launch directory %@: %@",_task.currentDirectoryPath, error.localizedDescription];
+				DDLogReport(@"%@",errorString);
+			} 
+		}
 		__weak __typeof__(self) weakSelf = self;
 		_task.terminationHandler = ^(NSTask * _Nonnull task) {
 			__typeof__(self) strongSelf = weakSelf; if (!strongSelf) return;

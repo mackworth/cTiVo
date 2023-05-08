@@ -531,7 +531,8 @@ __DDLOGHERE__
 - (id)pasteboardPropertyListForType:(NSString *)type {
 	//	NSLog(@"QQQ:pboard Type: %@",type);
 	if ([type compare:kMTDownloadPasteBoardType] ==NSOrderedSame) {
-		return  [NSKeyedArchiver archivedDataWithRootObject:self];
+		NSError * error;
+		return  [NSKeyedArchiver archivedDataWithRootObject:self requiringSecureCoding:true error:&error];
 	} else if ([type isEqualToString:(NSString *)kUTTypeFileURL] && self.encodeFilePath) {
 		NSURL *URL = [NSURL fileURLWithPath:self.encodeFilePath isDirectory:NO];
 		id temp =  [URL pasteboardPropertyListForType:(id)kUTTypeFileURL];

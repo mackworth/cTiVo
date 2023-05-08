@@ -13,7 +13,7 @@
 #import "DragDropImageView.h"
 #import "MTRPCData.h"
 
-@interface MTTiVoShow : NSObject <NSPasteboardWriting, NSPasteboardReading, NSSecureCoding> {
+@interface MTTiVoShow : NSObject <NSPasteboardWriting, NSPasteboardReading, NSSecureCoding,DragDropImageViewDelegate> {
  }
 
 #pragma mark - Which TiVo did we come from

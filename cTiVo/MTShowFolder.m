@@ -82,7 +82,8 @@
 	
 - (id)pasteboardPropertyListForType:(NSPasteboardType)type {
 	if ([type isEqualToString:kMTTiVoShowArrayPasteBoardType]) {
-		return  [NSKeyedArchiver archivedDataWithRootObject:self];
+		NSError * error;
+		return  [NSKeyedArchiver archivedDataWithRootObject:self requiringSecureCoding:true error:&error];
 	} else if ( [type isEqualToString:(NSString *)kUTTypeFileURL]) {
 		for (MTTiVoShow * show in self.folder) {
 			NSArray * files = [show copiesOnDisk];

@@ -48,7 +48,10 @@
 	IBOutlet MTDownloadTableView *__weak downloadQueueTable;
 	IBOutlet MTProgramTableView  *__weak tiVoShowTable;
 	IBOutlet MTSubscriptionTableView  *__weak subscriptionTable;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 	IBOutlet NSDrawer *showDetailDrawer;
+#pragma clang diagnostic pop
 }
 
 @property (nonatomic, weak) MTDownloadTableView *downloadQueueTable;

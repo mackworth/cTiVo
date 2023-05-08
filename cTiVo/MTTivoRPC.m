@@ -123,6 +123,8 @@ NSTimeInterval delay1, delay2, delay3,delay4 = 1.0;
         //make sure we create a unique keychain name:
 		NSString *temporaryDirectory = NSTemporaryDirectory();
         NSString *keychainPath = [[temporaryDirectory stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]] stringByAppendingPathExtension:@"keychain"];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
         OSStatus status = SecKeychainCreate(keychainPath.UTF8String,
                                             (UInt32)(keychainPassword.length),
@@ -136,7 +138,7 @@ NSTimeInterval delay1, delay2, delay3,delay4 = 1.0;
 			NSDictionary * optionsDictionary = @{(id)kSecImportExportPassphrase: tivoPassword,
 												 (id)kSecImportExportKeychain:   (__bridge id)keychain};
 			CFArrayRef p12Items = NULL;
-			OSStatus result = SecPKCS12Import((__bridge CFDataRef)p12Data, (__bridge CFDictionaryRef)optionsDictionary, &p12Items);
+			OSStatus result = SecPKCS12Import((__bridge CFDataRef)p12Data, (__bridge CFDictionaryRef)optionsDictionary, &p12Items);  //deprecated
 			if (result != noErr) {
                 if (overrodeCert) {
                     DDLogReport(@"Password of %@ not working with TiVo certificate at %@: %d", tivoPassword, overrideURL.path, result);
@@ -146,7 +148,7 @@ NSTimeInterval delay1, delay2, delay3,delay4 = 1.0;
 			} else {
 				CFDictionaryRef identityDict = CFArrayGetValueAtIndex(p12Items, 0);
 				if (identityDict) {
-					SecIdentityRef identityApp =(SecIdentityRef)CFDictionaryGetValue(identityDict,kSecImportItemIdentity);
+					SecIdentityRef identityApp =(SecIdentityRef)CFDictionaryGetValue(identityDict,kSecImportItemIdentity);  //deprecated
 
 					// the certificates array, containing the identity then the root certificate
 					NSMutableArray * chain =  CFDictionaryGetValue(identityDict, @"chain");
@@ -167,10 +169,11 @@ NSTimeInterval delay1, delay2, delay3,delay4 = 1.0;
     UInt32 mask = (kSecUnlockStateStatus | kSecReadPermStatus);
     if (!((keyStatus & mask) == mask)) {
 		DDLogMajor(@"Unlocking RPC keychain again");
-        SecKeychainUnlock(keychain, (UInt32)keychainPassword.length, keychainPassword.UTF8String, TRUE);
+        SecKeychainUnlock(keychain, (UInt32)keychainPassword.length, keychainPassword.UTF8String, TRUE);  //deprecated
     }
     return _myCerts;
 }
+#pragma clang diagnostic pop
 
 NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfer NSString *)SecCopyErrorMessageString(status, NULL); }
 
@@ -240,7 +243,18 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
     _tiVoSerialNumber = TSN;
     if (!self.showMap.count) {
         NSData * archiveMap = [[NSUserDefaults standardUserDefaults] objectForKey:self.defaultsKey];
-        self.showMap = [NSKeyedUnarchiver unarchiveObjectWithData: archiveMap] ?: [NSMutableDictionary dictionary];
+		NSError * error;
+		NSKeyedUnarchiver* unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:archiveMap error:nil];
+		unarchiver.requiresSecureCoding = NO;
+
+		self.showMap = [unarchiver decodeTopLevelObjectForKey:NSKeyedArchiveRootObjectKey error:&error];
+		if (error || !self.showMap) {
+			if (error) {
+				DDLogReport(@"Can't read showMap from userDefaults: %@", error.localizedDescription);
+				[[NSUserDefaults standardUserDefaults] setObject:nil forKey:self.defaultsKey ];
+			}
+			self.showMap = [NSMutableDictionary dictionary];
+		}
     }
 }
 
@@ -253,8 +267,13 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 }
 
 -(void) saveDefaults {
-   NSData * archive = [NSKeyedArchiver archivedDataWithRootObject:self.showMap];
-   [[NSUserDefaults standardUserDefaults] setObject:archive forKey:self.defaultsKey ];
+	NSError * error;
+	NSData * archive = [NSKeyedArchiver archivedDataWithRootObject:self.showMap requiringSecureCoding:true error:&error];
+    if (error) {
+		DDLogReport(@"Can't write showMap to userDefaults: %@", error.localizedDescription);
+		archive = nil;
+	}
+	[[NSUserDefaults standardUserDefaults] setObject:archive forKey:self.defaultsKey ];
 }
 
 -(NSDictionary <NSString *, NSString *> *) seriesImages {
@@ -1952,7 +1971,10 @@ static NSArray * imageResponseTemplate = nil;
 -(void) appWillTerminate: (id) notification {
     [self sharedShutdown];
     if (keychain != NULL) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         SecKeychainDelete(keychain);
+#pragma clang diagnostic pop
         keychain = NULL;
     }
 }

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -2024,7 +2024,7 @@
 			attributes = {
 				CLASSPREFIX = MT;
 				LastSwiftUpdateCheck = 1340;
-				LastUpgradeCheck = 1420;
+				LastUpgradeCheck = 1430;
 				ORGANIZATIONNAME = cTiVo;
 				TargetAttributes = {
 					AABD59E92895FECC0040A017 = {
@@ -2347,6 +2347,7 @@
 		};
 		1E3557132519BDB3004AF628 /* Initialize Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -2524,10 +2525,13 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
+			inputFileListPaths = (
+			);
 			inputPaths = (
 			);
 			name = "Record Bundle Number as GIT commit count";
 			outputPaths = (
+				"\"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

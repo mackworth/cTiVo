@@ -212,7 +212,8 @@ __DDLOGHERE__
 - (id)pasteboardPropertyListForType:(NSString *)type {
 //	NSLog(@"QQQ:pboard Type: %@",type);
 	if ([type isEqualToString:kMTTivoShowPasteBoardType]) {
-		return  [NSKeyedArchiver archivedDataWithRootObject:self];
+		NSError * error;
+		return  [NSKeyedArchiver archivedDataWithRootObject:self requiringSecureCoding:true error:&error];
     } else if ( [type isEqualToString:(NSString *)kUTTypeFileURL]) {
         NSArray * files = [self copiesOnDisk];
         if (files.count > 0) {
