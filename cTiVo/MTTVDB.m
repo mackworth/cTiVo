@@ -312,7 +312,13 @@ static BOOL inProgress = NO;
                 if (!jsonError && [jsonData isKindOfClass:[NSDictionary class]]) {
                     if (!jsonData[@"error"]) {
                         DDLogVerbose(@"TVDB Episode JSON: %@", jsonData);
-                        nextPage = jsonData[@"links"][@"next"];
+                        NSDictionary * links = jsonData[@"links"];
+                        if ([links isKindOfClass: NSDictionary.class]) {
+                            nextPage = links[@"next"];
+                        } else {
+                            DDLogReport(@"TVDB Episode JSON type Error (links should be Dictionary): %@ for %@ (%@)", jsonData, episodeName, response.URL);
+                            nextPage = @(-1);
+                        }
                         NSArray * episodeList = jsonData[@"data"];
                         if ([episodeList isKindOfClass:[NSArray class]]) {
                             for (NSDictionary * episodeDict in episodeList) {
@@ -348,7 +354,7 @@ static BOOL inProgress = NO;
                                 }
                             }
                         } else {
-                            DDLogReport(@"TVDB Episode JSON type Error (should be Array): %@ for %@", episodeList, seriesID);
+                            DDLogReport(@"TVDB Episode JSON type Error (should be Array): %@ for %@ (%@) ", episodeList, episodeName, response.URL);
                         }
                     } else {
                         DDLogDetail(@"TVDB error for %@: %@", seriesID, jsonData[@"error"]);
