@@ -22,26 +22,26 @@
 			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.5.3/cTiVo.app.zip" sparkle:version="1147" sparkle:shortVersionString="3.5.3" length="133964652" type="application/octet-stream" sparkle:dsaSignature="MCwCFCPJgfn9ZWIcFR3eZ3VO+EnhGfDAAhQX/7GQppYuacr2zHP1nSARhl68NQ=="/>
         </item>
         <item>
-            <title>Version 3.4.5; New TiVo certificate; Final release for 10.11</title>
+            <title>Version 3.4.6; New TiVo certificate; Final release for 10.11</title>
             <description><![CDATA[
-				<h2 id="Release-3.4.5">Release 3.4.5 (Newest TiVo certificate)</h2>
+				<h2 id="Release-3.4.6">Release 3.4.6 (Maintenance release)</h2>
 				<ul>
 				<li>New TiVo certificate through 2024 (old one expired December 2022)</li>
 				<li>Big Sur compatibility</li>
-				<li>Upgraded Handbrake CLI</li>
 				<li>Migration to Firebase</li>
 				<li>Note: incompatible with macOS 10.9 or 10.10</li>
 				</ul>
 				<h3 id="Fixes:">Fixes:</h3>
 				<ul>
+				<li>Fix for TVDB crash</li>
 				<li>Improved reliability for finding TiVos on Catalina.</li>
 				<li>Misc minor fixes.</li>
 				</ul>
             ]]>
             </description>
-            <pubDate>Tue., December 13, 2022 12:00:00 -0800</pubDate>
+            <pubDate>Thu., May 18, 2023 12:00:00 -0800</pubDate>
             <sparkle:minimumSystemVersion>10.11.0</sparkle:minimumSystemVersion>
-			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.4.5/cTiVo.app.zip" sparkle:version="1126" sparkle:shortVersionString="3.4.5" length="73373336" type="application/octet-stream" sparkle:dsaSignature="MC0CFHVZWr6DK5ov3L0Nt/mLhStOub1KAhUA3iGOdGOotFWvJEciaw1FVOEbZ8g="/>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/v3.4.6/cTiVo.app.zip" sparkle:version="1134" sparkle:shortVersionString="3.4.6" length="73381307" type="application/octet-stream" sparkle:dsaSignature="MC0CFDOwRhIEzXvgHtwXsZQXShATVmw8AhUA2ELhszU4jM0m2y/NafAbq2K2PsQ="/>
         </item>
         <item>
             <title>Version 3.4.4; Final for macOS 10.10</title>
