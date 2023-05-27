@@ -1912,7 +1912,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>formatDescription</key>
-			<string>H.264 video, AAC stereo audio, in an MP4 container. Hardware assisted, very fast, very small, but lower quality. Compatible with Apple iPhone 7 and later; Apple TV 2nd Generation and later.</string>
+			<string>H.264 video, AAC stereo audio, in an MP4 container. Hardware assisted, very small, but lower quality. Compatible with Apple iPhone 7 and later; Apple TV 2nd Generation and later.</string>
 			<key>iTunes</key>
 			<true/>
 			<key>inputFileFlag</key>
@@ -1924,7 +1924,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>mustDownloadFirst</key>
 			<true/>
 			<key>name</key>
-			<string>HB HW Fast, Small</string>
+			<string>HB HW Small</string>
 			<key>outputFileFlag</key>
 			<string>-o</string>
 			<key>regExProgress</key>

@@ -248,41 +248,43 @@ if [[ ! -n "$video_stream" ]]; then
 fi
 if [[ -n "$audio_stream" ]] ; then
   checkAC3=$(echo "$audio_line" | cut -d, -f2- | grep ac3)
-  if [[ ! -z "$checkAC3" ]]; then
+  if [[ -n "$checkAC3" ]]; then
     # we have an AC3
-    if [[ ! -z "$stereo" ]]; then
-      # Stereo requested
-      if [[ ! -z "$ac3" ]]; then
-          audio_opts="-E ca_aac,copy"
-      else
-        #stereo, but no AC3
-        audio_opts="-E ca_aac"
+    check51=$(echo "$checkAC3" | grep '5\.1')
+    if [[ -n "$check51" ]]; then
+      #AC3; 5.1
+      if [[ -n "$ac3" ]]; then
+        if [[ -n "$stereo" ]]; then
+          # Both requested
+            audio_opts="-E ca_aac,copy"
+        else
+          #AC3 but no stereo
+        audio_opts="-E copy"
+        fi
+      elif [[ -n "$stereo" ]]; then
+          audio_opts="-E ca_aac"
+      else 
+        #no audio requested?
+        audio_opts="-E none"
       fi
-    elif [[ ! -z "$ac3" ]]; then
-        #AC3, but no stereo
+    elif [[ -n "$ac3" ]]; then
+      # AC3, but not 5.1; AC3 requested
       audio_opts="-E copy"
+    elif [[ -n "$stereo" ]]; then
+      audio_opts="-E ca_aac"
     else
-      # no audio requested
+      #AC3,not 5.1, but no audio requested?
       audio_opts="-E none"
     fi
-  elif [[ ! -z "$stereo" ]] ; then
-    #no AC3, and want stereo
-    if [[ ! -z "$ac3" ]]; then
-      #also wants ac3, so generate
-      audio_opts="-E copy,ac3"
-    else
-      #but no AC3
-      audio_opts="-E copy"
-    fi
-  elif [[ ! -z "$ac3" ]]; then
-    #no AC3, want AC3
-    audio_opts="-E ac3"
-  else
-    #no audio requested
+  elif [[ -n "$stereo" ]] || [[ -n "$ac3" ]]; then
+    # Not AC3, but want audio
+    audio_opts="-E copy"
+  else 
+    #no audio requested?
     audio_opts="-E none"
   fi
 fi
-echo "Audio: ${audio_opts[@]}"
+echo "Audio: ${audio_opts[@]}" >&2
 
 # attempt to munge users's encoder args with our auto-generated -map and audio encoder opts.
 encode_opts=("${encoder_opts_pre_input[@]}"  ${audio_opts[@]} -i "$input" "${encoder_opts_post_input[@]}")
