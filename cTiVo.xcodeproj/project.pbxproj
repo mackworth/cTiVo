@@ -331,6 +331,7 @@
 		1E964CA41882768A00C19046 /* suggestion-recording@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964C9B1882768A00C19046 /* suggestion-recording@2x.png */; };
 		1E964CA7188313ED00C19046 /* checkImage2.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964CA5188313ED00C19046 /* checkImage2.png */; };
 		1E964CA8188313ED00C19046 /* checkImage2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E964CA6188313ED00C19046 /* checkImage2@2x.png */; };
+		1E9742D92A661DD200C5076E /* MTCenterButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9742D82A661DD200C5076E /* MTCenterButtonCell.m */; };
 		1E9A10EF1757200000863C44 /* cTiVo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E9A10EE1757200000863C44 /* cTiVo.png */; };
 		1E9EA3FD1F1AD91C00F0A2C9 /* MTProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */; };
 		1EB2D98E2110DC7B00E50C9B /* MTGCDTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB2D98D2110DC7B00E50C9B /* MTGCDTimer.m */; };
@@ -515,6 +516,27 @@
 			proxyType = 2;
 			remoteGlobalIDString = 148D0F9E8C7373FEAF40D800FC5F1BAA;
 			remoteInfo = FirebaseCoreInternal;
+		};
+		1E9742D12A661D8F00C5076E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = AEF1DC80F0EB62580B81D18786BAF924;
+			remoteInfo = FirebaseCoreExtension;
+		};
+		1E9742D32A661D8F00C5076E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 83F5CCB22EE126A829F2A8820798DC8D;
+			remoteInfo = FirebaseSessions;
+		};
+		1E9742D52A661D8F00C5076E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 379E5319BC6B4AE5613DFF7EEEAA6905;
+			remoteInfo = PromisesSwift;
 		};
 		1EF4A2C227497ECB00781BDD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1022,6 +1044,8 @@
 		1E964C9B1882768A00C19046 /* suggestion-recording@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "suggestion-recording@2x.png"; sourceTree = "<group>"; };
 		1E964CA5188313ED00C19046 /* checkImage2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkImage2.png; sourceTree = "<group>"; };
 		1E964CA6188313ED00C19046 /* checkImage2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkImage2@2x.png"; sourceTree = "<group>"; };
+		1E9742D72A661DD200C5076E /* MTCenterButtonCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MTCenterButtonCell.h; sourceTree = "<group>"; };
+		1E9742D82A661DD200C5076E /* MTCenterButtonCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MTCenterButtonCell.m; sourceTree = "<group>"; };
 		1E9A10EE1757200000863C44 /* cTiVo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cTiVo.png; sourceTree = "<group>"; };
 		1E9EA3FB1F1AD91C00F0A2C9 /* MTProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTProgressCell.h; sourceTree = "<group>"; };
 		1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTProgressCell.m; sourceTree = "<group>"; };
@@ -1495,9 +1519,11 @@
 				1ED49974174D898D0022E084 /* MTTiVoPopUpTableCellView.m */,
 				D20BA5511678F7BD007BADB9 /* MTProgressindicator.h */,
 				D20BA5521678F7BD007BADB9 /* MTProgressindicator.m */,
-				1E9EA3FB1F1AD91C00F0A2C9 /* MTProgressCell.h */,
 				1E09DD402099449D0010CAB4 /* MTTextFieldNoInteraction.h */,
 				1E09DD412099449D0010CAB4 /* MTTextFieldNoInteraction.m */,
+				1E9EA3FB1F1AD91C00F0A2C9 /* MTProgressCell.h */,
+				1E9742D72A661DD200C5076E /* MTCenterButtonCell.h */,
+				1E9742D82A661DD200C5076E /* MTCenterButtonCell.m */,
 				1E9EA3FC1F1AD91C00F0A2C9 /* MTProgressCell.m */,
 			);
 			name = "Custom NSViews";
@@ -1580,9 +1606,11 @@
 			children = (
 				AA41389928A5C126002C9813 /* CocoaLumberjack */,
 				1EF4A2C327497ECB00781BDD /* FirebaseCore */,
+				1E9742D22A661D8F00C5076E /* FirebaseCoreExtension */,
 				1E2FDD1929A42BBB001A5637 /* FirebaseCoreInternal */,
 				1EF4A2C727497ECB00781BDD /* FirebaseCrashlytics */,
 				1EF4A2C927497ECB00781BDD /* FirebaseInstallations */,
+				1E9742D42A661D8F00C5076E /* FirebaseSessions */,
 				1EF4A2CB27497ECB00781BDD /* GoogleDataTransport */,
 				1EF4A2CD27497ECB00781BDD /* GoogleUtilities */,
 				1EF4A2CF27497ECB00781BDD /* nanopb */,
@@ -1590,6 +1618,7 @@
 				1EF4A2D327497ECB00781BDD /* Pods-cTiVo MAS */,
 				AA4138AC28AAD26E002C9813 /* Pods-cTiVoTests */,
 				1EF4A2D527497ECB00781BDD /* PromisesObjC */,
+				1E9742D62A661D8F00C5076E /* PromisesSwift */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2082,6 +2111,30 @@
 			name = FirebaseCoreInternal;
 			path = FirebaseCoreInternal.framework;
 			remoteRef = 1E2FDD1829A42BBB001A5637 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1E9742D22A661D8F00C5076E /* FirebaseCoreExtension */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = FirebaseCoreExtension;
+			path = FirebaseCoreExtension.framework;
+			remoteRef = 1E9742D12A661D8F00C5076E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1E9742D42A661D8F00C5076E /* FirebaseSessions */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = FirebaseSessions;
+			path = FirebaseSessions.framework;
+			remoteRef = 1E9742D32A661D8F00C5076E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1E9742D62A661D8F00C5076E /* PromisesSwift */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = PromisesSwift;
+			path = Promises.framework;
+			remoteRef = 1E9742D52A661D8F00C5076E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		1EF4A2C327497ECB00781BDD /* FirebaseCore */ = {
@@ -2717,6 +2770,7 @@
 				D2C6BB5A1714681C00289751 /* MTTask.m in Sources */,
 				1E5BEC611F9532320082FA6B /* CrashlyticsLogger.m in Sources */,
 				D2ED1BBB1715C3BF00742F18 /* MTTaskChain.m in Sources */,
+				1E9742D92A661DD200C5076E /* MTCenterButtonCell.m in Sources */,
 				1EB328B1173ED0F0005E8656 /* MTLogFormatter.m in Sources */,
 				1E52C5261F2420A700389E93 /* DragDropImageView.m in Sources */,
 				1E59368C19648CFF0008780B /* MTLog.m in Sources */,
