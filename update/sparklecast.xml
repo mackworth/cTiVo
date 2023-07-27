@@ -3,10 +3,25 @@
     <channel>
         <title>cTiVo Updates</title>
         <link>https://raw.github.com/mackworth/cTiVo/master/update/sparklecast.xml</link>
-        <description>Version 3.5.3; updated Certificate</description>
+        <description>Version 3.6.0; TVDB update; hardware acceleration</description>
         <language>en</language>
         <item>
-            <title>Version 3.5.3; updated certificate</title>
+            <title>Version 3.6.0; TVDB update; hardware acceleration</title>
+            <description><![CDATA[
+				<h2 id="Release-3.6.0">Version 3.6.0; TVDB update; hardware acceleration</h2>
+				<ul>
+				<li>Update to TheTVDB v4 API and rewrite with Swift Async</li>
+				<li>Hardware acceleration for M1 Macs with Handbrake</li>
+				<li>Cutting commercials while using Handbrake</li>
+				</ul>
+            ]]>
+            </description>
+            <pubDate>Thu., Jul 27, 2023 12:00:00 -0800</pubDate>
+            <sparkle:minimumSystemVersion>10.15.0</sparkle:minimumSystemVersion>
+			<enclosure url="https://github.com/mackworth/cTiVo/releases/download/3.6/cTiVo-3.6.0.zip" sparkle:version="1206" sparkle:shortVersionString="3.6" length="137849873" type="application/octet-stream" sparkle:dsaSignature="MCwCFBzlKjeUB5xWt8XOgOdcnHGv2jBSAhRkDksSHCp+7Ss1RGfrBpODn6uVBA=="/>
+        </item>
+        <item>
+            <title>Version 3.5.3; Final for MacOS 10.12-10.14</title>
             <description><![CDATA[
 				<h2 id="Release-3.5.3">Release 3.5.3 (updated certificate)</h2>
 				<ul>
