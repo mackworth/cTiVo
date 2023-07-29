@@ -8,6 +8,9 @@
 
 #import "MTEdl.h"
 #import "MTLog.h"
+#ifndef DEBUG
+@import Firebase;
+#endif
 
 static NSString * kStartTime  = @"imageURL";
 static NSString * kEndTime  = @"endTime";
@@ -233,11 +236,25 @@ __DDLOGHERE__
         DDLogDetail(@"Chapter %d: duration %llu, title: %s",i+1,chapterList[i].duration, chapterList[i].title);
     }
 	if (chapterList && encodedFile) {
-		MP4SetChapters(encodedFile, chapterList, chapterOffset, MP4ChapterTypeQt);
-        free(chapterList);
-		return YES;
+		@try {
+			MP4SetChapters(encodedFile, chapterList, chapterOffset, MP4ChapterTypeQt);
+			return YES;
+		} @catch (...) {
+			DDLogReport(@"Error encoding chapters in show");
+			for (int i = 0; i < chapterOffset ; i++) {
+				DDLogReport(@"Chapter %d: duration %llu, title: %s",i+1,chapterList[i].duration, chapterList[i].title);
+			}
+#ifndef DEBUG
+            NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:2 userInfo:nil];
+			[[FIRCrashlytics crashlytics] recordError:error];
+#endif
+
+			return NO;
+		} @finally {
+			free(chapterList);
+		}
 	} else {
-        free(chapterList);
+        if (chapterList) free(chapterList);
 		return NO;
 	}
     

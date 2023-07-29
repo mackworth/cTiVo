@@ -9,6 +9,9 @@
 #import "MTSrt.h"
 #import "MTEdl.h"
 #import "MTLog.h"
+#ifndef DEBUG
+@import Firebase;
+#endif
 #define MAXLINE 2048
 
 @implementation MTSrt
@@ -320,8 +323,7 @@ uint16_t getFixedVideoWidth(MP4FileHandle fileHandle, MP4TrackId Id)
 
 	
 	double last = 0.0;
-	if (self.count > 0) {
-
+	if (self.count > 0) @try {
 		MP4TrackId textTrack = MP4AddSubtitleTrack(encodedFile,1000,0,0);  //timescale;height;width
 		const char * cLanguage = [language cStringUsingEncoding:NSUTF8StringEncoding];
 		MP4SetTrackLanguage(
@@ -351,11 +353,12 @@ uint16_t getFixedVideoWidth(MP4FileHandle fileHandle, MP4TrackId Id)
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorBlue", textColor[2]);
 		MP4SetTrackIntegerProperty(encodedFile,textTrack, "mdia.minf.stbl.stsd.tx3g.fontColorAlpha", textColor[3]);
 
-        NSSize videoSize = NSMakeSize(0, 0);
+        NSSize videoSize = NSZeroSize;
         if (videoTrack) {
             videoSize.width = getFixedVideoWidth(encodedFile, videoTrack);
             videoSize.height = 0.15* MP4GetTrackVideoHeight(encodedFile, videoTrack);
-        }  else {
+        }
+        if (NSEqualSizes(videoSize, NSZeroSize)) {
             videoSize.width = 640;
             videoSize.height = 0.15* 480;
         }
@@ -391,6 +394,12 @@ uint16_t getFixedVideoWidth(MP4FileHandle fileHandle, MP4TrackId Id)
 			}
 			last = srt.endTime;
 		}
+	} @catch (...) {
+		DDLogReport(@"Error encoding subtitles in show");
+#ifndef DEBUG
+            NSError *error = [[NSError alloc] initWithDomain:@"MTExceptionDomain" code:2 userInfo:nil];
+			[[FIRCrashlytics crashlytics] recordError:error];
+#endif
 	}
 }
 

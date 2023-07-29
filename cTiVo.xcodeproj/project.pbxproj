@@ -282,8 +282,6 @@
 		1E5C6FED2748DF930057541E /* libsnappy.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FEC2748DF8F0057541E /* libsnappy.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5C6FF02748E0330057541E /* libssl.1.0.0.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FEE2748DFD80057541E /* libssl.1.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1E5C6FF12748E0370057541E /* libssl.1.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1E5C6FEF2748DFD80057541E /* libssl.1.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1E61CDB91BB89E6A006D6DBE /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDB81BB89E6A006D6DBE /* libc++.tbd */; };
-		1E61CDBD1BB89E91006D6DBE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E61CDBC1BB89E91006D6DBE /* libz.tbd */; };
 		1E684A7B16E2C50B000F5C6E /* copyright.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7516E2C50B000F5C6E /* copyright.png */; };
 		1E684A7D16E2C50B000F5C6E /* expired-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7716E2C50B000F5C6E /* expired-recording.png */; };
 		1E684A7E16E2C50B000F5C6E /* expires-soon-recording.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E684A7816E2C50B000F5C6E /* expires-soon-recording.png */; };
@@ -1325,9 +1323,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E61CDBD1BB89E91006D6DBE /* libz.tbd in Frameworks */,
 				1E40C478251D4EEA004BCC38 /* CoreData.framework in Frameworks */,
-				1E61CDB91BB89E6A006D6DBE /* libc++.tbd in Frameworks */,
 				1EE1912F2536B35200B4278B /* libmp4v2.a in Frameworks */,
 				D271F3631734BCDA00641435 /* Security.framework in Frameworks */,
 				D2A09C7A16C77E9D00F2B86F /* Quartz.framework in Frameworks */,
@@ -3205,10 +3201,7 @@
 					"$(SRCROOT)/cTiVo",
 				);
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -3261,10 +3254,7 @@
 					"$(SRCROOT)/cTiVo",
 				);
 				INFOPLIST_FILE = "cTiVo/cTiVo-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
