@@ -74,6 +74,7 @@ typedef uint32_t (*encryptFunc_t)( uint32_t, uint32_t, uint8_t*, uint32_t*, uint
 #define MP4_CNTL_TRACK_TYPE     "cntl"  /**< Constant: control track. */
 #define MP4_TEXT_TRACK_TYPE     "text"  /**< Constant: text track. */
 #define MP4_SUBTITLE_TRACK_TYPE "sbtl"  /**< Constant: subtitle track. */
+#define MP4_CC_TRACK_TYPE       "clcp"  /**< Constant: closed captions track. */
 #define MP4_SUBPIC_TRACK_TYPE   "subp"  /**< Constant: subpic track. */
 /*
  * This second set of track types should be created
@@ -128,6 +129,7 @@ typedef uint32_t (*encryptFunc_t)( uint32_t, uint32_t, uint8_t*, uint32_t*, uint
 #define MP4_ULAW_AUDIO_TYPE             0xE4 /* a private definition */
 #define MP4_G723_AUDIO_TYPE             0xE5 /* a private definition */
 #define MP4_PCM16_BIG_ENDIAN_AUDIO_TYPE 0xE6 /* a private definition */
+#define MP4_EAC3_AUDIO_TYPE             0xE7 /* a private definition */
 
 /* MP4 MPEG-4 Audio types from 14496-3 Table 1.5.1 */
 #define MP4_MPEG4_INVALID_AUDIO_TYPE        0

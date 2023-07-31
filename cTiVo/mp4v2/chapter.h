@@ -19,6 +19,7 @@
 typedef struct MP4Chapter_s {
     MP4Duration duration; /**< duration of chapter in milliseconds */
     char title[MP4V2_CHAPTER_TITLE_MAX+1]; /**< title of chapter */
+    uint32_t titleLength;
 } MP4Chapter_t;
 
 /** Known chapter types.

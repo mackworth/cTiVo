@@ -6,24 +6,25 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 // Thanks, MSFT, for making C99 a total PITA.  Declare this not to define any stdint stuff; this is useful
 // if you're going to be using mp4v2 on windows with some other library that defines its own stdint.
-// TODO msft has finally re-included stdint in vs2010, so maybe at some point in the future this won't be needed.
+// The 1600 version check is for Visual Studio 2010 which has stdint once again.
 #ifndef MP4V2_NO_STDINT_DEFS
-    //#if defined( _WIN32 ) && !defined( __MINGW32__ )
-    //    typedef char      int8_t;
-    //    typedef short     int16_t;
-    //    typedef int       int32_t;
-    //    typedef long long int64_t;
+    #if defined( _WIN32 ) && !defined( __MINGW32__ ) && !(defined(_MSC_VER) && _MSC_VER >= 1600)
+        typedef char      int8_t;
+        typedef short     int16_t;
+        typedef int       int32_t;
+        typedef long long int64_t;
 
-    //    typedef unsigned char      uint8_t;
-    //    typedef unsigned short     uint16_t;
-    //    typedef unsigned int       uint32_t;
-    //    typedef unsigned long long uint64_t;
-    //#else
+        typedef unsigned char      uint8_t;
+        typedef unsigned short     uint16_t;
+        typedef unsigned int       uint32_t;
+        typedef unsigned long long uint64_t;
+    #else
         #include <stdint.h>
-    //#endif
+    #endif
 #endif
 
 #if defined( _WIN32 ) || defined( __MINGW32__ )

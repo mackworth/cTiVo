@@ -168,6 +168,18 @@ MP4TrackId MP4AddAC3AudioTrack(
     uint8_t       bit_rate_code );
 
 MP4V2_EXPORT
+MP4TrackId MP4AddEAC3AudioTrack(
+    MP4FileHandle hFile,
+    uint32_t samplingRate,
+    const void *cookie,
+    uint16_t cookieLen);
+
+MP4V2_EXPORT
+MP4TrackId MP4AddALACAudioTrack(
+    MP4FileHandle hFile,
+    uint32_t      samplingRate );
+
+MP4V2_EXPORT
 MP4TrackId MP4AddAmrAudioTrack(
     MP4FileHandle hFile,
     uint32_t      timeScale,
@@ -247,12 +259,42 @@ MP4TrackId MP4AddVideoTrack(
     uint8_t       videoType DEFAULT(MP4_MPEG4_VIDEO_TYPE) );
 
 MP4V2_EXPORT
-MP4TrackId MP4AddTSC2VideoTrack(
+MP4TrackId MP4AddJpegVideoTrack(
     MP4FileHandle hFile,
     uint32_t      timeScale,
     MP4Duration   sampleDuration,
     uint16_t      width,
-    uint16_t      height );
+    uint16_t      height);
+
+MP4V2_EXPORT
+MP4TrackId MP4AddH265VideoTrack(
+    MP4FileHandle hFile,
+    uint32_t      timeScale,
+    MP4Duration   sampleDuration,
+    uint16_t      width,
+    uint16_t      height,
+    const uint8_t *magicCookie,
+    uint32_t magicCookieSize,
+    bool completeness );
+
+MP4V2_EXPORT
+MP4TrackId MP4AddDolbyVisionH265VideoTrack(
+    MP4FileHandle hFile,
+    uint32_t timeScale,
+    MP4Duration sampleDuration,
+    uint16_t width,
+    uint16_t height,
+    const uint8_t *magicCookie,
+    uint32_t magicCookieSize,
+    uint8_t versionMajor,
+    uint8_t versionMinor,
+    uint8_t profile,
+    uint8_t level,
+    bool rpuPresentFlag,
+    bool elPresentFlag,
+    bool blPresentFlag,
+    uint8_t blSignalCompatibilityId,
+    bool complete );
 
 MP4V2_EXPORT
 MP4TrackId MP4AddH264VideoTrack(
@@ -311,6 +353,16 @@ MP4TrackId MP4AddH263VideoTrack(
     uint32_t      avgBitrate,
     uint32_t      maxBitrate );
 
+MP4V2_EXPORT
+MP4TrackId MP4AddAV1VideoTrack(
+    MP4FileHandle hFile,
+    uint32_t      timeScale,
+    MP4Duration   sampleDuration,
+    uint16_t      width,
+    uint16_t      height,
+    const uint8_t *magicCookie,
+    uint32_t magicCookieSize);
+
 /** Add a hint track.
  *
  *  MP4AddHintTrack adds a hint track to the mp4 file. A hint track is used
@@ -351,6 +403,35 @@ MP4TrackId MP4AddSubtitleTrack(
     uint16_t      width,
     uint16_t      height );
 
+/** Add a closed caption track.
+ *
+ *  MP4AddCCTrack adds a closed caption track track to the mp4 file. MP4WriteSample()
+ *  can then be used to add the desired video samples.
+ *
+ *  @param hFile handle of file for operation.
+ *  @param timeScale the timescale in ticks per second of the track.
+ *  @param width specifies the video frame width in pixels.
+ *  @param height specifies the video frame height in pixels.
+ *
+ *  @return On success, the track-id of the new track.
+ *      On error, #MP4_INVALID_TRACK_ID.
+ */
+MP4V2_EXPORT
+MP4TrackId MP4AddCCTrack(
+    MP4FileHandle hFile,
+    uint32_t      timeScale,
+    uint16_t      width,
+    uint16_t      height );
+
+MP4V2_EXPORT
+MP4TrackId MP4AddWebVTTTrack(
+    MP4FileHandle hFile,
+    uint32_t      timeScale,
+    uint16_t      width,
+    uint16_t      height,
+    const void   *cookie,
+    uint16_t      cookieLen);
+
 MP4V2_EXPORT
 MP4TrackId MP4AddSubpicTrack(
     MP4FileHandle hFile,
@@ -366,12 +447,63 @@ MP4TrackId MP4AddPixelAspectRatio(
     uint32_t      vSpacing );
 
 MP4V2_EXPORT
+MP4TrackId MP4AddCleanAperture(
+    MP4FileHandle hFile,
+	MP4TrackId trackId,
+	uint32_t cleanApertureWidthN, uint32_t cleanApertureWidthD,
+	uint32_t cleanApertureHeightN, uint32_t cleanApertureHeightD,
+	uint32_t horizOffN, uint32_t horizOffD,
+	uint32_t vertOffN, uint32_t vertOffD );
+
+MP4V2_EXPORT
 MP4TrackId MP4AddColr(
     MP4FileHandle hFile,
     MP4TrackId    refTrackId,
     uint16_t      primary,
     uint16_t      transfer,
     uint16_t      matrix );
+
+MP4V2_EXPORT
+MP4TrackId MP4SetContentLightMetadata(
+    MP4FileHandle hFile,
+    MP4TrackId refTrackId,
+    uint32_t maxCLL,
+    uint32_t maxFALL);
+
+MP4V2_EXPORT
+MP4TrackId MP4SetMasteringDisplayMetadata(
+    MP4FileHandle hFile, MP4TrackId refTrackId,
+    uint16_t displayPrimariesGX, uint16_t displayPrimariesGY,
+    uint16_t displayPrimariesBX, uint16_t displayPrimariesBY,
+    uint16_t displayPrimariesRX, uint16_t displayPrimariesRY,
+    uint16_t whitePointX, uint16_t whitePointY,
+    uint32_t maxDisplayMasteringLuminance,
+    uint32_t minDisplayMasteringLuminance);
+
+MP4V2_EXPORT
+MP4TrackId MP4SetAmbientViewingEnviroment(
+    MP4FileHandle hFile, MP4TrackId refTrackId,
+    uint32_t ambientIlluminance,
+    uint16_t ambientLightX,
+    uint16_t ambientLightY);
+
+MP4V2_EXPORT
+MP4TrackId MP4SetDolbyVisionMetadata(
+    MP4FileHandle hFile, MP4TrackId refTrackId,
+    uint8_t versionMajor,
+    uint8_t versionMinor,
+    uint8_t profile,
+    uint8_t level,
+    bool rpuPresentFlag,
+    bool elPresentFlag,
+    bool blPresentFlag,
+    uint8_t blSignalCompatibilityId);
+
+MP4V2_EXPORT
+MP4TrackId MP4SetDolbyVisionELConfiguration(
+    MP4FileHandle hFile, MP4TrackId refTrackId,
+    const uint8_t *config,
+    uint32_t configSize);
 
 MP4V2_EXPORT
 MP4TrackId MP4CloneTrack(
@@ -449,6 +581,30 @@ bool MP4SetTrackDurationPerChunk(
  *
  *  @return <b>true</b> on success, <b>false</b> on failure.
  */
+MP4V2_EXPORT
+bool MP4AddTrackReference(
+    MP4FileHandle hFile,
+    const char*   trefName,
+    MP4TrackId    trackId,
+    MP4TrackId    refTrackId );
+
+MP4V2_EXPORT
+bool MP4AddMediaCharacteristicTag(
+    MP4FileHandle hFile,
+    MP4TrackId    trackId,
+    const char*   tag);
+
+MP4V2_EXPORT
+bool MP4RemoveAllMediaCharacteristicTags(
+    MP4FileHandle hFile,
+    MP4TrackId    trackId);
+
+MP4V2_EXPORT
+bool MP4RemoveAllTrackReferences(
+    MP4FileHandle hFile,
+    const char*   trefName,
+    MP4TrackId    trackId );
+
 MP4V2_EXPORT
 bool MP4AddIPodUUID(
     MP4FileHandle hFile,
