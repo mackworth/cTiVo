@@ -50,6 +50,11 @@ EOS
             if actual < desired_macos
                 settings['MACOSX_DEPLOYMENT_TARGET'] = DEPLOYMENT_TARGET_MACOS
             end
+            #patch for Xcode 15 until cocoapods 1.13 released
+						xcconfig_path = config.base_configuration_reference.real_path
+						xcconfig = File.read(xcconfig_path)
+						xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
+						File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
         end
     end
 
