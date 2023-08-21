@@ -2,8 +2,8 @@ PODS:
   - AppCenter/Analytics (5.0.3):
     - AppCenter/Core
   - AppCenter/Core (5.0.3)
-  - CocoaLumberjack/Core (3.8.0)
-  - CocoaLumberjack/Swift (3.8.0):
+  - CocoaLumberjack/Core (3.8.1)
+  - CocoaLumberjack/Swift (3.8.1):
     - CocoaLumberjack/Core
   - Firebase/CoreOnly (10.13.0):
     - FirebaseCore (= 10.13.0)
@@ -83,7 +83,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   AppCenter: a4070ec3d4418b5539067a51f57155012e486ebd
-  CocoaLumberjack: 78abfb691154e2a9df8ded4350d504ee19d90732
+  CocoaLumberjack: 5c7e64cdb877770859bddec4d3d5a0d7c9299df9
   Firebase: 343d7539befb614d22b2eae24759f6307b1175e9
   FirebaseCore: 9948a31ff2c6cf323f9b040068201a95d271b68d
   FirebaseCoreExtension: ce60f9db46d83944cf444664d6d587474128eeca

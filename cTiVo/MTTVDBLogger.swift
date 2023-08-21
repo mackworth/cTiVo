@@ -17,16 +17,16 @@ public class MTTVDBLogger: NSObject {
         get { logLevel }
         @objc(ddSetLogLevel:) set { logLevel = newValue }
     }
-    static func DDLogReport(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
-        DDLogError(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
+    static func DDLogReport(_ msg: @autoclosure () -> DDLogMessageFormat, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+        DDLogError(msg(), level: Self.logLevel, context: 1, file: file, function: function, line: line)
     }
-    static func DDLogMajor(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
-        DDLogWarn(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
+    static func DDLogMajor(_ msg: @autoclosure () -> DDLogMessageFormat, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+        DDLogWarn(msg(), level: Self.logLevel, context: 1, file: file, function: function, line: line)
     }
-    static func DDLogDetail(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
-        DDLogInfo(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
+    static func DDLogDetail(_ msg: @autoclosure () -> DDLogMessageFormat, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+        DDLogInfo(msg(), level: Self.logLevel, context: 1, file: file, function: function, line: line)
     }
-    static func DDLogVerbose(_ msg: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
-        CocoaLumberjack.DDLogDebug(msg, level: Self.logLevel, context: 1, file: file, function: function, line: line)
+    static func DDLogVerbose(_ msg: @autoclosure () -> DDLogMessageFormat, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+        CocoaLumberjack.DDLogDebug(msg(), level: Self.logLevel, context: 1, file: file, function: function, line: line)
     }
 }
