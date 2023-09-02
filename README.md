@@ -1,7 +1,3 @@
----
-Note: A TiVo certificate included in cTiVo expired in early December 2022. To use certain commands (e.g. play on TiVo, get SkipMode etc), you'll need to update to 3.5.3.  (previous MacOS versions may need to use 3.4.4 or 3.4.5).
----
-
 **cTiVo** is a free Mac application to download shows from your TiVo and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, taking full advantage of MacOS, but very flexible. 
 
 cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
