@@ -1907,7 +1907,7 @@ NSString * fourChar(long n, BOOL allowZero) {
             });
         }];
     }
-    self.rpcData = [self.tiVo registerRPCforShow:self];
+    if (!all) self.rpcData = [self.tiVo registerRPCforShow:self];
 }
 
 - (NSString *) artworkFileWithPrefix: (NSString *) prefix andSuffix: (NSString *) suffix InPath: (NSString *) directory {

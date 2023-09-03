@@ -557,9 +557,7 @@ __DDLOGHERE__
 }
 
 -(IBAction)reloadAllInfo:(id)sender {
-	for (MTTiVoShow * show in [self selectedShows]) {
-		[show resetSourceInfo:YES];
-	}
+    [tiVoManager resetShowDetails: [self selectedShows]];
 	NSIndexSet * columns = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0,self.tiVoShowTable.numberOfColumns)];
 	[self.tiVoShowTable reloadDataForRowIndexes:[tiVoShowTable selectedRowIndexes] columnIndexes:columns];
 }

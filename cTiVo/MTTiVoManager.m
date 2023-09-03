@@ -1034,6 +1034,22 @@ __DDLOGHERE__
 	[self scheduleNextSkipModeIncludingNow: NO];
 }
 
+-(void) resetShowDetails:(NSArray <MTTiVoShow *> *) shows {
+    NSMutableDictionary <NSString *, NSMutableArray<MTTiVoShow *> *> * showsByTiVo = [NSMutableDictionary dictionary];
+    for (MTTiVoShow * show in shows) {
+        [show resetSourceInfo:YES];
+        if (!showsByTiVo[show.tiVo.tiVo.name]) 
+            [showsByTiVo setObject:[NSMutableArray array] forKey:show.tiVo.tiVo.name];
+        [showsByTiVo[show.tiVo.tiVo.name] addObject: show];
+    }
+    for (MTTiVo * tiVo in tiVoManager.tiVoList) {
+        NSMutableArray <MTTiVoShow *> * showList = showsByTiVo[tiVo.tiVo.name];
+        if (showList.count) {
+            [tiVo reloadShowInfoForShows:showList];
+        }
+    }
+}
+
 -(void) skipModeRetrieval: (NSArray <MTTiVoShow *> *) shows interrupting: (BOOL) interrupt {
 	NSMutableArray <MTTiVoShow *> * tivoShows = [shows mutableCopy];
 	while (tivoShows.count > 0) {
