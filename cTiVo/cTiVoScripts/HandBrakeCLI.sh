@@ -256,10 +256,10 @@ if [[ -n "$audio_stream" ]] ; then
       if [[ -n "$ac3" ]]; then
         if [[ -n "$stereo" ]]; then
           # Both requested
-            audio_opts="-E ca_aac,copy"
+            audio_opts="-E ca_aac,copy --audio-copy-mask ac3"
         else
           #AC3 but no stereo
-        audio_opts="-E copy"
+		audio_opts="-E copy --audio-copy-mask ac3"
         fi
       elif [[ -n "$stereo" ]]; then
           audio_opts="-E ca_aac"
@@ -269,7 +269,7 @@ if [[ -n "$audio_stream" ]] ; then
       fi
     elif [[ -n "$ac3" ]]; then
       # AC3, but not 5.1; AC3 requested
-      audio_opts="-E copy"
+		audio_opts="-E copy --audio-copy-mask ac3"
     elif [[ -n "$stereo" ]]; then
       audio_opts="-E ca_aac"
     else
@@ -278,7 +278,7 @@ if [[ -n "$audio_stream" ]] ; then
     fi
   elif [[ -n "$stereo" ]] || [[ -n "$ac3" ]]; then
     # Not AC3, but want audio
-    audio_opts="-E copy"
+    audio_opts="-E copy --audio-copy-mask aac"
   else 
     #no audio requested?
     audio_opts="-E none"
