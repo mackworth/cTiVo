@@ -46,8 +46,9 @@ fileprivate func fetchTMDBData(from url: URL, using session: URLSession, complet
                 if let error = error {
                     MTTVDBLogger.DDLogReport("TMDB HTTP Request Error \(error): for \(String(describing: url))")
                     completionHandler(nil, nil)
+                } else {
+                    completionHandler(data, response)
                 }
-                completionHandler(data, response)
             }.resume()
 }
 

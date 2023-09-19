@@ -99,8 +99,9 @@ fileprivate func fetchTVDBDataResponse(with request: URLRequest, using session: 
                 if let error = error {
                     MTTVDBLogger.DDLogReport("TVDB HTTP Request Error \(error): for \(String(describing: request.url))")
                     completionHandler(nil, nil)
+                } else {
+                    completionHandler(data, response)
                 }
-                completionHandler(data, response)
             }.resume()
 }
 
