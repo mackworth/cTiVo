@@ -285,6 +285,7 @@ __DDLOGHERE__
 	NSMutableArray <MTTiVoShow *> * result = [NSMutableArray array];
 	[selectedRowIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
 		id item = [self itemAtRow:idx];
+		if (!item) return;
 		if ([item isKindOfClass:[MTShowFolder class]]) {
 			if (![self isItemExpanded:item]) {
 				[result addObjectsFromArray:((MTShowFolder *) item).folder];
