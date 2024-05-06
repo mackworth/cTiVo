@@ -68,20 +68,45 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 * [Q and A on different video formats](../../wiki/Video-Formats)
 * [Other Advanced Topics](../../wiki/Advanced-Topics)
 
-## Compatibility:
+## Compatibility
 
-[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.5.3) is fully compatible with MacOS Monterey (12.x) back through Sierra (10.12). 
-This (3.5.3) will be the final release for MacOS Sierra (10.12).
+[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.2) is fully compatible with MacOS Sonoma (14.1) back through Sierra (10.15). 
+for MacOS Sierra (10.12), High Sierra (10.13), and Mojave (10.14), [final release is 3.5.3](https://github.com/mackworth/cTiVo/releases/tag/3.5.3), .
 For MacOS El Capitan (10.11), [final release is 3.4.5](https://github.com/mackworth/cTiVo/releases/tag/3.4.5)
 For MacOS Mavericks (10.9) and Yosemite (10.10), [final release is 3.4.4](https://github.com/mackworth/cTiVo/releases/tag/3.4.4)
 
 cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3HD TiVos do NOT support Transport Stream for download, which is necessary for any channels/shows transmitted by your cable company in H.264, which is true for most cable companies now. As Minis and Streams do not store their own shows, cTiVo only supports Remote Control for them.
 
-RPC Certificate: TiVo's RPC Certificate in versions 3.4.4, 3.4.5, and 3.5.3 will expire in May 2024, although we expect we will be able to get a new one before then. Prior versions will expire in December 2022, and the features that require the RPC connection (marked below with a asterisk * ) will not be available. The primary cTiVo functionalities (listing the Tivo's shows and downloading them) should continue regardless.
+RPC Certificate: TiVo's RPC Certificate in versions 3.4.4, 3.4.5, 3.5.3 expired in May 2024, but can be manually updated (see [below](#updating-tivos-certificate-manually)). Prior versions expired in December 2022, and the features that require the RPC connection (marked below with a asterisk * ) will not be available. The primary cTiVo functionalities (listing the Tivo's shows and downloading them) should continue regardless.
 
 Initially, TiVo's Edge DVR was incompatible with any PC/Mac downloads, but TiVo finally fixed this with software release 21.9.7.v3-USM-12-D6F.
 
 cTiVo is free to use, and the source is available for anyone to browse and contribute to. 
+
+## Updating TiVo's certificate manually
+Versions 3.4.5, 3.4.5, and 3.5.3 (and temporarily 3.6.2) must be updated manually.
+To do this, download the two files [cdata.zip](https://github.com/mackworth/cTiVo/files/15223714/cdata.zip) you need to download. They should auto-expand when you do, or else double-click on the zip file, and then open the folder.
+
+Then in the Finder, use Cmd-Shift-G to go to `~/Library/Application Support/com.cTivo.cTiVo` 
+(Just to confirm, you should see `com.microsoft.appcenter` and `com.crashlytics` folders).
+Drag the two individual files into that main folder. 
+
+To be overly clear, not the .zip file nor the folder containing the files, and into `com.cTiVo.cTiVo`, not the subfolders:
+
+```
+Application Support/
+  ...
+  com.cTiVo.cTiVo/
+     cdata.p12
+     cdata.password
+     com.crashlytics/
+     com.microsoft.appcenter/
+```
+Restart cTiVo. Check if you can (for example) see the remote for your TiVo. If not, look in the log file for your last launch, search for `p12` and see if there's an error message.
+It should say:
+>Overriding default TiVo Certificate with file:///Users/USERNAME/Library/Application%20Support/com.cTiVo.cTiVo/cdata.p12
+
+You should be good until January 2026. Note that this manual override will override even the next release if you don't manually update at that time).
 
 ## Recent features
 
@@ -146,6 +171,7 @@ cTiVo is free to use, and the source is available for anyone to browse and contr
 * Ability to "Stop Recording show from TiVo" (in Edit menu and contextual menu).*
 
 \*Starred items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)
+\*if any of these features are not working, see [Compatibility](#compatibility) above 
 
 ## 2.5.0 features
 
