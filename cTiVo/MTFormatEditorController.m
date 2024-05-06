@@ -271,7 +271,7 @@
     CGRect execFrame = self.executableTextField.frame;
     CGRect popupFrame = self.presetPopup.frame;
     NSString *currentEncoder = self.currentFormat.encoderUsed;
-    if ([[currentEncoder lowercaseString] hasPrefix:@"handbrakecli"]) {
+    if ([[currentEncoder lowercaseString] containsString:@"handbrakecli"]) {
       if (self.presetPopup.hidden) {
         //make room for preset and show it
         self.presetPopup.hidden = NO;
@@ -300,7 +300,7 @@
     } else {
         self.presetPopup.hidden = YES;
         CGFloat popupRight = popupFrame.origin.x + popupFrame.size.width;
-        execFrame.size.width = popupRight ;
+        execFrame.size.width = popupRight - execFrame.origin.x;
         self.executableTextField.frame = execFrame;
     }
 }
