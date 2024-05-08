@@ -5,6 +5,8 @@ cTiVo provides complete hands-off operation: once you choose or subscribe to you
 The current release is here:  https://github.com/mackworth/cTiVo/releases/
 Please let us know of any problems or suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
 
+If your cTiVo has suddenly lost RPC functions (like Remote Control, Play/Delete, SkipMode) after May 5, 2024, then you [need an updated  TiVo certificate.](#updating-tivo-certificate)
+
 ## Automatic Download and Conversions
 * Auto-discovery of all your TiVos (using Bonjour).
 * Drag/drop and contextual menus for ease of use; submit, reschedule, delete all by dragging the shows.
@@ -70,28 +72,30 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 
 ## Compatibility
 
-[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.2) is fully compatible with MacOS Sonoma (14.1) back through Sierra (10.15). 
+[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sonoma (14.1) back through Sierra (10.15). 
 for MacOS Sierra (10.12), High Sierra (10.13), and Mojave (10.14), [final release is 3.5.3](https://github.com/mackworth/cTiVo/releases/tag/3.5.3), .
 For MacOS El Capitan (10.11), [final release is 3.4.5](https://github.com/mackworth/cTiVo/releases/tag/3.4.5)
 For MacOS Mavericks (10.9) and Yosemite (10.10), [final release is 3.4.4](https://github.com/mackworth/cTiVo/releases/tag/3.4.4)
 
 cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3HD TiVos do NOT support Transport Stream for download, which is necessary for any channels/shows transmitted by your cable company in H.264, which is true for most cable companies now. As Minis and Streams do not store their own shows, cTiVo only supports Remote Control for them.
 
-RPC Certificate: TiVo's RPC Certificate in versions 3.4.4, 3.4.5, 3.5.3 expired in May 2024, but can be manually updated (see [below](#updating-tivos-certificate-manually)). Prior versions expired in December 2022, and the features that require the RPC connection (marked below with a asterisk * ) will not be available. The primary cTiVo functionalities (listing the Tivo's shows and downloading them) should continue regardless.
-
 Initially, TiVo's Edge DVR was incompatible with any PC/Mac downloads, but TiVo finally fixed this with software release 21.9.7.v3-USM-12-D6F.
 
 cTiVo is free to use, and the source is available for anyone to browse and contribute to. 
 
-## Updating TiVo's certificate manually
-Versions 3.4.5, 3.4.5, and 3.5.3 (and temporarily 3.6.2) must be updated manually.
-To do this, download the two files [cdata.zip](https://github.com/mackworth/cTiVo/files/15223714/cdata.zip) you need to download. They should auto-expand when you do, or else double-click on the zip file, and then open the folder.
+## Updating TiVo certificate
+The TiVo RPC Certificate in all versions prior to 3.6.3 have expired as of May 2024. This prevents any RPC functions, such as Remote Control SkipMode, Play on TiVo (marked below with an asterisk *). However, the primary cTiVo functionality, such as listing shows and downloading them) is unaffected by this expiration.
+
+For MacOS versions since Sonoma (14.1), just update to [cTiVo 3.6.3](https://github.com/mackworth/cTiVo/releases/tag/3.6.3).
+
+For older OS's, cTiVo versions 3.4.5, 3.4.5, and 3.5.3 must be updated manually. (Versions prior to these must first be updated to one of these versions; see compatability list above).
+To update the certificate, download these two files [cdata.zip](https://github.com/mackworth/cTiVo/files/15223714/cdata.zip). They should auto-expand when you do, or else double-click on the zip file, and then open the folder.
 
 Then in the Finder, use Cmd-Shift-G to go to `~/Library/Application Support/com.cTivo.cTiVo` 
-(Just to confirm, you should see `com.microsoft.appcenter` and `com.crashlytics` folders).
-Drag the two individual files into that main folder. 
+(Just to confirm, you should see `com.microsoft.appcenter` and `com.crashlytics` folders in the main folder).
+Drag the two individual files into the main folder. 
 
-To be overly clear, not the .zip file nor the folder containing the files, and into `com.cTiVo.cTiVo`, not the subfolders:
+To be overly clear, don't drag the .zip file, nor the folder containing the files, and do drag into `com.cTiVo.cTiVo`, not the subfolders:
 
 ```
 Application Support/
@@ -106,7 +110,7 @@ Restart cTiVo. Check if you can (for example) see the remote for your TiVo. If n
 It should say:
 >Overriding default TiVo Certificate with file:///Users/USERNAME/Library/Application%20Support/com.cTiVo.cTiVo/cdata.p12
 
-You should be good until January 2026. Note that this manual override will override even the next release if you don't manually update at that time).
+The updated certifiate should be good until January 2026.
 
 ## Recent features
 
