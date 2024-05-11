@@ -72,23 +72,22 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 
 ## Compatibility
 
-[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sonoma (14.1) back through Catalina (10.15). 
+[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sonoma (14.4) back through Catalina (10.15). 
 for MacOS Sierra (10.12), High Sierra (10.13), and Mojave (10.14), [final release is 3.5.3](https://github.com/mackworth/cTiVo/releases/tag/3.5.3), .
 For MacOS El Capitan (10.11), [final release is 3.4.5](https://github.com/mackworth/cTiVo/releases/tag/3.4.5)
 For MacOS Mavericks (10.9) and Yosemite (10.10), [final release is 3.4.4](https://github.com/mackworth/cTiVo/releases/tag/3.4.4)
 
-cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3HD TiVos do NOT support Transport Stream for download, which is necessary for any channels/shows transmitted by your cable company in H.264, which is true for most cable companies now. As Minis and Streams do not store their own shows, cTiVo only supports Remote Control for them.
-
-Initially, TiVo's Edge DVR was incompatible with any PC/Mac downloads, but TiVo finally fixed this with software release 21.9.7.v3-USM-12-D6F.
+cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3HD TiVos do NOT support Transport Stream for download, which is necessary for any channels/shows transmitted by your cable company in H.264, which is true for most cable companies now. As Minis and Streams do not store their own shows, cTiVo only supports Remote Control for them. Initially, TiVo's Edge DVR was incompatible with any PC/Mac downloads, but TiVo finally fixed this with software release 21.9.7.v3-USM-12-D6F.
 
 cTiVo is free to use, and the source is available for anyone to browse and contribute to. 
 
 ## Updating TiVo certificate
-The TiVo RPC Certificate in all versions prior to 3.6.3 have expired as of May 2024. This prevents any RPC functions, such as Remote Control SkipMode, Play on TiVo (marked below with an asterisk *). However, the primary cTiVo functionality, such as listing shows and downloading them) is unaffected by this expiration.
+The TiVo RPC Certificate in all versions prior to 3.6.3 have expired as of May 2024. This prevents any RPC functions, such as Remote Control SkipMode, Play on TiVo. However, the primary cTiVo functionality, such as listing shows and downloading them) is unaffected by this expiration.
 
-For MacOS versions since Sonoma (14.1), just update to [cTiVo 3.6.3](https://github.com/mackworth/cTiVo/releases/tag/3.6.3).
+For MacOS versions since Catalina (10.15), just update to [cTiVo 3.6.3](https://github.com/mackworth/cTiVo/releases/tag/3.6.3).
 
-For older OS's, cTiVo versions 3.4.5, 3.4.5, and 3.5.3 must be updated manually. (Versions prior to these must first be updated to one of these versions; see compatability list above).
+For older OS's, cTiVo versions 3.4.5, 3.4.5, and 3.5.3 can be updated manually. (Versions even older than these must first be updated to one of these versions; see [compatability list above](#compatibility).
+
 To update the certificate, download these two files [cdata.zip](https://github.com/mackworth/cTiVo/files/15223714/cdata.zip). They should auto-expand when you do, or else double-click on the zip file, and then open the folder.
 
 Then in the Finder, use Cmd-Shift-G to go to `~/Library/Application Support/com.cTivo.cTiVo` 
@@ -106,8 +105,7 @@ Application Support/
      com.crashlytics/
      com.microsoft.appcenter/
 ```
-Restart cTiVo. Check if you can (for example) see the remote for your TiVo. If not, look in the log file for your last launch, search for `p12` and see if there's an error message.
-It should say:
+Restart cTiVo. Check if you can (for example) see the remote for your TiVo. If not, look in the log file for your last launch, search for `p12` and see if there's an error message. It should say:
 >Overriding default TiVo Certificate with file:///Users/USERNAME/Library/Application%20Support/com.cTiVo.cTiVo/cdata.p12
 
 The updated certifiate should be good until January 2026.
