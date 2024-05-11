@@ -2,10 +2,10 @@
 
 cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
 
-The current release is here:  https://github.com/mackworth/cTiVo/releases/
+The [current release is here](https://github.com/mackworth/cTiVo/releases/). 
 Please let us know of any problems or suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
 
-If your cTiVo has suddenly lost RPC functions (like Remote Control, Play/Delete, SkipMode) after May 5, 2024, then you [need an updated  TiVo certificate.](#updating-tivo-certificate)
+If your cTiVo has suddenly lost RPC functions (like Remote Control, Play/Delete, SkipMode) after May 5, 2024, then you [need an updated TiVo certificate.](#updating-tivo-certificate)
 
 ## Automatic Download and Conversions
 * Auto-discovery of all your TiVos (using Bonjour).
@@ -72,10 +72,10 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 
 ## Compatibility
 
-[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sonoma (14.4) back through Catalina (10.15). 
-for MacOS Sierra (10.12), High Sierra (10.13), and Mojave (10.14), [final release is 3.5.3](https://github.com/mackworth/cTiVo/releases/tag/3.5.3), .
-For MacOS El Capitan (10.11), [final release is 3.4.5](https://github.com/mackworth/cTiVo/releases/tag/3.4.5)
-For MacOS Mavericks (10.9) and Yosemite (10.10), [final release is 3.4.4](https://github.com/mackworth/cTiVo/releases/tag/3.4.4)
+[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sonoma(14.4) back through Catalina(10.15). 
+For Mojave(10.14), High Sierra(10.13), Sierra(10.12), [final release is 3.5.3](https://github.com/mackworth/cTiVo/releases/tag/3.5.3).
+For El Capitan(10.11), [final release is 3.4.5](https://github.com/mackworth/cTiVo/releases/tag/3.4.5).
+For Yosemite(10.10), and Mavericks(10.9), [final release is 3.4.4](https://github.com/mackworth/cTiVo/releases/tag/3.4.4).
 
 cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3HD TiVos do NOT support Transport Stream for download, which is necessary for any channels/shows transmitted by your cable company in H.264, which is true for most cable companies now. As Minis and Streams do not store their own shows, cTiVo only supports Remote Control for them. Initially, TiVo's Edge DVR was incompatible with any PC/Mac downloads, but TiVo finally fixed this with software release 21.9.7.v3-USM-12-D6F.
 
@@ -86,7 +86,7 @@ The TiVo RPC Certificate in all versions prior to 3.6.3 have expired as of May 2
 
 For MacOS versions since Catalina (10.15), just update to [cTiVo 3.6.3](https://github.com/mackworth/cTiVo/releases/tag/3.6.3).
 
-For older OS's, cTiVo versions 3.4.5, 3.4.5, and 3.5.3 can be updated manually. (Versions even older than these must first be updated to one of these versions; see [compatability list above](#compatibility).
+For older OS's, cTiVo versions 3.4.5, 3.4.5, and 3.5.3 can be updated manually. (Versions even older than these must first be updated to one of these versions; see [compatibility list above](#compatibility).
 
 To update the certificate, download these two files [cdata.zip](https://github.com/mackworth/cTiVo/files/15223714/cdata.zip). They should auto-expand when you do, or else double-click on the zip file, and then open the folder.
 
@@ -174,12 +174,3 @@ The updated certifiate should be good until January 2026.
 
 \*Starred items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)
 \*if any of these features are not working, see [Compatibility](#compatibility) above 
-
-## 2.5.0 features
-
-* H.264 compatibility (new format for cable companies)
-* Autodetects H.264 transition by channel
-* Redesigned Formats (simpler, more compatible)
-* New Channels preference screen
-* Better handling for AC3 5.1 audio
-* Many bug fixes
