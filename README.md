@@ -72,7 +72,7 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 
 ## Compatibility
 
-[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sonoma (14.1) back through Sierra (10.15). 
+[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sonoma (14.1) back through Catalina (10.15). 
 for MacOS Sierra (10.12), High Sierra (10.13), and Mojave (10.14), [final release is 3.5.3](https://github.com/mackworth/cTiVo/releases/tag/3.5.3), .
 For MacOS El Capitan (10.11), [final release is 3.4.5](https://github.com/mackworth/cTiVo/releases/tag/3.4.5)
 For MacOS Mavericks (10.9) and Yosemite (10.10), [final release is 3.4.4](https://github.com/mackworth/cTiVo/releases/tag/3.4.4)
