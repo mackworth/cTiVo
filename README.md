@@ -1,8 +1,8 @@
-**cTiVo** is a free Mac application to download shows from your TiVo and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, taking full advantage of MacOS, but very flexible. 
+**cTiVo** is a free Mac application to download shows from your TiVo and convert them to many popular formats and devices. Its goal is to be extremely simple to set up and use, taking full advantage of MacOS, but very flexible.
 
 cTiVo provides complete hands-off operation: once you choose or subscribe to your shows, everything else is automated. For example, after you've set it up, every morning, you will find all your favorite shows from your TiVos loaded onto your iPhone or iPad. And although using cTiVo is very easy, you also have complete control over what it does.
 
-The [current release is here](https://github.com/mackworth/cTiVo/releases/). 
+The [current release is here](https://github.com/mackworth/cTiVo/releases/).
 Please let us know of any problems or suggestions at [Issues](https://github.com/mackworth/cTiVo/issues).
 
 If your cTiVo has suddenly lost RPC functions (like Remote Control, Play/Delete, SkipMode) after May 5, 2024, then you [need an updated TiVo certificate.](#updating-tivo-certificate)
@@ -19,7 +19,7 @@ If your cTiVo has suddenly lost RPC functions (like Remote Control, Play/Delete,
 * Adds artwork to downloaded shows from TiVo or theTVDB and theMovieDB (as available).
 * Copies shows to TV/iTunes with all data about the show (metadata) transferred as well.
 * Generates metadata appropriate for use by tools such as pyTivo and Plex.
-* Performs a sync for your device when the download is completed. 
+* Performs a sync for your device when the download is completed.
 * Maximum parallel processing, including downloading from multiple TiVos simultaneously.
 * Wide selection of predefined video Formats.
 * Target devices include iPhone, iPad, AppleTV, Xbox, YouTube.
@@ -60,7 +60,7 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 ## Documentation:
 
 * [How to get cTiVo running quickly](../../wiki/Quick-Start)
-* [Overview of Using cTivo](../../wiki/Overview)
+* [Overview of Using cTiVo](../../wiki/Overview)
 * [How to install cTiVo](../../wiki/Installation)
 * [How to configure cTiVo ](../../wiki/Configuration)
 * [How to set up and configure subscriptions in cTiVo](../../wiki/Subscriptions)
@@ -72,14 +72,14 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 
 ## Compatibility
 
-[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sonoma(14.4) back through Catalina(10.15). 
+[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sonoma(14.4) back through Catalina(10.15).
 For Mojave(10.14), High Sierra(10.13), Sierra(10.12), [final release is 3.5.3](https://github.com/mackworth/cTiVo/releases/tag/3.5.3).
 For El Capitan(10.11), [final release is 3.4.5](https://github.com/mackworth/cTiVo/releases/tag/3.4.5).
 For Yosemite(10.10), and Mavericks(10.9), [final release is 3.4.4](https://github.com/mackworth/cTiVo/releases/tag/3.4.4).
 
 cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3HD TiVos do NOT support Transport Stream for download, which is necessary for any channels/shows transmitted by your cable company in H.264, which is true for most cable companies now. As Minis and Streams do not store their own shows, cTiVo only supports Remote Control for them. Initially, TiVo's Edge DVR was incompatible with any PC/Mac downloads, but TiVo finally fixed this with software release 21.9.7.v3-USM-12-D6F.
 
-cTiVo is free to use, and the source is available for anyone to browse and contribute to. 
+cTiVo is free to use, and the source is available for anyone to browse and contribute to.
 
 ## Updating TiVo certificate
 The TiVo RPC Certificate in all versions prior to 3.6.3 have expired as of May 2024. This prevents any RPC functions, such as Remote Control SkipMode, Play on TiVo. However, the primary cTiVo functionality, such as listing shows and downloading them) is unaffected by this expiration.
@@ -90,9 +90,9 @@ For older OS's, cTiVo versions 3.4.5, 3.4.5, and 3.5.3 can be updated manually. 
 
 To update the certificate, download these two files [cdata.zip](https://github.com/mackworth/cTiVo/files/15223714/cdata.zip). They should auto-expand when you do, or else double-click on the zip file, and then open the folder.
 
-Then in the Finder, use Cmd-Shift-G to go to `~/Library/Application Support/com.cTivo.cTiVo` 
+Then in the Finder, use Cmd-Shift-G to go to `~/Library/Application Support/com.cTivo.cTiVo`
 (Just to confirm, you should see `com.microsoft.appcenter` and `com.crashlytics` folders in the main folder).
-Drag the two individual files into the main folder. 
+Drag the two individual files into the main folder.
 
 To be overly clear, don't drag the .zip file, nor the folder containing the files, and do drag into `com.cTiVo.cTiVo`, not the subfolders:
 
@@ -173,4 +173,4 @@ The updated certifiate should be good until January 2026.
 * Ability to "Stop Recording show from TiVo" (in Edit menu and contextual menu).*
 
 \*Starred items require RPC, real-time functionality, only available on TiVo Premiere or later (so not Series 2, 3, HD, or HD XL)
-\*if any of these features are not working, see [Compatibility](#compatibility) above 
+\*if any of these features are not working, see [Compatibility](#compatibility) above

@@ -83,7 +83,8 @@ __DDLOGHERE__
 	NSIndexSet *selectedRowIndexes = [self selectedRowIndexes];
 	NSMutableArray <id> * oldSelection = [NSMutableArray arrayWithCapacity:selectedRowIndexes.count];
 	[selectedRowIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-		[oldSelection addObject: [self itemAtRow:idx]];
+        id item = [self itemAtRow:idx];
+        if (item) [oldSelection addObject: item ];
 	}];
 	CGRect frame = self.enclosingScrollView.documentVisibleRect;
 
