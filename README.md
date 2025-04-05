@@ -72,7 +72,7 @@ Download the [cTiVo application](https://github.com/mackworth/cTiVo/releases), a
 
 ## Compatibility
 
-[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sonoma(14.4) back through Catalina(10.15).
+[Current release of cTiVo](https://github.com/mackworth/cTiVo/releases/tag/3.6.3) is fully compatible with MacOS Sequoia (15.x) back through Catalina(10.15).
 For Mojave(10.14), High Sierra(10.13), Sierra(10.12), [final release is 3.5.3](https://github.com/mackworth/cTiVo/releases/tag/3.5.3).
 For El Capitan(10.11), [final release is 3.4.5](https://github.com/mackworth/cTiVo/releases/tag/3.4.5).
 For Yosemite(10.10), and Mavericks(10.9), [final release is 3.4.4](https://github.com/mackworth/cTiVo/releases/tag/3.4.4).
@@ -82,33 +82,13 @@ cTiVo works with TiVos all the way back to Series2. However, Series2 and Series3
 cTiVo is free to use, and the source is available for anyone to browse and contribute to.
 
 ## Updating TiVo certificate
-The TiVo RPC Certificate in all versions prior to 3.6.3 have expired as of May 2024. This prevents any RPC functions, such as Remote Control SkipMode, Play on TiVo. However, the primary cTiVo functionality, such as listing shows and downloading them) is unaffected by this expiration.
+The TiVo RPC Certificate in all versions prior to 3.6.3 have expired as of May 2024. This prevents any RPC functions, such as Remote Control SkipMode, Play on TiVo. However, the primary cTiVo functionality (such as listing shows and downloading them) is unaffected by this expiration.
 
 For MacOS versions since Catalina (10.15), just update to [cTiVo 3.6.3](https://github.com/mackworth/cTiVo/releases/tag/3.6.3).
 
-For older OS's, cTiVo versions 3.4.5, 3.4.5, and 3.5.3 can be updated manually. (Versions even older than these must first be updated to one of these versions; see [compatibility list above](#compatibility).
+For older OS's, cTiVo versions 3.4.5, 3.4.5, and 3.5.3 can be updated manually. (Versions even older than these must first be updated to one of these versions; see [compatibility list above](#compatibility).)  See [here](https://github.com/mackworth/cTiVo/wiki/Advanced-Topics#tivo-certificates) for manual updating technique.
 
-To update the certificate, download these two files [cdata.zip](https://github.com/mackworth/cTiVo/files/15223714/cdata.zip). They should auto-expand when you do, or else double-click on the zip file, and then open the folder.
-
-Then in the Finder, use Cmd-Shift-G to go to `~/Library/Application Support/com.cTivo.cTiVo`
-(Just to confirm, you should see `com.microsoft.appcenter` and `com.crashlytics` folders in the main folder).
-Drag the two individual files into the main folder.
-
-To be overly clear, don't drag the .zip file, nor the folder containing the files, and do drag into `com.cTiVo.cTiVo`, not the subfolders:
-
-```
-Application Support/
-  ...
-  com.cTiVo.cTiVo/
-     cdata.p12
-     cdata.password
-     com.crashlytics/
-     com.microsoft.appcenter/
-```
-Restart cTiVo. Check if you can (for example) see the remote for your TiVo. If not, look in the log file for your last launch, search for `p12` and see if there's an error message. It should say:
->Overriding default TiVo Certificate with file:///Users/USERNAME/Library/Application%20Support/com.cTiVo.cTiVo/cdata.p12
-
-The updated certifiate should be good until January 2026.
+The updated certificate should be good until January 2026.
 
 ## Recent features
 
