@@ -1307,7 +1307,16 @@ static void * originalAirDateContext = &originalAirDateContext;
             if (skipOne) {
                 skipOne = NO;
             } else {
-                [outStr appendString: [self replacementForKeyword:bracketedString usingDictionary:keys]];
+              NSString * nextString = [self replacementForKeyword:bracketedString usingDictionary:keys];
+              if (nextString.length == 0) {
+                if ([scanner scanString:@"|" intoString:nil]) {
+                  //ah, we've got an alternative, so having eaten the or-pipe, the next keyword/field will be used instead.
+                } else {
+                  //Should probably return @"" here, as we have an empty field inside a field, but that would break existing templates.
+                }
+              } else {
+                [outStr appendString: nextString];
+              }
             }
         } else if ([scanner scanString:@"|" intoString:nil]) {
             //got an alternative, but previous one must have been good (or we'd have eaten this)
