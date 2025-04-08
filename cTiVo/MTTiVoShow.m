@@ -1301,6 +1301,8 @@ static void * originalAirDateContext = &originalAirDateContext;
                     numBrackets++;
                 } else if ([scanner scanString:@"]" intoString:&tempString]) {
                     numBrackets--;
+                } else {
+                  return [@"Missing right bracket in " stringByAppendingString: key];
                 }
             }
             [scanner scanCharactersFromSet:whitespaceSet intoString:nil];
@@ -1408,7 +1410,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                                 @"episodetitle":	NULLT(self.episodeTitle),
                                 @"channelnum":		NULLT(self.channelString),
                                 @"channel":		    NULLT(self.stationCallsign),
-                                @"starttime":		NULLT(self.showTime),
+                                @"showtime":		NULLT(self.showTime),
                                 @"min":			    twoChar([components minute], YES),
                                 @"hour":			twoChar([components hour], YES),
                                 @"wday":			twoChar([components weekday], NO),
@@ -1421,7 +1423,7 @@ NSString * fourChar(long n, BOOL allowZero) {
                                 @"extraepisode":    NULLT(extraEpisode),
                                 @"season":			twoChar(self.season, NO),
                                 @"episodenumber":	NULLT(self.episodeNumber),
-                                @"StartTime":       NULLT(self.startTime),
+                                @"starttime":       NULLT(self.startTime),
                                 @"seriesepnumber":  NULLT(self.seasonEpisode),
                                 @"guests":          NULLT(guests),
                                 @"tivoname":		NULLT(self.tiVoName),

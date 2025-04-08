@@ -208,7 +208,7 @@
 
 #define kMTFileNameFormat @"FileNameFormat"			//keyword pattern for filenames
 #define kMTPlexFolder @"[\"TV Shows\" / MainTitle / \"Season \" Season | Year / MainTitle \" - \" SeriesEpNumber | OriginalAirDate [\"-\" ExtraEpisode][\" - \" EpisodeTitle | Guests]][\"Movies\"  / MainTitle \" (\" MovieYear \")\"]"
-#define kMTcTiVoFolder @"[[MainTitle / MainTitle \" - \" EpisodeTitle | Guests | OriginalAirDate]|[\"Movies\"  / MainTitle \" (\" MovieYear \")\"]]"
+#define kMTcTiVoFolder @"[[\"Movies\"  / MainTitle \" (\" MovieYear \")\"]] | [MainTitle / MainTitle \" - \" EpisodeTitle | Guests | OriginalAirDate]]"
 #define kMTcTiVoDefault @"[Title]"
 
 #define kMTNumDownloadRetries @"NumDownloadRetries" // How many retries due to download failures
