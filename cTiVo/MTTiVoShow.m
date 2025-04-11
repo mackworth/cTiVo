@@ -1018,15 +1018,14 @@ static void * originalAirDateContext = &originalAirDateContext;
             _originalAirDateNoTime = self.movieYear;
         }
     } else if (context == originalAirDateContext) {
-
-        if (!self.isEpisodicShow && self.showDate) {
-            _originalAirDateNoTime = [self showDateRFCString];
-        } else if (_originalAirDate.length >= 10) {
+        if (_originalAirDate.length >= 10) {
             _originalAirDateNoTime = [_originalAirDate substringToIndex:10];
         } else if (_originalAirDate.length > 0) {
             _originalAirDateNoTime = _originalAirDate;
         } else if (_movieYear.length > 0){
             _originalAirDateNoTime = _movieYear;
+        } else if (self.showDate) {
+            _originalAirDateNoTime = [self showDateRFCString];
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
