@@ -1373,17 +1373,27 @@ NSString * fourChar(long n, BOOL allowZero) {
     } else {
         components = [[NSDateComponents alloc] init];
     }
+    NSArray <NSString *> * monthNames = [[[NSDateFormatter alloc] init] shortMonthSymbols];
+    NSUInteger monthNum = [components month];
+    NSString * monthName = @"";
+    if (monthNum > 0 && monthNum <= monthNames.count && monthNum != NSDateComponentUndefined) monthName =  monthNames [monthNum - 1];
+
     NSString * originalAirDate =self.originalAirDateNoTime;
-    if (!originalAirDate && [components year] > 0) {
+    if (originalAirDate.length == 0 && [components year] > 0) {
         originalAirDate = [NSString stringWithFormat:@"%@-%@-%@",
                            fourChar([components year], NO),
-                           twoChar([components month], YES),
+                           twoChar(monthNum, YES),
                            twoChar([components day], YES)];
     }
-	NSString * monthName = ([components month]> 0 && [components month] != NSDateComponentUndefined) ?
-    [[[[NSDateFormatter alloc] init] shortMonthSymbols]
-     objectAtIndex:[components month]-1] :
-    @"";
+    NSString * origDay, * origMonth, * origYear = @"";
+    NSUInteger origMonthNum = 0;
+    if (originalAirDate.length == 10) {
+      origYear =     [originalAirDate substringWithRange:NSMakeRange(0, 4)];
+      origMonthNum = [originalAirDate substringWithRange:NSMakeRange(5, 2)].intValue;
+      origDay =      [originalAirDate substringWithRange:NSMakeRange(8, 2)];
+      origMonth =    (origMonthNum > 0 && origMonthNum <= monthNames.count) ? monthNames[origMonthNum - 1] : @"";
+    }
+  
 
     NSMutableArray * seriesIDs = [NSMutableArray array];
     if (self.tvdbData) {
@@ -1415,9 +1425,13 @@ NSString * fourChar(long n, BOOL allowZero) {
                                 @"wday":			twoChar([components weekday], NO),
                                 @"mday":			twoChar([components day], NO),
                                 @"month":			monthName,
-                                @"monthnum":		twoChar([components month], NO),
+                                @"monthnum":		twoChar(monthNum, NO),
                                 @"year": 			self.isMovie ? @"" : fourChar([components year], NO),
                                 @"originalairdate": originalAirDate,
+                                @"origday":     origDay,
+                                @"origmonthnum":   twoChar(origMonthNum, NO),
+                                @"origmonth":   origMonth,
+                                @"origyear":    origYear,
                                 @"episode":		    twoChar(self.episode, NO),
                                 @"extraepisode":    NULLT(extraEpisode),
                                 @"season":			twoChar(self.season, NO),
