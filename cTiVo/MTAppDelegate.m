@@ -514,10 +514,10 @@ NSObject * assertionID = nil;
 		if (error.code == 516) {
 			DDLogVerbose(@"When moving %@ to %@, already there?", url, newURL);
 			[fm removeItemAtURL:url error:&error]; //no need to keep old one
-		} else {
-			DDLogReport(@"Could not move cache file %@ to %@: %@", url, newURL, error);
-			return NO;
+          return YES;
 		}
+        DDLogReport(@"Could not move cache file %@ to %@: %@", url, newURL, error);
+        return NO;
 	}
 	return YES;
 }

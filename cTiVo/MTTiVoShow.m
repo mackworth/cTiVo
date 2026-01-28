@@ -362,7 +362,7 @@ __DDLOGHERE__
 	if (_clipMetaDataId != clipMetaDataId) {
 		_clipMetaDataId = clipMetaDataId;
 		DDLogDetail(@"Notifying skipMode from %@", self);
-		[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+		[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationFoundSkipModeInfo object:self];
 	} else {
 		DDLogDetail(@"Not Notifying skipMode from %@", self);
 	}
@@ -373,7 +373,7 @@ __DDLOGHERE__
 		_edlList = edlList;
 		if (edlList != nil) {
 			DDLogDetail(@"Got EDL for %@: %@", self, edlList);
-			[[NSNotificationCenter defaultCenter] postNotificationName:kMTNotificationFoundSkipModeInfo object:self];
+			[NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationFoundSkipModeInfo object:self];
 		}
 	}
 }
@@ -451,10 +451,9 @@ __DDLOGHERE__
 	if (!self.inProgress.boolValue && timeLeft < 0) {
 		DDLogVerbose(@"No SkipMode for %@; Past deadline for SkipInfo to arrive by %0.1f", self, -timeLeft);
 		return NO;
-	} else {
-		DDLogVerbose(@"Looks like we might still have SkipMode for %@", self);
-		return YES;
 	}
+	DDLogVerbose(@"Looks like we might still have SkipMode for %@", self);
+	return YES;
 }
 
 -(void) checkAllInfoSources {

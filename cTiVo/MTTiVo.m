@@ -938,11 +938,25 @@ BOOL channelChecking = NO;
     NSURLRequest *tivoURLRequest = [NSURLRequest requestWithURL:tivoURL];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    self.showURLConnection = [NSURLConnection connectionWithRequest:tivoURLRequest delegate:self];
+    // Create connection on utility queue to avoid priority inversion
+    __weak __typeof__(self) weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+        __typeof__(self) strongSelf = weakSelf; if (!strongSelf) return;
+
+        NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:tivoURLRequest delegate:strongSelf startImmediately:NO];
+        // Schedule on main run loop for delegate callbacks
+        [connection scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __typeof__(self) strongSelf2 = weakSelf; if (!strongSelf2) return;
+
+            strongSelf2.showURLConnection = connection;
+            [strongSelf2->urlData setData:[NSData data]];
+            strongSelf2->authenticationTries = 0;
+            [connection start];
+        });
+    });
 #pragma clang diagnostic pop
-    [urlData setData:[NSData data]];
-    authenticationTries = 0;
-    [self.showURLConnection start];
 }
 
 -(void)resetAllDetails

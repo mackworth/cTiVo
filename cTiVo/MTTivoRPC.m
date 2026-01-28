@@ -295,19 +295,29 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
 }
 #pragma mark Communications
  -(void) launchServer {
+    // Ensure we're running at an appropriate QoS to avoid priority inversion
+    // when opening network streams
     if (![NSThread isMainThread]) {
         //just to be sure; e.g. timers don't get canceled if invalidated from different runloop
         DDLogReport(@"Launching RPC in background! %@",self.delegate);
-        dispatch_sync(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             [self launchServer];
-            return;
         });
+        return;
     }
      if (!self.delegate.isReachable) {
          DDLogMajor(@"Can't launch RPC; TiVo %@ offline",self.delegate);
          return;
      }
      if (!([self streamClosed: self.iStream] || [self streamClosed: self.oStream] )) return;
+     
+     // Perform stream setup at utility QoS to avoid priority inversion
+     dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+         [self actuallyLaunchServer];
+     });
+ }
+
+-(void) actuallyLaunchServer {
      [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(launchServer) object:nil  ];
      self.sessionID = arc4random_uniform(0x27dc20);
      CFReadStreamRef readStream;
@@ -321,9 +331,11 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
      iStream.delegate = self;
      oStream.delegate = self;
 
-     [iStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-     [oStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-
+     // Schedule on main run loop - must be done on main thread
+     dispatch_sync(dispatch_get_main_queue(), ^{
+         [iStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+         [oStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+     });
 
      [oStream setProperty:NSStreamSocketSecurityLevelNegotiatedSSL
                    forKey:NSStreamSocketSecurityLevelKey];
@@ -338,21 +350,29 @@ NSString *securityErrorMessageString(OSStatus status) { return (__bridge_transfe
                                        } ;
         [oStream setProperty:sslOptions forKey:(__bridge id)kCFStreamPropertySSLSettings];
         
-        _iStreamAnchor = NO; _oStreamAnchor = NO;
-        self.iStream = iStream;
-        self.oStream = oStream;
-        [self.streamDeadmanTimer invalidate];
-        [self.roundTripDeadmanTimer invalidate];
-        self.streamDeadmanTimer = [MTWeakTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
-        self.roundTripDeadmanTimer = [MTWeakTimer scheduledTimerWithTimeInterval:300 target:self selector:@selector(checkTiVoLive) userInfo:nil repeats:YES];
-        DDLogMajor(@"Launching RPC streams for %@", self.delegate);
+        // Must update properties and start timers on main thread
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self->_iStreamAnchor = NO; self->_oStreamAnchor = NO;
+            self.iStream = iStream;
+            self.oStream = oStream;
+            [self.streamDeadmanTimer invalidate];
+            [self.roundTripDeadmanTimer invalidate];
+            self.streamDeadmanTimer = [MTWeakTimer scheduledTimerWithTimeInterval:12 target:self selector:@selector(checkStreamStatus) userInfo:nil repeats:YES];
+            self.roundTripDeadmanTimer = [MTWeakTimer scheduledTimerWithTimeInterval:300 target:self selector:@selector(checkTiVoLive) userInfo:nil repeats:YES];
+            DDLogMajor(@"Launching RPC streams for %@", self.delegate);
+        });
+        
+        // Open streams on utility queue to avoid priority inversion
         [iStream open];
         [oStream open];
-        if (self.skipModeQueueMetaData.count > 0 || self.skipModeQueueEDL.count > 0 ) { //recover commercialing under way (e.g. after sleep)
-            DDLogMajor(@"SkipMode Queue restarting: %@ AND %@", self.skipModeQueueMetaData, self.skipModeQueueEDL);
-            [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ]; //remove if already there
-            [self performSelector:@selector(findSkipModeRecursive:) withObject:@0 afterDelay:20];
-        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (self.skipModeQueueMetaData.count > 0 || self.skipModeQueueEDL.count > 0 ) { //recover commercialing under way (e.g. after sleep)
+                DDLogMajor(@"SkipMode Queue restarting: %@ AND %@", self.skipModeQueueMetaData, self.skipModeQueueEDL);
+                [NSNotificationCenter postNotificationNameOnMainThread:kMTNotificationTiVoCommercialed object: self.delegate  ]; //remove if already there
+                [self performSelector:@selector(findSkipModeRecursive:) withObject:@0 afterDelay:20];
+            }
+        });
     }   
 
  }

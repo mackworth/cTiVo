@@ -40,19 +40,25 @@ __DDLOGHERE__
 	return self;
 }
 
+-(void)observeNotification: (NSNotificationName) name withSelector: (SEL) function {
+	[[NSNotificationCenter defaultCenter] addObserverForName:name object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification * _Nonnull notification) {
+		[self performSelectorOnMainThread:function withObject:notification waitUntilDone:NO];
+	}];
 
+}
 -(void)setNotifications
 {
 	DDLogDetail(@"Setting up notifications");
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData) name:kMTNotificationDownloadQueueUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tableViewSelectionDidChange:) name:kMTNotificationDownloadQueueUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress:) name:kMTNotificationProgressUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDownloadStatusChanged object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataFormat) name:kMTNotificationFormatListUpdated object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataTiVos) name:kMTNotificationTiVoListUpdated object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisode:) name:kMTNotificationDownloadRowChanged object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadEpisodeShow:) name:kMTNotificationDetailsLoaded	object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTiVoColumn:) name:kMTNotificationFoundMultipleTiVos object:nil];
+
+  [self observeNotification: kMTNotificationDownloadQueueUpdated  withSelector:@selector(reloadData) ];
+  [self observeNotification: kMTNotificationDownloadQueueUpdated  withSelector:@selector(tableViewSelectionDidChange:) ];
+  [self observeNotification: kMTNotificationProgressUpdated       withSelector:@selector(updateProgress:) ];
+  [self observeNotification: kMTNotificationDownloadStatusChanged withSelector:@selector(reloadEpisode:) ];
+  [self observeNotification: kMTNotificationFormatListUpdated     withSelector:@selector(reloadDataFormat) ];
+  [self observeNotification: kMTNotificationTiVoListUpdated       withSelector:@selector(reloadDataTiVos) ];
+  [self observeNotification: kMTNotificationDownloadRowChanged    withSelector:@selector(reloadEpisode:) ];
+  [self observeNotification: kMTNotificationDetailsLoaded         withSelector:@selector(reloadEpisodeShow:) ];
+  [self observeNotification: kMTNotificationFoundMultipleTiVos    withSelector:@selector(showTiVoColumn:) ];
     [self registerForDraggedTypes:[NSArray arrayWithObjects:kMTTivoShowPasteBoardType, kMTTiVoShowArrayPasteBoardType, kMTDownloadPasteBoardType, nil]];
 	[self  setDraggingSourceOperationMask:NSDragOperationLink forLocal:NO];
 	[self  setDraggingSourceOperationMask:NSDragOperationCopy forLocal:YES];
