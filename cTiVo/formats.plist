@@ -1794,7 +1794,7 @@ Should be compatible with all devices and Standard Def TVs</string>
 			<key>encoderUsed</key>
 			<string>HandBrakeCLI.sh</string>
 			<key>encoderVideoOptions</key>
-			<string>-Z&quot;Email 25 MB 10 Minutes 288p30&quot;</string>
+			<string>-Z&quot;Social 10 MB 2 Minutes 360p60&quot;</string>
 			<key>filenameExtension</key>
 			<string>.mp4</string>
 			<key>formatDescription</key>
