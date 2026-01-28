@@ -27,8 +27,7 @@
 #else
 #import "CrashlyticsLogger.h"
 @import Firebase;
-@import AppCenter;
-@import AppCenterAnalytics;
+@import FirebaseAnalytics;
 #endif
 
 #ifndef MAC_APP_STORE
@@ -165,11 +164,12 @@ void signalHandler(int signal)
 	[defaults registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
 	
 #ifndef DEBUG
-    if (![defaults boolForKey:kMTCrashlyticsOptOut]) {
-		[FIRApp configure];
-		[MSACAppCenter start:@"d25a8abd-34c7-4be0-b7cc-94a186e1c5c5" withServices:@[
-		[MSACAnalytics class],
-	]];
+	// Respect user's opt-out preference for analytics and crashlytics
+	if (![defaults boolForKey:kMTCrashlyticsOptOut]) {
+        [FIRApp configure];
+		[FIRAnalytics setAnalyticsCollectionEnabled:YES];
+    } else {
+      DDLogMajor(@"Firebase Analytics disabled per user preference");
     }
 #ifndef MAC_APP_STORE
 	PFMoveToApplicationsFolderIfNecessary();

@@ -5,8 +5,8 @@ use_frameworks!
 
 
 target 'cTiVo' do
-  pod 'AppCenter/Analytics'
   pod 'Firebase/Crashlytics'
+  pod 'Firebase/Analytics'
   pod 'CocoaLumberjack/Swift'
   target 'cTiVoTests' do
     inherit! :search_paths
@@ -14,8 +14,8 @@ target 'cTiVo' do
 end
 
 target 'cTiVo MAS' do
-  pod 'AppCenter/Analytics'
   pod 'Firebase/Crashlytics'
+  pod 'Firebase/Analytics'
   pod 'CocoaLumberjack/Swift'
 end
 

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0BB3B5010C47D7DC7A6D6805 /* Pods_cTiVoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1537C3E2E1D33D2825F890C6 /* Pods_cTiVoTests.framework */; };
 		1E00BDE7170A4809005F3970 /* MTMainWindowDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */; };
 		1E02BDE12056E9BB000B9F56 /* CommercialHelpFile.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 1E02BDE02056E9BB000B9F56 /* CommercialHelpFile.rtfd */; };
 		1E09D27520C5A91100A56B83 /* skipModeQuestion@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E09D27420C5A90F00A56B83 /* skipModeQuestion@2x.png */; };
@@ -429,8 +430,8 @@
 		1EFB697020DD3BA0001F5DB6 /* libz.1.dylib in Copy shared libraries for executables */ = {isa = PBXBuildFile; fileRef = 1ECB910C20DD364A00E3317D /* libz.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFB697120DD3BB9001F5DB6 /* ccextractor in Copy Executables */ = {isa = PBXBuildFile; fileRef = 1ECB90EF20DD35B200E3317D /* ccextractor */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EFE66FF1BE967460083386C /* sparklecast.xml in Resources */ = {isa = PBXBuildFile; fileRef = 1EFE66FE1BE967460083386C /* sparklecast.xml */; };
-		3D5C6DB5768A01B5781869ED /* Pods_cTiVoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6105580A8AA4517B0CF9FE /* Pods_cTiVoTests.framework */; };
-		80AA6BF21F8A30F8A0391DC7 /* Pods_cTiVo_MAS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8B98E58AF5B364270B05F00 /* Pods_cTiVo_MAS.framework */; };
+		236D9074CC35D6E31D290FD5 /* Pods_cTiVo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDDD17CF357B1B6F1F63B942 /* Pods_cTiVo.framework */; };
+		80AAC0435607E46FB9B031D5 /* Pods_cTiVo_MAS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0877698AC1D17203FACBDA7 /* Pods_cTiVo_MAS.framework */; };
 		94F32E0F1D6A67F1004B7FEB /* ffmpeg_edl_ac3.sh in Resources */ = {isa = PBXBuildFile; fileRef = 94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		AA41387C28A2A21B002C9813 /* MTMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA41387B28A2A21B002C9813 /* MTMock.swift */; };
 		AA41389E28AAD26E002C9813 /* MTTVDBLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA41389D28AAD26E002C9813 /* MTTVDBLogger.swift */; };
@@ -504,7 +505,6 @@
 		D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */; };
 		D2DFA68F1683C27600CD6CE0 /* MTDownloadCheckTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */; };
 		D2ED1BBB1715C3BF00742F18 /* MTTaskChain.m in Sources */ = {isa = PBXBuildFile; fileRef = D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */; };
-		E01D02B37A0CB350959C107C /* Pods_cTiVo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 665BB8CDB93A5A19738F6B10 /* Pods_cTiVo.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -992,6 +992,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1273D4A42D07E82196ED6893 /* Pods-cTiVoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.debug.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.debug.xcconfig"; sourceTree = "<group>"; };
+		1537C3E2E1D33D2825F890C6 /* Pods_cTiVoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E00BDE6170A4809005F3970 /* MTMainWindowDrawer.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MTMainWindowDrawer.xib; sourceTree = "<group>"; };
 		1E02BDE02056E9BB000B9F56 /* CommercialHelpFile.rtfd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.rtfd; path = CommercialHelpFile.rtfd; sourceTree = "<group>"; };
 		1E09D27420C5A90F00A56B83 /* skipModeQuestion@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skipModeQuestion@2x.png"; sourceTree = "<group>"; };
@@ -1243,12 +1245,10 @@
 		1EFA8D51211BFF6900B4505D /* MTChannelPopUpTableCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTChannelPopUpTableCellView.m; sourceTree = "<group>"; };
 		1EFA8D52211BFF6900B4505D /* MTChannelPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTChannelPopUpButton.h; sourceTree = "<group>"; };
 		1EFE66FE1BE967460083386C /* sparklecast.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sparklecast.xml; sourceTree = "<group>"; };
-		5B8F5CE40FC16719897C600E /* Pods-cTiVoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.debug.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.debug.xcconfig"; sourceTree = "<group>"; };
-		665BB8CDB93A5A19738F6B10 /* Pods_cTiVo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C3FB5DEBFD99FC5DBC7E884 /* Pods-cTiVo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.release.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.release.xcconfig"; sourceTree = "<group>"; };
+		5E9D13866699FC998B8719BF /* Pods-cTiVoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.release.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.release.xcconfig"; sourceTree = "<group>"; };
+		831BF5CDC6A933443AEE587A /* Pods-cTiVo MAS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.debug.xcconfig"; sourceTree = "<group>"; };
 		94F32E0C1D6A6798004B7FEB /* ffmpeg_edl_ac3.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ffmpeg_edl_ac3.sh; sourceTree = "<group>"; };
-		9E08CCD93CA2A25FA89D8908 /* Pods-cTiVo MAS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.debug.xcconfig"; sourceTree = "<group>"; };
-		A3450FE5C9EDF5BD419C5172 /* Pods-cTiVoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVoTests.release.xcconfig"; path = "Target Support Files/Pods-cTiVoTests/Pods-cTiVoTests.release.xcconfig"; sourceTree = "<group>"; };
-		A69D1FC4398CCBFC4A20974F /* Pods-cTiVo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.debug.xcconfig"; sourceTree = "<group>"; };
 		AA41387B28A2A21B002C9813 /* MTMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTMock.swift; sourceTree = "<group>"; };
 		AA41389D28AAD26E002C9813 /* MTTVDBLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBLogger.swift; sourceTree = "<group>"; };
 		AABD59EA2895FECC0040A017 /* cTiVoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = cTiVoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1260,9 +1260,9 @@
 		AABD5A1F289744560040A017 /* MTTVDBCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBCache.swift; sourceTree = "<group>"; };
 		AABD5A22289745680040A017 /* MTTVDBCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBCacheTests.swift; sourceTree = "<group>"; };
 		AABD5A242897510F0040A017 /* MTTVDBTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTTVDBTests.swift; sourceTree = "<group>"; };
-		AC7330CD23B0D7FDF33E1475 /* Pods-cTiVo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.release.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.release.xcconfig"; sourceTree = "<group>"; };
 		B81EA3E88B8F8460792891D5 /* MTTVDBRateLimiter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTTVDBRateLimiter.swift; sourceTree = "<group>"; };
-		C8B98E58AF5B364270B05F00 /* Pods_cTiVo_MAS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo_MAS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CDDD17CF357B1B6F1F63B942 /* Pods_cTiVo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0877698AC1D17203FACBDA7 /* Pods_cTiVo_MAS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVo_MAS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2001C211704F93F00B75D9C /* MTSrt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTSrt.h; sourceTree = "<group>"; };
 		D2001C221704F93F00B75D9C /* MTSrt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTSrt.m; sourceTree = "<group>"; };
 		D2001C231704F93F00B75D9C /* MTEdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = MTEdl.h; sourceTree = "<group>"; };
@@ -1371,8 +1371,8 @@
 		D2DFA68E1683C27600CD6CE0 /* MTDownloadCheckTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTDownloadCheckTableCell.m; sourceTree = "<group>"; };
 		D2ED1BB91715C3BF00742F18 /* MTTaskChain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTTaskChain.h; sourceTree = "<group>"; };
 		D2ED1BBA1715C3BF00742F18 /* MTTaskChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTTaskChain.m; sourceTree = "<group>"; };
-		DAE08E6A7C887636CDEA8B40 /* Pods-cTiVo MAS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.release.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.release.xcconfig"; sourceTree = "<group>"; };
-		DC6105580A8AA4517B0CF9FE /* Pods_cTiVoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_cTiVoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D520CCECB1C3D6260ABCEA66 /* Pods-cTiVo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo.debug.xcconfig"; path = "Target Support Files/Pods-cTiVo/Pods-cTiVo.debug.xcconfig"; sourceTree = "<group>"; };
+		DB25A5FCA02262D2AFD70EF8 /* Pods-cTiVo MAS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-cTiVo MAS.release.xcconfig"; path = "Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1391,7 +1391,7 @@
 				1E50511422556CC300D5981B /* Cocoa.framework in Frameworks */,
 				1E50511622556CC300D5981B /* libmp4v2.a in Frameworks */,
 				1E40C48E251D4FE7004BCC38 /* CoreData.framework in Frameworks */,
-				80AA6BF21F8A30F8A0391DC7 /* Pods_cTiVo_MAS.framework in Frameworks */,
+				80AAC0435607E46FB9B031D5 /* Pods_cTiVo_MAS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1399,7 +1399,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D5C6DB5768A01B5781869ED /* Pods_cTiVoTests.framework in Frameworks */,
+				0BB3B5010C47D7DC7A6D6805 /* Pods_cTiVoTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1416,7 +1416,7 @@
 				D2DFA6891683B9E200CD6CE0 /* ScriptingBridge.framework in Frameworks */,
 				D2D60BA216766EFD00CE32DE /* Cocoa.framework in Frameworks */,
 				1E81D3171BE9477200321370 /* Sparkle.framework in Frameworks */,
-				E01D02B37A0CB350959C107C /* Pods_cTiVo.framework in Frameworks */,
+				236D9074CC35D6E31D290FD5 /* Pods_cTiVo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1722,12 +1722,12 @@
 				1EF4A2D627497ED300781BDD /* Podfile.lock */,
 				1E6911C328A9609E00D2F4A2 /* DDLogPatch.patch */,
 				1EF4A2B327497ECB00781BDD /* Pods.xcodeproj */,
-				A69D1FC4398CCBFC4A20974F /* Pods-cTiVo.debug.xcconfig */,
-				AC7330CD23B0D7FDF33E1475 /* Pods-cTiVo.release.xcconfig */,
-				9E08CCD93CA2A25FA89D8908 /* Pods-cTiVo MAS.debug.xcconfig */,
-				DAE08E6A7C887636CDEA8B40 /* Pods-cTiVo MAS.release.xcconfig */,
-				5B8F5CE40FC16719897C600E /* Pods-cTiVoTests.debug.xcconfig */,
-				A3450FE5C9EDF5BD419C5172 /* Pods-cTiVoTests.release.xcconfig */,
+				D520CCECB1C3D6260ABCEA66 /* Pods-cTiVo.debug.xcconfig */,
+				5C3FB5DEBFD99FC5DBC7E884 /* Pods-cTiVo.release.xcconfig */,
+				831BF5CDC6A933443AEE587A /* Pods-cTiVo MAS.debug.xcconfig */,
+				DB25A5FCA02262D2AFD70EF8 /* Pods-cTiVo MAS.release.xcconfig */,
+				1273D4A42D07E82196ED6893 /* Pods-cTiVoTests.debug.xcconfig */,
+				5E9D13866699FC998B8719BF /* Pods-cTiVoTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -1871,9 +1871,9 @@
 				D2DFA6881683B9E200CD6CE0 /* ScriptingBridge.framework */,
 				D2D60BA116766EFD00CE32DE /* Cocoa.framework */,
 				D2D60BA316766EFD00CE32DE /* Other Frameworks */,
-				665BB8CDB93A5A19738F6B10 /* Pods_cTiVo.framework */,
-				C8B98E58AF5B364270B05F00 /* Pods_cTiVo_MAS.framework */,
-				DC6105580A8AA4517B0CF9FE /* Pods_cTiVoTests.framework */,
+				CDDD17CF357B1B6F1F63B942 /* Pods_cTiVo.framework */,
+				D0877698AC1D17203FACBDA7 /* Pods_cTiVo_MAS.framework */,
+				1537C3E2E1D33D2825F890C6 /* Pods_cTiVoTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2068,7 +2068,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1E5051BD22556CC300D5981B /* Build configuration list for PBXNativeTarget "cTiVo MAS" */;
 			buildPhases = (
-				DD3350D4DCB05FCC981FDF28 /* [CP] Check Pods Manifest.lock */,
+				8003F0AA6A6A7716F50EC7DE /* [CP] Check Pods Manifest.lock */,
 				1E5050CB22556CC300D5981B /* Sources */,
 				1E50510C22556CC300D5981B /* Frameworks */,
 				1E50511922556CC300D5981B /* Resources */,
@@ -2079,7 +2079,7 @@
 				1E5051BC22556CC300D5981B /* Sign Executables */,
 				1E5051BA22556CC300D5981B /* Record Bundle Number as GIT commit count */,
 				1E5051BB22556CC300D5981B /* Initialize Crashlytics */,
-				D2C14E2D277F15FDBB5638B8 /* [CP] Embed Pods Frameworks */,
+				0E3B8A5221D58F5464989BE6 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2095,7 +2095,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AABD59F02895FECC0040A017 /* Build configuration list for PBXNativeTarget "cTiVoTests" */;
 			buildPhases = (
-				D989236F8A1C5BA4BF0D9A71 /* [CP] Check Pods Manifest.lock */,
+				11C04480F5E400BD3CC5A804 /* [CP] Check Pods Manifest.lock */,
 				AABD59E62895FECC0040A017 /* Sources */,
 				AABD59E72895FECC0040A017 /* Frameworks */,
 				AABD59E82895FECC0040A017 /* Resources */,
@@ -2114,7 +2114,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D2D60BBB16766EFD00CE32DE /* Build configuration list for PBXNativeTarget "cTiVo" */;
 			buildPhases = (
-				50098BDDBC2110BE11A92152 /* [CP] Check Pods Manifest.lock */,
+				BBE748EA414BD48639432AB9 /* [CP] Check Pods Manifest.lock */,
 				D2D60B9916766EFD00CE32DE /* Sources */,
 				D2D60B9A16766EFD00CE32DE /* Frameworks */,
 				D2D60B9B16766EFD00CE32DE /* Resources */,
@@ -2125,7 +2125,7 @@
 				D2AA030A1833F09B00AEE326 /* Sign Sparkle */,
 				D2901ADC1677AF3C001E559C /* Record Bundle Number as GIT commit count */,
 				1E3557132519BDB3004AF628 /* Initialize Crashlytics */,
-				3702A25845F9AE3223C255E1 /* [CP] Embed Pods Frameworks */,
+				DBAD98F921514A3532E25F67 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2543,6 +2543,49 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		0E3B8A5221D58F5464989BE6 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		11C04480F5E400BD3CC5A804 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-cTiVoTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		1E3557132519BDB3004AF628 /* Initialize Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -2652,24 +2695,29 @@
 			shellPath = /bin/sh;
 			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${EXECUTABLE_FOLDER_PATH}\"\nENTITLEMENT=\"$SRCROOT/cTiVo/binary.entitlements\"\n# By default, use the configured code signing identity for the project/target\nIDENTITY=\"${CODE_SIGN_IDENTITY}\"\nDEVIDENTITY=\"Developer ID Application\"\necho $IDENTITY \"==>\" $DEVIDENTITY\nIDENTITY=\"${DEVIDENTITY}\"\necho $IDENTITY \" from \" $DEVIDENTITY\ncat \"$ENTITLEMENT\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/HandBrakeCLI\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/tivodecode-ng\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/comskip\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/ffmpeg\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/ccextractor\"\n/usr/bin/codesign --force --sign \"$IDENTITY\" -o runtime --entitlement \"$ENTITLEMENT\" --timestamp=none \"$LOCATION/mencoder\"\n";
 		};
-		3702A25845F9AE3223C255E1 /* [CP] Embed Pods Frameworks */ = {
+		8003F0AA6A6A7716F50EC7DE /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-cTiVo MAS-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		50098BDDBC2110BE11A92152 /* [CP] Check Pods Manifest.lock */ = {
+		BBE748EA414BD48639432AB9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2702,7 +2750,7 @@
 			);
 			name = "Record Bundle Number as GIT commit count";
 			outputPaths = (
-				"\"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist",
+				"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}.dSYM/Contents/Info.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2723,65 +2771,25 @@
 			shellPath = /bin/sh;
 			shellScript = "LOCATION=\"${BUILT_PRODUCTS_DIR}\"/\"${FRAMEWORKS_FOLDER_PATH}\"\n\n# By default, use the configured code signing identity for the project/target\nIDENTITY=\"${EXPANDED_CODE_SIGN_IDENTITY}\"\nif [ \"$IDENTITY\" == \"\" ]\nthen\n    # If a code signing identity is not specified, use ad hoc signing\n    IDENTITY=\"-\"\nfi\ncodesign --verbose --force --deep -o runtime --sign \"$IDENTITY\" \"$LOCATION/Sparkle.framework/Versions/A/Resources/AutoUpdate.app\"\ncodesign --verbose --force -o runtime --sign \"$IDENTITY\" \"$LOCATION/Sparkle.framework/Versions/A\"\n";
 		};
-		D2C14E2D277F15FDBB5638B8 /* [CP] Embed Pods Frameworks */ = {
+		DBAD98F921514A3532E25F67 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo MAS/Pods-cTiVo MAS-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		D989236F8A1C5BA4BF0D9A71 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-cTiVoTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		DD3350D4DCB05FCC981FDF28 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-cTiVo MAS-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-cTiVo/Pods-cTiVo-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -3004,7 +3012,7 @@
 /* Begin XCBuildConfiguration section */
 		1E5051BE22556CC300D5981B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9E08CCD93CA2A25FA89D8908 /* Pods-cTiVo MAS.debug.xcconfig */;
+			baseConfigurationReference = 831BF5CDC6A933443AEE587A /* Pods-cTiVo MAS.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -3059,7 +3067,7 @@
 		};
 		1E5051BF22556CC300D5981B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DAE08E6A7C887636CDEA8B40 /* Pods-cTiVo MAS.release.xcconfig */;
+			baseConfigurationReference = DB25A5FCA02262D2AFD70EF8 /* Pods-cTiVo MAS.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -3115,7 +3123,7 @@
 		};
 		AABD59F12895FECC0040A017 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5B8F5CE40FC16719897C600E /* Pods-cTiVoTests.debug.xcconfig */;
+			baseConfigurationReference = 1273D4A42D07E82196ED6893 /* Pods-cTiVoTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -3159,7 +3167,7 @@
 		};
 		AABD59F22895FECC0040A017 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A3450FE5C9EDF5BD419C5172 /* Pods-cTiVoTests.release.xcconfig */;
+			baseConfigurationReference = 5E9D13866699FC998B8719BF /* Pods-cTiVoTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -3339,7 +3347,7 @@
 		};
 		D2D60BBC16766EFD00CE32DE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A69D1FC4398CCBFC4A20974F /* Pods-cTiVo.debug.xcconfig */;
+			baseConfigurationReference = D520CCECB1C3D6260ABCEA66 /* Pods-cTiVo.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD)";
@@ -3381,9 +3389,8 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 3.6.4;
+				MARKETING_VERSION = 3.6.5;
 				OTHER_LDFLAGS = (
-					"-ld_classic",
 					"$(inherited)",
 					"-ObjC",
 				);
@@ -3400,7 +3407,7 @@
 		};
 		D2D60BBD16766EFD00CE32DE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AC7330CD23B0D7FDF33E1475 /* Pods-cTiVo.release.xcconfig */;
+			baseConfigurationReference = 5C3FB5DEBFD99FC5DBC7E884 /* Pods-cTiVo.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD)";
@@ -3442,9 +3449,8 @@
 					"$(PROJECT_DIR)/cTiVo/mp4v2/mp4v2-10.9/",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 3.6.4;
+				MARKETING_VERSION = 3.6.5;
 				OTHER_LDFLAGS = (
-					"-ld_classic",
 					"$(inherited)",
 					"-ObjC",
 				);

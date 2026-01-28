@@ -22,7 +22,7 @@
 #import <Carbon/Carbon.h>
 
 #ifndef DEBUG
-@import AppCenterAnalytics;
+@import FirebaseAnalytics;
 #endif
 
 
@@ -2178,10 +2178,10 @@ __DDLOGHERE__
 	NSInteger retries = ([[NSUserDefaults standardUserDefaults] integerForKey:kMTNumDownloadRetries] - self.numRetriesRemaining) ;
 	NSString * retryString = [NSString stringWithFormat:@"%d",(int) retries];
 
-	[MSACAnalytics trackEvent:@"Success"
-		withProperties:@{@"Format" : self.encodeFormat.name,
-						@"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
-						@"Retries" : retryString }];
+	[FIRAnalytics logEventWithName:@"download_success"
+		parameters:@{@"format" : self.encodeFormat.name,
+						@"flow_type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]],
+						@"retries" : retryString }];
 		
 //	[FIRAnalytics logEventWithName:kFIREventSelectContent
 //                    parameters:@{
@@ -2547,9 +2547,9 @@ __DDLOGHERE__
             self.downloadStatus = @(kMTStatusFailed);
             self.processProgress = 1.0;
 #ifndef DEBUG
-	[MSACAnalytics trackEvent:@"Failure"
-		withProperties:@{@"Format" : self.encodeFormat.name,
-						@"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]
+	[FIRAnalytics logEventWithName:@"download_failure"
+		parameters:@{@"format" : self.encodeFormat.name,
+						@"flow_type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]
 						}];
 #endif
             [self notifyUserWithTitle: @"TiVo show failed."
@@ -2563,9 +2563,9 @@ __DDLOGHERE__
 				self.numRetriesRemaining--;
                 [self notifyUserWithTitle:@"TiVo show failed" subTitle:@"Retrying" ];
 #ifndef DEBUG
-	[MSACAnalytics trackEvent:@"Retry"
-		withProperties:@{@"Format" : self.encodeFormat.name,
-						@"Type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]
+	[FIRAnalytics logEventWithName:@"download_retry"
+		parameters:@{@"format" : self.encodeFormat.name,
+						@"flow_type" : [NSString stringWithFormat:@"%d",(int)[self taskFlowType]]
 						}];
 #endif
                 DDLogMajor(@"Decrementing retries to %ld",(long)self.numRetriesRemaining);
