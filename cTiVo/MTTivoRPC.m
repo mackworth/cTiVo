@@ -91,7 +91,7 @@ NSTimeInterval delay1, delay2, delay3,delay4 = 1.0;
         DDLogDetail(@"Importing cert"); 
         BOOL overrodeCert = NO;
         NSString * p12Path = [[NSBundle mainBundle] pathForResource:@"cdata" ofType:@"p12"];
-        NSString * tivoPassword = @"piUYKNH7Sb"; // expires 11/17/26
+        NSString * tivoPassword = @"SKA2Kvgxvs"; // expires 5/28/2029
 
         //Check for user-provided certificate
         NSFileManager * fileMgr = [NSFileManager defaultManager];
